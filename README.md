@@ -34,4 +34,4 @@ group
 Users: Someone should set this up once there is something usable.
 
 ## How to help
-Read the CONTRIBUTORS file, then read the HACKING.md file.
+Read the CONTRIBUTORS.md file, then read the HACKING.md file.

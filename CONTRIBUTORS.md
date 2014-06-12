@@ -17,7 +17,7 @@ done and hope you will like K2.
 ## Contributing
 
 You can download the code and experiment with it all you like.  But if you
-think you would like to contribute your udpates, you should do two things:
+think you would like to contribute your updates, you should do two things:
 
 1. Read the HACKING file.
 2. Sign a CLA (keep reading this file).
