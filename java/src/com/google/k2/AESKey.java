@@ -268,10 +268,6 @@ public class AESKey extends SymmetricKey {
     // call the encrypt bytes method to encrypt the data
     byte[] encData = this.encryptBytes(data);
 
-    // @deprecated
-    // convert the decrypted data back to string format
-    // String result = new String(encData);
-
     // return the encrypted string
     return encData;
   }
