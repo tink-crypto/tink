@@ -4,7 +4,7 @@
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public class AESKey extends KeyVersion {
+public class AESKey extends SymmetricKey {
   // The key length in bytes (128 bits / 8 = 16 bytes)
   int keyLength = 16;
   // The actual key matter of the AES key.
