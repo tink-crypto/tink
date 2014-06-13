@@ -18,6 +18,8 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'gradleProtobufPlugin'
 
+// Allow the build process to pull plugins from maven central
+// and run the proto compiling plugin
 buildscript {
   repositories {
     mavenCentral()
@@ -28,11 +30,13 @@ buildscript {
   }
 }
 
-
-// Java 1.5, with a DEV version in the manifest
+// Java 1.5
 sourceCompatibility = 1.5
+
+// Build a manifest file containing info about the library
 version = 'DEVELOPMENT'
 jar {
+  archiveName = "K2.jar"
   manifest {
     attributes 'Implementation-Title': 'K2 Crypto Library', 'Implementation-Version': version
   }
@@ -48,29 +52,35 @@ dependencies {
   compile 'com.google.code.gson:gson:2.2.4'
   compile 'log4j:log4j:1.2.17'
   testCompile 'junit:junit:4.+'
+  testCompile 'org.mockito:mockito-all:1.9.5"
 }
 
 // Magic to make proto compilation happen
 protoBuf {
   protoc {
-    // Insert other OS's here
+    // Insert other OS's here if you need to. If at all possible follow the
+    // example of linux, and rely on a search path instead of a fully specified
+    // path
     'Linux' {
       path = "protoc"
     }
   }
 
+  // Where are the protos
   sourceSets {
     proto {
       srcDir = '../protos'
     }
   }
 
+  // Where should the generated java files go
   lang {
     java {
       genDir = 'build/proto-java'
     }
   }
 }
+
 // Make eclipse read the proto java files as well
 sourceSets.main.java.srcDir "build/proto-java"
 

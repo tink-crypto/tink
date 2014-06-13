@@ -23,9 +23,8 @@ Follow the guidelines at the
 
 ## Unit tests
 
-Write them.  Write good ones.
-
-Read (somebody find the book and include it here....)
+All concrete classes should have good unit tests. See ../HACKING.md for info
+about what makes a good unit test.
 
 ## Getting started
 
@@ -33,4 +32,8 @@ Read (somebody find the book and include it here....)
 Grandle 1.12, but other versions (particularly later version) will probably
 work.
 
-2. 
+2. Make sure you can build the project by running
+
+> gradle build
+
+3. Hack away.
