@@ -53,6 +53,17 @@ of the public record, so keep them polite and inoffensive.
 touch a file that is out of date) - commented using the language-appropriate
 commenting style.
 
+## Protocol buffers
+
+You must install the
+(protocol buffers tools)[https://developers.google.com/protocol-buffers/] to
+build K2.  Binaries are available for windows.  For other OSes, download the
+source, run 'configure' and 'make' and then put the protoc binary on your path.
+
+## Language specific HACKING.md files
+
+To keep going, read the langauge specific HACKING.md files.
+
 > Copyright 2014 Google. Inc.
 >
 > Licensed under the Apache License, Version 2.0 (the "License");

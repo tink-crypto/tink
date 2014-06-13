@@ -26,3 +26,11 @@ Follow the guidelines at the
 Write them.  Write good ones.
 
 Read (somebody find the book and include it here....)
+
+## Getting started
+
+1. Download and install [Gradle](http://www.gradle.org). We only support
+Grandle 1.12, but other versions (particularly later version) will probably
+work.
+
+2. 
