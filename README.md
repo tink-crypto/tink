@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ## What is K2?
-K2 is a cryptophic toolkit that provides an easy, code reviewable way to do
+K2 is a cryptographic toolkit that provides an easy, code-reviewable way to do
 crypto safely - avoiding many of the subtle problems that come up when you
 do crypto yourself.
 
