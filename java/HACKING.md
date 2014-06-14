@@ -36,4 +36,15 @@ work.
 
 > gradle build
 
-3. Hack away.
+3. You can build an Eclipse project that can be imported into any workspace
+by running
+
+> gradle eclipse
+
+and then importing the Eclipse project in this directory.
+
+Note that any changes you make to the project will not be commited to the repo.
+All build changes need to be made to the gradle file, which is the source of
+truth for the build.
+
+4. Hack away.
