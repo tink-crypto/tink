@@ -25,4 +25,4 @@ Follow the guidelines at the
 
 Write them.  Write good ones.
 
-Read (somebody find the book and include it here....)
+Read "Effective Unit Testing: A guide for Java developers" by L. Koskela
