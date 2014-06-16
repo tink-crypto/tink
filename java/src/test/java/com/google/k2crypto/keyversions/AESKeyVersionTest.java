@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.google.k2crypto;
+package com.google.k2crypto.keyversions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
