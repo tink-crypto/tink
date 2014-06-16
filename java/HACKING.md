@@ -23,6 +23,28 @@ Follow the guidelines at the
 
 ## Unit tests
 
-Write them.  Write good ones.
+All concrete classes should have good unit tests. See ../HACKING.md for info
+about what makes a good unit test.
 
-Read (somebody find the book and include it here....)
+## Getting started
+
+1. Download and install [Gradle](http://www.gradle.org). We only support
+Grandle 1.12, but other versions (particularly later version) will probably
+work.
+
+2. Make sure you can build the project by running
+
+> gradle build
+
+3. You can build an Eclipse project that can be imported into any workspace
+by running
+
+> gradle eclipse
+
+and then importing the Eclipse project in this directory.
+
+Note that any changes you make to the project will not be commited to the repo.
+All build changes need to be made to the gradle file, which is the source of
+truth for the build.
+
+4. Hack away.
