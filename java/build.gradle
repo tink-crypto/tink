@@ -52,7 +52,7 @@ dependencies {
   compile 'com.google.code.gson:gson:2.2.4'
   compile 'log4j:log4j:1.2.17'
   testCompile 'junit:junit:4.+'
-  testCompile 'org.mockito:mockito-all:1.9.5"
+  testCompile 'org.mockito:mockito-all:1.9.5'
 }
 
 // Magic to make proto compilation happen
