@@ -13,14 +13,14 @@
  */
 
 
-package com.google.k2;
+package com.google.k2crypto;
 
 /**
- * This class represents a KeyVersion in K2. It is abstract and extended by specific key
- * implementations such as SymmetricKey which is extended by AESKey
+ * This class represents a SymmetricKey in K2. It is abstract and extended by specific symmetric key
+ * implementations such as AESKey
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public abstract class KeyVersion {
+public abstract class SymmetricKey {
 
 }
