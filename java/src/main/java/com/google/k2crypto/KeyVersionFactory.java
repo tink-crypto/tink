@@ -15,10 +15,14 @@
 package com.google.k2crypto;
 
 /**
- * Stub for key factory.
+ * Stub for a KeyVersion factory.
+ * 
+ * This class will know how to construct a specific key version given a 
+ * generic protobuf message for it.
+ * 
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-public interface KeyFactory {
+public class KeyVersionFactory {
   
 }

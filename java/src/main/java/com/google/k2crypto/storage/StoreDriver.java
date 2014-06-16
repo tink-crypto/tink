@@ -15,8 +15,8 @@
 package com.google.k2crypto.storage;
 
 import com.google.k2crypto.Key;
-import com.google.k2crypto.KeyFactory;
 import com.google.k2crypto.K2Exception;
+import com.google.k2crypto.KeyVersionFactory;
 
 import java.net.URI;
 
@@ -26,7 +26,7 @@ import java.net.URI;
  * Drivers are concrete implementations of a {@link Store}. In addition to
  * implementing this interface, the instantiatable driver class must be
  * annotated with {@link StoreDriverInfo} and provide a public constructor that
- * accepts a {@link java.net.URI URI} address and a {@link KeyFactory}. Neither
+ * accepts a {@link java.net.URI URI} address and a {@link KeyVersionFactory}. Neither
  * of these arguments can be null. When instantiated, the driver must be in a
  * "closed" state; resources required for performing storage operations must not
  * be allocated until {@link #open()} is invoked. Drivers need not be concerned
@@ -48,7 +48,7 @@ public interface StoreDriver {
    * Returns the factory that will be used to create Keys, as provided through
    * the constructor.  Must never return null or have any other side effects.
    */
-  KeyFactory getFactory();
+  KeyVersionFactory getFactory();
   
   /**
    * Prepares the driver instance for performing storage operations by
