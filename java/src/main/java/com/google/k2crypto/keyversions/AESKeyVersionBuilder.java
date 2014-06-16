@@ -13,7 +13,9 @@
  */
 
 
-package com.google.k2crypto;
+package com.google.k2crypto.keyversions;
+
+import com.google.k2crypto.KeyVersionBuilder;
 
 /**
  * This class represents a key version builder for AES key versions. 

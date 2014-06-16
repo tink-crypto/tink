@@ -12,7 +12,9 @@
  * the License.
  */
 
-package com.google.k2crypto;
+package com.google.k2crypto.keyversions;
+
+import com.google.k2crypto.SymmetricKey;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;

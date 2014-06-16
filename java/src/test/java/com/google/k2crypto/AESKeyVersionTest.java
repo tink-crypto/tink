@@ -17,6 +17,8 @@ package com.google.k2crypto;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
+import com.google.k2crypto.keyversions.AESKeyVersion;
+
 import org.junit.Test;
 
 import java.security.InvalidAlgorithmParameterException;
