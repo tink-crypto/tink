@@ -15,12 +15,14 @@
 package com.google.k2crypto;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Test;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -78,6 +80,59 @@ public class AESKeyTest {
 
 
     // fail("Not yet implemented");
+
+  }
+
+  /**
+   * This tests loading a key matter byte array and using it to encrypt and decrypt a message.
+   *
+   * @throws NoSuchAlgorithmException
+   * @throws BadPaddingException
+   * @throws IllegalBlockSizeException
+   * @throws InvalidAlgorithmParameterException
+   * @throws NoSuchPaddingException
+   * @throws InvalidKeyException
+   */
+  @Test
+  public void testLoadKeyMatter()
+      throws NoSuchAlgorithmException,
+      InvalidKeyException,
+      NoSuchPaddingException,
+      InvalidAlgorithmParameterException,
+      IllegalBlockSizeException,
+      BadPaddingException {
+    // create AES key
+    AESKey key1 = new AESKey();
+    // obtain the raw key matter
+    byte[] keymatter = key1.getKeyMatter();
+    // obtain the raw initialization vector for first key
+    byte[] initvector = key1.getInitVector();
+
+    // create a new key using the key matter
+    AESKey key2 = new AESKey(keymatter, initvector);
+
+    // test text string that we will encrypt and then decrypt
+    String testinput = "weak";
+
+    // encrypt the test string using FIRST key
+    byte[] encTxt1 = key1.encryptString(testinput);
+    // encrypt the test string using SECOND key
+    byte[] encTxt2 = key2.encryptString(testinput);
+
+
+    // test encrypted messages are the same
+    assertArrayEquals(encTxt1, encTxt2);
+
+    // test that key 1 decrypts encrypted message 1
+    assertEquals(testinput, key1.decryptString(encTxt1));
+    // test that key 2 decrypts encrypted message 2
+    assertEquals(testinput, key2.decryptString(encTxt2));
+    // test that key 2 decrypts encrypted message 1
+    assertEquals(testinput, key2.decryptString(encTxt1));
+    // test that key 1 decrypts encrypted message 2
+    assertEquals(testinput, key1.decryptString(encTxt2));
+
+
 
   }
 }

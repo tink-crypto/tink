@@ -48,13 +48,13 @@ public class AESKey extends SymmetricKey {
   /**
    * The actual key matter of the AES key used by encKey.
    */
-  byte[] keyMatter = new byte[keyLength];
+  private byte[] keyMatter = new byte[keyLength];
 
 
   /**
    * initialization vector used for encryption and decryption
    */
-  byte[] initvector = new byte[this.keyLengthInBytes()];
+  private byte[] initvector = new byte[this.keyLengthInBytes()];
 
   /**
    * represents the algorithm, mode, and padding to use TODO: change this to allow different modes
@@ -129,12 +129,17 @@ public class AESKey extends SymmetricKey {
    *
    * @param keyMatter The byte array representing the key matter
    */
-  public AESKey(byte[] keyMatter) {
+  public AESKey(byte[] keyMatter, byte[] initvector) {
     // save key matter byte array in this object
     this.keyMatter = keyMatter;
     // use this secure random number generator to initialize the vector with random bytes
     SecureRandom random = new SecureRandom();
     random.nextBytes(initvector);
+
+    // initialize secret key using key matter byte array
+    secretKey = new SecretKeySpec(this.keyMatter, 0, this.keyLengthInBytes(), "AES");
+    // load the initialization vector
+    this.initvector = initvector;
   }
 
   /**
@@ -269,6 +274,24 @@ public class AESKey extends SymmetricKey {
 
     // return the encrypted string
     return encData;
+  }
+
+  /**
+   * Method to return the key matter to other classes.
+   *
+   * @return The byte array representation of the key matter
+   */
+  public byte[] getKeyMatter() {
+    return this.keyMatter;
+  }
+
+  /**
+   * Method to return the initialization vector to other classes.
+   *
+   * @return The byte array representation of the initialization vector
+   */
+  public byte[] getInitVector() {
+    return this.initvector;
   }
 
   /**
