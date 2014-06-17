@@ -39,7 +39,7 @@ public final class Messages {
    * @param key Name of the string.
    * @param params Parameter values.
    * @return the formatted internationalized string, or "!&lt;key&gt;!" if the
-   *        named string could not be found.
+   *         named string could not be found.
    */
   public static String getString(String key, Object ... params) {
     try {

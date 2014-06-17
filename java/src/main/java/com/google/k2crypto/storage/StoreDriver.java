@@ -26,12 +26,12 @@ import java.net.URI;
  * Drivers are concrete implementations of a {@link Store}. In addition to
  * implementing this interface, the instantiatable driver class must be
  * annotated with {@link StoreDriverInfo} and provide a public constructor that
- * accepts a {@link java.net.URI URI} address and a {@link KeyVersionFactory}. Neither
- * of these arguments can be null. When instantiated, the driver must be in a
- * "closed" state; resources required for performing storage operations must not
- * be allocated until {@link #open()} is invoked. Drivers need not be concerned
- * with thread safety; the {@link Store} will ensure that all method calls will
- * be synchronized. 
+ * accepts a {@link java.net.URI URI} address and a {@link KeyVersionFactory}.
+ * Neither of these arguments can be null. When instantiated, the driver must be
+ * in a "closed" state; resources required for performing storage operations
+ * must not be allocated until {@link #open()} is invoked. Drivers need not be
+ * concerned with thread safety; the {@link Store} will ensure that all method
+ * calls will be synchronized. 
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
@@ -60,7 +60,7 @@ public interface StoreDriver {
    * in the URI points to an unsuitable location, e.g. it contains existing
    * files not recognizable by the driver or the path has illegal characters.
    * 
-   * @throws K2Exception if there is a problem opening the driver
+   * @throws K2Exception if there is a problem opening the driver.
    */
   void open() throws K2Exception;
   
@@ -80,7 +80,7 @@ public interface StoreDriver {
    * or be in an invalid format. An attempt must be made to {@link #load()} to
    * know for sure if it is readable.
    * 
-   * @throws K2Exception if the store could not be queried
+   * @throws K2Exception if the store could not be queried.
    */
   boolean isEmpty() throws K2Exception;
     
@@ -93,11 +93,11 @@ public interface StoreDriver {
    * purpose checking will be enforced by {@link Store}.
    * 
    * @param key Key protecting the actual stored key, or null to
-   * disable wrapping
+   *            disable wrapping.
    * 
-   * @throws K2Exception if the specified Key cannot be used for wrapping
+   * @throws K2Exception if the specified Key cannot be used for wrapping.
    * @throws UnsupportedOperationException if a Key is provided and wrapping
-   * is not supported
+   *         is not supported.
    */
   void wrapWith(Key key) throws K2Exception;
   
@@ -105,20 +105,20 @@ public interface StoreDriver {
    * Saves the given Key to the store. Any existing Key will be
    * silently replaced, regardless of whether it is wrapped.
    *  
-   * @param key Key to save
+   * @param key Key to save.
    * 
-   * @throws K2Exception if there is some issue saving the given Key
-   * @throws NullPointerException if key is null
-   * @throws UnsupportedOperationException if this storage driver is read only
+   * @throws K2Exception if there is some issue saving the given Key.
+   * @throws NullPointerException if key is null.
+   * @throws UnsupportedOperationException if this storage driver is read only.
    */
   void save(Key key) throws K2Exception;
     
   /**
    * Loads the Key stored at this location. 
    * 
-   * @return the stored key or null if the location is empty
+   * @return the stored key or null if the location is empty.
    * 
-   * @throws K2Exception if there is some issue loading the stored data
+   * @throws K2Exception if there is some issue loading the stored data.
    */
   Key load() throws K2Exception;
  
@@ -126,10 +126,10 @@ public interface StoreDriver {
    * Erases any stored Key, regardless of whether it is wrapped.
    * 
    * @return true if there was data present and it is has been erased, false
-   * otherwise.
+   *         otherwise.
    * 
-   * @throws K2Exception if there is some issue erasing stored data
-   * @throws UnsupportedOperationException if this storage driver is read only
+   * @throws K2Exception if there is some issue erasing stored data.
+   * @throws UnsupportedOperationException if this storage driver is read only.
    */
   boolean erase() throws K2Exception;
     
