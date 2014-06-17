@@ -23,14 +23,12 @@ public @interface StoreDriverInfo {
   
   /**
    * Unique identifier of the driver, which users will specify in the scheme
-   * portion of the URI address to a store. 
-   * 
+   * portion of the URI address to a store.
+   * <p>
    * Legal identifiers must match the regular expression:
    * {@code [A-Za-z][A-Za-z0-9\+\-\.]*}
-   * 
-   * @see
-   * <a href="http://tools.ietf.org/html/rfc3986#section-3.1" target="_blank">
-   * RFC 3986 (URI: Generic Syntax), Section 3.1</a>
+   * (see <a href="http://tools.ietf.org/html/rfc3986#section-3.1"
+   * target="_blank">RFC 3986, Section 3.1</a>)
    */
   String id();
   
@@ -46,15 +44,13 @@ public @interface StoreDriverInfo {
   
   /**
    * Whether the driver can only read keys and not write them.
-   * Defaults to false.
    */
   boolean readOnly() default false;
   
   /**
    * Whether the driver supports wrapped (encrypted) keys.
-   * Defaults to false. 
    */
-  boolean wrapSupport() default false;
+  boolean wrapSupported() default false;
 
 }
 
