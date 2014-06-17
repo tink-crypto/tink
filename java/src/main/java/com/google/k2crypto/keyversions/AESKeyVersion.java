@@ -40,7 +40,7 @@ public class AESKeyVersion extends SymmetricKey {
   /**
    * The key length in bytes (128 bits / 8 = 16 bytes)
    */
-  final int keyLength = 16;
+  final int keyLength = 32;
 
   /**
    * SecretKey object representing the key matter in the AES key
@@ -56,7 +56,7 @@ public class AESKeyVersion extends SymmetricKey {
   /**
    * initialization vector used for encryption and decryption
    */
-  private byte[] initvector = new byte[this.keyLengthInBytes()];
+  private byte[] initvector = new byte[16];
 
   /**
    * represents the algorithm, mode, and padding to use TODO: change this to allow different modes
