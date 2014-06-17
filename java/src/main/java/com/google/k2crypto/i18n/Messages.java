@@ -26,7 +26,7 @@ import java.util.ResourceBundle;
  */
 public final class Messages {
   
-  private static final String BUNDLE_NAME = "com.google.k2.i18n.messages";
+  private static final String BUNDLE_NAME = "com.google.k2crypto.i18n.messages";
 
   private static ResourceBundle resourceBundle = 
       ResourceBundle.getBundle(BUNDLE_NAME);
@@ -38,8 +38,8 @@ public final class Messages {
    * 
    * @param key Name of the string.
    * @param params Parameter values.
-   * @return the formatted internationalized string, or "!&lt;key&gt;!" if the
-   *         named string could not be found.
+   * @return the formatted internationalized string, or {@code "!<key>!"} if
+   *         the named string could not be found.
    */
   public static String getString(String key, Object ... params) {
     try {
