@@ -59,19 +59,22 @@ public class AESKeyVersion extends SymmetricKey {
   private byte[] initvector = new byte[16];
 
   /**
-   * Supported modes: CBC, ECB
+   * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
    */
-  final String mode = "ECB";
+  final String mode = "CBC";
 
+  /**
+   * Supported padding: PKCS5PADDING
+   * Unsupported padding: PKCS7Padding, ISO10126d2Padding, X932Padding, ISO7816d4Padding, ZeroBytePadding
+   */
+  final String padding = "PKCS5PADDING";
+  
   /**
    * represents the algorithm, mode, and padding to use TODO: change this to allow different modes
    * and paddings (NOT algos - AES ONLY)
+   * 
    */
-  final String algModePadding = "AES/" + this.mode + "/PKCS5PADDING";
-
-  // final String algModePadding = "AES/CBC/PKCS5PADDING";
-  // final String algModePadding = "AES/ECB/PKCS5PADDING";
-
+  final String algModePadding = "AES/" + this.mode + "/" + padding;
 
 
   /**
@@ -181,7 +184,8 @@ public class AESKeyVersion extends SymmetricKey {
     Cipher encCipher = Cipher.getInstance(algModePadding);
 
 
-    if (this.mode.equals("CBC")) {
+    if (this.mode.equals("CBC") || this.mode.equals("OFB") || this.mode.equals("CFB")
+        || this.mode.equals("CTR")) {
       // Initialize the cipher using the secret key of this class and the initialization vector
       encCipher.init(Cipher.ENCRYPT_MODE, this.secretKey, new IvParameterSpec(this.initvector));
     } else if (this.mode.equals("ECB")) {
@@ -223,13 +227,15 @@ public class AESKeyVersion extends SymmetricKey {
     Cipher decCipher = Cipher.getInstance(algModePadding);
 
 
-    if (this.mode.equals("CBC")) {
+    if (this.mode.equals("CBC") || this.mode.equals("OFB") || this.mode.equals("CFB")
+        || this.mode.equals("CTR")) {
       // Initialize the cipher using the secret key of this class and the initialization vector
       decCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initvector));
     } else if (this.mode.equals("ECB")) {
       // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
       decCipher.init(Cipher.DECRYPT_MODE, secretKey);
     }
+
 
     // decrypt the data
     byte[] decryptedData = decCipher.doFinal(data);
