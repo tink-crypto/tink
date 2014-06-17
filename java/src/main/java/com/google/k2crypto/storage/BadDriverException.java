@@ -25,6 +25,9 @@ public class BadDriverException extends K2Exception {
 
   // Bad, bad driver
   private final Class<? extends StoreDriver> driverClass;
+
+  // Reason why it is bad
+  private final String reason;
   
   /**
    * Constructs a new BadDriverException.
@@ -34,8 +37,9 @@ public class BadDriverException extends K2Exception {
    */
   public BadDriverException(
       Class<? extends StoreDriver> driverClass, String reason) {
-    super(reason);
+    super("[" + driverClass.getName() + "] " + reason);
     this.driverClass = driverClass;
+    this.reason = reason;
   }
   
   /**
@@ -49,7 +53,7 @@ public class BadDriverException extends K2Exception {
    * Returns the reason the driver is bad. 
    */
   public String getReason() {
-    return getMessage();
+    return reason;
   }
   
 }
