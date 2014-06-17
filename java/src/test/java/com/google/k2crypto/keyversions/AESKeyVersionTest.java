@@ -31,13 +31,11 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 /**
- * Tests for AESKey class
+ * Tests for AESkeyVersion class
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
 public class AESKeyVersionTest {
-
-
   /**
    * This tests the encryption and decryption methods of the AESKeyVersion class.
    *
@@ -57,36 +55,18 @@ public class AESKeyVersionTest {
       IllegalBlockSizeException,
       BadPaddingException {
 
-    // test text string that we will encrypt and then decrypt
-    String testinput = "weak";
     // create AES key
-    AESKeyVersion key = new AESKeyVersion();
-    // encrypt the test string
-    byte[] encTxt = key.encryptString(testinput);
-    // decrypt the message
-    String result = key.decryptString(encTxt);
-    // test that the decrypted result is the same as the encryption input
-    assertEquals(testinput, result);
-
-    // empty string test
-    testinput = "";
-    // create AES key
-    key = new AESKeyVersion();
-    // encrypt the test string
-    encTxt = key.encryptString(testinput);
-    // decrypt the message
-    result = key.decryptString(encTxt);
-    // test that the decrypted result is the same as the encryption input
-    assertEquals(testinput, result);
-
-
+    AESKeyVersion keyVersion = new AESKeyVersion();
+    // call the method to test encrypting and decrypting strings using this key version
+    testEncryptDecryptKeyVersion(keyVersion);
 
     // fail("Not yet implemented");
 
   }
 
   /**
-   * This tests loading a key matter byte array and using it to encrypt and decrypt a message.
+   * This tests loading a keyVersion matter byte array and using it to encrypt and decrypt a
+   * message.
    *
    * @throws NoSuchAlgorithmException
    * @throws BadPaddingException
@@ -96,7 +76,7 @@ public class AESKeyVersionTest {
    * @throws InvalidKeyException
    */
   @Test
-  public void testLoadKeyMatter()
+  public void testLoadkeyVersionMatter()
       throws NoSuchAlgorithmException,
       InvalidKeyException,
       NoSuchPaddingException,
@@ -105,13 +85,13 @@ public class AESKeyVersionTest {
       BadPaddingException {
     // create AES key
     AESKeyVersion key1 = new AESKeyVersion();
-    // obtain the raw key matter
-    byte[] keymatter = key1.getKeyMatter();
+    // obtain the raw keyVersion matter
+    byte[] keyVersionMatter = key1.getkeyVersionMatter();
     // obtain the raw initialization vector for first key
     byte[] initvector = key1.getInitVector();
 
-    // create a new key using the key matter
-    AESKeyVersion key2 = new AESKeyVersion(keymatter, initvector);
+    // create a new keyVersion using the keyVersion matter
+    AESKeyVersion key2 = new AESKeyVersion(keyVersionMatter, initvector);
 
     // test text string that we will encrypt and then decrypt
     String testinput = "weak";
@@ -125,13 +105,13 @@ public class AESKeyVersionTest {
     // test encrypted messages are the same
     assertArrayEquals(encTxt1, encTxt2);
 
-    // test that key 1 decrypts encrypted message 1
+    // test that keyVersion 1 decrypts encrypted message 1
     assertEquals(testinput, key1.decryptString(encTxt1));
-    // test that key 2 decrypts encrypted message 2
+    // test that keyVersion 2 decrypts encrypted message 2
     assertEquals(testinput, key2.decryptString(encTxt2));
-    // test that key 2 decrypts encrypted message 1
+    // test that keyVersion 2 decrypts encrypted message 1
     assertEquals(testinput, key2.decryptString(encTxt1));
-    // test that key 1 decrypts encrypted message 2
+    // test that keyVersion 1 decrypts encrypted message 2
     assertEquals(testinput, key1.decryptString(encTxt2));
 
   }
@@ -156,114 +136,32 @@ public class AESKeyVersionTest {
       IllegalBlockSizeException,
       BadPaddingException {
 
-    // test using the default key builder
+    // test using the default keyVersion builder
     AESKeyVersion keyversion = new AESKeyVersion.AESKeyVersionBuilder().build();
     testEncryptDecryptKeyVersion(keyversion);
 
-    // test key version length of 16
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(16).build();
-    testEncryptDecryptKeyVersion(keyversion);
+    // ////////////////////////////
+    // test all keyVersion version length WITHOUT mode
+    // ////////////////////////////
+    for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
+      // test keyVersion version length of 16 and PKCS5 padding and ECB mode
+      keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(keyVersionLength)
+          .padding("PKCS5PADDING").build();
+      testEncryptDecryptKeyVersion(keyversion);
 
-    // test key version length of 24
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(24).build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 32
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(32).build();
-    testEncryptDecryptKeyVersion(keyversion);
+    }
 
     // ////////////////////////////
-    // 16 bit key version length with all modes
+    // test all keyVersion version length and mode combinations
     // ////////////////////////////
-
-    // test key version length of 16 and PKCS5 padding
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(16)
-        .padding("PKCS5PADDING").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 16 and PKCS5 padding and ECB mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(16)
-        .padding("PKCS5PADDING").mode("ECB").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 16 and PKCS5 padding and CBC mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(16)
-        .padding("PKCS5PADDING").mode("CBC").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 16 and PKCS5 padding and OFB mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(16)
-        .padding("PKCS5PADDING").mode("OFB").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 16 and PKCS5 padding and CFB mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(16)
-        .padding("PKCS5PADDING").mode("CFB").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 16 and PKCS5 padding and CTR mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(16)
-        .padding("PKCS5PADDING").mode("CTR").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // ////////////////////////////
-    // 24 bit key version length with all modes
-    // ////////////////////////////
-
-    // test key version length of 24 and PKCS5 padding and ECB mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(24)
-        .padding("PKCS5PADDING").mode("ECB").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 24 and PKCS5 padding and CBC mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(24)
-        .padding("PKCS5PADDING").mode("CBC").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 24 and PKCS5 padding and OFB mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(24)
-        .padding("PKCS5PADDING").mode("OFB").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 24 and PKCS5 padding and CFB mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(24)
-        .padding("PKCS5PADDING").mode("CFB").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 24 and PKCS5 padding and CTR mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(24)
-        .padding("PKCS5PADDING").mode("CTR").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // ////////////////////////////
-    // 32 bit key version length with all modes
-    // ////////////////////////////
-
-    // test key version length of 32 and PKCS5 padding and ECB mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(32)
-        .padding("PKCS5PADDING").mode("ECB").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 32 and PKCS5 padding and CBC mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(32)
-        .padding("PKCS5PADDING").mode("CBC").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 32 and PKCS5 padding and OFB mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(32)
-        .padding("PKCS5PADDING").mode("OFB").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 32 and PKCS5 padding and CFB mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(32)
-        .padding("PKCS5PADDING").mode("CFB").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
-    // test key version length of 32 and PKCS5 padding and CTR mode
-    keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(32)
-        .padding("PKCS5PADDING").mode("CTR").build();
-    testEncryptDecryptKeyVersion(keyversion);
-
+    for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
+      for (String mode : new String[] {"ECB", "CBC", "OFB", "CFB", "CTR"}) {
+        // test keyVersion version length of 16 and PKCS5 padding and ECB mode
+        keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(keyVersionLength)
+            .padding("PKCS5PADDING").mode(mode).build();
+        testEncryptDecryptKeyVersion(keyversion);
+      }
+    }
 
   }
 
@@ -272,7 +170,7 @@ public class AESKeyVersionTest {
    * decryption methods of the AESKeyVersion class using a SPECIFIC KEYVERSION (specified by the
    * parameter)
    *
-   * @param key The AESKeyVersion to use to test encryption and decryption
+   * @param keyVersion The AESKeyVersion to use to test encryption and decryption
    * @throws InvalidKeyException
    * @throws NoSuchAlgorithmException
    * @throws NoSuchPaddingException
@@ -280,7 +178,7 @@ public class AESKeyVersionTest {
    * @throws IllegalBlockSizeException
    * @throws BadPaddingException
    */
-  public void testEncryptDecryptKeyVersion(AESKeyVersion key)
+  public void testEncryptDecryptKeyVersion(AESKeyVersion keyVersion)
       throws InvalidKeyException,
       NoSuchAlgorithmException,
       NoSuchPaddingException,
@@ -291,18 +189,18 @@ public class AESKeyVersionTest {
     // test text string that we will encrypt and then decrypt
     String testinput = "weak";
     // encrypt the test string
-    byte[] encTxt = key.encryptString(testinput);
+    byte[] encTxt = keyVersion.encryptString(testinput);
     // decrypt the message
-    String result = key.decryptString(encTxt);
+    String result = keyVersion.decryptString(encTxt);
     // test that the decrypted result is the same as the encryption input
     assertEquals(testinput, result);
 
     // empty string test
     testinput = "";
     // encrypt the test string
-    encTxt = key.encryptString(testinput);
+    encTxt = keyVersion.encryptString(testinput);
     // decrypt the message
-    result = key.decryptString(encTxt);
+    result = keyVersion.decryptString(encTxt);
     // test that the decrypted result is the same as the encryption input
     assertEquals(testinput, result);
 
