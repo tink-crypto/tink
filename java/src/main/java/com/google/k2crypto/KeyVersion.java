@@ -22,5 +22,10 @@ package com.google.k2crypto;
  * @author John Maheswaran (maheswaran@google.com)
  */
 public abstract class KeyVersion {
-
+  
+  /**
+   * TODO: Add keyVersionID String
+   */
+  // private String keyVersionID;
+  
 }
