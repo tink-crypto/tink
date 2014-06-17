@@ -14,6 +14,7 @@
 
 package com.google.k2crypto.keyversions;
 
+import com.google.k2crypto.KeyVersionBuilder;
 import com.google.k2crypto.SymmetricKey;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -40,17 +41,17 @@ public class AESKeyVersion extends SymmetricKey {
   /**
    * The key length in bytes (128 bits / 8 = 16 bytes) Can be 16, 24 or 32 (NO OTHER VALUES)
    */
-  final int keyLength = 16;
+  private int keyVersionLength = 16;
 
   /**
    * SecretKey object representing the key matter in the AES key
    */
-  SecretKey secretKey;
+  private SecretKey secretKey;
 
   /**
    * The actual key matter of the AES key used by encKey.
    */
-  private byte[] keyMatter = new byte[keyLength];
+  private byte[] keyMatter = new byte[keyVersionLength];
 
 
   /**
@@ -61,20 +62,20 @@ public class AESKeyVersion extends SymmetricKey {
   /**
    * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
    */
-  final String mode = "CBC";
+  private String mode = "CTR";
 
   /**
-   * Supported padding: PKCS5PADDING
-   * Unsupported padding: PKCS7Padding, ISO10126d2Padding, X932Padding, ISO7816d4Padding, ZeroBytePadding
+   * Supported padding: PKCS5PADDING Unsupported padding: PKCS7Padding, ISO10126d2Padding,
+   * X932Padding, ISO7816d4Padding, ZeroBytePadding
    */
-  final String padding = "PKCS5PADDING";
-  
+  private String padding = "PKCS5PADDING";
+
   /**
    * represents the algorithm, mode, and padding to use TODO: change this to allow different modes
    * and paddings (NOT algos - AES ONLY)
-   * 
+   *
    */
-  final String algModePadding = "AES/" + this.mode + "/" + padding;
+  private String algModePadding = "AES/" + this.mode + "/" + padding;
 
 
   /**
@@ -154,7 +155,7 @@ public class AESKeyVersion extends SymmetricKey {
    * @return Key length in BITS
    */
   private int keyLengthInBits() {
-    return this.keyLength * 8;
+    return this.keyVersionLength * 8;
   }
 
   /**
@@ -310,7 +311,7 @@ public class AESKeyVersion extends SymmetricKey {
   /**
    * Initializes the key using key matter and initialization vector parameters.
    *
-   * @param keymatter Byte array representation of a key we want to use
+   * @param keyMatter Byte array representation of a key we want to use
    * @param initvector Byte array representation of initialization vector.
    */
   public void setKeyMatter(byte[] keyMatter, byte[] initvector) {
@@ -341,6 +342,161 @@ public class AESKeyVersion extends SymmetricKey {
    * @return Key length in BYTES
    */
   private int keyLengthInBytes() {
-    return this.keyLength;
+    return this.keyVersionLength;
+  }
+
+
+  /**
+   * Constructor to make an AESKeyVersion using the AESKeyVersionBuilder. Private to prevent use
+   * unless through the AESKeyVersionBuilder
+   *
+   * @param builder An AESKeyVersionBuilder with all the variables set according to how you want the
+   *        AESKeyVersion to be setup.
+   * @throws NoSuchAlgorithmException
+   */
+  private AESKeyVersion(AESKeyVersionBuilder builder) throws NoSuchAlgorithmException {
+    // set key version length, mode and padding based on the key version builder
+    this.keyVersionLength = builder.keyVersionLength;
+    this.mode = builder.mode;
+    this.padding = builder.padding;
+
+    // IMPORTANT! update the algorithm/mode/padding string to reflect the new mode and padding
+    this.algModePadding = "AES/" + this.mode + "/" + padding;
+
+    // set the key matter and initialization vector from input if is was provided
+    if (builder.keyMatterInitVectorProvided) {
+      // set key matter and init vector according to provided key matter and init vector
+      this.setKeyMatter(builder.keyMatter, builder.initVector);
+    } else {
+      // Generate the key using JCE crypto libraries
+      KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+      keyGen.init(this.keyLengthInBits());
+      secretKey = keyGen.generateKey();
+      // save the keymatter to the local variable keyMatter
+      this.keyMatter = secretKey.getEncoded();
+
+      // use this secure random number generator to initialize the vector with random bytes
+      SecureRandom prng = new SecureRandom();
+      prng.nextBytes(initvector);
+      // create the SecretKey object from the byte array
+      secretKey = new SecretKeySpec(this.keyMatter, 0, this.keyLengthInBytes(), "AES");
+
+    }
+  }
+
+
+  /**
+   * This class represents a key version builder for AES key versions.
+   *
+   * @author John Maheswaran (maheswaran@google.com)
+   */
+  public static class AESKeyVersionBuilder extends KeyVersionBuilder {
+    /**
+     * key size can be 16, 24 or 32
+     */
+    private int keyVersionLength = 16;
+    /**
+     * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
+     */
+    private String mode = "CTR";
+
+    /**
+     * TODO: Supported paddings depends on Java implementation. Upgrade java implementation to
+     * support more paddings
+     */
+    /**
+     * Supported padding: PKCS5PADDING Unsupported padding: PKCS7Padding, ISO10126d2Padding,
+     * X932Padding, ISO7816d4Padding, ZeroBytePadding
+     */
+    private String padding = "PKCS5PADDING";
+
+    /**
+     * Byte array that will represent the key matter
+     */
+    private byte[] keyMatter;
+    /**
+     * Byte array that will represent the initialization vector
+     */
+    private byte[] initVector;
+
+    /**
+     * Flag to indicate to the parent class (AESKeyVersion) whether the key matter and
+     * initialization vector have been manually set (true if and only if they have been manually
+     * set)
+     */
+    private boolean keyMatterInitVectorProvided = false;
+
+    /**
+     * Public constructor
+     *
+     * @throws NoSuchAlgorithmException
+     */
+    public AESKeyVersionBuilder() throws NoSuchAlgorithmException {
+
+    }
+
+    /**
+     * Set the key version length
+     *
+     * @param keyVersionLength Integer representing key version length in BYTES, can be 16, 24, 32
+     * @return This object with keyVersionLength updated
+     */
+    public AESKeyVersionBuilder keyVersionLength(int keyVersionLength) {
+      this.keyVersionLength = keyVersionLength;
+      return this;
+    }
+
+    /**
+     * Set the encryption mode
+     *
+     * @param mode String representing the encryption mode. Supported modes: CBC, ECB, OFB, CFB, CTR
+     * @return This object with mode updated
+     */
+    public AESKeyVersionBuilder mode(String mode) {
+      this.mode = mode;
+      return this;
+    }
+
+
+    /**
+     * Set the padding
+     *
+     * @param padding String representing the padding. Supported padding: PKCS5PADDING
+     * @return This object with padding updated
+     */
+    public AESKeyVersionBuilder padding(String padding) {
+      this.padding = padding;
+      return this;
+    }
+
+    /**
+     * Method to manually set key matter and initialization vector
+     *
+     * @param keyMatter Byte array representing the key matter
+     * @param initVector Byte array representing the initialization vector
+     * @return This object with key matter, initialization vector set
+     */
+    public AESKeyVersionBuilder matterVector(byte[] keyMatter, byte[] initVector) {
+      // This flag indicates to the parent class (AESKeyVersion) that the key matter and
+      // initialization vector have been manually set
+      keyMatterInitVectorProvided = true;
+      // set the key matter
+      this.keyMatter = keyMatter;
+      // set the initialization vector
+      this.initVector = initVector;
+      return this;
+    }
+
+
+    /**
+     * Method to build a new AESKeyVersion
+     *
+     * @return An AESKeyVersion with the parameters set according to the AESKeyVersionBuilder
+     * @throws NoSuchAlgorithmException
+     */
+    public AESKeyVersion build() throws NoSuchAlgorithmException {
+      return new AESKeyVersion(this);
+    }
+
   }
 }
