@@ -79,8 +79,10 @@ public interface StoreDriver {
    * Key will actually be readable. The data might be encrypted, corrupted
    * or be in an invalid format. An attempt must be made to {@link #load()} to
    * know for sure if it is readable.
+   * 
+   * @throws K2Exception if the store could not be queried
    */
-  boolean isEmpty();
+  boolean isEmpty() throws K2Exception;
     
   /**
    * Indicates that subsequent saves/loads on this instance should
