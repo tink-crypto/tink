@@ -39,6 +39,11 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class AESKeyVersion extends SymmetricKey {
   /**
+   * TODO: Add keyVersionID String - include security properties in calculation?
+   *
+   */
+
+  /**
    * The key length in bytes (128 bits / 8 = 16 bytes) Can be 16, 24 or 32 (NO OTHER VALUES)
    */
   private int keyVersionLength = 16;
@@ -71,8 +76,7 @@ public class AESKeyVersion extends SymmetricKey {
   private String padding = "PKCS5PADDING";
 
   /**
-   * represents the algorithm, mode, and padding to use TODO: change this to allow different modes
-   * and paddings (NOT algos - AES ONLY)
+   * represents the algorithm, mode, and padding to use and paddings (NOT algorithm - AES ONLY)
    *
    */
   private String algModePadding = "AES/" + this.mode + "/" + padding;
@@ -119,13 +123,17 @@ public class AESKeyVersion extends SymmetricKey {
   }
 
   /**
-   * Constructor for AESKey. Uses JCE crypto libraries to initialize key matter.
+   * Constructor for AESKey. Uses JCE cryptography libraries to initialize key matter.
    *
    * @throws NoSuchAlgorithmException This exception is only thrown if someone changes "AES" to an
    *         invalid encryption algorithm. This should never be changed.
+   *
+   * @deprecated As of addition of AESKeyVersionBuilder class, replaced by @see
+   *             com.google.k2crypto.AESKeyVersion.AESKeyVersionBuilder#build()}
    */
+  @Deprecated
   public AESKeyVersion() throws NoSuchAlgorithmException {
-    // Generate the key using JCE crypto libraries
+    // Generate the key using JCE cryptography libraries
     KeyGenerator keyGen = KeyGenerator.getInstance("AES");
     keyGen.init(this.keyLengthInBits());
     secretKey = keyGen.generateKey();
@@ -140,11 +148,17 @@ public class AESKeyVersion extends SymmetricKey {
 
   }
 
+
   /**
    * Create an AESKey from saved key matter byte array
    *
-   * @param keyVersionMatter The byte array representing the key matter
+   * @param keyVersionMatter The byte array representing the key version matter
+   * @param initvector The byte array representing the initialization vector
+   *
+   * @deprecated As of addition of AESKeyVersionBuilder class, replaced by @see
+   *             com.google.k2crypto.AESKeyVersion.AESKeyVersionBuilder#build()}
    */
+  @Deprecated
   public AESKeyVersion(byte[] keyVersionMatter, byte[] initvector) {
     this.setkeyVersionMatter(keyVersionMatter, initvector);
   }
@@ -177,10 +191,7 @@ public class AESKeyVersion extends SymmetricKey {
       InvalidAlgorithmParameterException,
       IllegalBlockSizeException,
       BadPaddingException {
-    /**
-     * TODO: Change this so we can use different modes of operation (instead of CBC) and different
-     * paddings instead of PKCS7 padding
-     */
+
     // make an AES cipher that we can use for encryption
     Cipher encCipher = Cipher.getInstance(algModePadding);
 
@@ -220,10 +231,7 @@ public class AESKeyVersion extends SymmetricKey {
       BadPaddingException,
       NoSuchAlgorithmException,
       NoSuchPaddingException {
-    /**
-     * TODO: Change this so we can use different modes of operation (instead of CBC) and different
-     * paddings instead of PKCS7 padding
-     */
+
     // make an AES cipher that we can use for decryption
     Cipher decCipher = Cipher.getInstance(algModePadding);
 
@@ -401,12 +409,9 @@ public class AESKeyVersion extends SymmetricKey {
     private String mode = "CTR";
 
     /**
-     * TODO: Supported paddings depends on Java implementation. Upgrade java implementation to
-     * support more paddings
-     */
-    /**
-     * Supported padding: PKCS5PADDING Unsupported padding: PKCS7Padding, ISO10126d2Padding,
-     * X932Padding, ISO7816d4Padding, ZeroBytePadding
+     * Supported paddings depends on Java implementation. Upgrade java implementation to support
+     * more paddings. Supported padding: PKCS5PADDING Unsupported padding: PKCS7Padding,
+     * ISO10126d2Padding, X932Padding, ISO7816d4Padding, ZeroBytePadding
      */
     private String padding = "PKCS5PADDING";
 
