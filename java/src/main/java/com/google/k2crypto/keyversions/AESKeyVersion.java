@@ -51,7 +51,7 @@ public class AESKeyVersion extends SymmetricKey {
   /**
    * The actual key matter of the AES key used by encKey.
    */
-  private byte[] keyMatter = new byte[keyVersionLength];
+  private byte[] keyVersionMatter = new byte[keyVersionLength];
 
 
   /**
@@ -129,24 +129,24 @@ public class AESKeyVersion extends SymmetricKey {
     KeyGenerator keyGen = KeyGenerator.getInstance("AES");
     keyGen.init(this.keyLengthInBits());
     secretKey = keyGen.generateKey();
-    // save the keymatter to the local variable keyMatter
-    this.keyMatter = secretKey.getEncoded();
+    // save the keyVersionMatter to the local variable keyVersionMatter
+    this.keyVersionMatter = secretKey.getEncoded();
 
     // use this secure random number generator to initialize the vector with random bytes
     SecureRandom prng = new SecureRandom();
     prng.nextBytes(initvector);
     // create the SecretKey object from the byte array
-    secretKey = new SecretKeySpec(this.keyMatter, 0, this.keyLengthInBytes(), "AES");
+    secretKey = new SecretKeySpec(this.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
 
   }
 
   /**
    * Create an AESKey from saved key matter byte array
    *
-   * @param keyMatter The byte array representing the key matter
+   * @param keyVersionMatter The byte array representing the key matter
    */
-  public AESKeyVersion(byte[] keyMatter, byte[] initvector) {
-    this.setKeyMatter(keyMatter, initvector);
+  public AESKeyVersion(byte[] keyVersionMatter, byte[] initvector) {
+    this.setkeyVersionMatter(keyVersionMatter, initvector);
   }
 
   /**
@@ -304,25 +304,25 @@ public class AESKeyVersion extends SymmetricKey {
    *
    * @return The byte array representation of the key matter
    */
-  public byte[] getKeyMatter() {
-    return this.keyMatter;
+  public byte[] getkeyVersionMatter() {
+    return this.keyVersionMatter;
   }
 
   /**
    * Initializes the key using key matter and initialization vector parameters.
    *
-   * @param keyMatter Byte array representation of a key we want to use
+   * @param keyVersionMatter Byte array representation of a key we want to use
    * @param initvector Byte array representation of initialization vector.
    */
-  public void setKeyMatter(byte[] keyMatter, byte[] initvector) {
+  public void setkeyVersionMatter(byte[] keyVersionMatter, byte[] initvector) {
 
     // save key matter byte array in this object
-    this.keyMatter = keyMatter;
+    this.keyVersionMatter = keyVersionMatter;
     // load the initialization vector
     this.initvector = initvector;
 
     // initialize secret key using key matter byte array
-    secretKey = new SecretKeySpec(this.keyMatter, 0, this.keyLengthInBytes(), "AES");
+    secretKey = new SecretKeySpec(this.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
 
   }
 
@@ -364,22 +364,22 @@ public class AESKeyVersion extends SymmetricKey {
     this.algModePadding = "AES/" + this.mode + "/" + padding;
 
     // set the key matter and initialization vector from input if is was provided
-    if (builder.keyMatterInitVectorProvided) {
+    if (builder.keyVersionMatterInitVectorProvided) {
       // set key matter and init vector according to provided key matter and init vector
-      this.setKeyMatter(builder.keyMatter, builder.initVector);
+      this.setkeyVersionMatter(builder.keyVersionMatter, builder.initVector);
     } else {
       // Generate the key using JCE crypto libraries
       KeyGenerator keyGen = KeyGenerator.getInstance("AES");
       keyGen.init(this.keyLengthInBits());
       secretKey = keyGen.generateKey();
-      // save the keymatter to the local variable keyMatter
-      this.keyMatter = secretKey.getEncoded();
+      // save the keyVersionMatter to the local variable keyVersionMatter
+      this.keyVersionMatter = secretKey.getEncoded();
 
       // use this secure random number generator to initialize the vector with random bytes
       SecureRandom prng = new SecureRandom();
       prng.nextBytes(initvector);
       // create the SecretKey object from the byte array
-      secretKey = new SecretKeySpec(this.keyMatter, 0, this.keyLengthInBytes(), "AES");
+      secretKey = new SecretKeySpec(this.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
 
     }
   }
@@ -413,7 +413,7 @@ public class AESKeyVersion extends SymmetricKey {
     /**
      * Byte array that will represent the key matter
      */
-    private byte[] keyMatter;
+    private byte[] keyVersionMatter;
     /**
      * Byte array that will represent the initialization vector
      */
@@ -424,7 +424,7 @@ public class AESKeyVersion extends SymmetricKey {
      * initialization vector have been manually set (true if and only if they have been manually
      * set)
      */
-    private boolean keyMatterInitVectorProvided = false;
+    private boolean keyVersionMatterInitVectorProvided = false;
 
     /**
      * Public constructor
@@ -470,18 +470,17 @@ public class AESKeyVersion extends SymmetricKey {
     }
 
     /**
-     * Method to manually set key matter and initialization vector
      *
-     * @param keyMatter Byte array representing the key matter
+     * @param keyVersionMatter Byte array representing the key matter
      * @param initVector Byte array representing the initialization vector
      * @return This object with key matter, initialization vector set
      */
-    public AESKeyVersionBuilder matterVector(byte[] keyMatter, byte[] initVector) {
+    public AESKeyVersionBuilder matterVector(byte[] keyVersionMatter, byte[] initVector) {
       // This flag indicates to the parent class (AESKeyVersion) that the key matter and
       // initialization vector have been manually set
-      keyMatterInitVectorProvided = true;
+      keyVersionMatterInitVectorProvided = true;
       // set the key matter
-      this.keyMatter = keyMatter;
+      this.keyVersionMatter = keyVersionMatter;
       // set the initialization vector
       this.initVector = initVector;
       return this;
