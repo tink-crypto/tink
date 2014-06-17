@@ -38,7 +38,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class AESKeyVersion extends SymmetricKey {
   /**
-   * The key length in bytes (128 bits / 8 = 16 bytes)
+   * The key length in bytes (128 bits / 8 = 16 bytes) Can be 16, 24 or 32 (NO OTHER VALUES)
    */
   final int keyLength = 16;
 
@@ -56,13 +56,26 @@ public class AESKeyVersion extends SymmetricKey {
   /**
    * initialization vector used for encryption and decryption
    */
-  private byte[] initvector = new byte[this.keyLengthInBytes()];
+  private byte[] initvector = new byte[16];
 
+  /**
+   * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
+   */
+  final String mode = "CBC";
+
+  /**
+   * Supported padding: PKCS5PADDING
+   * Unsupported padding: PKCS7Padding, ISO10126d2Padding, X932Padding, ISO7816d4Padding, ZeroBytePadding
+   */
+  final String padding = "PKCS5PADDING";
+  
   /**
    * represents the algorithm, mode, and padding to use TODO: change this to allow different modes
    * and paddings (NOT algos - AES ONLY)
+   * 
    */
-  final String algModePadding = "AES/CBC/PKCS5PADDING";
+  final String algModePadding = "AES/" + this.mode + "/" + padding;
+
 
   /**
    * The main method to test the other methods in this class
@@ -170,8 +183,15 @@ public class AESKeyVersion extends SymmetricKey {
     // make an AES cipher that we can use for encryption
     Cipher encCipher = Cipher.getInstance(algModePadding);
 
-    // initalize the cipher using the secret key of this class and the initialization vector
-    encCipher.init(Cipher.ENCRYPT_MODE, this.secretKey, new IvParameterSpec(this.initvector));
+
+    if (this.mode.equals("CBC") || this.mode.equals("OFB") || this.mode.equals("CFB")
+        || this.mode.equals("CTR")) {
+      // Initialize the cipher using the secret key of this class and the initialization vector
+      encCipher.init(Cipher.ENCRYPT_MODE, this.secretKey, new IvParameterSpec(this.initvector));
+    } else if (this.mode.equals("ECB")) {
+      // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
+      encCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
+    }
 
     // encrypt the data
     byte[] encryptedData = encCipher.doFinal(data);
@@ -206,8 +226,17 @@ public class AESKeyVersion extends SymmetricKey {
     // make an AES cipher that we can use for decryption
     Cipher decCipher = Cipher.getInstance(algModePadding);
 
-    // initalize the cipher using the secret key of this class and the initialization vector
-    decCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initvector));
+
+    if (this.mode.equals("CBC") || this.mode.equals("OFB") || this.mode.equals("CFB")
+        || this.mode.equals("CTR")) {
+      // Initialize the cipher using the secret key of this class and the initialization vector
+      decCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initvector));
+    } else if (this.mode.equals("ECB")) {
+      // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
+      decCipher.init(Cipher.DECRYPT_MODE, secretKey);
+    }
+
+
     // decrypt the data
     byte[] decryptedData = decCipher.doFinal(data);
     // return decrypted byte array
