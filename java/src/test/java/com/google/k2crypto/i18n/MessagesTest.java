@@ -12,43 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.k2crypto;
+package com.google.k2crypto.i18n;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Locale;
+
 /**
- * Unit tests for K2Exception. 
+ * Unit tests for i18n Messages. 
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
 @RunWith(JUnit4.class)
-public class K2ExceptionTest {
-  
-  private static final String MESSAGE =
-      "This is an exceptionally exceptional exception message.";
-  
-  private static final Throwable CAUSE =
-      new Throwable("This is the cause of the exception.");
-  
-  /**
-   * Tests construction with a message.
-   */
-  @Test public void testMessage() {
-    K2Exception ex = new K2Exception(MESSAGE);
-    assertEquals("Expect same message", MESSAGE, ex.getMessage());
+public class MessagesTest {
+
+  @Before public void setUp() {
+    // We are testing with English messages
+    Messages.changeLocale(new Locale("en"));    
   }
   
   /**
-   * Tests construction with a message and cause.
+   * Tests getting a known message.
    */
-  @Test public void testMessageCause() {
-    K2Exception ex = new K2Exception(MESSAGE, CAUSE);
-    assertEquals("Expect same message", MESSAGE, ex.getMessage());
-    assertEquals("Expect same cause", CAUSE, ex.getCause());
+  @Test public final void testGetMessage() {
+    String msg = Messages.getString("misc.arg.null");
+    assertEquals("Argument for \"{0}\" should not be null.", msg);
+  }
+
+  /**
+   * Tests getting a known message with parameters.
+   */
+  @Test public final void testGetMessageParams() {
+    String msg = Messages.getString("misc.arg.null", "key");
+    assertEquals("Argument for \"key\" should not be null.", msg);
   }
   
 }

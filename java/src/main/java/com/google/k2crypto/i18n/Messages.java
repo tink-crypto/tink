@@ -21,17 +21,34 @@ import java.util.ResourceBundle;
 
 /**
  * Provides access to internationalized K2 message strings.
+ * <p>
+ * For a guide on how to use this framework, see the
+ * <a href="http://docs.oracle.com/javase/tutorial/i18n/" target="_blank">Java
+ * internationalization tutorial</a>.  
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
 public final class Messages {
   
+  // Read: http://docs.oracle.com/javase/tutorial/i18n/
+  
   private static final String BUNDLE_NAME = "com.google.k2crypto.i18n.messages";
+  
+  private static ResourceBundle resourceBundle = null;
+  
+  static {
+    // Initialize locale with default
+    changeLocale(Locale.getDefault());
+  }
 
-  private static ResourceBundle resourceBundle = 
-      ResourceBundle.getBundle(BUNDLE_NAME);
-
-  private Messages() {}
+  /**
+   * Manually changes locale, for testing.
+   * 
+   * @param locale Locale to change to.
+   */
+  static void changeLocale(Locale locale) {
+    resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+  }
 
   /**
    * Returns the named string formatted with the provided parameter values.
@@ -52,12 +69,23 @@ public final class Messages {
   }
 
   /**
-   * Manually changes locale, for testing.
+   * Returns the named string.
    * 
-   * @param locale Locale to change to.
+   * @param key Name of the string.
+   * @return the internationalized string, or {@code "!<key>!"} if
+   *         the named string could not be found.
    */
-  static void changeLocale(Locale locale) {
-    resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+  public static String getString(String key) {
+    try {
+      return resourceBundle.getString(key);
+    } catch (MissingResourceException ex) {
+      // TODO: log this
+      ex.printStackTrace();
+    }
+    return '!' + key + '!';
   }
+  
+  // Non-instantiatable
+  private Messages() {}
 
 }
