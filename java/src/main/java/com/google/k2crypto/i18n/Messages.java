@@ -34,11 +34,11 @@ public final class Messages {
   
   private static final String BUNDLE_NAME = "com.google.k2crypto.i18n.messages";
   
-  private static ResourceBundle resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME);
+  private static ResourceBundle resourceBundle = null;
   
   static {
     // Initialize locale with default
-    //changeLocale(Locale.getDefault());
+    changeLocale(Locale.getDefault());
   }
 
   /**
