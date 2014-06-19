@@ -19,6 +19,11 @@ K2 is a cryptographic toolkit that provides an easy, code-reviewable way to do
 crypto safely - avoiding many of the subtle problems that come up when you
 do crypto yourself.
 
+## K2 is not an official Google project
+Although several of the maintainers are Google employees, this is just
+something we needed and decided to build - classic open source engineering.
+There is no official Google support or endorsement of this project.
+
 ## Status of K2
 K2 is currently in the design and early build phase.
 

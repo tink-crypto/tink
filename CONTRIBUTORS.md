@@ -4,7 +4,7 @@
 Much of the design of K2 come from the work of to Daniel Bleichenbacher.
 Additional design was done by Shawn Willden, Devin Lundberg, Ben Laurie,
 and Andrew Sacamano. The next round of design work and implementation was
-done by John Maheswaran and Daryl Seah.
+done by [John Maheswaran](http://www.cs.yale.edu/homes/maheswaran/home.html) and Daryl Seah.
 
 Jay Tuley, Damian Gryski, and Evan Jones all provided excellent advice
 about how to go in K2, based on their excperience in using KeyCzar.
