@@ -1,4 +1,4 @@
-# K2 Java Tests Directory
+# K2 Crypto Library Third Party Directory
 
 Copyright 2014 Google. Inc.
 
@@ -14,6 +14,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-## What goes in this directory?
+## What goes here
+This directory will contain any third party code or libraries that need to be
+distirbuted with K2 - if there any any.
 
-This directory contains the Java unit tests.
+## Adding things here
+In general, we don't expect to be adding things here - we expect to be asking
+developers & deployers to get any third party dependencies themselves, and
+K2 will just link to them.  But if we find a situation where that won't work,
+this is where such things will go.
+
