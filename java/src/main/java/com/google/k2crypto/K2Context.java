@@ -16,29 +16,35 @@
 
 package com.google.k2crypto;
 
+import com.google.k2crypto.i18n.K2Strings;
+
+import java.util.Locale;
+
 /**
- * Super-class of all K2-specific exceptions. 
+ * Context that will be propagated to every object in a K2 session. 
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-public class K2Exception extends Exception {
+public class K2Context {
+  /*
+   * NOTE: The design of this class is subject to heavy revision.
+   *       The current implementation only serves to bootstrap K2 dev.
+   */
+  
+  // Internationalized strings
+  private K2Strings strings; 
   
   /**
-   * Constructs a new K2 exception with the specified message.
-   *
-   * @param message the detail message.
+   * Constructs a new K2 context.
    */
-  public K2Exception(String message) {
-    super(message);
+  public K2Context() {
+    strings = new K2Strings(this, Locale.getDefault());
   }
   
   /**
-   * Constructs a new K2 exception with the specified message and cause.
-   *
-   * @param message the detail message.
-   * @param cause the cause of this exception.
+   * Returns the interface for obtaining internationalized strings.
    */
-  public K2Exception(String message, Throwable cause) {
-    super(message, cause);
+  public K2Strings getStrings() {
+    return strings;
   }
 }

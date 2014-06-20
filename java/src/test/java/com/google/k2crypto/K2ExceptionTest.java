@@ -52,5 +52,4 @@ public class K2ExceptionTest {
     assertEquals("Expect same message", MESSAGE, ex.getMessage());
     assertEquals("Expect same cause", CAUSE, ex.getCause());
   }
-  
 }

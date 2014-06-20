@@ -16,13 +16,15 @@
 
 package com.google.k2crypto.i18n;
 
+import com.google.k2crypto.K2Context;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
- * Provides access to internationalized K2 message strings.
+ * Provides access to internationalized K2 strings.
  * <p>
  * For a guide on how to use this framework, see the
  * <a href="http://docs.oracle.com/javase/tutorial/i18n/" target="_blank">Java
@@ -30,26 +32,49 @@ import java.util.ResourceBundle;
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-public final class Messages {
+public class K2Strings {
   
-  private static final String BUNDLE_NAME = "com.google.k2crypto.i18n.messages";
-  
-  private static ResourceBundle resourceBundle = null;
-  
-  static {
-    // Initialize locale with default
-    changeLocale(Locale.getDefault());
-  }
-
   /**
-   * Manually changes locale, for testing.
-   * 
-   * @param locale Locale to change to.
+   * Default resource bundle name.
    */
-  static void changeLocale(Locale locale) {
-    resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
-  }
+  public static final String DEFAULT_BUNDLE_NAME =
+      "com.google.k2crypto.i18n.strings";
+  
+  // Context for logging purposes (can be null for testing)
+  @SuppressWarnings("unused")
+  private final K2Context context;
 
+  // Bundle to pull the strings from
+  private final ResourceBundle resourceBundle;
+  
+  // Name of the bundle, for debugging
+  private final String bundleName;
+  
+  /**
+   * Constructs a set of K2 strings populated from the default locale-specific
+   * resource bundle.
+   * 
+   * @param context Context for logging, or null if not available.
+   * @param locale Locale of the string resources.
+   */
+  public K2Strings(K2Context context, Locale locale) {
+    this(context, DEFAULT_BUNDLE_NAME, locale);
+  }
+  
+  /**
+   * Constructs a set of K2 strings populated from a locale-specific 
+   * resource bundle.
+   * 
+   * @param context Context for logging, or null if not available.
+   * @param bundleName Name of the resource bundle to load.
+   * @param locale Locale of the string resources.
+   */
+  public K2Strings(K2Context context, String bundleName, Locale locale) {
+    this.context = context;
+    this.bundleName = bundleName;
+    resourceBundle = ResourceBundle.getBundle(bundleName, locale);
+  }
+  
   /**
    * Returns the named string formatted with the provided parameter values.
    * 
@@ -58,11 +83,11 @@ public final class Messages {
    * @return the formatted internationalized string, or {@code "!<key>!"} if
    *         the named string could not be found.
    */
-  public static String getString(String key, Object ... params) {
+  public String get(String key, Object ... params) {
     try {
       return MessageFormat.format(resourceBundle.getString(key), params);
     } catch (MissingResourceException ex) {
-      // TODO: log this
+      // TODO: log this, using the context
       ex.printStackTrace();
     }
     return '!' + key + '!';
@@ -75,17 +100,21 @@ public final class Messages {
    * @return the internationalized string, or {@code "!<key>!"} if
    *         the named string could not be found.
    */
-  public static String getString(String key) {
+  public String get(String key) {
     try {
       return resourceBundle.getString(key);
     } catch (MissingResourceException ex) {
-      // TODO: log this
+      // TODO: log this, using the context
       ex.printStackTrace();
     }
     return '!' + key + '!';
   }
   
-  // Non-instantiatable
-  private Messages() {}
-
+  /**
+   * Returns the bundle name and language.
+   */
+  @Override
+  public String toString() {
+    return bundleName + '[' + resourceBundle.getLocale().getLanguage() + ']';
+  }
 }
