@@ -1,7 +1,7 @@
 # K2 Contributors & Contributing to K2
 
 ## Who is involved & acknowledgements
-Much of the design of K2 come from the work of to Daniel Bleichenbacher.
+Much of the design of K2 come from the work of Daniel Bleichenbacher.
 Additional design was done by Shawn Willden, Devin Lundberg, Ben Laurie,
 and Andrew Sacamano. The next round of design work and implementation was
 done by [John Maheswaran](http://www.cs.yale.edu/homes/maheswaran/home.html) and Daryl Seah.
