@@ -46,7 +46,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   /**
    * The key length in bytes (128 bits / 8 = 16 bytes) Can be 16, 24 or 32 (NO OTHER VALUES)
    */
-  private int keyVersionLength = 16;
+  private int keyVersionLengthInBytes = 16;
 
   /**
    * SecretKey object representing the key matter in the AES key
@@ -56,7 +56,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   /**
    * The actual key matter of the AES key used by encKey.
    */
-  protected byte[] keyVersionMatter = new byte[keyVersionLength];
+  protected byte[] keyVersionMatter = new byte[keyVersionLengthInBytes];
 
   /**
    * initialization vector used for encryption and decryption
@@ -64,9 +64,15 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   protected byte[] initvector = new byte[16];
 
   /**
+   * Enum representing all supported modes
    * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
    */
-  private String mode = "CTR";
+  public enum Mode {CBC, ECB, OFB, CFB, CTR};
+  
+  /**
+   * The encryption mode
+   */
+  private Mode mode = Mode.CTR;
 
   /**
    * Supported padding: PKCS5PADDING Unsupported padding: PKCS7Padding, ISO10126d2Padding,
@@ -86,9 +92,9 @@ public class AESKeyVersion extends SymmetricKeyVersion {
    * @return Key length in BITS
    */
   private int keyLengthInBits() {
-    return this.keyVersionLength * 8;
+    return this.keyVersionLengthInBytes * 8;
   }
-
+ 
   /**
    * Takes an array of bytes and encrypts it using the AES key
    *
@@ -113,11 +119,11 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     Cipher encCipher = Cipher.getInstance(algModePadding);
 
 
-    if (this.mode.equals("CBC") || this.mode.equals("OFB") || this.mode.equals("CFB")
-        || this.mode.equals("CTR")) {
+    if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
+        || this.mode.equals(Mode.CTR)) {
       // Initialize the cipher using the secret key of this class and the initialization vector
       encCipher.init(Cipher.ENCRYPT_MODE, this.secretKey, new IvParameterSpec(this.initvector));
-    } else if (this.mode.equals("ECB")) {
+    } else if (this.mode.equals(Mode.ECB)) {
       // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
       encCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
     }
@@ -153,11 +159,11 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     Cipher decCipher = Cipher.getInstance(algModePadding);
 
 
-    if (this.mode.equals("CBC") || this.mode.equals("OFB") || this.mode.equals("CFB")
-        || this.mode.equals("CTR")) {
+    if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
+        || this.mode.equals(Mode.CTR)) {
       // Initialize the cipher using the secret key of this class and the initialization vector
       decCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initvector));
-    } else if (this.mode.equals("ECB")) {
+    } else if (this.mode.equals(Mode.ECB)) {
       // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
       decCipher.init(Cipher.DECRYPT_MODE, secretKey);
     }
@@ -193,7 +199,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
    * @return Key length in BYTES
    */
   private int keyLengthInBytes() {
-    return this.keyVersionLength;
+    return this.keyVersionLengthInBytes;
   }
 
 
@@ -207,7 +213,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
    */
   private AESKeyVersion(AESKeyVersionBuilder builder) throws NoSuchAlgorithmException {
     // set key version length, mode and padding based on the key version builder
-    this.keyVersionLength = builder.keyVersionLength;
+    this.keyVersionLengthInBytes = builder.keyVersionLength;
     this.mode = builder.mode;
     this.padding = builder.padding;
 
@@ -248,7 +254,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     /**
      * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
      */
-    private String mode = "CTR";
+    private Mode mode = Mode.CTR;
 
     /**
      * Supported paddings depends on Java implementation. Upgrade java implementation to support
@@ -296,10 +302,10 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     /**
      * Set the encryption mode
      *
-     * @param mode String representing the encryption mode. Supported modes: CBC, ECB, OFB, CFB, CTR
+     * @param mode representing the encryption mode. Supported modes: CBC, ECB, OFB, CFB, CTR
      * @return This object with mode updated
      */
-    public AESKeyVersionBuilder mode(String mode) {
+    public AESKeyVersionBuilder mode(Mode mode) {
       this.mode = mode;
       return this;
     }

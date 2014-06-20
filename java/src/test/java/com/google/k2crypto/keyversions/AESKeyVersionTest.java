@@ -17,6 +17,8 @@ package com.google.k2crypto.keyversions;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.google.k2crypto.keyversions.AESKeyVersion.Mode;
+
 import org.junit.Test;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -153,7 +155,7 @@ public class AESKeyVersionTest {
     // test all keyVersion version length and mode combinations
     // ////////////////////////////
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
-      for (String mode : new String[] {"ECB", "CBC", "OFB", "CFB", "CTR"}) {
+      for (Mode mode : Mode.values()) {
         // test keyVersion version length of 16 and PKCS5 padding and ECB mode
         keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(keyVersionLength)
             .padding("PKCS5PADDING").mode(mode).build();
