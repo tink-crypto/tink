@@ -32,8 +32,6 @@ import java.util.ResourceBundle;
  */
 public final class Messages {
   
-  // Read: http://docs.oracle.com/javase/tutorial/i18n/
-  
   private static final String BUNDLE_NAME = "com.google.k2crypto.i18n.messages";
   
   private static ResourceBundle resourceBundle = null;
