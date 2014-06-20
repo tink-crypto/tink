@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+option java_package = "com.google.k2crypto";
+
+package com.google.k2crypto;
+
+// A placeholder proto until the real ones go in
+// TODO(atgs@google.com) Delete this once we have something real.
+message PlaceholderMessage {
+  // A version number
+  required uint32 version = 1;
+
+  // Some content
+  required bytes payload = 2;
+}
+
