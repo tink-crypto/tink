@@ -1,0 +1,87 @@
+// K2 Crypto Library Java Build File
+//
+// Copyright 2014 Google. Inc.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'gradleProtobufPlugin'
+
+// Allow the build process to pull plugins from maven central
+// and run the proto compiling plugin
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath 'com.tomcawley:gradle-protobuf-plugin:0.2'
+  }
+}
+
+// Java 1.5
+sourceCompatibility = 1.5
+
+// Build a manifest file containing info about the library
+version = 'DEVELOPMENT'
+jar {
+  archiveName = "K2.jar"
+  manifest {
+    attributes 'Implementation-Title': 'K2 Crypto Library', 'Implementation-Version': version
+  }
+}
+
+// Use mavenCentral for project dependencies
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile 'com.google.protobuf:protobuf-java:2.5.0'
+  compile 'com.google.code.gson:gson:2.2.4'
+  compile 'log4j:log4j:1.2.17'
+  testCompile 'junit:junit:4.+'
+  testCompile 'org.mockito:mockito-all:1.9.5'
+}
+
+// Magic to make proto compilation happen
+protoBuf {
+  protoc {
+    // Insert other OS's here if you need to. If at all possible follow the
+    // example of linux, and rely on a search path instead of a fully specified
+    // path
+    'Linux' {
+      path = "protoc"
+    }
+  }
+
+  // Where are the protos
+  sourceSets {
+    proto {
+      srcDir = '../protos'
+    }
+  }
+
+  // Where should the generated java files go
+  lang {
+    java {
+      genDir = 'build/proto-java'
+    }
+  }
+}
+
+// Make eclipse read the proto java files as well
+sourceSets.main.java.srcDir "build/proto-java"
+
+// TODO(atgs@google.com) Once we have something usable, publish to mavenCentral

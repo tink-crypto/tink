@@ -42,7 +42,9 @@ repo.
 
 1. Follow the language specific guidelines (see the HACKING.md file in that
 
-2. Include unit tests for all your changes.
+2. Include unit tests for all your changes. What makes a good unit test? Read
+[The Art of Unit Testing by Roy Osherove](http://www.manning.com/osherove/)
+or just Google "How to write a good unit test".
 
 3. Be decriptive in your commit message - and remember, these messages are part
 of the public record, so keep them polite and inoffensive.
@@ -53,19 +55,16 @@ of the public record, so keep them polite and inoffensive.
 touch a file that is out of date) - commented using the language-appropriate
 commenting style.
 
-> Copyright 2014 Google. Inc.
->
-> Licensed under the Apache License, Version 2.0 (the "License");
-> you may not use this file except in compliance with the License.
-> You may obtain a copy of the License at
-> 
->   http://www.apache.org/licenses/LICENSE-2.0
-> 
-> Unless required by applicable law or agreed to in writing, software
-> distributed under the License is distributed on an "AS IS" BASIS,
-> WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-> See the License for the specific language governing permissions and
-> limitations under the License.
+## Protocol buffers
+
+You must install the
+(protocol buffers tools)[https://developers.google.com/protocol-buffers/] to
+build K2.  Binaries are available for windows.  For other OSes, download the
+source, run 'configure' and 'make' and then put the protoc binary on your path.
+
+## Language specific HACKING.md files
+
+To keep going, read the langauge specific HACKING.md files.
 
 ## K2 Specific Rules
 
