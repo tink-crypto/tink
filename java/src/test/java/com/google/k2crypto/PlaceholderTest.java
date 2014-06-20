@@ -25,7 +25,10 @@ import org.junit.runners.JUnit4;
 
 import java.io.UnsupportedEncodingException;
 
-/** Unit tests for {@link Placeholder}. */
+/**
+ * Unit tests for {@link Placeholder}.
+ * TODO(atgs@google.com) Remove this once we have other code here.
+ */
 @RunWith(JUnit4.class)
 public class PlaceholderTest {
 

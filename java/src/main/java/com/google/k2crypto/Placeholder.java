@@ -19,7 +19,10 @@ import com.google.protobuf.ByteString;
 
 import java.io.UnsupportedEncodingException;
 
-/** A placeholder class to make sure the build scipt works */
+/**
+ * A placeholder class to make sure the build scipt works.
+ * TODO(atgs@google.com) Delete this one we have other classes.
+ */
 class Placeholder {
 
   Placeholder() {
