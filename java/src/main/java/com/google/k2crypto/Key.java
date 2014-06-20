@@ -14,7 +14,7 @@
 
 package com.google.k2crypto;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 /**
  * This class represents a Key in K2. It holds a list of KeyVersions and a reference to the primary
@@ -24,7 +24,8 @@ import java.util.LinkedList;
  */
 public class Key {
   // The list of key versions
-  LinkedList<KeyVersion> keyVersions = new LinkedList<KeyVersion>();
+  // Andrew prefers to use ArrayList instead of LinkedList
+  ArrayList<KeyVersion> keyVersions = new ArrayList<KeyVersion>();
   KeyVersion primary;
 
   /**

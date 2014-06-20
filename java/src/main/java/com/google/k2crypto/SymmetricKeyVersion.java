@@ -21,6 +21,6 @@ package com.google.k2crypto;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public abstract class SymmetricKey {
+public abstract class SymmetricKeyVersion extends KeyVersion {
 
 }

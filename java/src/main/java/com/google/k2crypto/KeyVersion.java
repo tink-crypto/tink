@@ -12,7 +12,6 @@
  * the License.
  */
 
-
 package com.google.k2crypto;
 
 /**

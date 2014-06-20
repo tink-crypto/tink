@@ -15,7 +15,7 @@
 package com.google.k2crypto.keyversions;
 
 import com.google.k2crypto.KeyVersionBuilder;
-import com.google.k2crypto.SymmetricKey;
+import com.google.k2crypto.SymmetricKeyVersion;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -37,7 +37,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public class AESKeyVersion extends SymmetricKey {
+public class AESKeyVersion extends SymmetricKeyVersion {
   /**
    * TODO: Add keyVersionID String - include security properties in calculation?
    *
@@ -56,13 +56,12 @@ public class AESKeyVersion extends SymmetricKey {
   /**
    * The actual key matter of the AES key used by encKey.
    */
-  private byte[] keyVersionMatter = new byte[keyVersionLength];
-
+  protected byte[] keyVersionMatter = new byte[keyVersionLength];
 
   /**
    * initialization vector used for encryption and decryption
    */
-  private byte[] initvector = new byte[16];
+  protected byte[] initvector = new byte[16];
 
   /**
    * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
@@ -80,88 +79,6 @@ public class AESKeyVersion extends SymmetricKey {
    *
    */
   private String algModePadding = "AES/" + this.mode + "/" + padding;
-
-
-  /**
-   * The main method to test the other methods in this class
-   *
-   * @param args Command line parameters (unused)
-   * @throws NoSuchAlgorithmException
-   * @throws BadPaddingException
-   * @throws IllegalBlockSizeException
-   * @throws InvalidAlgorithmParameterException
-   * @throws NoSuchPaddingException
-   * @throws InvalidKeyException
-   */
-  public static void main(String[] args)
-      throws NoSuchAlgorithmException,
-      InvalidKeyException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException {
-
-
-    // test string that we will encrypt and then decrypt
-    String testinput = "weak";
-    // print input string
-    System.out.println("Input: " + testinput);
-    System.out.println();
-    // create AES key
-    AESKeyVersion key = new AESKeyVersion();
-    // encrypt the test string
-    byte[] encTxt = key.encryptString(testinput);
-    // print out the encrypted string
-    System.out.println("Encrypted string: " + encTxt);
-    System.out.println();
-    // decrypt the message
-    String result = key.decryptString(encTxt);
-    // print out decrypted message
-    System.out.println("Decrypted string: " + result);
-
-
-  }
-
-  /**
-   * Constructor for AESKey. Uses JCE cryptography libraries to initialize key matter.
-   *
-   * @throws NoSuchAlgorithmException This exception is only thrown if someone changes "AES" to an
-   *         invalid encryption algorithm. This should never be changed.
-   *
-   * @deprecated As of addition of AESKeyVersionBuilder class, replaced by @see
-   *             com.google.k2crypto.AESKeyVersion.AESKeyVersionBuilder#build()}
-   */
-  @Deprecated
-  public AESKeyVersion() throws NoSuchAlgorithmException {
-    // Generate the key using JCE cryptography libraries
-    KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-    keyGen.init(this.keyLengthInBits());
-    secretKey = keyGen.generateKey();
-    // save the keyVersionMatter to the local variable keyVersionMatter
-    this.keyVersionMatter = secretKey.getEncoded();
-
-    // use this secure random number generator to initialize the vector with random bytes
-    SecureRandom prng = new SecureRandom();
-    prng.nextBytes(initvector);
-    // create the SecretKey object from the byte array
-    secretKey = new SecretKeySpec(this.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
-
-  }
-
-
-  /**
-   * Create an AESKey from saved key matter byte array
-   *
-   * @param keyVersionMatter The byte array representing the key version matter
-   * @param initvector The byte array representing the initialization vector
-   *
-   * @deprecated As of addition of AESKeyVersionBuilder class, replaced by @see
-   *             com.google.k2crypto.AESKeyVersion.AESKeyVersionBuilder#build()}
-   */
-  @Deprecated
-  public AESKeyVersion(byte[] keyVersionMatter, byte[] initvector) {
-    this.setkeyVersionMatter(keyVersionMatter, initvector);
-  }
 
   /**
    * Method to give length of key in BITS. Used to prevent mixing up bytes and bits
@@ -253,70 +170,6 @@ public class AESKeyVersion extends SymmetricKey {
   }
 
   /**
-   * Method that decrypts an encrypted string
-   *
-   * @param input byte array representation of encrypted message
-   * @return String representation of decrypted message
-   * @throws InvalidKeyException
-   * @throws InvalidAlgorithmParameterException
-   * @throws IllegalBlockSizeException
-   * @throws BadPaddingException
-   * @throws NoSuchAlgorithmException
-   * @throws NoSuchPaddingException
-   */
-  public String decryptString(byte[] input)
-      throws InvalidKeyException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException,
-      NoSuchAlgorithmException,
-      NoSuchPaddingException {
-    // call decrypt bytes method
-    byte[] outputData = this.decryptBytes(input);
-    // convert to string
-    String result = new String(outputData);
-    // return result
-    return result;
-  }
-
-  /**
-   * Method to encrypt a string using the AES key
-   *
-   * @param input The input string that we want to encrypt
-   * @return The byte array representation of the AES encrypted version of the string
-   * @throws BadPaddingException
-   * @throws IllegalBlockSizeException
-   * @throws InvalidAlgorithmParameterException
-   * @throws NoSuchPaddingException
-   * @throws NoSuchAlgorithmException
-   * @throws InvalidKeyException
-   */
-  public byte[] encryptString(String input)
-      throws InvalidKeyException,
-      NoSuchAlgorithmException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException {
-    // Convert the input string to bytes
-    byte[] data = input.getBytes();
-    // call the encrypt bytes method to encrypt the data
-    byte[] encData = this.encryptBytes(data);
-
-    // return the encrypted string
-    return encData;
-  }
-
-  /**
-   * Method to return the key matter to other classes.
-   *
-   * @return The byte array representation of the key matter
-   */
-  public byte[] getkeyVersionMatter() {
-    return this.keyVersionMatter;
-  }
-
-  /**
    * Initializes the key using key matter and initialization vector parameters.
    *
    * @param keyVersionMatter Byte array representation of a key we want to use
@@ -331,16 +184,6 @@ public class AESKeyVersion extends SymmetricKey {
 
     // initialize secret key using key matter byte array
     secretKey = new SecretKeySpec(this.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
-
-  }
-
-  /**
-   * Method to return the initialization vector to other classes.
-   *
-   * @return The byte array representation of the initialization vector
-   */
-  public byte[] getInitVector() {
-    return this.initvector;
   }
 
   /**
@@ -391,7 +234,6 @@ public class AESKeyVersion extends SymmetricKey {
 
     }
   }
-
 
   /**
    * This class represents a key version builder for AES key versions.
@@ -462,7 +304,6 @@ public class AESKeyVersion extends SymmetricKey {
       return this;
     }
 
-
     /**
      * Set the padding
      *
@@ -490,7 +331,6 @@ public class AESKeyVersion extends SymmetricKey {
       this.initVector = initVector;
       return this;
     }
-
 
     /**
      * Method to build a new AESKeyVersion
