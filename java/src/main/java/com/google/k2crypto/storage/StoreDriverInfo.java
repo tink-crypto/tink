@@ -16,11 +16,15 @@
 
 package com.google.k2crypto.storage;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Annotation applied to all {@link StoreDriver} implementations.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
+@Retention(RetentionPolicy.RUNTIME)
 public @interface StoreDriverInfo {
   
   /**
