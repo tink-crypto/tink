@@ -37,20 +37,24 @@ public class InstalledDriver {
   private static final Pattern LEGAL_ID =
       Pattern.compile("^[A-Za-z][A-Za-z0-9\\+\\-\\.]*$");
   
-  private final Constructor<? extends StoreDriver> constructor;
+  // Context for the current K2 session
+  private final K2Context context;
   
+  // Class of the driver implementation.
   private final Class<? extends StoreDriver> driverClass;
   
-  private final StoreDriverInfo info;
+  // Constructor obtained from the driver class
+  private final Constructor<? extends StoreDriver> constructor;
   
-  private final K2Context context;
+  // Info annotation obtained from the driver class
+  private final StoreDriverInfo info;
   
   /**
    * Constructs an installed driver from a class and verifies that it conforms
    * to the expected structure.
    * 
    * @param context Context for the K2 session.
-   * @param driverClass Class of the driver to install.
+   * @param driverClass Class of the driver implementation to install.
    * 
    * @throws StoreDriverException if the driver does not conform.
    */
@@ -113,7 +117,9 @@ public class InstalledDriver {
    * @throws IllegalAddressException if the driver cannot accept the address.
    */
   StoreDriver instantiate(URI address) throws IllegalAddressException {
-    if (address == null) throw new NullPointerException("address");
+    if (address == null) {
+      throw new NullPointerException("address");
+    }
     try {
       // Use reflection to instantiate the driver
       return constructor.newInstance(context, address);
