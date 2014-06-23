@@ -221,6 +221,8 @@ public class Store {
    * 
    * @param key Key protecting the actual stored key.
    * 
+   * @return this Store, for method chaining.
+   * 
    * @throws StoreStateException if the store is not open.
    * @throws UnsupportedByStoreException if wrapping is not supported.
    * @throws StoreException if there is a driver-specific issue with the key.
@@ -252,6 +254,8 @@ public class Store {
   /**
    * Indicates that subsequent saves/loads on this store will not be wrapped.
    * 
+   * @return this Store, for method chaining.
+   *
    * @throws StoreStateException if the store is not open.
    * @throws StoreException if there is a driver-specific issue with disabling
    *                        wrapping.
