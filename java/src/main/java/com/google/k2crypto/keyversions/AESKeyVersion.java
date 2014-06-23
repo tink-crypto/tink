@@ -17,8 +17,7 @@ package com.google.k2crypto.keyversions;
 import com.google.k2crypto.KeyVersionBuilder;
 import com.google.k2crypto.SymmetricKeyVersion;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.InvalidAlgorithmParameterException;
@@ -114,6 +113,11 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   private Cipher decryptingCipher;
 
   /**
+   * Byte array used to buffer data when encrypting or decrypting streams
+   */
+  private byte[] byteBuffer = new byte[1024];
+
+  /**
    * Takes an array of bytes and encrypts it using the AES key
    *
    * @param data The byte array of data that we want to encrypt
@@ -195,6 +199,54 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     return this.keyVersionLengthInBytes;
   }
 
+
+  /**
+   * This method takes an input stream and encrypts it using this AES key version, returning an
+   * encrypted output stream
+   *
+   * @param in The input stream that we want to encrypt
+   * @param out An output stream encrypted using the AES key version
+   * @throws IOException
+   */
+  public void encryptStream(InputStream in, OutputStream out) throws IOException {
+    // initialize the output stream using the AES encrypting cipher
+    out = new CipherOutputStream(out, this.encryptingCipher);
+
+    // integer used to determine when we have read all of the input stream
+    int i = 0;
+    // read from the input stream into the byte array buffer
+    while ((i = in.read(byteBuffer)) >= 0) {
+      // now encrypt the data in the buffer using the AES cipher and write it to the output stream
+      out.write(byteBuffer, 0, i);
+    }
+    // close the output stream to prevent resource leakage
+    out.close();
+  }
+
+  /**
+   * * This method takes an encrypted input stream and decrypts it using this AES key version,
+   * returning the decrypted output stream
+   *
+   * @param in The encrypted input stream that we want to decrypt using the AES key version
+   * @param out The decrypted output stream
+   * @throws IOException
+   */
+  public void decryptStream(InputStream in, OutputStream out) throws IOException {
+    // initialize the input stream using the AES decrypting cipher
+    in = new CipherInputStream(in, this.decryptingCipher);
+
+    // integer used to determine when we have read all of the input stream
+    int i = 0;
+    // read from the input stream into the byte array buffer, decrypting the data using the AES
+    // cipher
+    while ((i = in.read(byteBuffer)) >= 0) {
+      // write the data to the output stream
+      out.write(byteBuffer, 0, i);
+    }
+    // close the output stream to prevent resource leakage
+    out.close();
+  }
+
   /**
    * Constructor to make an AESKeyVersion using the AESKeyVersionBuilder. Private to prevent use
    * unless through the AESKeyVersionBuilder
@@ -203,8 +255,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
    *        AESKeyVersion to be setup.
    * @throws NoSuchAlgorithmException
    * @throws NoSuchPaddingException
-   * @throws InvalidAlgorithmParameterException 
-   * @throws InvalidKeyException 
+   * @throws InvalidAlgorithmParameterException
+   * @throws InvalidKeyException
    */
   private AESKeyVersion(AESKeyVersionBuilder builder) throws NoSuchAlgorithmException,
       NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
@@ -235,10 +287,10 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       // create the SecretKey object from the byte array
       secretKey = new SecretKeySpec(this.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
     }
-    
+
     // make an AES cipher that we can use for encryption
     this.encryptingCipher = Cipher.getInstance(this.algModePadding);
-    
+
     // initialize the encrypting cipher
     if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
         || this.mode.equals(Mode.CTR)) {
@@ -249,7 +301,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
       encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
     }
-    
+
     // make an AES cipher that we can use for decryption
     this.decryptingCipher = Cipher.getInstance(this.algModePadding);
 
@@ -367,10 +419,11 @@ public class AESKeyVersion extends SymmetricKeyVersion {
      * @return An AESKeyVersion with the parameters set according to the AESKeyVersionBuilder
      * @throws NoSuchAlgorithmException
      * @throws NoSuchPaddingException
-     * @throws InvalidAlgorithmParameterException 
-     * @throws InvalidKeyException 
+     * @throws InvalidAlgorithmParameterException
+     * @throws InvalidKeyException
      */
-    public AESKeyVersion build() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+    public AESKeyVersion build() throws NoSuchAlgorithmException, NoSuchPaddingException,
+        InvalidKeyException, InvalidAlgorithmParameterException {
       return new AESKeyVersion(this);
     }
 
