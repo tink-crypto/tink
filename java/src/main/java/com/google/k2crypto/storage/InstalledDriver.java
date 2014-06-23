@@ -65,21 +65,23 @@ public class InstalledDriver {
     this.driverClass = driverClass;
     K2Strings strings = context.getStrings();
 
-    // Check if abstract
+    // Check that class is non-abstract
     if (Modifier.isAbstract(driverClass.getModifiers())) {
       throw new StoreDriverException(driverClass,
           strings.get("storage.driver.abstract"));        
     }
     
-    // Check for a constructor with a valid signature
+    // Check that class (and enclosing classes) are public
+    for (Class<?> cl = driverClass; cl != null; cl = cl.getEnclosingClass()) {
+      if (!Modifier.isPublic(cl.getModifiers())) {
+        throw new StoreDriverException(driverClass,
+            strings.get("storage.driver.nonpublic"));
+      } 
+    } 
+    
+    // Check for a public constructor with a valid signature
     try {
       constructor = driverClass.getConstructor(K2Context.class, URI.class);
-      
-      // Constructor must be public
-      if (!Modifier.isPublic(constructor.getModifiers())) {
-        throw new StoreDriverException(driverClass,
-            strings.get("storage.driver.constructor_nonpublic"));        
-      }
       
       // Constructor can only throw errors, runtime or IllegalAddressExceptions
       for (Class<?> exClass : constructor.getExceptionTypes()) {
