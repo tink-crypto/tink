@@ -127,7 +127,8 @@ public class K2Storage {
   }
 
   /**
-   * Converts a string address to a URI address.
+   * Converts a string address to a URI address. Escaped characters will be
+   * interpreted.
    * <p>
    * If the string is only a path (and nothing else), this method will convert
    * the path to an absolute one (if necessary) and append "file://" to it.
@@ -187,6 +188,20 @@ public class K2Storage {
   
   /**
    * Opens a storage location for reading/writing of a {@link Key}.
+   * <p>
+   * The string address should either be an absolute URI (i.e. complete with
+   * a scheme identifying the driver to use) or a path. Reserved characters
+   * should be URI-escaped if necessary, e.g. {@code "/My Keys"} should be
+   * {@code "/My%20Keys"}. 
+   * <p>
+   * If the string is only a path (and nothing else), the path will be converted
+   * to an absolute one (if necessary) and the scheme "file://" will be prefixed
+   * to it.
+   * <p>
+   * This method will search for an installed driver with an identifier matching
+   * the scheme of the URI. If no such driver is found, the available drivers
+   * will be queried in installation order and the first driver that accepts
+   * the address will be used.
    * 
    * @param address Address string of the key storage location.
    * 
@@ -210,6 +225,11 @@ public class K2Storage {
   
   /**
    * Opens a storage location for reading/writing of a {@link Key}.
+   * <p>
+   * This method will search for an installed driver with an identifier matching
+   * the scheme of the URI. If no such driver is found, the available drivers
+   * will be queried in installation order and the first driver that accepts
+   * the address will be used.
    * 
    * @param address URI address of the key storage location.
    * 
