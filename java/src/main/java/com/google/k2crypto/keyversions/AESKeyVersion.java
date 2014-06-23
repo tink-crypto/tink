@@ -137,8 +137,6 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       IllegalBlockSizeException,
       BadPaddingException {
 
-
-
     // encrypt the data
     byte[] encryptedData = encryptingCipher.doFinal(data);
 
@@ -245,6 +243,26 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     }
     // close the output stream to prevent resource leakage
     out.close();
+  }
+
+  /**
+   * Method to get the encrypting cipher of this key version
+   *
+   * @return The Cipher object representing the encrypting cipher of this key version
+   */
+  @Override
+  public Cipher getEncryptingCipher() {
+    return this.encryptingCipher;
+  }
+
+  /**
+   * Method to get the decrypting cipher of this key version
+   *
+   * @return The Cipher object representing the decrypting cipher of this key version
+   */
+  @Override
+  public Cipher getDecryptingCipher() {
+    return this.decryptingCipher;
   }
 
   /**
@@ -426,6 +444,5 @@ public class AESKeyVersion extends SymmetricKeyVersion {
         InvalidKeyException, InvalidAlgorithmParameterException {
       return new AESKeyVersion(this);
     }
-
   }
 }
