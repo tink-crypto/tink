@@ -56,7 +56,7 @@ public class AESKeyVersionTest {
 
     // create AES key
     AESKeyVersion keyVersion =
-        new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(16).build();
+        new AESKeyVersion.AESKeyVersionBuilder().keyVersionLengthInBytes(16).build();
     // call the method to test encrypting and decrypting strings using this key version
     testEncryptDecryptKeyVersion(keyVersion);
 
@@ -84,14 +84,14 @@ public class AESKeyVersionTest {
       IllegalBlockSizeException,
       BadPaddingException {
     // create AES key
-    AESKeyVersion key1 = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(16).build();
+    AESKeyVersion key1 = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLengthInBytes(16).build();
     // obtain the raw keyVersion matter
     byte[] keyVersionMatter = getkeyVersionMatter(key1);
     // obtain the raw initialization vector for first key
     byte[] initvector = getInitVector(key1);
 
     // create a new keyVersion using the keyVersion matter
-    AESKeyVersion key2 = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(16)
+    AESKeyVersion key2 = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLengthInBytes(16)
         .matterVector(keyVersionMatter, initvector).build();
 
     // test text string that we will encrypt and then decrypt
@@ -145,7 +145,7 @@ public class AESKeyVersionTest {
     // ////////////////////////////
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       // test keyVersion version length of 16 and PKCS5 padding and ECB mode
-      keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(keyVersionLength)
+      keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLengthInBytes(keyVersionLength)
           .padding("PKCS5PADDING").build();
       testEncryptDecryptKeyVersion(keyversion);
 
@@ -157,7 +157,7 @@ public class AESKeyVersionTest {
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       for (Mode mode : Mode.values()) {
         // test keyVersion version length of 16 and PKCS5 padding and ECB mode
-        keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLength(keyVersionLength)
+        keyversion = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLengthInBytes(keyVersionLength)
             .padding("PKCS5PADDING").mode(mode).build();
         testEncryptDecryptKeyVersion(keyversion);
       }

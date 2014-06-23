@@ -4,3 +4,5 @@
 .settings
 bin
 build
+cleartext
+ciphertext

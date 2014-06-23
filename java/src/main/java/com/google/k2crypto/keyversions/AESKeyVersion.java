@@ -17,6 +17,10 @@ package com.google.k2crypto.keyversions;
 import com.google.k2crypto.KeyVersionBuilder;
 import com.google.k2crypto.SymmetricKeyVersion;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -24,6 +28,8 @@ import java.security.SecureRandom;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
@@ -127,15 +133,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       IllegalBlockSizeException,
       BadPaddingException {
 
-    if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
-        || this.mode.equals(Mode.CTR)) {
-      // Initialize the cipher using the secret key of this class and the initialization vector
-      encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey,
-          new IvParameterSpec(this.initvector));
-    } else if (this.mode.equals(Mode.ECB)) {
-      // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
-      encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
-    }
+
 
     // encrypt the data
     byte[] encryptedData = encryptingCipher.doFinal(data);
@@ -163,16 +161,6 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       BadPaddingException,
       NoSuchAlgorithmException,
       NoSuchPaddingException {
-
-    if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
-        || this.mode.equals(Mode.CTR)) {
-      // Initialize the cipher using the secret key of this class and the initialization vector
-      decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initvector));
-    } else if (this.mode.equals(Mode.ECB)) {
-      // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
-      decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey);
-    }
-
 
     // decrypt the data
     byte[] decryptedData = decryptingCipher.doFinal(data);
@@ -207,7 +195,6 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     return this.keyVersionLengthInBytes;
   }
 
-
   /**
    * Constructor to make an AESKeyVersion using the AESKeyVersionBuilder. Private to prevent use
    * unless through the AESKeyVersionBuilder
@@ -216,24 +203,19 @@ public class AESKeyVersion extends SymmetricKeyVersion {
    *        AESKeyVersion to be setup.
    * @throws NoSuchAlgorithmException
    * @throws NoSuchPaddingException
+   * @throws InvalidAlgorithmParameterException 
+   * @throws InvalidKeyException 
    */
   private AESKeyVersion(AESKeyVersionBuilder builder) throws NoSuchAlgorithmException,
-      NoSuchPaddingException {
+      NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
     // set key version length, mode and padding based on the key version builder
-    this.keyVersionLengthInBytes = builder.keyVersionLength;
+    this.keyVersionLengthInBytes = builder.keyVersionLengthInBytes;
     this.mode = builder.mode;
     this.padding = builder.padding;
 
     // IMPORTANT! this line of code updates the algorithm/mode/padding string to reflect the new
     // mode and padding. The class will not work if you move or remove this line of code
     this.algModePadding = "AES/" + this.mode + "/" + padding;
-
-    // make an AES cipher that we can use for encryption
-    this.encryptingCipher = Cipher.getInstance(this.algModePadding);
-
-    // make an AES cipher that we can use for decryption
-    this.decryptingCipher = Cipher.getInstance(this.algModePadding);
-
 
     // set the key matter and initialization vector from input if is was provided
     if (builder.keyVersionMatterInitVectorProvided) {
@@ -252,7 +234,33 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       prng.nextBytes(initvector);
       // create the SecretKey object from the byte array
       secretKey = new SecretKeySpec(this.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
+    }
+    
+    // make an AES cipher that we can use for encryption
+    this.encryptingCipher = Cipher.getInstance(this.algModePadding);
+    
+    // initialize the encrypting cipher
+    if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
+        || this.mode.equals(Mode.CTR)) {
+      // Initialize the cipher using the secret key of this class and the initialization vector
+      encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey,
+          new IvParameterSpec(this.initvector));
+    } else if (this.mode.equals(Mode.ECB)) {
+      // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
+      encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
+    }
+    
+    // make an AES cipher that we can use for decryption
+    this.decryptingCipher = Cipher.getInstance(this.algModePadding);
 
+    // initialize the decrypting cipher
+    if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
+        || this.mode.equals(Mode.CTR)) {
+      // Initialize the cipher using the secret key of this class and the initialization vector
+      decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initvector));
+    } else if (this.mode.equals(Mode.ECB)) {
+      // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
+      decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey);
     }
   }
 
@@ -265,7 +273,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     /**
      * key size can be 16, 24 or 32
      */
-    private int keyVersionLength = 16;
+    private int keyVersionLengthInBytes = 16;
     /**
      * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
      */
@@ -309,8 +317,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
      * @param keyVersionLength Integer representing key version length in BYTES, can be 16, 24, 32
      * @return This object with keyVersionLength updated
      */
-    public AESKeyVersionBuilder keyVersionLength(int keyVersionLength) {
-      this.keyVersionLength = keyVersionLength;
+    public AESKeyVersionBuilder keyVersionLengthInBytes(int keyVersionLength) {
+      this.keyVersionLengthInBytes = keyVersionLength;
       return this;
     }
 
@@ -359,8 +367,10 @@ public class AESKeyVersion extends SymmetricKeyVersion {
      * @return An AESKeyVersion with the parameters set according to the AESKeyVersionBuilder
      * @throws NoSuchAlgorithmException
      * @throws NoSuchPaddingException
+     * @throws InvalidAlgorithmParameterException 
+     * @throws InvalidKeyException 
      */
-    public AESKeyVersion build() throws NoSuchAlgorithmException, NoSuchPaddingException {
+    public AESKeyVersion build() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
       return new AESKeyVersion(this);
     }
 
