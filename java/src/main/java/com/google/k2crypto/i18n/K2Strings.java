@@ -76,38 +76,46 @@ public class K2Strings {
   }
   
   /**
+   * Overridable handler for requests for a missing resource.
+   * 
+   * @param ex Exception containing information about the resource request.
+   * @return an alternative string, if possible.
+   */
+  protected String handleMissing(MissingResourceException ex) {
+    throw new AssertionError("Missing resource: " + ex.getKey(), ex);
+  }
+  
+  /**
    * Returns the named string formatted with the provided parameter values.
    * 
    * @param key Name of the string.
    * @param params Parameter values.
-   * @return the formatted internationalized string, or {@code "!<key>!"} if
-   *         the named string could not be found.
+   * @return the formatted internationalized string.
+   * 
+   * @throws AssertionError (by default) if the string is not found.
    */
   public String get(String key, Object ... params) {
     try {
       return MessageFormat.format(resourceBundle.getString(key), params);
     } catch (MissingResourceException ex) {
-      // TODO: log this, using the context
-      ex.printStackTrace();
+      return handleMissing(ex);
     }
-    return '!' + key + '!';
   }
 
   /**
    * Returns the named string.
    * 
    * @param key Name of the string.
-   * @return the internationalized string, or {@code "!<key>!"} if
-   *         the named string could not be found.
+   * @return the internationalized string.
+   * 
+   * @throws AssertionError (by default) if the string is not found.
    */
   public String get(String key) {
     try {
       return resourceBundle.getString(key);
     } catch (MissingResourceException ex) {
-      // TODO: log this, using the context
-      ex.printStackTrace();
+      return handleMissing(ex);
     }
-    return '!' + key + '!';
   }
   
   /**
