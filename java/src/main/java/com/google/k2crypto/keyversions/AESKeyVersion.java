@@ -69,7 +69,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
    */
   public enum Mode {
     CBC, ECB, OFB, CFB, CTR
-  };
+  }
 
   /**
    * The encryption mode
@@ -100,12 +100,12 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   /**
    * Cipher for encrypting data using this AES key version
    */
-  Cipher encryptingCipher;
+  private Cipher encryptingCipher;
 
   /**
    * Cipher for decrypting data using this AES key version
    */
-  Cipher decryptingCipher;
+  private Cipher decryptingCipher;
 
   /**
    * Takes an array of bytes and encrypts it using the AES key
