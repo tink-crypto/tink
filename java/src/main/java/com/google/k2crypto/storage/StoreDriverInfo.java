@@ -31,10 +31,11 @@ public @interface StoreDriverInfo {
    * Unique identifier of the driver, which users will specify in the scheme
    * portion of the URI address to a store.
    * <p>
-   * Legal identifiers must match the regular expression:
-   * {@code [A-Za-z][A-Za-z0-9\+\-\.]*}
-   * (see <a href="http://tools.ietf.org/html/rfc3986#section-3.1"
-   * target="_blank">RFC 3986, Section 3.1</a>)
+   * Legal identifiers must match the regular expression
+   * {@code [a-z][a-z0-9\+\-\.]*}, which is identical to the pattern specified
+   * in <a href="http://tools.ietf.org/html/rfc3986#section-3.1"
+   * target="_blank">RFC 3986, Section 3.1</a> for a URI scheme, except that
+   * upper-case letters are excluded.
    */
   String id();
   

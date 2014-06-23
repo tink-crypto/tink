@@ -32,10 +32,11 @@ import java.net.URI;
  */
 public class InstalledDriver {
   
-  // Regex matching a valid URI scheme
-  // (see http://tools.ietf.org/html/rfc3986#section-3.1)
+  // Regex matching a valid URI scheme.
+  // (Same as http://tools.ietf.org/html/rfc3986#section-3.1,
+  //  except we do not accept upper-case.)
   private static final Pattern LEGAL_ID =
-      Pattern.compile("^[A-Za-z][A-Za-z0-9\\+\\-\\.]*$");
+      Pattern.compile("^[a-z][a-z0-9\\+\\-\\.]*$");
   
   // Context for the current K2 session
   private final K2Context context;
