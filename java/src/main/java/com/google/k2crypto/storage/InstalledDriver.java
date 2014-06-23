@@ -16,7 +16,6 @@ package com.google.k2crypto.storage;
 
 import com.google.k2crypto.K2Context;
 import com.google.k2crypto.i18n.K2Strings;
-import com.google.k2crypto.keyversions.KeyVersionRegistry;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
