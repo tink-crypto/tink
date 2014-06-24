@@ -43,32 +43,18 @@ public class SymmetricEncryptionTest {
    * This tests encryption and decryption using an AESKeyVersion through the SymmetricEncryption
    * class
    *
-   * @throws NoSuchAlgorithmException
-   * @throws BadPaddingException
-   * @throws IllegalBlockSizeException
-   * @throws InvalidAlgorithmParameterException
-   * @throws NoSuchPaddingException
-   * @throws InvalidKeyException
-   * @throws IOException
-   * @throws BuilderException 
+   * @throws BuilderException
+   * @throws EncryptionException
    */
   @Test
-  public void testEncryptDecrypt()
-      throws NoSuchAlgorithmException,
-      InvalidKeyException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException,
-      IOException, BuilderException {
+  public void testEncryptDecrypt() throws DecryptionException, BuilderException,
+      EncryptionException {
 
     // test using the default keyVersion builder
     AESKeyVersion keyversion = new AESKeyVersion.AESKeyVersionBuilder().build();
     testEncryptDecryptKeyVersion(keyversion);
 
-    // ////////////////////////////
     // test all keyVersion version length WITHOUT mode
-    // ////////////////////////////
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       // test keyVersion version length of 16 and PKCS5 padding and ECB mode
       keyversion = new AESKeyVersion.AESKeyVersionBuilder()
@@ -77,9 +63,7 @@ public class SymmetricEncryptionTest {
 
     }
 
-    // ////////////////////////////
     // test all keyVersion version length and mode combinations
-    // ////////////////////////////
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       for (Mode mode : Mode.values()) {
         // test keyVersion version length of 16 and PKCS5 padding and ECB mode
@@ -96,23 +80,12 @@ public class SymmetricEncryptionTest {
    * decryption methods of the AESKeyVersion class using a SPECIFIC KEYVERSION (specified by the
    * parameter)
    *
-   * @param keyVersion The AESKeyVersion to use to test encryption and decryption
-   * @throws InvalidKeyException
-   * @throws NoSuchAlgorithmException
-   * @throws NoSuchPaddingException
-   * @throws InvalidAlgorithmParameterException
-   * @throws IllegalBlockSizeException
-   * @throws BadPaddingException
-   * @throws IOException
+   * @param keyVersion The AESKeyVersion to use to test encryption and decryption S
+   * @throws EncryptionException
+   * @throws DecryptionException
    */
   public void testEncryptDecryptKeyVersion(SymmetricKeyVersion keyVersion)
-      throws InvalidKeyException,
-      NoSuchAlgorithmException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException,
-      IOException {
+      throws EncryptionException, DecryptionException {
 
     // loop over an array of test input Strings to encrypt and the decrypt
     for (String testinput : new String[] {"weak", "test", "", "1234", "32980342yhio#$@^U"}) {
@@ -145,7 +118,7 @@ public class SymmetricEncryptionTest {
       // use the keyVersion to decrypt the encrypted stream
       SymmetricEncryption.decryptStream(keyVersion, encryptedStream, decryptedStream);
       // convert the decrypted stream back to a String
-      String output = new String(decryptedStream.toByteArray(), "UTF-8");
+      String output = new String(decryptedStream.toByteArray());
       // now check that the input matches the decrypted output
       assertEquals(testinput, output);
 
@@ -154,26 +127,14 @@ public class SymmetricEncryptionTest {
 
   /**
    * Helper method to encrypt a string using the AES key version. This is used to make testing
-   * encrypting a byte array easier so we can read the input string and decrypted string
-   * easily.
+   * encrypting a byte array easier so we can read the input string and decrypted string easily.
    *
    * @param kv The AESKeyVersion that we want to use to encrypt the String
    * @param input The input string that we want to encrypt
    * @return The byte array representation of the AES encrypted version of the string
-   * @throws BadPaddingException
-   * @throws IllegalBlockSizeException
-   * @throws InvalidAlgorithmParameterException
-   * @throws NoSuchPaddingException
-   * @throws NoSuchAlgorithmException
-   * @throws InvalidKeyException
+   * @throws EncryptionException
    */
-  private byte[] encryptString(SymmetricKeyVersion kv, String input)
-      throws InvalidKeyException,
-      NoSuchAlgorithmException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException {
+  private byte[] encryptString(SymmetricKeyVersion kv, String input) throws EncryptionException {
     // Convert the input string to bytes
     byte[] data = input.getBytes();
     // call the encrypt bytes method to encrypt the data
@@ -188,20 +149,9 @@ public class SymmetricEncryptionTest {
    * @param kv The AESKeyVersion that we want to use to decrypt the String
    * @param input byte array representation of encrypted message
    * @return String representation of decrypted message
-   * @throws InvalidKeyException
-   * @throws InvalidAlgorithmParameterException
-   * @throws IllegalBlockSizeException
-   * @throws BadPaddingException
-   * @throws NoSuchAlgorithmException
-   * @throws NoSuchPaddingException
+   * @throws DecryptionException
    */
-  private String decryptString(SymmetricKeyVersion kv, byte[] input)
-      throws InvalidKeyException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException,
-      NoSuchAlgorithmException,
-      NoSuchPaddingException {
+  private String decryptString(SymmetricKeyVersion kv, byte[] input) throws DecryptionException {
     // call decrypt bytes method
     byte[] outputData = SymmetricEncryption.decryptBytes(kv, input);
     // convert to string

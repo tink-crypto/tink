@@ -37,14 +37,21 @@ public class SymmetricEncryption extends Purpose {
    * @param keyVersion The symmetric key version to use to encrypt the data
    * @param materialToEncrypt The byte array of data to encrypt
    * @return A byte array of data encrypted using the symmetric key version
-   * @throws IllegalBlockSizeException
-   * @throws BadPaddingException
+   * @throws EncryptionException
    */
   public static byte[] encryptBytes(SymmetricKeyVersion keyVersion, byte[] materialToEncrypt)
-      throws IllegalBlockSizeException, BadPaddingException {
-    // encrypt the data
-    byte[] encryptedData = keyVersion.getEncryptingCipher().doFinal(materialToEncrypt);
-
+      throws EncryptionException {
+    // byte array to store encrypted data
+    byte[] encryptedData;
+    // use try catch block to abstract from individual exceptions using EncryptionException
+    try {
+      // encrypt the data
+      encryptedData = keyVersion.getEncryptingCipher().doFinal(materialToEncrypt);
+      // Catch all exceptions
+    } catch (Exception e) {
+      // propagate the exception up as an encryption exception
+      throw new EncryptionException("Encryption of byte array failed", e);
+    }
     // return the encrypted data
     return encryptedData;
   }
@@ -55,14 +62,22 @@ public class SymmetricEncryption extends Purpose {
    * @param keyVersion The symmetric key version to use to decrypt the data
    * @param materialToDecrypt The encrypted byte array of data to decrypt
    * @return A byte array of decrypted data
-   * @throws IllegalBlockSizeException
-   * @throws BadPaddingException
+   * @throws DecryptionException
    */
   public static byte[] decryptBytes(SymmetricKeyVersion keyVersion, byte[] materialToDecrypt)
-      throws IllegalBlockSizeException, BadPaddingException {
-    // decrypt the data
-    byte[] decryptedData = keyVersion.getDecryptingCipher().doFinal(materialToDecrypt);
+      throws DecryptionException {
+    // byte array to store decrypted data
+    byte[] decryptedData;
+    // use try catch block to abstract from individual exceptions using DecryptionException
+    try {
+      // decrypt the data
 
+      decryptedData = keyVersion.getDecryptingCipher().doFinal(materialToDecrypt);
+      // Catch all exceptions
+    } catch (Exception e) {
+      // propagate the exception up as an decrypted exception
+      throw new DecryptionException("Decryption of byte array failed", e);
+    }
     // return the decrypted data
     return decryptedData;
   }
@@ -74,10 +89,10 @@ public class SymmetricEncryption extends Purpose {
    * @param keyVersion The symmetric key version to use to encrypt the stream
    * @param in The input stream that we want to encrypt
    * @param out An output stream encrypted using the symmetric key version
-   * @throws IOException
+   * @throws EncryptionException
    */
   public static void encryptStream(SymmetricKeyVersion keyVersion, InputStream in, OutputStream out)
-      throws IOException {
+      throws EncryptionException {
     // a byte array buffer to use when reading from the stream
     byte[] byteBuffer = new byte[1024];
 
@@ -86,13 +101,21 @@ public class SymmetricEncryption extends Purpose {
 
     // integer used to determine when we have read all of the input stream
     int i = 0;
-    // read from the input stream into the byte array buffer
-    while ((i = in.read(byteBuffer)) >= 0) {
-      // now encrypt the data in the buffer using the cipher and write it to the output stream
-      out.write(byteBuffer, 0, i);
+
+    // use try catch block to abstract from individual exceptions using EncryptionException
+    try {
+      // read from the input stream into the byte array buffer
+      while ((i = in.read(byteBuffer)) >= 0) {
+        // now encrypt the data in the buffer using the cipher and write it to the output stream
+        out.write(byteBuffer, 0, i);
+      }
+      // close the output stream to prevent resource leakage
+      out.close();
+      // Catch all exceptions
+    } catch (Exception e) {
+      // propagate the exception up as an EncryptionException
+      throw new EncryptionException("Encryption of stream failed", e);
     }
-    // close the output stream to prevent resource leakage
-    out.close();
   }
 
   /**
@@ -102,25 +125,32 @@ public class SymmetricEncryption extends Purpose {
    * @param keyVersion The symmetric key version to use to decrypt the stream
    * @param in The encrypted input stream that we want to decrypt using the symmetric key version
    * @param out The decrypted output stream
-   * @throws IOException
+   * @throws DecryptionException
    */
   public static void decryptStream(SymmetricKeyVersion keyVersion, InputStream in, OutputStream out)
-      throws IOException {
+      throws DecryptionException {
     // a byte array buffer to use when reading from the stream
     byte[] byteBuffer = new byte[1024];
 
     // initialize the input stream using the AES decrypting cipher
     in = new CipherInputStream(in, keyVersion.getDecryptingCipher());
 
-    // integer used to determine when we have read all of the input stream
-    int i = 0;
-    // read from the input stream into the byte array buffer, decrypting the data using the
-    // symmetric cipher
-    while ((i = in.read(byteBuffer)) >= 0) {
-      // write the data to the output stream
-      out.write(byteBuffer, 0, i);
+    // use try catch block to abstract from individual exceptions using EncryptionException
+    try {
+
+      // integer used to determine when we have read all of the input stream
+      int i = 0;
+      // read from the input stream into the byte array buffer, decrypting the data using the
+      // symmetric cipher
+      while ((i = in.read(byteBuffer)) >= 0) {
+        // write the data to the output stream
+        out.write(byteBuffer, 0, i);
+      }
+      // close the output stream to prevent resource leakage
+      out.close();
+    } catch (Exception e) {
+      // propagate the exception up as an DecryptionException
+      throw new DecryptionException("Decryption of stream failed", e);
     }
-    // close the output stream to prevent resource leakage
-    out.close();
   }
 }

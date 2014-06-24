@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import com.google.k2crypto.BuilderException;
 import com.google.k2crypto.DecryptionException;
 import com.google.k2crypto.EncryptionException;
+import com.google.k2crypto.SymmetricEncryption;
 import com.google.k2crypto.keyversions.AESKeyVersion.Mode;
 
 import org.junit.Test;
@@ -27,13 +28,9 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 /**
  * Tests for AESkeyVersion class
@@ -113,12 +110,12 @@ public class AESKeyVersionTest {
    */
   @Test
   public void testAESKeyVersionStream() throws BuilderException, EncryptionException,
-      DecryptionException, IOException {
+      DecryptionException {
     AESKeyVersion keyversion;
 
-    // ////////////////////////////
-    // test all keyVersion version length WITHOUT mode
-    // ////////////////////////////
+    /*
+     *test all keyVersion version length WITHOUT mode
+     */
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       // test keyVersion version length of 16 and PKCS5 padding and ECB mode
       keyversion = new AESKeyVersion.AESKeyVersionBuilder()
@@ -127,9 +124,9 @@ public class AESKeyVersionTest {
 
     }
 
-    // ////////////////////////////
-    // test all keyVersion version length and mode combinations
-    // ////////////////////////////
+    /*
+     *test all keyVersion version length and mode combinations
+     */
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       for (Mode mode : Mode.values()) {
         // test keyVersion version length of 16 and PKCS5 padding and ECB mode
@@ -149,17 +146,17 @@ public class AESKeyVersionTest {
    */
   private void testEncryptDecryptStream(AESKeyVersion keyVersion) throws EncryptionException,
       DecryptionException {
-    // ////////////////////////
-    // test the encryption decryption STREAMS
-    // ////////////////////////
-
-    // loop over an array of test input Strings to encrypt and the decrypt
+    /*
+     *test the encryption decryption STREAMS. Loop over an array of test input Strings to encrypt
+     * and the decrypt
+     */
     for (String testinput : new String[] {"weak", "test", "", "1234", "32980342yhio#$@^U"}) {
       // the input stream
       ByteArrayOutputStream inputStream = new ByteArrayOutputStream();
 
       // convert the test String to an input stream and encrypt it using the keyVersion
-      keyVersion.encryptStream(new ByteArrayInputStream(testinput.getBytes()), inputStream);
+      SymmetricEncryption.encryptStream(keyVersion, new ByteArrayInputStream(testinput.getBytes()),
+          inputStream);
       // convert the OutputStream (called inputStream) back to an InputStream (called
       // encryptedStream)
       ByteArrayInputStream encryptedStream = new ByteArrayInputStream(inputStream.toByteArray());
@@ -168,7 +165,7 @@ public class AESKeyVersionTest {
       ByteArrayOutputStream decryptedStream = new ByteArrayOutputStream();
 
       // use the keyVersion to decrypt the encrypted stream
-      keyVersion.decryptStream(encryptedStream, decryptedStream);
+      SymmetricEncryption.decryptStream(keyVersion, encryptedStream, decryptedStream);
 
       // convert the decrypted stream back to a String
       String output = new String(decryptedStream.toByteArray());
@@ -194,9 +191,9 @@ public class AESKeyVersionTest {
     AESKeyVersion keyversion = new AESKeyVersion.AESKeyVersionBuilder().build();
     testEncryptDecryptKeyVersion(keyversion);
 
-    // ////////////////////////////
-    // test all keyVersion version length WITHOUT mode
-    // ////////////////////////////
+    /*
+     *test all keyVersion version length WITHOUT mode
+     */
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       // test keyVersion version length of 16 and PKCS5 padding and ECB mode
       keyversion = new AESKeyVersion.AESKeyVersionBuilder()
@@ -205,9 +202,9 @@ public class AESKeyVersionTest {
 
     }
 
-    // ////////////////////////////
-    // test all keyVersion version length and mode combinations
-    // ////////////////////////////
+    /*
+     * test all keyVersion version length and mode combinations
+     */
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       for (Mode mode : Mode.values()) {
         // test keyVersion version length of 16 and PKCS5 padding and ECB mode
@@ -285,7 +282,7 @@ public class AESKeyVersionTest {
     // Convert the input string to bytes
     byte[] data = input.getBytes();
     // call the encrypt bytes method to encrypt the data
-    byte[] encData = kv.encryptBytes(data);
+    byte[] encData = SymmetricEncryption.encryptBytes(kv, data);
 
     // return the encrypted string
     return encData;
@@ -301,7 +298,7 @@ public class AESKeyVersionTest {
    */
   private String decryptString(AESKeyVersion kv, byte[] input) throws DecryptionException {
     // call decrypt bytes method
-    byte[] outputData = kv.decryptBytes(input);
+    byte[] outputData = SymmetricEncryption.decryptBytes(kv, input);
     // convert to string
     String result = new String(outputData);
     // return result
