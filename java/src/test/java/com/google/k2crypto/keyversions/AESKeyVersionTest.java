@@ -17,6 +17,9 @@ package com.google.k2crypto.keyversions;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.google.k2crypto.BuilderException;
+import com.google.k2crypto.DecryptionException;
+import com.google.k2crypto.EncryptionException;
 import com.google.k2crypto.keyversions.AESKeyVersion.Mode;
 
 import org.junit.Test;
@@ -41,23 +44,13 @@ public class AESKeyVersionTest {
   /**
    * This tests the encryption and decryption methods of the AESKeyVersion class.
    *
-   * @throws NoSuchAlgorithmException
-   * @throws InvalidKeyException
-   * @throws NoSuchPaddingException
-   * @throws InvalidAlgorithmParameterException
-   * @throws IllegalBlockSizeException
-   * @throws BadPaddingException
-   * @throws IOException
+   * @throws BuilderException
+   * @throws EncryptionException
+   * @throws DecryptionException
    */
   @Test
-  public void testEncryptDecrypt()
-      throws NoSuchAlgorithmException,
-      InvalidKeyException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException,
-      IOException {
+  public void testEncryptDecrypt() throws BuilderException, EncryptionException,
+      DecryptionException {
 
     // create AES key
     AESKeyVersion keyVersion =
@@ -70,21 +63,13 @@ public class AESKeyVersionTest {
    * This tests loading a keyVersion matter byte array and using it to encrypt and decrypt a
    * message.
    *
-   * @throws NoSuchAlgorithmException
-   * @throws BadPaddingException
-   * @throws IllegalBlockSizeException
-   * @throws InvalidAlgorithmParameterException
-   * @throws NoSuchPaddingException
-   * @throws InvalidKeyException
+   * @throws BuilderException
+   * @throws EncryptionException
+   * @throws DecryptionException
    */
   @Test
-  public void testLoadkeyVersionMatter()
-      throws NoSuchAlgorithmException,
-      InvalidKeyException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException {
+  public void testLoadkeyVersionMatter() throws BuilderException, EncryptionException,
+      DecryptionException {
     // create AES key
     AESKeyVersion key1 =
         new AESKeyVersion.AESKeyVersionBuilder().keyVersionLengthInBytes(16).build();
@@ -122,19 +107,13 @@ public class AESKeyVersionTest {
   /**
    * Test the AESKeyVersion encrypting and decrypting streams
    *
-   * @throws InvalidKeyException
-   * @throws NoSuchAlgorithmException
-   * @throws NoSuchPaddingException
-   * @throws InvalidAlgorithmParameterException
-   * @throws IOException
+   * @throws BuilderException
+   * @throws DecryptionException
+   * @throws EncryptionException
    */
   @Test
-  public void testAESKeyVersionStream()
-      throws InvalidKeyException,
-      NoSuchAlgorithmException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IOException {
+  public void testAESKeyVersionStream() throws BuilderException, EncryptionException,
+      DecryptionException, IOException {
     AESKeyVersion keyversion;
 
     // ////////////////////////////
@@ -165,9 +144,11 @@ public class AESKeyVersionTest {
    * Helper method to test encrypting and decrypting a stream using an AESKeyVersion
    *
    * @param keyVersion The AESKeyVersion to use to encrypt and decrypt a stream
-   * @throws IOException
+   * @throws EncryptionException
+   * @throws DecryptionException
    */
-  private void testEncryptDecryptStream(AESKeyVersion keyVersion) throws IOException {
+  private void testEncryptDecryptStream(AESKeyVersion keyVersion) throws EncryptionException,
+      DecryptionException {
     // ////////////////////////
     // test the encryption decryption STREAMS
     // ////////////////////////
@@ -190,7 +171,7 @@ public class AESKeyVersionTest {
       keyVersion.decryptStream(encryptedStream, decryptedStream);
 
       // convert the decrypted stream back to a String
-      String output = new String(decryptedStream.toByteArray(), "UTF-8");
+      String output = new String(decryptedStream.toByteArray());
 
       // now check that the input matches the decrypted output
       assertEquals(testinput, output);
@@ -201,23 +182,13 @@ public class AESKeyVersionTest {
    * This tests creating an AESKeyVersion using the builder, then using that KeyVersion to encrypt
    * and decrypt a message
    *
-   * @throws NoSuchAlgorithmException
-   * @throws BadPaddingException
-   * @throws IllegalBlockSizeException
-   * @throws InvalidAlgorithmParameterException
-   * @throws NoSuchPaddingException
-   * @throws InvalidKeyException
-   * @throws IOException
+   * @throws BuilderException
+   * @throws EncryptionException
+   * @throws DecryptionException
    */
   @Test
-  public void testAESKeyVersionBuilder()
-      throws NoSuchAlgorithmException,
-      InvalidKeyException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException,
-      IOException {
+  public void testAESKeyVersionBuilder() throws BuilderException, EncryptionException,
+      DecryptionException {
 
     // test using the default keyVersion builder
     AESKeyVersion keyversion = new AESKeyVersion.AESKeyVersionBuilder().build();
@@ -254,22 +225,11 @@ public class AESKeyVersionTest {
    * parameter)
    *
    * @param keyVersion The AESKeyVersion to use to test encryption and decryption
-   * @throws InvalidKeyException
-   * @throws NoSuchAlgorithmException
-   * @throws NoSuchPaddingException
-   * @throws InvalidAlgorithmParameterException
-   * @throws IllegalBlockSizeException
-   * @throws BadPaddingException
-   * @throws IOException
+   * @throws EncryptionException
+   * @throws DecryptionException
    */
-  public void testEncryptDecryptKeyVersion(AESKeyVersion keyVersion)
-      throws InvalidKeyException,
-      NoSuchAlgorithmException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException,
-      IOException {
+  public void testEncryptDecryptKeyVersion(AESKeyVersion keyVersion) throws EncryptionException,
+      DecryptionException {
 
     // test text string that we will encrypt and then decrypt
     String testinput = "weak";
@@ -318,21 +278,10 @@ public class AESKeyVersionTest {
    *
    * @param kv The AESKeyVersion that we want to use to encrypt the String
    * @param input The input string that we want to encrypt
-   * @return The byte array representation of the AES encrypted version of the string
-   * @throws BadPaddingException
-   * @throws IllegalBlockSizeException
-   * @throws InvalidAlgorithmParameterException
-   * @throws NoSuchPaddingException
-   * @throws NoSuchAlgorithmException
-   * @throws InvalidKeyException
+   * @return The byte array representation of the AES encrypted version of the strings
+   * @throws EncryptionException
    */
-  private byte[] encryptString(AESKeyVersion kv, String input)
-      throws InvalidKeyException,
-      NoSuchAlgorithmException,
-      NoSuchPaddingException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException {
+  private byte[] encryptString(AESKeyVersion kv, String input) throws EncryptionException {
     // Convert the input string to bytes
     byte[] data = input.getBytes();
     // call the encrypt bytes method to encrypt the data
@@ -348,20 +297,9 @@ public class AESKeyVersionTest {
    * @param kv The AESKeyVersion that we want to use to decrypt the String
    * @param input byte array representation of encrypted message
    * @return String representation of decrypted message
-   * @throws InvalidKeyException
-   * @throws InvalidAlgorithmParameterException
-   * @throws IllegalBlockSizeException
-   * @throws BadPaddingException
-   * @throws NoSuchAlgorithmException
-   * @throws NoSuchPaddingException
+   * @throws DecryptionException
    */
-  private String decryptString(AESKeyVersion kv, byte[] input)
-      throws InvalidKeyException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException,
-      NoSuchAlgorithmException,
-      NoSuchPaddingException {
+  private String decryptString(AESKeyVersion kv, byte[] input) throws DecryptionException {
     // call decrypt bytes method
     byte[] outputData = kv.decryptBytes(input);
     // convert to string

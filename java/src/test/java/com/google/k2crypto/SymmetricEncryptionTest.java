@@ -50,6 +50,7 @@ public class SymmetricEncryptionTest {
    * @throws NoSuchPaddingException
    * @throws InvalidKeyException
    * @throws IOException
+   * @throws BuilderException 
    */
   @Test
   public void testEncryptDecrypt()
@@ -59,7 +60,7 @@ public class SymmetricEncryptionTest {
       InvalidAlgorithmParameterException,
       IllegalBlockSizeException,
       BadPaddingException,
-      IOException {
+      IOException, BuilderException {
 
     // test using the default keyVersion builder
     AESKeyVersion keyversion = new AESKeyVersion.AESKeyVersionBuilder().build();
@@ -91,7 +92,7 @@ public class SymmetricEncryptionTest {
   }
 
   /**
-   * This is a helper method used by the testAESKeyVersionBuilder test to testthe encryption and
+   * This is a helper method used by the testAESKeyVersionBuilder test to test the encryption and
    * decryption methods of the AESKeyVersion class using a SPECIFIC KEYVERSION (specified by the
    * parameter)
    *
