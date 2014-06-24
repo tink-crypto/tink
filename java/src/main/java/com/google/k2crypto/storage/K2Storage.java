@@ -255,6 +255,7 @@ public class K2Storage {
       throw new IllegalAddressException(address.toString(),
           context.getStrings().get("storage.address.no_scheme")); 
     }
+    scheme = scheme.toLowerCase();
     
     // We atomically query for a suitable driver,
     // or all the available drivers if we need to search.
