@@ -35,14 +35,25 @@ public class StoreDriverException extends K2Exception {
    * @param driverClass Class of the problematic driver.
    * @param reason The reason the driver is problematic.
    */
-  public StoreDriverException(
-      Class<? extends StoreDriver> driverClass, String reason) {
-    
-    super("[" + driverClass.getName() + "] " + reason);
+  public StoreDriverException(Class<? extends StoreDriver> driverClass,
+      String reason) {
+    this(driverClass, reason, null);
+  }
+  
+  /**
+   * Constructs a new StoreDriverException.
+   *
+   * @param driverClass Class of the problematic driver.
+   * @param reason The reason the driver is problematic.
+   * @param cause The cause of this exception.
+   */
+  public StoreDriverException(Class<? extends StoreDriver> driverClass,
+      String reason, Throwable cause) {
+    super("[" + driverClass.getName() + "] " + reason, cause);
     this.driverClass = driverClass;
     this.reason = reason;
   }
-  
+
   /**
    * Returns the class of the problematic driver.
    */

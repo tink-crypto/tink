@@ -20,11 +20,13 @@ import com.google.k2crypto.K2Context;
 import com.google.k2crypto.Key;
 
 import java.net.URI;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The interface to access a {@link Key} storage location.
+ * <p>
+ * While this class is thread-safe, {@link #wrapWith(Key)} and {@link #noWrap()}
+ * should not be called concurrently to avoid non-deterministic
+ * {@link #save(Key)} and {@link #load()} behavior.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
@@ -39,11 +41,11 @@ public class Store {
   // Driver instance being wrapped
   private final StoreDriver driver;
 
-  // Storage address, as obtained from driver
-  private final URI address;
+  // Storage address, as obtained from the driver
+  private URI address;
 
   // Synchronization lock
-  private final Lock lock; 
+  private final Object lock = new int[0]; 
 
   // Initial state is always the initial state
   private State state = State.INITIAL;
@@ -57,45 +59,21 @@ public class Store {
    * Constructs a Store that is backed by the given driver. 
    * 
    * @param installedDriver Driver installed for the store.
-   * @param address Address to open the driver with.
    * 
    * @throws IllegalAddressException if the address cannot be interpreted by
    *                                 the driver.
    */
-  Store(InstalledDriver installedDriver, URI address)
-      throws IllegalAddressException {
-    this(installedDriver, address, new ReentrantLock());
-  }
-  
-  /**
-   * Constructs a Store that is backed by given driver and uses the provided
-   * lock for synchronization.
-   * 
-   * @param installedDriver Driver installed for the store.
-   * @param address Address to open the driver with.
-   * @param lock Lock instance to use.
-   * 
-   * @throws IllegalAddressException if the address cannot be interpreted by
-   *                                 the driver.
-   */
-  Store(InstalledDriver installedDriver, URI address, Lock lock)
+  Store(InstalledDriver installedDriver)
       throws IllegalAddressException {
     
     if (installedDriver == null) {
       throw new NullPointerException("installedDriver");
-    } else if (address == null) {
-      throw new NullPointerException("address");
-    } else if (lock == null) {
-      throw new NullPointerException("lock");
     }
     
     this.installedDriver = installedDriver;
     this.context = installedDriver.getContext();
-    this.driver = installedDriver.instantiate(address);    
-    URI driverAddress = driver.getAddress();
-    this.address = (driverAddress == null ? address : driverAddress);
-    this.lock = lock;
-  }
+    this.driver = installedDriver.instantiate();
+}
   
   /**
    * Returns the address of the storage location that keys will be read from
@@ -113,37 +91,39 @@ public class Store {
   }
   
   /**
-   * Opens the store for loading/saving keys. Has no effect if the store is
-   * already open.
+   * Opens the store for loading/saving keys.
+   * 
+   * @param address Address to open the store with.
    *
    * @return the opened store.
    * 
-   * @throws StoreStateException if the store has already been closed.
+   * @throws IllegalAddressException if the address is not recognized. 
+   * @throws StoreStateException if the store is already opened (or closed).
    * @throws StoreException if there is a driver-specific issue.
    */
-  Store open() throws StoreException {
+  Store open(URI address) throws IllegalAddressException, StoreException {
     // This method is package-restricted because K2Storage automatically
     // opens the Store; there is no need for external code to see open().
-    lock.lock();
+    if (address == null) {
+      throw new NullPointerException("address");
+    }
     try {
-      switch (state) {
-        default: // Closed
-          throw new StoreStateException(
-              context.getStrings().get("storage.store.closed"));
-        case INITIAL:
-          // The driver may hurl on open(), so we defer changing state till
-          // after it is done. Depending on the driver, it may not be safe
-          // to invoke the read/write methods if open() fails.
-          driver.open();
-          state = State.OPEN;
-          break;
-        case OPEN:
+      synchronized (lock) {
+        switch (state) {
+          default: // Closed or Open
+            throw new StoreStateException(
+                context.getStrings().get("storage.store.not_initial"));
+          case INITIAL:
+            // The driver may hurl on open(), so we defer changing state till
+            // after it is done. Depending on the driver, it may not be safe
+            // to invoke the read/write methods if open() fails.
+            driver.open(address);
+            state = State.OPEN;
+        }
       }
     } catch (StoreException ex) {
       ex.setStore(this);
       throw ex;
-    } finally {
-      lock.unlock();
     }
     return this;
   }
@@ -153,16 +133,16 @@ public class Store {
    * not permitted.
    */
   public void close() {
-    lock.lock();
-    try {
-      if (state == State.OPEN) {
-        driver.close();
+    synchronized (lock) {
+      try {
+        if (state == State.OPEN) {
+          driver.close();
+        }
+      } finally {
+        // No matter what happens, we want the state to be
+        // closed when this is done.
+        state = State.CLOSED;
       }
-    } finally {
-      // No matter what happens, we want the state to be closed when this
-      // is done. Should not affect the unlock...
-      state = State.CLOSED;
-      lock.unlock();
     }
   }
   
@@ -170,11 +150,8 @@ public class Store {
    * Returns {@code true} if, and only if, the store is open.
    */
   public boolean isOpen() {
-    lock.lock();
-    try {
+    synchronized (lock) {
       return state == State.OPEN;
-    } finally {
-      lock.unlock();
     }    
   }
   
@@ -184,10 +161,12 @@ public class Store {
    * @throws StoreStateException if the store is not open.
    */
   private void checkOpen() throws StoreStateException {
-    if (state != State.OPEN) {
-      throw new StoreStateException(
-          context.getStrings().get("storage.store.not_open"));
-    }    
+    synchronized (lock) {
+      if (state != State.OPEN) {
+        throw new StoreStateException(
+            context.getStrings().get("storage.store.not_open"));
+      }
+    }
   }
   
   /**
@@ -203,15 +182,14 @@ public class Store {
    * @throws StoreException if there is a driver-specific issue.
    */
   public boolean isEmpty() throws StoreException {
-    lock.lock();
     try {
-      checkOpen();
-      return driver.isEmpty();
+      synchronized (lock) {
+        checkOpen();
+        return driver.isEmpty();
+      }
     } catch (StoreException ex) {
       ex.setStore(this);
       throw ex;
-    } finally {
-      lock.unlock();
     }
   }
   
@@ -234,19 +212,18 @@ public class Store {
       throw new NullPointerException("key");
     }
     
-    lock.lock();
     try {
-      checkOpen();
-      if (!installedDriver.isWrapSupported()) {
-        throw new UnsupportedByStoreException(
-            context.getStrings().get("storage.store.no_wrap"));
+      synchronized (lock) {
+        checkOpen();
+        if (!installedDriver.isWrapSupported()) {
+          throw new UnsupportedByStoreException(
+              context.getStrings().get("storage.store.no_wrap"));
+        }
+        driver.wrapWith(key);
       }
-      driver.wrapWith(key);
     } catch (StoreException ex) {
       ex.setStore(this);
       throw ex;
-    } finally {
-      lock.unlock();
     }
     return this;
   }
@@ -261,19 +238,18 @@ public class Store {
    *                        wrapping.
    */
   public Store noWrap() throws StoreException {
-    lock.lock();
     try {
-      checkOpen();
-      // We are basically expanding wrapWith implemented at the driver
-      // so that it will be clearer to the user of the store
-      if (installedDriver.isWrapSupported()) {
-        driver.wrapWith(null);
+      synchronized (lock) {
+        checkOpen();
+        // We are basically expanding wrapWith implemented at the driver
+        // so that it will be clearer to the user of the store
+        if (installedDriver.isWrapSupported()) {
+          driver.wrapWith(null);
+        }
       }
     } catch (StoreException ex) {
       ex.setStore(this);
       throw ex;
-    } finally {
-      lock.unlock();
     }
     return this;    
   }
@@ -292,15 +268,14 @@ public class Store {
       throw new NullPointerException("key");
     }
 
-    lock.lock();
     try {
-      checkOpen();
-      driver.save(key);
+      synchronized (lock) {
+        checkOpen();
+        driver.save(key);
+      }
     } catch (StoreException ex) {
       ex.setStore(this);
       throw ex;
-    } finally {
-      lock.unlock();
     }
   }
   
@@ -313,15 +288,14 @@ public class Store {
    * @throws StoreException if there is a driver-specific issue with loading.
    */
   public Key load() throws StoreException {
-    lock.lock();
     try {
-      checkOpen();
-      return driver.load();
+      synchronized (lock) {
+        checkOpen();
+        return driver.load();
+      }
     } catch (StoreException ex) {
       ex.setStore(this);
       throw ex;
-    } finally {
-      lock.unlock();
     }
   }
   
@@ -335,15 +309,14 @@ public class Store {
    * @throws StoreException if there is a driver-specific issue with erasing.
    */
   public boolean erase() throws StoreException {
-    lock.lock();
     try {
-      checkOpen();
-      return driver.erase();
+      synchronized (lock) {
+        checkOpen();
+        return driver.erase();
+      }
     } catch (StoreException ex) {
       ex.setStore(this);
       throw ex;
-    } finally {
-      lock.unlock();
     }
   }
 

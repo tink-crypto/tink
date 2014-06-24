@@ -24,24 +24,21 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
  * Main interface that the storage API exposes to the rest of K2.
- *  
+ * <p>
+ * This class is thread-safe.
+ * 
  * @author darylseah@google.com (Daryl Seah)
  */
 public class K2Storage {
 
   // Context for the current K2 session
   private final K2Context context;
-  
-  // Synchronization lock
-  private final Lock lock;
   
   // Map of driver identifiers to installed drivers
   private final Map<String, InstalledDriver> drivers =
@@ -56,21 +53,9 @@ public class K2Storage {
    * @param context Context of the current K2 session.
    */
   public K2Storage(K2Context context) {
-    this(context, new ReentrantLock());
+    this.context = context;
   }
   
-  /**
-   * Constructs a K2Storage interface for the given context that uses the
-   * provided lock for synchronization.
-   * 
-   * @param context Context of the current K2 session.
-   * @param lock Lock instance to use.
-   */
-  K2Storage(K2Context context, Lock lock) {
-    this.context = context;
-    this.lock = lock;
-  }
-
   /**
    * Convenience method for loading a Key from a given address.
    * <p>
@@ -261,25 +246,22 @@ public class K2Storage {
     // or all the available drivers if we need to search.
     InstalledDriver driver;
     List<InstalledDriver> installedDrivers = null;
-    lock.lock();
-    try {
+    synchronized (drivers) {
       driver = drivers.get(scheme);
       if (driver == null) {
         installedDrivers = getInstalledDrivers();
       }
-    } finally {
-      lock.unlock();
     }
     
     // We have an exact scheme/driver match, open a Store on that driver.
     if (driver != null) {
-      return new Store(driver, address).open();
+      return new Store(driver).open(address);
     }
     
     // Otherwise, search for a compatible driver in installation order.
     for (InstalledDriver idriver : installedDrivers) {
       try {
-        return new Store(idriver, address).open();
+        return new Store(idriver).open(address);
       } catch (IllegalAddressException ex) {
         // Ignored
       } catch (StoreException ex) {
@@ -309,8 +291,7 @@ public class K2Storage {
     InstalledDriver driver = new InstalledDriver(context, driverClass);
     String id = driver.getId();
     
-    lock.lock();
-    try {
+    synchronized (drivers) {
       InstalledDriver existing = drivers.get(id);
       if (existing != null) {
         return false;
@@ -318,8 +299,6 @@ public class K2Storage {
       drivers.put(id, driver);
       cachedDriverList = null;
       return true;
-    } finally {
-      lock.unlock();
     }
   }
   
@@ -332,15 +311,12 @@ public class K2Storage {
    *         such driver exists.
    */
   public boolean uninstallDriver(String id) {
-    lock.lock();
-    try {
+    synchronized (drivers) {
       if (drivers.remove(id) != null) {
         cachedDriverList = null;
         return true;
       }
       return false;
-    } finally {
-      lock.unlock();
     }
   }
   
@@ -348,8 +324,7 @@ public class K2Storage {
    * Returns an immutable thread-safe list of the currently installed drivers.
    */
   public List<InstalledDriver> getInstalledDrivers() {
-    lock.lock();
-    try {
+    synchronized (drivers) {
       List<InstalledDriver> list = cachedDriverList;
       if (list == null) {
         list = Collections.unmodifiableList(
@@ -357,8 +332,6 @@ public class K2Storage {
         cachedDriverList = list;
       }
       return list;      
-    } finally {
-      lock.unlock();
     }
   }
 }

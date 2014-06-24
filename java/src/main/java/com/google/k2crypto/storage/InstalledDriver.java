@@ -21,12 +21,12 @@ import com.google.k2crypto.i18n.K2Strings;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.util.regex.Pattern;
-import java.net.URI;
 
 /**
- * Driver after it has been installed into the storage system.
+ * A driver that has been installed into the storage system.
+ * <p>
+ * This class is thread-safe.
  * 
  * @author darylseah@google.com (Daryl Seah)
  */
@@ -71,86 +71,70 @@ public class InstalledDriver {
     this.driverClass = driverClass;
     K2Strings strings = context.getStrings();
 
-    // Check that class is non-abstract
-    if (Modifier.isAbstract(driverClass.getModifiers())) {
-      throw new StoreDriverException(driverClass,
-          strings.get("storage.driver.abstract"));        
-    }
-    
-    // Check that class (and enclosing classes) are public
-    for (Class<?> cl = driverClass; cl != null; cl = cl.getEnclosingClass()) {
-      if (!Modifier.isPublic(cl.getModifiers())) {
-        throw new StoreDriverException(driverClass,
-            strings.get("storage.driver.nonpublic"));
-      } 
-    } 
-    
-    // Check for a public constructor with a valid signature
     try {
-      constructor = driverClass.getConstructor(K2Context.class, URI.class);
-      
-      // Constructor can only throw errors, runtime or IllegalAddressExceptions
+      // Check for a public constructor with no arguments
+      constructor = driverClass.getConstructor();
+
+      // Constructor can only throw Errors or RuntimeExceptions
       for (Class<?> exClass : constructor.getExceptionTypes()) {
         if (!RuntimeException.class.isAssignableFrom(exClass) &&
-              !Error.class.isAssignableFrom(exClass) &&
-              !IllegalAddressException.class.isAssignableFrom(exClass)) {
+              !Error.class.isAssignableFrom(exClass)) {
           throw new StoreDriverException(driverClass,
-              strings.get("storage.driver.constructor_throwsbad"));
+              strings.get("storage.driver.bad_throws"));
         }
       }
+      
+      // Try to instantiate the driver (should work if driver is accessible)
+      constructor.newInstance();
+      
     } catch (NoSuchMethodException ex) {
+      // Constructor not found
       throw new StoreDriverException(driverClass,
-          strings.get("storage.driver.constructor_missing"));        
+          strings.get("storage.driver.no_constructor"));        
+    } catch (ReflectiveOperationException ex) {
+      // Instantiation failed
+      throw new StoreDriverException(driverClass,
+          strings.get("storage.driver.cannot_construct"));
     }
 
     // Check that annotation is present
     info = driverClass.getAnnotation(StoreDriverInfo.class);
     if (info == null) {
       throw new StoreDriverException(driverClass,
-          strings.get("storage.driver.metadata_missing"));
+          strings.get("storage.driver.no_metadata"));
     }
     
     // Check that driver identifier is legal
     if (!LEGAL_ID.matcher(info.id()).matches()) {
       throw new StoreDriverException(driverClass,
-          strings.get("storage.driver.id_illegal"));        
+          strings.get("storage.driver.bad_id"));        
     }
   }
   
   /**
    * Instantiates a new store (driver) from the driver installation.
-   * 
-   * @param address Address to pass to the driver.
-   * 
-   * @throws IllegalAddressException if the driver cannot accept the address.
    */
-  StoreDriver instantiate(URI address) throws IllegalAddressException {
-    if (address == null) {
-      throw new NullPointerException("address");
-    }
+  StoreDriver instantiate() {
     try {
       // Use reflection to instantiate the driver
-      return constructor.newInstance(context, address);
+      StoreDriver driver = constructor.newInstance();
+      driver.initialize(context);
+      return driver;
     } catch (InvocationTargetException ex) {
       Throwable t = ex.getCause();
-      // Re-throw permissible throwables
+      // Re-throw throwables that do not need an explicit catch. (This should
+      // not actually happen unless the driver has a flaky constructor.)
       if (t instanceof Error) {
         throw (Error)t;
       } else if (t instanceof RuntimeException) {
         throw (RuntimeException)t;
-      } else if (t instanceof IllegalAddressException) {
-        throw (IllegalAddressException)t;
       } else {
         // This should not happen, owing to construction-time checks.
         throw new AssertionError(context
             .getStrings().get("misc.unexpected"), t);
       }
-    } catch (IllegalAccessException ex) {
-      // Should not happen because we check that the constructor is public... 
-      throw new AssertionError(context
-          .getStrings().get("misc.unexpected"), ex);
-    } catch (InstantiationException ex) {
-      // Should only occur if abstract class, which we also check for...
+    } catch (ReflectiveOperationException ex) {
+      // Should not happen because we test instantiate in the constructor...
       throw new AssertionError(context
           .getStrings().get("misc.unexpected"), ex);
     }
