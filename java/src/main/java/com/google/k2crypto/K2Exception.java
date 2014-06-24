@@ -41,4 +41,13 @@ public class K2Exception extends Exception {
   public K2Exception(String message, Throwable cause) {
     super(message, cause);
   }
+  
+  /**
+   * Constructs a new K2 exception with the specified cause.
+   *
+   * @param cause the cause of this exception.
+   */
+  public K2Exception(Throwable cause) {
+    super(cause);
+  }
 }
