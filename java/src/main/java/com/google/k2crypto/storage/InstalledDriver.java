@@ -61,6 +61,11 @@ public class InstalledDriver {
    */
   InstalledDriver(K2Context context, Class<? extends StoreDriver> driverClass)
       throws StoreDriverException {
+    if (context == null) {
+      throw new NullPointerException("context");
+    } else if (driverClass == null) {
+      throw new NullPointerException("driverClass");
+    }
     
     this.context = context;
     this.driverClass = driverClass;

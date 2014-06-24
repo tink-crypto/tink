@@ -288,6 +288,10 @@ public class Store {
    * @throws StoreException if there is a driver-specific issue with saving.
    */
   public void save(Key key) throws StoreException {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+
     lock.lock();
     try {
       checkOpen();
