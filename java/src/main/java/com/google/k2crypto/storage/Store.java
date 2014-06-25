@@ -65,11 +65,10 @@ public class Store {
     if (installedDriver == null) {
       throw new NullPointerException("installedDriver");
     }
-    
     this.installedDriver = installedDriver;
     this.context = installedDriver.getContext();
     this.driver = installedDriver.instantiate();
-}
+  }
   
   /**
    * Returns the address of the storage location that keys will be read from
