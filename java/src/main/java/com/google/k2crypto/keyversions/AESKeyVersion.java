@@ -14,9 +14,15 @@
 
 package com.google.k2crypto.keyversions;
 
+import com.google.k2crypto.BuilderException;
+import com.google.k2crypto.DecryptionException;
+import com.google.k2crypto.EncryptionException;
 import com.google.k2crypto.KeyVersionBuilder;
 import com.google.k2crypto.SymmetricKeyVersion;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -24,6 +30,8 @@ import java.security.SecureRandom;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
@@ -64,15 +72,17 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   protected byte[] initvector = new byte[16];
 
   /**
-   * Enum representing all supported modes
-   * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
+   * Enum representing all supported modes Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported
+   * modes: XTS, OCB
    */
-  public enum Mode {CBC, ECB, OFB, CFB, CTR};
-  
+  public enum Mode {
+    CBC, ECB, OFB, CFB, CTR
+  }
+
   /**
    * The encryption mode
    */
-  private Mode mode = Mode.CTR;
+  private Mode mode = Mode.CBC;
 
   /**
    * Supported padding: PKCS5PADDING Unsupported padding: PKCS7Padding, ISO10126d2Padding,
@@ -94,86 +104,21 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   private int keyLengthInBits() {
     return this.keyVersionLengthInBytes * 8;
   }
- 
-  /**
-   * Takes an array of bytes and encrypts it using the AES key
-   *
-   * @param data The byte array of data that we want to encrypt
-   * @return Byte array representation of the encrypted data
-   * @throws NoSuchAlgorithmException
-   * @throws NoSuchPaddingException
-   * @throws InvalidKeyException
-   * @throws InvalidAlgorithmParameterException
-   * @throws IllegalBlockSizeException
-   * @throws BadPaddingException
-   */
-  public byte[] encryptBytes(byte[] data)
-      throws NoSuchAlgorithmException,
-      NoSuchPaddingException,
-      InvalidKeyException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException {
-
-    // make an AES cipher that we can use for encryption
-    Cipher encCipher = Cipher.getInstance(algModePadding);
-
-
-    if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
-        || this.mode.equals(Mode.CTR)) {
-      // Initialize the cipher using the secret key of this class and the initialization vector
-      encCipher.init(Cipher.ENCRYPT_MODE, this.secretKey, new IvParameterSpec(this.initvector));
-    } else if (this.mode.equals(Mode.ECB)) {
-      // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
-      encCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
-    }
-
-    // encrypt the data
-    byte[] encryptedData = encCipher.doFinal(data);
-
-    // return the encrypted data
-    return encryptedData;
-  }
 
   /**
-   * Method to decrypt an encrypted byte array using the AES key
-   *
-   * @param data The encrypted input data that we want to decrypt
-   * @return The byte array representation of the decrypted data
-   * @throws InvalidKeyException
-   * @throws InvalidAlgorithmParameterException
-   * @throws IllegalBlockSizeException
-   * @throws BadPaddingException
-   * @throws NoSuchAlgorithmException
-   * @throws NoSuchPaddingException
+   * Cipher for encrypting data using this AES key version
    */
-  public byte[] decryptBytes(byte[] data)
-      throws InvalidKeyException,
-      InvalidAlgorithmParameterException,
-      IllegalBlockSizeException,
-      BadPaddingException,
-      NoSuchAlgorithmException,
-      NoSuchPaddingException {
+  private Cipher encryptingCipher;
 
-    // make an AES cipher that we can use for decryption
-    Cipher decCipher = Cipher.getInstance(algModePadding);
+  /**
+   * Cipher for decrypting data using this AES key version
+   */
+  private Cipher decryptingCipher;
 
-
-    if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
-        || this.mode.equals(Mode.CTR)) {
-      // Initialize the cipher using the secret key of this class and the initialization vector
-      decCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initvector));
-    } else if (this.mode.equals(Mode.ECB)) {
-      // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
-      decCipher.init(Cipher.DECRYPT_MODE, secretKey);
-    }
-
-
-    // decrypt the data
-    byte[] decryptedData = decCipher.doFinal(data);
-    // return decrypted byte array
-    return decryptedData;
-  }
+  /**
+   * Byte array used to buffer data when encrypting or decrypting streams
+   */
+  private byte[] byteBuffer = new byte[1024];
 
   /**
    * Initializes the key using key matter and initialization vector parameters.
@@ -202,6 +147,25 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     return this.keyVersionLengthInBytes;
   }
 
+  /**
+   * Method to get the encrypting cipher of this key version
+   *
+   * @return The Cipher object representing the encrypting cipher of this key version
+   */
+  @Override
+  public Cipher getEncryptingCipher() {
+    return this.encryptingCipher;
+  }
+
+  /**
+   * Method to get the decrypting cipher of this key version
+   *
+   * @return The Cipher object representing the decrypting cipher of this key version
+   */
+  @Override
+  public Cipher getDecryptingCipher() {
+    return this.decryptingCipher;
+  }
 
   /**
    * Constructor to make an AESKeyVersion using the AESKeyVersionBuilder. Private to prevent use
@@ -209,35 +173,70 @@ public class AESKeyVersion extends SymmetricKeyVersion {
    *
    * @param builder An AESKeyVersionBuilder with all the variables set according to how you want the
    *        AESKeyVersion to be setup.
-   * @throws NoSuchAlgorithmException
+   * @throws BuilderException
    */
-  private AESKeyVersion(AESKeyVersionBuilder builder) throws NoSuchAlgorithmException {
+  private AESKeyVersion(AESKeyVersionBuilder builder) throws BuilderException {
     // set key version length, mode and padding based on the key version builder
-    this.keyVersionLengthInBytes = builder.keyVersionLength;
+    this.keyVersionLengthInBytes = builder.keyVersionLengthInBytes;
     this.mode = builder.mode;
     this.padding = builder.padding;
 
-    // IMPORTANT! update the algorithm/mode/padding string to reflect the new mode and padding
+    // IMPORTANT! this line of code updates the algorithm/mode/padding string to reflect the new
+    // mode and padding. The class will not work if you move or remove this line of code
     this.algModePadding = "AES/" + this.mode + "/" + padding;
 
-    // set the key matter and initialization vector from input if is was provided
-    if (builder.keyVersionMatterInitVectorProvided) {
-      // set key matter and init vector according to provided key matter and init vector
-      this.setkeyVersionMatter(builder.keyVersionMatter, builder.initVector);
-    } else {
-      // Generate the key using JCE crypto libraries
-      KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-      keyGen.init(this.keyLengthInBits());
-      secretKey = keyGen.generateKey();
-      // save the keyVersionMatter to the local variable keyVersionMatter
-      this.keyVersionMatter = secretKey.getEncoded();
+    // use try catch block to abstract from individual exceptions using BuilderException
+    try {
+      // set the key matter and initialization vector from input if is was provided
+      if (builder.keyVersionMatterInitVectorProvided) {
+        // set key matter and init vector according to provided key matter and init vector
+        this.setkeyVersionMatter(builder.keyVersionMatter, builder.initVector);
+      } else {
+        // Generate the key using JCE crypto libraries
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        keyGen.init(this.keyLengthInBits());
+        secretKey = keyGen.generateKey();
+        // save the keyVersionMatter to the local variable keyVersionMatter
+        this.keyVersionMatter = secretKey.getEncoded();
 
-      // use this secure random number generator to initialize the vector with random bytes
-      SecureRandom prng = new SecureRandom();
-      prng.nextBytes(initvector);
-      // create the SecretKey object from the byte array
-      secretKey = new SecretKeySpec(this.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
+        // use this secure random number generator to initialize the vector with random bytes
+        SecureRandom prng = new SecureRandom();
+        prng.nextBytes(initvector);
+        // create the SecretKey object from the byte array
+        secretKey = new SecretKeySpec(this.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
+      }
 
+      // make an AES cipher that we can use for encryption
+      this.encryptingCipher = Cipher.getInstance(this.algModePadding);
+
+      // initialize the encrypting cipher
+      if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
+          || this.mode.equals(Mode.CTR)) {
+        // Initialize the cipher using the secret key of this class and the initialization vector
+        encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey,
+            new IvParameterSpec(this.initvector));
+      } else if (this.mode.equals(Mode.ECB)) {
+        // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
+        encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
+      }
+
+      // make an AES cipher that we can use for decryption
+      this.decryptingCipher = Cipher.getInstance(this.algModePadding);
+
+      // initialize the decrypting cipher
+      if (this.mode.equals(Mode.CBC) || this.mode.equals(Mode.OFB) || this.mode.equals(Mode.CFB)
+          || this.mode.equals(Mode.CTR)) {
+        // Initialize the cipher using the secret key of this class and the initialization vector
+        decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initvector));
+      } else if (this.mode.equals(Mode.ECB)) {
+        // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
+        decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey);
+      }
+
+      // Catch all exceptions
+    } catch (Exception e) {
+      // Propagate the exception up using BuilderException
+      throw new BuilderException("Building AESKeyVersion failed", e);
     }
   }
 
@@ -250,7 +249,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     /**
      * key size can be 16, 24 or 32
      */
-    private int keyVersionLength = 16;
+    private int keyVersionLengthInBytes = 16;
     /**
      * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
      */
@@ -280,22 +279,13 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     private boolean keyVersionMatterInitVectorProvided = false;
 
     /**
-     * Public constructor
-     *
-     * @throws NoSuchAlgorithmException
-     */
-    public AESKeyVersionBuilder() throws NoSuchAlgorithmException {
-
-    }
-
-    /**
      * Set the key version length
      *
      * @param keyVersionLength Integer representing key version length in BYTES, can be 16, 24, 32
      * @return This object with keyVersionLength updated
      */
-    public AESKeyVersionBuilder keyVersionLength(int keyVersionLength) {
-      this.keyVersionLength = keyVersionLength;
+    public AESKeyVersionBuilder keyVersionLengthInBytes(int keyVersionLength) {
+      this.keyVersionLengthInBytes = keyVersionLength;
       return this;
     }
 
@@ -342,11 +332,14 @@ public class AESKeyVersion extends SymmetricKeyVersion {
      * Method to build a new AESKeyVersion
      *
      * @return An AESKeyVersion with the parameters set according to the AESKeyVersionBuilder
-     * @throws NoSuchAlgorithmException
+     * @throws BuilderException
      */
-    public AESKeyVersion build() throws NoSuchAlgorithmException {
-      return new AESKeyVersion(this);
+    public AESKeyVersion build() throws BuilderException {
+      try {
+        return new AESKeyVersion(this);
+      } catch (Exception e) {
+        throw new BuilderException("Building AESKeyVersion failed", e);
+      }
     }
-
   }
 }
