@@ -42,7 +42,7 @@ public class Store {
   // Driver instance being wrapped
   private final StoreDriver driver;
 
-  // Storage address, as obtained from the driver
+  // Storage address that the store points to
   private URI address;
 
   // Synchronization lock
@@ -60,14 +60,23 @@ public class Store {
    * Constructs a Store that is backed by the given driver. 
    * 
    * @param installedDriver Driver installed for the store.
+   * @param address Address to open the store with. 
    */
-  Store(InstalledDriver installedDriver) {
+  Store(InstalledDriver installedDriver, URI address) {
     if (installedDriver == null) {
       throw new NullPointerException("installedDriver");
+    } else if (address == null) {
+      throw new NullPointerException("address");
     }
     this.installedDriver = installedDriver;
     this.context = installedDriver.getContext();
     this.driver = installedDriver.instantiate();
+    
+    // The address could also be passed in through open(), but the constructor
+    // seems safer because hashCode(), equals() and toString() depend on address
+    // not being null. We do not want the object to be in a completely broken
+    // state after construction.
+    this.address = address;
   }
   
   /**
@@ -88,20 +97,15 @@ public class Store {
   /**
    * Opens the store for loading/saving keys.
    * 
-   * @param address Address to open the store with.
-   *
    * @return the opened store.
    * 
    * @throws IllegalAddressException if the address is not recognized. 
    * @throws StoreStateException if the store is already opened (or closed).
    * @throws StoreException if there is a driver-specific issue.
    */
-  Store open(URI address) throws IllegalAddressException, StoreException {
+  Store open() throws IllegalAddressException, StoreException {
     // This method is package-restricted because K2Storage automatically
     // opens the Store; there is no need for external code to see open().
-    if (address == null) {
-      throw new NullPointerException("address");
-    }
     try {
       synchronized (lock) {
         switch (state) {
@@ -115,7 +119,11 @@ public class Store {
             // The driver may hurl on open(), so we defer changing state till
             // after it is done. Depending on the driver, it may not be safe
             // to invoke the read/write methods if open() fails.
-            driver.open(address);
+            URI driverAddress = driver.open(address);
+            if (driverAddress != null) {
+              // Driver may provide a transformed address on open()
+              address = driverAddress;
+            }
             state = State.OPEN;
         }
       }

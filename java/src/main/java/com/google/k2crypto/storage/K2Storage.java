@@ -254,13 +254,13 @@ public class K2Storage {
     
     // We have an exact scheme/driver match, open a Store on that driver.
     if (driver != null) {
-      return new Store(driver).open(address);
+      return new Store(driver, address).open();
     }
     
     // Otherwise, search for a compatible driver in installation order.
     for (InstalledDriver idriver : installedDrivers) {
       try {
-        return new Store(idriver).open(address);
+        return new Store(idriver, address).open();
       } catch (IllegalAddressException ex) {
         // Ignored
       } catch (StoreException ex) {
