@@ -288,6 +288,8 @@ public class Store {
    * @return the stored key or null if the location is empty.
    * 
    * @throws StoreStateException if the store is not open.
+   * @throws WrapKeyException if the stored key is wrapped and no wrap key
+   *                             (or an invalid one) was specified.
    * @throws StoreException if there is a driver-specific issue with loading.
    */
   public Key load() throws StoreException {

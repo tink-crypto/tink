@@ -16,26 +16,29 @@
 
 package com.google.k2crypto.storage;
 
+import com.google.k2crypto.Key;
+
 /**
- * Exception thrown when the operation invoked is unsupported by the store. 
+ * Exception thrown when a operation cannot be performed because a stored
+ * {@link Key} is wrapped (encrypted).
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-public class UnsupportedByStoreException extends StoreException {
-  
+public class WrapKeyException extends StoreException {
+
   /**
    * Reason why the exception was thrown. 
    */
   public static enum Reason {
     /**
-     * The store does not support wrapping of keys. 
+     * A wrap key is required, and was not provided. 
      */
-    NO_WRAP("Store does not support key wrapping."),
+    MISSING("A wrap key is required."),
     
     /**
-     * The store is read-only.
+     * The provided wrap key cannot unwrap the stored key.
      */
-    READ_ONLY("Store is read-only.");
+    WRONG("The provided wrap key is wrong.");
     
     final String message;
     
@@ -47,11 +50,11 @@ public class UnsupportedByStoreException extends StoreException {
   private final Reason reason;
   
   /**
-   * Constructs a new UnsupportedByStoreException.
+   * Constructs a new WrapKeyException.
    *
    * @param reason The reason for the exception.
    */
-  public UnsupportedByStoreException(Reason reason) {
+  public WrapKeyException(Reason reason) {
     super(reason.message);
     this.reason = reason;
   }

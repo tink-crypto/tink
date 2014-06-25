@@ -138,6 +138,8 @@ public interface StoreDriver {
    * 
    * @return the stored key or null if the location is empty.
    * 
+   * @throws WrapKeyException if the stored key is wrapped and no wrap key
+   *                             (or an invalid one) was specified.
    * @throws StoreException if there is some issue loading the stored data.
    */
   Key load() throws StoreException;
