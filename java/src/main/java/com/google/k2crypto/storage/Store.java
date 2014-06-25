@@ -33,6 +33,7 @@ import java.net.URI;
 public class Store {
   
   // Context for the current K2 session
+  @SuppressWarnings("unused")
   private final K2Context context;
 
   // Driver installation backing the store
@@ -59,13 +60,8 @@ public class Store {
    * Constructs a Store that is backed by the given driver. 
    * 
    * @param installedDriver Driver installed for the store.
-   * 
-   * @throws IllegalAddressException if the address cannot be interpreted by
-   *                                 the driver.
    */
-  Store(InstalledDriver installedDriver)
-      throws IllegalAddressException {
-    
+  Store(InstalledDriver installedDriver) {
     if (installedDriver == null) {
       throw new NullPointerException("installedDriver");
     }
@@ -110,9 +106,12 @@ public class Store {
     try {
       synchronized (lock) {
         switch (state) {
-          default: // Closed or Open
+          default: // Closed
             throw new StoreStateException(
-                context.getStrings().get("storage.store.not_initial"));
+                StoreStateException.Reason.ALREADY_CLOSED);
+          case OPEN:
+            throw new StoreStateException(
+                StoreStateException.Reason.ALREADY_OPEN);
           case INITIAL:
             // The driver may hurl on open(), so we defer changing state till
             // after it is done. Depending on the driver, it may not be safe
@@ -163,8 +162,7 @@ public class Store {
   private void checkOpen() throws StoreStateException {
     synchronized (lock) {
       if (state != State.OPEN) {
-        throw new StoreStateException(
-            context.getStrings().get("storage.store.not_open"));
+        throw new StoreStateException(StoreStateException.Reason.NOT_OPEN);
       }
     }
   }
@@ -217,7 +215,7 @@ public class Store {
         checkOpen();
         if (!installedDriver.isWrapSupported()) {
           throw new UnsupportedByStoreException(
-              context.getStrings().get("storage.store.no_wrap"));
+              UnsupportedByStoreException.Reason.NO_WRAP);
         }
         driver.wrapWith(key);
       }
@@ -261,6 +259,7 @@ public class Store {
    * @param key Key to save.
    * 
    * @throws StoreStateException if the store is not open.
+   * @throws UnsupportedByStoreException if the store is read-only.
    * @throws StoreException if there is a driver-specific issue with saving.
    */
   public void save(Key key) throws StoreException {
@@ -271,6 +270,10 @@ public class Store {
     try {
       synchronized (lock) {
         checkOpen();
+        if (installedDriver.isReadOnly()) {
+          throw new UnsupportedByStoreException(
+              UnsupportedByStoreException.Reason.READ_ONLY);
+        }
         driver.save(key);
       }
     } catch (StoreException ex) {
@@ -306,12 +309,17 @@ public class Store {
    *         been erased.
    * 
    * @throws StoreStateException if the store is not open.
+   * @throws UnsupportedByStoreException if the store is read-only.
    * @throws StoreException if there is a driver-specific issue with erasing.
    */
   public boolean erase() throws StoreException {
     try {
       synchronized (lock) {
         checkOpen();
+        if (installedDriver.isReadOnly()) {
+          throw new UnsupportedByStoreException(
+              UnsupportedByStoreException.Reason.READ_ONLY);
+        }        
         return driver.erase();
       }
     } catch (StoreException ex) {

@@ -24,11 +24,42 @@ package com.google.k2crypto.storage;
 public class UnsupportedByStoreException extends StoreException {
   
   /**
+   * Reason why the exception was thrown. 
+   */
+  public static enum Reason {
+    /**
+     * The store does not support wrapping of keys. 
+     */
+    NO_WRAP("Store does not support key wrapping."),
+    
+    /**
+     * The store is read-only.
+     */
+    READ_ONLY("Store is read-only.");
+    
+    final String message;
+    
+    private Reason(String message) {
+      this.message = message;
+    }
+  }
+  
+  private final Reason reason;
+  
+  /**
    * Constructs a new UnsupportedByStoreException with the specified message.
    *
-   * @param message the detail message.
+   * @param reason The reason for the exception.
    */
-  public UnsupportedByStoreException(String message) {
-    super(message);
+  public UnsupportedByStoreException(Reason reason) {
+    super(reason.message);
+    this.reason = reason;
+  }
+  
+  /**
+   * Returns the reason for the exception. 
+   */
+  public Reason getReason() {
+    return reason;
   }
 }

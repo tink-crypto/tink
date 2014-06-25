@@ -147,7 +147,7 @@ public class K2Storage {
           if (path == null || path.length() == 0) {
             // We cannot do automatic conversion without any path...
             throw new IllegalAddressException(address,
-                context.getStrings().get("storage.address.no_path"));
+                IllegalAddressException.Reason.NO_PATH, null);
           }
           
           // Convert relative paths to absolute
@@ -160,13 +160,12 @@ public class K2Storage {
         }
         else {
           throw new IllegalAddressException(address,
-              context.getStrings().get("storage.address.no_scheme")); 
+              IllegalAddressException.Reason.NO_SCHEME, null);
         }
       }
     } catch (URISyntaxException ex) {
-      // TODO: Need to resolve the obvious i18n issue here.
-      //      (URISyntaxException.getReason will likely only return English.) 
-      throw new IllegalAddressException(address, ex.getReason());
+      throw new IllegalAddressException(address,
+          IllegalAddressException.Reason.INVALID_URI, ex);
     }
     return uri;
   }
@@ -237,8 +236,8 @@ public class K2Storage {
     // The URI must have a scheme
     String scheme = address.getScheme();
     if (scheme == null) {
-      throw new IllegalAddressException(address.toString(),
-          context.getStrings().get("storage.address.no_scheme")); 
+      throw new IllegalAddressException(address,
+          IllegalAddressException.Reason.NO_SCHEME, null);
     }
     scheme = scheme.toLowerCase();
     

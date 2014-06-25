@@ -17,7 +17,6 @@
 package com.google.k2crypto.storage;
 
 import com.google.k2crypto.K2Context;
-import com.google.k2crypto.i18n.K2Strings;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -69,45 +68,42 @@ public class InstalledDriver {
     
     this.context = context;
     this.driverClass = driverClass;
-    K2Strings strings = context.getStrings();
 
     try {
       // Check for a public constructor with no arguments
       constructor = driverClass.getConstructor();
-
       // Constructor can only throw Errors or RuntimeExceptions
       for (Class<?> exClass : constructor.getExceptionTypes()) {
         if (!RuntimeException.class.isAssignableFrom(exClass) &&
               !Error.class.isAssignableFrom(exClass)) {
           throw new StoreDriverException(driverClass,
-              strings.get("storage.driver.bad_throws"));
+              StoreDriverException.Reason.ILLEGAL_THROWS);
         }
       }
-      
       // Try to instantiate the driver (should work if driver is accessible)
       constructor.newInstance();
       
     } catch (NoSuchMethodException ex) {
       // Constructor not found
       throw new StoreDriverException(driverClass,
-          strings.get("storage.driver.no_constructor"));        
+          StoreDriverException.Reason.NO_CONSTRUCTOR);        
     } catch (ReflectiveOperationException ex) {
       // Instantiation failed
       throw new StoreDriverException(driverClass,
-          strings.get("storage.driver.cannot_construct"));
+          StoreDriverException.Reason.INSTANTIATE_FAIL);
     }
 
     // Check that annotation is present
     info = driverClass.getAnnotation(StoreDriverInfo.class);
     if (info == null) {
       throw new StoreDriverException(driverClass,
-          strings.get("storage.driver.no_metadata"));
+          StoreDriverException.Reason.NO_METADATA);
     }
     
     // Check that driver identifier is legal
     if (!LEGAL_ID.matcher(info.id()).matches()) {
       throw new StoreDriverException(driverClass,
-          strings.get("storage.driver.bad_id"));        
+          StoreDriverException.Reason.ILLEGAL_ID);        
     }
   }
   
@@ -130,13 +126,11 @@ public class InstalledDriver {
         throw (RuntimeException)t;
       } else {
         // This should not happen, owing to construction-time checks.
-        throw new AssertionError(context
-            .getStrings().get("misc.unexpected"), t);
+        throw new AssertionError("Should not happen!", t);
       }
     } catch (ReflectiveOperationException ex) {
       // Should not happen because we test instantiate in the constructor...
-      throw new AssertionError(context
-          .getStrings().get("misc.unexpected"), ex);
+      throw new AssertionError("Should not happen!", ex);
     }
   }
   

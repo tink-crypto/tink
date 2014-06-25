@@ -22,13 +22,49 @@ package com.google.k2crypto.storage;
  * @author darylseah@gmail.com (Daryl Seah)
  */
 public class StoreStateException extends StoreException {
-  
+
   /**
-   * Constructs a new StoreStateException with the specified message.
-   *
-   * @param message the detail message.
+   * Reason why the exception was thrown. 
    */
-  public StoreStateException(String message) {
-    super(message);
+  public static enum Reason {
+    /**
+     * The store cannot perform the operation because it is not open. 
+     */
+    NOT_OPEN("Store not open."),
+    
+    /**
+     * The store is already open.
+     */
+    ALREADY_OPEN("Store already open."),
+    
+    /**
+     * The store is already closed.
+     */
+    ALREADY_CLOSED("Store already closed.");
+    
+    final String message;
+    
+    private Reason(String message) {
+      this.message = message;
+    }
+  }
+  
+  private final Reason reason;
+
+  /**
+   * Constructs a new StoreStateException.
+   *
+   * @param reason The reason for the exception.
+   */
+  public StoreStateException(Reason reason) {
+    super(reason.message);
+    this.reason = reason;
+  }
+
+  /**
+   * Returns the reason for the state exception. 
+   */
+  public Reason getReason() {
+    return reason;
   }
 }
