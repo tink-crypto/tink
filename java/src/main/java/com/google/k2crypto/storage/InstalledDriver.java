@@ -70,8 +70,8 @@ public class InstalledDriver {
     this.driverClass = driverClass;
 
     try {
-      // Check for a public constructor with no arguments
-      constructor = driverClass.getConstructor();
+      // Check for a constructor with no arguments
+      constructor = driverClass.getDeclaredConstructor();
       // Constructor can only throw Errors or RuntimeExceptions
       for (Class<?> exClass : constructor.getExceptionTypes()) {
         if (!RuntimeException.class.isAssignableFrom(exClass) &&

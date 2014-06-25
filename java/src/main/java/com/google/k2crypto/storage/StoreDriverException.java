@@ -30,9 +30,9 @@ public class StoreDriverException extends K2Exception {
    */
   public static enum Reason {
     /**
-     * The driver does not have a public no-argument constructor. 
+     * The driver does not have an accessible no-argument constructor. 
      */
-    NO_CONSTRUCTOR("Driver is missing a valid constructor."),
+    NO_CONSTRUCTOR("Driver is missing an accessible constructor."),
     
     /**
      * The driver could not be instantiated.
