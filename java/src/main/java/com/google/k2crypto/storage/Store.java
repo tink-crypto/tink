@@ -95,6 +95,13 @@ public class Store {
   }
   
   /**
+   * Provides access to the driver instance (for testing).
+   */
+  StoreDriver getDriver() {
+    return driver;
+  }
+  
+  /**
    * Opens the store for loading/saving keys.
    * 
    * @return the opened store.
