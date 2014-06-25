@@ -63,7 +63,9 @@ public class SymmetricEncryptionTest {
 
     }
 
-    // test all keyVersion version length and mode combinations
+    /*
+     *test all keyVersion version length and mode combinations
+     */
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       for (Mode mode : Mode.values()) {
         // test keyVersion version length of 16 and PKCS5 padding and ECB mode
@@ -89,11 +91,11 @@ public class SymmetricEncryptionTest {
 
     // loop over an array of test input Strings to encrypt and the decrypt
     for (String testinput : new String[] {"weak", "test", "", "1234", "32980342yhio#$@^U"}) {
-      // ////////////////////////
-      // test the encryption decryption OF BYTE ARRAYS
-      // ////////////////////////
+      /*
+       *test the encryption decryption OF BYTE ARRAYS
+       */
 
-      // encrypt the test string
+// encrypt the test string
       byte[] encTxt = encryptString(keyVersion, testinput);
       // decrypt the message
       String result = decryptString(keyVersion, encTxt);
@@ -101,11 +103,11 @@ public class SymmetricEncryptionTest {
       assertEquals(testinput, result);
 
 
-      // ////////////////////////
-      // now test the encryption decryption STREAMS
-      // ////////////////////////
+      /*
+       *now test the encryption decryption STREAMS
+       */
 
-      // the input stream
+// the input stream
       ByteArrayOutputStream inputStream = new ByteArrayOutputStream();
       // convert the test String to an input stream and encrypt it using the keyVersion
       SymmetricEncryption.encryptStream(keyVersion, new ByteArrayInputStream(testinput.getBytes()),
