@@ -27,7 +27,7 @@ import com.google.k2crypto.Key;
 public class WrapKeyException extends StoreException {
 
   /**
-   * Reason why the exception was thrown. 
+   * Reason why the WrapKeyException was thrown. 
    */
   public static enum Reason {
     /**

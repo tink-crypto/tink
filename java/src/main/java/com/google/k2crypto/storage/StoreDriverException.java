@@ -26,7 +26,7 @@ import com.google.k2crypto.K2Exception;
 public class StoreDriverException extends K2Exception {
   
   /**
-   * Reason why the exception was thrown. 
+   * Reason why the StoreDriverException was thrown. 
    */
   public static enum Reason {
     /**

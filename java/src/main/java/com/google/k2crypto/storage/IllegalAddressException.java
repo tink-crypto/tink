@@ -28,7 +28,7 @@ import java.net.URI;
 public class IllegalAddressException extends K2Exception {
 
   /**
-   * Reason why the exception was thrown. 
+   * Reason why the IllegalAddressException was thrown. 
    */
   public static enum Reason {
     /**

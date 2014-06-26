@@ -24,7 +24,7 @@ package com.google.k2crypto.storage;
 public class UnsupportedByStoreException extends StoreException {
   
   /**
-   * Reason why the exception was thrown. 
+   * Reason why the UnsupportedByStoreException was thrown. 
    */
   public static enum Reason {
     /**

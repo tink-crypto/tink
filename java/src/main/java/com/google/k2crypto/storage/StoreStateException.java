@@ -24,7 +24,7 @@ package com.google.k2crypto.storage;
 public class StoreStateException extends StoreException {
 
   /**
-   * Reason why the exception was thrown. 
+   * Reason why the StoreStateException was thrown. 
    */
   public static enum Reason {
     /**
