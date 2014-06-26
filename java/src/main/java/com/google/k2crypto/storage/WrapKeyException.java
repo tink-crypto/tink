@@ -33,8 +33,13 @@ public class WrapKeyException extends StoreException {
     /**
      * A wrap key is required, and was not provided. 
      */
-    MISSING("A wrap key is required."),
+    REQUIRED("A wrap key is required."),
     
+    /**
+     * A wrap key was provided, but is not needed. 
+     */
+    UNNECESSARY("The wrap key is not required."),
+
     /**
      * The provided wrap key cannot unwrap the stored key.
      */

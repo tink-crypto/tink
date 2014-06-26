@@ -223,7 +223,6 @@ public class Store {
     if (key == null) {
       throw new NullPointerException("key");
     }
-    
     try {
       synchronized (lock) {
         checkOpen();
@@ -280,7 +279,6 @@ public class Store {
     if (key == null) {
       throw new NullPointerException("key");
     }
-
     try {
       synchronized (lock) {
         checkOpen();
@@ -303,7 +301,8 @@ public class Store {
    * 
    * @throws StoreStateException if the store is not open.
    * @throws WrapKeyException if the stored key is wrapped and no wrap key
-   *                             (or an invalid one) was specified.
+   *                          (or a wrong one) was specified, or the stored key
+   *                          is NOT wrapped and a wrap key was specified.
    * @throws StoreException if there is a driver-specific issue with loading.
    */
   public Key load() throws StoreException {
