@@ -99,6 +99,32 @@ public interface StoreDriver {
   void close();
   
   /**
+   * Indicates that subsequent saves/loads on this store should be
+   * wrapped/unwrapped with the provided key.
+   * <p>
+   * The driver should, in its initial state, have no wrapping key set.
+   * <p>
+   * This method will only be called if the driver declares
+   * {@code wrapSupport=true} with {@link StoreDriverInfo}.
+   * 
+   * @param key Key protecting the actual stored key, or null to disable
+   *            wrapping.
+   * 
+   * @throws StoreException if a key is provided and it cannot be used for
+   *                        wrapping
+   */
+  void wrapWith(Key key) throws StoreException;
+  
+  /**
+   * Returns {@code true} if a wrapping key is currently set (with
+   * {@link #wrapWith(Key)}), {@code false} otherwise.
+   * <p>
+   * This method will only be called if the driver declares
+   * {@code wrapSupport=true} with {@link StoreDriverInfo}.
+   */
+  boolean isWrapping();
+  
+  /**
    * Returns {@code true} if there is no key stored at this location,
    * {@code false} if one might be present.
    * <p>
@@ -112,20 +138,11 @@ public interface StoreDriver {
   boolean isEmpty() throws StoreException;
     
   /**
-   * Indicates that subsequent saves/loads on this store should be
-   * wrapped/unwrapped with the provided key.
-   * 
-   * @param key Key protecting the actual stored key, or null to disable
-   *            wrapping.
-   * 
-   * @throws StoreException if a key is provided and it cannot be used for
-   *                        wrapping
-   */
-  void wrapWith(Key key) throws StoreException;
-  
-  /**
    * Saves the given key to the store. Any existing key will be silently
    * replaced, regardless of whether it is wrapped.
+   * <p>
+   * This method will never be called if the driver declares
+   * {@code readOnly=true} with {@link StoreDriverInfo}.
    *  
    * @param key Key to save.
    * 
@@ -147,6 +164,9 @@ public interface StoreDriver {
  
   /**
    * Erases any stored key, regardless of whether it is wrapped.
+   * <p>
+   * This method will never be called if the driver declares
+   * {@code readOnly=true} with {@link StoreDriverInfo}.
    * 
    * @return {@code true} if, and only if, there was data present and it has
    *         been erased.

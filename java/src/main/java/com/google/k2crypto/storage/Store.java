@@ -180,31 +180,7 @@ public class Store {
       }
     }
   }
-  
-  /**
-   * Returns {@code true} if there is no key stored at this location,
-   * {@code false} if one might be present.
-   * <p>
-   * Note that if this method returns false, there is no a guarantee that the
-   * key will actually be readable. The data might be encrypted, corrupted
-   * or be in an invalid format. An attempt must be made to {@link #load()} to
-   * know for sure if it is readable.
-   * 
-   * @throws StoreStateException if the store is not open.
-   * @throws StoreException if there is a driver-specific issue.
-   */
-  public boolean isEmpty() throws StoreException {
-    try {
-      synchronized (lock) {
-        checkOpen();
-        return driver.isEmpty();
-      }
-    } catch (StoreException ex) {
-      ex.setStore(this);
-      throw ex;
-    }
-  }
-  
+
   /**
    * Indicates that subsequent saves/loads on this store should be
    * wrapped/unwrapped with the provided key.
@@ -263,6 +239,52 @@ public class Store {
       throw ex;
     }
     return this;    
+  }
+  
+  /**
+   * Returns {@code true} if a wrapping key is currently set (with
+   * {@link #wrapWith(Key)}), {@code false} otherwise.
+   * 
+   * @throws StoreStateException if the store is not open.
+   * @throws StoreException if there is a driver-specific issue.
+   */
+  public boolean isWrapping() throws StoreException {
+    try {
+      synchronized (lock) {
+        checkOpen();
+        if (installedDriver.isWrapSupported()) {
+          return driver.isWrapping();
+        }
+      }
+    } catch (StoreException ex) {
+      ex.setStore(this);
+      throw ex;
+    }
+    return false;
+  }
+  
+  /**
+   * Returns {@code true} if there is no key stored at this location,
+   * {@code false} if one might be present.
+   * <p>
+   * Note that if this method returns false, there is no a guarantee that the
+   * key will actually be readable. The data might be encrypted, corrupted
+   * or be in an invalid format. An attempt must be made to {@link #load()} to
+   * know for sure if it is readable.
+   * 
+   * @throws StoreStateException if the store is not open.
+   * @throws StoreException if there is a driver-specific issue.
+   */
+  public boolean isEmpty() throws StoreException {
+    try {
+      synchronized (lock) {
+        checkOpen();
+        return driver.isEmpty();
+      }
+    } catch (StoreException ex) {
+      ex.setStore(this);
+      throw ex;
+    }
   }
   
   /**
