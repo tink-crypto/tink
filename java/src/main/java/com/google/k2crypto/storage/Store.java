@@ -175,8 +175,14 @@ public class Store {
    */
   private void checkOpen() throws StoreStateException {
     synchronized (lock) {
-      if (state != State.OPEN) {
-        throw new StoreStateException(StoreStateException.Reason.NOT_OPEN);
+      switch (state) {
+        default: // Closed
+          throw new StoreStateException(
+              StoreStateException.Reason.ALREADY_CLOSED);
+        case INITIAL:
+          throw new StoreStateException(
+              StoreStateException.Reason.NOT_OPEN);          
+        case OPEN:
       }
     }
   }
