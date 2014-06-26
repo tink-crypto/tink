@@ -52,10 +52,10 @@ public @interface StoreDriverInfo {
   /**
    * Whether the driver can only read keys and not write them.
    */
-  boolean readOnly() default false;
+  boolean readOnly();
   
   /**
    * Whether the driver supports wrapped (encrypted) keys.
    */
-  boolean wrapSupported() default false;
+  boolean wrapSupported();
 }
