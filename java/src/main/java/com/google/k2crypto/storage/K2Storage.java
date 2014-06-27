@@ -216,13 +216,13 @@ public class K2Storage {
    * @param driverClass Class of the driver implementation to install.
    *                    See {@link StoreDriver} for specifications. 
    * 
-   * @return {@code true} if successfully installed, {@code false} if a driver
-   *         with the same identifier is already installed.
+   * @return {@link InstalledDriver} if successfully installed, {@code null}
+   *         if a driver with the same identifier is already installed.
    *         
    * @throws StoreDriverException if there is a problem with the driver
    *                              implementation.
    */
-  public boolean installDriver(Class<? extends StoreDriver> driverClass) 
+  public InstalledDriver installDriver(Class<? extends StoreDriver> driverClass) 
       throws StoreDriverException {
     
     InstalledDriver driver = new InstalledDriver(context, driverClass);
@@ -231,11 +231,11 @@ public class K2Storage {
     synchronized (drivers) {
       InstalledDriver existing = drivers.get(id);
       if (existing != null) {
-        return false;
+        return null;
       }
       drivers.put(id, driver);
       cachedDriverList = null;
-      return true;
+      return driver;
     }
   }
   
