@@ -370,7 +370,7 @@ public class K2StorageTest {
   /**
    * Verifies that a store open succeeds for testOpenXXXDriver/s() tests.
    */
-  private void assertOpenSuccess(K2Storage storage, URI address,
+  private static void assertOpenSuccess(K2Storage storage, URI address,
       Class<? extends StoreDriver> expectedDriver)
       throws K2Exception {
     Store store = storage.open(address);
@@ -384,7 +384,7 @@ public class K2StorageTest {
   /**
    * Verifies that a store open fails for testOpenXXXDriver/s() tests.
    */
-  private void assertOpenFail(K2Storage storage, URI address)
+  private static void assertOpenFail(K2Storage storage, URI address)
       throws K2Exception {
     try {
       storage.open(address).close();
