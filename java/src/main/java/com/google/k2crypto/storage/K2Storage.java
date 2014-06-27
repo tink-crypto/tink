@@ -142,9 +142,6 @@ public class K2Storage {
       throws IllegalAddressException,
              NoSuitableDriverException,
              StoreException {
-    if (address == null) {
-      throw new NullPointerException("address");
-    }
     return open(stringToURI(address));
   }
   
@@ -288,6 +285,9 @@ public class K2Storage {
    *                                 as a URI.
    */
   static URI stringToURI(String address) throws IllegalAddressException {
+    if (address == null) {
+      throw new NullPointerException("address");
+    }
     URI uri;
     try {
       // Parse to a URI, then make sure a scheme is present
