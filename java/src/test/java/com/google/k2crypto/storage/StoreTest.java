@@ -50,7 +50,7 @@ public class StoreTest {
   private Key wrapKeyB = null;
   
   /**
-   * Creates the mock drivers (and other objects) that will be passed to the
+   * Creates the mock driver (and other objects) that will be passed to the
    * store for testing.
    */
   @Before public final void setUp() {
