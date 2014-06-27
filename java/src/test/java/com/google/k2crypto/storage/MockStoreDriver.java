@@ -27,6 +27,8 @@ import java.net.URISyntaxException;
 /**
  * Mock implementation of a store driver. The mock, by default, is most 
  * permissively declared (i.e. not read-only and supports key wrapping).
+ * However, it will reject addresses that have a schemes that do not match
+ * its identifier.
  * <p>
  * The mock will raise assertion errors if it is used in a manner
  * that violates expected {@link Store} behavior.
@@ -48,10 +50,12 @@ public class MockStoreDriver implements StoreDriver {
   Key storedKey = null;
   Key storedKeyWrapper = null;
   
+  // Whether these methods have been called
   boolean initCalled = false;
   boolean openCalled = false;
   boolean closeCalled = false;
   
+  // Call counts to the other methods
   int wrapWithCalls = 0;
   int isWrappingCalls = 0;
   int isEmptyCalls = 0;
