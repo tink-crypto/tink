@@ -309,14 +309,14 @@ public class K2Storage {
           // will be interpreted as "%2520", i.e. a literal percent followed
           // by "20" instead of the space character.
           String path = uri.getPath();
-          if (path == null || path.length() == 0) {
+          if (path == null) {
             // We cannot do automatic conversion without any path...
             throw new IllegalAddressException(address,
                 IllegalAddressException.Reason.NO_PATH, null);
           }
           
           // Convert relative paths to absolute
-          if (path.charAt(0) != '/') {
+          if (path.length() == 0 || path.charAt(0) != '/') {
             path = new File("").toURI().getPath() + '/' + path;
           }
           
