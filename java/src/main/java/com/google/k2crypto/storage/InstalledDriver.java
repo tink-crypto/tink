@@ -145,7 +145,7 @@ public class InstalledDriver {
    * Returns the driver class.
    */
   public Class<? extends StoreDriver> getDriverClass() {
-    return constructor.getDeclaringClass();
+    return driverClass;
   }
   
   /**
