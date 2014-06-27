@@ -32,20 +32,45 @@ public class IllegalAddressException extends K2Exception {
    */
   public static enum Reason {
     /**
-     * The address has no path. 
-     */
-    NO_PATH("Address requires a path."),
-    
-    /**
-     * The address has no scheme.
-     */
-    NO_SCHEME("Address requires a scheme."),
-    
-    /**
      * The (string) address could not be parsed as a URI.
      */
     INVALID_URI("Address is not a valid URI."),
     
+    /**
+     * The address is not a valid path (for file-system-based drivers).
+     */
+    INVALID_PATH("Address is not a valid path."),
+    
+    /**
+     * The address has a scheme component and the driver does not recognize it.
+     */
+    INVALID_SCHEME("Address scheme is invalid."),
+
+    /**
+     * The address has a user component and the driver does not support it.
+     */
+    USER_UNSUPPORTED("User component is unsupported."),
+
+    /**
+     * The address has host/port components and the driver does not support it.
+     */
+    HOST_PORT_UNSUPPORTED("Host/port components are unsupported."),
+
+    /**
+     * The address has a path component and the driver does not support it.
+     */
+    PATH_UNSUPPORTED("Path component is unsupported."),
+
+    /**
+     * The address has a query component and the driver does not support it.
+     */
+    QUERY_UNSUPPORTED("Query component is unsupported."),
+
+    /**
+     * The address has a fragment component and the driver does not support it.
+     */
+    FRAGMENT_UNSUPPORTED("Fragment component is unsupported."),
+
     /**
      * The address was rejected for a driver-specific reason.
      */

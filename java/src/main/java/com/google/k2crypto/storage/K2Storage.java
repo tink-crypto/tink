@@ -173,20 +173,18 @@ public class K2Storage {
       throw new NullPointerException("address");
     }
     
-    // The URI must have a scheme
+    // Grab scheme to find a driver
     String scheme = address.getScheme();
-    if (scheme == null) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.NO_SCHEME, null);
+    if (scheme != null) {
+      scheme = scheme.toLowerCase(); // Case-insensitive matching
     }
-    scheme = scheme.toLowerCase();
     
     // We atomically query for a suitable driver,
     // or all the available drivers if we need to search.
     InstalledDriver driver;
     List<InstalledDriver> installedDrivers = null;
     synchronized (drivers) {
-      driver = drivers.get(scheme);
+      driver = (scheme == null ? null : drivers.get(scheme));
       if (driver == null) {
         installedDrivers = getInstalledDrivers();
       }
@@ -260,7 +258,8 @@ public class K2Storage {
   }
   
   /**
-   * Returns an immutable thread-safe list of the currently installed drivers.
+   * Returns an immutable thread-safe list of the currently installed drivers,
+   * in installation order.
    */
   public List<InstalledDriver> getInstalledDrivers() {
     synchronized (drivers) {
