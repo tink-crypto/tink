@@ -36,6 +36,9 @@ import java.util.List;
 
 /**
  * Unit tests for K2Storage.
+ * <p>
+ * Verifies that driver installation/uninstallation is working and that locating
+ * the appropriate store driver for a storage address has correct behavior.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
