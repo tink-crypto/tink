@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -114,26 +113,21 @@ public class K2Storage {
   /**
    * Opens a storage location for reading/writing of a {@link Key}.
    * <p>
-   * The string address should either be an absolute URI (i.e. complete with
-   * a scheme identifying the driver to use) or a path. Reserved characters
+   * The string address should be parsable as a URI. Reserved characters
    * should be URI-escaped if necessary, e.g. {@code "/My Keys"} should be
    * {@code "/My%20Keys"}. 
    * <p>
-   * If the string is only a path (and nothing else), the path will be converted
-   * to an absolute one (if necessary) and the scheme "file://" will be prefixed
-   * to it.
-   * <p>
    * This method will search for an installed driver with an identifier matching
-   * the scheme of the URI. If no such driver is found, the available drivers
-   * will be queried in installation order and the first driver that accepts
-   * the address will be used.
+   * the scheme of the URI. If no such driver is found (or the scheme is
+   * omitted), the available drivers will be queried in installation order and
+   * the first driver that accepts the address will be used.
    * 
    * @param address Address string of the key storage location.
    * 
    * @return an open store pointing to the specified address.
    * 
    * @throws IllegalAddressException if the address is not a valid URI or if it
-   *                                 is not recognized by the driver.
+   *                                 is not recognized by the specified driver.
    * @throws NoSuitableDriverException if the address cannot be handled by any
    *                                   installed driver.
    * @throws StoreException if there was an issue opening the location. 
@@ -145,23 +139,28 @@ public class K2Storage {
     if (address == null) {
       throw new NullPointerException("address");
     }
-    return open(stringToURI(address));
+    try {
+      return open(new URI(address));
+    } catch (URISyntaxException ex) {
+      throw new IllegalAddressException(address,
+          IllegalAddressException.Reason.INVALID_URI, ex);
+    }
   }
   
   /**
    * Opens a storage location for reading/writing of a {@link Key}.
    * <p>
    * This method will search for an installed driver with an identifier matching
-   * the scheme of the URI. If no such driver is found, the available drivers
-   * will be queried in installation order and the first driver that accepts
-   * the address will be used.
+   * the scheme of the URI. If no such driver is found (or the scheme is
+   * omitted), the available drivers will be queried in installation order and
+   * the first driver that accepts the address will be used.
    * 
    * @param address URI address of the key storage location.
    * 
    * @return an open store pointing to the specified address.
    * 
-   * @throws IllegalAddressException if the address is not a complete URI or if
-   *                                 it is not recognized by the driver.
+   * @throws IllegalAddressException if the address is not recognized by the
+   *                                 driver specified with the URI scheme.
    * @throws NoSuitableDriverException if the address cannot be handled by any
    *                                   installed driver.
    * @throws StoreException if there was an issue opening the location. 
@@ -173,7 +172,6 @@ public class K2Storage {
     if (address == null) {
       throw new NullPointerException("address");
     }
-    address = address.normalize();
     
     // The URI must have a scheme
     String scheme = address.getScheme();
@@ -274,64 +272,5 @@ public class K2Storage {
       }
       return list;      
     }
-  }
-  
-  /**
-   * Converts a string address to a URI address. Escaped characters will be
-   * interpreted.
-   * <p>
-   * If the string is only a path (and nothing else), this method will convert
-   * the path to an absolute one (if necessary) and append "file://" to it.
-   * 
-   * @param address String address to convert.
-   * @return the URI form of the string. 
-   * @throws IllegalAddressException if the string could not be interpreted
-   *                                 as a URI.
-   */
-  static URI stringToURI(String address) throws IllegalAddressException {
-    URI uri;
-    try {
-      // Parse to a URI, then make sure a scheme is present
-      // (Note: URI constructor hurls if argument is null)
-      uri = new URI(address).normalize();
-      
-      if (uri.getScheme() == null) {
-        // If there is no scheme, we automatically append "file://" and resolve
-        // relative paths ONLY if every other URI component is missing.
-        if (uri.getUserInfo() == null &&
-            uri.getHost() == null &&
-            uri.getPort() < 0 &&
-            uri.getQuery() == null &&
-            uri.getFragment() == null) {
-          
-          // getPath() is used instead of getRawPath() so that any escaped
-          // characters the user provides will be decoded. Otherwise, "%20"
-          // will be interpreted as "%2520", i.e. a literal percent followed
-          // by "20" instead of the space character.
-          String path = uri.getPath();
-          if (path == null) {
-            // We cannot do automatic conversion without any path...
-            throw new IllegalAddressException(address,
-                IllegalAddressException.Reason.NO_PATH, null);
-          }
-          
-          // Convert relative paths to absolute
-          if (path.length() == 0 || path.charAt(0) != '/') {
-            path = new File("").toURI().getPath() + '/' + path;
-          }
-          
-          // Reconstruct the URI
-          uri = new URI("file", null, null, -1, path, null, null).normalize();
-        }
-        else {
-          throw new IllegalAddressException(address,
-              IllegalAddressException.Reason.NO_SCHEME, null);
-        }
-      }
-    } catch (URISyntaxException ex) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.INVALID_URI, ex);
-    }
-    return uri;
   }
 }
