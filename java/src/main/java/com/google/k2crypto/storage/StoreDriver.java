@@ -76,6 +76,8 @@ public interface StoreDriver {
    * verify that the location is valid. Either way, if an open fails, the
    * driver must ensure that any partially allocated resources are freed;
    * {@link #close()} will not be called if {@code open()} throws an exception.
+   * The driver can assume that {@code open()} will not be called again if it
+   * fails.
    * <p>
    * This method may also return a modified address to present to the user,
    * e.g. an address that has been normalized with driver-specific logic.
