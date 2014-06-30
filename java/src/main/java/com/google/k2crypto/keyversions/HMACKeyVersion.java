@@ -15,7 +15,7 @@
 package com.google.k2crypto.keyversions;
 
 import com.google.k2crypto.exceptions.BuilderException;
-import com.google.k2crypto.exceptions.SigningException;
+import com.google.k2crypto.exceptions.EncryptionException;
 
 import java.util.Arrays;
 
@@ -34,10 +34,14 @@ import javax.crypto.spec.SecretKeySpec;
 public class HMACKeyVersion extends HashKeyVersion {
 
   /**
-   * The actual key matter of the HMAC key version. TODO: SHA1 and MD5 keys are both 64 bytes in
-   * length. Are any HMAC keys not 64 bytes in length?
+   * The key length in bytes (512 bits / 8 = 64 for SHA1 or MD5)
    */
-  protected byte[] keyVersionMatter = new byte[64];
+  private int keyVersionLengthInBytes = 64;
+
+  /**
+   * The actual key matter of the HMAC key version. 
+   */
+  protected byte[] keyVersionMatter = new byte[keyVersionLengthInBytes];
 
   /**
    * SecretKey object representing the key matter in the HMAC key version
@@ -53,16 +57,30 @@ public class HMACKeyVersion extends HashKeyVersion {
   }
 
   /**
+   * String constants representing all supported hash algorithms.
+   */
+  public static final String HMAC_MD5 = "HmacMD5";
+  public static final String HMAC_SHA1 = "HmacSHA1";
+  public static final String HMAC_SHA256 = "HmacSHA256";
+  public static final String HMAC_SHA384 = "HmacSHA384";
+  public static final String HMAC_SHA512 = "HmacSHA512";
+
+  /**
+   * Hash algorithm for this HMAC key version
+   */
+  private String algorithm = HMAC_SHA1;
+
+  /**
    * Generates a new HMAC using the SHA1 hash algorithm
    *
    * @return a new HMACKeyVersion using the SHA1 hash algorithm
    * @throws BuilderException
    */
-  public static HMACKeyVersion generateSHA1HMAC() throws BuilderException {
+  public static HMACKeyVersion generateHMAC(String hashAlgorithm) throws BuilderException {
     try {
       HMACKeyVersion hmac = new HMACKeyVersion();
       // Generate a key for the HMAC-SHA1 keyed-hashing algorithm
-      KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA1");
+      KeyGenerator keyGen = KeyGenerator.getInstance(hashAlgorithm);
       hmac.secretKey = keyGen.generateKey();
       // save the byte array of the secret key
       hmac.keyVersionMatter = hmac.secretKey.getEncoded();
@@ -81,34 +99,15 @@ public class HMACKeyVersion extends HashKeyVersion {
    *         matter
    * @throws BuilderException
    */
-  public static HMACKeyVersion generateSHA1HMAC(byte[] keyVersionMatter) throws BuilderException {
+  public static HMACKeyVersion generateHMAC(String hashAlgorithm, byte[] keyVersionMatter)
+      throws BuilderException {
     try {
       HMACKeyVersion hmac = new HMACKeyVersion();
       // save the byte array of the secret key
       hmac.keyVersionMatter = keyVersionMatter;
       // set the secret key based on the raw key matter
-      hmac.secretKey = new SecretKeySpec(keyVersionMatter, 0, keyVersionMatter.length, "HmacSHA1");
-      return hmac;
-    } catch (Exception e) {
-      // throw builder exception if could not build key
-      throw new BuilderException("Failed to build HMACKeyVersion", e);
-    }
-  }
-
-  /**
-   * Generates a new HMAC using the MD5 hash algorithm
-   *
-   * @return a new HMACKeyVersion using the MD5 hash algorithm
-   * @throws BuilderException
-   */
-  public static HMACKeyVersion generateMD5HMAC() throws BuilderException {
-    try {
-      HMACKeyVersion hmac = new HMACKeyVersion();
-      // Generate a key for the HMAC-SHA1 keyed-hashing algorithm
-      KeyGenerator keyGen = KeyGenerator.getInstance("HmacMD5");
-      hmac.secretKey = keyGen.generateKey();
-      // save the byte array of the secret key
-      hmac.keyVersionMatter = hmac.secretKey.getEncoded();
+      hmac.secretKey =
+          new SecretKeySpec(keyVersionMatter, 0, keyVersionMatter.length, hashAlgorithm);
       return hmac;
     } catch (Exception e) {
       // throw builder exception if could not build key
@@ -130,12 +129,12 @@ public class HMACKeyVersion extends HashKeyVersion {
    *
    * @param inputData The data on which to compute the HMAC
    * @return The byte array representation of the HMAC
-   * @throws SigningException
+   * @throws EncryptionException
    */
-  public byte[] getRawHMAC(byte[] inputData) throws SigningException {
+  public byte[] getRawHMAC(byte[] inputData) throws EncryptionException {
     try {
-      // get an SHA1 HMAC Mac instance
-      Mac mac = Mac.getInstance("HmacSHA1");
+      // get an HMAC Mac instance using the algorithm of this HMAC key
+      Mac mac = Mac.getInstance(this.algorithm);
       // now initialize with the signing key it withthe key
       mac.init(this.secretKey);
       // compute the hmac on input data bytes
@@ -144,7 +143,7 @@ public class HMACKeyVersion extends HashKeyVersion {
       return hmacsig;
     } catch (Exception e) {
       // catch any exceptions and throw custom exception
-      throw new SigningException("Failed to generate HMAC signature");
+      throw new EncryptionException("Failed to generate HMAC signature", e);
     }
   }
 
@@ -155,9 +154,9 @@ public class HMACKeyVersion extends HashKeyVersion {
    * @param message The input message to check the HMAC against
    * @return True if and only if the HMAC computed on the message matches the input HMAC, false
    *         otherwise
-   * @throws SigningException
+   * @throws EncryptionException
    */
-  public boolean verifyHMAC(byte[] inputHmac, byte[] message) throws SigningException {
+  public boolean verifyHMAC(byte[] inputHmac, byte[] message) throws EncryptionException {
     // compute the hmac on the message
     // if the input hmac matches the computed hmac return true
     if (Arrays.equals(inputHmac, getRawHMAC(message))) {
