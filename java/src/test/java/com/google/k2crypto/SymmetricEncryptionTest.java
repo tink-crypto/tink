@@ -16,7 +16,11 @@ package com.google.k2crypto;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.k2crypto.exceptions.BuilderException;
+import com.google.k2crypto.exceptions.DecryptionException;
+import com.google.k2crypto.exceptions.EncryptionException;
 import com.google.k2crypto.keyversions.AESKeyVersion;
+import com.google.k2crypto.keyversions.SymmetricKeyVersion;
 import com.google.k2crypto.keyversions.AESKeyVersion.Mode;
 
 import org.junit.Test;

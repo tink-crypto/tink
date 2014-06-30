@@ -14,27 +14,13 @@
 
 package com.google.k2crypto.keyversions;
 
-import com.google.k2crypto.BuilderException;
-import com.google.k2crypto.DecryptionException;
-import com.google.k2crypto.EncryptionException;
 import com.google.k2crypto.KeyVersionBuilder;
-import com.google.k2crypto.SymmetricKeyVersion;
+import com.google.k2crypto.exceptions.BuilderException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -114,11 +100,6 @@ public class AESKeyVersion extends SymmetricKeyVersion {
    * Cipher for decrypting data using this AES key version
    */
   private Cipher decryptingCipher;
-
-  /**
-   * Byte array used to buffer data when encrypting or decrypting streams
-   */
-  private byte[] byteBuffer = new byte[1024];
 
   /**
    * Initializes the key using key matter and initialization vector parameters.

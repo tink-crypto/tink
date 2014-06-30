@@ -15,16 +15,11 @@
 package com.google.k2crypto;
 
 /**
- * This class represents a KeyVersion in K2. It is abstract and extended by specific key
- * implementations such as SymmetricKey which is extended by AESKey
+ * This class represents a purpose for a K2. It is extended by other classes (for example
+ * SymmetricEncryption) to let you perform specific operations
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public abstract class KeyVersion {
-  
-  /**
-   * TODO: Add keyVersionID String
-   */
-  // private String keyVersionID;
-  
+public abstract class Operation {
+
 }

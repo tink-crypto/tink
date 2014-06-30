@@ -13,13 +13,13 @@
  */
 
 
-package com.google.k2crypto;
+package com.google.k2crypto.keyversions;
 
 import javax.crypto.Cipher;
 
 /**
- * This class represents a SymmetricKey in K2. It is abstract and extended by specific symmetric key
- * implementations such as AESKey
+ * This class represents a SymmetricKeyVersion in K2. It is abstract and extended by specific
+ * symmetric key version implementations such as AESKey
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
@@ -27,14 +27,16 @@ public abstract class SymmetricKeyVersion extends KeyVersion {
 
   /**
    * Method that returns the symmetric key version's encrypting Cipher
+   *
    * @return The Cipher used to encrypt data
    */
   public abstract Cipher getEncryptingCipher();
 
   /**
    * Method that returns the symmetric key version's decrypting Cipher
+   *
    * @return The Cipher used to decrypt data
    */
   public abstract Cipher getDecryptingCipher();
-  
+
 }
