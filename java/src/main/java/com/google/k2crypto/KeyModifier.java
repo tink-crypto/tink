@@ -14,7 +14,10 @@
 
 package com.google.k2crypto;
 
+import com.google.k2crypto.exceptions.BuilderException;
+import com.google.k2crypto.exceptions.KeyModifierException;
 import com.google.k2crypto.keyversions.AESKeyVersion;
+import com.google.k2crypto.keyversions.KeyVersion;
 
 /**
  * This class represents a Key modifier in K2. It allows you to create a Key, create KeyVersions and
@@ -72,8 +75,8 @@ public class KeyModifier {
    *
    * @return the number of KeyVersions in the Key
    */
-  public Object getNumKeyVersions() {
-    return key.getNumKeyVersions();
+  public Object getKeyVersionsCount() {
+    return key.getKeyVersionsCount();
   }
 
   /**

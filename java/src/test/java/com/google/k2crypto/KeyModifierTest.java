@@ -19,6 +19,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import com.google.k2crypto.exceptions.BuilderException;
+import com.google.k2crypto.exceptions.KeyModifierException;
+import com.google.k2crypto.keyversions.KeyVersion;
+
 import org.junit.Test;
 
 /**
@@ -72,7 +76,7 @@ public class KeyModifierTest {
       keymod.addKeyVersion();
     }
     // now check there are that many KeyVersion in the Key
-    assertEquals(numKeyVersions, keymod.getNumKeyVersions());
+    assertEquals(numKeyVersions, keymod.getKeyVersionsCount());
 
   }
 
@@ -137,7 +141,7 @@ public class KeyModifierTest {
    * @throws BuilderException 
    * @throws KeyModifierException 
    */
-  @Test(expected=com.google.k2crypto.KeyModifierException.class)
+  @Test(expected=com.google.k2crypto.exceptions.KeyModifierException.class)
   public void testRemovePrimary() throws BuilderException, KeyModifierException {
     // create a key modifier
     KeyModifier keymod = new KeyModifier();

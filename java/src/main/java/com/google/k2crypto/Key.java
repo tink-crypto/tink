@@ -14,6 +14,9 @@
 
 package com.google.k2crypto;
 
+import com.google.k2crypto.exceptions.KeyModifierException;
+import com.google.k2crypto.keyversions.KeyVersion;
+
 import java.util.ArrayList;
 
 /**
@@ -79,7 +82,7 @@ public class Key {
    *
    * @return the number of key versions in this key
    */
-  protected int getNumKeyVersions() {
+  protected int getKeyVersionsCount() {
     return this.keyVersions.size();
   }
 
