@@ -17,20 +17,16 @@ package com.google.k2crypto.keyversions;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.google.k2crypto.BuilderException;
-import com.google.k2crypto.DecryptionException;
-import com.google.k2crypto.EncryptionException;
 import com.google.k2crypto.SymmetricEncryption;
+import com.google.k2crypto.exceptions.BuilderException;
+import com.google.k2crypto.exceptions.DecryptionException;
+import com.google.k2crypto.exceptions.EncryptionException;
 import com.google.k2crypto.keyversions.AESKeyVersion.Mode;
 
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 
 /**
  * Tests for AESkeyVersion class

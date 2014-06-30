@@ -14,14 +14,15 @@
 
 package com.google.k2crypto;
 
-import java.io.IOException;
+import com.google.k2crypto.exceptions.DecryptionException;
+import com.google.k2crypto.exceptions.EncryptionException;
+import com.google.k2crypto.keyversions.SymmetricKeyVersion;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
-import javax.crypto.IllegalBlockSizeException;
 
 /**
  * This class represents a symmetric encryption in a K2. It is extends Purpose and allows you to
@@ -29,7 +30,7 @@ import javax.crypto.IllegalBlockSizeException;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public class SymmetricEncryption extends Purpose {
+public class SymmetricEncryption extends Operation {
 
   /**
    * Encrypts a byte array using a symmetric key version
