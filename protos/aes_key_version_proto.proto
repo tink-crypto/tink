@@ -14,6 +14,9 @@ message AesKeyVersionData {
 }
 
 message AesKeyVersionCore {
+  extend KeyVersionCore {
+    required AesKeyVersionCore keyVersion = 10001;
+  }
   // Core fields will be hashed into the KeyVersion ID
   optional bytes matter = 1;
   optional bytes iv = 2;

@@ -15,6 +15,12 @@ message KeyVersionData {
   optional bytes  core = 2;
 }
 
+// Container for just the essential fields of the KeyVersion
+// (these fields will be hashed into the ID)
+message KeyVersionCore {
+  extensions 10000 to max;
+}
+
 // Block-Cipher Modes
 enum BlockMode {
   // Encryption
