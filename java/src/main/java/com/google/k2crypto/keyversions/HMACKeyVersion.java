@@ -32,17 +32,6 @@ import javax.crypto.spec.SecretKeySpec;
  */
 
 public class HMACKeyVersion extends HashKeyVersion {
-
-  /**
-   * The key length in bytes (512 bits / 8 = 64 for SHA1 or MD5)
-   */
-  private int keyVersionLengthInBytes = 64;
-
-  /**
-   * The actual key matter of the HMAC key version. 
-   */
-  protected byte[] keyVersionMatter = new byte[keyVersionLengthInBytes];
-
   /**
    * SecretKey object representing the key matter in the HMAC key version
    */
@@ -82,8 +71,6 @@ public class HMACKeyVersion extends HashKeyVersion {
       // Generate a key for the HMAC-SHA1 keyed-hashing algorithm
       KeyGenerator keyGen = KeyGenerator.getInstance(hashAlgorithm);
       hmac.secretKey = keyGen.generateKey();
-      // save the byte array of the secret key
-      hmac.keyVersionMatter = hmac.secretKey.getEncoded();
       return hmac;
     } catch (Exception e) {
       // throw builder exception if could not build key
@@ -103,8 +90,6 @@ public class HMACKeyVersion extends HashKeyVersion {
       throws BuilderException {
     try {
       HMACKeyVersion hmac = new HMACKeyVersion();
-      // save the byte array of the secret key
-      hmac.keyVersionMatter = keyVersionMatter;
       // set the secret key based on the raw key matter
       hmac.secretKey =
           new SecretKeySpec(keyVersionMatter, 0, keyVersionMatter.length, hashAlgorithm);
@@ -121,7 +106,7 @@ public class HMACKeyVersion extends HashKeyVersion {
    * @return The byte array representation of the HMAC key version matter
    */
   public byte[] getKeyVersionMatter() {
-    return this.keyVersionMatter;
+    return this.secretKey.getEncoded();
   }
 
   /**
