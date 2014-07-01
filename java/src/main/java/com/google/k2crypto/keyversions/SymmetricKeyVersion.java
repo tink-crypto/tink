@@ -25,6 +25,10 @@ import javax.crypto.Cipher;
  */
 public abstract class SymmetricKeyVersion extends KeyVersion {
 
+  protected SymmetricKeyVersion(Builder builder) {
+    super(builder);
+  }
+  
   /**
    * Method that returns the symmetric key version's encrypting Cipher
    *

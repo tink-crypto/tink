@@ -21,7 +21,9 @@ import com.google.k2crypto.SymmetricEncryption;
 import com.google.k2crypto.exceptions.BuilderException;
 import com.google.k2crypto.exceptions.DecryptionException;
 import com.google.k2crypto.exceptions.EncryptionException;
+import com.google.k2crypto.keyversions.AESKeyVersion.KeySize;
 import com.google.k2crypto.keyversions.AESKeyVersion.Mode;
+import com.google.k2crypto.keyversions.AESKeyVersion.Padding;
 
 import org.junit.Test;
 
@@ -47,7 +49,7 @@ public class AESKeyVersionTest {
 
     // create AES key
     AESKeyVersion keyVersion =
-        new AESKeyVersion.AESKeyVersionBuilder().keyVersionLengthInBytes(16).build();
+        new AESKeyVersion.Builder().keySize(KeySize.BITS_128).build();
     // call the method to test encrypting and decrypting strings using this key version
     testEncryptDecryptKeyVersion(keyVersion);
   }
@@ -65,14 +67,14 @@ public class AESKeyVersionTest {
       DecryptionException {
     // create AES key
     AESKeyVersion key1 =
-        new AESKeyVersion.AESKeyVersionBuilder().keyVersionLengthInBytes(16).build();
+        new AESKeyVersion.Builder().keySize(KeySize.BITS_128).build();
     // obtain the raw keyVersion matter
     byte[] keyVersionMatter = getkeyVersionMatter(key1);
     // obtain the raw initialization vector for first key
     byte[] initvector = getInitVector(key1);
 
     // create a new keyVersion using the keyVersion matter
-    AESKeyVersion key2 = new AESKeyVersion.AESKeyVersionBuilder().keyVersionLengthInBytes(16)
+    AESKeyVersion key2 = new AESKeyVersion.Builder().keySize(KeySize.BITS_128)
         .matterVector(keyVersionMatter, initvector).build();
 
     // test text string that we will encrypt and then decrypt
@@ -112,10 +114,11 @@ public class AESKeyVersionTest {
     /*
      *test all keyVersion version length WITHOUT mode
      */
-    for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
+    for (KeySize keySize : KeySize.values()) {
       // test keyVersion version length of 16 and PKCS5 padding and ECB mode
-      keyversion = new AESKeyVersion.AESKeyVersionBuilder()
-          .keyVersionLengthInBytes(keyVersionLength).padding("PKCS5PADDING").build();
+      keyversion = new AESKeyVersion.Builder()
+          .keySize(keySize)
+          .padding(Padding.PKCS5).build();
       testEncryptDecryptStream(keyversion);
 
     }
@@ -123,11 +126,12 @@ public class AESKeyVersionTest {
     /*
      *test all keyVersion version length and mode combinations
      */
-    for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
+    for (KeySize keySize : KeySize.values()) {
       for (Mode mode : Mode.values()) {
         // test keyVersion version length of 16 and PKCS5 padding and ECB mode
-        keyversion = new AESKeyVersion.AESKeyVersionBuilder()
-            .keyVersionLengthInBytes(keyVersionLength).padding("PKCS5PADDING").mode(mode).build();
+        keyversion = new AESKeyVersion.Builder()
+            .keySize(keySize)
+            .padding(Padding.PKCS5).mode(mode).build();
         testEncryptDecryptStream(keyversion);
       }
     }
@@ -184,16 +188,17 @@ public class AESKeyVersionTest {
       DecryptionException {
 
     // test using the default keyVersion builder
-    AESKeyVersion keyversion = new AESKeyVersion.AESKeyVersionBuilder().build();
+    AESKeyVersion keyversion = new AESKeyVersion.Builder().build();
     testEncryptDecryptKeyVersion(keyversion);
 
     /*
      *test all keyVersion version length WITHOUT mode
      */
-    for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
+    for (KeySize keySize : KeySize.values()) {
       // test keyVersion version length of 16 and PKCS5 padding and ECB mode
-      keyversion = new AESKeyVersion.AESKeyVersionBuilder()
-          .keyVersionLengthInBytes(keyVersionLength).padding("PKCS5PADDING").build();
+      keyversion = new AESKeyVersion.Builder()
+          .keySize(keySize)
+          .padding(Padding.PKCS5).build();
       testEncryptDecryptKeyVersion(keyversion);
 
     }
@@ -201,11 +206,12 @@ public class AESKeyVersionTest {
     /*
      * test all keyVersion version length and mode combinations
      */
-    for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
+    for (KeySize keySize : KeySize.values()) {
       for (Mode mode : Mode.values()) {
         // test keyVersion version length of 16 and PKCS5 padding and ECB mode
-        keyversion = new AESKeyVersion.AESKeyVersionBuilder()
-            .keyVersionLengthInBytes(keyVersionLength).padding("PKCS5PADDING").mode(mode).build();
+        keyversion = new AESKeyVersion.Builder()
+            .keySize(keySize)
+            .padding(Padding.PKCS5).mode(mode).build();
         testEncryptDecryptKeyVersion(keyversion);
       }
     }
@@ -252,7 +258,7 @@ public class AESKeyVersionTest {
    * @return The byte array representation of the key version matter
    */
   private byte[] getkeyVersionMatter(AESKeyVersion kv) {
-    return kv.keyVersionMatter;
+    return kv.getKeyVersionMatter();
   }
 
   /**
@@ -262,7 +268,7 @@ public class AESKeyVersionTest {
    * @return The byte array representation of the initialization vector
    */
   private byte[] getInitVector(AESKeyVersion kv) {
-    return kv.initvector;
+    return kv.getInitVector();
   }
 
   /**

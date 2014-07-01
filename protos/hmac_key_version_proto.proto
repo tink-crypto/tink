@@ -1,0 +1,32 @@
+syntax = "proto2";
+
+import "key_version_proto.proto";
+
+option java_package = "com.google.k2crypto.keyversions";
+
+package com.google.k2crypto.keyversions;
+
+message HmacKeyVersionData {
+  extend KeyVersionData {
+    required HmacKeyVersionData keyVersion = 10001;
+  }
+  // Non-core fields go here
+}
+
+message HmacKeyVersionCore {
+  extend KeyVersionCore {
+    required HmacKeyVersionCore keyVersion = 10001;
+  }
+
+  // Core fields will be hashed into the KeyVersion ID
+  optional Algorithm algorithm = 1;
+  optional bytes matter = 2;
+}
+
+enum Algorithm {
+  MD5 = 1;
+  SHA1 = 2;
+  SHA256 = 3;
+  SHA384 = 4;
+  SHA512 = 5;
+}

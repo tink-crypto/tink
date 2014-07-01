@@ -14,6 +14,10 @@
 
 package com.google.k2crypto.keyversions;
 
+import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionCore;
+import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
+import com.google.protobuf.ByteString;
+
 /**
  * This class represents a KeyVersion in K2. It is abstract and extended by specific key
  * implementations such as SymmetricKey which is extended by AESKey
@@ -22,9 +26,104 @@ package com.google.k2crypto.keyversions;
  */
 public abstract class KeyVersion {
   
-  /**
-   * TODO: Add keyVersionID String
-   */
-  // private String keyVersionID;
+  // Retained raw bytes of the core key version material
+  // (Cannot be changed once generated)
+  private ByteString coreBytes = null;
   
+  // Key version identifier (a hash of the core)
+  private ByteString id = null;
+
+  /**
+   * Initializes the KeyVersion.
+   * 
+   * @param builder Builder, possibly with serialized data.
+   */
+  protected KeyVersion(Builder builder) {
+    KeyVersionData data = builder.kvData;
+    if (data != null) {
+      // Extract the core (important stuff) 
+      coreBytes = data.getCore();
+      // Extract other fields if necessary
+    }
+  }
+
+  /**
+   * Returns the identifier of the key version. 
+   */
+  public final ByteString getId() {
+    ByteString id = this.id;
+    if (id == null) {
+      ByteString core = getCore();
+      // TODO: Hash the core and produce the ID
+      //       (Right now, ID === core).
+      this.id = id = core;
+    }
+    return id;
+  }
+  
+  /**
+   * Returns the raw bytes of the core data of the key version.
+   * Will invoke {@link #buildCore()} to generate it if needed.
+   */
+  protected final ByteString getCore() {
+    ByteString core = coreBytes;
+    if (core == null) {
+      core = buildCore().build().toByteString();
+      coreBytes = core;
+    }
+    return core;
+  }
+  
+  /**
+   * Returns a builder for building the protobuf core of the key version.
+   * <p>
+   * The core consists of the essential fields of the KeyVersion that will be
+   * factored into the hash identifier. This method should be overridden by
+   * subclasses to add their own extension to the core.
+   */
+  protected KeyVersionCore.Builder buildCore() {
+    KeyVersionCore.Builder builder = KeyVersionCore.newBuilder();
+    return builder;
+  }
+  
+  /**
+   * Returns a builder for building the protobuf data of the key version.
+   * <p>
+   * The data is the overall package that needs to be saved to persist
+   * the KeyVersion and includes the core. This method should be overridden by
+   * subclasses to add their own extension to the data.
+   */
+  public KeyVersionData.Builder buildData() {
+    KeyVersionData.Builder builder = KeyVersionData.newBuilder();
+    builder.setCore(getCore());
+    return builder;
+  }
+  
+  /**
+   * This class represents an abstract key version builder. It is extended by other classes to allow
+   * you to build specific key versions (for example AESKeyVersionBuilder)
+   *
+   * @author John Maheswaran (maheswaran@google.com)
+   */
+  public static abstract class Builder {
+    
+    // Data of the key version (non-null only if we are deserializing)
+    private KeyVersionData kvData;
+    
+    /**
+     * Initializes the builder with protobuf data.
+     * <p> 
+     * Should be overridden by sub-classes to pull version-specific fields
+     * from the data to the builder.  
+     *     
+     * @param kvData Data of the key version.
+     */
+    public Builder withData(KeyVersionData kvData) {
+      if (kvData == null) {
+        throw new NullPointerException("kvData");
+      }
+      this.kvData = kvData;
+      return this;
+    }
+  }
 }
