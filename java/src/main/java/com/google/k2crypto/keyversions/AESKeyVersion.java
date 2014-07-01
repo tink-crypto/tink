@@ -20,7 +20,7 @@ import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
 import com.google.k2crypto.keyversions.AesKeyVersionProto.AesKeyVersionCore;
 import com.google.k2crypto.keyversions.AesKeyVersionProto.AesKeyVersionData;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.ExtensionRegistry;
 
 import java.security.SecureRandom;
 
@@ -416,26 +416,43 @@ public class AESKeyVersion extends SymmetricKeyVersion {
      */
     @Override
     public Builder withData(KeyVersionData kvData) {
+      super.withData(kvData);
+      
       @SuppressWarnings("unused")
       AesKeyVersionData data =
-          kvData.getExtension(AesKeyVersionProto.AesKeyVersionData.keyVersion);
+          kvData.getExtension(AesKeyVersionData.keyVersion);
       // TODO: Extract info from data (currently not used)
       
-      try {
-        AesKeyVersionCore core = AesKeyVersionCore.parseFrom(kvData.getCore());
-        // Extract info from core
-        this.matterVector(
-            core.getMatter().toByteArray(), core.getIv().toByteArray());
-        
-        // valueOf()s below can fail if the mode/padding stored is unsupported 
-        this.mode(Mode.valueOf(core.getBlockMode().name()));
-        this.padding(Padding.valueOf(core.getPadding().name()));
-        
-      } catch (InvalidProtocolBufferException ex) {
-        // This is bad. The key is corrupted.
-        throw new IllegalArgumentException("Data corrupted.");
-      }
       return this;
+    }
+
+    /**
+     * @see KeyVersion.Builder#withCore(KeyVersionCore)
+     */
+    @Override
+    protected Builder withCore(KeyVersionCore kvCore) {
+      super.withCore(kvCore);
+      
+      @SuppressWarnings("unused")
+      AesKeyVersionCore core =
+          kvCore.getExtension(AesKeyVersionCore.keyVersion);
+      // Extract info from core
+      this.matterVector(
+          core.getMatter().toByteArray(), core.getIv().toByteArray());
+      
+      // valueOf()s below can fail if the mode/padding stored is unsupported 
+      this.mode(Mode.valueOf(core.getBlockMode().name()));
+      this.padding(Padding.valueOf(core.getPadding().name()));
+      
+      return this;
+    }
+
+    /**
+     * @see KeyVersion.Builder#registerProtoExtensions(ExtensionRegistry)
+     */
+    @Override
+    protected void registerProtoExtensions(ExtensionRegistry registry) {
+      AesKeyVersionProto.registerAllExtensions(registry);
     }
     
     /**

@@ -22,7 +22,7 @@ import com.google.k2crypto.keyversions.HmacKeyVersionProto.HmacKeyVersionData;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionCore;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.ExtensionRegistry;
 
 import java.util.Arrays;
 
@@ -231,22 +231,39 @@ public class HMACKeyVersion extends HashKeyVersion {
      */
     @Override
     public Builder withData(KeyVersionData kvData) {
+      super.withData(kvData);
+
       @SuppressWarnings("unused")
       HmacKeyVersionData data =
-          kvData.getExtension(HmacKeyVersionProto.HmacKeyVersionData.keyVersion);
+          kvData.getExtension(HmacKeyVersionData.keyVersion);
       // TODO: Extract info from data (currently not used)
       
-      try {
-        HmacKeyVersionCore core = HmacKeyVersionCore.parseFrom(kvData.getCore());
-        // Extract info from core
-        this.matterVector(core.getMatter().toByteArray());
-        this.algorithm("Hmac" + core.getAlgorithm().name());
-        
-      } catch (InvalidProtocolBufferException ex) {
-        // This is bad. The key is corrupted.
-        throw new IllegalArgumentException("Data corrupted.");
-      }
       return this;
+    }
+
+    /**
+     * @see KeyVersion.Builder#withCore(KeyVersionCore)
+     */
+    @Override
+    protected Builder withCore(KeyVersionCore kvCore) {
+      super.withCore(kvCore);
+      
+      @SuppressWarnings("unused")
+      HmacKeyVersionCore core =
+          kvCore.getExtension(HmacKeyVersionCore.keyVersion);
+      // Extract info from core
+      this.matterVector(core.getMatter().toByteArray());
+      this.algorithm("Hmac" + core.getAlgorithm().name());
+      
+      return this;
+    }
+
+    /**
+     * @see KeyVersion.Builder#registerProtoExtensions(ExtensionRegistry)
+     */
+    @Override
+    protected void registerProtoExtensions(ExtensionRegistry registry) {
+      HmacKeyVersionProto.registerAllExtensions(registry);
     }
     
     /**

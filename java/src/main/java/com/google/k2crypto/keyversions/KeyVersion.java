@@ -17,6 +17,8 @@ package com.google.k2crypto.keyversions;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionCore;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistry;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
  * This class represents a KeyVersion in K2. It is abstract and extended by specific key
@@ -123,7 +125,37 @@ public abstract class KeyVersion {
         throw new NullPointerException("kvData");
       }
       this.kvData = kvData;
+      try {
+        ExtensionRegistry registry = ExtensionRegistry.newInstance();
+        registerProtoExtensions(registry);
+        withCore(KeyVersionCore.parseFrom(kvData.getCore(), registry));
+      } catch (InvalidProtocolBufferException ex) {
+        // This is bad. The key is corrupted.
+        throw new IllegalArgumentException("Data corrupted.");
+      }
       return this;
     }
+    
+    /**
+     * Initializes the builder with protobuf core.
+     * <p> 
+     * Should be overridden by sub-classes to pull version-specific fields
+     * from the core to the builder.  
+     *     
+     * @param kvCore Core of the key version.
+     */
+    protected Builder withCore(KeyVersionCore kvCore) {
+      if (kvCore == null) {
+        throw new NullPointerException("kvCore");
+      }
+      return this;
+    }
+    
+    /**
+     * Should be overriden by sub-classes to register the proto extensions.
+     * 
+     * @param registry Extension registry.
+     */
+    protected void registerProtoExtensions(ExtensionRegistry registry) {}
   }
 }
