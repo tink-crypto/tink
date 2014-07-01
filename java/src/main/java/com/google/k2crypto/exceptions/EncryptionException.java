@@ -17,7 +17,7 @@ package com.google.k2crypto.exceptions;
 import com.google.k2crypto.K2Exception;
 
 /**
- * This class represents a Encryption Exception in K2. It is thrown when encryption fails.
+ * This class represents a Encryption Exception in K2. It is thrown when encryption/decryption/signing fails.
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
