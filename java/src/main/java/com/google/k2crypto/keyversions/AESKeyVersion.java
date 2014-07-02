@@ -166,10 +166,16 @@ public class AESKeyVersion extends SymmetricKeyVersion {
           // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
           encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
           break;
-        default: // CBC, OFB, CFB, CTR
+        case CBC:
+        case OFB:
+        case CFB:
+        case CTR:
           // Initialize the cipher using the secret key of this class and the initialization vector
           encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey,
               new IvParameterSpec(this.initVector));
+          break;
+        default:
+          // TODO: handle this invalid mode
       }
 
       // make an AES cipher that we can use for decryption
@@ -181,9 +187,15 @@ public class AESKeyVersion extends SymmetricKeyVersion {
           // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
           decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey);
           break;
-        default: // CBC, OFB, CFB, CTR
+        case CBC:
+        case OFB:
+        case CFB:
+        case CTR:
           // Initialize the cipher using the secret key of this class and the initialization vector
           decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initVector));
+          break;
+        default:
+          // TODO: handle this invalid mode
       }
 
       // Catch all exceptions
