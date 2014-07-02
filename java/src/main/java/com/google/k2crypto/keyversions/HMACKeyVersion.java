@@ -41,7 +41,7 @@ public class HMACKeyVersion extends HashKeyVersion {
   /**
    * SecretKey object representing the key matter in the HMAC key version
    */
-  private final SecretKey secretKey;
+  private SecretKey secretKey;
 
   /**
    * Private constructor to ensure people use generateSHA1HMAC or generateMD5HMAC to generate HMAC
@@ -192,7 +192,7 @@ public class HMACKeyVersion extends HashKeyVersion {
     /**
      * Byte array that will represent the key matter
      */
-    private byte[] keyVersionMatter = null;
+    private byte[] keyVersionMatter;
     
     /**
      * Set the hash algorithm.

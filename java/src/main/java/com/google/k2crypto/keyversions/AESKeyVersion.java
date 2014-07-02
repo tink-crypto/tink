@@ -41,47 +41,20 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   private static final int IV_SIZE = 16; // bytes;
   
   /**
-   * Enum of valid key sizes.  
+   * The key length in bytes (128 bits / 8 = 16 bytes) Can be 16, 24 or 32 (NO OTHER VALUES)
    */
-  public enum KeySize {
-    BITS_128(128),
-    BITS_192(192),
-    BITS_256(256);
-    
-    private final int bits; 
+  private int keyVersionLengthInBytes = 16;
 
-    private KeySize(int bits) {
-      assert((bits & 7) == 0); // must be in multiple of bytes
-      this.bits = bits;
-    }
-    
-    public int bits() {
-      return bits;      
-    }
-    
-    public int bytes() {
-      return bits >> 3;
-    }
-    
-    public static KeySize fromBits(int bits) {
-      switch (bits) {
-        case 128: return BITS_128;
-        case 192: return BITS_192;
-        case 256: return BITS_256;
-        default:  return null;
-      }
-    }
-    
-    public static KeySize fromBytes(int bytes) {
-      switch (bytes) {
-        case 128 >> 3: return BITS_128;
-        case 192 >> 3: return BITS_192;
-        case 256 >> 3: return BITS_256;
-        default:       return null;
-      }      
-    }
-  }
-  
+  /**
+   * SecretKey object representing the key matter in the AES key
+   */
+  private SecretKey secretKey;
+
+  /**
+   * initialization vector used for encryption and decryption
+   */
+  private byte[] initVector;
+
   /**
    * Enum representing all supported modes Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported
    * modes: XTS, OCB
@@ -91,53 +64,57 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   }
 
   /**
+   * The encryption mode
+   */
+  private Mode mode;
+
+  /**
    * Enum representing all supported padding modes.
    */
   public enum Padding {
     PKCS5
   }
-  
-  /**
-   * SecretKey object representing the key matter in the AES key
-   */
-  private final SecretKey secretKey;
-
-  /**
-   * initialization vector used for encryption and decryption
-   */
-  private final byte[] initVector;
-
-  /**
-   * The key length
-   */
-  private final KeySize keySize;
-
-  /**
-   * The encryption mode
-   */
-  private final Mode mode;
 
   /**
    * Supported padding: PKCS5PADDING Unsupported padding: PKCS7Padding, ISO10126d2Padding,
    * X932Padding, ISO7816d4Padding, ZeroBytePadding
    */
-  private final Padding padding;
+  private Padding padding;
 
+  /**
+   * Method to give length of key in BITS. Used to prevent mixing up bytes and bits
+   *
+   * @return Key length in BITS
+   */
+  private int keyLengthInBits() {
+    return this.keyVersionLengthInBytes * 8;
+  }
+
+  /**
+   *
+   * Method to give length of key in BYTES. Used to prevent mixing up bytes and bits
+   *
+   * @return Key length in BYTES
+   */
+  private int keyLengthInBytes() {
+    return this.keyVersionLengthInBytes;
+  }
+  
   /**
    * represents the algorithm, mode, and padding to use and paddings (NOT algorithm - AES ONLY)
    *
    */
-  private final String algModePadding;
+  private String algModePadding;
 
   /**
    * Cipher for encrypting data using this AES key version
    */
-  private final Cipher encryptingCipher;
+  private Cipher encryptingCipher;
 
   /**
    * Cipher for decrypting data using this AES key version
    */
-  private final Cipher decryptingCipher;
+  private Cipher decryptingCipher;
 
   /**
    * Constructor to make an AESKeyVersion using the AESKeyVersionBuilder. Private to prevent use
@@ -150,7 +127,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   private AESKeyVersion(Builder builder) throws BuilderException {
     super(builder);
     // set key version length, mode and padding based on the key version builder
-    this.keySize = builder.keySize;
+    this.keyVersionLengthInBytes = builder.keyVersionLengthInBytes;
     this.mode = builder.mode;
     this.padding = builder.padding;
 
@@ -166,17 +143,17 @@ public class AESKeyVersion extends SymmetricKeyVersion {
         initVector = builder.initVector;
 
         // initialize secret key using key matter byte array
-        secretKey = new SecretKeySpec(builder.keyVersionMatter, 0, keySize.bytes(), "AES");
+        secretKey = new SecretKeySpec(builder.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
         
       } else {
         // Generate the key using JCE crypto libraries
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-        keyGen.init(keySize.bits());
+        keyGen.init(this.keyLengthInBits());
         secretKey = keyGen.generateKey();
 
         // use this secure random number generator to initialize the vector with random bytes
         SecureRandom prng = new SecureRandom();
-        initVector = new byte[16];
+        initVector = new byte[IV_SIZE];
         prng.nextBytes(initVector);
       }
 
@@ -232,15 +209,6 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     return initVector.clone();
   }
   
-  /**
-   * Method to give length of key.
-   *
-   * @return Key size
-   */
-  public KeySize getKeySize() {
-    return keySize;
-  }
-
   /**
    * Method to get the encrypting cipher of this key version
    *
@@ -302,9 +270,9 @@ public class AESKeyVersion extends SymmetricKeyVersion {
    */
   public static class Builder extends KeyVersion.Builder {
     /**
-     * Key size (from enum)
+     * key size can be 16, 24 or 32
      */
-    private KeySize keySize = KeySize.BITS_128;
+    private int keyVersionLengthInBytes = 16;
     
     /**
      * Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported modes: XTS, OCB
@@ -321,12 +289,12 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     /**
      * Byte array that will represent the key matter
      */
-    private byte[] keyVersionMatter = null;
+    private byte[] keyVersionMatter;
     
     /**
      * Byte array that will represent the initialization vector
      */
-    private byte[] initVector = null;
+    private byte[] initVector;
 
     /**
      * Flag to indicate to the parent class (AESKeyVersion) whether the key matter and
@@ -338,14 +306,11 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     /**
      * Set the key version length
      *
-     * @param keySize Desired key size.
-     * @return This object with keySize updated
+     * @param keyVersionLength Integer representing key version length in BYTES, can be 16, 24, 32
+     * @return This object with keyVersionLength updated
      */
-    public Builder keySize(KeySize keySize) {
-      if (keySize == null) {
-        throw new NullPointerException("keySize");
-      }
-      this.keySize = keySize;
+    public Builder keyVersionLengthInBytes(int keyVersionLength) {
+      this.keyVersionLengthInBytes = keyVersionLength;
       return this;
     }
 
@@ -388,14 +353,6 @@ public class AESKeyVersion extends SymmetricKeyVersion {
         throw new NullPointerException("keyVersionMatter");
       } else if (initVector == null) {
         throw new NullPointerException("initVector");
-      } else if (initVector.length != IV_SIZE) {
-        throw new IllegalArgumentException("Bad IV length.");
-      }
-      
-      // derive size
-      KeySize keySize = KeySize.fromBytes(keyVersionMatter.length);
-      if (keySize == null) {
-        throw new IllegalArgumentException("Bad key matter length.");        
       }
       
       // This flag indicates to the parent class (AESKeyVersion) that the key matter and
@@ -406,8 +363,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       // set the initialization vector
       this.initVector = initVector;
       // set derived key size
-      this.keySize = keySize;
-      
+      keyVersionLengthInBytes = keyVersionMatter.length;
+            
       return this;
     }
 
