@@ -16,6 +16,13 @@ package com.google.k2crypto.keyversions;
 
 import com.google.k2crypto.exceptions.BuilderException;
 import com.google.k2crypto.exceptions.EncryptionException;
+import com.google.k2crypto.keyversions.HmacKeyVersionProto.Algorithm;
+import com.google.k2crypto.keyversions.HmacKeyVersionProto.HmacKeyVersionCore;
+import com.google.k2crypto.keyversions.HmacKeyVersionProto.HmacKeyVersionData;
+import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionCore;
+import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistry;
 
 import java.util.Arrays;
 
@@ -30,7 +37,6 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-
 public class HMACKeyVersion extends HashKeyVersion {
   /**
    * SecretKey object representing the key matter in the HMAC key version
@@ -41,8 +47,17 @@ public class HMACKeyVersion extends HashKeyVersion {
    * Private constructor to ensure people use generateSHA1HMAC or generateMD5HMAC to generate HMAC
    * key
    */
-  private HMACKeyVersion() {
-    // Do not put any code here
+  private HMACKeyVersion(Builder builder) throws Exception {
+    super(builder);
+    if (builder.keyVersionMatter == null) {
+      // Generate a key for the HMAC-SHA1 keyed-hashing algorithm
+      KeyGenerator keyGen = KeyGenerator.getInstance(builder.algorithm);
+      secretKey = keyGen.generateKey();
+    } else {
+      // set the secret key based on the raw key matter
+      secretKey = new SecretKeySpec(builder.keyVersionMatter,
+          0, builder.keyVersionMatter.length, builder.algorithm);
+    }
   }
 
   /**
@@ -66,16 +81,7 @@ public class HMACKeyVersion extends HashKeyVersion {
    * @throws BuilderException
    */
   public static HMACKeyVersion generateHMAC(String hashAlgorithm) throws BuilderException {
-    try {
-      HMACKeyVersion hmac = new HMACKeyVersion();
-      // Generate a key for the HMAC-SHA1 keyed-hashing algorithm
-      KeyGenerator keyGen = KeyGenerator.getInstance(hashAlgorithm);
-      hmac.secretKey = keyGen.generateKey();
-      return hmac;
-    } catch (Exception e) {
-      // throw builder exception if could not build key
-      throw new BuilderException("Failed to build HMACKeyVersion", e);
-    }
+    return new Builder().algorithm(hashAlgorithm).build();
   }
 
   /**
@@ -88,16 +94,7 @@ public class HMACKeyVersion extends HashKeyVersion {
    */
   public static HMACKeyVersion generateHMAC(String hashAlgorithm, byte[] keyVersionMatter)
       throws BuilderException {
-    try {
-      HMACKeyVersion hmac = new HMACKeyVersion();
-      // set the secret key based on the raw key matter
-      hmac.secretKey =
-          new SecretKeySpec(keyVersionMatter, 0, keyVersionMatter.length, hashAlgorithm);
-      return hmac;
-    } catch (Exception e) {
-      // throw builder exception if could not build key
-      throw new BuilderException("Failed to build HMACKeyVersion", e);
-    }
+    return new Builder().algorithm(hashAlgorithm).matterVector(keyVersionMatter).build();
   }
 
   /**
@@ -149,5 +146,138 @@ public class HMACKeyVersion extends HashKeyVersion {
     }
     // otherwise return false as the computed hmac differs from the input hmac
     return false;
+  }
+  
+  /**
+   * @see KeyVersion#buildCore()
+   */
+  @Override
+  protected KeyVersionCore.Builder buildCore() {
+    HmacKeyVersionCore.Builder coreBuilder = HmacKeyVersionCore.newBuilder();
+    
+    // Populate the core builder
+    coreBuilder.setMatter(ByteString.copyFrom(secretKey.getEncoded()));
+    coreBuilder.setAlgorithm( // The valueOf here is a bit dicey...
+        Algorithm.valueOf(algorithm.substring(4).toUpperCase()));
+    
+    KeyVersionCore.Builder builder = super.buildCore();
+    builder.setExtension(HmacKeyVersionCore.extension, coreBuilder.build());
+    return builder;
+  }
+  
+  /**
+   * @see KeyVersion#buildData()
+   */
+  @Override
+  public KeyVersionData.Builder buildData() {
+    HmacKeyVersionData.Builder dataBuilder = HmacKeyVersionData.newBuilder();
+    // TODO: Populate the data builder
+
+    KeyVersionData.Builder builder = super.buildData();
+    builder.setExtension(HmacKeyVersionData.extension, dataBuilder.build());
+    return builder;
+  }
+  
+  /**
+   * This class represents a key version builder for HMAC key versions.
+   *
+   * @author John Maheswaran (maheswaran@google.com)
+   */
+  public static class Builder extends KeyVersion.Builder {
+    /**
+     * Hmac algorithm to use.
+     */
+    private String algorithm = HMAC_MD5;
+    
+    /**
+     * Byte array that will represent the key matter
+     */
+    private byte[] keyVersionMatter;
+    
+    /**
+     * Set the hash algorithm.
+     *
+     * @param hashAlgorithm Hash algorithm to use.
+     * @return This object with algorithm updated.
+     */
+    public Builder algorithm(String hashAlgorithm) {
+      if (hashAlgorithm.equalsIgnoreCase(HMAC_MD5) ||
+          hashAlgorithm.equalsIgnoreCase(HMAC_SHA1) ||
+          hashAlgorithm.equalsIgnoreCase(HMAC_SHA256) ||
+          hashAlgorithm.equalsIgnoreCase(HMAC_SHA384) ||
+          hashAlgorithm.equalsIgnoreCase(HMAC_SHA512)) {
+        this.algorithm = hashAlgorithm;
+        return this;
+      } else {
+        throw new IllegalArgumentException("Bad algorithm");
+      }
+    }
+
+    /**
+     * @param keyVersionMatter Byte array representing the key matter
+     * @return This object with key matter set
+     */
+    public Builder matterVector(byte[] keyVersionMatter) {
+      if (keyVersionMatter == null) {
+        throw new NullPointerException("keyVersionMatter");
+      }
+      // set the key matter
+      this.keyVersionMatter = keyVersionMatter;
+      return this;
+    }
+
+    /**
+     * @see KeyVersion.Builder#withData(KeyVersionData)
+     */
+    @Override
+    public Builder withData(KeyVersionData kvData) {
+      super.withData(kvData);
+
+      @SuppressWarnings("unused")
+      HmacKeyVersionData data =
+          kvData.getExtension(HmacKeyVersionData.extension);
+      // TODO: Extract info from data (currently not used)
+      
+      return this;
+    }
+
+    /**
+     * @see KeyVersion.Builder#withCore(KeyVersionCore)
+     */
+    @Override
+    protected Builder withCore(KeyVersionCore kvCore) {
+      super.withCore(kvCore);
+      
+      @SuppressWarnings("unused")
+      HmacKeyVersionCore core =
+          kvCore.getExtension(HmacKeyVersionCore.extension);
+      // Extract info from core
+      this.matterVector(core.getMatter().toByteArray());
+      this.algorithm("Hmac" + core.getAlgorithm().name());
+      
+      return this;
+    }
+
+    /**
+     * @see KeyVersion.Builder#registerProtoExtensions(ExtensionRegistry)
+     */
+    @Override
+    protected void registerProtoExtensions(ExtensionRegistry registry) {
+      HmacKeyVersionProto.registerAllExtensions(registry);
+    }
+    
+    /**
+     * Method to build a new HMACKeyVersion
+     *
+     * @return A HMACKeyVersion with the parameters set from the builder
+     * @throws BuilderException
+     */
+    public HMACKeyVersion build() throws BuilderException {
+      try {
+        return new HMACKeyVersion(this);
+      } catch (Exception e) {
+        throw new BuilderException("Building HMACKeyVersion failed", e);
+      }
+    }
   }
 }

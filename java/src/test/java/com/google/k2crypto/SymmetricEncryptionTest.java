@@ -20,6 +20,7 @@ import com.google.k2crypto.exceptions.BuilderException;
 import com.google.k2crypto.exceptions.DecryptionException;
 import com.google.k2crypto.exceptions.EncryptionException;
 import com.google.k2crypto.keyversions.AESKeyVersion;
+import com.google.k2crypto.keyversions.AESKeyVersion.Padding;
 import com.google.k2crypto.keyversions.SymmetricKeyVersion;
 import com.google.k2crypto.keyversions.AESKeyVersion.Mode;
 
@@ -47,14 +48,15 @@ public class SymmetricEncryptionTest {
       EncryptionException {
 
     // test using the default keyVersion builder
-    AESKeyVersion keyversion = new AESKeyVersion.AESKeyVersionBuilder().build();
+    AESKeyVersion keyversion = new AESKeyVersion.Builder().build();
     testEncryptDecryptKeyVersion(keyversion);
 
     // test all keyVersion version length WITHOUT mode
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       // test keyVersion version length of 16 and PKCS5 padding and ECB mode
-      keyversion = new AESKeyVersion.AESKeyVersionBuilder()
-          .keyVersionLengthInBytes(keyVersionLength).padding("PKCS5PADDING").build();
+      keyversion = new AESKeyVersion.Builder()
+          .keyVersionLengthInBytes(keyVersionLength)
+          .padding(Padding.PKCS5).build();
       testEncryptDecryptKeyVersion(keyversion);
 
     }
@@ -65,8 +67,9 @@ public class SymmetricEncryptionTest {
     for (Integer keyVersionLength : new Integer[] {16, 24, 32}) {
       for (Mode mode : Mode.values()) {
         // test keyVersion version length of 16 and PKCS5 padding and ECB mode
-        keyversion = new AESKeyVersion.AESKeyVersionBuilder()
-            .keyVersionLengthInBytes(keyVersionLength).padding("PKCS5PADDING").mode(mode).build();
+        keyversion = new AESKeyVersion.Builder()
+            .keyVersionLengthInBytes(keyVersionLength)
+            .padding(Padding.PKCS5).mode(mode).build();
         testEncryptDecryptKeyVersion(keyversion);
       }
     }

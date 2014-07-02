@@ -52,7 +52,7 @@ public class KeyModifier {
      * TODO: Update this to support multiple key versions
      */
     // Create a new KeyVersion
-    AESKeyVersion keyversion = new AESKeyVersion.AESKeyVersionBuilder().build();
+    AESKeyVersion keyversion = new AESKeyVersion.Builder().build();
 
     // now add it to the Key
     key.addKeyVersion(keyversion);

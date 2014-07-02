@@ -14,7 +14,6 @@
 
 package com.google.k2crypto.keyversions;
 
-
 /**
  * This class represents a hash key version in K2. It is abstract and extended by specific hash key
  * implementations such as HMACKeyVersion
@@ -22,6 +21,7 @@ package com.google.k2crypto.keyversions;
  * @author John Maheswaran (maheswaran@google.com)
  */
 public abstract class HashKeyVersion extends KeyVersion {
-
-  
+  protected HashKeyVersion(Builder builder) {
+    super(builder);
+  }
 }
