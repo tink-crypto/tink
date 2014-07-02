@@ -15,7 +15,6 @@
 package com.google.k2crypto;
 
 import java.util.HashSet;
-import java.util.HashSet;
 
 /**
  * This class represents the list of security services in K2. It provides a mapping from security
@@ -23,8 +22,7 @@ import java.util.HashSet;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public class SecurityServices {
- 
+public class SecurityServices { 
   /**
    * function that maps from ONE security services to ONE algorithm
    *
