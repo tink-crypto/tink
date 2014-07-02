@@ -4,7 +4,11 @@ option java_package = "com.google.k2crypto.keyversions";
 
 package com.google.k2crypto.keyversions;
 
-// Container for a serialized KeyVersion
+/**
+ * Container for the common non-hashed fields of a KeyVersion.
+ * Specific KeyVersions should add an extension with their own
+ * non-hashed fields.
+ */
 message KeyVersionData {
   extensions 10000 to max;
 
@@ -15,13 +19,18 @@ message KeyVersionData {
   optional bytes  core = 2;
 }
 
-// Container for just the essential fields of the KeyVersion
-// (these fields will be hashed into the ID)
+/**
+ * Container for the common essential fields of all KeyVersions
+ * (these fields will be hashed into the ID). Specific KeyVersions
+ * should add an extension with their own core fields.
+ */
 message KeyVersionCore {
   extensions 10000 to max;
 }
 
-// Block-Cipher Modes
+/**
+ * Block-Cipher Modes
+ */
 enum BlockMode {
   // Encryption
   ECB = 1;        // Electronic CodeBook
@@ -50,7 +59,9 @@ enum BlockMode {
   TKW = 303;      // Triple Data Encryption Algorithm (TDEA) Key Wrap
 }
 
-// Padding Modes
+/**
+ * Padding Modes
+ */
 enum Padding {
   ZERO = 0;                // Zero byte
   ANSI_X923 = 1;           // ANSI X.923

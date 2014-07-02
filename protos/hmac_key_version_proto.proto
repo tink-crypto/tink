@@ -8,14 +8,14 @@ package com.google.k2crypto.keyversions;
 
 message HmacKeyVersionData {
   extend KeyVersionData {
-    required HmacKeyVersionData extension = 10001;
+    required HmacKeyVersionData extension = 10002;
   }
   // Non-core fields go here
 }
 
 message HmacKeyVersionCore {
   extend KeyVersionCore {
-    required HmacKeyVersionCore extension = 10001;
+    required HmacKeyVersionCore extension = 10002;
   }
   // Core fields will be hashed into the KeyVersion ID
   optional Algorithm algorithm = 1;
