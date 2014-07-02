@@ -175,7 +175,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
               new IvParameterSpec(this.initVector));
           break;
         default:
-          // TODO: handle this invalid mode
+          throw new BuilderException("Unrecognized mode");
       }
 
       // make an AES cipher that we can use for decryption
@@ -195,7 +195,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
           decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initVector));
           break;
         default:
-          // TODO: handle this invalid mode
+          throw new BuilderException("Unrecognized mode");
       }
 
       // Catch all exceptions
