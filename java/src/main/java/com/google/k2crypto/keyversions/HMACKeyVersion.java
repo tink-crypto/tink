@@ -161,7 +161,7 @@ public class HMACKeyVersion extends HashKeyVersion {
         Algorithm.valueOf(algorithm.substring(4).toUpperCase()));
     
     KeyVersionCore.Builder builder = super.buildCore();
-    builder.setExtension(HmacKeyVersionCore.keyVersion, coreBuilder.build());
+    builder.setExtension(HmacKeyVersionCore.extension, coreBuilder.build());
     return builder;
   }
   
@@ -174,7 +174,7 @@ public class HMACKeyVersion extends HashKeyVersion {
     // TODO: Populate the data builder
 
     KeyVersionData.Builder builder = super.buildData();
-    builder.setExtension(HmacKeyVersionData.keyVersion, dataBuilder.build());
+    builder.setExtension(HmacKeyVersionData.extension, dataBuilder.build());
     return builder;
   }
   
@@ -235,7 +235,7 @@ public class HMACKeyVersion extends HashKeyVersion {
 
       @SuppressWarnings("unused")
       HmacKeyVersionData data =
-          kvData.getExtension(HmacKeyVersionData.keyVersion);
+          kvData.getExtension(HmacKeyVersionData.extension);
       // TODO: Extract info from data (currently not used)
       
       return this;
@@ -250,7 +250,7 @@ public class HMACKeyVersion extends HashKeyVersion {
       
       @SuppressWarnings("unused")
       HmacKeyVersionCore core =
-          kvCore.getExtension(HmacKeyVersionCore.keyVersion);
+          kvCore.getExtension(HmacKeyVersionCore.extension);
       // Extract info from core
       this.matterVector(core.getMatter().toByteArray());
       this.algorithm("Hmac" + core.getAlgorithm().name());

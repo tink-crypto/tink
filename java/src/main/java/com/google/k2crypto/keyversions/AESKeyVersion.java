@@ -258,7 +258,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     coreBuilder.setPadding(KeyVersionProto.Padding.valueOf(padding.name()));
     
     KeyVersionCore.Builder builder = super.buildCore();
-    builder.setExtension(AesKeyVersionCore.keyVersion, coreBuilder.build());
+    builder.setExtension(AesKeyVersionCore.extension, coreBuilder.build());
     return builder;
   }
   
@@ -271,7 +271,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     // TODO: Populate the data builder
 
     KeyVersionData.Builder builder = super.buildData();
-    builder.setExtension(AesKeyVersionData.keyVersion, dataBuilder.build());
+    builder.setExtension(AesKeyVersionData.extension, dataBuilder.build());
     return builder;
   }
 
@@ -389,7 +389,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       
       @SuppressWarnings("unused")
       AesKeyVersionData data =
-          kvData.getExtension(AesKeyVersionData.keyVersion);
+          kvData.getExtension(AesKeyVersionData.extension);
       // TODO: Extract info from data (currently not used)
       
       return this;
@@ -404,7 +404,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       
       @SuppressWarnings("unused")
       AesKeyVersionCore core =
-          kvCore.getExtension(AesKeyVersionCore.keyVersion);
+          kvCore.getExtension(AesKeyVersionCore.extension);
       // Extract info from core
       this.matterVector(
           core.getMatter().toByteArray(), core.getIv().toByteArray());
