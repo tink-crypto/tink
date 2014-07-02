@@ -140,7 +140,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       // set the key matter and initialization vector from input if is was provided
       if (builder.keyVersionMatterInitVectorProvided) {
         // load the initialization vector
-        initVector = builder.initVector;
+        initVector = builder.initVector.clone();
 
         // initialize secret key using key matter byte array
         secretKey = new SecretKeySpec(builder.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
