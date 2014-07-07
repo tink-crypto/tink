@@ -51,7 +51,7 @@ public class AESKeyVersionTest {
     // Dump its proto data bytes
     ByteString bytes = toSave.buildData().build().toByteString();
     
-    // Create a proto extension registry and register AES
+    // Create a proto extension registry and register AES extension
     // (this will normally be done by KeyVersionRegistry)
     ExtensionRegistry registry = ExtensionRegistry.newInstance();
     AesKeyVersionProto.registerAllExtensions(registry);
