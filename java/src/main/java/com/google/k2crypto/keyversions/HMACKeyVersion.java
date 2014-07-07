@@ -22,7 +22,6 @@ import com.google.k2crypto.keyversions.HmacKeyVersionProto.HmacKeyVersionData;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionCore;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistry;
 
 import java.util.Arrays;
 
@@ -37,6 +36,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
+@KeyVersionInfo(type=KeyVersionProto.Type.HMAC, proto=HmacKeyVersionProto.class)
 public class HMACKeyVersion extends HashKeyVersion {
   /**
    * SecretKey object representing the key matter in the HMAC key version
@@ -258,14 +258,6 @@ public class HMACKeyVersion extends HashKeyVersion {
       return this;
     }
 
-    /**
-     * @see KeyVersion.Builder#registerProtoExtensions(ExtensionRegistry)
-     */
-    @Override
-    protected void registerProtoExtensions(ExtensionRegistry registry) {
-      HmacKeyVersionProto.registerAllExtensions(registry);
-    }
-    
     /**
      * Method to build a new HMACKeyVersion
      *

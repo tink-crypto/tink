@@ -20,7 +20,6 @@ import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
 import com.google.k2crypto.keyversions.AesKeyVersionProto.AesKeyVersionCore;
 import com.google.k2crypto.keyversions.AesKeyVersionProto.AesKeyVersionData;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistry;
 
 import java.security.SecureRandom;
 
@@ -36,9 +35,10 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
+@KeyVersionInfo(type=KeyVersionProto.Type.AES, proto=AesKeyVersionProto.class)
 public class AESKeyVersion extends SymmetricKeyVersion {
-
-  private static final int IV_SIZE = 16; // bytes;
+  
+  private static final int BLOCK_SIZE = 16; // bytes;
   
   /**
    * The key length in bytes (128 bits / 8 = 16 bytes) Can be 16, 24 or 32 (NO OTHER VALUES)
@@ -140,7 +140,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       // set the key matter and initialization vector from input if is was provided
       if (builder.keyVersionMatterInitVectorProvided) {
         // load the initialization vector
-        initVector = builder.initVector.clone();
+        initVector = (builder.initVector == null ?
+            null : builder.initVector.clone());
 
         // initialize secret key using key matter byte array
         secretKey = new SecretKeySpec(builder.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
@@ -150,11 +151,13 @@ public class AESKeyVersion extends SymmetricKeyVersion {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(this.keyLengthInBits());
         secretKey = keyGen.generateKey();
-
+      }
+      
+      if (initVector == null) {
         // use this secure random number generator to initialize the vector with random bytes
         SecureRandom prng = new SecureRandom();
-        initVector = new byte[IV_SIZE];
-        prng.nextBytes(initVector);
+        initVector = new byte[BLOCK_SIZE];
+        prng.nextBytes(initVector);        
       }
 
       // make an AES cipher that we can use for encryption
@@ -250,7 +253,6 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     
     // Populate the core builder
     coreBuilder.setMatter(ByteString.copyFrom(secretKey.getEncoded()));
-    coreBuilder.setIv(ByteString.copyFrom(initVector));
     
     // We can just use valueOf here because the enum constants have the same
     // names. This may not be the case for all key versions...
@@ -269,7 +271,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   public KeyVersionData.Builder buildData() {
     AesKeyVersionData.Builder dataBuilder = AesKeyVersionData.newBuilder();
     // TODO: Populate the data builder
-
+    
     KeyVersionData.Builder builder = super.buildData();
     builder.setExtension(AesKeyVersionData.extension, dataBuilder.build());
     return builder;
@@ -363,8 +365,6 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     public Builder matterVector(byte[] keyVersionMatter, byte[] initVector) {
       if (keyVersionMatter == null) {
         throw new NullPointerException("keyVersionMatter");
-      } else if (initVector == null) {
-        throw new NullPointerException("initVector");
       }
       
       // This flag indicates to the parent class (AESKeyVersion) that the key matter and
@@ -388,8 +388,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       super.withData(kvData);
       
       @SuppressWarnings("unused")
-      AesKeyVersionData data =
-          kvData.getExtension(AesKeyVersionData.extension);
+      AesKeyVersionData data = kvData.getExtension(AesKeyVersionData.extension);
       // TODO: Extract info from data (currently not used)
       
       return this;
@@ -402,12 +401,9 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     protected Builder withCore(KeyVersionCore kvCore) {
       super.withCore(kvCore);
       
-      @SuppressWarnings("unused")
-      AesKeyVersionCore core =
-          kvCore.getExtension(AesKeyVersionCore.extension);
       // Extract info from core
-      this.matterVector(
-          core.getMatter().toByteArray(), core.getIv().toByteArray());
+      AesKeyVersionCore core = kvCore.getExtension(AesKeyVersionCore.extension);
+      this.matterVector(core.getMatter().toByteArray(), null);
       
       // valueOf()s below can fail if the mode/padding stored is unsupported 
       this.mode(Mode.valueOf(core.getBlockMode().name()));
@@ -416,14 +412,6 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       return this;
     }
 
-    /**
-     * @see KeyVersion.Builder#registerProtoExtensions(ExtensionRegistry)
-     */
-    @Override
-    protected void registerProtoExtensions(ExtensionRegistry registry) {
-      AesKeyVersionProto.registerAllExtensions(registry);
-    }
-    
     /**
      * Method to build a new AESKeyVersion
      *

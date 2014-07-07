@@ -58,6 +58,8 @@ public abstract class KeyVersion {
       ByteString core = getCore();
       // TODO: Hash the core and produce the ID
       //       (Right now, ID === core).
+      // TODO: Also, figure out how to pull in security properties from
+      //       the Key into the hash
       this.id = id = core;
     }
     return id;
@@ -97,11 +99,13 @@ public abstract class KeyVersion {
    */
   public KeyVersionData.Builder buildData() {
     KeyVersionData.Builder builder = KeyVersionData.newBuilder();
+    builder.setType(getClass().getAnnotation(KeyVersionInfo.class).type());
     builder.setCore(getCore());
     return builder;
   }
   
   /**
+   * 
    * This class represents an abstract key version builder. It is extended by other classes to allow
    * you to build specific key versions (for example AESKeyVersionBuilder)
    *
@@ -111,6 +115,21 @@ public abstract class KeyVersion {
     
     // Data of the key version (non-null only if we are deserializing)
     private KeyVersionData kvData;
+    
+    /**
+     * Registers extensions for the proto defined by the sub-class. 
+     */
+    private void registerProtoExtensions(ExtensionRegistry registry) {
+      try {
+        KeyVersionInfo info = getClass().getEnclosingClass()
+            .getAnnotation(KeyVersionInfo.class);
+        info.proto().getMethod("registerAllExtensions", ExtensionRegistry.class)
+            .invoke(null, registry);
+      } catch (RuntimeException ex) {
+      } catch (ReflectiveOperationException ex) {}
+      // Just ignore exceptions, because if the extensions really need to be 
+      // registered, there will be a proto parsing exception later on.
+    }
     
     /**
      * Initializes the builder with protobuf data.
@@ -129,6 +148,7 @@ public abstract class KeyVersion {
         ExtensionRegistry registry = ExtensionRegistry.newInstance();
         registerProtoExtensions(registry);
         withCore(KeyVersionCore.parseFrom(kvData.getCore(), registry));
+        
       } catch (InvalidProtocolBufferException ex) {
         // This is bad. The key is corrupted.
         throw new IllegalArgumentException("Data corrupted.");
@@ -151,11 +171,5 @@ public abstract class KeyVersion {
       return this;
     }
     
-    /**
-     * Should be overriden by sub-classes to register the proto extensions.
-     * 
-     * @param registry Extension registry.
-     */
-    protected void registerProtoExtensions(ExtensionRegistry registry) {}
   }
 }
