@@ -10,14 +10,14 @@ package com.google.k2crypto.keyversions;
 
 message HmacKeyVersionData {
   extend KeyVersionData {
-    required HmacKeyVersionData extension = 10128;
+    required HmacKeyVersionData extension = 10020;
   }
   // Non-core fields go here
 }
 
 message HmacKeyVersionCore {
   extend KeyVersionCore {
-    required HmacKeyVersionCore extension = 10128;
+    required HmacKeyVersionCore extension = 10020;
   }
   // Core fields will be hashed into the KeyVersion ID
   optional Algorithm algorithm = 1;
@@ -25,16 +25,18 @@ message HmacKeyVersionCore {
 }
 
 enum Algorithm {
+  // NEXT ID = 11
+
   MD5 = 1;
-  SHA1 = 16;
+  SHA1 = 2;
   // SHA-2 family
-  SHA2_224 = 32;
-  SHA2_256 = 33;
-  SHA2_384 = 34;
-  SHA2_512 = 35;
+  SHA2_224 = 3;
+  SHA2_256 = 4;
+  SHA2_384 = 5;
+  SHA2_512 = 6;
   // SHA-3 (Keccak) family
-  SHA3_224 = 48;
-  SHA3_256 = 49;
-  SHA3_384 = 50;
-  SHA3_512 = 51;
+  SHA3_224 = 7;
+  SHA3_256 = 8;
+  SHA3_384 = 9;
+  SHA3_512 = 10;
 }
