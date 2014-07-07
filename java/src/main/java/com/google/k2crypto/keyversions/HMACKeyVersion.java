@@ -105,6 +105,13 @@ public class HMACKeyVersion extends HashKeyVersion {
   public byte[] getKeyVersionMatter() {
     return this.secretKey.getEncoded();
   }
+  
+  /**
+   * Returns the digest algorithm for the HMAC. 
+   */
+  public String getAlgorithm() {
+    return algorithm;
+  }
 
   /**
    * Method to compute the raw HMAC on a piece of input data

@@ -23,6 +23,10 @@ import com.google.k2crypto.exceptions.DecryptionException;
 import com.google.k2crypto.exceptions.EncryptionException;
 import com.google.k2crypto.keyversions.AESKeyVersion.Mode;
 import com.google.k2crypto.keyversions.AESKeyVersion.Padding;
+import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistry;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.junit.Test;
 
@@ -35,6 +39,35 @@ import java.io.ByteArrayOutputStream;
  * @author John Maheswaran (maheswaran@google.com)
  */
 public class AESKeyVersionTest {
+  
+  /**
+   * Tests that the AESKeyVersion correctly saves to and loads from proto data. 
+   */
+  @Test
+  public void testSaveLoad()
+      throws BuilderException, InvalidProtocolBufferException {
+    // Just generate a key version (use non-defaults where possible)
+    AESKeyVersion toSave = new AESKeyVersion.Builder().mode(Mode.ECB).build();
+    // Dump its proto data bytes
+    ByteString bytes = toSave.buildData().build().toByteString();
+    
+    // Create a proto extension registry and register AES
+    // (this will normally be done by KeyVersionRegistry)
+    ExtensionRegistry registry = ExtensionRegistry.newInstance();
+    AesKeyVersionProto.registerAllExtensions(registry);
+    
+    // Read the proto
+    AESKeyVersion loaded = new AESKeyVersion.Builder()
+        .withData(KeyVersionData.parseFrom(bytes, registry)).build();
+    
+    // Make sure the data is the same at a low-level (nothing gets lost)
+    assertEquals(bytes, loaded.buildData().build().toByteString());
+
+    // Make sure the important fields are all the same
+    assertArrayEquals(toSave.getKeyVersionMatter(), loaded.getKeyVersionMatter());
+    assertEquals(toSave.getAlgModePadding(), loaded.getAlgModePadding());
+  }
+  
   /**
    * This tests the encryption and decryption methods of the AESKeyVersion class.
    *

@@ -216,12 +216,19 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   public byte[] getKeyVersionMatter() {
     return this.secretKey.getEncoded();
   }
-
+  
   /**
    * Returns a copy of the IV.
    */
   public byte[] getInitVector() {
     return initVector.clone();
+  }
+  
+  /**
+   * Returns the algorithm, mode, and padding string passed to JCE.
+   */
+  public String getAlgModePadding() {
+    return algModePadding;
   }
   
   /**
