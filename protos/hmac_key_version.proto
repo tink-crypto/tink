@@ -1,6 +1,8 @@
 syntax = "proto2";
 
-import "key_version_proto.proto";
+import "key_version.proto";
+
+option java_outer_classname = "HmacKeyVersionProto";
 
 option java_package = "com.google.k2crypto.keyversions";
 
@@ -8,14 +10,14 @@ package com.google.k2crypto.keyversions;
 
 message HmacKeyVersionData {
   extend KeyVersionData {
-    required HmacKeyVersionData extension = 10002;
+    required HmacKeyVersionData extension = 10128;
   }
   // Non-core fields go here
 }
 
 message HmacKeyVersionCore {
   extend KeyVersionCore {
-    required HmacKeyVersionCore extension = 10002;
+    required HmacKeyVersionCore extension = 10128;
   }
   // Core fields will be hashed into the KeyVersion ID
   optional Algorithm algorithm = 1;
