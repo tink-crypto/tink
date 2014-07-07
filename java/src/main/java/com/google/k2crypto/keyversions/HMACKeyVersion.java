@@ -164,8 +164,19 @@ public class HMACKeyVersion extends HashKeyVersion {
     
     // Populate the core builder
     coreBuilder.setMatter(ByteString.copyFrom(secretKey.getEncoded()));
-    coreBuilder.setAlgorithm( // The valueOf here is a bit dicey...
-        Algorithm.valueOf(algorithm.substring(4).toUpperCase()));
+
+    // TODO: change this to an enum...
+    if (algorithm.equalsIgnoreCase(HMAC_MD5)) {
+      coreBuilder.setAlgorithm(Algorithm.MD5);  
+    } else if (algorithm.equalsIgnoreCase(HMAC_SHA1)) {
+      coreBuilder.setAlgorithm(Algorithm.SHA1);  
+    } else if (algorithm.equalsIgnoreCase(HMAC_SHA256)) {
+      coreBuilder.setAlgorithm(Algorithm.SHA2_256);  
+    } else if (algorithm.equalsIgnoreCase(HMAC_SHA384)) {
+      coreBuilder.setAlgorithm(Algorithm.SHA2_384);  
+    } else if (algorithm.equalsIgnoreCase(HMAC_SHA512)) {
+      coreBuilder.setAlgorithm(Algorithm.SHA2_512);  
+    }
     
     KeyVersionCore.Builder builder = super.buildCore();
     builder.setExtension(HmacKeyVersionCore.extension, coreBuilder.build());
@@ -260,7 +271,25 @@ public class HMACKeyVersion extends HashKeyVersion {
           kvCore.getExtension(HmacKeyVersionCore.extension);
       // Extract info from core
       this.matterVector(core.getMatter().toByteArray());
-      this.algorithm("Hmac" + core.getAlgorithm().name());
+      switch (core.getAlgorithm()) {
+        case MD5:
+          this.algorithm(HMAC_MD5);
+          break;
+        case SHA1:
+          this.algorithm(HMAC_SHA1);
+          break;
+        case SHA2_256:
+          this.algorithm(HMAC_SHA256);
+          break;
+        case SHA2_384:
+          this.algorithm(HMAC_SHA384);
+          break;
+        case SHA2_512:
+          this.algorithm(HMAC_SHA512);
+          break;
+        default:
+          throw new IllegalArgumentException("Bad algorithm");
+      }
       
       return this;
     }

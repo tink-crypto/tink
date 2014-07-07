@@ -34,7 +34,7 @@ enum Type {
   // Stream ciphers
   RC4 = 64;
   CHACHA20 = 65;
-  // MAC algorithms
+  // Hash-based MAC
   HMAC = 128;
 }
 
