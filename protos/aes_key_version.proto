@@ -1,6 +1,8 @@
 syntax = "proto2";
 
-import "key_version_proto.proto";
+import "key_version.proto";
+
+option java_outer_classname = "AesKeyVersionProto";
 
 option java_package = "com.google.k2crypto.keyversions";
 
@@ -8,18 +10,17 @@ package com.google.k2crypto.keyversions;
 
 message AesKeyVersionData {
   extend KeyVersionData {
-    required AesKeyVersionData extension = 10001;
+    required AesKeyVersionData extension = 10007;
   }
   // Non-core fields go here
 }
 
 message AesKeyVersionCore {
   extend KeyVersionCore {
-    required AesKeyVersionCore extension = 10001;
+    required AesKeyVersionCore extension = 10007;
   }
   // Core fields will be hashed into the KeyVersion ID
   optional bytes matter = 1;
-  optional bytes iv = 2;
-  optional BlockMode block_mode = 3;
-  optional Padding padding = 4;
+  optional BlockMode block_mode = 2;
+  optional Padding padding = 3;
 }

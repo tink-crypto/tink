@@ -16,6 +16,7 @@
 
 package com.google.k2crypto.storage;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -24,6 +25,7 @@ import java.lang.annotation.RetentionPolicy;
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StoreDriverInfo {
   

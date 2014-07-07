@@ -1,0 +1,120 @@
+syntax = "proto2";
+
+option java_outer_classname = "KeyVersionProto";
+
+option java_package = "com.google.k2crypto.keyversions";
+
+package com.google.k2crypto.keyversions;
+
+/**
+ * Key Version Types
+ */
+enum Type {
+  // NEXT ID = 21
+
+  // Asymmetric
+  RSA = 1;
+  DSA = 2;
+  ECDSA = 3;
+  DH = 4;
+  ECDH = 5;
+  ECIES = 6;
+  // FIPS Approved
+  AES = 7;
+  TRIPLE_DES = 8;
+  SKIPJACK = 9;
+  // AES Finalists
+  MARS = 10;
+  RC6 = 11;
+  SERPENT = 12;
+  TWOFISH = 13;
+  // Other block ciphers
+  IDEA = 14;
+  RC5 = 15;
+  CAST5 = 16;
+  BLOWFISH = 17;
+  // Stream ciphers
+  RC4 = 18;
+  CHACHA20 = 19;
+  // Hash-based MAC
+  HMAC = 20;
+}
+
+/**
+ * Block-Cipher Modes
+ */
+enum BlockMode {
+  // NEXT ID = 19
+
+  // Encryption
+  ECB = 1;        // Electronic CodeBook
+  ECB_CTS = 2;    // Electronic CodeBook mode with Cipher Text Stealing
+  CBC = 3;        // Cipher-Block Chaining
+  CBC_CTS = 4;    // Cipher-Block Chaining mode with Cipher Text Stealing
+  CTR = 5;        // Counter
+  OFB = 6;        // Output Feedback
+  CFB = 7;        // Cipher Feedback
+  XTS = 8;        // XEX-based Tweaked-CodeBook mode with Cipher Text Stealing
+
+  // Authenticated Encryption
+  GCM = 9;        // Galois/Counter Mode
+  OCB = 10;       // Offset Codebook
+  CCM = 11;       // Counter with CBC-MAC
+  EAX = 12;       // Conventional AUthenticated-Encryption MOde
+  CWC = 13;       // Carter Wegman with Counter
+
+  // Authentication
+  CMAC = 14;      // Cipher-based MAC, aka One-Key CBC-MAC (OMAC)
+  POLY1305 = 15;  // Poly1305-AES MAC
+
+  // Key Wrapping
+  KW = 16;        // (AES) Key Wrap
+  KWP = 17;       // (AES) Key Wrap with Padding
+  TKW = 18;       // Triple Data Encryption Algorithm (TDEA) Key Wrap
+}
+
+/**
+ * Padding Modes
+ */
+enum Padding {
+  // NEXT ID = 11
+
+  ZERO = 1;               // Zero byte
+  ANSI_X923 = 2;          // ANSI X.923
+  PKCS5 = 3;              // PKCS #5
+  PKCS7 = 4;              // PKCS #7
+  ISO10126 = 5;           // ISO 10126 (withdrawn)
+  ISO7816_4 = 6;          // ISO/IEC 7816-4
+
+  // RSA standards
+  PKCS1_1_5_ENCRYPT = 7;  // PKCS #1 v1.5 (Encrypt)
+  PKCS1_1_5_SIGN = 8;     // PKCS #1 v1.5 (Sign)
+  OAEP = 9;               // Optimal Asymmetric Encryption Padding (PKCS #1 v2)
+  PSS = 10;               // Probabilistic Signature Scheme (PKCS #1 v2.1)
+}
+
+/**
+ * Container for the common non-hashed fields of a KeyVersion.
+ * Specific KeyVersions should add an extension with their own
+ * non-hashed fields. By convention, the extension number should
+ * be 10000 + <type number>.
+ */
+message KeyVersionData {
+  extensions 10000 to max;
+
+  // Identifies the key version being stored
+  optional Type  type = 1;
+
+  // Raw bytes of the key version material that will be hashed into the ID
+  optional bytes core = 2;
+}
+
+/**
+ * Container for the common essential fields of all KeyVersions
+ * (these fields will be hashed into the ID). Specific KeyVersions
+ * should add an extension with their own core fields. By convention,
+ * the extension number should be 10000 + <type number>.
+ */
+message KeyVersionCore {
+  extensions 10000 to max;
+}
