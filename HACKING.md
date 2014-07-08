@@ -57,10 +57,11 @@ commenting style.
 
 ## Protocol buffers
 
-You must install the
+You must install version 2.5 of the
 (protocol buffers tools)[https://developers.google.com/protocol-buffers/] to
-build K2.  Binaries are available for windows.  For other OSes, download the
-source, run 'configure' and 'make' and then put the protoc binary on your path.
+build K2.  Earlier versions will not work.  Binaries are available for windows.
+For other OSes, download the source, run 'configure' and 'make' and then put
+the protoc binary on your path.
 
 ## Language specific HACKING.md files
 
