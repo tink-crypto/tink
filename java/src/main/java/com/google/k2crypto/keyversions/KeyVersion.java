@@ -14,6 +14,7 @@
 
 package com.google.k2crypto.keyversions;
 
+import com.google.k2crypto.exceptions.BuilderException;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionCore;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
 import com.google.protobuf.ByteString;
@@ -117,36 +118,21 @@ public abstract class KeyVersion {
     private KeyVersionData kvData;
     
     /**
-     * Registers extensions for the proto defined by the sub-class. 
-     */
-    private void registerProtoExtensions(ExtensionRegistry registry) {
-      try {
-        KeyVersionInfo info = getClass().getEnclosingClass()
-            .getAnnotation(KeyVersionInfo.class);
-        info.proto().getMethod("registerAllExtensions", ExtensionRegistry.class)
-            .invoke(null, registry);
-      } catch (RuntimeException ex) {
-      } catch (ReflectiveOperationException ex) {}
-      // Just ignore exceptions, because if the extensions really need to be 
-      // registered, there will be a proto parsing exception later on.
-    }
-    
-    /**
-     * Initializes the builder with protobuf data.
+     * Initializes the builder with protobuf data. The core will be parsed
+     * from the data and the protobuf extension registry is required for this.
      * <p> 
      * Should be overridden by sub-classes to pull version-specific fields
      * from the data to the builder.  
      *     
      * @param kvData Data of the key version.
+     * @param registry Registry of all protobuf extensions for key versions.
      */
-    public Builder withData(KeyVersionData kvData) {
+    public Builder withData(KeyVersionData kvData, ExtensionRegistry registry) {
       if (kvData == null) {
         throw new NullPointerException("kvData");
       }
       this.kvData = kvData;
       try {
-        ExtensionRegistry registry = ExtensionRegistry.newInstance();
-        registerProtoExtensions(registry);
         withCore(KeyVersionCore.parseFrom(kvData.getCore(), registry));
         
       } catch (InvalidProtocolBufferException ex) {
@@ -171,5 +157,11 @@ public abstract class KeyVersion {
       return this;
     }
     
+    /**
+     * Builds the KeyVersion with the arguments set from the builder.
+     *   
+     * @throws BuilderException if there is a problem building the KeyVersion.
+     */
+    public abstract KeyVersion build() throws BuilderException;
   }
 }

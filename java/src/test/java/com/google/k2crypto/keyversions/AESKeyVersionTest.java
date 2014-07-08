@@ -58,7 +58,7 @@ public class AESKeyVersionTest {
     
     // Read the proto
     AESKeyVersion loaded = new AESKeyVersion.Builder()
-        .withData(KeyVersionData.parseFrom(bytes, registry)).build();
+        .withData(KeyVersionData.parseFrom(bytes, registry), registry).build();
     
     // Make sure the data is the same at a low-level (nothing gets lost)
     assertEquals(bytes, loaded.buildData().build().toByteString());
