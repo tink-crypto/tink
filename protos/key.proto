@@ -17,7 +17,10 @@ message KeyData {
   // Raw bytes that will be hashed with the key version core
   optional bytes core = 1;
 
+  // Set of key versions in the key
   repeated com.google.k2crypto.keyversions.KeyVersionData key_version = 2;
+
+  // Index of the primary key version
   optional uint32 primary = 3;
 }
 

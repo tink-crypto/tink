@@ -23,6 +23,7 @@ import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionCore;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistry;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.util.Arrays;
 
@@ -249,7 +250,8 @@ public class HMACKeyVersion extends HashKeyVersion {
      * @see KeyVersion.Builder#withData(KeyVersionData, ExtensionRegistry)
      */
     @Override
-    public Builder withData(KeyVersionData kvData, ExtensionRegistry registry) {
+    public Builder withData(KeyVersionData kvData, ExtensionRegistry registry)
+        throws InvalidProtocolBufferException {
       super.withData(kvData, registry);
 
       @SuppressWarnings("unused")

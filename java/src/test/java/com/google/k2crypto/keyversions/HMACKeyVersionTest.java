@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.k2crypto.exceptions.BuilderException;
 import com.google.k2crypto.exceptions.EncryptionException;
+import com.google.k2crypto.exceptions.InvalidKeyDataException;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistry;
@@ -25,7 +26,9 @@ public class HMACKeyVersionTest {
    */
   @Test
   public void testSaveLoad()
-      throws BuilderException, InvalidProtocolBufferException {
+      throws BuilderException, InvalidProtocolBufferException,
+             InvalidKeyDataException {
+    
     // Just generate a key version (use non-defaults where possible)
     HMACKeyVersion toSave = new HMACKeyVersion.Builder()
         .algorithm(HMACKeyVersion.HMAC_SHA512).build();

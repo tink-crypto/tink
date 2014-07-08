@@ -126,19 +126,16 @@ public abstract class KeyVersion {
      *     
      * @param kvData Data of the key version.
      * @param registry Registry of all protobuf extensions for key versions.
+     * 
+     * @throws InvalidProtocolBufferException if the core could not be parsed. 
      */
-    public Builder withData(KeyVersionData kvData, ExtensionRegistry registry) {
+    public Builder withData(KeyVersionData kvData, ExtensionRegistry registry)
+        throws InvalidProtocolBufferException {
       if (kvData == null) {
         throw new NullPointerException("kvData");
       }
+      withCore(KeyVersionCore.parseFrom(kvData.getCore(), registry));
       this.kvData = kvData;
-      try {
-        withCore(KeyVersionCore.parseFrom(kvData.getCore(), registry));
-        
-      } catch (InvalidProtocolBufferException ex) {
-        // This is bad. The key is corrupted.
-        throw new IllegalArgumentException("Data corrupted.");
-      }
       return this;
     }
     
