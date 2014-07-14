@@ -82,37 +82,11 @@ public class Key {
   public Key(K2Context context, KeyData data)
       throws UnregisteredKeyVersionException, InvalidKeyDataException {
     
-    // Retain the core
-    coreBytes = data.getCore();
-
-    // Extract the key version list
     KeyVersionRegistry registry = context.getKeyVersionRegistry();
     ExtensionRegistry protoRegistry = registry.getProtoExtensions();
-    final int kvCount = data.getKeyVersionCount();
-    keyVersions.ensureCapacity(kvCount);
-    try {
-      for (KeyVersionData kvData : data.getKeyVersionList()) {
-        KeyVersion kv = registry.newBuilder(kvData.getType())
-            .withData(kvData, protoRegistry).build();
-        keyVersions.add(kv);
-      }
-    } catch (InvalidProtocolBufferException ex) {
-      throw new InvalidKeyDataException(
-          InvalidKeyDataException.Reason.PROTO_PARSE, ex);
-    } catch (BuilderException ex) {
-      throw new InvalidKeyDataException(
-          InvalidKeyDataException.Reason.KEY_VERSION_BUILD, ex);
-    }
-    
-    // Extract the primary
-    if (kvCount > 0) {
-      int primaryIndex = (data.hasPrimary() ? data.getPrimary() : -1);
-      if (primaryIndex < 0 || primaryIndex >= keyVersions.size()) {
-        throw new InvalidKeyDataException(
-            InvalidKeyDataException.Reason.CORRUPTED_PRIMARY, null);
-      }
-      primary = keyVersions.get(primaryIndex);      
-    }
+
+    // Retain the core
+    coreBytes = data.getCore();
     
     // Parse the core, containing the security/usage constraints
     @SuppressWarnings("unused")
@@ -124,6 +98,42 @@ public class Key {
           InvalidKeyDataException.Reason.PROTO_PARSE, ex);
     }
     // TODO: extract security properties from core
+
+    // Extract the key version list
+    final int kvCount = data.getKeyVersionCount();
+    keyVersions.ensureCapacity(kvCount);
+    InvalidKeyDataException delayedException = null; 
+    for (KeyVersionData kvData : data.getKeyVersionList()) {
+      try {
+        KeyVersion kv = registry.newBuilder(kvData.getType())
+            .withData(kvData, protoRegistry).build();
+        keyVersions.add(kv);
+      } catch (InvalidProtocolBufferException ex) {
+        // Throw immediately on proto parsing exception
+        throw new InvalidKeyDataException(
+            InvalidKeyDataException.Reason.PROTO_PARSE, ex);
+      } catch (BuilderException ex) {
+        // Delay-throw builder exceptions
+        delayedException = new InvalidKeyDataException(
+            InvalidKeyDataException.Reason.KEY_VERSION_BUILD, ex);
+      }
+    }
+    
+    // Delay-throw builder-based exceptions because we want
+    // low-level proto parsing exceptions to take priority.
+    if (delayedException != null) {
+      throw delayedException;
+    }
+    
+    // Extract the primary
+    if (kvCount > 0) {
+      int primaryIndex = (data.hasPrimary() ? data.getPrimary() : -1);
+      if (primaryIndex < 0 || primaryIndex >= keyVersions.size()) {
+        throw new InvalidKeyDataException(
+            InvalidKeyDataException.Reason.CORRUPTED_PRIMARY, null);
+      }
+      primary = keyVersions.get(primaryIndex);      
+    }
   }
 
   /**
