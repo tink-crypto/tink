@@ -82,6 +82,8 @@ public class Key {
   public Key(K2Context context, KeyData data)
       throws UnregisteredKeyVersionException, InvalidKeyDataException {
     
+    // NOTE: lower-level exceptions take precedence by design
+    
     KeyVersionRegistry registry = context.getKeyVersionRegistry();
     ExtensionRegistry protoRegistry = registry.getProtoExtensions();
 
@@ -102,27 +104,34 @@ public class Key {
     // Extract the key version list
     final int kvCount = data.getKeyVersionCount();
     keyVersions.ensureCapacity(kvCount);
-    InvalidKeyDataException delayedException = null; 
+
+    UnregisteredKeyVersionException unregisteredException = null; 
+    InvalidKeyDataException buildException = null;
+    
     for (KeyVersionData kvData : data.getKeyVersionList()) {
       try {
         KeyVersion kv = registry.newBuilder(kvData.getType())
             .withData(kvData, protoRegistry).build();
         keyVersions.add(kv);
       } catch (InvalidProtocolBufferException ex) {
-        // Throw immediately on proto parsing exception
+        // Throw proto parsing exceptions immediately
         throw new InvalidKeyDataException(
             InvalidKeyDataException.Reason.PROTO_PARSE, ex);
       } catch (BuilderException ex) {
-        // Delay-throw builder exceptions
-        delayedException = new InvalidKeyDataException(
+        // Delay-throw builder exceptions...
+        buildException = new InvalidKeyDataException(
             InvalidKeyDataException.Reason.KEY_VERSION_BUILD, ex);
+      } catch (UnregisteredKeyVersionException ex) {
+        // ...and unregistered key version exceptions
+        unregisteredException = ex;
       }
     }
-    
-    // Delay-throw builder-based exceptions because we want
-    // low-level proto parsing exceptions to take priority.
-    if (delayedException != null) {
-      throw delayedException;
+
+    // Unregistered key versions take precedence over build exceptions
+    if (unregisteredException != null) {
+      throw unregisteredException;
+    } else if (buildException != null) {
+      throw buildException;
     }
     
     // Extract the primary
