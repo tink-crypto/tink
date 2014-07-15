@@ -235,7 +235,8 @@ public class K2FileSystemDriver implements StoreDriver {
     // Replace primary key file in a fault-tolerant manner
     if (keyFile.isFile()) {
       // Primary exists; pick a temp slot to write to
-      File target = (isFormerMoreReadable(tempFileA, tempFileB) ? tempFileB : tempFileA);
+      File target =
+          (isFormerMoreReadable(tempFileA, tempFileB) ? tempFileB : tempFileA);
       File other = (target == tempFileB ? tempFileA : tempFileB);
       
       // Both temp slots exist => something went really wrong last time
