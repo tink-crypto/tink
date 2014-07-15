@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -36,6 +37,21 @@ import java.net.URISyntaxException;
  */
 public class K2Storage {
 
+  // Regex matching percent (%) characters in the address string that are NOT
+  // of the format %[HEX][HEX].
+  private static final Pattern PERCENT_REGEX =
+      Pattern.compile("\\%(?![0-9a-fA-F][0-9a-fA-F])");
+  
+  // Replacement for the above that will percent-encode the percentages
+  private static final String PERCENT_REPLACEMENT = "%25";
+  
+  // Regex matching space (' ') characters in the address string
+  private static final Pattern SPACE_REGEX =
+      Pattern.compile(" ", Pattern.LITERAL);
+
+  // Replacement for the above that will percent-encode the spaces
+  private static final String SPACE_REPLACEMENT = "%20";
+  
   // Context for the current K2 session
   private final K2Context context;
   
@@ -113,9 +129,11 @@ public class K2Storage {
   /**
    * Opens a storage location for reading/writing of a {@link Key}.
    * <p>
-   * The string address should be parsable as a URI. Reserved characters
-   * should be URI-escaped if necessary, e.g. {@code "/My Keys"} should be
-   * {@code "/My%20Keys"}. 
+   * The string address should be parsable as a URI. For convenience sake, the
+   * common characters {@code ' '} (spaces) and {@code '%'} (percent characters
+   * not followed by two hex digits) are automatically percent-encoded. All
+   * other invalid URI characters must be manually escaped by the caller,
+   * e.g. {@code "/{my_keys^2}"} should be {@code "/%7Bmy_keys%5e2%7D"}. 
    * <p>
    * This method will search for an installed driver with an identifier matching
    * the scheme of the URI. If no such driver is found (or the scheme is
@@ -139,6 +157,12 @@ public class K2Storage {
     if (address == null) {
       throw new NullPointerException("address");
     }
+    
+    // Perform safe URI-escaping of the '%' and ' ' characters in the string
+    // for convenience sake. This is NOT a complete escaping procedure.
+    address = PERCENT_REGEX.matcher(address).replaceAll(PERCENT_REPLACEMENT);
+    address = SPACE_REGEX.matcher(address).replaceAll(SPACE_REPLACEMENT);
+
     try {
       return open(new URI(address));
     } catch (URISyntaxException ex) {
