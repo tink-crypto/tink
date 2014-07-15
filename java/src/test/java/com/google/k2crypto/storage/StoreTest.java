@@ -40,7 +40,7 @@ import java.net.URI;
  */
 @RunWith(JUnit4.class)
 public class StoreTest {
-  
+
   private static final String ADDRESS_FRAGMENT = "://my_keys";
   
   private K2Context context = null;
@@ -63,9 +63,9 @@ public class StoreTest {
     }
     // TODO: We need a proper way to create keys for testing.
     //       The current approach is fragile and WILL break later.
-    saveKey = new Key(null);
-    wrapKeyA = new Key(null);
-    wrapKeyB = new Key(null);
+    saveKey = new Key();
+    wrapKeyA = new Key();
+    wrapKeyB = new Key();
   }
   
   /**
@@ -258,8 +258,8 @@ public class StoreTest {
       try {
         store.load();
         fail("Store should fail to load without the wrap key.");
-      } catch (WrapKeyException ex) {
-        assertEquals(WrapKeyException.Reason.REQUIRED, ex.getReason());
+      } catch (StoreIOException ex) {
+        assertEquals(StoreIOException.Reason.WRAP_KEY_REQUIRED, ex.getReason());
         assertEquals(store, ex.getStore());
       }
       assertEquals(2, driver.loadCalls);
@@ -273,8 +273,8 @@ public class StoreTest {
       try {
         store.load();
         fail("Store should fail to load without correct wrap key.");
-      } catch (WrapKeyException ex) {
-        assertEquals(WrapKeyException.Reason.WRONG, ex.getReason());
+      } catch (StoreIOException ex) {
+        assertEquals(StoreIOException.Reason.WRAP_KEY_WRONG, ex.getReason());
         assertEquals(store, ex.getStore());
       }
       assertEquals(3, driver.loadCalls);
@@ -304,8 +304,9 @@ public class StoreTest {
       try {
         store.load();
         fail("Store should fail to load when wrap key is unnecessary.");
-      } catch (WrapKeyException ex) {
-        assertEquals(WrapKeyException.Reason.UNNECESSARY, ex.getReason());
+      } catch (StoreIOException ex) {
+        assertEquals(
+            StoreIOException.Reason.WRAP_KEY_UNNECESSARY, ex.getReason());
         assertEquals(store, ex.getStore());
       }
       assertEquals(5, driver.loadCalls);
