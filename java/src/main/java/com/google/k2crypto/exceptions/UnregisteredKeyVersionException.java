@@ -14,29 +14,34 @@
  * limitations under the License.
  */
 
-package com.google.k2crypto.keyversions;
+package com.google.k2crypto.exceptions;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import com.google.k2crypto.K2Exception;
+import com.google.k2crypto.keyversions.KeyVersionProto.Type;
 
 /**
- * Annotation applied to all {@link KeyVersion} implementations.
+ * Exception thrown when a required KeyVersion type is unregistered.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-public @interface KeyVersionInfo {
+public class UnregisteredKeyVersionException extends K2Exception {
+  
+  private final Type type;
   
   /**
-   * Type of the Key Version, as listed in {@code key_version.proto}.
+   * Constructs a new UnregisteredKeyVersionException.
+   *
+   * @param type Type requested but not registered.
    */
-  KeyVersionProto.Type type();
-
+  public UnregisteredKeyVersionException(Type type) {
+    super(type.name());
+    this.type = type;
+  }
+  
   /**
-   * Generated protocol buffer class of the key version that contains the
-   * data and core messages.
+   * Returns the unregistered type.
    */
-  Class<?> proto();
+  public Type type() {
+    return type;
+  }
 }

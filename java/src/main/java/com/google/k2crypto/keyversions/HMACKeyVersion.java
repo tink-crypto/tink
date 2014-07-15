@@ -22,6 +22,8 @@ import com.google.k2crypto.keyversions.HmacKeyVersionProto.HmacKeyVersionData;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionCore;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistry;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.util.Arrays;
 
@@ -245,11 +247,12 @@ public class HMACKeyVersion extends HashKeyVersion {
     }
 
     /**
-     * @see KeyVersion.Builder#withData(KeyVersionData)
+     * @see KeyVersion.Builder#withData(KeyVersionData, ExtensionRegistry)
      */
     @Override
-    public Builder withData(KeyVersionData kvData) {
-      super.withData(kvData);
+    public Builder withData(KeyVersionData kvData, ExtensionRegistry registry)
+        throws InvalidProtocolBufferException {
+      super.withData(kvData, registry);
 
       @SuppressWarnings("unused")
       HmacKeyVersionData data =
@@ -266,7 +269,6 @@ public class HMACKeyVersion extends HashKeyVersion {
     protected Builder withCore(KeyVersionCore kvCore) {
       super.withCore(kvCore);
       
-      @SuppressWarnings("unused")
       HmacKeyVersionCore core =
           kvCore.getExtension(HmacKeyVersionCore.extension);
       // Extract info from core
@@ -300,6 +302,7 @@ public class HMACKeyVersion extends HashKeyVersion {
      * @return A HMACKeyVersion with the parameters set from the builder
      * @throws BuilderException
      */
+    @Override
     public HMACKeyVersion build() throws BuilderException {
       try {
         return new HMACKeyVersion(this);

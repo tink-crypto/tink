@@ -21,6 +21,7 @@ import com.google.k2crypto.SymmetricEncryption;
 import com.google.k2crypto.exceptions.BuilderException;
 import com.google.k2crypto.exceptions.DecryptionException;
 import com.google.k2crypto.exceptions.EncryptionException;
+import com.google.k2crypto.exceptions.InvalidKeyDataException;
 import com.google.k2crypto.keyversions.AESKeyVersion.Mode;
 import com.google.k2crypto.keyversions.AESKeyVersion.Padding;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
@@ -45,7 +46,9 @@ public class AESKeyVersionTest {
    */
   @Test
   public void testSaveLoad()
-      throws BuilderException, InvalidProtocolBufferException {
+      throws BuilderException, InvalidProtocolBufferException,
+             InvalidKeyDataException {
+    
     // Just generate a key version (use non-defaults where possible)
     AESKeyVersion toSave = new AESKeyVersion.Builder().mode(Mode.ECB).build();
     // Dump its proto data bytes
@@ -58,7 +61,7 @@ public class AESKeyVersionTest {
     
     // Read the proto
     AESKeyVersion loaded = new AESKeyVersion.Builder()
-        .withData(KeyVersionData.parseFrom(bytes, registry)).build();
+        .withData(KeyVersionData.parseFrom(bytes, registry), registry).build();
     
     // Make sure the data is the same at a low-level (nothing gets lost)
     assertEquals(bytes, loaded.buildData().build().toByteString());

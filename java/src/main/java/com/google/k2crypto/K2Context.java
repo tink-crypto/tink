@@ -17,6 +17,7 @@
 package com.google.k2crypto;
 
 import com.google.k2crypto.i18n.K2Strings;
+import com.google.k2crypto.keyversions.KeyVersionRegistry;
 
 import java.util.Locale;
 
@@ -34,11 +35,15 @@ public class K2Context {
   // Internationalized strings
   private K2Strings strings; 
   
+  // Registry for all available key versions
+  private KeyVersionRegistry keyVersionRegistry;
+  
   /**
    * Constructs a new K2 context.
    */
   public K2Context() {
     strings = new K2Strings(this, Locale.getDefault());
+    keyVersionRegistry = new KeyVersionRegistry(this);
   }
   
   /**
@@ -46,5 +51,12 @@ public class K2Context {
    */
   public K2Strings getStrings() {
     return strings;
+  }
+  
+  /**
+   * Returns the registry of all available key versions.
+   */
+  public KeyVersionRegistry getKeyVersionRegistry() {
+    return keyVersionRegistry;
   }
 }

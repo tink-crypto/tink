@@ -20,6 +20,8 @@ import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
 import com.google.k2crypto.keyversions.AesKeyVersionProto.AesKeyVersionCore;
 import com.google.k2crypto.keyversions.AesKeyVersionProto.AesKeyVersionData;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistry;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.security.SecureRandom;
 
@@ -388,11 +390,12 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     }
 
     /**
-     * @see KeyVersion.Builder#withData(KeyVersionData)
+     * @see KeyVersion.Builder#withData(KeyVersionData, ExtensionRegistry)
      */
     @Override
-    public Builder withData(KeyVersionData kvData) {
-      super.withData(kvData);
+    public Builder withData(KeyVersionData kvData, ExtensionRegistry registry)
+        throws InvalidProtocolBufferException {
+      super.withData(kvData, registry);
       
       @SuppressWarnings("unused")
       AesKeyVersionData data = kvData.getExtension(AesKeyVersionData.extension);
@@ -425,6 +428,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
      * @return An AESKeyVersion with the parameters set from the builder
      * @throws BuilderException
      */
+    @Override
     public AESKeyVersion build() throws BuilderException {
       try {
         return new AESKeyVersion(this);
