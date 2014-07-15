@@ -269,7 +269,6 @@ public class HMACKeyVersion extends HashKeyVersion {
     protected Builder withCore(KeyVersionCore kvCore) {
       super.withCore(kvCore);
       
-      @SuppressWarnings("unused")
       HmacKeyVersionCore core =
           kvCore.getExtension(HmacKeyVersionCore.extension);
       // Extract info from core

@@ -41,7 +41,6 @@ public class K2Strings {
       "com.google.k2crypto.i18n.strings";
   
   // Context for logging purposes (can be null for testing)
-  @SuppressWarnings("unused")
   private final K2Context context;
 
   // Bundle to pull the strings from
@@ -73,6 +72,13 @@ public class K2Strings {
     this.context = context;
     this.bundleName = bundleName;
     resourceBundle = ResourceBundle.getBundle(bundleName, locale);
+  }
+  
+  /**
+   * Returns the context associated with the strings.
+   */
+  public K2Context getContext() {
+    return context;
   }
   
   /**

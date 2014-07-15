@@ -91,7 +91,6 @@ public class Key {
     coreBytes = data.getCore();
     
     // Parse the core, containing the security/usage constraints
-    @SuppressWarnings("unused")
     KeyCore core;
     try {
       core = KeyCore.parseFrom(coreBytes, protoRegistry);
