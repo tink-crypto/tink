@@ -135,6 +135,7 @@ public interface StoreDriver {
    * or be in an invalid format. An attempt must be made to {@link #load()} to
    * know for sure if it is readable.
    * 
+   * @throws StoreIOException if there is an I/O issue with checking emptiness.
    * @throws StoreException if the store could not be queried.
    */
   boolean isEmpty() throws StoreException;
@@ -148,6 +149,7 @@ public interface StoreDriver {
    *  
    * @param key Key to save.
    * 
+   * @throws StoreIOException if there is an I/O issue with saving the key.
    * @throws StoreException if there is some issue saving the given key.
    */
   void save(Key key) throws StoreException;
@@ -157,9 +159,7 @@ public interface StoreDriver {
    * 
    * @return the stored key or null if the location is empty.
    * 
-   * @throws WrapKeyException if the stored key is wrapped and no wrap key
-   *                          (or a wrong one) was specified, or the stored key
-   *                          is NOT wrapped and a wrap key was specified.
+   * @throws StoreIOException if there is an I/O issue with loading the key.
    * @throws StoreException if there is some issue loading the stored data.
    */
   Key load() throws StoreException;
@@ -173,6 +173,7 @@ public interface StoreDriver {
    * @return {@code true} if, and only if, there was data present and it has
    *         been erased.
    * 
+   * @throws StoreIOException if there is an I/O issue with erasing the key.
    * @throws StoreException if there is some issue erasing stored data.
    */
   boolean erase() throws StoreException;

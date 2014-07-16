@@ -33,7 +33,6 @@ import java.net.URI;
 public class Store {
   
   // Context for the current K2 session
-  @SuppressWarnings("unused")
   private final K2Context context;
 
   // Driver installation backing the store
@@ -77,6 +76,13 @@ public class Store {
     // not being null. We do not want the object to be in a completely broken
     // state after construction.
     this.address = address;
+  }
+
+  /**
+   * Returns the context associated with the Store.
+   */
+  public K2Context getContext() {
+    return context;
   }
   
   /**
@@ -279,6 +285,7 @@ public class Store {
    * know for sure if it is readable.
    * 
    * @throws StoreStateException if the store is not open.
+   * @throws StoreIOException if there is an I/O issue with checking emptiness.
    * @throws StoreException if there is a driver-specific issue.
    */
   public boolean isEmpty() throws StoreException {
@@ -300,6 +307,7 @@ public class Store {
    * @param key Key to save.
    * 
    * @throws StoreStateException if the store is not open.
+   * @throws StoreIOException if there is an I/O issue with saving the key.
    * @throws UnsupportedByStoreException if the store is read-only.
    * @throws StoreException if there is a driver-specific issue with saving.
    */
@@ -328,9 +336,7 @@ public class Store {
    * @return the stored key or null if the location is empty.
    * 
    * @throws StoreStateException if the store is not open.
-   * @throws WrapKeyException if the stored key is wrapped and no wrap key
-   *                          (or a wrong one) was specified, or the stored key
-   *                          is NOT wrapped and a wrap key was specified.
+   * @throws StoreIOException if there is an I/O issue with loading the key.
    * @throws StoreException if there is a driver-specific issue with loading.
    */
   public Key load() throws StoreException {
@@ -352,6 +358,7 @@ public class Store {
    *         been erased.
    * 
    * @throws StoreStateException if the store is not open.
+   * @throws StoreIOException if there is an I/O issue with erasing the key.
    * @throws UnsupportedByStoreException if the store is read-only.
    * @throws StoreException if there is a driver-specific issue with erasing.
    */

@@ -242,15 +242,17 @@ public class K2StorageTest {
         }
       };
       
-      final String badAddress = "@_@:/ /";
-      final String goodAddress = "file:///my/path";
+      final String badAddress = "@_@:/ /%fF";
+      final String expectedBad = "@_@:/%20/%fF"; 
+      final String goodAddress = "file:///my/path%20/ 10%%";
+      final String expectedGood = "file:///my/path%20/%2010%25%25";
       
       // Test that a bad address is rejected
       try {
         storage.open(badAddress).close();
         fail("Should not permit opening a bad string address.");
       } catch (IllegalAddressException ex) {
-        assertEquals(badAddress, ex.getAddress());
+        assertEquals(expectedBad, ex.getAddress());
         assertEquals(IllegalAddressException.Reason.INVALID_URI,
             ex.getReason());
       }
@@ -262,9 +264,9 @@ public class K2StorageTest {
         storage.open(goodAddress).close();
         fail("Expected no suitable driver.");
       } catch (NoSuitableDriverException ex) {
-        assertEquals(goodAddress, String.valueOf(ex.getAddress()));
+        assertEquals(expectedGood, String.valueOf(ex.getAddress()));
       }
-      assertEquals(goodAddress, String.valueOf(openAddress[0]));
+      assertEquals(expectedGood, String.valueOf(openAddress[0]));
       
     } catch (K2Exception ex) {
       fail("Unexpected exception: " + ex);
