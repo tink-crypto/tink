@@ -105,16 +105,19 @@ public class K2FileSystemDriver implements StoreDriver {
           + "(?:[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}\\p{Zs}]*"
           + "[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}&&[^\\.]])?\\."
           + Pattern.quote(FILE_EXTENSION) + '$');
-      // Do not start with '~' or '.' or any spaces.
-      // Everything except control characters permitted in-between.
-      // Do not end with '.' or any spaces before the file extension.
+      /* 
+       * Do not start with '~' or '.' or any spaces.
+       * Everything except control characters permitted in-between.
+       * Do not end with '.' or any spaces before the file extension.
+       * The file extension is case-sensitive.
+       */
 
   /**
    * Regex for checking if the address path already has the file extension.
    */
-  private static final Pattern EXTENSION_EXISTS = Pattern.compile(
+  private static final Pattern EXTENSION_REGEX = Pattern.compile(
       "(?:\\.|\\%2[Ee])(?:[Kk]|\\%[46][Bb])(?:2|\\%32)(?:[Kk]|\\%[46][Bb])$");
-      // This matches all possible forms of ".k2k" with percent-encoding
+      // matches all possible forms of ".k2k" with percent-encoding
   
   // Context for the current K2 session
   private K2Context context;
@@ -174,7 +177,7 @@ public class K2FileSystemDriver implements StoreDriver {
     }
     
     // Check if the file extension is included in the path.
-    if (!EXTENSION_EXISTS.matcher(path).find()) {
+    if (!EXTENSION_REGEX.matcher(path).find()) {
       if (mustHaveExtension) {
         throw new IllegalAddressException(address,
             IllegalAddressException.Reason.INVALID_PATH, null);
