@@ -113,7 +113,8 @@ public class K2FileSystemDriver implements StoreDriver {
    * Regex for checking if the address path already has the file extension.
    */
   private static final Pattern EXTENSION_EXISTS = Pattern.compile(
-      "\\." + Pattern.quote(FILE_EXTENSION) + '$', Pattern.CASE_INSENSITIVE);
+      "(?:\\.|\\%2[Ee])(?:[Kk]|\\%[46][Bb])(?:2|\\%32)(?:[Kk]|\\%[46][Bb])$");
+      // This matches all possible forms of ".k2k" with percent-encoding
   
   // Context for the current K2 session
   private K2Context context;
@@ -135,7 +136,7 @@ public class K2FileSystemDriver implements StoreDriver {
   /**
    * @see StoreDriver#open(java.net.URI)
    */
-  public URI open(URI address) throws IllegalAddressException {
+  public URI open(final URI address) throws IllegalAddressException {
     // Check for unsupported components in the address
     // (we only accept a scheme + path)
     if (address.getAuthority() != null) {
@@ -172,37 +173,22 @@ public class K2FileSystemDriver implements StoreDriver {
           IllegalAddressException.Reason.MISSING_PATH, null);
     }
     
-    // Resolve the given path against the base URI (k2:/current_directory).
-    final URI base =
-        URI.create(NATIVE_SCHEME + ':' + new File("").toURI().getRawPath());
-    
-    // We must resolve the path (instead of the address directly) because a
-    // scheme on the address will prevent correct resolution of relative paths. 
-    address = base.resolve(path).normalize();
-
-    try {
-      // Check if the extension is included, and whether it is required
-      final boolean extensionExists =
-          EXTENSION_EXISTS.matcher(address.getPath()).find(); 
-      if (mustHaveExtension && !extensionExists) {
+    // Check if the file extension is included in the path.
+    if (!EXTENSION_EXISTS.matcher(path).find()) {
+      if (mustHaveExtension) {
         throw new IllegalAddressException(address,
             IllegalAddressException.Reason.INVALID_PATH, null);
       }
-
-      // Generate URI for accessing the location on disk.
-      // Slap the extension on if it's not already provided.
-      final String filePath = FILE_SCHEME + ':' + address.getRawPath() +
-          (extensionExists ? "" : '.' + FILE_EXTENSION);
-   
-      /* 
-       * NOTE: The "extension-exists" regex is case-INSENSITIVE, while the
-       * "filename-white" regex is case-SENSITIVE for the extension portion.
-       * Consequence is we will reject paths that include a non-lowercase
-       * ".k2k" extension. This is deliberate.
-       */
+      // Append if missing
+      path += '.' + FILE_EXTENSION;
+    }
+    
+    try {
+      // Resolve the disk address of the provided path
+      final URI diskAddress = new File("").toURI().resolve(path).normalize();
       
       // Create all file objects before checking
-      final File pri = new File(URI.create(filePath));
+      final File pri = new File(diskAddress);
       final File parent = pri.getParentFile();
       final String filename = pri.getName();
       final File tmpA =
@@ -219,11 +205,16 @@ public class K2FileSystemDriver implements StoreDriver {
           // Everything else should NOT be a directory
           && !pri.isDirectory() && !tmpA.isDirectory() && !tmpB.isDirectory()) {
         
-        // All OK. Initialize the driver.
+        // All OK. Generate final address with scheme and without extension.
+        path = pri.toURI().getRawPath();
+        path = path.substring(0, path.length() - FILE_EXTENSION.length() - 1);
+        URI finalAddress = URI.create(NATIVE_SCHEME + ':' + path);
+        
+        // Initialize the driver.
         this.keyFile = pri;
         this.tempFileA = tmpA;
         this.tempFileB = tmpB;
-        return address;
+        return finalAddress;
       }
     } catch (IllegalArgumentException ex) {
       // The path is invalid
