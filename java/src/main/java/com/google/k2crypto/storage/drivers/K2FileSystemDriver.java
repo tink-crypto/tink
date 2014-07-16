@@ -197,22 +197,26 @@ public class K2FileSystemDriver implements StoreDriver {
       final File tmpA =
           new File(parent, TEMP_PREFIX + filename + TEMP_A_EXTENSION); 
       final File tmpB =
-          new File(parent, TEMP_PREFIX + filename + TEMP_B_EXTENSION); 
+          new File(parent, TEMP_PREFIX + filename + TEMP_B_EXTENSION);
+      
+      // Grab path from the file for checking and later usage
+      path = pri.toURI().getRawPath();
       
       // Filename should be a valid
       if (FILENAME_WHITE.matcher(filename).matches()
           && !FILENAME_BLACK.matcher(filename).find()
           && filename.length() <= MAX_FILENAME_LENGTH
+          // Path should be absolute after normalization 
+          && !path.startsWith("/../")
           // Parent file should be an existing directory
           && parent != null && parent.isDirectory()
           // Everything else should NOT be a directory
           && !pri.isDirectory() && !tmpA.isDirectory() && !tmpB.isDirectory()) {
         
         // All OK. Generate final address with scheme and without extension.
-        path = pri.toURI().getRawPath();
         path = path.substring(0, path.length() - FILE_EXTENSION.length() - 1);
         URI finalAddress = URI.create(NATIVE_SCHEME + ':' + path);
-        
+
         // Initialize the driver.
         this.keyFile = pri;
         this.tempFileA = tmpA;
@@ -220,7 +224,7 @@ public class K2FileSystemDriver implements StoreDriver {
         return finalAddress;
       }
     } catch (IllegalArgumentException ex) {
-      // The path is invalid
+      // The path is invalid (from URI.create or new File)
     }
     
     // Falling through to here implies the path is invalid
