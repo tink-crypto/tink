@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  * @author darylseah@gmail.com (Daryl Seah)
  */
 @StoreDriverInfo(
-    id = K2FileSystemDriver.ID,
+    id = K2FileSystemDriver.NATIVE_SCHEME,
     name = "K2 Native File-System Driver",
     version = "0.1",
     readOnly = false,
@@ -54,34 +54,45 @@ import java.util.regex.Pattern;
 public class K2FileSystemDriver implements StoreDriver {
   
   /**
-   * Identifier of the driver.
-   */
-  public static final String ID = "k2";
-  
-  /**
    * File extension that will be appended to key files.
    */
-  public static final String FILE_EXTENSION = ".k2k"; // "K2 Key"
+  public static final String FILE_EXTENSION = "k2k"; // "K2 Key"
   
+  /**
+   * Name of the native scheme in use (also the identifier of the driver).
+   */
+  static final String NATIVE_SCHEME = "k2";
+  
+  /**
+   * Name of the alternative file scheme that this driver accepts.
+   */
+  static final String FILE_SCHEME = "file";
+
   /**
    * File extension appended to the first temporary file.
    */
-  public static final String TEMP_A_EXTENSION = ".000";
+  static final String TEMP_A_EXTENSION = ".000";
   
   /**
    * File extension appended to the second temporary file.
    */
-  public static final String TEMP_B_EXTENSION = ".111";
+  static final String TEMP_B_EXTENSION = ".111";
   
   /**
    * Prefix appended to both temporary filenames.
    */
-  public static final String TEMP_PREFIX = ".";
+  static final String TEMP_PREFIX = ".";
   
+  /**
+   * Maximum length of the name of the main key file, including the extension.
+   */
+  static final int MAX_FILENAME_LENGTH = 255 - TEMP_PREFIX.length()
+      - Math.max(TEMP_A_EXTENSION.length(), TEMP_B_EXTENSION.length());
+
   /**
    * Regex blacklisting illegal characters in a filename.
    */
-  public static final Pattern FILENAME_BLACK = Pattern.compile(
+  private static final Pattern FILENAME_BLACK = Pattern.compile(
       "[\\u0000-\\u001F \\\\ \\/ \\* \\? \\| \\< \\> \\: \\; \\\"]",
       // all control characters, \, /, *, ?, |, <, >, :, ;, "
       Pattern.COMMENTS);
@@ -89,19 +100,21 @@ public class K2FileSystemDriver implements StoreDriver {
   /**
    * Regex matching a valid filename.
    */
-  public static final Pattern FILENAME_WHITE = Pattern.compile(
-      "^(?:[\\p{L}\\p{N}\\p{M}]+[\\p{Zs}\\p{P}\\p{S}]*)+" 
-          + Pattern.quote(FILE_EXTENSION) + '$',
-      // Must start with a unicode letter/digit. Spaces, punctuation and symbols
-      // only permitted in-between. Must end with the extension. 
-      Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+  private static final Pattern FILENAME_WHITE = Pattern.compile(
+      "^[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}&&[^\\~\\.]]"
+          + "(?:[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}\\p{Zs}]*"
+          + "[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}&&[^\\.]])?\\."
+          + Pattern.quote(FILE_EXTENSION) + '$');
+      // Do not start with '~' or '.' or any spaces.
+      // Everything except control characters permitted in-between.
+      // Do not end with '.' or any spaces before the file extension.
 
   /**
-   * Maximum length of the name of the main key file, including the extension.
+   * Regex for checking if the address path already has the file extension.
    */
-  public static final int MAX_FILENAME_LENGTH = 254
-      - Math.max(TEMP_A_EXTENSION.length(), TEMP_B_EXTENSION.length());
-
+  private static final Pattern EXTENSION_EXISTS = Pattern.compile(
+      "\\." + Pattern.quote(FILE_EXTENSION) + '$', Pattern.CASE_INSENSITIVE);
+  
   // Context for the current K2 session
   private K2Context context;
   
@@ -136,9 +149,18 @@ public class K2FileSystemDriver implements StoreDriver {
           IllegalAddressException.Reason.FRAGMENT_UNSUPPORTED, null);
     }
 
-    // Reject foreign schemes as default behavior.
+    // Check that we either have an empty, file or native scheme 
+    final boolean mustHaveExtension;
     String scheme = address.getScheme();
-    if (scheme != null && !ID.equalsIgnoreCase(scheme)) {
+    if (scheme == null || scheme.equalsIgnoreCase(FILE_SCHEME)) {
+      // The empty and file schemes are generic, so there should be a
+      // qualifying extension that tells us we are accessing a k2 key file.
+      mustHaveExtension = true;
+    } else if (NATIVE_SCHEME.equalsIgnoreCase(scheme)) {
+      // If the "k2" scheme is specified, the path need not have the extension.
+      mustHaveExtension = false;
+    } else {
+      // Unrecognized scheme
       throw new IllegalAddressException(address,
           IllegalAddressException.Reason.INVALID_SCHEME, null);
     }
@@ -151,16 +173,35 @@ public class K2FileSystemDriver implements StoreDriver {
     }
     
     // Resolve the given path against the base URI (k2:/current_directory).
-    final URI base = URI.create(ID + ':' + new File("").toURI().getRawPath());
+    final URI base =
+        URI.create(NATIVE_SCHEME + ':' + new File("").toURI().getRawPath());
     
     // We must resolve the path (instead of the address directly) because a
     // scheme on the address will prevent correct resolution of relative paths. 
     address = base.resolve(path).normalize();
 
     try {
-      // Create all file objects before checking
-      final String filePath = "file:" + address.getRawPath() + FILE_EXTENSION; 
+      // Check if the extension is included, and whether it is required
+      final boolean extensionExists =
+          EXTENSION_EXISTS.matcher(address.getPath()).find(); 
+      if (mustHaveExtension && !extensionExists) {
+        throw new IllegalAddressException(address,
+            IllegalAddressException.Reason.INVALID_PATH, null);
+      }
+
+      // Generate URI for accessing the location on disk.
+      // Slap the extension on if it's not already provided.
+      final String filePath = FILE_SCHEME + ':' + address.getRawPath() +
+          (extensionExists ? "" : '.' + FILE_EXTENSION);
+   
+      /* 
+       * NOTE: The "extension-exists" regex is case-INSENSITIVE, while the
+       * "filename-white" regex is case-SENSITIVE for the extension portion.
+       * Consequence is we will reject paths that include a non-lowercase
+       * ".k2k" extension. This is deliberate.
+       */
       
+      // Create all file objects before checking
       final File pri = new File(URI.create(filePath));
       final File parent = pri.getParentFile();
       final String filename = pri.getName();
