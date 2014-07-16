@@ -82,17 +82,19 @@ public class K2FileSystemDriver implements StoreDriver {
    * Regex blacklisting illegal characters in a filename.
    */
   public static final Pattern FILENAME_BLACK = Pattern.compile(
-      "[\u0000-\u001F\\\\\\/\\*\\?\\|\\<\\>\\:\\;\\\"]");
+      "[\\u0000-\\u001F \\\\ \\/ \\* \\? \\| \\< \\> \\: \\; \\\"]",
       // all control characters, \, /, *, ?, |, <, >, :, ;, "
+      Pattern.COMMENTS);
   
   /**
    * Regex matching a valid filename.
    */
-  public static final Pattern FILENAME_WHITE =
-      Pattern.compile("^(?:[\\p{L}\\p{N}\\p{M}]+[\\p{Zs}\\p{P}\\p{S}]*)+"
-          + Pattern.quote(FILE_EXTENSION) + '$');
+  public static final Pattern FILENAME_WHITE = Pattern.compile(
+      "^(?:[\\p{L}\\p{N}\\p{M}]+[\\p{Zs}\\p{P}\\p{S}]*)+" 
+          + Pattern.quote(FILE_EXTENSION) + '$',
       // Must start with a unicode letter/digit. Spaces, punctuation and symbols
       // only permitted in-between. Must end with the extension. 
+      Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
   /**
    * Maximum length of the name of the main key file, including the extension.
@@ -120,7 +122,7 @@ public class K2FileSystemDriver implements StoreDriver {
   /**
    * @see StoreDriver#open(java.net.URI)
    */
-  public URI open(URI address) throws IllegalAddressException, StoreException {
+  public URI open(URI address) throws IllegalAddressException {
     // Check for unsupported components in the address
     // (we only accept a scheme + path)
     if (address.getAuthority() != null) {
@@ -153,7 +155,7 @@ public class K2FileSystemDriver implements StoreDriver {
     
     // We must resolve the path (instead of the address directly) because a
     // scheme on the address will prevent correct resolution of relative paths. 
-    address = base.resolve(path);
+    address = base.resolve(path).normalize();
 
     try {
       // Create all file objects before checking
@@ -169,7 +171,7 @@ public class K2FileSystemDriver implements StoreDriver {
       
       // Filename should be a valid
       if (FILENAME_WHITE.matcher(filename).matches()
-          && !FILENAME_BLACK.matcher(filename).matches()
+          && !FILENAME_BLACK.matcher(filename).find()
           && filename.length() <= MAX_FILENAME_LENGTH
           // Parent file should be an existing directory
           && parent != null && parent.isDirectory()
