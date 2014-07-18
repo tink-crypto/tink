@@ -16,6 +16,11 @@
 
 package com.google.k2crypto.storage.drivers;
 
+import static com.google.k2crypto.storage.AddressUtilities.checkNoAuthority;
+import static com.google.k2crypto.storage.AddressUtilities.checkNoQuery;
+import static com.google.k2crypto.storage.AddressUtilities.checkNoFragment;
+import static com.google.k2crypto.storage.AddressUtilities.extractRawPath;
+
 import com.google.k2crypto.Key;
 import com.google.k2crypto.K2Context;
 import com.google.k2crypto.KeyProto.KeyData;
@@ -122,8 +127,7 @@ public class K2FileSystemDriver implements StoreDriver {
    * Regex for checking if the address path already has the file extension.
    */
   private static final Pattern EXTENSION_REGEX = Pattern.compile(
-      "(?:\\.|\\%2[Ee])(?:[Kk]|\\%[46][Bb])(?:2|\\%32)(?:[Kk]|\\%[46][Bb])$");
-      // matches all possible forms of ".k2k" with percent-encoding
+      "\\." + Pattern.quote(FILE_EXTENSION) + '$', Pattern.CASE_INSENSITIVE); 
   
   // Context for the current K2 session
   private K2Context context;
@@ -148,16 +152,9 @@ public class K2FileSystemDriver implements StoreDriver {
   public URI open(final URI address) throws IllegalAddressException {
     // Check for unsupported components in the address
     // (we only accept a scheme + path)
-    if (address.getAuthority() != null) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.AUTHORITY_UNSUPPORTED, null);
-    } else if (address.getQuery() != null) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.QUERY_UNSUPPORTED, null);
-    } else if (address.getFragment() != null) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.FRAGMENT_UNSUPPORTED, null);
-    }
+    checkNoAuthority(address);
+    checkNoQuery(address);
+    checkNoFragment(address);
 
     // Check that we either have an empty, file or native scheme 
     final boolean mustHaveExtension;
@@ -175,12 +172,9 @@ public class K2FileSystemDriver implements StoreDriver {
           IllegalAddressException.Reason.INVALID_SCHEME, null);
     }
     
-    // A path must be present
-    String path = address.getRawPath();
-    if (path == null || path.length() == 0) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.MISSING_PATH, null);
-    }
+    // Extract path. We are assuming (below) that any encoded unreserved
+    // characters have already been decoded by K2Storage.
+    String path = extractRawPath(address);
     
     // Check if the file extension is included in the path.
     if (!EXTENSION_REGEX.matcher(path).find()) {
@@ -189,7 +183,7 @@ public class K2FileSystemDriver implements StoreDriver {
             IllegalAddressException.Reason.INVALID_PATH, null);
       }
       // Append if missing
-      path += '.' + FILE_EXTENSION;
+      path = path + '.' + FILE_EXTENSION;
     }
     
     try {
