@@ -88,6 +88,10 @@ public class Key {
     ExtensionRegistry protoRegistry = registry.getProtoExtensions();
 
     // Retain the core
+    if (!data.hasCore()) {
+      throw new InvalidKeyDataException(
+          InvalidKeyDataException.Reason.PROTO_PARSE, null);
+    }
     coreBytes = data.getCore();
     
     // Parse the core, containing the security/usage constraints
