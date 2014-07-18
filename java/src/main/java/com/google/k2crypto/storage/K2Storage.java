@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -37,21 +36,6 @@ import java.net.URISyntaxException;
  */
 public class K2Storage {
 
-  // Regex matching percent (%) characters in the address string that are NOT
-  // of the format %[HEX][HEX].
-  private static final Pattern PERCENT_REGEX =
-      Pattern.compile("\\%(?![0-9a-fA-F][0-9a-fA-F])");
-  
-  // Replacement for the above that will percent-encode the percentages
-  private static final String PERCENT_REPLACEMENT = "%25";
-  
-  // Regex matching space (' ') characters in the address string
-  private static final Pattern SPACE_REGEX =
-      Pattern.compile(" ", Pattern.LITERAL);
-
-  // Replacement for the above that will percent-encode the spaces
-  private static final String SPACE_REPLACEMENT = "%20";
-  
   // Context for the current K2 session
   private final K2Context context;
   
@@ -157,11 +141,7 @@ public class K2Storage {
     if (address == null) {
       throw new NullPointerException("address");
     }
-    
-    // Perform safe URI-escaping of the '%' and ' ' characters in the string
-    // for convenience sake. This is NOT a complete escaping procedure.
-    address = PERCENT_REGEX.matcher(address).replaceAll(PERCENT_REPLACEMENT);
-    address = SPACE_REGEX.matcher(address).replaceAll(SPACE_REPLACEMENT);
+    address = AddressUtilities.encodeConvenience(address);
 
     try {
       return open(new URI(address));
@@ -196,6 +176,10 @@ public class K2Storage {
     if (address == null) {
       throw new NullPointerException("address");
     }
+    
+    // We have to manually clean up any encoded unreserved characters because
+    // Java's URI class does not do this for us. 
+    address = AddressUtilities.decodeUnreserved(address);
     
     // Grab scheme to find a driver
     String scheme = address.getScheme();
