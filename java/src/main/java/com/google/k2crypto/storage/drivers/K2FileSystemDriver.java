@@ -40,8 +40,14 @@ import java.util.regex.Pattern;
 /**
  * K2-native local file-system key storage driver.
  * <p>
- * This driver is designed to minimize the possibility of data-loss when
- * saving a key and maximize the possibility of recovery when loading a key.
+ * This driver uses temporary/backup files to minimize the possibility of
+ * data-loss when saving a key and maximize the possibility of recovery when
+ * loading a key.
+ * <p>
+ * The current implementation does NOT acquire an OS-level lock on the key
+ * file, so it is possible for two instances of the driver, possibly on
+ * different VMs, to open the same key location. In this scenario, concurrent
+ * writes on the two instances will have undefined behavior.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
