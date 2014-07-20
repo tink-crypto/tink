@@ -157,7 +157,8 @@ public class AddressUtilities {
    */
   public static void checkNoUser(URI address)
       throws IllegalAddressException {
-    if (address.getUserInfo() != null) {
+    String user = address.getUserInfo(); 
+    if (user != null && user.length() > 0) {
       throw new IllegalAddressException(address,
           IllegalAddressException.Reason.USER_UNSUPPORTED, null);
     }
@@ -185,7 +186,8 @@ public class AddressUtilities {
    */
   public static void checkNoPath(URI address)
       throws IllegalAddressException {
-    if (address.getPath() != null) {
+    String path = address.getPath();
+    if (path != null && path.length() > 0) {
       throw new IllegalAddressException(address,
           IllegalAddressException.Reason.PATH_UNSUPPORTED, null);
     }
@@ -199,7 +201,8 @@ public class AddressUtilities {
    */
   public static void checkNoQuery(URI address)
       throws IllegalAddressException {
-    if (address.getQuery() != null) {
+    String query = address.getQuery(); 
+    if (query != null && query.length() > 0) {
       throw new IllegalAddressException(address,
           IllegalAddressException.Reason.QUERY_UNSUPPORTED, null);
     }
@@ -213,7 +216,8 @@ public class AddressUtilities {
    */
   public static void checkNoFragment(URI address)
       throws IllegalAddressException {
-    if (address.getFragment() != null) {
+    String fragment = address.getFragment();
+    if (fragment != null && fragment.length() > 0) {
       throw new IllegalAddressException(address,
           IllegalAddressException.Reason.FRAGMENT_UNSUPPORTED, null);
     }
