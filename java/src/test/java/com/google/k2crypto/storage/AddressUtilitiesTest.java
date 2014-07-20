@@ -113,7 +113,7 @@ public class AddressUtilitiesTest {
     assertEquals(
         URI.create("k2://h%2F/%3f%23/../~/./key"),
         AddressUtilities.decodeUnreserved(
-            URI.create("k2://%68%2F/%3f%23/%2e%2E/%7e/%2E/key")));
+            URI.create("k2://%68%2F/%3f%23/%2e%2E/%7e/%2E/%6bey")));
   }
 
   /**
