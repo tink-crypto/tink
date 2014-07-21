@@ -17,11 +17,9 @@ package com.google.k2crypto.keyversions;
 import com.google.k2crypto.exceptions.BuilderException;
 import com.google.k2crypto.exceptions.EncryptionException;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.Signature;
-import java.security.SignatureException;
 
 /**
  * Class representing a DSA public key version in K2. It allows you to digitally verify data using
@@ -77,7 +75,7 @@ public class DSAPublicKeyVersion extends PublicKeyVersion {
       signer.update(data);
       // verify the signature on the input data using the private key and return it
       return (signer.verify(sig));
-    } catch (InvalidKeyException|SignatureException|NoSuchAlgorithmException e) {
+    } catch (GeneralSecurityException e) {
       // catch any exceptions and throw a K2 exception
       throw new EncryptionException("DSA verification failed unexpectedly", e);
     }
@@ -112,6 +110,7 @@ public class DSAPublicKeyVersion extends PublicKeyVersion {
      * @return A new DSAPublicKeyVersion build using this Builder
      * @throws BuilderException
      */
+    @Override
     public DSAPublicKeyVersion build() throws BuilderException {
       return new DSAPublicKeyVersion(this);
     }
