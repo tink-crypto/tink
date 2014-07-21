@@ -47,6 +47,11 @@ public class IllegalAddressException extends K2Exception {
     INVALID_SCHEME("Address scheme is invalid."),
 
     /**
+     * The address does not have a path (for file-system-based drivers).
+     */
+    MISSING_PATH("Address does not have a path."),
+
+    /**
      * The address has a user component and the driver does not support it.
      */
     USER_UNSUPPORTED("User component is unsupported."),
@@ -55,6 +60,12 @@ public class IllegalAddressException extends K2Exception {
      * The address has host/port components and the driver does not support it.
      */
     HOST_PORT_UNSUPPORTED("Host/port components are unsupported."),
+
+    /**
+     * The address has an authority component (i.e. user, host and/or port) and
+     * the driver does not support it.
+     */
+    AUTHORITY_UNSUPPORTED("Authority component is unsupported."),
 
     /**
      * The address has a path component and the driver does not support it.

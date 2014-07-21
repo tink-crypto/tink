@@ -184,11 +184,13 @@ public class MockStoreDriver implements StoreDriver {
     if (storedKey != null) {
       if (storedKeyWrapper == null) {
         if (wrapKey != null) {
-          throw new WrapKeyException(WrapKeyException.Reason.UNNECESSARY);                  
+          throw new StoreIOException(
+              StoreIOException.Reason.WRAP_KEY_UNNECESSARY);                  
         }
       } else if (!storedKeyWrapper.equals(wrapKey)) {
-        throw new WrapKeyException(wrapKey == null ?
-            WrapKeyException.Reason.REQUIRED : WrapKeyException.Reason.WRONG);        
+        throw new StoreIOException(wrapKey == null ?
+            StoreIOException.Reason.WRAP_KEY_REQUIRED :
+            StoreIOException.Reason.WRAP_KEY_WRONG);        
       }
       return storedKey;
     }

@@ -88,6 +88,11 @@ public class Key {
     ExtensionRegistry protoRegistry = registry.getProtoExtensions();
 
     // Retain the core
+    if (!data.hasCore()) {
+      // Core field is required
+      throw new InvalidKeyDataException(
+          InvalidKeyDataException.Reason.PROTO_PARSE, null);
+    }
     coreBytes = data.getCore();
     
     // Parse the core, containing the security/usage constraints
@@ -108,6 +113,11 @@ public class Key {
     InvalidKeyDataException buildException = null;
     
     for (KeyVersionData kvData : data.getKeyVersionList()) {
+      if (!kvData.hasType()) {
+        // Type field is required
+        throw new InvalidKeyDataException(
+            InvalidKeyDataException.Reason.PROTO_PARSE, null);
+      }
       try {
         KeyVersion kv = registry.newBuilder(kvData.getType())
             .withData(kvData, protoRegistry).build();

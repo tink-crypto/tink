@@ -103,10 +103,10 @@ message KeyVersionData {
   extensions 10000 to max;
 
   // Identifies the key version being stored
-  optional Type  type = 1;
+  optional Type  type = 1; // Required
 
   // Raw bytes of the key version material that will be hashed into the ID
-  optional bytes core = 2;
+  optional bytes core = 2; // Required
 }
 
 /**
