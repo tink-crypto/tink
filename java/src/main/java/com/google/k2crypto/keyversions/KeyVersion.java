@@ -134,6 +134,7 @@ public abstract class KeyVersion {
       if (kvData == null) {
         throw new NullPointerException("kvData");
       } else if (!kvData.hasCore()) {
+        // Core field is required
         throw new InvalidProtocolBufferException("No core.");
       }
       withCore(KeyVersionCore.parseFrom(kvData.getCore(), registry));
