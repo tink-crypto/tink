@@ -139,11 +139,7 @@ public class DSAPrivateKeyVersion extends PrivateKeyVersion {
      */
     @Override
     public DSAPrivateKeyVersion build() throws BuilderException {
-      try {
-        return new DSAPrivateKeyVersion(this);
-      } catch (Exception e) {
-        throw new BuilderException("Building DSAKeyVersion failed", e);
-      }
+      return new DSAPrivateKeyVersion(this);
     }
 
   }
