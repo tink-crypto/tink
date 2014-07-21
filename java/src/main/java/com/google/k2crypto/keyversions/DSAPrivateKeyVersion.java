@@ -17,15 +17,12 @@ package com.google.k2crypto.keyversions;
 import com.google.k2crypto.exceptions.BuilderException;
 import com.google.k2crypto.exceptions.EncryptionException;
 
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.SignatureException;
 
 /**
  * Class representing a DSA private key version in K2. It allows you to digitally sign data using
@@ -73,7 +70,7 @@ public class DSAPrivateKeyVersion extends PrivateKeyVersion {
       signer.update(inputData);
       // sign the input data using the private key and return it
       return (signer.sign());
-    } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+    } catch (GeneralSecurityException e) {
       // catch any exceptions and throw a K2 exception
       throw new EncryptionException("DSA signing failed", e);
     }
@@ -118,7 +115,7 @@ public class DSAPrivateKeyVersion extends PrivateKeyVersion {
       // use the key generator to generate a key pair and return it
       return (keyGenerator.generateKeyPair());
 
-    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+    } catch (GeneralSecurityException e) {
       // catch and propagate any exceptions
       throw new BuilderException("Failed to build DSA key pair", e);
     }
