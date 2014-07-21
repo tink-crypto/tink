@@ -12,39 +12,21 @@
  * the License.
  */
 
-
 package com.google.k2crypto.keyversions;
 
-import javax.crypto.Cipher;
-
 /**
- * This class represents a SymmetricKeyVersion in K2. It is abstract and extended by specific
- * symmetric key version implementations such as AESKey
+ * This class represents a public key version in K2. Extended by specific implementations such as
+ * DSAPublicKeyVersion
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public abstract class SymmetricKeyVersion extends KeyVersion {
+public abstract class PublicKeyVersion extends AsymmetricKeyVersion {
 
   /**
-   * TODO: Daryl can you add a comment on what this constructor does.
    * @param builder
    */
-  protected SymmetricKeyVersion(Builder builder) {
+  protected PublicKeyVersion(Builder builder) {
     super(builder);
   }
-  
-  /**
-   * Method that returns the symmetric key version's encrypting Cipher
-   *
-   * @return The Cipher used to encrypt data
-   */
-  public abstract Cipher getEncryptingCipher();
-
-  /**
-   * Method that returns the symmetric key version's decrypting Cipher
-   *
-   * @return The Cipher used to decrypt data
-   */
-  public abstract Cipher getDecryptingCipher();
 
 }
