@@ -52,56 +52,48 @@ public class InstalledDriverTest {
   /**
    * Tests rejection when the context to the constructor is null. 
    */
-  @Test public final void testRejectNullContext() {
+  @Test public final void testRejectNullContext() throws K2Exception {
     Class<? extends StoreDriver> driverClass = MockStoreDriver.class; 
     try {
       new InstalledDriver(null, driverClass);
-    } catch (StoreDriverException ex) {
+      fail("Expected NullPointerException of context.");
     } catch (NullPointerException ex) {
       // Exception is expected
       assertEquals("context", ex.getMessage());
-      return;
     }
-    fail("Expected NullPointerException of context.");
   }
   
   /**
    * Tests rejection when the driver class to the constructor is null. 
    */
-  @Test public final void testRejectNullDriverClass() {
+  @Test public final void testRejectNullDriverClass() throws K2Exception {
     try {
       new InstalledDriver(context, null);
-    } catch (StoreDriverException ex) {
+      fail("Expected NullPointerException of driverClass.");
     } catch (NullPointerException ex) {
       // Exception is expected
       assertEquals("driverClass", ex.getMessage());
-      return;
     }
-    fail("Expected NullPointerException of driverClass.");
   }
   
   /**
    * Tests successful verification and instantiation of a valid driver.
    */
-  @Test public final void testAcceptValidDriver() {
+  @Test public final void testAcceptValidDriver() throws K2Exception {
     Class<? extends StoreDriver> driverClass = MockStoreDriver.class; 
-    try {
-      InstalledDriver idriver = new InstalledDriver(context, driverClass);
-      assertEquals(context, idriver.getContext());
-      assertEquals(driverClass, idriver.getDriverClass());
-      assertEquals("mock", idriver.getId());
-      assertEquals("Mock Store", idriver.getName());
-      assertEquals("1.0", idriver.getVersion());
-      assertFalse(idriver.isReadOnly());
-      assertTrue(idriver.isWrapSupported());
-      assertEquals(driverClass.hashCode(), idriver.hashCode());
-      
-      StoreDriver driver = idriver.instantiate();
-      assertTrue(driverClass.isInstance(driver));
-      assertEquals(context, ((MockStoreDriver)driver).context);
-    } catch (K2Exception ex) {
-      fail("The driver should be accepted.");
-    }
+    InstalledDriver idriver = new InstalledDriver(context, driverClass);
+    assertEquals(context, idriver.getContext());
+    assertEquals(driverClass, idriver.getDriverClass());
+    assertEquals("mock", idriver.getId());
+    assertEquals("Mock Store", idriver.getName());
+    assertEquals("1.0", idriver.getVersion());
+    assertFalse(idriver.isReadOnly());
+    assertTrue(idriver.isWrapSupported());
+    assertEquals(driverClass.hashCode(), idriver.hashCode());
+    
+    StoreDriver driver = idriver.instantiate();
+    assertTrue(driverClass.isInstance(driver));
+    assertEquals(context, ((MockStoreDriver)driver).context);
   }
 
   /**
@@ -130,15 +122,11 @@ public class InstalledDriverTest {
    * Tests acceptance of a private driver with a package-protected constructor.
    * (Yes, this works.)
    */
-  @Test public final void testAcceptPrivateDriver() {
+  @Test public final void testAcceptPrivateDriver() throws K2Exception {
     Class<? extends StoreDriver> driverClass = PrivateDriver.class; 
-    try {
-      StoreDriver driver =
-          new InstalledDriver(context, driverClass).instantiate();
-      assertTrue(driverClass.isInstance(driver));
-    } catch (K2Exception ex) {
-      fail("The driver should be accepted.");
-    }
+    StoreDriver driver =
+        new InstalledDriver(context, driverClass).instantiate();
+    assertTrue(driverClass.isInstance(driver));
   }
 
   @StoreDriverInfo(id="mock", name="Private Driver", version="1.0",
@@ -202,16 +190,13 @@ public class InstalledDriverTest {
    * Test acceptance of a driver with a constructor that throws entirely legal
    * throwables.
    */
-  @Test public final void testAcceptConstructorWithLegalThrowables() {
+  @Test public final void testAcceptConstructorWithLegalThrowables()
+      throws K2Exception {
     Class<? extends StoreDriver> driverClass =
         ConstructorWithLegalThrowablesDriver.class; 
-    try {
-      StoreDriver driver =
-          new InstalledDriver(context, driverClass).instantiate();
-      assertTrue(driverClass.isInstance(driver));
-    } catch (K2Exception ex) {
-      fail("The driver should be accepted.");
-    }
+    StoreDriver driver =
+        new InstalledDriver(context, driverClass).instantiate();
+    assertTrue(driverClass.isInstance(driver));
   }
   
   @StoreDriverInfo(id="mock", name="Constructor with Legal Throwables Driver",
@@ -287,25 +272,21 @@ public class InstalledDriverTest {
   /**
    * Tests acceptance of a driver with a complex but legal identifier.
    */
-  @Test public final void testAcceptComplexIdentifier() {
+  @Test public final void testAcceptComplexIdentifier() throws K2Exception {
     Class<? extends StoreDriver> driverClass = ComplexIdentifierDriver.class; 
-    try {
-      InstalledDriver idriver = new InstalledDriver(context, driverClass);
-      assertEquals(context, idriver.getContext());
-      assertEquals(driverClass, idriver.getDriverClass());
-      assertEquals("c0m-p13x+id.", idriver.getId());
-      assertEquals("Complex Identifier Driver", idriver.getName());
-      assertEquals("1.0a", idriver.getVersion());
-      assertTrue(idriver.isReadOnly());
-      assertTrue(idriver.isWrapSupported());
-      assertEquals(driverClass.hashCode(), idriver.hashCode());
+    InstalledDriver idriver = new InstalledDriver(context, driverClass);
+    assertEquals(context, idriver.getContext());
+    assertEquals(driverClass, idriver.getDriverClass());
+    assertEquals("c0m-p13x+id.", idriver.getId());
+    assertEquals("Complex Identifier Driver", idriver.getName());
+    assertEquals("1.0a", idriver.getVersion());
+    assertTrue(idriver.isReadOnly());
+    assertTrue(idriver.isWrapSupported());
+    assertEquals(driverClass.hashCode(), idriver.hashCode());
 
-      StoreDriver driver = idriver.instantiate();
-      assertTrue(driverClass.isInstance(driver));
-      assertEquals(context, ((MockStoreDriver)driver).context);
-    } catch (K2Exception ex) {
-      fail("The driver should be accepted.");
-    }
+    StoreDriver driver = idriver.instantiate();
+    assertTrue(driverClass.isInstance(driver));
+    assertEquals(context, ((MockStoreDriver)driver).context);
   }
   
   @StoreDriverInfo(id="c0m-p13x+id.", name="Complex Identifier Driver",
