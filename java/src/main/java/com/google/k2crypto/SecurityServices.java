@@ -129,7 +129,6 @@ public class SecurityServices {
 
     // create list that we will return of the algorithms
     HashSet<Algorithm> algorithms = new HashSet<Algorithm>();
-
     // confidentiality, data integrity, authentication - use AES and HMAC
     if (services.contains(SecService.CONFIDENTIALITY)
         && services.contains(SecService.DATA_INTEGRITY)
