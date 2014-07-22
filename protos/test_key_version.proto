@@ -1,0 +1,25 @@
+syntax = "proto2";
+
+import "key_version.proto";
+
+option java_outer_classname = "TestKeyVersionProto";
+
+option java_package = "com.google.k2crypto.keyversions";
+
+package com.google.k2crypto.keyversions;
+
+message TestKeyVersionData {
+  extend KeyVersionData {
+    required TestKeyVersionData extension = 10000;
+  }
+  // Non-core fields go here
+  optional string comments = 1;
+}
+
+message TestKeyVersionCore {
+  extend KeyVersionCore {
+    required TestKeyVersionCore extension = 10000;
+  }
+  // Core fields will be hashed into the KeyVersion ID
+  optional bytes material = 1; // Required
+}

@@ -12,6 +12,9 @@ package com.google.k2crypto.keyversions;
 enum Type {
   // NEXT ID = 21
 
+  // For Testing Only
+  TEST = 0;
+
   // Asymmetric
   RSA = 1;
   DSA = 2;
@@ -19,23 +22,28 @@ enum Type {
   DH = 4;
   ECDH = 5;
   ECIES = 6;
+
   // FIPS Approved
   AES = 7;
   TRIPLE_DES = 8;
   SKIPJACK = 9;
+
   // AES Finalists
   MARS = 10;
   RC6 = 11;
   SERPENT = 12;
   TWOFISH = 13;
+
   // Other block ciphers
   IDEA = 14;
   RC5 = 15;
   CAST5 = 16;
   BLOWFISH = 17;
+
   // Stream ciphers
   RC4 = 18;
   CHACHA20 = 19;
+
   // Hash-based MAC
   HMAC = 20;
 }
