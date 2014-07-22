@@ -23,11 +23,14 @@ import static org.junit.Assert.fail;
 
 import com.google.k2crypto.K2Context;
 import com.google.k2crypto.K2Exception;
+import com.google.k2crypto.Key;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.net.URI;
 
 /**
  * Unit tests for an InstalledDriver.
@@ -223,8 +226,18 @@ public class InstalledDriverTest {
     }
   }
   
-  public static class NoAnnotationDriver extends MockStoreDriver {
-    public NoAnnotationDriver() {}    
+  public static class NoAnnotationDriver implements StoreDriver {
+    public NoAnnotationDriver() {}
+
+    public void initialize(K2Context context) {}
+    public URI open(URI address) { return null; }
+    public void close() {}
+    public void wrapWith(Key key) {}
+    public boolean isWrapping() { return false; }
+    public boolean isEmpty() { return false; }
+    public void save(Key key) {}
+    public Key load() { return null; }
+    public boolean erase() { return false; }
   }
   
   /**
