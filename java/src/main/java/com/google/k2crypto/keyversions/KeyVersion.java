@@ -106,6 +106,29 @@ public abstract class KeyVersion {
   }
   
   /**
+   * Returns the hash code for the key version, which is a function of the
+   * computed identifier.
+   */
+  @Override
+  public int hashCode() {
+    return getId().hashCode();
+  }
+  
+  /**
+   * Tests the key version for equality with an object.
+   * 
+   * @param obj Object to compare to.
+   * 
+   * @return {@code true} if, and only if, the object is of the same class and
+   *         has the same core bytes as this one. 
+   */
+  @Override
+  public boolean equals(Object obj) {
+    return obj != null && getClass().equals(obj.getClass()) &&
+        getCore().equals(((KeyVersion)obj).getCore());
+  }
+  
+  /**
    * 
    * This class represents an abstract key version builder. It is extended by other classes to allow
    * you to build specific key versions (for example AESKeyVersionBuilder)
@@ -127,7 +150,8 @@ public abstract class KeyVersion {
      * @param kvData Data of the key version.
      * @param registry Registry of all protobuf extensions for key versions.
      * 
-     * @throws InvalidProtocolBufferException if the core could not be parsed. 
+     * @throws InvalidProtocolBufferException if the data could not be parsed,
+     *     e.g. it is not formatted correctly or a required field is missing.
      */
     public Builder withData(KeyVersionData kvData, ExtensionRegistry registry)
         throws InvalidProtocolBufferException {
@@ -149,8 +173,12 @@ public abstract class KeyVersion {
      * from the core to the builder.  
      *     
      * @param kvCore Core of the key version.
+     * 
+     * @throws InvalidProtocolBufferException if the core could not be parsed,
+     *     e.g. it is not formatted correctly or a required field is missing.
      */
-    protected Builder withCore(KeyVersionCore kvCore) {
+    protected Builder withCore(KeyVersionCore kvCore)
+        throws InvalidProtocolBufferException {
       if (kvCore == null) {
         throw new NullPointerException("kvCore");
       }
