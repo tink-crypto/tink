@@ -21,7 +21,6 @@ import com.google.k2crypto.SymmetricEncryption;
 import com.google.k2crypto.exceptions.BuilderException;
 import com.google.k2crypto.exceptions.DecryptionException;
 import com.google.k2crypto.exceptions.EncryptionException;
-import com.google.k2crypto.exceptions.InvalidKeyDataException;
 import com.google.k2crypto.keyversions.AESKeyVersion.Mode;
 import com.google.k2crypto.keyversions.AESKeyVersion.Padding;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
@@ -46,8 +45,7 @@ public class AESKeyVersionTest {
    */
   @Test
   public void testSaveLoad()
-      throws BuilderException, InvalidProtocolBufferException,
-             InvalidKeyDataException {
+      throws BuilderException, InvalidProtocolBufferException {
     
     // Just generate a key version (use non-defaults where possible)
     AESKeyVersion toSave = new AESKeyVersion.Builder().mode(Mode.ECB).build();
