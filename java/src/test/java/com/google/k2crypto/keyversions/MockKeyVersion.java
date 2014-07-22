@@ -18,8 +18,8 @@ package com.google.k2crypto.keyversions;
 
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionCore;
 import com.google.k2crypto.keyversions.KeyVersionProto.KeyVersionData;
-import com.google.k2crypto.keyversions.TestKeyVersionProto.TestKeyVersionCore;
-import com.google.k2crypto.keyversions.TestKeyVersionProto.TestKeyVersionData;
+import com.google.k2crypto.keyversions.MockKeyVersionProto.MockKeyVersionCore;
+import com.google.k2crypto.keyversions.MockKeyVersionProto.MockKeyVersionData;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -35,7 +35,7 @@ import java.util.Random;
  * @author darylseah@gmail.com (Daryl Seah)
  */
 @KeyVersionInfo(
-    type = KeyVersionProto.Type.TEST, proto = TestKeyVersionProto.class)
+    type = KeyVersionProto.Type.TEST, proto = MockKeyVersionProto.class)
 public class MockKeyVersion extends KeyVersion {
   
   /**
@@ -95,10 +95,10 @@ public class MockKeyVersion extends KeyVersion {
   @Override
   protected KeyVersionCore.Builder buildCore() {
     ++buildCoreCalls;
-    TestKeyVersionCore.Builder coreBuilder = TestKeyVersionCore.newBuilder();
+    MockKeyVersionCore.Builder coreBuilder = MockKeyVersionCore.newBuilder();
     coreBuilder.setMaterial(material);
     KeyVersionCore.Builder builder = super.buildCore();
-    builder.setExtension(TestKeyVersionCore.extension, coreBuilder.build());
+    builder.setExtension(MockKeyVersionCore.extension, coreBuilder.build());
     return builder;
   }
   
@@ -108,12 +108,12 @@ public class MockKeyVersion extends KeyVersion {
   @Override
   public KeyVersionData.Builder buildData() {
     ++buildDataCalls;
-    TestKeyVersionData.Builder dataBuilder = TestKeyVersionData.newBuilder();
+    MockKeyVersionData.Builder dataBuilder = MockKeyVersionData.newBuilder();
     if (comments != null) {
       dataBuilder.setComments(comments);
     }
     KeyVersionData.Builder builder = super.buildData();
-    builder.setExtension(TestKeyVersionData.extension, dataBuilder.build());
+    builder.setExtension(MockKeyVersionData.extension, dataBuilder.build());
     return builder;
   }
   
@@ -195,8 +195,8 @@ public class MockKeyVersion extends KeyVersion {
     public Builder withData(KeyVersionData kvData, ExtensionRegistry registry)
         throws InvalidProtocolBufferException {
       super.withData(kvData, registry);
-      TestKeyVersionData data =
-          kvData.getExtension(TestKeyVersionData.extension);
+      MockKeyVersionData data =
+          kvData.getExtension(MockKeyVersionData.extension);
       this.comments(data.hasComments() ? data.getComments() : null);
       return this;
     }
@@ -208,8 +208,8 @@ public class MockKeyVersion extends KeyVersion {
     protected Builder withCore(KeyVersionCore kvCore) 
         throws InvalidProtocolBufferException {
       super.withCore(kvCore);
-      TestKeyVersionCore core =
-          kvCore.getExtension(TestKeyVersionCore.extension);
+      MockKeyVersionCore core =
+          kvCore.getExtension(MockKeyVersionCore.extension);
       if (!core.hasMaterial()) {
         // Material is required
         throw new InvalidProtocolBufferException("Core material missing.");
