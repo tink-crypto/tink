@@ -12,28 +12,22 @@
  * the License.
  */
 
-
 package com.google.k2crypto.keyversions;
-
 
 /**
  * This class represents a a AsymmetricKeyVersion in K2. It is abstract and extended by the two
  * different types of asymmetric key version, PrivateKey and PublicKey
- *
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
 public abstract class AsymmetricKeyVersion extends KeyVersion {
 
   /**
-   * TODO: Daryl can you add a comment on what this constructor does - I copied it from
-   * SymmetricKeyVersion
-   *
-   * @param builder
+   * Passes on the Builder to initialize the KeyVersion super-class. 
+   * 
+   * @param builder Builder from sub-class creation.
    */
   protected AsymmetricKeyVersion(Builder builder) {
     super(builder);
   }
-
-
 }

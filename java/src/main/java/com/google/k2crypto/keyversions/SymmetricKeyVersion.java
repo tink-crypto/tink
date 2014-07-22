@@ -12,7 +12,6 @@
  * the License.
  */
 
-
 package com.google.k2crypto.keyversions;
 
 import javax.crypto.Cipher;
@@ -26,8 +25,9 @@ import javax.crypto.Cipher;
 public abstract class SymmetricKeyVersion extends KeyVersion {
 
   /**
-   * TODO: Daryl can you add a comment on what this constructor does.
-   * @param builder
+   * Passes on the Builder to initialize the KeyVersion super-class. 
+   * 
+   * @param builder Builder from sub-class creation.
    */
   protected SymmetricKeyVersion(Builder builder) {
     super(builder);
@@ -46,5 +46,4 @@ public abstract class SymmetricKeyVersion extends KeyVersion {
    * @return The Cipher used to decrypt data
    */
   public abstract Cipher getDecryptingCipher();
-
 }
