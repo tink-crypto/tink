@@ -113,9 +113,11 @@ public class K2Storage {
   /**
    * Opens a storage location for reading/writing of a {@link Key}.
    * <p>
-   * The string address should be parsable as a URI. Reserved characters
-   * should be URI-escaped if necessary, e.g. {@code "/My Keys"} should be
-   * {@code "/My%20Keys"}. 
+   * The string address should be parsable as a URI. For convenience sake, the
+   * common characters {@code ' '} (spaces) and {@code '%'} (percent characters
+   * not followed by two hex digits) are automatically percent-encoded. All
+   * other invalid URI characters must be manually escaped by the caller,
+   * e.g. {@code "/{my_keys^2}"} should be {@code "/%7Bmy_keys%5e2%7D"}. 
    * <p>
    * This method will search for an installed driver with an identifier matching
    * the scheme of the URI. If no such driver is found (or the scheme is
@@ -139,6 +141,8 @@ public class K2Storage {
     if (address == null) {
       throw new NullPointerException("address");
     }
+    address = AddressUtilities.encodeConvenience(address);
+
     try {
       return open(new URI(address));
     } catch (URISyntaxException ex) {
@@ -172,6 +176,10 @@ public class K2Storage {
     if (address == null) {
       throw new NullPointerException("address");
     }
+    
+    // We have to manually clean up any encoded unreserved characters because
+    // Java's URI class does not do this for us. 
+    address = AddressUtilities.decodeUnreserved(address);
     
     // Grab scheme to find a driver
     String scheme = address.getScheme();
