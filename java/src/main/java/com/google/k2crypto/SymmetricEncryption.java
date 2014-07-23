@@ -22,10 +22,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
-import javax.crypto.IllegalBlockSizeException;
 
 /**
  * This class represents a symmetric encryption in a K2. It is extends Purpose and allows you to
@@ -78,7 +76,7 @@ public class SymmetricEncryption extends Operation {
 
       decryptedData = keyVersion.getDecryptingCipher().doFinal(materialToDecrypt);
       // Catch all exceptions
-    } catch (BadPaddingException | IllegalBlockSizeException e) {
+    } catch (GeneralSecurityException e) {
       // propagate the exception up as an decrypted exception
       throw new DecryptionException("Decryption of byte array failed", e);
     }
