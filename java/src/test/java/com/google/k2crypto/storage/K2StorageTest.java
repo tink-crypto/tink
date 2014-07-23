@@ -71,6 +71,7 @@ public class K2StorageTest {
     assertEquals(0, storage.getInstalledDrivers().size());
   }
   
+  // Test "data" for the above
   public static abstract class BadDriver extends MockStoreDriver {
     private BadDriver() {}
   }
@@ -107,6 +108,7 @@ public class K2StorageTest {
     assertEquals(idriver, drivers.get(0));
   }
   
+  // Test "data" for the above
   @StoreDriverInfo(id="mock", name="Mock Store", version="1.0",
       readOnly=false, wrapSupported=true)
   public static class ConflictingDriver extends MockStoreDriver {}
@@ -263,19 +265,19 @@ public class K2StorageTest {
     assertNull(pathAddress.getScheme());
     
     // Verify that nothing can be opened without any drivers
-    assertOpenFail(storage, exactAddress);
-    assertOpenFail(storage, fileAddress);
-    assertOpenFail(storage, pathAddress);
+    checkOpenFail(storage, exactAddress);
+    checkOpenFail(storage, fileAddress);
+    checkOpenFail(storage, pathAddress);
     
     // Install a driver that accepts all addresses.
     assertNotNull(storage.installDriver(MockStoreDriver.AcceptAll.class));
     
     // Verify that all addresses go to this driver
-    assertOpenSuccess(storage, exactAddress,
+    checkOpenSuccess(storage, exactAddress,
         MockStoreDriver.AcceptAll.class);
-    assertOpenSuccess(storage, fileAddress,
+    checkOpenSuccess(storage, fileAddress,
         MockStoreDriver.AcceptAll.class);
-    assertOpenSuccess(storage, pathAddress,
+    checkOpenSuccess(storage, pathAddress,
         MockStoreDriver.AcceptAll.class);
     
     // Add new driver that matches "exactAddress" exactly.
@@ -285,18 +287,18 @@ public class K2StorageTest {
     assertNotNull(exactDriver);
     
     // Verify that (only) exactAddress now opens this driver
-    assertOpenSuccess(storage, exactAddress,
+    checkOpenSuccess(storage, exactAddress,
         MockStoreDriver.class);
-    assertOpenSuccess(storage, fileAddress,
+    checkOpenSuccess(storage, fileAddress,
         MockStoreDriver.AcceptAll.class);
-    assertOpenSuccess(storage, pathAddress,
+    checkOpenSuccess(storage, pathAddress,
         MockStoreDriver.AcceptAll.class);
     
     // Uninstall the driver
     assertTrue(storage.uninstallDriver(exactDriver.getId()));
     
     // Verify that there is no longer an exact match
-    assertOpenSuccess(storage, exactAddress,
+    checkOpenSuccess(storage, exactAddress,
         MockStoreDriver.AcceptAll.class);
   }
 
@@ -316,19 +318,19 @@ public class K2StorageTest {
     assertNotNull(acceptFileDriver);
     
     // K2 and path should trigger a search (and fail)
-    assertOpenFail(storage, k2Address);
-    assertOpenFail(storage, pathAddress);
+    checkOpenFail(storage, k2Address);
+    checkOpenFail(storage, pathAddress);
     // The file address should be accepted after a brief search
-    assertOpenSuccess(storage, fileAddress, MockStoreDriver.AcceptFile.class);
+    checkOpenSuccess(storage, fileAddress, MockStoreDriver.AcceptFile.class);
     
     // Install an accept all driver
     assertNotNull(storage.installDriver(MockStoreDriver.AcceptAll.class));
 
     // Now all should be successful, but the fileAddress should still
     // be with the same driver.
-    assertOpenSuccess(storage, k2Address, MockStoreDriver.AcceptAll.class);
-    assertOpenSuccess(storage, pathAddress, MockStoreDriver.AcceptAll.class);
-    assertOpenSuccess(storage, fileAddress, MockStoreDriver.AcceptFile.class);
+    checkOpenSuccess(storage, k2Address, MockStoreDriver.AcceptAll.class);
+    checkOpenSuccess(storage, pathAddress, MockStoreDriver.AcceptAll.class);
+    checkOpenSuccess(storage, fileAddress, MockStoreDriver.AcceptFile.class);
 
     // Uninstall and reinstall AcceptFile driver (move to end of search list)
     assertTrue(storage.uninstallDriver(acceptFileDriver.getId()));
@@ -338,13 +340,13 @@ public class K2StorageTest {
 
     // Now file address should point to AcceptAll with the
     // updated search order
-    assertOpenSuccess(storage, fileAddress, MockStoreDriver.AcceptAll.class);
+    checkOpenSuccess(storage, fileAddress, MockStoreDriver.AcceptAll.class);
   }
   
   /**
    * Verifies that a store open succeeds for testOpenXXXDriver/s() tests.
    */
-  private static void assertOpenSuccess(K2Storage storage, URI address,
+  private static void checkOpenSuccess(K2Storage storage, URI address,
       Class<? extends StoreDriver> expectedDriver)
       throws K2Exception {
     Store store = storage.open(address);
@@ -358,7 +360,7 @@ public class K2StorageTest {
   /**
    * Verifies that a store open fails for testOpenXXXDriver/s() tests.
    */
-  private static void assertOpenFail(K2Storage storage, URI address)
+  private static void checkOpenFail(K2Storage storage, URI address)
       throws K2Exception {
     try {
       storage.open(address).close();
