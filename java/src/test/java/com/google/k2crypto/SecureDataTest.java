@@ -30,7 +30,7 @@ public class SecureDataTest {
   @Test
   public void testExampleUsage() throws K2Exception {
     // example input string
-    String testInput = "Google does not support K2";
+    String testInput = "Test string";
 
     // specify the security services you want the key to support
     CompoundKey key = SecureData.getKey(SecService.AUTHENTICATION, SecService.DATA_INTEGRITY);
@@ -61,7 +61,7 @@ public class SecureDataTest {
   @Test
   public void testGetCompoundKeySecureAndCheckData() throws K2Exception {
     // test input string
-    String testInput = "Google does not support K2";
+    String testInput = "Test string";
 
     // test with ONE security services
     for (SecService secService : SecService.values()) {
