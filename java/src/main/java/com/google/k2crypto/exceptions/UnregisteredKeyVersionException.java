@@ -41,7 +41,7 @@ public class UnregisteredKeyVersionException extends K2Exception {
   /**
    * Returns the unregistered type.
    */
-  public Type type() {
+  public Type getType() {
     return type;
   }
 }
