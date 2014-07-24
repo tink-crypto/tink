@@ -104,7 +104,7 @@ public class K2FileSystemDriver implements StoreDriver {
    * Regex blacklisting illegal characters in a filename.
    */
   private static final Pattern FILENAME_BLACK = Pattern.compile(
-      "[\\u0000-\\u001F \\\\ \\/ \\* \\? \\| \\< \\> \\: \\; \\\"]",
+      "[\\u0000-\\u001F" + Pattern.quote("\\/*?|<>:;\"") + "]",
       // all control characters, \, /, *, ?, |, <, >, :, ;, "
       Pattern.COMMENTS);
   
