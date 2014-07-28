@@ -14,6 +14,8 @@
 
 package com.google.k2crypto;
 
+import com.google.protobuf.ByteString;
+
 /**
  * This class represents a blob of data secured according to NIST guidelines
  *
@@ -57,13 +59,51 @@ public class SecureDataBlob {
   private byte[] unencryptedData = null;
 
   /**
+   * The ID of the HMAC KeyVersion
+   */
+  private ByteString hmacId;
+
+  /**
+   * The ID of the encryption KeyVersion
+   */
+  private ByteString encryptionId;
+
+  /**
+   * The ID of the signing KeyVersion
+   */
+  private ByteString signingId;
+
+  /**
+   * @return the hmacId
+   */
+  public ByteString getHmacId() {
+    return hmacId;
+  }
+
+  /**
+   * @return the encryptionId
+   */
+  public ByteString getEncryptionId() {
+    return encryptionId;
+  }
+
+  /**
+   * @return the signingId
+   */
+  public ByteString getSigningId() {
+    return signingId;
+  }
+
+
+  /**
    * Set digital signature method
    *
    * @param signature
    */
-  public void setDigitalSignature(byte[] signature) {
+  public void setDigitalSignature(byte[] signature, ByteString signingId) {
     this.digitalSignature = signature;
     this.isSigned = true;
+    this.signingId = signingId;
   }
 
   /**
@@ -71,9 +111,10 @@ public class SecureDataBlob {
    *
    * @param encryptedData
    */
-  public void setEncryptedData(byte[] encryptedData) {
+  public void setEncryptedData(byte[] encryptedData, ByteString encryptionId) {
     this.encryptedData = encryptedData;
     this.isEncrypted = true;
+    this.encryptionId = encryptionId;
   }
 
   /**
@@ -81,9 +122,10 @@ public class SecureDataBlob {
    *
    * @param hmac
    */
-  public void setHmac(byte[] hmac) {
+  public void setHmac(byte[] hmac, ByteString hmacId) {
     this.hmac = hmac;
     this.hasHmac = true;
+    this.hmacId = hmacId;
   }
 
   /**

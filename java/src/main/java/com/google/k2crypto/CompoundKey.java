@@ -67,6 +67,8 @@ public class CompoundKey {
     AESKeyVersion aesKeyVersion = new AESKeyVersion.Builder().keyVersionLengthInBytes(16).build();
     // now put it in a Key and set it as the symmetric encryption key
     symmetricEncryptionKey = new Key(aesKeyVersion);
+
+    System.out.println(symmetricEncryptionKey.getPrimary().getId());
   }
 
   /**
@@ -79,6 +81,8 @@ public class CompoundKey {
     DSAPrivateKeyVersion dsaKeyVersion = new DSAPrivateKeyVersion.Builder().build();
     // now put it in a Key and set it as the digital signing key
     signingKey = new Key(dsaKeyVersion);
+
+    System.out.println(signingKey.getPrimary().getId());
   }
 
   /**
@@ -217,10 +221,9 @@ public class CompoundKey {
 
   /**
    * Get a secure data blob using this compound key to secure the data
-   * @param inputData
-   * The data we want to secure
-   * @return
-   * A SecureDataBlob representing the secured data
+   *
+   * @param inputData The data we want to secure
+   * @return A SecureDataBlob representing the secured data
    * @throws EncryptionException
    */
   public SecureDataBlob getSecureData(byte[] inputData) throws EncryptionException {
@@ -232,16 +235,19 @@ public class CompoundKey {
     if (this.getEncryptionKey() != null) {
       // get the encrypted data
       byte[] encryptedData = this.encryptData(inputData);
-      // save the encrypted data in the secure data blob
-      secureDataBlob.setEncryptedData(encryptedData);
+      // save the encrypted data in the secure data blob along with the ID used to do the encryption
+      secureDataBlob.setEncryptedData(encryptedData, this.getEncryptionKey().getPrimary().getId());
 
       // do signing if required - using encrypted data
       if (this.getSigningKey() != null) {
-        secureDataBlob.setDigitalSignature(this.getSignature(encryptedData));
+        // also save key version ID used to to the signing
+        secureDataBlob.setDigitalSignature(this.getSignature(encryptedData),
+            this.getSigningKey().getPrimary().getId());
       }
       // do HMAC if required - using encrypted data
       if (this.getHmacKey() != null) {
-        secureDataBlob.setHmac(this.getHMAC(encryptedData));
+        // save hmac and the key version ID of the hmac key version
+        secureDataBlob.setHmac(this.getHMAC(encryptedData), this.getHmacKey().getPrimary().getId());
       }
 
       // else without encryption
@@ -251,11 +257,14 @@ public class CompoundKey {
 
       // do signing if required - using plain unencrypted data
       if (this.getSigningKey() != null) {
-        secureDataBlob.setDigitalSignature(this.getSignature(inputData));
+        // also save key version ID used to to the signing
+        secureDataBlob.setDigitalSignature(this.getSignature(inputData),
+            this.getSigningKey().getPrimary().getId());
       }
       // do HMAC if required - using plain unencrypted data
+      // save hmac and the key version ID of the hmac key version
       if (this.getHmacKey() != null) {
-        secureDataBlob.setHmac(this.getHMAC(inputData));
+        secureDataBlob.setHmac(this.getHMAC(inputData), this.getHmacKey().getPrimary().getId());
       }
     }
 
