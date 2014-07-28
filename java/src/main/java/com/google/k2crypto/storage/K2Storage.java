@@ -18,6 +18,8 @@ package com.google.k2crypto.storage;
 
 import com.google.k2crypto.K2Context;
 import com.google.k2crypto.Key;
+import com.google.k2crypto.storage.driver.AddressUtilities;
+import com.google.k2crypto.storage.driver.Driver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -222,16 +224,16 @@ public class K2Storage {
    * Installs a storage driver.
    * 
    * @param driverClass Class of the driver implementation to install.
-   *                    See {@link StoreDriver} for specifications. 
+   *                    See {@link Driver} for specifications. 
    * 
    * @return {@link InstalledDriver} if successfully installed, {@code null}
    *         if a driver with the same identifier is already installed.
    *         
-   * @throws StoreDriverException if there is a problem with the driver
-   *                              implementation.
+   * @throws StorageDriverException if there is a problem with the driver
+   *                                implementation.
    */
-  public InstalledDriver installDriver(Class<? extends StoreDriver> driverClass) 
-      throws StoreDriverException {
+  public InstalledDriver installDriver(Class<? extends Driver> driverClass) 
+      throws StorageDriverException {
     
     InstalledDriver driver = new InstalledDriver(context, driverClass);
     String id = driver.getId();

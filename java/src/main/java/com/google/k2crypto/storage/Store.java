@@ -18,6 +18,10 @@ package com.google.k2crypto.storage;
 
 import com.google.k2crypto.K2Context;
 import com.google.k2crypto.Key;
+import com.google.k2crypto.storage.driver.Driver;
+import com.google.k2crypto.storage.driver.ReadableDriver;
+import com.google.k2crypto.storage.driver.WrappingDriver;
+import com.google.k2crypto.storage.driver.WritableDriver;
 
 import java.net.URI;
 
@@ -39,7 +43,7 @@ public class Store {
   private final InstalledDriver installedDriver;
   
   // Driver instance being wrapped
-  private final StoreDriver driver;
+  private final Driver driver;
 
   // Storage address that the store points to
   private URI address;
@@ -103,7 +107,7 @@ public class Store {
   /**
    * Provides access to the driver instance (for testing).
    */
-  StoreDriver getDriver() {
+  Driver getDriver() {
     return driver;
   }
   
@@ -214,11 +218,12 @@ public class Store {
     try {
       synchronized (lock) {
         checkOpen();
-        if (!installedDriver.isWrapSupported()) {
+        if (driver instanceof WrappingDriver) {
+          ((WrappingDriver)driver).wrapWith(key);
+        } else {
           throw new UnsupportedByStoreException(
               UnsupportedByStoreException.Reason.NO_WRAP);
         }
-        driver.wrapWith(key);
       }
     } catch (StoreException ex) {
       ex.setStore(this);
@@ -242,8 +247,8 @@ public class Store {
         checkOpen();
         // We are basically expanding wrapWith implemented at the driver
         // so that it will be clearer to the user of the store
-        if (installedDriver.isWrapSupported()) {
-          driver.wrapWith(null);
+        if (driver instanceof WrappingDriver) {
+          ((WrappingDriver)driver).wrapWith(null);
         }
       }
     } catch (StoreException ex) {
@@ -264,8 +269,8 @@ public class Store {
     try {
       synchronized (lock) {
         checkOpen();
-        if (installedDriver.isWrapSupported()) {
-          return driver.isWrapping();
+        if (driver instanceof WrappingDriver) {
+          return ((WrappingDriver)driver).isWrapping();
         }
       }
     } catch (StoreException ex) {
@@ -286,13 +291,20 @@ public class Store {
    * 
    * @throws StoreStateException if the store is not open.
    * @throws StoreIOException if there is an I/O issue with checking emptiness.
+   * @throws UnsupportedByStoreException if the store is write-only.
    * @throws StoreException if there is a driver-specific issue.
    */
   public boolean isEmpty() throws StoreException {
     try {
       synchronized (lock) {
         checkOpen();
-        return driver.isEmpty();
+        if (driver instanceof ReadableDriver) {
+          return ((ReadableDriver)driver).isEmpty();
+        } else {
+          // Non-readable implies the driver must be writable
+          throw new UnsupportedByStoreException(
+              UnsupportedByStoreException.Reason.WRITE_ONLY);
+        }
       }
     } catch (StoreException ex) {
       ex.setStore(this);
@@ -318,11 +330,13 @@ public class Store {
     try {
       synchronized (lock) {
         checkOpen();
-        if (installedDriver.isReadOnly()) {
+        if (driver instanceof WritableDriver) {
+          ((WritableDriver)driver).save(key);
+        } else {
+          // Non-writable implies the driver must be readable
           throw new UnsupportedByStoreException(
               UnsupportedByStoreException.Reason.READ_ONLY);
         }
-        driver.save(key);
       }
     } catch (StoreException ex) {
       ex.setStore(this);
@@ -337,13 +351,20 @@ public class Store {
    * 
    * @throws StoreStateException if the store is not open.
    * @throws StoreIOException if there is an I/O issue with loading the key.
+   * @throws UnsupportedByStoreException if the store is write-only.
    * @throws StoreException if there is a driver-specific issue with loading.
    */
   public Key load() throws StoreException {
     try {
       synchronized (lock) {
         checkOpen();
-        return driver.load();
+        if (driver instanceof ReadableDriver) {
+          return ((ReadableDriver)driver).load();
+        } else {
+          // Non-readable implies the driver must be writable
+          throw new UnsupportedByStoreException(
+              UnsupportedByStoreException.Reason.WRITE_ONLY);
+        }
       }
     } catch (StoreException ex) {
       ex.setStore(this);
@@ -366,11 +387,13 @@ public class Store {
     try {
       synchronized (lock) {
         checkOpen();
-        if (installedDriver.isReadOnly()) {
+        if (driver instanceof WritableDriver) {
+          return ((WritableDriver)driver).erase();
+        } else {
+          // Non-writable implies the driver must be readable
           throw new UnsupportedByStoreException(
               UnsupportedByStoreException.Reason.READ_ONLY);
-        }        
-        return driver.erase();
+        }
       }
     } catch (StoreException ex) {
       ex.setStore(this);

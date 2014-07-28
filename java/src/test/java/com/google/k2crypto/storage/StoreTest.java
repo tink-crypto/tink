@@ -55,7 +55,7 @@ public class StoreTest {
    */
   @Before public final void setUp() throws K2Exception {
     context = new K2Context();
-    normalDriver = new InstalledDriver(context, MockStoreDriver.class);
+    normalDriver = new InstalledDriver(context, MockDriver.Normal.class);
     
     // TODO: We need a proper way to create keys for testing.
     //       The current approach is fragile and WILL break later.
@@ -76,7 +76,7 @@ public class StoreTest {
     assertEquals(address, store.getAddress());
 
     // Check driver state
-    MockStoreDriver driver = (MockStoreDriver)store.getDriver();
+    MockDriver driver = (MockDriver)store.getDriver();
     assertTrue(driver.initCalled);
     assertFalse(driver.openCalled);
     assertFalse(driver.closeCalled);
@@ -141,7 +141,7 @@ public class StoreTest {
   @Test public final void testSaveWithWrapping() throws K2Exception {
     URI address = URI.create(normalDriver.getId() + ADDRESS_FRAGMENT);
     Store store = new Store(normalDriver, address);
-    MockStoreDriver driver = (MockStoreDriver)store.getDriver();
+    MockDriver driver = (MockDriver)store.getDriver();
     store.open();
 
     // Set wrap key
@@ -212,7 +212,7 @@ public class StoreTest {
   @Test public final void testLoadWithWrapping() throws K2Exception {
     URI address = URI.create(normalDriver.getId() + ADDRESS_FRAGMENT);
     Store store = new Store(normalDriver, address);
-    MockStoreDriver driver = (MockStoreDriver)store.getDriver();
+    MockDriver driver = (MockDriver)store.getDriver();
     store.open();
     
     // Set the wrapping key
@@ -311,7 +311,7 @@ public class StoreTest {
   @Test public final void testEraseWithWrapping() throws K2Exception {
     URI address = URI.create(normalDriver.getId() + ADDRESS_FRAGMENT);
     Store store = new Store(normalDriver, address);
-    MockStoreDriver driver = (MockStoreDriver)store.getDriver();
+    MockDriver driver = (MockDriver)store.getDriver();
     store.open();
     
     // Set the wrapping key
@@ -362,7 +362,7 @@ public class StoreTest {
   @Test public final void testAccessBeforeOpen() throws K2Exception {
     URI address = URI.create(normalDriver.getId() + ADDRESS_FRAGMENT);
     Store store = new Store(normalDriver, address);
-    MockStoreDriver driver = (MockStoreDriver)store.getDriver();
+    MockDriver driver = (MockDriver)store.getDriver();
     
     // All method calls below should fail
     try {
@@ -436,7 +436,7 @@ public class StoreTest {
   @Test public final void testAccessAfterClose() throws K2Exception {
     URI address = URI.create(normalDriver.getId() + ADDRESS_FRAGMENT);
     Store store = new Store(normalDriver, address);
-    MockStoreDriver driver = (MockStoreDriver)store.getDriver();
+    MockDriver driver = (MockDriver)store.getDriver();
 
     // Straight to closed state without open 
     store.close();
@@ -513,15 +513,15 @@ public class StoreTest {
   }
   
   /**
-   * Tests that save and erase do not work on a read-only driver.  
+   * Tests that save(Key) and erase() do not work on a read-only driver.  
    */
   @Test public final void testAccessForReadOnlyDriver() throws K2Exception {
     InstalledDriver readOnlyDriver =
-        new InstalledDriver(context, MockStoreDriver.ReadOnly.class);
+        new InstalledDriver(context, MockDriver.ReadOnly.class);
     URI address = URI.create(readOnlyDriver.getId() + ADDRESS_FRAGMENT);
     Store store = new Store(readOnlyDriver, address);
     assertEquals(readOnlyDriver, store.getInstalledDriver());
-    MockStoreDriver driver = (MockStoreDriver)store.getDriver();
+    MockDriver driver = (MockDriver)store.getDriver();
     store.open();
     
     // Save and erase should fail
@@ -578,16 +578,82 @@ public class StoreTest {
   }
   
   /**
+   * Tests that load() and isEmpty() do not work on a write-only driver.  
+   */
+  @Test public final void testAccessForWriteOnlyDriver() throws K2Exception {
+    InstalledDriver writeOnlyDriver =
+        new InstalledDriver(context, MockDriver.WriteOnly.class);
+    URI address = URI.create(writeOnlyDriver.getId() + ADDRESS_FRAGMENT);
+    Store store = new Store(writeOnlyDriver, address);
+    assertEquals(writeOnlyDriver, store.getInstalledDriver());
+    MockDriver driver = (MockDriver)store.getDriver();
+    store.open();
+    
+    // Load and isEmpty should fail
+    try {
+      store.load();
+      fail("Load works for write-only driver.");
+    } catch (UnsupportedByStoreException ex) {
+      assertEquals(UnsupportedByStoreException.Reason.WRITE_ONLY,
+          ex.getReason());
+      assertEquals(store, ex.getStore());
+    }
+    try {
+      store.isEmpty();
+      fail("IsEmpty works for write-only driver.");
+    } catch (UnsupportedByStoreException ex) {
+      assertEquals(UnsupportedByStoreException.Reason.WRITE_ONLY,
+          ex.getReason());
+      assertEquals(store, ex.getStore());
+    }
+    
+    // ...even with a wrapping key (sanity check)
+    store.wrapWith(wrapKeyA);
+    try {
+      store.load();
+      fail("Load works for write-only driver with a wrapping key.");
+    } catch (UnsupportedByStoreException ex) {
+      assertEquals(UnsupportedByStoreException.Reason.WRITE_ONLY,
+          ex.getReason());
+      assertEquals(store, ex.getStore());
+    }
+    try {
+      store.isEmpty();
+      fail("IsEmpty works for write-only driver with a wrapping key.");
+    } catch (UnsupportedByStoreException ex) {
+      assertEquals(UnsupportedByStoreException.Reason.WRITE_ONLY,
+          ex.getReason());
+      assertEquals(store, ex.getStore());
+    }
+    
+    // The remaining method calls should work
+    assertEquals(store, store.noWrap());
+    assertFalse(store.isWrapping());
+    store.save(saveKey);
+    assertTrue(store.erase());
+    assertFalse(store.erase());
+
+    // The driver should only see permitted calls
+    assertEquals(2, driver.wrapWithCalls);
+    assertEquals(1, driver.isWrappingCalls);
+    assertEquals(0, driver.isEmptyCalls);
+    assertEquals(0, driver.loadCalls);
+    assertEquals(1, driver.saveCalls);
+    assertEquals(2, driver.eraseCalls);
+    store.close();
+  }
+  
+  /**
    * Tests that wrapWith() and noWrap()/isWrapping() do not work on a
    * no-wrap driver.  
    */
   @Test public final void testAccessForNoWrapDriver() throws K2Exception {
     InstalledDriver noWrapDriver =
-        new InstalledDriver(context, MockStoreDriver.NoWrap.class);
+        new InstalledDriver(context, MockDriver.NoWrap.class);
     URI address = URI.create(noWrapDriver.getId() + ADDRESS_FRAGMENT);
     Store store = new Store(noWrapDriver, address);
     assertEquals(noWrapDriver, store.getInstalledDriver());
-    MockStoreDriver driver = (MockStoreDriver)store.getDriver();
+    MockDriver driver = (MockDriver)store.getDriver();
     store.open();
     
     // wrapWith should fail
@@ -626,7 +692,7 @@ public class StoreTest {
    */
   @Test public final void testAddressChangeDriver() throws K2Exception {
     InstalledDriver acceptAllDriver =
-        new InstalledDriver(context, MockStoreDriver.AcceptAll.class);
+        new InstalledDriver(context, MockDriver.AcceptAll.class);
     URI address = URI.create("file" + ADDRESS_FRAGMENT);
     Store store = new Store(acceptAllDriver, address);
     assertEquals(acceptAllDriver, store.getInstalledDriver());
@@ -643,7 +709,7 @@ public class StoreTest {
   @Test public final void testRejectNulls() throws K2Exception {
     URI address = URI.create(normalDriver.getId() + ADDRESS_FRAGMENT);
     Store store = new Store(normalDriver, address);
-    MockStoreDriver driver = (MockStoreDriver)store.getDriver();
+    MockDriver driver = (MockDriver)store.getDriver();
     store.open();
     
     // WrapWith should fail
