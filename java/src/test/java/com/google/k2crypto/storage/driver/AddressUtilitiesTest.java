@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.google.k2crypto.storage;
+package com.google.k2crypto.storage.driver;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import com.google.k2crypto.storage.IllegalAddressException;
+import com.google.k2crypto.storage.driver.AddressUtilities;
 
 import java.net.URI;
 

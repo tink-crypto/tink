@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.k2crypto.storage;
+package com.google.k2crypto.storage.driver;
 
 import com.google.k2crypto.storage.IllegalAddressException;
 
