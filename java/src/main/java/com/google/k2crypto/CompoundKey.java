@@ -67,8 +67,6 @@ public class CompoundKey {
     AESKeyVersion aesKeyVersion = new AESKeyVersion.Builder().keyVersionLengthInBytes(16).build();
     // now put it in a Key and set it as the symmetric encryption key
     symmetricEncryptionKey = new Key(aesKeyVersion);
-
-    System.out.println(symmetricEncryptionKey.getPrimary().getId());
   }
 
   /**
@@ -81,8 +79,6 @@ public class CompoundKey {
     DSAPrivateKeyVersion dsaKeyVersion = new DSAPrivateKeyVersion.Builder().build();
     // now put it in a Key and set it as the digital signing key
     signingKey = new Key(dsaKeyVersion);
-
-    System.out.println(signingKey.getPrimary().getId());
   }
 
   /**
