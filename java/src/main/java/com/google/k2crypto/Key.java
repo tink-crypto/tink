@@ -126,6 +126,10 @@ public class Key {
         // Throw proto parsing exceptions immediately
         throw new InvalidKeyDataException(
             InvalidKeyDataException.Reason.PROTO_PARSE, ex);
+      } catch (RuntimeException ex) {
+        // We consider runtime exceptions to be parsing exceptions
+        throw new InvalidKeyDataException(
+            InvalidKeyDataException.Reason.PROTO_PARSE, ex);        
       } catch (BuilderException ex) {
         // Delay-throw builder exceptions...
         buildException = new InvalidKeyDataException(

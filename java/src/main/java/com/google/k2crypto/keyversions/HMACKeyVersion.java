@@ -266,7 +266,8 @@ public class HMACKeyVersion extends HashKeyVersion {
      * @see KeyVersion.Builder#withCore(KeyVersionCore)
      */
     @Override
-    protected Builder withCore(KeyVersionCore kvCore) {
+    protected Builder withCore(KeyVersionCore kvCore)
+        throws InvalidProtocolBufferException {
       super.withCore(kvCore);
       
       HmacKeyVersionCore core =

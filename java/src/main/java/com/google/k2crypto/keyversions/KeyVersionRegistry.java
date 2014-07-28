@@ -88,7 +88,10 @@ public class KeyVersionRegistry {
    *     for the type has not been registered. 
    */
   public KeyVersion.Builder newBuilder(Type type)
-      throws UnregisteredKeyVersionException{
+      throws UnregisteredKeyVersionException {
+    if (type == null) {
+      throw new NullPointerException("type");
+    }
     RegisteredKeyVersion regKeyVersion;
     synchronized (keyVersions) {
       regKeyVersion = keyVersions.get(type);
@@ -107,6 +110,9 @@ public class KeyVersionRegistry {
    * @return {@code true} if the type is registered, {@code false} otherwise.
    */
   public boolean isRegistered(Type type) {
+    if (type == null) {
+      throw new NullPointerException("type");
+    }
     synchronized (keyVersions) {
       return keyVersions.containsKey(type);
     }
@@ -121,6 +127,9 @@ public class KeyVersionRegistry {
    *     the type has not been registered.
    */
   public RegisteredKeyVersion getRegistration(Type type) {
+    if (type == null) {
+      throw new NullPointerException("type");
+    }
     synchronized (keyVersions) {
       return keyVersions.get(type);
     }    

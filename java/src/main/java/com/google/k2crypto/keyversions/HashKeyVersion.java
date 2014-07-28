@@ -21,6 +21,12 @@ package com.google.k2crypto.keyversions;
  * @author John Maheswaran (maheswaran@google.com)
  */
 public abstract class HashKeyVersion extends KeyVersion {
+
+  /**
+   * Passes on the Builder to initialize the KeyVersion super-class. 
+   * 
+   * @param builder Builder from sub-class creation.
+   */
   protected HashKeyVersion(Builder builder) {
     super(builder);
   }
