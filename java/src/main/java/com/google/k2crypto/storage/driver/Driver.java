@@ -14,29 +14,36 @@
  * limitations under the License.
  */
 
-package com.google.k2crypto.storage;
+package com.google.k2crypto.storage.driver;
 
 import com.google.k2crypto.K2Context;
-import com.google.k2crypto.Key;
+import com.google.k2crypto.storage.IllegalAddressException;
+import com.google.k2crypto.storage.Store;
+import com.google.k2crypto.storage.StoreException;
 
 import java.net.URI;
 
 /**
- * Driver interface for a {@link Key} storage location.
+ * Main driver interface for a key storage location.
  * <p>
  * Drivers are concrete implementations of a {@link Store}. In addition to
  * implementing this interface, the instantiatable driver class must be
- * annotated with {@link StoreDriverInfo} and provide a public constructor
- * with no arguments. When instantiated, {@link #initialize(K2Context)}
- * will be invoked on the driver to provide the context of the current K2
- * session. After a successful initialization, {@link #open(URI)} will be
- * called to actually allocate resources for performing storage operations
- * on the specified storage address. This method may throw {@link
- * IllegalAddressException} if the address is not recognized by the
- * driver. Finally, {@link #close()} will be called to free resources, after
- * the user has performed the storage operations. Note that it is NOT safe to
- * allocate resources before {@link #open(URI)} is called, e.g. during
- * construction or on initialize.
+ * annotated with {@link DriverInfo}, provide a public constructor
+ * with no arguments and implement {@link ReadableDriver} and/or
+ * {@link WritableDriver} depending on the operations supported. For example,
+ * a driver that only allows importing of Keys would only implement
+ * {@link ReadableDriver}. The {@link WrappingDriver} interface should be 
+ * implemented for drivers that support wrapping/unwrapping of Keys.   
+ * <p>
+ * When instantiated, {@link #initialize(K2Context)} will be invoked on the
+ * driver to provide the context of the current K2 session. After a successful
+ * initialization, {@link #open(URI)} will be called to actually allocate
+ * resources for performing storage operations on the specified storage address.
+ * This method may throw {@link IllegalAddressException} if the address is not
+ * recognized by the driver. Finally, {@link #close()} will be called to free
+ * resources, after the user has performed the storage operations. Note that it
+ * is NOT safe to allocate resources before {@link #open(URI)} is called,
+ * e.g. during construction or on initialize.
  * <p>
  * Drivers need not be concerned with thread safety, or methods invoked when
  * they are not supported, or methods invoked when {@link #open(URI)} has not
@@ -51,7 +58,7 @@ import java.net.URI;
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-public interface StoreDriver {
+public interface Driver {
 
   /**
    * Initializes the driver instance with the K2 environment.
@@ -99,82 +106,4 @@ public interface StoreDriver {
    * invoked after a close.
    */
   void close();
-  
-  /**
-   * Indicates that subsequent saves/loads on this store should be
-   * wrapped/unwrapped with the provided key.
-   * <p>
-   * The driver should, in its initial state, have no wrapping key set.
-   * <p>
-   * This method will only be called if the driver declares
-   * {@code wrapSupport=true} with {@link StoreDriverInfo}.
-   * 
-   * @param key Key protecting the actual stored key, or null to disable
-   *            wrapping.
-   * 
-   * @throws StoreException if a key is provided and it cannot be used for
-   *                        wrapping
-   */
-  void wrapWith(Key key) throws StoreException;
-  
-  /**
-   * Returns {@code true} if a wrapping key is currently set (with
-   * {@link #wrapWith(Key)}), {@code false} otherwise.
-   * <p>
-   * This method will only be called if the driver declares
-   * {@code wrapSupport=true} with {@link StoreDriverInfo}.
-   */
-  boolean isWrapping();
-  
-  /**
-   * Returns {@code true} if there is no key stored at this location,
-   * {@code false} if one might be present.
-   * <p>
-   * Note that if this method returns false, there is no a guarantee that the
-   * key will actually be readable. The data might be encrypted, corrupted
-   * or be in an invalid format. An attempt must be made to {@link #load()} to
-   * know for sure if it is readable.
-   * 
-   * @throws StoreIOException if there is an I/O issue with checking emptiness.
-   * @throws StoreException if the store could not be queried.
-   */
-  boolean isEmpty() throws StoreException;
-    
-  /**
-   * Saves the given key to the store. Any existing key will be silently
-   * replaced, regardless of whether it is wrapped.
-   * <p>
-   * This method will never be called if the driver declares
-   * {@code readOnly=true} with {@link StoreDriverInfo}.
-   *  
-   * @param key Key to save.
-   * 
-   * @throws StoreIOException if there is an I/O issue with saving the key.
-   * @throws StoreException if there is some issue saving the given key.
-   */
-  void save(Key key) throws StoreException;
-    
-  /**
-   * Loads the key stored at this location. 
-   * 
-   * @return the stored key or null if the location is empty.
-   * 
-   * @throws StoreIOException if there is an I/O issue with loading the key.
-   * @throws StoreException if there is some issue loading the stored data.
-   */
-  Key load() throws StoreException;
- 
-  /**
-   * Erases any stored key, regardless of whether it is wrapped.
-   * <p>
-   * This method will never be called if the driver declares
-   * {@code readOnly=true} with {@link StoreDriverInfo}.
-   * 
-   * @return {@code true} if, and only if, there was data present and it has
-   *         been erased.
-   * 
-   * @throws StoreIOException if there is an I/O issue with erasing the key.
-   * @throws StoreException if there is some issue erasing stored data.
-   */
-  boolean erase() throws StoreException;
 }

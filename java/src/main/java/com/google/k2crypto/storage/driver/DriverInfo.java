@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.k2crypto.storage;
+package com.google.k2crypto.storage.driver;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
@@ -22,14 +22,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Annotation applied to all {@link StoreDriver} implementations.
+ * Annotation applied to all {@link Driver} implementations.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface StoreDriverInfo {
+public @interface DriverInfo {
   
   /**
    * Unique identifier of the driver, which users will specify in the scheme
@@ -52,14 +52,4 @@ public @interface StoreDriverInfo {
    * Version string of the driver.
    */
   String version();
-  
-  /**
-   * Whether the driver can only read keys and not write them.
-   */
-  boolean readOnly();
-  
-  /**
-   * Whether the driver supports wrapped (encrypted) keys.
-   */
-  boolean wrapSupported();
 }
