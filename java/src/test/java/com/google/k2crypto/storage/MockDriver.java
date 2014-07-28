@@ -20,24 +20,29 @@ import static org.junit.Assert.fail;
 
 import com.google.k2crypto.Key;
 import com.google.k2crypto.K2Context;
+import com.google.k2crypto.storage.driver.Driver;
+import com.google.k2crypto.storage.driver.DriverInfo;
+import com.google.k2crypto.storage.driver.ReadableDriver;
+import com.google.k2crypto.storage.driver.WrappingDriver;
+import com.google.k2crypto.storage.driver.WritableDriver;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- * Mock implementation of a store driver. The mock, by default, is most 
- * permissively declared (i.e. not read-only and supports key wrapping).
- * However, it will reject addresses that have a schemes that do not match
- * its identifier.
+ * Mock implementation of a storage driver. The mock super-class implements all
+ * driver capabilities, but does not declare them. This is so that sub-classes
+ * can selectively declare what capabilities they want the mock to expose. 
+ * Also, by default, the mock will reject addresses that have a schemes that
+ * do not match its identifier.
  * <p>
  * The mock will raise assertion errors if it is used in a manner
  * that violates expected {@link Store} behavior.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-@StoreDriverInfo(id="mock", name="Mock Store", version="1.0",
-    readOnly=false, wrapSupported=true)
-public class MockStoreDriver implements StoreDriver {
+@DriverInfo(id="mock", name="Mock Driver", version="1.0")
+public abstract class MockDriver implements Driver {
   // All variables are package-protected for easy inspection.
   
   K2Context context;
@@ -66,8 +71,8 @@ public class MockStoreDriver implements StoreDriver {
   /**
    * Returns the meta-data annotated on the driver class.
    */
-  StoreDriverInfo getInfo() {
-    StoreDriverInfo info = getClass().getAnnotation(StoreDriverInfo.class);
+  DriverInfo getInfo() {
+    DriverInfo info = getClass().getAnnotation(DriverInfo.class);
     if (info == null) {
       fail("There should be an annotation.");
     }
@@ -75,7 +80,7 @@ public class MockStoreDriver implements StoreDriver {
   }
   
   /**
-   * @see StoreDriver#initialize(K2Context)
+   * @see Driver#initialize(K2Context)
    */
   public void initialize(K2Context context) {
     boolean prevInitCalled = initCalled;
@@ -89,7 +94,7 @@ public class MockStoreDriver implements StoreDriver {
   }
 
   /**
-   * @see StoreDriver#open(java.net.URI)
+   * @see Driver#open(java.net.URI)
    */
   public URI open(URI address) throws IllegalAddressException, StoreException {
     boolean prevOpenCalled = openCalled;
@@ -114,7 +119,7 @@ public class MockStoreDriver implements StoreDriver {
   }
 
   /**
-   * @see StoreDriver#close()
+   * @see Driver#close()
    */
   public void close() {
     boolean prevCloseCalled = closeCalled;
@@ -136,16 +141,16 @@ public class MockStoreDriver implements StoreDriver {
   }
   
   /**
-   * @see StoreDriver#wrapWith(Key)
+   * @see WrappingDriver#wrapWith(Key)
    */
-  public void wrapWith(Key key) throws StoreException {
+  public void wrapWith(Key key) {
     ++wrapWithCalls;
     checkOpen();
     wrapKey = key;
   }
 
   /**
-   * @see StoreDriver#isWrapping()
+   * @see WrappingDriver#isWrapping()
    */
   public boolean isWrapping() {
     ++isWrappingCalls;
@@ -154,18 +159,18 @@ public class MockStoreDriver implements StoreDriver {
   }
 
   /**
-   * @see StoreDriver#isEmpty()
+   * @see ReadableDriver#isEmpty()
    */
-  public boolean isEmpty() throws StoreException {
+  public boolean isEmpty() {
     ++isEmptyCalls;
     checkOpen();
     return storedKey == null;
   }
 
   /**
-   * @see StoreDriver#save(Key)
+   * @see WritableDriver#save(Key)
    */
-  public void save(Key key) throws StoreException {
+  public void save(Key key) {
     ++saveCalls;
     if (key == null) {
       fail("Key to save should never be null.");
@@ -176,7 +181,7 @@ public class MockStoreDriver implements StoreDriver {
   }
 
   /**
-   * @see StoreDriver#load()
+   * @see ReadableDriver#load()
    */
   public Key load() throws StoreException {
     ++loadCalls;
@@ -198,9 +203,9 @@ public class MockStoreDriver implements StoreDriver {
   }
 
   /**
-   * @see StoreDriver#erase()
+   * @see WritableDriver#erase()
    */
-  public boolean erase() throws StoreException {
+  public boolean erase() {
     ++eraseCalls;
     checkOpen();
     Key erasedKey = storedKey;
@@ -210,20 +215,27 @@ public class MockStoreDriver implements StoreDriver {
   }
   
   /**
+   * A normal full-capability version of the mock driver. 
+   */
+  public static class Normal extends MockDriver
+      implements ReadableDriver, WritableDriver, WrappingDriver {
+  }
+
+  /**
    * A read-only version of the mock driver. 
    */
-  @StoreDriverInfo(id="mock-ro", name="Read-Only Mock Store", version="2.0",
-      readOnly=true, wrapSupported=true)
-  public static class ReadOnly extends MockStoreDriver {
+  @DriverInfo(id="mock-ro", name="Read-Only Mock Driver", version="2.0")
+  public static class ReadOnly extends MockDriver
+      implements ReadableDriver, WrappingDriver {
     
     @Override
-    public void save(Key key) throws StoreException {
+    public void save(Key key) {
       super.save(key); // just for accounting
       fail("Save should not be called on read-only drivers.");
     }
     
     @Override
-    public boolean erase() throws StoreException {
+    public boolean erase() {
       boolean value = super.erase(); // just for accounting
       fail("Erase should not be called on read-only drivers.");
       return value;
@@ -231,14 +243,36 @@ public class MockStoreDriver implements StoreDriver {
   }
 
   /**
-   * A no-wrap-support version of the mock driver.
+   * A write-only version of the mock driver. 
    */
-  @StoreDriverInfo(id="mock-nw", name="No-Wrap Mock Store", version="3.0",
-      readOnly=false, wrapSupported=false)
-  public static class NoWrap extends MockStoreDriver {
+  @DriverInfo(id="mock-wo", name="Write-Only Mock Driver", version="3.0")
+  public static class WriteOnly extends MockDriver
+      implements WritableDriver, WrappingDriver {
     
     @Override
-    public void wrapWith(Key key) throws StoreException {
+    public Key load() throws StoreException {
+      Key key = super.load(); // just for accounting
+      fail("Load should not be called on write-only drivers.");
+      return key;
+    }
+    
+    @Override
+    public boolean isEmpty() {
+      boolean value = super.isEmpty(); // just for accounting
+      fail("IsEmpty should not be called on write-only drivers.");
+      return value;
+    }
+  }
+
+  /**
+   * A no-wrap-support version of the mock driver.
+   */
+  @DriverInfo(id="mock-nw", name="No-Wrap Mock Driver", version="4.0")
+  public static class NoWrap extends MockDriver
+      implements ReadableDriver, WritableDriver {
+    
+    @Override
+    public void wrapWith(Key key) {
       super.wrapWith(key); // just for accounting
       fail("WrapWith should not be called on no-wrap drivers.");
     }
@@ -254,9 +288,9 @@ public class MockStoreDriver implements StoreDriver {
   /**
    * A version of the mock driver that accepts all URI schemes.
    */
-  @StoreDriverInfo(id="mock-aa", name="Accept-All Mock Store",
-      version="4.0", readOnly=false, wrapSupported=true)
-  public static class AcceptAll extends MockStoreDriver {
+  @DriverInfo(id="mock-aa", name="Accept-All Mock Driver", version="5.0")
+  public static class AcceptAll extends MockDriver
+      implements ReadableDriver, WritableDriver, WrappingDriver {
     
     @Override
     public URI open(URI address)
@@ -275,9 +309,9 @@ public class MockStoreDriver implements StoreDriver {
    * A version of the mock driver that accepts only it's own scheme and the
    * "file" scheme.
    */
-  @StoreDriverInfo(id="mock-af", name="Accept-File Mock Store",
-      version="5.0", readOnly=false, wrapSupported=true)
-  public static class AcceptFile extends MockStoreDriver {
+  @DriverInfo(id="mock-af", name="Accept-File Mock Driver", version="6.0")
+  public static class AcceptFile extends MockDriver 
+      implements ReadableDriver, WritableDriver, WrappingDriver {
     
     @Override
     public URI open(URI address)
