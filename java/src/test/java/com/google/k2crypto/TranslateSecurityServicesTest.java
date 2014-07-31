@@ -25,7 +25,7 @@ import java.util.HashSet;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public class SecurityServicesTest {
+public class TranslateSecurityServicesTest {
 
   /**
    * Test getting an algorithm for ONE security service
@@ -36,12 +36,12 @@ public class SecurityServicesTest {
     HashSet<Algorithm> expectedAlgorithms = new HashSet<Algorithm>();
     expectedAlgorithms.add(Algorithm.HMAC);
     // get the algorithms from the security services class for data integrity
-    HashSet<Algorithm> result = SecurityServices.getAlgorithms(SecService.DATA_INTEGRITY);
+    HashSet<Algorithm> result = TranslateSecurityServices.getAlgorithms(SecService.DATA_INTEGRITY);
     // check they are equal
     assertEquals(expectedAlgorithms, result);
 
     // now test for authentication
-    result = SecurityServices.getAlgorithms(SecService.AUTHENTICATION);
+    result = TranslateSecurityServices.getAlgorithms(SecService.AUTHENTICATION);
     assertEquals(expectedAlgorithms, result);
 
     // clear the expected algorithms
@@ -49,13 +49,13 @@ public class SecurityServicesTest {
 
     // now test for confidentiality
     expectedAlgorithms.add(Algorithm.AES);
-    result = SecurityServices.getAlgorithms(SecService.CONFIDENTIALITY);
+    result = TranslateSecurityServices.getAlgorithms(SecService.CONFIDENTIALITY);
     assertEquals(expectedAlgorithms, result);
 
     // now test for non repudiation
     expectedAlgorithms.clear();
     expectedAlgorithms.add(Algorithm.DSA);
-    result = SecurityServices.getAlgorithms(SecService.NON_REPUDIATION);
+    result = TranslateSecurityServices.getAlgorithms(SecService.NON_REPUDIATION);
     assertEquals(expectedAlgorithms, result);
   }
 
@@ -69,7 +69,7 @@ public class SecurityServicesTest {
     expectedAlgorithms.add(Algorithm.HMAC);
     // get the algorithms from the security services class for data integrity
     HashSet<Algorithm> result =
-        SecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.AUTHENTICATION);
+        TranslateSecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.AUTHENTICATION);
     // check they are equal
     assertEquals(expectedAlgorithms, result);
 
@@ -78,22 +78,22 @@ public class SecurityServicesTest {
     expectedAlgorithms.add(Algorithm.AES);
     expectedAlgorithms.add(Algorithm.HMAC);
 
-    result = SecurityServices.getAlgorithms(SecService.CONFIDENTIALITY, SecService.DATA_INTEGRITY);
+    result = TranslateSecurityServices.getAlgorithms(SecService.CONFIDENTIALITY, SecService.DATA_INTEGRITY);
     assertEquals(expectedAlgorithms, result);
-    result = SecurityServices.getAlgorithms(SecService.CONFIDENTIALITY, SecService.AUTHENTICATION);
+    result = TranslateSecurityServices.getAlgorithms(SecService.CONFIDENTIALITY, SecService.AUTHENTICATION);
     assertEquals(expectedAlgorithms, result);
 
     expectedAlgorithms.clear();
     expectedAlgorithms.add(Algorithm.DSA);
-    result = SecurityServices.getAlgorithms(SecService.NON_REPUDIATION, SecService.DATA_INTEGRITY);
+    result = TranslateSecurityServices.getAlgorithms(SecService.NON_REPUDIATION, SecService.DATA_INTEGRITY);
     assertEquals(expectedAlgorithms, result);
-    result = SecurityServices.getAlgorithms(SecService.NON_REPUDIATION, SecService.AUTHENTICATION);
+    result = TranslateSecurityServices.getAlgorithms(SecService.NON_REPUDIATION, SecService.AUTHENTICATION);
     assertEquals(expectedAlgorithms, result);
 
     expectedAlgorithms.clear();
     expectedAlgorithms.add(Algorithm.DSA);
     expectedAlgorithms.add(Algorithm.AES);
-    result = SecurityServices.getAlgorithms(SecService.NON_REPUDIATION, SecService.CONFIDENTIALITY);
+    result = TranslateSecurityServices.getAlgorithms(SecService.NON_REPUDIATION, SecService.CONFIDENTIALITY);
     assertEquals(expectedAlgorithms, result);
   }
 
@@ -107,7 +107,7 @@ public class SecurityServicesTest {
     expectedAlgorithms.add(Algorithm.DSA);
 
     // get the algorithms from the security services class for data integrity
-    HashSet<Algorithm> result = SecurityServices.getAlgorithms(SecService.DATA_INTEGRITY,
+    HashSet<Algorithm> result = TranslateSecurityServices.getAlgorithms(SecService.DATA_INTEGRITY,
         SecService.NON_REPUDIATION, SecService.AUTHENTICATION);
     // check they are equal
     assertEquals(expectedAlgorithms, result);
@@ -115,21 +115,21 @@ public class SecurityServicesTest {
     expectedAlgorithms.clear();
     expectedAlgorithms.add(Algorithm.HMAC);
     expectedAlgorithms.add(Algorithm.AES);
-    result = SecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.CONFIDENTIALITY,
+    result = TranslateSecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.CONFIDENTIALITY,
         SecService.AUTHENTICATION);
     assertEquals(expectedAlgorithms, result);
 
     expectedAlgorithms.clear();
     expectedAlgorithms.add(Algorithm.DSA);
     expectedAlgorithms.add(Algorithm.AES);
-    result = SecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.CONFIDENTIALITY,
+    result = TranslateSecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.CONFIDENTIALITY,
         SecService.NON_REPUDIATION);
     assertEquals(expectedAlgorithms, result);
 
     expectedAlgorithms.clear();
     expectedAlgorithms.add(Algorithm.DSA);
     expectedAlgorithms.add(Algorithm.AES);
-    result = SecurityServices.getAlgorithms(SecService.AUTHENTICATION, SecService.CONFIDENTIALITY,
+    result = TranslateSecurityServices.getAlgorithms(SecService.AUTHENTICATION, SecService.CONFIDENTIALITY,
         SecService.NON_REPUDIATION);
     assertEquals(expectedAlgorithms, result);
   }
@@ -145,7 +145,7 @@ public class SecurityServicesTest {
     expectedAlgorithms.add(Algorithm.AES);
 
     // get the algorithms from the security services class for data integrity
-    HashSet<Algorithm> result = SecurityServices.getAlgorithms(SecService.DATA_INTEGRITY,
+    HashSet<Algorithm> result = TranslateSecurityServices.getAlgorithms(SecService.DATA_INTEGRITY,
         SecService.NON_REPUDIATION, SecService.AUTHENTICATION, SecService.CONFIDENTIALITY);
     // check they are equal
     assertEquals(expectedAlgorithms, result);
@@ -158,7 +158,7 @@ public class SecurityServicesTest {
    */
   @Test(expected = K2Exception.class)
   public void testDataIntegrityTwoDuplicate() throws K2Exception {
-    SecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.DATA_INTEGRITY);
+    TranslateSecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.DATA_INTEGRITY);
   }
 
   /**
@@ -168,7 +168,7 @@ public class SecurityServicesTest {
    */
   @Test(expected = K2Exception.class)
   public void testAuthenticationTwoDuplicate() throws K2Exception {
-    SecurityServices.getAlgorithms(SecService.AUTHENTICATION, SecService.AUTHENTICATION);
+    TranslateSecurityServices.getAlgorithms(SecService.AUTHENTICATION, SecService.AUTHENTICATION);
   }
 
   /**
@@ -178,7 +178,7 @@ public class SecurityServicesTest {
    */
   @Test(expected = K2Exception.class)
   public void testNonRepudiationTwoDuplicate() throws K2Exception {
-    SecurityServices.getAlgorithms(SecService.NON_REPUDIATION, SecService.NON_REPUDIATION);
+    TranslateSecurityServices.getAlgorithms(SecService.NON_REPUDIATION, SecService.NON_REPUDIATION);
   }
 
   /**
@@ -188,7 +188,7 @@ public class SecurityServicesTest {
    */
   @Test(expected = K2Exception.class)
   public void testConfidentialityTwoDuplicate() throws K2Exception {
-    SecurityServices.getAlgorithms(SecService.CONFIDENTIALITY, SecService.CONFIDENTIALITY);
+    TranslateSecurityServices.getAlgorithms(SecService.CONFIDENTIALITY, SecService.CONFIDENTIALITY);
   }
 
   /**
@@ -199,7 +199,7 @@ public class SecurityServicesTest {
    */
   @Test(expected = K2Exception.class)
   public void testThreeDuplicateSecurityServices() throws K2Exception {
-    SecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.AUTHENTICATION,
+    TranslateSecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.AUTHENTICATION,
         SecService.DATA_INTEGRITY);
   }
 
@@ -211,7 +211,7 @@ public class SecurityServicesTest {
    */
   @Test(expected = K2Exception.class)
   public void testFourDuplicateSecurityServices() throws K2Exception {
-    SecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.AUTHENTICATION,
+    TranslateSecurityServices.getAlgorithms(SecService.DATA_INTEGRITY, SecService.AUTHENTICATION,
         SecService.DATA_INTEGRITY, SecService.CONFIDENTIALITY);
   }
 }

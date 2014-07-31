@@ -46,13 +46,13 @@ public class SecureData {
     if (numArgs == 0) {
       throw new K2Exception("Must provide desired security services");
     } else if (numArgs == 1) {
-      algorithms = SecurityServices.getAlgorithms(secServices[0]);
+      algorithms = TranslateSecurityServices.getAlgorithms(secServices[0]);
     } else if (numArgs == 2) {
-      algorithms = SecurityServices.getAlgorithms(secServices[0], secServices[1]);
+      algorithms = TranslateSecurityServices.getAlgorithms(secServices[0], secServices[1]);
     } else if (numArgs == 3) {
-      algorithms = SecurityServices.getAlgorithms(secServices[0], secServices[1], secServices[2]);
+      algorithms = TranslateSecurityServices.getAlgorithms(secServices[0], secServices[1], secServices[2]);
     } else {
-      algorithms = SecurityServices.getAlgorithms(secServices[0], secServices[1], secServices[2],
+      algorithms = TranslateSecurityServices.getAlgorithms(secServices[0], secServices[1], secServices[2],
           secServices[3]);
     }
 

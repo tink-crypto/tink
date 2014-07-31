@@ -22,7 +22,7 @@ import java.util.HashSet;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public class SecurityServices { 
+public class TranslateSecurityServices { 
   /**
    * function that maps from ONE security services to ONE algorithm
    *
