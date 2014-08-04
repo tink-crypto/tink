@@ -258,6 +258,9 @@ public class K2Storage {
    *         such driver exists.
    */
   public boolean uninstallDriver(String id) {
+    if (id == null) {
+      throw new NullPointerException("id");
+    }
     synchronized (drivers) {
       if (drivers.remove(id) != null) {
         cachedDriverList = null;

@@ -57,6 +57,34 @@ public class K2StorageTest {
   }
 
   /**
+   * Tests rejection of null driver on installation.
+   */
+  @Test public final void testInstallNullDriver() throws K2Exception {
+    K2Storage storage = new K2Storage(context);
+    try {
+      storage.installDriver(null);
+      fail("InstallDriver should not accept a null class.");
+    } catch (NullPointerException ex) {
+      // Expected exception
+      assertEquals("driverClass", ex.getMessage());
+    }
+  }
+  
+  /**
+   * Tests rejection of null id on uninstall.
+   */
+  @Test public final void testUninstallNull() {
+    K2Storage storage = new K2Storage(context);
+    try {
+      storage.uninstallDriver(null);
+      fail("UninstallDriver should not accept a null id.");
+    } catch (NullPointerException ex) {
+      // Expected exception
+      assertEquals("id", ex.getMessage());
+    }
+  }
+
+  /**
    * Tests installing a bad driver.
    */
   @Test public final void testInstallBadDriver() {
