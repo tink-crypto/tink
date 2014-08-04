@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * <p>
  * This class is thread-safe.
  * 
- * @author darylseah@google.com (Daryl Seah)
+ * @author darylseah@gmail.com (Daryl Seah)
  */
 public class InstalledDriver {
   

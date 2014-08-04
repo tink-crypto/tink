@@ -34,7 +34,7 @@ import java.net.URISyntaxException;
  * <p>
  * This class is thread-safe.
  * 
- * @author darylseah@google.com (Daryl Seah)
+ * @author darylseah@gmail.com (Daryl Seah)
  */
 public class K2Storage {
 
