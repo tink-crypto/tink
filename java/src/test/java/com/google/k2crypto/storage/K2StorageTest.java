@@ -57,34 +57,6 @@ public class K2StorageTest {
   }
 
   /**
-   * Tests rejection of null driver on installation.
-   */
-  @Test public final void testInstallNullDriver() throws K2Exception {
-    K2Storage storage = new K2Storage(context);
-    try {
-      storage.installDriver(null);
-      fail("InstallDriver should not accept a null class.");
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("driverClass", ex.getMessage());
-    }
-  }
-  
-  /**
-   * Tests rejection of null id on uninstall.
-   */
-  @Test public final void testUninstallNull() {
-    K2Storage storage = new K2Storage(context);
-    try {
-      storage.uninstallDriver(null);
-      fail("UninstallDriver should not accept a null id.");
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("id", ex.getMessage());
-    }
-  }
-
-  /**
    * Tests installing a bad driver.
    */
   @Test public final void testInstallBadDriver() {
@@ -214,27 +186,6 @@ public class K2StorageTest {
         drivers.get(2).getDriverClass());
     assertEquals(MockDriver.Normal.class,
         drivers.get(3).getDriverClass());
-  }
-  
-  /**
-   * Tests rejection of null addresses for open(String) and open(URI).
-   */
-  @Test public final void testOpenNullAddress() throws K2Exception {
-    K2Storage storage = new K2Storage(context);
-    try {
-      storage.open((String)null).close();
-      fail("Open should not accept a null String.");
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("address", ex.getMessage());
-    }
-    try {
-      storage.open((URI)null).close();
-      fail("Open should not accept a null URI.");
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("address", ex.getMessage());
-    }
   }
   
   /**
@@ -371,6 +322,41 @@ public class K2StorageTest {
     // Now file address should point to AcceptAll with the
     // updated search order
     checkOpenSuccess(storage, fileAddress, MockDriver.AcceptAll.class);
+  }
+  
+  /**
+   * Tests that all methods throw up on a null argument.
+   */
+  @Test public final void testNullArguments() throws K2Exception {
+    K2Storage storage = new K2Storage(context);
+    try {
+      storage.installDriver(null);
+      fail("InstallDriver should not accept a null class.");
+    } catch (NullPointerException ex) {
+      // Expected exception
+      assertEquals("driverClass", ex.getMessage());
+    }
+    try {
+      storage.uninstallDriver(null);
+      fail("UninstallDriver should not accept a null id.");
+    } catch (NullPointerException ex) {
+      // Expected exception
+      assertEquals("id", ex.getMessage());
+    }
+    try {
+      storage.open((String)null).close();
+      fail("Open should not accept a null String.");
+    } catch (NullPointerException ex) {
+      // Expected exception
+      assertEquals("address", ex.getMessage());
+    }
+    try {
+      storage.open((URI)null).close();
+      fail("Open should not accept a null URI.");
+    } catch (NullPointerException ex) {
+      // Expected exception
+      assertEquals("address", ex.getMessage());
+    }    
   }
   
   /**
