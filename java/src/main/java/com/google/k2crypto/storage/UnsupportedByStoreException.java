@@ -35,8 +35,13 @@ public class UnsupportedByStoreException extends StoreException {
     /**
      * The store is read-only.
      */
-    READ_ONLY("Store is read-only.");
+    READ_ONLY("Store is read-only."),
     
+    /**
+     * The store is write-only.
+     */
+    WRITE_ONLY("Store is write-only.");
+
     final String message;
     
     private Reason(String message) {

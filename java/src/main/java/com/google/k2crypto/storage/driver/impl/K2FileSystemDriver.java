@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.k2crypto.storage.drivers;
+package com.google.k2crypto.storage.driver.impl;
 
-import static com.google.k2crypto.storage.AddressUtilities.checkNoAuthority;
-import static com.google.k2crypto.storage.AddressUtilities.checkNoQuery;
-import static com.google.k2crypto.storage.AddressUtilities.checkNoFragment;
-import static com.google.k2crypto.storage.AddressUtilities.extractRawPath;
+import static com.google.k2crypto.storage.driver.AddressUtilities.checkNoAuthority;
+import static com.google.k2crypto.storage.driver.AddressUtilities.checkNoFragment;
+import static com.google.k2crypto.storage.driver.AddressUtilities.checkNoQuery;
+import static com.google.k2crypto.storage.driver.AddressUtilities.extractRawPath;
 
 import com.google.k2crypto.Key;
 import com.google.k2crypto.K2Context;
@@ -28,10 +28,12 @@ import com.google.k2crypto.exceptions.InvalidKeyDataException;
 import com.google.k2crypto.exceptions.UnregisteredKeyVersionException;
 import com.google.k2crypto.keyversions.KeyVersionRegistry;
 import com.google.k2crypto.storage.IllegalAddressException;
-import com.google.k2crypto.storage.StoreDriver;
-import com.google.k2crypto.storage.StoreDriverInfo;
 import com.google.k2crypto.storage.StoreException;
 import com.google.k2crypto.storage.StoreIOException;
+import com.google.k2crypto.storage.driver.ReadableDriver;
+import com.google.k2crypto.storage.driver.Driver;
+import com.google.k2crypto.storage.driver.DriverInfo;
+import com.google.k2crypto.storage.driver.WritableDriver;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.ExtensionRegistry;
 
@@ -56,13 +58,14 @@ import java.util.regex.Pattern;
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-@StoreDriverInfo(
+@DriverInfo(
     id = K2FileSystemDriver.NATIVE_SCHEME,
     name = "K2 Native File-System Driver",
-    version = "0.1",
-    readOnly = false,
-    wrapSupported = false) // TODO: implement key wrapping when API is stable
-public class K2FileSystemDriver implements StoreDriver {
+    version = "0.1")
+public class K2FileSystemDriver 
+    implements Driver, ReadableDriver, WritableDriver {
+  
+  // TODO: implement WrappingDriver when the Key usage API is stable
   
   /**
    * File extension that will be appended to key files.
@@ -104,7 +107,7 @@ public class K2FileSystemDriver implements StoreDriver {
    * Regex blacklisting illegal characters in a filename.
    */
   private static final Pattern FILENAME_BLACK = Pattern.compile(
-      "[\\u0000-\\u001F \\\\ \\/ \\* \\? \\| \\< \\> \\: \\; \\\"]",
+      "[\\u0000-\\u001F" + Pattern.quote("\\/*?|<>:;\"") + "]",
       // all control characters, \, /, *, ?, |, <, >, :, ;, "
       Pattern.COMMENTS);
   
@@ -140,14 +143,14 @@ public class K2FileSystemDriver implements StoreDriver {
   private File tempFileB;
   
   /**
-   * @see StoreDriver#initialize(K2Context)
+   * @see Driver#initialize(K2Context)
    */
   public void initialize(K2Context context) {
     this.context = context;
   }
 
   /**
-   * @see StoreDriver#open(java.net.URI)
+   * @see Driver#open(java.net.URI)
    */
   public URI open(final URI address) throws IllegalAddressException {
     // Check for unsupported components in the address
@@ -233,7 +236,7 @@ public class K2FileSystemDriver implements StoreDriver {
   }
 
   /**
-   * @see StoreDriver#close()
+   * @see Driver#close()
    */
   public void close() {
     // Free file resources.
@@ -244,30 +247,14 @@ public class K2FileSystemDriver implements StoreDriver {
   }
 
   /**
-   * @see StoreDriver#wrapWith(Key)
-   */
-  public void wrapWith(Key key) throws StoreException {
-    // TODO: implement key wrapping when API is stable
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * @see StoreDriver#isWrapping()
-   */
-  public boolean isWrapping() {
-    // TODO: implement key wrapping when API is stable
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * @see StoreDriver#isEmpty()
+   * @see ReadableDriver#isEmpty()
    */
   public boolean isEmpty() throws StoreException {
     return !(keyFile.isFile() || tempFileA.isFile() || tempFileB.isFile());
   }
 
   /**
-   * @see StoreDriver#save(Key)
+   * @see WritableDriver#save(Key)
    */
   public void save(Key key) throws StoreException {
     // Dump key to bytes first
@@ -368,7 +355,7 @@ public class K2FileSystemDriver implements StoreDriver {
   }
   
   /**
-   * @see StoreDriver#load()
+   * @see ReadableDriver#load()
    */
   public Key load() throws StoreException {
     // If all the candidate files for a key are non-existent,
@@ -438,7 +425,7 @@ public class K2FileSystemDriver implements StoreDriver {
   }
   
   /**
-   * @see StoreDriver#erase()
+   * @see WritableDriver#erase()
    */
   public boolean erase() throws StoreException {
     return keyFile.delete() | tempFileA.delete() | tempFileB.delete();

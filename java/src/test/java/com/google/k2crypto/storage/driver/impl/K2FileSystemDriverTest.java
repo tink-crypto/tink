@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.k2crypto.storage.drivers;
+package com.google.k2crypto.storage.driver.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static com.google.k2crypto.storage.drivers.K2FileSystemDriver.NATIVE_SCHEME;
-import static com.google.k2crypto.storage.drivers.K2FileSystemDriver.FILE_EXTENSION;
-import static com.google.k2crypto.storage.drivers.K2FileSystemDriver.TEMP_A_EXTENSION;
-import static com.google.k2crypto.storage.drivers.K2FileSystemDriver.TEMP_B_EXTENSION;
-import static com.google.k2crypto.storage.drivers.K2FileSystemDriver.TEMP_PREFIX;
-import static com.google.k2crypto.storage.drivers.K2FileSystemDriver.MAX_FILENAME_LENGTH;
+import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.FILE_EXTENSION;
+import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.MAX_FILENAME_LENGTH;
+import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.NATIVE_SCHEME;
+import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.TEMP_A_EXTENSION;
+import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.TEMP_B_EXTENSION;
+import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.TEMP_PREFIX;
 
 import com.google.k2crypto.K2Context;
 import com.google.k2crypto.K2Exception;
@@ -34,10 +34,11 @@ import com.google.k2crypto.Key;
 import com.google.k2crypto.keyversions.AESKeyVersion;
 import com.google.k2crypto.storage.IllegalAddressException;
 import com.google.k2crypto.storage.K2Storage;
-import com.google.k2crypto.storage.StoreDriver;
-import com.google.k2crypto.storage.StoreDriverException;
+import com.google.k2crypto.storage.StorageDriverException;
 import com.google.k2crypto.storage.StoreException;
 import com.google.k2crypto.storage.StoreIOException;
+import com.google.k2crypto.storage.driver.Driver;
+import com.google.k2crypto.storage.driver.impl.K2FileSystemDriver;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -117,8 +118,8 @@ public class K2FileSystemDriverTest {
   /**
    * Creates an initialized instance of the K2 driver for a test.
    */
-  private StoreDriver newDriver() {
-    StoreDriver driver = new K2FileSystemDriver();
+  private K2FileSystemDriver newDriver() {
+    K2FileSystemDriver driver = new K2FileSystemDriver();
     driver.initialize(context);
     return driver;
   }
@@ -130,7 +131,7 @@ public class K2FileSystemDriverTest {
     K2Storage storage = new K2Storage(context);
     try {
       storage.installDriver(K2FileSystemDriver.class);
-    } catch (StoreDriverException ex) {
+    } catch (StorageDriverException ex) {
       throw new AssertionError("Driver structure is bad.", ex);
     }
   }
@@ -269,7 +270,7 @@ public class K2FileSystemDriverTest {
    */
   private void checkRejectAddress(
       String address, IllegalAddressException.Reason reason) {
-    StoreDriver driver = newDriver();
+    Driver driver = newDriver();
     try {
       driver.open(URI.create(address));
       fail("Should reject " + address);
@@ -330,7 +331,7 @@ public class K2FileSystemDriverTest {
    */
   private void checkNormalization(String expected, String address)
       throws K2Exception {
-    StoreDriver driver = newDriver();
+    Driver driver = newDriver();
     try {
       URI result = driver.open(URI.create(address));
       assertEquals(expected, result.toString());
@@ -347,7 +348,7 @@ public class K2FileSystemDriverTest {
     URI address = files[0].toURI().normalize();
     deleteAllOnExit(files);
     
-    StoreDriver driver = newDriver();
+    K2FileSystemDriver driver = newDriver();
     try {
       assertEquals(
           NATIVE_PREFIX + address.getSchemeSpecificPart(),
@@ -383,7 +384,7 @@ public class K2FileSystemDriverTest {
     URI address = files[0].toURI().normalize();
     deleteAllOnExit(files);
     
-    StoreDriver driver = newDriver();
+    K2FileSystemDriver driver = newDriver();
     try {
       // Open and save a key
       assertEquals(
@@ -439,7 +440,7 @@ public class K2FileSystemDriverTest {
     emptyFile.deleteOnExit();
     deleteAllOnExit(files);
 
-    StoreDriver driver = newDriver();
+    K2FileSystemDriver driver = newDriver();
     try {
       // Open store and perform some initial setup
       assertEquals(
@@ -489,7 +490,7 @@ public class K2FileSystemDriverTest {
    * 
    * @throws StoreException if there is an unexpected error loading. 
    */
-  private static void loadAndCheck(StoreDriver driver, Key expected)
+  private static void loadAndCheck(K2FileSystemDriver driver, Key expected)
       throws StoreException {
     assertFalse(driver.isEmpty());
     Key loaded = driver.load();
@@ -507,7 +508,7 @@ public class K2FileSystemDriverTest {
     URI address = files[0].toURI().normalize();
     deleteAllOnExit(files);
     
-    StoreDriver driver = newDriver();
+    K2FileSystemDriver driver = newDriver();
     try {
       // Open the driver
       assertEquals(
@@ -550,7 +551,7 @@ public class K2FileSystemDriverTest {
    * 
    * @throws StoreException if there is an unexpected error.
    */
-  private static void checkLoadFails(StoreDriver driver)
+  private static void checkLoadFails(K2FileSystemDriver driver)
       throws StoreException {
     assertFalse(driver.isEmpty());
     try {    

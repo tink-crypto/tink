@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.k2crypto.storage;
+package com.google.k2crypto.storage.driver;
 
 import com.google.k2crypto.storage.IllegalAddressException;
 
@@ -24,11 +24,23 @@ import java.util.regex.Pattern;
 
 /**
  * Utility methods for checking and manipulating storage URI addresses.
- *  
+ * 
+ * <p>The {@link #encodeConvenience(String)} and
+ * {@link #decodeUnreserved(String)} utility methods are required because
+ * {@link java.net.URLEncoder} and {@link java.net.URLDecoder} do not provide
+ * the desired functionality. Details are provided in the documentation of the
+ * individual methods. It boils down to {@link java.net.URLEncoder} and
+ * {@link java.net.URLDecoder} being designed to encode and decode ALL
+ * percent-encoded characters and ONLY within the query portion of a URL. They
+ * are NOT designed for operating on an entire URI, which is what we want to do. 
+ * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
 public class AddressUtilities {
 
+  // Prevent instantiation
+  private AddressUtilities() {}
+  
   // Regex matching percent ('%') characters in the address string that are NOT
   // of the format %[HEX][HEX] and spaces (' ').
   private static final Pattern CONVENIENCE_ENCODABLE =
@@ -46,6 +58,18 @@ public class AddressUtilities {
   /**
    * Performs safe URI-escaping of the '%' and ' ' characters in the string
    * for convenience sake. This is NOT a complete percent-encoding procedure.
+   * The idea is to escape these characters (and only these characters) across
+   * the entire URI string so that addresses containing them can remain in a
+   * readable form in user code.
+   *  
+   * <p>The Java-included {@link java.net.URLEncoder} class has similar
+   * functionality, but its encoding is designed specifically for the query
+   * portion of a URL, and does not work universally across an entire URI.
+   * For example, it will encode {@code "/my keys/bank"} as
+   * {@code "%2Fmy+keys%2Fbank"}, whereas this method will encode it as
+   * {@code "/my%20keys/bank"}. The escaped backslashes and conversion of
+   * spaces to {@code '+'} will effectively change the meaning of the address,
+   * and this is undesirable behavior. 
    * 
    * @param str String to encode.
    * 
@@ -84,8 +108,8 @@ public class AddressUtilities {
   
   /**
    * Decodes any percent-encoded URI-unreserved characters in the URI address.
-   * <p>
-   * As mentioned in <a href="http://tools.ietf.org/html/rfc3986#section-2.3"
+   * 
+   * <p>As mentioned in <a href="http://tools.ietf.org/html/rfc3986#section-2.3"
    * target="_blank">RFC 3986, Section 2.3</a>, any unreserved characters in a
    * URI should be decoded before the URI can be safely compared or normalized.
    * Unfortunately, Java's URI implementation does not do this for us. 
@@ -93,7 +117,9 @@ public class AddressUtilities {
    * @param address URI to decode.
    * 
    * @return a new URI with all unreserved characters decoded, or the same
-   *    URI if there are no unreserved characters to decode. 
+   *    URI if there are no unreserved characters to decode.
+   * 
+   * @see #decodeUnreserved(String)
    */
   public static URI decodeUnreserved(URI address) {
     String addressStr = address.toString();
@@ -103,7 +129,18 @@ public class AddressUtilities {
   
   /**
    * Decodes any percent-encoded URI-unreserved characters in the string.
-   *
+   * 
+   * <p>The Java-included {@link java.net.URLDecoder} class has similar
+   * functionality, except it decodes ALL percent-encoded characters; it is
+   * designed primarily for decoding individual key/value strings in the query
+   * portion of a URL after they have been extracted. For example, it will
+   * decode {@code "/my+keys%3F/%62%61%6E%6B"} as {@code "/my keys?/bank"},
+   * which will result in an invalid URI because {@code "/bank"} would be
+   * interpreted as a query. The {@code '+'} symbol should also only be
+   * interpreted as a space in the query portion, and not in any other part of
+   * a URI. This method will decode the string as {@code "/my+keys%3F/bank"},
+   * preserving the meaning of the address. 
+   * 
    * @param str String to decode.
    * 
    * @return the string with all unreserved characters decoded.

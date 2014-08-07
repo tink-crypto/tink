@@ -17,18 +17,25 @@
 package com.google.k2crypto.storage;
 
 import com.google.k2crypto.K2Exception;
+import com.google.k2crypto.storage.driver.Driver;
+import com.google.k2crypto.storage.driver.DriverInfo;
 
 /**
  * Exception thrown when an issue with the storage driver is detected.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-public class StoreDriverException extends K2Exception {
+public class StorageDriverException extends K2Exception {
   
   /**
-   * Reason why the StoreDriverException was thrown. 
+   * Reason why the StorageDriverException was thrown. 
    */
   public static enum Reason {
+    /**
+     * The driver can neither read nor write keys.
+     */
+    USELESS("Driver neither reads or writes."),
+
     /**
      * The driver does not have an accessible no-argument constructor. 
      */
@@ -46,12 +53,12 @@ public class StoreDriverException extends K2Exception {
     ILLEGAL_THROWS("Driver constructor throws illegal throwables."),
     
     /**
-     * The driver is not annotated with {@link StoreDriverInfo}.
+     * The driver is not annotated with {@link DriverInfo}.
      */
     NO_METADATA("Driver is missing meta-data annotation."),
     
     /**
-     * The driver identifier declared with {@link StoreDriverInfo} is illegal.
+     * The driver identifier declared with {@link DriverInfo} is illegal.
      */
     ILLEGAL_ID("Driver has an illegal identifier.");
     
@@ -62,17 +69,17 @@ public class StoreDriverException extends K2Exception {
     }
   }
       
-  private final Class<? extends StoreDriver> driverClass;
+  private final Class<? extends Driver> driverClass;
 
   private final Reason reason;
   
   /**
-   * Constructs a new StoreDriverException.
+   * Constructs a new StorageDriverException.
    *
    * @param driverClass Class of the problematic driver.
    * @param reason The reason the driver is problematic.
    */
-  public StoreDriverException(Class<? extends StoreDriver> driverClass,
+  public StorageDriverException(Class<? extends Driver> driverClass,
       Reason reason) {
     super(reason.message);
     this.driverClass = driverClass;
@@ -82,7 +89,7 @@ public class StoreDriverException extends K2Exception {
   /**
    * Returns the class of the problematic driver.
    */
-  public Class<? extends StoreDriver> getDriverClass() {
+  public Class<? extends Driver> getDriverClass() {
     return driverClass;
   }
   
