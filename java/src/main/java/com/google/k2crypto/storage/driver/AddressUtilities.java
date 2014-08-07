@@ -24,7 +24,16 @@ import java.util.regex.Pattern;
 
 /**
  * Utility methods for checking and manipulating storage URI addresses.
- *  
+ * 
+ * <p>The {@link #encodeConvenience(String)} and
+ * {@link #decodeUnreserved(String)} utility methods are required because
+ * {@link java.net.URLEncoder} and {@link java.net.URLDecoder} do not provide
+ * the desired functionality. Details are provided in the documentation of the
+ * individual methods. It boils down to {@link java.net.URLEncoder} and
+ * {@link java.net.URLDecoder} being designed to encode and decode ALL
+ * percent-encoded characters and ONLY within the query portion of a URL. They
+ * are NOT designed for operating on an entire URI, which is what we want to do. 
+ * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
 public class AddressUtilities {
@@ -51,9 +60,9 @@ public class AddressUtilities {
    * for convenience sake. This is NOT a complete percent-encoding procedure.
    * The idea is to escape these characters (and only these characters) across
    * the entire URI string so that addresses containing them can remain in a
-   * readable form in user code. 
-   * <p>
-   * The Java-included {@link java.net.URLEncoder} class has similar
+   * readable form in user code.
+   *  
+   * <p>The Java-included {@link java.net.URLEncoder} class has similar
    * functionality, but its encoding is designed specifically for the query
    * portion of a URL, and does not work universally across an entire URI.
    * For example, it will encode {@code "/my keys/bank"} as
@@ -99,8 +108,8 @@ public class AddressUtilities {
   
   /**
    * Decodes any percent-encoded URI-unreserved characters in the URI address.
-   * <p>
-   * As mentioned in <a href="http://tools.ietf.org/html/rfc3986#section-2.3"
+   * 
+   * <p>As mentioned in <a href="http://tools.ietf.org/html/rfc3986#section-2.3"
    * target="_blank">RFC 3986, Section 2.3</a>, any unreserved characters in a
    * URI should be decoded before the URI can be safely compared or normalized.
    * Unfortunately, Java's URI implementation does not do this for us. 
@@ -120,8 +129,8 @@ public class AddressUtilities {
   
   /**
    * Decodes any percent-encoded URI-unreserved characters in the string.
-   * <p>
-   * The Java-included {@link java.net.URLDecoder} class has similar
+   * 
+   * <p>The Java-included {@link java.net.URLDecoder} class has similar
    * functionality, except it decodes ALL percent-encoded characters; it is
    * designed primarily for decoding individual key/value strings in the query
    * portion of a URL after they have been extracted. For example, it will
