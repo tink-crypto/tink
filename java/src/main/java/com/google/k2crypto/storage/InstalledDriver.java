@@ -201,7 +201,7 @@ public class InstalledDriver {
    * Returns whether the driver can only read keys and not write them.
    */
   public boolean isReadOnly() {
-    return !canWrite; // implies canRead == true
+    return canRead && !canWrite;
   }
   
   /**
@@ -215,7 +215,7 @@ public class InstalledDriver {
    * Returns whether the driver can only write keys and not read them.
    */
   public boolean isWriteOnly() {
-    return !canRead; // implies canWrite == true
+    return canWrite && !canRead;
   }
   
   /**
