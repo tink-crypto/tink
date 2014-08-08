@@ -103,7 +103,7 @@ public class Key {
       throw new InvalidKeyDataException(
           InvalidKeyDataException.Reason.PROTO_PARSE, ex);
     }
-    // TODO: extract security properties from core
+    // TODO(darylseah): extract security properties from core
 
     // Extract the key version list
     final int kvCount = data.getKeyVersionCount();
@@ -178,7 +178,7 @@ public class Key {
    */
   protected KeyCore.Builder buildCore() {
     KeyCore.Builder builder = KeyCore.newBuilder();
-    // TODO: populate core with security properties
+    // TODO(darylseah): populate core with security properties
     return builder;
   }
   

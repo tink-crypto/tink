@@ -281,7 +281,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   @Override
   public KeyVersionData.Builder buildData() {
     AesKeyVersionData.Builder dataBuilder = AesKeyVersionData.newBuilder();
-    // TODO: Populate the data builder
+    // TODO(darylseah): Populate the data builder
     
     KeyVersionData.Builder builder = super.buildData();
     builder.setExtension(AesKeyVersionData.extension, dataBuilder.build());
@@ -401,7 +401,7 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       
       @SuppressWarnings("unused")
       AesKeyVersionData data = kvData.getExtension(AesKeyVersionData.extension);
-      // TODO: Extract info from data (currently not used)
+      // TODO(darylseah): Extract info from data (currently not used)
       
       return this;
     }

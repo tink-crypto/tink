@@ -57,10 +57,10 @@ public abstract class KeyVersion {
     ByteString id = this.id;
     if (id == null) {
       ByteString core = getCore();
-      // TODO: Hash the core and produce the ID
-      //       (Right now, ID === core).
-      // TODO: Also, figure out how to pull in security properties from
-      //       the Key into the hash
+      // TODO(darylseah): Hash the core and produce the ID
+      //                  (Right now, ID === core).
+      // TODO(darylseah): Also, figure out how to pull in security properties
+      //                  from the Key into the hash
       this.id = id = core;
     }
     return id;

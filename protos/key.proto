@@ -30,5 +30,5 @@ message KeyData {
 message KeyCore {
   extensions 10000 to max;
 
-  // TODO: add security properties of key
+  // TODO(darylseah): add security properties of key
 }

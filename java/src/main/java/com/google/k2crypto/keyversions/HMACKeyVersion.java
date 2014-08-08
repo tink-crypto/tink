@@ -193,7 +193,7 @@ public class HMACKeyVersion extends HashKeyVersion {
   @Override
   public KeyVersionData.Builder buildData() {
     HmacKeyVersionData.Builder dataBuilder = HmacKeyVersionData.newBuilder();
-    // TODO: Populate the data builder
+    // TODO(darylseah): Populate the data builder
 
     KeyVersionData.Builder builder = super.buildData();
     builder.setExtension(HmacKeyVersionData.extension, dataBuilder.build());
@@ -259,7 +259,7 @@ public class HMACKeyVersion extends HashKeyVersion {
       @SuppressWarnings("unused")
       HmacKeyVersionData data =
           kvData.getExtension(HmacKeyVersionData.extension);
-      // TODO: Extract info from data (currently not used)
+      // TODO(darylseah): Extract info from data (currently not used)
       
       return this;
     }

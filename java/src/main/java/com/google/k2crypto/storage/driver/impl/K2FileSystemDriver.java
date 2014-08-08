@@ -65,7 +65,7 @@ import java.util.regex.Pattern;
 public class K2FileSystemDriver 
     implements Driver, ReadableDriver, WritableDriver {
   
-  // TODO: implement WrappingDriver when the Key usage API is stable
+  // TODO(darylseah): implement WrappingDriver when the Key usage API is stable
   
   /**
    * File extension that will be appended to key files.

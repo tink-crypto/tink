@@ -57,8 +57,8 @@ public class StoreTest {
     context = new K2Context();
     normalDriver = new InstalledDriver(context, MockDriver.Normal.class);
     
-    // TODO: We need a proper way to create keys for testing.
-    //       The current approach is fragile and WILL break later.
+    // TODO(darylseah): We need a proper way to create keys for testing.
+    //                  The current approach is fragile and WILL break later.
     saveKey = new Key();
     wrapKeyA = new Key();
     wrapKeyB = new Key();
