@@ -38,7 +38,6 @@ import com.google.k2crypto.storage.StorageDriverException;
 import com.google.k2crypto.storage.StoreException;
 import com.google.k2crypto.storage.StoreIOException;
 import com.google.k2crypto.storage.driver.Driver;
-import com.google.k2crypto.storage.driver.impl.K2FileSystemDriver;
 
 import org.junit.Before;
 import org.junit.Test;
