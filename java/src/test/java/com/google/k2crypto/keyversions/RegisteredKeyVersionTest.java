@@ -33,9 +33,10 @@ import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for a RegisteredKeyVersion.
- * <p>
- * We want to make sure that the class rejects all badly-implemented KeyVersion
- * sub-classes, while also accepting oddly-implemented but legal sub-classes.
+ * 
+ * <p>We want to make sure that the class rejects all badly-implemented
+ * KeyVersion sub-classes, while also accepting oddly-implemented but legal
+ * sub-classes.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */

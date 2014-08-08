@@ -28,8 +28,8 @@ import java.util.Random;
 
 /**
  * Mock implementation of a KeyVersion.
- * <p>
- * This mock generates key "material" and supports adding arbitrary comments
+ * 
+ * <p>This mock generates key "material" and supports adding arbitrary comments
  * to the key version. It does not support any cryptographic function.
  * 
  * @author darylseah@gmail.com (Daryl Seah)

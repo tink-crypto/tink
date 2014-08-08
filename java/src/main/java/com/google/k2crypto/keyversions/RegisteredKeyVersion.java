@@ -26,9 +26,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * A key version implementation (class) that has been registered with K2. 
- * <p>
- * This class is thread-safe.
+ * A key version implementation (class) that has been registered with K2.
+ *  
+ * <p>This class is thread-safe.
  *
  * @author darylseah@gmail.com (Daryl Seah)
  */

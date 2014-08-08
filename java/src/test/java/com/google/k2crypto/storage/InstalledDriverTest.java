@@ -37,9 +37,9 @@ import java.net.URI;
 
 /**
  * Unit tests for an InstalledDriver.
- * <p>
- * Goal is to verify that the class will reject all badly-implemented drivers
- * and accept odd (but valid) driver implementations. 
+ * 
+ * <p>Goal is to verify that the class will reject all badly-implemented
+ * drivers and accept odd (but valid) driver implementations. 
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */

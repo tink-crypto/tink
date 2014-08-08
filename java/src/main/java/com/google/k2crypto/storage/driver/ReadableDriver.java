@@ -32,8 +32,8 @@ public interface ReadableDriver {
   /**
    * Returns {@code true} if there is no key stored at this location,
    * {@code false} if one might be present.
-   * <p>
-   * Note that if this method returns false, there is no a guarantee that the
+   * 
+   * <p>Note that if this method returns false, there is no a guarantee that the
    * key will actually be readable. The data might be encrypted, corrupted
    * or be in an invalid format. An attempt must be made to {@link #load()} to
    * know for sure if it is readable.

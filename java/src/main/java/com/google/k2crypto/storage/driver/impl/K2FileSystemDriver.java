@@ -46,12 +46,12 @@ import java.util.regex.Pattern;
 
 /**
  * K2-native local file-system key storage driver.
- * <p>
- * This driver uses temporary/backup files to minimize the possibility of
+ * 
+ * <p>This driver uses temporary/backup files to minimize the possibility of
  * data-loss when saving a key and maximize the possibility of recovery when
  * loading a key.
- * <p>
- * The current implementation does NOT acquire an OS-level lock on the key
+ * 
+ * <p>The current implementation does NOT acquire an OS-level lock on the key
  * file, so it is possible for two instances of the driver, possibly on
  * different VMs, to open the same key location. In this scenario, concurrent
  * writes on the two instances will have undefined behavior.
@@ -433,12 +433,13 @@ public class K2FileSystemDriver
   
   /**
    * Evaluates whether the first file is likely more "readable" than the second.
-   * <p>
-   * We do this by heuristically comparing the attributes of the files, without
-   * actually attempting a read.  
+   * 
+   * <p>We do this by heuristically comparing the attributes of the files,
+   * without actually attempting a read.  
    * 
    * @param f1 First file.
    * @param f2 Second file.
+   * 
    * @return {@code true} if the first file is more readable,
    *         {@code false} otherwise.
    */

@@ -29,8 +29,8 @@ import java.util.regex.Pattern;
 
 /**
  * A driver that has been installed into the storage system.
- * <p>
- * This class is thread-safe.
+ * 
+ * <p>This class is thread-safe.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */

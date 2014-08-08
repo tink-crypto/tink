@@ -35,8 +35,8 @@ import java.net.URISyntaxException;
  * can selectively declare what capabilities they want the mock to expose. 
  * Also, by default, the mock will reject addresses that have a schemes that
  * do not match its identifier.
- * <p>
- * The mock will raise assertion errors if it is used in a manner
+ * 
+ * <p>The mock will raise assertion errors if it is used in a manner
  * that violates expected {@link Store} behavior.
  * 
  * @author darylseah@gmail.com (Daryl Seah)

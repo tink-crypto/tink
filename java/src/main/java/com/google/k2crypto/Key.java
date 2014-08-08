@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents a Key in K2. It holds a list of KeyVersions and a reference to the primary
- * KeyVersion.
+ * This class represents a Key in K2. It holds a list of KeyVersions and a
+ * reference to the primary KeyVersion.
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
@@ -173,8 +173,8 @@ public class Key {
   
   /**
    * Returns a builder for building the protobuf core of the key.
-   * <p>
-   * The core contains all the security properties of the key.
+   * 
+   * <p>The core contains all the security properties of the key.
    */
   protected KeyCore.Builder buildCore() {
     KeyCore.Builder builder = KeyCore.newBuilder();
@@ -184,8 +184,8 @@ public class Key {
   
   /**
    * Returns a builder for building the protobuf data of the key.
-   * <p>
-   * The data contains the core as well as the key versions in the key.
+   * 
+   * <p>The data contains the core as well as the key versions in the key.
    */
   public KeyData.Builder buildData() {
     KeyData.Builder builder = KeyData.newBuilder();

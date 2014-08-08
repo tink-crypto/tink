@@ -31,8 +31,8 @@ public interface WrappingDriver {
   /**
    * Indicates that subsequent saves/loads on this store should be
    * wrapped/unwrapped with the provided key.
-   * <p>
-   * The driver should, in its initial state, have no wrapping key set.
+   * 
+   * <p>The driver should, in its initial state, have no wrapping key set.
    * 
    * @param key Key protecting the actual stored key, or null to disable
    *            wrapping.

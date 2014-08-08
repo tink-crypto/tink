@@ -28,8 +28,8 @@ import java.util.Map;
 
 /**
  * A registry of available {@link KeyVersion} implementations.
- * <p>
- * This class is thread-safe.
+ * 
+ * <p>This class is thread-safe.
  *
  * @author darylseah@gmail.com (Daryl Seah)
  */

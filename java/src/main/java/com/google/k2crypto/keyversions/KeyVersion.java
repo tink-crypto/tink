@@ -22,8 +22,8 @@ import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- * This class represents a KeyVersion in K2. It is abstract and extended by specific key
- * implementations such as SymmetricKey which is extended by AESKey
+ * This class represents a KeyVersion in K2. It is abstract and extended by
+ * specific key implementations such as SymmetricKey which is extended by AESKey
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
@@ -81,9 +81,9 @@ public abstract class KeyVersion {
   
   /**
    * Returns a builder for building the protobuf core of the key version.
-   * <p>
-   * The core consists of the essential fields of the KeyVersion that will be
-   * factored into the hash identifier. This method should be overridden by
+   * 
+   * <p>The core consists of the essential fields of the KeyVersion that will
+   * be factored into the hash identifier. This method should be overridden by
    * subclasses to add their own extension to the core.
    */
   protected KeyVersionCore.Builder buildCore() {
@@ -93,8 +93,8 @@ public abstract class KeyVersion {
   
   /**
    * Returns a builder for building the protobuf data of the key version.
-   * <p>
-   * The data is the overall package that needs to be saved to persist
+   * 
+   * <p>The data is the overall package that needs to be saved to persist
    * the KeyVersion and includes the core. This method should be overridden by
    * subclasses to add their own extension to the data.
    */
@@ -143,8 +143,8 @@ public abstract class KeyVersion {
     /**
      * Initializes the builder with protobuf data. The core will be parsed
      * from the data and the protobuf extension registry is required for this.
-     * <p> 
-     * Should be overridden by sub-classes to pull version-specific fields
+     * 
+     * <p>Should be overridden by sub-classes to pull version-specific fields
      * from the data to the builder.  
      *     
      * @param kvData Data of the key version.
@@ -168,8 +168,8 @@ public abstract class KeyVersion {
     
     /**
      * Initializes the builder with protobuf core.
-     * <p> 
-     * Should be overridden by sub-classes to pull version-specific fields
+     * 
+     * <p>Should be overridden by sub-classes to pull version-specific fields
      * from the core to the builder.  
      *     
      * @param kvCore Core of the key version.
