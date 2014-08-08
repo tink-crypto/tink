@@ -35,7 +35,8 @@ import java.util.Random;
  * @author darylseah@gmail.com (Daryl Seah)
  */
 @KeyVersionInfo(
-    type = KeyVersionProto.Type.TEST, proto = MockKeyVersionProto.class)
+    type = KeyVersionProto.Type.TEST,
+    proto = MockKeyVersionProto.class)
 public class MockKeyVersion extends KeyVersion {
   
   /**

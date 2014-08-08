@@ -37,7 +37,9 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-@KeyVersionInfo(type=KeyVersionProto.Type.AES, proto=AesKeyVersionProto.class)
+@KeyVersionInfo(
+    type = KeyVersionProto.Type.AES,
+    proto = AesKeyVersionProto.class)
 public class AESKeyVersion extends SymmetricKeyVersion {
   
   private static final int BLOCK_SIZE = 16; // bytes;

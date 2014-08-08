@@ -38,7 +38,9 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-@KeyVersionInfo(type=KeyVersionProto.Type.HMAC, proto=HmacKeyVersionProto.class)
+@KeyVersionInfo(
+    type = KeyVersionProto.Type.HMAC,
+    proto = HmacKeyVersionProto.class)
 public class HMACKeyVersion extends HashKeyVersion {
   /**
    * SecretKey object representing the key matter in the HMAC key version

@@ -41,7 +41,7 @@ import java.net.URISyntaxException;
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-@DriverInfo(id="mock", name="Mock Driver", version="1.0")
+@DriverInfo(id = "mock", name = "Mock Driver", version = "1.0")
 public abstract class MockDriver implements Driver {
   // All variables are package-protected for easy inspection.
   
@@ -224,7 +224,7 @@ public abstract class MockDriver implements Driver {
   /**
    * A read-only version of the mock driver. 
    */
-  @DriverInfo(id="mock-ro", name="Read-Only Mock Driver", version="2.0")
+  @DriverInfo(id = "mock-ro", name = "Read-Only Mock Driver", version = "2.0")
   public static class ReadOnly extends MockDriver
       implements ReadableDriver, WrappingDriver {
     
@@ -245,7 +245,7 @@ public abstract class MockDriver implements Driver {
   /**
    * A write-only version of the mock driver. 
    */
-  @DriverInfo(id="mock-wo", name="Write-Only Mock Driver", version="3.0")
+  @DriverInfo(id = "mock-wo", name = "Write-Only Mock Driver", version = "3.0")
   public static class WriteOnly extends MockDriver
       implements WritableDriver, WrappingDriver {
     
@@ -267,7 +267,7 @@ public abstract class MockDriver implements Driver {
   /**
    * A no-wrap-support version of the mock driver.
    */
-  @DriverInfo(id="mock-nw", name="No-Wrap Mock Driver", version="4.0")
+  @DriverInfo(id = "mock-nw", name = "No-Wrap Mock Driver", version = "4.0")
   public static class NoWrap extends MockDriver
       implements ReadableDriver, WritableDriver {
     
@@ -288,7 +288,7 @@ public abstract class MockDriver implements Driver {
   /**
    * A version of the mock driver that accepts all URI schemes.
    */
-  @DriverInfo(id="mock-aa", name="Accept-All Mock Driver", version="5.0")
+  @DriverInfo(id = "mock-aa", name = "Accept-All Mock Driver", version = "5.0")
   public static class AcceptAll extends MockDriver
       implements ReadableDriver, WritableDriver, WrappingDriver {
     
@@ -309,7 +309,7 @@ public abstract class MockDriver implements Driver {
    * A version of the mock driver that accepts only it's own scheme and the
    * "file" scheme.
    */
-  @DriverInfo(id="mock-af", name="Accept-File Mock Driver", version="6.0")
+  @DriverInfo(id = "mock-af", name = "Accept-File Mock Driver", version = "6.0")
   public static class AcceptFile extends MockDriver 
       implements ReadableDriver, WritableDriver, WrappingDriver {
     
