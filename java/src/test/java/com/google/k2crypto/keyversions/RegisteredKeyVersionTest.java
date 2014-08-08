@@ -175,7 +175,7 @@ public class RegisteredKeyVersionTest {
         KVWithMissingBuilderConstructor.class, 
         KeyVersionException.Reason.NO_CONSTRUCTOR, 
         "Key version builders without a zero-argument constructor "
-        + "should be rejected.");
+            + "should be rejected.");
   }
 
   // Test "data" for the above
@@ -199,7 +199,7 @@ public class RegisteredKeyVersionTest {
         KVWithWrongBuilderParent.class, 
         KeyVersionException.Reason.BAD_PARENT, 
         "Key version builders not extending KeyVersion.Builder "
-        + "should be rejected.");
+            + "should be rejected.");
   }
 
   // Test "data" for the above
@@ -223,7 +223,7 @@ public class RegisteredKeyVersionTest {
         KVWithBadBuildMethod.class, 
         KeyVersionException.Reason.BAD_BUILD, 
         "Key version builders that don't build the specified key version "
-        + "should be rejected.");
+            + "should be rejected.");
   }
 
   // Test "data" for the above
@@ -385,7 +385,7 @@ public class RegisteredKeyVersionTest {
         KVWithoutAnnotation.class,
         KeyVersionException.Reason.NO_METADATA,
         "Key version builders without the KeyVersionInfo annotation "
-        + "should be rejected.");
+            + "should be rejected.");
   }
   
   // Test "data" for the above
@@ -412,7 +412,7 @@ public class RegisteredKeyVersionTest {
         KVWithSelfProto.class,
         KeyVersionException.Reason.BAD_PROTO,
         "Key versions specifying a proto with a non-static register"
-        + "extensions method should be rejected.");
+            + "extensions method should be rejected.");
   }
 
   // Test "data" for the above

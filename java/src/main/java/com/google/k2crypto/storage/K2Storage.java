@@ -149,8 +149,8 @@ public class K2Storage {
     try {
       return open(new URI(address));
     } catch (URISyntaxException ex) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.INVALID_URI, ex);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.INVALID_URI, ex);
     }
   }
   

@@ -254,11 +254,14 @@ public class Key {
    * @param keyversion the keyversion to remove from the key
    * @throws KeyModifierException
    */
-  protected void removeKeyVersion(KeyVersion keyversion) throws KeyModifierException {
+  protected void removeKeyVersion(KeyVersion keyversion)
+      throws KeyModifierException {
     if (!keyVersions.contains(keyversion)) {
-      throw new KeyModifierException("Given KeyVersion is not in the Key");
+      throw new KeyModifierException(
+          "Given KeyVersion is not in the Key");
     } else if (this.primary == keyversion) {
-      throw new KeyModifierException("Cannot remove KeyVersion as it is the primary in the Key");
+      throw new KeyModifierException(
+          "Cannot remove KeyVersion as it is the primary in the Key");
     } else {
       this.keyVersions.remove(keyversion);
     }

@@ -44,7 +44,8 @@ public class AddressUtilitiesTest {
     
     // Substrings that are invariant on encoding
     final String[] identities = {
-        "a", "A", "9", "%20", "%25", "%fA", "%Af", "%09", "%90", "%0A", "%a9" };
+        "a", "A", "9", "%20", "%25", "%fA", "%Af", "%09", "%90", "%0A", "%a9"
+    };
     
     // Check identity encodings and 2-up sequences
     for (String id : identities) {
@@ -56,10 +57,12 @@ public class AddressUtilitiesTest {
     }
     
     // Input substrings and encoded results 
-    final String[] input =   {
-        "", " ",   "%",   "%G",   "%g",   "%0G",   "%0g"   };
+    final String[] input = {
+        "", " ",   "%",   "%G",   "%g",   "%0G",   "%0g"
+    };
     final String[] encoded = {
-        "", "%20", "%25", "%25G", "%25g", "%250G", "%250g" };
+        "", "%20", "%25", "%25G", "%25g", "%250G", "%250g"
+    };
     assertEquals(input.length, encoded.length);
     
     // Check individual encoded results and 2-up sequences
@@ -124,7 +127,8 @@ public class AddressUtilitiesTest {
   @Test public final void testCheckNoAuthority() {
     // Acceptance cases
     for (String address : new String[] {
-        "k2:///p?q#f", "/p?q#f", "///p", "" }) {
+        "k2:///p?q#f", "/p?q#f", "///p", ""
+    }) {
       try {
         AddressUtilities.checkNoAuthority(URI.create(address));
       } catch (IllegalAddressException ex) {
@@ -153,7 +157,8 @@ public class AddressUtilitiesTest {
   @Test public final void testCheckNoUser() {
     // Acceptance cases
     for (String address : new String[] {
-        "k2://h:1/p?q#f", "//@h:1", "@h", "" }) {
+        "k2://h:1/p?q#f", "//@h:1", "@h", ""
+    }) {
       try {
         AddressUtilities.checkNoUser(URI.create(address));
       } catch (IllegalAddressException ex) {
@@ -183,7 +188,8 @@ public class AddressUtilitiesTest {
   @Test public final void testCheckNoHostPort() {
     // Acceptance cases
     for (String address : new String[] {
-        "k2://u@/p?q#f", "//:0", "//:", "///p", "" }) {
+        "k2://u@/p?q#f", "//:0", "//:", "///p", ""
+    }) {
       try {
         AddressUtilities.checkNoHostPort(URI.create(address));
       } catch (IllegalAddressException ex) {
@@ -213,7 +219,8 @@ public class AddressUtilitiesTest {
   @Test public final void testCheckNoPath() {
     // Acceptance cases
     for (String address : new String[] {
-        "k2://u@h:1?q#f", "//h:1", "?q#f", "" }) {
+        "k2://u@h:1?q#f", "//h:1", "?q#f", ""
+    }) {
       try {
         AddressUtilities.checkNoPath(URI.create(address));
       } catch (IllegalAddressException ex) {
@@ -222,7 +229,8 @@ public class AddressUtilitiesTest {
     }
     // Rejection cases
     for (String address : new String[] {
-        "k2://h:1/", "///", "/", ".", "..", "~" }) {
+        "k2://h:1/", "///", "/", ".", "..", "~"
+    }) {
       try {
         AddressUtilities.checkNoPath(URI.create(address));
         fail("Should reject: " + address);
@@ -241,7 +249,8 @@ public class AddressUtilitiesTest {
   @Test public final void testCheckNoQuery() {
     // Acceptance cases
     for (String address : new String[] {
-        "k2://u@h:1/p#f", "//u@h:1/p?#f", "?#f", "?", "" }) {
+        "k2://u@h:1/p#f", "//u@h:1/p?#f", "?#f", "?", ""
+    }) {
       try {
         AddressUtilities.checkNoQuery(URI.create(address));
       } catch (IllegalAddressException ex) {
@@ -250,7 +259,8 @@ public class AddressUtilitiesTest {
     }
     // Rejection cases
     for (String address : new String[] {
-        "k2:/p?q", "//h:1/?q", "?q" }) {
+        "k2:/p?q", "//h:1/?q", "?q"
+    }) {
       try {
         AddressUtilities.checkNoQuery(URI.create(address));
         fail("Should reject " + address);
@@ -269,7 +279,8 @@ public class AddressUtilitiesTest {
   @Test public final void testCheckNoFragment() {
     // Acceptance cases
     for (String address : new String[] {
-        "k2://u@h:1/p?q", "//u@h:1/p?q#", "?q#", "#", "" }) {
+        "k2://u@h:1/p?q", "//u@h:1/p?q#", "?q#", "#", ""
+    }) {
       try {
         AddressUtilities.checkNoFragment(URI.create(address));
       } catch (IllegalAddressException ex) {
@@ -278,7 +289,8 @@ public class AddressUtilitiesTest {
     }
     // Rejection cases
     for (String address : new String[] {
-        "k2:/p#f", "//h:1/?#f", "#f" }) {
+        "k2:/p#f", "//h:1/?#f", "#f"
+    }) {
       try {
         AddressUtilities.checkNoFragment(URI.create(address));
         fail("Should reject " + address);
@@ -301,7 +313,8 @@ public class AddressUtilitiesTest {
     checkExtractRawPath("/%20", "/%20");
     // Rejection cases    
     for (String address : new String[] {
-        "k2://u@h:1?q#f", "//h:1", "?q#f", "" }) {
+        "k2://u@h:1?q#f", "//h:1", "?q#f", ""
+    }) {
       try {
         AddressUtilities.extractRawPath(URI.create(address));
         fail("Should reject " + address);
@@ -322,8 +335,8 @@ public class AddressUtilitiesTest {
    */
   private static void checkExtractRawPath(String expected, String address) {
     try {
-      assertEquals(expected, 
-          AddressUtilities.extractRawPath(URI.create(address)));
+      assertEquals(
+          expected, AddressUtilities.extractRawPath(URI.create(address)));
     } catch (IllegalAddressException ex) {
       throw new AssertionError("Address is acceptable: " + address, ex);
     }    

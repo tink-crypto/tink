@@ -708,7 +708,8 @@ public class StoreTest {
     assertEquals(acceptAllDriver, store.getInstalledDriver());
     assertEquals(address, store.getAddress());
     store.open();
-    assertEquals(URI.create(acceptAllDriver.getId() + ADDRESS_FRAGMENT),
+    assertEquals(
+        URI.create(acceptAllDriver.getId() + ADDRESS_FRAGMENT),
         store.getAddress());
     store.close();
   }

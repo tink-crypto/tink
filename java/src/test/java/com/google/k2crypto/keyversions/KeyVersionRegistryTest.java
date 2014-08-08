@@ -92,8 +92,8 @@ public class KeyVersionRegistryTest {
       FieldDescriptor fd) {
     assertNull(registry.getRegistration(type));
     assertFalse(registry.isRegistered(type));
-    assertNull(registry.getProtoExtensions()
-        .findExtensionByName(fd.getFullName()));
+    assertNull(
+        registry.getProtoExtensions().findExtensionByName(fd.getFullName()));
     try {
       registry.newBuilder(type);
       fail("Expected unregistered exception.");
@@ -117,10 +117,10 @@ public class KeyVersionRegistryTest {
     Type type = rkv.getType();
     assertEquals(rkv, registry.getRegistration(type));
     assertTrue(registry.isRegistered(type));
-    assertEquals(fd, registry.getProtoExtensions()
-        .findExtensionByName(fd.getFullName()).descriptor);
-    assertEquals(rkv.getKeyVersionClass(), 
-        registry.newBuilder(type).build().getClass());
+    assertEquals(fd, registry
+        .getProtoExtensions().findExtensionByName(fd.getFullName()).descriptor);
+    assertEquals(
+        rkv.getKeyVersionClass(), registry.newBuilder(type).build().getClass());
   }
 
   /**

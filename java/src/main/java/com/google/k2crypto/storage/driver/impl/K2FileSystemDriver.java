@@ -171,8 +171,8 @@ public class K2FileSystemDriver
       mustHaveExtension = false;
     } else {
       // Unrecognized scheme
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.INVALID_SCHEME, null);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.INVALID_SCHEME, null);
     }
     
     // Extract path. We are assuming (below) that any encoded unreserved
@@ -182,8 +182,8 @@ public class K2FileSystemDriver
     // Check if the file extension is included in the path.
     if (!EXTENSION_REGEX.matcher(path).find()) {
       if (mustHaveExtension) {
-        throw new IllegalAddressException(address,
-            IllegalAddressException.Reason.INVALID_PATH, null);
+        throw new IllegalAddressException(
+            address, IllegalAddressException.Reason.INVALID_PATH, null);
       }
       // Append if missing
       path = path + '.' + FILE_EXTENSION;
@@ -227,7 +227,8 @@ public class K2FileSystemDriver
         return finalAddress;
       }
     } catch (IllegalArgumentException ex) {
-      // The path is invalid (from URI.create or new File)
+      // The path is invalid (from URI.create or new File).
+      // Fall-through for exception throw.
     }
     
     // Falling through to here implies the path is invalid
@@ -380,8 +381,8 @@ public class K2FileSystemDriver
         }
       } catch (StoreIOException ex) {
         // Retain the highest-level exception (i.e. the furthest we have gotten)
-        if (ioException == null ||
-              ex.getReason().compareTo(ioException.getReason()) < 0) {
+        if (ioException == null
+            || ex.getReason().compareTo(ioException.getReason()) < 0) {
           ioException = ex;
         }
       }
@@ -445,10 +446,10 @@ public class K2FileSystemDriver
    */
   private static boolean isFormerMoreReadable(File f1, File f2) {
     int cmp;
-    if ((cmp = Boolean.compare(f1.isFile(), f2.isFile())) != 0 ||
-        (cmp = Boolean.compare(f1.canRead(), f2.canRead())) != 0 ||
-        (cmp = Long.compare(f1.lastModified(), f2.lastModified())) != 0 ||
-        (cmp = Long.compare(f1.length(), f2.length())) != 0) { 
+    if ((cmp = Boolean.compare(f1.isFile(), f2.isFile())) != 0
+        || (cmp = Boolean.compare(f1.canRead(), f2.canRead())) != 0
+        || (cmp = Long.compare(f1.lastModified(), f2.lastModified())) != 0
+        || (cmp = Long.compare(f1.length(), f2.length())) != 0) { 
       return cmp > 0;
     }
     return false;

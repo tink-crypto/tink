@@ -34,8 +34,7 @@ public class StoreIOException extends StoreException {
      * A key version cannot be read because it is unregistered.
      * This is possibly a configuration error.
      */
-    UNREGISTERED_KEY_VERSION(
-        "A key version is unregistered."),
+    UNREGISTERED_KEY_VERSION("A key version is unregistered."),
 
     /**
      * The key could not be serialized to bytes.

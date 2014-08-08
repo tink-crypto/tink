@@ -141,19 +141,25 @@ public class K2FileSystemDriverTest {
    */
   @Test public final void testRejectBadAddresses() {
     // Test unsupported components
-    checkRejectAddress(FILE_PREFIX + "//host/path",
+    checkRejectAddress(
+        FILE_PREFIX + "//host/path",
         IllegalAddressException.Reason.AUTHORITY_UNSUPPORTED);
-    checkRejectAddress(FILE_PREFIX + "//user@localhost:80/path",
+    checkRejectAddress(
+        FILE_PREFIX + "//user@localhost:80/path",
         IllegalAddressException.Reason.AUTHORITY_UNSUPPORTED);
-    checkRejectAddress(FILE_PREFIX + "/path?que",
+    checkRejectAddress(
+        FILE_PREFIX + "/path?que",
         IllegalAddressException.Reason.QUERY_UNSUPPORTED);
-    checkRejectAddress(FILE_PREFIX + "/path#frag",
+    checkRejectAddress(
+        FILE_PREFIX + "/path#frag",
         IllegalAddressException.Reason.FRAGMENT_UNSUPPORTED);
     
     // Test invalid schemes
-    checkRejectAddress("k3:/path",
+    checkRejectAddress(
+        "k3:/path",
         IllegalAddressException.Reason.INVALID_SCHEME);
-    checkRejectAddress("keyczar:/path",
+    checkRejectAddress(
+        "keyczar:/path",
         IllegalAddressException.Reason.INVALID_SCHEME);
     
     // Test generic schemes without the proper lowercase ".k2k" extension
@@ -174,11 +180,13 @@ public class K2FileSystemDriverTest {
         IllegalAddressException.Reason.INVALID_PATH);
     
     // Test no path
-    checkRejectAddress(NATIVE_PREFIX + "?",
+    checkRejectAddress(
+        NATIVE_PREFIX + "?",
         IllegalAddressException.Reason.MISSING_PATH);
     
     // Test relative path going beyond the logical URI root
-    checkRejectAddress("/../my%20key",
+    checkRejectAddress(
+        "/../my%20key",
         IllegalAddressException.Reason.INVALID_PATH);
     
     final String testingAddress = NATIVE_PREFIX + testingDirPath;
@@ -186,31 +194,37 @@ public class K2FileSystemDriverTest {
     // Test all illegal filename characters
     for (char illegal : new char[] {
         '\0', '\n', '\r', '\t', '\f', '\b', '\\',
-        '/', '*', '?', '|', '<', '>', ':', ';', '"'}) {
+        '/', '*', '?', '|', '<', '>', ':', ';', '"'
+    }) {
       String encoded = String.format("%%%02X", (int)illegal);
       assertEquals(3, encoded.length()); // sanity check
-      checkRejectAddress(testingAddress + 'A' + encoded + 'Z',
+      checkRejectAddress(
+          testingAddress + 'A' + encoded + 'Z',
           IllegalAddressException.Reason.INVALID_PATH);
-      checkRejectAddress(testingAddress + encoded,
+      checkRejectAddress(
+          testingAddress + encoded,
           IllegalAddressException.Reason.INVALID_PATH);
     }
     
     // Test illegal filename prefixes
     for (String illegalPrefix : new String[] { "~", ".", "%20" }) {
-      checkRejectAddress(testingAddress + illegalPrefix + "abc",
+      checkRejectAddress(
+          testingAddress + illegalPrefix + "abc",
           IllegalAddressException.Reason.INVALID_PATH);
     }
 
     // Test illegal filename postfixes
     for (String illegalPostfix : new String[] { ".", "%20" }) {
-      checkRejectAddress(testingAddress + "abc" + illegalPostfix,
+      checkRejectAddress(
+          testingAddress + "abc" + illegalPostfix,
           IllegalAddressException.Reason.INVALID_PATH);
     }
 
     // Test filename that is one character too long
-    String oneCharTooLongName = generateString(random,
-        1 + MAX_FILENAME_LENGTH - NATIVE_POSTFIX.length());
-    checkRejectAddress(testingAddress + oneCharTooLongName,
+    String oneCharTooLongName = generateString(
+        random, 1 + MAX_FILENAME_LENGTH - NATIVE_POSTFIX.length());
+    checkRejectAddress(
+        testingAddress + oneCharTooLongName,
         IllegalAddressException.Reason.INVALID_PATH);
   }
   
@@ -224,7 +238,8 @@ public class K2FileSystemDriverTest {
     if (roots != null) {
       // Should not be able to open the root path (without a filename)
       for (File root : roots) {
-        checkRejectAddress(NATIVE_PREFIX + root.toURI().getRawPath(),
+        checkRejectAddress(
+            NATIVE_PREFIX + root.toURI().getRawPath(),
             IllegalAddressException.Reason.INVALID_PATH);
       }
     }
@@ -252,8 +267,8 @@ public class K2FileSystemDriverTest {
       String mainAddress = NATIVE_PREFIX + files[0].toURI().getRawPath();
       for (File f : files) {
         assertTrue(f.mkdir());
-        checkRejectAddress(mainAddress,
-            IllegalAddressException.Reason.INVALID_PATH);
+        checkRejectAddress(
+            mainAddress, IllegalAddressException.Reason.INVALID_PATH);
         assertTrue(f.delete());
       }
     } finally {
@@ -295,26 +310,21 @@ public class K2FileSystemDriverTest {
     final String expected = absTestingAddress + filename;
     
     // Test absolute addresses (with k2: scheme), without and with extension
-    checkNormalization(expected,
-        absTestingAddress + filename);
-    checkNormalization(expected,
-        absTestingAddress + filename + NATIVE_POSTFIX);
+    checkNormalization(expected, absTestingAddress + filename);
+    checkNormalization(expected, absTestingAddress + filename + NATIVE_POSTFIX);
     
     // Test absolute addresses with collapsable paths, w/o and w/ extension
     checkNormalization(expected,
         absTestingAddress + "anything/./something/.././../" + filename);
-    checkNormalization(expected,
-        absTestingAddress + "/././" + filename + "");
+    checkNormalization(expected, absTestingAddress + "/././" + filename + "");
     
     // Test the above with absolute paths (i.e. no k2: scheme) 
-    checkNormalization(expected,
-        absTestingPath + filename + NATIVE_POSTFIX);
+    checkNormalization(expected, absTestingPath + filename + NATIVE_POSTFIX);
     checkNormalization(expected,
         absTestingPath + "/./something/../" + filename + NATIVE_POSTFIX);
     
     // Test the above with relative paths
-    checkNormalization(expected,
-        relTestingPath + filename + NATIVE_POSTFIX);
+    checkNormalization(expected, relTestingPath + filename + NATIVE_POSTFIX);
     checkNormalization(expected,
         relTestingPath + "/anything/../" + filename + NATIVE_POSTFIX);
   }
@@ -641,13 +651,10 @@ public class K2FileSystemDriverTest {
         fail("Could not generate file triple!");
       }
       // Main file
-      File main = files[0] =
-          generateFile(random, dir, "", NATIVE_POSTFIX);
+      File main = files[0] = generateFile(random, dir, "", NATIVE_POSTFIX);
       // Temp files
-      files[1] = new File(dir,
-          TEMP_PREFIX + main.getName() + TEMP_A_EXTENSION);
-      files[2] = new File(dir,
-          TEMP_PREFIX + main.getName() + TEMP_B_EXTENSION);      
+      files[1] = new File(dir, TEMP_PREFIX + main.getName() + TEMP_A_EXTENSION);
+      files[2] = new File(dir, TEMP_PREFIX + main.getName() + TEMP_B_EXTENSION);      
     } while (files[1].exists() || files[2].exists());
     return files;
   }
@@ -670,8 +677,8 @@ public class K2FileSystemDriverTest {
     // Create an initial random filename
     char[] filename = new char[prefixLen + GENERATED_NAME_LENGTH + postfixLen];
     prefix.getChars(0, prefixLen, filename, 0);
-    postfix.getChars(0, postfixLen, filename,
-        GENERATED_NAME_LENGTH + prefixLen);
+    postfix.getChars(
+        0, postfixLen, filename, GENERATED_NAME_LENGTH + prefixLen);
     
     for (int i = GENERATED_NAME_LENGTH + prefixLen; --i >= prefixLen; ) {
       filename[i] = (char)('A' + random.nextInt(26));

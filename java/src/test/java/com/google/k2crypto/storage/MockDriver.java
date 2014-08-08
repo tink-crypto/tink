@@ -110,8 +110,8 @@ public abstract class MockDriver implements Driver {
     if (!getInfo().id().equalsIgnoreCase(address.getScheme())) {
       // Reject foreign schemes as default behavior.
       // (This is not necessarily true for all driver implementations.)
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.INVALID_SCHEME, null);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.INVALID_SCHEME, null);
     }
     
     this.address = address;
@@ -193,9 +193,9 @@ public abstract class MockDriver implements Driver {
               StoreIOException.Reason.WRAP_KEY_UNNECESSARY);                  
         }
       } else if (!storedKeyWrapper.equals(wrapKey)) {
-        throw new StoreIOException(wrapKey == null ?
-            StoreIOException.Reason.WRAP_KEY_REQUIRED :
-            StoreIOException.Reason.WRAP_KEY_WRONG);        
+        throw new StoreIOException(wrapKey == null
+            ? StoreIOException.Reason.WRAP_KEY_REQUIRED
+            : StoreIOException.Reason.WRAP_KEY_WRONG);        
       }
       return storedKey;
     }
@@ -296,7 +296,8 @@ public abstract class MockDriver implements Driver {
     public URI open(URI address)
         throws IllegalAddressException, StoreException {
       try {
-        return super.open(new URI(getInfo().id(),
+        return super.open(new URI(
+            getInfo().id(),
             address.getSchemeSpecificPart(),
             address.getFragment()).normalize());
       } catch (URISyntaxException ex) {
@@ -318,14 +319,15 @@ public abstract class MockDriver implements Driver {
         throws IllegalAddressException, StoreException {
       String scheme = address.getScheme();
       try {
-        if (getInfo().id().equalsIgnoreCase(scheme) ||
-            "file".equalsIgnoreCase(scheme)) {
-          return super.open(new URI(getInfo().id(),
+        if (getInfo().id().equalsIgnoreCase(scheme)
+            || "file".equalsIgnoreCase(scheme)) {
+          return super.open(new URI(
+              getInfo().id(),
               address.getSchemeSpecificPart(),
               address.getFragment()).normalize());
         }
-        throw new IllegalAddressException(address,
-            IllegalAddressException.Reason.INVALID_SCHEME, null);
+        throw new IllegalAddressException(
+            address, IllegalAddressException.Reason.INVALID_SCHEME, null);
       } catch (URISyntaxException ex) {
         throw new IllegalAddressException(address, "Transform failure.", ex);
       }

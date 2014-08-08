@@ -208,8 +208,7 @@ public class InstalledDriverTest {
   
   // Test "data" for the above
   @DriverInfo(id = "mock", name = "No Constructor Driver", version = "1.0")
-  public static class NoConstructorDriver
-      extends MockDriver.Normal {
+  public static class NoConstructorDriver extends MockDriver.Normal {
     public NoConstructorDriver(@SuppressWarnings("unused") Object obj) {}
   }
   

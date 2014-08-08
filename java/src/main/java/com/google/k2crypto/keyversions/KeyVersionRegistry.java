@@ -149,7 +149,8 @@ public class KeyVersionRegistry {
             rkv.registerProtoExtensions(registry);
           } catch (ReflectiveOperationException ex) {
             // Might get this if the proto is broken. Just print trace and
-            // continue. (Perhaps log this?)
+            // continue.
+            // TODO(darylseah): Perhaps log this? 
             ex.printStackTrace();
           }
         }

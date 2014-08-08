@@ -130,8 +130,8 @@ public class MockKeyVersion extends KeyVersion {
   public boolean equals(Object obj) {
     if (super.equals(obj)) {
       MockKeyVersion other = (MockKeyVersion)obj;
-      return material.equals(other.material) && (comments == null ?
-          other.comments == null : comments.equals(other.comments));
+      return material.equals(other.material) && (comments == null
+          ? other.comments == null : comments.equals(other.comments));
     }
     return false;
   }

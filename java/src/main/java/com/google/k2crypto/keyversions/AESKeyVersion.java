@@ -32,8 +32,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * This class represents an AES key version in K2. It allows you to encrypt and decrypt messaged
- * using AES symmetric key encryption
+ * This class represents an AES key version in K2. It allows you to encrypt and
+ * decrypt messaged using AES symmetric key encryption
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
@@ -45,7 +45,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   private static final int BLOCK_SIZE = 16; // bytes;
   
   /**
-   * The key length in bytes (128 bits / 8 = 16 bytes) Can be 16, 24 or 32 (NO OTHER VALUES)
+   * The key length in bytes (128 bits / 8 = 16 bytes) Can be 16, 24 or 32
+   * (NO OTHER VALUES)
    */
   private int keyVersionLengthInBytes = 16;
 
@@ -60,7 +61,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   private byte[] initVector;
 
   /**
-   * Enum representing all supported modes Supported modes: CBC, ECB, OFB, CFB, CTR Unsupported
+   * Enum representing all supported modes Supported modes:
+   *    CBC, ECB, OFB, CFB, CTR Unsupported
    * modes: XTS, OCB
    */
   public enum Mode {
@@ -80,13 +82,14 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   }
 
   /**
-   * Supported padding: PKCS5PADDING Unsupported padding: PKCS7Padding, ISO10126d2Padding,
-   * X932Padding, ISO7816d4Padding, ZeroBytePadding
+   * Supported padding: PKCS5PADDING Unsupported padding: PKCS7Padding,
+   * ISO10126d2Padding, X932Padding, ISO7816d4Padding, ZeroBytePadding
    */
   private Padding padding;
 
   /**
-   * Method to give length of key in BITS. Used to prevent mixing up bytes and bits
+   * Method to give length of key in BITS. Used to prevent mixing up bytes
+   * and bits
    *
    * @return Key length in BITS
    */
@@ -96,7 +99,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
 
   /**
    *
-   * Method to give length of key in BYTES. Used to prevent mixing up bytes and bits
+   * Method to give length of key in BYTES. Used to prevent mixing up bytes
+   * and bits
    *
    * @return Key length in BYTES
    */
@@ -105,7 +109,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   }
   
   /**
-   * represents the algorithm, mode, and padding to use and paddings (NOT algorithm - AES ONLY)
+   * represents the algorithm, mode, and padding to use and paddings
+   * (NOT algorithm - AES ONLY)
    *
    */
   private String algModePadding;
@@ -121,11 +126,11 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   private Cipher decryptingCipher;
 
   /**
-   * Constructor to make an AESKeyVersion using the AESKeyVersionBuilder. Private to prevent use
-   * unless through the AESKeyVersionBuilder
+   * Constructor to make an AESKeyVersion using the AESKeyVersionBuilder.
+   * Private to prevent use unless through the AESKeyVersionBuilder
    *
-   * @param builder An AESKeyVersionBuilder with all the variables set according to how you want the
-   *        AESKeyVersion to be setup.
+   * @param builder An AESKeyVersionBuilder with all the variables set according
+   *                to how you want the AESKeyVersion to be setup.
    * @throws BuilderException
    */
   private AESKeyVersion(Builder builder) throws BuilderException {
@@ -135,20 +140,24 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     this.mode = builder.mode;
     this.padding = builder.padding;
 
-    // IMPORTANT! this line of code updates the algorithm/mode/padding string to reflect the new
-    // mode and padding. The class will not work if you move or remove this line of code
+    // IMPORTANT! this line of code updates the algorithm/mode/padding string
+    // to reflect the new mode and padding. The class will not work if you move
+    // or remove this line of code
     this.algModePadding = "AES/" + this.mode + "/" + padding + "padding";
 
-    // use try catch block to abstract from individual exceptions using BuilderException
+    // use try catch block to abstract from individual exceptions using
+    // BuilderException
     try {
-      // set the key matter and initialization vector from input if is was provided
+      // set the key matter and initialization vector from input if is
+      // was provided
       if (builder.keyVersionMatterInitVectorProvided) {
         // load the initialization vector
         initVector = (builder.initVector == null ?
             null : builder.initVector.clone());
 
         // initialize secret key using key matter byte array
-        secretKey = new SecretKeySpec(builder.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
+        secretKey = new SecretKeySpec(
+            builder.keyVersionMatter, 0, this.keyLengthInBytes(), "AES");
         
       } else {
         // Generate the key using JCE crypto libraries
@@ -158,7 +167,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       }
       
       if (initVector == null) {
-        // use this secure random number generator to initialize the vector with random bytes
+        // use this secure random number generator to initialize
+        // the vector with random bytes
         SecureRandom prng = new SecureRandom();
         initVector = new byte[BLOCK_SIZE];
         prng.nextBytes(initVector);        
@@ -170,14 +180,16 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       // initialize the encrypting cipher
       switch (this.mode) {
         case ECB:
-          // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
+          // Initialize the cipher using the secret key -
+          // ECB does NOT use an initialization vector
           encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey);
           break;
         case CBC:
         case OFB:
         case CFB:
         case CTR:
-          // Initialize the cipher using the secret key of this class and the initialization vector
+          // Initialize the cipher using the secret key of this class
+          // and the initialization vector
           encryptingCipher.init(Cipher.ENCRYPT_MODE, this.secretKey,
               new IvParameterSpec(this.initVector));
           break;
@@ -191,15 +203,18 @@ public class AESKeyVersion extends SymmetricKeyVersion {
       // initialize the decrypting cipher
       switch (this.mode) {
         case ECB:
-          // Initialize the cipher using the secret key - ECB does NOT use an initialization vector
+          // Initialize the cipher using the secret key -
+          // ECB does NOT use an initialization vector
           decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey);
           break;
         case CBC:
         case OFB:
         case CFB:
         case CTR:
-          // Initialize the cipher using the secret key of this class and the initialization vector
-          decryptingCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initVector));
+          // Initialize the cipher using the secret key of this class
+          // and the initialization vector
+          decryptingCipher.init(
+              Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(initVector));
           break;
         default:
           throw new BuilderException("Unrecognized mode");
@@ -238,7 +253,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   /**
    * Method to get the encrypting cipher of this key version
    *
-   * @return The Cipher object representing the encrypting cipher of this key version
+   * @return The Cipher object representing the encrypting cipher
+   *         of this key version
    */
   @Override
   public Cipher getEncryptingCipher() {
@@ -248,7 +264,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
   /**
    * Method to get the decrypting cipher of this key version
    *
-   * @return The Cipher object representing the decrypting cipher of this key version
+   * @return The Cipher object representing the decrypting cipher
+   *         of this key version
    */
   @Override
   public Cipher getDecryptingCipher() {
@@ -305,9 +322,10 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     private Mode mode = Mode.CTR;
 
     /**
-     * Supported paddings depends on Java implementation. Upgrade java implementation to support
-     * more paddings. Supported padding: PKCS5PADDING Unsupported padding: PKCS7Padding,
-     * ISO10126d2Padding, X932Padding, ISO7816d4Padding, ZeroBytePadding
+     * Supported paddings depends on Java implementation. Upgrade java
+     * implementation to support more paddings. Supported padding: PKCS5PADDING
+     * Unsupported padding: PKCS7Padding, ISO10126d2Padding, X932Padding,
+     * ISO7816d4Padding, ZeroBytePadding
      */
     private Padding padding = Padding.PKCS5;
 
@@ -322,16 +340,17 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     private byte[] initVector;
 
     /**
-     * Flag to indicate to the parent class (AESKeyVersion) whether the key matter and
-     * initialization vector have been manually set (true if and only if they have been manually
-     * set)
+     * Flag to indicate to the parent class (AESKeyVersion) whether the key
+     * matter and initialization vector have been manually set (true if and
+     * only if they have been manually set)
      */
     private boolean keyVersionMatterInitVectorProvided = false;
 
     /**
      * Set the key version length
      *
-     * @param keyVersionLength Integer representing key version length in BYTES, can be 16, 24, 32
+     * @param keyVersionLength Integer representing key version length in BYTES,
+     *                         can be 16, 24, 32
      * @return This object with keyVersionLength updated
      */
     public Builder keyVersionLengthInBytes(int keyVersionLength) {
@@ -342,7 +361,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
     /**
      * Set the encryption mode
      *
-     * @param mode representing the encryption mode. Supported modes: CBC, ECB, OFB, CFB, CTR
+     * @param mode representing the encryption mode.
+     *             Supported modes: CBC, ECB, OFB, CFB, CTR
      * @return This object with mode updated
      */
     public Builder mode(Mode mode) {
@@ -378,8 +398,8 @@ public class AESKeyVersion extends SymmetricKeyVersion {
         throw new NullPointerException("keyVersionMatter");
       }
       
-      // This flag indicates to the parent class (AESKeyVersion) that the key matter and
-      // initialization vector have been manually set
+      // This flag indicates to the parent class (AESKeyVersion) that the
+      // key matter and initialization vector have been manually set
       keyVersionMatterInitVectorProvided = true;
       // set the key matter
       this.keyVersionMatter = keyVersionMatter;

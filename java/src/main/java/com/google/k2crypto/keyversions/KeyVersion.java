@@ -124,8 +124,8 @@ public abstract class KeyVersion {
    */
   @Override
   public boolean equals(Object obj) {
-    return obj != null && getClass().equals(obj.getClass()) &&
-        getCore().equals(((KeyVersion)obj).getCore());
+    return obj != null && getClass().equals(obj.getClass())
+        && getCore().equals(((KeyVersion)obj).getCore());
   }
   
   /**

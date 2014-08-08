@@ -88,8 +88,7 @@ public class K2StorageTest {
     assertEquals(0, storage.getInstalledDrivers().size());
 
     // Try to install
-    InstalledDriver idriver =
-        storage.installDriver(MockDriver.Normal.class);
+    InstalledDriver idriver = storage.installDriver(MockDriver.Normal.class);
     assertNotNull(idriver);
     assertEquals(MockDriver.Normal.class, idriver.getDriverClass());
     
@@ -131,12 +130,9 @@ public class K2StorageTest {
     // Make sure that the drivers are all in the list, in order
     List<InstalledDriver> drivers = storage.getInstalledDrivers();
     assertEquals(3, drivers.size());
-    assertEquals(MockDriver.Normal.class,
-        drivers.get(0).getDriverClass());
-    assertEquals(MockDriver.ReadOnly.class,
-        drivers.get(1).getDriverClass());
-    assertEquals(MockDriver.NoWrap.class,
-        drivers.get(2).getDriverClass());
+    assertEquals(MockDriver.Normal.class, drivers.get(0).getDriverClass());
+    assertEquals(MockDriver.ReadOnly.class, drivers.get(1).getDriverClass());
+    assertEquals(MockDriver.NoWrap.class, drivers.get(2).getDriverClass());
   }
   
   /**
@@ -156,8 +152,7 @@ public class K2StorageTest {
     
     // Verify that initial list is UNCHANGED
     assertEquals(3, drivers.size());
-    assertEquals(MockDriver.Normal.class,
-        drivers.get(1).getDriverClass());
+    assertEquals(MockDriver.Normal.class, drivers.get(1).getDriverClass());
 
     // Check that new list is a different object
     List<InstalledDriver> newDrivers = storage.getInstalledDrivers();
@@ -166,10 +161,8 @@ public class K2StorageTest {
     // Verify that new list is missing middle driver
     drivers = newDrivers;
     assertEquals(2, drivers.size());
-    assertEquals(MockDriver.NoWrap.class,
-        drivers.get(0).getDriverClass());
-    assertEquals(MockDriver.ReadOnly.class,
-        drivers.get(1).getDriverClass());
+    assertEquals(MockDriver.NoWrap.class, drivers.get(0).getDriverClass());
+    assertEquals(MockDriver.ReadOnly.class, drivers.get(1).getDriverClass());
 
     // Install some other driver, then put back the one that was removed
     assertNotNull(storage.installDriver(MockDriver.AcceptAll.class));
@@ -178,14 +171,10 @@ public class K2StorageTest {
     // Check that the list is updated
     drivers = storage.getInstalledDrivers();
     assertEquals(4, drivers.size());
-    assertEquals(MockDriver.NoWrap.class,
-        drivers.get(0).getDriverClass());
-    assertEquals(MockDriver.ReadOnly.class,
-        drivers.get(1).getDriverClass());
-    assertEquals(MockDriver.AcceptAll.class,
-        drivers.get(2).getDriverClass());
-    assertEquals(MockDriver.Normal.class,
-        drivers.get(3).getDriverClass());
+    assertEquals(MockDriver.NoWrap.class, drivers.get(0).getDriverClass());
+    assertEquals(MockDriver.ReadOnly.class, drivers.get(1).getDriverClass());
+    assertEquals(MockDriver.AcceptAll.class, drivers.get(2).getDriverClass());
+    assertEquals(MockDriver.Normal.class, drivers.get(3).getDriverClass());
   }
   
   /**
@@ -219,8 +208,8 @@ public class K2StorageTest {
       fail("Should not permit opening a bad string address.");
     } catch (IllegalAddressException expected) {
       assertEquals(expectedBad, expected.getAddress());
-      assertEquals(IllegalAddressException.Reason.INVALID_URI,
-          expected.getReason());
+      assertEquals(
+          IllegalAddressException.Reason.INVALID_URI, expected.getReason());
     }
     // open(URI) should NOT have been invoked
     assertNull(openAddress[0]);
@@ -254,12 +243,9 @@ public class K2StorageTest {
     assertNotNull(storage.installDriver(MockDriver.AcceptAll.class));
     
     // Verify that all addresses go to this driver
-    checkOpenSuccess(storage, exactAddress,
-        MockDriver.AcceptAll.class);
-    checkOpenSuccess(storage, fileAddress,
-        MockDriver.AcceptAll.class);
-    checkOpenSuccess(storage, pathAddress,
-        MockDriver.AcceptAll.class);
+    checkOpenSuccess(storage, exactAddress, MockDriver.AcceptAll.class);
+    checkOpenSuccess(storage, fileAddress, MockDriver.AcceptAll.class);
+    checkOpenSuccess(storage, pathAddress, MockDriver.AcceptAll.class);
     
     // Add new driver that matches "exactAddress" exactly.
     // This driver will be after the accept-all driver in search order.
@@ -268,19 +254,15 @@ public class K2StorageTest {
     assertNotNull(exactDriver);
     
     // Verify that (only) exactAddress now opens this driver
-    checkOpenSuccess(storage, exactAddress,
-        MockDriver.Normal.class);
-    checkOpenSuccess(storage, fileAddress,
-        MockDriver.AcceptAll.class);
-    checkOpenSuccess(storage, pathAddress,
-        MockDriver.AcceptAll.class);
+    checkOpenSuccess(storage, exactAddress, MockDriver.Normal.class);
+    checkOpenSuccess(storage, fileAddress, MockDriver.AcceptAll.class);
+    checkOpenSuccess(storage, pathAddress, MockDriver.AcceptAll.class);
     
     // Uninstall the driver
     assertTrue(storage.uninstallDriver(exactDriver.getId()));
     
     // Verify that there is no longer an exact match
-    checkOpenSuccess(storage, exactAddress,
-        MockDriver.AcceptAll.class);
+    checkOpenSuccess(storage, exactAddress, MockDriver.AcceptAll.class);
   }
 
   /**
@@ -315,8 +297,7 @@ public class K2StorageTest {
 
     // Uninstall and reinstall AcceptFile driver (move to end of search list)
     assertTrue(storage.uninstallDriver(acceptFileDriver.getId()));
-    acceptFileDriver =
-        storage.installDriver(MockDriver.AcceptFile.class);
+    acceptFileDriver = storage.installDriver(MockDriver.AcceptFile.class);
     assertNotNull(acceptFileDriver);
 
     // Now file address should point to AcceptAll with the
@@ -358,9 +339,9 @@ public class K2StorageTest {
   /**
    * Verifies that a store open succeeds for testOpenXXXDriver/s() tests.
    */
-  private static void checkOpenSuccess(K2Storage storage, URI address,
-      Class<? extends Driver> expectedDriver)
-      throws K2Exception {
+  private static void checkOpenSuccess(
+      K2Storage storage, URI address, Class<? extends Driver> expectedDriver)
+          throws K2Exception {
     Store store = storage.open(address);
     try {
       assertEquals(expectedDriver, store.getDriver().getClass());

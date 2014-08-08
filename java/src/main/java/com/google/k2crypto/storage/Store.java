@@ -421,8 +421,8 @@ public class Store {
   public boolean equals(Object obj) {
     if (obj instanceof Store) {
       Store other = (Store)obj;
-      return other.address.equals(address) &&
-          other.installedDriver.equals(installedDriver);
+      return other.address.equals(address)
+          && other.installedDriver.equals(installedDriver);
     }
     return false;
   }
