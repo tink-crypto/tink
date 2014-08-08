@@ -60,9 +60,8 @@ public class RegisteredKeyVersionTest {
     try {
       new RegisteredKeyVersion(null, kvClass);
       fail("Expected NullPointerException of context.");
-    } catch (NullPointerException ex) {
-      // Exception is expected
-      assertEquals("context", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("context", expected.getMessage());
     }
   }
   
@@ -73,9 +72,8 @@ public class RegisteredKeyVersionTest {
     try {
       new RegisteredKeyVersion(context, null);
       fail("Expected NullPointerException of kvClass.");
-    } catch (NullPointerException ex) {
-      // Exception is expected
-      assertEquals("kvClass", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("kvClass", expected.getMessage());
     }
   }
 
@@ -118,10 +116,9 @@ public class RegisteredKeyVersionTest {
     try {
       new RegisteredKeyVersion(context, kvClass);
       fail(failMessage);
-    } catch (KeyVersionException ex) {
-      // Exception is expected
-      assertEquals(kvClass, ex.getKeyVersionClass());
-      assertEquals(reason, ex.getReason());
+    } catch (KeyVersionException expected) {
+      assertEquals(kvClass, expected.getKeyVersionClass());
+      assertEquals(reason, expected.getReason());
     }
   }
   

@@ -275,11 +275,10 @@ public class K2FileSystemDriverTest {
       driver.open(URI.create(address));
       fail("Should reject " + address);
     } catch (StoreException ex) {
-      fail("Unexpected " + ex);
-    } catch (IllegalAddressException ex) {
-      // Expected
-      assertEquals(reason, ex.getReason());
-      assertEquals(address, ex.getAddress());
+      throw new AssertionError("Unexpected", ex);
+    } catch (IllegalAddressException expected) {
+      assertEquals(reason, expected.getReason());
+      assertEquals(address, expected.getAddress());
     } finally {
       driver.close();
     }
@@ -557,9 +556,10 @@ public class K2FileSystemDriverTest {
     try {    
       driver.load();
       fail("Load should fail.");
-    } catch (StoreIOException ex) {
-      assertEquals(StoreIOException.Reason.DESERIALIZATION_ERROR,
-          ex.getReason());
+    } catch (StoreIOException expected) {
+      assertEquals(
+          StoreIOException.Reason.DESERIALIZATION_ERROR,
+          expected.getReason());
     }
   }
   
@@ -577,7 +577,7 @@ public class K2FileSystemDriverTest {
       out = new FileOutputStream(destination).getChannel();
       out.transferFrom(in, 0, in.size());
     } catch (IOException ex) {
-      fail("Could not copy file: " + ex);
+      throw new AssertionError("Could not copy file", ex);
     } finally {
       try { in.close(); }
       catch (Exception ex) {}

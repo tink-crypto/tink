@@ -63,9 +63,8 @@ public class InstalledDriverTest {
     try {
       new InstalledDriver(null, driverClass);
       fail("Expected NullPointerException of context.");
-    } catch (NullPointerException ex) {
-      // Exception is expected
-      assertEquals("context", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("context", expected.getMessage());
     }
   }
   
@@ -76,9 +75,8 @@ public class InstalledDriverTest {
     try {
       new InstalledDriver(context, null);
       fail("Expected NullPointerException of driverClass.");
-    } catch (NullPointerException ex) {
-      // Exception is expected
-      assertEquals("driverClass", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("driverClass", expected.getMessage());
     }
   }
   
@@ -118,10 +116,9 @@ public class InstalledDriverTest {
     try {
       new InstalledDriver(context, driverClass);
       fail(failMessage);
-    } catch (StorageDriverException ex) {
-      // Exception is expected
-      assertEquals(driverClass, ex.getDriverClass());
-      assertEquals(reason, ex.getReason());
+    } catch (StorageDriverException expected) {
+      assertEquals(driverClass, expected.getDriverClass());
+      assertEquals(reason, expected.getReason());
     }
   }
   

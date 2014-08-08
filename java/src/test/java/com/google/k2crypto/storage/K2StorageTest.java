@@ -66,9 +66,8 @@ public class K2StorageTest {
     try {
       storage.installDriver(BadDriver.class);
       fail("Driver should not be installable.");
-    } catch (StorageDriverException ex) {
-      // Expected exception
-      assertEquals(BadDriver.class, ex.getDriverClass());
+    } catch (StorageDriverException expected) {
+      assertEquals(BadDriver.class, expected.getDriverClass());
     }    
     // Make sure that driver is NOT in the installed list
     assertEquals(0, storage.getInstalledDrivers().size());
@@ -218,10 +217,10 @@ public class K2StorageTest {
     try {
       storage.open(badAddress).close();
       fail("Should not permit opening a bad string address.");
-    } catch (IllegalAddressException ex) {
-      assertEquals(expectedBad, ex.getAddress());
+    } catch (IllegalAddressException expected) {
+      assertEquals(expectedBad, expected.getAddress());
       assertEquals(IllegalAddressException.Reason.INVALID_URI,
-          ex.getReason());
+          expected.getReason());
     }
     // open(URI) should NOT have been invoked
     assertNull(openAddress[0]);
@@ -230,8 +229,8 @@ public class K2StorageTest {
     try {
       storage.open(goodAddress).close();
       fail("Expected no suitable driver.");
-    } catch (NoSuitableDriverException ex) {
-      assertEquals(expectedGood, String.valueOf(ex.getAddress()));
+    } catch (NoSuitableDriverException expected) {
+      assertEquals(expectedGood, String.valueOf(expected.getAddress()));
     }
     assertEquals(expectedGood, String.valueOf(openAddress[0]));
   }
@@ -333,30 +332,26 @@ public class K2StorageTest {
     try {
       storage.installDriver(null);
       fail("InstallDriver should not accept a null class.");
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("driverClass", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("driverClass", expected.getMessage());
     }
     try {
       storage.uninstallDriver(null);
       fail("UninstallDriver should not accept a null id.");
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("id", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("id", expected.getMessage());
     }
     try {
       storage.open((String)null).close();
       fail("Open should not accept a null String.");
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("address", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("address", expected.getMessage());
     }
     try {
       storage.open((URI)null).close();
       fail("Open should not accept a null URI.");
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("address", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("address", expected.getMessage());
     }    
   }
   
@@ -382,9 +377,8 @@ public class K2StorageTest {
     try {
       storage.open(address).close();
       fail("There should not be a matching driver.");
-    } catch (NoSuitableDriverException ex) {
-      // Expected exception
-      assertEquals(address, ex.getAddress());
+    } catch (NoSuitableDriverException expected) {
+      assertEquals(address, expected.getAddress());
     }    
   }
 }

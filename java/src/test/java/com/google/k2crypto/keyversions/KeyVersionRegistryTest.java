@@ -65,9 +65,8 @@ public class KeyVersionRegistryTest {
     try {
       registry.register(BadKeyVersion.class);
       fail("Key version should not be installable.");
-    } catch (KeyVersionException ex) {
-      // Expected exception
-      assertEquals(BadKeyVersion.class, ex.getKeyVersionClass());
+    } catch (KeyVersionException expected) {
+      assertEquals(BadKeyVersion.class, expected.getKeyVersionClass());
     }
     assertEquals(0, registry.getRegisteredKeyVersions().size());
     assertNull(registry.getRegistration(Type.TEST));
@@ -98,8 +97,8 @@ public class KeyVersionRegistryTest {
     try {
       registry.newBuilder(type);
       fail("Expected unregistered exception.");
-    } catch (UnregisteredKeyVersionException ex) {
-      assertEquals(type, ex.getType());
+    } catch (UnregisteredKeyVersionException expected) {
+      assertEquals(type, expected.getType());
     }
     assertFalse(registry.unregister(type));
   }
@@ -286,37 +285,32 @@ public class KeyVersionRegistryTest {
     try {
       registry.register(null);
       fail();
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("kvClass", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("kvClass", expected.getMessage());
     }
     try {
       registry.unregister(null);
       fail();
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("type", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("type", expected.getMessage());
     }
     try {
       registry.getRegistration(null);
       fail();
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("type", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("type", expected.getMessage());
     }
     try {
       registry.isRegistered(null);
       fail();
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("type", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("type", expected.getMessage());
     }
     try {
       registry.newBuilder(null);
       fail();
-    } catch (NullPointerException ex) {
-      // Expected exception
-      assertEquals("type", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("type", expected.getMessage());
     }
   }
 }

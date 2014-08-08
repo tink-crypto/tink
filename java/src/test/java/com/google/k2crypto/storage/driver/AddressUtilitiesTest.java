@@ -138,10 +138,11 @@ public class AddressUtilitiesTest {
       try {
         AddressUtilities.checkNoAuthority(URI.create(address));
         fail("Should reject " + address);
-      } catch (IllegalAddressException ex) {
-        assertEquals(address, ex.getAddress());
-        assertEquals(IllegalAddressException.Reason.AUTHORITY_UNSUPPORTED,
-            ex.getReason());
+      } catch (IllegalAddressException expected) {
+        assertEquals(address, expected.getAddress());
+        assertEquals(
+            IllegalAddressException.Reason.AUTHORITY_UNSUPPORTED,
+            expected.getReason());
       }
     }
   }
@@ -167,10 +168,11 @@ public class AddressUtilitiesTest {
       try {
         AddressUtilities.checkNoUser(URI.create(address));
         fail("Should reject " + address);
-      } catch (IllegalAddressException ex) {
-        assertEquals(address, ex.getAddress());
-        assertEquals(IllegalAddressException.Reason.USER_UNSUPPORTED,
-            ex.getReason());
+      } catch (IllegalAddressException expected) {
+        assertEquals(address, expected.getAddress());
+        assertEquals(
+            IllegalAddressException.Reason.USER_UNSUPPORTED,
+            expected.getReason());
       }
     }
   }
@@ -196,10 +198,11 @@ public class AddressUtilitiesTest {
       try {
         AddressUtilities.checkNoHostPort(URI.create(address));
         fail("Should reject " + address);
-      } catch (IllegalAddressException ex) {
-        assertEquals(address, ex.getAddress());
-        assertEquals(IllegalAddressException.Reason.HOST_PORT_UNSUPPORTED,
-            ex.getReason());
+      } catch (IllegalAddressException expected) {
+        assertEquals(address, expected.getAddress());
+        assertEquals(
+            IllegalAddressException.Reason.HOST_PORT_UNSUPPORTED,
+            expected.getReason());
       }
     }
   }
@@ -223,10 +226,11 @@ public class AddressUtilitiesTest {
       try {
         AddressUtilities.checkNoPath(URI.create(address));
         fail("Should reject: " + address);
-      } catch (IllegalAddressException ex) {
-        assertEquals(address, ex.getAddress());
-        assertEquals(IllegalAddressException.Reason.PATH_UNSUPPORTED,
-            ex.getReason());
+      } catch (IllegalAddressException expected) {
+        assertEquals(address, expected.getAddress());
+        assertEquals(
+            IllegalAddressException.Reason.PATH_UNSUPPORTED,
+            expected.getReason());
       }
     }
   }
@@ -250,10 +254,11 @@ public class AddressUtilitiesTest {
       try {
         AddressUtilities.checkNoQuery(URI.create(address));
         fail("Should reject " + address);
-      } catch (IllegalAddressException ex) {
-        assertEquals(address, ex.getAddress());
-        assertEquals(IllegalAddressException.Reason.QUERY_UNSUPPORTED,
-            ex.getReason());
+      } catch (IllegalAddressException expected) {
+        assertEquals(address, expected.getAddress());
+        assertEquals(
+            IllegalAddressException.Reason.QUERY_UNSUPPORTED,
+            expected.getReason());
       }
     }
   }
@@ -277,10 +282,11 @@ public class AddressUtilitiesTest {
       try {
         AddressUtilities.checkNoFragment(URI.create(address));
         fail("Should reject " + address);
-      } catch (IllegalAddressException ex) {
-        assertEquals(address, ex.getAddress());
-        assertEquals(IllegalAddressException.Reason.FRAGMENT_UNSUPPORTED,
-            ex.getReason());
+      } catch (IllegalAddressException expected) {
+        assertEquals(address, expected.getAddress());
+        assertEquals(
+            IllegalAddressException.Reason.FRAGMENT_UNSUPPORTED,
+            expected.getReason());
       }
     }
   }
@@ -299,10 +305,11 @@ public class AddressUtilitiesTest {
       try {
         AddressUtilities.extractRawPath(URI.create(address));
         fail("Should reject " + address);
-      } catch (IllegalAddressException ex) {
-        assertEquals(address, ex.getAddress());
-        assertEquals(IllegalAddressException.Reason.MISSING_PATH,
-            ex.getReason());
+      } catch (IllegalAddressException expected) {
+        assertEquals(address, expected.getAddress());
+        assertEquals(
+            IllegalAddressException.Reason.MISSING_PATH,
+            expected.getReason());
       }
     }
   }
