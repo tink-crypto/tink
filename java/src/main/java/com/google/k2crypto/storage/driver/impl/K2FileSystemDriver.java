@@ -47,9 +47,17 @@ import java.util.regex.Pattern;
 /**
  * K2-native local file-system key storage driver.
  * 
- * <p>This driver uses temporary/backup files to minimize the possibility of
- * data-loss when saving a key and maximize the possibility of recovery when
- * loading a key.
+ * <p>This driver will save/load keys to a local file with a {@code .k2k}
+ * extension in a directory specified by the storage address, which can be in
+ * one of the following formats:
+ * <ul>
+ * <li>{@code k2:[ABSOLUTE PATH]filename[.k2k]}  
+ * <li>{@code file:[ABSOLUTE PATH]filename.k2k}  
+ * <li>{@code [ABSOLUTE/RELATIVE PATH]filename.k2k}  
+ *  </ul>
+ * 
+ * <p>Temporary/backup files are used to minimize the possibility of data-loss
+ * when saving a key and to maximize the chance of recovery when loading a key.
  * 
  * <p>The current implementation does NOT acquire an OS-level lock on the key
  * file, so it is possible for two instances of the driver, possibly on
@@ -163,7 +171,7 @@ public class K2FileSystemDriver
     final boolean mustHaveExtension;
     String scheme = address.getScheme();
     if (scheme == null || scheme.equalsIgnoreCase(FILE_SCHEME)) {
-      // The empty and file schemes are generic, so there should be a
+      // The empty and file schemes are generic,  so there should be a
       // qualifying extension that tells us we are accessing a k2 key file.
       mustHaveExtension = true;
     } else if (NATIVE_SCHEME.equalsIgnoreCase(scheme)) {
