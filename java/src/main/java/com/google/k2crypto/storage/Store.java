@@ -28,7 +28,7 @@ import java.net.URI;
 /**
  * The interface to access a {@link Key} storage location.
  * 
- * <p>While this class is thread-safe, {@link #wrapWith(Key)} and
+ * <p>This class is conditionally thread-safe; {@link #wrapWith(Key)} and
  * {@link #noWrap()} should not be called concurrently to avoid
  * non-deterministic {@link #save(Key)} and {@link #load()} behavior.
  * 
