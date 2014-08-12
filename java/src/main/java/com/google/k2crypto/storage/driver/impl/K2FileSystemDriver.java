@@ -111,32 +111,31 @@ public class K2FileSystemDriver
   static final int MAX_FILENAME_LENGTH = 255 - TEMP_PREFIX.length()
       - Math.max(TEMP_A_EXTENSION.length(), TEMP_B_EXTENSION.length());
 
-  /**
-   * Regex blacklisting illegal characters in a filename.
-   */
-  private static final Pattern FILENAME_BLACK = Pattern.compile(
-      "[\\u0000-\\u001F" + Pattern.quote("\\/*?|<>:;\"") + "]",
-      // all control characters, \, /, *, ?, |, <, >, :, ;, "
-      Pattern.COMMENTS);
+  // Regex fragment excluding control characters, \, /, *, ?, |, <, >, :, ;, "
+  private static final String FILENAME_EXCLUSIONS =
+      "&&[^\\u0000-\\u001F" + Pattern.quote("\\/*?|<>:;\"") + "]";
   
-  /**
-   * Regex matching a valid filename.
-   */
-  private static final Pattern FILENAME_WHITE = Pattern.compile(
-      "^[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}&&[^\\~\\.]]"
-          + "(?:[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}\\p{Zs}]*"
-          + "[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}&&[^\\.]])?\\."
-          + Pattern.quote(FILE_EXTENSION) + '$');
-      /* 
-       * Do not start with '~' or '.' or any spaces.
-       * Everything except control characters permitted in-between.
-       * Do not end with '.' or any spaces before the file extension.
-       * The file extension is case-sensitive.
-       */
+  // Regex fragment for common valid filename characters only
+  private static final String FILENAME_COMMON =
+      "\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}" + FILENAME_EXCLUSIONS; 
+      
+  // Regex fragments defining valid initial, middle
+  // and terminating characters for a filename
+  private static final String FILENAME_START = FILENAME_COMMON + "&&[^\\~\\.]";
+  private static final String FILENAME_MIDDLE = "\\p{Zs}" + FILENAME_COMMON;
+  private static final String FILENAME_END = FILENAME_COMMON + "&&[^\\.]";
+  
+  // Regex matching a valid filename. Summary:
+  //   - Do not start with '~' or '.' or any spaces.
+  //   - Spaces permitted in-between.
+  //   - Do not end with '.' or any spaces before the file extension.
+  //   - The file extension is case-sensitive.
+  private static final Pattern FILENAME_REGEX =
+      Pattern.compile("^[" + FILENAME_START + "]"
+          + "(?:[" + FILENAME_MIDDLE + "]*[" + FILENAME_END + "])?"
+          + "\\." + Pattern.quote(FILE_EXTENSION) + '$');
 
-  /**
-   * Regex for checking if the address path already has the file extension.
-   */
+  // Regex for checking if the address path already has the file extension.
   private static final Pattern EXTENSION_REGEX = Pattern.compile(
       "\\." + Pattern.quote(FILE_EXTENSION) + '$', Pattern.CASE_INSENSITIVE); 
   
@@ -214,8 +213,7 @@ public class K2FileSystemDriver
       path = pri.toURI().getRawPath();
       
       // Filename should be a valid
-      if (FILENAME_WHITE.matcher(filename).matches()
-          && !FILENAME_BLACK.matcher(filename).find()
+      if (FILENAME_REGEX.matcher(filename).matches()
           && filename.length() <= MAX_FILENAME_LENGTH
           // Path should be absolute after normalization 
           && !path.startsWith("/../")
