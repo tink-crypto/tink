@@ -429,6 +429,7 @@ public class K2FileSystemDriver
    * @see WritableDriver#erase()
    */
   public boolean erase() throws StoreException {
+    // Intentional use of non-short circuiting OR to delete everything.
     return keyFile.delete() | tempFileA.delete() | tempFileB.delete();
   }
   
