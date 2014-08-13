@@ -106,14 +106,15 @@ public class K2FileSystemDriver
   static final String TEMP_PREFIX = ".";
   
   /**
-   * Maximum length of the name of the main key file, including the extension.
+   * Maximum length of the name of the main key file, excluding the extension.
    */
-  static final int MAX_FILENAME_LENGTH = 255 - TEMP_PREFIX.length()
+  static final int MAX_FILENAME_LENGTH = 255 
+      - (FILE_EXTENSION.length() + 1) - TEMP_PREFIX.length()
       - Math.max(TEMP_A_EXTENSION.length(), TEMP_B_EXTENSION.length());
 
   // Regex fragment excluding control characters, \, /, *, ?, |, <, >, :, ;, "
   private static final String FILENAME_EXCLUSIONS =
-      "&&[^\\u0000-\\u001F" + Pattern.quote("\\/*?|<>:;\"") + "]";
+      "&&[^\\u0000-\\u001F\\u007F" + Pattern.quote("\\/*?|<>:;\"") + "]";
   
   // Regex fragment for common valid filename characters only
   private static final String FILENAME_COMMON =
@@ -127,12 +128,14 @@ public class K2FileSystemDriver
   
   // Regex matching a valid filename. Summary:
   //   - Do not start with '~' or '.' or any spaces.
-  //   - Spaces permitted in-between.
   //   - Do not end with '.' or any spaces before the file extension.
+  //   - Spaces permitted only in the middle.
   //   - The file extension is case-sensitive.
+  //   - Overall length must not exceed MAX_FILENAME_LENGTH.
   private static final Pattern FILENAME_REGEX =
       Pattern.compile("^[" + FILENAME_START + "]"
-          + "(?:[" + FILENAME_MIDDLE + "]*[" + FILENAME_END + "])?"
+          + "(?:[" + FILENAME_MIDDLE + "]{0," + (MAX_FILENAME_LENGTH - 2) + "}" 
+          + "[" + FILENAME_END + "])?"
           + "\\." + Pattern.quote(FILE_EXTENSION) + '$');
 
   // Regex for checking if the address path already has the file extension.
@@ -214,7 +217,6 @@ public class K2FileSystemDriver
       
       // Filename should be a valid
       if (FILENAME_REGEX.matcher(filename).matches()
-          && filename.length() <= MAX_FILENAME_LENGTH
           // Path should be absolute after normalization 
           && !path.startsWith("/../")
           // Parent file should be an existing directory
