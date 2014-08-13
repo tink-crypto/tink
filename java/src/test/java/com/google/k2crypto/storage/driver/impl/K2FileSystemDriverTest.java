@@ -193,8 +193,8 @@ public class K2FileSystemDriverTest {
     
     // Test all illegal filename characters
     for (char illegal : new char[] {
-        '\0', '\n', '\r', '\t', '\f', '\b', '\\',
-        '/', '*', '?', '|', '<', '>', ':', ';', '"'
+        '\0', '\n', '\r', '\t', '\f', '\b', '\u007F',
+        '\\', '/', '*', '?', '|', '<', '>', ':', ';', '"'
     }) {
       String encoded = String.format("%%%02X", (int)illegal);
       assertEquals(3, encoded.length()); // sanity check
@@ -219,13 +219,29 @@ public class K2FileSystemDriverTest {
           testingAddress + "abc" + illegalPostfix,
           IllegalAddressException.Reason.INVALID_PATH);
     }
+  }
+  
+  /**
+   * Tests that the open() method accepts a filename at maximum length and
+   * rejects when it is any longer.
+   */
+  @Test public final void testFilenameLength() throws K2Exception {
+    final String testingAddress = NATIVE_PREFIX + testingDirPath;
 
     // Test filename that is one character too long
-    String oneCharTooLongName = generateString(
-        random, 1 + MAX_FILENAME_LENGTH - NATIVE_POSTFIX.length());
+    String oneCharTooLongName = generateString(random, 1 + MAX_FILENAME_LENGTH);
     checkRejectAddress(
         testingAddress + oneCharTooLongName,
         IllegalAddressException.Reason.INVALID_PATH);
+    
+    // Test acceptance of filename at maximum length
+    Driver driver = newDriver();
+    try {
+      driver.open(URI.create(
+          testingAddress + generateString(random, MAX_FILENAME_LENGTH)));
+    } finally {
+      driver.close();
+    }  
   }
   
   /**
