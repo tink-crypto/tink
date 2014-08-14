@@ -126,8 +126,8 @@ public class K2FileSystemDriver
   //   - Spaces permitted only in the middle.
   //   - The file extension is case-sensitive.
   //   - Length without extension must not exceed MAX_FILENAME_LENGTH.
-  private static final Pattern FILENAME_REGEX = Pattern.compile(
-      "^(?![\\p{Z}\\~\\.])"
+  private static final Pattern FILENAME_REGEX =
+      Pattern.compile("^(?![\\p{Z}\\~\\.])"
           + "[" + FILENAME_CHARS + "]{1," + MAX_FILENAME_LENGTH + "}" 
           + "(?<![\\p{Z}\\.])"
           + "\\." + Pattern.quote(FILE_EXTENSION) + '$');
