@@ -116,26 +116,20 @@ public class K2FileSystemDriver
   private static final String FILENAME_EXCLUSIONS =
       "&&[^\\u0000-\\u001F\\u007F" + Pattern.quote("\\/*?|<>:;\"") + "]";
   
-  // Regex fragment for common valid filename characters only
-  private static final String FILENAME_COMMON =
-      "\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}" + FILENAME_EXCLUSIONS; 
+  // Regex fragment for valid filename characters only
+  private static final String FILENAME_CHARS =
+      "\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}\\p{Zs}" + FILENAME_EXCLUSIONS; 
       
-  // Regex fragments defining valid initial, middle
-  // and terminating characters for a filename
-  private static final String FILENAME_START = FILENAME_COMMON + "&&[^\\~\\.]";
-  private static final String FILENAME_MIDDLE = "\\p{Zs}" + FILENAME_COMMON;
-  private static final String FILENAME_END = FILENAME_COMMON + "&&[^\\.]";
-  
   // Regex matching a valid filename. Summary:
   //   - Do not start with '~' or '.' or any spaces.
   //   - Do not end with '.' or any spaces before the file extension.
   //   - Spaces permitted only in the middle.
   //   - The file extension is case-sensitive.
-  //   - Overall length must not exceed MAX_FILENAME_LENGTH.
-  private static final Pattern FILENAME_REGEX =
-      Pattern.compile("^[" + FILENAME_START + "]"
-          + "(?:[" + FILENAME_MIDDLE + "]{0," + (MAX_FILENAME_LENGTH - 2) + "}" 
-          + "[" + FILENAME_END + "])?"
+  //   - Length without extension must not exceed MAX_FILENAME_LENGTH.
+  private static final Pattern FILENAME_REGEX = Pattern.compile(
+      "^(?![\\p{Z}\\~\\.])"
+          + "[" + FILENAME_CHARS + "]{1," + MAX_FILENAME_LENGTH + "}" 
+          + "(?<![\\p{Z}\\.])"
           + "\\." + Pattern.quote(FILE_EXTENSION) + '$');
 
   // Regex for checking if the address path already has the file extension.
