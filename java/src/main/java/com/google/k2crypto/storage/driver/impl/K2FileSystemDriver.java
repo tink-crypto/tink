@@ -51,9 +51,9 @@ import java.util.regex.Pattern;
  * extension in a directory specified by the storage address, which can be in
  * one of the following formats:
  * <ul>
- * <li>{@code k2:[ABSOLUTE PATH]filename[.k2k]}  
- * <li>{@code file:[ABSOLUTE PATH]filename.k2k}  
- * <li>{@code [ABSOLUTE/RELATIVE PATH]filename.k2k}  
+ * <li>{@code k2:{ABSOLUTE PATH}filename[.k2k]}  
+ * <li>{@code file:{ABSOLUTE PATH}filename.k2k}  
+ * <li>{@code {ABSOLUTE/RELATIVE PATH}filename.k2k}  
  *  </ul>
  * 
  * <p>Temporary/backup files are used to minimize the possibility of data-loss
@@ -112,23 +112,21 @@ public class K2FileSystemDriver
       - (FILE_EXTENSION.length() + 1) - TEMP_PREFIX.length()
       - Math.max(TEMP_A_EXTENSION.length(), TEMP_B_EXTENSION.length());
 
-  // Regex fragment excluding control characters, \, /, *, ?, |, <, >, :, ;, "
+  // Regex fragment excluding \, /, *, ?, |, <, >, :, ;, ", control characters
+  // and vertical spaces from filenames
   private static final String FILENAME_EXCLUSIONS =
-      "&&[^\\u0000-\\u001F\\u007F" + Pattern.quote("\\/*?|<>:;\"") + "]";
+      "\\p{Zl}\\p{Zp}\\p{C}\\u0000-\\u001F\\u007F"
+          + Pattern.quote("\\/*?|<>:;\"");
   
-  // Regex fragment for valid filename characters only
-  private static final String FILENAME_CHARS =
-      "\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}\\p{Zs}" + FILENAME_EXCLUSIONS; 
-      
   // Regex matching a valid filename. Summary:
   //   - Do not start with '~' or '.' or any spaces.
   //   - Do not end with '.' or any spaces before the file extension.
-  //   - Spaces permitted only in the middle.
+  //   - Must not include any filename exclusions (above).
   //   - The file extension is case-sensitive.
   //   - Length without extension must not exceed MAX_FILENAME_LENGTH.
   private static final Pattern FILENAME_REGEX =
       Pattern.compile("^(?![\\p{Z}\\~\\.])"
-          + "[" + FILENAME_CHARS + "]{1," + MAX_FILENAME_LENGTH + "}" 
+          + "[^" + FILENAME_EXCLUSIONS + "]{1," + MAX_FILENAME_LENGTH + "}" 
           + "(?<![\\p{Z}\\.])"
           + "\\." + Pattern.quote(FILE_EXTENSION) + '$');
 
@@ -293,7 +291,7 @@ public class K2FileSystemDriver
       // then move 'target' slot to the primary. 
       if (!keyFile.renameTo(other) || !target.renameTo(keyFile)) {
         throw new StoreIOException(
-            StoreIOException.Reason.FILE_WRITE_ERROR);
+            StoreIOException.Reason.WRITE_ERROR);
       }
       
     } else {
@@ -353,7 +351,7 @@ public class K2FileSystemDriver
     if (exception != null || file.length() != keyBytes.length) {
       file.delete();
       throw new StoreIOException(
-          StoreIOException.Reason.FILE_WRITE_ERROR, exception);
+          StoreIOException.Reason.WRITE_ERROR, exception);
     }
   }
   
@@ -414,7 +412,7 @@ public class K2FileSystemDriver
       return new Key(context, KeyData.parseFrom(in, registry));
     } catch (IOException ex) {
       throw new StoreIOException(
-          StoreIOException.Reason.FILE_READ_ERROR, ex);
+          StoreIOException.Reason.READ_ERROR, ex);
     } catch (InvalidKeyDataException ex) {
       throw new StoreIOException(
           StoreIOException.Reason.DESERIALIZATION_ERROR, ex);
