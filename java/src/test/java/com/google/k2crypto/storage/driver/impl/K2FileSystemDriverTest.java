@@ -261,8 +261,8 @@ public class K2FileSystemDriverTest {
       }
     }
     
-    // The parent "File" of the key file should NOT be a file
-    // (i.e. it should be a directory)
+    // The parent "File" of the key file should be an existing directory
+    // (and not a file)
     File parent = generateFile(random, testingDir, "", ".tmp");
     parent.deleteOnExit();
     try {
