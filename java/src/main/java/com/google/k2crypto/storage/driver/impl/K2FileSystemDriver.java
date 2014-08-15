@@ -46,12 +46,20 @@ import java.util.regex.Pattern;
 
 /**
  * K2-native local file-system key storage driver.
- * <p>
- * This driver uses temporary/backup files to minimize the possibility of
- * data-loss when saving a key and maximize the possibility of recovery when
- * loading a key.
- * <p>
- * The current implementation does NOT acquire an OS-level lock on the key
+ * 
+ * <p>This driver will save/load keys to a local file with a {@code .k2k}
+ * extension in a directory specified by the storage address, which can be in
+ * one of the following formats:
+ * <ul>
+ * <li>{@code k2:{ABSOLUTE PATH}filename[.k2k]}  
+ * <li>{@code file:{ABSOLUTE PATH}filename.k2k}  
+ * <li>{@code {ABSOLUTE/RELATIVE PATH}filename.k2k}  
+ *  </ul>
+ * 
+ * <p>Temporary/backup files are used to minimize the possibility of data-loss
+ * when saving a key and to maximize the chance of recovery when loading a key.
+ * 
+ * <p>The current implementation does NOT acquire an OS-level lock on the key
  * file, so it is possible for two instances of the driver, possibly on
  * different VMs, to open the same key location. In this scenario, concurrent
  * writes on the two instances will have undefined behavior.
@@ -65,7 +73,7 @@ import java.util.regex.Pattern;
 public class K2FileSystemDriver 
     implements Driver, ReadableDriver, WritableDriver {
   
-  // TODO: implement WrappingDriver when the Key usage API is stable
+  // TODO(darylseah): implement WrappingDriver when the Key usage API is stable
   
   /**
    * File extension that will be appended to key files.
@@ -98,37 +106,31 @@ public class K2FileSystemDriver
   static final String TEMP_PREFIX = ".";
   
   /**
-   * Maximum length of the name of the main key file, including the extension.
+   * Maximum length of the name of the main key file, excluding the extension.
    */
-  static final int MAX_FILENAME_LENGTH = 255 - TEMP_PREFIX.length()
+  static final int MAX_FILENAME_LENGTH = 255 
+      - (FILE_EXTENSION.length() + 1) - TEMP_PREFIX.length()
       - Math.max(TEMP_A_EXTENSION.length(), TEMP_B_EXTENSION.length());
 
-  /**
-   * Regex blacklisting illegal characters in a filename.
-   */
-  private static final Pattern FILENAME_BLACK = Pattern.compile(
-      "[\\u0000-\\u001F" + Pattern.quote("\\/*?|<>:;\"") + "]",
-      // all control characters, \, /, *, ?, |, <, >, :, ;, "
-      Pattern.COMMENTS);
+  // Regex fragment excluding \, /, *, ?, |, <, >, :, ;, ", control characters
+  // and vertical spaces from filenames
+  private static final String FILENAME_EXCLUSIONS =
+      "\\p{Zl}\\p{Zp}\\p{C}\\u0000-\\u001F\\u007F"
+          + Pattern.quote("\\/*?|<>:;\"");
   
-  /**
-   * Regex matching a valid filename.
-   */
-  private static final Pattern FILENAME_WHITE = Pattern.compile(
-      "^[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}&&[^\\~\\.]]"
-          + "(?:[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}\\p{Zs}]*"
-          + "[\\p{L}\\p{N}\\p{M}\\p{P}\\p{S}&&[^\\.]])?\\."
-          + Pattern.quote(FILE_EXTENSION) + '$');
-      /* 
-       * Do not start with '~' or '.' or any spaces.
-       * Everything except control characters permitted in-between.
-       * Do not end with '.' or any spaces before the file extension.
-       * The file extension is case-sensitive.
-       */
+  // Regex matching a valid filename. Summary:
+  //   - Do not start with '~' or '.' or any spaces.
+  //   - Do not end with '.' or any spaces before the file extension.
+  //   - Must not include any filename exclusions (above).
+  //   - The file extension is case-sensitive.
+  //   - Length without extension must not exceed MAX_FILENAME_LENGTH.
+  private static final Pattern FILENAME_REGEX =
+      Pattern.compile("^(?![\\p{Z}\\~\\.])"
+          + "[^" + FILENAME_EXCLUSIONS + "]{1," + MAX_FILENAME_LENGTH + "}" 
+          + "(?<![\\p{Z}\\.])"
+          + "\\." + Pattern.quote(FILE_EXTENSION) + '$');
 
-  /**
-   * Regex for checking if the address path already has the file extension.
-   */
+  // Regex for checking if the address path already has the file extension.
   private static final Pattern EXTENSION_REGEX = Pattern.compile(
       "\\." + Pattern.quote(FILE_EXTENSION) + '$', Pattern.CASE_INSENSITIVE); 
   
@@ -163,7 +165,7 @@ public class K2FileSystemDriver
     final boolean mustHaveExtension;
     String scheme = address.getScheme();
     if (scheme == null || scheme.equalsIgnoreCase(FILE_SCHEME)) {
-      // The empty and file schemes are generic, so there should be a
+      // The empty and file schemes are generic,  so there should be a
       // qualifying extension that tells us we are accessing a k2 key file.
       mustHaveExtension = true;
     } else if (NATIVE_SCHEME.equalsIgnoreCase(scheme)) {
@@ -171,8 +173,8 @@ public class K2FileSystemDriver
       mustHaveExtension = false;
     } else {
       // Unrecognized scheme
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.INVALID_SCHEME, null);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.INVALID_SCHEME, null);
     }
     
     // Extract path. We are assuming (below) that any encoded unreserved
@@ -182,8 +184,8 @@ public class K2FileSystemDriver
     // Check if the file extension is included in the path.
     if (!EXTENSION_REGEX.matcher(path).find()) {
       if (mustHaveExtension) {
-        throw new IllegalAddressException(address,
-            IllegalAddressException.Reason.INVALID_PATH, null);
+        throw new IllegalAddressException(
+            address, IllegalAddressException.Reason.INVALID_PATH, null);
       }
       // Append if missing
       path = path + '.' + FILE_EXTENSION;
@@ -206,9 +208,7 @@ public class K2FileSystemDriver
       path = pri.toURI().getRawPath();
       
       // Filename should be a valid
-      if (FILENAME_WHITE.matcher(filename).matches()
-          && !FILENAME_BLACK.matcher(filename).find()
-          && filename.length() <= MAX_FILENAME_LENGTH
+      if (FILENAME_REGEX.matcher(filename).matches()
           // Path should be absolute after normalization 
           && !path.startsWith("/../")
           // Parent file should be an existing directory
@@ -227,7 +227,8 @@ public class K2FileSystemDriver
         return finalAddress;
       }
     } catch (IllegalArgumentException ex) {
-      // The path is invalid (from URI.create or new File)
+      // The path is invalid (from URI.create or new File).
+      // Fall-through for exception throw.
     }
     
     // Falling through to here implies the path is invalid
@@ -290,7 +291,7 @@ public class K2FileSystemDriver
       // then move 'target' slot to the primary. 
       if (!keyFile.renameTo(other) || !target.renameTo(keyFile)) {
         throw new StoreIOException(
-            StoreIOException.Reason.FILE_WRITE_ERROR);
+            StoreIOException.Reason.WRITE_ERROR);
       }
       
     } else {
@@ -350,7 +351,7 @@ public class K2FileSystemDriver
     if (exception != null || file.length() != keyBytes.length) {
       file.delete();
       throw new StoreIOException(
-          StoreIOException.Reason.FILE_WRITE_ERROR, exception);
+          StoreIOException.Reason.WRITE_ERROR, exception);
     }
   }
   
@@ -380,8 +381,8 @@ public class K2FileSystemDriver
         }
       } catch (StoreIOException ex) {
         // Retain the highest-level exception (i.e. the furthest we have gotten)
-        if (ioException == null ||
-              ex.getReason().compareTo(ioException.getReason()) < 0) {
+        if (ioException == null
+            || ex.getReason().compareTo(ioException.getReason()) < 0) {
           ioException = ex;
         }
       }
@@ -411,7 +412,7 @@ public class K2FileSystemDriver
       return new Key(context, KeyData.parseFrom(in, registry));
     } catch (IOException ex) {
       throw new StoreIOException(
-          StoreIOException.Reason.FILE_READ_ERROR, ex);
+          StoreIOException.Reason.READ_ERROR, ex);
     } catch (InvalidKeyDataException ex) {
       throw new StoreIOException(
           StoreIOException.Reason.DESERIALIZATION_ERROR, ex);
@@ -428,26 +429,28 @@ public class K2FileSystemDriver
    * @see WritableDriver#erase()
    */
   public boolean erase() throws StoreException {
+    // Intentional use of non-short circuiting OR to delete everything.
     return keyFile.delete() | tempFileA.delete() | tempFileB.delete();
   }
   
   /**
    * Evaluates whether the first file is likely more "readable" than the second.
-   * <p>
-   * We do this by heuristically comparing the attributes of the files, without
-   * actually attempting a read.  
+   * 
+   * <p>We do this by heuristically comparing the attributes of the files,
+   * without actually attempting a read.  
    * 
    * @param f1 First file.
    * @param f2 Second file.
+   * 
    * @return {@code true} if the first file is more readable,
    *         {@code false} otherwise.
    */
   private static boolean isFormerMoreReadable(File f1, File f2) {
     int cmp;
-    if ((cmp = Boolean.compare(f1.isFile(), f2.isFile())) != 0 ||
-        (cmp = Boolean.compare(f1.canRead(), f2.canRead())) != 0 ||
-        (cmp = Long.compare(f1.lastModified(), f2.lastModified())) != 0 ||
-        (cmp = Long.compare(f1.length(), f2.length())) != 0) { 
+    if ((cmp = Boolean.compare(f1.isFile(), f2.isFile())) != 0
+        || (cmp = Boolean.compare(f1.canRead(), f2.canRead())) != 0
+        || (cmp = Long.compare(f1.lastModified(), f2.lastModified())) != 0
+        || (cmp = Long.compare(f1.length(), f2.length())) != 0) { 
       return cmp > 0;
     }
     return false;

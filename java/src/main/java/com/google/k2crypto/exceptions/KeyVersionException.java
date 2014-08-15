@@ -93,8 +93,8 @@ public class KeyVersionException extends K2Exception {
    * @param keyVersionClass Class of the problematic key version.
    * @param reason The reason the key version is problematic.
    */
-  public KeyVersionException(Class<? extends KeyVersion> keyVersionClass,
-      Reason reason) {
+  public KeyVersionException(
+      Class<? extends KeyVersion> keyVersionClass, Reason reason) {
     super(reason.message);
     this.keyVersionClass = keyVersionClass;
     this.reason = reason;

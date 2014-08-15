@@ -31,14 +31,14 @@ import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.TEMP_PR
 import com.google.k2crypto.K2Context;
 import com.google.k2crypto.K2Exception;
 import com.google.k2crypto.Key;
-import com.google.k2crypto.keyversions.AESKeyVersion;
+import com.google.k2crypto.keyversions.MockKeyVersion;
 import com.google.k2crypto.storage.IllegalAddressException;
 import com.google.k2crypto.storage.K2Storage;
 import com.google.k2crypto.storage.StorageDriverException;
 import com.google.k2crypto.storage.StoreException;
 import com.google.k2crypto.storage.StoreIOException;
 import com.google.k2crypto.storage.driver.Driver;
-import com.google.k2crypto.storage.driver.impl.K2FileSystemDriver;
+import com.google.k2crypto.storage.driver.ReadableDriver;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -84,7 +84,7 @@ public class K2FileSystemDriverTest {
   
   private Key emptyKey = null;
   
-  private Key aesKey = null;
+  private Key mockKey = null;
 
   private Random random = null;
   
@@ -97,10 +97,11 @@ public class K2FileSystemDriverTest {
    */
   @Before public final void setUp() throws K2Exception {
     context = new K2Context();
-    context.getKeyVersionRegistry().register(AESKeyVersion.class);
+    context.getKeyVersionRegistry().register(MockKeyVersion.class);
     
     emptyKey = new Key();
-    aesKey = new Key(new AESKeyVersion.Builder().build());
+    mockKey =
+        new Key(new MockKeyVersion.Builder().comments("testing key").build());
     
     random = new Random(); // for generating test files
     
@@ -142,19 +143,25 @@ public class K2FileSystemDriverTest {
    */
   @Test public final void testRejectBadAddresses() {
     // Test unsupported components
-    checkRejectAddress(FILE_PREFIX + "//host/path",
+    checkRejectAddress(
+        FILE_PREFIX + "//host/path",
         IllegalAddressException.Reason.AUTHORITY_UNSUPPORTED);
-    checkRejectAddress(FILE_PREFIX + "//user@localhost:80/path",
+    checkRejectAddress(
+        FILE_PREFIX + "//user@localhost:80/path",
         IllegalAddressException.Reason.AUTHORITY_UNSUPPORTED);
-    checkRejectAddress(FILE_PREFIX + "/path?que",
+    checkRejectAddress(
+        FILE_PREFIX + "/path?que",
         IllegalAddressException.Reason.QUERY_UNSUPPORTED);
-    checkRejectAddress(FILE_PREFIX + "/path#frag",
+    checkRejectAddress(
+        FILE_PREFIX + "/path#frag",
         IllegalAddressException.Reason.FRAGMENT_UNSUPPORTED);
     
     // Test invalid schemes
-    checkRejectAddress("k3:/path",
+    checkRejectAddress(
+        "k3:/path",
         IllegalAddressException.Reason.INVALID_SCHEME);
-    checkRejectAddress("keyczar:/path",
+    checkRejectAddress(
+        "keyczar:/path",
         IllegalAddressException.Reason.INVALID_SCHEME);
     
     // Test generic schemes without the proper lowercase ".k2k" extension
@@ -175,44 +182,68 @@ public class K2FileSystemDriverTest {
         IllegalAddressException.Reason.INVALID_PATH);
     
     // Test no path
-    checkRejectAddress(NATIVE_PREFIX + "?",
+    checkRejectAddress(
+        NATIVE_PREFIX + "?",
         IllegalAddressException.Reason.MISSING_PATH);
     
     // Test relative path going beyond the logical URI root
-    checkRejectAddress("/../my%20key",
+    checkRejectAddress(
+        "/../my%20key",
         IllegalAddressException.Reason.INVALID_PATH);
     
     final String testingAddress = NATIVE_PREFIX + testingDirPath;
     
     // Test all illegal filename characters
     for (char illegal : new char[] {
-        '\0', '\n', '\r', '\t', '\f', '\b', '\\',
-        '/', '*', '?', '|', '<', '>', ':', ';', '"'}) {
+        '\0', '\n', '\r', '\t', '\f', '\b', '\u007F',
+        '\\', '/', '*', '?', '|', '<', '>', ':', ';', '"'
+    }) {
       String encoded = String.format("%%%02X", (int)illegal);
       assertEquals(3, encoded.length()); // sanity check
-      checkRejectAddress(testingAddress + 'A' + encoded + 'Z',
+      checkRejectAddress(
+          testingAddress + 'A' + encoded + 'Z',
           IllegalAddressException.Reason.INVALID_PATH);
-      checkRejectAddress(testingAddress + encoded,
+      checkRejectAddress(
+          testingAddress + encoded,
           IllegalAddressException.Reason.INVALID_PATH);
     }
     
     // Test illegal filename prefixes
     for (String illegalPrefix : new String[] { "~", ".", "%20" }) {
-      checkRejectAddress(testingAddress + illegalPrefix + "abc",
+      checkRejectAddress(
+          testingAddress + illegalPrefix + "abc",
           IllegalAddressException.Reason.INVALID_PATH);
     }
 
     // Test illegal filename postfixes
     for (String illegalPostfix : new String[] { ".", "%20" }) {
-      checkRejectAddress(testingAddress + "abc" + illegalPostfix,
+      checkRejectAddress(
+          testingAddress + "abc" + illegalPostfix,
           IllegalAddressException.Reason.INVALID_PATH);
     }
+  }
+  
+  /**
+   * Tests that the open() method accepts a filename at maximum length and
+   * rejects when it is any longer.
+   */
+  @Test public final void testFilenameLength() throws K2Exception {
+    final String testingAddress = NATIVE_PREFIX + testingDirPath;
 
     // Test filename that is one character too long
-    String oneCharTooLongName = generateString(random,
-        1 + MAX_FILENAME_LENGTH - NATIVE_POSTFIX.length());
-    checkRejectAddress(testingAddress + oneCharTooLongName,
+    String oneCharTooLongName = generateString(random, 1 + MAX_FILENAME_LENGTH);
+    checkRejectAddress(
+        testingAddress + oneCharTooLongName,
         IllegalAddressException.Reason.INVALID_PATH);
+    
+    // Test acceptance of filename at maximum length
+    Driver driver = newDriver();
+    try {
+      driver.open(URI.create(
+          testingAddress + generateString(random, MAX_FILENAME_LENGTH)));
+    } finally {
+      driver.close();
+    }  
   }
   
   /**
@@ -225,13 +256,14 @@ public class K2FileSystemDriverTest {
     if (roots != null) {
       // Should not be able to open the root path (without a filename)
       for (File root : roots) {
-        checkRejectAddress(NATIVE_PREFIX + root.toURI().getRawPath(),
+        checkRejectAddress(
+            NATIVE_PREFIX + root.toURI().getRawPath(),
             IllegalAddressException.Reason.INVALID_PATH);
       }
     }
     
-    // The parent "File" of the key file should NOT be a file
-    // (i.e. it should be a directory)
+    // The parent "File" of the key file should be an existing directory
+    // (and not a file)
     File parent = generateFile(random, testingDir, "", ".tmp");
     parent.deleteOnExit();
     try {
@@ -253,8 +285,8 @@ public class K2FileSystemDriverTest {
       String mainAddress = NATIVE_PREFIX + files[0].toURI().getRawPath();
       for (File f : files) {
         assertTrue(f.mkdir());
-        checkRejectAddress(mainAddress,
-            IllegalAddressException.Reason.INVALID_PATH);
+        checkRejectAddress(
+            mainAddress, IllegalAddressException.Reason.INVALID_PATH);
         assertTrue(f.delete());
       }
     } finally {
@@ -275,11 +307,10 @@ public class K2FileSystemDriverTest {
       driver.open(URI.create(address));
       fail("Should reject " + address);
     } catch (StoreException ex) {
-      fail("Unexpected " + ex);
-    } catch (IllegalAddressException ex) {
-      // Expected
-      assertEquals(reason, ex.getReason());
-      assertEquals(address, ex.getAddress());
+      throw new AssertionError("Unexpected", ex);
+    } catch (IllegalAddressException expected) {
+      assertEquals(reason, expected.getReason());
+      assertEquals(address, expected.getAddress());
     } finally {
       driver.close();
     }
@@ -297,26 +328,21 @@ public class K2FileSystemDriverTest {
     final String expected = absTestingAddress + filename;
     
     // Test absolute addresses (with k2: scheme), without and with extension
-    checkNormalization(expected,
-        absTestingAddress + filename);
-    checkNormalization(expected,
-        absTestingAddress + filename + NATIVE_POSTFIX);
+    checkNormalization(expected, absTestingAddress + filename);
+    checkNormalization(expected, absTestingAddress + filename + NATIVE_POSTFIX);
     
     // Test absolute addresses with collapsable paths, w/o and w/ extension
     checkNormalization(expected,
         absTestingAddress + "anything/./something/.././../" + filename);
-    checkNormalization(expected,
-        absTestingAddress + "/././" + filename + "");
+    checkNormalization(expected, absTestingAddress + "/././" + filename + "");
     
     // Test the above with absolute paths (i.e. no k2: scheme) 
-    checkNormalization(expected,
-        absTestingPath + filename + NATIVE_POSTFIX);
+    checkNormalization(expected, absTestingPath + filename + NATIVE_POSTFIX);
     checkNormalization(expected,
         absTestingPath + "/./something/../" + filename + NATIVE_POSTFIX);
     
     // Test the above with relative paths
-    checkNormalization(expected,
-        relTestingPath + filename + NATIVE_POSTFIX);
+    checkNormalization(expected, relTestingPath + filename + NATIVE_POSTFIX);
     checkNormalization(expected,
         relTestingPath + "/anything/../" + filename + NATIVE_POSTFIX);
   }
@@ -357,9 +383,9 @@ public class K2FileSystemDriverTest {
       assertTrue(driver.isEmpty());
       assertNull(driver.load());
 
-      driver.save(aesKey);
+      driver.save(mockKey);
       assertFalse(driver.isEmpty());
-      loadAndCheck(driver, aesKey);
+      loadAndCheck(driver, mockKey);
       
       driver.save(emptyKey);
       assertFalse(driver.isEmpty());
@@ -429,14 +455,14 @@ public class K2FileSystemDriverTest {
    */
   @Test public final void testRecoveryPrecedence()
       throws K2Exception, IOException {
-    final File aesFile =
-        generateFile(random, testingDir, "aes", NATIVE_POSTFIX);
+    final File keyFile =
+        generateFile(random, testingDir, "key", NATIVE_POSTFIX);
     final File emptyFile =
         generateFile(random, testingDir, "empty", NATIVE_POSTFIX);
     File[] files = generateFileTriple(random, testingDir);
     URI address = files[0].toURI().normalize();
     
-    aesFile.deleteOnExit();
+    keyFile.deleteOnExit();
     emptyFile.deleteOnExit();
     deleteAllOnExit(files);
 
@@ -448,22 +474,22 @@ public class K2FileSystemDriverTest {
           driver.open(address) + NATIVE_POSTFIX);
       
       // Save then put aside the two keys as test data
-      driver.save(aesKey);
-      assertTrue(files[0].renameTo(aesFile));
+      driver.save(mockKey);
+      assertTrue(files[0].renameTo(keyFile));
       assertTrue(driver.isEmpty());
       driver.save(emptyKey);
       assertTrue(files[0].renameTo(emptyFile));
       assertTrue(driver.isEmpty());
 
       // If both temp files are readable, the later one takes precedence 
-      copyData(aesFile, files[1]);
+      copyData(keyFile, files[1]);
       files[1].setLastModified(Math.max(files[1].lastModified() - 5000, 0));
       copyData(emptyFile, files[2]);
       loadAndCheck(driver, emptyKey);
       
       // If both have the same timestamp, the larger one takes precedence
       files[1].setLastModified(files[2].lastModified());
-      loadAndCheck(driver, aesKey);
+      loadAndCheck(driver, mockKey);
       
       // If main file exists, it always takes precedence
       copyData(emptyFile, files[0]);
@@ -472,11 +498,11 @@ public class K2FileSystemDriverTest {
       // If the main file is corrupted, we fallback to the temporary files
       files[0].delete();
       files[0].createNewFile();
-      loadAndCheck(driver, aesKey);
+      loadAndCheck(driver, mockKey);
       
     } finally {
       deleteAll(files);
-      aesFile.delete();
+      keyFile.delete();
       emptyFile.delete();
       driver.close();
     }
@@ -490,7 +516,7 @@ public class K2FileSystemDriverTest {
    * 
    * @throws StoreException if there is an unexpected error loading. 
    */
-  private static void loadAndCheck(K2FileSystemDriver driver, Key expected)
+  private static void loadAndCheck(ReadableDriver driver, Key expected)
       throws StoreException {
     assertFalse(driver.isEmpty());
     Key loaded = driver.load();
@@ -557,9 +583,10 @@ public class K2FileSystemDriverTest {
     try {    
       driver.load();
       fail("Load should fail.");
-    } catch (StoreIOException ex) {
-      assertEquals(StoreIOException.Reason.DESERIALIZATION_ERROR,
-          ex.getReason());
+    } catch (StoreIOException expected) {
+      assertEquals(
+          StoreIOException.Reason.DESERIALIZATION_ERROR,
+          expected.getReason());
     }
   }
   
@@ -577,7 +604,7 @@ public class K2FileSystemDriverTest {
       out = new FileOutputStream(destination).getChannel();
       out.transferFrom(in, 0, in.size());
     } catch (IOException ex) {
-      fail("Could not copy file: " + ex);
+      throw new AssertionError("Could not copy file", ex);
     } finally {
       try { in.close(); }
       catch (Exception ex) {}
@@ -642,13 +669,10 @@ public class K2FileSystemDriverTest {
         fail("Could not generate file triple!");
       }
       // Main file
-      File main = files[0] =
-          generateFile(random, dir, "", NATIVE_POSTFIX);
+      File main = files[0] = generateFile(random, dir, "", NATIVE_POSTFIX);
       // Temp files
-      files[1] = new File(dir,
-          TEMP_PREFIX + main.getName() + TEMP_A_EXTENSION);
-      files[2] = new File(dir,
-          TEMP_PREFIX + main.getName() + TEMP_B_EXTENSION);      
+      files[1] = new File(dir, TEMP_PREFIX + main.getName() + TEMP_A_EXTENSION);
+      files[2] = new File(dir, TEMP_PREFIX + main.getName() + TEMP_B_EXTENSION);      
     } while (files[1].exists() || files[2].exists());
     return files;
   }
@@ -671,8 +695,8 @@ public class K2FileSystemDriverTest {
     // Create an initial random filename
     char[] filename = new char[prefixLen + GENERATED_NAME_LENGTH + postfixLen];
     prefix.getChars(0, prefixLen, filename, 0);
-    postfix.getChars(0, postfixLen, filename,
-        GENERATED_NAME_LENGTH + prefixLen);
+    postfix.getChars(
+        0, postfixLen, filename, GENERATED_NAME_LENGTH + prefixLen);
     
     for (int i = GENERATED_NAME_LENGTH + prefixLen; --i >= prefixLen; ) {
       filename[i] = (char)('A' + random.nextInt(26));

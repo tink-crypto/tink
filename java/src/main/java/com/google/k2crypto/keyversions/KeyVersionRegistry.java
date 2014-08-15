@@ -28,8 +28,8 @@ import java.util.Map;
 
 /**
  * A registry of available {@link KeyVersion} implementations.
- * <p>
- * This class is thread-safe.
+ * 
+ * <p>This class is thread-safe.
  *
  * @author darylseah@gmail.com (Daryl Seah)
  */
@@ -149,7 +149,8 @@ public class KeyVersionRegistry {
             rkv.registerProtoExtensions(registry);
           } catch (ReflectiveOperationException ex) {
             // Might get this if the proto is broken. Just print trace and
-            // continue. (Perhaps log this?)
+            // continue.
+            // TODO(darylseah): Perhaps log this? 
             ex.printStackTrace();
           }
         }

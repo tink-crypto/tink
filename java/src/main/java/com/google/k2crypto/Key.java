@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents a Key in K2. It holds a list of KeyVersions and a reference to the primary
- * KeyVersion.
+ * This class represents a Key in K2. It holds a list of KeyVersions and a
+ * reference to the primary KeyVersion.
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
@@ -103,7 +103,7 @@ public class Key {
       throw new InvalidKeyDataException(
           InvalidKeyDataException.Reason.PROTO_PARSE, ex);
     }
-    // TODO: extract security properties from core
+    // TODO(darylseah): extract security properties from core
 
     // Extract the key version list
     final int kvCount = data.getKeyVersionCount();
@@ -173,19 +173,19 @@ public class Key {
   
   /**
    * Returns a builder for building the protobuf core of the key.
-   * <p>
-   * The core contains all the security properties of the key.
+   * 
+   * <p>The core contains all the security properties of the key.
    */
   protected KeyCore.Builder buildCore() {
     KeyCore.Builder builder = KeyCore.newBuilder();
-    // TODO: populate core with security properties
+    // TODO(darylseah): populate core with security properties
     return builder;
   }
   
   /**
    * Returns a builder for building the protobuf data of the key.
-   * <p>
-   * The data contains the core as well as the key versions in the key.
+   * 
+   * <p>The data contains the core as well as the key versions in the key.
    */
   public KeyData.Builder buildData() {
     KeyData.Builder builder = KeyData.newBuilder();
@@ -254,11 +254,14 @@ public class Key {
    * @param keyversion the keyversion to remove from the key
    * @throws KeyModifierException
    */
-  protected void removeKeyVersion(KeyVersion keyversion) throws KeyModifierException {
+  protected void removeKeyVersion(KeyVersion keyversion)
+      throws KeyModifierException {
     if (!keyVersions.contains(keyversion)) {
-      throw new KeyModifierException("Given KeyVersion is not in the Key");
+      throw new KeyModifierException(
+          "Given KeyVersion is not in the Key");
     } else if (this.primary == keyversion) {
-      throw new KeyModifierException("Cannot remove KeyVersion as it is the primary in the Key");
+      throw new KeyModifierException(
+          "Cannot remove KeyVersion as it is the primary in the Key");
     } else {
       this.keyVersions.remove(keyversion);
     }

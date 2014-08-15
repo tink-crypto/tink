@@ -25,17 +25,17 @@ import java.net.URI;
 
 /**
  * Main driver interface for a key storage location.
- * <p>
- * Drivers are concrete implementations of a {@link Store}. In addition to
+ * 
+ * <p>Drivers are concrete implementations of a {@link Store}. In addition to
  * implementing this interface, the instantiatable driver class must be
  * annotated with {@link DriverInfo}, provide a public constructor
  * with no arguments and implement {@link ReadableDriver} and/or
  * {@link WritableDriver} depending on the operations supported. For example,
  * a driver that only allows importing of Keys would only implement
  * {@link ReadableDriver}. The {@link WrappingDriver} interface should be 
- * implemented for drivers that support wrapping/unwrapping of Keys.   
- * <p>
- * When instantiated, {@link #initialize(K2Context)} will be invoked on the
+ * implemented for drivers that support wrapping/unwrapping of Keys.
+ *    
+ * <p>When instantiated, {@link #initialize(K2Context)} will be invoked on the
  * driver to provide the context of the current K2 session. After a successful
  * initialization, {@link #open(URI)} will be called to actually allocate
  * resources for performing storage operations on the specified storage address.
@@ -44,14 +44,14 @@ import java.net.URI;
  * resources, after the user has performed the storage operations. Note that it
  * is NOT safe to allocate resources before {@link #open(URI)} is called,
  * e.g. during construction or on initialize.
- * <p>
- * Drivers need not be concerned with thread safety, or methods invoked when
+ * 
+ * <p>Drivers need not be concerned with thread safety, or methods invoked when
  * they are not supported, or methods invoked when {@link #open(URI)} has not
  * been called, or methods invoked when {@link #close()} has been called. The
  * {@link Store} wrapper will manage all access to the driver by ensuring that
- * calls are synchronized, methods are not invoked when inappropriate, etc. 
- * <p>
- * A note about open/close and network-based stores: It is possible for the
+ * calls are synchronized, methods are not invoked when inappropriate, etc.
+ *  
+ * <p>A note about open/close and network-based stores: It is possible for the
  * network connection to drop after the driver is opened. However, the driver
  * must not implicitly close the store in this event. As long as the store is
  * still open, the connection should be reattempted.
@@ -72,8 +72,8 @@ public interface Driver {
    * allocating resources, establishing network connections, etc. The driver
    * may assume that this is only called once and only after
    * {@link #initialize(K2Context)} has been called.
-   * <p>
-   * An open may fail if the address is illegal with respect to the driver
+   * 
+   * <p>An open may fail if the address is illegal with respect to the driver
    * implementation; e.g. it contains invalid characters that will not map
    * to any file-system. An open may also fail if the provided address is legal
    * but points to an unsuitable location; e.g. it contains existing files not
@@ -85,8 +85,8 @@ public interface Driver {
    * {@link #close()} will not be called if {@code open()} throws an exception.
    * The driver can assume that {@code open()} will not be called again if it
    * fails.
-   * <p>
-   * This method may also return a modified address to present to the user,
+   * 
+   * <p>This method may also return a modified address to present to the user,
    * e.g. an address that has been normalized with driver-specific logic.
    * 
    * @param address Address of the storage location to open.

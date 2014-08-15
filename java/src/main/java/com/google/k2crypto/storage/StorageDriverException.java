@@ -79,8 +79,8 @@ public class StorageDriverException extends K2Exception {
    * @param driverClass Class of the problematic driver.
    * @param reason The reason the driver is problematic.
    */
-  public StorageDriverException(Class<? extends Driver> driverClass,
-      Reason reason) {
+  public StorageDriverException(
+      Class<? extends Driver> driverClass, Reason reason) {
     super(reason.message);
     this.driverClass = driverClass;
     this.reason = reason;

@@ -37,9 +37,9 @@ import java.net.URI;
 
 /**
  * Unit tests for an InstalledDriver.
- * <p>
- * Goal is to verify that the class will reject all badly-implemented drivers
- * and accept odd (but valid) driver implementations. 
+ * 
+ * <p>Goal is to verify that the class will reject all badly-implemented
+ * drivers and accept odd (but valid) driver implementations. 
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
@@ -63,9 +63,8 @@ public class InstalledDriverTest {
     try {
       new InstalledDriver(null, driverClass);
       fail("Expected NullPointerException of context.");
-    } catch (NullPointerException ex) {
-      // Exception is expected
-      assertEquals("context", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("context", expected.getMessage());
     }
   }
   
@@ -76,9 +75,8 @@ public class InstalledDriverTest {
     try {
       new InstalledDriver(context, null);
       fail("Expected NullPointerException of driverClass.");
-    } catch (NullPointerException ex) {
-      // Exception is expected
-      assertEquals("driverClass", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("driverClass", expected.getMessage());
     }
   }
   
@@ -118,10 +116,9 @@ public class InstalledDriverTest {
     try {
       new InstalledDriver(context, driverClass);
       fail(failMessage);
-    } catch (StorageDriverException ex) {
-      // Exception is expected
-      assertEquals(driverClass, ex.getDriverClass());
-      assertEquals(reason, ex.getReason());
+    } catch (StorageDriverException expected) {
+      assertEquals(driverClass, expected.getDriverClass());
+      assertEquals(reason, expected.getReason());
     }
   }
   
@@ -210,9 +207,8 @@ public class InstalledDriverTest {
   }
   
   // Test "data" for the above
-  @DriverInfo(id="mock", name="No Constructor Driver", version="1.0")
-  public static class NoConstructorDriver
-      extends MockDriver.Normal {
+  @DriverInfo(id = "mock", name = "No Constructor Driver", version = "1.0")
+  public static class NoConstructorDriver extends MockDriver.Normal {
     public NoConstructorDriver(@SuppressWarnings("unused") Object obj) {}
   }
   
@@ -227,7 +223,7 @@ public class InstalledDriverTest {
   }
   
   // Test "data" for the above
-  @DriverInfo(id="mock", name="Abstract Driver", version="1.0")
+  @DriverInfo(id = "mock", name = "Abstract Driver", version = "1.0")
   public static abstract class AbstractDriver extends MockDriver.Normal {
     public AbstractDriver() {}
   }
@@ -245,7 +241,7 @@ public class InstalledDriverTest {
   }
 
   // Test "data" for the above
-  @DriverInfo(id="priv", name="Private Driver", version="1.0.0")
+  @DriverInfo(id = "priv", name = "Private Driver", version = "1.0.0")
   private static class PrivateDriver extends MockDriver.Normal {
     @SuppressWarnings("unused") PrivateDriver() {}
   }
@@ -261,7 +257,7 @@ public class InstalledDriverTest {
   }
   
   // Test "data" for the above
-  @DriverInfo(id="mock", name="Private Constructor Driver", version="1.0")
+  @DriverInfo(id = "mock", name = "Private Constructor Driver", version = "1.0")
   public static class PrivateConstructorDriver extends MockDriver.Normal {
     private PrivateConstructorDriver() {}
   }
@@ -279,8 +275,10 @@ public class InstalledDriverTest {
   }
   
   // Test "data" for the above
-  @DriverInfo(id="mock", name="Constructor with Bad Throwables Driver",
-      version="1.0")
+  @DriverInfo(
+      id = "mock",
+      name = "Constructor with Bad Throwables Driver",
+      version = "1.0")
   public static class ConstructorWithBadThrowablesDriver
       extends MockDriver.Normal {
     public ConstructorWithBadThrowablesDriver() throws Exception, Throwable {}
@@ -300,8 +298,10 @@ public class InstalledDriverTest {
   }
   
   // Test "data" for the above
-  @DriverInfo(id="legalcon", name="Constructor with Legal Throwables Driver",
-      version="0.1")
+  @DriverInfo(
+      id = "legalcon",
+      name = "Constructor with Legal Throwables Driver",
+      version = "0.1")
   public static class ConstructorWithLegalThrowablesDriver
       extends MockDriver.Normal {
     public ConstructorWithLegalThrowablesDriver()
@@ -339,7 +339,7 @@ public class InstalledDriverTest {
   }
   
   // Test "data" for the above
-  @DriverInfo(id="", name="Empty Identifier Driver", version="1.0")
+  @DriverInfo(id = "", name = "Empty Identifier Driver", version = "1.0")
   public static class EmptyIdentifierDriver extends MockDriver.Normal {
     public EmptyIdentifierDriver() {}    
   }
@@ -355,7 +355,10 @@ public class InstalledDriverTest {
   }
   
   // Test "data" for the above
-  @DriverInfo(id="0b:@_d I/D", name="Bad Identifier Driver", version="1.0")
+  @DriverInfo(
+      id = "0b:@_d I/D",
+      name = "Bad Identifier Driver",
+      version = "1.0")
   public static class BadIdentifierDriver extends MockDriver.Normal {
     public BadIdentifierDriver() {}
   }
@@ -372,8 +375,10 @@ public class InstalledDriverTest {
   }
   
   // Test "data" for the above
-  @DriverInfo(id="c0m-p13x+id.", name="Complex Identifier Driver",
-      version="1.0a")
+  @DriverInfo(
+      id = "c0m-p13x+id.",
+      name = "Complex Identifier Driver",
+      version = "1.0a")
   public static class ComplexIdentifierDriver extends MockDriver.Normal {
     public ComplexIdentifierDriver() {}
   }

@@ -28,14 +28,15 @@ import java.util.Random;
 
 /**
  * Mock implementation of a KeyVersion.
- * <p>
- * This mock generates key "material" and supports adding arbitrary comments
+ * 
+ * <p>This mock generates key "material" and supports adding arbitrary comments
  * to the key version. It does not support any cryptographic function.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
 @KeyVersionInfo(
-    type = KeyVersionProto.Type.TEST, proto = MockKeyVersionProto.class)
+    type = KeyVersionProto.Type.TEST,
+    proto = MockKeyVersionProto.class)
 public class MockKeyVersion extends KeyVersion {
   
   /**
@@ -129,8 +130,8 @@ public class MockKeyVersion extends KeyVersion {
   public boolean equals(Object obj) {
     if (super.equals(obj)) {
       MockKeyVersion other = (MockKeyVersion)obj;
-      return material.equals(other.material) && (comments == null ?
-          other.comments == null : comments.equals(other.comments));
+      return material.equals(other.material) && (comments == null
+          ? other.comments == null : comments.equals(other.comments));
     }
     return false;
   }

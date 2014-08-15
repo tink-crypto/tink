@@ -52,6 +52,9 @@ public class StoreException extends K2Exception {
    * @param store Store that triggered the exception.
    */
   void setStore(Store store) {
+    if (this.store != null) {
+      throw new IllegalStateException("Exception already has store assigned.");
+    }
     this.store = store;
   }
   

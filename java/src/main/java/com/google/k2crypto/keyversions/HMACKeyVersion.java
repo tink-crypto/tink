@@ -33,12 +33,14 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * This class represents a hash key version in K2. It is abstract and extended by specific hash key
- * implementations such as HMACKeyVersion
+ * This class represents a hash key version in K2. It is abstract and extended
+ * by specific hash key implementations such as HMACKeyVersion
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-@KeyVersionInfo(type=KeyVersionProto.Type.HMAC, proto=HmacKeyVersionProto.class)
+@KeyVersionInfo(
+    type = KeyVersionProto.Type.HMAC,
+    proto = HmacKeyVersionProto.class)
 public class HMACKeyVersion extends HashKeyVersion {
   /**
    * SecretKey object representing the key matter in the HMAC key version
@@ -46,8 +48,8 @@ public class HMACKeyVersion extends HashKeyVersion {
   private SecretKey secretKey;
 
   /**
-   * Private constructor to ensure people use generateSHA1HMAC or generateMD5HMAC to generate HMAC
-   * key
+   * Private constructor to ensure people use generateSHA1HMAC or
+   * generateMD5HMAC to generate HMAC key
    */
   private HMACKeyVersion(Builder builder) throws Exception {
     super(builder);
@@ -82,21 +84,26 @@ public class HMACKeyVersion extends HashKeyVersion {
    * @return a new HMACKeyVersion using the SHA1 hash algorithm
    * @throws BuilderException
    */
-  public static HMACKeyVersion generateHMAC(String hashAlgorithm) throws BuilderException {
+  public static HMACKeyVersion generateHMAC(String hashAlgorithm)
+      throws BuilderException {
     return new Builder().algorithm(hashAlgorithm).build();
   }
 
   /**
-   * Generates a new HMAC using the SHA1 hash algorithm from give keyversion matter
+   * Generates a new HMAC using the SHA1 hash algorithm from give keyversion
+   * matter
    *
-   * @param keyVersionMatter The byte array representation of the HMAC key version
-   * @return an HMACKeyVersion object representing the HMAC key based on the input key version
-   *         matter
+   * @param keyVersionMatter The byte array representation of the
+   *                         HMAC key version
+   * @return an HMACKeyVersion object representing the HMAC key based on the
+   *         input key version matter
    * @throws BuilderException
    */
-  public static HMACKeyVersion generateHMAC(String hashAlgorithm, byte[] keyVersionMatter)
-      throws BuilderException {
-    return new Builder().algorithm(hashAlgorithm).matterVector(keyVersionMatter).build();
+  public static HMACKeyVersion generateHMAC(
+      String hashAlgorithm, byte[] keyVersionMatter)
+          throws BuilderException {
+    return new Builder()
+        .algorithm(hashAlgorithm).matterVector(keyVersionMatter).build();
   }
 
   /**
@@ -143,11 +150,12 @@ public class HMACKeyVersion extends HashKeyVersion {
    *
    * @param inputHmac The input HMAC to verify
    * @param message The input message to check the HMAC against
-   * @return True if and only if the HMAC computed on the message matches the input HMAC, false
-   *         otherwise
+   * @return True if and only if the HMAC computed on the message matches the
+   *         input HMAC, false otherwise
    * @throws EncryptionException
    */
-  public boolean verifyHMAC(byte[] inputHmac, byte[] message) throws EncryptionException {
+  public boolean verifyHMAC(byte[] inputHmac, byte[] message)
+      throws EncryptionException {
     // compute the hmac on the message
     // if the input hmac matches the computed hmac return true
     if (Arrays.equals(inputHmac, getRawHMAC(message))) {
@@ -191,7 +199,7 @@ public class HMACKeyVersion extends HashKeyVersion {
   @Override
   public KeyVersionData.Builder buildData() {
     HmacKeyVersionData.Builder dataBuilder = HmacKeyVersionData.newBuilder();
-    // TODO: Populate the data builder
+    // TODO(darylseah): Populate the data builder
 
     KeyVersionData.Builder builder = super.buildData();
     builder.setExtension(HmacKeyVersionData.extension, dataBuilder.build());
@@ -221,11 +229,11 @@ public class HMACKeyVersion extends HashKeyVersion {
      * @return This object with algorithm updated.
      */
     public Builder algorithm(String hashAlgorithm) {
-      if (hashAlgorithm.equalsIgnoreCase(HMAC_MD5) ||
-          hashAlgorithm.equalsIgnoreCase(HMAC_SHA1) ||
-          hashAlgorithm.equalsIgnoreCase(HMAC_SHA256) ||
-          hashAlgorithm.equalsIgnoreCase(HMAC_SHA384) ||
-          hashAlgorithm.equalsIgnoreCase(HMAC_SHA512)) {
+      if (hashAlgorithm.equalsIgnoreCase(HMAC_MD5)
+          || hashAlgorithm.equalsIgnoreCase(HMAC_SHA1)
+          || hashAlgorithm.equalsIgnoreCase(HMAC_SHA256)
+          || hashAlgorithm.equalsIgnoreCase(HMAC_SHA384)
+          || hashAlgorithm.equalsIgnoreCase(HMAC_SHA512)) {
         this.algorithm = hashAlgorithm;
         return this;
       } else {
@@ -257,7 +265,7 @@ public class HMACKeyVersion extends HashKeyVersion {
       @SuppressWarnings("unused")
       HmacKeyVersionData data =
           kvData.getExtension(HmacKeyVersionData.extension);
-      // TODO: Extract info from data (currently not used)
+      // TODO(darylseah): Extract info from data (currently not used)
       
       return this;
     }

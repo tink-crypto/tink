@@ -57,8 +57,8 @@ public class StoreTest {
     context = new K2Context();
     normalDriver = new InstalledDriver(context, MockDriver.Normal.class);
     
-    // TODO: We need a proper way to create keys for testing.
-    //       The current approach is fragile and WILL break later.
+    // TODO(darylseah): We need a proper way to create keys for testing.
+    //                  The current approach is fragile and WILL break later.
     saveKey = new Key();
     wrapKeyA = new Key();
     wrapKeyB = new Key();
@@ -239,9 +239,10 @@ public class StoreTest {
     try {
       store.load();
       fail("Store should fail to load without the wrap key.");
-    } catch (StoreIOException ex) {
-      assertEquals(StoreIOException.Reason.WRAP_KEY_REQUIRED, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreIOException expected) {
+      assertEquals(
+          StoreIOException.Reason.WRAP_KEY_REQUIRED, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     assertEquals(2, driver.loadCalls);
 
@@ -254,9 +255,10 @@ public class StoreTest {
     try {
       store.load();
       fail("Store should fail to load without correct wrap key.");
-    } catch (StoreIOException ex) {
-      assertEquals(StoreIOException.Reason.WRAP_KEY_WRONG, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreIOException expected) {
+      assertEquals(
+          StoreIOException.Reason.WRAP_KEY_WRONG, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     assertEquals(3, driver.loadCalls);
     
@@ -285,10 +287,10 @@ public class StoreTest {
     try {
       store.load();
       fail("Store should fail to load when wrap key is unnecessary.");
-    } catch (StoreIOException ex) {
+    } catch (StoreIOException expected) {
       assertEquals(
-          StoreIOException.Reason.WRAP_KEY_UNNECESSARY, ex.getReason());
-      assertEquals(store, ex.getStore());
+          StoreIOException.Reason.WRAP_KEY_UNNECESSARY, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     assertEquals(5, driver.loadCalls);
     
@@ -368,51 +370,51 @@ public class StoreTest {
     try {
       store.wrapWith(wrapKeyA);
       fail("WrapWith permits access before open.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.NOT_OPEN, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(StoreStateException.Reason.NOT_OPEN, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.noWrap();
       fail("NoWrap permits access before open.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.NOT_OPEN, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(StoreStateException.Reason.NOT_OPEN, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.isWrapping();
       fail("IsWrapping permits access before open.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.NOT_OPEN, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(StoreStateException.Reason.NOT_OPEN, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.isEmpty();
       fail("IsEmpty permits access before open.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.NOT_OPEN, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(StoreStateException.Reason.NOT_OPEN, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.save(saveKey);
       fail("Save permits access before open.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.NOT_OPEN, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(StoreStateException.Reason.NOT_OPEN, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.load();
       fail("Load permits access before open.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.NOT_OPEN, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(StoreStateException.Reason.NOT_OPEN, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.erase();
       fail("Erase permits access before open.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.NOT_OPEN, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(StoreStateException.Reason.NOT_OPEN, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
 
     // The driver should not see any of the calls
@@ -448,58 +450,66 @@ public class StoreTest {
     try {
       store.open();
       fail("Open permits access after close.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.ALREADY_CLOSED, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(
+          StoreStateException.Reason.ALREADY_CLOSED, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.wrapWith(wrapKeyA);
       fail("WrapWith permits access after close.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.ALREADY_CLOSED, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(
+          StoreStateException.Reason.ALREADY_CLOSED, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.noWrap();
       fail("NoWrap permits access after close.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.ALREADY_CLOSED, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(
+          StoreStateException.Reason.ALREADY_CLOSED, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.isWrapping();
       fail("IsWrapping permits access after close.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.ALREADY_CLOSED, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(
+          StoreStateException.Reason.ALREADY_CLOSED, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.isEmpty();
       fail("IsEmpty permits access after close.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.ALREADY_CLOSED, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(
+          StoreStateException.Reason.ALREADY_CLOSED, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.save(saveKey);
       fail("Save permits access after close.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.ALREADY_CLOSED, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(
+          StoreStateException.Reason.ALREADY_CLOSED, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.load();
       fail("Load permits access after close.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.ALREADY_CLOSED, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(
+          StoreStateException.Reason.ALREADY_CLOSED, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.erase();
       fail("Erase permits access after close.");
-    } catch (StoreStateException ex) {
-      assertEquals(StoreStateException.Reason.ALREADY_CLOSED, ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (StoreStateException expected) {
+      assertEquals(
+          StoreStateException.Reason.ALREADY_CLOSED, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
 
     // The driver should not see any of the calls
@@ -528,18 +538,18 @@ public class StoreTest {
     try {
       store.save(saveKey);
       fail("Save works for read-only driver.");
-    } catch (UnsupportedByStoreException ex) {
-      assertEquals(UnsupportedByStoreException.Reason.READ_ONLY,
-          ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (UnsupportedByStoreException expected) {
+      assertEquals(
+          UnsupportedByStoreException.Reason.READ_ONLY, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.erase();
       fail("Erase works for read-only driver.");
-    } catch (UnsupportedByStoreException ex) {
-      assertEquals(UnsupportedByStoreException.Reason.READ_ONLY,
-          ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (UnsupportedByStoreException expected) {
+      assertEquals(
+          UnsupportedByStoreException.Reason.READ_ONLY, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     
     // ...even with a wrapping key (sanity check)
@@ -547,18 +557,18 @@ public class StoreTest {
     try {
       store.save(saveKey);
       fail("Save works for read-only driver with a wrapping key.");
-    } catch (UnsupportedByStoreException ex) {
-      assertEquals(UnsupportedByStoreException.Reason.READ_ONLY,
-          ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (UnsupportedByStoreException expected) {
+      assertEquals(
+          UnsupportedByStoreException.Reason.READ_ONLY, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.erase();
       fail("Erase works for read-only driver with a wrapping key.");
-    } catch (UnsupportedByStoreException ex) {
-      assertEquals(UnsupportedByStoreException.Reason.READ_ONLY,
-          ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (UnsupportedByStoreException expected) {
+      assertEquals(
+          UnsupportedByStoreException.Reason.READ_ONLY, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     
     // The remaining method calls should work
@@ -593,18 +603,18 @@ public class StoreTest {
     try {
       store.load();
       fail("Load works for write-only driver.");
-    } catch (UnsupportedByStoreException ex) {
-      assertEquals(UnsupportedByStoreException.Reason.WRITE_ONLY,
-          ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (UnsupportedByStoreException expected) {
+      assertEquals(
+          UnsupportedByStoreException.Reason.WRITE_ONLY, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.isEmpty();
       fail("IsEmpty works for write-only driver.");
-    } catch (UnsupportedByStoreException ex) {
-      assertEquals(UnsupportedByStoreException.Reason.WRITE_ONLY,
-          ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (UnsupportedByStoreException expected) {
+      assertEquals(
+          UnsupportedByStoreException.Reason.WRITE_ONLY, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     
     // ...even with a wrapping key (sanity check)
@@ -612,18 +622,18 @@ public class StoreTest {
     try {
       store.load();
       fail("Load works for write-only driver with a wrapping key.");
-    } catch (UnsupportedByStoreException ex) {
-      assertEquals(UnsupportedByStoreException.Reason.WRITE_ONLY,
-          ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (UnsupportedByStoreException expected) {
+      assertEquals(
+          UnsupportedByStoreException.Reason.WRITE_ONLY, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     try {
       store.isEmpty();
       fail("IsEmpty works for write-only driver with a wrapping key.");
-    } catch (UnsupportedByStoreException ex) {
-      assertEquals(UnsupportedByStoreException.Reason.WRITE_ONLY,
-          ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (UnsupportedByStoreException expected) {
+      assertEquals(
+          UnsupportedByStoreException.Reason.WRITE_ONLY, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     
     // The remaining method calls should work
@@ -660,10 +670,10 @@ public class StoreTest {
     try {
       store.wrapWith(wrapKeyA);
       fail("WrapWith works for no-wrap driver.");
-    } catch (UnsupportedByStoreException ex) {
-      assertEquals(UnsupportedByStoreException.Reason.NO_WRAP,
-          ex.getReason());
-      assertEquals(store, ex.getStore());
+    } catch (UnsupportedByStoreException expected) {
+      assertEquals(
+          UnsupportedByStoreException.Reason.NO_WRAP, expected.getReason());
+      assertEquals(store, expected.getStore());
     }
     
     // noWrap and isWrapping should have no effect
@@ -698,7 +708,8 @@ public class StoreTest {
     assertEquals(acceptAllDriver, store.getInstalledDriver());
     assertEquals(address, store.getAddress());
     store.open();
-    assertEquals(URI.create(acceptAllDriver.getId() + ADDRESS_FRAGMENT),
+    assertEquals(
+        URI.create(acceptAllDriver.getId() + ADDRESS_FRAGMENT),
         store.getAddress());
     store.close();
   }
@@ -716,8 +727,8 @@ public class StoreTest {
     try {
       store.wrapWith(null);
       fail("WrapWith works with a null key.");
-    } catch (NullPointerException ex) {
-      assertEquals("key", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("key", expected.getMessage());
     }
     assertFalse(store.isWrapping());
     
@@ -725,8 +736,8 @@ public class StoreTest {
     try {
       store.save(null);
       fail("Save works with a null key.");
-    } catch (NullPointerException ex) {
-      assertEquals("key", ex.getMessage());
+    } catch (NullPointerException expected) {
+      assertEquals("key", expected.getMessage());
     }
     assertTrue(store.isEmpty());
 

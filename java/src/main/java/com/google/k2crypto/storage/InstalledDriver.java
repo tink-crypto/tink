@@ -29,8 +29,8 @@ import java.util.regex.Pattern;
 
 /**
  * A driver that has been installed into the storage system.
- * <p>
- * This class is thread-safe.
+ * 
+ * <p>This class is thread-safe.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
@@ -86,8 +86,8 @@ public class InstalledDriver {
     
     if (!canRead && !canWrite) {
       // A driver that can neither read nor write is literally useless
-      throw new StorageDriverException(driverClass,
-          StorageDriverException.Reason.USELESS);      
+      throw new StorageDriverException(
+          driverClass, StorageDriverException.Reason.USELESS);      
     }
 
     try {
@@ -95,10 +95,10 @@ public class InstalledDriver {
       constructor = driverClass.getDeclaredConstructor();
       // Constructor can only throw Errors or RuntimeExceptions
       for (Class<?> exClass : constructor.getExceptionTypes()) {
-        if (!RuntimeException.class.isAssignableFrom(exClass) &&
-              !Error.class.isAssignableFrom(exClass)) {
-          throw new StorageDriverException(driverClass,
-              StorageDriverException.Reason.ILLEGAL_THROWS);
+        if (!RuntimeException.class.isAssignableFrom(exClass)
+            && !Error.class.isAssignableFrom(exClass)) {
+          throw new StorageDriverException(
+              driverClass, StorageDriverException.Reason.ILLEGAL_THROWS);
         }
       }
       // Try to instantiate the driver (should work if driver is accessible)
@@ -106,25 +106,25 @@ public class InstalledDriver {
       
     } catch (NoSuchMethodException ex) {
       // Constructor not found
-      throw new StorageDriverException(driverClass,
-          StorageDriverException.Reason.NO_CONSTRUCTOR);        
+      throw new StorageDriverException(
+          driverClass, StorageDriverException.Reason.NO_CONSTRUCTOR);        
     } catch (ReflectiveOperationException ex) {
       // Instantiation failed
-      throw new StorageDriverException(driverClass,
-          StorageDriverException.Reason.INSTANTIATE_FAIL);
+      throw new StorageDriverException(
+          driverClass, StorageDriverException.Reason.INSTANTIATE_FAIL);
     }
 
     // Check that annotation is present
     info = driverClass.getAnnotation(DriverInfo.class);
     if (info == null) {
-      throw new StorageDriverException(driverClass,
-          StorageDriverException.Reason.NO_METADATA);
+      throw new StorageDriverException(
+          driverClass, StorageDriverException.Reason.NO_METADATA);
     }
     
     // Check that driver identifier is legal
     if (!LEGAL_ID.matcher(info.id()).matches()) {
-      throw new StorageDriverException(driverClass,
-          StorageDriverException.Reason.ILLEGAL_ID);        
+      throw new StorageDriverException(
+          driverClass, StorageDriverException.Reason.ILLEGAL_ID);        
     }
   }
   
@@ -247,8 +247,8 @@ public class InstalledDriver {
   public boolean equals(Object obj) {
     if (obj instanceof InstalledDriver) {
       InstalledDriver other = (InstalledDriver)obj;
-      return other.driverClass.equals(driverClass) &&
-          other.context.equals(context);
+      return other.driverClass.equals(driverClass)
+          && other.context.equals(context);
     }
     return false;
   }

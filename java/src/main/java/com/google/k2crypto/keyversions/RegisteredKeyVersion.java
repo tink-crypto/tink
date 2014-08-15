@@ -26,9 +26,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * A key version implementation (class) that has been registered with K2. 
- * <p>
- * This class is thread-safe.
+ * A key version implementation (class) that has been registered with K2.
+ *  
+ * <p>This class is thread-safe.
  *
  * @author darylseah@gmail.com (Daryl Seah)
  */
@@ -76,13 +76,13 @@ public class RegisteredKeyVersion {
       
       if (!Builder.class.isAssignableFrom(builder)) {
         // The builder class does not extend KeyVersion.Builder
-        throw new KeyVersionException(kvClass,
-            KeyVersionException.Reason.BAD_PARENT);
+        throw new KeyVersionException(
+            kvClass, KeyVersionException.Reason.BAD_PARENT);
       } else if (!kvClass.isAssignableFrom(
           builder.getMethod("build").getReturnType())) {
         // There is no build() method returning the key version type
-        throw new KeyVersionException(kvClass,
-            KeyVersionException.Reason.BAD_BUILD);        
+        throw new KeyVersionException(
+            kvClass, KeyVersionException.Reason.BAD_BUILD);        
       }
 
       // The following constructor extraction is reflectively type checked
@@ -92,10 +92,10 @@ public class RegisteredKeyVersion {
       
       // Constructor can only throw Errors or RuntimeExceptions
       for (Class<?> exClass : constructor.getExceptionTypes()) {
-        if (!RuntimeException.class.isAssignableFrom(exClass) &&
-              !Error.class.isAssignableFrom(exClass)) {
-          throw new KeyVersionException(kvClass,
-              KeyVersionException.Reason.ILLEGAL_THROWS);
+        if (!RuntimeException.class.isAssignableFrom(exClass)
+            && !Error.class.isAssignableFrom(exClass)) {
+          throw new KeyVersionException(
+              kvClass, KeyVersionException.Reason.ILLEGAL_THROWS);
         }
       }
 
@@ -105,24 +105,24 @@ public class RegisteredKeyVersion {
       
     } catch (ClassNotFoundException ex) {
       // The builder class was not found
-      throw new KeyVersionException(kvClass,
-          KeyVersionException.Reason.NO_BUILDER);
+      throw new KeyVersionException(
+          kvClass, KeyVersionException.Reason.NO_BUILDER);
     } catch (NoSuchMethodException ex) {
       // This exception should only be thrown by the constructor check
       // (and not the build method check). 
-      throw new KeyVersionException(kvClass,
-          KeyVersionException.Reason.NO_CONSTRUCTOR);
+      throw new KeyVersionException(
+          kvClass, KeyVersionException.Reason.NO_CONSTRUCTOR);
     } catch (ReflectiveOperationException ex) {
       // Builder instantiation test failed
-      throw new KeyVersionException(kvClass,
-          KeyVersionException.Reason.INSTANTIATE_FAIL);
+      throw new KeyVersionException(
+          kvClass, KeyVersionException.Reason.INSTANTIATE_FAIL);
     }
     
     // Check the info annotation
     info = kvClass.getAnnotation(KeyVersionInfo.class);
     if (info == null) {
-      throw new KeyVersionException(kvClass,
-          KeyVersionException.Reason.NO_METADATA);
+      throw new KeyVersionException(
+          kvClass, KeyVersionException.Reason.NO_METADATA);
     }
     
     // What we really need is the static registerAllExtensions() method on the
@@ -132,12 +132,12 @@ public class RegisteredKeyVersion {
       registerProtoExtensions = info.proto()
           .getMethod("registerAllExtensions", ExtensionRegistry.class);
       if (!Modifier.isStatic(registerProtoExtensions.getModifiers())) {
-        throw new KeyVersionException(kvClass,
-            KeyVersionException.Reason.BAD_PROTO);
+        throw new KeyVersionException(
+            kvClass, KeyVersionException.Reason.BAD_PROTO);
       }
     } catch (NoSuchMethodException ex) {
-      throw new KeyVersionException(kvClass,
-          KeyVersionException.Reason.BAD_PROTO);
+      throw new KeyVersionException(
+          kvClass, KeyVersionException.Reason.BAD_PROTO);
     }
   }
 
@@ -240,8 +240,8 @@ public class RegisteredKeyVersion {
   public boolean equals(Object obj) {
     if (obj instanceof RegisteredKeyVersion) {
       RegisteredKeyVersion other = (RegisteredKeyVersion)obj;
-      return other.keyVersionClass.equals(keyVersionClass) &&
-          other.context.equals(context);
+      return other.keyVersionClass.equals(keyVersionClass)
+          && other.context.equals(context);
     }
     return false;
   }

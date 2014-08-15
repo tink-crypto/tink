@@ -31,8 +31,8 @@ import java.net.URISyntaxException;
 
 /**
  * Main interface that the storage API exposes to the rest of K2.
- * <p>
- * This class is thread-safe.
+ * 
+ * <p>This class is thread-safe.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
@@ -59,9 +59,9 @@ public class K2Storage {
   
   /**
    * Convenience method for loading a Key from a given address.
-   * <p>
-   * This method is equivalent to calling {@code open(address)}, followed by a
-   * {@code load()} and a {@code close()} on the resulting {@link Store}.  
+   * 
+   * <p>This method is equivalent to calling {@code open(address)}, followed by
+   * a {@code load()} and a {@code close()} on the resulting {@link Store}.  
    * 
    * @param address Address of the key storage location.
    * 
@@ -87,9 +87,9 @@ public class K2Storage {
   
   /**
    * Convenience method for saving a Key to a given address.
-   * <p>
-   * This method is equivalent to calling {@code open(address)}, followed by a
-   * {@code save(key)} and a {@code close()} on the resulting {@link Store}.  
+   * 
+   * <p>This method is equivalent to calling {@code open(address)}, followed by
+   * a {@code save(key)} and a {@code close()} on the resulting {@link Store}.  
    * 
    * @param address Address of the key storage location.
    * @param key Key to save.
@@ -114,17 +114,18 @@ public class K2Storage {
 
   /**
    * Opens a storage location for reading/writing of a {@link Key}.
-   * <p>
-   * The string address should be parsable as a URI. For convenience sake, the
-   * common characters {@code ' '} (spaces) and {@code '%'} (percent characters
-   * not followed by two hex digits) are automatically percent-encoded. All
-   * other invalid URI characters must be manually escaped by the caller,
-   * e.g. {@code "/{my_keys^2}"} should be {@code "/%7Bmy_keys%5e2%7D"}. 
-   * <p>
-   * This method will search for an installed driver with an identifier matching
-   * the scheme of the URI. If no such driver is found (or the scheme is
-   * omitted), the available drivers will be queried in installation order and
-   * the first driver that accepts the address will be used.
+   * 
+   * <p>The string address should be parsable as a URI. For convenience sake,
+   * the common characters {@code ' '} (spaces) and {@code '%'} (percent
+   * characters not followed by two hex digits) are automatically
+   * percent-encoded. All other invalid URI characters must be manually escaped
+   * by the caller, e.g. {@code "/{my_keys^2}"} should be
+   * {@code "/%7Bmy_keys%5e2%7D"}.
+   *  
+   * <p>This method will search for an installed driver with an identifier
+   * matching the scheme of the URI. If no such driver is found (or the scheme
+   * is omitted), the available drivers will be queried in installation order
+   * and the first driver that accepts the address will be used.
    * 
    * @param address Address string of the key storage location.
    * 
@@ -148,18 +149,18 @@ public class K2Storage {
     try {
       return open(new URI(address));
     } catch (URISyntaxException ex) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.INVALID_URI, ex);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.INVALID_URI, ex);
     }
   }
   
   /**
    * Opens a storage location for reading/writing of a {@link Key}.
-   * <p>
-   * This method will search for an installed driver with an identifier matching
-   * the scheme of the URI. If no such driver is found (or the scheme is
-   * omitted), the available drivers will be queried in installation order and
-   * the first driver that accepts the address will be used.
+   * 
+   * <p>This method will search for an installed driver with an identifier
+   * matching the scheme of the URI. If no such driver is found (or the scheme
+   * is omitted), the available drivers will be queried in installation order
+   * and the first driver that accepts the address will be used.
    * 
    * @param address URI address of the key storage location.
    * 

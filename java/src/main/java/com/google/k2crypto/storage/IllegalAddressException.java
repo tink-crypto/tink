@@ -107,8 +107,8 @@ public class IllegalAddressException extends K2Exception {
    * @param reason Reason why the address is illegal.
    * @param cause The throwable that caused this one.
    */
-  public IllegalAddressException(String address, Reason reason,
-      Throwable cause) {
+  public IllegalAddressException(
+      String address, Reason reason, Throwable cause) {
     this(address, reason, null, cause);
   }
 
@@ -119,8 +119,8 @@ public class IllegalAddressException extends K2Exception {
    * @param reason Reason why the address is illegal.
    * @param cause The throwable that caused this one.
    */
-  public IllegalAddressException(URI address, Reason reason,
-      Throwable cause) {
+  public IllegalAddressException(
+      URI address, Reason reason, Throwable cause) {
     this(address.toASCIIString(), reason, null, cause);
   }
 
@@ -131,8 +131,8 @@ public class IllegalAddressException extends K2Exception {
    * @param details Driver-specific details.
    * @param cause The throwable that caused this one.
    */
-  public IllegalAddressException(URI address, String details,
-      Throwable cause) {
+  public IllegalAddressException(
+      URI address, String details, Throwable cause) {
     this(address.toASCIIString(), Reason.DRIVER_SPECIFIC, details, cause);
   }
 
@@ -144,8 +144,8 @@ public class IllegalAddressException extends K2Exception {
    * @param details Driver-specific details.
    * @param cause The throwable that caused this one.
    */
-  private IllegalAddressException(String address, Reason reason,
-      String details, Throwable cause) {
+  private IllegalAddressException(
+      String address, Reason reason, String details, Throwable cause) {
     super(reason.message, cause);
     this.address = address;
     this.reason = reason;

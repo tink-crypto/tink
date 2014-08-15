@@ -34,8 +34,7 @@ public class StoreIOException extends StoreException {
      * A key version cannot be read because it is unregistered.
      * This is possibly a configuration error.
      */
-    UNREGISTERED_KEY_VERSION(
-        "A key version is unregistered."),
+    UNREGISTERED_KEY_VERSION("A key version is unregistered."),
 
     /**
      * The key could not be serialized to bytes.
@@ -63,14 +62,24 @@ public class StoreIOException extends StoreException {
     WRAP_KEY_UNNECESSARY("The wrap key is not required."),
 
     /**
-     * Error writing to a local file.
+     * Error writing to a device/resource.
      */
-    FILE_WRITE_ERROR("Error writing file."),
+    WRITE_ERROR("General write error."),
     
     /**
-     * Error reading from a local file.
+     * Error reading from a device/resource.
      */
-    FILE_READ_ERROR("Error reading file.");
+    READ_ERROR("General read error."),
+    
+    /**
+     * The key being read or written is too large for the driver to handle.
+     */
+    KEY_TOO_LARGE("Key is too large."),
+
+    /**
+     * Driver-specific error when reading/writing the key.
+     */
+    DRIVER_SPECIFIC("Driver-specific I/O error.");
     
     final String message;
     

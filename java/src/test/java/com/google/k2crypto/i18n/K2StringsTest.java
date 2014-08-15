@@ -41,8 +41,8 @@ public class K2StringsTest {
    * Tests getting a string keyed by a digit.
    */
   @Test public final void testDigitKey() {
-    K2Strings strings = new K2Strings(null, TEST_BUNDLE_NAME,
-        Locale.getDefault());
+    K2Strings strings =
+        new K2Strings(null, TEST_BUNDLE_NAME, Locale.getDefault());
     String msg = strings.get("0");
     assertEquals("Number zero ", msg);
   }
@@ -51,8 +51,8 @@ public class K2StringsTest {
    * Tests getting a string keyed by a letter.
    */
   @Test public final void testLetterKey() {
-    K2Strings strings = new K2Strings(null, TEST_BUNDLE_NAME,
-        Locale.getDefault());
+    K2Strings strings =
+        new K2Strings(null, TEST_BUNDLE_NAME, Locale.getDefault());
     String msg = strings.get("a");
     assertEquals("Alphabet A  ", msg);
   }
@@ -61,8 +61,8 @@ public class K2StringsTest {
    * Tests getting a multiline string.
    */
   @Test public final void testMultiline() {
-    K2Strings strings = new K2Strings(null, TEST_BUNDLE_NAME,
-        Locale.getDefault());
+    K2Strings strings =
+        new K2Strings(null, TEST_BUNDLE_NAME, Locale.getDefault());
     String msg = strings.get("multiline");
     assertEquals("The quick brown fox jumps over the lazy dog", msg);
   }
@@ -71,8 +71,8 @@ public class K2StringsTest {
    * Tests formatting a string with one parameter.
    */
   @Test public final void testFormatOne() {
-    K2Strings strings = new K2Strings(null, TEST_BUNDLE_NAME,
-        Locale.getDefault());
+    K2Strings strings =
+        new K2Strings(null, TEST_BUNDLE_NAME, Locale.getDefault());
     assertEquals("I love dogs.", strings.get("one_param", "dogs"));
     assertEquals("I love cats.", strings.get("one_param", "cats"));    
   }
@@ -81,8 +81,8 @@ public class K2StringsTest {
    * Tests formatting a string with two parameters.
    */
   @Test public final void testFormatTwo() {
-    K2Strings strings = new K2Strings(null, TEST_BUNDLE_NAME,
-        Locale.getDefault());
+    K2Strings strings = 
+        new K2Strings(null, TEST_BUNDLE_NAME, Locale.getDefault());
     String msg = strings.get("two_params", "dogs", "cats");
     assertEquals("I love dogs and cats!", msg);
     msg = strings.get("two_params", "cats", "dogs");

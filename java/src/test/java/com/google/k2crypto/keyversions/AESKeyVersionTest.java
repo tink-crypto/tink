@@ -65,7 +65,8 @@ public class AESKeyVersionTest {
     assertEquals(bytes, loaded.buildData().build().toByteString());
 
     // Make sure the important fields are all the same
-    assertArrayEquals(toSave.getKeyVersionMatter(), loaded.getKeyVersionMatter());
+    assertArrayEquals(
+        toSave.getKeyVersionMatter(), loaded.getKeyVersionMatter());
     assertEquals(toSave.getAlgModePadding(), loaded.getAlgModePadding());
   }
   

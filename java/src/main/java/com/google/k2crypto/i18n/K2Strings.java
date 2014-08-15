@@ -25,8 +25,8 @@ import java.util.ResourceBundle;
 
 /**
  * Provides access to internationalized K2 strings.
- * <p>
- * For a guide on how to use this framework, see the
+ * 
+ * <p>For a guide on how to use this framework, see the
  * <a href="http://docs.oracle.com/javase/tutorial/i18n/" target="_blank">Java
  * internationalization tutorial</a>.  
  * 

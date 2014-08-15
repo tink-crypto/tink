@@ -181,8 +181,8 @@ public class AddressUtilities {
   public static void checkNoAuthority(URI address)
       throws IllegalAddressException {
     if (address.getAuthority() != null) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.AUTHORITY_UNSUPPORTED, null);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.AUTHORITY_UNSUPPORTED, null);
     }
   }
   
@@ -196,8 +196,8 @@ public class AddressUtilities {
       throws IllegalAddressException {
     String user = address.getUserInfo(); 
     if (user != null && user.length() > 0) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.USER_UNSUPPORTED, null);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.USER_UNSUPPORTED, null);
     }
   }
   
@@ -210,8 +210,8 @@ public class AddressUtilities {
   public static void checkNoHostPort(URI address)
       throws IllegalAddressException {
     if (address.getHost() != null || address.getPort() >= 0) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.HOST_PORT_UNSUPPORTED, null);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.HOST_PORT_UNSUPPORTED, null);
     }
   }
   
@@ -225,8 +225,8 @@ public class AddressUtilities {
       throws IllegalAddressException {
     String path = address.getPath();
     if (path != null && path.length() > 0) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.PATH_UNSUPPORTED, null);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.PATH_UNSUPPORTED, null);
     }
   }
 
@@ -240,8 +240,8 @@ public class AddressUtilities {
       throws IllegalAddressException {
     String query = address.getQuery(); 
     if (query != null && query.length() > 0) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.QUERY_UNSUPPORTED, null);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.QUERY_UNSUPPORTED, null);
     }
   }
 
@@ -255,8 +255,8 @@ public class AddressUtilities {
       throws IllegalAddressException {
     String fragment = address.getFragment();
     if (fragment != null && fragment.length() > 0) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.FRAGMENT_UNSUPPORTED, null);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.FRAGMENT_UNSUPPORTED, null);
     }
   }
 
@@ -270,8 +270,8 @@ public class AddressUtilities {
       throws IllegalAddressException {
     String path = address.getRawPath();
     if (path == null || path.length() == 0) {
-      throw new IllegalAddressException(address,
-          IllegalAddressException.Reason.MISSING_PATH, null);
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.MISSING_PATH, null);
     }
     return path;
   }

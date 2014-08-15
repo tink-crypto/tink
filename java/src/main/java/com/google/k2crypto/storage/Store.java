@@ -27,10 +27,10 @@ import java.net.URI;
 
 /**
  * The interface to access a {@link Key} storage location.
- * <p>
- * While this class is thread-safe, {@link #wrapWith(Key)} and {@link #noWrap()}
- * should not be called concurrently to avoid non-deterministic
- * {@link #save(Key)} and {@link #load()} behavior.
+ * 
+ * <p>This class is conditionally thread-safe; {@link #wrapWith(Key)} and
+ * {@link #noWrap()} should not be called concurrently to avoid
+ * non-deterministic {@link #save(Key)} and {@link #load()} behavior.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
@@ -283,9 +283,9 @@ public class Store {
   /**
    * Returns {@code true} if there is no key stored at this location,
    * {@code false} if one might be present.
-   * <p>
-   * Note that if this method returns false, there is no a guarantee that the
-   * key will actually be readable. The data might be encrypted, corrupted
+   * 
+   * <p>Note that if this method returns false, there is no a guarantee that
+   * the key will actually be readable. The data might be encrypted, corrupted
    * or be in an invalid format. An attempt must be made to {@link #load()} to
    * know for sure if it is readable.
    * 
@@ -421,8 +421,8 @@ public class Store {
   public boolean equals(Object obj) {
     if (obj instanceof Store) {
       Store other = (Store)obj;
-      return other.address.equals(address) &&
-          other.installedDriver.equals(installedDriver);
+      return other.address.equals(address)
+          && other.installedDriver.equals(installedDriver);
     }
     return false;
   }
