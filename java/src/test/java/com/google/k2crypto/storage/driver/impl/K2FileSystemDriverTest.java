@@ -38,6 +38,7 @@ import com.google.k2crypto.storage.StorageDriverException;
 import com.google.k2crypto.storage.StoreException;
 import com.google.k2crypto.storage.StoreIOException;
 import com.google.k2crypto.storage.driver.Driver;
+import com.google.k2crypto.storage.driver.ReadableDriver;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -515,7 +516,7 @@ public class K2FileSystemDriverTest {
    * 
    * @throws StoreException if there is an unexpected error loading. 
    */
-  private static void loadAndCheck(K2FileSystemDriver driver, Key expected)
+  private static void loadAndCheck(ReadableDriver driver, Key expected)
       throws StoreException {
     assertFalse(driver.isEmpty());
     Key loaded = driver.load();
