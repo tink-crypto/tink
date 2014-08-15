@@ -15,5 +15,6 @@
 // limitations under the License.
 
 include 'examples:sqlite-storage'
+include 'examples:storage-usage'
 
 rootProject.name = 'k2'
