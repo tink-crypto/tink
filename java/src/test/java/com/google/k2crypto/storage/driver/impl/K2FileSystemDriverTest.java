@@ -31,7 +31,7 @@ import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.TEMP_PR
 import com.google.k2crypto.K2Context;
 import com.google.k2crypto.K2Exception;
 import com.google.k2crypto.Key;
-import com.google.k2crypto.keyversions.AESKeyVersion;
+import com.google.k2crypto.keyversions.MockKeyVersion;
 import com.google.k2crypto.storage.IllegalAddressException;
 import com.google.k2crypto.storage.K2Storage;
 import com.google.k2crypto.storage.StorageDriverException;
@@ -83,7 +83,7 @@ public class K2FileSystemDriverTest {
   
   private Key emptyKey = null;
   
-  private Key aesKey = null;
+  private Key mockKey = null;
 
   private Random random = null;
   
@@ -96,10 +96,11 @@ public class K2FileSystemDriverTest {
    */
   @Before public final void setUp() throws K2Exception {
     context = new K2Context();
-    context.getKeyVersionRegistry().register(AESKeyVersion.class);
+    context.getKeyVersionRegistry().register(MockKeyVersion.class);
     
     emptyKey = new Key();
-    aesKey = new Key(new AESKeyVersion.Builder().build());
+    mockKey =
+        new Key(new MockKeyVersion.Builder().comments("testing key").build());
     
     random = new Random(); // for generating test files
     
@@ -381,9 +382,9 @@ public class K2FileSystemDriverTest {
       assertTrue(driver.isEmpty());
       assertNull(driver.load());
 
-      driver.save(aesKey);
+      driver.save(mockKey);
       assertFalse(driver.isEmpty());
-      loadAndCheck(driver, aesKey);
+      loadAndCheck(driver, mockKey);
       
       driver.save(emptyKey);
       assertFalse(driver.isEmpty());
@@ -453,14 +454,14 @@ public class K2FileSystemDriverTest {
    */
   @Test public final void testRecoveryPrecedence()
       throws K2Exception, IOException {
-    final File aesFile =
-        generateFile(random, testingDir, "aes", NATIVE_POSTFIX);
+    final File keyFile =
+        generateFile(random, testingDir, "key", NATIVE_POSTFIX);
     final File emptyFile =
         generateFile(random, testingDir, "empty", NATIVE_POSTFIX);
     File[] files = generateFileTriple(random, testingDir);
     URI address = files[0].toURI().normalize();
     
-    aesFile.deleteOnExit();
+    keyFile.deleteOnExit();
     emptyFile.deleteOnExit();
     deleteAllOnExit(files);
 
@@ -472,22 +473,22 @@ public class K2FileSystemDriverTest {
           driver.open(address) + NATIVE_POSTFIX);
       
       // Save then put aside the two keys as test data
-      driver.save(aesKey);
-      assertTrue(files[0].renameTo(aesFile));
+      driver.save(mockKey);
+      assertTrue(files[0].renameTo(keyFile));
       assertTrue(driver.isEmpty());
       driver.save(emptyKey);
       assertTrue(files[0].renameTo(emptyFile));
       assertTrue(driver.isEmpty());
 
       // If both temp files are readable, the later one takes precedence 
-      copyData(aesFile, files[1]);
+      copyData(keyFile, files[1]);
       files[1].setLastModified(Math.max(files[1].lastModified() - 5000, 0));
       copyData(emptyFile, files[2]);
       loadAndCheck(driver, emptyKey);
       
       // If both have the same timestamp, the larger one takes precedence
       files[1].setLastModified(files[2].lastModified());
-      loadAndCheck(driver, aesKey);
+      loadAndCheck(driver, mockKey);
       
       // If main file exists, it always takes precedence
       copyData(emptyFile, files[0]);
@@ -496,11 +497,11 @@ public class K2FileSystemDriverTest {
       // If the main file is corrupted, we fallback to the temporary files
       files[0].delete();
       files[0].createNewFile();
-      loadAndCheck(driver, aesKey);
+      loadAndCheck(driver, mockKey);
       
     } finally {
       deleteAll(files);
-      aesFile.delete();
+      keyFile.delete();
       emptyFile.delete();
       driver.close();
     }
