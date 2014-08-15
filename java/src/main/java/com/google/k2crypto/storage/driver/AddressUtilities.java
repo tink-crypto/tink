@@ -261,6 +261,22 @@ public class AddressUtilities {
   }
 
   /**
+   * Obtains the host from the URI address.
+   * 
+   * @param address Address to obtain the host from.
+   * @throws IllegalAddressException if the address is missing a host.
+   */
+  public static String extractHost(URI address)
+      throws IllegalAddressException {
+    String host = address.getHost();
+    if (host == null || host.length() == 0) {
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.MISSING_HOST_PORT, null);
+    }
+    return host;
+  }
+  
+  /**
    * Obtains the raw path from the URI address.
    * 
    * @param address Address to obtain the path from.
@@ -274,5 +290,37 @@ public class AddressUtilities {
           address, IllegalAddressException.Reason.MISSING_PATH, null);
     }
     return path;
+  }
+  
+  /**
+   * Obtains the raw query from the URI address.
+   * 
+   * @param address Address to obtain the query from.
+   * @throws IllegalAddressException if the address is missing a query.
+   */
+  public static String extractRawQuery(URI address)
+      throws IllegalAddressException {
+    String query = address.getRawQuery();
+    if (query == null || query.length() == 0) {
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.MISSING_QUERY, null);
+    }
+    return query;
+  }
+  
+  /**
+   * Obtains the fragment from the URI address.
+   * 
+   * @param address Address to obtain the fragment from.
+   * @throws IllegalAddressException if the address is missing a fragment.
+   */
+  public static String extractFragment(URI address)
+      throws IllegalAddressException {
+    String frag = address.getFragment();
+    if (frag == null || frag.length() == 0) {
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.MISSING_FRAGMENT, null);
+    }
+    return frag;
   }
 }

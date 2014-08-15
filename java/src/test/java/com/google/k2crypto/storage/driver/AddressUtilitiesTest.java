@@ -302,6 +302,47 @@ public class AddressUtilitiesTest {
       }
     }
   }
+
+  /**
+   * Tests the extractHost(URI) method.
+   */
+  @Test public final void testExtractHost() {
+    // Acceptance cases
+    checkExtractHost("h", "k2://u@h:1/p?q#f");
+    checkExtractHost("1.1.1.1", "//1.1.1.1:0");
+    checkExtractHost("255.255.255.255", "//255.255.255.255#f");
+    checkExtractHost("[0:0:0:0:0:0:0:0]", "ipv6://[0:0:0:0:0:0:0:0]:1?q");
+    
+    // Rejection cases    
+    for (String address : new String[] {
+        "k2:p?q#f", "p?q#f", "h", ""
+    }) {
+      try {
+        AddressUtilities.extractHost(URI.create(address));
+        fail("Should reject " + address);
+      } catch (IllegalAddressException expected) {
+        assertEquals(address, expected.getAddress());
+        assertEquals(
+            IllegalAddressException.Reason.MISSING_HOST_PORT,
+            expected.getReason());
+      }
+    }
+  }
+  
+  /**
+   * Checks that the extractHost method returns the expected value.
+   * 
+   * @param expected Expected host value.
+   * @param address Input address.
+   */
+  private static void checkExtractHost(String expected, String address) {
+    try {
+      assertEquals(
+          expected, AddressUtilities.extractHost(URI.create(address)));
+    } catch (IllegalAddressException ex) {
+      throw new AssertionError("Address is acceptable: " + address, ex);
+    }    
+  }
   
   /**
    * Tests the extractRawPath(URI) method.
@@ -310,7 +351,8 @@ public class AddressUtilitiesTest {
     // Acceptance cases
     checkExtractRawPath("/", "k2:///");
     checkExtractRawPath("/./p/../", "file:/./p/../");
-    checkExtractRawPath("/%20", "/%20");
+    checkExtractRawPath("/%20", "k2://u@h:1/%20?q#f");
+    
     // Rejection cases    
     for (String address : new String[] {
         "k2://u@h:1?q#f", "//h:1", "?q#f", ""
@@ -337,6 +379,88 @@ public class AddressUtilitiesTest {
     try {
       assertEquals(
           expected, AddressUtilities.extractRawPath(URI.create(address)));
+    } catch (IllegalAddressException ex) {
+      throw new AssertionError("Address is acceptable: " + address, ex);
+    }    
+  }
+  
+  /**
+   * Tests the extractRawQuery(URI) method.
+   */
+  @Test public final void testExtractRawQuery() {
+    // Acceptance cases
+    checkExtractRawQuery("q", "?q");
+    checkExtractRawQuery("q", "k2://u@h:1/p?q#f");
+    checkExtractRawQuery("+&%20=x", "?+&%20=x");
+    checkExtractRawQuery("%20", "/%3Fp?%20#f");
+    
+    // Rejection cases
+    for (String address : new String[] {
+        "k2://u@h:1/p?#f", "//h:1/p", "#f", "?", "%3Fq", ""
+    }) {
+      try {
+        AddressUtilities.extractRawQuery(URI.create(address));
+        fail("Should reject " + address);
+      } catch (IllegalAddressException expected) {
+        assertEquals(address, expected.getAddress());
+        assertEquals(
+            IllegalAddressException.Reason.MISSING_QUERY,
+            expected.getReason());
+      }
+    }
+  }
+  
+  /**
+   * Checks that the extractRawQuery method returns the expected value.
+   * 
+   * @param expected Expected query value.
+   * @param address Input address.
+   */
+  private static void checkExtractRawQuery(String expected, String address) {
+    try {
+      assertEquals(
+          expected, AddressUtilities.extractRawQuery(URI.create(address)));
+    } catch (IllegalAddressException ex) {
+      throw new AssertionError("Address is acceptable: " + address, ex);
+    }    
+  }
+
+  /**
+   * Tests the extractFragment(URI) method.
+   */
+  @Test public final void testExtractFragment() {
+    // Acceptance cases
+    checkExtractFragment("f", "#f");
+    checkExtractFragment("0", "k2://u@h:1/p?q#0");
+    checkExtractFragment(" ", "#%20");
+    checkExtractFragment("f +", "?%23q#f%20+");
+    
+    // Rejection cases
+    for (String address : new String[] {
+        "k2://u@h:1/p?q#", "//h:1/p?q", "#", "%23f", ""
+    }) {
+      try {
+        AddressUtilities.extractFragment(URI.create(address));
+        fail("Should reject " + address);
+      } catch (IllegalAddressException expected) {
+        assertEquals(address, expected.getAddress());
+        assertEquals(
+            IllegalAddressException.Reason.MISSING_FRAGMENT,
+            expected.getReason());
+      }
+    }
+  }
+  
+  /**
+   * Checks that the extractFragment method returns the expected value.
+   * 
+   * @param expected Expected fragment value.
+   * @param address Input address.
+   */
+  private static void checkExtractFragment(String expected, String address) {
+    try {
+      assertEquals(
+          expected, AddressUtilities.extractFragment(URI.create(address)));
     } catch (IllegalAddressException ex) {
       throw new AssertionError("Address is acceptable: " + address, ex);
     }    
