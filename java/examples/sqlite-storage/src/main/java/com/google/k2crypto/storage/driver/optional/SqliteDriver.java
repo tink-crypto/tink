@@ -169,7 +169,7 @@ public class SqliteDriver implements Driver, ReadableDriver, WritableDriver {
         
         // Attempt opening a connection to the database file
         Connection connection =
-            DriverManager.getConnection("jdbc:sqlite:" + address.getPath());
+            DriverManager.getConnection("jdbc:sqlite:" + fileAddress.getPath());
         Statement stmt = null;
         try {
           // Create the Keys table if it does not already exist

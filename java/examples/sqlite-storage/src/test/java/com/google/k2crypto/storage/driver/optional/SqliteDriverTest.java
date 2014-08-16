@@ -268,37 +268,6 @@ public class SqliteDriverTest {
       parent.delete();
     }
   }
-  
-  /**
-   * Tests saving, loading and erasing keys. 
-   */
-  @Test public final void testSaveLoadErase() throws K2Exception {
-    File db = generateTempDatabase();
-    SqliteDriver driver = newDriver();
-    try {
-      driver.open(generateAddress(db, "my%20key"));
-      assertFalse(driver.erase());
-      assertTrue(driver.isEmpty());
-      assertNull(driver.load());
-
-      driver.save(mockKey);
-      assertFalse(driver.isEmpty());
-      loadAndCheck(driver, mockKey);
-      
-      driver.save(emptyKey);
-      assertFalse(driver.isEmpty());
-      loadAndCheck(driver, emptyKey);
-
-      assertTrue(driver.erase());
-      assertTrue(driver.isEmpty());
-      assertNull(driver.load());
-      assertFalse(driver.erase());
-      
-    } finally {
-      db.delete();
-      driver.close();
-    }
-  }
 
   /**
    * Checks that the address is rejected by the driver for the given reason.
@@ -333,6 +302,82 @@ public class SqliteDriverTest {
     }
   }
   
+  /**
+   * Tests that various addresses are normalized correctly.
+   */
+  @Test public final void testAddressNormalization() throws K2Exception {
+    File db = generateTempDatabase();
+    try {
+      final String expected = generateAddress(db, "key").toString();
+      
+      final String filename = db.getName();
+      final String absTestingPath = new File("").toURI()
+          .resolve(db.getParentFile().toURI().getRawPath())
+          .normalize().getRawPath();
+      final String absTestingAddress = ADDRESS_PREFIX + absTestingPath;
+      
+      checkNormalization(expected,
+          absTestingAddress + filename + GENERIC_KEY_ID);
+      checkNormalization(expected,
+          absTestingAddress + "/././" + filename + GENERIC_KEY_ID);
+      checkNormalization(expected,
+          absTestingAddress + "a/./b/.././../" + filename + GENERIC_KEY_ID);
+      
+    } finally {
+      db.delete();
+    }
+  }
+  
+  /**
+   * Checks that the address is normalized correctly. 
+   * 
+   * @param expected Expected result of normalization.
+   * @param address Address to check.
+   * 
+   * @throws K2Exception if there is an unexpected failure opening the address.
+   */
+  private void checkNormalization(String expected, String address)
+      throws K2Exception {
+    Driver driver = newDriver();
+    try {
+      URI result = driver.open(URI.create(address));
+      assertEquals(expected, result.toString());
+    } finally {
+      driver.close();
+    }
+  }
+  
+  /**
+   * Tests saving, loading and erasing keys. 
+   */
+  @Test public final void testSaveLoadErase() throws K2Exception {
+    File db = generateTempDatabase();
+    SqliteDriver driver = newDriver();
+    try {
+      driver.open(generateAddress(db, "my%20key"));
+      assertFalse(driver.erase());
+      assertTrue(driver.isEmpty());
+      assertNull(driver.load());
+
+      driver.save(mockKey);
+      assertFalse(driver.isEmpty());
+      loadAndCheck(driver, mockKey);
+      
+      driver.save(emptyKey);
+      assertFalse(driver.isEmpty());
+      loadAndCheck(driver, emptyKey);
+
+      assertTrue(driver.erase());
+      assertTrue(driver.isEmpty());
+      assertNull(driver.load());
+      assertFalse(driver.erase());
+      
+    } finally {
+      db.delete();
+      driver.close();
+    }
+  }
+
   /**
    * Checks that the driver loads the given key. 
    * 
@@ -372,7 +417,7 @@ public class SqliteDriverTest {
    * @return a URI address pointing to the given database and key. 
    */
   private static URI generateAddress(File database, String keyName) {
-    return URI.create(
-        ADDRESS_PREFIX + database.toURI().getRawPath() + '#' + keyName);
+    return URI.create(ADDRESS_PREFIX + database.toURI().normalize().getRawPath()
+        + '#' + keyName);
   }  
 }
