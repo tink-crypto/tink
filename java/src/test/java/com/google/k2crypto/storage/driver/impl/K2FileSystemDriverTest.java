@@ -330,11 +330,16 @@ public class K2FileSystemDriverTest {
     // Test absolute addresses (with k2: scheme), without and with extension
     checkNormalization(expected, absTestingAddress + filename);
     checkNormalization(expected, absTestingAddress + filename + NATIVE_POSTFIX);
-    
+
+    // Test with empty query and fragment
+    checkNormalization(expected, absTestingAddress + filename + '?');
+    checkNormalization(expected, absTestingAddress + filename + '#');
+
     // Test absolute addresses with collapsable paths, w/o and w/ extension
     checkNormalization(expected,
         absTestingAddress + "anything/./something/.././../" + filename);
-    checkNormalization(expected, absTestingAddress + "/././" + filename + "");
+    checkNormalization(expected,
+        absTestingAddress + "/././" + filename + NATIVE_POSTFIX);
     
     // Test the above with absolute paths (i.e. no k2: scheme) 
     checkNormalization(expected, absTestingPath + filename + NATIVE_POSTFIX);
