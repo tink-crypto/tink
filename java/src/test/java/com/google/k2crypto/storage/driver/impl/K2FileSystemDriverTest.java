@@ -18,7 +18,6 @@ package com.google.k2crypto.storage.driver.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.FILE_EXTENSION;
@@ -28,41 +27,32 @@ import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.TEMP_A_
 import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.TEMP_B_EXTENSION;
 import static com.google.k2crypto.storage.driver.impl.K2FileSystemDriver.TEMP_PREFIX;
 
-import com.google.k2crypto.K2Context;
 import com.google.k2crypto.K2Exception;
-import com.google.k2crypto.Key;
-import com.google.k2crypto.keyversions.MockKeyVersion;
 import com.google.k2crypto.storage.IllegalAddressException;
-import com.google.k2crypto.storage.K2Storage;
-import com.google.k2crypto.storage.StorageDriverException;
-import com.google.k2crypto.storage.StoreException;
 import com.google.k2crypto.storage.StoreIOException;
 import com.google.k2crypto.storage.driver.Driver;
-import com.google.k2crypto.storage.driver.ReadableDriver;
+import com.google.k2crypto.storage.driver.FileBasedDriverTest;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.channels.FileChannel;
-import java.util.Random;
 
 /**
  * Unit tests for the K2 native file-system driver.
  * 
  * @author darylseah@gmail.com (Daryl Seah)
  */
-@RunWith(JUnit4.class)
-public class K2FileSystemDriverTest {
+public class K2FileSystemDriverTest
+    extends FileBasedDriverTest<K2FileSystemDriver> {
 
-  // Directory for the driver to read/write test key files
-  private static final String TESTING_DIRECTORY = "./build/tmp/"; 
+  // Limit to prevent tests from stalling completely if something goes wrong
+  // during random generation of test files 
+  private static final int MAX_TRIPLE_GENERATION_ATTEMPTS = 10;
+
+  // File scheme prefix to add to addresses
+  private static final String FILE_PREFIX = "file:"; 
   
   // Native scheme prefix to add to addresses 
   private static final String NATIVE_PREFIX = NATIVE_SCHEME + ':';
@@ -70,71 +60,11 @@ public class K2FileSystemDriverTest {
   // Native file extension to add to addresses
   private static final String NATIVE_POSTFIX = '.' + FILE_EXTENSION;
   
-  // File scheme prefix to add to addresses
-  private static final String FILE_PREFIX = "file:"; 
-  
-  // Limit to prevent tests from stalling completely if something goes wrong
-  // during random generation of test files 
-  private static final int MAX_GENERATION_ATTEMPTS = 100;
- 
-  // Length of the randomly generated portion of filenames
-  private static final int GENERATED_NAME_LENGTH = 64;
-  
-  private K2Context context = null;
-  
-  private Key emptyKey = null;
-  
-  private Key mockKey = null;
-
-  private Random random = null;
-  
-  private File testingDir = null;
-  
-  private String testingDirPath = null;
-
   /**
-   * Creates a context, test keys and initializes the working directory.
+   * Constructs the driver test class.
    */
-  @Before public final void setUp() throws K2Exception {
-    context = new K2Context();
-    context.getKeyVersionRegistry().register(MockKeyVersion.class);
-    
-    emptyKey = new Key();
-    mockKey =
-        new Key(new MockKeyVersion.Builder().comments("testing key").build());
-    
-    random = new Random(); // for generating test files
-    
-    testingDir = new File(TESTING_DIRECTORY);
-    testingDir.mkdirs();
-    if (!testingDir.isDirectory() || !testingDir.canWrite()) {
-      throw new IllegalStateException("Could not access test directory.");
-    }
-    testingDirPath = testingDir.toURI().normalize().getRawPath();
-    if (!testingDirPath.endsWith("/")) {
-      testingDirPath += "/";
-    }
-  }
-
-  /**
-   * Creates an initialized instance of the K2 driver for a test.
-   */
-  private K2FileSystemDriver newDriver() {
-    K2FileSystemDriver driver = new K2FileSystemDriver();
-    driver.initialize(context);
-    return driver;
-  }
-  
-  /**
-   * Test that the driver has a valid structure by attempting to install it.
-   */
-  @Test public final void testDriverStructure() {
-    K2Storage storage = new K2Storage(context);
-    try {
-      storage.installDriver(K2FileSystemDriver.class);
-    } catch (StorageDriverException ex) {
-      throw new AssertionError("Driver structure is bad.", ex);
-    }
+  public K2FileSystemDriverTest() {
+    super(K2FileSystemDriver.class);
   }
   
   /**
@@ -142,6 +72,8 @@ public class K2FileSystemDriverTest {
    * URI addresses.
    */
   @Test public final void testRejectBadAddresses() {
+    final String testingDirPath = getTestingDirPath();
+    
     // Test unsupported components
     checkRejectAddress(
         FILE_PREFIX + "//host/path",
@@ -228,10 +160,10 @@ public class K2FileSystemDriverTest {
    * rejects when it is any longer.
    */
   @Test public final void testFilenameLength() throws K2Exception {
-    final String testingAddress = NATIVE_PREFIX + testingDirPath;
+    final String testingAddress = NATIVE_PREFIX + getTestingDirPath();
 
     // Test filename that is one character too long
-    String oneCharTooLongName = generateString(random, 1 + MAX_FILENAME_LENGTH);
+    String oneCharTooLongName = generateString(1 + MAX_FILENAME_LENGTH);
     checkRejectAddress(
         testingAddress + oneCharTooLongName,
         IllegalAddressException.Reason.INVALID_PATH);
@@ -240,7 +172,7 @@ public class K2FileSystemDriverTest {
     Driver driver = newDriver();
     try {
       driver.open(URI.create(
-          testingAddress + generateString(random, MAX_FILENAME_LENGTH)));
+          testingAddress + generateString(MAX_FILENAME_LENGTH)));
     } finally {
       driver.close();
     }  
@@ -264,7 +196,7 @@ public class K2FileSystemDriverTest {
     
     // The parent "File" of the key file should be an existing directory
     // (and not a file)
-    File parent = generateFile(random, testingDir, "", ".tmp");
+    File parent = generateFile(getTestingDir(), "", ".tmp");
     parent.deleteOnExit();
     try {
       assertTrue(parent.createNewFile());
@@ -276,7 +208,7 @@ public class K2FileSystemDriverTest {
     }
     
     // Generate the main key file and two temp files for it that do not exist.
-    File[] files = generateFileTriple(random, testingDir);
+    File[] files = generateFileTriple(getTestingDir());
     deleteAllOnExit(files);
     
     // Check that the driver rejects opening the main file address
@@ -295,36 +227,14 @@ public class K2FileSystemDriverTest {
   }
   
   /**
-   * Checks that the address is rejected by the driver for the given reason.
-   * 
-   * @param address Address to open.
-   * @param reason Reason the address is rejected.
-   */
-  private void checkRejectAddress(
-      String address, IllegalAddressException.Reason reason) {
-    Driver driver = newDriver();
-    try {
-      driver.open(URI.create(address));
-      fail("Should reject " + address);
-    } catch (StoreException ex) {
-      throw new AssertionError("Unexpected", ex);
-    } catch (IllegalAddressException expected) {
-      assertEquals(reason, expected.getReason());
-      assertEquals(address, expected.getAddress());
-    } finally {
-      driver.close();
-    }
-  }
-  
-  /**
    * Tests that various addresses are normalized correctly.
    */
   @Test public final void testAddressNormalization() throws K2Exception {
-    final String absTestingAddress = NATIVE_PREFIX + testingDirPath;
-    final String absTestingPath = testingDirPath;
-    final String relTestingPath = TESTING_DIRECTORY;
+    final String absTestingPath = getTestingDirPath();
+    final String absTestingAddress = NATIVE_PREFIX + absTestingPath;
+    final String relTestingPath = getRelativeTestingDirPath();
     
-    final String filename = generateSafeFilename(random, testingDir);
+    final String filename = generateSafeFilename(getTestingDir());
     final String expected = absTestingAddress + filename;
     
     // Test absolute addresses (with k2: scheme), without and with extension
@@ -353,54 +263,17 @@ public class K2FileSystemDriverTest {
   }
   
   /**
-   * Checks that the address is normalized correctly. 
-   * 
-   * @param expected Expected result of normalization.
-   * @param address Address to check.
-   * 
-   * @throws K2Exception if there is an unexpected failure opening the address.
-   */
-  private void checkNormalization(String expected, String address)
-      throws K2Exception {
-    Driver driver = newDriver();
-    try {
-      URI result = driver.open(URI.create(address));
-      assertEquals(expected, result.toString());
-    } finally {
-      driver.close();
-    }
-  }
-  
-  /**
    * Tests saving, loading and erasing keys. 
    */
   @Test public final void testSaveLoadErase() throws K2Exception {
-    File[] files = generateFileTriple(random, testingDir);
+    File[] files = generateFileTriple(getTestingDir());
     URI address = files[0].toURI().normalize();
     deleteAllOnExit(files);
     
     K2FileSystemDriver driver = newDriver();
     try {
-      assertEquals(
-          NATIVE_PREFIX + address.getSchemeSpecificPart(),
-          driver.open(address) + NATIVE_POSTFIX);
-      assertFalse(driver.erase());
-      assertTrue(driver.isEmpty());
-      assertNull(driver.load());
-
-      driver.save(mockKey);
-      assertFalse(driver.isEmpty());
-      loadAndCheck(driver, mockKey);
-      
-      driver.save(emptyKey);
-      assertFalse(driver.isEmpty());
-      loadAndCheck(driver, emptyKey);
-
-      assertTrue(driver.erase());
-      assertTrue(driver.isEmpty());
-      assertNull(driver.load());
-      assertFalse(driver.erase());
-      
+      driver.open(address);
+      checkLoadSaveErase(driver);
     } finally {
       deleteAll(files);
       driver.close();
@@ -411,7 +284,7 @@ public class K2FileSystemDriverTest {
    * Tests recovering a key from any save slot. 
    */
   @Test public final void testRecovery() throws K2Exception, IOException {
-    File[] files = generateFileTriple(random, testingDir);
+    File[] files = generateFileTriple(getTestingDir());
     URI address = files[0].toURI().normalize();
     deleteAllOnExit(files);
     
@@ -421,7 +294,7 @@ public class K2FileSystemDriverTest {
       assertEquals(
           NATIVE_PREFIX + address.getSchemeSpecificPart(),
           driver.open(address) + NATIVE_POSTFIX);
-      driver.save(emptyKey);
+      driver.save(EMPTY_KEY);
       
       // Verify that we can load when key data is in any slot
       File last = null;
@@ -434,7 +307,7 @@ public class K2FileSystemDriverTest {
         
         // Check that the slot is readable
         assertTrue(current.isFile());
-        loadAndCheck(driver, emptyKey);
+        checkLoad(driver, EMPTY_KEY);
 
         // Check it is still readable with corrupted (empty)
         // files in some other slot
@@ -442,7 +315,7 @@ public class K2FileSystemDriverTest {
           if (f != current) {
             assertFalse(f.exists());            
             assertTrue(f.createNewFile());
-            loadAndCheck(driver, emptyKey);
+            checkLoad(driver, EMPTY_KEY);
             assertTrue(f.delete());
           }
         }        
@@ -461,10 +334,10 @@ public class K2FileSystemDriverTest {
   @Test public final void testRecoveryPrecedence()
       throws K2Exception, IOException {
     final File keyFile =
-        generateFile(random, testingDir, "key", NATIVE_POSTFIX);
+        generateFile(getTestingDir(), "key", NATIVE_POSTFIX);
     final File emptyFile =
-        generateFile(random, testingDir, "empty", NATIVE_POSTFIX);
-    File[] files = generateFileTriple(random, testingDir);
+        generateFile(getTestingDir(), "empty", NATIVE_POSTFIX);
+    File[] files = generateFileTriple(getTestingDir());
     URI address = files[0].toURI().normalize();
     
     keyFile.deleteOnExit();
@@ -479,10 +352,10 @@ public class K2FileSystemDriverTest {
           driver.open(address) + NATIVE_POSTFIX);
       
       // Save then put aside the two keys as test data
-      driver.save(mockKey);
+      driver.save(MOCK_KEY);
       assertTrue(files[0].renameTo(keyFile));
       assertTrue(driver.isEmpty());
-      driver.save(emptyKey);
+      driver.save(EMPTY_KEY);
       assertTrue(files[0].renameTo(emptyFile));
       assertTrue(driver.isEmpty());
 
@@ -490,20 +363,20 @@ public class K2FileSystemDriverTest {
       copyData(keyFile, files[1]);
       files[1].setLastModified(Math.max(files[1].lastModified() - 5000, 0));
       copyData(emptyFile, files[2]);
-      loadAndCheck(driver, emptyKey);
+      checkLoad(driver, EMPTY_KEY);
       
       // If both have the same timestamp, the larger one takes precedence
       files[1].setLastModified(files[2].lastModified());
-      loadAndCheck(driver, mockKey);
+      checkLoad(driver, MOCK_KEY);
       
       // If main file exists, it always takes precedence
       copyData(emptyFile, files[0]);
-      loadAndCheck(driver, emptyKey);
+      checkLoad(driver, EMPTY_KEY);
       
       // If the main file is corrupted, we fallback to the temporary files
       files[0].delete();
       files[0].createNewFile();
-      loadAndCheck(driver, mockKey);
+      checkLoad(driver, MOCK_KEY);
       
     } finally {
       deleteAll(files);
@@ -514,28 +387,11 @@ public class K2FileSystemDriverTest {
   }
   
   /**
-   * Checks that the driver loads the given key. 
-   * 
-   * @param driver Driver to load from.
-   * @param expected The key that should be loaded.
-   * 
-   * @throws StoreException if there is an unexpected error loading. 
-   */
-  private static void loadAndCheck(ReadableDriver driver, Key expected)
-      throws StoreException {
-    assertFalse(driver.isEmpty());
-    Key loaded = driver.load();
-    assertEquals(
-        expected.buildData().build().toByteString(),
-        loaded.buildData().build().toByteString());    
-  }
-  
-  /**
    * Tests loading and erasing of corrupted files.
    */
   @Test public final void testLoadEraseCorrupted()
       throws K2Exception, IOException {
-    File[] files = generateFileTriple(random, testingDir);
+    File[] files = generateFileTriple(getTestingDir());
     URI address = files[0].toURI().normalize();
     deleteAllOnExit(files);
     
@@ -550,7 +406,7 @@ public class K2FileSystemDriverTest {
       for (File f : files) {
         assertFalse(f.exists());
         assertTrue(f.createNewFile());
-        checkLoadFails(driver);
+        checkLoadFails(driver, StoreIOException.Reason.DESERIALIZATION_ERROR);
         assertTrue(driver.erase());
         assertTrue(driver.isEmpty());
       }
@@ -560,7 +416,7 @@ public class K2FileSystemDriverTest {
         assertFalse(f.exists());
         assertTrue(f.createNewFile());
       }
-      checkLoadFails(driver);
+      checkLoadFails(driver, StoreIOException.Reason.DESERIALIZATION_ERROR);
       
       // Make sure that an erase wipes all the slots
       assertTrue(driver.erase());
@@ -576,80 +432,14 @@ public class K2FileSystemDriverTest {
   }
 
   /**
-   * Checks that a load fails on the driver because of corrupted data.
-   * 
-   * @param driver Driver to load from.
-   * 
-   * @throws StoreException if there is an unexpected error.
-   */
-  private static void checkLoadFails(K2FileSystemDriver driver)
-      throws StoreException {
-    assertFalse(driver.isEmpty());
-    try {    
-      driver.load();
-      fail("Load should fail.");
-    } catch (StoreIOException expected) {
-      assertEquals(
-          StoreIOException.Reason.DESERIALIZATION_ERROR,
-          expected.getReason());
-    }
-  }
-  
-  /**
-   * Copies a file. 
-   * 
-   * @param source File to copy.
-   * @param destination The copy to create.
-   */
-  private static void copyData(File source, File destination) {
-    FileChannel in = null;
-    FileChannel out = null;
-    try {
-      in = new FileInputStream(source).getChannel();
-      out = new FileOutputStream(destination).getChannel();
-      out.transferFrom(in, 0, in.size());
-    } catch (IOException ex) {
-      throw new AssertionError("Could not copy file", ex);
-    } finally {
-      try { in.close(); }
-      catch (Exception ex) {}
-      try { out.close(); }
-      catch (Exception ex) {}
-    }
-  }
-  
-  /**
-   * Marks the given files for deletion on VM exit.  
-   * 
-   * @param files Files to delete.
-   */
-  private static void deleteAllOnExit(File ... files) {
-    for (File f : files) {
-      f.deleteOnExit();
-    }
-  }
-  
-  /**
-   * Deletes the given files immediately.  
-   * 
-   * @param files Files to delete.
-   */
-  private static void deleteAll(File ... files) {
-    for (File f : files) {
-      f.delete();
-    }
-  }
-
-  /**
    * Generates a path to a K2 key location that does not currently exist. 
    * 
-   * @param random Random source.
    * @param dir Directory that the key should be in.
    * 
    * @return path to the K2 key file without the extension. 
    */
-  private static String generateSafeFilename(Random random, File dir) {
-    String name = generateFileTriple(random, dir)[0].getName();
+  private String generateSafeFilename(File dir) {
+    String name = generateFileTriple(dir)[0].getName();
     return name.substring(0, name.length() - NATIVE_POSTFIX.length());
   }
   
@@ -659,80 +449,25 @@ public class K2FileSystemDriverTest {
    * The first file in the returned array will be the main key file, while 
    * the remaining two will be the temporary/backup files. 
    * 
-   * @param random Random source.
    * @param dir Directory that the key should be in.
    * 
    * @return a 3-element array with the main key file at index 0 and the 
    *         temporary/backup files in the remaining slots. 
    */
-  private static File[] generateFileTriple(Random random, File dir) {
+  private File[] generateFileTriple(File dir) {
     // Generate the main key file and two temp files for it that do not exist.
     File[] files = new File[3];
-    int countdown = MAX_GENERATION_ATTEMPTS;
+    int countdown = MAX_TRIPLE_GENERATION_ATTEMPTS;
     do {
       if (--countdown < 0) {
         fail("Could not generate file triple!");
       }
       // Main file
-      File main = files[0] = generateFile(random, dir, "", NATIVE_POSTFIX);
+      File main = files[0] = generateFile(dir, "", NATIVE_POSTFIX);
       // Temp files
       files[1] = new File(dir, TEMP_PREFIX + main.getName() + TEMP_A_EXTENSION);
       files[2] = new File(dir, TEMP_PREFIX + main.getName() + TEMP_B_EXTENSION);      
     } while (files[1].exists() || files[2].exists());
     return files;
-  }
-  
-  /**
-   * Generates a file that does not currently exist.
-   * 
-   * @param random Random source.
-   * @param dir Directory that the file should be in.
-   * @param prefix String to append at the start of the generated filename.
-   * @param postfix String to append at the end of the generated filename.
-   * 
-   * @return a non-existent file in the given directory.
-   */
-  private static File generateFile(
-      Random random, File dir, String prefix, String postfix) {
-    final int prefixLen = prefix.length();
-    final int postfixLen = postfix.length();
-    
-    // Create an initial random filename
-    char[] filename = new char[prefixLen + GENERATED_NAME_LENGTH + postfixLen];
-    prefix.getChars(0, prefixLen, filename, 0);
-    postfix.getChars(
-        0, postfixLen, filename, GENERATED_NAME_LENGTH + prefixLen);
-    
-    for (int i = GENERATED_NAME_LENGTH + prefixLen; --i >= prefixLen; ) {
-      filename[i] = (char)('A' + random.nextInt(26));
-    }
-    
-    // Mutate one character each time until we get a non-existent file 
-    File file;
-    int countdown = MAX_GENERATION_ATTEMPTS;
-    while ((file = new File(dir, new String(filename))).exists()) {
-      filename[prefixLen + random.nextInt(GENERATED_NAME_LENGTH)] =
-          (char)('a' + random.nextInt(26));
-      if (--countdown <= 0) {
-        fail("Could not generate file!");
-      }
-    }
-    return file;
-  }
-  
-  /**
-   * Generates a random string of digits.
-   * 
-   * @param random Random source.
-   * @param length Length of the string to generate.
-   * 
-   * @return the generated string.
-   */
-  private static String generateString(Random random, int length) {
-    char[] buffer = new char[length];
-    for (int i = buffer.length; --i >= 0; ) {
-      buffer[i] = (char)('0' + random.nextInt(10)); 
-    }
-    return new String(buffer);
   }
 }
