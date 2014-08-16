@@ -18,29 +18,18 @@ package com.google.k2crypto.storage.driver.optional;
 
 import static com.google.k2crypto.storage.driver.optional.SqliteDriver.MAX_KEY_ID_LENGTH;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.k2crypto.K2Exception;
-import com.google.k2crypto.Key;
-import com.google.k2crypto.K2Context;
-import com.google.k2crypto.keyversions.MockKeyVersion;
 import com.google.k2crypto.storage.IllegalAddressException;
-import com.google.k2crypto.storage.K2Storage;
-import com.google.k2crypto.storage.StorageDriverException;
-import com.google.k2crypto.storage.StoreException;
 import com.google.k2crypto.storage.driver.Driver;
-import com.google.k2crypto.storage.driver.ReadableDriver;
+import com.google.k2crypto.storage.driver.FileBasedDriverTest;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -49,60 +38,19 @@ import java.net.URI;
  * @author darylseah@gmail.com (Daryl Seah)
  */
 @RunWith(JUnit4.class)
-public class SqliteDriverTest {
-
-  // Directory for the driver to read/write test key files
-  private static final File TESTING_DIRECTORY = new File("./build/tmp/"); 
+public class SqliteDriverTest extends FileBasedDriverTest<SqliteDriver> {
 
   // Scheme prefix to add to addresses 
   private static final String ADDRESS_PREFIX = SqliteDriver.SCHEME + ':';
   
   // Generic key id postfix to add to addresses 
-  private static final String GENERIC_KEY_ID = "#my%20key"; 
-
-  private K2Context context = null;
-
-  private Key emptyKey = null;
-  
-  private Key mockKey = null;
+  private static final String GENERIC_KEY_ID = "#my%20key";
 
   /**
-   * Creates a context, test keys and verifies the testing directory.
+   * Constructs the driver test class.
    */
-  @Before public final void setUp() throws K2Exception {
-    context = new K2Context();
-    context.getKeyVersionRegistry().register(MockKeyVersion.class);
-    
-    emptyKey = new Key();
-    mockKey =
-        new Key(new MockKeyVersion.Builder().comments("testing key").build());
-    
-    File dir = TESTING_DIRECTORY;
-    dir.mkdirs();
-    if (!dir.isDirectory() || !dir.canWrite()) {
-      throw new IllegalStateException("Could not access test directory.");
-    }
-  }
-
-  /**
-   * Creates an initialized instance of the SQLite driver for a test.
-   */
-  private SqliteDriver newDriver() {
-    SqliteDriver driver = new SqliteDriver();
-    driver.initialize(context);
-    return driver;
-  }
-  
-  /**
-   * Test that the driver has a valid structure by attempting to install it.
-   */
-  @Test public final void testDriverStructure() {
-    K2Storage storage = new K2Storage(context);
-    try {
-      storage.installDriver(SqliteDriver.class);
-    } catch (StorageDriverException ex) {
-      throw new AssertionError("Driver structure is bad.", ex);
-    }
+  public SqliteDriverTest() {
+    super(SqliteDriver.class);
   }
   
   /**
@@ -137,8 +85,7 @@ public class SqliteDriverTest {
         ADDRESS_PREFIX + "host" + GENERIC_KEY_ID,
         IllegalAddressException.Reason.MISSING_PATH);
     
-    final String testingAddress =
-        ADDRESS_PREFIX + TESTING_DIRECTORY.toURI().getRawPath() + '/';
+    final String testingAddress = ADDRESS_PREFIX + getTestingDirPath();
     
     // Test common illegal database filename characters
     for (char illegal : new char[] {
@@ -210,8 +157,7 @@ public class SqliteDriverTest {
     File db = generateTempDatabase();
     try {
       // Test key identifier that is one character too long
-      String oneCharTooLongId =
-          String.format("%0" + (MAX_KEY_ID_LENGTH + 1) + "d", 0);
+      String oneCharTooLongId = generateString(MAX_KEY_ID_LENGTH + 1);
       checkRejectAddress(
           generateAddress(db, oneCharTooLongId),
           IllegalAddressException.Reason.INVALID_FRAGMENT);
@@ -219,8 +165,7 @@ public class SqliteDriverTest {
       // Test acceptance of identifier at maximum length
       Driver driver = newDriver();
       try {
-        driver.open(generateAddress(
-            db, String.format("%0" + MAX_KEY_ID_LENGTH + "d", 0)));
+        driver.open(generateAddress(db, generateString(MAX_KEY_ID_LENGTH)));
       } finally {
         driver.close();
       }  
@@ -248,7 +193,7 @@ public class SqliteDriverTest {
     // The database file should not be a directory.
     File db = generateTempDatabase();
     try {
-      assertTrue(db.delete());
+      db.delete();
       assertTrue(db.mkdir());
       checkRejectAddress(
           ADDRESS_PREFIX + db.toURI().getRawPath() + GENERIC_KEY_ID,
@@ -269,39 +214,6 @@ public class SqliteDriverTest {
     }
   }
 
-  /**
-   * Checks that the address is rejected by the driver for the given reason.
-   * 
-   * @param address String address to open.
-   * @param reason Reason the address is rejected.
-   */
-  private void checkRejectAddress(
-      String address, IllegalAddressException.Reason reason) {
-    checkRejectAddress(URI.create(address), reason);
-  }
-  
-  /**
-   * Checks that the address is rejected by the driver for the given reason.
-   * 
-   * @param address URI address to open.
-   * @param reason Reason the address is rejected.
-   */
-  private void checkRejectAddress(
-      URI address, IllegalAddressException.Reason reason) {
-    Driver driver = newDriver();
-    try {
-      driver.open(address);
-      fail("Should reject " + address);
-    } catch (StoreException ex) {
-      throw new AssertionError("Unexpected", ex);
-    } catch (IllegalAddressException expected) {
-      assertEquals(reason, expected.getReason());
-      assertEquals(address.toString(), expected.getAddress());
-    } finally {
-      driver.close();
-    }
-  }
-  
   /**
    * Tests that various addresses are normalized correctly.
    */
@@ -331,25 +243,6 @@ public class SqliteDriverTest {
   }
   
   /**
-   * Checks that the address is normalized correctly. 
-   * 
-   * @param expected Expected result of normalization.
-   * @param address Address to check.
-   * 
-   * @throws K2Exception if there is an unexpected failure opening the address.
-   */
-  private void checkNormalization(String expected, String address)
-      throws K2Exception {
-    Driver driver = newDriver();
-    try {
-      URI result = driver.open(URI.create(address));
-      assertEquals(expected, result.toString());
-    } finally {
-      driver.close();
-    }
-  }
-  
-  /**
    * Tests saving, loading and erasing keys. 
    */
   @Test public final void testSaveLoadErase() throws K2Exception {
@@ -357,23 +250,7 @@ public class SqliteDriverTest {
     SqliteDriver driver = newDriver();
     try {
       driver.open(generateAddress(db, "my+key"));
-      assertFalse(driver.erase());
-      assertTrue(driver.isEmpty());
-      assertNull(driver.load());
-
-      driver.save(mockKey);
-      assertFalse(driver.isEmpty());
-      loadAndCheck(driver, mockKey);
-      
-      driver.save(emptyKey);
-      assertFalse(driver.isEmpty());
-      loadAndCheck(driver, emptyKey);
-
-      assertTrue(driver.erase());
-      assertTrue(driver.isEmpty());
-      assertNull(driver.load());
-      assertFalse(driver.erase());
-      
+      checkLoadSaveErase(driver);
     } finally {
       db.delete();
       driver.close();
@@ -381,33 +258,12 @@ public class SqliteDriverTest {
   }
 
   /**
-   * Checks that the driver loads the given key. 
-   * 
-   * @param driver Driver to load from.
-   * @param expected The key that should be loaded.
-   * 
-   * @throws StoreException if there is an unexpected error loading. 
-   */
-  private static void loadAndCheck(ReadableDriver driver, Key expected)
-      throws StoreException {
-    assertFalse(driver.isEmpty());
-    Key loaded = driver.load();
-    assertEquals(
-        expected.buildData().build().toByteString(),
-        loaded.buildData().build().toByteString());    
-  }
-
-  /**
    * Generates an empty temporary database file for testing. 
    */
-  private static File generateTempDatabase() {
-    try {
-      File db = File.createTempFile("sqlite", ".db", TESTING_DIRECTORY);
-      db.deleteOnExit();
-      return db;
-    } catch (IOException ex) {
-      throw new AssertionError("Could not create database.", ex);
-    }
+  private File generateTempDatabase() {
+    File db = generateFile(getTestingDir(), "sqlite", ".db");
+    db.deleteOnExit();
+    return db;
   }
   
   /**
