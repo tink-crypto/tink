@@ -319,6 +319,8 @@ public class SqliteDriverTest {
       checkNormalization(expected,
           absTestingAddress + filename + GENERIC_KEY_ID);
       checkNormalization(expected,
+          absTestingAddress + filename + '?' + GENERIC_KEY_ID);
+      checkNormalization(expected,
           absTestingAddress + "/././" + filename + GENERIC_KEY_ID);
       checkNormalization(expected,
           absTestingAddress + "a/./b/.././../" + filename + GENERIC_KEY_ID);
