@@ -31,6 +31,7 @@ import com.google.k2crypto.storage.IllegalAddressException;
 import com.google.k2crypto.storage.K2Storage;
 import com.google.k2crypto.storage.StorageDriverException;
 import com.google.k2crypto.storage.StoreException;
+import com.google.k2crypto.storage.StoreIOException;
 import com.google.k2crypto.storage.driver.Driver;
 import com.google.k2crypto.storage.driver.ReadableDriver;
 
@@ -206,7 +207,27 @@ public abstract class BasicDriverTest<T extends Driver> {
       driver.close();
     }
   }
-  
+
+  /**
+   * Checks that a load fails on the driver because of the specified I/O reason.
+   * 
+   * @param driver Driver to load from.
+   * @param reason Reason for the failure.
+   * 
+   * @throws StoreException if there is an unexpected error.
+   */
+  protected void checkLoadFails(
+      ReadableDriver driver, StoreIOException.Reason reason)
+          throws StoreException {
+    assertFalse(driver.isEmpty());
+    try {    
+      driver.load();
+      fail("Load should fail.");
+    } catch (StoreIOException expected) {
+      assertEquals(reason, expected.getReason());
+    }
+  }
+
   /**
    * Checks that the driver loads the given key. 
    * 
