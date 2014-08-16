@@ -58,7 +58,7 @@ public class SqliteDriverTest {
   private static final String ADDRESS_PREFIX = SqliteDriver.SCHEME + ':';
   
   // Generic key id postfix to add to addresses 
-  private static final String GENERIC_KEY_ID = "#key"; 
+  private static final String GENERIC_KEY_ID = "#my%20key"; 
 
   private K2Context context = null;
 
@@ -308,7 +308,7 @@ public class SqliteDriverTest {
   @Test public final void testAddressNormalization() throws K2Exception {
     File db = generateTempDatabase();
     try {
-      final String expected = generateAddress(db, "key").toString();
+      final String expected = generateAddress(db, "my%20key").toString();
       
       final String filename = db.getName();
       final String absTestingPath = new File("").toURI()
@@ -356,7 +356,7 @@ public class SqliteDriverTest {
     File db = generateTempDatabase();
     SqliteDriver driver = newDriver();
     try {
-      driver.open(generateAddress(db, "my%20key"));
+      driver.open(generateAddress(db, "my+key"));
       assertFalse(driver.erase());
       assertTrue(driver.isEmpty());
       assertNull(driver.load());
