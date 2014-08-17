@@ -94,11 +94,11 @@ public class SqliteDriver implements Driver, ReadableDriver, WritableDriver {
 
   // Regex matching a valid key identifier. Rules:
   //   - Do not start or end with spaces.
-  //   - No control characters or ';' or vertical spaces.
+  //   - No control characters or vertical spaces.
   //   - Maximum length is 255 characters.
   private static final Pattern KEY_ID_REGEX =
       Pattern.compile("^(?![\\p{Z}])"
-          + "[^\\p{Zl}\\p{Zp}\\p{C}\\u0000-\\u001F\\u007F\\;]"
+          + "[^\\p{Zl}\\p{Zp}\\p{C}\\u0000-\\u001F\\u007F]"
           + "{1," + MAX_KEY_ID_LENGTH + "}"
           + "(?<![\\p{Z}])$");
   

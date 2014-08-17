@@ -125,7 +125,7 @@ public class SqliteDriverTest extends FileBasedDriverTest<SqliteDriver> {
     try {
       // Test common illegal key identifier characters
       for (char illegal : new char[] {
-          '\0', '\n', '\r', '\t', '\f', '\b', '\u007F', ';'
+          '\0', '\n', '\r', '\t', '\f', '\b', '\u007F',
       }) {
         String encoded = String.format("%%%02X", (int)illegal);
         assertEquals(3, encoded.length()); // sanity check
