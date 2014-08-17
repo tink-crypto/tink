@@ -28,6 +28,7 @@ import com.google.k2crypto.storage.K2Storage;
 import com.google.k2crypto.storage.StorageDriverException;
 import com.google.k2crypto.storage.Store;
 import com.google.k2crypto.storage.driver.impl.K2FileSystemDriver;
+import com.google.k2crypto.storage.driver.impl.K2MemoryDriver;
 import com.google.k2crypto.storage.driver.optional.SqliteDriver;
 
 import java.io.File;
@@ -77,10 +78,11 @@ public final class StorageExample {
       throw ex;
     }
     
-    // Install desired storage drivers 
+    // Install desired storage drivers in order of preference
     try {
       storage.installDriver(K2FileSystemDriver.class);
       storage.installDriver(SqliteDriver.class);
+      storage.installDriver(K2MemoryDriver.class);
     } catch (StorageDriverException ex) {
       // Something wrong with a storage driver
       throw ex;
