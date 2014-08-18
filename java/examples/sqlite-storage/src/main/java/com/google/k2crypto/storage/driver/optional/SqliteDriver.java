@@ -136,13 +136,7 @@ public class SqliteDriver implements Driver, ReadableDriver, WritableDriver {
     checkNoQuery(address);
     checkScheme(address);
     
-    final String keyIdentifier = extractFragment(address);
-    if (!KEY_ID_REGEX.matcher(keyIdentifier).matches()) {
-      // Fragment (specifying the key id) is invalid
-      throw new IllegalAddressException(
-          address, IllegalAddressException.Reason.INVALID_FRAGMENT, null);      
-    }
-    
+    final String keyIdentifier = extractKeyIdentifier(address);
     final String path = extractRawPath(address);
     try {
       // Locate the database file specified by the path
@@ -163,28 +157,7 @@ public class SqliteDriver implements Driver, ReadableDriver, WritableDriver {
             + fileAddress.getRawPath() + '#' + address.getRawFragment());
         
         // Attempt opening a connection to the database file
-        Connection connection =
-            DriverManager.getConnection("jdbc:sqlite:" + fileAddress.getPath());
-        Statement stmt = null;
-        try {
-          // Create the Keys table if it does not already exist
-          stmt = connection.createStatement();
-          stmt.executeUpdate(
-              "CREATE TABLE IF NOT EXISTS Keys ("
-                  + "id VARCHAR(" + MAX_KEY_ID_LENGTH + ") PRIMARY KEY, "
-                  + "data BLOB NOT NULL, "
-                  + "modified DATETIME NOT NULL)");
-          
-        } catch (SQLException ex) {
-          // Unexpected error, close connection and throw to other handler
-          try { connection.close(); }
-          catch (Exception e) {}
-          throw ex;
-        } finally {
-          // Close temp. statement
-          try { stmt.close(); }
-          catch (Exception e) {}
-        }
+        Connection connection = openConnection(fileAddress.getPath());
 
         // Everything seems OK. Set open state and return.
         this.connection = connection;
@@ -219,7 +192,59 @@ public class SqliteDriver implements Driver, ReadableDriver, WritableDriver {
           address, IllegalAddressException.Reason.INVALID_SCHEME, null);
     }
   }
+  
+  /**
+   * Opens a connection to the database and creates the keys table for storage
+   * if it does not already exist. 
+   * 
+   * @param dbFilePath Path to the SQLite database file on disk.
+   * 
+   * @return the opened connection.
+   * 
+   * @throws SQLException if there is some issue opening the connection.
+   */
+  private Connection openConnection(String dbFilePath) throws SQLException {
+    Connection connection =
+        DriverManager.getConnection("jdbc:sqlite:" + dbFilePath);
+    Statement stmt = null;
+    try {
+      // Create the Keys table if it does not already exist
+      stmt = connection.createStatement();
+      stmt.executeUpdate(
+          "CREATE TABLE IF NOT EXISTS Keys ("
+              + "id VARCHAR(" + MAX_KEY_ID_LENGTH + ") PRIMARY KEY, "
+              + "data BLOB NOT NULL, "
+              + "modified DATETIME NOT NULL)");
+      
+    } catch (SQLException ex) {
+      // Unexpected error, close connection and throw to other handler
+      try { connection.close(); }
+      catch (Exception e) {}
+      throw ex;
+    } finally {
+      // Close temp. statement
+      try { stmt.close(); }
+      catch (Exception e) {}
+    }
+    return connection;
+  }
 
+  /**
+   * Extracts (and verifies) the key id from the fragment of the address.
+   *  
+   * @param address Address to obtain the identifier from.
+   */
+  private String extractKeyIdentifier(URI address)
+      throws IllegalAddressException {
+    final String keyIdentifier = extractFragment(address);
+    if (!KEY_ID_REGEX.matcher(keyIdentifier).matches()) {
+      // Fragment (specifying the key id) is invalid
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.INVALID_FRAGMENT, null);      
+    }
+    return keyIdentifier;
+  }
+  
   /**
    * @see Driver#close()
    */
