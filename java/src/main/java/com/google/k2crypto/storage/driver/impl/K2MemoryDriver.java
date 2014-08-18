@@ -37,19 +37,18 @@ import com.google.k2crypto.storage.driver.WritableDriver;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
- * K2-native in-memory (i.e. temporary and volatile) key storage driver.
+ * K2-native in-memory (i.e. volatile) key storage driver.
  * 
  * <p>This driver uses the normalized path component of the storage address
- * to uniquely identify the memory slot for saving or loading the key.
- * It accepts storage addresses in the following format:
- * {@code [mem:]{ANY LEGAL URI PATH}}.
- * 
- * <p>The storage space is defined with respect to the {@link K2Context}
- * provided to the driver. In other words, stored keys are only accessible
- * within the provided context and are discarded when the context is destroyed.
+ * to uniquely identify the memory slot for saving or loading the key. In other
+ * words, a key stored at a certain address can be retrieved at a later time 
+ * as long as the same logical address is used. Stored keys are retained only
+ * for the lifetime of the Java virtual machine.
+ *  
+ * <p>The driver accepts storage addresses only in the following format:
+ * {@code [mem:]{ANY LEGAL URI PATH}}
  *
  * @author darylseah@gmail.com (Daryl Seah)
  */
@@ -63,20 +62,18 @@ public class K2MemoryDriver implements Driver, ReadableDriver, WritableDriver {
    * Name of the native scheme in use (also the identifier of the driver).
    */
   static final String NATIVE_SCHEME = "mem";
-
-  // Storage spaces for each context. Memory spaces should be automatically
-  // freed when their associated context is garbage collected.
-  private static final Map<K2Context, MemorySpace> memSpaces =
-      new WeakHashMap<K2Context, MemorySpace>();
   
+  // Memory space that will be shared among all driver instances
+  private static final MemorySpace sharedMemorySpace = new MemorySpace();
+
   // Context for the current K2 session
   private K2Context context;
 
-  // Memory space associated with the context (available on open)
-  private MemorySpace memSpace;
-  
   // Address of the storage slot in the memory space
   private URI address;
+  
+  // Memory space associated with the current driver session
+  private MemorySpace memSpace;
   
   /**
    * @see Driver#initialize(K2Context)
@@ -96,7 +93,7 @@ public class K2MemoryDriver implements Driver, ReadableDriver, WritableDriver {
     checkNoFragment(address);
     checkScheme(address);
     
-    // Extract normalized path and fragment
+    // Extract normalized path
     String path = extractRawPath(address.normalize());
     
     // Reconstitute final address
@@ -110,8 +107,8 @@ public class K2MemoryDriver implements Driver, ReadableDriver, WritableDriver {
     URI normAddress = URI.create(sb.toString());
     this.address = normAddress;    
     
-    // Open the memory space for reading/writing
-    memSpace = openMemorySpace();
+    // Assign memory space to use (currently just shared among all instances)
+    memSpace = sharedMemorySpace;
     return normAddress;
   }
   
@@ -133,30 +130,13 @@ public class K2MemoryDriver implements Driver, ReadableDriver, WritableDriver {
   }
   
   /**
-   * Opens the memory space associated with the context provided to the driver.
-   */
-  private MemorySpace openMemorySpace() {
-    K2Context context = this.context;
-    // Grab the memory space of the context
-    synchronized (memSpaces) {
-      MemorySpace ms = memSpaces.get(context);
-      if (ms == null) {
-        // ...or create a new one if it does not exist
-        ms = new MemorySpace();
-        memSpaces.put(context, ms);
-      }
-      return ms;
-    }
-  }
-  
-  /**
    * @see Driver#close()
    */
   public void close() {
     // Free resources.
     context = null;
-    memSpace = null;
     address = null;
+    memSpace = null;
   }
 
   /**
@@ -207,7 +187,7 @@ public class K2MemoryDriver implements Driver, ReadableDriver, WritableDriver {
   }
   
   /**
-   * A key storage space associated with a K2Context.
+   * A memory-based key storage space.
    * 
    * <p>All methods synchronize directly on the object for thread-safety.
    * Should be acceptable since it is private to the driver.    
