@@ -89,18 +89,12 @@ public class K2MemoryDriver implements Driver, ReadableDriver, WritableDriver {
    * @see Driver#open(java.net.URI)
    */
   public URI open(final URI address) throws IllegalAddressException {
-    // Check for unsupported components in the address
+    // Check for unsupported components in the address and scheme.
     // (we only accept a scheme + path + optional fragment)
     checkNoAuthority(address);
     checkNoQuery(address);
     checkNoFragment(address);
-
-    String scheme = address.getScheme();
-    if (scheme != null && !NATIVE_SCHEME.equalsIgnoreCase(scheme)) {
-      // Unrecognized scheme
-      throw new IllegalAddressException(
-          address, IllegalAddressException.Reason.INVALID_SCHEME, null);
-    }
+    checkScheme(address);
     
     // Extract normalized path and fragment
     String path = extractRawPath(address.normalize());
@@ -127,6 +121,23 @@ public class K2MemoryDriver implements Driver, ReadableDriver, WritableDriver {
       memSpace = ms;
     }
     return normAddress;
+  }
+  
+  /**
+   * Checks that there is no scheme or that the scheme is identical to the 
+   * driver identifier.
+   *  
+   * @param address Address to check.
+   * 
+   * @throws IllegalAddressException if the address has an invalid scheme.
+   */
+  private void checkScheme(URI address) throws IllegalAddressException {
+    String scheme = address.getScheme();
+    if (scheme != null && !NATIVE_SCHEME.equalsIgnoreCase(scheme)) {
+      // Unrecognized scheme
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.INVALID_SCHEME, null);
+    }
   }
   
   /**

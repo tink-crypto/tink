@@ -130,16 +130,11 @@ public class SqliteDriver implements Driver, ReadableDriver, WritableDriver {
       throw new StoreException("SQLite JDBC not available.", ex);
     }
 
-    // Check for unsupported components in the address
+    // Check for unsupported components in the address and scheme.
     // (we only accept/require a scheme + path + fragment)
     checkNoAuthority(address);
     checkNoQuery(address);
-    
-    if (!SCHEME.equalsIgnoreCase(address.getScheme())) {
-      // Unrecognized scheme
-      throw new IllegalAddressException(
-          address, IllegalAddressException.Reason.INVALID_SCHEME, null);
-    }
+    checkScheme(address);
     
     final String keyIdentifier = extractFragment(address);
     if (!KEY_ID_REGEX.matcher(keyIdentifier).matches()) {
@@ -208,6 +203,21 @@ public class SqliteDriver implements Driver, ReadableDriver, WritableDriver {
     // Falling through to here implies the path is invalid
     throw new IllegalAddressException(address,
         IllegalAddressException.Reason.INVALID_PATH, null);
+  }
+  
+  /**
+   * Checks that the scheme is identical to the driver identifier.
+   *  
+   * @param address Address to check.
+   * 
+   * @throws IllegalAddressException if the address has an invalid scheme.
+   */
+  private void checkScheme(URI address) throws IllegalAddressException {
+    if (!SCHEME.equalsIgnoreCase(address.getScheme())) {
+      // Unrecognized scheme
+      throw new IllegalAddressException(
+          address, IllegalAddressException.Reason.INVALID_SCHEME, null);
+    }
   }
 
   /**
