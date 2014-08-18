@@ -14,10 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'gradleProtobufPlugin'
-
 // Allow the build process to pull plugins from maven central
 // and run the proto compiling plugin
 buildscript {
@@ -30,29 +26,48 @@ buildscript {
   }
 }
 
-// Java 1.5
-sourceCompatibility = 1.5
+allprojects {
+  apply plugin: 'java'
+
+  // Java 1.5
+  sourceCompatibility = 1.5
+  
+  // Use mavenCentral for project dependencies
+  repositories {
+    mavenCentral()
+  }
+  
+  // Testing dependencies for all projects
+  dependencies {
+    testCompile 'junit:junit:4.+'
+    testCompile 'org.mockito:mockito-all:1.9.5'
+  }
+}
+
+subprojects {
+  // All sub-projects will depend on the root project
+  dependencies {
+    compile project(':')
+    testCompile files(project(':').sourceSets.test.output.classesDir) 
+  }
+}
+
+apply plugin: 'eclipse'
+apply plugin: 'gradleProtobufPlugin'
 
 // Build a manifest file containing info about the library
 version = 'DEVELOPMENT'
 jar {
-  archiveName = "K2.jar"
+  archiveName = "k2.jar"
   manifest {
     attributes 'Implementation-Title': 'K2 Crypto Library', 'Implementation-Version': version
   }
-}
-
-// Use mavenCentral for project dependencies
-repositories {
-  mavenCentral()
 }
 
 dependencies {
   compile 'com.google.protobuf:protobuf-java:2.5.0'
   compile 'com.google.code.gson:gson:2.2.4'
   compile 'log4j:log4j:1.2.17'
-  testCompile 'junit:junit:4.+'
-  testCompile 'org.mockito:mockito-all:1.9.5'
 }
 
 // Magic to make proto compilation happen
@@ -62,6 +77,9 @@ protoBuf {
     // example of linux, and rely on a search path instead of a fully specified
     // path
     'Linux' {
+      path = "protoc"
+    }
+    'Mac OS X' {
       path = "protoc"
     }
   }

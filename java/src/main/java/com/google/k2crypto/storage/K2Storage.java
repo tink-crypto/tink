@@ -60,10 +60,11 @@ public class K2Storage {
   /**
    * Convenience method for loading a Key from a given address.
    * 
-   * <p>This method is equivalent to calling {@code open(address)}, followed by
-   * a {@code load()} and a {@code close()} on the resulting {@link Store}.  
+   * <p>This method is equivalent to calling {@link #open(String)}, followed
+   * by a {@link Store#load()} and a {@link Store#close()} on the resulting
+   * {@link Store}.
    * 
-   * @param address Address of the key storage location.
+   * @param address String address of the key storage location.
    * 
    * @throws IllegalAddressException if the address is not a valid URI or if it
    *                                 is not recognized by the driver.
@@ -86,12 +87,42 @@ public class K2Storage {
   }
   
   /**
+   * Convenience method for loading a Key from a given address.
+   * 
+   * <p>This method is equivalent to calling {@link #open(URI)}, followed
+   * by a {@link Store#load()} and a {@link Store#close()} on the resulting
+   * {@link Store}.
+   * 
+   * @param address URI address of the key storage location.
+   * 
+   * @throws IllegalAddressException if the address is not a valid URI or if it
+   *                                 is not recognized by the driver.
+   * @throws NoSuitableDriverException if the address cannot be handled by any
+   *                                   installed driver.
+   * @throws StoreException if there was an issue reading from the location. 
+   * 
+   * @return Key read from the specified address.
+   */
+  public Key load(URI address)
+      throws IllegalAddressException,
+             NoSuitableDriverException,
+             StoreException {
+    Store store = open(address);
+    try {
+      return store.load();
+    } finally {
+      store.close();
+    }
+  }
+
+  /**
    * Convenience method for saving a Key to a given address.
    * 
-   * <p>This method is equivalent to calling {@code open(address)}, followed by
-   * a {@code save(key)} and a {@code close()} on the resulting {@link Store}.  
+   * <p>This method is equivalent to calling {@link #open(String)}, followed
+   * by a {@link Store#save(Key)} and a {@link Store#close()} on the resulting
+   * {@link Store}.
    * 
-   * @param address Address of the key storage location.
+   * @param address String address of the key storage location.
    * @param key Key to save.
    * 
    * @throws IllegalAddressException if the address is not a valid URI or if it
@@ -112,6 +143,34 @@ public class K2Storage {
     }    
   }
 
+  /**
+   * Convenience method for saving a Key to a given address.
+   * 
+   * <p>This method is equivalent to calling {@link #open(URI)}, followed
+   * by a {@link Store#save(Key)} and a {@link Store#close()} on the resulting
+   * {@link Store}.
+   * 
+   * @param address URI address of the key storage location.
+   * @param key Key to save.
+   * 
+   * @throws IllegalAddressException if the address is not a valid URI or if it
+   *                                 is not recognized by the driver.
+   * @throws NoSuitableDriverException if the address cannot be handled by any
+   *                                   installed driver.
+   * @throws StoreException if there was an issue writing to the location. 
+   */
+  public void save(URI address, Key key)
+      throws IllegalAddressException,
+             NoSuitableDriverException,
+             StoreException {
+    Store store = open(address);
+    try {
+      store.save(key);
+    } finally {
+      store.close();
+    }    
+  }
+  
   /**
    * Opens a storage location for reading/writing of a {@link Key}.
    * 

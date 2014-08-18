@@ -37,20 +37,48 @@ public class IllegalAddressException extends K2Exception {
     INVALID_URI("Address is not a valid URI."),
     
     /**
-     * The address is not a valid path (for file-system-based drivers).
-     */
-    INVALID_PATH("Address is not a valid path."),
-    
-    /**
      * The address has a scheme component and the driver does not recognize it.
      */
     INVALID_SCHEME("Address scheme is invalid."),
 
     /**
-     * The address does not have a path (for file-system-based drivers).
+     * The address does not have a valid path
+     * (typically for file-system-based drivers).
+     */
+    INVALID_PATH("Address does not have a valid path."),
+    
+    /**
+     * The address query is unrecognized or invalid.
+     */
+    INVALID_QUERY("Address does not have a valid query."),
+
+    /**
+     * The address fragment is unrecognized or invalid.
+     */
+    INVALID_FRAGMENT("Address does not have a valid fragment."),
+    
+    /**
+     * The address does not have the required host/port components.
+     * (typically for network-based drivers).
+     */
+    MISSING_HOST_PORT("Address does not have a host/port."),
+
+    /**
+     * The address does not have the required path
+     * (typically for file-system-based drivers).
      */
     MISSING_PATH("Address does not have a path."),
 
+    /**
+     * The address does not have the required query.
+     */
+    MISSING_QUERY("Address does not have a query."),
+
+    /**
+     * The address does not have the required fragment.
+     */
+    MISSING_FRAGMENT("Address does not have a fragment."),
+    
     /**
      * The address has a user component and the driver does not support it.
      */
