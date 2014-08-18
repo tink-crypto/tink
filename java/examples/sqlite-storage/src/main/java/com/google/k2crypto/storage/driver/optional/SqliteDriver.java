@@ -63,15 +63,6 @@ import java.util.regex.Pattern;
     version = "0.1")
 public class SqliteDriver implements Driver, ReadableDriver, WritableDriver {
 
-  static {
-    // Make sure the SQLite JDBC driver is loaded
-    try {
-      Class.forName("org.sqlite.JDBC").newInstance();
-    } catch (Exception ex) {
-      throw new AssertionError("SQLite JDBC not available.", ex);
-    }
-  }
-
   /**
    * Name of the scheme and identifier of the driver.
    */
@@ -129,7 +120,16 @@ public class SqliteDriver implements Driver, ReadableDriver, WritableDriver {
   /**
    * @see Driver#open(java.net.URI)
    */
-  public URI open(final URI address) throws IllegalAddressException {
+  public URI open(final URI address)
+      throws StoreException, IllegalAddressException {
+    
+    // Make sure the SQLite JDBC driver is loaded
+    try {
+      Class.forName("org.sqlite.JDBC").newInstance();
+    } catch (Exception ex) {
+      throw new StoreException("SQLite JDBC not available.", ex);
+    }
+
     // Check for unsupported components in the address
     // (we only accept/require a scheme + path + fragment)
     checkNoAuthority(address);
