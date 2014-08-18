@@ -20,6 +20,7 @@ import com.google.k2crypto.keyversions.SymmetricKeyVersion;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.GeneralSecurityException;
 
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
@@ -49,7 +50,7 @@ public class SymmetricEncryption extends Operation {
       // encrypt the data
       encryptedData = keyVersion.getEncryptingCipher().doFinal(materialToEncrypt);
       // Catch all exceptions
-    } catch (Exception e) {
+    } catch (GeneralSecurityException e) {
       // propagate the exception up as an encryption exception
       throw new EncryptionException("Encryption of byte array failed", e);
     }
@@ -75,7 +76,7 @@ public class SymmetricEncryption extends Operation {
 
       decryptedData = keyVersion.getDecryptingCipher().doFinal(materialToDecrypt);
       // Catch all exceptions
-    } catch (Exception e) {
+    } catch (GeneralSecurityException e) {
       // propagate the exception up as an decrypted exception
       throw new DecryptionException("Decryption of byte array failed", e);
     }

@@ -48,7 +48,7 @@ public class Key {
   private ArrayList<KeyVersion> keyVersions = new ArrayList<KeyVersion>();
 
   /**
-   * 
+   * The primary KeyVersion
    */
   private KeyVersion primary;
 

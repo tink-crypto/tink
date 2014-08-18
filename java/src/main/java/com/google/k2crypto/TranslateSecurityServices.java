@@ -22,7 +22,7 @@ import java.util.HashSet;
  *
  * @author John Maheswaran (maheswaran@google.com)
  */
-public class SecurityServices { 
+public class TranslateSecurityServices { 
   /**
    * function that maps from ONE security services to ONE algorithm
    *
@@ -129,7 +129,6 @@ public class SecurityServices {
 
     // create list that we will return of the algorithms
     HashSet<Algorithm> algorithms = new HashSet<Algorithm>();
-
     // confidentiality, data integrity, authentication - use AES and HMAC
     if (services.contains(SecService.CONFIDENTIALITY)
         && services.contains(SecService.DATA_INTEGRITY)
