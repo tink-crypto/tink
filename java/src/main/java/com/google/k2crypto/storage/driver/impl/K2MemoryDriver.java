@@ -110,16 +110,8 @@ public class K2MemoryDriver implements Driver, ReadableDriver, WritableDriver {
     URI normAddress = URI.create(sb.toString());
     this.address = normAddress;    
     
-    // Grab the memory space of the context
-    synchronized (memSpaces) {
-      MemorySpace ms = memSpaces.get(context);
-      if (ms == null) {
-        // ...or create a new one if it does not exist
-        ms = new MemorySpace();
-        memSpaces.put(context, ms);
-      }
-      memSpace = ms;
-    }
+    // Open the memory space for reading/writing
+    memSpace = openMemorySpace();
     return normAddress;
   }
   
@@ -137,6 +129,23 @@ public class K2MemoryDriver implements Driver, ReadableDriver, WritableDriver {
       // Unrecognized scheme
       throw new IllegalAddressException(
           address, IllegalAddressException.Reason.INVALID_SCHEME, null);
+    }
+  }
+  
+  /**
+   * Opens the memory space associated with the context provided to the driver.
+   */
+  private MemorySpace openMemorySpace() {
+    K2Context context = this.context;
+    // Grab the memory space of the context
+    synchronized (memSpaces) {
+      MemorySpace ms = memSpaces.get(context);
+      if (ms == null) {
+        // ...or create a new one if it does not exist
+        ms = new MemorySpace();
+        memSpaces.put(context, ms);
+      }
+      return ms;
     }
   }
   
