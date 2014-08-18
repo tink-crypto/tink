@@ -16,11 +16,7 @@
 
 package com.google.k2crypto.storage.driver.impl;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import com.google.k2crypto.K2Exception;
-import com.google.k2crypto.K2Context;
 import com.google.k2crypto.storage.IllegalAddressException;
 import com.google.k2crypto.storage.driver.BasicDriverTest;
 
