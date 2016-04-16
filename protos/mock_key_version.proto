@@ -10,7 +10,7 @@ package com.google.k2crypto.keyversions;
 
 message MockKeyVersionData {
   extend KeyVersionData {
-    required MockKeyVersionData extension = 10000;
+    optional MockKeyVersionData extension = 10000;
   }
   // Non-core fields go here
   optional string comments = 1;
@@ -18,7 +18,7 @@ message MockKeyVersionData {
 
 message MockKeyVersionCore {
   extend KeyVersionCore {
-    required MockKeyVersionCore extension = 10000;
+    optional MockKeyVersionCore extension = 10000;
   }
   // Core fields will be hashed into the KeyVersion ID
   optional bytes material = 1; // Required
