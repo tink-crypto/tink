@@ -1,14 +1,15 @@
 // AEAD primitive (Authenticated Encryption with Associated Data, RFC 5116).
 // TODO(przydatek): add documentation.
 
-#ifndef K2_PUBLIC_AEAD_H_
-#define K2_PUBLIC_AEAD_H_
+#ifndef TINK_PUBLIC_AEAD_H_
+#define TINK_PUBLIC_AEAD_H_
 
 #include "google/protobuf/stubs/stringpiece.h"
 #include "google/protobuf/stubs/statusor.h"
 
 namespace cloud {
-namespace k2 {
+namespace crypto {
+namespace tink {
 
 using google::protobuf::util::StatusOr;
 using google::protobuf::StringPiece;
@@ -22,8 +23,8 @@ class Aead {
   virtual ~Aead() {}
 };
 
-}  // namespace k2
+}  // namespace tink
+}  // namespace crypto
 }  // namespace cloud
 
-#endif  // K2_PUBLIC_AEAD_H_
-
+#endif  // TINK_PUBLIC_AEAD_H_

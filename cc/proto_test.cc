@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
 
-#include "proto/k2.pb.h"
+#include "proto/tink.pb.h"
 
-using cloud::k2::Keyset;
+using cloud::crypto::tink::Keyset;
 
-class K2ProtoTest : public ::testing::Test {
+class ProtoTest : public ::testing::Test {
  protected:
   virtual void SetUp() {
   }
@@ -14,7 +14,7 @@ class K2ProtoTest : public ::testing::Test {
 
 };
 
-TEST_F(K2ProtoTest, testKeysetBasic) {
+TEST_F(ProtoTest, testKeysetBasic) {
   Keyset keyset;
   keyset.set_primary_key_id(1);
   EXPECT_EQ(1, keyset.primary_key_id());

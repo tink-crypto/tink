@@ -1,16 +1,16 @@
-// Definitions for K2 library.
+// Definitions for Cloud Crypto SDK (Tink) library.
 
 syntax = "proto3";
 
-package cloud.k2;
+package cloud.crypto.tink;
 
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
-option java_package = "com.google.cloud.k2";
-option java_outer_classname = "K2Proto";
+option java_package = "com.google.cloud.crypto.tink";
+option java_outer_classname = "Proto";
 
-// Each instantiation of a K2 primitive is identified by key_type,
+// Each instantiation of a Tink primitive is identified by key_type,
 // which is a global URL pointing to a *Key proto that holds key material
 // and other parameters of the instantiation. For each key_type, in addition
 // to the *Key proto, there exist two related structures:
@@ -47,7 +47,7 @@ message KeyFormat {
 //     If the key_type does have parameters then we should make the
 //     format required.
 
-// A K2 user works usually not with single keys, but with keysets,
+// A Tink user works usually not with single keys, but with keysets,
 // to enable key rotation.  The keys in a keyset can belong to different
 // implementations/key types, but must all implement the same primitive.
 // Any given keyset (and any given key) can be used for one primitive only.
@@ -70,8 +70,8 @@ message Keyset {
     // of a ciphertext/signature.
     int32 key_id = 3;
 
-    // Note: info for key management is still work-in-progress (go/k2-km)
-    // TODO(przydatek): update this proto once go/k2-km is stable.
+    // Note: info for key management is still work-in-progress.
+    // TODO(przydatek): update this proto once key management is stable.
     // Optional fields, used by key management tools, but not used
     // by actual cryptographic operations.
     google.protobuf.Timestamp generated_at = 101;

@@ -1,17 +1,17 @@
 java_library(
     name = "aead",
     srcs = [
-        "src/main/java/com/google/cloud/k2/Aead.java",
+        "src/main/java/com/google/cloud/crypto/tink/Aead.java",
     ],
 )
 
 # tests
 
 java_test(
-    name = "K2ProtoTest",
+    name = "ProtoTest",
     size = "small",
-    srcs = ["src/test/java/com/google/cloud/k2/K2ProtoTest.java"],
-    test_class = "com.google.cloud.k2.K2ProtoTest",
+    srcs = ["src/test/java/com/google/cloud/crypto/tink/ProtoTest.java"],
+    test_class = "com.google.cloud.crypto.tink.ProtoTest",
     deps = [
         "//proto:java",
         "@junit_junit_4//jar",

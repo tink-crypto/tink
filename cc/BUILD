@@ -12,9 +12,9 @@ cc_library(
 # tests
 
 cc_test(
-    name = "k2proto_test",
+    name = "proto_test",
     size = "small",
-    srcs = ["k2proto_test.cc"],
+    srcs = ["proto_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
         "//proto:cc",

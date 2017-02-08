@@ -5,7 +5,7 @@ load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_library")
 
 filegroup(
     name = "protos",
-    srcs = ["k2.proto"],
+    srcs = ["tink.proto"],
 )
 
 cc_proto_library(

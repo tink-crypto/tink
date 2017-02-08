@@ -1,4 +1,4 @@
-package com.google.cloud.k2;
+package com.google.cloud.crypto.tink;
 
 import java.security.GeneralSecurityException;
 
