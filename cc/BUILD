@@ -17,7 +17,7 @@ cc_test(
     srcs = ["proto_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        "//proto:cc",
+        "//proto:cc_core_proto",
         "@gtest//:gtest",
     ],
 )

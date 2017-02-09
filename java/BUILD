@@ -13,7 +13,7 @@ java_test(
     srcs = ["src/test/java/com/google/cloud/crypto/tink/ProtoTest.java"],
     test_class = "com.google.cloud.crypto.tink.ProtoTest",
     deps = [
-        "//proto:java",
+        "//proto:java_core_proto",
         "@junit_junit_4//jar",
     ],
 )
