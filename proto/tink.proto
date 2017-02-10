@@ -2,13 +2,13 @@
 
 syntax = "proto3";
 
-package cloud.crypto.tink;
+package google.cloud.crypto.tink;
 
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
 option java_package = "com.google.cloud.crypto.tink";
-option java_outer_classname = "Proto";
+option java_outer_classname = "TinkProto";
 
 // Each instantiation of a Tink primitive is identified by key_type,
 // which is a global URL pointing to a *Key proto that holds key material

@@ -8,12 +8,23 @@ java_library(
 # tests
 
 java_test(
-    name = "ProtoTest",
+    name = "TinkProtoTest",
     size = "small",
-    srcs = ["src/test/java/com/google/cloud/crypto/tink/ProtoTest.java"],
-    test_class = "com.google.cloud.crypto.tink.ProtoTest",
+    srcs = ["src/test/java/com/google/cloud/crypto/tink/TinkProtoTest.java"],
+    test_class = "com.google.cloud.crypto.tink.TinkProtoTest",
     deps = [
-        "//proto:java",
+        "//proto:java_core",
+        "@junit_junit_4//jar",
+    ],
+)
+
+java_test(
+    name = "EcdsaProtoTest",
+    size = "small",
+    srcs = ["src/test/java/com/google/cloud/crypto/tink/EcdsaProtoTest.java"],
+    test_class = "com.google.cloud.crypto.tink.EcdsaProtoTest",
+    deps = [
+        "//proto:java_ecdsa",
         "@junit_junit_4//jar",
     ],
 )

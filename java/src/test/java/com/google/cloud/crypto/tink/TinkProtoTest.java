@@ -2,14 +2,14 @@ package com.google.cloud.crypto.tink;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.cloud.crypto.tink.Proto.Keyset;
+import com.google.cloud.crypto.tink.TinkProto.Keyset;
 
 import org.junit.Test;
 
 /**
  * A simple integration test to see whether protobuf is built correctly.
  */
-public class ProtoTest {
+public class TinkProtoTest {
 
   @Test
   public void testKeysetBasic() throws Exception {

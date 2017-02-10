@@ -12,12 +12,23 @@ cc_library(
 # tests
 
 cc_test(
-    name = "proto_test",
+    name = "tink_proto_test",
     size = "small",
-    srcs = ["proto_test.cc"],
+    srcs = ["tink_proto_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        "//proto:cc",
+        "//proto:cc_core",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
+    name = "ecdsa_proto_test",
+    size = "small",
+    srcs = ["ecdsa_proto_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        "//proto:cc_ecdsa",
         "@gtest//:gtest",
     ],
 )

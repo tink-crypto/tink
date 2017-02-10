@@ -2,9 +2,9 @@
 
 #include "proto/tink.pb.h"
 
-using cloud::crypto::tink::Keyset;
+using google::cloud::crypto::tink::Keyset;
 
-class ProtoTest : public ::testing::Test {
+class TinkProtoTest : public ::testing::Test {
  protected:
   virtual void SetUp() {
   }
@@ -14,7 +14,7 @@ class ProtoTest : public ::testing::Test {
 
 };
 
-TEST_F(ProtoTest, testKeysetBasic) {
+TEST_F(TinkProtoTest, testKeysetBasic) {
   Keyset keyset;
   keyset.set_primary_key_id(1);
   EXPECT_EQ(1, keyset.primary_key_id());
