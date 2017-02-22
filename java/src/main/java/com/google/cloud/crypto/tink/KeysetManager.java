@@ -83,9 +83,9 @@ public class KeysetManager {
    * Rotates a keyset by generating a fresh key using a key format.
    * Setting the new key as the primary key.
    */
-  public void rotate() throws GeneralSecurityException {
+  public KeysetManager rotate() throws GeneralSecurityException {
     if (keyFormat != null) {
-      rotate(keyFormat);
+      return rotate(keyFormat);
     } else {
       throw new GeneralSecurityException("cannot rotate, needs key format");
     }
@@ -95,7 +95,7 @@ public class KeysetManager {
    * Rotates a keyset by generating a fresh key using {@code keyFormat}.
    * Setting the new key as the primary key.
    */
-  public void rotate(KeyFormat keyFormat) throws GeneralSecurityException {
+  public KeysetManager rotate(KeyFormat keyFormat) throws GeneralSecurityException {
     Any keyData = Registry.INSTANCE.newKey(keyFormat);
     int keyId = Random.randNonNegativeInt();
     while (hasKeyWithKeyId(keyId)) {
@@ -108,6 +108,7 @@ public class KeysetManager {
         .setOutputPrefixType(outputPrefixType)
         .build();
     keysetBuilder.addKey(key).setPrimaryKeyId(key.getKeyId());
+    return this;
   }
 
   /**

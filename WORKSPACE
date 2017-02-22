@@ -12,6 +12,11 @@ load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cpp_proto_repositories")
 cpp_proto_repositories()
 
 maven_jar(
+    name = "args4j",
+    artifact = "args4j:args4j:2.33",
+)
+
+maven_jar(
     name = "com_fasterxml_jackson_core",
     artifact = "com.fasterxml.jackson.core:jackson-core:2.8.6",
 )
