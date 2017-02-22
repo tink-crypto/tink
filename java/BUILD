@@ -1,4 +1,12 @@
 java_library(
+    name = "signature",
+    srcs = [
+        "src/main/java/com/google/cloud/crypto/tink/PublicKeySign.java",
+        "src/main/java/com/google/cloud/crypto/tink/PublicKeyVerify.java",
+    ],
+)
+
+java_library(
     name = "aead",
     srcs = [
         "src/main/java/com/google/cloud/crypto/tink/Aead.java",
