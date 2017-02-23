@@ -5,13 +5,15 @@ load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_library")
 
 filegroup(
     name = "core",
-    srcs = ["tink.proto"],
+    srcs = [
+        "common.proto",
+        "tink.proto",
+    ],
 )
 
 filegroup(
     name = "ecdsa",
     srcs = [
-        "common.proto",
         "ecdsa.proto",
     ],
 )
@@ -38,6 +40,9 @@ cc_proto_library(
     ],
     inputs = [
         "@com_github_google_protobuf//:well_known_protos",
+    ],
+    proto_deps = [
+        ":cc_core",
     ],
     protos = [
         ":ecdsa",
@@ -68,6 +73,9 @@ java_proto_library(
     ],
     inputs = [
         "@com_github_google_protobuf//:well_known_protos",
+    ],
+    proto_deps = [
+        ":java_core",
     ],
     protos = [
         ":ecdsa",

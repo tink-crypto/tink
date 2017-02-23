@@ -3,13 +3,7 @@ JAVACOPTS = [
     "-Xlint:deprecation",
 ]
 
-java_library(
-    name = "signature",
-    srcs = [
-        "src/main/java/com/google/cloud/crypto/tink/PublicKeySign.java",
-        "src/main/java/com/google/cloud/crypto/tink/PublicKeyVerify.java",
-    ],
-)
+# core
 
 java_library(
     name = "core",
@@ -31,44 +25,32 @@ COMMON_JAVA_DEPS = [
 
 # tests
 
-java_test(
-    name = "TinkProtoTest",
-    size = "small",
-    srcs = ["src/test/java/com/google/cloud/crypto/tink/TinkProtoTest.java"],
-    test_class = "com.google.cloud.crypto.tink.TinkProtoTest",
-    deps = [
-        "//proto:java_core",
-        "@junit_junit_4//jar",
-    ],
-)
+load(":GenTestRules.bzl", "GenTestRules")
 
-java_test(
-    name = "EcdsaProtoTest",
-    size = "small",
-    srcs = ["src/test/java/com/google/cloud/crypto/tink/EcdsaProtoTest.java"],
-    test_class = "com.google.cloud.crypto.tink.EcdsaProtoTest",
-    deps = [
+java_library(
+    name = "generator_test",
+    testonly = 1,
+    srcs = glob([
+        "src/test/java/**/*.java",
+    ]),
+    deps = COMMON_JAVA_DEPS + [
         "//proto:java_ecdsa",
+        "@com_google_api_client//jar",
+        "@com_google_cloudkms//jar",
+        "@com_fasterxml_jackson_core//jar",
         "@junit_junit_4//jar",
     ],
 )
 
-java_test(
-    name = "PrimitiveSetTest",
-    size = "small",
-    srcs = ["src/test/java/com/google/cloud/crypto/tink/PrimitiveSetTest.java"],
-    test_class = "com.google.cloud.crypto.tink.PrimitiveSetTest",
-    deps = COMMON_JAVA_DEPS + [
-        "@junit_junit_4//jar",
-    ],
-)
-
-java_test(
-    name = "RegistryTest",
-    size = "small",
-    srcs = ["src/test/java/com/google/cloud/crypto/tink/RegistryTest.java"],
-    test_class = "com.google.cloud.crypto.tink.RegistryTest",
-    deps = COMMON_JAVA_DEPS + [
-        "@junit_junit_4//jar",
+GenTestRules(
+    name = "GeneratedTestRules",
+    small_tests = glob([
+        "src/test/java/**/*ProtoTest.java",
+    ]),
+    test_files = glob([
+        "src/test/java/**/*Test.java",
+    ]),
+    deps = [
+        ":generator_test",
     ],
 )
