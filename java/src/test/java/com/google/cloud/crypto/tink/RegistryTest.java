@@ -2,6 +2,7 @@ package com.google.cloud.crypto.tink;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
@@ -142,6 +143,7 @@ public class RegistryTest {
     String badTypeUrl = "bad type URL";
     try {
       KeyManager<Mac> macManager = registry.getKeyManager(badTypeUrl);
+      fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("Unsupported"));
       assertTrue(e.toString().contains(badTypeUrl));
@@ -235,6 +237,7 @@ public class RegistryTest {
 
     try {
       registry.registerKeyManager(mac1TypeUrl, null);
+      fail("Expected NullPointerException.");
     } catch (NullPointerException e) {
       assertTrue(e.toString().contains("must be non-null"));
     }
@@ -244,6 +247,7 @@ public class RegistryTest {
 
     try {
       registry.registerKeyManager(mac1TypeUrl, new Mac1KeyManager());
+      fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains(mac1TypeUrl));
       assertTrue(e.toString().contains("already registered"));
