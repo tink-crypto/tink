@@ -17,8 +17,14 @@
 package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
+import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.security.GeneralSecurityException;
 
 /**
  * A container class for a set of primitives (i.e. implementations of cryptographic
@@ -40,14 +46,17 @@ public class PrimitiveSet<P> {
   /**
    * A single entry in the set. In addition to the actual primitive it holds also
    * some extra information about the primitive.
-   * TODO(przydatek): update identifier to fit the key management mechanisms.
    */
   public class Entry<P> {
-    private final P primitive;      // the actual primitive
-    private final long identifier;  // identifies the primitive within the set
-    private final Keyset.KeyStatus status;  // the status of the key represented by the primitive
+    // The actual primitive.
+    private final P primitive;
+    // Identifies the primitive within the set.
+    // It is the ciphertext prefix of the correponding key.
+    private final byte[] identifier;
+    // The status of the key represented by the primitive.
+    private final Key.StatusType status;
 
-    public Entry(P primitive, long identifier, Keyset.KeyStatus status) {
+    public Entry(P primitive, byte[] identifier, Key.StatusType status) {
       this.primitive = primitive;
       this.identifier = identifier;
       this.status = status;
@@ -55,36 +64,42 @@ public class PrimitiveSet<P> {
     protected P getPrimitive() {
       return this.primitive;
     }
-    protected Keyset.KeyStatus getStatus() {
+    protected Key.StatusType getStatus() {
       return status;
     }
-    protected final long getIdentifier() {
+    protected final byte[] getIdentifier() {
       return identifier;
     }
   }
+
+  /**
+   * The primitives are stored in a hash map of (ciphertext prefix, list of primivies sharing
+   * the prefix).
+   * This allows quickly retrieving the list of primitives sharing some particular prefix.
+   * Because all RAW keys are using an empty prefix, this also quickly allows retrieving them.
+   */
+  private ConcurrentMap<java.lang.String, List<Entry<P>>> primitives =
+    new ConcurrentHashMap<java.lang.String, List<Entry<P>>>();
+
+  private Entry<P> primary;
 
   protected static <P> PrimitiveSet<P> newPrimitiveSet() {
     return new PrimitiveSet<P>();
   }
 
-  private ConcurrentMap<java.lang.Long, Entry<P>> primitives =
-    new ConcurrentHashMap<java.lang.Long, Entry<P>>();
-
-  private Entry<P> primary;
-
   /**
-   * @returns the number of primitives in this set.
+   * @returns the entries with primitives identified by the ciphertext prefix of {@code key}.
    */
-  protected int size() {
-    return primitives.size();
+  protected List<Entry<P>> getPrimitive(Keyset.Key key)
+      throws GeneralSecurityException {
+    return getPrimitive(CryptoFormat.getPrefix(key));
   }
 
   /**
-   * @returns the entry with primitve identifed by {@code identifier}.
-   * TODO(przydatek): make it return List<Entry<P>> to be able to handle identifier collisions.
+   * @returns the entries with primitive identifed by {@code identifier}.
    */
-  protected Entry<P> getPrimitiveForId(long identifier) {
-    return primitives.get(identifier);
+  protected List<Entry<P>> getPrimitive(byte[] identifier) {
+    return primitives.get(new String(identifier, StandardCharsets.UTF_8));
   }
 
   /**
@@ -102,10 +117,29 @@ public class PrimitiveSet<P> {
   }
 
   /**
-   * Creates an entry in the primitive table.
+    * Creates an entry in the primitive table.
+    * @returns the added entry
+    */
+  protected Entry<P> addPrimitive(P primitive, Keyset.Key key) throws GeneralSecurityException {
+    Entry<P> entry = new Entry<P>(primitive, CryptoFormat.getPrefix(key), key.getStatus());
+    List<Entry<P>> list = new ArrayList<Entry<P>>();
+    list.add(entry);
+    // Cannot use [] as keys in hash map, convert to string.
+    String identifier = new String(entry.getIdentifier(), StandardCharsets.UTF_8);
+    List<Entry<P>> existing = primitives.put(identifier, Collections.unmodifiableList(list));
+    if (existing != null) {
+      List<Entry<P>> newList = new ArrayList<Entry<P>>();
+      newList.addAll(existing);
+      newList.add(entry);
+      primitives.put(identifier, Collections.unmodifiableList(newList));
+    }
+    return entry;
+  }
+
+  /**
+   * @returns all primitives using RAW prefix.
    */
-  protected void addPrimitive(P primitive, Keyset.Key key) {
-    Entry<P> entry = new Entry<P>(primitive, key.getKeyId(), key.getStatus());
-    primitives.put(new Long(key.getKeyId()), entry);
+  protected List<Entry<P>> getRawPrimitives() {
+    return getPrimitive(CryptoFormat.RAW_PREFIX);
   }
 }

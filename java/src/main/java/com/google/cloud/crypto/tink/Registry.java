@@ -18,7 +18,7 @@ package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.KeyStatus;
+import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,7 +59,7 @@ public final class Registry {
    * @throws GeneralSecurityException if there already exists a key manager for {@code typeUrl}.
    * @throws NullPointerException if {@code manager} is null.
    */
-  public <Primitive> void registerKeyManager(String typeUrl, KeyManager<Primitive> manager)
+  public <P> void registerKeyManager(String typeUrl, KeyManager<P> manager)
       throws GeneralSecurityException {
     if (manager == null) {
       throw new NullPointerException("Key manager must be non-null.");
@@ -77,9 +77,9 @@ public final class Registry {
    * TODO(przydatek): find a way for verifying the primitive type.
    */
   @SuppressWarnings("unchecked")
-  public <Primitive> KeyManager<Primitive> getKeyManager(String typeUrl)
+  public <P> KeyManager<P> getKeyManager(String typeUrl)
       throws GeneralSecurityException {
-    KeyManager<Primitive> manager = keyManager.get(typeUrl);
+    KeyManager<P> manager = keyManager.get(typeUrl);
     if (manager == null) {
       throw new GeneralSecurityException("Unsupported key type: " + typeUrl);
     }
@@ -93,9 +93,9 @@ public final class Registry {
    *
    * @returns a new key.
    */
-  public <Primitive> Any newKey(KeyFormat format)
+  public <P> Any newKey(KeyFormat format)
       throws GeneralSecurityException {
-    KeyManager<Primitive> manager = getKeyManager(format.getKeyType());
+    KeyManager<P> manager = getKeyManager(format.getKeyType());
     return manager.newKey(format);
   }
 
@@ -106,9 +106,9 @@ public final class Registry {
    *
    * @returns a new primitive.
    */
-  public <Primitive> Primitive getPrimitive(Any proto)
+  public <P> P getPrimitive(Any proto)
       throws GeneralSecurityException {
-    KeyManager<Primitive> manager = getKeyManager(proto.getTypeUrl());
+    KeyManager<P> manager = getKeyManager(proto.getTypeUrl());
     return manager.getPrimitive(proto);
   }
 
@@ -122,16 +122,16 @@ public final class Registry {
    *
    * @returns a PrimitiveSet with all instantiated primitives.
    */
-  public <Primitive> PrimitiveSet<Primitive> getPrimitives(KeysetHandle keysetHandle)
+  public <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     // TODO(thaidn): cache it?
-    PrimitiveSet<Primitive> primitives = PrimitiveSet.newPrimitiveSet();
+    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
     for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
-      if (key.getStatus() == KeyStatus.ENABLED) {
-        Primitive primitive = getPrimitive(key.getKeyData());
-        primitives.addPrimitive(primitive, key);
+      if (key.getStatus() == Key.StatusType.ENABLED) {
+        P primitive = getPrimitive(key.getKeyData());
+        PrimitiveSet<P>.Entry<P> entry = primitives.addPrimitive(primitive, key);
         if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {
-          primitives.setPrimary(primitives.getPrimitiveForId(key.getKeyId()));
+          primitives.setPrimary(entry);
         }
       }
     }

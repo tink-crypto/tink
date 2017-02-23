@@ -22,7 +22,9 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.KeyStatus;
+import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
+import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.PrefixType;
+import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.StatusType;
 import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.Future;
@@ -205,17 +207,28 @@ public class RegistryTest {
         public Keyset getKeyset() {
           return Keyset.newBuilder()
               .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key1).setKeyId(1).setStatus(KeyStatus.ENABLED).build())
+                  .setKeyData(key1)
+                  .setKeyId(1)
+                  .setStatus(StatusType.ENABLED)
+                  .setPrefixType(PrefixType.TINK)
+                  .build())
               .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key2).setKeyId(2).setStatus(KeyStatus.ENABLED).build())
+                  .setKeyData(key2)
+                  .setKeyId(2)
+                  .setStatus(StatusType.ENABLED)
+                  .setPrefixType(PrefixType.TINK)
+                  .build())
               .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key3).setKeyId(3).setStatus(KeyStatus.ENABLED).build())
+                  .setKeyData(key3)
+                  .setKeyId(3)
+                  .setStatus(StatusType.ENABLED)
+                  .setPrefixType(PrefixType.TINK)
+                  .build())
               .setPrimaryKeyId(2)
               .build();
         }
       };
     PrimitiveSet<Mac> macSet = registry.getPrimitives(keysetHandle);
-    assertEquals(3, macSet.size());
     computedMac = new String(macSet.getPrimary().getPrimitive().computeMac(null));
     assertEquals(mac1TypeUrl, computedMac);
 
@@ -227,17 +240,28 @@ public class RegistryTest {
         public Keyset getKeyset() {
           return Keyset.newBuilder()
               .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key1).setKeyId(1).setStatus(KeyStatus.DESTROYED).build())
+                  .setKeyData(key1)
+                  .setKeyId(1)
+                  .setStatus(StatusType.DESTROYED)
+                  .setPrefixType(PrefixType.TINK)
+                  .build())
               .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key2).setKeyId(2).setStatus(KeyStatus.DISABLED).build())
+                  .setKeyData(key2)
+                  .setKeyId(2)
+                  .setStatus(StatusType.DISABLED)
+                  .setPrefixType(PrefixType.TINK)
+                  .build())
               .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key3).setKeyId(3).setStatus(KeyStatus.ENABLED).build())
+                  .setKeyData(key3)
+                  .setKeyId(3)
+                  .setStatus(StatusType.ENABLED)
+                  .setPrefixType(PrefixType.TINK)
+                  .build())
               .setPrimaryKeyId(3)
               .build();
         }
       };
     macSet = registry.getPrimitives(keysetHandle);
-    assertEquals(1, macSet.size());
     computedMac = new String(macSet.getPrimary().getPrimitive().computeMac(null));
     assertEquals(mac2TypeUrl, computedMac);
   }

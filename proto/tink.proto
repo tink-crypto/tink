@@ -67,23 +67,38 @@ message KeyFormat {
 // implementations/key types, but must all implement the same primitive.
 // Any given keyset (and any given key) can be used for one primitive only.
 message Keyset {
-  enum KeyStatus {
-    UNKNOWN_STATUS = 0;
-    ENABLED = 1;    // Can be used for crypto operations.
-    DISABLED = 2;   // Cannot be used, but exists and can become ENABLED.
-    DESTROYED = 3;  // Key data does not exist in this Keyset any more.
-  }
-
   message Key {
     // Contains the actual, instantiation specific key proto.
     // By convention, each key proto contains a version field.
     google.protobuf.Any key_data = 1;
 
-    KeyStatus status = 2;
+    enum StatusType {
+      UNKNOWN_STATUS = 0;
+      ENABLED = 1;    // Can be used for crypto operations.
+      DISABLED = 2;   // Cannot be used, but exists and can become ENABLED.
+      DESTROYED = 3;  // Key data does not exist in this Keyset any more.
+    }
+    StatusType status = 2;
 
     // Identifies a key within a keyset, is a part of metadata
     // of a ciphertext/signature.
     int32 key_id = 3;
+
+    // Tink produces and accepts ciphertexts or signatures that consist of a
+    // prefix and a payload. The payload and its format is determined entirely
+    // by the primitive, but the prefix has to be one of the following 3 types:
+    //   - Legacy: prefix is 5 bytes, starts with \x00 and followed by a 4-byte
+    //             key id.
+    //   - Tink  : prefix is 5 bytes, starts with \x01 and followed by a 4-byte
+    //             key id.
+    //   - Raw   : prefix is 0 byte, i.e., empty.
+    enum PrefixType {
+      UNKNOWN_PREFIX = 0;
+      TINK = 1;
+      LEGACY = 2;
+      RAW = 3;
+    }
+    PrefixType prefix_type = 4;
 
     // Note: info for key management is still work-in-progress.
     // TODO(przydatek): update this proto once key management is stable.
