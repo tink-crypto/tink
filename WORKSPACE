@@ -5,6 +5,11 @@ git_repository(
   commit = "be63ed9cb3140ec23e4df5118fca9a3f98640cf6",
 )
 
+maven_jar(
+    name = "com_google_inject_guice",
+    artifact = "com.google.inject:guice:4.1.0",
+)
+
 load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_repositories")
 java_proto_repositories()
 

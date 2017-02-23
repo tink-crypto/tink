@@ -89,5 +89,5 @@ message Keyset {
 
   // Actual keys in the Keyset.
   // Required.
-  repeated Key keys = 4;
+  repeated Key key = 4;
 }
