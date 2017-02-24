@@ -22,11 +22,11 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.PrefixType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.StatusType;
 import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import java.util.concurrent.Future;
 import org.junit.Test;
 
@@ -88,7 +88,24 @@ public class RegistryTest {
     }
     @Override
     public boolean doesSupport(String typeUrl) {
-      return typeUrl == this.getClass().getSimpleName();
+      return typeUrl.equals(this.getClass().getSimpleName());
+    }
+  }
+
+  private class CustomMac1KeyManager implements KeyManager<Mac> {
+    public CustomMac1KeyManager() {}
+
+    @Override
+    public Mac getPrimitive(Any proto) throws GeneralSecurityException {
+      return new DummyMac(this.getClass().getSimpleName());
+    }
+    @Override
+    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public boolean doesSupport(String typeUrl) {  // supports same keys as Mac1KeyManager
+      return typeUrl.equals(Mac1KeyManager.class.getSimpleName());
     }
   }
 
@@ -105,7 +122,7 @@ public class RegistryTest {
     }
     @Override
     public boolean doesSupport(String typeUrl) {
-      return typeUrl == this.getClass().getSimpleName();
+      return typeUrl.equals(this.getClass().getSimpleName());
     }
   }
 
@@ -122,7 +139,7 @@ public class RegistryTest {
     }
     @Override
     public boolean doesSupport(String typeUrl) {
-      return typeUrl == this.getClass().getSimpleName();
+      return typeUrl.equals(this.getClass().getSimpleName());
     }
   }
 
@@ -290,6 +307,67 @@ public class RegistryTest {
       assertTrue(e.toString().contains(mac1TypeUrl));
       assertTrue(e.toString().contains("already registered"));
     }
+  }
+
+  @Test
+  public void testCustomKeyManagerHandling() throws Exception {
+    // Setup the registry.
+    Registry registry = new Registry();
+    String mac1TypeUrl = Mac1KeyManager.class.getSimpleName();
+    String mac2TypeUrl = Mac2KeyManager.class.getSimpleName();
+
+    registry.registerKeyManager(mac1TypeUrl, new Mac1KeyManager());
+    registry.registerKeyManager(mac2TypeUrl, new Mac2KeyManager());
+
+    // Create a keyset.
+    KeyFormat format1 = KeyFormat.newBuilder().setKeyType(mac1TypeUrl).build();
+    KeyFormat format2 = KeyFormat.newBuilder().setKeyType(mac2TypeUrl).build();
+    Any key1 = registry.newKey(format1);
+    Any key2 = registry.newKey(format2);
+    KeysetHandle keysetHandle = new KeysetHandle() {
+        public byte[] getSource() {
+          return "keyset source".getBytes();
+        }
+        public Keyset getKeyset() {
+          return Keyset.newBuilder()
+              .addKey(Keyset.Key.newBuilder()
+                  .setKeyData(key1)
+                  .setKeyId(1)
+                  .setStatus(StatusType.ENABLED)
+                  .setPrefixType(PrefixType.TINK)
+                  .build())
+              .addKey(Keyset.Key.newBuilder()
+                  .setKeyData(key2)
+                  .setKeyId(2)
+                  .setStatus(StatusType.ENABLED)
+                  .setPrefixType(PrefixType.TINK)
+                  .build())
+              .setPrimaryKeyId(2)
+              .build();
+        }
+      };
+    // Get a PrimitiveSet using registered key managers.
+    PrimitiveSet<Mac> macSet = registry.getPrimitives(keysetHandle);
+    List<PrimitiveSet<Mac>.Entry<Mac>> mac1List =
+        macSet.getPrimitive(keysetHandle.getKeyset().getKey(0));
+    List<PrimitiveSet<Mac>.Entry<Mac>> mac2List =
+        macSet.getPrimitive(keysetHandle.getKeyset().getKey(1));
+    assertEquals(1, mac1List.size());
+    assertEquals(mac1TypeUrl, new String(mac1List.get(0).getPrimitive().computeMac(null)));
+    assertEquals(1, mac2List.size());
+    assertEquals(mac2TypeUrl, new String(mac2List.get(0).getPrimitive().computeMac(null)));
+
+    // Get a PrimitiveSet using a custom key manager for key1.
+    KeyManager<Mac> customManager = new CustomMac1KeyManager();
+    macSet = registry.getPrimitives(keysetHandle, customManager);
+    mac1List = macSet.getPrimitive(keysetHandle.getKeyset().getKey(0));
+    mac2List = macSet.getPrimitive(keysetHandle.getKeyset().getKey(1));
+    assertEquals(1, mac1List.size());
+    assertEquals(CustomMac1KeyManager.class.getSimpleName(),
+        new String(mac1List.get(0).getPrimitive().computeMac(null)));
+    assertEquals(1, mac2List.size());
+    assertEquals(mac2TypeUrl,
+        new String(mac2List.get(0).getPrimitive().computeMac(null)));
   }
 
   // TODO(przydatek): Add more tests for creation of PrimitiveSets.

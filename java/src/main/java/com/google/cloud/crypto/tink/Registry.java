@@ -137,8 +137,38 @@ public final class Registry {
     }
     return primitives;
   }
+  /**
+   * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset
+   * given in {@code keysetHandle}, using {@code customManager} (instead of registered key managers)
+   * for keys supported by it.  Keys not supported by {@code customManager} are handled by matching
+   * registered key managers (if present), and keys with status!=ENABLED are skipped. <p>
+   *
+   * This enables custom treatment of keys, for example providing extra context (e.g. credentials
+   * for accessing keys managed by a KMS), or gathering custom monitoring/profiling information.
+   *
+   * The returned set is usually later "wrapped" into a class that implements
+   * the corresponding Primitive-interface.
+   *
+   * @returns a PrimitiveSet with all instantiated primitives.
+   */
+    public <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle, KeyManager<P> customManager)
+        throws GeneralSecurityException {
+    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
+    for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
+      if (key.getStatus() == Key.StatusType.ENABLED) {
+        P primitive;
+        if (customManager.doesSupport(key.getKeyData().getTypeUrl())) {
+          primitive = customManager.getPrimitive(key.getKeyData());
+        } else {
+          primitive = getPrimitive(key.getKeyData());
+        }
+        PrimitiveSet<P>.Entry<P> entry = primitives.addPrimitive(primitive, key);
+        if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {
+          primitives.setPrimary(entry);
+        }
+      }
+    }
+    return primitives;
+  }
 
-  // TODO(przydatek): add methods for providing custom KeyManager-objects
-  //   Primitive getPrimitive(Any proto, KeyManager<Primitive> customManager);
-  //   PrimitiveSet<Primitive> getPrimitive(KeysetHandle, KeyManager<Primitive> customManager);
 }
