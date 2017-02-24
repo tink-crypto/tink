@@ -22,7 +22,7 @@ package google.cloud.crypto.tink;
 option java_package = "com.google.cloud.crypto.tink";
 option java_outer_classname = "CommonProto";
 
-enum EllipticCurve {
+enum EllipticCurveType {
   UNKNOWN_CURVE = 0;
   NIST_P224 = 1;
   NIST_P256 = 2;

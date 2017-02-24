@@ -28,13 +28,13 @@ message EcdsaParams {
   // Required.
   HashType hash_type = 1;
   // Required.
-  EllipticCurve curve = 2;
+  EllipticCurveType curve = 2;
 }
 
 // key_type: type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey
 message EcdsaPublicKey {
   // Required.
-  uint32 version = 1;
+  int32 version = 1;
   // Required.
   EcdsaParams params = 2;
   // Affine coordinates of the public key in bigendian representation. The
@@ -50,7 +50,7 @@ message EcdsaPublicKey {
 // key_type: type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey
 message EcdsaPrivateKey {
   // Required.
-  uint32 version = 1;
+  int32 version = 1;
   // Required.
   EcdsaPublicKey public_key = 2;
   // Unsigned big integer in bigendian representation.
@@ -59,8 +59,6 @@ message EcdsaPrivateKey {
 }
 
 message EcdsaKeyFormat {
-  // Requied.
-  uint32 key_version = 1;
   // Required.
   EcdsaParams params = 2;
 }

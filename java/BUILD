@@ -110,6 +110,33 @@ java_library(
     deps = COMMON_JAVA_DEPS,
 )
 
+# signature
+
+java_library(
+    name = "signature_subtle",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EcdsaSignJce.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EcdsaVerifyJce.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EcUtil.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java:public_interfaces",
+    ],
+)
+
+java_library(
+    name = "signature",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/signature/*.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = COMMON_JAVA_DEPS + [
+        "//java:signature_subtle",
+        "//proto:java_ecdsa",
+    ],
+)
+
 # tests
 
 load(":GenTestRules.bzl", "GenTestRules")
@@ -124,6 +151,8 @@ java_library(
         "//java:mac",
         "//java:keyset_handle_restricted",
         "//java:aead",
+        "//java:signature",
+        "//java:signature_subtle",
         "//proto:java_ecdsa",
         "//proto:java_hmac",
         "@com_google_api_client//jar",
