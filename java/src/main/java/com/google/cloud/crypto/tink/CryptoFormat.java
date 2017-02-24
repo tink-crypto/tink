@@ -16,7 +16,6 @@
 
 package com.google.cloud.crypto.tink;
 
-import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -25,16 +24,22 @@ import java.security.GeneralSecurityException;
  * Constants and convenience methods that deal with crypto format.
  */
 public class CryptoFormat {
+
+  /**
+   * Prefix size of Tink and Legacy key types.
+   */
+  public static final int NON_RAW_PREFIX_SIZE = 5;
+
   /**
    * Legacy prefix starts with \x00 and followed by a 4-byte key id.
    */
-  public static final int LEGACY_PREFIX_SIZE = 5;
+  public static final int LEGACY_PREFIX_SIZE = NON_RAW_PREFIX_SIZE;
   public static final byte LEGACY_START_BYTE = (byte) 0;
 
   /**
    * Tink prefix starts with \x01 and followed by a 4-byte key id.
    */
-  public static final int TINK_PREFIX_SIZE = 5;
+  public static final int TINK_PREFIX_SIZE = NON_RAW_PREFIX_SIZE;
   public static final byte TINK_START_BYTE = (byte) 1;
 
   /**

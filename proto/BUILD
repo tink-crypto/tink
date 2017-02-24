@@ -11,13 +11,6 @@ filegroup(
     ],
 )
 
-filegroup(
-    name = "ecdsa",
-    srcs = [
-        "ecdsa.proto",
-    ],
-)
-
 cc_proto_library(
     name = "cc_core",
     imports = [
@@ -31,6 +24,30 @@ cc_proto_library(
     ],
     verbose = 0,
     with_grpc = False,
+)
+
+java_proto_library(
+    name = "java_core",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    protos = [
+        ":core",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+# ecdsa
+
+filegroup(
+    name = "ecdsa",
+    srcs = [
+        "ecdsa.proto",
+    ],
 )
 
 cc_proto_library(
@@ -52,21 +69,6 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_core",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
-    protos = [
-        ":core",
-    ],
-    verbose = 0,
-    with_grpc = False,
-)
-
-java_proto_library(
     name = "java_ecdsa",
     imports = [
         "external/com_github_google_protobuf/src/",
@@ -79,6 +81,51 @@ java_proto_library(
     ],
     protos = [
         ":ecdsa",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+# hmac
+
+filegroup(
+    name = "hmac",
+    srcs = [
+        "hmac.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "cc_hmac",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    proto_deps = [
+        ":cc_core",
+    ],
+    protos = [
+        ":hmac",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+java_proto_library(
+    name = "java_hmac",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    proto_deps = [
+        ":java_core",
+    ],
+    protos = [
+        ":hmac",
     ],
     verbose = 0,
     with_grpc = False,

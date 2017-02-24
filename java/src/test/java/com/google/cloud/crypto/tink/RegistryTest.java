@@ -17,6 +17,7 @@
 package com.google.cloud.crypto.tink;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -300,13 +301,11 @@ public class RegistryTest {
     registry.registerKeyManager(mac1TypeUrl, new Mac1KeyManager());
     registry.registerKeyManager(mac2TypeUrl, new Mac2KeyManager());
 
-    try {
-      registry.registerKeyManager(mac1TypeUrl, new Mac1KeyManager());
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains(mac1TypeUrl));
-      assertTrue(e.toString().contains("already registered"));
-    }
+    // This should not overwrite the existing manager.
+    assertFalse(registry.registerKeyManager(mac1TypeUrl, new Mac2KeyManager()));
+    KeyManager<Mac> manager= registry.getKeyManager(mac1TypeUrl);
+    assertEquals(Mac1KeyManager.class.getSimpleName(),
+        manager.getClass().getSimpleName());
   }
 
   @Test

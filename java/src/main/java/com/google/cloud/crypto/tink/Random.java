@@ -16,25 +16,20 @@
 
 package com.google.cloud.crypto.tink;
 
-import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
 
 /**
- * Interface for MACs (Message Authentication Codes).
- * This interface should be used for authentication only, and not for other purposes
- * (for example, it should not be used to generate pseudorandom bytes).
+ * A simple wrapper of SecureRandom.
  */
-public interface Mac {
-  /**
-   * Computes message authentication code (MAC) for {@code data}.
-   *
-   * @returns MAC value.
-   */
-  byte[] computeMac(final byte[] data) throws GeneralSecurityException;
+public class Random {
+  private static final SecureRandom secureRandom = new SecureRandom();
 
   /**
-   * Verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
-   *
-   * @returns true iff {@code mac} is a correct MAC for {@code data}.
+   * @returns a random byte array of size {@code size}.
    */
-  boolean verifyMac(final byte[] mac, final byte[] data) throws GeneralSecurityException;
+  public static byte[] randBytes(int size) {
+    byte[] rand = new byte[size];
+    secureRandom.nextBytes(rand);
+    return rand;
+  }
 }

@@ -54,21 +54,24 @@ public final class Registry {
 
   /**
    * Registers {@code manager} for the given {@code typeUrl}, assuming that there is
-   * no key manager registered for {@code typeUrl} yet.
+   * no key manager registered for {@code typeUrl} yet. Does nothing if there already exists
+   * a key manager for {@code typeUrl}.
    *
-   * @throws GeneralSecurityException if there already exists a key manager for {@code typeUrl}.
    * @throws NullPointerException if {@code manager} is null.
+   * @returns true if the {@code manager} is registered as a manager for {@code typeUrl}; false if
+   * there already exists a key manager for {@code typeUrl}.
    */
-  public <P> void registerKeyManager(String typeUrl, KeyManager<P> manager)
+  @SuppressWarnings("unchecked")
+  public <P> boolean registerKeyManager(String typeUrl, KeyManager<P> manager)
       throws GeneralSecurityException {
     if (manager == null) {
       throw new NullPointerException("Key manager must be non-null.");
     }
-    if (keyManager.containsKey(typeUrl)) {
-      throw new GeneralSecurityException("Key manager for '"
-          + typeUrl + "' has been already registered.");
+    KeyManager<P> existing = keyManager.putIfAbsent(typeUrl, manager);
+    if (existing == null) {
+      return true;
     }
-    keyManager.put(typeUrl, manager);
+    return false;
   }
 
   /**
@@ -124,18 +127,7 @@ public final class Registry {
    */
   public <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    // TODO(thaidn): cache it?
-    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
-    for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
-      if (key.getStatus() == Key.StatusType.ENABLED) {
-        P primitive = getPrimitive(key.getKeyData());
-        PrimitiveSet<P>.Entry<P> entry = primitives.addPrimitive(primitive, key);
-        if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {
-          primitives.setPrimary(entry);
-        }
-      }
-    }
-    return primitives;
+    return getPrimitives(keysetHandle, null /* customManager */);
   }
   /**
    * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset
@@ -157,7 +149,7 @@ public final class Registry {
     for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
       if (key.getStatus() == Key.StatusType.ENABLED) {
         P primitive;
-        if (customManager.doesSupport(key.getKeyData().getTypeUrl())) {
+        if (customManager != null && customManager.doesSupport(key.getKeyData().getTypeUrl())) {
           primitive = customManager.getPrimitive(key.getKeyData());
         } else {
           primitive = getPrimitive(key.getKeyData());

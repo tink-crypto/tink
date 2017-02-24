@@ -23,6 +23,33 @@ COMMON_JAVA_DEPS = [
     "//proto:java_core_compile_imports",
 ]
 
+# mac
+
+java_library(
+    name = "mac_subtle",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/subtle/MacJce.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java:core",
+    ],
+)
+
+java_library(
+    name = "mac",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/mac/*.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = COMMON_JAVA_DEPS + [
+        "//java:mac_subtle",
+        "//proto:java_hmac",
+        "@com_google_guava_guava//jar",
+    ],
+)
+
 # tests
 
 load(":GenTestRules.bzl", "GenTestRules")
@@ -34,7 +61,9 @@ java_library(
         "src/test/java/**/*.java",
     ]),
     deps = COMMON_JAVA_DEPS + [
+        "//java:mac",
         "//proto:java_ecdsa",
+        "//proto:java_hmac",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
         "@com_fasterxml_jackson_core//jar",

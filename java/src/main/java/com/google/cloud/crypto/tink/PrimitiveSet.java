@@ -61,15 +61,37 @@ public class PrimitiveSet<P> {
       this.identifier = identifier;
       this.status = status;
     }
-    protected P getPrimitive() {
+    public P getPrimitive() {
       return this.primitive;
     }
-    protected Key.StatusType getStatus() {
+    public Key.StatusType getStatus() {
       return status;
     }
-    protected final byte[] getIdentifier() {
+    public final byte[] getIdentifier() {
       return identifier;
     }
+  }
+
+  /**
+   * @returns the entry with the primary primitive.
+   */
+  public Entry<P> getPrimary() {
+    return primary;
+  }
+
+  /**
+   * @returns all primitives using RAW prefix.
+   */
+  public List<Entry<P>> getRawPrimitives() {
+    return getPrimitive(CryptoFormat.RAW_PREFIX);
+  }
+
+  /**
+   * @returns the entries with primitive identifed by {@code identifier}.
+   */
+  public List<Entry<P>> getPrimitive(byte[] identifier) {
+    List<Entry<P>> found = primitives.get(new String(identifier, StandardCharsets.UTF_8));
+    return found != null ? found : Collections.<Entry<P>>emptyList();
   }
 
   /**
@@ -93,20 +115,6 @@ public class PrimitiveSet<P> {
   protected List<Entry<P>> getPrimitive(Keyset.Key key)
       throws GeneralSecurityException {
     return getPrimitive(CryptoFormat.getPrefix(key));
-  }
-
-  /**
-   * @returns the entries with primitive identifed by {@code identifier}.
-   */
-  protected List<Entry<P>> getPrimitive(byte[] identifier) {
-    return primitives.get(new String(identifier, StandardCharsets.UTF_8));
-  }
-
-  /**
-   * @returns the entry with the primary primitive.
-   */
-  protected Entry<P> getPrimary() {
-    return primary;
   }
 
   /**
@@ -134,12 +142,5 @@ public class PrimitiveSet<P> {
       primitives.put(identifier, Collections.unmodifiableList(newList));
     }
     return entry;
-  }
-
-  /**
-   * @returns all primitives using RAW prefix.
-   */
-  protected List<Entry<P>> getRawPrimitives() {
-    return getPrimitive(CryptoFormat.RAW_PREFIX);
   }
 }

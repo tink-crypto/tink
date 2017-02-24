@@ -84,9 +84,10 @@ message Keyset {
     // of a ciphertext/signature.
     int32 key_id = 3;
 
-    // Tink produces and accepts ciphertexts or signatures that consist of a
-    // prefix and a payload. The payload and its format is determined entirely
-    // by the primitive, but the prefix has to be one of the following 3 types:
+    // Tink produces and accepts ciphertexts or signatures that consist
+    // of a prefix and a payload. The payload and its format is determined
+    // entirely by the primitive, but the prefix has to be one of the following
+    // 3 types:
     //   - Legacy: prefix is 5 bytes, starts with \x00 and followed by a 4-byte
     //             key id.
     //   - Tink  : prefix is 5 bytes, starts with \x01 and followed by a 4-byte
