@@ -101,6 +101,15 @@ java_library(
     deps = COMMON_JAVA_DEPS,
 )
 
+java_library(
+    name = "aead",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/aead/*.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = COMMON_JAVA_DEPS,
+)
+
 # tests
 
 load(":GenTestRules.bzl", "GenTestRules")
@@ -114,6 +123,7 @@ java_library(
     deps = COMMON_JAVA_DEPS + [
         "//java:mac",
         "//java:keyset_handle_restricted",
+        "//java:aead",
         "//proto:java_ecdsa",
         "//proto:java_hmac",
         "@com_google_api_client//jar",
