@@ -34,6 +34,19 @@ COMMON_JAVA_DEPS = [
     "//proto:java_core_compile_imports",
 ]
 
+# public interfaces
+
+java_library(
+    name = "public_interfaces",
+    srcs = [
+        "src/main/java/com/google/cloud/crypto/tink/Aead.java",
+        "src/main/java/com/google/cloud/crypto/tink/Mac.java",
+        "src/main/java/com/google/cloud/crypto/tink/PublicKeySign.java",
+        "src/main/java/com/google/cloud/crypto/tink/PublicKeyVerify.java",
+    ],
+    javacopts = JAVACOPTS,
+)
+
 # mac
 
 java_library(
@@ -44,7 +57,7 @@ java_library(
     ]),
     javacopts = JAVACOPTS,
     deps = [
-        "//java:core",
+        "//java:public_interfaces",
     ],
 )
 
