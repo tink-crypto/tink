@@ -122,3 +122,19 @@ message Keyset {
   // Required.
   repeated Key key = 4;
 }
+
+// Represents a keyset that is encrypted with a key in a KMS.
+// The library assumes that the KMS key implements the Aead interface.
+message KmsEncryptedKeyset {
+  // Required.
+  google.protobuf.Any kms_key = 1;
+  // Required.
+  bytes key_material = 2;
+  // Optional.
+  // This protobuf doesn't contain any key material, and is used for
+  // documentation purpose only.
+
+  // TODO(thaidn): introduce a "KeysetInfo"-proto, that is a "safe" subset
+  // of Keyset-proto and is for logging/monitoring only.
+  Keyset keyset = 3;
+}

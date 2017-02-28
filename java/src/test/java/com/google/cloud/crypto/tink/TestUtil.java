@@ -25,6 +25,7 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.PrefixType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.StatusType;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.KeysetHandle;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
@@ -81,17 +82,7 @@ public class TestUtil {
    * @returns a keyset handle from a {@code keyset}.
    */
   public static KeysetHandle createKeysetHandle(final Keyset keyset) throws Exception {
-    return new KeysetHandle() {
-      @Override
-      public byte[] getSource() {
-        return new byte[0];
-      }
-
-      @Override
-      public Keyset getKeyset() {
-        return keyset;
-      }
-    };
+    return new KeysetHandle(keyset);
   }
 
   /**

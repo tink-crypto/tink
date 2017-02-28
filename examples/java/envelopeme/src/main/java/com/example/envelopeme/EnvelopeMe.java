@@ -1,0 +1,31 @@
+/*
+ * Copyright (c) 2017 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package com.example.envelopeme;
+
+import com.google.cloud.crypto.tink.CleartextKeysetHandleFactory;
+import com.google.cloud.crypto.tink.KeysetHandle;
+import com.google.cloud.crypto.tink.TinkProto.Keyset;
+
+/**
+ * Simple command-line tool that encrypts an input string using envelope encryption.
+ */
+public class EnvelopeMe {
+  public static void main(String[] args) throws Exception {
+    // TODO(thaidn): finish this app when envelope encryption is done.
+    System.out.println("Hello, world!");
+    KeysetHandle keysetHandle = CleartextKeysetHandleFactory.fromProto(
+        Keyset.newBuilder().build());
+  }
+}

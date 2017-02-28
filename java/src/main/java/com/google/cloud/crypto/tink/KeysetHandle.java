@@ -21,19 +21,29 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset;
 /**
  * KeysetHandle provides abstracted access to Keysets, to limit the exposure
  * of actual protocol buffers that hold sensitive key material.
- *
- * NOTE: this is an initial definition of this interface, which needs more work.
- *   It should probably be an abstract class which does not provide public access
- *   to the actual key material.
  */
-public interface KeysetHandle {
+public final class KeysetHandle {
   /**
-   * @returns source of the key material of this keyset (e.g. Keystore, Cloud KMS).
+   * The keyset data.
    */
-  byte[] getSource();
+  private final Keyset keyset;
+
+  /**
+   * This constructor is package-private. To get a new instance, users have to use one of
+   * the public factories, e.g., {@code CleartextKeysetHandle} or
+   * {@code KmsEncryptedKeysetHandle}).
+   */
+  KeysetHandle(final Keyset keyset) {
+    this.keyset = keyset;
+  }
 
   /**
    * @returns the actual keyset data.
    */
-  Keyset getKeyset();
+  public Keyset getKeyset() {
+    return keyset;
+  }
+
+  // TODO(thaidn): add a "safe" ToString(), which prints out the keyset but without actual
+  // key material, but maybe only names of key types and the key format proto.
 }

@@ -3,13 +3,24 @@ JAVACOPTS = [
     "-Xlint:deprecation",
 ]
 
-# core
+KEYSET_HANDLE_RESTRICTED_API_SRCS = [
+    # Storing keyset in cleartext usually leads to security incidents.
+    # To discourage users from doing that, the visibility of
+    # CleartextKeysetHandleFactory, which allows loading cleartext keyset,
+    # is restricted.
+    "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandleFactory.java",
+]
+
+# core, without restricted APIs
 
 java_library(
     name = "core",
-    srcs = glob([
-        "src/main/java/com/google/cloud/crypto/tink/*.java",
-    ]),
+    srcs = glob(
+        [
+            "src/main/java/com/google/cloud/crypto/tink/*.java",
+        ],
+        exclude = KEYSET_HANDLE_RESTRICTED_API_SRCS,
+    ),
     javacopts = JAVACOPTS,
     deps = [
         "//proto:java_core",
@@ -50,6 +61,33 @@ java_library(
     ],
 )
 
+# public library
+
+java_library(
+    name = "tink",
+    visibility = [
+        "//visibility:public",
+    ],
+    exports = [
+        "//java:core",
+        "//java:mac",
+        "//proto:java_core",
+        "//proto:java_hmac",
+    ],
+)
+
+# restricted API
+
+java_library(
+    name = "keyset_handle_restricted",
+    srcs = KEYSET_HANDLE_RESTRICTED_API_SRCS,
+    javacopts = JAVACOPTS,
+    visibility = [
+        "//examples/java/envelopeme:__pkg__",
+    ],
+    deps = COMMON_JAVA_DEPS,
+)
+
 # tests
 
 load(":GenTestRules.bzl", "GenTestRules")
@@ -62,6 +100,7 @@ java_library(
     ]),
     deps = COMMON_JAVA_DEPS + [
         "//java:mac",
+        "//java:keyset_handle_restricted",
         "//proto:java_ecdsa",
         "//proto:java_hmac",
         "@com_google_api_client//jar",

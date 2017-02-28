@@ -218,67 +218,53 @@ public class RegistryTest {
     Any key1 = registry.newKey(format1);
     Any key2 = registry.newKey(format1);
     Any key3 = registry.newKey(format2);
-    KeysetHandle keysetHandle = new KeysetHandle() {
-        public byte[] getSource() {
-          return "keyset source".getBytes();
-        }
-        public Keyset getKeyset() {
-          return Keyset.newBuilder()
-              .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key1)
-                  .setKeyId(1)
-                  .setStatus(StatusType.ENABLED)
-                  .setPrefixType(PrefixType.TINK)
-                  .build())
-              .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key2)
-                  .setKeyId(2)
-                  .setStatus(StatusType.ENABLED)
-                  .setPrefixType(PrefixType.TINK)
-                  .build())
-              .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key3)
-                  .setKeyId(3)
-                  .setStatus(StatusType.ENABLED)
-                  .setPrefixType(PrefixType.TINK)
-                  .build())
-              .setPrimaryKeyId(2)
-              .build();
-        }
-      };
+    KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key1)
+            .setKeyId(1)
+            .setStatus(StatusType.ENABLED)
+            .setPrefixType(PrefixType.TINK)
+            .build())
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key2)
+            .setKeyId(2)
+            .setStatus(StatusType.ENABLED)
+            .setPrefixType(PrefixType.TINK)
+            .build())
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key3)
+            .setKeyId(3)
+            .setStatus(StatusType.ENABLED)
+            .setPrefixType(PrefixType.TINK)
+            .build())
+        .setPrimaryKeyId(2)
+        .build());
     PrimitiveSet<Mac> macSet = registry.getPrimitives(keysetHandle);
     computedMac = new String(macSet.getPrimary().getPrimitive().computeMac(null));
     assertEquals(mac1TypeUrl, computedMac);
 
     // Try a keyset with some keys non-ENABLED.
-    keysetHandle = new KeysetHandle() {
-        public byte[] getSource() {
-          return "keyset source".getBytes();
-        }
-        public Keyset getKeyset() {
-          return Keyset.newBuilder()
-              .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key1)
-                  .setKeyId(1)
-                  .setStatus(StatusType.DESTROYED)
-                  .setPrefixType(PrefixType.TINK)
-                  .build())
-              .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key2)
-                  .setKeyId(2)
-                  .setStatus(StatusType.DISABLED)
-                  .setPrefixType(PrefixType.TINK)
-                  .build())
-              .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key3)
-                  .setKeyId(3)
-                  .setStatus(StatusType.ENABLED)
-                  .setPrefixType(PrefixType.TINK)
-                  .build())
-              .setPrimaryKeyId(3)
-              .build();
-        }
-      };
+    keysetHandle = new KeysetHandle(Keyset.newBuilder()
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key1)
+            .setKeyId(1)
+            .setStatus(StatusType.DESTROYED)
+            .setPrefixType(PrefixType.TINK)
+            .build())
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key2)
+            .setKeyId(2)
+            .setStatus(StatusType.DISABLED)
+            .setPrefixType(PrefixType.TINK)
+            .build())
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key3)
+            .setKeyId(3)
+            .setStatus(StatusType.ENABLED)
+            .setPrefixType(PrefixType.TINK)
+            .build())
+        .setPrimaryKeyId(3)
+        .build());
     macSet = registry.getPrimitives(keysetHandle);
     computedMac = new String(macSet.getPrimary().getPrimitive().computeMac(null));
     assertEquals(mac2TypeUrl, computedMac);
@@ -323,28 +309,21 @@ public class RegistryTest {
     KeyFormat format2 = KeyFormat.newBuilder().setKeyType(mac2TypeUrl).build();
     Any key1 = registry.newKey(format1);
     Any key2 = registry.newKey(format2);
-    KeysetHandle keysetHandle = new KeysetHandle() {
-        public byte[] getSource() {
-          return "keyset source".getBytes();
-        }
-        public Keyset getKeyset() {
-          return Keyset.newBuilder()
-              .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key1)
-                  .setKeyId(1)
-                  .setStatus(StatusType.ENABLED)
-                  .setPrefixType(PrefixType.TINK)
-                  .build())
-              .addKey(Keyset.Key.newBuilder()
-                  .setKeyData(key2)
-                  .setKeyId(2)
-                  .setStatus(StatusType.ENABLED)
-                  .setPrefixType(PrefixType.TINK)
-                  .build())
-              .setPrimaryKeyId(2)
-              .build();
-        }
-      };
+    KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key1)
+            .setKeyId(1)
+            .setStatus(StatusType.ENABLED)
+            .setPrefixType(PrefixType.TINK)
+            .build())
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key2)
+            .setKeyId(2)
+            .setStatus(StatusType.ENABLED)
+            .setPrefixType(PrefixType.TINK)
+            .build())
+        .setPrimaryKeyId(2)
+        .build());
     // Get a PrimitiveSet using registered key managers.
     PrimitiveSet<Mac> macSet = registry.getPrimitives(keysetHandle);
     List<PrimitiveSet<Mac>.Entry<Mac>> mac1List =
