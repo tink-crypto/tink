@@ -35,7 +35,7 @@ public final class KeysetHandle {
    * the public factories, e.g., {@code CleartextKeysetHandle} or
    * {@code KmsEncryptedKeysetHandle}).
    */
-  KeysetHandle(final Keyset keyset) {
+  KeysetHandle(Keyset keyset) {
     this.keyset = keyset;
   }
 

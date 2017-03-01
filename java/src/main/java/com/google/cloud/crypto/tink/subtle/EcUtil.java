@@ -36,7 +36,7 @@ import java.util.Arrays;
 /**
  * Utility functions for elliptic curve crypto, used in ECDSA and ECDH.
  */
-public class EcUtil {
+public final class EcUtil {
 
   public static ECParameterSpec getNistP256Params() {
     return getNistCurveSpec(

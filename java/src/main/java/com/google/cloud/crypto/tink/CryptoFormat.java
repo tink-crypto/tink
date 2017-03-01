@@ -23,7 +23,7 @@ import java.security.GeneralSecurityException;
 /**
  * Constants and convenience methods that deal with crypto format.
  */
-public class CryptoFormat {
+public final class CryptoFormat {
 
   /**
    * Prefix size of Tink and Legacy key types.

@@ -59,7 +59,7 @@ public final class KmsEncryptedKeysetHandleFactory {
    * @returns a new keyset handle from {@code encryptedKeyset}.
    * @throws GeneralSecurityException
    */
-  public static final KeysetHandle fromProto(final KmsEncryptedKeyset encryptedKeyset)
+  public static final KeysetHandle fromProto(KmsEncryptedKeyset encryptedKeyset)
       throws GeneralSecurityException {
     if (encryptedKeyset.getKeyMaterial() != null || !encryptedKeyset.hasKmsKey()) {
       throw new GeneralSecurityException("invalid keyset");

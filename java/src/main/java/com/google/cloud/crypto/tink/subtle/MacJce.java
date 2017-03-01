@@ -22,7 +22,7 @@ import java.security.GeneralSecurityException;
 /**
  * Mac implementations in JCE.
  */
-public class MacJce implements Mac {
+public final class MacJce implements Mac {
   private javax.crypto.Mac mac;
   private final int digestSize;
 

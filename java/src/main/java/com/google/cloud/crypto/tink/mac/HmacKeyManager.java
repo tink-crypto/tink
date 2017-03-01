@@ -33,7 +33,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
 
-class HmacKeyManager implements KeyManager<Mac> {
+final class HmacKeyManager implements KeyManager<Mac> {
   /**
    * Type url that this manager does support.
    */

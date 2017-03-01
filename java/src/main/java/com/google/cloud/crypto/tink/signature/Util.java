@@ -23,7 +23,7 @@ import com.google.cloud.crypto.tink.subtle.EcUtil;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.ECParameterSpec;
 
-class Util {
+final class Util {
   /**
    * Returns the Ecdsa algorithm name corresponding to a hash type.
    *

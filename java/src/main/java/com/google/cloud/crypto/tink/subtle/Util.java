@@ -19,12 +19,12 @@ package com.google.cloud.crypto.tink.subtle;
 /**
  * Helper methods.
  */
-public class Util {
+public final class Util {
   /**
    * Best effort fix-timing array comparison.
    * @returns true if two arrays are equal.
    */
-  public static final boolean arrayEquals(byte[] x, byte[] y) {
+  public static final boolean arrayEquals(final byte[] x, final byte[] y) {
     if (x == null || y == null) {
       return false;
     }

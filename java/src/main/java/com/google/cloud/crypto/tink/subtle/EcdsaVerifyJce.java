@@ -29,7 +29,7 @@ public final class EcdsaVerifyJce implements PublicKeyVerify {
   private final ECPublicKey publicKey;
   private final String signatureAlgorithm;
 
-  public EcdsaVerifyJce(ECPublicKey pubKey, String signatureAlgorithm)
+  public EcdsaVerifyJce(final ECPublicKey pubKey, String signatureAlgorithm)
       throws GeneralSecurityException {
         EcUtil.checkPublicKey(pubKey);
         this.publicKey = pubKey;
@@ -37,7 +37,8 @@ public final class EcdsaVerifyJce implements PublicKeyVerify {
       }
 
   @Override
-  public boolean verify(byte[] signature, byte[] data) throws GeneralSecurityException {
+  public boolean verify(final byte[] signature, final byte[] data)
+      throws GeneralSecurityException {
     Signature verifier = Signature.getInstance(signatureAlgorithm);
     verifier.initVerify(publicKey);
     verifier.update(data);

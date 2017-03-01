@@ -63,7 +63,7 @@ public final class Registry {
    * there already exists a key manager for {@code typeUrl}.
    */
   @SuppressWarnings("unchecked")
-  public <P> boolean registerKeyManager(String typeUrl, KeyManager<P> manager)
+  public <P> boolean registerKeyManager(String typeUrl, final KeyManager<P> manager)
       throws GeneralSecurityException {
     if (manager == null) {
       throw new NullPointerException("Key manager must be non-null.");
@@ -126,7 +126,7 @@ public final class Registry {
    *
    * @returns a PrimitiveSet with all instantiated primitives.
    */
-  public <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle)
+  public <P> PrimitiveSet<P> getPrimitives(final KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     return getPrimitives(keysetHandle, null /* customManager */);
   }
@@ -144,8 +144,8 @@ public final class Registry {
    *
    * @returns a PrimitiveSet with all instantiated primitives.
    */
-    public <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle, KeyManager<P> customManager)
-        throws GeneralSecurityException {
+    public <P> PrimitiveSet<P> getPrimitives(final KeysetHandle keysetHandle,
+        final KeyManager<P> customManager) throws GeneralSecurityException {
     PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
     for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
       if (key.getStatus() == KeyStatusType.ENABLED) {

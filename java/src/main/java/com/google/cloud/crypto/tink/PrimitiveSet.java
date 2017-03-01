@@ -42,7 +42,7 @@ import java.security.GeneralSecurityException;
  *
  * PrimitiveSet is a public class to allow its use in implementations of custom primitives.
  */
-public class PrimitiveSet<P> {
+public final class PrimitiveSet<P> {
   /**
    * A single entry in the set. In addition to the actual primitive it holds also
    * some extra information about the primitive.
@@ -56,7 +56,7 @@ public class PrimitiveSet<P> {
     // The status of the key represented by the primitive.
     private final KeyStatusType status;
 
-    public Entry(P primitive, byte[] identifier, KeyStatusType status) {
+    public Entry(P primitive, final byte[] identifier, KeyStatusType status) {
       this.primitive = primitive;
       this.identifier = identifier;
       this.status = status;
@@ -89,7 +89,7 @@ public class PrimitiveSet<P> {
   /**
    * @returns the entries with primitive identifed by {@code identifier}.
    */
-  public List<Entry<P>> getPrimitive(byte[] identifier) {
+  public List<Entry<P>> getPrimitive(final byte[] identifier) {
     List<Entry<P>> found = primitives.get(new String(identifier, StandardCharsets.UTF_8));
     return found != null ? found : Collections.<Entry<P>>emptyList();
   }
@@ -120,7 +120,7 @@ public class PrimitiveSet<P> {
   /**
    * @returns sets given Entry {@code primary} as the primary one.
    */
-  protected void setPrimary(Entry<P> primary) {
+  protected void setPrimary(final Entry<P> primary) {
     this.primary = primary;
   }
 
@@ -128,7 +128,7 @@ public class PrimitiveSet<P> {
     * Creates an entry in the primitive table.
     * @returns the added entry
     */
-  protected Entry<P> addPrimitive(P primitive, Keyset.Key key) throws GeneralSecurityException {
+  protected Entry<P> addPrimitive(final P primitive, Keyset.Key key) throws GeneralSecurityException {
     Entry<P> entry = new Entry<P>(primitive, CryptoFormat.getOutputPrefix(key), key.getStatus());
     List<Entry<P>> list = new ArrayList<Entry<P>>();
     list.add(entry);

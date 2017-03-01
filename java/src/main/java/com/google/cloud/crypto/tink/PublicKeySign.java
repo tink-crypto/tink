@@ -29,5 +29,5 @@ public interface PublicKeySign {
    *
    * @returns the signature of {$code data}.
    */
-  byte[] sign(byte[] data) throws GeneralSecurityException;
+  byte[] sign(final byte[] data) throws GeneralSecurityException;
 }

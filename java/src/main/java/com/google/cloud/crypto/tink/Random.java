@@ -21,7 +21,7 @@ import java.security.SecureRandom;
 /**
  * A simple wrapper of SecureRandom.
  */
-public class Random {
+public final class Random {
   private static final SecureRandom secureRandom = new SecureRandom();
 
   /**

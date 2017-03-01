@@ -32,7 +32,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 
-class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
+final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   final static String ECDSA_PUBLIC_KEY_TYPE =
       "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey";
   /**

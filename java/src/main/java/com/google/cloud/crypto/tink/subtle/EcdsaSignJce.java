@@ -29,13 +29,13 @@ public final class EcdsaSignJce implements PublicKeySign {
   private final ECPrivateKey privateKey;
   private final String signatureAlgorithm;
 
-  public EcdsaSignJce(ECPrivateKey priv, String signatureAlgorithm) {
+  public EcdsaSignJce(final ECPrivateKey priv, String signatureAlgorithm) {
     this.privateKey = priv;
     this.signatureAlgorithm = signatureAlgorithm;
   }
 
   @Override
-  public byte[] sign(byte[] data) throws GeneralSecurityException {
+  public byte[] sign(final byte[] data) throws GeneralSecurityException {
     Signature signer = Signature.getInstance(signatureAlgorithm);
     signer.initSign(privateKey);
     signer.update(data);

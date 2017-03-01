@@ -29,5 +29,5 @@ public interface PublicKeyVerify {
    *
    * @returns true iff {@code signature} is a valid signature for {@code data}.
    */
-  boolean verify(byte[] signature, byte[] data) throws GeneralSecurityException;
+  boolean verify(final byte[] signature, final byte[] data) throws GeneralSecurityException;
 }

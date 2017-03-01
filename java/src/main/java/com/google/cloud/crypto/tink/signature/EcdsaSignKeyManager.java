@@ -38,7 +38,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 
-class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
+final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
   /**
    * Type url that this manager supports
    */

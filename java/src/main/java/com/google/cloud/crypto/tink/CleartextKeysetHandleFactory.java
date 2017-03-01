@@ -59,7 +59,7 @@ public final class CleartextKeysetHandleFactory {
    * @returns a new keyset handle from {@code encryptedKeySet}.
    * @throws GeneralSecurityException
    */
-  public static final KeysetHandle fromProto(final Keyset keyset)
+  public static final KeysetHandle fromProto(Keyset keyset)
       throws GeneralSecurityException {
     return new KeysetHandle(keyset);
   }

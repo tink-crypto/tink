@@ -33,7 +33,7 @@ public interface Aead {
    *
    * @return resulting ciphertext.
    */
-  byte[] encrypt(byte[] plaintext, byte[] aad) throws GeneralSecurityException;
+  byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException;
 
   /**
    * Decrypts {@code ciphertext} with {@code aad} as additional authenticated data.
@@ -42,7 +42,7 @@ public interface Aead {
    *
    * @return resulting plaintext.
    */
-  byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException;
+  byte[] decrypt(final byte[] ciphertext, final byte[] aad) throws GeneralSecurityException;
 
   /**
    * Encrypts {@code plaintext} with {@code aad} as additional authenticated data.
@@ -51,7 +51,8 @@ public interface Aead {
    *
    * @return resulting ciphertext
    */
-  Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) throws GeneralSecurityException;
+  Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad)
+      throws GeneralSecurityException;
 
   /**
    * Decrypts {@code ciphertext} with {@code aad} as additional authenticated data.
@@ -60,5 +61,6 @@ public interface Aead {
    *
    * @return resulting plaintext
    */
-  Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException;
+  Future<byte[]> asyncDecrypt(final  byte[] ciphertext, final  byte[] aad)
+      throws GeneralSecurityException;
 }
