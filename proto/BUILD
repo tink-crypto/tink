@@ -130,3 +130,42 @@ java_proto_library(
     verbose = 0,
     with_grpc = False,
 )
+
+# googlecloudkms
+
+filegroup(
+    name = "googlecloudkms",
+    srcs = [
+        "googlecloudkms.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "cc_googlecloudkms",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    protos = [
+        ":googlecloudkms",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+java_proto_library(
+    name = "java_googlecloudkms",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    protos = [
+        ":googlecloudkms",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)

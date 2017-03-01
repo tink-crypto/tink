@@ -18,24 +18,25 @@ syntax = "proto3";
 
 package google.cloud.crypto.tink;
 
-import "proto/common.proto";
-
 option java_package = "com.google.cloud.crypto.tink";
-option java_outer_classname = "HmacProto";
+option java_outer_classname = "GoogleCloudKmsProto";
 
-message HmacParams {
-  HashType hash = 1;    // HashType is an enum.
-  int32 tag_size = 2;
+message GoogleCloudKmsAeadParams {
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.HmacKey
-message HmacKey {
+// key_type: type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey
+message GoogleCloudKmsAeadKey {
   int32 version = 1;
-  HmacParams params = 2;
-  bytes key = 3;
+  GoogleCloudKmsAeadParams params = 2;
+  // Required.
+  // The location of a CryptoKey in Google Cloud KMS.
+  // Valid values have this format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
+  // See https://cloud.google.com/kms/docs/object-hierarchy.
+  // Note that to enable key rotation, this value should point to a CryptoKey,
+  // not a CryptoKeyVersion.
+  string kms_key_uri = 3;
 }
 
-message HmacKeyFormat {
-  HmacParams params = 1;
-  int32 key_size = 2;
+message GoogleCloudKmsAeadKeyFormat {
+  GoogleCloudKmsAeadParams params = 1;
 }
