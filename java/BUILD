@@ -56,12 +56,26 @@ java_library(
 # aead
 
 java_library(
+    name = "aead_subtle",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/subtle/AesGcmJce.java",
+        "src/main/java/com/google/cloud/crypto/tink/Random.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java:public_interfaces",
+    ],
+)
+
+java_library(
     name = "aead",
     srcs = glob([
         "src/main/java/com/google/cloud/crypto/tink/aead/*.java",
     ]),
     javacopts = JAVACOPTS,
-    deps = COMMON_JAVA_DEPS,
+    deps = COMMON_JAVA_DEPS + [
+        "//java:aead_subtle",
+    ],
 )
 
 # signature
@@ -126,9 +140,17 @@ java_library(
         "//visibility:public",
     ],
     exports = [
+        "//java:aead",
+        "//java:aead_subtle",
         "//java:core",
         "//java:mac",
+        "//java:mac_subtle",
+        "//java:signature",
+        "//java:signature_subtle",
         "//proto:java_core",
+        "//proto:java_core_compile_imports",
+        "//proto:java_ecdsa",
+        "//proto:java_googlecloudkms",
         "//proto:java_hmac",
     ],
 )
@@ -166,15 +188,9 @@ java_library(
         "src/test/java/**/*.java",
     ]),
     deps = COMMON_JAVA_DEPS + [
-        "//java:aead",
-        "//java:mac",
         "//java:key_management_restricted",
         "//java:keyset_handle_restricted",
-        "//java:signature",
-        "//java:signature_subtle",
-        "//proto:java_ecdsa",
-        "//proto:java_googlecloudkms",
-        "//proto:java_hmac",
+        "//java:tink",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
         "@com_fasterxml_jackson_core//jar",
