@@ -19,9 +19,9 @@ package com.google.cloud.crypto.tink;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.PrefixType;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.StatusType;
+import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 
 import org.junit.Test;
 
@@ -32,17 +32,18 @@ public class CryptoFormatTest {
   /**
    * Tests that prefix is generated correctly.
    */
-  public void testPrefix(PrefixType type, int... keyIds) throws Exception {
+  public void testPrefix(OutputPrefixType type, int... keyIds) throws Exception {
+    String keyValue = "01234567890123456";
     for (int keyId : keyIds) {
       Key key = TestUtil.createKey(
-          TestUtil.createHmacKey(),
+          TestUtil.createHmacKey(keyValue),
           keyId,
-          StatusType.ENABLED,
+          KeyStatusType.ENABLED,
           type);
-      if (type == PrefixType.RAW) {
-        assertEquals(CryptoFormat.RAW_PREFIX_SIZE, CryptoFormat.getPrefix(key).length);
+      if (type == OutputPrefixType.RAW) {
+        assertEquals(CryptoFormat.RAW_PREFIX_SIZE, CryptoFormat.getOutputPrefix(key).length);
       } else {
-        assertEquals(CryptoFormat.NON_RAW_PREFIX_SIZE, CryptoFormat.getPrefix(key).length);
+        assertEquals(CryptoFormat.NON_RAW_PREFIX_SIZE, CryptoFormat.getOutputPrefix(key).length);
       }
     }
   }
@@ -52,8 +53,8 @@ public class CryptoFormatTest {
    */
   @Test
   public void testPrefixWithWeirdKeyIds() throws Exception {
-    testPrefix(PrefixType.RAW, 0, -1, 2147483647 /* INT_MAX */, -2147483648 /* INT_MIN */);
-    testPrefix(PrefixType.TINK, 0, -1, 2147483647, -2147483648);
-    testPrefix(PrefixType.LEGACY, 0, -1, 2147483647, -2147483648);
+    testPrefix(OutputPrefixType.RAW, 0, -1, 2147483647 /* INT_MAX */, -2147483648 /* INT_MIN */);
+    testPrefix(OutputPrefixType.TINK, 0, -1, 2147483647, -2147483648);
+    testPrefix(OutputPrefixType.LEGACY, 0, -1, 2147483647, -2147483648);
   }
 }

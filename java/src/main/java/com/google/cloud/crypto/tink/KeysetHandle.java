@@ -17,6 +17,8 @@
 package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
+import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
+import com.google.protobuf.TextFormat;
 
 /**
  * KeysetHandle provides abstracted access to Keysets, to limit the exposure
@@ -44,6 +46,11 @@ public final class KeysetHandle {
     return keyset;
   }
 
-  // TODO(thaidn): add a "safe" ToString(), which prints out the keyset but without actual
-  // key material, but maybe only names of key types and the key format proto.
+  /**
+   * Prints out the keyset but without actual key material, but only names of key types
+   * and the key format proto.
+   */
+  public String toString() {
+    return TextFormat.printToUnicodeString(Util.getKeysetInfo(keyset));
+  }
 }

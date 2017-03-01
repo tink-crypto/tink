@@ -22,9 +22,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.PrefixType;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.StatusType;
+import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -222,20 +222,20 @@ public class RegistryTest {
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
             .setKeyId(1)
-            .setStatus(StatusType.ENABLED)
-            .setPrefixType(PrefixType.TINK)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
             .build())
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key2)
             .setKeyId(2)
-            .setStatus(StatusType.ENABLED)
-            .setPrefixType(PrefixType.TINK)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
             .build())
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key3)
             .setKeyId(3)
-            .setStatus(StatusType.ENABLED)
-            .setPrefixType(PrefixType.TINK)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
             .build())
         .setPrimaryKeyId(2)
         .build());
@@ -248,20 +248,20 @@ public class RegistryTest {
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
             .setKeyId(1)
-            .setStatus(StatusType.DESTROYED)
-            .setPrefixType(PrefixType.TINK)
+            .setStatus(KeyStatusType.DESTROYED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
             .build())
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key2)
             .setKeyId(2)
-            .setStatus(StatusType.DISABLED)
-            .setPrefixType(PrefixType.TINK)
+            .setStatus(KeyStatusType.DISABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
             .build())
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key3)
             .setKeyId(3)
-            .setStatus(StatusType.ENABLED)
-            .setPrefixType(PrefixType.TINK)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
             .build())
         .setPrimaryKeyId(3)
         .build());
@@ -313,14 +313,14 @@ public class RegistryTest {
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
             .setKeyId(1)
-            .setStatus(StatusType.ENABLED)
-            .setPrefixType(PrefixType.TINK)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
             .build())
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key2)
             .setKeyId(2)
-            .setStatus(StatusType.ENABLED)
-            .setPrefixType(PrefixType.TINK)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
             .build())
         .setPrimaryKeyId(2)
         .build());

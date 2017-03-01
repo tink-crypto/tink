@@ -41,6 +41,29 @@ message KeyFormat {
   google.protobuf.Any format = 2;  // Contains specific *KeyFormat proto.
 }
 
+enum KeyStatusType {
+  UNKNOWN_STATUS = 0;
+  ENABLED = 1;    // Can be used for crypto operations.
+  DISABLED = 2;   // Cannot be used, but exists and can become ENABLED.
+  DESTROYED = 3;  // Key data does not exist in this Keyset any more.
+}
+
+// Tink produces and accepts ciphertexts or signatures that consist
+// of a prefix and a payload. The payload and its format is determined
+// entirely by the primitive, but the prefix has to be one of the following
+// 3 types:
+//   - Legacy: prefix is 5 bytes, starts with \x00 and followed by a 4-byte
+//             key id.
+//   - Tink  : prefix is 5 bytes, starts with \x01 and followed by a 4-byte
+//             key id.
+//   - Raw   : prefix is 0 byte, i.e., empty.
+enum OutputPrefixType {
+  UNKNOWN_PREFIX = 0;
+  TINK = 1;
+  LEGACY = 2;
+  RAW = 3;
+}
+
 // Each *Key proto by convention contains a version field, which
 // identifies the version of implementation that can work with this key.
 //   message SomeInstantiationKey {
@@ -72,34 +95,13 @@ message Keyset {
     // By convention, each key proto contains a version field.
     google.protobuf.Any key_data = 1;
 
-    enum StatusType {
-      UNKNOWN_STATUS = 0;
-      ENABLED = 1;    // Can be used for crypto operations.
-      DISABLED = 2;   // Cannot be used, but exists and can become ENABLED.
-      DESTROYED = 3;  // Key data does not exist in this Keyset any more.
-    }
-    StatusType status = 2;
+    KeyStatusType status = 2;
 
     // Identifies a key within a keyset, is a part of metadata
     // of a ciphertext/signature.
     int32 key_id = 3;
 
-    // Tink produces and accepts ciphertexts or signatures that consist
-    // of a prefix and a payload. The payload and its format is determined
-    // entirely by the primitive, but the prefix has to be one of the following
-    // 3 types:
-    //   - Legacy: prefix is 5 bytes, starts with \x00 and followed by a 4-byte
-    //             key id.
-    //   - Tink  : prefix is 5 bytes, starts with \x01 and followed by a 4-byte
-    //             key id.
-    //   - Raw   : prefix is 0 byte, i.e., empty.
-    enum PrefixType {
-      UNKNOWN_PREFIX = 0;
-      TINK = 1;
-      LEGACY = 2;
-      RAW = 3;
-    }
-    PrefixType prefix_type = 4;
+    OutputPrefixType output_prefix_type = 4;
 
     // Note: info for key management is still work-in-progress.
     // TODO(przydatek): update this proto once key management is stable.
@@ -112,15 +114,50 @@ message Keyset {
   // Provides the parameters necessary to generate a new key.
   // TODO(przydatek): consider keeping the format outside of a keyset.
   // Required.
-  KeyFormat key_format = 2;
+  KeyFormat key_format = 1;
 
   // Identifies key used to generate new crypto data (encrypt, sign).
   // Required.
-  int32 primary_key_id = 3;
+  int32 primary_key_id = 2;
 
   // Actual keys in the Keyset.
   // Required.
-  repeated Key key = 4;
+  repeated Key key = 3;
+}
+
+// Represents a "safe" Keyset that doesn't contain any actual key material, thus
+// can be used for logging or monitoring. Most fields are copied from Keyset.
+message KeysetInfo {
+  message KeyInfo {
+    // the type url of this key,
+    // e.g., type.googleapis.com/google.cloud.crypto.tink.HmacKey.
+    string type_url = 1;
+
+    // See Keyset.Key.status.
+    KeyStatusType status = 2;
+
+    // See Keyset.Key.key_id.
+    int32 key_id = 3;
+
+    // See Keyset.Key.output_prefix_type.
+    OutputPrefixType output_prefix_type = 4;
+
+    // See Keyset.Key.generated_at.
+    google.protobuf.Timestamp generated_at = 101;
+
+    // See Keyset.Key.valid_until.
+    google.protobuf.Timestamp valid_until = 102;
+  }
+
+  // See Keyset.key_format.
+  KeyFormat key_format = 1;
+
+  // See Keyset.primary_key_id.
+  int32 primary_key_id = 2;
+
+  // KeyInfos in the KeysetInfo.
+  // Each KeyInfo is corresponding to a Key in the corresponding Keyset.
+  repeated KeyInfo key_info = 3;
 }
 
 // Represents a keyset that is encrypted with a key in a KMS.
@@ -131,10 +168,5 @@ message KmsEncryptedKeyset {
   // Required.
   bytes key_material = 2;
   // Optional.
-  // This protobuf doesn't contain any key material, and is used for
-  // documentation purpose only.
-
-  // TODO(thaidn): introduce a "KeysetInfo"-proto, that is a "safe" subset
-  // of Keyset-proto and is for logging/monitoring only.
-  Keyset keyset = 3;
+  KeysetInfo keyset_info = 3;
 }

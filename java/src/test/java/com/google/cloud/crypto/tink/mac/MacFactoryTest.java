@@ -23,9 +23,9 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Mac;
+import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.PrefixType;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.StatusType;
+import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.TestUtil;
 
 import java.util.Arrays;
@@ -44,49 +44,51 @@ public class MacFactoryTest {
 
   @Test
   public void testMultipleKeys() throws Exception {
+    String keyValue = "01234567890123456";
     Key primary = TestUtil.createKey(
-        TestUtil.createHmacKey(),
+        TestUtil.createHmacKey(keyValue),
         42,
-        StatusType.ENABLED,
-        PrefixType.TINK);
+        KeyStatusType.ENABLED,
+        OutputPrefixType.TINK);
     Key raw = TestUtil.createKey(
-        TestUtil.createHmacKey(),
+        TestUtil.createHmacKey(keyValue),
         43,
-        StatusType.ENABLED,
-        PrefixType.RAW);
+        KeyStatusType.ENABLED,
+        OutputPrefixType.RAW);
     Key legacy = TestUtil.createKey(
-        TestUtil.createHmacKey(),
+        TestUtil.createHmacKey(keyValue),
         44,
-        StatusType.ENABLED,
-        PrefixType.LEGACY);
+        KeyStatusType.ENABLED,
+        OutputPrefixType.LEGACY);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(primary, raw, legacy));
     Mac mac = MacFactory.getPrimitive(keysetHandle);
     byte[] plaintext = "plaintext".getBytes("UTF-8");
     byte[] tag = mac.computeMac(plaintext);
-    byte[] prefix = Arrays.copyOfRange(tag, 0, 5);
-    assertArrayEquals(prefix, CryptoFormat.getPrefix(primary));
+    byte[] prefix = Arrays.copyOfRange(tag, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
+    assertArrayEquals(prefix, CryptoFormat.getOutputPrefix(primary));
     assertEquals(prefix.length + 16 /* TAG */, tag.length);
     assertTrue(mac.verifyMac(tag, plaintext));
   }
 
   @Test
   public void testRawKeyAsPrimary() throws Exception {
+    String keyValue = "01234567890123456";
     Key primary = TestUtil.createKey(
-        TestUtil.createHmacKey(),
+        TestUtil.createHmacKey(keyValue),
         42,
-        StatusType.ENABLED,
-        PrefixType.RAW);
+        KeyStatusType.ENABLED,
+        OutputPrefixType.RAW);
     Key raw = TestUtil.createKey(
-        TestUtil.createHmacKey(),
+        TestUtil.createHmacKey(keyValue),
         43,
-        StatusType.ENABLED,
-        PrefixType.RAW);
+        KeyStatusType.ENABLED,
+        OutputPrefixType.RAW);
     Key legacy = TestUtil.createKey(
-        TestUtil.createHmacKey(),
+        TestUtil.createHmacKey(keyValue),
         44,
-        StatusType.ENABLED,
-        PrefixType.LEGACY);
+        KeyStatusType.ENABLED,
+        OutputPrefixType.LEGACY);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(primary, raw, legacy));
     Mac mac = MacFactory.getPrimitive(keysetHandle);
@@ -99,11 +101,12 @@ public class MacFactoryTest {
 
   @Test
   public void testSmallPlaintextWithRawKey() throws Exception {
+    String keyValue = "01234567890123456";
     Key primary = TestUtil.createKey(
-        TestUtil.createHmacKey(),
+        TestUtil.createHmacKey(keyValue),
         42,
-        StatusType.ENABLED,
-        PrefixType.RAW);
+        KeyStatusType.ENABLED,
+        OutputPrefixType.RAW);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(primary));
     Mac mac = MacFactory.getPrimitive(keysetHandle);

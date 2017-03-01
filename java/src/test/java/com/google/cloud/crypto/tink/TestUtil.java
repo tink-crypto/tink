@@ -20,10 +20,10 @@ import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
+import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.PrefixType;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.StatusType;
+import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.KeysetHandle;
 
@@ -53,20 +53,20 @@ public class TestUtil {
   /**
    * @returns a key with some specific properties.
    */
-  public static Key createKey(Message proto, int keyId, StatusType status, PrefixType prefixType)
+  public static Key createKey(Message proto, int keyId, KeyStatusType status, OutputPrefixType prefixType)
       throws Exception {
     return Key.newBuilder()
         .setKeyData(Any.pack(proto))
         .setStatus(status)
         .setKeyId(keyId)
-        .setPrefixType(prefixType)
+        .setOutputPrefixType(prefixType)
         .build();
   }
 
   /**
    * @returns a HmacKey key.
    */
-  public static HmacKey createHmacKey() throws Exception {
+  public static HmacKey createHmacKey(String keyValue) throws Exception {
     HmacParams params = HmacParams.newBuilder()
         .setHash(HashType.SHA256)
         .setTagSize(16)
@@ -74,7 +74,7 @@ public class TestUtil {
 
     return HmacKey.newBuilder()
         .setParams(params)
-        .setKey(ByteString.copyFromUtf8("12345678901234561234567890123456"))
+        .setKey(ByteString.copyFromUtf8(keyValue))
         .build();
   }
 

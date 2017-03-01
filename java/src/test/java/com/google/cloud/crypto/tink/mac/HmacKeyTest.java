@@ -24,8 +24,8 @@ import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.TestUtil;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.PrefixType;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.StatusType;
+import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 
 import org.junit.Before;
@@ -43,13 +43,14 @@ public class HmacKeyTest {
 
   @Test
   public void testBasic() throws Exception {
+    String keyValue = "01234567890123456";
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createHmacKey(),
+                TestUtil.createHmacKey(keyValue),
                 42,
-                StatusType.ENABLED,
-                PrefixType.TINK)));
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK)));
     Mac mac = MacFactory.getPrimitive(keysetHandle);
     byte[] plaintext = "plaintext".getBytes("UTF-8");
     byte[] tag = mac.computeMac(plaintext);

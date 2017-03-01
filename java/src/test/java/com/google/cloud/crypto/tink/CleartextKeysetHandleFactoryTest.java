@@ -20,10 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.PrefixType;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key.StatusType;
+import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
@@ -34,11 +34,12 @@ import org.junit.Test;
 public class CleartextKeysetHandleFactoryTest {
   @Test
   public void testBasic() throws Exception {
+    String keyValue = "01234567890123456";
     Keyset keyset1 =  TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKey(),
+        TestUtil.createHmacKey(keyValue),
         42,
-        StatusType.ENABLED,
-        PrefixType.TINK));
+        KeyStatusType.ENABLED,
+        OutputPrefixType.TINK));
     KeysetHandle handle1 = CleartextKeysetHandleFactory.fromBinaryFormat(keyset1.toByteArray());
     assertEquals(keyset1, handle1.getKeyset());
 
@@ -49,11 +50,12 @@ public class CleartextKeysetHandleFactoryTest {
 
   @Test
   public void testInvalidKeyset() throws Exception {
+    String keyValue = "01234567890123456";
     Keyset keyset =  TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKey(),
+        TestUtil.createHmacKey(keyValue),
         42,
-        StatusType.ENABLED,
-        PrefixType.TINK));
+        KeyStatusType.ENABLED,
+        OutputPrefixType.TINK));
     byte[] proto = keyset.toByteArray();
     proto[0] = (byte) ~proto[0];
     try {

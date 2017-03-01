@@ -55,8 +55,8 @@ public class CryptoFormat {
    * @throws GeneralSecurityException if the prefix type of {@code key} is unknown.
    * @return a prefix.
    */
-  public static byte[] getPrefix(Key key) throws GeneralSecurityException {
-    switch (key.getPrefixType()) {
+  public static byte[] getOutputPrefix(Key key) throws GeneralSecurityException {
+    switch (key.getOutputPrefixType()) {
       case LEGACY:
         return ByteBuffer.allocate(LEGACY_PREFIX_SIZE)
             .put(LEGACY_START_BYTE)

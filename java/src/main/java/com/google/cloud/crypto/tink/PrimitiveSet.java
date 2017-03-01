@@ -16,8 +16,8 @@
 
 package com.google.cloud.crypto.tink;
 
+import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,9 +54,9 @@ public class PrimitiveSet<P> {
     // It is the ciphertext prefix of the correponding key.
     private final byte[] identifier;
     // The status of the key represented by the primitive.
-    private final Key.StatusType status;
+    private final KeyStatusType status;
 
-    public Entry(P primitive, byte[] identifier, Key.StatusType status) {
+    public Entry(P primitive, byte[] identifier, KeyStatusType status) {
       this.primitive = primitive;
       this.identifier = identifier;
       this.status = status;
@@ -64,7 +64,7 @@ public class PrimitiveSet<P> {
     public P getPrimitive() {
       return this.primitive;
     }
-    public Key.StatusType getStatus() {
+    public KeyStatusType getStatus() {
       return status;
     }
     public final byte[] getIdentifier() {
@@ -114,7 +114,7 @@ public class PrimitiveSet<P> {
    */
   protected List<Entry<P>> getPrimitive(Keyset.Key key)
       throws GeneralSecurityException {
-    return getPrimitive(CryptoFormat.getPrefix(key));
+    return getPrimitive(CryptoFormat.getOutputPrefix(key));
   }
 
   /**
@@ -129,7 +129,7 @@ public class PrimitiveSet<P> {
     * @returns the added entry
     */
   protected Entry<P> addPrimitive(P primitive, Keyset.Key key) throws GeneralSecurityException {
-    Entry<P> entry = new Entry<P>(primitive, CryptoFormat.getPrefix(key), key.getStatus());
+    Entry<P> entry = new Entry<P>(primitive, CryptoFormat.getOutputPrefix(key), key.getStatus());
     List<Entry<P>> list = new ArrayList<Entry<P>>();
     list.add(entry);
     // Cannot use [] as keys in hash map, convert to string.

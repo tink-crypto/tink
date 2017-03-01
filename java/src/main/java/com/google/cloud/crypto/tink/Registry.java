@@ -17,6 +17,7 @@
 package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.protobuf.Any;
@@ -147,7 +148,7 @@ public final class Registry {
         throws GeneralSecurityException {
     PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
     for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
-      if (key.getStatus() == Key.StatusType.ENABLED) {
+      if (key.getStatus() == KeyStatusType.ENABLED) {
         P primitive;
         if (customManager != null && customManager.doesSupport(key.getKeyData().getTypeUrl())) {
           primitive = customManager.getPrimitive(key.getKeyData());
