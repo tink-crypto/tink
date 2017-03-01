@@ -23,19 +23,10 @@ import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaKeyFormat;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaParams;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
-import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.Signature;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
 import org.junit.Test;
 
 /**

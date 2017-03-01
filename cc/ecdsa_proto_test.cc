@@ -27,7 +27,6 @@ class EcdsaProtoTest : public ::testing::Test {
 
   virtual void TearDown() {
   }
-
 };
 
 TEST_F(EcdsaProtoTest, testEcdsaPublicKey) {
@@ -35,7 +34,6 @@ TEST_F(EcdsaProtoTest, testEcdsaPublicKey) {
   pubKey.set_version(1);
   EXPECT_EQ(1, pubKey.version());
 }
-
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);

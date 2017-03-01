@@ -20,7 +20,6 @@ import static junit.framework.Assert.assertTrue;
 
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
-import com.google.cloud.crypto.tink.EcdsaProto.EcdsaKeyFormat;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaParams;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.PublicKeyVerify;

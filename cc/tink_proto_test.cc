@@ -27,7 +27,6 @@ class TinkProtoTest : public ::testing::Test {
 
   virtual void TearDown() {
   }
-
 };
 
 TEST_F(TinkProtoTest, testKeysetBasic) {
@@ -35,7 +34,6 @@ TEST_F(TinkProtoTest, testKeysetBasic) {
   keyset.set_primary_key_id(1);
   EXPECT_EQ(1, keyset.primary_key_id());
 }
-
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);

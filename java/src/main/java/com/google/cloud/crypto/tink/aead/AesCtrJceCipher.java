@@ -17,9 +17,7 @@
 package com.google.cloud.crypto.tink.aead;
 
 import com.google.cloud.crypto.tink.Random;
-import java.lang.System;
 import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;

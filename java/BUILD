@@ -139,7 +139,7 @@ java_library(
 
 # tests
 
-load(":GenTestRules.bzl", "GenTestRules")
+load("//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
 
 java_library(
     name = "generator_test",
@@ -162,8 +162,7 @@ java_library(
     ],
 )
 
-GenTestRules(
-    name = "GeneratedTestRules",
+gen_java_test_rules(
     small_tests = glob([
         "src/test/java/**/*ProtoTest.java",
     ]),

@@ -19,11 +19,6 @@ package com.google.cloud.crypto.tink.subtle;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import com.google.cloud.crypto.tink.EcdsaProto.EcdsaKeyFormat;
-import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.cloud.crypto.tink.subtle.EcUtil;
-import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -75,7 +70,7 @@ public class EcdsaSignJceTest {
 
     for (int i = 0; i < signature.length; i++) {
       for (int j = 0; j < 8; j++) {
-        signature[i] = (byte) (signature[i] ^ (1<<j));
+        signature[i] = (byte) (signature[i] ^ (1 << j));
         // Verify with JCE's Signature.
         Signature verifier = Signature.getInstance("SHA256WithECDSA");
         verifier.initVerify(pub);
@@ -87,7 +82,7 @@ public class EcdsaSignJceTest {
           verified = false;
         }
         assertFalse(verified);
-        signature[i] = (byte) (signature[i] ^ (1<<j));
+        signature[i] = (byte) (signature[i] ^ (1 << j));
       }
     }
   }

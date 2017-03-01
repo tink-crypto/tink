@@ -289,7 +289,7 @@ public class RegistryTest {
 
     // This should not overwrite the existing manager.
     assertFalse(registry.registerKeyManager(mac1TypeUrl, new Mac2KeyManager()));
-    KeyManager<Mac> manager= registry.getKeyManager(mac1TypeUrl);
+    KeyManager<Mac> manager = registry.getKeyManager(mac1TypeUrl);
     assertEquals(Mac1KeyManager.class.getSimpleName(),
         manager.getClass().getSimpleName());
   }

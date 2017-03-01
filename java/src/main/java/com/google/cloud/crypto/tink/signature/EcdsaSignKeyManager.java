@@ -22,7 +22,6 @@ import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.PublicKeySign;
-import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.EcdsaSignJce;
 import com.google.protobuf.Any;
@@ -38,7 +37,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
-import java.security.spec.ECPublicKeySpec;
 
 class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
   /**
@@ -115,8 +113,9 @@ class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
 
   private void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {
     if (privKey.getVersion() > VERSION) {
-      throw new GeneralSecurityException("Key with version greater than " + VERSION +
-          " are not supported");
+      throw new GeneralSecurityException("Key with version greater than "
+          + VERSION
+          + " are not supported");
     }
     if (!Util.validateEcdsaParams(privKey.getPublicKey().getParams())) {
       throw new GeneralSecurityException("Invalid Ecdsa's parameters");
