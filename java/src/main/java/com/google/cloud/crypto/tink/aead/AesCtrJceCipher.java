@@ -61,6 +61,10 @@ final class AesCtrJceCipher implements IndCpaCipher {
    */
   @Override
   public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
+    if (plaintext.length > Integer.MAX_VALUE - ivSize) {
+      throw new GeneralSecurityException("Plaintext length can not exceed "
+          + (Integer.MAX_VALUE - ivSize));
+    }
     byte[] ciphertext = new byte[ivSize + plaintext.length];
     byte[] iv = Random.randBytes(ivSize);
     System.arraycopy(iv, 0, ciphertext, 0, ivSize);
