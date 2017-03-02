@@ -60,8 +60,8 @@ final class HmacKeyManager implements KeyManager<Mac> {
       HmacKey hmac = proto.unpack(HmacKey.class);
       validate(hmac);
       HashType hash = hmac.getParams().getHash();
-      byte[] key = hmac.getKey().toByteArray();
-      SecretKeySpec keySpec = new SecretKeySpec(key, "HMAC");
+      byte[] keyValue = hmac.getKeyValue().toByteArray();
+      SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
       int tagSize = hmac.getParams().getTagSize();
       switch (hash) {
         case SHA1 : return new MacJce("HMACSHA1", keySpec, tagSize);
@@ -82,7 +82,7 @@ final class HmacKeyManager implements KeyManager<Mac> {
       return Any.pack(HmacKey.newBuilder()
           .setVersion(VERSION)
           .setParams(format.getParams())
-          .setKey(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+          .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
           .build());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException(e);
@@ -98,7 +98,7 @@ final class HmacKeyManager implements KeyManager<Mac> {
     if (key.getVersion() > VERSION) {
       throw new GeneralSecurityException("key not supported");
     }
-    if (key.getKey().size() < MIN_KEY_SIZE_IN_BYTES) {
+    if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("key too short");
     }
     validate(key.getParams());

@@ -18,24 +18,22 @@ syntax = "proto3";
 
 package google.cloud.crypto.tink;
 
-import "proto/common.proto";
-
 option java_package = "com.google.cloud.crypto.tink";
-option java_outer_classname = "HmacProto";
+option java_outer_classname = "AesGcmProto";
 
-message HmacParams {
-  HashType hash = 1;    // HashType is an enum.
-  int32 tag_size = 2;
+// only allowing IV size in bytes = 12 and tag size in bytes = 16
+// Thus, accept no params.
+message AesGcmParams {
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.HmacKey
-message HmacKey {
-  int32 version = 1;
-  HmacParams params = 2;
-  bytes key_value = 3;
-}
-
-message HmacKeyFormat {
-  HmacParams params = 1;
+message AesGcmKeyFormat {
+  AesGcmParams params = 1;
   int32 key_size = 2;
+}
+
+// key_type: type.googleapis.com/google.cloud.crypto.tink.AesGcmKey
+message AesGcmKey {
+  int32 version = 1;
+  AesGcmParams params = 2;
+  bytes key_value = 3;
 }

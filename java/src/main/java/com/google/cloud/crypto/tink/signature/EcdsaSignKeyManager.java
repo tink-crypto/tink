@@ -61,7 +61,7 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
     }
     validateKey(privKey);
     EcdsaPublicKey ecdsaPubKey = privKey.getPublicKey();
-    BigInteger privValue = new BigInteger(1, privKey.getPrivateKey().toByteArray());
+    BigInteger privValue = new BigInteger(1, privKey.getKeyValue().toByteArray());
     ECParameterSpec ecParams = Util.getCurveSpec(ecdsaPubKey.getParams().getCurve());
     ECPrivateKeySpec spec = new ECPrivateKeySpec(privValue, ecParams);
     KeyFactory kf = KeyFactory.getInstance("EC");
@@ -100,7 +100,7 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
     EcdsaPrivateKey ecdsaPrivKey = EcdsaPrivateKey.newBuilder()
         .setVersion(VERSION)
         .setPublicKey(ecdsaPubKey)
-        .setPrivateKey(ByteString.copyFrom(privKey.getS().toByteArray()))
+        .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
         .build();
 
     return Any.pack(ecdsaPrivKey);

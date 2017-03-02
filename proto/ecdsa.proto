@@ -55,7 +55,7 @@ message EcdsaPrivateKey {
   EcdsaPublicKey public_key = 2;
   // Unsigned big integer in bigendian representation.
   // Required.
-  bytes private_key = 3;
+  bytes key_value = 3;
 }
 
 message EcdsaKeyFormat {

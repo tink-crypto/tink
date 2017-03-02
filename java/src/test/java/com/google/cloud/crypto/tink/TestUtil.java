@@ -193,7 +193,7 @@ public class TestUtil {
 
     return HmacKey.newBuilder()
         .setParams(params)
-        .setKey(ByteString.copyFromUtf8(keyValue))
+        .setKeyValue(ByteString.copyFromUtf8(keyValue))
         .build();
   }
 

@@ -52,12 +52,6 @@ filegroup(
 
 cc_proto_library(
     name = "cc_ecdsa",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     proto_deps = [
         ":cc_core",
     ],
@@ -70,12 +64,6 @@ cc_proto_library(
 
 java_proto_library(
     name = "java_ecdsa",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     proto_deps = [
         ":java_core",
     ],
@@ -97,12 +85,6 @@ filegroup(
 
 cc_proto_library(
     name = "cc_hmac",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     proto_deps = [
         ":cc_core",
     ],
@@ -115,17 +97,72 @@ cc_proto_library(
 
 java_proto_library(
     name = "java_hmac",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     proto_deps = [
         ":java_core",
     ],
     protos = [
         ":hmac",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+# aes_ctr_hmac_aead
+
+filegroup(
+    name = "aes_ctr_hmac_aead",
+    srcs = [
+        "aes_ctr.proto",
+        "aes_ctr_hmac_aead.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "cc_aes_ctr_hmac_aead",
+    proto_deps = [
+        ":cc_hmac",
+    ],
+    protos = [
+        ":aes_ctr_hmac_aead",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+java_proto_library(
+    name = "java_aes_ctr_hmac_aead",
+    proto_deps = [
+        ":java_hmac",
+    ],
+    protos = [
+        ":aes_ctr_hmac_aead",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+# aes_gcm
+
+filegroup(
+    name = "aes_gcm",
+    srcs = [
+        "aes_gcm.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "cc_aes_gcm",
+    protos = [
+        ":aes_gcm",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+java_proto_library(
+    name = "java_aes_gcm",
+    protos = [
+        ":aes_gcm",
     ],
     verbose = 0,
     with_grpc = False,
@@ -142,12 +179,6 @@ filegroup(
 
 cc_proto_library(
     name = "cc_googlecloudkms",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     protos = [
         ":googlecloudkms",
     ],
@@ -157,12 +188,6 @@ cc_proto_library(
 
 java_proto_library(
     name = "java_googlecloudkms",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     protos = [
         ":googlecloudkms",
     ],
