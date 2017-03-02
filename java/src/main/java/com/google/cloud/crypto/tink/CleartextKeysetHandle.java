@@ -26,7 +26,7 @@ import java.security.GeneralSecurityException;
 /**
  * Creates keyset handles from cleartext keysets.
  */
-public final class CleartextKeysetHandleFactory {
+public final class CleartextKeysetHandle {
   /**
    * @returns a new keyset handle from {@code proto} which is a Keyset protobuf in binary format.
    * @throws GeneralSecurityException

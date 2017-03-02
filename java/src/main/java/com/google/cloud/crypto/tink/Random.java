@@ -32,4 +32,15 @@ public final class Random {
     secureRandom.nextBytes(rand);
     return rand;
   }
+
+  /**
+   * @returns non negative random int.
+   */
+  public static int randNonNegativeInt() {
+    byte[] rand = randBytes(4);
+    return ((rand[0] & 0x7f) << 24)
+        | ((rand[1] & 0xff) << 16)
+        | ((rand[2] & 0xff) << 8)
+        | (rand[3] & 0xff);
+  }
 }

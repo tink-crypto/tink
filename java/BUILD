@@ -6,9 +6,14 @@ JAVACOPTS = [
 KEYSET_HANDLE_RESTRICTED_API_SRCS = [
     # Storing keyset in cleartext usually leads to security incidents.
     # To discourage users from doing that, the visibility of
-    # CleartextKeysetHandleFactory, which allows loading cleartext keyset,
+    # CleartextKeysetHandle, which allows loading cleartext keyset,
     # is restricted.
-    "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandleFactory.java",
+    "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandle.java",
+]
+
+KEY_MANAGEMENT_RESTRICTED_API_SRCS = [
+    # Normal users should not use this API directly, thus this is restricted.
+    "src/main/java/com/google/cloud/crypto/tink/KeysetManager.java",
 ]
 
 # core, without restricted APIs
@@ -19,7 +24,8 @@ java_library(
         [
             "src/main/java/com/google/cloud/crypto/tink/*.java",
         ],
-        exclude = KEYSET_HANDLE_RESTRICTED_API_SRCS,
+        exclude = KEYSET_HANDLE_RESTRICTED_API_SRCS +
+                  KEY_MANAGEMENT_RESTRICTED_API_SRCS,
     ),
     javacopts = JAVACOPTS,
     deps = [
@@ -47,59 +53,7 @@ java_library(
     javacopts = JAVACOPTS,
 )
 
-# mac
-
-java_library(
-    name = "mac_subtle",
-    srcs = glob([
-        "src/main/java/com/google/cloud/crypto/tink/subtle/MacJce.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
-    ]),
-    javacopts = JAVACOPTS,
-    deps = [
-        "//java:public_interfaces",
-    ],
-)
-
-java_library(
-    name = "mac",
-    srcs = glob([
-        "src/main/java/com/google/cloud/crypto/tink/mac/*.java",
-    ]),
-    javacopts = JAVACOPTS,
-    deps = COMMON_JAVA_DEPS + [
-        "//java:mac_subtle",
-        "//proto:java_hmac",
-        "@com_google_guava_guava//jar",
-    ],
-)
-
-# public library
-
-java_library(
-    name = "tink",
-    visibility = [
-        "//visibility:public",
-    ],
-    exports = [
-        "//java:core",
-        "//java:mac",
-        "//proto:java_core",
-        "//proto:java_hmac",
-    ],
-)
-
-# restricted API
-
-java_library(
-    name = "keyset_handle_restricted",
-    srcs = KEYSET_HANDLE_RESTRICTED_API_SRCS,
-    javacopts = JAVACOPTS,
-    visibility = [
-        "//examples/java/envelopeme:__pkg__",
-    ],
-    deps = COMMON_JAVA_DEPS,
-)
+# aead
 
 java_library(
     name = "aead",
@@ -137,6 +91,70 @@ java_library(
     ],
 )
 
+# mac
+
+java_library(
+    name = "mac_subtle",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/subtle/MacJce.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java:public_interfaces",
+    ],
+)
+
+java_library(
+    name = "mac",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/mac/*.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = COMMON_JAVA_DEPS + [
+        "//java:mac_subtle",
+        "//proto:java_hmac",
+        "@com_google_guava_guava//jar",
+    ],
+)
+
+# public library, everything
+
+java_library(
+    name = "tink",
+    visibility = [
+        "//visibility:public",
+    ],
+    exports = [
+        "//java:core",
+        "//java:mac",
+        "//proto:java_core",
+        "//proto:java_hmac",
+    ],
+)
+
+# restricted APIs
+
+java_library(
+    name = "keyset_handle_restricted",
+    srcs = KEYSET_HANDLE_RESTRICTED_API_SRCS,
+    javacopts = JAVACOPTS,
+    visibility = [
+        "//examples/java/envelopeme:__pkg__",
+    ],
+    deps = COMMON_JAVA_DEPS,
+)
+
+java_library(
+    name = "key_management_restricted",
+    srcs = KEY_MANAGEMENT_RESTRICTED_API_SRCS,
+    javacopts = JAVACOPTS,
+    visibility = [
+        "//examples/java/envelopeme:__pkg__",
+    ],
+    deps = COMMON_JAVA_DEPS,
+)
+
 # tests
 
 load("//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
@@ -148,12 +166,14 @@ java_library(
         "src/test/java/**/*.java",
     ]),
     deps = COMMON_JAVA_DEPS + [
-        "//java:mac",
-        "//java:keyset_handle_restricted",
         "//java:aead",
+        "//java:mac",
+        "//java:key_management_restricted",
+        "//java:keyset_handle_restricted",
         "//java:signature",
         "//java:signature_subtle",
         "//proto:java_ecdsa",
+        "//proto:java_googlecloudkms",
         "//proto:java_hmac",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",

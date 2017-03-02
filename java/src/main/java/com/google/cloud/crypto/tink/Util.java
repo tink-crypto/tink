@@ -28,8 +28,7 @@ public class Util {
    */
   public static KeysetInfo getKeysetInfo(Keyset keyset) {
     KeysetInfo.Builder info = KeysetInfo.newBuilder()
-        .setPrimaryKeyId(keyset.getPrimaryKeyId())
-        .setKeyFormat(keyset.getKeyFormat());
+        .setPrimaryKeyId(keyset.getPrimaryKeyId());
     for (Keyset.Key key : keyset.getKeyList()) {
       info.addKeyInfo(getKeyInfo(key));
     }

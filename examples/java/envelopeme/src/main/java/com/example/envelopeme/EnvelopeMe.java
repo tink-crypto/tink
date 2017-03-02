@@ -14,7 +14,7 @@
 
 package com.example.envelopeme;
 
-import com.google.cloud.crypto.tink.CleartextKeysetHandleFactory;
+import com.google.cloud.crypto.tink.CleartextKeysetHandle;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 
@@ -25,7 +25,7 @@ public class EnvelopeMe {
   public static void main(String[] args) throws Exception {
     // TODO(thaidn): finish this app when envelope encryption is done.
     System.out.println("Hello, world!");
-    KeysetHandle keysetHandle = CleartextKeysetHandleFactory.fromProto(
+    KeysetHandle keysetHandle = CleartextKeysetHandle.fromProto(
         Keyset.newBuilder().build());
   }
 }

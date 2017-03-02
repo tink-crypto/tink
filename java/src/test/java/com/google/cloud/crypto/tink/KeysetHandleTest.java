@@ -42,7 +42,7 @@ public class KeysetHandleTest {
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK));
-    KeysetHandle handle = CleartextKeysetHandleFactory.fromBinaryFormat(keyset.toByteArray());
+    KeysetHandle handle = CleartextKeysetHandle.fromBinaryFormat(keyset.toByteArray());
     assertEquals(keyset, handle.getKeyset());
 
     String keysetInfo = handle.toString();

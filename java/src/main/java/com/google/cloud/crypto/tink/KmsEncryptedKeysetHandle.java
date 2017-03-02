@@ -26,9 +26,10 @@ import java.security.GeneralSecurityException;
 /**
  * Creates keyset handles from keysets that are encrypted with a key in some KMS.
  */
-public final class KmsEncryptedKeysetHandleFactory {
+public final class KmsEncryptedKeysetHandle {
   /**
-   * @returns a new keyset handle from {@code proto} which is a Keyset protobuf in binary format.
+   * @returns a new keyset handle from {@code proto} which is a KmsEncryptedKeyset
+   * protobuf in binary format.
    * @throws GeneralSecurityException
    */
   public static final KeysetHandle fromBinaryFormat(final byte[] proto)
@@ -42,7 +43,8 @@ public final class KmsEncryptedKeysetHandleFactory {
   }
 
   /**
-   * @returns a new keyset handle from {@code proto} which is a Keyset protobuf in text format.
+   * @returns a new keyset handle from {@code proto} which is a KmsEncryptedKeyset
+   * protobuf in text format.
    * @throws GeneralSecurityException
    */
   public static final KeysetHandle fromTextFormat(String proto) throws GeneralSecurityException {
@@ -59,16 +61,16 @@ public final class KmsEncryptedKeysetHandleFactory {
    * @returns a new keyset handle from {@code encryptedKeyset}.
    * @throws GeneralSecurityException
    */
-  public static final KeysetHandle fromProto(KmsEncryptedKeyset encryptedKeyset)
+  public static final KeysetHandle fromProto(KmsEncryptedKeyset kmsEncryptedKeyset)
       throws GeneralSecurityException {
-    if (encryptedKeyset.getKeyMaterial() != null || !encryptedKeyset.hasKmsKey()) {
+    byte[] encryptedKeyset = kmsEncryptedKeyset.getEncryptedKeyset().toByteArray();
+    if (encryptedKeyset.length == 0 || !kmsEncryptedKeyset.hasKmsKey()) {
       throw new GeneralSecurityException("invalid keyset");
     }
-    Aead aead = Registry.INSTANCE.getPrimitive(encryptedKeyset.getKmsKey());
+    Aead aead = Registry.INSTANCE.getPrimitive(kmsEncryptedKeyset.getKmsKey());
     try {
-      final Keyset keyset = Keyset.parseFrom(
-          aead.decrypt(encryptedKeyset.getKeyMaterial().toByteArray(), null /* aad */));
-      return new KeysetHandle(keyset);
+      final Keyset keyset = Keyset.parseFrom(aead.decrypt(encryptedKeyset, null /* aad */));
+      return new KeysetHandle(keyset, encryptedKeyset);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("invalid keyset");
     }

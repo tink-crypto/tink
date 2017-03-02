@@ -111,18 +111,13 @@ message Keyset {
     google.protobuf.Timestamp valid_until = 102;
   }
 
-  // Provides the parameters necessary to generate a new key.
-  // TODO(przydatek): consider keeping the format outside of a keyset.
-  // Required.
-  KeyFormat key_format = 1;
-
   // Identifies key used to generate new crypto data (encrypt, sign).
   // Required.
-  int32 primary_key_id = 2;
+  int32 primary_key_id = 1;
 
   // Actual keys in the Keyset.
   // Required.
-  repeated Key key = 3;
+  repeated Key key = 2;
 }
 
 // Represents a "safe" Keyset that doesn't contain any actual key material, thus
@@ -149,15 +144,12 @@ message KeysetInfo {
     google.protobuf.Timestamp valid_until = 102;
   }
 
-  // See Keyset.key_format.
-  KeyFormat key_format = 1;
-
   // See Keyset.primary_key_id.
-  int32 primary_key_id = 2;
+  int32 primary_key_id = 1;
 
   // KeyInfos in the KeysetInfo.
   // Each KeyInfo is corresponding to a Key in the corresponding Keyset.
-  repeated KeyInfo key_info = 3;
+  repeated KeyInfo key_info = 2;
 }
 
 // Represents a keyset that is encrypted with a key in a KMS.
@@ -166,7 +158,7 @@ message KmsEncryptedKeyset {
   // Required.
   google.protobuf.Any kms_key = 1;
   // Required.
-  bytes key_material = 2;
+  bytes encrypted_keyset = 2;
   // Optional.
   KeysetInfo keyset_info = 3;
 }

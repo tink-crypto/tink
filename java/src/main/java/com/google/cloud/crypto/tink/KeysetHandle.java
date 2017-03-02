@@ -26,9 +26,14 @@ import com.google.protobuf.TextFormat;
  */
 public final class KeysetHandle {
   /**
-   * The keyset data.
+   * The {@code Keyset}.
    */
   private final Keyset keyset;
+
+  /**
+   * {@code Keyset} encrypted with some key.
+   */
+  private final byte[] encryptedKeyset;
 
   /**
    * This constructor is package-private. To get a new instance, users have to use one of
@@ -37,6 +42,17 @@ public final class KeysetHandle {
    */
   KeysetHandle(Keyset keyset) {
     this.keyset = keyset;
+    this.encryptedKeyset = null;
+  }
+
+  /**
+   * This constructor is package-private. To get a new instance, users have to use one of
+   * the public factories, e.g., {@code CleartextKeysetHandle} or
+   * {@code KmsEncryptedKeysetHandle}).
+   */
+  KeysetHandle(Keyset keyset, final byte[] encryptedKeyset) {
+    this.keyset = keyset;
+    this.encryptedKeyset = encryptedKeyset;
   }
 
   /**
@@ -47,10 +63,24 @@ public final class KeysetHandle {
   }
 
   /**
+   * @returns the actual keyset data.
+   */
+  public KeysetInfo getKeysetInfo() {
+    return Util.getKeysetInfo(keyset);
+  }
+
+  /**
+   * @returns the actual keyset data.
+   */
+  public byte[] getEncryptedKeyset() {
+    return encryptedKeyset;
+  }
+
+  /**
    * Prints out the keyset but without actual key material, but only names of key types
    * and the key format proto.
    */
   public String toString() {
-    return TextFormat.printToUnicodeString(Util.getKeysetInfo(keyset));
+    return TextFormat.printToUnicodeString(getKeysetInfo());
   }
 }

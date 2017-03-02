@@ -17,49 +17,61 @@
 package com.google.cloud.crypto.tink;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.TestUtil.DummyMacKeyManager;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
-import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests for CleartextKeysetHandleFactory.
+ * Tests for CleartextKeysetHandle.
  */
-public class CleartextKeysetHandleFactoryTest {
+public class CleartextKeysetHandleTest {
+  private final String macTypeUrl = DummyMacKeyManager.class.getSimpleName();
+  @Before
+  public void setUp() throws GeneralSecurityException {
+    Registry.INSTANCE.registerKeyManager(macTypeUrl, new DummyMacKeyManager());
+  }
+
   @Test
   public void testBasic() throws Exception {
-    String keyValue = "01234567890123456";
-    Keyset keyset1 =  TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue),
-        42,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.TINK));
-    KeysetHandle handle1 = CleartextKeysetHandleFactory.fromBinaryFormat(keyset1.toByteArray());
+    // Create a keyset that contains a single DummyMacKey.
+    KeyFormat format = KeyFormat.newBuilder().setKeyType(macTypeUrl).build();
+    KeysetManager manager = new KeysetManager.Builder()
+        .setKeyFormat(format)
+        .build();
+    manager.rotate();
+
+    assertNull(manager.getKeysetHandle().getEncryptedKeyset());
+    Keyset keyset1 = manager.getKeysetHandle().getKeyset();
+    KeysetHandle handle1 = CleartextKeysetHandle.fromBinaryFormat(keyset1.toByteArray());
     assertEquals(keyset1, handle1.getKeyset());
 
-    KeysetHandle handle2 = CleartextKeysetHandleFactory.fromTextFormat(
+    KeysetHandle handle2 = CleartextKeysetHandle.fromTextFormat(
         TextFormat.printToUnicodeString(keyset1));
     assertEquals(keyset1, handle2.getKeyset());
   }
 
   @Test
   public void testInvalidKeyset() throws Exception {
-    String keyValue = "01234567890123456";
-    Keyset keyset =  TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue),
-        42,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.TINK));
+    // Create a keyset that contains a single DummyMacKey.
+    KeyFormat format = KeyFormat.newBuilder().setKeyType(macTypeUrl).build();
+    KeysetManager manager = new KeysetManager.Builder()
+        .setKeyFormat(format)
+        .build();
+    manager.rotate();
+    Keyset keyset = manager.getKeysetHandle().getKeyset();
+
     byte[] proto = keyset.toByteArray();
     proto[0] = (byte) ~proto[0];
     try {
-      KeysetHandle handle = CleartextKeysetHandleFactory.fromBinaryFormat(proto);
+      KeysetHandle handle = CleartextKeysetHandle.fromBinaryFormat(proto);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));
@@ -67,7 +79,7 @@ public class CleartextKeysetHandleFactoryTest {
 
     String str = TextFormat.printToUnicodeString(keyset);
     try {
-      KeysetHandle handle = CleartextKeysetHandleFactory.fromTextFormat(str + "invalid");
+      KeysetHandle handle = CleartextKeysetHandle.fromTextFormat(str + "invalid");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));

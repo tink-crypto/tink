@@ -17,25 +17,144 @@
 package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.CommonProto.HashType;
+import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.cloud.crypto.tink.KeysetHandle;
-
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
+import java.security.GeneralSecurityException;
+import java.util.concurrent.Future;
 
 /**
  * Test helpers.
  */
 public class TestUtil {
+  public static class DummyMac implements Mac {
+    public DummyMac() {}
+    @Override
+    public byte[] computeMac(byte[] data) throws GeneralSecurityException {
+      return data;
+    }
+    @Override
+    public boolean verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
+      return true;
+    }
+  }
+
+  /**
+   * A key manager for DummyMac keys.
+   */
+  public static class DummyMacKeyManager implements KeyManager<Mac> {
+    public DummyMacKeyManager() {}
+
+    @Override
+    public Mac getPrimitive(Any proto) throws GeneralSecurityException {
+      return new DummyMac();
+    }
+    @Override
+    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public boolean doesSupport(String typeUrl) {
+      return typeUrl.equals(this.getClass().getSimpleName());
+    }
+  }
+
+  public static class EchoAead implements Aead {
+    public EchoAead() {}
+
+    @Override
+    public byte[] encrypt(byte[] plaintext, byte[] aad) throws GeneralSecurityException {
+      return plaintext;
+    }
+    @Override
+    public byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException {
+      return ciphertext;
+    }
+    @Override
+    public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad)
+        throws GeneralSecurityException {
+      return null;
+    }
+    @Override
+    public Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad)
+        throws GeneralSecurityException {
+      return null;
+    }
+  }
+
+  /**
+   * A key manager for EchoAead keys that just echo plaintext.
+   */
+  public static class EchoAeadKeyManager implements KeyManager<Aead> {
+    public EchoAeadKeyManager() {}
+
+    @Override
+    public Aead getPrimitive(Any proto) throws GeneralSecurityException {
+      return new EchoAead();
+    }
+    @Override
+    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public boolean doesSupport(String typeUrl) {
+      return typeUrl.equals(this.getClass().getSimpleName());
+    }
+  }
+
+  public static class FaultyAead implements Aead {
+    public FaultyAead() {}
+
+    @Override
+    public byte[] encrypt(byte[] plaintext, byte[] aad) throws GeneralSecurityException {
+      return new byte[0];
+    }
+    @Override
+    public byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException {
+      return new byte[0];
+    }
+    @Override
+    public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad)
+        throws GeneralSecurityException {
+      return null;
+    }
+    @Override
+    public Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad)
+        throws GeneralSecurityException {
+      return null;
+    }
+  }
+
+  /**
+   * A key manager for FaultyAead keys that always return an empty byte array on all encrypt or
+   * decrypt requests.
+   */
+  public static class FaultyAeadKeyManager implements KeyManager<Aead> {
+    public FaultyAeadKeyManager() {}
+
+    @Override
+    public Aead getPrimitive(Any proto) throws GeneralSecurityException {
+      return new FaultyAead();
+    }
+    @Override
+    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public boolean doesSupport(String typeUrl) {
+      return typeUrl.equals(this.getClass().getSimpleName());
+    }
+  }
 
   /**
    * @returns a keyset from a list of keys. The first key is primary.
@@ -53,8 +172,8 @@ public class TestUtil {
   /**
    * @returns a key with some specific properties.
    */
-  public static Key createKey(Message proto, int keyId, KeyStatusType status, OutputPrefixType prefixType)
-      throws Exception {
+  public static Key createKey(Message proto, int keyId, KeyStatusType status,
+      OutputPrefixType prefixType) throws Exception {
     return Key.newBuilder()
         .setKeyData(Any.pack(proto))
         .setStatus(status)
@@ -64,7 +183,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a HmacKey key.
+   * @returns a {@code HmacKey}.
    */
   public static HmacKey createHmacKey(String keyValue) throws Exception {
     HmacParams params = HmacParams.newBuilder()
@@ -76,6 +195,37 @@ public class TestUtil {
         .setParams(params)
         .setKey(ByteString.copyFromUtf8(keyValue))
         .build();
+  }
+
+  /**
+   * @returns a {@code HmacKeyFormat}.
+   */
+  public static HmacKeyFormat createHmacKeyFormat() throws Exception {
+    return HmacKeyFormat.newBuilder()
+        .setParams(
+            HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(16).build())
+        .setKeySize(16)
+        .build();
+  }
+
+  /**
+   * @returns a GoogleCloudKmsAeadKey key.
+   */
+  public static GoogleCloudKmsAeadKey createGoogleCloudKmsAeadKey(String kmsKeyUri)
+      throws Exception {
+    return GoogleCloudKmsAeadKey.newBuilder()
+        .setKmsKeyUri(kmsKeyUri)
+        .build();
+  }
+
+  /**
+   * @returns a KMS key URI in a format defined by Google Cloud KMS.
+   */
+  public static String createGoogleCloudKmsKeyUri(
+    String projectId, String location, String ringId, String keyId) {
+    return String.format(
+        "projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+        projectId, location, ringId, keyId);
   }
 
   /**
