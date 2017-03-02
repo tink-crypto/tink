@@ -31,10 +31,13 @@ import com.google.cloud.crypto.tink.TestUtil;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for MacFactory.
  */
+@RunWith(JUnit4.class)
 public class MacFactoryTest {
 
   @Before

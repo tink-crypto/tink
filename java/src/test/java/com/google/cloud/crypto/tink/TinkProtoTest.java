@@ -20,10 +20,13 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * A simple integration test to see whether protobuf is built correctly.
  */
+@RunWith(JUnit4.class)
 public class TinkProtoTest {
 
   @Test

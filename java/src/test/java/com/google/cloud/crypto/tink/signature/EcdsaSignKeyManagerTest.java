@@ -28,11 +28,14 @@ import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.protobuf.Any;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for EcdsaSignKeyManager.
  * TODO(quannguyen): Add more tests.
  */
+@RunWith(JUnit4.class)
 public class EcdsaSignKeyManagerTest {
   @Test
   public void testBasic() throws Exception {

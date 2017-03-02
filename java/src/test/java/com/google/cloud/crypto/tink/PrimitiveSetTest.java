@@ -27,10 +27,13 @@ import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import java.util.List;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for PrimitiveSet.
  */
+@RunWith(JUnit4.class)
 public class PrimitiveSetTest {
   private class DummyMac1 implements Mac {
     public DummyMac1() {}

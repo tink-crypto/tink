@@ -24,11 +24,14 @@ import static org.junit.Assert.assertArrayEquals;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for AesCtrJceCipher.
  * TODO(quangnguyen): Add more tests.
  */
+@RunWith(JUnit4.class)
 public class AesCtrJceCipherTest {
   // NIST SP 800-38A pp 55.
   private static final String NIST_KEY = "2b7e151628aed2a6abf7158809cf4f3c";

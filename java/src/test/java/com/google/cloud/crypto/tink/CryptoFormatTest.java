@@ -24,10 +24,13 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for CryptoFormat.
  */
+@RunWith(JUnit4.class)
 public class CryptoFormatTest {
   /**
    * Tests that prefix is generated correctly.

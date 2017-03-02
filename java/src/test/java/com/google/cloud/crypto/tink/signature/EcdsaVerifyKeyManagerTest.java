@@ -34,11 +34,14 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for EcdsaVerifyKeyManager.
  * TODO(quannguyen): Add more tests.
  */
+@RunWith(JUnit4.class)
 public class EcdsaVerifyKeyManagerTest {
   @Test
   public void testBasic() throws Exception {

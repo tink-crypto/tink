@@ -35,10 +35,13 @@ import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.Future;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test helpers.
  */
+@RunWith(JUnit4.class)
 public class TestUtil {
   public static class DummyMac implements Mac {
     public DummyMac() {}

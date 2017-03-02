@@ -27,11 +27,14 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for EcdsaVerifyJce.
  * TODO(quannguyen): Add more tests.
  */
+@RunWith(JUnit4.class)
 public class EcdsaVerifyJceTest {
   @Test
   public void testBasic() throws Exception {

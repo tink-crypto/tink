@@ -27,10 +27,13 @@ import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for Util.
  */
+@RunWith(JUnit4.class)
 public class UtilTest {
   /**
    * Tests that getKeysetInfo doesn't contain key material.

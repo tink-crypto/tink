@@ -20,11 +20,14 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * A simple integration test to see whether Ecdsa protobuf is built correctly.
  * TODO(quannguyen): Add extensive tests.
  */
+@RunWith(JUnit4.class)
 public class EcdsaProtoTest {
 
   @Test

@@ -25,6 +25,8 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for AesGcm
@@ -37,6 +39,7 @@ import org.junit.Test;
  *   - more sizes for the AAD
  *   - modify the AAD.
  */
+@RunWith(JUnit4.class)
 public class AesGcmJceTest {
 
   @Test

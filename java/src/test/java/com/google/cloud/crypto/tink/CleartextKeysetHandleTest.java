@@ -28,10 +28,13 @@ import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for CleartextKeysetHandle.
  */
+@RunWith(JUnit4.class)
 public class CleartextKeysetHandleTest {
   private final String macTypeUrl = DummyMacKeyManager.class.getSimpleName();
   @Before

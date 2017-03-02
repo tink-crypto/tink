@@ -26,10 +26,13 @@ import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for KeysetHandle.
  */
+@RunWith(JUnit4.class)
 public class KeysetHandleTest {
   /**
    * Tests that toString doesn't contain key material.

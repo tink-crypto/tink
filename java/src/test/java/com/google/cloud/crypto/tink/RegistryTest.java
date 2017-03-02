@@ -30,10 +30,13 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.concurrent.Future;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for Registry.
  */
+@RunWith(JUnit4.class)
 public class RegistryTest {
 
   private class DummyMac implements Mac {

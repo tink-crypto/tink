@@ -12,8 +12,11 @@ import java.util.Arrays;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link EncryptThenAuthenticate}. */
+@RunWith(JUnit4.class)
 public class EncryptThenAuthenticateTest {
   class RFCTestVector {
     public byte[] encKey;

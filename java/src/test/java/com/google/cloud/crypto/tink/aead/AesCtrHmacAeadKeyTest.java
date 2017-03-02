@@ -30,7 +30,10 @@ import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
+@RunWith(JUnit4.class)
 public class AesCtrHmacAeadKeyTest {
 
   @Test

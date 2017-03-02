@@ -30,10 +30,13 @@ import com.google.cloud.crypto.tink.mac.MacFactory;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for HmacKey.
  */
+@RunWith(JUnit4.class)
 public class HmacKeyTest {
 
   @Before

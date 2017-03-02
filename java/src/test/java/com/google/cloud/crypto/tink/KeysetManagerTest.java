@@ -38,10 +38,13 @@ import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for KeysetManager.
  */
+@RunWith(JUnit4.class)
 public class KeysetManagerTest {
   private final String macTypeUrl = DummyMacKeyManager.class.getSimpleName();
   private final String echoAeadTypeUrl = EchoAeadKeyManager.class.getSimpleName();
