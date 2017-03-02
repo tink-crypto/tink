@@ -14,15 +14,15 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.cloud.crypto.tink.mac;
+package com.google.cloud.crypto.tink.aead;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.KeysetHandle;
-import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
@@ -33,87 +33,108 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests for MacFactory.
+ * Tests for AeadFactory.
  */
-public class MacFactoryTest {
+public class AeadFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    MacFactory.registerStandardKeyTypes();
+    AeadFactory.registerStandardKeyTypes();
   }
 
   @Test
   public void testMultipleKeys() throws Exception {
-    String keyValue = "01234567890123456";
+    String aesCtrKeyValue = "0123456789abcdef";
+    String hmacKeyValue = "0123456789123456";
+    int ivSize = 12;
+    int tagSize = 16;
+
     Key primary = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK);
     Key raw = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         43,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key legacy = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         44,
         KeyStatusType.ENABLED,
         OutputPrefixType.LEGACY);
+
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(primary, raw, legacy));
-    Mac mac = MacFactory.getPrimitive(keysetHandle);
+    Aead aead = AeadFactory.getPrimitive(keysetHandle);
     byte[] plaintext = "plaintext".getBytes("UTF-8");
-    byte[] tag = mac.computeMac(plaintext);
-    byte[] prefix = Arrays.copyOfRange(tag, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
+    byte[] associatedData = "associatedData".getBytes("UTF-8");
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
+
     assertArrayEquals(prefix, CryptoFormat.getOutputPrefix(primary));
-    assertEquals(prefix.length + 16 /* TAG */, tag.length);
-    assertTrue(mac.verifyMac(tag, plaintext));
+    assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
+    assertEquals(
+        CryptoFormat.NON_RAW_PREFIX_SIZE + plaintext.length  + ivSize + tagSize,
+        ciphertext.length);
   }
 
   @Test
   public void testRawKeyAsPrimary() throws Exception {
-    String keyValue = "01234567890123456";
+    String aesCtrKeyValue = "0123456789abcdef";
+    String hmacKeyValue = "0123456789123456";
+    int ivSize = 12;
+    int tagSize = 16;
+
     Key primary = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key raw = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         43,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key legacy = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         44,
         KeyStatusType.ENABLED,
         OutputPrefixType.LEGACY);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(primary, raw, legacy));
-    Mac mac = MacFactory.getPrimitive(keysetHandle);
+    Aead aead = AeadFactory.getPrimitive(keysetHandle);
     byte[] plaintext = "plaintext".getBytes("UTF-8");
-    byte[] tag = mac.computeMac(plaintext);
-    // no prefix
-    assertEquals(16 /* TAG */, tag.length);
-    assertTrue(mac.verifyMac(tag, plaintext));
+    byte[] associatedData = "associatedData".getBytes("UTF-8");
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
+    assertEquals(
+        CryptoFormat.RAW_PREFIX_SIZE + plaintext.length  + ivSize + tagSize,
+        ciphertext.length);
   }
 
   @Test
   public void testSmallPlaintextWithRawKey() throws Exception {
-    String keyValue = "01234567890123456";
+    String aesCtrKeyValue = "0123456789abcdef";
+    String hmacKeyValue = "0123456789123456";
+    int ivSize = 12;
+    int tagSize = 16;
+
     Key primary = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(primary));
-    Mac mac = MacFactory.getPrimitive(keysetHandle);
-    byte[] plaintext = "blah".getBytes("UTF-8");
-    byte[] tag = mac.computeMac(plaintext);
-    // no prefix
-    assertEquals(16 /* TAG */, tag.length);
-    assertTrue(mac.verifyMac(tag, plaintext));
+    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    byte[] plaintext = "plaintext".getBytes("UTF-8");
+    byte[] associatedData = "associatedData".getBytes("UTF-8");
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
+    assertEquals(
+        CryptoFormat.RAW_PREFIX_SIZE + plaintext.length  + ivSize + tagSize,
+        ciphertext.length);
   }
 }

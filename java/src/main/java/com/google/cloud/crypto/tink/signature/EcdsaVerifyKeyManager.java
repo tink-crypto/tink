@@ -22,6 +22,7 @@ import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.EcdsaVerifyJce;
+import com.google.cloud.crypto.tink.subtle.Util;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.math.BigInteger;
@@ -50,14 +51,14 @@ final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
       throw new GeneralSecurityException(e);
     }
     validateKey(pubKey);
-    ECParameterSpec ecParams = Util.getCurveSpec(pubKey.getParams().getCurve());
+    ECParameterSpec ecParams = SigUtil.getCurveSpec(pubKey.getParams().getCurve());
     BigInteger pubX = new BigInteger(1, pubKey.getX().toByteArray());
     BigInteger pubY = new BigInteger(1, pubKey.getY().toByteArray());
     ECPoint w = new ECPoint(pubX, pubY);
     ECPublicKeySpec spec = new ECPublicKeySpec(w, ecParams);
     KeyFactory kf = KeyFactory.getInstance("EC");
     return new EcdsaVerifyJce((ECPublicKey) kf.generatePublic(spec),
-        Util.hashToEcdsaAlgorithmName(pubKey.getParams().getHashType()));
+        SigUtil.hashToEcdsaAlgorithmName(pubKey.getParams().getHashType()));
   }
 
   @Override
@@ -71,11 +72,8 @@ final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   }
 
   private void validateKey(EcdsaPublicKey pubKey) throws GeneralSecurityException {
-    if (pubKey.getVersion() > VERSION) {
-      throw new GeneralSecurityException("Key with version greater than " + VERSION +
-          " is not supported");
-    }
-    if (!Util.validateEcdsaParams(pubKey.getParams())) {
+    Util.validateVersion(pubKey.getVersion(), VERSION);
+    if (!SigUtil.validateEcdsaParams(pubKey.getParams())) {
       throw new GeneralSecurityException("Invalid Ecdsa's parameters");
     }
   }

@@ -34,12 +34,6 @@ java_library(
     ],
 )
 
-COMMON_JAVA_DEPS = [
-    "//java:core",
-    "//proto:java_core",
-    "//proto:java_core_compile_imports",
-]
-
 # public interfaces
 
 java_library(
@@ -53,16 +47,39 @@ java_library(
     javacopts = JAVACOPTS,
 )
 
+# common subtle
+
+java_library(
+    name = "common_subtle",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/subtle/Random.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
+    ]),
+    javacopts = JAVACOPTS,
+)
+
+COMMON_JAVA_DEPS = [
+    "//java:common_subtle",
+    "//java:core",
+    "//proto:java_core",
+    "//proto:java_core_compile_imports",
+]
+
 # aead
 
 java_library(
     name = "aead_subtle",
     srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/subtle/AesCtrJceCipher.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/AesGcmJce.java",
-        "src/main/java/com/google/cloud/crypto/tink/Random.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EncryptThenAuthenticate.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/IndCpaCipher.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/Random.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
     ]),
     javacopts = JAVACOPTS,
     deps = [
+        "//java:common_subtle",
         "//java:public_interfaces",
     ],
 )
@@ -75,6 +92,37 @@ java_library(
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
         "//java:aead_subtle",
+        "//java:mac",
+        "//proto:java_aes_ctr_hmac_aead",
+        "//proto:java_aes_gcm",
+        "//proto:java_hmac",
+    ],
+)
+
+# mac
+
+java_library(
+    name = "mac_subtle",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/subtle/MacJce.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/Random.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java:public_interfaces",
+    ],
+)
+
+java_library(
+    name = "mac",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/mac/*.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = COMMON_JAVA_DEPS + [
+        "//java:mac_subtle",
+        "//proto:java_hmac",
     ],
 )
 
@@ -105,34 +153,7 @@ java_library(
     ],
 )
 
-# mac
-
-java_library(
-    name = "mac_subtle",
-    srcs = glob([
-        "src/main/java/com/google/cloud/crypto/tink/subtle/MacJce.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
-    ]),
-    javacopts = JAVACOPTS,
-    deps = [
-        "//java:public_interfaces",
-    ],
-)
-
-java_library(
-    name = "mac",
-    srcs = glob([
-        "src/main/java/com/google/cloud/crypto/tink/mac/*.java",
-    ]),
-    javacopts = JAVACOPTS,
-    deps = COMMON_JAVA_DEPS + [
-        "//java:mac_subtle",
-        "//proto:java_hmac",
-        "@com_google_guava_guava//jar",
-    ],
-)
-
-# public library, everything
+# public library
 
 java_library(
     name = "tink",
@@ -147,6 +168,8 @@ java_library(
         "//java:mac_subtle",
         "//java:signature",
         "//java:signature_subtle",
+        "//proto:java_aes_ctr_hmac_aead",
+        "//proto:java_aes_gcm",
         "//proto:java_core",
         "//proto:java_core_compile_imports",
         "//proto:java_ecdsa",
@@ -187,13 +210,13 @@ java_library(
     srcs = glob([
         "src/test/java/**/*.java",
     ]),
-    deps = COMMON_JAVA_DEPS + [
+    deps = [
         "//java:key_management_restricted",
         "//java:keyset_handle_restricted",
         "//java:tink",
+        "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
-        "@com_fasterxml_jackson_core//jar",
         "@junit_junit_4//jar",
     ],
 )

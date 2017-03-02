@@ -21,11 +21,12 @@ import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.PrimitiveSet;
-import com.google.cloud.crypto.tink.Random;
 import com.google.cloud.crypto.tink.Registry;
+import com.google.cloud.crypto.tink.subtle.Util;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.Bytes;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Arrays;
 import java.util.List;
@@ -54,11 +55,24 @@ import java.security.GeneralSecurityException;
  *  }</pre>
  */
 public final class MacFactory {
-  private static final ImmutableMap<String, KeyManager<Mac>> STANDARD_KEY_TYPES = ImmutableMap.of(
-      "type.googleapis.com/google.cloud.crypto.tink.HmacKey", new HmacKeyManager()
-  );
-  private static final ImmutableMap<String, KeyManager<Mac>> LEGACY_KEY_TYPES = ImmutableMap.of();
+  /**
+   * Safe to use MAC key types.
+   */
+  private static final Map<String, KeyManager<Mac>> STANDARD_KEY_TYPES;
 
+  /**
+   * Deprecated MAC key types, should not be used in new code.
+   */
+  private static final Map<String, KeyManager<Mac>> LEGACY_KEY_TYPES;
+
+  static {
+    Map<String, KeyManager<Mac>> standard = new HashMap<String, KeyManager<Mac>>();
+    standard.put("type.googleapis.com/google.cloud.crypto.tink.HmacKey", new HmacKeyManager());
+    STANDARD_KEY_TYPES = Collections.unmodifiableMap(standard);
+
+    Map<String, KeyManager<Mac>> legacy = new HashMap<String, KeyManager<Mac>>();
+    LEGACY_KEY_TYPES = Collections.unmodifiableMap(legacy);
+  }
   /**
    * Registers standard Mac key types and their managers with the {@code Registry}.
    * @throws GeneralSecurityException
@@ -99,7 +113,7 @@ public final class MacFactory {
     return new Mac() {
       @Override
       public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
-        return Bytes.concat(
+        return Util.concat(
             primitives.getPrimary().getIdentifier(),
             primitives.getPrimary().getPrimitive().computeMac(data));
       }

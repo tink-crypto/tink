@@ -24,6 +24,7 @@ import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.EcdsaSignJce;
+import com.google.cloud.crypto.tink.subtle.Util;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -62,12 +63,12 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
     validateKey(privKey);
     EcdsaPublicKey ecdsaPubKey = privKey.getPublicKey();
     BigInteger privValue = new BigInteger(1, privKey.getKeyValue().toByteArray());
-    ECParameterSpec ecParams = Util.getCurveSpec(ecdsaPubKey.getParams().getCurve());
+    ECParameterSpec ecParams = SigUtil.getCurveSpec(ecdsaPubKey.getParams().getCurve());
     ECPrivateKeySpec spec = new ECPrivateKeySpec(privValue, ecParams);
     KeyFactory kf = KeyFactory.getInstance("EC");
 
     return new EcdsaSignJce((ECPrivateKey) kf.generatePrivate(spec),
-        Util.hashToEcdsaAlgorithmName(ecdsaPubKey.getParams().getHashType()));
+        SigUtil.hashToEcdsaAlgorithmName(ecdsaPubKey.getParams().getHashType()));
   }
 
   @Override
@@ -79,8 +80,8 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
       throw new GeneralSecurityException("Invalid Ecdsa key format");
     }
     EcdsaParams ecdsaParams = ecdsaKeyFormat.getParams();
-    Util.validateEcdsaParams(ecdsaParams);
-    ECParameterSpec ecParams = Util.getCurveSpec(ecdsaParams.getCurve());
+    SigUtil.validateEcdsaParams(ecdsaParams);
+    ECParameterSpec ecParams = SigUtil.getCurveSpec(ecdsaParams.getCurve());
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
     KeyPair keyPair = keyGen.generateKeyPair();
@@ -112,12 +113,8 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
   }
 
   private void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {
-    if (privKey.getVersion() > VERSION) {
-      throw new GeneralSecurityException("Key with version greater than "
-          + VERSION
-          + " are not supported");
-    }
-    if (!Util.validateEcdsaParams(privKey.getPublicKey().getParams())) {
+    Util.validateVersion(privKey.getVersion(), VERSION);
+    if (!SigUtil.validateEcdsaParams(privKey.getPublicKey().getParams())) {
       throw new GeneralSecurityException("Invalid Ecdsa's parameters");
     }
   }

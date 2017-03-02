@@ -16,6 +16,8 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
+import java.security.GeneralSecurityException;
+
 /**
  * Helper methods.
  */
@@ -36,5 +38,51 @@ public final class Util {
       res |= x[i] ^ y[i];
     }
     return res == 0;
+  }
+
+  /**
+   * Returns the values from each provided array combined into a single array. For example,
+   * {@code concat(new byte[] {a, b}, new byte[] {}, new byte[] {c}} returns the array
+   * {@code {a, b, c}}.
+   *
+   * @return a single array containing all the values from the source arrays, in order
+   */
+  public static byte[] concat(byte[]... chunks) throws GeneralSecurityException {
+    int length = 0;
+    for (byte[] chunk : chunks) {
+      if (length > Integer.MAX_VALUE - chunk.length) {
+        throw new GeneralSecurityException("Exceed size limit");
+      }
+      length += chunk.length;
+    }
+    byte[] res = new byte[length];
+    int pos = 0;
+    for (byte[] chunk : chunks) {
+      System.arraycopy(chunk, 0, res, pos, chunk.length);
+      pos += chunk.length;
+    }
+    return res;
+  }
+
+  /**
+   * @returns true if the {@code sizeInBytes} is a valid AES key size.
+   */
+  public static boolean isValidAesKeySize(int sizeInBytes) {
+    return (sizeInBytes == 16 || sizeInBytes == 24 || sizeInBytes == 32);
+  }
+
+  /**
+   * @throws GeneralSecurityException if {@code candidate} is negative
+   * or larger than {@code maxExpected}.
+   */
+  public static void validateVersion(int candidate, int maxExpected)
+      throws GeneralSecurityException {
+    if (candidate < 0 || candidate > maxExpected) {
+      throw new GeneralSecurityException("Key has version "
+          + candidate
+          + ". Only keys with version equal to or smaller than "
+          + maxExpected
+          + " are supported.");
+    }
   }
 }

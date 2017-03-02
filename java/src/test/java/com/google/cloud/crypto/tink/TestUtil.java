@@ -16,10 +16,13 @@
 
 package com.google.cloud.crypto.tink;
 
+import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
+import com.google.cloud.crypto.tink.AesCtrProto.AesCtrParams;
+import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
+import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadParams;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
-import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
@@ -185,10 +188,10 @@ public class TestUtil {
   /**
    * @returns a {@code HmacKey}.
    */
-  public static HmacKey createHmacKey(String keyValue) throws Exception {
+  public static HmacKey createHmacKey(String keyValue, int tagSize) throws Exception {
     HmacParams params = HmacParams.newBuilder()
         .setHash(HashType.SHA256)
-        .setTagSize(16)
+        .setTagSize(tagSize)
         .build();
 
     return HmacKey.newBuilder()
@@ -198,18 +201,34 @@ public class TestUtil {
   }
 
   /**
-   * @returns a {@code HmacKeyFormat}.
+   * @returns a {@code AesCtrKey}.
    */
-  public static HmacKeyFormat createHmacKeyFormat() throws Exception {
-    return HmacKeyFormat.newBuilder()
-        .setParams(
-            HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(16).build())
-        .setKeySize(16)
+  public static AesCtrKey createAesCtrKey(String keyValue, int ivSize) throws Exception {
+    AesCtrParams aesCtrParams = AesCtrParams.newBuilder()
+        .setIvSize(ivSize)
+        .build();
+    return AesCtrKey.newBuilder()
+        .setParams(aesCtrParams)
+        .setKeyValue(ByteString.copyFromUtf8(keyValue))
         .build();
   }
 
   /**
-   * @returns a GoogleCloudKmsAeadKey key.
+   * @returns a {@code AesCtrHmacAeadKey}.
+   */
+  public static AesCtrHmacAeadKey createAesCtrHmacAeadKey(String aesCtrKeyValue, int ivSize,
+      String hmacKeyValue, int tagSize) throws Exception {
+    AesCtrKey aesCtrKey = createAesCtrKey(aesCtrKeyValue, ivSize);
+    HmacKey hmacKey = createHmacKey(hmacKeyValue, tagSize);
+
+    return AesCtrHmacAeadKey.newBuilder()
+        .setAesCtrKey(aesCtrKey)
+        .setHmacKey(hmacKey)
+        .build();
+  }
+
+  /**
+   * @returns a {@code GoogleCloudKmsAeadKey}.
    */
   public static GoogleCloudKmsAeadKey createGoogleCloudKmsAeadKey(String kmsKeyUri)
       throws Exception {

@@ -14,14 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.cloud.crypto.tink.aead;
+package com.google.cloud.crypto.tink.subtle;
 
 import static com.google.common.io.BaseEncoding.base16;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertArrayEquals;
 
-import com.google.cloud.crypto.tink.Random;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;

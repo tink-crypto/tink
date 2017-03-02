@@ -14,28 +14,29 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.cloud.crypto.tink.aead;
+package com.google.cloud.crypto.tink.subtle;
 
-import com.google.cloud.crypto.tink.Random;
 import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * The AesCtrJceCipher class implements AES counter mode using JCE's cipher which is
- * indistinguishable under chosen-plaintext attack.
+ * The primitive implements AES counter mode with random IVs, using JCE. It is safe against
+ * chosen-plaintext attacks, but does not provide ciphertext integrity, thus is unsafe
+ * against chosen-ciphertext attacks.
  */
-final class AesCtrJceCipher implements IndCpaCipher {
+public final class AesCtrJceCipher implements IndCpaCipher {
   private static final String KEY_ALGORITHM = "AES";
   private static final String CIPHER_ALGORITHM = "AES/CTR/NoPadding";
-  // In counter mode, each message is encrypted with an initialization vector (IV) that must be
+
+  // In counter mode each message is encrypted with an initialization vector (IV) that must be
   // unique. If one single IV is ever used to encrypt two or more messages, the confidentiality of
   // these messages might be lost. This cipher uses a randomly generated IV for each message. The
   // birthday paradox says that if one encrypts 2^k messages, the probability that the random IV
-  // will repeat is 2^{t- 2k - 1}, where t is the size in bits of the IV. Thus with 96-bit (12-byte)
-  // IV, if one encrypts 2^32 messages the probability of IV collision is less than 2^-33 (i.e.,
-  // less than one in eight billion).
+  // will repeat is roughly 2^{2k - t}, where t is the size in bits of the IV. Thus with 96-bit
+  // (12-byte) IV, if one encrypts 2^32 messages the probability of IV collision is less than
+  // 2^-33 (i.e., less than one in eight billion).
   private static final int MIN_IV_SIZE_IN_BYTES = 12;
 
   private final SecretKeySpec keySpec;

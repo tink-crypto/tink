@@ -23,9 +23,10 @@ import com.google.cloud.crypto.tink.HmacProto.HmacParams;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Mac;
-import com.google.cloud.crypto.tink.Random;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.MacJce;
+import com.google.cloud.crypto.tink.subtle.Random;
+import com.google.cloud.crypto.tink.subtle.Util;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
@@ -50,7 +51,7 @@ final class HmacKeyManager implements KeyManager<Mac> {
   private static final int MIN_KEY_SIZE_IN_BYTES = 16;
 
   /**
-   * Minimum tag size in bytes.
+   * Minimum tag size in bytes. This provides minimum 80-bit security strength.
    */
   private static final int MIN_TAG_SIZE_IN_BYTES = 10;
 
@@ -70,7 +71,7 @@ final class HmacKeyManager implements KeyManager<Mac> {
         default: throw new GeneralSecurityException("Unknown hash");
       }
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException(e);
+      throw new GeneralSecurityException("invalid Hmac key");
     }
   }
 
@@ -85,7 +86,7 @@ final class HmacKeyManager implements KeyManager<Mac> {
           .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
           .build());
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException(e);
+      throw new GeneralSecurityException("cannot generate Hmac key");
     }
   }
 
@@ -95,9 +96,7 @@ final class HmacKeyManager implements KeyManager<Mac> {
   }
 
   private void validate(HmacKey key) throws GeneralSecurityException {
-    if (key.getVersion() > VERSION) {
-      throw new GeneralSecurityException("key not supported");
-    }
+    Util.validateVersion(key.getVersion(), VERSION);
     if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("key too short");
     }
@@ -114,7 +113,26 @@ final class HmacKeyManager implements KeyManager<Mac> {
 
   private void validate(HmacParams params) throws GeneralSecurityException {
     if (params.getTagSize() < MIN_TAG_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("tag too short");
+      throw new GeneralSecurityException("tag size too small");
+    }
+    switch (params.getHash()) {
+      case SHA1:
+        if (params.getTagSize() > 20) {
+          throw new GeneralSecurityException("tag size too big");
+        }
+        break;
+      case SHA256:
+        if (params.getTagSize() > 32) {
+          throw new GeneralSecurityException("tag size too big");
+        }
+        break;
+      case SHA512:
+        if (params.getTagSize() > 64) {
+          throw new GeneralSecurityException("tag size too big");
+        }
+        break;
+      default:
+        throw new GeneralSecurityException("unknown hash type");
     }
   }
 }

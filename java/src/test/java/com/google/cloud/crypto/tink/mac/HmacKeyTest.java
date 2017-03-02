@@ -47,7 +47,7 @@ public class HmacKeyTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createHmacKey(keyValue),
+                TestUtil.createHmacKey(keyValue, 16),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));

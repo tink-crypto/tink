@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.cloud.crypto.tink;
+package com.google.cloud.crypto.tink.subtle;
 
 import java.security.SecureRandom;
 

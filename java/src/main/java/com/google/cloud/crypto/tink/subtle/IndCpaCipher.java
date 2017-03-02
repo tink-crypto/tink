@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.cloud.crypto.tink.aead;
+package com.google.cloud.crypto.tink.subtle;
 
 import java.security.GeneralSecurityException;
 
@@ -23,7 +23,7 @@ import java.security.GeneralSecurityException;
  * attacks. Said primitives do not provide authentication, thus should not be used directly, but
  * only to construct safer primitives such as Aead.
  */
-interface IndCpaCipher {
+public interface IndCpaCipher {
   /**
    * Encrypts {@code plaintext}.
    * The resulting ciphertext is indistinguishable under chosen-plaintext attack. However, it does
