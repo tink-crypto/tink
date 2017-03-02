@@ -194,3 +194,48 @@ java_proto_library(
     verbose = 0,
     with_grpc = False,
 )
+
+# kms_envelope
+
+filegroup(
+    name = "kms_envelope",
+    srcs = [
+        "kms_envelope.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "cc_kms_envelope",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    proto_deps = [
+        ":cc_core",
+    ],
+    protos = [
+        ":kms_envelope",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+java_proto_library(
+    name = "java_kms_envelope",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    proto_deps = [
+        ":java_core",
+    ],
+    protos = [
+        ":kms_envelope",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
