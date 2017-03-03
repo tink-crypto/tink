@@ -24,6 +24,7 @@ import com.google.cloud.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
+import javax.crypto.AEADBadTagException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -72,11 +73,8 @@ public class AesGcmJceTest {
         try {
           byte[] unused = gcm.decrypt(modified, aad);
           fail("Decrypting modified ciphertext should fail");
-        } catch (GeneralSecurityException ex) {
+        } catch (AEADBadTagException ex) {
           // This is expected.
-          // AeadBadTagException is the typical case here,
-          // but we only guarantee GeneralSecurityException for modified
-          // ciphertexts in an AEAD.
         }
       }
     }
