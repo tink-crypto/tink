@@ -74,6 +74,9 @@ public final class AeadFactory {
     standard.put(
         "type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey",
         new AesCtrHmacAeadKeyManager());
+    standard.put(
+        "type.googleapis.com/google.cloud.crypto.tink.KmsEnvelopeAeadKey",
+        new KmsEnvelopeAeadKeyManager());
     STANDARD_KEY_TYPES = Collections.unmodifiableMap(standard);
 
     Map<String, KeyManager<Aead>> legacy = new HashMap<String, KeyManager<Aead>>();

@@ -90,20 +90,6 @@ java_library(
 )
 
 java_library(
-    name = "aead_subtle_aes_ctr_hmac",
-    srcs = glob([
-        "src/main/java/com/google/cloud/crypto/tink/subtle/AesCtrJceCipher.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EncryptThenAuthenticate.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/IndCpaCipher.java",
-    ]),
-    javacopts = JAVACOPTS,
-    deps = [
-        "//java:common_subtle",
-        "//java:public_interfaces",
-    ],
-)
-
-java_library(
     name = "aead",
     srcs = glob([
         "src/main/java/com/google/cloud/crypto/tink/aead/*.java",
@@ -116,29 +102,13 @@ java_library(
         "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_aes_gcm",
         "//proto:java_hmac",
+        "//proto:java_kms_envelope",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
         "@com_google_http_client//jar",
         "@com_google_http_client_jackson2//jar",
         "@com_google_oauth_client//jar",
         "@org_codehaus_jackson//jar",
-    ],
-)
-
-# this library does not depend on com_google_api_client, etc.
-java_library(
-    name = "aead_aes_ctr_hmac",
-    srcs = glob([
-        "src/main/java/com/google/cloud/crypto/tink/aead/AeadFactory.java",
-        "src/main/java/com/google/cloud/crypto/tink/aead/AesCtrHmacAeadKeyManager.java",
-        "src/main/java/com/google/cloud/crypto/tink/aead/AesCtrKeyManager.java",
-    ]),
-    javacopts = JAVACOPTS,
-    deps = COMMON_JAVA_DEPS + [
-        "//java:aead_subtle_aes_ctr_hmac",
-        "//java:mac",
-        "//proto:java_aes_ctr_hmac_aead",
-        "//proto:java_hmac",
     ],
 )
 
@@ -218,6 +188,7 @@ java_library(
         "//proto:java_ecdsa",
         "//proto:java_googlecloudkms",
         "//proto:java_hmac",
+        "//proto:java_kms_envelope",
     ],
 )
 

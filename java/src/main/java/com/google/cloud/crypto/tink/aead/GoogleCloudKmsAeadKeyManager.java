@@ -54,6 +54,7 @@ class GoogleCloudKmsAeadKeyManager implements KeyManager<Aead> {
   public Aead getPrimitive(Any proto) throws GeneralSecurityException {
     try {
       GoogleCloudKmsAeadKey key = proto.unpack(GoogleCloudKmsAeadKey.class);
+      validate(key);
       return new GoogleCloudKmsAead(createCloudKmsClient(key), key.getKmsKeyUri());
     } catch (IOException e) {
       throw new GeneralSecurityException(e);

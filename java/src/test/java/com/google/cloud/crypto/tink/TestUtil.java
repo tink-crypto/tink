@@ -22,12 +22,16 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
+import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKeyFormat;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrParams;
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
-import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadParams;
+import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
+import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
+import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadParams;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
+import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
@@ -236,6 +240,30 @@ public class TestUtil {
   }
 
   /**
+   * @returns a {@code AesCtrHmacAeadKeyFormat}.
+   */
+  public static KeyFormat createAesCtrHmacAeadKeyFormat(int aesKeySize, int ivSize,
+      int hmacKeySize, int tagSize) throws Exception {
+    AesCtrKeyFormat aesCtrKeyFormat = AesCtrKeyFormat.newBuilder()
+        .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
+        .setKeySize(aesKeySize)
+        .build();
+    HmacKeyFormat hmacKeyFormat = HmacKeyFormat.newBuilder()
+        .setParams(
+            HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(tagSize).build())
+        .setKeySize(hmacKeySize)
+        .build();
+    AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.newBuilder()
+        .setAesCtrKeyFormat(aesCtrKeyFormat)
+        .setHmacKeyFormat(hmacKeyFormat)
+        .build();
+    return KeyFormat.newBuilder()
+        .setFormat(Any.pack(format))
+        .setKeyType("type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey")
+        .build();
+  }
+
+  /**
    * @returns a {@code GoogleCloudKmsAeadKey}.
    */
   public static GoogleCloudKmsAeadKey createGoogleCloudKmsAeadKey(String kmsKeyUri)
@@ -243,6 +271,18 @@ public class TestUtil {
     return GoogleCloudKmsAeadKey.newBuilder()
         .setKmsKeyUri(kmsKeyUri)
         .build();
+  }
+
+  /**
+   * @returns a {@code KmsEnvelopeAeadKey}.
+   */
+  public static KmsEnvelopeAeadKey createKmsEnvelopeAeadKey(Any kmsKey, KeyFormat dekFormat)
+      throws Exception {
+    KmsEnvelopeAeadParams params = KmsEnvelopeAeadParams.newBuilder()
+        .setDekFormat(dekFormat)
+        .setKmsKey(kmsKey)
+        .build();
+    return KmsEnvelopeAeadKey.newBuilder().setParams(params).build();
   }
 
   /**
