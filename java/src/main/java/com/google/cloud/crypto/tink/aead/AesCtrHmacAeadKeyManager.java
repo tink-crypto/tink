@@ -30,8 +30,12 @@ import com.google.cloud.crypto.tink.subtle.Util;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.util.logging.Logger;
 
 class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
+  private static final Logger logger =
+      Logger.getLogger(AesCtrHmacAeadKeyManager.class.getName());
+
   private static final int VERSION = 0;
 
   private static final String AES_CTR_KEY_TYPE =
@@ -49,7 +53,7 @@ class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
       Registry.INSTANCE.registerKeyManager(AES_CTR_KEY_TYPE, new AesCtrKeyManager());
       MacFactory.registerStandardKeyTypes();
     } catch (GeneralSecurityException e) {
-      System.out.println("Cannot register key managers: " + e);
+      logger.severe("Cannot register key managers: " + e);
     }
   }
 

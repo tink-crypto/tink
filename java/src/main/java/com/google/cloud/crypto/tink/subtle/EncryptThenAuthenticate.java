@@ -49,7 +49,7 @@ public final class EncryptThenAuthenticate implements Aead {
    *
    * The plaintext is encrypted with an {@code IndCpaCipher}, then MAC is computed over
    * (aad || ciphertext || t) where t is aad's length in bits represented as 64-bit
-   * bigendian integer. The final ciphertext format is (ind-cpa ciphertext || mac).
+   * bigendian unsigned integer. The final ciphertext format is (ind-cpa ciphertext || mac).
    *
    * @return resulting ciphertext.
    */
@@ -69,7 +69,7 @@ public final class EncryptThenAuthenticate implements Aead {
    *
    * The ciphertext format is ciphertext || mac. The MAC is verified against
    * (aad || ciphertext|| t) where t is aad's length in bits represented as 64-bit
-   * bigendian integer.
+   * bigendian unsigned integer.
    *
    * @return resulting plaintext.
    */

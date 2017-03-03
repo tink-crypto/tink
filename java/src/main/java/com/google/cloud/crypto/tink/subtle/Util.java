@@ -41,7 +41,7 @@ public final class Util {
   }
 
   /**
-   * Returns the values from each provided array combined into a single array. For example,
+   * Returns the concatenation of the input arrays in a single array. For example,
    * {@code concat(new byte[] {a, b}, new byte[] {}, new byte[] {c}} returns the array
    * {@code {a, b, c}}.
    *
@@ -51,7 +51,7 @@ public final class Util {
     int length = 0;
     for (byte[] chunk : chunks) {
       if (length > Integer.MAX_VALUE - chunk.length) {
-        throw new GeneralSecurityException("Exceed size limit");
+        throw new GeneralSecurityException("Exceeded size limit");
       }
       length += chunk.length;
     }
@@ -78,11 +78,11 @@ public final class Util {
   public static void validateVersion(int candidate, int maxExpected)
       throws GeneralSecurityException {
     if (candidate < 0 || candidate > maxExpected) {
-      throw new GeneralSecurityException("Key has version "
-          + candidate
-          + ". Only keys with version equal to or smaller than "
-          + maxExpected
-          + " are supported.");
+      throw new GeneralSecurityException(
+          String.format(
+              "Key has version %d. Only keys with version in range [0..%d] are supported",
+              candidate,
+              maxExpected));
     }
   }
 }

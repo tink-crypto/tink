@@ -18,32 +18,38 @@ package com.google.cloud.crypto.tink.aead;
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.KeysetHandle;
+import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
+import com.google.cloud.crypto.tink.TestGoogleCredentialFactory;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.Registry;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
-public class AesCtrHmacAeadKeyTest {
+public class GoogleCloudKmsAeadKeyTest {
+
+  @Before
+  public void setUp() throws GeneralSecurityException {
+    Registry.INSTANCE.registerKeyManager(
+        "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
+        new GoogleCloudKmsAeadKeyManager(new TestGoogleCredentialFactory()));
+  }
 
   @Test
-  public void testBasic() throws Exception {
-    AeadFactory.registerStandardKeyTypes();
-    String aesCtrKeyValue = "0123456789abcdef";
-    String hmacKeyValue = "0123456789123456";
-    int ivSize = 12;
-    int tagSize = 16;
+  public void testGoogleCloudKmsKeyRestricted() throws Exception {
+    // This key is restricted, use the cred of
+    // tink-unit-tests@testing-cloud-kms-159306.iam.gserviceaccount.com.
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+                TestUtil.createGoogleCloudKmsAeadKey(TestGoogleCredentialFactory.RESTRICTED),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));
+
     Aead aead = AeadFactory.getPrimitive(keysetHandle);
     TestUtil.runBasicTests(aead);
   }

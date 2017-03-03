@@ -16,6 +16,11 @@
 
 package com.google.cloud.crypto.tink;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrParams;
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
@@ -268,6 +273,44 @@ public class TestUtil {
     } catch (Exception e) {
       System.out.println(e);
       return null;
+    }
+  }
+
+  /**
+   * Runs basic tests against an Aead primitive.
+   */
+  public static void runBasicTests(Aead aead) throws Exception {
+    byte[] plaintext = "plaintext".getBytes("UTF-8");
+    byte[] associatedData = "associatedData".getBytes("UTF-8");
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+
+    byte original = ciphertext[0];
+    ciphertext[0] = (byte) ~original;
+    try {
+      aead.decrypt(ciphertext, associatedData);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("decrypted failed"));
+    }
+
+    ciphertext[0] = original;
+    original = ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE];
+    ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE] = (byte) ~original;
+    try {
+      aead.decrypt(ciphertext, associatedData);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("decrypted failed"));
+    }
+
+    ciphertext[0] = original;
+    original = associatedData[0];
+    associatedData[0] = (byte) ~original;
+    try {
+      aead.decrypt(ciphertext, associatedData);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("decrypted failed"));
     }
   }
 }

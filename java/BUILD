@@ -73,9 +73,28 @@ java_library(
         "src/main/java/com/google/cloud/crypto/tink/subtle/AesCtrJceCipher.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/AesGcmJce.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/EncryptThenAuthenticate.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/GoogleCloudKmsAead.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/IndCpaCipher.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/Random.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java:common_subtle",
+        "//java:public_interfaces",
+        "@com_google_api_client//jar",
+        "@com_google_cloudkms//jar",
+        "@com_google_http_client//jar",
+        "@com_google_http_client_jackson2//jar",
+        "@com_google_oauth_client//jar",
+        "@org_codehaus_jackson//jar",
+    ],
+)
+
+java_library(
+    name = "aead_subtle_aes_ctr_hmac",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/subtle/AesCtrJceCipher.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EncryptThenAuthenticate.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/IndCpaCipher.java",
     ]),
     javacopts = JAVACOPTS,
     deps = [
@@ -93,8 +112,32 @@ java_library(
     deps = COMMON_JAVA_DEPS + [
         "//java:aead_subtle",
         "//java:mac",
+        "//proto:java_googlecloudkms",
         "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_aes_gcm",
+        "//proto:java_hmac",
+        "@com_google_api_client//jar",
+        "@com_google_cloudkms//jar",
+        "@com_google_http_client//jar",
+        "@com_google_http_client_jackson2//jar",
+        "@com_google_oauth_client//jar",
+        "@org_codehaus_jackson//jar",
+    ],
+)
+
+# this library does not depend on com_google_api_client, etc.
+java_library(
+    name = "aead_aes_ctr_hmac",
+    srcs = glob([
+        "src/main/java/com/google/cloud/crypto/tink/aead/AeadFactory.java",
+        "src/main/java/com/google/cloud/crypto/tink/aead/AesCtrHmacAeadKeyManager.java",
+        "src/main/java/com/google/cloud/crypto/tink/aead/AesCtrKeyManager.java",
+    ]),
+    javacopts = JAVACOPTS,
+    deps = COMMON_JAVA_DEPS + [
+        "//java:aead_subtle_aes_ctr_hmac",
+        "//java:mac",
+        "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_hmac",
     ],
 )
