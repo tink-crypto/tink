@@ -80,16 +80,12 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
 
   private void validate(AesCtrKey key) throws GeneralSecurityException {
     Util.validateVersion(key.getVersion(), VERSION);
-    if (!Util.isValidAesKeySize(key.getKeyValue().size())) {
-      throw new GeneralSecurityException("invalid key size");
-    }
+    Util.validateAesKeySize(key.getKeyValue().size());
     validate(key.getParams());
   }
 
   private void validate(AesCtrKeyFormat format) throws GeneralSecurityException {
-    if (!Util.isValidAesKeySize(format.getKeySize())) {
-      throw new GeneralSecurityException("invalid key size");
-    }
+    Util.validateAesKeySize(format.getKeySize());
     validate(format.getParams());
   }
 

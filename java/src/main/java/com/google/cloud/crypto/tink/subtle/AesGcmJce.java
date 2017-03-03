@@ -37,7 +37,7 @@ public final class AesGcmJce implements Aead {
 
   private final SecretKeySpec keySpec;
 
-  AesGcmJce(final byte[] key) {
+  public AesGcmJce(final byte[] key) {
     keySpec = new SecretKeySpec(key, "AES");
   }
 

@@ -65,10 +65,12 @@ public final class Util {
   }
 
   /**
-   * @returns true if the {@code sizeInBytes} is a valid AES key size.
+   * @throws GeneralSecurityException if the {@code sizeInBytes} is not a valid AES key size.
    */
-  public static boolean isValidAesKeySize(int sizeInBytes) {
-    return (sizeInBytes == 16 || sizeInBytes == 24 || sizeInBytes == 32);
+  public static void validateAesKeySize(int sizeInBytes) throws GeneralSecurityException {
+    if (sizeInBytes != 16 && sizeInBytes != 24 && sizeInBytes != 32) {
+      throw new GeneralSecurityException("invalid Aes key size");
+    }
   }
 
   /**

@@ -1,11 +1,11 @@
 package com.google.cloud.crypto.tink.subtle;
 
-import static com.google.common.io.BaseEncoding.base16;
 import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertArrayEquals;
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.Mac;
+import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.subtle.MacJce;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -29,10 +29,10 @@ public class EncryptThenAuthenticateTest {
     public RFCTestVector(String macKey, String encKey, String ciphertext, String aad,
         String macAlg, int ivSize, int tagLength) {
       try {
-        this.encKey = decode(encKey);
-        this.macKey = decode(macKey);
-        this.ciphertext = decode(ciphertext);
-        this.aad = decode(aad);
+        this.encKey = TestUtil.hexDecode(encKey);
+        this.macKey = TestUtil.hexDecode(macKey);
+        this.ciphertext = TestUtil.hexDecode(ciphertext);
+        this.aad = TestUtil.hexDecode(aad);
         this.macAlg = macAlg;
         this.ivSize = ivSize;
         this.tagLength = tagLength;
@@ -180,9 +180,5 @@ public class EncryptThenAuthenticateTest {
     SecretKeySpec keySpec = new SecretKeySpec(hmacKey, "HMAC");
     Mac mac = new MacJce(macAlg, keySpec, tagLength);
     return new EncryptThenAuthenticate(cipher, mac, tagLength);
-  }
-
-  private static byte[] decode(String hexData) {
-    return base16().lowerCase().decode(hexData);
   }
 }

@@ -16,10 +16,11 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
-import static com.google.common.io.BaseEncoding.base16;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertArrayEquals;
+
+import com.google.cloud.crypto.tink.TestUtil;
 
 import java.util.Arrays;
 import org.junit.Before;
@@ -59,13 +60,13 @@ public class AesCtrJceCipherTest {
 
   @Test
   public void testNistVector() throws Exception {
-    byte[] rawCiphertext = decode(NIST_CIPHERTEXT);
-    byte[] iv = decode(NIST_IV);
+    byte[] rawCiphertext = TestUtil.hexDecode(NIST_CIPHERTEXT);
+    byte[] iv = TestUtil.hexDecode(NIST_IV);
     byte[] ciphertext = new byte[iv.length + rawCiphertext.length];
     System.arraycopy(iv, 0, ciphertext, 0, iv.length);
     System.arraycopy(rawCiphertext, 0, ciphertext, iv.length, rawCiphertext.length);
-    AesCtrJceCipher cipher = new AesCtrJceCipher(decode(NIST_KEY), iv.length);
-    assertArrayEquals(decode(NIST_PLAINTEXT), cipher.decrypt(ciphertext));
+    AesCtrJceCipher cipher = new AesCtrJceCipher(TestUtil.hexDecode(NIST_KEY), iv.length);
+    assertArrayEquals(TestUtil.hexDecode(NIST_PLAINTEXT), cipher.decrypt(ciphertext));
   }
 
   @Test
@@ -109,7 +110,4 @@ public class AesCtrJceCipherTest {
     assertArrayEquals(msg, c.decrypt(ciphertext));
   }
 
-  private static byte[] decode(String hexData) {
-    return base16().lowerCase().decode(hexData);
-  }
 }

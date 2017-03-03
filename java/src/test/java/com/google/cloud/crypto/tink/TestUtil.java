@@ -16,6 +16,7 @@
 
 package com.google.cloud.crypto.tink;
 
+import static com.google.common.io.BaseEncoding.base16;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -26,6 +27,7 @@ import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKeyFormat;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrParams;
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
+import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
@@ -240,6 +242,24 @@ public class TestUtil {
   }
 
   /**
+   * @returns a {@code AesGcmKey}.
+   */
+  public static AesGcmKey createAesGcmKey(String keyValue) throws Exception {
+    return AesGcmKey.newBuilder()
+        .setKeyValue(ByteString.copyFromUtf8(keyValue))
+        .build();
+  }
+
+  /**
+   * @returns a {@code AesGcmKey}.
+   */
+  public static AesGcmKey createAesGcmKey(byte[] keyValue) throws Exception {
+    return AesGcmKey.newBuilder()
+        .setKeyValue(ByteString.copyFrom(keyValue))
+        .build();
+  }
+
+  /**
    * @returns a {@code AesCtrHmacAeadKeyFormat}.
    */
   public static KeyFormat createAesCtrHmacAeadKeyFormat(int aesKeySize, int ivSize,
@@ -352,5 +372,12 @@ public class TestUtil {
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("decrypted failed"));
     }
+  }
+
+  /**
+   * Decodes hex string.
+   */
+  public static byte[] hexDecode(String hexData) {
+    return base16().lowerCase().decode(hexData);
   }
 }
