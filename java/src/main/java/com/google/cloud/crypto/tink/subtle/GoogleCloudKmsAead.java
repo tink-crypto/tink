@@ -58,7 +58,7 @@ public final class GoogleCloudKmsAead implements Aead {
           .execute();
       return response.decodeCiphertext();
     } catch (IOException e) {
-      throw new GeneralSecurityException("encryption failed");
+      throw new GeneralSecurityException("decryption failed");
     }
 
   }

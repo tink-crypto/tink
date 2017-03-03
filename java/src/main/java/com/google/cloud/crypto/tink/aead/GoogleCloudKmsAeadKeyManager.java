@@ -37,7 +37,7 @@ import java.security.GeneralSecurityException;
  * Currently it doesn't support key generation. To use it one must
  * provide an implementation of {@code GoogleCredentialFactory}.
  */
-class GoogleCloudKmsAeadKeyManager implements KeyManager<Aead> {
+public class GoogleCloudKmsAeadKeyManager implements KeyManager<Aead> {
   private static final int VERSION = 0;
 
   private static final String KEY_TYPE =

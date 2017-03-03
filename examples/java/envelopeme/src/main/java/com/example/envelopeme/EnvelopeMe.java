@@ -14,18 +14,55 @@
 
 package com.example.envelopeme;
 
+import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.CleartextKeysetHandle;
 import com.google.cloud.crypto.tink.KeysetHandle;
-import com.google.cloud.crypto.tink.TinkProto.Keyset;
+import com.google.cloud.crypto.tink.aead.AeadFactory;
+import com.google.cloud.crypto.tink.mac.MacFactory;
+
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
 
 /**
- * Simple command-line tool that encrypts an input string using envelope encryption.
+ * Implements the commands specified in {@code EnvelopeMeCommands}.
  */
 public class EnvelopeMe {
+
+  /**
+   * Encrypts the given bytes, using the key config file and the credential file.
+   */
+  public static byte[] encrypt(byte[] config, byte[] plaintext)
+      throws Exception {
+    KeysetHandle handle = CleartextKeysetHandle.fromTextFormat(new String(config, "UTF-8"));
+    Aead aead = AeadFactory.getPrimitive(handle);
+    return aead.encrypt(plaintext, null /* aad */);
+  }
+
+  /**
+   * Decrypts the given encrypted bytes, using the key config file and the credential file.
+   */
+  public static byte[] decrypt(byte[] config, byte[] ciphertext)
+      throws Exception {
+    KeysetHandle handle = CleartextKeysetHandle.fromTextFormat(new String(config, "UTF-8"));
+    Aead aead = AeadFactory.getPrimitive(handle);
+    return aead.decrypt(ciphertext, null /* aad */);
+  }
+
   public static void main(String[] args) throws Exception {
-    // TODO(thaidn): finish this app when envelope encryption is done.
-    System.out.println("Hello, world!");
-    KeysetHandle keysetHandle = CleartextKeysetHandle.fromProto(
-        Keyset.newBuilder().build());
+    AeadFactory.registerStandardKeyTypes();
+    MacFactory.registerStandardKeyTypes();
+
+    EnvelopeMeCommands commands = new EnvelopeMeCommands();
+    CmdLineParser parser = new CmdLineParser(commands);
+
+    try {
+      parser.parseArgument(args);
+    } catch (CmdLineException e) {
+      System.out.println(e);
+      System.out.println();
+      e.getParser().printUsage(System.out);
+      System.exit(1);
+    }
+    commands.command.run();
   }
 }

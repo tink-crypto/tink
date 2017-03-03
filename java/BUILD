@@ -212,6 +212,7 @@ java_library(
     srcs = KEY_MANAGEMENT_RESTRICTED_API_SRCS,
     javacopts = JAVACOPTS,
     visibility = [
+        "//examples/java/envelopeme:__pkg__",
         "//tools/tinkey:__pkg__",
     ],
     deps = COMMON_JAVA_DEPS + [
