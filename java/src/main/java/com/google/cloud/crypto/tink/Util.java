@@ -24,7 +24,7 @@ import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
  */
 public class Util {
   /**
-   * @returns a KeysetInfo-proto from a {@code keyset} protobuf.
+   * @return a KeysetInfo-proto from a {@code keyset} protobuf.
    */
   public static KeysetInfo getKeysetInfo(Keyset keyset) {
     KeysetInfo.Builder info = KeysetInfo.newBuilder()
@@ -36,7 +36,7 @@ public class Util {
   }
 
   /**
-   * @returns a KeyInfo-proto from a {@code key} protobuf.
+   * @return a KeyInfo-proto from a {@code key} protobuf.
    */
   public static KeysetInfo.KeyInfo getKeyInfo(Keyset.Key key) {
     return KeysetInfo.KeyInfo.newBuilder()

@@ -28,7 +28,7 @@ import java.security.GeneralSecurityException;
  */
 public final class CleartextKeysetHandle {
   /**
-   * @returns a new keyset handle from {@code proto} which is a Keyset protobuf in binary format.
+   * @return a new keyset handle from {@code proto} which is a Keyset protobuf in binary format.
    * @throws GeneralSecurityException
    */
   public static final KeysetHandle fromBinaryFormat(final byte[] proto)
@@ -42,7 +42,7 @@ public final class CleartextKeysetHandle {
   }
 
   /**
-   * @returns a new keyset handle from {@code proto} which is a Keyset protobuf in text format.
+   * @return a new keyset handle from {@code proto} which is a Keyset protobuf in text format.
    * @throws GeneralSecurityException
    */
   public static final KeysetHandle fromTextFormat(String proto) throws GeneralSecurityException {
@@ -56,7 +56,7 @@ public final class CleartextKeysetHandle {
   }
 
   /**
-   * @returns a new keyset handle from {@code encryptedKeySet}.
+   * @return a new keyset handle from {@code encryptedKeySet}.
    * @throws GeneralSecurityException
    */
   public static final KeysetHandle fromProto(Keyset keyset)

@@ -28,7 +28,7 @@ import java.security.GeneralSecurityException;
  */
 public final class KmsEncryptedKeysetHandle {
   /**
-   * @returns a new keyset handle from {@code proto} which is a KmsEncryptedKeyset
+   * @return a new keyset handle from {@code proto} which is a KmsEncryptedKeyset
    * protobuf in binary format.
    * @throws GeneralSecurityException
    */
@@ -43,7 +43,7 @@ public final class KmsEncryptedKeysetHandle {
   }
 
   /**
-   * @returns a new keyset handle from {@code proto} which is a KmsEncryptedKeyset
+   * @return a new keyset handle from {@code proto} which is a KmsEncryptedKeyset
    * protobuf in text format.
    * @throws GeneralSecurityException
    */
@@ -58,7 +58,7 @@ public final class KmsEncryptedKeysetHandle {
   }
 
   /**
-   * @returns a new keyset handle from {@code encryptedKeyset}.
+   * @return a new keyset handle from {@code encryptedKeyset}.
    * @throws GeneralSecurityException
    */
   public static final KeysetHandle fromProto(KmsEncryptedKeyset kmsEncryptedKeyset)

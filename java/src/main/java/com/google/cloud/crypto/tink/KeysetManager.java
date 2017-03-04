@@ -113,7 +113,7 @@ public class KeysetManager {
   }
 
   /**
-   * @returns return {@code KeysetHandle} of the managed keyset.
+   * @return return {@code KeysetHandle} of the managed keyset.
    */
   public KeysetHandle getKeysetHandle() {
     return new KeysetHandle(keysetBuilder.build());
@@ -122,7 +122,7 @@ public class KeysetManager {
   /**
    * Encrypts the managed keyset with {@code aead} and returns a {@code KeysetHandle} of
    * the encrypted result.
-   * @returns a {@code KeysetHandle} of an encrypted keyset.
+   * @return a {@code KeysetHandle} of an encrypted keyset.
    * @throws GeneralSecurityException
    */
   public KeysetHandle getKeysetHandle(Aead aead) throws GeneralSecurityException {

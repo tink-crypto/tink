@@ -59,7 +59,7 @@ public final class Registry {
    * a key manager for {@code typeUrl}.
    *
    * @throws NullPointerException if {@code manager} is null.
-   * @returns true if the {@code manager} is registered as a manager for {@code typeUrl}; false if
+   * @return true if the {@code manager} is registered as a manager for {@code typeUrl}; false if
    * there already exists a key manager for {@code typeUrl}.
    */
   @SuppressWarnings("unchecked")
@@ -76,7 +76,7 @@ public final class Registry {
   }
 
   /**
-   * @returns a KeyManager for the given {@code typeUrl} (if found).
+   * @return a KeyManager for the given {@code typeUrl} (if found).
    *
    * TODO(przydatek): find a way for verifying the primitive type.
    */
@@ -95,7 +95,7 @@ public final class Registry {
    * It looks up a KeyManager identified by {@code format.key_type}, and calls
    * managers {@code newKey(format)}-method.
    *
-   * @returns a new key.
+   * @return a new key.
    */
   public <P> Any newKey(KeyFormat format)
       throws GeneralSecurityException {
@@ -108,7 +108,7 @@ public final class Registry {
    * It looks up a KeyManager identified by {@code proto.type_url}, and calls
    * managers {@code getPrimitive(proto)}-method.
    *
-   * @returns a new primitive.
+   * @return a new primitive.
    */
   public <P> P getPrimitive(Any proto)
       throws GeneralSecurityException {
@@ -124,7 +124,7 @@ public final class Registry {
    * The returned set is usually later "wrapped" into a class that implements
    * the corresponding Primitive-interface.
    *
-   * @returns a PrimitiveSet with all instantiated primitives.
+   * @return a PrimitiveSet with all instantiated primitives.
    */
   public <P> PrimitiveSet<P> getPrimitives(final KeysetHandle keysetHandle)
       throws GeneralSecurityException {
@@ -142,7 +142,7 @@ public final class Registry {
    * The returned set is usually later "wrapped" into a class that implements
    * the corresponding Primitive-interface.
    *
-   * @returns a PrimitiveSet with all instantiated primitives.
+   * @return a PrimitiveSet with all instantiated primitives.
    */
     public <P> PrimitiveSet<P> getPrimitives(final KeysetHandle keysetHandle,
         final KeyManager<P> customManager) throws GeneralSecurityException {

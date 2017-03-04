@@ -27,14 +27,14 @@ public interface Mac {
   /**
    * Computes message authentication code (MAC) for {@code data}.
    *
-   * @returns MAC value.
+   * @return MAC value.
    */
   byte[] computeMac(final byte[] data) throws GeneralSecurityException;
 
   /**
    * Verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
    *
-   * @returns true iff {@code mac} is a correct MAC for {@code data}.
+   * @return true iff {@code mac} is a correct MAC for {@code data}.
    */
   boolean verifyMac(final byte[] mac, final byte[] data) throws GeneralSecurityException;
 }

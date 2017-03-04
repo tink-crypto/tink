@@ -174,7 +174,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a keyset from a list of keys. The first key is primary.
+   * @return a keyset from a list of keys. The first key is primary.
    */
   public static Keyset createKeyset(Key primary, Key... keys) throws Exception {
     Keyset.Builder builder = Keyset.newBuilder();
@@ -187,7 +187,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a key with some specific properties.
+   * @return a key with some specific properties.
    */
   public static Key createKey(Message proto, int keyId, KeyStatusType status,
       OutputPrefixType prefixType) throws Exception {
@@ -200,7 +200,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a {@code HmacKey}.
+   * @return a {@code HmacKey}.
    */
   public static HmacKey createHmacKey(String keyValue, int tagSize) throws Exception {
     HmacParams params = HmacParams.newBuilder()
@@ -215,7 +215,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a {@code AesCtrKey}.
+   * @return a {@code AesCtrKey}.
    */
   public static AesCtrKey createAesCtrKey(String keyValue, int ivSize) throws Exception {
     AesCtrParams aesCtrParams = AesCtrParams.newBuilder()
@@ -228,7 +228,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a {@code AesCtrHmacAeadKey}.
+   * @return a {@code AesCtrHmacAeadKey}.
    */
   public static AesCtrHmacAeadKey createAesCtrHmacAeadKey(String aesCtrKeyValue, int ivSize,
       String hmacKeyValue, int tagSize) throws Exception {
@@ -242,7 +242,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a {@code AesGcmKey}.
+   * @return a {@code AesGcmKey}.
    */
   public static AesGcmKey createAesGcmKey(String keyValue) throws Exception {
     return AesGcmKey.newBuilder()
@@ -251,7 +251,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a {@code AesGcmKey}.
+   * @return a {@code AesGcmKey}.
    */
   public static AesGcmKey createAesGcmKey(byte[] keyValue) throws Exception {
     return AesGcmKey.newBuilder()
@@ -260,7 +260,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a {@code AesCtrHmacAeadKeyFormat}.
+   * @return a {@code AesCtrHmacAeadKeyFormat}.
    */
   public static KeyFormat createAesCtrHmacAeadKeyFormat(int aesKeySize, int ivSize,
       int hmacKeySize, int tagSize) throws Exception {
@@ -284,7 +284,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a {@code GoogleCloudKmsAeadKey}.
+   * @return a {@code GoogleCloudKmsAeadKey}.
    */
   public static GoogleCloudKmsAeadKey createGoogleCloudKmsAeadKey(String kmsKeyUri)
       throws Exception {
@@ -294,7 +294,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a {@code KmsEnvelopeAeadKey}.
+   * @return a {@code KmsEnvelopeAeadKey}.
    */
   public static KmsEnvelopeAeadKey createKmsEnvelopeAeadKey(Any kmsKey, KeyFormat dekFormat)
       throws Exception {
@@ -306,7 +306,7 @@ public class TestUtil {
   }
 
   /**
-   * @returns a KMS key URI in a format defined by Google Cloud KMS.
+   * @return a KMS key URI in a format defined by Google Cloud KMS.
    */
   public static String createGoogleCloudKmsKeyUri(
     String projectId, String location, String ringId, String keyId) {
@@ -316,14 +316,14 @@ public class TestUtil {
   }
 
   /**
-   * @returns a keyset handle from a {@code keyset}.
+   * @return a keyset handle from a {@code keyset}.
    */
   public static KeysetHandle createKeysetHandle(final Keyset keyset) throws Exception {
     return new KeysetHandle(keyset);
   }
 
   /**
-   * @returns a keyset handle from a {@code keyset} which must be a Keyset proto in text format.
+   * @return a keyset handle from a {@code keyset} which must be a Keyset proto in text format.
    */
   public static KeysetHandle createKeysetHandle(final String keyset) throws Exception {
     try {

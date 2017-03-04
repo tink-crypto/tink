@@ -73,21 +73,21 @@ public final class PrimitiveSet<P> {
   }
 
   /**
-   * @returns the entry with the primary primitive.
+   * @return the entry with the primary primitive.
    */
   public Entry<P> getPrimary() {
     return primary;
   }
 
   /**
-   * @returns all primitives using RAW prefix.
+   * @return all primitives using RAW prefix.
    */
   public List<Entry<P>> getRawPrimitives() {
     return getPrimitive(CryptoFormat.RAW_PREFIX);
   }
 
   /**
-   * @returns the entries with primitive identifed by {@code identifier}.
+   * @return the entries with primitive identifed by {@code identifier}.
    */
   public List<Entry<P>> getPrimitive(final byte[] identifier) {
     List<Entry<P>> found = primitives.get(new String(identifier, StandardCharsets.UTF_8));
@@ -110,7 +110,7 @@ public final class PrimitiveSet<P> {
   }
 
   /**
-   * @returns the entries with primitives identified by the ciphertext prefix of {@code key}.
+   * @return the entries with primitives identified by the ciphertext prefix of {@code key}.
    */
   protected List<Entry<P>> getPrimitive(Keyset.Key key)
       throws GeneralSecurityException {
@@ -118,7 +118,7 @@ public final class PrimitiveSet<P> {
   }
 
   /**
-   * @returns sets given Entry {@code primary} as the primary one.
+   * @return sets given Entry {@code primary} as the primary one.
    */
   protected void setPrimary(final Entry<P> primary) {
     this.primary = primary;
@@ -126,7 +126,7 @@ public final class PrimitiveSet<P> {
 
   /**
     * Creates an entry in the primitive table.
-    * @returns the added entry
+    * @return the added entry
     */
   protected Entry<P> addPrimitive(final P primitive, Keyset.Key key) throws GeneralSecurityException {
     Entry<P> entry = new Entry<P>(primitive, CryptoFormat.getOutputPrefix(key), key.getStatus());

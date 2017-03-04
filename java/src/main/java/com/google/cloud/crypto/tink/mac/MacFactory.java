@@ -94,7 +94,7 @@ public final class MacFactory {
   }
 
   /**
-   * @returns a Mac primitive from a {@code keysetHandle}.
+   * @return a Mac primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
    */
   public static Mac getPrimitive(final KeysetHandle keysetHandle)
@@ -103,7 +103,7 @@ public final class MacFactory {
   }
 
   /**
-   * @returns a Mac primitive from a {@code keysetHandle} and a custom {@code keyManager}.
+   * @return a Mac primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
   public static Mac getPrimitive(final KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)

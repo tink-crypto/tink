@@ -107,7 +107,7 @@ public final class AeadFactory {
   }
 
   /**
-   * @returns a Aead primitive from a {@code keysetHandle}.
+   * @return a Aead primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
    */
   public static Aead getPrimitive(final KeysetHandle keysetHandle)
@@ -116,7 +116,7 @@ public final class AeadFactory {
   }
 
   /**
-   * @returns a Aead primitive from a {@code keysetHandle} and a custom {@code keyManager}.
+   * @return a Aead primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
   public static Aead getPrimitive(final KeysetHandle keysetHandle,

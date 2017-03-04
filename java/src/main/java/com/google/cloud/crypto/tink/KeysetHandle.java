@@ -56,21 +56,21 @@ public final class KeysetHandle {
   }
 
   /**
-   * @returns the actual keyset data.
+   * @return the actual keyset data.
    */
   public Keyset getKeyset() {
     return keyset;
   }
 
   /**
-   * @returns the actual keyset data.
+   * @return the actual keyset data.
    */
   public KeysetInfo getKeysetInfo() {
     return Util.getKeysetInfo(keyset);
   }
 
   /**
-   * @returns the actual keyset data.
+   * @return the actual keyset data.
    */
   public byte[] getEncryptedKeyset() {
     return encryptedKeyset;

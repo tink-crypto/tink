@@ -24,7 +24,7 @@ import java.security.GeneralSecurityException;
 public final class Util {
   /**
    * Best effort fix-timing array comparison.
-   * @returns true if two arrays are equal.
+   * @return true if two arrays are equal.
    */
   public static final boolean arrayEquals(final byte[] x, final byte[] y) {
     if (x == null || y == null) {

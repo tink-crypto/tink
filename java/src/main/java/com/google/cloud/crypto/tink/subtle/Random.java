@@ -25,7 +25,7 @@ public final class Random {
   private static final SecureRandom secureRandom = new SecureRandom();
 
   /**
-   * @returns a random byte array of size {@code size}.
+   * @return a random byte array of size {@code size}.
    */
   public static byte[] randBytes(int size) {
     byte[] rand = new byte[size];
@@ -34,7 +34,7 @@ public final class Random {
   }
 
   /**
-   * @returns non negative random int.
+   * @return non negative random int.
    */
   public static int randNonNegativeInt() {
     byte[] rand = randBytes(4);

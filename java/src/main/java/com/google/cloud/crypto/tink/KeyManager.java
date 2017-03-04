@@ -31,7 +31,7 @@ public interface KeyManager<Primitive> {
   /**
    * Constructs an instance of Primitive for the key given in {@code proto}.
    *
-   * @returns the new constructed Primitive.
+   * @return the new constructed Primitive.
    * @throws GeneralSecurityException if the key given in {@code proto} is corrupted
    *         or not supported.
    */
@@ -40,13 +40,13 @@ public interface KeyManager<Primitive> {
   /**
    * Generates a new key according to specification in {@code keyFormat}.
    *
-   * @returns the new generated key.
+   * @return the new generated key.
    * @throws GeneralSecurityException if the specified format is wrong or not supported.
    */
   Any newKey(KeyFormat keyFormat) throws GeneralSecurityException;
 
   /**
-   * @returns true iff this KeyManager supports key type identified by {@code typeUrl}.
+   * @return true iff this KeyManager supports key type identified by {@code typeUrl}.
    */
   boolean doesSupport(String typeUrl);
 }
