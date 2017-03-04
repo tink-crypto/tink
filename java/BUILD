@@ -51,10 +51,10 @@ java_library(
 
 java_library(
     name = "common_subtle",
-    srcs = glob([
+    srcs = [
         "src/main/java/com/google/cloud/crypto/tink/subtle/Random.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
-    ]),
+    ],
     javacopts = JAVACOPTS,
 )
 
@@ -69,13 +69,13 @@ COMMON_JAVA_DEPS = [
 
 java_library(
     name = "aead_subtle",
-    srcs = glob([
+    srcs = [
         "src/main/java/com/google/cloud/crypto/tink/subtle/AesCtrJceCipher.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/AesGcmJce.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/EncryptThenAuthenticate.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/GoogleCloudKmsAead.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/IndCpaCipher.java",
-    ]),
+    ],
     javacopts = JAVACOPTS,
     deps = [
         "//java:common_subtle",
@@ -116,11 +116,11 @@ java_library(
 
 java_library(
     name = "mac_subtle",
-    srcs = glob([
+    srcs = [
         "src/main/java/com/google/cloud/crypto/tink/subtle/MacJce.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/Random.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
-    ]),
+    ],
     javacopts = JAVACOPTS,
     deps = [
         "//java:public_interfaces",
@@ -143,11 +143,11 @@ java_library(
 
 java_library(
     name = "signature_subtle",
-    srcs = glob([
+    srcs = [
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EcUtil.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/EcdsaSignJce.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/EcdsaVerifyJce.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EcUtil.java",
-    ]),
+    ],
     javacopts = JAVACOPTS,
     deps = [
         "//java:public_interfaces",

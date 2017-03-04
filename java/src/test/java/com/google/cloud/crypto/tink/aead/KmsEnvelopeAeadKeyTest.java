@@ -18,23 +18,24 @@ package com.google.cloud.crypto.tink.aead;
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.KeysetHandle;
-import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
+import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TestGoogleCredentialFactory;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
-import com.google.cloud.crypto.tink.Registry;
+import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.protobuf.Any;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for {@code KmsEnvelopeAead} and {@code KmsEnvelopeAeadKeyManager}.
  */
+@RunWith(JUnit4.class)
 public class KmsEnvelopeAeadKeyTest {
 
   @Before

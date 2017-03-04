@@ -27,6 +27,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+/**
+ * Tests for AesCtrHmacAead and its key manager.
+ */
 @RunWith(JUnit4.class)
 public class AesCtrHmacAeadKeyTest {
 

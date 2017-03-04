@@ -29,6 +29,9 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * This primitive implements AesGcm using JCE.
+ */
 public final class AesGcmJce implements Aead {
 
   // All instances of this class use a 12 byte IV and a 16 byte tag.

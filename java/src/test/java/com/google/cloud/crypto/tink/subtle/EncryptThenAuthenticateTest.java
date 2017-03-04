@@ -85,7 +85,7 @@ public class EncryptThenAuthenticateTest {
   public void testRFCVectors() throws Exception {
     for (int i = 0; i < rfcTestVectors.length; i++) {
       RFCTestVector t = rfcTestVectors[i];
-      if(Cipher.getMaxAllowedKeyLength("AES") < 256 && t.encKey.length > 16) {
+      if (Cipher.getMaxAllowedKeyLength("AES") < 256 && t.encKey.length > 16) {
           System.out.println("Unlimited Strength Jurisdiction Policy Files are required"
               + " but not installed. Skip tests with keys larger than 128 bits.");
           continue;

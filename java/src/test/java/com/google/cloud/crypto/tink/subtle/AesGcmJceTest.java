@@ -41,10 +41,10 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class AesGcmJceTest {
+  private static final int KEY_SIZE = 16;
 
   @Test
   public void testEncryptDecrypt() throws Exception {
-    final int KEY_SIZE = 16;
     byte aad[] = new byte[] {1, 2, 3};
     byte key[] = Random.randBytes(KEY_SIZE);
     AesGcmJce gcm = new AesGcmJce(key);
@@ -58,7 +58,6 @@ public class AesGcmJceTest {
 
   @Test
   public void testModifyCiphertext() throws Exception {
-    final int KEY_SIZE = 16;
     byte aad[] = new byte[] {1, 2, 3};
     byte key[] = Random.randBytes(KEY_SIZE);
     byte message[] = Random.randBytes(32);
@@ -69,7 +68,7 @@ public class AesGcmJceTest {
     for (int b = 0; b < ciphertext.length; b++) {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modified = Arrays.copyOf(ciphertext, ciphertext.length);
-        modified[b] ^= (byte)(1 << bit);
+        modified[b] ^= (byte) (1 << bit);
         try {
           byte[] unused = gcm.decrypt(modified, aad);
           fail("Decrypting modified ciphertext should fail");
@@ -102,7 +101,6 @@ public class AesGcmJceTest {
    * A very basic test for asynchronous encryption.
    */
   public void testAsync() throws Exception {
-    final int KEY_SIZE = 16;
     byte aad[] = new byte[] {1, 2, 3};
     byte key[] = Random.randBytes(KEY_SIZE);
     AesGcmJce gcm = new AesGcmJce(key);

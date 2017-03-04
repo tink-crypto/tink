@@ -128,7 +128,8 @@ public final class PrimitiveSet<P> {
     * Creates an entry in the primitive table.
     * @return the added entry
     */
-  protected Entry<P> addPrimitive(final P primitive, Keyset.Key key) throws GeneralSecurityException {
+  protected Entry<P> addPrimitive(final P primitive, Keyset.Key key)
+      throws GeneralSecurityException {
     Entry<P> entry = new Entry<P>(primitive, CryptoFormat.getOutputPrefix(key), key.getStatus());
     List<Entry<P>> list = new ArrayList<Entry<P>>();
     list.add(entry);

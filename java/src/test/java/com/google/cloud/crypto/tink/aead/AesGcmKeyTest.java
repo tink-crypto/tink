@@ -18,23 +18,24 @@ package com.google.cloud.crypto.tink.aead;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.TestUtil;
-import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Util;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import javax.crypto.Cipher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+/**
+ * Test for AesGcmJce and its key manager.
+ */
 @RunWith(JUnit4.class)
 public class AesGcmKeyTest {
   class NistTestVector {
@@ -315,7 +316,7 @@ public class AesGcmKeyTest {
   @Test
   public void testNistVectors() throws Exception {
     for (NistTestVector t : nistTestVectors) {
-      if(Cipher.getMaxAllowedKeyLength("AES") < 256 && t.keyValue.length > 16) {
+      if (Cipher.getMaxAllowedKeyLength("AES") < 256 && t.keyValue.length > 16) {
           System.out.println("Unlimited Strength Jurisdiction Policy Files are required"
               + " but not installed. Skip tests with keys larger than 128 bits.");
           continue;
