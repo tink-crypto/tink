@@ -45,8 +45,3 @@ maven_jar(
     name = "com_google_oauth_client",
     artifact = "com.google.oauth-client:google-oauth-client:1.22.0",
 )
-
-maven_jar(
-    name = "org_codehaus_jackson",
-    artifact = "org.codehaus.jackson:jackson-core-asl:1.9.13",
-)

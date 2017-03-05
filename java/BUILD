@@ -64,7 +64,6 @@ COMMON_JAVA_DEPS = [
     "//java:common_subtle",
     "//java:core",
     "//proto:java_core",
-    "//proto:java_core_compile_imports",
 ]
 
 # aead
@@ -85,9 +84,6 @@ java_library(
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
         "@com_google_http_client//jar",
-        "@com_google_http_client_jackson2//jar",
-        "@com_google_oauth_client//jar",
-        "@org_codehaus_jackson//jar",
     ],
 )
 
@@ -100,9 +96,10 @@ java_library(
     deps = COMMON_JAVA_DEPS + [
         "//java:aead_subtle",
         "//java:mac",
-        "//proto:java_googlecloudkms",
         "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_aes_gcm",
+        "//proto:java_core_compile_imports",
+        "//proto:java_googlecloudkms",
         "//proto:java_hmac",
         "//proto:java_kms_envelope",
         "@com_google_api_client//jar",
@@ -110,7 +107,6 @@ java_library(
         "@com_google_http_client//jar",
         "@com_google_http_client_jackson2//jar",
         "@com_google_oauth_client//jar",
-        "@org_codehaus_jackson//jar",
     ],
 )
 
@@ -137,6 +133,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
         "//java:mac_subtle",
+        "//proto:java_core_compile_imports",
         "//proto:java_hmac",
     ],
 )
@@ -164,6 +161,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
         "//java:signature_subtle",
+        "//proto:java_core_compile_imports",
         "//proto:java_ecdsa",
     ],
 )
@@ -203,7 +201,9 @@ java_library(
     visibility = [
         "//examples/java/envelopeme:__pkg__",
     ],
-    deps = COMMON_JAVA_DEPS,
+    deps = COMMON_JAVA_DEPS + [
+        "//proto:java_core_compile_imports",
+    ],
 )
 
 java_library(
@@ -213,7 +213,9 @@ java_library(
     visibility = [
         "//examples/java/envelopeme:__pkg__",
     ],
-    deps = COMMON_JAVA_DEPS,
+    deps = COMMON_JAVA_DEPS + [
+        "//proto:java_core_compile_imports",
+    ],
 )
 
 # tests
