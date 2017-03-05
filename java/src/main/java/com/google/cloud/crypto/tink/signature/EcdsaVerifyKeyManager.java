@@ -72,8 +72,6 @@ final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
 
   private void validateKey(EcdsaPublicKey pubKey) throws GeneralSecurityException {
     Util.validateVersion(pubKey.getVersion(), VERSION);
-    if (!SigUtil.validateEcdsaParams(pubKey.getParams())) {
-      throw new GeneralSecurityException("Invalid Ecdsa's parameters");
-    }
+    SigUtil.validateEcdsaParams(pubKey.getParams());
   }
 }

@@ -114,8 +114,6 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
 
   private void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {
     Util.validateVersion(privKey.getVersion(), VERSION);
-    if (!SigUtil.validateEcdsaParams(privKey.getPublicKey().getParams())) {
-      throw new GeneralSecurityException("Invalid Ecdsa's parameters");
-    }
+    SigUtil.validateEcdsaParams(privKey.getPublicKey().getParams());
   }
 }

@@ -20,10 +20,12 @@ import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaParams;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.ECParameterSpec;
 
 final class SigUtil {
+  static final String INVALID_PARAMS = "Invalid ECDSA parameters";
   /**
    * Returns the Ecdsa algorithm name corresponding to a hash type.
    *
@@ -66,9 +68,9 @@ final class SigUtil {
    * Validates Ecdsa's parameters. The hash's strength must not be weaker than the curve's strength.
    *
    * @param params the Ecdsa's parameters protocol buffer.
-   * @return true iff it's valid.
+   * @throws GeneralSecurityException iff it's invalid.
    */
-  public static boolean validateEcdsaParams(EcdsaParams params) {
+  public static void validateEcdsaParams(EcdsaParams params) throws GeneralSecurityException {
     HashType hash = params.getHashType();
     EllipticCurveType curve = params.getCurve();
     switch(curve) {
@@ -76,13 +78,19 @@ final class SigUtil {
         // Using SHA512 for curve P256 is fine. However, only the 256 leftmost bits of the hash is
         // used in signature computation. Therefore, we don't allow it here to prevent security's
         // illusion.
-        return hash == HashType.SHA256;
+        if (hash != HashType.SHA256) {
+          throw new GeneralSecurityException(INVALID_PARAMS);
+        }
+        break;
       case NIST_P384:
         /* fall through */
       case NIST_P521:
-        return hash == HashType.SHA512;
+        if (hash != HashType.SHA512) {
+          throw new GeneralSecurityException(INVALID_PARAMS);
+        }
+        break;
       default:
-        return false;
+          throw new GeneralSecurityException(INVALID_PARAMS);
     }
   }
 }

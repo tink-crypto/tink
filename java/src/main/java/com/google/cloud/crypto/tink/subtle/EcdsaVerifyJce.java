@@ -41,7 +41,7 @@ public final class EcdsaVerifyJce implements PublicKeyVerify {
     Signature verifier = Signature.getInstance(signatureAlgorithm);
     verifier.initVerify(publicKey);
     verifier.update(data);
-    boolean verified;
+    boolean verified = false;
     try {
       verified = verifier.verify(signature);
     } catch (java.lang.RuntimeException ex) {
