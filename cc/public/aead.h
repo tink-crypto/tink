@@ -26,14 +26,13 @@ namespace cloud {
 namespace crypto {
 namespace tink {
 
-using google::protobuf::util::StatusOr;
-using google::protobuf::StringPiece;
+using google::protobuf;
 
 class Aead {
  public:
-  virtual StatusOr<std::string> Encrypt(
+  virtual util::StatusOr<std::string> Encrypt(
      StringPiece plaintext, StringPiece associated_data) const = 0;
-  virtual StatusOr<std::string> Decrypt(
+  virtual util::StatusOr<std::string> Decrypt(
      StringPiece ciphertext, StringPiece associated_data) const = 0;
   virtual ~Aead() {}
 };

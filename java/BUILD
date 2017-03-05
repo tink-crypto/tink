@@ -1,3 +1,5 @@
+licenses(["notice"])  # Apache 2.0
+
 JAVACOPTS = [
     "-Xlint:unchecked",
     "-Xlint:deprecation",

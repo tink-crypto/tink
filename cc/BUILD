@@ -1,3 +1,5 @@
+licenses(["notice"])  # Apache 2.0
+
 COMMON_DEPS = [
     # this library provides Status, StatusOr, StringPiece, etc.
     "@com_github_google_protobuf//:protobuf_lite",
