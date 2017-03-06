@@ -194,3 +194,50 @@ java_proto_library(
     verbose = 0,
     with_grpc = False,
 )
+
+# ecies hybrid encryption
+
+filegroup(
+    name = "ecies",
+    srcs = [
+        "ecies.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "cc_ecies",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    proto_deps = [
+        ":cc_core",
+        ":cc_hmac",
+    ],
+    protos = [
+        ":ecies",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+java_proto_library(
+    name = "java_ecies",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    proto_deps = [
+        ":java_core",
+        ":java_hmac",
+    ],
+    protos = [
+        ":ecies",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)

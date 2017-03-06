@@ -42,6 +42,8 @@ java_library(
     name = "public_interfaces",
     srcs = [
         "src/main/java/com/google/cloud/crypto/tink/Aead.java",
+        "src/main/java/com/google/cloud/crypto/tink/HybridDecrypt.java",
+        "src/main/java/com/google/cloud/crypto/tink/HybridEncrypt.java",
         "src/main/java/com/google/cloud/crypto/tink/Mac.java",
         "src/main/java/com/google/cloud/crypto/tink/PublicKeySign.java",
         "src/main/java/com/google/cloud/crypto/tink/PublicKeyVerify.java",
