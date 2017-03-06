@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.crypto.tink.TestUtil.DummyMac;
 import com.google.cloud.crypto.tink.TestUtil.DummyMacKeyManager;
 import com.google.cloud.crypto.tink.TestUtil.EchoAead;
 import com.google.cloud.crypto.tink.TestUtil.EchoAeadKeyManager;
@@ -32,9 +31,7 @@ import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
-import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
-import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;

@@ -80,6 +80,7 @@ public final class KeysetHandle {
    * Prints out the keyset but without actual key material, but only names of key types
    * and the key format proto.
    */
+  @Override
   public String toString() {
     return TextFormat.printToUnicodeString(getKeysetInfo());
   }

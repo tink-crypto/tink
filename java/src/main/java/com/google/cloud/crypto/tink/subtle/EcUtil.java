@@ -17,21 +17,12 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import java.math.BigInteger;
-import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECField;
 import java.security.spec.ECFieldFp;
-import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
-import java.security.spec.InvalidParameterSpecException;
-import java.util.Arrays;
 
 /**
  * Utility functions for elliptic curve crypto, used in ECDSA and ECDH.

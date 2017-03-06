@@ -18,7 +18,6 @@ package com.google.cloud.crypto.tink.aead;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.CryptoFormat;

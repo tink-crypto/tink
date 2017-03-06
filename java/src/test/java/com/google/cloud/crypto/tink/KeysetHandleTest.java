@@ -24,7 +24,6 @@ import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.protobuf.TextFormat;
-import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

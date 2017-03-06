@@ -19,12 +19,12 @@ package com.google.cloud.crypto.tink;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.security.GeneralSecurityException;
 
 /**
  * A container class for a set of primitives (i.e. implementations of cryptographic
@@ -118,7 +118,7 @@ public final class PrimitiveSet<P> {
   }
 
   /**
-   * @return sets given Entry {@code primary} as the primary one.
+   * Sets given Entry {@code primary} as the primary one.
    */
   protected void setPrimary(final Entry<P> primary) {
     this.primary = primary;

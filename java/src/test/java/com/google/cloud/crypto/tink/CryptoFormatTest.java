@@ -17,12 +17,10 @@
 package com.google.cloud.crypto.tink;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

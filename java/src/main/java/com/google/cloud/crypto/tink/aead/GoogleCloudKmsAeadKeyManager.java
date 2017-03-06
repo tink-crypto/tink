@@ -29,7 +29,6 @@ import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.GoogleCloudKmsAead;
 import com.google.cloud.crypto.tink.subtle.Util;
 import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 

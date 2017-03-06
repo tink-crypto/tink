@@ -16,7 +16,7 @@ import org.junit.runners.JUnit4;
 /** Unit tests for {@link MacJce}. */
 @RunWith(JUnit4.class)
 public class MacJceTest {
-  class NISTTestVector {
+  private static class NISTTestVector {
     String algName;
     public byte[] key;
     public byte[] message;

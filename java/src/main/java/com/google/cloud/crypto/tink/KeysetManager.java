@@ -19,12 +19,10 @@ package com.google.cloud.crypto.tink;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 

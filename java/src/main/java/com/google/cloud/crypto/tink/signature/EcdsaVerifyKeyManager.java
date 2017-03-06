@@ -16,7 +16,6 @@
 
 package com.google.cloud.crypto.tink.signature;
 
-import com.google.cloud.crypto.tink.EcdsaProto.EcdsaParams;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.PublicKeyVerify;

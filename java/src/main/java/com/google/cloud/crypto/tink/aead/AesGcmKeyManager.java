@@ -21,7 +21,6 @@ import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.subtle.AesGcmJce;
 import com.google.cloud.crypto.tink.subtle.Util;
 import com.google.cloud.crypto.tink.subtle.Random;

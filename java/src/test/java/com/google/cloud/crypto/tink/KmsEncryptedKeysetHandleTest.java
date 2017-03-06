@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.crypto.tink.TestUtil.DummyMac;
 import com.google.cloud.crypto.tink.TestUtil.DummyMacKeyManager;
 import com.google.cloud.crypto.tink.TestUtil.EchoAead;
 import com.google.cloud.crypto.tink.TestUtil.EchoAeadKeyManager;

@@ -21,7 +21,6 @@ import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
 import com.google.cloud.crypto.tink.KeyManager;
-import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.MacJce;

@@ -34,7 +34,7 @@ import org.junit.runners.JUnit4;
 /** Unit tests for {@link EncryptThenAuthenticate}. */
 @RunWith(JUnit4.class)
 public class EncryptThenAuthenticateTest {
-  class RFCTestVector {
+  private static class RFCTestVector {
     public byte[] encKey;
     public byte[] macKey;
     public byte[] ciphertext;

@@ -17,7 +17,6 @@
 package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.TextFormat.ParseException;

@@ -19,14 +19,11 @@ package com.google.cloud.crypto.tink.subtle;
 import com.google.cloud.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import javax.crypto.Cipher;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -35,8 +32,8 @@ import javax.crypto.spec.SecretKeySpec;
 public final class AesGcmJce implements Aead {
 
   // All instances of this class use a 12 byte IV and a 16 byte tag.
-  private static int IV_SIZE_IN_BYTES = 12;
-  private static int TAG_SIZE_IN_BYTES = 16;
+  private static final int IV_SIZE_IN_BYTES = 12;
+  private static final int TAG_SIZE_IN_BYTES = 16;
 
   private final SecretKeySpec keySpec;
 

@@ -19,7 +19,6 @@ package com.google.cloud.crypto.tink;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.ConcurrentHashMap;

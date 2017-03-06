@@ -18,7 +18,6 @@ package com.google.cloud.crypto.tink.subtle;
 
 import com.google.cloud.crypto.tink.PublicKeySign;
 import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
 
