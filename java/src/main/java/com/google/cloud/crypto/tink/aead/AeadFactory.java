@@ -22,17 +22,15 @@ import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.Registry;
-import com.google.cloud.crypto.tink.subtle.IndCpaCipher;
 import com.google.cloud.crypto.tink.subtle.Util;
-
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Future;
-import java.security.GeneralSecurityException;
 
 /**
  * AeadFactory allows obtaining a primitive from a {@code KeysetHandle}.

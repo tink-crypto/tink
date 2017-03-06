@@ -18,9 +18,9 @@ package com.google.cloud.crypto.tink.aead;
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.KeyManager;
-import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKeyFormat;
+import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.Util;
 import com.google.protobuf.Any;

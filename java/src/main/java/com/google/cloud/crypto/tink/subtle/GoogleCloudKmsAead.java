@@ -21,12 +21,10 @@ import com.google.api.services.cloudkms.v1beta1.model.DecryptRequest;
 import com.google.api.services.cloudkms.v1beta1.model.DecryptResponse;
 import com.google.api.services.cloudkms.v1beta1.model.EncryptRequest;
 import com.google.api.services.cloudkms.v1beta1.model.EncryptResponse;
-
 import com.google.cloud.crypto.tink.Aead;
-
 import java.io.IOException;
-import java.util.concurrent.Future;
 import java.security.GeneralSecurityException;
+import java.util.concurrent.Future;
 
 /**
  * This primitive forwards encryption/decryption requests to a key in Google Cloud KMS.

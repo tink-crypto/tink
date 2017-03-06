@@ -23,11 +23,10 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Mac;
+import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
-import com.google.cloud.crypto.tink.TestUtil;
-
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
