@@ -27,7 +27,11 @@ import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKeyFormat;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrParams;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
+import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaParams;
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
@@ -39,12 +43,20 @@ import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.subtle.EcUtil;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -347,7 +359,6 @@ public class TestUtil {
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("decryption failed"));
     }
-
     ciphertext[0] = original;
     original = ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE];
     ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE] = (byte) ~original;
@@ -382,6 +393,80 @@ public class TestUtil {
         assertTrue(ex.getCause() instanceof GeneralSecurityException);
       }
     }
+  }
+
+  /**
+   * @return a {@code EcdsaPrivateKey} constructed from {@code EcdsaPublicKey} and the byte array
+   * of private key.
+   */
+  public static EcdsaPrivateKey createEcdsaPrivKey(EcdsaPublicKey pubKey, byte[] privKey) {
+    final int version = 0;
+    return EcdsaPrivateKey.newBuilder()
+        .setVersion(version)
+        .setPublicKey(pubKey)
+        .setKeyValue(ByteString.copyFrom(privKey))
+        .build();
+  }
+
+  /**
+   * @return a {@code EcdsaPublicKey} constructed from {@code EllipticCurveType} and
+   * {@code HashType}.
+   */
+  public static EcdsaPublicKey generateEcdsaPubKey(EllipticCurveType curve, HashType hashType)
+    throws Exception {
+    EcdsaPrivateKey privKey = generateEcdsaPrivKey(curve, hashType);
+    return privKey.getPublicKey();
+  }
+
+  /**
+   * @return a {@code EcdsaPrivateKey} constructed from {@code EllipticCurveType} and
+   * {@code HashType}.
+   */
+  public static EcdsaPrivateKey  generateEcdsaPrivKey(EllipticCurveType curve, HashType hashType)
+      throws Exception {
+        ECParameterSpec ecParams;
+        switch(curve) {
+          case NIST_P256:
+            ecParams = EcUtil.getNistP256Params();
+            break;
+          case NIST_P384:
+            ecParams = EcUtil.getNistP384Params();
+            break;
+          case NIST_P521:
+            ecParams = EcUtil.getNistP521Params();
+            break;
+          default:
+            throw new NoSuchAlgorithmException("Curve not implemented:" + curve);
+        }
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+        keyGen.initialize(ecParams);
+        KeyPair keyPair = keyGen.generateKeyPair();
+        ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
+        ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
+        ECPoint w = pubKey.getW();
+        EcdsaPublicKey ecdsaPubKey = createEcdsaPubKey(hashType, curve,
+            w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
+
+        return createEcdsaPrivKey(ecdsaPubKey, privKey.getS().toByteArray());
+      }
+
+  /**
+   * @return a {@code EcdsaPublicKey} constructed from {@code HashType}, {@code EllipticCurveType}
+   * and affine coordinates of the public key.
+   */
+  public static EcdsaPublicKey createEcdsaPubKey(HashType hashType, EllipticCurveType curve,
+      byte[] pubX, byte[] pubY) throws Exception {
+    final int version = 0;
+    EcdsaParams ecdsaParams = EcdsaParams.newBuilder()
+        .setHashType(hashType)
+        .setCurve(curve)
+        .build();
+    return EcdsaPublicKey.newBuilder()
+        .setVersion(version)
+        .setParams(ecdsaParams)
+        .setX(ByteString.copyFrom(pubX))
+        .setY(ByteString.copyFrom(pubY))
+        .build();
   }
 
   /**
