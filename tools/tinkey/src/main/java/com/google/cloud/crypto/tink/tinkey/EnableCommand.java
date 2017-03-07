@@ -16,22 +16,27 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * Enables a key with some key id in a keyset.
  */
 public class EnableCommand extends KeyIdOptions implements Command {
   @Override
   public void run() throws Exception {
-    enable(inFilename, credentialFilename, keyIdValue);
+    validate();
+    enable(outputStream, outFormat, inputStream, inFormat, credentialFile, keyIdValue);
   }
 
   /**
-   * Enables the key with {@code keyIdValue} in the keyset in {@code inFilename} (using
-   * {@code credentialFilename} to decrypt if it is encrypted).
+   * Enables the key with {@code keyIdValue} in the keyset in {@code inFile} (using
+   * {@code credentialFile} to decrypt if it is encrypted).
    * @throws GeneralSecurityException if the key is not found.
    */
-  public static void enable(String inFilename, String credentialFilename, int keyIdValue)
-      throws Exception {
+  public static void enable(OutputStream outputStream, String outFormat, InputStream inputStream,
+      String inFormat, File credentialFile, int keyIdValue) throws Exception {
     throw new Exception("Not Implemented Yet");
   }
 }

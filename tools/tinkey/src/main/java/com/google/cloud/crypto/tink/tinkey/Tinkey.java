@@ -17,7 +17,11 @@
 package com.google.cloud.crypto.tink.tinkey;
 
 import com.google.cloud.crypto.tink.aead.AeadFactory;
+import com.google.cloud.crypto.tink.hybrid.HybridDecryptFactory;
+import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
+import com.google.cloud.crypto.tink.signature.PublicKeySignFactory;
+import com.google.cloud.crypto.tink.signature.PublicKeyVerifyFactory;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -28,6 +32,10 @@ public class Tinkey {
   public static void main(String[] args) throws Exception {
     AeadFactory.registerStandardKeyTypes();
     MacFactory.registerStandardKeyTypes();
+    HybridDecryptFactory.registerStandardKeyTypes();
+    HybridEncryptFactory.registerStandardKeyTypes();
+    PublicKeySignFactory.registerStandardKeyTypes();
+    PublicKeyVerifyFactory.registerStandardKeyTypes();
 
     TinkeyCommands commands = new TinkeyCommands();
     CmdLineParser parser = new CmdLineParser(commands);

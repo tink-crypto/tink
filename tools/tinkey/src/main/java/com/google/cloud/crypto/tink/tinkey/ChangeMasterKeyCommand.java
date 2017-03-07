@@ -16,22 +16,27 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * Changes the master key of a keyset. The keyset will be encrypted with the new master key.
  */
 public class ChangeMasterKeyCommand extends ChangeMasterKeyOptions implements Command {
   @Override
   public void run() throws Exception {
-    changeMasterKey(outFilename, inFilename, credentialFilename, newMasterKeyValue,
-        newCredentialFilename);
+    validate();
+    changeMasterKey(outputStream, inputStream, credentialFile, newMasterKeyValue,
+        newCredentialFile);
   }
 
   /**
-   * Reencrypts the keyset in {@code inFilename} using {@code newMasterKeyValue}, writes the
-   * resulting keyset to {@code outFilename}.
+   * Reencrypts the keyset in {@code inputStream} using {@code newMasterKeyValue}, writes the
+   * resulting keyset to {@code outputStream}.
    */
-  public static void changeMasterKey(String outFilename, String inFilename,
-      String credentialFilename, String newMasterKeyValue, String newCredentialFilename)
+  public static void changeMasterKey(OutputStream outputStream, InputStream inputStream,
+      File credentialFile, String newMasterKeyValue, File newCredentialFile)
       throws Exception {
     throw new Exception("Not Implemented Yet");
   }

@@ -16,13 +16,38 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import java.io.InputStream;
 import org.kohsuke.args4j.Option;
 
 /**
  * Common args for commands that read from file.
  */
 class InOptions extends OutOptions {
-  @Option(name = "--in", required = true,
-      usage = "The input filename to read the keyset from")
-  String inFilename;
+  @Option(
+      name = "--in",
+      handler = InputStreamHandler.class,
+      required = true,
+      usage = "The input filename to read the keyset from or standard input if not specified")
+  InputStream inputStream;
+
+  @Option(
+      name = "--inFormat",
+      required = false,
+      metaVar = "TEXT | JSON | BINARY",
+      usage = "The input format: TEXT, JSON or BINARY. TEXT is default")
+  String inFormat;
+
+  @Override
+  void validate() {
+    super.validate();
+    if (inputStream == null) {
+      inputStream = System.in;
+    }
+    try {
+      TinkeyUtil.validateInputOutputFormat(inFormat);
+    } catch (Exception e) {
+      SubtleUtil.die(e.toString());
+    }
+  }
 }

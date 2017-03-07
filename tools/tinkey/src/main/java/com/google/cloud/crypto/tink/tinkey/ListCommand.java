@@ -16,20 +16,27 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+
 /**
  * List keys in a keyset.
  */
-public class ListCommand extends ListOptions implements Command {
+public class ListCommand extends InOptions implements Command {
   @Override
   public void run() throws Exception {
-    list(inFilename, credentialFilename);
+    validate();
+    list(outputStream, outFormat, inputStream, inFormat, credentialFile);
   }
 
   /**
-   * Lists all keys in the keyset in {@code inFilename} (using {@code credentialFilename} to
+   * Lists all keys in the keyset in {@code inputStream} (using {@code credentialFile} to
    * decrypt if it is encrypted). This command doesn't output actual key material.
    */
-  public static void list(String inFilename, String credentialFilename) throws Exception {
+  public static void list(OutputStream outputStream, String outFormat, InputStream inputStream,
+      String inFormat, File credentialFile) throws Exception {
     throw new Exception("Not Implemented Yet");
   }
 }

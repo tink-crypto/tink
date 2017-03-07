@@ -15,16 +15,22 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 package com.google.cloud.crypto.tink.tinkey;
-
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import org.kohsuke.args4j.Option;
 
 /**
  * Options for add or rotate command.
  */
 class AddRotateOptions extends InOptions {
-  @Option(name = "--key-type", required = true, usage = "The key type of the new key")
-  String keyTypeValue;
-
-  @Option(name = "--key-format", required = true, usage = "The key format of the new key")
-  String keyFormatValue;
+  @Option(
+      name = "--key-template",
+      metaVar = "aes-128-gcm.proto",
+      required = true,
+      handler = KeyTemplateHandler.class,
+      usage =
+          "The input filename to read the key template from. "
+          + "Pre-generated templates can be found at "
+          + "https://github.com/google/tink/tree/master/tools/tinkey/keytemplates."
+  )
+  KeyTemplate keyTemplate;
 }

@@ -17,45 +17,40 @@
 package com.google.cloud.crypto.tink.tinkey;
 
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
-import java.io.File;
 import java.io.OutputStream;
 import org.kohsuke.args4j.Option;
 
 /**
- * Common args for commands that write to file and need credential.
+ * Options for creating key templates.
  */
-class OutOptions {
+class CreateKeyTemplateOptions {
+  @Option(
+      name = "--type-url",
+      metaVar = "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey",
+      required = true,
+      usage = "The type URL of the key template")
+  String typeUrlValue;
+
+  @Option(
+      name = "--key-format",
+      metaVar = "\"key_size: 32\"",
+      required = true,
+      usage = "The key format of the key template, formatted as text proto")
+  String keyFormatValue;
+
   @Option(
       name = "--out",
       handler = OutputStreamHandler.class,
       required = false,
-      usage = "The output filename to write the keyset to or standard output if not specified")
+      usage = "The output filename to write the key template to")
   OutputStream outputStream;
-
-  @Option(
-      name = "--outFormat",
-      metaVar = "TEXT | JSON | BINARY",
-      required = false,
-      usage = "The output format: TEXT, JSON or BINARY. TEXT is default")
-  String outFormat;
-
-  @Option(
-      name = "--credential",
-      required = false,
-      usage =
-          "The output keyset can be encrypted with a master key. "
-          + "This specifies the filename containing a credential to obtain that master key")
-  File credentialFile;
 
   void validate() {
     if (outputStream == null) {
       outputStream = System.out;
     }
     try {
-      if (credentialFile != null) {
-        SubtleUtil.validateExists(credentialFile);
-      }
-      TinkeyUtil.validateInputOutputFormat(outFormat);
+      SubtleUtil.validate(typeUrlValue);
     } catch (Exception e) {
       SubtleUtil.die(e.toString());
     }

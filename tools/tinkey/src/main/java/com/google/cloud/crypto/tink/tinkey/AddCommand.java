@@ -16,22 +16,29 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
- * Adds a new key to an existing keyset.
+ * Generates and adds a new key to an existing keyset.
  */
 public class AddCommand extends AddRotateOptions implements Command {
   @Override
   public void run() throws Exception {
-    add(outFilename, inFilename, credentialFilename, keyTypeValue, keyFormatValue);
+    validate();
+    add(outputStream, outFormat, inputStream, inFormat, credentialFile, keyTemplate);
   }
 
   /**
-   * Adds a key with type {@code keyTypeValue} and format {@code keyFormatValue} to the keyset in
-   * {@code inFilename} (using {@code credentialFilename} to decrypt if it is encrypted).
-   * Writes the resulting keyset to {@code outFilename}.
+   * Generates and adds a key of template {@code keyTemplate} to the keyset in
+   * {@code inputStream} (using {@code credentialFile} to decrypt if it is encrypted).
+   * Writes the resulting keyset to {@code outputStream}.
    */
-  public static void add(String outFilename, String inFilename, String credentialFilename,
-      String keyTypeValue, String keyFormatValue) throws Exception {
+  public static void add(OutputStream outputStream, String outFormat,
+      InputStream inputStream, String inFormat,
+      File credentialFile, KeyTemplate keyTemplate) throws Exception {
     throw new Exception("Not Implemented Yet");
   }
 }

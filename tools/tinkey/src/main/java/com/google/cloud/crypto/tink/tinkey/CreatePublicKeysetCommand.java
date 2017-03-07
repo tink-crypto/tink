@@ -16,21 +16,24 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
- * Creates a public keyset from an existing keyset.
+ * Creates a public keyset from an existing private keyset.
  */
 public class CreatePublicKeysetCommand extends InOptions implements Command {
   @Override
   public void run() throws Exception {
-    createPublicKeyset(outFilename, inFilename, credentialFilename);
+    createPublicKeyset(outputStream, outFormat, inputStream, inFormat, credentialFile);
   }
 
   /**
-   * Extracts public keys from {@code inFilename} (using {@code credentialFilename} to decrypt
-   * if it is encrypted) and writes public keys to {@code outFilename}.
+   * Extracts public keys from {@code inputStream} (using {@code credentialFile} to decrypt
+   * if it is encrypted) and writes public keys to {@code outputStream}.
    */
-  public static void createPublicKeyset(String outFilename, String inFilename,
-      String credentialFilename) throws Exception {
-    throw new Exception("Not Implemented Yet");
+  public static void createPublicKeyset(OutputStream outputStream, String outFormat,
+      InputStream inputStream, String inFormat, File credentialFile) throws Exception {
   }
 }

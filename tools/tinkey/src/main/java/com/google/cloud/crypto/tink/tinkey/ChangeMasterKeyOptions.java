@@ -16,6 +16,9 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import java.io.File;
+import java.io.IOException;
 import org.kohsuke.args4j.Option;
 
 /**
@@ -27,6 +30,18 @@ class ChangeMasterKeyOptions extends InOptions {
   String newMasterKeyValue;
 
   @Option(name = "--new-credential", required = false,
-      usage = "The filename with credential to use the new master key")
-  String newCredentialFilename;
+      usage = "The filename containing a credential of the master key")
+  File newCredentialFile;
+
+  @Override
+  void validate() {
+    super.validate();
+    if (newCredentialFile != null) {
+      try {
+        SubtleUtil.validateExists(newCredentialFile);
+      } catch (IOException e) {
+        SubtleUtil.die(e.toString());
+      }
+    }
+  }
 }

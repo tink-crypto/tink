@@ -16,9 +16,10 @@ package com.example.envelopeme;
 
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.aead.GoogleCloudKmsAeadKeyManager;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.SubCommand;
@@ -40,13 +41,24 @@ class EnvelopeMeCommands {
   // as classes for greater code reuse.
   static class Args {
     @Option(name = "--config", required = true, usage = "The key config file")
-    String configFilename;
+    File configFile;
     @Option(name = "--credential", required = true, usage = "The credential file")
-    String credentialFilename;
+    File credentialFile;
     @Argument(metaVar = "inFile", required = true, index = 0, usage = "The source file")
-    String inFilename;
+    File inFile;
     @Argument(metaVar = "outFile", required = true, index = 1, usage = "The destination file")
-    String outFilename;
+    File outFile;
+
+    void validate() {
+      try {
+        SubtleUtil.validateNotExist(outFile);
+        SubtleUtil.validateExists(configFile);
+        SubtleUtil.validateExists(credentialFile);
+        SubtleUtil.validateExists(inFile);
+      } catch (Exception e) {
+        SubtleUtil.die(e.toString());
+      }
+    }
   }
 
   public static class EncryptCommand extends Args implements Command {
@@ -56,13 +68,13 @@ class EnvelopeMeCommands {
         "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
         new GoogleCloudKmsAeadKeyManager(
             new EnvelopeMeGoogleCredentialFactory(
-                Files.readAllBytes(Paths.get(credentialFilename)))));
+                Files.readAllBytes(credentialFile.toPath()))));
 
       byte[] encrypted = EnvelopeMe.encrypt(
-          Files.readAllBytes(Paths.get(configFilename)),
-          Files.readAllBytes(Paths.get(inFilename)));
+          Files.readAllBytes(configFile.toPath()),
+          Files.readAllBytes(inFile.toPath()));
 
-      FileOutputStream stream = new FileOutputStream(outFilename);
+      FileOutputStream stream = new FileOutputStream(outFile);
       try {
         stream.write(encrypted);
       } finally {
@@ -78,13 +90,13 @@ class EnvelopeMeCommands {
         "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
         new GoogleCloudKmsAeadKeyManager(
             new EnvelopeMeGoogleCredentialFactory(
-                Files.readAllBytes(Paths.get(credentialFilename)))));
+                Files.readAllBytes(credentialFile.toPath()))));
 
       byte[] decrypted = EnvelopeMe.decrypt(
-          Files.readAllBytes(Paths.get(configFilename)),
-          Files.readAllBytes(Paths.get(inFilename)));
+          Files.readAllBytes(configFile.toPath()),
+          Files.readAllBytes(inFile.toPath()));
 
-      FileOutputStream stream = new FileOutputStream(outFilename);
+      FileOutputStream stream = new FileOutputStream(outFile);
       try {
         stream.write(decrypted);
       } finally {

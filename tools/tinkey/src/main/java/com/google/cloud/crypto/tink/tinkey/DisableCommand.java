@@ -16,22 +16,27 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * Disables a key with some key id in a keyset.
  */
 public class DisableCommand extends KeyIdOptions implements Command {
   @Override
   public void run() throws Exception {
-    disable(inFilename, credentialFilename, keyIdValue);
+    validate();
+    disable(outputStream, outFormat, inputStream, inFormat, credentialFile, keyIdValue);
   }
 
   /**
-   * Disables the key with {@code keyIdValue} in the keyset in {@code inFilename} (using
-   * {@code credentialFilename} to decrypt if it is encrypted).
+   * Disables the key with {@code keyIdValue} in the keyset in {@code inputStream} (using
+   * {@code credentialFile} to decrypt if it is encrypted).
    * @throws GeneralSecurityException if the key is the primary key, or not found.
    */
-  public static void disable(String inFilename, String credentialFilename, int keyIdValue)
-      throws Exception {
+  public static void disable(OutputStream outputStream, String outFormat, InputStream inputStream,
+      String inFormat, File credentialFile, int keyIdValue) throws Exception {
     throw new Exception("Not Implemented Yet");
   }
 }

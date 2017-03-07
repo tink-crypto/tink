@@ -58,7 +58,6 @@ public final class GoogleCloudKmsAead extends AeadBase {
     } catch (IOException e) {
       throw new GeneralSecurityException("encryption failed", e);
     }
-
   }
 
   @Override

@@ -16,22 +16,27 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * Destroy a key with some key id in a keyset.
  */
 public class DestroyCommand extends KeyIdOptions implements Command {
   @Override
   public void run() throws Exception {
-    destroy(inFilename, credentialFilename, keyIdValue);
+    validate();
+    destroy(outputStream, outFormat, inputStream, inFormat, credentialFile, keyIdValue);
   }
 
   /**
-   * Destroys the key with {@code keyIdValue} in the keyset in {@code inFilename} (using
-   * {@code credentialFilename} to decrypt if it is encrypted).
+   * Destroys the key with {@code keyIdValue} in the keyset in {@code inputStream} (using
+   * {@code credentialFile} to decrypt if it is encrypted).
    * @throws GeneralSecurityException if the key is the primary key, or not found.
    */
-  public static void destroy(String inFilename, String credentialFilename, int keyIdValue)
-      throws Exception {
+  public static void destroy(OutputStream outputStream, String outFormat, InputStream inputStream,
+      String inFormat, File credentialFile, int keyIdValue) throws Exception {
     throw new Exception("Not Implemented Yet");
   }
 }

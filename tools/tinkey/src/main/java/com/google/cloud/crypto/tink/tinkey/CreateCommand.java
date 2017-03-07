@@ -16,25 +16,92 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import com.google.cloud.crypto.tink.KeysetHandle;
+import com.google.cloud.crypto.tink.KeysetManager;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
+import com.google.cloud.crypto.tink.TinkProto.Keyset;
+import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
+import com.google.cloud.crypto.tink.subtle.GoogleCloudKmsAead;
+import com.google.protobuf.Message;
+import java.io.File;
+import java.io.OutputStream;
+import java.security.GeneralSecurityException;
+
 /**
- * Creates an empty keyset.
+ * Creates a new keyset.
  */
 public class CreateCommand extends CreateOptions implements Command {
   @Override
   public void run() throws Exception {
-    create(outFilename, credentialFilename, gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
+    validate();
+    create(outputStream, outFormat, credentialFile, keyTemplate,
+        gcpKmsMasterKeyUriValue, awsKmsMasterKeyUriValue);
   }
 
   /**
-   * Creates an empty keyset and writes it to {@code outFilename}.
-   * Attempts to encrypt the keyset using {@code credentialFilename} and either
-   * {@code gcpKmsMasterKeyValue} or {@code awsKmsMasterKeyValue}.
-   * @throws IllegalArgumentException if both {@code gcpKmsMasterKeyValue} and
-   * {code awsKmsMasterKeyValue} are set.
+   * Creates a keyset that contains a single key of template {@code keyTemplate}, and writes it
+   * to {@code outputStream}. Attempts to encrypt the keyset using {@code credentialFile} and either
+   * {@code gcpKmsMasterKeyValue} or {@code awsKmsMasterKeyUriValue}.
    */
-  public static void create(String outFilename, String credentialFilename,
-      String gcpKmsMasterKeyValue, String awsKmsMasterKeyValue)
+  public static void create(OutputStream outputStream, String outFormat, File credentialFile,
+      KeyTemplate keyTemplate, String gcpKmsMasterKeyUriValue, String awsKmsMasterKeyUriValue)
       throws Exception {
+    Message keyset;
+    if (gcpKmsMasterKeyUriValue != null) {
+      keyset = createEncryptedKeysetWithGcp(credentialFile, keyTemplate,
+          gcpKmsMasterKeyUriValue);
+    } else if (awsKmsMasterKeyUriValue != null) {
+      keyset = createEncryptedKeysetWithAws(credentialFile, keyTemplate,
+          awsKmsMasterKeyUriValue);
+    } else {
+      // cleartext, empty, keyset.
+      keyset = createCleartextKeyset(keyTemplate);
+    }
+    TinkeyUtil.writeProto(keyset, outFormat, outputStream);
+  }
+
+  /**
+   * Creates a keyset that contains a single key of template {@code keyTemplateFile}.
+   * @return the resulting keyset.
+   */
+  public static final Keyset createCleartextKeyset(KeyTemplate keyTemplate) throws Exception {
+    KeysetManager manager = new KeysetManager.Builder()
+        .setKeyTemplate(keyTemplate)
+        .build()
+        .rotate();
+    return manager.getKeysetHandle().getKeyset();
+  }
+
+  /**
+   * Creates a keyset that contains a single key of template {@code keyTemplateFile}.
+   * Encrypts the keyset using {@code credentialFile} and {@code gcpKmsMasterKeyUriValue}.
+   * @return the resulting encrypted keyset.
+   * @throws GeneralSecurityException if failed to encrypt keyset.
+   */
+  public static final KmsEncryptedKeyset createEncryptedKeysetWithGcp(
+      File credentialFile, KeyTemplate keyTemplate,
+      String gcpKmsMasterKeyUriValue) throws Exception {
+    KeysetManager manager = new KeysetManager.Builder()
+        .setKeyTemplate(keyTemplate)
+        .build()
+        .rotate();
+    GoogleCloudKmsAead aead = new GoogleCloudKmsAead(
+        TinkeyUtil.createCloudKmsClient(credentialFile), gcpKmsMasterKeyUriValue);
+    KeysetHandle handle = manager.getKeysetHandle(aead);
+    return TinkeyUtil.createKmsEncryptedKeyset(
+        TinkeyUtil.createGoogleCloudKmsAeadKeyData(gcpKmsMasterKeyUriValue),
+        handle);
+  }
+
+  /**
+   * Creates a keyset that contains a single key of template {@code keyTemplate}.
+   * Encrypts the keyset using {@code credentialFile} and {@code awsKmsMasterKeyUriValue}.
+   * @return the resulting keyset in text format.
+   * @throws GeneralSecurityException if failed to encrypt keyset.
+   */
+  public static final KmsEncryptedKeyset createEncryptedKeysetWithAws(
+      File credentialFile, KeyTemplate keyTemplate,
+      String awsKmsMasterKeyUriValue) throws Exception {
     throw new Exception("Not Implemented Yet");
   }
 }

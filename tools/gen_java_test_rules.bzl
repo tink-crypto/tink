@@ -25,6 +25,7 @@ files.
 
 def gen_java_test_rules(test_files,
                         deps,
+                        data=[],
                         exclude_tests=[],
                         default_test_size="small",
                         small_tests=[],
@@ -58,6 +59,7 @@ def gen_java_test_rules(test_files,
         PACKAGE_NAME + "/" + _strip_right(test, ".java"))
     native.java_test(name = prefix + test,
                      runtime_deps = deps,
+                     data = data,
                      resources = resources,
                      size = test_size,
                      jvm_flags = jvm_flags,

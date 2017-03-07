@@ -16,16 +16,47 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import org.kohsuke.args4j.Option;
 
 /**
- * Args for command to create an empty keyset.
+ * Args for command to create a keyset.
  */
 class CreateOptions extends OutOptions {
-  @Option(name = "--google-cloud-kms-key-uri", required = false,
-      usage = "The Google Cloud KMS master key to encrypt the keyset with")
-  String gcpKmsMasterKeyValue;
-  @Option(name = "--aws-kms-key-arn", required = false,
-      usage = "The AWS KMS master key to encrypt the keyset with")
-  String awsKmsMasterKeyValue;
+  @Option(
+      name = "--key-template",
+      handler = KeyTemplateHandler.class,
+      metaVar = "aes-128-gcm.proto",
+      required = true,
+      usage =
+          "The input filename to read the key template from. "
+          + "Pre-generated templates can be found at "
+          + "https://github.com/google/tink/tree/master/tools/tinkey/keytemplates."
+  )
+  KeyTemplate keyTemplate;
+
+  @Option(name = "--gcp-kms-key-uri",
+      required = false,
+      usage = "The Google Cloud KMS master key to encrypt the keyset with.",
+      forbids = {"--aws-kms-key-arn"})
+  String gcpKmsMasterKeyUriValue;
+
+  @Option(name = "--aws-kms-key-arn",
+      required = false,
+      usage = "The AWS KMS master key to encrypt the keyset with.",
+      forbids = {"--gcp-kms-key-uri"})
+  String awsKmsMasterKeyUriValue;
+
+  @Override
+  void validate() {
+    super.validate();
+    try {
+      if (gcpKmsMasterKeyUriValue != null) {
+        SubtleUtil.validateCloudKmsCryptoKeyUri(gcpKmsMasterKeyUriValue);
+      }
+    } catch (Exception e) {
+      SubtleUtil.die(e.toString());
+    }
+  }
 }

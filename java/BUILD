@@ -53,8 +53,13 @@ java_library(
 
 java_library(
     name = "subtle",
+    visibility = [
+        "//examples/java/envelopeme:__pkg__",
+        "//tools/tinkey:__pkg__",
+    ],
     exports = [
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_envelope_subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybriddecrypt_subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybridencrypt_subtle",

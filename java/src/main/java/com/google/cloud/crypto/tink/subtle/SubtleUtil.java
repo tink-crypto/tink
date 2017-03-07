@@ -16,7 +16,10 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
+import java.io.File;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.regex.Pattern;
 
 /**
  * Helper methods.
@@ -100,5 +103,85 @@ public final class SubtleUtil {
       // If Application isn't loaded, it might as well not be Android.
       return false;
     }
+  }
+
+  /*
+   * @throws IOException if {@code f} exists.
+   */
+  public static void validateNotExist(File f) throws IOException {
+    if (f.exists()) {
+      throw new IOException(
+          String.format("%s exists, please choose another file\n", f.toString()));
+    }
+  }
+
+  /**
+   * @throws IOException if {@code f} does not exists.
+   */
+  public static void validateExists(File f) throws IOException {
+    if (!f.exists()) {
+      throw new IOException(
+          String.format("Error: %s doesn't exist, please choose another file\n", f.toString()));
+    }
+  }
+
+  private static final String TYPE_URL_PREFIX = "type.googleapis.com/";
+  /**
+   * @throws IllegalArgumentException if {@code typeUrl} is in invalid format.
+   */
+  public static void validate(String typeUrl) throws IllegalArgumentException {
+    if (!typeUrl.startsWith(TYPE_URL_PREFIX)) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Error: type URL %s is invalid; it must start with %s\n",
+              typeUrl,
+              TYPE_URL_PREFIX));
+    }
+  }
+
+  /**
+   * Prints an error then exits.
+   */
+  public static void die(String error) {
+    System.err.print(String.format("Error: %s\n", error));
+    System.exit(1);
+  }
+
+  private static final Pattern GCP_CLOUD_KMS_CRYPTO_KEY_PATTERN = Pattern.compile(
+        "^projects/([0-9a-zA-Z\\-]+)/locations/([0-9a-zA-Z\\-]+)"
+        + "/keyRings/([0-9a-zA-Z\\-]+)/cryptoKeys/([0-9a-zA-Z\\-]+)$", Pattern.CASE_INSENSITIVE);
+
+  private static final Pattern GCP_CLOUD_KMS_CRYPTO_KEY_VERSION_PATTERN = Pattern.compile(
+        "^projects/([0-9a-zA-Z\\-]+)/locations/([0-9a-zA-Z\\-]+)"
+        + "/keyRings/([0-9a-zA-Z\\-]+)/cryptoKeys/([0-9a-zA-Z\\-]+)"
+        + "/cryptoKeyVersions/([0-9a-zA-Z\\-]+)$", Pattern.CASE_INSENSITIVE);
+  /**
+   * @throws IllegalArgumentException if {@code kmsKeyUri} is not a valid URI of a CryptoKey
+   * in Google Cloud KMS.
+   */
+  public static void validateCloudKmsCryptoKeyUri(String kmsKeyUri)
+      throws IllegalArgumentException {
+    if (!GCP_CLOUD_KMS_CRYPTO_KEY_PATTERN.matcher(kmsKeyUri).matches()) {
+      if (GCP_CLOUD_KMS_CRYPTO_KEY_VERSION_PATTERN.matcher(kmsKeyUri).matches()) {
+        throw new IllegalArgumentException("Invalid Google Cloud KMS Key URI. "
+          + "The URI must point to a CryptoKey, not a CryptoKeyVersion");
+      }
+      throw new IllegalArgumentException("Invalid Google Cloud KMS Key URI. "
+          + "The URI must point to a CryptoKey in the format "
+          + "projects/*/locations/*/keyRings/*/cryptoKeys/*. "
+          + "See https://cloud.google.com/kms/docs/reference/rest/v1beta1"
+          + "/projects.locations.keyRings.cryptoKeys#CryptoKey");
+    }
+  }
+
+  /**
+   * @return the class name of a proto from its type url. For example, return AesGcmKey
+   * if the type url is type.googleapis.com/google.cloud.crypto.tink.AesGcmKey.
+   * @throws IllegalArgumentException if {@code typeUrl} is in invalid format.
+   */
+  public static String getProtoClassName(String typeUrl) throws IllegalArgumentException {
+    validate(typeUrl);
+    int dot = typeUrl.lastIndexOf(".");
+    return typeUrl.substring(dot + 1);
   }
 }
