@@ -82,9 +82,7 @@ public final class EncryptThenAuthenticate extends AeadBase {
         ciphertext.length);
     byte[] aadLengthInBits = Arrays.copyOf(
         ByteBuffer.allocate(8).putLong(8L * aad.length).array(), 8);
-    if (!mac.verifyMac(macValue, Util.concat(aad, rawCiphertext, aadLengthInBits))) {
-      throw new GeneralSecurityException("Mac verification failed");
-    }
+    mac.verifyMac(macValue, Util.concat(aad, rawCiphertext, aadLengthInBits));
     return cipher.decrypt(rawCiphertext);
   }
 }

@@ -16,10 +16,9 @@
 
 package com.google.cloud.crypto.tink.mac;
 
+import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
@@ -32,6 +31,7 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.protobuf.Any;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,23 +82,40 @@ public class MacFactoryTest {
     byte[] prefix = Arrays.copyOfRange(tag, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
     assertArrayEquals(prefix, CryptoFormat.getOutputPrefix(primary));
     assertEquals(prefix.length + 16 /* TAG */, tag.length);
-    assertTrue(mac.verifyMac(tag, plaintext));
+    try {
+      mac.verifyMac(tag, plaintext);
+    } catch (GeneralSecurityException e) {
+      fail("Valid MAC, should not throw exception");
+    }
 
     // mac with a non-primary key, verify with the keyset
     Mac mac2 = Registry.INSTANCE.getPrimitive(Any.pack(hmacKey));
     tag = mac2.computeMac(plaintext);
-    assertTrue(mac.verifyMac(tag, plaintext));
+    try {
+      mac.verifyMac(tag, plaintext);
+    } catch (GeneralSecurityException e) {
+      fail("Valid MAC, should not throw exception");
+    }
 
     // mac with a RAW key, verify with the keyset
     mac2 = Registry.INSTANCE.getPrimitive(Any.pack(TestUtil.createHmacKey(keyValue, 16)));
     tag = mac2.computeMac(plaintext);
-    assertTrue(mac.verifyMac(tag, plaintext));
+    try {
+      mac.verifyMac(tag, plaintext);
+    } catch (GeneralSecurityException e) {
+      fail("Valid MAC, should not throw exception");
+    }
 
     // mac with a RAW key not in the keyset, decrypt with the keyset should fail
     byte[] keyValue2 = Random.randBytes(HMAC_KEY_SIZE);
     mac2 = Registry.INSTANCE.getPrimitive(Any.pack(TestUtil.createHmacKey(keyValue2, 16)));
     tag = mac2.computeMac(plaintext);
-    assertFalse(mac.verifyMac(tag, plaintext));
+    try {
+      mac.verifyMac(tag, plaintext);
+      fail("Invalid MAC MAC, should have thrown exception");
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
   }
 
   @Test
@@ -126,7 +143,11 @@ public class MacFactoryTest {
     byte[] tag = mac.computeMac(plaintext);
     // no prefix
     assertEquals(16 /* TAG */, tag.length);
-    assertTrue(mac.verifyMac(tag, plaintext));
+    try {
+      mac.verifyMac(tag, plaintext);
+    } catch (GeneralSecurityException e) {
+      fail("Valid MAC, should not throw exception");
+    }
   }
 
   @Test
@@ -144,6 +165,10 @@ public class MacFactoryTest {
     byte[] tag = mac.computeMac(plaintext);
     // no prefix
     assertEquals(16 /* TAG */, tag.length);
-    assertTrue(mac.verifyMac(tag, plaintext));
+    try {
+      mac.verifyMac(tag, plaintext);
+    } catch (GeneralSecurityException e) {
+      fail("Valid MAC, should not throw exception");
+    }
   }
 }

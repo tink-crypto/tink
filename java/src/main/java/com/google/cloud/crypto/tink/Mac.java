@@ -34,7 +34,8 @@ public interface Mac {
   /**
    * Verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
    *
-   * @return true iff {@code mac} is a correct MAC for {@code data}.
+   * @throws GeneralSecurityException If {@code mac} is not a correct MAC for {@code data} then a
+   * GeneralSecurityException is thrown.
    */
-  boolean verifyMac(final byte[] mac, final byte[] data) throws GeneralSecurityException;
+  void verifyMac(final byte[] mac, final byte[] data) throws GeneralSecurityException;
 }

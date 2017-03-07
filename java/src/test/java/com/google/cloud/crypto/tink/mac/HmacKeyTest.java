@@ -16,9 +16,8 @@
 
 package com.google.cloud.crypto.tink.mac;
 
+import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.KeysetHandle;
@@ -27,6 +26,7 @@ import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
+import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,20 +58,39 @@ public class HmacKeyTest {
     byte[] plaintext = "plaintext".getBytes("UTF-8");
     byte[] tag = mac.computeMac(plaintext);
     assertEquals(16 + CryptoFormat.NON_RAW_PREFIX_SIZE, tag.length);
-    assertTrue(mac.verifyMac(tag, plaintext));
+    try {
+      mac.verifyMac(tag, plaintext);
+    } catch (GeneralSecurityException e) {
+      fail("Valid MAC, should not throw exception");
+    }
 
     byte original = plaintext[0];
     plaintext[0] = (byte) ~original;
-    assertFalse(mac.verifyMac(tag, plaintext));
+    try {
+      mac.verifyMac(tag, plaintext);
+      fail("Invalid MAC, should have thrown exception");
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
 
     plaintext[0] = original;
     original = tag[0];
     tag[0] = (byte) ~original;
-    assertFalse(mac.verifyMac(tag, plaintext));
+    try {
+      mac.verifyMac(tag, plaintext);
+      fail("Invalid MAC, should have thrown exception");
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
 
     tag[0] = original;
     original = tag[CryptoFormat.NON_RAW_PREFIX_SIZE];
     tag[CryptoFormat.NON_RAW_PREFIX_SIZE] = (byte) ~original;
-    assertFalse(mac.verifyMac(tag, plaintext));
+    try {
+      mac.verifyMac(tag, plaintext);
+      fail("Invalid MAC, should have thrown exception");
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
   }
 }

@@ -17,10 +17,9 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import com.google.cloud.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;

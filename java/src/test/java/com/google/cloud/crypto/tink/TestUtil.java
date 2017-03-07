@@ -75,8 +75,8 @@ public class TestUtil {
       return data;
     }
     @Override
-    public boolean verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
-      return true;
+    public void verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
+      return;
     }
   }
 

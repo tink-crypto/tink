@@ -21,7 +21,6 @@ import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertArrayEquals;
 
 import com.google.cloud.crypto.tink.TestUtil;
-
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;

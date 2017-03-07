@@ -117,8 +117,7 @@ public final class MacFactory {
       }
 
       @Override
-      public boolean verifyMac(final byte[] mac, final byte[] data)
-          throws GeneralSecurityException {
+      public void verifyMac(final byte[] mac, final byte[] data) throws GeneralSecurityException {
         if (mac.length <= CryptoFormat.NON_RAW_PREFIX_SIZE) {
           // This also rejects raw MAC with size of 4 bytes or fewer. Those MACs are
           // clearly insecure, thus should be discouraged.
@@ -129,22 +128,28 @@ public final class MacFactory {
               mac.length);
         List<PrimitiveSet<Mac>.Entry<Mac>> entries = primitives.getPrimitive(prefix);
         for (PrimitiveSet<Mac>.Entry<Mac> entry : entries) {
-          boolean result = entry.getPrimitive().verifyMac(macNoPrefix, data);
-          if (result) {
-              return result;
-          }
+            try {
+              entry.getPrimitive().verifyMac(macNoPrefix, data);
+              // If there is no exception, the MAC is valid and we can return.
+              return;
+            } catch (GeneralSecurityException ignored) {
+              // Ignored as we want to continue verification with the remaining keys.
+            }
         }
 
-        // Let's try all RAW keys.
+        // None "non-raw" key matched, so let's try the raw keys (if any exist).
         entries = primitives.getRawPrimitives();
         for (PrimitiveSet<Mac>.Entry<Mac> entry : entries) {
-          boolean result = entry.getPrimitive().verifyMac(mac, data);
-          if (result) {
-              return result;
+          try {
+            entry.getPrimitive().verifyMac(mac, data);
+            // If there is no exception, the MAC is valid and we can return.
+            return;
+          } catch (GeneralSecurityException ignored) {
+            // Ignored as we want to continue verification with other raw keys.
           }
         }
         // nothing works.
-        return false;
+        throw new GeneralSecurityException("Invalid MAC");
       }
     };
   }

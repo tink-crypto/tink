@@ -43,8 +43,8 @@ public class PrimitiveSetTest {
       return this.getClass().getSimpleName().getBytes(UTF_8);
     }
     @Override
-    public boolean verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
-      return true;
+    public void verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
+      return;
     }
   }
 
@@ -55,8 +55,8 @@ public class PrimitiveSetTest {
       return this.getClass().getSimpleName().getBytes(UTF_8);
     }
     @Override
-    public boolean verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
-      return true;
+    public void verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
+      return;
     }
   }
 

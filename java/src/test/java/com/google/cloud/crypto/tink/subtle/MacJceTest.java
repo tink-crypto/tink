@@ -16,8 +16,7 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertArrayEquals;
 
 import com.google.cloud.crypto.tink.Mac;
@@ -80,7 +79,11 @@ public class MacJceTest {
       SecretKeySpec keySpec = new SecretKeySpec(t.key, "HMAC");
       Mac mac = new MacJce(t.algName, keySpec, t.tag.length);
       assertArrayEquals(t.tag, mac.computeMac(t.message));
-      assertTrue(mac.verifyMac(t.tag, t.message));
+      try {
+        mac.verifyMac(t.tag, t.message);
+      } catch (GeneralSecurityException e) {
+        fail("Valid MAC, should not throw exception");
+      }
     }
   }
 
@@ -92,13 +95,12 @@ public class MacJceTest {
       Mac mac = new MacJce(t.algName, keySpec, t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
-        boolean verified = true;
         try {
-          verified = mac.verifyMac(modifiedTag, t.message);
+          mac.verifyMac(modifiedTag, t.message);
+          fail("Invalid MAC, should have thrown exception");
         } catch (GeneralSecurityException expected) {
-          verified = false;
+          // Expected
         }
-        assertFalse(verified);
       }
     }
   }
@@ -113,13 +115,12 @@ public class MacJceTest {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedMessage = Arrays.copyOf(t.message, t.message.length);
           modifiedMessage[b] = (byte) (modifiedMessage[b] ^ (1 << bit));
-          boolean verified = true;
           try {
-            verified = mac.verifyMac(t.tag, modifiedMessage);
+            mac.verifyMac(t.tag, modifiedMessage);
+            fail("Invalid MAC, should have thrown exception");
           } catch (GeneralSecurityException expected) {
-            verified = false;
+            // Expected
           }
-          assertFalse(verified);
         }
       }
     }
@@ -135,13 +136,12 @@ public class MacJceTest {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length);
           modifiedTag[b] = (byte) (modifiedTag[b] ^ (1 << bit));
-          boolean verified = true;
           try {
-            verified = mac.verifyMac(modifiedTag, t.message);
+            mac.verifyMac(modifiedTag, t.message);
+            fail("Invalid MAC, should have thrown exception");
           } catch (GeneralSecurityException expected) {
-            verified = false;
+            // Expected
           }
-          assertFalse(verified);
         }
       }
     }

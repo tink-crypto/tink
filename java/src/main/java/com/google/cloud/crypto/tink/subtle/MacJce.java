@@ -51,8 +51,9 @@ public final class MacJce implements Mac {
   }
 
   @Override
-  public boolean verifyMac(final byte[] mac, final byte[] data)
-      throws GeneralSecurityException {
-    return Util.arrayEquals(computeMac(data), mac);
+  public void verifyMac(final byte[] mac, final byte[] data) throws GeneralSecurityException {
+    if (!Util.arrayEquals(computeMac(data), mac)) {
+      throw new GeneralSecurityException("Invalid MAC");
+    }
   }
 };
