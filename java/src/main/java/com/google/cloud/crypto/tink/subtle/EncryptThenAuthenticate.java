@@ -16,12 +16,10 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
-import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.Mac;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.concurrent.Future;
 
 /**
  * This primitive performs an encrypt-then-Mac operation on plaintext and additional
@@ -31,7 +29,7 @@ import java.util.concurrent.Future;
  * <a href="http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05">Authenticated
  * Encryption with AES-CBC and HMAC-SHA</a>.
  */
-public final class EncryptThenAuthenticate implements Aead {
+public final class EncryptThenAuthenticate extends AeadBase {
   private final IndCpaCipher cipher;
   private final Mac mac;
   private final int macLength;
@@ -88,17 +86,5 @@ public final class EncryptThenAuthenticate implements Aead {
       throw new GeneralSecurityException("Mac verification failed");
     }
     return cipher.decrypt(rawCiphertext);
-  }
-
-  @Override
-  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad)
-  throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented yet");
-  }
-
-  @Override
-  public Future<byte[]> asyncDecrypt(final  byte[] ciphertext, final  byte[] aad)
-  throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented yet");
   }
 }

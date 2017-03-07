@@ -71,6 +71,7 @@ COMMON_JAVA_DEPS = [
 java_library(
     name = "aead_subtle",
     srcs = [
+        "src/main/java/com/google/cloud/crypto/tink/subtle/AeadBase.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/AesCtrJceCipher.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/AesGcmJce.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/EncryptThenAuthenticate.java",

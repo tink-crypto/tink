@@ -16,11 +16,8 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
-import com.google.cloud.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
@@ -29,7 +26,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * This primitive implements AesGcm using JCE.
  */
-public final class AesGcmJce implements Aead {
+public final class AesGcmJce extends AeadBase {
 
   // All instances of this class use a 12 byte IV and a 16 byte tag.
   private static final int IV_SIZE_IN_BYTES = 12;
@@ -81,25 +78,5 @@ public final class AesGcmJce implements Aead {
     }
     return cipher.doFinal(
         ciphertext, IV_SIZE_IN_BYTES, ciphertext.length - IV_SIZE_IN_BYTES);
-  }
-
-  /**
-   * TODO(bleichen): Would it be possible to implement this in AEAD or some generic sub-class
-   *   of this? Is there a simpler implementation using lambda expressions?
-   *   Shouldn't the caller be responsible to decide how these tasks are scheduled,
-   *   i.e. shouldn't the caller be able to add the task to a threadpool?
-   * TODO(bleichen): Do we have to clone the inputs or can we assume that the inputs remain
-   *   unchanged until the asynchronous encryption terminates?
-   */
-  @Override
-  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad)
-      throws GeneralSecurityException {
-    return Executors.newSingleThreadExecutor().submit(() -> encrypt(plaintext, aad));
-  }
-
-  @Override
-  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] aad)
-      throws GeneralSecurityException {
-    return Executors.newSingleThreadExecutor().submit(() -> decrypt(ciphertext, aad));
   }
 };

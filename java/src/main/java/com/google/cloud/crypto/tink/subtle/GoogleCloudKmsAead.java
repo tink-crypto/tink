@@ -21,16 +21,14 @@ import com.google.api.services.cloudkms.v1beta1.model.DecryptRequest;
 import com.google.api.services.cloudkms.v1beta1.model.DecryptResponse;
 import com.google.api.services.cloudkms.v1beta1.model.EncryptRequest;
 import com.google.api.services.cloudkms.v1beta1.model.EncryptResponse;
-import com.google.cloud.crypto.tink.Aead;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.concurrent.Future;
 
 /**
  * This primitive forwards encryption/decryption requests to a key in Google Cloud KMS.
  * As of March 2017, Google Cloud KMS supports only AES-256-GCM keys.
  */
-public final class GoogleCloudKmsAead implements Aead {
+public final class GoogleCloudKmsAead extends AeadBase {
 
   /**
    * This client knows how to talk to Google Cloud KMS.
@@ -78,17 +76,5 @@ public final class GoogleCloudKmsAead implements Aead {
       throw new GeneralSecurityException("decryption failed");
     }
 
-  }
-
-  @Override
-  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad)
-      throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not Implemented Yet");
-  }
-
-  @Override
-  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] aad)
-      throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not Implemented Yet");
   }
 }

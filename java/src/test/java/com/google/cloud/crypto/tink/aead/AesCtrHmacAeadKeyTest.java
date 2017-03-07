@@ -21,6 +21,7 @@ import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.subtle.Random;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -30,12 +31,14 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class AesCtrHmacAeadKeyTest {
+  private static final int AES_KEY_SIZE = 16;
+  private static final int HMAC_KEY_SIZE = 20;
 
   @Test
   public void testBasic() throws Exception {
     AeadFactory.registerStandardKeyTypes();
-    String aesCtrKeyValue = "0123456789abcdef";
-    String hmacKeyValue = "0123456789123456";
+    byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
+    byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
     int ivSize = 12;
     int tagSize = 16;
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(

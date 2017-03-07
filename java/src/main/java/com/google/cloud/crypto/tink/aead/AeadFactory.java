@@ -22,6 +22,7 @@ import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.Registry;
+import com.google.cloud.crypto.tink.subtle.AeadBase;
 import com.google.cloud.crypto.tink.subtle.Util;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -120,7 +121,7 @@ public final class AeadFactory {
       throws GeneralSecurityException {
     PrimitiveSet<Aead> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
-    return new Aead() {
+    return new AeadBase() {
       @Override
       public byte[] encrypt(final byte[] plaintext, final byte[] aad)
           throws GeneralSecurityException {
@@ -158,19 +159,7 @@ public final class AeadFactory {
           }
         }
         // nothing works.
-        throw new GeneralSecurityException("decrypted failed");
-      }
-
-      @Override
-      public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad)
-          throws GeneralSecurityException {
-        throw new GeneralSecurityException("Not Implemented Yet");
-      }
-
-      @Override
-      public Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad)
-          throws GeneralSecurityException {
-        throw new GeneralSecurityException("Not Implemented Yet");
+        throw new GeneralSecurityException("decryption failed");
       }
     };
   }

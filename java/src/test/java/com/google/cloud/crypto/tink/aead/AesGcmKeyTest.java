@@ -26,6 +26,7 @@ import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.Util;
 import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
@@ -38,6 +39,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class AesGcmKeyTest {
+  private static final int AES_KEY_SIZE = 16;
+
   class NistTestVector {
     String name;
     public byte[] keyValue;
@@ -350,7 +353,7 @@ public class AesGcmKeyTest {
   @Test
   public void testBasic() throws Exception {
     AeadFactory.registerStandardKeyTypes();
-    String keyValue = "0123456789abcdef";
+    byte[] keyValue = Random.randBytes(AES_KEY_SIZE);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
@@ -365,7 +368,7 @@ public class AesGcmKeyTest {
   @Test
   public void testCiphertextSize() throws Exception {
     AeadFactory.registerStandardKeyTypes();
-    String keyValue = "0123456789abcdef";
+    byte[] keyValue = Random.randBytes(AES_KEY_SIZE);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(

@@ -19,14 +19,19 @@ package com.google.cloud.crypto.tink.mac;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import com.google.cloud.crypto.tink.CryptoFormat;
+import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Mac;
+import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.subtle.Random;
+import com.google.protobuf.Any;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +43,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class MacFactoryTest {
+  private static final int HMAC_KEY_SIZE = 20;
 
   @Before
   public void setUp() throws Exception {
@@ -46,7 +52,7 @@ public class MacFactoryTest {
 
   @Test
   public void testMultipleKeys() throws Exception {
-    String keyValue = "01234567890123456";
+    byte[] keyValue = Random.randBytes(HMAC_KEY_SIZE);
     Key primary = TestUtil.createKey(
         TestUtil.createHmacKey(keyValue, 16),
         42,
@@ -62,8 +68,14 @@ public class MacFactoryTest {
         44,
         KeyStatusType.ENABLED,
         OutputPrefixType.LEGACY);
+    HmacKey hmacKey = TestUtil.createHmacKey(keyValue, 16);
+    Key tink = TestUtil.createKey(
+        hmacKey,
+        44,
+        KeyStatusType.ENABLED,
+        OutputPrefixType.LEGACY);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primary, raw, legacy));
+        TestUtil.createKeyset(primary, raw, legacy, tink));
     Mac mac = MacFactory.getPrimitive(keysetHandle);
     byte[] plaintext = "plaintext".getBytes("UTF-8");
     byte[] tag = mac.computeMac(plaintext);
@@ -71,11 +83,27 @@ public class MacFactoryTest {
     assertArrayEquals(prefix, CryptoFormat.getOutputPrefix(primary));
     assertEquals(prefix.length + 16 /* TAG */, tag.length);
     assertTrue(mac.verifyMac(tag, plaintext));
+
+    // mac with a non-primary key, verify with the keyset
+    Mac mac2 = Registry.INSTANCE.getPrimitive(Any.pack(hmacKey));
+    tag = mac2.computeMac(plaintext);
+    assertTrue(mac.verifyMac(tag, plaintext));
+
+    // mac with a RAW key, verify with the keyset
+    mac2 = Registry.INSTANCE.getPrimitive(Any.pack(TestUtil.createHmacKey(keyValue, 16)));
+    tag = mac2.computeMac(plaintext);
+    assertTrue(mac.verifyMac(tag, plaintext));
+
+    // mac with a RAW key not in the keyset, decrypt with the keyset should fail
+    byte[] keyValue2 = Random.randBytes(HMAC_KEY_SIZE);
+    mac2 = Registry.INSTANCE.getPrimitive(Any.pack(TestUtil.createHmacKey(keyValue2, 16)));
+    tag = mac2.computeMac(plaintext);
+    assertFalse(mac.verifyMac(tag, plaintext));
   }
 
   @Test
   public void testRawKeyAsPrimary() throws Exception {
-    String keyValue = "01234567890123456";
+    byte[] keyValue = Random.randBytes(HMAC_KEY_SIZE);
     Key primary = TestUtil.createKey(
         TestUtil.createHmacKey(keyValue, 16),
         42,
@@ -103,7 +131,7 @@ public class MacFactoryTest {
 
   @Test
   public void testSmallPlaintextWithRawKey() throws Exception {
-    String keyValue = "01234567890123456";
+    byte[] keyValue = Random.randBytes(HMAC_KEY_SIZE);
     Key primary = TestUtil.createKey(
         TestUtil.createHmacKey(keyValue, 16),
         42,

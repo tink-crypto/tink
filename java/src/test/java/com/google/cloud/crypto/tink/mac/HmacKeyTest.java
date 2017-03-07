@@ -26,6 +26,7 @@ import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.subtle.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class HmacKeyTest {
+  private static final int HMAC_KEY_SIZE = 20;
 
   @Before
   public void setUp() throws Exception {
@@ -44,7 +46,7 @@ public class HmacKeyTest {
 
   @Test
   public void testBasic() throws Exception {
-    String keyValue = "01234567890123456";
+    byte[] keyValue = Random.randBytes(HMAC_KEY_SIZE);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(

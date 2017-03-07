@@ -17,6 +17,7 @@
 package com.google.cloud.crypto.tink;
 
 import static com.google.common.io.BaseEncoding.base16;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -38,11 +39,14 @@ import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -200,7 +204,7 @@ public class TestUtil {
   /**
    * @return a {@code HmacKey}.
    */
-  public static HmacKey createHmacKey(String keyValue, int tagSize) throws Exception {
+  public static HmacKey createHmacKey(byte[] keyValue, int tagSize) throws Exception {
     HmacParams params = HmacParams.newBuilder()
         .setHash(HashType.SHA256)
         .setTagSize(tagSize)
@@ -208,43 +212,34 @@ public class TestUtil {
 
     return HmacKey.newBuilder()
         .setParams(params)
-        .setKeyValue(ByteString.copyFromUtf8(keyValue))
+        .setKeyValue(ByteString.copyFrom(keyValue))
         .build();
   }
 
   /**
    * @return a {@code AesCtrKey}.
    */
-  public static AesCtrKey createAesCtrKey(String keyValue, int ivSize) throws Exception {
+  public static AesCtrKey createAesCtrKey(byte[] keyValue, int ivSize) throws Exception {
     AesCtrParams aesCtrParams = AesCtrParams.newBuilder()
         .setIvSize(ivSize)
         .build();
     return AesCtrKey.newBuilder()
         .setParams(aesCtrParams)
-        .setKeyValue(ByteString.copyFromUtf8(keyValue))
+        .setKeyValue(ByteString.copyFrom(keyValue))
         .build();
   }
 
   /**
    * @return a {@code AesCtrHmacAeadKey}.
    */
-  public static AesCtrHmacAeadKey createAesCtrHmacAeadKey(String aesCtrKeyValue, int ivSize,
-      String hmacKeyValue, int tagSize) throws Exception {
+  public static AesCtrHmacAeadKey createAesCtrHmacAeadKey(byte[] aesCtrKeyValue, int ivSize,
+      byte[] hmacKeyValue, int tagSize) throws Exception {
     AesCtrKey aesCtrKey = createAesCtrKey(aesCtrKeyValue, ivSize);
     HmacKey hmacKey = createHmacKey(hmacKeyValue, tagSize);
 
     return AesCtrHmacAeadKey.newBuilder()
         .setAesCtrKey(aesCtrKey)
         .setHmacKey(hmacKey)
-        .build();
-  }
-
-  /**
-   * @return a {@code AesGcmKey}.
-   */
-  public static AesGcmKey createAesGcmKey(String keyValue) throws Exception {
-    return AesGcmKey.newBuilder()
-        .setKeyValue(ByteString.copyFromUtf8(keyValue))
         .build();
   }
 
@@ -338,9 +333,11 @@ public class TestUtil {
    * Runs basic tests against an Aead primitive.
    */
   public static void runBasicTests(Aead aead) throws Exception {
-    byte[] plaintext = "plaintext".getBytes("UTF-8");
-    byte[] associatedData = "associatedData".getBytes("UTF-8");
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    byte[] decrypted = aead.decrypt(ciphertext, associatedData);
+    assertArrayEquals(plaintext, decrypted);
 
     byte original = ciphertext[0];
     ciphertext[0] = (byte) ~original;
@@ -348,7 +345,7 @@ public class TestUtil {
       aead.decrypt(ciphertext, associatedData);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decrypted failed"));
+      assertTrue(e.toString().contains("decryption failed"));
     }
 
     ciphertext[0] = original;
@@ -358,7 +355,7 @@ public class TestUtil {
       aead.decrypt(ciphertext, associatedData);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decrypted failed"));
+      assertTrue(e.toString().contains("decryption failed"));
     }
 
     ciphertext[0] = original;
@@ -368,7 +365,22 @@ public class TestUtil {
       aead.decrypt(ciphertext, associatedData);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decrypted failed"));
+      assertTrue(e.toString().contains("decryption failed"));
+    }
+
+    // async tests
+    ciphertext = aead.asyncEncrypt(plaintext, associatedData).get();
+    decrypted = aead.asyncDecrypt(ciphertext, associatedData).get();
+    assertArrayEquals(plaintext, decrypted);
+    for (int length = 0; length < ciphertext.length; length++) {
+      byte[] truncated = Arrays.copyOf(ciphertext, length);
+      try {
+        byte[] unused = aead.asyncDecrypt(truncated, associatedData).get();
+        fail("Decrypting a truncated ciphertext should fail");
+      } catch (ExecutionException ex) {
+        // The decryption should fail because the ciphertext has been truncated.
+        assertTrue(ex.getCause() instanceof GeneralSecurityException);
+      }
     }
   }
 
