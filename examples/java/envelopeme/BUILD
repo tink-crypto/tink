@@ -13,7 +13,6 @@ java_binary(
     javacopts = JAVACOPTS,
     main_class = "com.example.envelopeme.EnvelopeMe",
     deps = [
-        "//java:key_management_restricted",
         "//java:keyset_handle_restricted",
         "//java:tink",
         "@args4j//jar",

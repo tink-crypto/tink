@@ -20,6 +20,7 @@ package com.google.cloud.crypto.tink.tinkey;
  * Changes the master key of a keyset. The keyset will be encrypted with the new master key.
  */
 public class ChangeMasterKeyCommand extends ChangeMasterKeyOptions implements Command {
+  @Override
   public void run() throws Exception {
     changeMasterKey(outFilename, inFilename, credentialFilename, newMasterKeyValue,
         newCredentialFilename);

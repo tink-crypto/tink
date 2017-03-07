@@ -20,6 +20,7 @@ package com.google.cloud.crypto.tink.tinkey;
  * Disables a key with some key id in a keyset.
  */
 public class DisableCommand extends KeyIdOptions implements Command {
+  @Override
   public void run() throws Exception {
     disable(inFilename, credentialFilename, keyIdValue);
   }

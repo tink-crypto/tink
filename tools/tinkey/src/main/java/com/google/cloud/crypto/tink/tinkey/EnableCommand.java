@@ -20,6 +20,7 @@ package com.google.cloud.crypto.tink.tinkey;
  * Enables a key with some key id in a keyset.
  */
 public class EnableCommand extends KeyIdOptions implements Command {
+  @Override
   public void run() throws Exception {
     enable(inFilename, credentialFilename, keyIdValue);
   }

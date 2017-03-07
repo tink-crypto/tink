@@ -17,7 +17,6 @@
 package com.google.cloud.crypto.tink.tinkey;
 
 import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.SubCommand;
 import org.kohsuke.args4j.spi.SubCommandHandler;
 import org.kohsuke.args4j.spi.SubCommands;

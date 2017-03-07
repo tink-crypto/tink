@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
 
@@ -49,7 +48,7 @@ public class Util {
   public static final String KEY_FORMAT_SUFFIX = "KeyFormat";
 
   /**
-   * @returns a {@code KeyFormat} for {@code keyType} and {@code keyFormat}. For example,
+   * @return a {@code KeyFormat} for {@code keyType} and {@code keyFormat}. For example,
    * createKeyFormat("AesGcm", "key_size: 32") would return a {@code KeyFormat} of 256-bit AesGcm.
    *
    * @param the key type. By convention this is the name of the crypto algorithm, e.g., AesGcm.
@@ -71,7 +70,7 @@ public class Util {
   }
 
   /**
-   * @returns the full type url starting with types.googleapis.com of {@code keyType}.
+   * @return the full type url starting with types.googleapis.com of {@code keyType}.
    * @throws IllegalArgumentException if {@code keyType} has not equivalent proto class.
    */
   public static String getTypeUrl(String keyType) throws Exception {
@@ -84,7 +83,7 @@ public class Util {
   }
 
   /**
-   * @returns a {@code Builder} of {@code messageClass} which is a protobuf message.
+   * @return a {@code Builder} of {@code messageClass} which is a protobuf message.
    */
   public static Builder getBuilder(Class<?> messageClass) throws Exception {
     return (Builder) messageClass
@@ -107,7 +106,7 @@ public class Util {
   }
 
   /**
-   * @returns a {@code KeyFormat} constructed from {@code keyType} and {@code keyFormat}.
+   * @return a {@code KeyFormat} constructed from {@code keyType} and {@code keyFormat}.
    */
   public static KeyFormat createKeyFormat(String keyType, Any keyFormat) {
     return KeyFormat.newBuilder()
@@ -117,7 +116,7 @@ public class Util {
   }
 
   /**
-   * @returns a {@code GoogleCloudKmsAeadKey}.
+   * @return a {@code GoogleCloudKmsAeadKey}.
    */
   public static GoogleCloudKmsAeadKey createGoogleCloudKmsAeadKey(String kmsKeyUri)
       throws Exception {
@@ -127,7 +126,7 @@ public class Util {
   }
 
   /**
-   * @returns a {@code createKmsEnvelopeAeadKeyFormat}.
+   * @return a {@code createKmsEnvelopeAeadKeyFormat}.
    */
   public static KmsEnvelopeAeadKeyFormat createKmsEnvelopeAeadKeyFormat(
       Any kmsKey, KeyFormat dekFormat) throws Exception {

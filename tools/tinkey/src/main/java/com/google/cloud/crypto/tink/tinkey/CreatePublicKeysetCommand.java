@@ -20,6 +20,7 @@ package com.google.cloud.crypto.tink.tinkey;
  * Creates a public keyset from an existing keyset.
  */
 public class CreatePublicKeysetCommand extends InOptions implements Command {
+  @Override
   public void run() throws Exception {
     createPublicKeyset(outFilename, inFilename, credentialFilename);
   }

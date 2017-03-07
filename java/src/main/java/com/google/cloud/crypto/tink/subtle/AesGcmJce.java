@@ -59,7 +59,7 @@ public final class AesGcmJce extends AeadBase {
     if (aad != null) {
       cipher.updateAAD(aad);
     }
-    int written = cipher.doFinal(plaintext, 0, plaintext.length, ciphertext, IV_SIZE_IN_BYTES);
+    int unusedWritten = cipher.doFinal(plaintext, 0, plaintext.length, ciphertext, IV_SIZE_IN_BYTES);
     return ciphertext;
   }
 

@@ -49,7 +49,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class EcdsaSignKeyManagerTest {
-  class HashAndCurveType {
+  private static class HashAndCurveType {
     public HashType hashType;
     public EllipticCurveType curveType;
 
@@ -118,7 +118,7 @@ public class EcdsaSignKeyManagerTest {
           .build();
       KeyFormat keyFormat = KeyFormat.newBuilder().setFormat(Any.pack(ecdsaFormat)).build();
       try {
-        Any privKey = signManager.newKey(keyFormat);
+        Any unusedPrivKey = signManager.newKey(keyFormat);
         fail("Unsupported key format, should have thrown exception: " + hashType + " "
             + curveType);
       } catch (GeneralSecurityException expected) {
@@ -184,7 +184,7 @@ public class EcdsaSignKeyManagerTest {
 
       EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
       try {
-        PublicKeySign signer = signManager.getPrimitive(
+        PublicKeySign unusedSigner = signManager.getPrimitive(
             Any.pack(ecdsaPrivKey));
         fail("Unsupported key, should have thrown exception: " + hashType + " "
             + curveType);

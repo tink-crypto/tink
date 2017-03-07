@@ -46,8 +46,8 @@ public class AesGcmJceTest {
 
   @Test
   public void testEncryptDecrypt() throws Exception {
-    byte aad[] = new byte[] {1, 2, 3};
-    byte key[] = Random.randBytes(KEY_SIZE);
+    byte[] aad = new byte[] {1, 2, 3};
+    byte[] key = Random.randBytes(KEY_SIZE);
     AesGcmJce gcm = new AesGcmJce(key);
     for (int messageSize = 0; messageSize < 75; messageSize++) {
       byte[] message = Random.randBytes(messageSize);
@@ -59,9 +59,9 @@ public class AesGcmJceTest {
 
   @Test
   public void testModifyCiphertext() throws Exception {
-    byte aad[] = new byte[] {1, 2, 3};
-    byte key[] = Random.randBytes(KEY_SIZE);
-    byte message[] = Random.randBytes(32);
+    byte[] aad = new byte[] {1, 2, 3};
+    byte[] key = Random.randBytes(KEY_SIZE);
+    byte[] message = Random.randBytes(32);
     AesGcmJce gcm = new AesGcmJce(key);
     byte[] ciphertext = gcm.encrypt(message, aad);
 
@@ -99,8 +99,8 @@ public class AesGcmJceTest {
    * A very basic test for asynchronous encryption.
    */
   public void testAsync() throws Exception {
-    byte aad[] = new byte[] {1, 2, 3};
-    byte key[] = Random.randBytes(KEY_SIZE);
+    byte[] aad = new byte[] {1, 2, 3};
+    byte[] key = Random.randBytes(KEY_SIZE);
     AesGcmJce gcm = new AesGcmJce(key);
     byte[] plaintext = Random.randBytes(20);
 

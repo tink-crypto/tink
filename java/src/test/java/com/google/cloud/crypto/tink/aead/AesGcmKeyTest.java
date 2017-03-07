@@ -41,7 +41,7 @@ import org.junit.runners.JUnit4;
 public class AesGcmKeyTest {
   private static final int AES_KEY_SIZE = 16;
 
-  class NistTestVector {
+  private static class NistTestVector {
     String name;
     public byte[] keyValue;
     public byte[] plaintext;

@@ -22,7 +22,6 @@ import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.aead.GoogleCredentialFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Produces {@code GoogleCredential} used in tests.
@@ -50,7 +49,7 @@ public class EnvelopeMeGoogleCredentialFactory implements GoogleCredentialFactor
   }
 
   /**
-   * @returns a {@code GoogleCredential} from a {@code serviceAccount}.
+   * @return a {@code GoogleCredential} from a {@code serviceAccount}.
    */
   public static GoogleCredential createGoogleCredential(byte[] serviceAccount) throws IOException {
     return GoogleCredential.fromStream(

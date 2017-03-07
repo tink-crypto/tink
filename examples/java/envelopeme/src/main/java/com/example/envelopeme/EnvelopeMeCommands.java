@@ -52,6 +52,7 @@ class EnvelopeMeCommands {
   }
 
   public static class EncryptCommand extends Args implements Command {
+    @Override
     public void run() throws Exception {
       Registry.INSTANCE.registerKeyManager(
         "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
@@ -73,6 +74,7 @@ class EnvelopeMeCommands {
   }
 
   public static class DecryptCommand extends Args implements Command {
+    @Override
     public void run() throws Exception {
       Registry.INSTANCE.registerKeyManager(
         "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",

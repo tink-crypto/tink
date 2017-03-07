@@ -20,6 +20,7 @@ package com.google.cloud.crypto.tink.tinkey;
  * List keys in a keyset.
  */
 public class ListCommand extends ListOptions implements Command {
+  @Override
   public void run() throws Exception {
     list(inFilename, credentialFilename);
   }

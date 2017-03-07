@@ -46,7 +46,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class EcdsaVerifyKeyManagerTest {
-  class HashAndCurveType {
+  private static class HashAndCurveType {
     public HashType hashType;
     public EllipticCurveType curveType;
 
@@ -185,12 +185,12 @@ public class EcdsaVerifyKeyManagerTest {
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();
       ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
-      ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
+      ECPrivateKey unusedPrivKey = (ECPrivateKey) keyPair.getPrivate();
 
       // Create PublicKeyVerify.
       ECPoint w = pubKey.getW();
       try {
-        PublicKeyVerify verifier = createVerifier(hashType, curveType,
+        PublicKeyVerify unusedVerifier = createVerifier(hashType, curveType,
             w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
         fail("Unsupported key, should have thrown exception: " + hashType + " "
             + curveType);

@@ -22,12 +22,8 @@ import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKeyFormat;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadParams;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
-
 import java.io.FileOutputStream;
 
 /**
@@ -49,7 +45,7 @@ public class EnvelopeCommand extends EnvelopeOptions implements Command {
   }
 
   /**
-   * @returns a keyset containing a {@code KmsEnvelopeAeadKey}, using
+   * @return a keyset containing a {@code KmsEnvelopeAeadKey}, using
    * {@code dekTypeValue} and {@code dekFormatValue} to construct DEK format,
    * and using {@code kmsKeyUriValue} to construct the KMS key.
    */

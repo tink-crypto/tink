@@ -20,6 +20,7 @@ package com.google.cloud.crypto.tink.tinkey;
  * Destroy a key with some key id in a keyset.
  */
 public class DestroyCommand extends KeyIdOptions implements Command {
+  @Override
   public void run() throws Exception {
     destroy(inFilename, credentialFilename, keyIdValue);
   }

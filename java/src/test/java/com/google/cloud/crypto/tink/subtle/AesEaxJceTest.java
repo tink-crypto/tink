@@ -253,8 +253,8 @@ public class AesEaxJceTest {
 
   @Test
   public void testEncryptDecrypt() throws Exception {
-    byte aad[] = new byte[] {1, 2, 3};
-    byte key[] = Random.randBytes(KEY_SIZE);
+    byte[] aad = new byte[] {1, 2, 3};
+    byte[] key = Random.randBytes(KEY_SIZE);
     AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
     for (int messageSize = 0; messageSize < 75; messageSize++) {
       byte[] message = Random.randBytes(messageSize);
@@ -291,9 +291,9 @@ public class AesEaxJceTest {
   }
 
   public void testModifyCiphertext(int keySizeInBytes, int ivSizeInBytes) throws Exception {
-    byte aad[] = new byte[] {1, 2, 3};
-    byte key[] = Random.randBytes(KEY_SIZE);
-    byte message[] = Random.randBytes(32);
+    byte[] aad = new byte[] {1, 2, 3};
+    byte[] key = Random.randBytes(KEY_SIZE);
+    byte[] message = Random.randBytes(32);
     AesEaxJce eax = new AesEaxJce(key, ivSizeInBytes);
     byte[] ciphertext = eax.encrypt(message, aad);
 
@@ -345,8 +345,8 @@ public class AesEaxJceTest {
    * A very basic test for asynchronous encryption.
    */
   public void testAsync() throws Exception {
-    byte aad[] = new byte[] {1, 2, 3};
-    byte key[] = Random.randBytes(KEY_SIZE);
+    byte[] aad = new byte[] {1, 2, 3};
+    byte[] key = Random.randBytes(KEY_SIZE);
     AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
     byte[] plaintext = Random.randBytes(20);
 
