@@ -81,10 +81,7 @@ java_library(
         "src/main/java/com/google/cloud/crypto/tink/subtle/GoogleCloudKmsAead.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/IndCpaCipher.java",
     ],
-    # Errorprone is simplistic and has a lot of false positives.
-    # Here we have to turn of the crypto usage checks, since we construct
-    # authenticated ciphers from underlying ciphers that are falsly flagged by errorprone.
-    javacopts = JAVACOPTS + ["-Xep:InsecureCryptoUsage:OFF"],
+    javacopts = JAVACOPTS,
     deps = [
         "//java:common_subtle",
         "//java:public_interfaces",

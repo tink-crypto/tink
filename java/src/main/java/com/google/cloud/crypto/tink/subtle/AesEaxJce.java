@@ -17,9 +17,6 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import com.google.cloud.crypto.tink.Aead;
-import com.google.cloud.crypto.tink.subtle.Random;
-
-import java.lang.IllegalArgumentException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
@@ -61,6 +58,7 @@ public final class AesEaxJce implements Aead {
   private final SecretKeySpec keySpec;
   private final int ivSizeInBytes;
 
+  @SuppressWarnings("InsecureCryptoUsage")
   public AesEaxJce(final byte[] key, int ivSizeInBytes) throws GeneralSecurityException {
     if (ivSizeInBytes != 12 && ivSizeInBytes != 16) {
       throw new IllegalArgumentException("Iv size should be either 12 or 16 bytes");
@@ -82,7 +80,7 @@ public final class AesEaxJce implements Aead {
     int len = x.length;
     byte[] res = new byte[len];
     for (int i = 0; i < len; i++) {
-      res[i] = (byte)(x[i] ^ y[i]);
+      res[i] = (byte) (x[i] ^ y[i]);
     }
     return res;
   }
@@ -95,11 +93,11 @@ public final class AesEaxJce implements Aead {
     byte[] res = new byte[BLOCK_SIZE_IN_BYTES];
     for (int i = 0; i < BLOCK_SIZE_IN_BYTES - 1; i++) {
       // Shifts byte array by 1 bit (this is ugly because bytes in Java are signed)
-      res[i] = (byte)(((block[i] << 1) ^ ((block[i + 1] & 0xff) >>> 7)) & 0xff);
+      res[i] = (byte) (((block[i] << 1) ^ ((block[i + 1] & 0xff) >>> 7)) & 0xff);
     }
     // Shifts the least significant block by 1 bit and reduces the msb modulo the polynomial.
     res[BLOCK_SIZE_IN_BYTES - 1] =
-        (byte)((block[BLOCK_SIZE_IN_BYTES - 1] << 1) ^ ((block[0] & 0x80) == 0 ? 0 : 0x87));
+        (byte) ((block[BLOCK_SIZE_IN_BYTES - 1] << 1) ^ ((block[0] & 0x80) == 0 ? 0 : 0x87));
     return res;
   }
 
@@ -158,6 +156,7 @@ public final class AesEaxJce implements Aead {
     return ecb.doFinal(block);
   }
 
+  @SuppressWarnings("InsecureCryptoUsage")
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
     // Check that ciphertext is not longer than the max. size of a Java array.
@@ -178,11 +177,12 @@ public final class AesEaxJce implements Aead {
     byte[] t = omac(ecb, 2, ciphertext, ivSizeInBytes, plaintext.length);
     int offset = plaintext.length + ivSizeInBytes;
     for (int i = 0; i < TAG_SIZE_IN_BYTES; i++) {
-      ciphertext[offset + i] = (byte)(h[i] ^ n[i] ^ t[i]);
+      ciphertext[offset + i] = (byte) (h[i] ^ n[i] ^ t[i]);
     }
     return ciphertext;
   }
 
+  @SuppressWarnings("InsecureCryptoUsage")
   @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
       throws GeneralSecurityException {

@@ -197,13 +197,6 @@ java_proto_library(
 
 # ecies hybrid encryption
 
-filegroup(
-    name = "ecies",
-    srcs = [
-        "ecies.proto",
-    ],
-)
-
 cc_proto_library(
     name = "cc_ecies",
     imports = [
@@ -217,7 +210,7 @@ cc_proto_library(
         ":cc_hmac",
     ],
     protos = [
-        ":ecies",
+        "ecies.proto",
     ],
     verbose = 0,
     with_grpc = False,
@@ -236,7 +229,7 @@ java_proto_library(
         ":java_hmac",
     ],
     protos = [
-        ":ecies",
+        "ecies.proto",
     ],
     verbose = 0,
     with_grpc = False,

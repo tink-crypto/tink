@@ -17,15 +17,16 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import com.google.cloud.crypto.tink.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import javax.crypto.AEADBadTagException;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for AesEax
@@ -35,8 +36,10 @@ import org.junit.Test;
  *   - tests with long ciphertexts (e.g. BC had a bug with messages of size 8k or longer)
  *   - check that IVs are distinct.
  */
+@RunWith(JUnit4.class)
 public class AesEaxJceTest {
-
+  private static final int KEY_SIZE = 16;
+  private static final int IV_SIZE = 16;
   // TODO(bleichen): This method will be in TestUtil.
   public static byte[] hexDecode(String hex) throws IllegalArgumentException {
     if (hex.length() % 2 != 0) {
@@ -54,7 +57,9 @@ public class AesEaxJceTest {
     }
     return result;
   }
-
+  /**
+   * EaxTestVector
+   */
   public static class EaxTestVector {
     final byte[] pt;
     final byte[] aad;
@@ -248,11 +253,9 @@ public class AesEaxJceTest {
 
   @Test
   public void testEncryptDecrypt() throws Exception {
-    final int KEY_SIZE = 16;
-    final int IV_SIZE_IN_BYTES = 16;
     byte aad[] = new byte[] {1, 2, 3};
     byte key[] = Random.randBytes(KEY_SIZE);
-    AesEaxJce eax = new AesEaxJce(key, IV_SIZE_IN_BYTES);
+    AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
     for (int messageSize = 0; messageSize < 75; messageSize++) {
       byte[] message = Random.randBytes(messageSize);
       byte[] ciphertext = eax.encrypt(message, aad);
@@ -288,7 +291,6 @@ public class AesEaxJceTest {
   }
 
   public void testModifyCiphertext(int keySizeInBytes, int ivSizeInBytes) throws Exception {
-    final int KEY_SIZE = 16;
     byte aad[] = new byte[] {1, 2, 3};
     byte key[] = Random.randBytes(KEY_SIZE);
     byte message[] = Random.randBytes(32);
@@ -299,7 +301,7 @@ public class AesEaxJceTest {
     for (int b = 0; b < ciphertext.length; b++) {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modified = Arrays.copyOf(ciphertext, ciphertext.length);
-        modified[b] ^= (byte)(1 << bit);
+        modified[b] ^= (byte) (1 << bit);
         try {
           byte[] unused = eax.decrypt(modified, aad);
           fail("Decrypting modified ciphertext should fail");
@@ -327,7 +329,7 @@ public class AesEaxJceTest {
     for (int b = 0; b < aad.length; b++) {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modified = Arrays.copyOf(aad, aad.length);
-        modified[b] ^= (byte)(1 << bit);
+        modified[b] ^= (byte) (1 << bit);
         try {
           byte[] unused = eax.decrypt(ciphertext, modified);
           fail("Decrypting with modified aad should fail");
@@ -343,8 +345,6 @@ public class AesEaxJceTest {
    * A very basic test for asynchronous encryption.
    */
   public void testAsync() throws Exception {
-    final int KEY_SIZE = 16;
-    final int IV_SIZE = 16;
     byte aad[] = new byte[] {1, 2, 3};
     byte key[] = Random.randBytes(KEY_SIZE);
     AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
