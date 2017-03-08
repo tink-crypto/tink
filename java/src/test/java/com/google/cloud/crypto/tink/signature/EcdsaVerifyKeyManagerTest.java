@@ -21,6 +21,7 @@ import static junit.framework.Assert.fail;
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.subtle.Random;
@@ -157,7 +158,7 @@ public class EcdsaVerifyKeyManagerTest {
 
       // Create PublicKeyVerify.
       ECPoint w = pubKey.getW();
-      PublicKeyVerify verifier = createVerifier(hashType, curveType,
+      PublicKeyVerify verifier = createVerifier(hashType, curveType, EcdsaSignatureEncoding.DER,
           w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
       try {
         verifier.verify(signature, msg);
@@ -191,7 +192,7 @@ public class EcdsaVerifyKeyManagerTest {
       ECPoint w = pubKey.getW();
       try {
         PublicKeyVerify unusedVerifier = createVerifier(hashType, curveType,
-            w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
+            EcdsaSignatureEncoding.DER, w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
         fail("Unsupported key, should have thrown exception: " + hashType + " "
             + curveType);
       } catch (GeneralSecurityException expected) {
@@ -200,14 +201,33 @@ public class EcdsaVerifyKeyManagerTest {
     }
   }
 
+  @Test
+  public void testGetPrimitiveWithUnsupportedEncoding() throws Exception {
+    ECParameterSpec ecParams = SigUtil.getCurveSpec(EllipticCurveType.NIST_P256);
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+    keyGen.initialize(ecParams);
+    KeyPair keyPair = keyGen.generateKeyPair();
+    ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
+    ECPrivateKey unusedPrivKey = (ECPrivateKey) keyPair.getPrivate();
 
-  private PublicKeyVerify createVerifier(RfcTestVector t) throws Exception {
-    return createVerifier(t.hashType, t.curveType, t.pubX, t.pubY);
+    // Create PublicKeyVerify.
+    ECPoint w = pubKey.getW();
+    try {
+      PublicKeyVerify unusedVerifier = createVerifier(HashType.SHA256, EllipticCurveType.NIST_P256,
+          EcdsaSignatureEncoding.RAW, w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
+      fail("Unsupported encoding, should have thrown exception.");
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
   }
 
-  private PublicKeyVerify createVerifier(HashType hashType, EllipticCurveType curve, byte[] pubX,
-      byte[] pubY) throws Exception {
-    EcdsaPublicKey ecdsaPubKey = TestUtil.createEcdsaPubKey(hashType, curve, pubX, pubY);
+  private PublicKeyVerify createVerifier(RfcTestVector t) throws Exception {
+    return createVerifier(t.hashType, t.curveType, EcdsaSignatureEncoding.DER, t.pubX, t.pubY);
+  }
+
+  private PublicKeyVerify createVerifier(HashType hashType, EllipticCurveType curve,
+      EcdsaSignatureEncoding encoding, byte[] pubX, byte[] pubY) throws Exception {
+    EcdsaPublicKey ecdsaPubKey = TestUtil.createEcdsaPubKey(hashType, curve, encoding, pubX, pubY);
     EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
     return verifyManager.getPrimitive(Any.pack(ecdsaPubKey));
   }

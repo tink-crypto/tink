@@ -24,6 +24,7 @@ import com.google.cloud.crypto.tink.EcdsaProto.EcdsaKeyFormat;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaParams;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TestUtil;
@@ -71,6 +72,7 @@ public class EcdsaSignKeyManagerTest {
       EcdsaParams ecdsaParams = EcdsaParams.newBuilder()
           .setHashType(hashType)
           .setCurve(curveType)
+          .setEncoding(EcdsaSignatureEncoding.DER)
           .build();
       EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder()
           .setParams(ecdsaParams)
@@ -103,6 +105,26 @@ public class EcdsaSignKeyManagerTest {
   }
 
   @Test
+  public void testNewKeyUnsupportedEncoding() throws Exception {
+    EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
+    EcdsaParams ecdsaParams = EcdsaParams.newBuilder()
+        .setHashType(HashType.SHA256)
+        .setCurve(EllipticCurveType.NIST_P256)
+        .setEncoding(EcdsaSignatureEncoding.RAW)
+        .build();
+    EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder()
+        .setParams(ecdsaParams)
+        .build();
+    KeyFormat keyFormat = KeyFormat.newBuilder().setFormat(Any.pack(ecdsaFormat)).build();
+    try {
+      signManager.newKey(keyFormat);
+      fail("Unsupported encoding, should have thrown exception");
+    } catch (GeneralSecurityException expecpted) {
+      // Raw encoding is not supported yet.
+    }
+  }
+
+  @Test
   public void testNewKeyUnsupportedKeyFormat() throws Exception {
     HashAndCurveType[] hashAndCurves = {
       new HashAndCurveType(HashType.SHA1, EllipticCurveType.NIST_P256),
@@ -119,6 +141,7 @@ public class EcdsaSignKeyManagerTest {
       EcdsaParams ecdsaParams = EcdsaParams.newBuilder()
           .setHashType(hashType)
           .setCurve(curveType)
+          .setEncoding(EcdsaSignatureEncoding.DER)
           .build();
       EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder()
           .setParams(ecdsaParams)
@@ -152,7 +175,7 @@ public class EcdsaSignKeyManagerTest {
 
       ECPoint w = pubKey.getW();
       EcdsaPublicKey ecdsaPubKey = TestUtil.createEcdsaPubKey(hashType, curveType,
-          w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
+          EcdsaSignatureEncoding.DER, w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
       EcdsaPrivateKey ecdsaPrivKey = TestUtil.createEcdsaPrivKey(ecdsaPubKey,
           privKey.getS().toByteArray());
       EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
@@ -189,7 +212,7 @@ public class EcdsaSignKeyManagerTest {
 
       ECPoint w = pubKey.getW();
       EcdsaPublicKey ecdsaPubKey = TestUtil.createEcdsaPubKey(hashType, curveType,
-          w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
+          EcdsaSignatureEncoding.DER, w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
       EcdsaPrivateKey ecdsaPrivKey = TestUtil.createEcdsaPrivKey(ecdsaPubKey,
           privKey.getS().toByteArray());
 

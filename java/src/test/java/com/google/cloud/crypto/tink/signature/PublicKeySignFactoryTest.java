@@ -23,6 +23,7 @@ import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
@@ -61,9 +62,12 @@ public class PublicKeySignFactoryTest {
       {2, 1, 0}
     };
     EcdsaPrivateKey[] ecdsaPrivKeys = new EcdsaPrivateKey[] {
-      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P521, HashType.SHA512),
-      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P384, HashType.SHA512),
-      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P256, HashType.SHA256)};
+      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P521, HashType.SHA512,
+          EcdsaSignatureEncoding.DER),
+      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P384, HashType.SHA512,
+          EcdsaSignatureEncoding.DER),
+      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P256, HashType.SHA256,
+          EcdsaSignatureEncoding.DER)};
     Key[] keys = new Key[] {
       TestUtil.createKey(ecdsaPrivKeys[0], 0, KeyStatusType.ENABLED, OutputPrefixType.TINK),
       TestUtil.createKey(ecdsaPrivKeys[1], 1, KeyStatusType.ENABLED, OutputPrefixType.RAW),
@@ -103,7 +107,7 @@ public class PublicKeySignFactoryTest {
       }
       // Verifying with a random public key should fail.
       EcdsaPrivateKey randomPrivKey = TestUtil.generateEcdsaPrivKey(
-          EllipticCurveType.NIST_P521, HashType.SHA512);
+          EllipticCurveType.NIST_P521, HashType.SHA512, EcdsaSignatureEncoding.DER);
       verifier = PublicKeyVerifyFactory.getPrimitive(
           TestUtil.createKeysetHandle(
               TestUtil.createKeyset(TestUtil.createKey(randomPrivKey.getPublicKey(),

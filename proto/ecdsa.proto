@@ -23,12 +23,28 @@ import "proto/common.proto";
 option java_package = "com.google.cloud.crypto.tink";
 option java_outer_classname = "EcdsaProto";
 
+enum EcdsaSignatureEncoding {
+  UNKNOWN_ENCODING = 0;
+  // The signature's format is r || s, where r and s have fixed length equal to
+  // the curve order's length in bytes.
+  RAW = 1;
+  // The signature is encoded using ASN.1
+  // (https://tools.ietf.org/html/rfc5480#appendix-A):
+  // ECDSA-Sig-Value :: = SEQUENCE {
+  //  r INTEGER,
+  //  s INTEGER
+  // }
+  DER = 2;
+}
+
 // Protos for Ecdsa.
 message EcdsaParams {
   // Required.
   HashType hash_type = 1;
   // Required.
   EllipticCurveType curve = 2;
+  // Required.
+  EcdsaSignatureEncoding encoding = 3;
 }
 
 // key_type: type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey

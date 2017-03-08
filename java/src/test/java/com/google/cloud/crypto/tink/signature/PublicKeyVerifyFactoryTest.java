@@ -22,6 +22,7 @@ import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
@@ -59,9 +60,12 @@ public class PublicKeyVerifyFactoryTest {
       {2, 1, 0}
     };
     EcdsaPrivateKey[] ecdsaPrivKeys = new EcdsaPrivateKey[] {
-      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P521, HashType.SHA512),
-      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P384, HashType.SHA512),
-      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P256, HashType.SHA256)};
+      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P521, HashType.SHA512,
+          EcdsaSignatureEncoding.DER),
+      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P384, HashType.SHA512,
+          EcdsaSignatureEncoding.DER),
+      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P256, HashType.SHA256,
+          EcdsaSignatureEncoding.DER)};
     EcdsaPublicKey[] ecdsaPubKeys = new EcdsaPublicKey[] {
       ecdsaPrivKeys[0].getPublicKey(),
           ecdsaPrivKeys[1].getPublicKey(),
@@ -91,7 +95,7 @@ public class PublicKeyVerifyFactoryTest {
       }
       // Signature signed by random key should not be verified by the verifier.
       EcdsaPrivateKey randomPrivKey = TestUtil.generateEcdsaPrivKey(
-          EllipticCurveType.NIST_P521, HashType.SHA512);
+          EllipticCurveType.NIST_P521, HashType.SHA512, EcdsaSignatureEncoding.DER);
       PublicKeySign signer = PublicKeySignFactory.getPrimitive(
           TestUtil.createKeysetHandle(
               TestUtil.createKeyset(TestUtil.createKey(randomPrivKey, 0, KeyStatusType.ENABLED,
@@ -104,7 +108,6 @@ public class PublicKeyVerifyFactoryTest {
       } catch (GeneralSecurityException expected) {
         // Expected
       }
-
     }
   }
 }

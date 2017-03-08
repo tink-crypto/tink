@@ -19,6 +19,7 @@ package com.google.cloud.crypto.tink.signature;
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaParams;
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
@@ -71,8 +72,16 @@ final class SigUtil {
    * @throws GeneralSecurityException iff it's invalid.
    */
   public static void validateEcdsaParams(EcdsaParams params) throws GeneralSecurityException {
+    EcdsaSignatureEncoding encoding = params.getEncoding();
     HashType hash = params.getHashType();
     EllipticCurveType curve = params.getCurve();
+    switch(encoding) {
+      case DER:
+        break;
+      // TODO(quannguyen): support other signature encodings.
+      default:
+        throw new GeneralSecurityException("Unsupported signature encoding");
+    }
     switch(curve) {
       case NIST_P256:
         // Using SHA512 for curve P256 is fine. However, only the 256 leftmost bits of the hash is

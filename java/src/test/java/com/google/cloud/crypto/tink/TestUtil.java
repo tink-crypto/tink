@@ -32,6 +32,7 @@ import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaParams;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
@@ -412,9 +413,10 @@ public class TestUtil {
    * @return a {@code EcdsaPublicKey} constructed from {@code EllipticCurveType} and
    * {@code HashType}.
    */
-  public static EcdsaPublicKey generateEcdsaPubKey(EllipticCurveType curve, HashType hashType)
+  public static EcdsaPublicKey generateEcdsaPubKey(EllipticCurveType curve, HashType hashType,
+      EcdsaSignatureEncoding encoding)
     throws Exception {
-    EcdsaPrivateKey privKey = generateEcdsaPrivKey(curve, hashType);
+    EcdsaPrivateKey privKey = generateEcdsaPrivKey(curve, hashType, encoding);
     return privKey.getPublicKey();
   }
 
@@ -422,7 +424,8 @@ public class TestUtil {
    * @return a {@code EcdsaPrivateKey} constructed from {@code EllipticCurveType} and
    * {@code HashType}.
    */
-  public static EcdsaPrivateKey  generateEcdsaPrivKey(EllipticCurveType curve, HashType hashType)
+  public static EcdsaPrivateKey generateEcdsaPrivKey(EllipticCurveType curve, HashType hashType,
+      EcdsaSignatureEncoding encoding)
       throws Exception {
         ECParameterSpec ecParams;
         switch(curve) {
@@ -444,7 +447,7 @@ public class TestUtil {
         ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
         ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
         ECPoint w = pubKey.getW();
-        EcdsaPublicKey ecdsaPubKey = createEcdsaPubKey(hashType, curve,
+        EcdsaPublicKey ecdsaPubKey = createEcdsaPubKey(hashType, curve, encoding,
             w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
 
         return createEcdsaPrivKey(ecdsaPubKey, privKey.getS().toByteArray());
@@ -455,11 +458,12 @@ public class TestUtil {
    * and affine coordinates of the public key.
    */
   public static EcdsaPublicKey createEcdsaPubKey(HashType hashType, EllipticCurveType curve,
-      byte[] pubX, byte[] pubY) throws Exception {
+      EcdsaSignatureEncoding encoding, byte[] pubX, byte[] pubY) throws Exception {
     final int version = 0;
     EcdsaParams ecdsaParams = EcdsaParams.newBuilder()
         .setHashType(hashType)
         .setCurve(curve)
+        .setEncoding(encoding)
         .build();
     return EcdsaPublicKey.newBuilder()
         .setVersion(version)
