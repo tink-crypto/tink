@@ -16,8 +16,6 @@
 
 package com.google.cloud.crypto.tink.signature;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
@@ -84,14 +82,23 @@ public class EcdsaSignKeyManagerTest {
       EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
       PublicKeyVerify verifier = verifyManager.getPrimitive(
           Any.pack(privKey.unpack(EcdsaPrivateKey.class).getPublicKey()));
-      assertTrue(verifier.verify(signature, msg));
+      try {
+        verifier.verify(signature, msg);
+      } catch (GeneralSecurityException e) {
+        fail("Valid signature, should not throw exception");
+      }
 
       // Creates another signer and checks that the signature can not be verified with a different
       // verifier.
       Any privKey1 = signManager.newKey(keyFormat);
       PublicKeySign signer1 = signManager.getPrimitive(privKey1);
       byte[] signature1 = signer1.sign(msg);
-      assertFalse(verifier.verify(signature1, msg));
+      try {
+        verifier.verify(signature1, msg);
+        fail("Invalid signature, should have thrown exception");
+      } catch (GeneralSecurityException expected) {
+        // Expected
+      }
     }
   }
 
@@ -152,7 +159,11 @@ public class EcdsaSignKeyManagerTest {
       PublicKeySign signer = signManager.getPrimitive(
           Any.pack(ecdsaPrivKey));
       PublicKeyVerify verifier = (new EcdsaVerifyKeyManager()).getPrimitive(Any.pack(ecdsaPubKey));
-      assertTrue(verifier.verify(signer.sign(msg), msg));
+      try {
+        verifier.verify(signer.sign(msg), msg);
+      } catch (GeneralSecurityException e) {
+        fail("Valid signature, should not throw exception");
+      }
     }
   }
 

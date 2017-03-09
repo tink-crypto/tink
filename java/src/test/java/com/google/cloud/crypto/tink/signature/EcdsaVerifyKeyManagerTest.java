@@ -16,7 +16,6 @@
 
 package com.google.cloud.crypto.tink.signature;
 
-import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
@@ -125,13 +124,11 @@ public class EcdsaVerifyKeyManagerTest {
     for (int i = 0; i < rfcTestVectors.length; i++) {
       RfcTestVector t = rfcTestVectors[i];
       PublicKeyVerify verifier = createVerifier(t);
-      boolean verified = false;
       try {
-        verified = verifier.verify(t.sig, t.msg);
+        verifier.verify(t.sig, t.msg);
       } catch (GeneralSecurityException e) {
-        verified = false;
+        fail("Valid signature, should not throw exception");
       }
-      assertTrue(verified);
     }
   }
 
@@ -162,8 +159,11 @@ public class EcdsaVerifyKeyManagerTest {
       ECPoint w = pubKey.getW();
       PublicKeyVerify verifier = createVerifier(hashType, curveType,
           w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
-
-      assertTrue(verifier.verify(signature, msg));
+      try {
+        verifier.verify(signature, msg);
+      } catch (GeneralSecurityException e) {
+        fail("Valid signature, should not throw exception");
+      }
     }
   }
 

@@ -27,7 +27,8 @@ public interface PublicKeyVerify {
   /**
    * Verifies whether {@code signature} is a valid signature for {@code data}.
    *
-   * @return true iff {@code signature} is a valid signature for {@code data}.
+   * @throws GeneralSecurityException If {@code signature} is not a valid signature for
+   * {@code data} then GeneralSecurityException is thrown.
    */
-  boolean verify(final byte[] signature, final byte[] data) throws GeneralSecurityException;
+  void verify(final byte[] signature, final byte[] data) throws GeneralSecurityException;
 }

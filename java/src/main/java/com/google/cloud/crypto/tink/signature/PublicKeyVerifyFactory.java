@@ -48,7 +48,7 @@ import java.util.Map.Entry;
  *   KeysetHandle keysetHandle = ...;
  *   PublicKeyVerifyFactory.registerStandardKeyTypes();
  *   PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle);
- *   boolean verified = verifier.verify(signature, data);
+ *   verifier.verify(signature, data);
  *  }</pre>
  */
 class PublicKeyVerifyFactory {
@@ -113,7 +113,7 @@ class PublicKeyVerifyFactory {
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
     return new PublicKeyVerify() {
       @Override
-      public boolean verify(final byte[] signature, final byte[] data)
+      public void verify(final byte[] signature, final byte[] data)
       throws GeneralSecurityException {
         if (signature.length <= CryptoFormat.NON_RAW_PREFIX_SIZE) {
           // This also rejects raw signatures with size of 4 bytes or fewer. We're not aware of any
@@ -126,32 +126,28 @@ class PublicKeyVerifyFactory {
         List<PrimitiveSet<PublicKeyVerify>.Entry<PublicKeyVerify>> entries =
             primitives.getPrimitive(prefix);
         for (PrimitiveSet<PublicKeyVerify>.Entry<PublicKeyVerify> entry : entries) {
-          boolean verified = false;
           try {
-            verified = entry.getPrimitive().verify(sigNoPrefix, data);
+            entry.getPrimitive().verify(sigNoPrefix, data);
+            // If there is no exception, the signature is valid and we can return.
+            return;
           } catch (GeneralSecurityException e) {
-            // Ignored
-          }
-          if (verified) {
-            return verified;
+            // Ignored as we want to continue verification with the remaining keys.
           }
         }
 
-        // Let's try all RAW keys.
+        // None "non-raw" key matched, so let's try the raw keys (if any exist).
         entries = primitives.getRawPrimitives();
         for (PrimitiveSet<PublicKeyVerify>.Entry<PublicKeyVerify> entry : entries) {
-          boolean verified = false;
           try {
-            verified = entry.getPrimitive().verify(signature, data);
+            entry.getPrimitive().verify(signature, data);
+            // If there is no exception, the signature is valid and we can return.
+            return;
           } catch (GeneralSecurityException e) {
-            // Ignored
-          }
-          if (verified) {
-            return verified;
+            // Ignored as we want to continue verification with raw keys.
           }
         }
         // nothing works.
-        return false;
+        throw new GeneralSecurityException("Invalid signature");
       }
     };
   }

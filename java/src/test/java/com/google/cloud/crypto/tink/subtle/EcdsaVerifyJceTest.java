@@ -19,6 +19,7 @@ package com.google.cloud.crypto.tink.subtle;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 import com.google.cloud.crypto.tink.TestUtil;
 import java.math.BigInteger;
@@ -32,6 +33,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
+import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -551,7 +553,8 @@ public class EcdsaVerifyJceTest {
       byte[] signatureBytes = TestUtil.hexDecode(signature);
       boolean verified = false;
       try {
-        verified = verifier.verify(signatureBytes, messageBytes);
+        verifier.verify(signatureBytes, messageBytes);
+        verified = true;
       } catch (GeneralSecurityException ex) {
         verified = false;
       }
@@ -622,7 +625,11 @@ public class EcdsaVerifyJceTest {
 
     //Verify with EcdsaVerifyJce.
     EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, "SHA256WithECDSA");
-    assertTrue(verifier.verify(signature, message.getBytes("UTF-8")));
+    try {
+      verifier.verify(signature, message.getBytes("UTF-8"));
+    } catch (GeneralSecurityException ex) {
+      fail("Valid signature, should not throw exception");
+    }
   }
 
   @Test
@@ -645,15 +652,14 @@ public class EcdsaVerifyJceTest {
     EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, "SHA256WithECDSA");
     for (int i = 0; i < signature.length; i++) {
       for (int j = 0; j < 8; j++) {
-        signature[i] = (byte) (signature[i] ^ (1 << j));
-        boolean verified = true;
+        byte[] modifiedSignature = Arrays.copyOf(signature, signature.length);
+        modifiedSignature[i] = (byte) (modifiedSignature[i] ^ (1 << j));
         try {
-          verified = verifier.verify(signature, message.getBytes("UTF-8"));
+          verifier.verify(modifiedSignature, message.getBytes("UTF-8"));
+          fail("Invalid signature, should have thrown exception");
         } catch (GeneralSecurityException expected) {
-          verified = false;
+          // Expected.
         }
-        assertFalse(verified);
-        signature[i] = (byte) (signature[i] ^ (1 << j));
       }
     }
   }

@@ -16,8 +16,8 @@
 
 package com.google.cloud.crypto.tink.signature;
 
+import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
@@ -30,6 +30,7 @@ import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,6 +69,10 @@ public class PublicKeyVerifyFactoryTest {
         TestUtil.createKeyset(TestUtil.createKey(privKey1.getPublicKey(), 1, KeyStatusType.ENABLED,
         OutputPrefixType.TINK)));
     PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle1);
-    assertTrue(verifier.verify(sig, plaintext));
+    try {
+      verifier.verify(sig, plaintext);
+    } catch (GeneralSecurityException ex) {
+      fail("Valid signature, should not throw exception");
+    }
   }
 }
