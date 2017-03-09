@@ -214,7 +214,8 @@ public class EcdsaVerifyKeyManagerTest {
     ECPoint w = pubKey.getW();
     try {
       PublicKeyVerify unusedVerifier = createVerifier(HashType.SHA256, EllipticCurveType.NIST_P256,
-          EcdsaSignatureEncoding.RAW, w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
+          EcdsaSignatureEncoding.IEEE_P1363, w.getAffineX().toByteArray(),
+          w.getAffineY().toByteArray());
       fail("Unsupported encoding, should have thrown exception.");
     } catch (GeneralSecurityException expected) {
       // Expected

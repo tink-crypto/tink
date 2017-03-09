@@ -110,7 +110,7 @@ public class EcdsaSignKeyManagerTest {
     EcdsaParams ecdsaParams = EcdsaParams.newBuilder()
         .setHashType(HashType.SHA256)
         .setCurve(EllipticCurveType.NIST_P256)
-        .setEncoding(EcdsaSignatureEncoding.RAW)
+        .setEncoding(EcdsaSignatureEncoding.IEEE_P1363)
         .build();
     EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder()
         .setParams(ecdsaParams)
