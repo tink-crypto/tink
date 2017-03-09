@@ -196,6 +196,22 @@ java_library(
     ],
 )
 
+# public signature library
+
+java_library(
+    name = "tink_signature",
+    visibility = [
+        "//visibility:public",
+    ],
+    exports = [
+        "//java:signature",
+        "//java:signature_subtle",
+        "//proto:java_core",
+        "//proto:java_core_compile_imports",
+        "//proto:java_ecdsa",
+    ],
+)
+
 # restricted APIs
 
 java_library(
