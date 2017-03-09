@@ -51,7 +51,7 @@ import java.util.Map.Entry;
  *   verifier.verify(signature, data);
  *  }</pre>
  */
-class PublicKeyVerifyFactory {
+public final class PublicKeyVerifyFactory {
   /**
    * Safe to use PublicKeyVerify key types.
    */

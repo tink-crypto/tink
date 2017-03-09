@@ -51,7 +51,7 @@ import java.util.Map.Entry;
  *  }</pre>
  */
 
-class PublicKeySignFactory {
+public final class PublicKeySignFactory {
   /**
    * Safe to use PublicKeySign key types.
    */

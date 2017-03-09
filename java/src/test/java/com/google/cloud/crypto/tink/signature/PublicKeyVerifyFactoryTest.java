@@ -17,12 +17,11 @@
 package com.google.cloud.crypto.tink.signature;
 
 import static junit.framework.Assert.fail;
-import static org.junit.Assert.assertArrayEquals;
 
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
-import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
@@ -30,8 +29,8 @@ import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,30 +48,63 @@ public class PublicKeyVerifyFactoryTest {
   }
 
   @Test
-  public void testSignVerify() throws Exception {
-    EcdsaPrivateKey privKey1 = TestUtil.generateEcdsaPrivKey(
-        EllipticCurveType.NIST_P521, HashType.SHA512);
-    Key primary = TestUtil.createKey(
-        privKey1,
-        1,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.TINK);
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primary));
-    PublicKeySign signer = PublicKeySignFactory.getPrimitive(keysetHandle);
-    byte[] plaintext = "plaintext".getBytes("UTF-8");
-    byte[] sig = signer.sign(plaintext);
-    byte[] prefix = Arrays.copyOfRange(sig, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-    assertArrayEquals(prefix, CryptoFormat.getOutputPrefix(primary));
-    // Create PublicKeyVerifyFactory
-    KeysetHandle keysetHandle1 = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(TestUtil.createKey(privKey1.getPublicKey(), 1, KeyStatusType.ENABLED,
-        OutputPrefixType.TINK)));
-    PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle1);
-    try {
-      verifier.verify(sig, plaintext);
-    } catch (GeneralSecurityException ex) {
-      fail("Valid signature, should not throw exception");
+  public void testMultipleKeys() throws Exception {
+    // Permutations of {0, 1, 2}.
+    int[][] ids = new int[][] {
+      {0, 1, 2},
+      {0, 2, 1},
+      {1, 0, 2},
+      {1, 2, 0},
+      {2, 0, 1},
+      {2, 1, 0}
+    };
+    EcdsaPrivateKey[] ecdsaPrivKeys = new EcdsaPrivateKey[] {
+      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P521, HashType.SHA512),
+      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P384, HashType.SHA512),
+      TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P256, HashType.SHA256)};
+    EcdsaPublicKey[] ecdsaPubKeys = new EcdsaPublicKey[] {
+      ecdsaPrivKeys[0].getPublicKey(),
+          ecdsaPrivKeys[1].getPublicKey(),
+          ecdsaPrivKeys[2].getPublicKey()
+    };
+    Key[] keys = new Key[] {
+      TestUtil.createKey(ecdsaPubKeys[0], 0, KeyStatusType.ENABLED, OutputPrefixType.TINK),
+      TestUtil.createKey(ecdsaPubKeys[1], 1, KeyStatusType.ENABLED, OutputPrefixType.RAW),
+      TestUtil.createKey(ecdsaPubKeys[2], 2, KeyStatusType.ENABLED, OutputPrefixType.LEGACY)};
+    for (int i = 0; i < ids.length; i++) {
+      KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
+        TestUtil.createKeyset(keys[ids[i][0]], keys[ids[i][1]], keys[ids[i][2]]));
+      PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle);
+      // Signature signed by any of 3 keys should be verified by the verifier.
+      for (int j = 0; j < 3; j++) {
+        PublicKeySign signer = PublicKeySignFactory.getPrimitive(
+          TestUtil.createKeysetHandle(
+              TestUtil.createKeyset(TestUtil.createKey(ecdsaPrivKeys[j], j, KeyStatusType.ENABLED,
+                  keys[j].getOutputPrefixType()))));
+        byte[] plaintext = Random.randBytes(1211);
+        byte[] sig = signer.sign(plaintext);
+        try {
+          verifier.verify(sig, plaintext);
+        } catch (GeneralSecurityException ex) {
+          fail("Valid signature, should not throw exception");
+        }
+      }
+      // Signature signed by random key should not be verified by the verifier.
+      EcdsaPrivateKey randomPrivKey = TestUtil.generateEcdsaPrivKey(
+          EllipticCurveType.NIST_P521, HashType.SHA512);
+      PublicKeySign signer = PublicKeySignFactory.getPrimitive(
+          TestUtil.createKeysetHandle(
+              TestUtil.createKeyset(TestUtil.createKey(randomPrivKey, 0, KeyStatusType.ENABLED,
+                  keys[0].getOutputPrefixType()))));
+      byte[] plaintext = Random.randBytes(1211);
+      byte[] sig = signer.sign(plaintext);
+      try {
+        verifier.verify(sig, plaintext);
+        fail("Invalid signature, should have thrown exception");
+      } catch (GeneralSecurityException expected) {
+        // Expected
+      }
+
     }
   }
 }
