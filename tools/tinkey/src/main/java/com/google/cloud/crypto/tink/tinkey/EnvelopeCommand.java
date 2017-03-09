@@ -18,8 +18,6 @@ package com.google.cloud.crypto.tink.tinkey;
 
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.KeysetManager;
-import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKeyFormat;
-import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadParams;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.protobuf.Any;

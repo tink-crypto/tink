@@ -27,8 +27,8 @@ public class ChangeMasterKeyCommand extends ChangeMasterKeyOptions implements Co
   }
 
   /**
-   * Reencrypts the keyset in {@code inFilename} using {@code newMasterKeyValue}, writes the resulting
-   * keyset to {@code outFilename}.
+   * Reencrypts the keyset in {@code inFilename} using {@code newMasterKeyValue}, writes the
+   * resulting keyset to {@code outFilename}.
    */
   public static void changeMasterKey(String outFilename, String inFilename,
       String credentialFilename, String newMasterKeyValue, String newCredentialFilename)

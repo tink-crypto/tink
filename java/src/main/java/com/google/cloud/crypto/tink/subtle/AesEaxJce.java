@@ -198,7 +198,7 @@ public final class AesEaxJce implements Aead {
     byte res = 0;
     int offset = ciphertext.length - TAG_SIZE_IN_BYTES;
     for (int i = 0; i < TAG_SIZE_IN_BYTES; i++) {
-      res = (byte) (res | ciphertext[offset + i] ^ h[i] ^ n[i] ^ t[i]);
+      res = (byte) (res | (ciphertext[offset + i] ^ h[i] ^ n[i] ^ t[i]));
     }
     if (res != 0) {
       throw new AEADBadTagException("tag mismatch");

@@ -20,16 +20,13 @@ import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKeyFormat;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadParams;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
-
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 /**
  * Various helpers.
@@ -51,8 +48,8 @@ public class Util {
    * @return a {@code KeyFormat} for {@code keyType} and {@code keyFormat}. For example,
    * createKeyFormat("AesGcm", "key_size: 32") would return a {@code KeyFormat} of 256-bit AesGcm.
    *
-   * @param the key type. By convention this is the name of the crypto algorithm, e.g., AesGcm.
-   * @param a text format of some XyzKeyFormat-proto.
+   * @param keyType. By convention this is the name of the crypto algorithm, e.g., AesGcm.
+   * @param keyFormat. A text format of some XyzKeyFormat-proto.
    * @throws IllegalArgumentException if {@code keyType} has not equivalent proto class.
    */
   public static KeyFormat createKeyFormat(String keyType, String keyFormat)

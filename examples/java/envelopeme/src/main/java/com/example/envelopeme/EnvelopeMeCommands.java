@@ -16,16 +16,14 @@ package com.example.envelopeme;
 
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.aead.GoogleCloudKmsAeadKeyManager;
-
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.SubCommand;
 import org.kohsuke.args4j.spi.SubCommandHandler;
 import org.kohsuke.args4j.spi.SubCommands;
-
-import java.io.FileOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * Defines the different sub-commands and their parameters, for command-line invocation.
