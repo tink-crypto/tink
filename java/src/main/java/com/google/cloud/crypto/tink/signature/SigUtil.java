@@ -20,10 +20,8 @@ import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaParams;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
-import com.google.cloud.crypto.tink.subtle.EcUtil;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.ECParameterSpec;
 
 final class SigUtil {
   static final String INVALID_PARAMS = "Invalid ECDSA parameters";

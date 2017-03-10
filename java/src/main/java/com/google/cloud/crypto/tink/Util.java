@@ -16,15 +16,14 @@
 
 package com.google.cloud.crypto.tink;
 
-import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
+import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
@@ -121,8 +120,7 @@ public class Util {
           boolean lsb;
           if (encoded[0] == 2) {
             lsb = false;
-          }
-          else if (encoded[0] == 3) {
+          } else if (encoded[0] == 3) {
             lsb = true;
           } else {
             throw new GeneralSecurityException("Invalid format");

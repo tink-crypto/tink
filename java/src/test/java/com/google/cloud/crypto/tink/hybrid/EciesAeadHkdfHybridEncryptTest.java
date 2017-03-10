@@ -19,13 +19,9 @@ package com.google.cloud.crypto.tink.hybrid;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 
-import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
-import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
-import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
-import com.google.cloud.crypto.tink.HmacProto.HmacKey;
-import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
+import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.HybridDecrypt;
 import com.google.cloud.crypto.tink.HybridEncrypt;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;

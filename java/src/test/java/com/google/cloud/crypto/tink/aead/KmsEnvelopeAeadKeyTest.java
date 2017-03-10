@@ -33,7 +33,6 @@ import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.protobuf.Any;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +52,8 @@ public class KmsEnvelopeAeadKeyTest {
         new GoogleCloudKmsAeadKeyManager(new TestGoogleCredentialFactory()));
   }
 
-  public void GoogleCloudKmsKeyRestricted() throws Exception {
+  @Test
+  public void testGoogleCloudKmsKeyRestricted() throws Exception {
     // This key is restricted, use the cred of
     // tink-unit-tests@testing-cloud-kms-159306.iam.gserviceaccount.com.
     int aesKeySize = 16;
