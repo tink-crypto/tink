@@ -67,15 +67,16 @@ public class EciesAeadHkdfHybridEncryptTest {
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
     byte[] salt = "some salt".getBytes();
+    String hmacAlgo = "HmacSha256";
 
     KeyFormat keyFormat = KeyFormat.newBuilder()
         .setKeyType("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")
         .setFormat(Any.pack(AesGcmKeyFormat.newBuilder().setKeySize(AES_GCM_KEY_SIZE).build()))
         .build();
-    HybridEncrypt hybridEncrypt =
-        new EciesAeadHkdfHybridEncrypt(recipientPublicKey, salt, keyFormat, EcPointFormat.UNCOMPRESSED);
-    HybridDecrypt hybridDecrypt =
-        new EciesAeadHkdfHybridDecrypt(recipientPrivateKey, salt, keyFormat, EcPointFormat.UNCOMPRESSED);
+    HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey, salt,
+        hmacAlgo, keyFormat, EcPointFormat.UNCOMPRESSED);
+    HybridDecrypt hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey, salt,
+        hmacAlgo, keyFormat, EcPointFormat.UNCOMPRESSED);
 
     byte[] ciphertext = hybridEncrypt.encrypt(PLAINTEXT.getBytes(), CONTEXT.getBytes());
     byte[] decrypted = hybridDecrypt.decrypt(ciphertext, CONTEXT.getBytes());

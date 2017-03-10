@@ -45,6 +45,7 @@ class EciesAeadHkdfPrivateKeyManager implements KeyManager<HybridDecrypt> {
           recipientKeyProto.getKeyValue().toByteArray());
       return new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
           kemParams.getHkdfSalt().toByteArray(),
+          Util.hashToHmacAlgorithmName(kemParams.getHkdfHashType()),
           recipientKeyProto.getPublicKey().getParams().getDemParams().getAeadDem(),
           recipientKeyProto.getPublicKey().getParams().getEcPointFormat());
     } catch (InvalidProtocolBufferException e) {

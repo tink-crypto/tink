@@ -18,6 +18,7 @@ package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
+import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
@@ -222,5 +223,24 @@ public class Util {
     ECPrivateKeySpec spec = new ECPrivateKeySpec(privValue, ecParams);
     KeyFactory kf = KeyFactory.getInstance("EC");
     return (ECPrivateKey) kf.generatePrivate(spec);
+  }
+
+  /**
+   * Returns the HMAC algorithm name corresponding to a hash type.
+   *
+   * @param hash the hash type
+   * @return the JCE's HMAC algorithm name for the hash.
+   */
+  public static String hashToHmacAlgorithmName(HashType hash) throws NoSuchAlgorithmException {
+    switch(hash) {
+      case SHA1:
+        return "HmacSha1";
+      case SHA256:
+        return "HmacSha256";
+      case SHA512:
+        return "HmacSha512";
+      default:
+        throw new NoSuchAlgorithmException("Hash unsupported for HMAC: " + hash);
+    }
   }
 }

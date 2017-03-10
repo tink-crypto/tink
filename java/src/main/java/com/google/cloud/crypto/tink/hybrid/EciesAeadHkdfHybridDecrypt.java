@@ -37,14 +37,17 @@ public final class EciesAeadHkdfHybridDecrypt extends HybridDecryptBase {
   private final ECPrivateKey recipientPrivateKey;
   private final EciesHkdfRecipientKem recipientKem;
   private final byte[] hkdfSalt;
+  private final String hkdfHmacAlgo;
   private final EcPointFormat ecPointFormat;
   private final EciesAeadHkdfAeadFactory aeadFactory;
 
   public EciesAeadHkdfHybridDecrypt(final ECPrivateKey recipientPrivateKey,
-      final byte[] hkdfSalt, KeyFormat aeadDemFormat, EcPointFormat ecPointFormat)
+      final byte[] hkdfSalt, String hkdfHmacAlgo,
+      KeyFormat aeadDemFormat, EcPointFormat ecPointFormat)
       throws GeneralSecurityException {
     this.recipientPrivateKey = recipientPrivateKey;
     this.recipientKem = new EciesHkdfRecipientKem(recipientPrivateKey);
+    this.hkdfHmacAlgo = hkdfHmacAlgo;
     this.hkdfSalt = hkdfSalt;
     if (ecPointFormat != EcPointFormat.UNCOMPRESSED) {
       throw new GeneralSecurityException("Unsupported EcPointFormat.");
@@ -62,19 +65,12 @@ public final class EciesAeadHkdfHybridDecrypt extends HybridDecryptBase {
           new BigInteger(1, payload.getEphemeralPkX().toByteArray()),
           new BigInteger(1, payload.getEphemeralPkY().toByteArray()));
 
-      byte[] symmetricKey = recipientKem.generateKey(
-          ephemeralPublicPoint, aeadFactory.getSymmetricKeySize(), hkdfSalt, contextInfo);
+      byte[] symmetricKey = recipientKem.generateKey(ephemeralPublicPoint,
+          aeadFactory.getSymmetricKeySize(), hkdfHmacAlgo, hkdfSalt, contextInfo);
       Aead aead = aeadFactory.getAead(symmetricKey);
       return aead.decrypt(payload.getCiphertext().toByteArray(), EMPTY_AAD);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Invalid KeyFormat protobuf, expected AesGcmKeyFormat.");
+      throw new GeneralSecurityException("Invalid ciphertext format.");
     }
   }
-
-  private void validate(KeyFormat demFormat) throws GeneralSecurityException {
-    if (!demFormat.getKeyType().equals("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")) {
-      throw new GeneralSecurityException("Expected AesGcmKey as AEAD-DEM Key.");
-    }
-  }
-
 }

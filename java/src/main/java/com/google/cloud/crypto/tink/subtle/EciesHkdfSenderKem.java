@@ -53,7 +53,8 @@ public final class EciesHkdfSenderKem {
     this.recipientPublicKey = recipientPublicKey;
   }
 
-  public KemKey generateKey(int keySizeInBytes, final byte[] hkdfSalt, final byte[] hkdfInfo)
+  public KemKey generateKey(int keySizeInBytes,
+      String hmacAlgo, final byte[] hkdfSalt, final byte[] hkdfInfo)
       throws GeneralSecurityException {
     KeyPair ephemeralKeyPair = generateEphemeralKey();
     ECPublicKey ephemeralPublicKey = (ECPublicKey) ephemeralKeyPair.getPublic();
@@ -61,7 +62,7 @@ public final class EciesHkdfSenderKem {
 
     byte[] sharedSecret = getSharedSecret(ephemeralPrivateKey);
     byte[] symmetricKey = Hkdf.computeEciesHkdfSymmetricKey(ephemeralPublicKey, sharedSecret,
-        keySizeInBytes, hkdfSalt, hkdfInfo);
+        keySizeInBytes, hmacAlgo, hkdfSalt, hkdfInfo);
     return new KemKey(ephemeralPublicKey, symmetricKey);
   }
 

@@ -26,7 +26,6 @@ import javax.crypto.spec.SecretKeySpec;
  * https://tools.ietf.org/html/rfc5869.
  */
 public class Hkdf {
-  public static final String ECIES_HKDF_MAC_ALGORITHM = "HmacSha256";
 
   /**
    * Computes an HKDF.
@@ -88,12 +87,12 @@ public class Hkdf {
    * Computes symmetric key for ECIES with HKDF from the provided parameters.
    */
   public static byte[] computeEciesHkdfSymmetricKey(final ECPublicKey ephemeralPublicKey,
-      final byte[] sharedSecret, int keySizeInBytes, final byte[] hkdfSalt, final byte[] hkdfInfo)
+      final byte[] sharedSecret, int keySizeInBytes, String hmacAlgo,
+      final byte[] hkdfSalt, final byte[] hkdfInfo)
       throws GeneralSecurityException {
     byte[] ephemeralPublicKeyBytes = ephemeralPublicKey.getEncoded();
     byte[] hkdfInput = SubtleUtil.concat(ephemeralPublicKeyBytes, sharedSecret);
-    byte[] symmetricKey = Hkdf.computeHkdf(ECIES_HKDF_MAC_ALGORITHM,
-        hkdfInput, hkdfSalt, hkdfInfo, keySizeInBytes);
+    byte[] symmetricKey = Hkdf.computeHkdf(hmacAlgo, hkdfInput, hkdfSalt, hkdfInfo, keySizeInBytes);
     return symmetricKey;
   }
 }

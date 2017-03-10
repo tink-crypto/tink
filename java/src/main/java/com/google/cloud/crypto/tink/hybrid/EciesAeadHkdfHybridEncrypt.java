@@ -36,17 +36,20 @@ public final class EciesAeadHkdfHybridEncrypt extends HybridEncryptBase {
   private static final byte[] EMPTY_AAD = new byte[0];
   private final ECPublicKey recipientPublicKey;
   private final EciesHkdfSenderKem senderKem;
+  private final String hkdfHmacAlgo;
   private final byte[] hkdfSalt;
   private final EcPointFormat ecPointFormat;
   private final EciesAeadHkdfAeadFactory aeadFactory;
 
   public EciesAeadHkdfHybridEncrypt(final ECPublicKey recipientPublicKey,
-      final byte[] hkdfSalt, KeyFormat aeadDemFormat, EcPointFormat ecPointFormat)
+      final byte[] hkdfSalt, String hkdfHmacAlgo,
+      KeyFormat aeadDemFormat, EcPointFormat ecPointFormat)
       throws GeneralSecurityException {
     EcUtil.checkPublicKey(recipientPublicKey);
     this.recipientPublicKey = recipientPublicKey;
     this.senderKem = new EciesHkdfSenderKem(recipientPublicKey);
     this.hkdfSalt = hkdfSalt;
+    this.hkdfHmacAlgo = hkdfHmacAlgo;
     if (ecPointFormat != EcPointFormat.UNCOMPRESSED) {
       throw new GeneralSecurityException("Unsupported EcPointFormat.");
     }
@@ -63,8 +66,8 @@ public final class EciesAeadHkdfHybridEncrypt extends HybridEncryptBase {
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
       throws GeneralSecurityException {
-    EciesHkdfSenderKem.KemKey kemKey =
-        senderKem.generateKey(aeadFactory.getSymmetricKeySize(), hkdfSalt, contextInfo);
+    EciesHkdfSenderKem.KemKey kemKey =  senderKem.generateKey(aeadFactory.getSymmetricKeySize(),
+            hkdfHmacAlgo, hkdfSalt, contextInfo);
     Aead aead = aeadFactory.getAead(kemKey.getSymmetricKey());
     byte[] ciphertext = aead.encrypt(plaintext, EMPTY_AAD);
     ECPoint pk = kemKey.getEphemeralPublicKey().getW();

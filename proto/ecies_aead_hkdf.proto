@@ -43,6 +43,9 @@ message EciesHkdfKemParams {
   // Required.
   EllipticCurveType curve_type = 1;
 
+  // Required.
+  HashType hkdf_hash_type = 2;
+
   // Optional.
   bytes hkdf_salt = 11;
 }
