@@ -18,6 +18,7 @@ package com.google.cloud.crypto.tink.subtle;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
@@ -120,7 +121,7 @@ public final class EcUtil {
    * @param curve must be a prime order elliptic curve
    * @return the order of the finite field over which curve is defined.
    */
-  private static BigInteger getModulus(EllipticCurve curve) throws GeneralSecurityException {
+  public static BigInteger getModulus(EllipticCurve curve) throws GeneralSecurityException {
     java.security.spec.ECField field = curve.getField();
     if (field instanceof java.security.spec.ECFieldFp) {
       return ((java.security.spec.ECFieldFp) field).getP();
@@ -145,7 +146,7 @@ public final class EcUtil {
    * @param curve must be a prime order elliptic curve
    * @return the size of an element in bytes.
    */
-  private static int fieldSizeInBytes(EllipticCurve curve) throws GeneralSecurityException {
+  public static int fieldSizeInBytes(EllipticCurve curve) throws GeneralSecurityException {
     return (fieldSizeInBits(curve) + 7) / 8;
   }
 
@@ -164,5 +165,121 @@ public final class EcUtil {
     ECPoint g = new ECPoint(gx, gy);
     ECParameterSpec ecSpec = new ECParameterSpec(curveSpec, g, n, h);
     return ecSpec;
+  }
+
+  /**
+   * Computes a square root modulo an odd prime.
+   * Timing and exceptions can leak information about the inputs. Therefore this method must only
+   * be used to decompress public keys.
+   * @param x the square
+   * @param p the prime modulus (the behaviour of the method is undefined if p is not prime).
+   * @return a value s such that s^2 mod p == x mod p
+   * @throws GeneralSecurityException if the square root could not be found.
+   */
+  protected static BigInteger modSqrt(BigInteger x, BigInteger p) throws GeneralSecurityException {
+    if (p.signum() != 1) {
+      throw new InvalidAlgorithmParameterException("p must be positive");
+    }
+    x = x.mod(p);
+    BigInteger squareRoot = null;
+    // Special case for x == 0.
+    // This check is necessary for Cipolla's algorithm.
+    if (x.equals(BigInteger.ZERO)) {
+      return BigInteger.ZERO;
+    }
+    if (p.testBit(0) && p.testBit(1)) {
+      // Case p % 4 == 3
+      // q = (p + 1) / 4
+      BigInteger q = p.add(BigInteger.ONE).shiftRight(2);
+      squareRoot = x.modPow(q, p);
+    } else if (p.testBit(0) && !p.testBit(1)) {
+      // Case p % 4 == 1
+      // For this case we use Cipolla's algorithm.
+      // This alogorithm is preferrable to Tonelli-Shanks for primes p where p-1 is divisible by
+      // a large power of 2, which is a frequent choice since it simplifies modular reduction.
+      BigInteger a = BigInteger.ONE;
+      BigInteger d = null;
+      BigInteger q1 = p.subtract(BigInteger.ONE).shiftRight(1);
+      int tries = 0;
+      while (true) {
+        d = a.multiply(a).subtract(x).mod(p);
+        // Special case d==0. We need d!=0 below.
+        if (d.equals(BigInteger.ZERO)) {
+          return a;
+        }
+        // Computes the Legendre symbol. Using the Jacobi symbol would be a faster.
+        BigInteger t = d.modPow(q1, p);
+        if (t.add(BigInteger.ONE).equals(p)) {
+          // d is a quadratic non-residue.
+          break;
+        } else if (!t.equals(BigInteger.ONE)) {
+          // p does not divide d. Hence, t != 1 implies that p is not a prime.
+          throw new InvalidAlgorithmParameterException("p is not prime");
+        } else {
+          a = a.add(BigInteger.ONE);
+        }
+        tries++;
+        // If 128 tries were not enough to find a quadratic non-residue, then it is likely that
+        // p is not prime. To avoid an infinite loop in this case we perform a primality test.
+        // If p is prime then this test will be done with a negligible probability of 2^{-128}.
+        if (tries == 128) {
+          if (!p.isProbablePrime(80)) {
+            throw new InvalidAlgorithmParameterException("p is not prime");
+          }
+        }
+      }
+      // Since d = a^2 - x is a quadratic non-residue modulo p, we have
+      //   a - sqrt(d) == (a + sqrt(d))^p (mod p),
+      // and hence
+      //   x == (a + sqrt(d))(a - sqrt(d)) == (a + sqrt(d))^(p+1) (mod p).
+      // Thus if x is square then (a + sqrt(d))^((p+1)/2) (mod p) is a square root of x.
+      BigInteger q = p.add(BigInteger.ONE).shiftRight(1);
+      BigInteger u = a;
+      BigInteger v = BigInteger.ONE;
+      for (int bit = q.bitLength() - 2; bit >= 0; bit--) {
+        // Square u + v sqrt(d) and reduce mod p.
+        BigInteger tmp = u.multiply(v);
+        u = u.multiply(u).add(v.multiply(v).mod(p).multiply(d)).mod(p);
+        v = tmp.add(tmp).mod(p);
+        if (q.testBit(bit)) {
+          // Multiply u + v sqrt(d) by a + sqrt(d) and reduce mod p.
+          tmp = u.multiply(a).add(v.multiply(d)).mod(p);
+          v = a.multiply(v).add(u).mod(p);
+          u = tmp;
+        }
+      }
+      squareRoot = u;
+    }
+    // The methods used to compute the square root only guarantees a correct result if the
+    // preconditions (i.e. p prime and x is a square) are satisfied. Otherwise the value is
+    // undefined. Hence it is important to verify that squareRoot is indeed a square root.
+    if (squareRoot != null && squareRoot.multiply(squareRoot).mod(p).compareTo(x) != 0) {
+      throw new GeneralSecurityException("Could not find a modular square root");
+    }
+    return squareRoot;
+  }
+
+  /**
+   * Computes the y coordinate of a point on an elliptic curve. This method can be used
+   * to decompress elliptic curve points.
+   * @param x the x-coordinate of the point
+   * @param lsb the least significant bit of the y-coordinate of the point.
+   * @param curve this must be an elliptic curve over a prime field using Weierstrass
+   *        representation.
+   * @return the y coordinate.
+   * @throws GeneralSecurityException if there is no point with coordinate x on the curve,
+   *   or if curve is not supported.
+   */
+  public static BigInteger getY(BigInteger x, boolean lsb, EllipticCurve curve)
+      throws GeneralSecurityException {
+    BigInteger p = getModulus(curve);
+    BigInteger a = curve.getA();
+    BigInteger b = curve.getB();
+    BigInteger rhs = x.multiply(x).add(a).multiply(x).add(b).mod(p);
+    BigInteger y = modSqrt(rhs, p);
+    if (lsb != y.testBit(0)) {
+      y = p.subtract(y).mod(p);
+    }
+    return y;
   }
 }

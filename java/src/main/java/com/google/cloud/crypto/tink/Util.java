@@ -17,11 +17,13 @@
 package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
+import com.google.cloud.crypto.tink.CommonProto.PointFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
@@ -30,6 +32,8 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
+import java.security.spec.EllipticCurve;
+import java.util.Arrays;
 
 /**
  * Various helpers.
@@ -59,6 +63,118 @@ public class Util {
         .setGeneratedAt(key.getGeneratedAt())
         .setValidUntil(key.getValidUntil())
         .build();
+  }
+
+  // TODO(bleichen): Some of the methods below were written so that AdSpam could use them
+  //   independently. Check if some of them are unnecessary or don't need to be public.
+
+  public static int encodingSizeInBytes(EllipticCurve curve, PointFormat format)
+      throws GeneralSecurityException {
+    int coordinateSize = EcUtil.fieldSizeInBytes(curve);
+    switch (format) {
+      case UNCOMPRESSED:
+        return 2 * coordinateSize + 1;
+      case COMPRESSED:
+        return coordinateSize + 1;
+      default:
+        throw new GeneralSecurityException("Unknown format");
+    }
+  }
+
+  /**
+   * Decodes an encoded point on an elliptic curve. This method checks that the
+   * encoded point is on the curve.
+   * @param curve the elliptic curve
+   * @param format the format used to enocde the point
+   * @param encoded the encoded point
+   * @return the point
+   * @throws GeneralSecurityException if the encoded point
+   * is invalid or if the curve or format are not supported.
+   */
+  public static ECPoint ecPointDecode(
+      EllipticCurve curve, PointFormat format, byte[] encoded)
+      throws GeneralSecurityException {
+    int coordinateSize = EcUtil.fieldSizeInBytes(curve);
+    switch (format) {
+      case UNCOMPRESSED:
+        {
+          if (encoded.length != 2 * coordinateSize + 1) {
+            throw new GeneralSecurityException("Invalid point size");
+          }
+          if (encoded[0] != 4) {
+            throw new GeneralSecurityException("Invalid point format");
+          }
+          BigInteger x = new BigInteger(1, Arrays.copyOfRange(encoded, 1, coordinateSize + 1));
+          BigInteger y =
+              new BigInteger(1, Arrays.copyOfRange(encoded, coordinateSize + 1, encoded.length));
+          ECPoint point = new ECPoint(x, y);
+          EcUtil.checkPointOnCurve(point, curve);
+          return point;
+        }
+      case COMPRESSED:
+        {
+          BigInteger p = EcUtil.getModulus(curve);
+          if (encoded.length != coordinateSize + 1) {
+            throw new GeneralSecurityException("compressed point has wrong length");
+          }
+          boolean lsb;
+          if (encoded[0] == 2) {
+            lsb = false;
+          }
+          else if (encoded[0] == 3) {
+            lsb = true;
+          } else {
+            throw new GeneralSecurityException("Invalid format");
+          }
+          BigInteger x = new BigInteger(1, Arrays.copyOfRange(encoded, 1, encoded.length));
+          if (x.signum() == -1 || x.compareTo(p) != -1) {
+            throw new GeneralSecurityException("x is out of range");
+          }
+          BigInteger y = EcUtil.getY(x, lsb, curve);
+          return new ECPoint(x, y);
+        }
+      default:
+        throw new GeneralSecurityException("Invalid format:" + format);
+    }
+  }
+
+  /**
+   * Encodes a point on an elliptic curve.
+   *
+   * @param curve the elliptic curve
+   * @param format the format for the encoding
+   * @param point the point to encode
+   * @return the encoded key exchange
+   * @throws GeneralSecurityException if the point is not on the curve or
+   *     if the format is not supported.
+   */
+  public static byte[] ecPointEncode(EllipticCurve curve, PointFormat format, ECPoint point)
+      throws GeneralSecurityException {
+    EcUtil.checkPointOnCurve(point, curve);
+    int coordinateSize = EcUtil.fieldSizeInBytes(curve);
+    switch (format) {
+      case UNCOMPRESSED:
+        {
+          byte[] encoded = new byte[2 * coordinateSize + 1];
+          byte[] x = point.getAffineX().toByteArray();
+          byte[] y = point.getAffineY().toByteArray();
+          // Order of System.arraycopy is important because x,y can have leading 0's.
+          System.arraycopy(y, 0, encoded, 1 + 2 * coordinateSize - y.length, y.length);
+          System.arraycopy(x, 0, encoded, 1 + coordinateSize - x.length, x.length);
+          encoded[0] = 4;
+          return encoded;
+        }
+      case COMPRESSED:
+        {
+          byte[] encoded = new byte[coordinateSize + 1];
+          byte[] x = point.getAffineX().toByteArray();
+          System.arraycopy(x, 0, encoded, 1 + coordinateSize - x.length, x.length);
+          encoded[0] = (byte) (point.getAffineY().testBit(0) ? 3 : 2);
+          return encoded;
+        }
+      default:
+        throw new GeneralSecurityException("Invalid format:" + format);
+    }
   }
 
   /**

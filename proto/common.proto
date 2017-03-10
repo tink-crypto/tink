@@ -30,6 +30,12 @@ enum EllipticCurveType {
   NIST_P521 = 4;
 };
 
+enum PointFormat {
+  UNKNOWN_FORMAT = 0;
+  UNCOMPRESSED = 1;
+  COMPRESSED = 2;
+}
+
 enum HashType {
   UNKNOWN_HASH = 0;
   SHA1 = 1; // Using SHA1 for digital signature is deprecated but HMAC-SHA1 is fine.
