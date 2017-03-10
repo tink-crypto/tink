@@ -479,4 +479,11 @@ public class TestUtil {
   public static byte[] hexDecode(String hexData) {
     return base16().lowerCase().decode(hexData);
   }
+
+  /**
+   * Encodes bytes to hex string.
+   */
+  public static String hexEncode(byte[] data) {
+    return base16().lowerCase().encode(data);
+  }
 }

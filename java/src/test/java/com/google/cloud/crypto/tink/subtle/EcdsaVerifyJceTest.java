@@ -17,8 +17,6 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import com.google.cloud.crypto.tink.TestUtil;

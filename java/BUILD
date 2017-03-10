@@ -170,6 +170,20 @@ java_library(
     ],
 )
 
+# hybrid
+
+java_library(
+    name = "hybrid_subtle",
+    srcs = [
+        "src/main/java/com/google/cloud/crypto/tink/subtle/Hkdf.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java:common_subtle",
+        "//java:public_interfaces",
+    ],
+)
+
 # public library
 
 java_library(
@@ -181,6 +195,7 @@ java_library(
         "//java:aead",
         "//java:aead_subtle",
         "//java:core",
+        "//java:hybrid_subtle",
         "//java:mac",
         "//java:mac_subtle",
         "//java:signature",
