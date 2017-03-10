@@ -18,15 +18,15 @@ package com.google.cloud.crypto.tink.hybrid; // instead of subtle, because it de
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
-import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPayload;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.EciesHkdfRecipientKem;
 import com.google.cloud.crypto.tink.subtle.HybridDecryptBase;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.ECPoint;
+import java.security.spec.EllipticCurve;
+import java.util.Arrays;
 
 /**
  * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and
@@ -59,18 +59,16 @@ public final class EciesAeadHkdfHybridDecrypt extends HybridDecryptBase {
   @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
       throws GeneralSecurityException {
-    try {
-      EciesAeadHkdfPayload payload = EciesAeadHkdfPayload.parseFrom(ciphertext);
-      ECPoint ephemeralPublicPoint = new ECPoint(
-          new BigInteger(1, payload.getEphemeralPkX().toByteArray()),
-          new BigInteger(1, payload.getEphemeralPkY().toByteArray()));
-
-      byte[] symmetricKey = recipientKem.generateKey(ephemeralPublicPoint,
-          aeadFactory.getSymmetricKeySize(), hkdfHmacAlgo, hkdfSalt, contextInfo);
-      Aead aead = aeadFactory.getAead(symmetricKey);
-      return aead.decrypt(payload.getCiphertext().toByteArray(), EMPTY_AAD);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Invalid ciphertext format.");
+    EllipticCurve curve = recipientPrivateKey.getParams().getCurve();
+    int headerSize = Util.encodingSizeInBytes(curve, ecPointFormat);
+    if (ciphertext.length < headerSize) {
+      throw new GeneralSecurityException("Ciphertext too short");
     }
+    ECPoint ephemeralPublicPoint = Util.ecPointDecode(curve, ecPointFormat,
+        Arrays.copyOfRange(ciphertext, 0, headerSize));
+    byte[] symmetricKey = recipientKem.generateKey(ephemeralPublicPoint,
+        aeadFactory.getSymmetricKeySize(), hkdfHmacAlgo, hkdfSalt, contextInfo);
+    Aead aead = aeadFactory.getAead(symmetricKey);
+    return aead.decrypt(Arrays.copyOfRange(ciphertext, headerSize, ciphertext.length), EMPTY_AAD);
   }
 }

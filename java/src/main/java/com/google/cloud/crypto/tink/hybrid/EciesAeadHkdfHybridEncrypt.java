@@ -18,15 +18,14 @@ package com.google.cloud.crypto.tink.hybrid; // instead of subtle, because it de
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
-import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPayload;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
 import com.google.cloud.crypto.tink.subtle.EciesHkdfSenderKem;
 import com.google.cloud.crypto.tink.subtle.HybridEncryptBase;
-import com.google.protobuf.ByteString;
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECPoint;
 
 /**
  * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and
@@ -70,13 +69,13 @@ public final class EciesAeadHkdfHybridEncrypt extends HybridEncryptBase {
             hkdfHmacAlgo, hkdfSalt, contextInfo);
     Aead aead = aeadFactory.getAead(kemKey.getSymmetricKey());
     byte[] ciphertext = aead.encrypt(plaintext, EMPTY_AAD);
-    ECPoint pk = kemKey.getEphemeralPublicKey().getW();
-    // TODO(przydatek): replace EciesAeadHkdfPayload-proto with a "manual" format.
-    return EciesAeadHkdfPayload.newBuilder()
-        .setEphemeralPkX(ByteString.copyFrom(pk.getAffineX().toByteArray()))
-        .setEphemeralPkY(ByteString.copyFrom(pk.getAffineY().toByteArray()))
-        .setCiphertext(ByteString.copyFrom(ciphertext))
-        .build()
-        .toByteArray();
+    byte[] header = Util.ecPointEncode(
+        recipientPublicKey.getParams().getCurve(),
+        ecPointFormat,
+        kemKey.getEphemeralPublicKey().getW());
+    return ByteBuffer.allocate(header.length + ciphertext.length)
+        .put(header)
+        .put(ciphertext)
+        .array();
   }
 }

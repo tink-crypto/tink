@@ -103,15 +103,3 @@ message EciesAeadHkdfKeyFromat {
   // Required.
   EciesAeadHkdfParams params = 1;
 }
-
-// EciesAeadHkdf produces a payload that is a serizlization of this protobuf.
-message EciesAeadHkdfPayload {
-  // Affine coordinates of the ephemeral public key in bigendian representation.
-  // The public key is a point (x, y) on the curve determined by recipient's public key.
-  // Required.
-  bytes ephemeral_pk_x = 1;
-  bytes ephemeral_pk_y = 2;
-
-  // Encryption of plaintext under HKDF-derived key; this is an AEAD-ciphertext.
-  bytes ciphertext = 3;
-}
