@@ -31,8 +31,7 @@ public abstract class HybridDecryptBase implements HybridDecrypt {
       throws GeneralSecurityException;
 
   @Override
-  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] contextInfo)
-      throws GeneralSecurityException {
+  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] contextInfo) {
     return Executors.newSingleThreadExecutor().submit(() -> decrypt(ciphertext, contextInfo));
   }
 }

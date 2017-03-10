@@ -54,8 +54,11 @@ public interface HybridDecrypt {
    * Asynchronous decryption:
    * decrypts {@code ciphertext} verifying the integrity of {@code contextInfo}.
    *
-   * @return resulting plaintext.
+   * If the ciphertext is invalid or unauthenticated then {@code get()} method will return
+   * {@code ExecutionException} whose {@code getCause()} method returns {@code
+   * GeneralSecurityException}.
+   *
+   * @return a {@code Future} that holds the resulting plaintext.
    */
-  Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] contextInfo)
-      throws GeneralSecurityException;
+  Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] contextInfo);
 }

@@ -54,8 +54,7 @@ public interface HybridEncrypt {
    * Asynchronous encryption:
    * encrypts {@code plaintext} binding {@code contextInfo} to the resulting ciphertext.
    *
-   * @return resulting ciphertext.
+   * @return a {@code Future} that holds the resulting ciphertext.
    */
-  Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] contextInfo)
-      throws GeneralSecurityException;
+  Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] contextInfo);
 }

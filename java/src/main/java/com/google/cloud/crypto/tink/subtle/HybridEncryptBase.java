@@ -31,8 +31,7 @@ public abstract class HybridEncryptBase implements HybridEncrypt {
       throws GeneralSecurityException;
 
   @Override
-  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] contextInfo)
-      throws GeneralSecurityException {
+  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] contextInfo) {
     return Executors.newSingleThreadExecutor().submit(() -> encrypt(plaintext, contextInfo));
   }
 }
