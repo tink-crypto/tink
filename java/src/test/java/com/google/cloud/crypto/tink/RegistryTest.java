@@ -68,13 +68,11 @@ public class RegistryTest {
       return label.getBytes();
     }
     @Override
-    public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad)
-        throws GeneralSecurityException {
+    public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) {
       return null;
     }
     @Override
-    public Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad)
-        throws GeneralSecurityException {
+    public Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad) {
       return null;
     }
   }

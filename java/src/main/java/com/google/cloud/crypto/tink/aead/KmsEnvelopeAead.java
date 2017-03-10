@@ -1,10 +1,10 @@
-// Copyright 2017 Google Inc.
+// Copyright 2016 Google Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, Version 1.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-3.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,15 +17,16 @@
 package com.google.cloud.crypto.tink.aead; // instead of subtle, because it depends on KeyFormat.
 
 import com.google.cloud.crypto.tink.Aead;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Registry;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.security.GeneralSecurityException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.security.GeneralSecurityException;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * This primitive implements <a href="https://cloud.google.com/kms/docs/data-encryption-keys">
@@ -97,14 +98,16 @@ class KmsEnvelopeAead implements Aead {
   }
 
   @Override
-  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad)
-      throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not Implemented Yet!");
+  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad) {
+    // According to ExecutorService.submit() method's documentation, a RejectedExecutionException
+    // is thrown if the task cannot be scheduled for execution.
+    throw new RejectedExecutionException("Not Implemented Yet!");
   }
 
   @Override
-  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] aad)
-      throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not Implemented Yet!");
+  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] aad) {
+    // According to ExecutorService.submit() method's documentation, a RejectedExecutionException
+    // is thrown if the task cannot be scheduled for execution.
+    throw new RejectedExecutionException("Not Implemented Yet!");
   }
 }

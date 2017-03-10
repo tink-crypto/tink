@@ -49,18 +49,20 @@ public interface Aead {
    * The resulting ciphertext allows for checking authenticity and integrity
    * of additional data ({@code aad}), but does not guarantee its secrecy.
    *
-   * @return resulting ciphertext
+   * @return a {@code Future} that holds the resulting ciphertext.
    */
-  Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad)
-      throws GeneralSecurityException;
+  Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad);
 
   /**
    * Decrypts {@code ciphertext} with {@code aad} as additional authenticated data.
    * The decryption verifies the authenticity and integrity of additional data ({@code aad}),
    * but there are no guarantees wrt. secrecy of that data.
    *
-   * @return resulting plaintext
+   * If the ciphertext is invalid or unauthenticated then {@code get()} method will return
+   * {@code ExecutionException} whose {@code getCause()} method returns {@code
+   * GeneralSecurityException}.
+   *
+   * @return a {@code Future} that holds the resulting plaintext.
    */
-  Future<byte[]> asyncDecrypt(final  byte[] ciphertext, final  byte[] aad)
-      throws GeneralSecurityException;
+  Future<byte[]> asyncDecrypt(final  byte[] ciphertext, final  byte[] aad);
 }

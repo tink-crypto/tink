@@ -113,13 +113,11 @@ public class TestUtil {
       return ciphertext;
     }
     @Override
-    public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad)
-        throws GeneralSecurityException {
+    public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) {
       return null;
     }
     @Override
-    public Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad)
-        throws GeneralSecurityException {
+    public Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad) {
       return null;
     }
   }
@@ -156,13 +154,11 @@ public class TestUtil {
       return new byte[0];
     }
     @Override
-    public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad)
-        throws GeneralSecurityException {
+    public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) {
       return null;
     }
     @Override
-    public Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad)
-        throws GeneralSecurityException {
+    public Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad) {
       return null;
     }
   }

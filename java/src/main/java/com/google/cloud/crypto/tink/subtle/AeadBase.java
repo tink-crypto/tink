@@ -35,14 +35,12 @@ public abstract class AeadBase implements Aead {
       throws GeneralSecurityException;
 
   @Override
-  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad)
-      throws GeneralSecurityException {
+  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad) {
     return Executors.newSingleThreadExecutor().submit(() -> encrypt(plaintext, aad));
   }
 
   @Override
-  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] aad)
-      throws GeneralSecurityException {
+  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] aad) {
     return Executors.newSingleThreadExecutor().submit(() -> decrypt(ciphertext, aad));
   }
 }
