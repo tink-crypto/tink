@@ -17,6 +17,7 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import java.security.GeneralSecurityException;
+import java.security.interfaces.ECPublicKey;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -25,6 +26,8 @@ import javax.crypto.spec.SecretKeySpec;
  * https://tools.ietf.org/html/rfc5869.
  */
 public class Hkdf {
+  public static final String ECIES_HKDF_MAC_ALGORITHM = "HmacSha256";
+
   /**
    * Computes an HKDF.
    *
@@ -48,7 +51,7 @@ public class Hkdf {
     if (size > 255 * mac.getMacLength()) {
       throw new GeneralSecurityException("size too large");
     }
-    if (salt.length == 0) {
+    if (salt == null || salt.length == 0) {
       // According to RFC 5869, Section 2.2 the salt is optional. If no salt is provided
       // then HKDF uses a salt that is an array of zeros of the same length as the hash digest.
       // We do not implement this for security reasons. If an application does really not
@@ -78,5 +81,19 @@ public class Hkdf {
       }
     }
     return result;
+  }
+
+
+  /**
+   * Computes symmetric key for ECIES with HKDF from the provided parameters.
+   */
+  public static byte[] computeEciesHkdfSymmetricKey(final ECPublicKey ephemeralPublicKey,
+      final byte[] sharedSecret, int keySizeInBytes, final byte[] hkdfSalt, final byte[] hkdfInfo)
+      throws GeneralSecurityException {
+    byte[] ephemeralPublicKeyBytes = ephemeralPublicKey.getEncoded();
+    byte[] hkdfInput = SubtleUtil.concat(ephemeralPublicKeyBytes, sharedSecret);
+    byte[] symmetricKey = Hkdf.computeHkdf(ECIES_HKDF_MAC_ALGORITHM,
+        hkdfInput, hkdfSalt, hkdfInfo, keySizeInBytes);
+    return symmetricKey;
   }
 }

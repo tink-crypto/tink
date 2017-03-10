@@ -17,7 +17,7 @@
 package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
-import com.google.cloud.crypto.tink.CommonProto.PointFormat;
+import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
@@ -68,7 +68,7 @@ public class Util {
   // TODO(bleichen): Some of the methods below were written so that AdSpam could use them
   //   independently. Check if some of them are unnecessary or don't need to be public.
 
-  public static int encodingSizeInBytes(EllipticCurve curve, PointFormat format)
+  public static int encodingSizeInBytes(EllipticCurve curve, EcPointFormat format)
       throws GeneralSecurityException {
     int coordinateSize = EcUtil.fieldSizeInBytes(curve);
     switch (format) {
@@ -92,7 +92,7 @@ public class Util {
    * is invalid or if the curve or format are not supported.
    */
   public static ECPoint ecPointDecode(
-      EllipticCurve curve, PointFormat format, byte[] encoded)
+      EllipticCurve curve, EcPointFormat format, byte[] encoded)
       throws GeneralSecurityException {
     int coordinateSize = EcUtil.fieldSizeInBytes(curve);
     switch (format) {
@@ -148,7 +148,7 @@ public class Util {
    * @throws GeneralSecurityException if the point is not on the curve or
    *     if the format is not supported.
    */
-  public static byte[] ecPointEncode(EllipticCurve curve, PointFormat format, ECPoint point)
+  public static byte[] ecPointEncode(EllipticCurve curve, EcPointFormat format, ECPoint point)
       throws GeneralSecurityException {
     EcUtil.checkPointOnCurve(point, curve);
     int coordinateSize = EcUtil.fieldSizeInBytes(curve);

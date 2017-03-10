@@ -79,24 +79,30 @@ java_library(
         "src/main/java/com/google/cloud/crypto/tink/subtle/AesEaxJce.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/AesGcmJce.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/EncryptThenAuthenticate.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/GoogleCloudKmsAead.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/IndCpaCipher.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
         "//java:common_subtle",
         "//java:public_interfaces",
-        "@com_google_api_client//jar",
-        "@com_google_cloudkms//jar",
-        "@com_google_http_client//jar",
     ],
 )
 
+AEAD_ENVELOPE_SRCS = [
+    "src/main/java/com/google/cloud/crypto/tink/aead/GoogleCloudKmsAeadKeyManager.java",
+    "src/main/java/com/google/cloud/crypto/tink/aead/GoogleCredentialFactory.java",
+    "src/main/java/com/google/cloud/crypto/tink/subtle/AeadBase.java",
+    "src/main/java/com/google/cloud/crypto/tink/subtle/GoogleCloudKmsAead.java",
+]
+
 java_library(
     name = "aead",
-    srcs = glob([
-        "src/main/java/com/google/cloud/crypto/tink/aead/*.java",
-    ]),
+    srcs = glob(
+        [
+            "src/main/java/com/google/cloud/crypto/tink/aead/*.java",
+        ],
+        exclude = AEAD_ENVELOPE_SRCS,
+    ),
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
         "//java:aead_subtle",
@@ -104,8 +110,18 @@ java_library(
         "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_aes_gcm",
         "//proto:java_core_compile_imports",
-        "//proto:java_googlecloudkms",
         "//proto:java_hmac",
+        "//proto:java_kms_envelope",
+    ],
+)
+
+java_library(
+    name = "aead_envelope",
+    srcs = AEAD_ENVELOPE_SRCS,
+    javacopts = JAVACOPTS,
+    deps = COMMON_JAVA_DEPS + [
+        "//proto:java_core_compile_imports",
+        "//proto:java_googlecloudkms",
         "//proto:java_kms_envelope",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
@@ -174,14 +190,48 @@ java_library(
 # hybrid
 
 java_library(
-    name = "hybrid_subtle",
+    name = "hybridencrypt",
     srcs = [
+        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfAeadFactory.java",
+        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfHybridEncrypt.java",
+        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfPublicKeyManager.java",
+        "src/main/java/com/google/cloud/crypto/tink/hybrid/HybridEncryptFactory.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EcUtil.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EciesHkdfSenderKem.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/Hkdf.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/HybridEncryptBase.java",
     ],
     javacopts = JAVACOPTS,
-    deps = [
-        "//java:common_subtle",
+    deps = COMMON_JAVA_DEPS + [
+        "//proto:java_core_compile_imports",
         "//java:public_interfaces",
+        "//proto:java_hmac",
+        "//proto:java_aes_ctr_hmac_aead",
+        "//proto:java_aes_gcm",
+        "//proto:java_ecies_aead_hkdf",
+    ],
+)
+
+java_library(
+    name = "hybriddecrypt",
+    srcs = [
+        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfAeadFactory.java",
+        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfHybridDecrypt.java",
+        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfPrivateKeyManager.java",
+        "src/main/java/com/google/cloud/crypto/tink/hybrid/HybridDecryptFactory.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EcUtil.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EciesHkdfRecipientKem.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/Hkdf.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/HybridDecryptBase.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = COMMON_JAVA_DEPS + [
+        "//proto:java_core_compile_imports",
+        "//java:public_interfaces",
+        "//proto:java_aes_gcm",
+        "//proto:java_hmac",
+        "//proto:java_aes_ctr_hmac_aead",
+        "//proto:java_ecies_aead_hkdf",
     ],
 )
 
@@ -194,9 +244,12 @@ java_library(
     ],
     exports = [
         "//java:aead",
+        "//java:aead_envelope",
         "//java:aead_subtle",
+        "//java:common_subtle",
         "//java:core",
-        "//java:hybrid_subtle",
+        "//java:hybriddecrypt",
+        "//java:hybridencrypt",
         "//java:mac",
         "//java:mac_subtle",
         "//java:signature",
@@ -206,9 +259,46 @@ java_library(
         "//proto:java_core",
         "//proto:java_core_compile_imports",
         "//proto:java_ecdsa",
+        "//proto:java_ecies_aead_hkdf",
         "//proto:java_googlecloudkms",
         "//proto:java_hmac",
         "//proto:java_kms_envelope",
+    ],
+)
+
+# public hybrid library
+
+java_library(
+    name = "tink_hybridencrypt",
+    visibility = [
+        "//visibility:public",
+    ],
+    exports = [
+        "//java:aead",
+        "//java:aead_subtle",
+        "//java:common_subtle",
+        "//java:hybridencrypt",
+        "//proto:java_aes_gcm",
+        "//proto:java_core",
+        "//proto:java_core_compile_imports",
+        "//proto:java_ecies_aead_hkdf",
+    ],
+)
+
+java_library(
+    name = "tink_hybriddecrypt",
+    visibility = [
+        "//visibility:public",
+    ],
+    exports = [
+        "//java:aead",
+        "//java:aead_subtle",
+        "//java:common_subtle",
+        "//java:hybriddecrypt",
+        "//proto:java_aes_gcm",
+        "//proto:java_core",
+        "//proto:java_core_compile_imports",
+        "//proto:java_ecies_aead_hkdf",
     ],
 )
 
@@ -267,7 +357,6 @@ java_library(
         "src/test/java/**/*.java",
     ]),
     deps = [
-        "//java:common_subtle",
         "//java:key_management_restricted",
         "//java:keyset_handle_restricted",
         "//java:tink",

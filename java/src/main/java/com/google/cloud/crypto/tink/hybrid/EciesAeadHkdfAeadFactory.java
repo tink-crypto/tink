@@ -1,0 +1,111 @@
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+package com.google.cloud.crypto.tink.hybrid; // instead of subtle, because it depends on Tink-protos.
+
+import com.google.cloud.crypto.tink.Aead;
+import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
+import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
+import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
+import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
+import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
+import com.google.cloud.crypto.tink.HmacProto.HmacKey;
+import com.google.cloud.crypto.tink.Registry;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
+
+/**
+ * Helper generating {@code Aead}-instances for specified {@code KeyFormat} and key material.
+ */
+final class EciesAeadHkdfAeadFactory {
+  private enum DemKeyType {
+    AES_GCM_KEY,
+    AES_CTR_HMAC_AEAD_KEY
+  }
+
+  private final DemKeyType demKeyType;
+  private final int symmetricKeySize;
+
+  // used iff demKeyType == AES_GCM_KEY
+  private AesGcmKey aesGcmKey;
+
+  // used iff demKeyType == AES_CTR_HMAC_AEAD_KEY
+  private AesCtrHmacAeadKey aesCtrHmacAeadKey;
+  private int aesCtrKeySize;
+
+  public EciesAeadHkdfAeadFactory(KeyFormat demFormat) throws GeneralSecurityException {
+    String keyType = demFormat.getKeyType();
+    if (keyType.equals("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")) {
+      try {
+        AesGcmKeyFormat gcmKeyFormat = demFormat.getFormat().unpack(AesGcmKeyFormat.class);
+        this.demKeyType = DemKeyType.AES_GCM_KEY;
+        this.aesGcmKey = Registry.INSTANCE.newKey(demFormat).unpack(AesGcmKey.class);
+        this.symmetricKeySize = gcmKeyFormat.getKeySize();
+      } catch (InvalidProtocolBufferException e) {
+        throw new GeneralSecurityException("Invalid KeyFormat protobuf, expected AesGcmKeyFormat.");
+      }
+    } else if (keyType.equals("type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey")) {
+      try {
+        AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat =
+            demFormat.getFormat().unpack(AesCtrHmacAeadKeyFormat.class);
+        this.demKeyType = DemKeyType.AES_CTR_HMAC_AEAD_KEY;
+        this.aesCtrHmacAeadKey =
+            Registry.INSTANCE.newKey(demFormat).unpack(AesCtrHmacAeadKey.class);
+        this.aesCtrKeySize = aesCtrHmacAeadKeyFormat.getAesCtrKeyFormat().getKeySize();
+        int hmacKeySize = aesCtrHmacAeadKeyFormat.getHmacKeyFormat().getKeySize();
+        this.symmetricKeySize = aesCtrKeySize + hmacKeySize;
+      } catch (InvalidProtocolBufferException e) {
+        throw new GeneralSecurityException("Invalid KeyFormat protobuf, expected AesGcmKeyFormat.");
+      }
+    } else {
+      throw new GeneralSecurityException("Unsupported AEAD DEM key type: " + keyType);
+    }
+  }
+
+  public int getSymmetricKeySize() {
+    return symmetricKeySize;
+  }
+
+  public Aead getAead(final byte[] symmetricKeyValue) throws GeneralSecurityException {
+    if (demKeyType == DemKeyType.AES_GCM_KEY) {
+      Any aeadKey = Any.pack(
+          AesGcmKey.newBuilder()
+          .mergeFrom(aesGcmKey)
+          .setKeyValue(ByteString.copyFrom(symmetricKeyValue)).build());
+      return Registry.INSTANCE.getPrimitive(aeadKey);
+    } else if (demKeyType == DemKeyType.AES_CTR_HMAC_AEAD_KEY) {
+      byte[] aesCtrKeyValue = Arrays.copyOfRange(symmetricKeyValue, 0, aesCtrKeySize);
+      byte[] hmacKeyValue = Arrays.copyOfRange(symmetricKeyValue, aesCtrKeySize, symmetricKeySize);
+      AesCtrKey aesCtrKey = AesCtrKey.newBuilder()
+          .mergeFrom(aesCtrHmacAeadKey.getAesCtrKey())
+          .setKeyValue(ByteString.copyFrom(aesCtrKeyValue)).build();
+      HmacKey hmacKey = HmacKey.newBuilder()
+          .mergeFrom(aesCtrHmacAeadKey.getHmacKey())
+          .setKeyValue(ByteString.copyFrom(hmacKeyValue)).build();
+      Any aeadKey = Any.pack(AesCtrHmacAeadKey.newBuilder()
+          .setVersion(aesCtrHmacAeadKey.getVersion())
+          .setAesCtrKey(aesCtrKey)
+          .setHmacKey(hmacKey).build());
+      return Registry.INSTANCE.getPrimitive(aeadKey);
+    } else {
+      throw new GeneralSecurityException("Unknown DEM key type");
+    }
+  }
+}

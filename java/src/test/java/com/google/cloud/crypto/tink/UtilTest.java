@@ -21,7 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
-import com.google.cloud.crypto.tink.CommonProto.PointFormat;
+import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
@@ -63,14 +63,14 @@ public class UtilTest {
    */
   protected static class TestVector {
     protected EllipticCurveType curve;
-    protected PointFormat format;
+    protected EcPointFormat format;
     protected byte[] encoded;
     BigInteger x;
     BigInteger y;
 
     protected TestVector(
         EllipticCurveType curve,
-        PointFormat format,
+        EcPointFormat format,
         String encodedHex,
         String x,
         String y) {
@@ -87,7 +87,7 @@ public class UtilTest {
     // NIST_P256
     new TestVector(
         EllipticCurveType.NIST_P256,
-        PointFormat.UNCOMPRESSED,
+        EcPointFormat.UNCOMPRESSED,
         "04"
             + "b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a"
             + "1886ccdca5487a6772f9401888203f90587cc00a730e2b83d5c6f89b3b568df7",
@@ -95,14 +95,14 @@ public class UtilTest {
         "11093679777528052772423074391650378811758820120351664471899251711300542565879"),
     new TestVector(
         EllipticCurveType.NIST_P256,
-        PointFormat.COMPRESSED,
+        EcPointFormat.COMPRESSED,
         "03b0cfc7bc02fc980d858077552947ffb449b10df8949dee4e56fe21e016dcb25a",
         "79974177209371530366349631093481213364328002500948308276357601809416549347930",
         "11093679777528052772423074391650378811758820120351664471899251711300542565879"),
     // Exceptional point: x==0
     new TestVector(
         EllipticCurveType.NIST_P256,
-        PointFormat.UNCOMPRESSED,
+        EcPointFormat.UNCOMPRESSED,
         "04"
             + "0000000000000000000000000000000000000000000000000000000000000000"
             + "66485c780e2f83d72433bd5d84a06bb6541c2af31dae871728bf856a174f93f4",
@@ -110,14 +110,14 @@ public class UtilTest {
         "46263761741508638697010950048709651021688891777877937875096931459006746039284"),
     new TestVector(
         EllipticCurveType.NIST_P256,
-        PointFormat.COMPRESSED,
+        EcPointFormat.COMPRESSED,
         "020000000000000000000000000000000000000000000000000000000000000000",
         "0",
         "46263761741508638697010950048709651021688891777877937875096931459006746039284"),
     // Exceptional point: x==-3
     new TestVector(
         EllipticCurveType.NIST_P256,
-        PointFormat.UNCOMPRESSED,
+        EcPointFormat.UNCOMPRESSED,
         "04"
             + "ffffffff00000001000000000000000000000000fffffffffffffffffffffffc"
             + "19719bebf6aea13f25c96dfd7c71f5225d4c8fc09eb5a0ab9f39e9178e55c121",
@@ -125,7 +125,7 @@ public class UtilTest {
         "11508551065151498768481026661199445482476508121209842448718573150489103679777"),
     new TestVector(
         EllipticCurveType.NIST_P256,
-        PointFormat.COMPRESSED,
+        EcPointFormat.COMPRESSED,
         "03ffffffff00000001000000000000000000000000fffffffffffffffffffffffc",
         "115792089210356248762697446949407573530086143415290314195533631308867097853948",
         "11508551065151498768481026661199445482476508121209842448718573150489103679777"),

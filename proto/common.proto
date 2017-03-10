@@ -30,7 +30,7 @@ enum EllipticCurveType {
   NIST_P521 = 4;
 };
 
-enum PointFormat {
+enum EcPointFormat {
   UNKNOWN_FORMAT = 0;
   UNCOMPRESSED = 1;
   COMPRESSED = 2;
@@ -43,4 +43,3 @@ enum HashType {
   SHA256 = 3;
   SHA512 = 4;
 };
-

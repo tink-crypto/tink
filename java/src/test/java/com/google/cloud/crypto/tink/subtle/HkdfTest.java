@@ -32,7 +32,7 @@ public class HkdfTest {
   @Test
   public void testInvalidCodeSize() throws Exception {
     try {
-      Hkdf.computeHkdf("HmacSh256", new byte[0], new byte[0], new byte[0], 16 * 256);
+      Hkdf.computeHkdf("HmacSha256", new byte[0], new byte[0], new byte[0], 32 * 256);
       fail("Invalid size, should have thrown exception");
     } catch (GeneralSecurityException expected) {
       // Expected

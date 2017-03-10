@@ -195,10 +195,10 @@ java_proto_library(
     with_grpc = False,
 )
 
-# ecies hybrid encryption
+# ECIES hybrid encryption with AEAD and HKDF
 
 cc_proto_library(
-    name = "cc_ecies",
+    name = "cc_ecies_aead_hkdf",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
@@ -207,17 +207,16 @@ cc_proto_library(
     ],
     proto_deps = [
         ":cc_core",
-        ":cc_hmac",
     ],
     protos = [
-        "ecies.proto",
+        "ecies_aead_hkdf.proto",
     ],
     verbose = 0,
     with_grpc = False,
 )
 
 java_proto_library(
-    name = "java_ecies",
+    name = "java_ecies_aead_hkdf",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
@@ -226,10 +225,9 @@ java_proto_library(
     ],
     proto_deps = [
         ":java_core",
-        ":java_hmac",
     ],
     protos = [
-        "ecies.proto",
+        "ecies_aead_hkdf.proto",
     ],
     verbose = 0,
     with_grpc = False,
