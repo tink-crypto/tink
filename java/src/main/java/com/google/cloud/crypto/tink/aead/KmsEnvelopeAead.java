@@ -17,13 +17,14 @@
 package com.google.cloud.crypto.tink.aead; // instead of subtle, because it depends on KeyFormat.
 
 import com.google.cloud.crypto.tink.Aead;
-import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopePayload;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
 
 /**
@@ -32,10 +33,15 @@ import java.util.concurrent.Future;
  * locally, encrypts data with DEK, sends DEK to a KMS to be encrypted (with a key managed by KMS),
  * and stores encrypted DEK with encrypted data; at a later point user can retrieve encrypted data
  * and DEK, use Storky to decrypt DEK, and use decrypted DEK to decrypt the data.
+ * The ciphertext structure is as follows:
+ *   - Length of encrypted DEK: 4 bytes.
+ *   - Encrypted DEK: variable length that is equal to the value specified in the last 4 bytes.
+ *   - AEAD payload: variable length.
  */
 class KmsEnvelopeAead implements Aead {
   private final KeyFormat dekFormat;
   private final Aead remote;
+  private static final int LENGTH_ENCRYPTED_DEK = 4;
 
   KmsEnvelopeAead(KeyFormat dekFormat, Aead remote) {
     this.dekFormat = dekFormat;
@@ -50,29 +56,44 @@ class KmsEnvelopeAead implements Aead {
     byte[] encryptedDek = remote.encrypt(dek.toByteArray(), null /* aad */);
     // Use DEK to encrypt plaintext.
     Aead aead = Registry.INSTANCE.getPrimitive(dek);
-    byte[] ciphertext = aead.encrypt(plaintext, aad);
+    byte[] payload = aead.encrypt(plaintext, aad);
     // Build ciphertext protobuf and return result.
-    return KmsEnvelopePayload.newBuilder()
-        .setEncryptedDek(ByteString.copyFrom(encryptedDek))
-        .setCiphertext(ByteString.copyFrom(ciphertext))
-        .build()
-        .toByteArray();
+    return buildCiphertext(encryptedDek, payload);
   }
 
   @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
       throws GeneralSecurityException {
     try {
-      KmsEnvelopePayload proto = KmsEnvelopePayload.parseFrom(ciphertext);
-      byte[] encryptedDek = proto.getEncryptedDek().toByteArray();
+      // TODO(thaidn): more efficient parsing?
+      ByteBuffer buffer = ByteBuffer.wrap(ciphertext);
+      int encryptedDekSize = buffer.getInt();
+      if (encryptedDekSize < 0 || encryptedDekSize > (ciphertext.length - LENGTH_ENCRYPTED_DEK)) {
+        throw new GeneralSecurityException("invalid ciphertext");
+      }
+      byte[] encryptedDek = new byte[encryptedDekSize];
+      buffer.get(encryptedDek, 0, encryptedDekSize);
+      byte[] payload = new byte[buffer.remaining()];
+      buffer.get(payload, 0, buffer.remaining());
       // Use remote to decrypt encryptedDek.
       Any dek = Any.parseFrom(remote.decrypt(encryptedDek, null /* aad */));
-      // Use DEK to decrypt ciphertext.
+      // Use DEK to decrypt payload.
       Aead aead = Registry.INSTANCE.getPrimitive(dek);
-      return aead.decrypt(proto.getCiphertext().toByteArray(), aad);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("decryption failed");
+      return aead.decrypt(payload, aad);
+    } catch (IndexOutOfBoundsException
+             | InvalidProtocolBufferException
+             | BufferUnderflowException
+             | NegativeArraySizeException e) {
+      throw new GeneralSecurityException("invalid ciphertext");
     }
+  }
+
+  private byte[] buildCiphertext(final byte[] encryptedDek, final byte[] payload) {
+    return ByteBuffer.allocate(LENGTH_ENCRYPTED_DEK + encryptedDek.length + payload.length)
+        .putInt(encryptedDek.length)
+        .put(encryptedDek)
+        .put(payload)
+        .array();
   }
 
   @Override

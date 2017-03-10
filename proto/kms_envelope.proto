@@ -42,11 +42,3 @@ message KmsEnvelopeAeadKey {
   int32 version = 1;
   KmsEnvelopeAeadParams params = 2;
 }
-
-// Envelope encryption produces a payload that is a serialization of this protobuf.
-message KmsEnvelopePayload {
-  // The encrypted DEK is the result of encrypting the DEK under the KMS key.
-  bytes encrypted_dek = 1;
-  // The encryption of plaintext under the DEK.
-  bytes ciphertext = 2;
-}

@@ -16,6 +16,10 @@
 
 package com.google.cloud.crypto.tink.aead;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
@@ -25,8 +29,11 @@ import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.protobuf.Any;
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,8 +53,7 @@ public class KmsEnvelopeAeadKeyTest {
         new GoogleCloudKmsAeadKeyManager(new TestGoogleCredentialFactory()));
   }
 
-  @Test
-  public void testGoogleCloudKmsKeyRestricted() throws Exception {
+  public void GoogleCloudKmsKeyRestricted() throws Exception {
     // This key is restricted, use the cred of
     // tink-unit-tests@testing-cloud-kms-159306.iam.gserviceaccount.com.
     int aesKeySize = 16;
@@ -66,5 +72,80 @@ public class KmsEnvelopeAeadKeyTest {
 
     Aead aead = AeadFactory.getPrimitive(keysetHandle);
     TestUtil.runBasicTests(aead);
+  }
+
+  @Test
+  public void testParsingInvalidCiphertexts() throws Exception {
+    int aesKeySize = 16;
+    int ivSize = 16;
+    int hmacKeySize = 16;
+    int tagSize = 16;
+    KeyFormat dekFormat = TestUtil.createAesCtrHmacAeadKeyFormat(
+        aesKeySize, ivSize, hmacKeySize, tagSize);
+    Any kmsKey = Any.pack(TestUtil.createGoogleCloudKmsAeadKey(
+        TestGoogleCredentialFactory.RESTRICTED));
+    KmsEnvelopeAeadKey kmsEnvelopeAeadKey = TestUtil.createKmsEnvelopeAeadKey(kmsKey, dekFormat);
+    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
+        TestUtil.createKeyset(
+            TestUtil.createKey(kmsEnvelopeAeadKey, 42,
+                KeyStatusType.ENABLED, OutputPrefixType.RAW)));
+
+    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    byte[] plaintext = Random.randBytes(20);
+    byte[] aad = Random.randBytes(20);
+    byte[] ciphertext = aead.encrypt(plaintext, aad);
+    ByteBuffer buffer = ByteBuffer.wrap(ciphertext);
+    int encryptedDekSize = buffer.getInt();
+    byte[] encryptedDek = new byte[encryptedDekSize];
+    buffer.get(encryptedDek, 0, encryptedDekSize);
+    byte[] payload = new byte[buffer.remaining()];
+    buffer.get(payload, 0, buffer.remaining());
+
+    // valid, should work
+    byte[] ciphertext2 = ByteBuffer.allocate(ciphertext.length)
+        .putInt(encryptedDekSize)
+        .put(encryptedDek)
+        .put(payload)
+        .array();
+    assertArrayEquals(plaintext, aead.decrypt(ciphertext2, aad));
+
+    // negative length
+    ciphertext2 = ByteBuffer.allocate(ciphertext.length)
+        .putInt(-1)
+        .put(encryptedDek)
+        .put(payload)
+        .array();
+    try {
+      aead.decrypt(ciphertext2, aad);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("decryption failed"));
+    }
+
+    // length larger than actual value
+    ciphertext2 = ByteBuffer.allocate(ciphertext.length)
+        .putInt(encryptedDek.length + 1)
+        .put(encryptedDek)
+        .put(payload)
+        .array();
+    try {
+      aead.decrypt(ciphertext2, aad);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("decryption failed"));
+    }
+
+    // length larger than total ciphertext length
+    ciphertext2 = ByteBuffer.allocate(ciphertext.length)
+        .putInt(encryptedDek.length + payload.length + 1)
+        .put(encryptedDek)
+        .put(payload)
+        .array();
+    try {
+      aead.decrypt(ciphertext2, aad);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("decryption failed"));
+    }
   }
 }
