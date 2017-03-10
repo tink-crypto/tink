@@ -56,9 +56,7 @@ public final class AesGcmJce extends AeadBase {
     Cipher cipher = instance();
     GCMParameterSpec params = new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, iv);
     cipher.init(Cipher.ENCRYPT_MODE, keySpec, params);
-    if (aad != null) {
-      cipher.updateAAD(aad);
-    }
+    cipher.updateAAD(aad);
     int unusedWritten = cipher.doFinal(plaintext, 0, plaintext.length, ciphertext,
         IV_SIZE_IN_BYTES);
     return ciphertext;
@@ -74,9 +72,7 @@ public final class AesGcmJce extends AeadBase {
         new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, ciphertext, 0, IV_SIZE_IN_BYTES);
     Cipher cipher = instance();
     cipher.init(Cipher.DECRYPT_MODE, keySpec, params);
-    if (aad != null) {
-      cipher.updateAAD(aad);
-    }
+    cipher.updateAAD(aad);
     return cipher.doFinal(
         ciphertext, IV_SIZE_IN_BYTES, ciphertext.length - IV_SIZE_IN_BYTES);
   }
