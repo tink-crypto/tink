@@ -20,6 +20,8 @@ import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.Registry;
+import com.google.cloud.crypto.tink.aead.AeadFactory;
+import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.subtle.HybridEncryptBase;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
@@ -27,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 /**
  * HybridEncryptFactory allows obtaining a HybridEncrypt-primitive from a {@code KeysetHandle}.
@@ -51,6 +54,8 @@ import java.util.Map.Entry;
  *  }</pre>
  */
 public final class HybridEncryptFactory {
+  private static final Logger logger =
+      Logger.getLogger(HybridEncryptFactory.class.getName());
   /**
    * Safe to use HybridEncrypt key types.
    */
@@ -70,6 +75,13 @@ public final class HybridEncryptFactory {
     Map<String, KeyManager<HybridEncrypt>> legacy =
         new HashMap<String, KeyManager<HybridEncrypt>>();
     LEGACY_KEY_TYPES = Collections.unmodifiableMap(legacy);
+
+    try {
+      AeadFactory.registerStandardKeyTypes();
+      MacFactory.registerStandardKeyTypes();
+    } catch (GeneralSecurityException e) {
+      logger.severe("Cannot register key managers: " + e);
+    }
   }
   /**
    * Registers standard HybridEncrypt key types and their managers with the {@code Registry}.
