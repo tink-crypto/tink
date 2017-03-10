@@ -48,6 +48,11 @@ import java.util.List;
  *   byte[] data = ...;
  *   byte[] tag = mac.computeMac(data);
  *  }</pre>
+ * The returned primitive works with a keyset (rather than a single key). To compute a MAC tag, it
+ * uses the primary key in the keyset, and prepends to the tag a certain prefix associated with the
+ * primary key. To verify a tag, the primitive uses the prefix of the tag to efficiently select the
+ * right key in the set. If the keys associated with the prefix do not validate the tag, the
+ * primitive tries all keys with {@code OutputPrefixType.RAW}.
  */
 public final class MacFactory {
   /**

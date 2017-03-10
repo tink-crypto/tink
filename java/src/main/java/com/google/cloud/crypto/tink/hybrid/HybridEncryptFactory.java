@@ -49,6 +49,9 @@ import java.util.logging.Logger;
  *   byte[] contextInfo = ...;
  *   byte[] ciphertext = hybridEncypt.encrypt(plaintext, contextInfo);
  *  }</pre>
+ * The returned primitive works with a keyset (rather than a single key). To encrypt a message,
+ * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix
+ * associated with the primary key.
  */
 public final class HybridEncryptFactory {
   private static final Logger logger =

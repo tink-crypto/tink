@@ -51,6 +51,10 @@ import java.util.logging.Logger;
  *   byte[] contextInfo = ...;
  *   byte[] plaintext = hybridEncypt.decrypt(ciphertext, contextInfo);
  *  }</pre>
+ * The returned primitive works with a keyset (rather than a single key). To decrypt a message,
+ * the primitive uses the prefix of the ciphertext to efficiently select the right key in the set.
+ * If there is no key associated with the prefix or if the keys associated with the prefix do not
+ * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
  */
 public final class HybridDecryptFactory {
   private static final Logger logger =

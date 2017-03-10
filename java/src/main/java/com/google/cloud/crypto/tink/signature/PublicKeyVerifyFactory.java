@@ -47,6 +47,10 @@ import java.util.List;
  *   PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle);
  *   verifier.verify(signature, data);
  *  }</pre>
+ * The returned primitive works with a keyset (rather than a single key). To verify a signature,
+ * the primitive uses the prefix of the signature to efficiently select the right key in the set.
+ * If there is no key associated with the prefix or if the keys associated with the prefix do not
+ * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
  */
 public final class PublicKeyVerifyFactory {
   /**

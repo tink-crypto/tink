@@ -50,6 +50,11 @@ import java.util.List;
  *   byte[] aad = ...;
  *   byte[] ciphertext = aead.encrypt(plaintext, aad);
  *  }</pre>
+ * The returned primitive works with a keyset (rather than a single key). To encrypt a plaintext,
+ * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix
+ * associated with the primary key. To decrypt, the primitive uses the prefix of the ciphertext
+ * to efficiently select the right key in the set. If the keys associated with the prefix do not
+ * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
  */
 public final class AeadFactory {
   /**

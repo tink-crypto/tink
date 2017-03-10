@@ -46,6 +46,9 @@ import java.security.GeneralSecurityException;
  *   byte[] data = ...;
  *   byte[] signature = signer.sign(data);
  *  }</pre>
+ * The returned primitive works with a keyset (rather than a single key). To sign a message,
+ * it uses the primary key in the keyset, and prepends to the signature a certain prefix
+ * associated with the primary key.
  */
 
 public final class PublicKeySignFactory {
