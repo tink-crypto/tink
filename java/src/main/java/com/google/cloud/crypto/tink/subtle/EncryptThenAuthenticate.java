@@ -56,8 +56,8 @@ public final class EncryptThenAuthenticate extends AeadBase {
     byte[] ciphertext = cipher.encrypt(plaintext);
     byte[] aadLengthInBits = Arrays.copyOf(ByteBuffer.allocate(8).putLong(8L * aad.length).array(),
         8);
-    byte[] macValue = mac.computeMac(Util.concat(aad, ciphertext, aadLengthInBits));
-    return Util.concat(ciphertext, macValue);
+    byte[] macValue = mac.computeMac(SubtleUtil.concat(aad, ciphertext, aadLengthInBits));
+    return SubtleUtil.concat(ciphertext, macValue);
   }
 
   /**
@@ -82,7 +82,7 @@ public final class EncryptThenAuthenticate extends AeadBase {
         ciphertext.length);
     byte[] aadLengthInBits = Arrays.copyOf(
         ByteBuffer.allocate(8).putLong(8L * aad.length).array(), 8);
-    mac.verifyMac(macValue, Util.concat(aad, rawCiphertext, aadLengthInBits));
+    mac.verifyMac(macValue, SubtleUtil.concat(aad, rawCiphertext, aadLengthInBits));
     return cipher.decrypt(rawCiphertext);
   }
 }

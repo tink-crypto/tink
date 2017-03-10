@@ -27,7 +27,7 @@ import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
-import com.google.cloud.crypto.tink.subtle.Util;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
 import org.junit.Test;
@@ -330,7 +330,7 @@ public class AesGcmKeyTest {
       }
       Aead aead = getRawAesGcm(t.keyValue);
       try {
-        byte[] ciphertext = Util.concat(t.iv, t.ciphertext, t.tag);
+        byte[] ciphertext = SubtleUtil.concat(t.iv, t.ciphertext, t.tag);
         byte[] plaintext = aead.decrypt(ciphertext, t.aad);
         assertArrayEquals(plaintext, t.plaintext);
       } catch (GeneralSecurityException e) {

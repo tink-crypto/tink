@@ -25,7 +25,7 @@ import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.cloud.crypto.tink.subtle.IndCpaCipher;
 import com.google.cloud.crypto.tink.subtle.Random;
-import com.google.cloud.crypto.tink.subtle.Util;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -79,13 +79,13 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   }
 
   private void validate(AesCtrKey key) throws GeneralSecurityException {
-    Util.validateVersion(key.getVersion(), VERSION);
-    Util.validateAesKeySize(key.getKeyValue().size());
+    SubtleUtil.validateVersion(key.getVersion(), VERSION);
+    SubtleUtil.validateAesKeySize(key.getKeyValue().size());
     validate(key.getParams());
   }
 
   private void validate(AesCtrKeyFormat format) throws GeneralSecurityException {
-    Util.validateAesKeySize(format.getKeySize());
+    SubtleUtil.validateAesKeySize(format.getKeySize());
     validate(format.getParams());
   }
 

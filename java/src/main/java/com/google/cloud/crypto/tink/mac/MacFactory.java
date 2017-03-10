@@ -22,7 +22,7 @@ import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.Registry;
-import com.google.cloud.crypto.tink.subtle.Util;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -111,7 +111,7 @@ public final class MacFactory {
     return new Mac() {
       @Override
       public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
-        return Util.concat(
+        return SubtleUtil.concat(
             primitives.getPrimary().getIdentifier(),
             primitives.getPrimary().getPrimitive().computeMac(data));
       }

@@ -18,24 +18,6 @@ KEY_MANAGEMENT_RESTRICTED_API_SRCS = [
     "src/main/java/com/google/cloud/crypto/tink/KeysetManager.java",
 ]
 
-# core, without restricted APIs
-
-java_library(
-    name = "core",
-    srcs = glob(
-        [
-            "src/main/java/com/google/cloud/crypto/tink/*.java",
-        ],
-        exclude = KEYSET_HANDLE_RESTRICTED_API_SRCS +
-                  KEY_MANAGEMENT_RESTRICTED_API_SRCS,
-    ),
-    javacopts = JAVACOPTS,
-    deps = [
-        "//proto:java_core",
-        "//proto:java_core_compile_imports",
-    ],
-)
-
 # public interfaces
 
 java_library(
@@ -56,10 +38,29 @@ java_library(
 java_library(
     name = "common_subtle",
     srcs = [
+        "src/main/java/com/google/cloud/crypto/tink/subtle/EcUtil.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/Random.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
+        "src/main/java/com/google/cloud/crypto/tink/subtle/SubtleUtil.java",
     ],
     javacopts = JAVACOPTS,
+)
+# core, without restricted APIs
+
+java_library(
+    name = "core",
+    srcs = glob(
+        [
+            "src/main/java/com/google/cloud/crypto/tink/*.java",
+        ],
+        exclude = KEYSET_HANDLE_RESTRICTED_API_SRCS +
+                  KEY_MANAGEMENT_RESTRICTED_API_SRCS,
+    ),
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java:common_subtle",
+        "//proto:java_core",
+        "//proto:java_core_compile_imports",
+    ],
 )
 
 COMMON_JAVA_DEPS = [
@@ -120,11 +121,10 @@ java_library(
     name = "mac_subtle",
     srcs = [
         "src/main/java/com/google/cloud/crypto/tink/subtle/MacJce.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/Random.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/Util.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
+        "//java:common_subtle",
         "//java:public_interfaces",
     ],
 )
@@ -153,6 +153,7 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
+        "//java:common_subtle",
         "//java:public_interfaces",
     ],
 )
@@ -266,6 +267,7 @@ java_library(
         "src/test/java/**/*.java",
     ]),
     deps = [
+        "//java:common_subtle",
         "//java:key_management_restricted",
         "//java:keyset_handle_restricted",
         "//java:tink",

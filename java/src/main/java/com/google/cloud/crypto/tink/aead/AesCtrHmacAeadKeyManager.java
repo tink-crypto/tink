@@ -26,7 +26,7 @@ import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.subtle.EncryptThenAuthenticate;
-import com.google.cloud.crypto.tink.subtle.Util;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
@@ -102,6 +102,6 @@ class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
   }
 
   private void validate(AesCtrHmacAeadKey key) throws GeneralSecurityException {
-    Util.validateVersion(key.getVersion(), VERSION);
+    SubtleUtil.validateVersion(key.getVersion(), VERSION);
   }
 }

@@ -23,7 +23,7 @@ import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.AesGcmJce;
 import com.google.cloud.crypto.tink.subtle.Random;
-import com.google.cloud.crypto.tink.subtle.Util;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -68,11 +68,11 @@ class AesGcmKeyManager implements KeyManager<Aead> {
   }
 
   private void validate(AesGcmKey key) throws GeneralSecurityException {
-    Util.validateVersion(key.getVersion(), VERSION);
-    Util.validateAesKeySize(key.getKeyValue().size());
+    SubtleUtil.validateVersion(key.getVersion(), VERSION);
+    SubtleUtil.validateAesKeySize(key.getKeyValue().size());
   }
 
   private void validate(AesGcmKeyFormat format) throws GeneralSecurityException {
-    Util.validateAesKeySize(format.getKeySize());
+    SubtleUtil.validateAesKeySize(format.getKeySize());
   }
 }

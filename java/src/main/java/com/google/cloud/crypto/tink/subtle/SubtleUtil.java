@@ -21,7 +21,7 @@ import java.security.GeneralSecurityException;
 /**
  * Helper methods.
  */
-public final class Util {
+public final class SubtleUtil {
   /**
    * Best effort fix-timing array comparison.
    * @return true if two arrays are equal.

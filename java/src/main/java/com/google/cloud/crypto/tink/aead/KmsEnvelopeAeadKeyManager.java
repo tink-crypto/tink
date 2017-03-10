@@ -22,7 +22,7 @@ import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKeyFormat;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.cloud.crypto.tink.subtle.Util;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
@@ -66,6 +66,6 @@ class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
   }
 
   private void validate(KmsEnvelopeAeadKey key) throws GeneralSecurityException {
-    Util.validateVersion(key.getVersion(), VERSION);
+    SubtleUtil.validateVersion(key.getVersion(), VERSION);
   }
 }

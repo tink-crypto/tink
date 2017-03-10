@@ -21,7 +21,7 @@ import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.Registry;
-import com.google.cloud.crypto.tink.subtle.Util;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -114,7 +114,7 @@ public final class PublicKeySignFactory {
         return new PublicKeySign() {
           @Override
           public byte[] sign(final byte[] data) throws GeneralSecurityException {
-            return Util.concat(
+            return SubtleUtil.concat(
                 primitives.getPrimary().getIdentifier(),
                 primitives.getPrimary().getPrimitive().sign(data));
           }

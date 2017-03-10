@@ -20,17 +20,13 @@ import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.EcdsaVerifyJce;
-import com.google.cloud.crypto.tink.subtle.Util;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
 
 final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   private static final String ECDSA_PUBLIC_KEY_TYPE =
@@ -50,13 +46,9 @@ final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
       throw new GeneralSecurityException(e);
     }
     validateKey(pubKey);
-    ECParameterSpec ecParams = SigUtil.getCurveSpec(pubKey.getParams().getCurve());
-    BigInteger pubX = new BigInteger(1, pubKey.getX().toByteArray());
-    BigInteger pubY = new BigInteger(1, pubKey.getY().toByteArray());
-    ECPoint w = new ECPoint(pubX, pubY);
-    ECPublicKeySpec spec = new ECPublicKeySpec(w, ecParams);
-    KeyFactory kf = KeyFactory.getInstance("EC");
-    return new EcdsaVerifyJce((ECPublicKey) kf.generatePublic(spec),
+    ECPublicKey publicKey = Util.getEcPublicKey(pubKey.getParams().getCurve(),
+        pubKey.getX().toByteArray(), pubKey.getY().toByteArray());
+    return new EcdsaVerifyJce(publicKey,
         SigUtil.hashToEcdsaAlgorithmName(pubKey.getParams().getHashType()));
   }
 
@@ -71,7 +63,7 @@ final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   }
 
   private void validateKey(EcdsaPublicKey pubKey) throws GeneralSecurityException {
-    Util.validateVersion(pubKey.getVersion(), VERSION);
+    SubtleUtil.validateVersion(pubKey.getVersion(), VERSION);
     SigUtil.validateEcdsaParams(pubKey.getParams());
   }
 }

@@ -27,7 +27,7 @@ import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.GoogleCloudKmsAead;
-import com.google.cloud.crypto.tink.subtle.Util;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.Any;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -80,6 +80,6 @@ public class GoogleCloudKmsAeadKeyManager implements KeyManager<Aead> {
   }
 
   private void validate(GoogleCloudKmsAeadKey key) throws GeneralSecurityException {
-    Util.validateVersion(key.getVersion(), VERSION);
+    SubtleUtil.validateVersion(key.getVersion(), VERSION);
   }
 }

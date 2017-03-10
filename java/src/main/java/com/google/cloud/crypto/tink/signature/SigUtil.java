@@ -45,27 +45,6 @@ final class SigUtil {
   }
 
   /**
-   * Returns the ECParameterSpec for a named curve.
-   *
-   * @param curve the curve type
-   * @return the ECParameterSpec for the curve.
-   */
-  public static ECParameterSpec getCurveSpec(EllipticCurveType curve)
-      throws NoSuchAlgorithmException {
-        switch(curve) {
-          case NIST_P256:
-            return EcUtil.getNistP256Params();
-          case NIST_P384:
-            return EcUtil.getNistP384Params();
-          case NIST_P521:
-            return EcUtil.getNistP521Params();
-          default:
-            throw new NoSuchAlgorithmException("Curve not implemented:" + curve);
-        }
-      }
-
-
-  /**
    * Validates Ecdsa's parameters. The hash's strength must not be weaker than the curve's strength.
    *
    * @param params the Ecdsa's parameters protocol buffer.
