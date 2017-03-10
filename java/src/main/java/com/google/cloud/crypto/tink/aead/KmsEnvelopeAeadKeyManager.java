@@ -49,7 +49,8 @@ class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
   @Override
   public Any newKey(KeyFormat keyFormat) throws GeneralSecurityException {
     try {
-      KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.parseFrom(keyFormat.getFormat().getValue());
+      KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.parseFrom(
+          keyFormat.getFormat().getValue());
       // special key type, doesn't actually store any key material.
       return Util.pack(KEY_TYPE, KmsEnvelopeAeadKey.newBuilder()
           .setParams(format.getParams())

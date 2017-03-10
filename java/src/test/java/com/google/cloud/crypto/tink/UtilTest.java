@@ -55,7 +55,7 @@ public class UtilTest {
     KeysetInfo keysetInfo = Util.getKeysetInfo(keyset);
     assertFalse(TextFormat.printToUnicodeString(keysetInfo).contains(keyValue));
   }
-    
+
   /**
    * A class for storing test vectors.
    * This class contains the directory for the public and private key,

@@ -11,6 +11,7 @@ KEYSET_HANDLE_RESTRICTED_API_SRCS = [
     # CleartextKeysetHandle, which allows loading cleartext keyset,
     # is restricted.
     "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandle.java",
+    "src/main/java/com/google/cloud/crypto/tink/AndroidCleartextKeysetHandle.java",
 ]
 
 KEY_MANAGEMENT_RESTRICTED_API_SRCS = [
@@ -68,10 +69,15 @@ java_library(
     ],
 )
 
-# excluded from Android because they need TextFormat
-ANDROID_EXCLUDE_SRC = [
+# excluded from Android because they need com.google.protobuf.TextFormat which is
+# not available on Android.
+ANDROID_EXCLUDE_SRCS = [
     "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandle.java",
     "src/main/java/com/google/cloud/crypto/tink/KmsEncryptedKeysetHandle.java",
+]
+
+ANDROID_RESTRICTED_SRCS = [
+    "src/main/java/com/google/cloud/crypto/tink/AndroidCleartextKeysetHandle.java",
 ]
 
 filegroup(
@@ -82,7 +88,8 @@ filegroup(
         ],
         exclude = KEYSET_HANDLE_RESTRICTED_API_SRCS +
                   KEY_MANAGEMENT_RESTRICTED_API_SRCS +
-                  ANDROID_EXCLUDE_SRC,
+                  ANDROID_EXCLUDE_SRCS +
+                  ANDROID_RESTRICTED_SRCS,
     ),
 )
 
@@ -150,7 +157,6 @@ java_library(
     deps = COMMON_JAVA_DEPS + [
         "//proto:java_core_compile_imports",
         "//proto:java_googlecloudkms",
-        "//proto:java_kms_envelope",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
         "@com_google_http_client//jar",
@@ -204,7 +210,6 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
-        "//java:common_subtle",
         "//java:public_interfaces",
     ],
 )
@@ -253,9 +258,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
         "//java:aead",
-        "//java:aead_subtle",
         "//java:mac",
-        "//java:mac_subtle",
         "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_aes_gcm",
         "//proto:java_core_compile_imports",
@@ -286,9 +289,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
         "//java:aead",
-        "//java:aead_subtle",
         "//java:mac",
-        "//java:mac_subtle",
         "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_aes_gcm",
         "//proto:java_core_compile_imports",
