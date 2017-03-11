@@ -46,8 +46,8 @@ java_library(
 )
 # core, without restricted APIs
 
-java_library(
-    name = "core",
+filegroup(
+    name = "core_srcs",
     srcs = glob(
         [
             "src/main/java/com/google/cloud/crypto/tink/*.java",
@@ -55,12 +55,35 @@ java_library(
         exclude = KEYSET_HANDLE_RESTRICTED_API_SRCS +
                   KEY_MANAGEMENT_RESTRICTED_API_SRCS,
     ),
+)
+
+java_library(
+    name = "core",
+    srcs = [":core_srcs"],
     javacopts = JAVACOPTS,
     deps = [
         "//java:common_subtle",
         "//proto:java_core",
         "//proto:java_core_compile_imports",
     ],
+)
+
+# excluded from Android because they need TextFormat
+ANDROID_EXCLUDE_SRC = [
+    "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandle.java",
+    "src/main/java/com/google/cloud/crypto/tink/KmsEncryptedKeysetHandle.java",
+]
+
+filegroup(
+    name = "core_android_srcs",
+    srcs = glob(
+        [
+            "src/main/java/com/google/cloud/crypto/tink/*.java",
+        ],
+        exclude = KEYSET_HANDLE_RESTRICTED_API_SRCS +
+                  KEY_MANAGEMENT_RESTRICTED_API_SRCS +
+                  ANDROID_EXCLUDE_SRC,
+    ),
 )
 
 COMMON_JAVA_DEPS = [
@@ -95,14 +118,19 @@ AEAD_ENVELOPE_SRCS = [
     "src/main/java/com/google/cloud/crypto/tink/subtle/GoogleCloudKmsAead.java",
 ]
 
-java_library(
-    name = "aead",
+filegroup(
+    name = "aead_srcs",
     srcs = glob(
         [
             "src/main/java/com/google/cloud/crypto/tink/aead/*.java",
         ],
         exclude = AEAD_ENVELOPE_SRCS,
     ),
+)
+
+java_library(
+    name = "aead",
+    srcs = [":aead_srcs"],
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
         "//java:aead_subtle",
@@ -145,11 +173,18 @@ java_library(
     ],
 )
 
+filegroup(
+    name = "mac_srcs",
+    srcs = glob(
+        [
+            "src/main/java/com/google/cloud/crypto/tink/mac/*.java",
+        ],
+    ),
+)
+
 java_library(
     name = "mac",
-    srcs = glob([
-        "src/main/java/com/google/cloud/crypto/tink/mac/*.java",
-    ]),
+    srcs = [":mac_srcs"],
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
         "//java:mac_subtle",
@@ -174,11 +209,18 @@ java_library(
     ],
 )
 
+filegroup(
+    name = "signature_srcs",
+    srcs = glob(
+        [
+            "src/main/java/com/google/cloud/crypto/tink/signature/*.java",
+        ],
+    ),
+)
+
 java_library(
     name = "signature",
-    srcs = glob([
-        "src/main/java/com/google/cloud/crypto/tink/signature/*.java",
-    ]),
+    srcs = [":signature_srcs"],
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
         "//java:signature_subtle",
@@ -189,8 +231,8 @@ java_library(
 
 # hybrid
 
-java_library(
-    name = "hybridencrypt",
+filegroup(
+    name = "hybridencrypt_srcs",
     srcs = [
         "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfAeadFactory.java",
         "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfHybridEncrypt.java",
@@ -200,6 +242,13 @@ java_library(
         "src/main/java/com/google/cloud/crypto/tink/subtle/EciesHkdfSenderKem.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/Hkdf.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/HybridEncryptBase.java",
+    ],
+)
+
+java_library(
+    name = "hybridencrypt",
+    srcs = [
+        ":hybridencrypt_srcs",
     ],
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
@@ -215,8 +264,8 @@ java_library(
     ],
 )
 
-java_library(
-    name = "hybriddecrypt",
+filegroup(
+    name = "hybriddecrypt_srcs",
     srcs = [
         "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfAeadFactory.java",
         "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfHybridDecrypt.java",
@@ -226,6 +275,13 @@ java_library(
         "src/main/java/com/google/cloud/crypto/tink/subtle/EciesHkdfRecipientKem.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/Hkdf.java",
         "src/main/java/com/google/cloud/crypto/tink/subtle/HybridDecryptBase.java",
+    ],
+)
+
+java_library(
+    name = "hybriddecrypt",
+    srcs = [
+        ":hybriddecrypt_srcs",
     ],
     javacopts = JAVACOPTS,
     deps = COMMON_JAVA_DEPS + [
