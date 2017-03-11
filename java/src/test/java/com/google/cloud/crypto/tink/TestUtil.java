@@ -27,12 +27,19 @@ import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKeyFormat;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrParams;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
+import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
+import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaParams;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadDemParams;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
@@ -69,6 +76,9 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class TestUtil {
+  /**
+   * A dummy Mac for testing.
+   */
   public static class DummyMac implements Mac {
     public DummyMac() {}
     @Override
@@ -101,6 +111,9 @@ public class TestUtil {
     }
   }
 
+  /**
+   * A dummy Aead-implementation that just returns the plaintext.
+   */
   public static class EchoAead implements Aead {
     public EchoAead() {}
 
@@ -142,6 +155,9 @@ public class TestUtil {
     }
   }
 
+  /**
+   * A dummy Aead-Implementation that returns empty byte arrays.
+   */
   public static class FaultyAead implements Aead {
     public FaultyAead() {}
 
@@ -282,6 +298,19 @@ public class TestUtil {
     return KeyFormat.newBuilder()
         .setFormat(Any.pack(format))
         .setKeyType("type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey")
+        .build();
+  }
+
+  /**
+   * @return a {@code AesGcmKeyFormat}.
+   */
+  public static KeyFormat createAesGcmKeyFormat(int keySize) throws Exception {
+    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder()
+        .setKeySize(keySize)
+        .build();
+    return KeyFormat.newBuilder()
+        .setFormat(Any.pack(format))
+        .setKeyType("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")
         .build();
   }
 
@@ -464,6 +493,79 @@ public class TestUtil {
     return EcdsaPublicKey.newBuilder()
         .setVersion(version)
         .setParams(ecdsaParams)
+        .setX(ByteString.copyFrom(pubX))
+        .setY(ByteString.copyFrom(pubY))
+        .build();
+  }
+
+  /**
+   * @return a freshly generated {@code EciesAeadHkdfPrivateKey} constructed with specified
+   * parameters.
+   */
+  public static EciesAeadHkdfPrivateKey generateEciesAeadHkdfPrivKey(EllipticCurveType curve,
+      HashType hashType, EcPointFormat pointFormat, KeyFormat demKeyFormat, byte[] salt)
+      throws Exception {
+    ECParameterSpec ecParams;
+    switch(curve) {
+      case NIST_P256:
+        ecParams = EcUtil.getNistP256Params();
+        break;
+      case NIST_P384:
+        ecParams = EcUtil.getNistP384Params();
+        break;
+      case NIST_P521:
+        ecParams = EcUtil.getNistP521Params();
+        break;
+      default:
+        throw new NoSuchAlgorithmException("Curve not implemented:" + curve);
+    }
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+    keyGen.initialize(ecParams);
+    KeyPair keyPair = keyGen.generateKeyPair();
+    ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
+    ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
+    ECPoint w = pubKey.getW();
+    EciesAeadHkdfPublicKey eciesPubKey = createEciesAeadHkdfPubKey(curve, hashType, pointFormat,
+        demKeyFormat, w.getAffineX().toByteArray(), w.getAffineY().toByteArray(), salt);
+    return createEciesAeadHkdfPrivKey(eciesPubKey, privKey.getS().toByteArray());
+  }
+
+  /**
+   *  @return a {@code EciesAeadHkdfPrivateKey} with the specified key material and parameters.
+   */
+  public static EciesAeadHkdfPrivateKey createEciesAeadHkdfPrivKey(EciesAeadHkdfPublicKey pubKey,
+      byte[] privKeyValue) throws Exception {
+    final int version = 0;
+    return EciesAeadHkdfPrivateKey.newBuilder()
+        .setVersion(version)
+        .setPublicKey(pubKey)
+        .setKeyValue(ByteString.copyFrom(privKeyValue))
+        .build();
+  }
+
+  /**
+   *  @return a {@code EciesAeadHkdfPublicKey} with the specified key material and parameters.
+   */
+  public static EciesAeadHkdfPublicKey createEciesAeadHkdfPubKey(EllipticCurveType curve,
+      HashType hashType, EcPointFormat ecPointFormat, KeyFormat demKeyFormat,
+      byte[] pubX, byte[] pubY, byte[] salt) throws Exception {
+    final int version = 0;
+    EciesHkdfKemParams kemParams = EciesHkdfKemParams.newBuilder()
+        .setCurveType(curve)
+        .setHkdfHashType(hashType)
+        .setHkdfSalt(ByteString.copyFrom(salt))
+        .build();
+    EciesAeadDemParams demParams = EciesAeadDemParams.newBuilder()
+        .setAeadDem(demKeyFormat)
+        .build();
+    EciesAeadHkdfParams params = EciesAeadHkdfParams.newBuilder()
+        .setKemParams(kemParams)
+        .setDemParams(demParams)
+        .setEcPointFormat(ecPointFormat)
+        .build();
+    return EciesAeadHkdfPublicKey.newBuilder()
+        .setVersion(version)
+        .setParams(params)
         .setX(ByteString.copyFrom(pubX))
         .setY(ByteString.copyFrom(pubY))
         .build();

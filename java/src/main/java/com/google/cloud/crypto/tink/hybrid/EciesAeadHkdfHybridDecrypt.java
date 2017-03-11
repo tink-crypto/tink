@@ -49,9 +49,6 @@ public final class EciesAeadHkdfHybridDecrypt extends HybridDecryptBase {
     this.recipientKem = new EciesHkdfRecipientKem(recipientPrivateKey);
     this.hkdfHmacAlgo = hkdfHmacAlgo;
     this.hkdfSalt = hkdfSalt;
-    if (ecPointFormat != EcPointFormat.UNCOMPRESSED) {
-      throw new GeneralSecurityException("Unsupported EcPointFormat.");
-    }
     this.ecPointFormat = ecPointFormat;
     this.aeadFactory = new EciesAeadHkdfAeadFactory(aeadDemFormat);  // validates the format
   }

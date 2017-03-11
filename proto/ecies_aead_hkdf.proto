@@ -99,7 +99,7 @@ message EciesAeadHkdfPrivateKey {
   bytes key_value = 3;  // Big integer in bigendian representation.
 }
 
-message EciesAeadHkdfKeyFromat {
+message EciesAeadHkdfKeyFormat {
   // Required.
   EciesAeadHkdfParams params = 1;
 }
