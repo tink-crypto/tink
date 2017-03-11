@@ -42,7 +42,7 @@ import org.junit.runners.JUnit4;
  * Tests for {@code KmsEnvelopeAead} and {@code KmsEnvelopeAeadKeyManager}.
  */
 @RunWith(JUnit4.class)
-public class KmsEnvelopeAeadKeyTest {
+public class KmsEnvelopeAeadKeyManagerTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {

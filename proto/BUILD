@@ -137,6 +137,26 @@ java_proto_library(
     with_grpc = False,
 )
 
+# aes_eax
+
+cc_proto_library(
+    name = "cc_aes_eax",
+    protos = [
+        "aes_eax.proto",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+java_proto_library(
+    name = "java_aes_eax",
+    protos = [
+        "aes_eax.proto",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
 # googlecloudkms
 
 cc_proto_library(

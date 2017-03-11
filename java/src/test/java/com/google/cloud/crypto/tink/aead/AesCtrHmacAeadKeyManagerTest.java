@@ -30,7 +30,7 @@ import org.junit.runners.JUnit4;
  * Tests for AesCtrHmacAead and its key manager.
  */
 @RunWith(JUnit4.class)
-public class AesCtrHmacAeadKeyTest {
+public class AesCtrHmacAeadKeyManagerTest {
   private static final int AES_KEY_SIZE = 16;
   private static final int HMAC_KEY_SIZE = 20;
 

@@ -26,6 +26,8 @@ import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKeyFormat;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrParams;
+import com.google.cloud.crypto.tink.AesEaxProto.AesEaxKey;
+import com.google.cloud.crypto.tink.AesEaxProto.AesEaxParams;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
@@ -311,6 +313,16 @@ public class TestUtil {
   public static AesGcmKey createAesGcmKey(byte[] keyValue) throws Exception {
     return AesGcmKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(keyValue))
+        .build();
+  }
+
+  /**
+   * @return a {@code AesEaxKey}.
+   */
+  public static AesEaxKey createAesEaxKey(byte[] keyValue, int ivSizeInBytes) throws Exception {
+    return AesEaxKey.newBuilder()
+        .setKeyValue(ByteString.copyFrom(keyValue))
+        .setParams(AesEaxParams.newBuilder().setIvSize(ivSizeInBytes).build())
         .build();
   }
 

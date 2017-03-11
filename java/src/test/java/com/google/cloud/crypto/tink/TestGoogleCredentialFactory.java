@@ -89,12 +89,14 @@ public class TestGoogleCredentialFactory implements GoogleCredentialFactory {
         + "IYBLXRxQ6kzoWDGx+ZpuZQ==\\n"
         + "-----END PRIVATE KEY-----\\n"
         + "\",\n"
-        + "\"client_email\": \"tink-unit-tests@testing-cloud-kms-159306.iam.gserviceaccount.com\",\n"
+        + "\"client_email\": "
+        + "\"tink-unit-tests@testing-cloud-kms-159306.iam.gserviceaccount.com\",\n"
         + "\"client_id\": \"109010856886823037140\",\n"
         + "\"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n"
         + "\"token_uri\": \"https://accounts.google.com/o/oauth2/token\",\n"
         + "\"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n"
-        + "\"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/tink-unit-tests%40testing-cloud-kms-159306.iam.gserviceaccount.com\"\n"
+        + "\"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/"
+        + "tink-unit-tests%40testing-cloud-kms-159306.iam.gserviceaccount.com\"\n"
         + "}";
     return GoogleCredential.fromStream(
         new ByteArrayInputStream(serviceAccount.getBytes(StandardCharsets.UTF_8)));

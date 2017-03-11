@@ -66,6 +66,9 @@ public final class AeadFactory {
     Registry.INSTANCE.registerKeyManager(
         "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey",
         new AesGcmKeyManager());
+    Registry.INSTANCE.registerKeyManager(
+        "type.googleapis.com/google.cloud.crypto.tink.AesEaxKey",
+        new AesEaxKeyManager());
   }
 
   /**

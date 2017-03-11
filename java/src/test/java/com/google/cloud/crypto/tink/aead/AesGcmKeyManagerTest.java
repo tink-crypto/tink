@@ -30,6 +30,7 @@ import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -38,7 +39,7 @@ import org.junit.runners.JUnit4;
  * Test for AesGcmJce and its key manager.
  */
 @RunWith(JUnit4.class)
-public class AesGcmKeyTest {
+public class AesGcmKeyManagerTest {
   private static final int AES_KEY_SIZE = 16;
 
   private static class NistTestVector {
@@ -316,6 +317,11 @@ public class AesGcmKeyTest {
           "a44a8266ee1c8eb0c8b5d4cf5ae9f19a"),
   };
 
+  @Before
+  public void setUp() throws GeneralSecurityException {
+    AeadFactory.registerStandardKeyTypes();
+  }
+
   @Test
   public void testNistVectors() throws Exception {
     for (NistTestVector t : nistTestVectors) {
@@ -352,7 +358,6 @@ public class AesGcmKeyTest {
 
   @Test
   public void testBasic() throws Exception {
-    AeadFactory.registerStandardKeyTypes();
     byte[] keyValue = Random.randBytes(AES_KEY_SIZE);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(

@@ -30,10 +30,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for GoogleCloudKmsAead and its key manager
+ * Tests for GoogleCloudKmsAead and its key manager.
  */
 @RunWith(JUnit4.class)
-public class GoogleCloudKmsAeadKeyTest {
+public class GoogleCloudKmsAeadKeyManagerTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {
