@@ -18,6 +18,7 @@ package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.protobuf.Any;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**

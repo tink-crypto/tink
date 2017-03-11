@@ -37,7 +37,8 @@ class EciesAeadHkdfPrivateKeyManager implements KeyManager<HybridDecrypt> {
   @Override
   public HybridDecrypt getPrimitive(Any proto) throws GeneralSecurityException {
     try {
-      EciesAeadHkdfPrivateKey recipientKeyProto = proto.unpack(EciesAeadHkdfPrivateKey.class);
+      EciesAeadHkdfPrivateKey recipientKeyProto = EciesAeadHkdfPrivateKey.parseFrom(
+          proto.getValue());
       validate(recipientKeyProto);
       EciesHkdfKemParams kemParams = recipientKeyProto.getPublicKey().getParams().getKemParams();
 

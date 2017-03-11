@@ -21,6 +21,7 @@ import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.AesGcmJce;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
@@ -38,7 +39,7 @@ class AesGcmKeyManager implements KeyManager<Aead> {
   @Override
   public Aead getPrimitive(Any proto) throws GeneralSecurityException {
     try {
-      AesGcmKey keyProto = proto.unpack(AesGcmKey.class);
+      AesGcmKey keyProto = AesGcmKey.parseFrom(proto.getValue());
       validate(keyProto);
       return new AesGcmJce(keyProto.getKeyValue().toByteArray());
     } catch (InvalidProtocolBufferException e) {
@@ -49,10 +50,9 @@ class AesGcmKeyManager implements KeyManager<Aead> {
   @Override
   public Any newKey(KeyFormat keyFormat) throws GeneralSecurityException {
     try {
-      AesGcmKeyFormat format = keyFormat.getFormat().unpack(
-          AesGcmKeyFormat.class);
+      AesGcmKeyFormat format = AesGcmKeyFormat.parseFrom(keyFormat.getFormat().getValue());
       validate(format);
-      return Any.pack(AesGcmKey.newBuilder()
+      return Util.pack(KEY_TYPE, AesGcmKey.newBuilder()
           .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
           .setParams(format.getParams())
           .setVersion(VERSION)

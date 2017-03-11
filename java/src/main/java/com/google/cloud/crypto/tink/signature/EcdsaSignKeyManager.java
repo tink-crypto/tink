@@ -54,7 +54,7 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
   public PublicKeySign getPrimitive(Any proto) throws GeneralSecurityException {
     EcdsaPrivateKey privKeyProto;
     try {
-      privKeyProto = proto.unpack(EcdsaPrivateKey.class);
+      privKeyProto = EcdsaPrivateKey.parseFrom(proto.getValue());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Invalid Ecdsa private key");
     }
@@ -70,7 +70,7 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
   public Any newKey(KeyFormat format) throws GeneralSecurityException {
     EcdsaKeyFormat ecdsaKeyFormat;
     try {
-      ecdsaKeyFormat = format.getFormat().unpack(EcdsaKeyFormat.class);
+      ecdsaKeyFormat = EcdsaKeyFormat.parseFrom(format.getFormat().getValue());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Invalid Ecdsa key format");
     }
@@ -99,7 +99,7 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
         .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
         .build();
 
-    return Any.pack(ecdsaPrivKey);
+    return Util.pack(ECDSA_PRIVATE_KEY_TYPE, ecdsaPrivKey);
   }
 
   @Override

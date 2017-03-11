@@ -22,6 +22,7 @@ import com.google.cloud.crypto.tink.AesCtrProto.AesCtrParams;
 
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.cloud.crypto.tink.subtle.IndCpaCipher;
 import com.google.cloud.crypto.tink.subtle.Random;
@@ -49,7 +50,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   @Override
   public AesCtrJceCipher getPrimitive(Any proto) throws GeneralSecurityException {
     try {
-      AesCtrKey keyProto = proto.unpack(AesCtrKey.class);
+      AesCtrKey keyProto = AesCtrKey.parseFrom(proto.getValue());
       validate(keyProto);
       return new AesCtrJceCipher(keyProto.getKeyValue().toByteArray(),
           keyProto.getParams().getIvSize());
@@ -61,9 +62,9 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   @Override
   public Any newKey(KeyFormat keyFormat) throws GeneralSecurityException {
     try {
-      AesCtrKeyFormat format = keyFormat.getFormat().unpack(AesCtrKeyFormat.class);
+      AesCtrKeyFormat format = AesCtrKeyFormat.parseFrom(keyFormat.getFormat().getValue());
       validate(format);
-      return Any.pack(AesCtrKey.newBuilder()
+      return Util.pack(AES_CTR_KEY_TYPE, AesCtrKey.newBuilder()
           .setParams(format.getParams())
           .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
           .setVersion(VERSION)

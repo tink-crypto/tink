@@ -25,6 +25,7 @@ import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.Util;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -35,6 +36,12 @@ import java.util.Arrays;
  * Helper generating {@code Aead}-instances for specified {@code KeyFormat} and key material.
  */
 final class EciesAeadHkdfAeadFactory {
+  private static final String AES_GCM_KEY_TYPE =
+      "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
+
+  private static final String AES_CTR_HMAC_AEAD_KEY_TYPE =
+      "type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey";
+
   private enum DemKeyType {
     AES_GCM_KEY,
     AES_CTR_HMAC_AEAD_KEY
@@ -52,22 +59,22 @@ final class EciesAeadHkdfAeadFactory {
 
   public EciesAeadHkdfAeadFactory(KeyFormat demFormat) throws GeneralSecurityException {
     String keyType = demFormat.getKeyType();
-    if (keyType.equals("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")) {
+    if (keyType.equals(AES_GCM_KEY_TYPE)) {
       try {
-        AesGcmKeyFormat gcmKeyFormat = demFormat.getFormat().unpack(AesGcmKeyFormat.class);
+        AesGcmKeyFormat gcmKeyFormat = AesGcmKeyFormat.parseFrom(demFormat.getFormat().getValue());
         this.demKeyType = DemKeyType.AES_GCM_KEY;
-        this.aesGcmKey = Registry.INSTANCE.newKey(demFormat).unpack(AesGcmKey.class);
+        this.aesGcmKey = AesGcmKey.parseFrom(Registry.INSTANCE.newKey(demFormat).getValue());
         this.symmetricKeySize = gcmKeyFormat.getKeySize();
       } catch (InvalidProtocolBufferException e) {
         throw new GeneralSecurityException("Invalid KeyFormat protobuf, expected AesGcmKeyFormat.");
       }
-    } else if (keyType.equals("type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey")) {
+    } else if (keyType.equals(AES_CTR_HMAC_AEAD_KEY_TYPE)) {
       try {
-        AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat =
-            demFormat.getFormat().unpack(AesCtrHmacAeadKeyFormat.class);
+        AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(
+            demFormat.getFormat().getValue());
         this.demKeyType = DemKeyType.AES_CTR_HMAC_AEAD_KEY;
-        this.aesCtrHmacAeadKey =
-            Registry.INSTANCE.newKey(demFormat).unpack(AesCtrHmacAeadKey.class);
+        this.aesCtrHmacAeadKey = AesCtrHmacAeadKey.parseFrom(
+            Registry.INSTANCE.newKey(demFormat).getValue());
         this.aesCtrKeySize = aesCtrHmacAeadKeyFormat.getAesCtrKeyFormat().getKeySize();
         int hmacKeySize = aesCtrHmacAeadKeyFormat.getHmacKeyFormat().getKeySize();
         this.symmetricKeySize = aesCtrKeySize + hmacKeySize;
@@ -85,7 +92,7 @@ final class EciesAeadHkdfAeadFactory {
 
   public Aead getAead(final byte[] symmetricKeyValue) throws GeneralSecurityException {
     if (demKeyType == DemKeyType.AES_GCM_KEY) {
-      Any aeadKey = Any.pack(
+      Any aeadKey = Util.pack(AES_GCM_KEY_TYPE,
           AesGcmKey.newBuilder()
           .mergeFrom(aesGcmKey)
           .setKeyValue(ByteString.copyFrom(symmetricKeyValue)).build());
@@ -99,7 +106,7 @@ final class EciesAeadHkdfAeadFactory {
       HmacKey hmacKey = HmacKey.newBuilder()
           .mergeFrom(aesCtrHmacAeadKey.getHmacKey())
           .setKeyValue(ByteString.copyFrom(hmacKeyValue)).build();
-      Any aeadKey = Any.pack(AesCtrHmacAeadKey.newBuilder()
+      Any aeadKey = Util.pack(AES_CTR_HMAC_AEAD_KEY_TYPE, AesCtrHmacAeadKey.newBuilder()
           .setVersion(aesCtrHmacAeadKey.getVersion())
           .setAesCtrKey(aesCtrKey)
           .setHmacKey(hmacKey).build());

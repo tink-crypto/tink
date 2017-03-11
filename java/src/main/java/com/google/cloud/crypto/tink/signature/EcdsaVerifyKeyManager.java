@@ -41,7 +41,7 @@ final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   public PublicKeyVerify getPrimitive(Any proto) throws GeneralSecurityException {
     EcdsaPublicKey pubKey;
     try {
-      pubKey = proto.unpack(EcdsaPublicKey.class);
+      pubKey = EcdsaPublicKey.parseFrom(proto.getValue());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException(e);
     }

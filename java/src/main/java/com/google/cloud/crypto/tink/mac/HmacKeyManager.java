@@ -23,6 +23,7 @@ import com.google.cloud.crypto.tink.HmacProto.HmacParams;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.MacJce;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
@@ -56,7 +57,7 @@ final class HmacKeyManager implements KeyManager<Mac> {
   @Override
   public Mac getPrimitive(Any proto) throws GeneralSecurityException {
     try {
-      HmacKey hmac = proto.unpack(HmacKey.class);
+      HmacKey hmac = HmacKey.parseFrom(proto.getValue());
       validate(hmac);
       HashType hash = hmac.getParams().getHash();
       byte[] keyValue = hmac.getKeyValue().toByteArray();
@@ -76,13 +77,14 @@ final class HmacKeyManager implements KeyManager<Mac> {
   @Override
   public Any newKey(KeyFormat keyFormat) throws GeneralSecurityException {
     try {
-      HmacKeyFormat format = keyFormat.getFormat().unpack(HmacKeyFormat.class);
+      HmacKeyFormat format = HmacKeyFormat.parseFrom(keyFormat.getFormat().getValue());
       validate(format);
-      return Any.pack(HmacKey.newBuilder()
+      HmacKey key = HmacKey.newBuilder()
           .setVersion(VERSION)
           .setParams(format.getParams())
           .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-          .build());
+          .build();
+      return Util.pack(TYPE_URL, key);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("cannot generate Hmac key");
     }

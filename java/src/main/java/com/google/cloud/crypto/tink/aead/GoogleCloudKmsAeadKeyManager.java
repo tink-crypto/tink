@@ -52,7 +52,7 @@ public class GoogleCloudKmsAeadKeyManager implements KeyManager<Aead> {
   @Override
   public Aead getPrimitive(Any proto) throws GeneralSecurityException {
     try {
-      GoogleCloudKmsAeadKey key = proto.unpack(GoogleCloudKmsAeadKey.class);
+      GoogleCloudKmsAeadKey key = GoogleCloudKmsAeadKey.parseFrom(proto.getValue());
       validate(key);
       return new GoogleCloudKmsAead(createCloudKmsClient(key), key.getKmsKeyUri());
     } catch (IOException e) {

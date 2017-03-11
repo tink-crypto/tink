@@ -22,6 +22,11 @@ import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.MessageLite;
+import com.google.protobuf.Parser;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -39,6 +44,15 @@ import java.util.Arrays;
  * Various helpers.
  */
 public class Util {
+  /**
+   * Packs a protobuf into an {@code Any} message.
+   */
+  public static <T extends MessageLite> Any pack(String typeUrl, T proto) {
+    return Any.newBuilder()
+        .setTypeUrl(typeUrl)
+        .setValue(ByteString.copyFrom(proto.toByteArray()))
+        .build();
+  }
   /**
    * @return a KeysetInfo-proto from a {@code keyset} protobuf.
    */
