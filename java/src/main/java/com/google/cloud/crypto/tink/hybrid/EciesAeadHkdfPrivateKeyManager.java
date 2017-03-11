@@ -16,7 +16,10 @@
 
 package com.google.cloud.crypto.tink.hybrid;
 
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfKeyFormat;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
 import com.google.cloud.crypto.tink.HybridDecrypt;
 import com.google.cloud.crypto.tink.KeyManager;
@@ -24,9 +27,13 @@ import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECPoint;
 
 class EciesAeadHkdfPrivateKeyManager implements KeyManager<HybridDecrypt> {
   private static final int VERSION = 0;
@@ -56,7 +63,36 @@ class EciesAeadHkdfPrivateKeyManager implements KeyManager<HybridDecrypt> {
 
   @Override
   public Any newKey(KeyFormat keyFormat) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented.");
+    EciesAeadHkdfKeyFormat eciesKeyFormat;
+    try {
+      eciesKeyFormat = EciesAeadHkdfKeyFormat.parseFrom(keyFormat.getFormat().getValue());
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("Invalid EciesAeadHkdf key format");
+    }
+    HybridUtil.validate(eciesKeyFormat.getParams());
+
+    EciesHkdfKemParams kemParams = eciesKeyFormat.getParams().getKemParams();
+    KeyPair keyPair = Util.generateKeyPair(kemParams.getCurveType());
+    ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
+    ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
+    ECPoint w = pubKey.getW();
+
+    // Creates EciesAeadHkdfPublicKey.
+    EciesAeadHkdfPublicKey eciesPublicKey = EciesAeadHkdfPublicKey.newBuilder()
+        .setVersion(VERSION)
+        .setParams(eciesKeyFormat.getParams())
+        .setX(ByteString.copyFrom(w.getAffineX().toByteArray()))
+        .setY(ByteString.copyFrom(w.getAffineY().toByteArray()))
+        .build();
+
+    //Creates EciesAeadHkdfPrivateKey.
+    EciesAeadHkdfPrivateKey eciesPrivateKey = EciesAeadHkdfPrivateKey.newBuilder()
+        .setVersion(VERSION)
+        .setPublicKey(eciesPublicKey)
+        .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
+        .build();
+
+    return Util.pack(ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE, eciesPrivateKey);
   }
 
   @Override
@@ -64,9 +100,9 @@ class EciesAeadHkdfPrivateKeyManager implements KeyManager<HybridDecrypt> {
     return ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE.equals(typeUrl);
   }
 
-  private void validate(EciesAeadHkdfPrivateKey key) throws GeneralSecurityException {
+  private void validate(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {
     // TODO(przydatek): add more checks.
-    SubtleUtil.validateVersion(key.getVersion(), VERSION);
+    SubtleUtil.validateVersion(keyProto.getVersion(), VERSION);
+    HybridUtil.validate(keyProto.getPublicKey().getParams());
   }
-
 }

@@ -544,12 +544,11 @@ public class TestUtil {
   }
 
   /**
-   *  @return a {@code EciesAeadHkdfPublicKey} with the specified key material and parameters.
+   *  @return a {@code EciesAeadHkdfParams} with the specified parameters.
    */
-  public static EciesAeadHkdfPublicKey createEciesAeadHkdfPubKey(EllipticCurveType curve,
+  public static EciesAeadHkdfParams createEciesAeadHkdfParams(EllipticCurveType curve,
       HashType hashType, EcPointFormat ecPointFormat, KeyFormat demKeyFormat,
-      byte[] pubX, byte[] pubY, byte[] salt) throws Exception {
-    final int version = 0;
+      byte[] salt) throws Exception {
     EciesHkdfKemParams kemParams = EciesHkdfKemParams.newBuilder()
         .setCurveType(curve)
         .setHkdfHashType(hashType)
@@ -558,11 +557,22 @@ public class TestUtil {
     EciesAeadDemParams demParams = EciesAeadDemParams.newBuilder()
         .setAeadDem(demKeyFormat)
         .build();
-    EciesAeadHkdfParams params = EciesAeadHkdfParams.newBuilder()
+    return EciesAeadHkdfParams.newBuilder()
         .setKemParams(kemParams)
         .setDemParams(demParams)
         .setEcPointFormat(ecPointFormat)
         .build();
+  }
+
+  /**
+   *  @return a {@code EciesAeadHkdfPublicKey} with the specified key material and parameters.
+   */
+  public static EciesAeadHkdfPublicKey createEciesAeadHkdfPubKey(EllipticCurveType curve,
+      HashType hashType, EcPointFormat ecPointFormat, KeyFormat demKeyFormat,
+      byte[] pubX, byte[] pubY, byte[] salt) throws Exception {
+    final int version = 0;
+    EciesAeadHkdfParams params = createEciesAeadHkdfParams(curve, hashType, ecPointFormat,
+        demKeyFormat, salt);
     return EciesAeadHkdfPublicKey.newBuilder()
         .setVersion(version)
         .setParams(params)

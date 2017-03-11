@@ -17,10 +17,13 @@
 package com.google.cloud.crypto.tink.hybrid;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfKeyFormat;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
 import com.google.cloud.crypto.tink.HybridDecrypt;
 import com.google.cloud.crypto.tink.HybridEncrypt;
@@ -31,16 +34,17 @@ import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
+import com.google.protobuf.Any;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for HybridEncryptFactory.
+ * Tests for EciesAeadHkdfPrivateKeyManager.
  */
 @RunWith(JUnit4.class)
-public class HybridEncryptFactoryTest {
+public class EciesAeadHkdfPrivateKeyManagerTest {
   private static final int AES_KEY_SIZE = 16;
   private static final int HMAC_KEY_SIZE = 20;
 
@@ -51,65 +55,41 @@ public class HybridEncryptFactoryTest {
   }
 
   @Test
-  public void testBasicEncryption() throws Exception {
+  public void testNewKey() throws Exception {
     int ivSize = 12;
     int tagSize = 16;
     EllipticCurveType curve = EllipticCurveType.NIST_P384;
     HashType hashType = HashType.SHA256;
-    EcPointFormat primaryPointFormat = EcPointFormat.UNCOMPRESSED;
-    EcPointFormat rawPointFormat = EcPointFormat.COMPRESSED;
-    KeyFormat primaryDemKeyFormat = TestUtil.createAesCtrHmacAeadKeyFormat(AES_KEY_SIZE, ivSize,
+    EcPointFormat pointFormat = EcPointFormat.UNCOMPRESSED;
+    KeyFormat demKeyFormat = TestUtil.createAesCtrHmacAeadKeyFormat(AES_KEY_SIZE, ivSize,
         HMAC_KEY_SIZE, tagSize);
-    KeyFormat rawDemKeyFormat = TestUtil.createAesGcmKeyFormat(AES_KEY_SIZE);
-    byte[] primarySalt = "some salt".getBytes("UTF-8");
-    byte[] rawSalt = "other salt".getBytes("UTF-8");
-    byte[] legacySalt = "yet another salt".getBytes("UTF-8");
+    byte[] salt = "some salt".getBytes("UTF-8");
+    EciesAeadHkdfParams params = TestUtil.createEciesAeadHkdfParams(curve, hashType, pointFormat,
+        demKeyFormat, salt);
+    KeyFormat keyFormat = KeyFormat.newBuilder()
+        .setKeyType("type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey")
+        .setFormat(Any.pack(EciesAeadHkdfKeyFormat.newBuilder().setParams(params).build()))
+        .build();
 
-    EciesAeadHkdfPrivateKey primaryPrivProto = TestUtil.generateEciesAeadHkdfPrivKey(curve,
-        hashType, primaryPointFormat, primaryDemKeyFormat, primarySalt);
+    EciesAeadHkdfPrivateKeyManager manager = new EciesAeadHkdfPrivateKeyManager();
+    EciesAeadHkdfPrivateKey keyProto = EciesAeadHkdfPrivateKey.parseFrom(
+        manager.newKey(keyFormat).getValue());
+    assertEquals(params, keyProto.getPublicKey().getParams());
 
     Key primaryPriv = TestUtil.createKey(
-        primaryPrivProto,
+        keyProto,
         8,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key primaryPub = TestUtil.createKey(
-        primaryPrivProto.getPublicKey(),
+        keyProto.getPublicKey(),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
-
-    EciesAeadHkdfPrivateKey rawPrivProto = TestUtil.generateEciesAeadHkdfPrivKey(curve,
-        hashType, rawPointFormat, rawDemKeyFormat, rawSalt);
-
-    Key rawPriv = TestUtil.createKey(
-        rawPrivProto,
-        11,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.RAW);
-    Key rawPub = TestUtil.createKey(
-        rawPrivProto.getPublicKey(),
-        43,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.RAW);
-
-    EciesAeadHkdfPrivateKey legacyPrivProto = TestUtil.generateEciesAeadHkdfPrivKey(curve,
-        hashType, primaryPointFormat, rawDemKeyFormat, legacySalt);
-
-    Key legacyPriv = TestUtil.createKey(
-        legacyPrivProto,
-        23,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.LEGACY);
-    Key legacyPub = TestUtil.createKey(
-        legacyPrivProto.getPublicKey(),
-        44,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.LEGACY);
     KeysetHandle keysetHandlePub = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primaryPub, rawPub, legacyPub));
+        TestUtil.createKeyset(primaryPub));
     KeysetHandle keysetHandlePriv = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primaryPriv, rawPriv, legacyPriv));
+        TestUtil.createKeyset(primaryPriv));
     HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(keysetHandlePub);
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandlePriv);
     byte[] plaintext = Random.randBytes(20);

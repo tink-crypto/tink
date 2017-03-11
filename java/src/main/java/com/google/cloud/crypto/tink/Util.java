@@ -28,6 +28,8 @@ import com.google.protobuf.MessageLite;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -252,5 +254,15 @@ public class Util {
       default:
         throw new NoSuchAlgorithmException("Hash unsupported for HMAC: " + hash);
     }
+  }
+
+  /**
+   * Generates a new key pair for {@code curve}.
+   */
+  public static KeyPair generateKeyPair(EllipticCurveType curve) throws GeneralSecurityException {
+    ECParameterSpec ecParams = getCurveSpec(curve);
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+    keyGen.initialize(ecParams);
+    return keyGen.generateKeyPair();
   }
 }

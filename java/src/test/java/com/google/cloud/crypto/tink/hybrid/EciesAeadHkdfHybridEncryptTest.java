@@ -62,7 +62,7 @@ public class EciesAeadHkdfHybridEncryptTest {
     KeyPair recipientKey = keyGen.generateKeyPair();
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
-    byte[] salt = "some salt".getBytes();
+    byte[] salt = "some salt".getBytes("UTF-8");
     String hmacAlgo = "HmacSha256";
 
     KeyFormat keyFormat = KeyFormat.newBuilder()
@@ -74,8 +74,9 @@ public class EciesAeadHkdfHybridEncryptTest {
     HybridDecrypt hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey, salt,
         hmacAlgo, keyFormat, EcPointFormat.UNCOMPRESSED);
 
-    byte[] ciphertext = hybridEncrypt.encrypt(PLAINTEXT.getBytes(), CONTEXT.getBytes());
-    byte[] decrypted = hybridDecrypt.decrypt(ciphertext, CONTEXT.getBytes());
+    byte[] ciphertext = hybridEncrypt.encrypt(PLAINTEXT.getBytes("UTF-8"),
+        CONTEXT.getBytes("UTF-8"));
+    byte[] decrypted = hybridDecrypt.decrypt(ciphertext, CONTEXT.getBytes("UTF-8"));
 
     assertFalse(PLAINTEXT.equals(new String(ciphertext)));
     assertEquals(PLAINTEXT, new String(decrypted));

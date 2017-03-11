@@ -31,10 +31,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 
 final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
@@ -76,10 +74,7 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
     }
     EcdsaParams ecdsaParams = ecdsaKeyFormat.getParams();
     SigUtil.validateEcdsaParams(ecdsaParams);
-    ECParameterSpec ecParams = Util.getCurveSpec(ecdsaParams.getCurve());
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
-    keyGen.initialize(ecParams);
-    KeyPair keyPair = keyGen.generateKeyPair();
+    KeyPair keyPair = Util.generateKeyPair(ecdsaParams.getCurve());
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
     ECPoint w = pubKey.getW();

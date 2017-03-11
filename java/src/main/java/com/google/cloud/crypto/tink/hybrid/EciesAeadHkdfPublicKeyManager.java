@@ -66,6 +66,7 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   private void validate(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {
     // TODO(przydatek): add more checks.
     SubtleUtil.validateVersion(key.getVersion(), VERSION);
+    HybridUtil.validate(key.getParams());
   }
 
 }
