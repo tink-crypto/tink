@@ -18,7 +18,6 @@ package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
-import com.google.protobuf.TextFormat;
 
 /**
  * KeysetHandle provides abstracted access to Keysets, to limit the exposure
@@ -82,6 +81,6 @@ public final class KeysetHandle {
    */
   @Override
   public String toString() {
-    return TextFormat.printToUnicodeString(getKeysetInfo());
+    return getKeysetInfo().toString();
   }
 }
