@@ -34,7 +34,6 @@ import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
-import com.google.protobuf.Any;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,14 +65,10 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     byte[] salt = "some salt".getBytes("UTF-8");
     EciesAeadHkdfParams params = TestUtil.createEciesAeadHkdfParams(curve, hashType, pointFormat,
         demKeyFormat, salt);
-    KeyFormat keyFormat = KeyFormat.newBuilder()
-        .setKeyType("type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey")
-        .setFormat(Any.pack(EciesAeadHkdfKeyFormat.newBuilder().setParams(params).build()))
-        .build();
 
     EciesAeadHkdfPrivateKeyManager manager = new EciesAeadHkdfPrivateKeyManager();
-    EciesAeadHkdfPrivateKey keyProto = EciesAeadHkdfPrivateKey.parseFrom(
-        manager.newKey(keyFormat).getValue());
+    EciesAeadHkdfPrivateKey keyProto = manager.newKey(
+        EciesAeadHkdfKeyFormat.newBuilder().setParams(params).build());
     assertEquals(params, keyProto.getPublicKey().getParams());
 
     Key primaryPriv = TestUtil.createKey(

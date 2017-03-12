@@ -24,11 +24,11 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudkms.v1beta1.CloudKMS;
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
+import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKeyFormat;
 import com.google.cloud.crypto.tink.KeyManager;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.GoogleCloudKmsAead;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -37,7 +37,8 @@ import java.security.GeneralSecurityException;
  * Currently it doesn't support key generation. To use it one must
  * provide an implementation of {@code GoogleCredentialFactory}.
  */
-public class GoogleCloudKmsAeadKeyManager implements KeyManager<Aead> {
+public class GoogleCloudKmsAeadKeyManager
+    implements KeyManager<Aead, GoogleCloudKmsAeadKey, GoogleCloudKmsAeadKeyFormat> {
   private static final int VERSION = 0;
 
   private static final String KEY_TYPE =
@@ -50,18 +51,33 @@ public class GoogleCloudKmsAeadKeyManager implements KeyManager<Aead> {
   }
 
   @Override
-  public Aead getPrimitive(Any proto) throws GeneralSecurityException {
+  public Aead getPrimitive(byte[] serialized) throws GeneralSecurityException {
     try {
-      GoogleCloudKmsAeadKey key = GoogleCloudKmsAeadKey.parseFrom(proto.getValue());
-      validate(key);
-      return new GoogleCloudKmsAead(createCloudKmsClient(key), key.getKmsKeyUri());
-    } catch (IOException e) {
-      throw new GeneralSecurityException(e);
+      GoogleCloudKmsAeadKey keyProto = GoogleCloudKmsAeadKey.parseFrom(serialized);
+      return getPrimitive(keyProto);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("invalid GoogleCloudKmsAead key");
     }
   }
 
   @Override
-  public Any newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+  public Aead getPrimitive(GoogleCloudKmsAeadKey keyProto) throws GeneralSecurityException {
+    try {
+      validate(keyProto);
+      return new GoogleCloudKmsAead(createCloudKmsClient(keyProto), keyProto.getKmsKeyUri());
+    } catch (IOException e) {
+      throw new GeneralSecurityException("invalid GoogleCloudKmsAead key");
+    }
+  }
+
+  @Override
+  public GoogleCloudKmsAeadKey newKey(byte[] serialized) throws GeneralSecurityException {
+    throw new GeneralSecurityException("Not Implemented");
+  }
+
+  @Override
+  public GoogleCloudKmsAeadKey newKey(GoogleCloudKmsAeadKeyFormat format)
+      throws GeneralSecurityException {
     throw new GeneralSecurityException("Not Implemented");
   }
 

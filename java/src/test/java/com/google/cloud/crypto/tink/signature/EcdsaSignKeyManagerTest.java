@@ -28,10 +28,8 @@ import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TestUtil;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.Random;
-import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -78,13 +76,11 @@ public class EcdsaSignKeyManagerTest {
       EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder()
           .setParams(ecdsaParams)
           .build();
-      KeyFormat keyFormat = KeyFormat.newBuilder().setFormat(Any.pack(ecdsaFormat)).build();
-      Any privKey = signManager.newKey(keyFormat);
+      EcdsaPrivateKey privKey = signManager.newKey(ecdsaFormat);
       PublicKeySign signer = signManager.getPrimitive(privKey);
       byte[] signature = signer.sign(msg);
       EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
-      PublicKeyVerify verifier = verifyManager.getPrimitive(
-          Any.pack(privKey.unpack(EcdsaPrivateKey.class).getPublicKey()));
+      PublicKeyVerify verifier = verifyManager.getPrimitive(privKey.getPublicKey());
       try {
         verifier.verify(signature, msg);
       } catch (GeneralSecurityException e) {
@@ -93,7 +89,7 @@ public class EcdsaSignKeyManagerTest {
 
       // Creates another signer and checks that the signature can not be verified with a different
       // verifier.
-      Any privKey1 = signManager.newKey(keyFormat);
+      EcdsaPrivateKey privKey1 = signManager.newKey(ecdsaFormat);
       PublicKeySign signer1 = signManager.getPrimitive(privKey1);
       byte[] signature1 = signer1.sign(msg);
       try {
@@ -116,9 +112,8 @@ public class EcdsaSignKeyManagerTest {
     EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder()
         .setParams(ecdsaParams)
         .build();
-    KeyFormat keyFormat = KeyFormat.newBuilder().setFormat(Any.pack(ecdsaFormat)).build();
     try {
-      signManager.newKey(keyFormat);
+      signManager.newKey(ecdsaFormat);
       fail("Unsupported encoding, should have thrown exception");
     } catch (GeneralSecurityException expecpted) {
       // Raw encoding is not supported yet.
@@ -147,9 +142,8 @@ public class EcdsaSignKeyManagerTest {
       EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder()
           .setParams(ecdsaParams)
           .build();
-      KeyFormat keyFormat = KeyFormat.newBuilder().setFormat(Any.pack(ecdsaFormat)).build();
       try {
-        Any unusedPrivKey = signManager.newKey(keyFormat);
+        EcdsaPrivateKey unusedPrivKey = signManager.newKey(ecdsaFormat);
         fail("Unsupported key format, should have thrown exception: " + hashType + " "
             + curveType);
       } catch (GeneralSecurityException expected) {
@@ -180,9 +174,8 @@ public class EcdsaSignKeyManagerTest {
       EcdsaPrivateKey ecdsaPrivKey = TestUtil.createEcdsaPrivKey(ecdsaPubKey,
           privKey.getS().toByteArray());
       EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
-      PublicKeySign signer = signManager.getPrimitive(
-          Any.pack(ecdsaPrivKey));
-      PublicKeyVerify verifier = (new EcdsaVerifyKeyManager()).getPrimitive(Any.pack(ecdsaPubKey));
+      PublicKeySign signer = signManager.getPrimitive(ecdsaPrivKey);
+      PublicKeyVerify verifier = (new EcdsaVerifyKeyManager()).getPrimitive(ecdsaPubKey);
       try {
         verifier.verify(signer.sign(msg), msg);
       } catch (GeneralSecurityException e) {
@@ -219,8 +212,7 @@ public class EcdsaSignKeyManagerTest {
 
       EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
       try {
-        PublicKeySign unusedSigner = signManager.getPrimitive(
-            Any.pack(ecdsaPrivKey));
+        PublicKeySign unusedSigner = signManager.getPrimitive(ecdsaPrivKey);
         fail("Unsupported key, should have thrown exception: " + hashType + " "
             + curveType);
       } catch (GeneralSecurityException expected) {

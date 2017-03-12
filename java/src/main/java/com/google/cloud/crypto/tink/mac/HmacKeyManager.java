@@ -22,18 +22,15 @@ import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.Mac;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.MacJce;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
 
-final class HmacKeyManager implements KeyManager<Mac> {
+final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFormat> {
   /**
    * Type url that this manager does support.
    */
@@ -55,40 +52,50 @@ final class HmacKeyManager implements KeyManager<Mac> {
   private static final int MIN_TAG_SIZE_IN_BYTES = 10;
 
   @Override
-  public Mac getPrimitive(Any proto) throws GeneralSecurityException {
+  public Mac getPrimitive(byte[] serialized) throws GeneralSecurityException {
     try {
-      HmacKey hmac = HmacKey.parseFrom(proto.getValue());
-      validate(hmac);
-      HashType hash = hmac.getParams().getHash();
-      byte[] keyValue = hmac.getKeyValue().toByteArray();
-      SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
-      int tagSize = hmac.getParams().getTagSize();
-      switch (hash) {
-        case SHA1 : return new MacJce("HMACSHA1", keySpec, tagSize);
-        case SHA256 : return new MacJce("HMACSHA256", keySpec, tagSize);
-        case SHA512 : return new MacJce("HMACSHA512", keySpec, tagSize);
-        default: throw new GeneralSecurityException("Unknown hash");
-      }
+      HmacKey keyProto = HmacKey.parseFrom(serialized);
+      return getPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("invalid Hmac key");
     }
   }
 
   @Override
-  public Any newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+  public Mac getPrimitive(HmacKey keyProto) throws GeneralSecurityException {
+    validate(keyProto);
+    HashType hash = keyProto.getParams().getHash();
+    byte[] keyValue = keyProto.getKeyValue().toByteArray();
+    SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
+    int tagSize = keyProto.getParams().getTagSize();
+    switch (hash) {
+      case SHA1 : return new MacJce("HMACSHA1", keySpec, tagSize);
+      case SHA256 : return new MacJce("HMACSHA256", keySpec, tagSize);
+      case SHA512 : return new MacJce("HMACSHA512", keySpec, tagSize);
+      default: throw new GeneralSecurityException("Unknown hash");
+    }
+  }
+
+  @Override
+  public HmacKey newKey(byte[] serialized) throws GeneralSecurityException {
     try {
-      HmacKeyFormat format = HmacKeyFormat.parseFrom(keyFormat.getFormat().getValue());
-      validate(format);
-      HmacKey key = HmacKey.newBuilder()
-          .setVersion(VERSION)
-          .setParams(format.getParams())
-          .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-          .build();
-      return Util.pack(TYPE_URL, key);
+      HmacKeyFormat format = HmacKeyFormat.parseFrom(serialized);
+      return newKey(format);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("cannot generate Hmac key");
     }
   }
+
+  @Override
+  public HmacKey newKey(HmacKeyFormat format) throws GeneralSecurityException {
+    validate(format);
+    return HmacKey.newBuilder()
+        .setVersion(VERSION)
+        .setParams(format.getParams())
+        .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+        .build();
+  }
+
 
   @Override
   public boolean doesSupport(String typeUrl) {

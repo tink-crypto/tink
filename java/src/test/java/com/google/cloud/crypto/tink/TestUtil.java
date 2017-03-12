@@ -94,15 +94,23 @@ public class TestUtil {
   /**
    * A key manager for DummyMac keys.
    */
-  public static class DummyMacKeyManager implements KeyManager<Mac> {
+  public static class DummyMacKeyManager implements KeyManager<Mac, Message, Message> {
     public DummyMacKeyManager() {}
 
     @Override
-    public Mac getPrimitive(Any proto) throws GeneralSecurityException {
+    public Mac getPrimitive(byte[] serialized) throws GeneralSecurityException {
       return new DummyMac();
     }
     @Override
-    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+    public Mac getPrimitive(Message proto) throws GeneralSecurityException {
+      return new DummyMac();
+    }
+    @Override
+    public Message newKey(byte[] serialized) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public Message newKey(Message format) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -138,15 +146,23 @@ public class TestUtil {
   /**
    * A key manager for EchoAead keys that just echo plaintext.
    */
-  public static class EchoAeadKeyManager implements KeyManager<Aead> {
+  public static class EchoAeadKeyManager implements KeyManager<Aead, Message, Message> {
     public EchoAeadKeyManager() {}
 
     @Override
-    public Aead getPrimitive(Any proto) throws GeneralSecurityException {
+    public Aead getPrimitive(byte[] serialized) throws GeneralSecurityException {
       return new EchoAead();
     }
     @Override
-    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+    public Aead getPrimitive(Message proto) throws GeneralSecurityException {
+      return new EchoAead();
+    }
+    @Override
+    public Message newKey(byte[] serialized) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public Message newKey(Message format) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -183,15 +199,23 @@ public class TestUtil {
    * A key manager for FaultyAead keys that always return an empty byte array on all encrypt or
    * decrypt requests.
    */
-  public static class FaultyAeadKeyManager implements KeyManager<Aead> {
+  public static class FaultyAeadKeyManager implements KeyManager<Aead, Message, Message> {
     public FaultyAeadKeyManager() {}
 
     @Override
-    public Aead getPrimitive(Any proto) throws GeneralSecurityException {
+    public Aead getPrimitive(byte[] serialized) throws GeneralSecurityException {
       return new FaultyAead();
     }
     @Override
-    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+    public Aead getPrimitive(Message proto) throws GeneralSecurityException {
+      return new FaultyAead();
+    }
+    @Override
+    public Message newKey(byte[] serialized) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public Message newKey(Message format) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override

@@ -22,11 +22,9 @@ import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.PublicKeySign;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.EcdsaSignJce;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
@@ -35,7 +33,8 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 
-final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
+final class EcdsaSignKeyManager implements
+    KeyManager<PublicKeySign, EcdsaPrivateKey, EcdsaKeyFormat> {
   /**
    * Type url that this manager supports
    */
@@ -49,13 +48,17 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
   private static final int VERSION = 0;
 
   @Override
-  public PublicKeySign getPrimitive(Any proto) throws GeneralSecurityException {
-    EcdsaPrivateKey privKeyProto;
+  public PublicKeySign getPrimitive(byte[] serialized) throws GeneralSecurityException {
     try {
-      privKeyProto = EcdsaPrivateKey.parseFrom(proto.getValue());
+      EcdsaPrivateKey privKeyProto = EcdsaPrivateKey.parseFrom(serialized);
+      return getPrimitive(privKeyProto);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Invalid Ecdsa private key");
     }
+  }
+
+  @Override
+  public PublicKeySign getPrimitive(EcdsaPrivateKey privKeyProto) throws GeneralSecurityException {
     validateKey(privKeyProto);
     ECPrivateKey privateKey = Util.getEcPrivateKey(
         privKeyProto.getPublicKey().getParams().getCurve(),
@@ -65,13 +68,17 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
   }
 
   @Override
-  public Any newKey(KeyFormat format) throws GeneralSecurityException {
-    EcdsaKeyFormat ecdsaKeyFormat;
+  public EcdsaPrivateKey newKey(byte[] serialized) throws GeneralSecurityException {
     try {
-      ecdsaKeyFormat = EcdsaKeyFormat.parseFrom(format.getFormat().getValue());
+      EcdsaKeyFormat ecdsaKeyFormat = EcdsaKeyFormat.parseFrom(serialized);
+      return newKey(ecdsaKeyFormat);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Invalid Ecdsa key format");
     }
+  }
+
+  @Override
+  public EcdsaPrivateKey newKey(EcdsaKeyFormat ecdsaKeyFormat) throws GeneralSecurityException {
     EcdsaParams ecdsaParams = ecdsaKeyFormat.getParams();
     SigUtil.validateEcdsaParams(ecdsaParams);
     KeyPair keyPair = Util.generateKeyPair(ecdsaParams.getCurve());
@@ -88,13 +95,11 @@ final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
         .build();
 
     //Creates EcdsaPrivateKey.
-    EcdsaPrivateKey ecdsaPrivKey = EcdsaPrivateKey.newBuilder()
+    return EcdsaPrivateKey.newBuilder()
         .setVersion(VERSION)
         .setPublicKey(ecdsaPubKey)
         .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
         .build();
-
-    return Util.pack(ECDSA_PRIVATE_KEY_TYPE, ecdsaPrivKey);
   }
 
   @Override

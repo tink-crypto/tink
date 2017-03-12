@@ -20,27 +20,23 @@ import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
 import com.google.cloud.crypto.tink.KeyManager;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.AesGcmJce;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
-class AesGcmKeyManager implements KeyManager<Aead> {
+class AesGcmKeyManager implements KeyManager<Aead, AesGcmKey, AesGcmKeyFormat> {
   private static final int VERSION = 0;
 
   private static final String KEY_TYPE =
       "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
 
   @Override
-  public Aead getPrimitive(Any proto) throws GeneralSecurityException {
+  public Aead getPrimitive(byte[] serialized) throws GeneralSecurityException {
     try {
-      AesGcmKey keyProto = AesGcmKey.parseFrom(proto.getValue());
-      validate(keyProto);
+      AesGcmKey keyProto = AesGcmKey.parseFrom(serialized);
       return new AesGcmJce(keyProto.getKeyValue().toByteArray());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("invalid AesGcm key");
@@ -48,18 +44,29 @@ class AesGcmKeyManager implements KeyManager<Aead> {
   }
 
   @Override
-  public Any newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+  public Aead getPrimitive(AesGcmKey keyProto) throws GeneralSecurityException {
+    validate(keyProto);
+    return new AesGcmJce(keyProto.getKeyValue().toByteArray());
+  }
+
+  @Override
+  public AesGcmKey newKey(byte[] serialized) throws GeneralSecurityException {
     try {
-      AesGcmKeyFormat format = AesGcmKeyFormat.parseFrom(keyFormat.getFormat().getValue());
-      validate(format);
-      return Util.pack(KEY_TYPE, AesGcmKey.newBuilder()
-          .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-          .setParams(format.getParams())
-          .setVersion(VERSION)
-          .build());
+      AesGcmKeyFormat format = AesGcmKeyFormat.parseFrom(serialized);
+      return newKey(format);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("cannot generate AesGcm key");
     }
+  }
+
+  @Override
+  public AesGcmKey newKey(AesGcmKeyFormat format) throws GeneralSecurityException {
+    validate(format);
+    return AesGcmKey.newBuilder()
+        .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+        .setParams(format.getParams())
+        .setVersion(VERSION)
+        .build();
   }
 
   @Override

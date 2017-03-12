@@ -19,8 +19,6 @@ package com.google.cloud.crypto.tink.aead; // instead of subtle, because it depe
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -39,6 +37,7 @@ import java.util.concurrent.RejectedExecutionException;
  *   - AEAD payload: variable length.
  */
 class KmsEnvelopeAead implements Aead {
+  private static final byte[] EMPTY_AAD = new byte[0];
   private final KeyFormat dekFormat;
   private final Aead remote;
   private static final int LENGTH_ENCRYPTED_DEK = 4;
@@ -51,11 +50,11 @@ class KmsEnvelopeAead implements Aead {
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
     // Generate a new DEK.
-    Any dek = Registry.INSTANCE.newKey(dekFormat);
+    byte[] dek = Registry.INSTANCE.newKey(dekFormat).toByteArray();
     // Wrap it with remote.
-    byte[] encryptedDek = remote.encrypt(dek.toByteArray(), null /* aad */);
+    byte[] encryptedDek = remote.encrypt(dek, EMPTY_AAD);
     // Use DEK to encrypt plaintext.
-    Aead aead = Registry.INSTANCE.getPrimitive(dek);
+    Aead aead = Registry.INSTANCE.getPrimitive(dekFormat.getKeyType(), dek);
     byte[] payload = aead.encrypt(plaintext, aad);
     // Build ciphertext protobuf and return result.
     return buildCiphertext(encryptedDek, payload);
@@ -76,12 +75,11 @@ class KmsEnvelopeAead implements Aead {
       byte[] payload = new byte[buffer.remaining()];
       buffer.get(payload, 0, buffer.remaining());
       // Use remote to decrypt encryptedDek.
-      Any dek = Any.parseFrom(remote.decrypt(encryptedDek, null /* aad */));
+      byte[] dek = remote.decrypt(encryptedDek, EMPTY_AAD);
       // Use DEK to decrypt payload.
-      Aead aead = Registry.INSTANCE.getPrimitive(dek);
+      Aead aead = Registry.INSTANCE.getPrimitive(dekFormat.getKeyType(), dek);
       return aead.decrypt(payload, aad);
     } catch (IndexOutOfBoundsException
-             | InvalidProtocolBufferException
              | BufferUnderflowException
              | NegativeArraySizeException e) {
       throw new GeneralSecurityException("invalid ciphertext");

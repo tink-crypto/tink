@@ -22,11 +22,8 @@ import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * PublicKeySignFactory allows obtaining a {@code PublicKeySign} primitive from a
@@ -53,34 +50,13 @@ import java.util.Map.Entry;
 
 public final class PublicKeySignFactory {
   /**
-   * Safe to use PublicKeySign key types.
-   */
-  private static final Map<String, KeyManager<PublicKeySign>> STANDARD_KEY_TYPES;
-
-  /**
-   * Deprecated PublicKeySign key types, should not be used in new code.
-   */
-  private static final Map<String, KeyManager<PublicKeySign>> LEGACY_KEY_TYPES;
-
-  static {
-    Map<String, KeyManager<PublicKeySign>> standard =
-        new HashMap<String, KeyManager<PublicKeySign>>();
-    standard.put("type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
-        new EcdsaSignKeyManager());
-    STANDARD_KEY_TYPES = Collections.unmodifiableMap(standard);
-
-    Map<String, KeyManager<PublicKeySign>> legacy =
-        new HashMap<String, KeyManager<PublicKeySign>>();
-    LEGACY_KEY_TYPES = Collections.unmodifiableMap(legacy);
-  }
-  /**
    * Registers standard PublicKeySign key types and their managers with the {@code Registry}.
    * @throws GeneralSecurityException
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    for (Entry<String, KeyManager<PublicKeySign>> entry : STANDARD_KEY_TYPES.entrySet()) {
-      Registry.INSTANCE.registerKeyManager(entry.getKey(), entry.getValue());
-    }
+    Registry.INSTANCE.registerKeyManager(
+        "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
+        new EcdsaSignKeyManager());
   }
 
   /**
@@ -88,16 +64,14 @@ public final class PublicKeySignFactory {
    * @throws GeneralSecurityException
    */
   public static void registerLegacyKeyTypes() throws GeneralSecurityException {
-    for (Entry<String, KeyManager<PublicKeySign>> entry : LEGACY_KEY_TYPES.entrySet()) {
-      Registry.INSTANCE.registerKeyManager(entry.getKey(), entry.getValue());
-    }
+    ;
   }
 
   /**
    * @return a PublicKeySign primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
    */
-  public static PublicKeySign getPrimitive(final KeysetHandle keysetHandle)
+  public static PublicKeySign getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
         return getPrimitive(keysetHandle, null /* keyManager */);
       }
@@ -106,8 +80,8 @@ public final class PublicKeySignFactory {
    * @return a PublicKeySign primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static PublicKeySign getPrimitive(final KeysetHandle keysetHandle,
-      final KeyManager<PublicKeySign> keyManager)
+  public static <K extends MessageLite, F extends MessageLite> PublicKeySign getPrimitive(
+      KeysetHandle keysetHandle, final KeyManager<PublicKeySign, K, F> keyManager)
       throws GeneralSecurityException {
         PrimitiveSet<PublicKeySign> primitives =
             Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);

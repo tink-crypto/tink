@@ -16,34 +16,50 @@
 
 package com.google.cloud.crypto.tink;
 
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.protobuf.Any;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * KeyManager "understands" keys of specific key type(s):  it can generate keys
- * of the supported type(s) and create primitives for supported keys.
+ * KeyManager "understands" keys of a specific key type: it can generate keys
+ * of the supported type and create primitives for supported keys.
  * A key type is identified by the global name of the protocol buffer that holds
  * the corresponding key material, and is given by {@code typeUrl}-field
- * of {@code google.protobuf.Any}-protocol buffer.
+ * of {@code KeyData}-protocol buffer.
  */
-public interface KeyManager<Primitive> {
+public interface KeyManager<P, K extends MessageLite, F extends MessageLite> {
   /**
-   * Constructs an instance of Primitive for the key given in {@code proto}.
+   * Constructs an instance of P for the key given in {@code serialized}.
    *
-   * @return the new constructed Primitive.
+   * @return the new constructed P.
+   * @throws GeneralSecurityException if the key given in {@code serialized} is corrupted
+   *         or not supported.
+   */
+  P getPrimitive(byte[] serialized) throws GeneralSecurityException;
+
+  /**
+   * Constructs an instance of P for the key given in {@code proto}.
+   *
+   * @return the new constructed P.
    * @throws GeneralSecurityException if the key given in {@code proto} is corrupted
    *         or not supported.
    */
-  Primitive getPrimitive(Any proto) throws GeneralSecurityException;
+  P getPrimitive(K proto) throws GeneralSecurityException;
 
   /**
-   * Generates a new key according to specification in {@code keyFormat}.
+   * Generates a new key according to specification in {@code serialized}.
    *
    * @return the new generated key.
    * @throws GeneralSecurityException if the specified format is wrong or not supported.
    */
-  Any newKey(KeyFormat keyFormat) throws GeneralSecurityException;
+  K newKey(byte[] serialized) throws GeneralSecurityException;
+
+  /**
+   * Generates a new key according to specification in {@code proto}.
+   *
+   * @return the new generated key.
+   * @throws GeneralSecurityException if the specified format is wrong or not supported.
+   */
+  K newKey(F proto) throws GeneralSecurityException;
 
   /**
    * @return true iff this KeyManager supports key type identified by {@code typeUrl}.

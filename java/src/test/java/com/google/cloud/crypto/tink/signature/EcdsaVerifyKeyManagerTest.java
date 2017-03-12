@@ -26,7 +26,6 @@ import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.Random;
-import com.google.protobuf.Any;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -231,7 +230,7 @@ public class EcdsaVerifyKeyManagerTest {
       EcdsaSignatureEncoding encoding, byte[] pubX, byte[] pubY) throws Exception {
     EcdsaPublicKey ecdsaPubKey = TestUtil.createEcdsaPubKey(hashType, curve, encoding, pubX, pubY);
     EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
-    return verifyManager.getPrimitive(Any.pack(ecdsaPubKey));
+    return verifyManager.getPrimitive(ecdsaPubKey);
   }
 
   private byte[] derEncodeSignature(byte[] r, byte[] s) {

@@ -24,13 +24,10 @@ import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.subtle.AeadBase;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * AeadFactory allows obtaining a primitive from a {@code KeysetHandle}.
@@ -56,40 +53,19 @@ import java.util.Map.Entry;
  */
 public final class AeadFactory {
   /**
-   * Safe to use Aead key types.
-   */
-  private static final Map<String, KeyManager<Aead>> STANDARD_KEY_TYPES;
-
-  /**
-   * Deprecated Aead key types, should not be used in new code.
-   */
-  private static final Map<String, KeyManager<Aead>> LEGACY_KEY_TYPES;
-
-  static {
-    Map<String, KeyManager<Aead>> standard = new HashMap<String, KeyManager<Aead>>();
-    standard.put(
-        "type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey",
-        new AesCtrHmacAeadKeyManager());
-    standard.put(
-        "type.googleapis.com/google.cloud.crypto.tink.KmsEnvelopeAeadKey",
-        new KmsEnvelopeAeadKeyManager());
-    standard.put(
-        "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey",
-        new AesGcmKeyManager());
-    STANDARD_KEY_TYPES = Collections.unmodifiableMap(standard);
-
-    Map<String, KeyManager<Aead>> legacy = new HashMap<String, KeyManager<Aead>>();
-    LEGACY_KEY_TYPES = Collections.unmodifiableMap(legacy);
-  }
-
-  /**
    * Registers standard Aead key types and their managers with the {@code Registry}.
    * @throws GeneralSecurityException
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    for (Entry<String, KeyManager<Aead>> entry : STANDARD_KEY_TYPES.entrySet()) {
-      Registry.INSTANCE.registerKeyManager(entry.getKey(), entry.getValue());
-    }
+    Registry.INSTANCE.registerKeyManager(
+        "type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey",
+        new AesCtrHmacAeadKeyManager());
+    Registry.INSTANCE.registerKeyManager(
+        "type.googleapis.com/google.cloud.crypto.tink.KmsEnvelopeAeadKey",
+        new KmsEnvelopeAeadKeyManager());
+    Registry.INSTANCE.registerKeyManager(
+        "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey",
+        new AesGcmKeyManager());
   }
 
   /**
@@ -97,16 +73,14 @@ public final class AeadFactory {
    * @throws GeneralSecurityException
    */
   public static void registerLegacyKeyTypes() throws GeneralSecurityException {
-    for (Entry<String, KeyManager<Aead>> entry : LEGACY_KEY_TYPES.entrySet()) {
-      Registry.INSTANCE.registerKeyManager(entry.getKey(), entry.getValue());
-    }
+    ;
   }
 
   /**
    * @return a Aead primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
    */
-  public static Aead getPrimitive(final KeysetHandle keysetHandle)
+  public static Aead getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     return getPrimitive(keysetHandle, null /* keyManager */);
   }
@@ -115,8 +89,8 @@ public final class AeadFactory {
    * @return a Aead primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static Aead getPrimitive(final KeysetHandle keysetHandle,
-      final KeyManager<Aead> keyManager)
+  public static <K extends MessageLite, F extends MessageLite> Aead getPrimitive(
+      KeysetHandle keysetHandle, final KeyManager<Aead, K, F> keyManager)
       throws GeneralSecurityException {
     PrimitiveSet<Aead> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);

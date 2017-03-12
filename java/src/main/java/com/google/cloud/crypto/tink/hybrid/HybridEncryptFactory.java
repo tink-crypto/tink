@@ -24,11 +24,8 @@ import com.google.cloud.crypto.tink.aead.AeadFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.subtle.HybridEncryptBase;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 /**
@@ -56,26 +53,8 @@ import java.util.logging.Logger;
 public final class HybridEncryptFactory {
   private static final Logger logger =
       Logger.getLogger(HybridEncryptFactory.class.getName());
-  /**
-   * Safe to use HybridEncrypt key types.
-   */
-  private static final Map<String, KeyManager<HybridEncrypt>> STANDARD_KEY_TYPES;
-  /**
-   * Deprecated HybridEncrypt key types, should not be used in new code.
-   */
-  private static final Map<String, KeyManager<HybridEncrypt>> LEGACY_KEY_TYPES;
+
   static {
-    Map<String, KeyManager<HybridEncrypt>> standard =
-        new HashMap<String, KeyManager<HybridEncrypt>>();
-    standard.put(
-        "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
-        new EciesAeadHkdfPublicKeyManager());
-    STANDARD_KEY_TYPES = Collections.unmodifiableMap(standard);
-
-    Map<String, KeyManager<HybridEncrypt>> legacy =
-        new HashMap<String, KeyManager<HybridEncrypt>>();
-    LEGACY_KEY_TYPES = Collections.unmodifiableMap(legacy);
-
     try {
       AeadFactory.registerStandardKeyTypes();
       MacFactory.registerStandardKeyTypes();
@@ -88,24 +67,22 @@ public final class HybridEncryptFactory {
    * @throws GeneralSecurityException
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    for (Entry<String, KeyManager<HybridEncrypt>> entry : STANDARD_KEY_TYPES.entrySet()) {
-      Registry.INSTANCE.registerKeyManager(entry.getKey(), entry.getValue());
-    }
+    Registry.INSTANCE.registerKeyManager(
+        "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
+        new EciesAeadHkdfPublicKeyManager());
   }
   /**
    * Registers legacy HybridEncrypt key types and their managers with the {@code Registry}.
    * @throws GeneralSecurityException
    */
   public static void registerLegacyKeyTypes() throws GeneralSecurityException {
-    for (Entry<String, KeyManager<HybridEncrypt>> entry : LEGACY_KEY_TYPES.entrySet()) {
-      Registry.INSTANCE.registerKeyManager(entry.getKey(), entry.getValue());
-    }
+    ;
   }
   /**
    * @return a HybridEncrypt primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
    */
-  public static HybridEncrypt getPrimitive(final KeysetHandle keysetHandle)
+  public static HybridEncrypt getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     return getPrimitive(keysetHandle, null /* keyManager */);
   }
@@ -113,8 +90,8 @@ public final class HybridEncryptFactory {
    * @return a HybridEncrypt primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static HybridEncrypt getPrimitive(final KeysetHandle keysetHandle,
-      final KeyManager<HybridEncrypt> keyManager)
+  public static <K extends MessageLite, F extends MessageLite> HybridEncrypt getPrimitive(
+      KeysetHandle keysetHandle, final KeyManager<HybridEncrypt, K, F> keyManager)
       throws GeneralSecurityException {
     PrimitiveSet<HybridEncrypt> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);

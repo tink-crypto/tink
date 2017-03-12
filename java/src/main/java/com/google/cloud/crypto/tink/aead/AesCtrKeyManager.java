@@ -19,20 +19,16 @@ package com.google.cloud.crypto.tink.aead;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKeyFormat;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrParams;
-
 import com.google.cloud.crypto.tink.KeyManager;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.cloud.crypto.tink.subtle.IndCpaCipher;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
-class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
+class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyFormat> {
   private static final int VERSION = 0;
 
   private static final String AES_CTR_KEY_TYPE =
@@ -48,30 +44,40 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   private static final int MIN_IV_SIZE_IN_BYTES = 12;
 
   @Override
-  public AesCtrJceCipher getPrimitive(Any proto) throws GeneralSecurityException {
+  public AesCtrJceCipher getPrimitive(byte[] serialized) throws GeneralSecurityException {
     try {
-      AesCtrKey keyProto = AesCtrKey.parseFrom(proto.getValue());
-      validate(keyProto);
-      return new AesCtrJceCipher(keyProto.getKeyValue().toByteArray(),
-          keyProto.getParams().getIvSize());
+      AesCtrKey keyProto = AesCtrKey.parseFrom(serialized);
+      return getPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Invalid AesCtr Key");
     }
   }
 
   @Override
-  public Any newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+  public AesCtrJceCipher getPrimitive(AesCtrKey keyProto) throws GeneralSecurityException {
+    validate(keyProto);
+    return new AesCtrJceCipher(keyProto.getKeyValue().toByteArray(),
+        keyProto.getParams().getIvSize());
+  }
+
+  @Override
+  public AesCtrKey newKey(byte[] serialized) throws GeneralSecurityException {
     try {
-      AesCtrKeyFormat format = AesCtrKeyFormat.parseFrom(keyFormat.getFormat().getValue());
-      validate(format);
-      return Util.pack(AES_CTR_KEY_TYPE, AesCtrKey.newBuilder()
-          .setParams(format.getParams())
-          .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-          .setVersion(VERSION)
-          .build());
+      AesCtrKeyFormat format = AesCtrKeyFormat.parseFrom(serialized);
+      return newKey(format);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException(e);
     }
+  }
+
+  @Override
+  public AesCtrKey newKey(AesCtrKeyFormat format) throws GeneralSecurityException {
+    validate(format);
+    return AesCtrKey.newBuilder()
+        .setParams(format.getParams())
+        .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+        .setVersion(VERSION)
+        .build();
   }
 
   @Override

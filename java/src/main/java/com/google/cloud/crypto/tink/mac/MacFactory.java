@@ -23,13 +23,10 @@ import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * MacFactory allows obtaining a primitive from a {@code KeysetHandle}.
@@ -54,31 +51,12 @@ import java.util.Map.Entry;
  */
 public final class MacFactory {
   /**
-   * Safe to use MAC key types.
-   */
-  private static final Map<String, KeyManager<Mac>> STANDARD_KEY_TYPES;
-
-  /**
-   * Deprecated MAC key types, should not be used in new code.
-   */
-  private static final Map<String, KeyManager<Mac>> LEGACY_KEY_TYPES;
-
-  static {
-    Map<String, KeyManager<Mac>> standard = new HashMap<String, KeyManager<Mac>>();
-    standard.put("type.googleapis.com/google.cloud.crypto.tink.HmacKey", new HmacKeyManager());
-    STANDARD_KEY_TYPES = Collections.unmodifiableMap(standard);
-
-    Map<String, KeyManager<Mac>> legacy = new HashMap<String, KeyManager<Mac>>();
-    LEGACY_KEY_TYPES = Collections.unmodifiableMap(legacy);
-  }
-  /**
    * Registers standard Mac key types and their managers with the {@code Registry}.
    * @throws GeneralSecurityException
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    for (Entry<String, KeyManager<Mac>> entry : STANDARD_KEY_TYPES.entrySet()) {
-      Registry.INSTANCE.registerKeyManager(entry.getKey(), entry.getValue());
-    }
+      Registry.INSTANCE.registerKeyManager("type.googleapis.com/google.cloud.crypto.tink.HmacKey",
+          new HmacKeyManager());
   }
 
   /**
@@ -86,16 +64,14 @@ public final class MacFactory {
    * @throws GeneralSecurityException
    */
   public static void registerLegacyKeyTypes() throws GeneralSecurityException {
-    for (Entry<String, KeyManager<Mac>> entry : LEGACY_KEY_TYPES.entrySet()) {
-      Registry.INSTANCE.registerKeyManager(entry.getKey(), entry.getValue());
-    }
+    ;
   }
 
   /**
    * @return a Mac primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
    */
-  public static Mac getPrimitive(final KeysetHandle keysetHandle)
+  public static Mac getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     return getPrimitive(keysetHandle, null /* keyManager */);
   }
@@ -104,7 +80,8 @@ public final class MacFactory {
    * @return a Mac primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static Mac getPrimitive(final KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)
+  public static <K extends MessageLite, F extends MessageLite> Mac getPrimitive(
+      KeysetHandle keysetHandle, final KeyManager<Mac, K, F> keyManager)
       throws GeneralSecurityException {
     PrimitiveSet<Mac> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);

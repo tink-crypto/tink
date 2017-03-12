@@ -23,17 +23,15 @@ import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.Registry;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
-import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
-class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
+class AesCtrHmacAeadKeyManager
+    implements KeyManager<Aead, AesCtrHmacAeadKey, AesCtrHmacAeadKeyFormat> {
   private static final Logger logger =
       Logger.getLogger(AesCtrHmacAeadKeyManager.class.getName());
 
@@ -65,42 +63,44 @@ class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
   }
 
   @Override
-  public Aead getPrimitive(Any proto) throws GeneralSecurityException {
+  public Aead getPrimitive(byte[] serialized) throws GeneralSecurityException {
     try {
-      AesCtrHmacAeadKey key = AesCtrHmacAeadKey.parseFrom(proto.getValue());
-      validate(key);
-      return new EncryptThenAuthenticate(
-          Registry.INSTANCE.getPrimitive(Util.pack(AES_CTR_KEY_TYPE, key.getAesCtrKey())),
-          Registry.INSTANCE.getPrimitive(Util.pack(HMAC_KEY_TYPE, key.getHmacKey())),
-          key.getHmacKey().getParams().getTagSize());
+      AesCtrHmacAeadKey keyProto = AesCtrHmacAeadKey.parseFrom(serialized);
+      return getPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("invalid AesCtrHmacAead key");
     }
   }
 
   @Override
-  public Any newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+  public Aead getPrimitive(AesCtrHmacAeadKey keyProto) throws GeneralSecurityException {
+    validate(keyProto);
+    return new EncryptThenAuthenticate(
+        Registry.INSTANCE.getPrimitive(AES_CTR_KEY_TYPE, keyProto.getAesCtrKey()),
+        Registry.INSTANCE.getPrimitive(HMAC_KEY_TYPE, keyProto.getHmacKey()),
+        keyProto.getHmacKey().getParams().getTagSize());
+  }
+
+  @Override
+  public AesCtrHmacAeadKey newKey(byte[] serialized) throws GeneralSecurityException {
     try {
-      AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.parseFrom(
-          keyFormat.getFormat().getValue());
-      Any aesCtrKey = Registry.INSTANCE.newKey(
-          KeyFormat.newBuilder()
-              .setFormat(Util.pack(AES_CTR_KEY_FORMAT, format.getAesCtrKeyFormat()))
-              .setKeyType(AES_CTR_KEY_TYPE)
-              .build());
-      Any hmacKey = Registry.INSTANCE.newKey(
-          KeyFormat.newBuilder()
-              .setFormat(Util.pack(HMAC_KEY_FORMAT, format.getHmacKeyFormat()))
-              .setKeyType(HMAC_KEY_TYPE)
-              .build());
-      return Util.pack(AES_CTR_HMAC_AEAD_KEY_TYPE, AesCtrHmacAeadKey.newBuilder()
-          .setAesCtrKey(AesCtrKey.parseFrom(aesCtrKey.getValue()))
-          .setHmacKey(HmacKey.parseFrom(hmacKey.getValue()))
-          .setVersion(VERSION)
-          .build());
+      AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.parseFrom(serialized);
+      return newKey(format);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("cannot generate AesCtrHmacAead key");
     }
+  }
+
+  @Override
+  public AesCtrHmacAeadKey newKey(AesCtrHmacAeadKeyFormat format) throws GeneralSecurityException {
+    AesCtrKey aesCtrKey = Registry.INSTANCE.newKey(
+        AES_CTR_KEY_TYPE, format.getAesCtrKeyFormat());
+    HmacKey hmacKey = Registry.INSTANCE.newKey(HMAC_KEY_TYPE, format.getHmacKeyFormat());
+    return AesCtrHmacAeadKey.newBuilder()
+        .setAesCtrKey(aesCtrKey)
+        .setHmacKey(hmacKey)
+        .setVersion(VERSION)
+        .build();
   }
 
   @Override

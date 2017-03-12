@@ -16,19 +16,19 @@
 
 package com.google.cloud.crypto.tink.signature;
 
+import com.google.cloud.crypto.tink.EcdsaProto.EcdsaKeyFormat;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
-final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
+final class EcdsaVerifyKeyManager
+    implements KeyManager<PublicKeyVerify, EcdsaPublicKey, EcdsaKeyFormat> {
   private static final String ECDSA_PUBLIC_KEY_TYPE =
       "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey";
   /**
@@ -38,13 +38,16 @@ final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   private static final int VERSION = 0;
 
   @Override
-  public PublicKeyVerify getPrimitive(Any proto) throws GeneralSecurityException {
-    EcdsaPublicKey pubKey;
+  public PublicKeyVerify getPrimitive(byte[] serialized) throws GeneralSecurityException {
     try {
-      pubKey = EcdsaPublicKey.parseFrom(proto.getValue());
+      EcdsaPublicKey pubKey = EcdsaPublicKey.parseFrom(serialized);
+      return getPrimitive(pubKey);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException(e);
     }
+  }
+
+  public PublicKeyVerify getPrimitive(EcdsaPublicKey pubKey) throws GeneralSecurityException {
     validateKey(pubKey);
     ECPublicKey publicKey = Util.getEcPublicKey(pubKey.getParams().getCurve(),
         pubKey.getX().toByteArray(), pubKey.getY().toByteArray());
@@ -53,7 +56,13 @@ final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   }
 
   @Override
-  public Any newKey(KeyFormat format) throws GeneralSecurityException {
+  public EcdsaPublicKey newKey(byte[] serialized) throws GeneralSecurityException {
+    throw new GeneralSecurityException("Not implemented");
+  }
+
+
+  @Override
+  public EcdsaPublicKey newKey(EcdsaKeyFormat format) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented");
   }
 

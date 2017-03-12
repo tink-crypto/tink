@@ -22,13 +22,10 @@ import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.Registry;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * PublicKeyVerifyFactory allows obtaining a {@code PublicKeyVerify} primitive from a
@@ -53,34 +50,13 @@ import java.util.Map.Entry;
  */
 public final class PublicKeyVerifyFactory {
   /**
-   * Safe to use PublicKeyVerify key types.
-   */
-  private static final Map<String, KeyManager<PublicKeyVerify>> STANDARD_KEY_TYPES;
-
-  /**
-   * Deprecated PublicKeyVerify key types, should not be used in new code.
-   */
-  private static final Map<String, KeyManager<PublicKeyVerify>> LEGACY_KEY_TYPES;
-
-  static {
-    Map<String, KeyManager<PublicKeyVerify>> standard =
-        new HashMap<String, KeyManager<PublicKeyVerify>>();
-    standard.put("type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
-        new EcdsaVerifyKeyManager());
-    STANDARD_KEY_TYPES = Collections.unmodifiableMap(standard);
-
-    Map<String, KeyManager<PublicKeyVerify>> legacy =
-        new HashMap<String, KeyManager<PublicKeyVerify>>();
-    LEGACY_KEY_TYPES = Collections.unmodifiableMap(legacy);
-  }
-  /**
    * Registers standard PublicKeyVerify key types and their managers with the {@code Registry}.
    * @throws GeneralSecurityException
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    for (Entry<String, KeyManager<PublicKeyVerify>> entry : STANDARD_KEY_TYPES.entrySet()) {
-      Registry.INSTANCE.registerKeyManager(entry.getKey(), entry.getValue());
-    }
+    Registry.INSTANCE.registerKeyManager(
+        "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
+        new EcdsaVerifyKeyManager());
   }
 
   /**
@@ -88,16 +64,14 @@ public final class PublicKeyVerifyFactory {
    * @throws GeneralSecurityException
    */
   public static void registerLegacyKeyTypes() throws GeneralSecurityException {
-    for (Entry<String, KeyManager<PublicKeyVerify>> entry : LEGACY_KEY_TYPES.entrySet()) {
-      Registry.INSTANCE.registerKeyManager(entry.getKey(), entry.getValue());
-    }
+    ;
   }
 
   /**
    * @return a PublicKeyVerify primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
    */
-  public static PublicKeyVerify getPrimitive(final KeysetHandle keysetHandle)
+  public static PublicKeyVerify getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
         return getPrimitive(keysetHandle, null /* keyManager */);
       }
@@ -107,8 +81,9 @@ public final class PublicKeyVerifyFactory {
    * {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static PublicKeyVerify getPrimitive(final KeysetHandle keysetHandle,
-      final KeyManager<PublicKeyVerify> keyManager) throws GeneralSecurityException {
+  public static <K extends MessageLite, F extends MessageLite> PublicKeyVerify getPrimitive(
+      KeysetHandle keysetHandle, final KeyManager<PublicKeyVerify, K, F> keyManager)
+      throws GeneralSecurityException {
     PrimitiveSet<PublicKeyVerify> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
     return new PublicKeyVerify() {

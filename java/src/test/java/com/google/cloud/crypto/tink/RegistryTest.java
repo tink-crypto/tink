@@ -26,6 +26,7 @@ import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -77,15 +78,23 @@ public class RegistryTest {
     }
   }
 
-  private class Mac1KeyManager implements KeyManager<Mac> {
+  private class Mac1KeyManager implements KeyManager<Mac, Message, Message> {
     public Mac1KeyManager() {}
 
     @Override
-    public Mac getPrimitive(Any proto) throws GeneralSecurityException {
+    public Mac getPrimitive(byte[] proto) throws GeneralSecurityException {
       return new DummyMac(this.getClass().getSimpleName());
     }
     @Override
-    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+    public Mac getPrimitive(Message proto) throws GeneralSecurityException {
+      return new DummyMac(this.getClass().getSimpleName());
+    }
+    @Override
+    public Message newKey(byte[] format) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public Message newKey(Message format) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -94,15 +103,23 @@ public class RegistryTest {
     }
   }
 
-  private class CustomMac1KeyManager implements KeyManager<Mac> {
+  private class CustomMac1KeyManager implements KeyManager<Mac, Message, Message> {
     public CustomMac1KeyManager() {}
 
     @Override
-    public Mac getPrimitive(Any proto) throws GeneralSecurityException {
+    public Mac getPrimitive(byte[] proto) throws GeneralSecurityException {
       return new DummyMac(this.getClass().getSimpleName());
     }
     @Override
-    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+    public Mac getPrimitive(Message proto) throws GeneralSecurityException {
+      return new DummyMac(this.getClass().getSimpleName());
+    }
+    @Override
+    public Message newKey(byte[] format) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public Message newKey(Message format) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -111,15 +128,23 @@ public class RegistryTest {
     }
   }
 
-  private class Mac2KeyManager implements KeyManager<Mac> {
+  private class Mac2KeyManager implements KeyManager<Mac, Message, Message> {
     public Mac2KeyManager() {}
 
     @Override
-    public Mac getPrimitive(Any proto) throws GeneralSecurityException {
+    public Mac getPrimitive(byte[] proto) throws GeneralSecurityException {
       return new DummyMac(this.getClass().getSimpleName());
     }
     @Override
-    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+    public Mac getPrimitive(Message proto) throws GeneralSecurityException {
+      return new DummyMac(this.getClass().getSimpleName());
+    }
+    @Override
+    public Message newKey(byte[] format) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public Message newKey(Message format) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -128,15 +153,23 @@ public class RegistryTest {
     }
   }
 
-  private class AeadKeyManager implements KeyManager<Aead> {
+  private class AeadKeyManager implements KeyManager<Aead, Message, Message> {
     public AeadKeyManager() {}
 
     @Override
-    public Aead getPrimitive(Any proto) throws GeneralSecurityException {
+    public Aead getPrimitive(byte[] proto) throws GeneralSecurityException {
       return new DummyAead(this.getClass().getSimpleName());
     }
     @Override
-    public Any newKey(KeyFormat format) throws GeneralSecurityException {
+    public Aead getPrimitive(Message proto) throws GeneralSecurityException {
+      return new DummyAead(this.getClass().getSimpleName());
+    }
+    @Override
+    public Message newKey(byte[] format) throws GeneralSecurityException {
+      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public Message newKey(Message format) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -159,25 +192,25 @@ public class RegistryTest {
     registry.registerKeyManager(aeadTypeUrl, new AeadKeyManager());
 
     // Retrieve some key managers.
-    KeyManager<Mac> mac1Manager = registry.getKeyManager(mac1TypeUrl);
-    KeyManager<Mac> mac2Manager = registry.getKeyManager(mac2TypeUrl);
+    KeyManager<Mac, Message, Message> mac1Manager = registry.getKeyManager(mac1TypeUrl);
+    KeyManager<Mac, Message, Message> mac2Manager = registry.getKeyManager(mac2TypeUrl);
     assertEquals(Mac1KeyManager.class, mac1Manager.getClass());
     assertEquals(Mac2KeyManager.class, mac2Manager.getClass());
-    String computedMac = new String(mac1Manager.getPrimitive(null).computeMac(null));
+    String computedMac = new String(mac1Manager.getPrimitive(new byte[0]).computeMac(null));
     assertEquals(Mac1KeyManager.class.getSimpleName(), computedMac);
-    computedMac = new String(mac2Manager.getPrimitive(null).computeMac(null));
+    computedMac = new String(mac2Manager.getPrimitive(new byte[0]).computeMac(null));
     assertEquals(Mac2KeyManager.class.getSimpleName(), computedMac);
 
-    KeyManager<Aead> aeadManager = registry.getKeyManager(aeadTypeUrl);
+    KeyManager<Aead, Message, Message> aeadManager = registry.getKeyManager(aeadTypeUrl);
     assertEquals(AeadKeyManager.class, aeadManager.getClass());
-    Aead aead = aeadManager.getPrimitive(null);
+    Aead aead = aeadManager.getPrimitive(new byte[0]);
     String ciphertext = new String(aead.encrypt("plaintext".getBytes(), null));
     assertEquals(AeadKeyManager.class.getSimpleName(), ciphertext);
     // TODO(przydatek): add tests when the primitive of KeyManager does not match key type.
 
     String badTypeUrl = "bad type URL";
     try {
-      KeyManager<Mac> macManager = registry.getKeyManager(badTypeUrl);
+      KeyManager<Mac, Message, Message> macManager = registry.getKeyManager(badTypeUrl);
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("Unsupported"));
@@ -290,7 +323,7 @@ public class RegistryTest {
 
     // This should not overwrite the existing manager.
     assertFalse(registry.registerKeyManager(mac1TypeUrl, new Mac2KeyManager()));
-    KeyManager<Mac> manager = registry.getKeyManager(mac1TypeUrl);
+    KeyManager<Mac, Message, Message> manager = registry.getKeyManager(mac1TypeUrl);
     assertEquals(Mac1KeyManager.class.getSimpleName(),
         manager.getClass().getSimpleName());
   }
@@ -337,7 +370,7 @@ public class RegistryTest {
     assertEquals(mac2TypeUrl, new String(mac2List.get(0).getPrimitive().computeMac(null)));
 
     // Get a PrimitiveSet using a custom key manager for key1.
-    KeyManager<Mac> customManager = new CustomMac1KeyManager();
+    KeyManager<Mac, Message, Message> customManager = new CustomMac1KeyManager();
     macSet = registry.getPrimitives(keysetHandle, customManager);
     mac1List = macSet.getPrimitive(keysetHandle.getKeyset().getKey(0));
     mac2List = macSet.getPrimitive(keysetHandle.getKeyset().getKey(1));
