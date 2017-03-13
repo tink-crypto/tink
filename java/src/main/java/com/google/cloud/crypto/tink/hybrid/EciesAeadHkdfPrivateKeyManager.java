@@ -22,6 +22,8 @@ import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
 import com.google.cloud.crypto.tink.HybridDecrypt;
 import com.google.cloud.crypto.tink.KeyManager;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
@@ -40,7 +42,7 @@ class EciesAeadHkdfPrivateKeyManager
       "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey";
 
   @Override
-  public HybridDecrypt getPrimitive(byte[] proto) throws GeneralSecurityException {
+  public HybridDecrypt getPrimitive(ByteString proto) throws GeneralSecurityException {
     try {
       EciesAeadHkdfPrivateKey recipientKeyProto = EciesAeadHkdfPrivateKey.parseFrom(proto);
       return getPrimitive(recipientKeyProto);
@@ -65,7 +67,7 @@ class EciesAeadHkdfPrivateKeyManager
   }
 
   @Override
-  public EciesAeadHkdfPrivateKey newKey(byte[] serialized) throws GeneralSecurityException {
+  public EciesAeadHkdfPrivateKey newKey(ByteString serialized) throws GeneralSecurityException {
     try {
       EciesAeadHkdfKeyFormat eciesKeyFormat = EciesAeadHkdfKeyFormat.parseFrom(serialized);
       return newKey(eciesKeyFormat);
@@ -98,6 +100,16 @@ class EciesAeadHkdfPrivateKeyManager
         .setVersion(VERSION)
         .setPublicKey(eciesPublicKey)
         .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
+        .build();
+  }
+
+  @Override
+  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+    EciesAeadHkdfPrivateKey key = newKey(keyFormat.getValue());
+    return KeyData.newBuilder()
+        .setTypeUrl(ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE)
+        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE)
         .build();
   }
 

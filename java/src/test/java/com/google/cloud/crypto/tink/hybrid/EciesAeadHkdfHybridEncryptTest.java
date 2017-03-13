@@ -27,7 +27,6 @@ import com.google.cloud.crypto.tink.HybridEncrypt;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
-import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -66,8 +65,8 @@ public class EciesAeadHkdfHybridEncryptTest {
     String hmacAlgo = "HmacSha256";
 
     KeyFormat keyFormat = KeyFormat.newBuilder()
-        .setKeyType("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")
-        .setFormat(Any.pack(AesGcmKeyFormat.newBuilder().setKeySize(AES_GCM_KEY_SIZE).build()))
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")
+        .setValue(AesGcmKeyFormat.newBuilder().setKeySize(AES_GCM_KEY_SIZE).build().toByteString())
         .build();
     HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey, salt,
         hmacAlgo, keyFormat, EcPointFormat.UNCOMPRESSED);

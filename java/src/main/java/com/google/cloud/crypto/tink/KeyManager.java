@@ -16,6 +16,9 @@
 
 package com.google.cloud.crypto.tink;
 
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
@@ -27,6 +30,8 @@ import java.security.GeneralSecurityException;
  * of {@code KeyData}-protocol buffer.
  */
 public interface KeyManager<P, K extends MessageLite, F extends MessageLite> {
+  // APIs for primitive development
+
   /**
    * Constructs an instance of P for the key given in {@code serialized}.
    *
@@ -34,7 +39,7 @@ public interface KeyManager<P, K extends MessageLite, F extends MessageLite> {
    * @throws GeneralSecurityException if the key given in {@code serialized} is corrupted
    *         or not supported.
    */
-  P getPrimitive(byte[] serialized) throws GeneralSecurityException;
+  P getPrimitive(ByteString serialized) throws GeneralSecurityException;
 
   /**
    * Constructs an instance of P for the key given in {@code proto}.
@@ -51,7 +56,7 @@ public interface KeyManager<P, K extends MessageLite, F extends MessageLite> {
    * @return the new generated key.
    * @throws GeneralSecurityException if the specified format is wrong or not supported.
    */
-  K newKey(byte[] serialized) throws GeneralSecurityException;
+  K newKey(ByteString serialized) throws GeneralSecurityException;
 
   /**
    * Generates a new key according to specification in {@code proto}.
@@ -65,4 +70,14 @@ public interface KeyManager<P, K extends MessageLite, F extends MessageLite> {
    * @return true iff this KeyManager supports key type identified by {@code typeUrl}.
    */
   boolean doesSupport(String typeUrl);
+
+  // APIs for Key Management
+
+  /**
+   * Generates a new key according to specification in {@code serialized}.
+   *
+   * @return the new generated key.
+   * @throws GeneralSecurityException if the specified format is wrong or not supported.
+   */
+  KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException;
 }

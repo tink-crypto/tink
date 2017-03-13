@@ -19,11 +19,13 @@ package com.google.cloud.crypto.tink.tinkey;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKeyFormat;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadParams;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
 import java.io.IOException;
@@ -63,7 +65,7 @@ public class Util {
     Builder builder = getBuilder(keyFormatClass);
     TextFormat.merge(keyFormat, builder);
 
-    return createKeyFormat(getTypeUrl(keyType), Any.pack(builder.build()));
+    return createKeyFormat(getTypeUrl(keyType), builder.build().toByteString());
   }
 
   /**
@@ -103,22 +105,27 @@ public class Util {
   }
 
   /**
-   * @return a {@code KeyFormat} constructed from {@code keyType} and {@code keyFormat}.
+   * @return a {@code KeyFormat} constructed from {@code typeUrl} and {@code format}.
    */
-  public static KeyFormat createKeyFormat(String keyType, Any keyFormat) {
+  public static KeyFormat createKeyFormat(String typeUrl, ByteString format) {
     return KeyFormat.newBuilder()
-        .setKeyType(keyType)
-        .setFormat(keyFormat)
+        .setTypeUrl(typeUrl)
+        .setValue(format)
         .build();
   }
 
   /**
    * @return a {@code GoogleCloudKmsAeadKey}.
    */
-  public static GoogleCloudKmsAeadKey createGoogleCloudKmsAeadKey(String kmsKeyUri)
+  public static KeyData createGoogleCloudKmsAeadKeyData(String kmsKeyUri)
       throws Exception {
-    return GoogleCloudKmsAeadKey.newBuilder()
+    GoogleCloudKmsAeadKey key = GoogleCloudKmsAeadKey.newBuilder()
         .setKmsKeyUri(kmsKeyUri)
+        .build();
+    return KeyData.newBuilder()
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey")
+        .setValue(key.toByteString())
+        .setKeyMaterialType(KeyData.KeyMaterialType.REMOTE)
         .build();
   }
 
@@ -126,7 +133,7 @@ public class Util {
    * @return a {@code createKmsEnvelopeAeadKeyFormat}.
    */
   public static KmsEnvelopeAeadKeyFormat createKmsEnvelopeAeadKeyFormat(
-      Any kmsKey, KeyFormat dekFormat) throws Exception {
+      KeyData kmsKey, KeyFormat dekFormat) throws Exception {
     KmsEnvelopeAeadParams params = KmsEnvelopeAeadParams.newBuilder()
         .setDekFormat(dekFormat)
         .setKmsKey(kmsKey)

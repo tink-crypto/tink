@@ -26,8 +26,11 @@ import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKeyFormat;
 import com.google.cloud.crypto.tink.KeyManager;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.GoogleCloudKmsAead;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -51,7 +54,7 @@ public class GoogleCloudKmsAeadKeyManager
   }
 
   @Override
-  public Aead getPrimitive(byte[] serialized) throws GeneralSecurityException {
+  public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
     try {
       GoogleCloudKmsAeadKey keyProto = GoogleCloudKmsAeadKey.parseFrom(serialized);
       return getPrimitive(keyProto);
@@ -71,13 +74,18 @@ public class GoogleCloudKmsAeadKeyManager
   }
 
   @Override
-  public GoogleCloudKmsAeadKey newKey(byte[] serialized) throws GeneralSecurityException {
+  public GoogleCloudKmsAeadKey newKey(ByteString serialized) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not Implemented");
   }
 
   @Override
   public GoogleCloudKmsAeadKey newKey(GoogleCloudKmsAeadKeyFormat format)
       throws GeneralSecurityException {
+    throw new GeneralSecurityException("Not Implemented");
+  }
+
+  @Override
+  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not Implemented");
   }
 

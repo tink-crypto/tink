@@ -22,6 +22,8 @@ import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.PublicKeySign;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.EcdsaSignJce;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
@@ -48,7 +50,7 @@ final class EcdsaSignKeyManager implements
   private static final int VERSION = 0;
 
   @Override
-  public PublicKeySign getPrimitive(byte[] serialized) throws GeneralSecurityException {
+  public PublicKeySign getPrimitive(ByteString serialized) throws GeneralSecurityException {
     try {
       EcdsaPrivateKey privKeyProto = EcdsaPrivateKey.parseFrom(serialized);
       return getPrimitive(privKeyProto);
@@ -68,7 +70,7 @@ final class EcdsaSignKeyManager implements
   }
 
   @Override
-  public EcdsaPrivateKey newKey(byte[] serialized) throws GeneralSecurityException {
+  public EcdsaPrivateKey newKey(ByteString serialized) throws GeneralSecurityException {
     try {
       EcdsaKeyFormat ecdsaKeyFormat = EcdsaKeyFormat.parseFrom(serialized);
       return newKey(ecdsaKeyFormat);
@@ -99,6 +101,16 @@ final class EcdsaSignKeyManager implements
         .setVersion(VERSION)
         .setPublicKey(ecdsaPubKey)
         .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
+        .build();
+  }
+
+  @Override
+  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+    EcdsaPrivateKey key = newKey(keyFormat.getValue());
+    return KeyData.newBuilder()
+        .setTypeUrl(ECDSA_PRIVATE_KEY_TYPE)
+        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE)
         .build();
   }
 

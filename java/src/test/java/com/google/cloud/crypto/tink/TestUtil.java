@@ -46,6 +46,7 @@ import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadParams;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
@@ -98,7 +99,7 @@ public class TestUtil {
     public DummyMacKeyManager() {}
 
     @Override
-    public Mac getPrimitive(byte[] serialized) throws GeneralSecurityException {
+    public Mac getPrimitive(ByteString serialized) throws GeneralSecurityException {
       return new DummyMac();
     }
     @Override
@@ -106,12 +107,16 @@ public class TestUtil {
       return new DummyMac();
     }
     @Override
-    public Message newKey(byte[] serialized) throws GeneralSecurityException {
+    public Message newKey(ByteString serialized) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
     public Message newKey(Message format) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+      return KeyData.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
     public boolean doesSupport(String typeUrl) {
@@ -150,7 +155,7 @@ public class TestUtil {
     public EchoAeadKeyManager() {}
 
     @Override
-    public Aead getPrimitive(byte[] serialized) throws GeneralSecurityException {
+    public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
       return new EchoAead();
     }
     @Override
@@ -158,12 +163,16 @@ public class TestUtil {
       return new EchoAead();
     }
     @Override
-    public Message newKey(byte[] serialized) throws GeneralSecurityException {
+    public Message newKey(ByteString serialized) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
     public Message newKey(Message format) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+      return KeyData.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
     public boolean doesSupport(String typeUrl) {
@@ -203,7 +212,7 @@ public class TestUtil {
     public FaultyAeadKeyManager() {}
 
     @Override
-    public Aead getPrimitive(byte[] serialized) throws GeneralSecurityException {
+    public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
       return new FaultyAead();
     }
     @Override
@@ -211,12 +220,16 @@ public class TestUtil {
       return new FaultyAead();
     }
     @Override
-    public Message newKey(byte[] serialized) throws GeneralSecurityException {
+    public Message newKey(ByteString serialized) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
     public Message newKey(Message format) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+    }
+    @Override
+    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+      return KeyData.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
     public boolean doesSupport(String typeUrl) {
@@ -243,7 +256,7 @@ public class TestUtil {
   public static Key createKey(Message proto, int keyId, KeyStatusType status,
       OutputPrefixType prefixType) throws Exception {
     return Key.newBuilder()
-        .setKeyData(Any.pack(proto))
+        .setKeyData(createKeyData(proto))
         .setStatus(status)
         .setKeyId(keyId)
         .setOutputPrefixType(prefixType)
@@ -320,8 +333,8 @@ public class TestUtil {
         .setHmacKeyFormat(hmacKeyFormat)
         .build();
     return KeyFormat.newBuilder()
-        .setFormat(Any.pack(format))
-        .setKeyType("type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey")
+        .setValue(format.toByteString())
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey")
         .build();
   }
 
@@ -333,8 +346,19 @@ public class TestUtil {
         .setKeySize(keySize)
         .build();
     return KeyFormat.newBuilder()
-        .setFormat(Any.pack(format))
-        .setKeyType("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")
+        .setValue(format.toByteString())
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")
+        .build();
+  }
+
+  /**
+   * @return a {@code KeyData} from a specific key.
+   */
+  public static KeyData createKeyData(Message key)
+      throws Exception {
+    return KeyData.newBuilder()
+        .setValue(key.toByteString())
+        .setTypeUrl(Any.pack(key).getTypeUrl())
         .build();
   }
 
@@ -351,7 +375,7 @@ public class TestUtil {
   /**
    * @return a {@code KmsEnvelopeAeadKey}.
    */
-  public static KmsEnvelopeAeadKey createKmsEnvelopeAeadKey(Any kmsKey, KeyFormat dekFormat)
+  public static KmsEnvelopeAeadKey createKmsEnvelopeAeadKey(KeyData kmsKey, KeyFormat dekFormat)
       throws Exception {
     KmsEnvelopeAeadParams params = KmsEnvelopeAeadParams.newBuilder()
         .setDekFormat(dekFormat)

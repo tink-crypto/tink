@@ -22,6 +22,8 @@ import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.Mac;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.MacJce;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
@@ -52,7 +54,7 @@ final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFormat> {
   private static final int MIN_TAG_SIZE_IN_BYTES = 10;
 
   @Override
-  public Mac getPrimitive(byte[] serialized) throws GeneralSecurityException {
+  public Mac getPrimitive(ByteString serialized) throws GeneralSecurityException {
     try {
       HmacKey keyProto = HmacKey.parseFrom(serialized);
       return getPrimitive(keyProto);
@@ -77,7 +79,7 @@ final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFormat> {
   }
 
   @Override
-  public HmacKey newKey(byte[] serialized) throws GeneralSecurityException {
+  public HmacKey newKey(ByteString serialized) throws GeneralSecurityException {
     try {
       HmacKeyFormat format = HmacKeyFormat.parseFrom(serialized);
       return newKey(format);
@@ -96,6 +98,15 @@ final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFormat> {
         .build();
   }
 
+  @Override
+  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+    HmacKey key = newKey(keyFormat.getValue());
+    return KeyData.newBuilder()
+        .setTypeUrl(TYPE_URL)
+        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
+        .build();
+  }
 
   @Override
   public boolean doesSupport(String typeUrl) {

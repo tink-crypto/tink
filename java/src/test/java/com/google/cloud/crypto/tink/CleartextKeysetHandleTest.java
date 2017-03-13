@@ -45,7 +45,7 @@ public class CleartextKeysetHandleTest {
   @Test
   public void testBasic() throws Exception {
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setKeyType(macTypeUrl).build();
+    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyFormat(format)
         .build();
@@ -64,7 +64,7 @@ public class CleartextKeysetHandleTest {
   @Test
   public void testInvalidKeyset() throws Exception {
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setKeyType(macTypeUrl).build();
+    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyFormat(format)
         .build();

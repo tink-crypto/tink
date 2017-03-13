@@ -24,10 +24,10 @@ import static org.junit.Assert.fail;
 import com.google.cloud.crypto.tink.TestUtil.DummyMacKeyManager;
 import com.google.cloud.crypto.tink.TestUtil.EchoAead;
 import com.google.cloud.crypto.tink.TestUtil.EchoAeadKeyManager;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
@@ -53,7 +53,7 @@ public class KmsEncryptedKeysetHandleTest {
   @Test
   public void testBasic() throws Exception {
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setKeyType(macTypeUrl).build();
+    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyFormat(format)
         .build();
@@ -61,8 +61,8 @@ public class KmsEncryptedKeysetHandleTest {
     Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     // Encrypt the keyset with EchoAeadKey.
-    Any echoAeadKey = Registry.INSTANCE.newKey(
-        KeyFormat.newBuilder().setKeyType(echoAeadTypeUrl).build());
+    KeyData echoAeadKey = Registry.INSTANCE.newKey(
+        KeyFormat.newBuilder().setTypeUrl(echoAeadTypeUrl).build());
     EchoAead echoAead = Registry.INSTANCE.getPrimitive(echoAeadKey);
     KeysetHandle keysetHandle = manager.getKeysetHandle(echoAead);
     assertNotNull(keysetHandle.getEncryptedKeyset());
@@ -80,7 +80,7 @@ public class KmsEncryptedKeysetHandleTest {
   @Test
   public void testInvalidKeyset() throws Exception {
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setKeyType(macTypeUrl).build();
+    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyFormat(format)
         .build();
@@ -88,8 +88,8 @@ public class KmsEncryptedKeysetHandleTest {
     Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     // Encrypt the keyset with EchoAeadKey.
-    Any echoAeadKey = Registry.INSTANCE.newKey(
-        KeyFormat.newBuilder().setKeyType(echoAeadTypeUrl).build());
+    KeyData echoAeadKey = Registry.INSTANCE.newKey(
+        KeyFormat.newBuilder().setTypeUrl(echoAeadTypeUrl).build());
     EchoAead echoAead = Registry.INSTANCE.getPrimitive(echoAeadKey);
     KeysetHandle keysetHandle = manager.getKeysetHandle(echoAead);
     assertNotNull(keysetHandle.getEncryptedKeyset());

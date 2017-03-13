@@ -25,13 +25,11 @@ import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
 import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.KeysetHandle;
-import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
-import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
@@ -98,22 +96,24 @@ public class AeadFactoryTest {
         CryptoFormat.NON_RAW_PREFIX_SIZE + plaintext.length  + ivSize + tagSize,
         ciphertext.length);
 
-    // encrypt with a non-primary key and decrypt with the keyset
-    Aead aead2 = Registry.INSTANCE.getPrimitive(Any.pack(aeadKey));
+    // encrypt with a non-primary RAW key and decrypt with the keyset
+    KeysetHandle keysetHandle2 = TestUtil.createKeysetHandle(
+        TestUtil.createKeyset(raw, legacy, tink));
+    Aead aead2 = AeadFactory.getPrimitive(keysetHandle2);
     ciphertext = aead2.encrypt(plaintext, associatedData);
     assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
 
-    // encrypt with a RAW key, decrypt with the keyset
-    aead2 = Registry.INSTANCE.getPrimitive(Any.pack(TestUtil.createAesCtrHmacAeadKey(
-        aesCtrKeyValue, ivSize, hmacKeyValue, tagSize)));
-    ciphertext = aead2.encrypt(plaintext, associatedData);
-    assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
-
-    // encrypt with a random RAW key not in the keyset, decrypt with the keyset should fail
+    // encrypt with a random key not in the keyset, decrypt with the keyset should fail
     byte[] aesCtrKeyValue2 = Random.randBytes(AES_KEY_SIZE);
     byte[] hmacKeyValue2 = Random.randBytes(HMAC_KEY_SIZE);
-    aead2 = Registry.INSTANCE.getPrimitive(Any.pack(TestUtil.createAesCtrHmacAeadKey(
-        aesCtrKeyValue2, ivSize, hmacKeyValue2, tagSize)));
+    Key random = TestUtil.createKey(
+        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue2, ivSize, hmacKeyValue2, tagSize),
+        44,
+        KeyStatusType.ENABLED,
+        OutputPrefixType.TINK);
+    keysetHandle2 = TestUtil.createKeysetHandle(
+        TestUtil.createKeyset(random));
+    aead2 = AeadFactory.getPrimitive(keysetHandle2);
     ciphertext = aead2.encrypt(plaintext, associatedData);
     try {
       aead.decrypt(ciphertext, associatedData);

@@ -24,13 +24,11 @@ import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Mac;
-import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
-import com.google.protobuf.Any;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import org.junit.Before;
@@ -88,8 +86,10 @@ public class MacFactoryTest {
       fail("Valid MAC, should not throw exception");
     }
 
-    // mac with a non-primary key, verify with the keyset
-    Mac mac2 = Registry.INSTANCE.getPrimitive(Any.pack(hmacKey));
+    // mac with a non-primary RAW key, verify with the keyset
+    KeysetHandle keysetHandle2 = TestUtil.createKeysetHandle(
+        TestUtil.createKeyset(raw, legacy, tink));
+    Mac mac2 = MacFactory.getPrimitive(keysetHandle2);
     tag = mac2.computeMac(plaintext);
     try {
       mac.verifyMac(tag, plaintext);
@@ -97,18 +97,16 @@ public class MacFactoryTest {
       fail("Valid MAC, should not throw exception");
     }
 
-    // mac with a RAW key, verify with the keyset
-    mac2 = Registry.INSTANCE.getPrimitive(Any.pack(TestUtil.createHmacKey(keyValue, 16)));
-    tag = mac2.computeMac(plaintext);
-    try {
-      mac.verifyMac(tag, plaintext);
-    } catch (GeneralSecurityException e) {
-      fail("Valid MAC, should not throw exception");
-    }
-
-    // mac with a RAW key not in the keyset, decrypt with the keyset should fail
+    // mac with a random key not in the keyset, verify with the keyset should fail
     byte[] keyValue2 = Random.randBytes(HMAC_KEY_SIZE);
-    mac2 = Registry.INSTANCE.getPrimitive(Any.pack(TestUtil.createHmacKey(keyValue2, 16)));
+    Key random = TestUtil.createKey(
+        TestUtil.createHmacKey(keyValue2, 16),
+        44,
+        KeyStatusType.ENABLED,
+        OutputPrefixType.TINK);
+    keysetHandle2 = TestUtil.createKeysetHandle(
+        TestUtil.createKeyset(random));
+    mac2 = MacFactory.getPrimitive(keysetHandle2);
     tag = mac2.computeMac(plaintext);
     try {
       mac.verifyMac(tag, plaintext);

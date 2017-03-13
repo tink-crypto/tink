@@ -65,7 +65,7 @@ public class KeysetManagerTest {
     }
 
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setKeyType(macTypeUrl).build();
+    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
     manager = new KeysetManager.Builder()
         .setKeyFormat(format)
         .build();
@@ -82,7 +82,7 @@ public class KeysetManagerTest {
 
     // Encrypt the keyset with EchoAead.
     EchoAead echoAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKey(
-        KeyFormat.newBuilder().setKeyType(echoAeadTypeUrl).build()));
+        KeyFormat.newBuilder().setTypeUrl(echoAeadTypeUrl).build()));
     KeysetHandle keysetHandle = manager.getKeysetHandle(echoAead);
     assertNotNull(keysetHandle.getEncryptedKeyset());
 
@@ -97,7 +97,7 @@ public class KeysetManagerTest {
   @Test
   public void testExistingKeyset() throws Exception {
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setKeyType(macTypeUrl).build();
+    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
     KeysetManager manager1 = new KeysetManager.Builder()
         .setKeyFormat(format)
         .build();
@@ -121,7 +121,7 @@ public class KeysetManagerTest {
   @Test
   public void testFaultyKms() throws Exception {
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setKeyType(macTypeUrl).build();
+    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyFormat(format)
         .build();
@@ -129,7 +129,7 @@ public class KeysetManagerTest {
 
     // Encrypt with faulty Aead.
     FaultyAead faultyAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKey(
-        KeyFormat.newBuilder().setKeyType(faultyAeadTypeUrl).build()));
+        KeyFormat.newBuilder().setTypeUrl(faultyAeadTypeUrl).build()));
     try {
       KeysetHandle keysetHandle = manager.getKeysetHandle(faultyAead);
       fail("Expected GeneralSecurityException");

@@ -16,10 +16,11 @@
 
 package com.google.cloud.crypto.tink;
 
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,12 +95,13 @@ public final class Registry {
    * Convenience method for generating a new key for the specified {@code format}.
    * It looks up a KeyManager identified by {@code format.type_url}, and calls
    * managers {@code newKey(format)}-method.
-   *
+   * This method should be used solely for key management.
    * @return a new key.
    */
-  public <K extends MessageLite> K newKey(KeyFormat format)
+  public <P, K extends MessageLite, F extends MessageLite> KeyData newKey(KeyFormat format)
       throws GeneralSecurityException {
-    return newKey(format.getKeyType(), format.getFormat().getValue().toByteArray());
+    KeyManager<P, K, F> manager = getKeyManager(format.getTypeUrl());
+    return manager.newKey(format);
   }
 
   /**
@@ -110,9 +112,21 @@ public final class Registry {
    * @return a new key.
    */
   public <P, K extends MessageLite, F extends MessageLite> K newKey(
-      String typeUrl, byte[] serialized) throws GeneralSecurityException {
+      String typeUrl, ByteString serialized) throws GeneralSecurityException {
     KeyManager<P, K, F> manager = getKeyManager(typeUrl);
     return manager.newKey(serialized);
+  }
+
+  /**
+   * Convenience method for generating a new key for the specified {@code serialized}.
+   * It looks up a KeyManager identified by {@code typeUrl}, and calls
+   * managers {@code newKey(serialized)}-method.
+   *
+   * @return a new key.
+   */
+  public <K extends MessageLite> K newKey(String typeUrl, byte[] serialized)
+      throws GeneralSecurityException {
+    return newKey(typeUrl, ByteString.copyFrom(serialized));
   }
 
   /**
@@ -149,21 +163,31 @@ public final class Registry {
    * @return a new primitive.
    */
   public <P, K extends MessageLite, F extends MessageLite> P getPrimitive(
-      String typeUrl, byte[] serialized) throws GeneralSecurityException {
+      String typeUrl, ByteString serialized) throws GeneralSecurityException {
     KeyManager<P, K, F> manager = getKeyManager(typeUrl);
     return manager.getPrimitive(serialized);
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code proto}.
-   * It looks up a KeyManager identified by {@code proto.type_url}, and calls
-   * managers {@code getPrimitive(proto)}-method.
+   * Convenience method for creating a new primitive for the key given in {@code serialized}.
+   * It looks up a KeyManager identified by {@code type_url}, and calls
+   * managers {@code getPrimitive(serialized)}-method.
    *
    * @return a new primitive.
    */
-  public <P> P getPrimitive(Any proto)
-      throws GeneralSecurityException {
-    return getPrimitive(proto.getTypeUrl(), proto.getValue().toByteArray());
+  public <P> P getPrimitive(String typeUrl, byte[] serialized) throws GeneralSecurityException {
+    return getPrimitive(typeUrl, ByteString.copyFrom(serialized));
+  }
+
+  /**
+   * Convenience method for creating a new primitive for the key given in {@code keyData}.
+   * It looks up a KeyManager identified by {@code keyData.type_url}, and calls
+   * managers {@code getPrimitive(keyData.value)}-method.
+   *
+   * @return a new primitive.
+   */
+  public <P> P getPrimitive(KeyData keyData) throws GeneralSecurityException {
+    return getPrimitive(keyData.getTypeUrl(), keyData.getValue());
   }
 
   /**
@@ -202,10 +226,10 @@ public final class Registry {
       if (key.getStatus() == KeyStatusType.ENABLED) {
         P primitive;
         if (customManager != null && customManager.doesSupport(key.getKeyData().getTypeUrl())) {
-          primitive = customManager.getPrimitive(key.getKeyData().getValue().toByteArray());
+          primitive = customManager.getPrimitive(key.getKeyData().getValue());
         } else {
           primitive = getPrimitive(key.getKeyData().getTypeUrl(),
-              key.getKeyData().getValue().toByteArray());
+              key.getKeyData().getValue());
         }
         PrimitiveSet<P>.Entry<P> entry = primitives.addPrimitive(primitive, key);
         if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {

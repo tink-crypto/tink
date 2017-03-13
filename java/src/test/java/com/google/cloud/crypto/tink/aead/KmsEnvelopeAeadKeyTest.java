@@ -26,11 +26,11 @@ import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TestGoogleCredentialFactory;
 import com.google.cloud.crypto.tink.TestUtil;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
-import com.google.protobuf.Any;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
@@ -62,7 +62,7 @@ public class KmsEnvelopeAeadKeyTest {
     int tagSize = 16;
     KeyFormat dekFormat = TestUtil.createAesCtrHmacAeadKeyFormat(
         aesKeySize, ivSize, hmacKeySize, tagSize);
-    Any kmsKey = Any.pack(TestUtil.createGoogleCloudKmsAeadKey(
+    KeyData kmsKey = TestUtil.createKeyData(TestUtil.createGoogleCloudKmsAeadKey(
         TestGoogleCredentialFactory.RESTRICTED));
     KmsEnvelopeAeadKey kmsEnvelopeAeadKey = TestUtil.createKmsEnvelopeAeadKey(kmsKey, dekFormat);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
@@ -82,7 +82,7 @@ public class KmsEnvelopeAeadKeyTest {
     int tagSize = 16;
     KeyFormat dekFormat = TestUtil.createAesCtrHmacAeadKeyFormat(
         aesKeySize, ivSize, hmacKeySize, tagSize);
-    Any kmsKey = Any.pack(TestUtil.createGoogleCloudKmsAeadKey(
+    KeyData kmsKey = TestUtil.createKeyData(TestUtil.createGoogleCloudKmsAeadKey(
         TestGoogleCredentialFactory.RESTRICTED));
     KmsEnvelopeAeadKey kmsEnvelopeAeadKey = TestUtil.createKmsEnvelopeAeadKey(kmsKey, dekFormat);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(

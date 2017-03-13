@@ -21,7 +21,10 @@ import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKeyFormat;
 import com.google.cloud.crypto.tink.Registry;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -33,7 +36,7 @@ class KmsEnvelopeAeadKeyManager
       "type.googleapis.com/google.cloud.crypto.tink.KmsEnvelopeAeadKey";
 
   @Override
-  public Aead getPrimitive(byte[] serialized) throws GeneralSecurityException {
+  public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
     try {
       KmsEnvelopeAeadKey keyProto = KmsEnvelopeAeadKey.parseFrom(serialized);
       return getPrimitive(keyProto);
@@ -50,7 +53,7 @@ class KmsEnvelopeAeadKeyManager
   }
 
   @Override
-  public KmsEnvelopeAeadKey newKey(byte[] serialized) throws GeneralSecurityException {
+  public KmsEnvelopeAeadKey newKey(ByteString serialized) throws GeneralSecurityException {
     try {
       KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.parseFrom(serialized);
       return newKey(format);
@@ -65,6 +68,16 @@ class KmsEnvelopeAeadKeyManager
     return KmsEnvelopeAeadKey.newBuilder()
         .setParams(format.getParams())
         .setVersion(VERSION)
+        .build();
+  }
+
+  @Override
+  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+    KmsEnvelopeAeadKey key = newKey(keyFormat.getValue());
+    return KeyData.newBuilder()
+        .setTypeUrl(KEY_TYPE)
+        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setKeyMaterialType(KeyData.KeyMaterialType.REMOTE)
         .build();
   }
 

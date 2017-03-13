@@ -21,8 +21,11 @@ import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
 import com.google.cloud.crypto.tink.HybridEncrypt;
 import com.google.cloud.crypto.tink.KeyManager;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
@@ -35,7 +38,7 @@ class EciesAeadHkdfPublicKeyManager implements
       "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey";
 
   @Override
-  public HybridEncrypt getPrimitive(byte[] serialized) throws GeneralSecurityException {
+  public HybridEncrypt getPrimitive(ByteString serialized) throws GeneralSecurityException {
     try {
       EciesAeadHkdfPublicKey recipientKeyProto = EciesAeadHkdfPublicKey.parseFrom(serialized);
       return getPrimitive(recipientKeyProto);
@@ -59,13 +62,18 @@ class EciesAeadHkdfPublicKeyManager implements
   }
 
   @Override
-  public EciesAeadHkdfPublicKey newKey(byte[] serialized) throws GeneralSecurityException {
+  public EciesAeadHkdfPublicKey newKey(ByteString serialized) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented.");
   }
 
   @Override
   public EciesAeadHkdfPublicKey newKey(EciesAeadHkdfKeyFormat keyFormat)
       throws GeneralSecurityException {
+    throw new GeneralSecurityException("Not implemented.");
+  }
+
+  @Override
+  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented.");
   }
 

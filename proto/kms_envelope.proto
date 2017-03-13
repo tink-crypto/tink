@@ -18,7 +18,6 @@ syntax = "proto3";
 
 package google.cloud.crypto.tink;
 
-import "google/protobuf/any.proto";
 import "proto/tink.proto";
 
 option java_package = "com.google.cloud.crypto.tink";
@@ -27,7 +26,7 @@ option java_outer_classname = "KmsEnvelopeProto";
 message KmsEnvelopeAeadParams {
   // This field specifies which KMS to call and how, e.g., GoogleCloudKmsAeadKey.
   // Required.
-  google.protobuf.Any kms_key = 1;
+  KeyData kms_key = 1;
   // Key format of the Data Encryption Key, e.g., AesCtrHmacAeadKeyFormat.
   // Required.
   KeyFormat dek_format = 2;

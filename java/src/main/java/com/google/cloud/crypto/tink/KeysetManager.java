@@ -16,12 +16,12 @@
 
 package com.google.cloud.crypto.tink;
 
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
-import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -95,7 +95,7 @@ public class KeysetManager {
    * Setting the new key as the primary key.
    */
   public KeysetManager rotate(KeyFormat keyFormat) throws GeneralSecurityException {
-    Any keyData = Util.pack(keyFormat.getKeyType(), Registry.INSTANCE.newKey(keyFormat));
+    KeyData keyData = Registry.INSTANCE.newKey(keyFormat);
     int keyId = Random.randNonNegativeInt();
     while (hasKeyWithKeyId(keyId)) {
       keyId = Random.randNonNegativeInt();

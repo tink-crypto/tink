@@ -23,9 +23,12 @@ import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.Registry;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
@@ -63,7 +66,7 @@ class AesCtrHmacAeadKeyManager
   }
 
   @Override
-  public Aead getPrimitive(byte[] serialized) throws GeneralSecurityException {
+  public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
     try {
       AesCtrHmacAeadKey keyProto = AesCtrHmacAeadKey.parseFrom(serialized);
       return getPrimitive(keyProto);
@@ -82,7 +85,7 @@ class AesCtrHmacAeadKeyManager
   }
 
   @Override
-  public AesCtrHmacAeadKey newKey(byte[] serialized) throws GeneralSecurityException {
+  public AesCtrHmacAeadKey newKey(ByteString serialized) throws GeneralSecurityException {
     try {
       AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.parseFrom(serialized);
       return newKey(format);
@@ -100,6 +103,16 @@ class AesCtrHmacAeadKeyManager
         .setAesCtrKey(aesCtrKey)
         .setHmacKey(hmacKey)
         .setVersion(VERSION)
+        .build();
+  }
+
+  @Override
+  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+    AesCtrHmacAeadKey key = newKey(keyFormat.getValue());
+    return KeyData.newBuilder()
+        .setTypeUrl(AES_CTR_HMAC_AEAD_KEY_TYPE)
+        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
         .build();
   }
 
