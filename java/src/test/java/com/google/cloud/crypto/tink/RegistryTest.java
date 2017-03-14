@@ -29,6 +29,7 @@ import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -42,14 +43,18 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class RegistryTest {
 
-  private class DummyMac implements Mac {
+  private static class DummyMac implements Mac {
     private final String label;
     public DummyMac(String label) {
       this.label = label;
     }
     @Override
     public byte[] computeMac(byte[] data) throws GeneralSecurityException {
-      return label.getBytes();
+      try {
+        return label.getBytes("UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        return null;
+      }
     }
     @Override
     public void verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
@@ -57,18 +62,26 @@ public class RegistryTest {
     }
   }
 
-  private class DummyAead implements Aead {
+  private static class DummyAead implements Aead {
     private final String label;
     public DummyAead(String label) {
       this.label = label;
     }
     @Override
     public byte[] encrypt(byte[] plaintext, byte[] aad) throws GeneralSecurityException {
-      return label.getBytes();
+      try {
+        return label.getBytes("UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        return null;
+      }
     }
     @Override
     public byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException {
-      return label.getBytes();
+      try {
+        return label.getBytes("UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        return null;
+      }
     }
     @Override
     public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) {
@@ -80,7 +93,7 @@ public class RegistryTest {
     }
   }
 
-  private class Mac1KeyManager implements KeyManager<Mac, Message, Message> {
+  private static class Mac1KeyManager implements KeyManager<Mac, Message, Message> {
     public Mac1KeyManager() {}
 
     @Override
@@ -109,7 +122,7 @@ public class RegistryTest {
     }
   }
 
-  private class CustomMac1KeyManager implements KeyManager<Mac, Message, Message> {
+  private static class CustomMac1KeyManager implements KeyManager<Mac, Message, Message> {
     public CustomMac1KeyManager() {}
 
     @Override
@@ -138,7 +151,7 @@ public class RegistryTest {
     }
   }
 
-  private class Mac2KeyManager implements KeyManager<Mac, Message, Message> {
+  private static class Mac2KeyManager implements KeyManager<Mac, Message, Message> {
     public Mac2KeyManager() {}
 
     @Override
@@ -167,7 +180,7 @@ public class RegistryTest {
     }
   }
 
-  private class AeadKeyManager implements KeyManager<Aead, Message, Message> {
+  private static class AeadKeyManager implements KeyManager<Aead, Message, Message> {
     public AeadKeyManager() {}
 
     @Override
@@ -224,13 +237,13 @@ public class RegistryTest {
     KeyManager<Aead, Message, Message> aeadManager = registry.getKeyManager(aeadTypeUrl);
     assertEquals(AeadKeyManager.class, aeadManager.getClass());
     Aead aead = aeadManager.getPrimitive(ByteString.copyFrom(new byte[0]));
-    String ciphertext = new String(aead.encrypt("plaintext".getBytes(), null));
+    String ciphertext = new String(aead.encrypt("plaintext".getBytes("UTF-8"), null));
     assertEquals(AeadKeyManager.class.getSimpleName(), ciphertext);
     // TODO(przydatek): add tests when the primitive of KeyManager does not match key type.
 
     String badTypeUrl = "bad type URL";
     try {
-      KeyManager<Mac, Message, Message> macManager = registry.getKeyManager(badTypeUrl);
+      KeyManager<Mac, Message, Message> unused = registry.getKeyManager(badTypeUrl);
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("Unsupported"));

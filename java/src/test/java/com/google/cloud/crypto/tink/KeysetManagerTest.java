@@ -111,6 +111,8 @@ public class KeysetManagerTest {
     Keyset keyset2 = manager2.getKeysetHandle().getKeyset();
 
     assertEquals(2, keyset2.getKeyCount());
+    // The first key in two keysets should be the same.
+    assertEquals(keyset1.getKey(0), keyset2.getKey(0));
     // The new key is the primary key.
     assertEquals(keyset2.getPrimaryKeyId(), keyset2.getKey(1).getKeyId());
   }
@@ -131,7 +133,7 @@ public class KeysetManagerTest {
     FaultyAead faultyAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKey(
         KeyFormat.newBuilder().setTypeUrl(faultyAeadTypeUrl).build()));
     try {
-      KeysetHandle keysetHandle = manager.getKeysetHandle(faultyAead);
+      KeysetHandle unused = manager.getKeysetHandle(faultyAead);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("encryption with KMS failed"));

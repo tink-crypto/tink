@@ -74,7 +74,7 @@ public class CleartextKeysetHandleTest {
     byte[] proto = keyset.toByteArray();
     proto[0] = (byte) ~proto[0];
     try {
-      KeysetHandle handle = CleartextKeysetHandle.fromBinaryFormat(proto);
+      KeysetHandle unused = CleartextKeysetHandle.fromBinaryFormat(proto);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));
@@ -82,7 +82,7 @@ public class CleartextKeysetHandleTest {
 
     String str = TextFormat.printToUnicodeString(keyset);
     try {
-      KeysetHandle handle = CleartextKeysetHandle.fromTextFormat(str + "invalid");
+      KeysetHandle unused = CleartextKeysetHandle.fromTextFormat(str + "invalid");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));

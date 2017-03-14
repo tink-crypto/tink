@@ -85,7 +85,6 @@ public class KmsEncryptedKeysetHandleTest {
         .setKeyFormat(format)
         .build();
     manager.rotate();
-    Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     // Encrypt the keyset with EchoAeadKey.
     KeyData echoAeadKey = Registry.INSTANCE.newKey(
@@ -103,7 +102,7 @@ public class KmsEncryptedKeysetHandleTest {
     byte[] proto = encryptedKeyset.toByteArray();
     proto[0] = (byte) ~proto[0];
     try {
-      KeysetHandle handle = KmsEncryptedKeysetHandle.fromBinaryFormat(proto);
+      KeysetHandle unused = KmsEncryptedKeysetHandle.fromBinaryFormat(proto);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));
@@ -111,7 +110,7 @@ public class KmsEncryptedKeysetHandleTest {
 
     String str = TextFormat.printToUnicodeString(encryptedKeyset);
     try {
-      KeysetHandle handle = KmsEncryptedKeysetHandle.fromTextFormat(str + "invalid");
+      KeysetHandle unused = KmsEncryptedKeysetHandle.fromTextFormat(str + "invalid");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));
@@ -121,7 +120,7 @@ public class KmsEncryptedKeysetHandleTest {
         .clearEncryptedKeyset()
         .build();
     try {
-      KeysetHandle handle = KmsEncryptedKeysetHandle.fromBinaryFormat(proto);
+      KeysetHandle unused = KmsEncryptedKeysetHandle.fromProto(encryptedKeySet2);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));
@@ -131,7 +130,7 @@ public class KmsEncryptedKeysetHandleTest {
         .clearKmsKey()
         .build();
     try {
-      KeysetHandle handle = KmsEncryptedKeysetHandle.fromBinaryFormat(proto);
+      KeysetHandle unused = KmsEncryptedKeysetHandle.fromProto(encryptedKeySet3);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));

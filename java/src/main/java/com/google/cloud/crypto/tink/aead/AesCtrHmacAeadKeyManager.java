@@ -43,14 +43,8 @@ class AesCtrHmacAeadKeyManager
   private static final String AES_CTR_KEY_TYPE =
       "type.googleapis.com/google.cloud.crypto.tink.AesCtrKey";
 
-  private static final String AES_CTR_KEY_FORMAT =
-      "type.googleapis.com/google.cloud.crypto.tink.AesCtrKeyFormat";
-
   private static final String HMAC_KEY_TYPE =
       "type.googleapis.com/google.cloud.crypto.tink.HmacKey";
-
-  private static final String HMAC_KEY_FORMAT =
-      "type.googleapis.com/google.cloud.crypto.tink.HmacKeyFormat";
 
   private static final String AES_CTR_HMAC_AEAD_KEY_TYPE =
       "type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey";

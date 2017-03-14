@@ -77,7 +77,7 @@ public class EciesAeadHkdfHybridEncryptTest {
         CONTEXT.getBytes("UTF-8"));
     byte[] decrypted = hybridDecrypt.decrypt(ciphertext, CONTEXT.getBytes("UTF-8"));
 
-    assertFalse(PLAINTEXT.equals(new String(ciphertext)));
-    assertEquals(PLAINTEXT, new String(decrypted));
+    assertFalse(PLAINTEXT.equals(new String(ciphertext, "UTF-8")));
+    assertEquals(PLAINTEXT, new String(decrypted, "UTF-8"));
   }
 }
