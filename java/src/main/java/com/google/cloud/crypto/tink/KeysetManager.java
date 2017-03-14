@@ -22,7 +22,12 @@ import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
+import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 
 /**
@@ -111,6 +116,26 @@ public class KeysetManager {
   }
 
   /**
+   * Transforms all private keys in the keyset to public keys.
+   * Warning: the private keys are destroyed if the operation is successful.
+   * @throws GeneralSecurityException if cannot convert one of the keys or cannot find
+   * the corresponding public key protobuf.
+   */
+  public KeysetManager transformToPublicKeyset() throws GeneralSecurityException {
+    Keyset.Builder keysetBuilder2 = Keyset.newBuilder();
+    for (Keyset.Key key : keysetBuilder.getKeyList()) {
+      KeyData keyData = createPublicKeyData(key.getKeyData());
+      keysetBuilder2.addKey(Keyset.Key.newBuilder()
+          .mergeFrom(key)
+          .setKeyData(keyData)
+          .build());
+    }
+    keysetBuilder.clearKey();
+    keysetBuilder.mergeFrom(keysetBuilder2.build());
+    return this;
+  }
+
+  /**
    * @return return {@code KeysetHandle} of the managed keyset.
    */
   public KeysetHandle getKeysetHandle() {
@@ -147,5 +172,65 @@ public class KeysetManager {
       }
     }
     return false;
+  }
+
+  private static KeyData createPublicKeyData(KeyData privateKeyData)
+      throws GeneralSecurityException {
+    if (privateKeyData.getKeyMaterialType() != KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
+      throw new GeneralSecurityException("The keyset contains non-private key");
+    }
+    KeyData publicKeyData = getPublicKeyData(privateKeyData);
+    validate(publicKeyData);
+    return publicKeyData;
+  }
+
+  private static KeyData getPublicKeyData(KeyData privateKeyData)
+      throws GeneralSecurityException {
+    String className = getClassNameFromTypeUrl(privateKeyData.getTypeUrl());
+    Class<?> privateKeyProtoClass = loadClass(className);
+    try {
+      Object privateKeyInstance = privateKeyProtoClass
+          .getDeclaredMethod("parseFrom", ByteString.class)
+          .invoke(null /* Object, ignored */, privateKeyData.getValue());
+      MessageLite publicKey = (MessageLite) privateKeyProtoClass
+          .getDeclaredMethod("getPublicKey")
+          .invoke(privateKeyInstance);
+      return KeyData.newBuilder()
+          .setTypeUrl(getPublicKeyTypeUrl(privateKeyData.getTypeUrl()))
+          .setValue(publicKey.toByteString())
+          .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
+          .build();
+    } catch (Exception e) {
+      throw new GeneralSecurityException("Cannot extract public key", e);
+    }
+  }
+
+  private static void validate(KeyData keyData) throws GeneralSecurityException {
+    // This will throw GeneralSecurityException if the keyData is invalid.
+    Registry.INSTANCE.getPrimitive(keyData);
+  }
+
+  private static String getClassNameFromTypeUrl(String typeUrl) {
+    int dot = typeUrl.lastIndexOf(".");
+    return typeUrl.substring(dot + 1);
+  }
+
+  private static String getPublicKeyTypeUrl(String privateKeyTypeUrl) {
+    return privateKeyTypeUrl.replace("PrivateKey", "PublicKey");
+  }
+
+  private static Class<?> loadClass(String className) throws GeneralSecurityException {
+    try {
+      ImmutableSet<ClassInfo> classInfos =
+          ClassPath.from(KeysetManager.class.getClassLoader()).getAllClasses();
+      for (ClassInfo classInfo : classInfos) {
+        if (classInfo.getName().toLowerCase().endsWith(className.toLowerCase())) {
+          return classInfo.load();
+        }
+      }
+    } catch (Exception e) {
+      throw new GeneralSecurityException("Class not found: " + className, e);
+    }
+    throw new GeneralSecurityException("Class not found: " + className);
   }
 }

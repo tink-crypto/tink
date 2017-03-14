@@ -133,5 +133,6 @@ java_library(
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
         "//proto:tink_java_proto_compile_imports",
+        "@com_google_guava//jar",
     ],
 )

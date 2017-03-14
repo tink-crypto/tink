@@ -24,23 +24,28 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
+import com.google.cloud.crypto.tink.CleartextKeysetHandle;
 import com.google.cloud.crypto.tink.KeysetHandle;
+import com.google.cloud.crypto.tink.KmsEncryptedKeysetHandle;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
+import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.ByteStreams;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
-import com.google.protobuf.util.JsonFormat;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -185,16 +190,14 @@ public class TinkeyUtil {
   }
 
   /**
-   * Writes {@code proto} in {@code outFormat} to {@code outputStream}. Closes outputStream
-   * afterward.
+   * Writes {@code proto} in {@code outFormat} to {@code outputStream}. Closes
+   * {@code outputStream} afterward.
    */
-  public static void writeProto(Message proto, String outFormat, OutputStream outputStream)
+  public static void writeProto(Message proto, OutputStream outputStream, String outFormat)
       throws IOException {
     byte[] output;
     if (outFormat == null || outFormat.equals("TEXT")) {
       output = TextFormat.printToUnicodeString(proto).getBytes("UTF-8");
-    } else if (outFormat.equals("JSON")) {
-      output = JsonFormat.printer().preservingProtoFieldNames().print(proto).getBytes("UTF-8");
     } else {
       output = proto.toByteArray();
     }
@@ -203,6 +206,23 @@ public class TinkeyUtil {
     } finally {
       outputStream.close();
     }
+  }
+
+  /**
+   * Returns a {@code KeysetHandle} from either a cleartext {@code Keyset} or a
+   * {@code KmsEncryptedKeyset}, read from {@code inputStream}.
+   * Closes {code inputStream} afterward.
+   */
+  public static KeysetHandle getKeysetHandle(InputStream inputStream, String inFormat,
+      File credentialFile) throws IOException, GeneralSecurityException {
+    byte[] inBytes = ByteStreams.toByteArray(inputStream);
+    inputStream.close();
+    if (inFormat == null || inFormat.equals("TEXT")) {
+      Keyset.Builder builder = Keyset.newBuilder();
+      TextFormat.merge(new String(inBytes, "UTF-8"), builder);
+      return CleartextKeysetHandle.parseFrom(builder.build());
+    }
+    return CleartextKeysetHandle.parseFrom(inBytes);
   }
 
   /**
@@ -240,7 +260,6 @@ public class TinkeyUtil {
   public static void validateInputOutputFormat(String format) throws IllegalArgumentException {
     if (format != null
         && !format.equals("TEXT")
-        && !format.equals("JSON")
         && !format.equals("BINARY")) {
       throw new IllegalArgumentException("invalid format: " + format);
     }

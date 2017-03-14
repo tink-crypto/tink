@@ -16,6 +16,7 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import com.google.cloud.crypto.tink.KeysetManager;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,14 +27,20 @@ import java.io.OutputStream;
 public class CreatePublicKeysetCommand extends InOptions implements Command {
   @Override
   public void run() throws Exception {
-    createPublicKeyset(outputStream, outFormat, inputStream, inFormat, credentialFile);
+    create(outputStream, outFormat, inputStream, inFormat, credentialFile);
   }
 
   /**
    * Extracts public keys from {@code inputStream} (using {@code credentialFile} to decrypt
    * if it is encrypted) and writes public keys to {@code outputStream}.
    */
-  public static void createPublicKeyset(OutputStream outputStream, String outFormat,
+  public static void create(OutputStream outputStream, String outFormat,
       InputStream inputStream, String inFormat, File credentialFile) throws Exception {
+    KeysetManager manager = new KeysetManager.Builder()
+        .setKeysetHandle(
+            TinkeyUtil.getKeysetHandle(inputStream, inFormat, credentialFile))
+        .build()
+        .transformToPublicKeyset();
+    TinkeyUtil.writeProto(manager.getKeysetHandle().getKeyset(), outputStream, outFormat);
   }
 }

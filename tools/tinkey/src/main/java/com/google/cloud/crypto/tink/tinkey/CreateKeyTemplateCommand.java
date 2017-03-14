@@ -43,6 +43,6 @@ public class CreateKeyTemplateCommand extends CreateKeyTemplateOptions implement
         + String.format("#     --type-url %s \\\n", typeUrlValue)
         + String.format("#     --key-format \"%s\"\n", keyFormatValue);
     outputStream.write(comment.getBytes("UTF-8"));
-    TinkeyUtil.writeProto(keyTemplate, "TEXT" /* outFormat */, outputStream);
+    TinkeyUtil.writeProto(keyTemplate, outputStream, "TEXT" /* outFormat */);
   }
 }

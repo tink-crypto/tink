@@ -34,8 +34,8 @@ class InOptions extends OutOptions {
   @Option(
       name = "--inFormat",
       required = false,
-      metaVar = "TEXT | JSON | BINARY",
-      usage = "The input format: TEXT, JSON or BINARY. TEXT is default")
+      metaVar = "TEXT | BINARY",
+      usage = "The input format: TEXT or BINARY. TEXT is default")
   String inFormat;
 
   @Override

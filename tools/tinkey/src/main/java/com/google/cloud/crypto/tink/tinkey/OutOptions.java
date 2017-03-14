@@ -34,9 +34,9 @@ class OutOptions {
 
   @Option(
       name = "--outFormat",
-      metaVar = "TEXT | JSON | BINARY",
+      metaVar = "TEXT | BINARY",
       required = false,
-      usage = "The output format: TEXT, JSON or BINARY. TEXT is default")
+      usage = "The output format: TEXT or BINARY. TEXT is default")
   String outFormat;
 
   @Option(

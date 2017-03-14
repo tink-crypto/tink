@@ -38,6 +38,7 @@ import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPrivateKey;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadDemParams;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfKeyFormat;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
@@ -476,6 +477,21 @@ public class TestUtil {
         .setVersion(version)
         .setPublicKey(pubKey)
         .setKeyValue(ByteString.copyFrom(privKeyValue))
+        .build();
+  }
+
+  /**
+   *  @return a {@code KeyTemplate} containing a {code EciesAeadHkdfKeyFormat}.
+   */
+  public static KeyTemplate createEciesAeadHkdfKeyTemplate(EllipticCurveType curve,
+      HashType hashType, EcPointFormat ecPointFormat, KeyTemplate demKeyTemplate,
+      byte[] salt) throws Exception {
+    EciesAeadHkdfKeyFormat format = EciesAeadHkdfKeyFormat.newBuilder()
+        .setParams(createEciesAeadHkdfParams(curve, hashType, ecPointFormat, demKeyTemplate, salt))
+        .build();
+    return KeyTemplate.newBuilder()
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey")
+        .setValue(format.toByteString())
         .build();
   }
 

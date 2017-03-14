@@ -19,6 +19,7 @@ java_library(
     deps = [
         "//java",
         "//java:key_management_restricted",
+        "//java:keyset_handle_restricted",
         "//java:protos",
         "//java:subtle",
         "@args4j//jar",
@@ -29,7 +30,6 @@ java_library(
         "@com_google_http_client//jar",
         "@com_google_http_client_jackson2//jar",
         "@com_google_oauth_client//jar",
-        "@com_google_protobuf_protobuf_java_util//jar",
     ],
 )
 

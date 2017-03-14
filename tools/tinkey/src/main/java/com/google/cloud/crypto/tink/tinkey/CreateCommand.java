@@ -57,7 +57,7 @@ public class CreateCommand extends CreateOptions implements Command {
       // cleartext, empty, keyset.
       keyset = createCleartextKeyset(keyTemplate);
     }
-    TinkeyUtil.writeProto(keyset, outFormat, outputStream);
+    TinkeyUtil.writeProto(keyset, outputStream, outFormat);
   }
 
   /**
