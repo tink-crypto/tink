@@ -33,7 +33,8 @@ public interface KeyManager<P, K extends MessageLite, F extends MessageLite> {
   // APIs for primitive development
 
   /**
-   * Constructs an instance of P for the key given in {@code serialized}.
+   * Constructs an instance of P for the key given in {@code serialized},
+   * which must be a serialized {@code K}-proto.
    *
    * @return the new constructed P.
    * @throws GeneralSecurityException if the key given in {@code serialized} is corrupted
@@ -51,7 +52,8 @@ public interface KeyManager<P, K extends MessageLite, F extends MessageLite> {
   P getPrimitive(K proto) throws GeneralSecurityException;
 
   /**
-   * Generates a new key according to specification in {@code serialized}.
+   * Generates a new key according to specification in {@code serialized},
+   * which must be a serialized {@code F}-proto.
    *
    * @return the new generated key.
    * @throws GeneralSecurityException if the specified format is wrong or not supported.
@@ -74,7 +76,7 @@ public interface KeyManager<P, K extends MessageLite, F extends MessageLite> {
   // APIs for Key Management
 
   /**
-   * Generates a new key according to specification in {@code serialized}.
+   * Generates a new key according to specification in {@code keyFormat}.
    *
    * @return the new generated key.
    * @throws GeneralSecurityException if the specified format is wrong or not supported.
