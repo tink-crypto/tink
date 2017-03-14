@@ -228,16 +228,16 @@ public class RegistryTest {
     assertEquals(Mac1KeyManager.class, mac1Manager.getClass());
     assertEquals(Mac2KeyManager.class, mac2Manager.getClass());
     String computedMac = new String(mac1Manager.getPrimitive(
-        ByteString.copyFrom(new byte[0])).computeMac(null));
+        ByteString.copyFrom(new byte[0])).computeMac(null), "UTF-8");
     assertEquals(Mac1KeyManager.class.getSimpleName(), computedMac);
     computedMac = new String(mac2Manager.getPrimitive(
-        ByteString.copyFrom(new byte[0])).computeMac(null));
+        ByteString.copyFrom(new byte[0])).computeMac(null), "UTF-8");
     assertEquals(Mac2KeyManager.class.getSimpleName(), computedMac);
 
     KeyManager<Aead, Message, Message> aeadManager = registry.getKeyManager(aeadTypeUrl);
     assertEquals(AeadKeyManager.class, aeadManager.getClass());
     Aead aead = aeadManager.getPrimitive(ByteString.copyFrom(new byte[0]));
-    String ciphertext = new String(aead.encrypt("plaintext".getBytes("UTF-8"), null));
+    String ciphertext = new String(aead.encrypt("plaintext".getBytes("UTF-8"), null), "UTF-8");
     assertEquals(AeadKeyManager.class.getSimpleName(), ciphertext);
     // TODO(przydatek): add tests when the primitive of KeyManager does not match key type.
 
@@ -269,14 +269,14 @@ public class RegistryTest {
     KeyData key = registry.newKey(format);
     assertEquals(mac2TypeUrl, key.getTypeUrl());
     Mac mac = registry.getPrimitive(key);
-    String computedMac = new String(mac.computeMac(null));
+    String computedMac = new String(mac.computeMac(null), "UTF-8");
     assertEquals(mac2TypeUrl, computedMac);
 
     format =  KeyFormat.newBuilder().setTypeUrl(aeadTypeUrl).build();
     key = registry.newKey(format);
     assertEquals(aeadTypeUrl, key.getTypeUrl());
     Aead aead = registry.getPrimitive(key);
-    String ciphertext = new String(aead.encrypt(null, null));
+    String ciphertext = new String(aead.encrypt(null, null), "UTF-8");
     assertEquals(aeadTypeUrl, ciphertext);
 
     // Create a keyset, and get a PrimitiveSet.
@@ -307,7 +307,7 @@ public class RegistryTest {
         .setPrimaryKeyId(2)
         .build());
     PrimitiveSet<Mac> macSet = registry.getPrimitives(keysetHandle);
-    computedMac = new String(macSet.getPrimary().getPrimitive().computeMac(null));
+    computedMac = new String(macSet.getPrimary().getPrimitive().computeMac(null), "UTF-8");
     assertEquals(mac1TypeUrl, computedMac);
 
     // Try a keyset with some keys non-ENABLED.
@@ -333,7 +333,7 @@ public class RegistryTest {
         .setPrimaryKeyId(3)
         .build());
     macSet = registry.getPrimitives(keysetHandle);
-    computedMac = new String(macSet.getPrimary().getPrimitive().computeMac(null));
+    computedMac = new String(macSet.getPrimary().getPrimitive().computeMac(null), "UTF-8");
     assertEquals(mac2TypeUrl, computedMac);
   }
 
@@ -398,9 +398,11 @@ public class RegistryTest {
     List<PrimitiveSet<Mac>.Entry<Mac>> mac2List =
         macSet.getPrimitive(keysetHandle.getKeyset().getKey(1));
     assertEquals(1, mac1List.size());
-    assertEquals(mac1TypeUrl, new String(mac1List.get(0).getPrimitive().computeMac(null)));
+    assertEquals(mac1TypeUrl, new String(
+        mac1List.get(0).getPrimitive().computeMac(null), "UTF-8"));
     assertEquals(1, mac2List.size());
-    assertEquals(mac2TypeUrl, new String(mac2List.get(0).getPrimitive().computeMac(null)));
+    assertEquals(mac2TypeUrl, new String(
+        mac2List.get(0).getPrimitive().computeMac(null), "UTF-8"));
 
     // Get a PrimitiveSet using a custom key manager for key1.
     KeyManager<Mac, Message, Message> customManager = new CustomMac1KeyManager();
@@ -409,10 +411,10 @@ public class RegistryTest {
     mac2List = macSet.getPrimitive(keysetHandle.getKeyset().getKey(1));
     assertEquals(1, mac1List.size());
     assertEquals(CustomMac1KeyManager.class.getSimpleName(),
-        new String(mac1List.get(0).getPrimitive().computeMac(null)));
+        new String(mac1List.get(0).getPrimitive().computeMac(null), "UTF-8"));
     assertEquals(1, mac2List.size());
     assertEquals(mac2TypeUrl,
-        new String(mac2List.get(0).getPrimitive().computeMac(null)));
+        new String(mac2List.get(0).getPrimitive().computeMac(null), "UTF-8"));
   }
 
   // TODO(przydatek): Add more tests for creation of PrimitiveSets.

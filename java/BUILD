@@ -5,19 +5,6 @@ JAVACOPTS = [
     "-Xlint:deprecation",
 ]
 
-KEYSET_HANDLE_RESTRICTED_API_SRCS = [
-    # Storing keyset in cleartext usually leads to security incidents.
-    # To discourage users from doing that, the visibility of
-    # CleartextKeysetHandle, which allows loading cleartext keyset,
-    # is restricted.
-    "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandle.java",
-]
-
-KEY_MANAGEMENT_RESTRICTED_API_SRCS = [
-    # Normal users should not use this API directly, thus this is restricted.
-    "src/main/java/com/google/cloud/crypto/tink/KeysetManager.java",
-]
-
 # public interfaces
 
 java_library(
@@ -47,6 +34,32 @@ java_library(
     ],
     javacopts = JAVACOPTS,
 )
+
+# restricted APIs
+
+KEYSET_HANDLE_RESTRICTED_SRCS = [
+    # Storing keyset in cleartext usually leads to security incidents.
+    # To discourage users from doing that, the visibility of
+    # CleartextKeysetHandle, which allows loading cleartext keyset,
+    # is restricted.
+    "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandle.java",
+]
+
+filegroup(
+    name = "keyset_handle_restricted_srcs",
+    srcs = KEYSET_HANDLE_RESTRICTED_SRCS,
+)
+
+KEY_MANAGEMENT_RESTRICTED_SRCS = [
+    # Normal users should not use this API directly, thus this is restricted.
+    "src/main/java/com/google/cloud/crypto/tink/KeysetManager.java",
+]
+
+filegroup(
+    name = "key_management_restricted_srcs",
+    srcs = KEY_MANAGEMENT_RESTRICTED_SRCS,
+)
+
 # core, without restricted APIs
 
 filegroup(
@@ -55,8 +68,8 @@ filegroup(
         [
             "src/main/java/com/google/cloud/crypto/tink/*.java",
         ],
-        exclude = KEYSET_HANDLE_RESTRICTED_API_SRCS +
-                  KEY_MANAGEMENT_RESTRICTED_API_SRCS,
+        exclude = KEYSET_HANDLE_RESTRICTED_SRCS +
+                  KEY_MANAGEMENT_RESTRICTED_SRCS,
     ),
 )
 
@@ -68,6 +81,7 @@ java_library(
         "//java:common_subtle",
         "//proto:java_core",
         "//proto:java_core_compile_imports",
+        "@com_google_guava//jar",
     ],
 )
 
@@ -139,6 +153,7 @@ java_library(
         "//proto:java_googlecloudkms",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
+        "@com_google_guava//jar",
         "@com_google_http_client//jar",
         "@com_google_http_client_jackson2//jar",
         "@com_google_oauth_client//jar",
@@ -284,54 +299,103 @@ java_library(
     ],
 )
 
-# public library
+# restricted libraries
 
-PUBLIC_LIBS = [
-    "//java:aead",
-    "//java:aead_envelope",
-    "//java:aead_subtle",
-    "//java:common_subtle",
-    "//java:core",
-    "//java:hybriddecrypt",
-    "//java:hybridencrypt",
-    "//java:mac",
-    "//java:mac_subtle",
-    "//java:signature",
-    "//java:signature_subtle",
-    "//proto:java_aes_ctr_hmac_aead",
-    "//proto:java_aes_gcm",
-    "//proto:java_aes_eax",
-    "//proto:java_core",
-    "//proto:java_core_compile_imports",
-    "//proto:java_ecdsa",
-    "//proto:java_ecies_aead_hkdf",
-    "//proto:java_googlecloudkms",
-    "//proto:java_hmac",
-    "//proto:java_kms_envelope",
-]
+java_library(
+    name = "keyset_handle_restricted",
+    srcs = [
+        ":keyset_handle_restricted_srcs",
+    ],
+    javacopts = JAVACOPTS,
+    visibility = [
+        "//tools/tinkey:__pkg__",
+    ],
+    deps = COMMON_JAVA_DEPS + [
+        "//proto:java_core_compile_imports",
+    ],
+)
+
+java_library(
+    name = "key_management_restricted",
+    srcs = [
+        ":key_management_restricted_srcs",
+    ],
+    javacopts = JAVACOPTS,
+    visibility = [
+        "//tools/tinkey:__pkg__",
+    ],
+    deps = COMMON_JAVA_DEPS + [
+        "//proto:java_core_compile_imports",
+    ],
+)
+
+# public libraries
 
 java_library(
     name = "tink",
     visibility = [
         "//visibility:public",
     ],
-    exports = PUBLIC_LIBS,
+    exports = [
+        "//java:aead",
+        "//java:aead_envelope",
+        "//java:aead_subtle",
+        "//java:common_subtle",
+        "//java:core",
+        "//java:hybriddecrypt",
+        "//java:hybridencrypt",
+        "//java:mac",
+        "//java:mac_subtle",
+        "//java:signature",
+        "//java:signature_subtle",
+        "//proto:java_aes_ctr_hmac_aead",
+        "//proto:java_aes_eax",
+        "//proto:java_aes_gcm",
+        "//proto:java_core",
+        "//proto:java_core_compile_imports",
+        "//proto:java_ecdsa",
+        "//proto:java_ecies_aead_hkdf",
+        "//proto:java_googlecloudkms",
+        "//proto:java_hmac",
+        "//proto:java_kms_envelope",
+    ],
 )
 
-# like ":tink", but also includes restricted libraries
+# like :tink, but include restricted APIs so it can be used for testonly code
 java_library(
     name = "tink_testonly",
     testonly = 1,
     visibility = [
         "//visibility:public",
     ],
-    exports = PUBLIC_LIBS + [
+    exports = [
+        "//java:aead",
+        "//java:aead_envelope",
+        "//java:aead_subtle",
+        "//java:common_subtle",
+        "//java:core",
+        "//java:hybriddecrypt",
+        "//java:hybridencrypt",
         "//java:key_management_restricted",
         "//java:keyset_handle_restricted",
+        "//java:mac",
+        "//java:mac_subtle",
+        "//java:signature",
+        "//java:signature_subtle",
+        "//proto:java_aes_ctr_hmac_aead",
+        "//proto:java_aes_eax",
+        "//proto:java_aes_gcm",
+        "//proto:java_core",
+        "//proto:java_core_compile_imports",
+        "//proto:java_ecdsa",
+        "//proto:java_ecies_aead_hkdf",
+        "//proto:java_googlecloudkms",
+        "//proto:java_hmac",
+        "//proto:java_kms_envelope",
     ],
 )
 
-# public hybrid library
+# public hybrid libraries
 
 java_library(
     name = "tink_hybridencrypt",
@@ -391,32 +455,6 @@ java_library(
         "//proto:java_core",
         "//proto:java_core_compile_imports",
         "//proto:java_ecdsa",
-    ],
-)
-
-# restricted APIs
-
-java_library(
-    name = "keyset_handle_restricted",
-    srcs = KEYSET_HANDLE_RESTRICTED_API_SRCS,
-    javacopts = JAVACOPTS,
-    visibility = [
-        "//tools/tinkey:__pkg__",
-    ],
-    deps = COMMON_JAVA_DEPS + [
-        "//proto:java_core_compile_imports",
-    ],
-)
-
-java_library(
-    name = "key_management_restricted",
-    srcs = KEY_MANAGEMENT_RESTRICTED_API_SRCS,
-    javacopts = JAVACOPTS,
-    visibility = [
-        "//tools/tinkey:__pkg__",
-    ],
-    deps = COMMON_JAVA_DEPS + [
-        "//proto:java_core_compile_imports",
     ],
 )
 

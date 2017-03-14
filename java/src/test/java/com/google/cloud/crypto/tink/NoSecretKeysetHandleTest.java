@@ -16,7 +16,6 @@
 
 package com.google.cloud.crypto.tink;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -74,18 +73,18 @@ public class NoSecretKeysetHandleTest {
     }
   }
 
-  private static final String macTypeUrl = DummyMacKeyManager.class.getSimpleName();
-  private static final String aeadTypeUrl = RemoteAeadKeyManager.class.getSimpleName();
+  private static final String MAC_TYPE_URL = DummyMacKeyManager.class.getSimpleName();
+  private static final String AEAD_TYPE_URL = RemoteAeadKeyManager.class.getSimpleName();
 
   @Before
   public void setUp() throws GeneralSecurityException {
-    Registry.INSTANCE.registerKeyManager(macTypeUrl, new DummyMacKeyManager());
-    Registry.INSTANCE.registerKeyManager(aeadTypeUrl, new RemoteAeadKeyManager());
+    Registry.INSTANCE.registerKeyManager(MAC_TYPE_URL, new DummyMacKeyManager());
+    Registry.INSTANCE.registerKeyManager(AEAD_TYPE_URL, new RemoteAeadKeyManager());
   }
 
   @Test
   public void testBasic() throws Exception {
-    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
+    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(MAC_TYPE_URL).build();
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyFormat(format)
         .build()
@@ -99,7 +98,7 @@ public class NoSecretKeysetHandleTest {
       assertTrue(e.toString().contains("Keyset contains secret key material"));
     }
 
-    KeyFormat format2 = KeyFormat.newBuilder().setTypeUrl(aeadTypeUrl).build();
+    KeyFormat format2 = KeyFormat.newBuilder().setTypeUrl(AEAD_TYPE_URL).build();
     KeysetManager manager2 = new KeysetManager.Builder()
         .setKeyFormat(format2)
         .build()

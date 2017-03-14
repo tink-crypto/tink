@@ -69,7 +69,7 @@ public class CleartextKeysetHandleTest {
     byte[] proto = keyset.toByteArray();
     proto[0] = (byte) ~proto[0];
     try {
-      KeysetHandle handle = CleartextKeysetHandle.parseFrom(proto);
+      KeysetHandle unused = CleartextKeysetHandle.parseFrom(proto);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));
