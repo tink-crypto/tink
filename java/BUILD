@@ -11,7 +11,6 @@ KEYSET_HANDLE_RESTRICTED_API_SRCS = [
     # CleartextKeysetHandle, which allows loading cleartext keyset,
     # is restricted.
     "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandle.java",
-    "src/main/java/com/google/cloud/crypto/tink/AndroidCleartextKeysetHandle.java",
 ]
 
 KEY_MANAGEMENT_RESTRICTED_API_SRCS = [
@@ -70,30 +69,6 @@ java_library(
         "//proto:java_core",
         "//proto:java_core_compile_imports",
     ],
-)
-
-# excluded from Android because they need com.google.protobuf.TextFormat which is
-# not available on Android.
-ANDROID_EXCLUDE_SRCS = [
-    "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandle.java",
-    "src/main/java/com/google/cloud/crypto/tink/KmsEncryptedKeysetHandle.java",
-]
-
-ANDROID_RESTRICTED_SRCS = [
-    "src/main/java/com/google/cloud/crypto/tink/AndroidCleartextKeysetHandle.java",
-]
-
-filegroup(
-    name = "core_android_srcs",
-    srcs = glob(
-        [
-            "src/main/java/com/google/cloud/crypto/tink/*.java",
-        ],
-        exclude = KEYSET_HANDLE_RESTRICTED_API_SRCS +
-                  KEY_MANAGEMENT_RESTRICTED_API_SRCS +
-                  ANDROID_EXCLUDE_SRCS +
-                  ANDROID_RESTRICTED_SRCS,
-    ),
 )
 
 COMMON_JAVA_DEPS = [
@@ -311,33 +286,48 @@ java_library(
 
 # public library
 
+PUBLIC_LIBS = [
+    "//java:aead",
+    "//java:aead_envelope",
+    "//java:aead_subtle",
+    "//java:common_subtle",
+    "//java:core",
+    "//java:hybriddecrypt",
+    "//java:hybridencrypt",
+    "//java:mac",
+    "//java:mac_subtle",
+    "//java:signature",
+    "//java:signature_subtle",
+    "//proto:java_aes_ctr_hmac_aead",
+    "//proto:java_aes_gcm",
+    "//proto:java_aes_eax",
+    "//proto:java_core",
+    "//proto:java_core_compile_imports",
+    "//proto:java_ecdsa",
+    "//proto:java_ecies_aead_hkdf",
+    "//proto:java_googlecloudkms",
+    "//proto:java_hmac",
+    "//proto:java_kms_envelope",
+]
+
 java_library(
     name = "tink",
     visibility = [
         "//visibility:public",
     ],
-    exports = [
-        "//java:aead",
-        "//java:aead_envelope",
-        "//java:aead_subtle",
-        "//java:common_subtle",
-        "//java:core",
-        "//java:hybriddecrypt",
-        "//java:hybridencrypt",
-        "//java:mac",
-        "//java:mac_subtle",
-        "//java:signature",
-        "//java:signature_subtle",
-        "//proto:java_aes_ctr_hmac_aead",
-        "//proto:java_aes_eax",
-        "//proto:java_aes_gcm",
-        "//proto:java_core",
-        "//proto:java_core_compile_imports",
-        "//proto:java_ecdsa",
-        "//proto:java_ecies_aead_hkdf",
-        "//proto:java_googlecloudkms",
-        "//proto:java_hmac",
-        "//proto:java_kms_envelope",
+    exports = PUBLIC_LIBS,
+)
+
+# like ":tink", but also includes restricted libraries
+java_library(
+    name = "tink_testonly",
+    testonly = 1,
+    visibility = [
+        "//visibility:public",
+    ],
+    exports = PUBLIC_LIBS + [
+        "//java:key_management_restricted",
+        "//java:keyset_handle_restricted",
     ],
 )
 
@@ -411,7 +401,6 @@ java_library(
     srcs = KEYSET_HANDLE_RESTRICTED_API_SRCS,
     javacopts = JAVACOPTS,
     visibility = [
-        "//examples/java/envelopeme:__pkg__",
         "//tools/tinkey:__pkg__",
     ],
     deps = COMMON_JAVA_DEPS + [
@@ -424,7 +413,6 @@ java_library(
     srcs = KEY_MANAGEMENT_RESTRICTED_API_SRCS,
     javacopts = JAVACOPTS,
     visibility = [
-        "//examples/java/envelopeme:__pkg__",
         "//tools/tinkey:__pkg__",
     ],
     deps = COMMON_JAVA_DEPS + [

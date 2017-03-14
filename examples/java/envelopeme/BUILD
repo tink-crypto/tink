@@ -13,7 +13,6 @@ java_binary(
     javacopts = JAVACOPTS,
     main_class = "com.example.envelopeme.EnvelopeMe",
     deps = [
-        "//java:keyset_handle_restricted",
         "//java:tink",
         "@args4j//jar",
         "@com_fasterxml_jackson_core//jar",

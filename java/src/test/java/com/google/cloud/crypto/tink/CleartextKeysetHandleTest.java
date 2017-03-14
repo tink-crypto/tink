@@ -24,7 +24,6 @@ import static org.junit.Assert.fail;
 import com.google.cloud.crypto.tink.TestUtil.DummyMacKeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,12 +52,8 @@ public class CleartextKeysetHandleTest {
 
     assertNull(manager.getKeysetHandle().getEncryptedKeyset());
     Keyset keyset1 = manager.getKeysetHandle().getKeyset();
-    KeysetHandle handle1 = CleartextKeysetHandle.fromBinaryFormat(keyset1.toByteArray());
+    KeysetHandle handle1 = CleartextKeysetHandle.parseFrom(keyset1.toByteArray());
     assertEquals(keyset1, handle1.getKeyset());
-
-    KeysetHandle handle2 = CleartextKeysetHandle.fromTextFormat(
-        TextFormat.printToUnicodeString(keyset1));
-    assertEquals(keyset1, handle2.getKeyset());
   }
 
   @Test
@@ -74,15 +69,7 @@ public class CleartextKeysetHandleTest {
     byte[] proto = keyset.toByteArray();
     proto[0] = (byte) ~proto[0];
     try {
-      KeysetHandle unused = CleartextKeysetHandle.fromBinaryFormat(proto);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("invalid keyset"));
-    }
-
-    String str = TextFormat.printToUnicodeString(keyset);
-    try {
-      KeysetHandle unused = CleartextKeysetHandle.fromTextFormat(str + "invalid");
+      KeysetHandle handle = CleartextKeysetHandle.parseFrom(proto);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));

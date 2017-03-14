@@ -118,7 +118,10 @@ public class TestUtil {
     }
     @Override
     public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
-      return KeyData.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+      return KeyData.newBuilder()
+          .setTypeUrl(this.getClass().getSimpleName())
+          .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
+          .build();
     }
     @Override
     public boolean doesSupport(String typeUrl) {
@@ -174,7 +177,10 @@ public class TestUtil {
     }
     @Override
     public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
-      return KeyData.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+      return KeyData.newBuilder()
+          .setTypeUrl(this.getClass().getSimpleName())
+          .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
+          .build();
     }
     @Override
     public boolean doesSupport(String typeUrl) {
@@ -231,7 +237,10 @@ public class TestUtil {
     }
     @Override
     public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
-      return KeyData.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+      return KeyData.newBuilder()
+          .setTypeUrl(this.getClass().getSimpleName())
+          .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
+          .build();
     }
     @Override
     public boolean doesSupport(String typeUrl) {

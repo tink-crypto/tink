@@ -19,8 +19,6 @@ package com.google.cloud.crypto.tink;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.TextFormat;
-import com.google.protobuf.TextFormat.ParseException;
 import java.security.GeneralSecurityException;
 
 /**
@@ -28,31 +26,16 @@ import java.security.GeneralSecurityException;
  */
 public final class KmsEncryptedKeysetHandle {
   /**
-   * @return a new keyset handle from {@code proto} which is a KmsEncryptedKeyset
-   * protobuf in binary format.
+   * @return a new keyset handle from {@code serialized} which is a serialized
+   * {@code KmsEncryptedKeyset}.
    * @throws GeneralSecurityException
    */
-  public static final KeysetHandle fromBinaryFormat(final byte[] proto)
+  public static final KeysetHandle parseFrom(final byte[] serialized)
       throws GeneralSecurityException {
     try {
-      KmsEncryptedKeyset keyset = KmsEncryptedKeyset.parseFrom(proto);
-      return fromProto(keyset);
+      KmsEncryptedKeyset keyset = KmsEncryptedKeyset.parseFrom(serialized);
+      return parseFrom(keyset);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid keyset");
-    }
-  }
-
-  /**
-   * @return a new keyset handle from {@code proto} which is a KmsEncryptedKeyset
-   * protobuf in text format.
-   * @throws GeneralSecurityException
-   */
-  public static final KeysetHandle fromTextFormat(String proto) throws GeneralSecurityException {
-    try {
-      KmsEncryptedKeyset.Builder keysetBuilder = KmsEncryptedKeyset.newBuilder();
-      TextFormat.merge(proto, keysetBuilder);
-      return fromProto(keysetBuilder.build());
-    } catch (ParseException e) {
       throw new GeneralSecurityException("invalid keyset");
     }
   }
@@ -61,7 +44,7 @@ public final class KmsEncryptedKeysetHandle {
    * @return a new keyset handle from {@code encryptedKeyset}.
    * @throws GeneralSecurityException
    */
-  public static final KeysetHandle fromProto(KmsEncryptedKeyset kmsEncryptedKeyset)
+  public static final KeysetHandle parseFrom(KmsEncryptedKeyset kmsEncryptedKeyset)
       throws GeneralSecurityException {
     byte[] encryptedKeyset = kmsEncryptedKeyset.getEncryptedKeyset().toByteArray();
     if (encryptedKeyset.length == 0 || !kmsEncryptedKeyset.hasKmsKey()) {

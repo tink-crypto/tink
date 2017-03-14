@@ -29,7 +29,6 @@ import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.TextFormat;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +72,7 @@ public class KmsEncryptedKeysetHandleTest {
         .setKeysetInfo(keysetHandle.getKeysetInfo())
         .build();
 
-    KeysetHandle keysetHandle2 = KmsEncryptedKeysetHandle.fromProto(encryptedKeyset);
+    KeysetHandle keysetHandle2 = KmsEncryptedKeysetHandle.parseFrom(encryptedKeyset);
     assertEquals(keyset, keysetHandle2.getKeyset());
   }
 
@@ -102,15 +101,7 @@ public class KmsEncryptedKeysetHandleTest {
     byte[] proto = encryptedKeyset.toByteArray();
     proto[0] = (byte) ~proto[0];
     try {
-      KeysetHandle unused = KmsEncryptedKeysetHandle.fromBinaryFormat(proto);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("invalid keyset"));
-    }
-
-    String str = TextFormat.printToUnicodeString(encryptedKeyset);
-    try {
-      KeysetHandle unused = KmsEncryptedKeysetHandle.fromTextFormat(str + "invalid");
+      KeysetHandle unused = KmsEncryptedKeysetHandle.parseFrom(proto);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));
@@ -120,7 +111,7 @@ public class KmsEncryptedKeysetHandleTest {
         .clearEncryptedKeyset()
         .build();
     try {
-      KeysetHandle unused = KmsEncryptedKeysetHandle.fromProto(encryptedKeySet2);
+      KeysetHandle unused = KmsEncryptedKeysetHandle.parseFrom(encryptedKeySet2);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));
@@ -130,7 +121,7 @@ public class KmsEncryptedKeysetHandleTest {
         .clearKmsKey()
         .build();
     try {
-      KeysetHandle unused = KmsEncryptedKeysetHandle.fromProto(encryptedKeySet3);
+      KeysetHandle unused = KmsEncryptedKeysetHandle.parseFrom(encryptedKeySet3);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));

@@ -16,16 +16,17 @@
 
 package com.google.cloud.crypto.tink;
 
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
 /**
- * Creates keyset handles from cleartext keysets. This API allows loading cleartext keysets, thus
- * its usage should be restricted. Users that need to load keysets that don't contain any secret
- * key material can use {@code NoSecretKeysetHandle}.
+ * Creates keyset handles from keysets that don't contain secret key material. This keyset handle
+ * therefore is not restricted, and can be used to load keysets containing only public or remote
+ * keys.
  */
-public final class CleartextKeysetHandle {
+public final class NoSecretKeysetHandle {
   /**
    * @return a new keyset handle from {@code serialized} which is a serialized {@code Keyset}.
    * @throws GeneralSecurityException
@@ -46,6 +47,21 @@ public final class CleartextKeysetHandle {
    */
   public static final KeysetHandle parseFrom(Keyset keyset)
       throws GeneralSecurityException {
+    validate(keyset);
     return new KeysetHandle(keyset);
+  }
+
+  /**
+   * Validates that {@code keyset} doesn't contain any secret key material.
+   * @throws GeneralSecurityException if {@code keyset} contains secret key material.
+   */
+  private static void validate(Keyset keyset) throws GeneralSecurityException {
+    for (Keyset.Key key : keyset.getKeyList()) {
+      if (key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL
+          || key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.SYMMETRIC
+          || key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
+        throw new GeneralSecurityException("Keyset contains secret key material");
+      }
+    }
   }
 }
