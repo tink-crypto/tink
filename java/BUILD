@@ -32,6 +32,9 @@ java_library(
         "src/main/java/com/google/cloud/crypto/tink/PublicKeyVerify.java",
     ],
     javacopts = JAVACOPTS,
+    deps = [
+        "@com_google_guava//jar",
+    ],
 )
 
 # common subtle
@@ -115,6 +118,7 @@ java_library(
     deps = [
         "//java:common_subtle",
         "//java:public_interfaces",
+        "@com_google_guava//jar",
     ],
 )
 
@@ -267,6 +271,7 @@ java_library(
         "//proto:java_core_compile_imports",
         "//proto:java_ecies_aead_hkdf",
         "//proto:java_hmac",
+        "@com_google_guava//jar",
     ],
 )
 
@@ -300,6 +305,7 @@ java_library(
         "//proto:java_core_compile_imports",
         "//proto:java_ecies_aead_hkdf",
         "//proto:java_hmac",
+        "@com_google_guava//jar",
     ],
 )
 
@@ -443,6 +449,7 @@ java_library(
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
+        "@com_google_guava//jar",
         "@junit_junit_4//jar",
     ],
 )

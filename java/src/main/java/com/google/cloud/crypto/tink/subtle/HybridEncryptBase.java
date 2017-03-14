@@ -17,9 +17,11 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import com.google.cloud.crypto.tink.HybridEncrypt;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Base class for all HybridEncrypt primitives, implements async methods that are the same
@@ -31,7 +33,9 @@ public abstract class HybridEncryptBase implements HybridEncrypt {
       throws GeneralSecurityException;
 
   @Override
-  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] contextInfo) {
-    return Executors.newSingleThreadExecutor().submit(() -> encrypt(plaintext, contextInfo));
+  public ListenableFuture<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] contextInfo) {
+    ListeningExecutorService service =
+        MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+    return service.submit(() -> encrypt(plaintext, contextInfo));
   }
 }

@@ -16,8 +16,8 @@
 
 package com.google.cloud.crypto.tink;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.security.GeneralSecurityException;
-import java.util.concurrent.Future;
 
 /**
  * The interface for authenticated encryption with additional authenticated data.
@@ -27,42 +27,48 @@ import java.util.concurrent.Future;
  */
 public interface Aead {
   /**
-   * Encrypts {@code plaintext} with {@code aad} as additional authenticated data.
+   * Encrypts {@code plaintext} with {@code additionalData} as additional authenticated data.
    * The resulting ciphertext allows for checking authenticity and integrity
-   * of additional data ({@code aad}), but does not guarantee its secrecy.
+   * of additional data ({@code additionalData}), but does not guarantee its secrecy.
    *
    * @return resulting ciphertext.
    */
-  byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException;
+  byte[] encrypt(final byte[] plaintext, final byte[] additionalData)
+      throws GeneralSecurityException;
 
   /**
-   * Decrypts {@code ciphertext} with {@code aad} as additional authenticated data.
-   * The decryption verifies the authenticity and integrity of additional data ({@code aad}),
+   * Decrypts {@code ciphertext} with {@code additionalData} as additional authenticated data.
+   * The decryption verifies the authenticity and integrity of the additional data,
    * but there are no guarantees wrt. secrecy of that data.
    *
    * @return resulting plaintext.
    */
-  byte[] decrypt(final byte[] ciphertext, final byte[] aad) throws GeneralSecurityException;
+  byte[] decrypt(final byte[] ciphertext, final byte[] additionalData)
+      throws GeneralSecurityException;
 
   /**
-   * Encrypts {@code plaintext} with {@code aad} as additional authenticated data.
-   * The resulting ciphertext allows for checking authenticity and integrity
-   * of additional data ({@code aad}), but does not guarantee its secrecy.
+   * Encrypts {@code plaintext} with {@code additionalData} as additional authenticated data.
+   * The resulting ciphertext allows for checking the authenticity and integrity
+   * of the additional data, but does not guarantee its secrecy.
    *
-   * @return a {@code Future} that holds the resulting ciphertext.
+   * If the encryption fails for some reason then future's {@code get()} method
+   * will return {@code ExecutionException} whose {@code getCause()} method returns
+   * {@code GeneralSecurityException}.
+   *
+   * @return a {@code ListenableFuture} that holds the resulting ciphertext.
    */
-  Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad);
+  ListenableFuture<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] additionalData);
 
   /**
-   * Decrypts {@code ciphertext} with {@code aad} as additional authenticated data.
-   * The decryption verifies the authenticity and integrity of additional data ({@code aad}),
+   * Decrypts {@code ciphertext} with {@code additionalData} as additional authenticated data.
+   * The decryption verifies the authenticity and integrity of the additional data,
    * but there are no guarantees wrt. secrecy of that data.
    *
-   * If the ciphertext is invalid or unauthenticated then {@code get()} method will return
-   * {@code ExecutionException} whose {@code getCause()} method returns {@code
-   * GeneralSecurityException}.
+   * If the ciphertext is invalid or unauthenticated, or if the decryption fails for some
+   * other reason, then future's {@code get()} method will return {@code ExecutionException}
+   * whose {@code getCause()} method returns {@code GeneralSecurityException}.
    *
-   * @return a {@code Future} that holds the resulting plaintext.
+   * @return a {@code ListenableFuture} that holds the resulting plaintext.
    */
-  Future<byte[]> asyncDecrypt(final  byte[] ciphertext, final  byte[] aad);
+  ListenableFuture<byte[]> asyncDecrypt(final  byte[] ciphertext, final  byte[] additionalData);
 }

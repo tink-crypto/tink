@@ -19,11 +19,10 @@ package com.google.cloud.crypto.tink.aead; // instead of subtle, because it depe
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.subtle.AeadBase;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 
 /**
  * This primitive implements <a href="https://cloud.google.com/kms/docs/data-encryption-keys">
@@ -36,7 +35,7 @@ import java.util.concurrent.RejectedExecutionException;
  *   - Encrypted DEK: variable length that is equal to the value specified in the last 4 bytes.
  *   - AEAD payload: variable length.
  */
-class KmsEnvelopeAead implements Aead {
+class KmsEnvelopeAead extends AeadBase {
   private static final byte[] EMPTY_AAD = new byte[0];
   private final KeyFormat dekFormat;
   private final Aead remote;
@@ -93,19 +92,5 @@ class KmsEnvelopeAead implements Aead {
         .put(encryptedDek)
         .put(payload)
         .array();
-  }
-
-  @Override
-  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad) {
-    // According to ExecutorService.submit() method's documentation, a RejectedExecutionException
-    // is thrown if the task cannot be scheduled for execution.
-    throw new RejectedExecutionException("Not Implemented Yet!");
-  }
-
-  @Override
-  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] aad) {
-    // According to ExecutorService.submit() method's documentation, a RejectedExecutionException
-    // is thrown if the task cannot be scheduled for execution.
-    throw new RejectedExecutionException("Not Implemented Yet!");
   }
 }

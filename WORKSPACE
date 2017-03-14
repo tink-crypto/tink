@@ -32,6 +32,11 @@ maven_jar(
 )
 
 maven_jar(
+    name = "com_google_guava",
+    artifact = "com.google.guava:guava:21.0",
+)
+
+maven_jar(
     name = "com_google_inject_guice",
     artifact = "com.google.inject:guice:4.1.0",
 )

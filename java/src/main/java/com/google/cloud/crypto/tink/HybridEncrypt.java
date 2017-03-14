@@ -16,8 +16,8 @@
 
 package com.google.cloud.crypto.tink;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.security.GeneralSecurityException;
-import java.util.concurrent.Future;
 
 /**
  * The interface for hybrid encryption.
@@ -54,7 +54,12 @@ public interface HybridEncrypt {
    * Asynchronous encryption:
    * encrypts {@code plaintext} binding {@code contextInfo} to the resulting ciphertext.
    *
-   * @return a {@code Future} that holds the resulting ciphertext.
+   * If the encryption fails for some reason then future's {@code get()} method
+   * will return {@code ExecutionException} whose {@code getCause()} method returns
+   * {@code GeneralSecurityException}.
+   *
+   *
+   * @return a {@code ListenableFuture} that holds the resulting ciphertext.
    */
-  Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] contextInfo);
+  ListenableFuture<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] contextInfo);
 }

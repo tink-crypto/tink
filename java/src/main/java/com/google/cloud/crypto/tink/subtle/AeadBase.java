@@ -17,9 +17,11 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import com.google.cloud.crypto.tink.Aead;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Base class for all Aead primitives. This base class implements async methods that are the same
@@ -27,20 +29,26 @@ import java.util.concurrent.Future;
  */
 public abstract class AeadBase implements Aead {
   @Override
-  public abstract byte[] encrypt(final byte[] plaintext, final byte[] aad)
+  public abstract byte[] encrypt(final byte[] plaintext, final byte[] additionalData)
       throws GeneralSecurityException;
 
   @Override
-  public abstract byte[] decrypt(final byte[] ciphertext, final byte[] aad)
+  public abstract byte[] decrypt(final byte[] ciphertext, final byte[] additionalData)
       throws GeneralSecurityException;
 
   @Override
-  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad) {
-    return Executors.newSingleThreadExecutor().submit(() -> encrypt(plaintext, aad));
+  public ListenableFuture<byte[]> asyncEncrypt(
+      final byte[] plaintext, final byte[] additionalData) {
+    ListeningExecutorService service =
+        MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+    return service.submit(() -> encrypt(plaintext, additionalData));
   }
 
   @Override
-  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] aad) {
-    return Executors.newSingleThreadExecutor().submit(() -> decrypt(ciphertext, aad));
+  public ListenableFuture<byte[]> asyncDecrypt(
+      final byte[] ciphertext, final byte[] additionalData) {
+    ListeningExecutorService service =
+        MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+    return service.submit(() -> decrypt(ciphertext, additionalData));
   }
 }

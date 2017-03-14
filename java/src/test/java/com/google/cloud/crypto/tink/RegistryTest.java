@@ -26,13 +26,13 @@ import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.concurrent.Future;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -84,11 +84,11 @@ public class RegistryTest {
       }
     }
     @Override
-    public Future<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) {
+    public ListenableFuture<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) {
       return null;
     }
     @Override
-    public Future<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad) {
+    public ListenableFuture<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad) {
       return null;
     }
   }

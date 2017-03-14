@@ -16,11 +16,8 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
-import com.google.cloud.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import javax.crypto.AEADBadTagException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -47,7 +44,7 @@ import javax.crypto.spec.SecretKeySpec;
  *   that the encryption modes "AES/ECB/NOPADDING" and "AES/CTR/NOPADDING" are
  *   implemented. Our plan is to implement a native version of EAX.
  */
-public final class AesEaxJce implements Aead {
+public final class AesEaxJce extends AeadBase {
   static final int BLOCK_SIZE_IN_BYTES = 16;
   static final int TAG_SIZE_IN_BYTES = 16;
 
@@ -206,16 +203,5 @@ public final class AesEaxJce implements Aead {
     Cipher ctr = Cipher.getInstance("AES/CTR/NOPADDING");
     ctr.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(n));
     return ctr.doFinal(ciphertext, ivSizeInBytes, plaintextLength);
-  }
-
-  // TODO(bleichen): This is the same as in AesGcmJce and could be moved into a superclass.
-  @Override
-  public Future<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] aad) {
-    return Executors.newSingleThreadExecutor().submit(() -> encrypt(plaintext, aad));
-  }
-
-  @Override
-  public Future<byte[]> asyncDecrypt(final byte[] ciphertext, final byte[] aad) {
-    return Executors.newSingleThreadExecutor().submit(() -> decrypt(ciphertext, aad));
   }
 }
