@@ -35,8 +35,8 @@ public final class EciesHkdfRecipientKem {
     this.recipientPrivateKey = recipientPrivateKey;
   }
 
-  public byte[] generateKey(final ECPoint ephemeralPublicPoint, int keySizeInBytes,
-      String hmacAlgo, final byte[] hkdfSalt, final byte[] hkdfInfo)
+  public byte[] generateKey(final ECPoint ephemeralPublicPoint, String hmacAlgo,
+      final byte[] hkdfSalt, final byte[] hkdfInfo, int keySizeInBytes)
       throws GeneralSecurityException {
     ECParameterSpec spec = recipientPrivateKey.getParams();
     ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ephemeralPublicPoint, spec);
@@ -44,7 +44,7 @@ public final class EciesHkdfRecipientKem {
     ECPublicKey ephemeralPublicKey = (ECPublicKey) kf.generatePublic(publicKeySpec);
     byte[] sharedSecret = getSharedSecret(ephemeralPublicKey);
     return Hkdf.computeEciesHkdfSymmetricKey(ephemeralPublicKey,
-        sharedSecret, keySizeInBytes, hmacAlgo, hkdfSalt, hkdfInfo);
+        sharedSecret, hmacAlgo, hkdfSalt, hkdfInfo, keySizeInBytes);
   }
 
   private byte[] getSharedSecret(final ECPublicKey publicKey)

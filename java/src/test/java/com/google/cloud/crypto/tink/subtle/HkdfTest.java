@@ -16,8 +16,9 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.TestUtil;
 import java.security.GeneralSecurityException;
@@ -28,6 +29,22 @@ import org.junit.runners.JUnit4;
 /** Unit tests for {@link Hkdf}. */
 @RunWith(JUnit4.class)
 public class HkdfTest {
+
+  @Test
+  public void testNullSaltOrInfo() throws Exception {
+    byte[] ikm = Random.randBytes(20);
+    byte[] info = Random.randBytes(20);
+    int size = 40;
+
+    byte[] hkdfWithNullSalt = Hkdf.computeHkdf("HmacSha256", ikm, null, info, size);
+    byte[] hkdfWithEmptySalt =  Hkdf.computeHkdf("HmacSha256", ikm, new byte[0], info, size);
+    assertArrayEquals(hkdfWithNullSalt, hkdfWithEmptySalt);
+
+    byte[] salt = Random.randBytes(20);
+    byte[] hkdfWithNullInfo = Hkdf.computeHkdf("HmacSha256", ikm, salt, null, size);
+    byte[] hkdfWithEmptyInfo =  Hkdf.computeHkdf("HmacSha256", ikm, salt, new byte[0], size);
+    assertArrayEquals(hkdfWithNullInfo, hkdfWithEmptyInfo);
+  }
 
   @Test
   public void testInvalidCodeSize() throws Exception {

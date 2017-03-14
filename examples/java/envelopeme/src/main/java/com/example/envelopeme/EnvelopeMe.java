@@ -15,8 +15,8 @@
 package com.example.envelopeme;
 
 import com.google.cloud.crypto.tink.Aead;
-import com.google.cloud.crypto.tink.NoSecretKeysetHandle;
 import com.google.cloud.crypto.tink.KeysetHandle;
+import com.google.cloud.crypto.tink.NoSecretKeysetHandle;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import org.kohsuke.args4j.CmdLineException;

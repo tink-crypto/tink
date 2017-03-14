@@ -53,8 +53,6 @@ public class Hkdf {
     if (salt == null || salt.length == 0) {
       // According to RFC 5869, Section 2.2 the salt is optional. If no salt is provided
       // then HKDF uses a salt that is an array of zeros of the same length as the hash digest.
-      // We do not implement this for security reasons. If an application does really not
-      // want to use a salt then this should be made explicit by passing an array of 0's.
       mac.init(new SecretKeySpec(new byte[mac.getMacLength()], macAlgorithm));
     } else {
       mac.init(new SecretKeySpec(salt, macAlgorithm));
@@ -87,9 +85,8 @@ public class Hkdf {
    * Computes symmetric key for ECIES with HKDF from the provided parameters.
    */
   public static byte[] computeEciesHkdfSymmetricKey(final ECPublicKey ephemeralPublicKey,
-      final byte[] sharedSecret, int keySizeInBytes, String hmacAlgo,
-      final byte[] hkdfSalt, final byte[] hkdfInfo)
-      throws GeneralSecurityException {
+      final byte[] sharedSecret, String hmacAlgo, final byte[] hkdfSalt, final byte[] hkdfInfo,
+      int keySizeInBytes) throws GeneralSecurityException {
     byte[] ephemeralPublicKeyBytes = ephemeralPublicKey.getEncoded();
     byte[] hkdfInput = SubtleUtil.concat(ephemeralPublicKeyBytes, sharedSecret);
     byte[] symmetricKey = Hkdf.computeHkdf(hmacAlgo, hkdfInput, hkdfSalt, hkdfInfo, keySizeInBytes);

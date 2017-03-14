@@ -64,7 +64,7 @@ public final class EciesAeadHkdfHybridDecrypt extends HybridDecryptBase {
     ECPoint ephemeralPublicPoint = Util.ecPointDecode(curve, ecPointFormat,
         Arrays.copyOfRange(ciphertext, 0, headerSize));
     byte[] symmetricKey = recipientKem.generateKey(ephemeralPublicPoint,
-        aeadFactory.getSymmetricKeySize(), hkdfHmacAlgo, hkdfSalt, contextInfo);
+        hkdfHmacAlgo, hkdfSalt, contextInfo, aeadFactory.getSymmetricKeySize());
     Aead aead = aeadFactory.getAead(symmetricKey);
     return aead.decrypt(Arrays.copyOfRange(ciphertext, headerSize, ciphertext.length), EMPTY_AAD);
   }

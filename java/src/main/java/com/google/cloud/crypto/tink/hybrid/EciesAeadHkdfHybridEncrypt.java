@@ -62,8 +62,8 @@ public final class EciesAeadHkdfHybridEncrypt extends HybridEncryptBase {
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
       throws GeneralSecurityException {
-    EciesHkdfSenderKem.KemKey kemKey =  senderKem.generateKey(aeadFactory.getSymmetricKeySize(),
-            hkdfHmacAlgo, hkdfSalt, contextInfo);
+    EciesHkdfSenderKem.KemKey kemKey =  senderKem.generateKey(hkdfHmacAlgo, hkdfSalt,
+        contextInfo, aeadFactory.getSymmetricKeySize());
     Aead aead = aeadFactory.getAead(kemKey.getSymmetricKey());
     byte[] ciphertext = aead.encrypt(plaintext, EMPTY_AAD);
     byte[] header = Util.ecPointEncode(
