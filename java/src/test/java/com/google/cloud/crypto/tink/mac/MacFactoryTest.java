@@ -29,6 +29,7 @@ import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import org.junit.Before;
@@ -84,6 +85,22 @@ public class MacFactoryTest {
       mac.verifyMac(tag, plaintext);
     } catch (GeneralSecurityException e) {
       fail("Valid MAC, should not throw exception");
+    }
+
+    // Modify plaintext or tag and make sure the verifyMac failed.
+    byte[] plaintextAndTag = SubtleUtil.concat(plaintext, tag);
+    for (int b = 0; b < plaintextAndTag.length; b++) {
+      for (int bit = 0; bit < 8; bit++) {
+        byte[] modified = Arrays.copyOf(plaintextAndTag, plaintextAndTag.length);
+        modified[b] ^= (byte) (1 << bit);
+        try {
+          mac.verifyMac(Arrays.copyOfRange(modified, plaintext.length, modified.length),
+              Arrays.copyOfRange(modified, 0, plaintext.length));
+          fail("Invalid tag or plaintext, should have thrown exception");
+        } catch (GeneralSecurityException expected) {
+          // Expected
+        }
+      }
     }
 
     // mac with a non-primary RAW key, verify with the keyset
