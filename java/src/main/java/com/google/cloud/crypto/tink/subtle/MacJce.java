@@ -25,25 +25,22 @@ import java.security.GeneralSecurityException;
 public final class MacJce implements Mac {
   private javax.crypto.Mac mac;
   private final int digestSize;
-
-  private javax.crypto.Mac instance() throws GeneralSecurityException {
-    try {
-      return (javax.crypto.Mac) mac.clone();
-    } catch (java.lang.CloneNotSupportedException ex) {
-      throw new GeneralSecurityException(ex);
-    }
-  }
+  private final String algorithm;
+  private final java.security.Key key;
 
   public MacJce(String algorithm, java.security.Key key, int digestSize)
       throws GeneralSecurityException {
     this.mac = javax.crypto.Mac.getInstance(algorithm);
+    this.algorithm = algorithm;
     this.digestSize = digestSize;
     mac.init(key);
+    this.key = key;
   }
 
   @Override
   public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
-    javax.crypto.Mac tmp = instance();
+    javax.crypto.Mac tmp = javax.crypto.Mac.getInstance(this.algorithm);
+    tmp.init(this.key);
     tmp.update(data);
     byte[] digest = new byte[digestSize];
     System.arraycopy(tmp.doFinal(), 0, digest, 0, digestSize);
