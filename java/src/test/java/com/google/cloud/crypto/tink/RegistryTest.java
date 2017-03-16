@@ -362,6 +362,59 @@ public class RegistryTest {
   }
 
   @Test
+  public void testInvalidKeyset() throws Exception {
+    // Setup the registry.
+    Registry registry = new Registry();
+    String mac1TypeUrl = Mac1KeyManager.class.getSimpleName();
+    registry.registerKeyManager(mac1TypeUrl, new Mac1KeyManager());
+
+    // Empty keyset.
+    try {
+      registry.getPrimitives(new KeysetHandle(Keyset.newBuilder().build()));
+      fail("Invalid keyset. Expect GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
+    }
+
+    // Create a keyset.
+    KeyFormat format1 =  KeyFormat.newBuilder().setTypeUrl(mac1TypeUrl).build();
+    KeyData key1 = registry.newKey(format1);
+    // No primary key.
+    KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key1)
+            .setKeyId(1)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build())
+        .build());
+    // No primary key.
+    try {
+      registry.getPrimitives(keysetHandle);
+      fail("Invalid keyset. Expect GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("keyset doesn't contain a valid primary key"));
+    }
+
+    // Primary key is disabled.
+    keysetHandle = new KeysetHandle(Keyset.newBuilder()
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key1)
+            .setKeyId(1)
+            .setStatus(KeyStatusType.DISABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build())
+        .setPrimaryKeyId(1)
+        .build());
+    try {
+      registry.getPrimitives(keysetHandle);
+      fail("Invalid keyset. Expect GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("keyset doesn't contain a valid primary key"));
+    }
+  }
+
+  @Test
   public void testCustomKeyManagerHandling() throws Exception {
     // Setup the registry.
     Registry registry = new Registry();

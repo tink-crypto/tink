@@ -19,15 +19,18 @@ package com.google.cloud.crypto.tink;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.protobuf.TextFormat;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
 import org.junit.Test;
@@ -39,6 +42,66 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class UtilTest {
+  @Test
+  public void testValidateKeyset() throws Exception {
+    String keyValue = "01234567890123456";
+    Keyset keyset =  TestUtil.createKeyset(TestUtil.createKey(
+        TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+        42,
+        KeyStatusType.ENABLED,
+        OutputPrefixType.TINK,
+        KeyData.KeyMaterialType.SYMMETRIC));
+    try {
+      Util.validateKeyset(keyset);
+    } catch (GeneralSecurityException e) {
+      fail("Valid keyset; should not throw Exception: " + e);
+    }
+
+    // Empty keyset.
+    try {
+      Util.validateKeyset(Keyset.newBuilder().build());
+      fail("Invalid keyset. Expect GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
+    }
+
+    // Primary key is disabled.
+    Keyset invalidKeyset = TestUtil.createKeyset(TestUtil.createKey(
+        TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+        42,
+        KeyStatusType.DISABLED,
+        OutputPrefixType.TINK,
+        KeyData.KeyMaterialType.SYMMETRIC));
+    try {
+      Util.validateKeyset(invalidKeyset);
+      fail("Invalid keyset. Expect GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("keyset doesn't contain a valid primary key"));
+    }
+
+    // Multiple primary keys.
+    invalidKeyset = TestUtil.createKeyset(
+        TestUtil.createKey(
+            TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK,
+            KeyData.KeyMaterialType.SYMMETRIC),
+        TestUtil.createKey(
+            TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK,
+            KeyData.KeyMaterialType.SYMMETRIC)
+    );
+    try {
+      Util.validateKeyset(invalidKeyset);
+      fail("Invalid keyset. Expect GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("keyset contains multiple primary keys"));
+    }
+  }
+
   /**
    * Tests that getKeysetInfo doesn't contain key material.
    */

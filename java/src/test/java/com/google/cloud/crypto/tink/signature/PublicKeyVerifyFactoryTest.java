@@ -72,9 +72,9 @@ public class PublicKeyVerifyFactoryTest {
           ecdsaPrivKeys[2].getPublicKey()
     };
     Key[] keys = new Key[] {
-      TestUtil.createKey(ecdsaPubKeys[0], 0, KeyStatusType.ENABLED, OutputPrefixType.TINK),
-      TestUtil.createKey(ecdsaPubKeys[1], 1, KeyStatusType.ENABLED, OutputPrefixType.RAW),
-      TestUtil.createKey(ecdsaPubKeys[2], 2, KeyStatusType.ENABLED, OutputPrefixType.LEGACY)};
+      TestUtil.createKey(ecdsaPubKeys[0], 1, KeyStatusType.ENABLED, OutputPrefixType.TINK),
+      TestUtil.createKey(ecdsaPubKeys[1], 2, KeyStatusType.ENABLED, OutputPrefixType.RAW),
+      TestUtil.createKey(ecdsaPubKeys[2], 3, KeyStatusType.ENABLED, OutputPrefixType.LEGACY)};
     for (int i = 0; i < ids.length; i++) {
       KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(keys[ids[i][0]], keys[ids[i][1]], keys[ids[i][2]]));
@@ -83,8 +83,12 @@ public class PublicKeyVerifyFactoryTest {
       for (int j = 0; j < 3; j++) {
         PublicKeySign signer = PublicKeySignFactory.getPrimitive(
           TestUtil.createKeysetHandle(
-              TestUtil.createKeyset(TestUtil.createKey(ecdsaPrivKeys[j], j, KeyStatusType.ENABLED,
-                  keys[j].getOutputPrefixType()))));
+              TestUtil.createKeyset(
+                  TestUtil.createKey(
+                      ecdsaPrivKeys[j],
+                      j + 1,
+                      KeyStatusType.ENABLED,
+                      keys[j].getOutputPrefixType()))));
         byte[] plaintext = Random.randBytes(1211);
         byte[] sig = signer.sign(plaintext);
         try {
@@ -98,7 +102,7 @@ public class PublicKeyVerifyFactoryTest {
           EllipticCurveType.NIST_P521, HashType.SHA512, EcdsaSignatureEncoding.DER);
       PublicKeySign signer = PublicKeySignFactory.getPrimitive(
           TestUtil.createKeysetHandle(
-              TestUtil.createKeyset(TestUtil.createKey(randomPrivKey, 0, KeyStatusType.ENABLED,
+              TestUtil.createKeyset(TestUtil.createKey(randomPrivKey, 1, KeyStatusType.ENABLED,
                   keys[0].getOutputPrefixType()))));
       byte[] plaintext = Random.randBytes(1211);
       byte[] sig = signer.sign(plaintext);

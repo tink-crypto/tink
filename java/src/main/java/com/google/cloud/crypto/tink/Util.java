@@ -19,12 +19,11 @@ package com.google.cloud.crypto.tink;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
+import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
+import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
-import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.MessageLite;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -44,15 +43,6 @@ import java.util.Arrays;
  * Various helpers.
  */
 public class Util {
-  /**
-   * Packs a protobuf into an {@code Any} message.
-   */
-  public static <T extends MessageLite> Any pack(String typeUrl, T proto) {
-    return Any.newBuilder()
-        .setTypeUrl(typeUrl)
-        .setValue(ByteString.copyFrom(proto.toByteArray()))
-        .build();
-  }
   /**
    * @return a KeysetInfo-proto from a {@code keyset} protobuf.
    */
@@ -264,5 +254,58 @@ public class Util {
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
     return keyGen.generateKeyPair();
+  }
+
+  /**
+   * Validates a {@code key}.
+   * @throws GeneralSecurityException if {@code key} is invalid.
+   */
+  public static void validateKey(Keyset.Key key) throws GeneralSecurityException {
+    if (!key.hasKeyData()) {
+      throw new GeneralSecurityException(
+          String.format("key %d has no key data", key.getKeyId()));
+    }
+
+    if (key.getOutputPrefixType() == OutputPrefixType.UNKNOWN_PREFIX) {
+      throw new GeneralSecurityException(
+          String.format("key %d has unknown prefix", key.getKeyId()));
+    }
+
+    if (key.getStatus() == KeyStatusType.UNKNOWN_STATUS) {
+      throw new GeneralSecurityException(
+          String.format("key %d has unknown status", key.getKeyId()));
+    }
+
+    if (key.getKeyId() <= 0) {
+      throw new GeneralSecurityException(
+          String.format("key has a non-positive key id: %d", key.getKeyId()));
+    }
+  }
+
+  /**
+   * Validates a {@code Keyset}.
+   * @throws GeneralSecurityException if {@code keyset} is invalid.
+   */
+  public static void validateKeyset(Keyset keyset) throws GeneralSecurityException {
+    if (keyset.getKeyCount() == 0) {
+      throw new GeneralSecurityException("empty keyset");
+    }
+
+    Keyset.Key first = keyset.getKey(0);
+    int primaryKeyId = keyset.getPrimaryKeyId();
+    boolean hasPrimaryKey = false;
+    for (Keyset.Key key : keyset.getKeyList()) {
+      validateKey(key);
+      if (key.getStatus() == KeyStatusType.ENABLED && key.getKeyId() == primaryKeyId) {
+        if (hasPrimaryKey) {
+          throw new GeneralSecurityException("keyset contains multiple primary keys");
+        }
+        hasPrimaryKey = true;
+      }
+      // TODO(thaidn): use TypeLiteral to ensure that all keys are of the same primitive.
+    }
+    if (!hasPrimaryKey) {
+      throw new GeneralSecurityException("keyset doesn't contain a valid primary key");
+    }
   }
 }

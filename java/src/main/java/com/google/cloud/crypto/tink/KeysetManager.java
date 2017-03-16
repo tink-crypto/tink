@@ -96,9 +96,9 @@ public class KeysetManager {
    */
   public KeysetManager rotate(KeyFormat keyFormat) throws GeneralSecurityException {
     KeyData keyData = Registry.INSTANCE.newKey(keyFormat);
-    int keyId = Random.randNonNegativeInt();
+    int keyId = Random.randPositiveInt();
     while (hasKeyWithKeyId(keyId)) {
-      keyId = Random.randNonNegativeInt();
+      keyId = Random.randPositiveInt();
     }
     Keyset.Key key = Keyset.Key.newBuilder()
         .setKeyData(keyData)

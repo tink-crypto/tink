@@ -221,23 +221,23 @@ public final class Registry {
     public <P, K extends MessageLite, F extends MessageLite> PrimitiveSet<P> getPrimitives(
         KeysetHandle keysetHandle, final KeyManager<P, K, F> customManager)
         throws GeneralSecurityException {
-    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
-    for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
-      if (key.getStatus() == KeyStatusType.ENABLED) {
-        P primitive;
-        if (customManager != null && customManager.doesSupport(key.getKeyData().getTypeUrl())) {
-          primitive = customManager.getPrimitive(key.getKeyData().getValue());
-        } else {
-          primitive = getPrimitive(key.getKeyData().getTypeUrl(),
-              key.getKeyData().getValue());
-        }
-        PrimitiveSet<P>.Entry<P> entry = primitives.addPrimitive(primitive, key);
-        if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {
-          primitives.setPrimary(entry);
+      Util.validateKeyset(keysetHandle.getKeyset());
+      PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
+      for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
+        if (key.getStatus() == KeyStatusType.ENABLED) {
+          P primitive;
+          if (customManager != null && customManager.doesSupport(key.getKeyData().getTypeUrl())) {
+            primitive = customManager.getPrimitive(key.getKeyData().getValue());
+          } else {
+            primitive = getPrimitive(key.getKeyData().getTypeUrl(),
+                key.getKeyData().getValue());
+          }
+          PrimitiveSet<P>.Entry<P> entry = primitives.addPrimitive(primitive, key);
+          if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {
+            primitives.setPrimary(entry);
+          }
         }
       }
-    }
-    return primitives;
+      return primitives;
   }
-
 }

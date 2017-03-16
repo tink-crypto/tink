@@ -9,7 +9,7 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
+// See the License for the specified language governing permissions and
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -262,12 +262,21 @@ public class TestUtil {
   }
 
   /**
-   * @return a key with some specific properties.
+   * @return a key with some specified properties.
    */
   public static Key createKey(Message proto, int keyId, KeyStatusType status,
       OutputPrefixType prefixType) throws Exception {
+    return createKey(proto, keyId, status, prefixType,
+        KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL);
+  }
+
+  /**
+   * @return a key with some specified properties.
+   */
+  public static Key createKey(Message proto, int keyId, KeyStatusType status,
+      OutputPrefixType prefixType, KeyData.KeyMaterialType type) throws Exception {
     return Key.newBuilder()
-        .setKeyData(createKeyData(proto))
+        .setKeyData(createKeyData(proto, type))
         .setStatus(status)
         .setKeyId(keyId)
         .setOutputPrefixType(prefixType)
@@ -373,13 +382,14 @@ public class TestUtil {
   }
 
   /**
-   * @return a {@code KeyData} from a specific key.
+   * @return a {@code KeyData} from a specified key.
    */
-  public static KeyData createKeyData(Message key)
+  public static KeyData createKeyData(Message key, KeyData.KeyMaterialType type)
       throws Exception {
     return KeyData.newBuilder()
         .setValue(key.toByteString())
         .setTypeUrl(Any.pack(key).getTypeUrl())
+        .setKeyMaterialType(type)
         .build();
   }
 

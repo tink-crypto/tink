@@ -69,9 +69,9 @@ public class PublicKeySignFactoryTest {
       TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P256, HashType.SHA256,
           EcdsaSignatureEncoding.DER)};
     Key[] keys = new Key[] {
-      TestUtil.createKey(ecdsaPrivKeys[0], 0, KeyStatusType.ENABLED, OutputPrefixType.TINK),
-      TestUtil.createKey(ecdsaPrivKeys[1], 1, KeyStatusType.ENABLED, OutputPrefixType.RAW),
-      TestUtil.createKey(ecdsaPrivKeys[2], 2, KeyStatusType.ENABLED, OutputPrefixType.LEGACY)};
+      TestUtil.createKey(ecdsaPrivKeys[0], 1, KeyStatusType.ENABLED, OutputPrefixType.TINK),
+      TestUtil.createKey(ecdsaPrivKeys[1], 2, KeyStatusType.ENABLED, OutputPrefixType.RAW),
+      TestUtil.createKey(ecdsaPrivKeys[2], 3, KeyStatusType.ENABLED, OutputPrefixType.LEGACY)};
     for (int i = 0; i < ids.length; i++) {
       KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(keys[ids[i][0]], keys[ids[i][1]], keys[ids[i][2]]));
@@ -88,7 +88,7 @@ public class PublicKeySignFactoryTest {
       PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(
           TestUtil.createKeysetHandle(
               TestUtil.createKeyset(TestUtil.createKey(ecdsaPrivKeys[ids[i][0]].getPublicKey(),
-                  ids[i][0], KeyStatusType.ENABLED, keys[ids[i][0]].getOutputPrefixType()))));
+                  ids[i][0] + 1, KeyStatusType.ENABLED, keys[ids[i][0]].getOutputPrefixType()))));
       try {
         verifier.verify(sig, plaintext);
       } catch (GeneralSecurityException ex) {
@@ -99,7 +99,7 @@ public class PublicKeySignFactoryTest {
       verifier = PublicKeyVerifyFactory.getPrimitive(
           TestUtil.createKeysetHandle(
               TestUtil.createKeyset(TestUtil.createKey(ecdsaPrivKeys[ids[i][1]].getPublicKey(),
-                  ids[i][1], KeyStatusType.ENABLED, keys[ids[i][1]].getOutputPrefixType()))));
+                  ids[i][1] + 1, KeyStatusType.ENABLED, keys[ids[i][1]].getOutputPrefixType()))));
       try {
         verifier.verify(sig, plaintext);
         fail("Invalid signature, should have thrown exception");
@@ -111,7 +111,7 @@ public class PublicKeySignFactoryTest {
       verifier = PublicKeyVerifyFactory.getPrimitive(
           TestUtil.createKeysetHandle(
               TestUtil.createKeyset(TestUtil.createKey(randomPrivKey.getPublicKey(),
-                  ids[i][0], KeyStatusType.ENABLED, keys[ids[i][0]].getOutputPrefixType()))));
+                  ids[i][0] + 1, KeyStatusType.ENABLED, keys[ids[i][0]].getOutputPrefixType()))));
       try {
         verifier.verify(sig, plaintext);
         fail("Invalid signature, should have thrown exception");

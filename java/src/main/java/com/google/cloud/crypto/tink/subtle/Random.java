@@ -34,13 +34,17 @@ public final class Random {
   }
 
   /**
-   * @return non negative random int.
+   * @return positive random int.
    */
-  public static int randNonNegativeInt() {
-    byte[] rand = randBytes(4);
-    return ((rand[0] & 0x7f) << 24)
-        | ((rand[1] & 0xff) << 16)
-        | ((rand[2] & 0xff) << 8)
-        | (rand[3] & 0xff);
+  public static int randPositiveInt() {
+    int result = 0;
+    while (result == 0) {
+      byte[] rand = randBytes(4);
+      result = ((rand[0] & 0x7f) << 24)
+          | ((rand[1] & 0xff) << 16)
+          | ((rand[2] & 0xff) << 8)
+          | (rand[3] & 0xff);
+    }
+    return result;
   }
 }
