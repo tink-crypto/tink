@@ -16,7 +16,7 @@
 
 package com.google.cloud.crypto.tink.hybrid;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertArrayEquals;
 
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
@@ -34,33 +34,29 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for EciesAeadHkdfHybridEncrypt.
- * TODO(przydatek): Add more tests.
- */
+/** Unit tests for {@link EciesAeadHkdfHybridDecrypt}. */
 @RunWith(JUnit4.class)
-public class EciesAeadHkdfHybridEncryptTest {
+public class EciesAeadHkdfHybridDecryptTest {
   @Before
   public void setUp() throws GeneralSecurityException {
     AeadFactory.registerStandardKeyTypes();
   }
 
   @Test
-  public void testBasicMultipleEncrypts() throws Exception {
+  public void testModifyDecrypt() throws Exception {
     ECParameterSpec spec = Util.getCurveSpec(EllipticCurveType.NIST_P256);
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(spec);
     KeyPair recipientKey = keyGen.generateKeyPair();
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
-    byte[] salt = "some salt".getBytes("UTF-8");
+    byte[] salt = Random.randBytes(123);
     byte[] plaintext = Random.randBytes(111);
     byte[] context = "context info".getBytes("UTF-8");
     String hmacAlgo = "HmacSha256";
@@ -75,18 +71,41 @@ public class EciesAeadHkdfHybridEncryptTest {
       HybridDecrypt hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey, salt,
           hmacAlgo, keyFormats[i], EcPointFormat.UNCOMPRESSED);
 
-      // Makes sure that the encryption is randomized.
-      Set<String> ciphertexts = new TreeSet<String>();
-      for (int j = 0; j < 1024; j++) {
-        byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
-        if (ciphertexts.contains(new String(ciphertext, "UTF-8"))) {
-          throw new GeneralSecurityException("Encryption is not randomized");
+      byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
+      byte[] decrypted = hybridDecrypt.decrypt(ciphertext, context);
+      assertArrayEquals(plaintext, decrypted);
+
+      // Changes each bit of ciphertext and makes sure that the decryption failed. This test
+      // implicitly checks the modification of public key and the raw ciphertext.
+      for (int bytes = 0; bytes < ciphertext.length; bytes++) {
+        for (int bit = 0; bit < 8; bit++) {
+          byte[] modifiedCiphertext = Arrays.copyOf(ciphertext, ciphertext.length);
+          modifiedCiphertext[bytes] ^= (byte) (1 << bit);
+          try {
+            hybridDecrypt.decrypt(modifiedCiphertext, context);
+            fail("Invalid ciphertext, should have thrown exception");
+          } catch (GeneralSecurityException expected) {
+            // Expected
+          }
         }
-        ciphertexts.add(new String(ciphertext, "UTF-8"));
-        byte[] decrypted = hybridDecrypt.decrypt(ciphertext, context);
-        assertArrayEquals(plaintext, decrypted);
       }
-      assertEquals(1024, ciphertexts.size());
+      // Modify context.
+      try {
+        hybridDecrypt.decrypt(ciphertext, Arrays.copyOf(context, context.length - 1));
+        fail("Invalid context, should have thrown exception");
+      } catch (GeneralSecurityException expected) {
+        // Expected
+      }
+      // Modify salt.
+      hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
+          Arrays.copyOf(salt, salt.length - 1), hmacAlgo, keyFormats[i],
+          EcPointFormat.UNCOMPRESSED);
+      try {
+        hybridDecrypt.decrypt(ciphertext, context);
+        fail("Invalid salt, should have thrown exception");
+      } catch (GeneralSecurityException expected) {
+        // Expected
+      }
     }
   }
 }
