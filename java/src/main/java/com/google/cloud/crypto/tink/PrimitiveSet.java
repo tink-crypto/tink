@@ -18,7 +18,7 @@ package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,6 +43,7 @@ import java.util.concurrent.ConcurrentMap;
  * PrimitiveSet is a public class to allow its use in implementations of custom primitives.
  */
 public final class PrimitiveSet<P> {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
   /**
    * A single entry in the set. In addition to the actual primitive it holds also
    * some extra information about the primitive.
@@ -82,15 +83,16 @@ public final class PrimitiveSet<P> {
   /**
    * @return all primitives using RAW prefix.
    */
-  public List<Entry<P>> getRawPrimitives() {
+  public List<Entry<P>> getRawPrimitives() throws GeneralSecurityException {
     return getPrimitive(CryptoFormat.RAW_PREFIX);
   }
 
   /**
    * @return the entries with primitive identifed by {@code identifier}.
    */
-  public List<Entry<P>> getPrimitive(final byte[] identifier) {
-    List<Entry<P>> found = primitives.get(new String(identifier, StandardCharsets.UTF_8));
+  public List<Entry<P>> getPrimitive(final byte[] identifier)
+      throws GeneralSecurityException {
+    List<Entry<P>> found = primitives.get(new String(identifier, UTF_8));
     return found != null ? found : Collections.<Entry<P>>emptyList();
   }
 
@@ -134,7 +136,7 @@ public final class PrimitiveSet<P> {
     List<Entry<P>> list = new ArrayList<Entry<P>>();
     list.add(entry);
     // Cannot use [] as keys in hash map, convert to string.
-    String identifier = new String(entry.getIdentifier(), StandardCharsets.UTF_8);
+    String identifier = new String(entry.getIdentifier(), UTF_8);
     List<Entry<P>> existing = primitives.put(identifier, Collections.unmodifiableList(list));
     if (existing != null) {
       List<Entry<P>> newList = new ArrayList<Entry<P>>();
