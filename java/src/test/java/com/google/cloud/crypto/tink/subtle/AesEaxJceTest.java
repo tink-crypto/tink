@@ -20,6 +20,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.crypto.tink.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
@@ -40,23 +41,7 @@ import org.junit.runners.JUnit4;
 public class AesEaxJceTest {
   private static final int KEY_SIZE = 16;
   private static final int IV_SIZE = 16;
-  // TODO(bleichen): This method will be in TestUtil.
-  public static byte[] hexDecode(String hex) throws IllegalArgumentException {
-    if (hex.length() % 2 != 0) {
-      throw new IllegalArgumentException("Expected a string of even length");
-    }
-    int size = hex.length() / 2;
-    byte[] result = new byte[size];
-    for (int i = 0; i < size; i++) {
-      int hi = Character.digit(hex.charAt(2 * i), 16);
-      int lo = Character.digit(hex.charAt(2 * i + 1), 16);
-      if ((hi == -1) || (lo == -1)) {
-        throw new IllegalArgumentException("input is not hexadecimal");
-      }
-      result[i] = (byte) (16 * hi + lo);
-    }
-    return result;
-  }
+
   /**
    * EaxTestVector
    */
@@ -72,11 +57,11 @@ public class AesEaxJceTest {
     public EaxTestVector(
         String message, String keyMaterial, String nonce, String aad, String ciphertext) {
       this.ptHex = message;
-      this.pt = hexDecode(message);
-      this.aad = hexDecode(aad);
+      this.pt = TestUtil.hexDecode(message);
+      this.aad = TestUtil.hexDecode(aad);
       this.ctHex = nonce + ciphertext;
-      this.ct = hexDecode(this.ctHex);
-      this.key = hexDecode(keyMaterial);
+      this.ct = TestUtil.hexDecode(this.ctHex);
+      this.key = TestUtil.hexDecode(keyMaterial);
       this.ivSizeInBytes = nonce.length() / 2;
     }
   };
