@@ -395,69 +395,6 @@ java_library(
     ],
 )
 
-# public hybrid libraries
-
-java_library(
-    name = "tink_hybridencrypt",
-    visibility = [
-        "//visibility:public",
-    ],
-    exports = [
-        "//java:aead",
-        "//java:aead_subtle",
-        "//java:common_subtle",
-        "//java:hybridencrypt",
-        "//java:mac",
-        "//java:mac_subtle",
-        "//proto:java_aes_ctr_hmac_aead",
-        "//proto:java_aes_eax",
-        "//proto:java_aes_gcm",
-        "//proto:java_core",
-        "//proto:java_core_compile_imports",
-        "//proto:java_ecies_aead_hkdf",
-        "//proto:java_hmac",
-        "//proto:java_kms_envelope",
-    ],
-)
-
-java_library(
-    name = "tink_hybriddecrypt",
-    visibility = [
-        "//visibility:public",
-    ],
-    exports = [
-        "//java:aead",
-        "//java:aead_subtle",
-        "//java:common_subtle",
-        "//java:hybriddecrypt",
-        "//java:mac",
-        "//java:mac_subtle",
-        "//proto:java_aes_ctr_hmac_aead",
-        "//proto:java_aes_gcm",
-        "//proto:java_core",
-        "//proto:java_core_compile_imports",
-        "//proto:java_ecies_aead_hkdf",
-        "//proto:java_hmac",
-        "//proto:java_kms_envelope",
-    ],
-)
-
-# public signature library
-
-java_library(
-    name = "tink_signature",
-    visibility = [
-        "//visibility:public",
-    ],
-    exports = [
-        "//java:signature",
-        "//java:signature_subtle",
-        "//proto:java_core",
-        "//proto:java_core_compile_imports",
-        "//proto:java_ecdsa",
-    ],
-)
-
 # tests
 
 load("//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
