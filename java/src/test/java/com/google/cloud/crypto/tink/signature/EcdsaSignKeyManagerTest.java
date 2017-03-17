@@ -16,6 +16,8 @@
 
 package com.google.cloud.crypto.tink.signature;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
@@ -28,8 +30,10 @@ import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TestUtil;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.Random;
+import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -37,6 +41,8 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
+import java.util.Set;
+import java.util.TreeSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -76,28 +82,92 @@ public class EcdsaSignKeyManagerTest {
       EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder()
           .setParams(ecdsaParams)
           .build();
-      EcdsaPrivateKey privKey = signManager.newKey(ecdsaFormat);
-      PublicKeySign signer = signManager.getPrimitive(privKey);
-      byte[] signature = signer.sign(msg);
-      EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
-      PublicKeyVerify verifier = verifyManager.getPrimitive(privKey.getPublicKey());
-      try {
-        verifier.verify(signature, msg);
-      } catch (GeneralSecurityException e) {
-        fail("Valid signature, should not throw exception");
+      ByteString serializedFormat = ByteString.copyFrom(ecdsaFormat.toByteArray());
+      KeyFormat keyFormat = KeyFormat.newBuilder()
+          .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey")
+          .setValue(serializedFormat)
+          .build();
+      // Call newKey multiple times and make sure that it generates different keys.
+      int numTests = 27;
+      EcdsaPrivateKey[] privKeys = new EcdsaPrivateKey[numTests];
+      Set<String> keys = new TreeSet<String>();
+      for (int j = 0; j < numTests / 3; j++) {
+        privKeys[3 * j] = signManager.newKey(ecdsaFormat);
+        privKeys[3 * j + 1] = signManager.newKey(serializedFormat);
+        privKeys[3 * j + 2] = EcdsaPrivateKey.parseFrom(signManager.newKey(keyFormat).getValue());
+        keys.add(new String(privKeys[3 * j].toByteArray(), "UTF-8"));
+        keys.add(new String(privKeys[3 * j + 1].toByteArray(), "UTF-8"));
+        keys.add(new String(privKeys[3 * j + 2].toByteArray(), "UTF-8"));
+      }
+      assertEquals(numTests, keys.size());
+      for (int j = 0; j < numTests; j++) {
+        int keySize = privKeys[j].getKeyValue().toByteArray().length;
+        switch(curveType) {
+          case NIST_P256:
+            // BigInteger may contain sign bit.
+            assertTrue(256 / 8 <= keySize);
+            assertTrue(256 / 8 + 1 >= keySize);
+            break;
+          case NIST_P384:
+            // BigInteger may contain sign bit.
+            assertTrue(384 / 8 <= keySize);
+            assertTrue(384 / 8 + 1 >= keySize);
+            break;
+          case NIST_P521:
+            // BigInteger may contain sign bit.
+            assertTrue(521 / 8 <= keySize);
+            assertTrue(521 / 8 + 1 >= keySize);
+            break;
+          default:
+            break;
+          }
       }
 
-      // Creates another signer and checks that the signature can not be verified with a different
-      // verifier.
-      EcdsaPrivateKey privKey1 = signManager.newKey(ecdsaFormat);
-      PublicKeySign signer1 = signManager.getPrimitive(privKey1);
-      byte[] signature1 = signer1.sign(msg);
-      try {
-        verifier.verify(signature1, msg);
-        fail("Invalid signature, should have thrown exception");
-      } catch (GeneralSecurityException expected) {
-        // Expected
+      // Test whether signer works correctly with the corresponding verifier.
+      EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
+      for (int j = 0; j < numTests; j++) {
+        PublicKeySign signer = signManager.getPrimitive(privKeys[j]);
+        byte[] signature = signer.sign(msg);
+        for (int k = 0; k < numTests; k++) {
+          PublicKeyVerify verifier = verifyManager.getPrimitive(privKeys[k].getPublicKey());
+          if (j == k) { // The same key
+            try {
+              verifier.verify(signature, msg);
+            } catch (GeneralSecurityException ex) {
+              fail("Valid signature, should not throw exception");
+            }
+          } else { // Different keys
+            try {
+              verifier.verify(signature, msg);
+              fail("Invalid signature, should have thrown exception");
+            } catch (GeneralSecurityException expected) {
+              // Expected
+            }
+          }
+        }
       }
+    }
+  }
+
+  @Test
+  public void testNewKeyWithCorruptedFormat() {
+    ByteString serialized = ByteString.copyFrom(new byte[128]);
+    KeyFormat keyFormat = KeyFormat.newBuilder()
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey")
+        .setValue(serialized)
+        .build();
+    EcdsaSignKeyManager keyManager = new EcdsaSignKeyManager();
+    try {
+      keyManager.newKey(serialized);
+      fail("Corrupted format, should have thrown exception");
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
+    try {
+      keyManager.newKey(keyFormat);
+      fail("Corrupted format, should have thrown exception");
+    } catch (GeneralSecurityException expected) {
+      // Expected
     }
   }
 
