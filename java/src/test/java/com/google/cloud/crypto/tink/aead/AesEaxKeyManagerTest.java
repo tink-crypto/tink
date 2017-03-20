@@ -21,14 +21,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.Aead;
+import com.google.cloud.crypto.tink.AesEaxProto.AesEaxKey;
+import com.google.cloud.crypto.tink.AesEaxProto.AesEaxKeyFormat;
+import com.google.cloud.crypto.tink.AesEaxProto.AesEaxParams;
 import com.google.cloud.crypto.tink.CryptoFormat;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.TestUtil;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
+import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
+import java.util.Set;
+import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +47,60 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class AesEaxKeyManagerTest {
+  @Test
+  public void testNewKeyMultipleTimes() throws Exception {
+    AesEaxKeyFormat eaxKeyFormat = AesEaxKeyFormat.newBuilder()
+        .setParams(AesEaxParams.newBuilder().setIvSize(16).build())
+        .setKeySize(16)
+        .build();
+    ByteString serialized = ByteString.copyFrom(eaxKeyFormat.toByteArray());
+    KeyFormat keyFormat = KeyFormat.newBuilder()
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesEaxKey")
+        .setValue(serialized)
+        .build();
+    AesEaxKeyManager keyManager = new AesEaxKeyManager();
+    Set<String> keys = new TreeSet<String>();
+    // Calls newKey multiple times and make sure that they generate different keys.
+    int numTests = 27;
+    for (int i = 0; i < numTests / 3; i++) {
+      AesEaxKey key = keyManager.newKey(eaxKeyFormat);
+      keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
+      assertEquals(16, key.getKeyValue().toByteArray().length);
+
+      key = keyManager.newKey(serialized);
+      keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
+      assertEquals(16, key.getKeyValue().toByteArray().length);
+
+      KeyData keyData = keyManager.newKey(keyFormat);
+      key = AesEaxKey.parseFrom(keyData.getValue());
+      keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
+      assertEquals(16, key.getKeyValue().toByteArray().length);
+    }
+    assertEquals(numTests, keys.size());
+  }
+
+  @Test
+  public void testNewKeyWithCorruptedFormat() throws Exception {
+    ByteString serialized = ByteString.copyFrom(new byte[128]);
+    KeyFormat keyFormat = KeyFormat.newBuilder()
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesEaxKey")
+        .setValue(serialized)
+        .build();
+    AesEaxKeyManager keyManager = new AesEaxKeyManager();
+    try {
+      keyManager.newKey(serialized);
+      fail("Corrupted format, should have thrown exception");
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
+    try {
+      keyManager.newKey(keyFormat);
+      fail("Corrupted format, should have thrown exception");
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
+  }
+
   private static final int AES_KEY_SIZE = 16;
 
   private static class PublicTestVector {
