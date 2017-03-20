@@ -52,6 +52,24 @@ public class AeadFactoryTest {
   }
 
   @Test
+  public void testBasicAesCtrHmacAead() throws Exception {
+    AeadFactory.registerStandardKeyTypes();
+    byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
+    byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
+    int ivSize = 12;
+    int tagSize = 16;
+    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK)));
+    Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    TestUtil.runBasicTests(aead);
+  }
+
+  @Test
   public void testMultipleKeys() throws Exception {
     byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
     byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);

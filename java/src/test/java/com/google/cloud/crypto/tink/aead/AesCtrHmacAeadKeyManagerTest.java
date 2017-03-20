@@ -16,39 +16,79 @@
 
 package com.google.cloud.crypto.tink.aead;
 
-import com.google.cloud.crypto.tink.Aead;
-import com.google.cloud.crypto.tink.KeysetHandle;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
+
+import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
+import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
 import com.google.cloud.crypto.tink.TestUtil;
-import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
-import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
-import com.google.cloud.crypto.tink.subtle.Random;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.protobuf.ByteString;
+import java.security.GeneralSecurityException;
+import java.util.Set;
+import java.util.TreeSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for AesCtrHmacAead and its key manager.
+ * Tests for AesCtrHmaAeadKeyManager.
  */
 @RunWith(JUnit4.class)
 public class AesCtrHmacAeadKeyManagerTest {
-  private static final int AES_KEY_SIZE = 16;
-  private static final int HMAC_KEY_SIZE = 20;
+  @Test
+  public void testNewKeyMultipleTimes() throws Exception {
+    KeyFormat keyFormat = TestUtil.createAesCtrHmacAeadKeyFormat(16, 16, 32, 16);
+    AesCtrHmacAeadKeyFormat aeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(keyFormat.getValue()
+        .toByteArray());
+    ByteString serialized = ByteString.copyFrom(aeadKeyFormat.toByteArray());
+    AesCtrHmacAeadKeyManager keyManager = new AesCtrHmacAeadKeyManager();
+    Set<String> keys = new TreeSet<String>();
+    // Calls newKey multiple times and make sure that they generate different keys.
+    int numTests = 24;
+    for (int i = 0; i < numTests / 6; i++) {
+      AesCtrHmacAeadKey key = keyManager.newKey(aeadKeyFormat);
+      keys.add(new String(key.getAesCtrKey().getKeyValue().toByteArray(), "UTF-8"));
+      keys.add(new String(key.getHmacKey().getKeyValue().toByteArray(), "UTF-8"));
+      assertEquals(16, key.getAesCtrKey().getKeyValue().toByteArray().length);
+      assertEquals(32, key.getHmacKey().getKeyValue().toByteArray().length);
+
+      key = keyManager.newKey(serialized);
+      keys.add(new String(key.getAesCtrKey().getKeyValue().toByteArray(), "UTF-8"));
+      keys.add(new String(key.getHmacKey().getKeyValue().toByteArray(), "UTF-8"));
+      assertEquals(16, key.getAesCtrKey().getKeyValue().toByteArray().length);
+      assertEquals(32, key.getHmacKey().getKeyValue().toByteArray().length);
+
+      KeyData keyData = keyManager.newKey(keyFormat);
+      key = AesCtrHmacAeadKey.parseFrom(keyData.getValue());
+      keys.add(new String(key.getAesCtrKey().getKeyValue().toByteArray(), "UTF-8"));
+      keys.add(new String(key.getHmacKey().getKeyValue().toByteArray(), "UTF-8"));
+      assertEquals(16, key.getAesCtrKey().getKeyValue().toByteArray().length);
+      assertEquals(32, key.getHmacKey().getKeyValue().toByteArray().length);
+    }
+    assertEquals(numTests, keys.size());
+  }
 
   @Test
-  public void testBasic() throws Exception {
-    AeadFactory.registerStandardKeyTypes();
-    byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
-    byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
-    int ivSize = 12;
-    int tagSize = 16;
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(
-            TestUtil.createKey(
-                TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-                42,
-                KeyStatusType.ENABLED,
-                OutputPrefixType.TINK)));
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
-    TestUtil.runBasicTests(aead);
+  public void testNewKeyWithCorruptedFormat() throws Exception {
+    ByteString serialized = ByteString.copyFrom(new byte[128]);
+    KeyFormat keyFormat = KeyFormat.newBuilder()
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey")
+        .setValue(serialized)
+        .build();
+    AesCtrHmacAeadKeyManager keyManager = new AesCtrHmacAeadKeyManager();
+    try {
+      keyManager.newKey(serialized);
+      fail("Corrupted format, should have thrown exception");
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
+    try {
+      keyManager.newKey(keyFormat);
+      fail("Corrupted format, should have thrown exception");
+    } catch (GeneralSecurityException expected) {
+      // Expected
+    }
   }
 }
