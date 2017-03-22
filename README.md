@@ -1,9 +1,9 @@
 # Tink
 
-Tink is a small crypto library that provides a safe, simple, agile, fast and
-fun way to accomplish some common crypto tasks. It is written by a group of
-cryptographers and security engineers at Google, but it is not an official
-Google product.
+Tink is a small cryptographic library that provides a safe, simple, agile and
+fast way to accomplish some common cryptographic tasks. It is written by a
+group of cryptographers and security engineers at Google, but it is not an
+official Google product.
 
 ## Getting started
 
@@ -21,12 +21,12 @@ Tink, as much as we’ve enjoyed working on it!
 Tink provides a set of basic tools to perform common crypto tasks in a variety
 of environments.
 
-Tink supports the 4 fundamental crypto operations including authenticated
-encryption with associated data (Aead), message authentication code (Mac),
-digital signature (PublicKeySign and PublicKeyVerify), and hybrid encryption
-(HybridEncrypt and HybridDecrypt). In the future we might add other primitives
-such as deterministic encryption (e.g., SIV modes), pseudorandom function (e.g.
-, HMAC as a PRF), strong pseudorandom permutation (e.g., HEH).
+Currently Tink supports the 4 fundamental crypto operations including
+authenticated encryption with associated data (AEAD), message authentication
+code (MAC), digital signature (PublicKeySign and PublicKeyVerify), and hybrid
+encryption (HybridEncrypt and HybridDecrypt). In the future we might add other
+primitives such as deterministic encryption (e.g., SIV modes), pseudorandom
+function (e.g., HMAC as a PRF), strong pseudorandom permutation (e.g., HEH).
 
 Tink also supports
 [envelope](http://docs.aws.amazon.com/kms/latest/developerguide/workflow.html)
@@ -40,14 +40,14 @@ use the KMS to decrypt DEK, and use decrypted DEK to decrypt the data.
 
 #### Primitives
 
-The following Aead algorithms are supported:
+The following AEAD algorithms are supported:
 
 - AES-EAX
 - AES-GCM
 - AES-CTR-HMAC-AEAD
 - CHACHA20-POLY1305 (planned)
 
-The following Mac algorithms are supported:
+The following MAC algorithms are supported:
 
 - HMAC-SHA2
 
@@ -58,7 +58,8 @@ The following digital signature algorithms are supported:
 
 The following hybrid encryption algorithms are supported:
 
-- ECIES with AEAD and HKDF, based on Victor Shoup’s design
+- ECIES with AEAD and HKDF, based on [Victor Shoup's ISO 18033-2 design]
+(http://www.shoup.net/iso/).
 - NaCl CryptoBox (planned)
 
 #### Key Management
@@ -96,7 +97,7 @@ Engine. iOS support is in active development.
 Tink reduces common crypto pitfalls with user-centered design, careful
 implementation and code reviews, and extensive testing.
 
-Tink is an accumulation of decades of experiences in building and breaking
+Tink stems from combined decades of experience in building and breaking
 real-world cryptosystems. We are also maintainers of
 [Project Wycheproof](https://github.com/google/wycheproof), a framework for
 validating the correctness of crypto libraries, thus Tink has been
@@ -135,7 +136,7 @@ piece of data using authenticated encryption you need only 3 lines of code:
 
 ```
 // 1. Read a keyset from some storage system
-KeysetHandle keysetHandle = KeysetHandle.newHandle(bytes);
+KeysetHandle keysetHandle = ...
 
 // 2. Get an instance of the Aead primitive.
 Aead aead = AeadFactory.getPrimitive(keysetHandle);
