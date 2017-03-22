@@ -13,7 +13,7 @@ java_binary(
     javacopts = JAVACOPTS,
     main_class = "com.example.envelopeme.EnvelopeMe",
     deps = [
-        "//java:tink",
+        "//java",
         "@args4j//jar",
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",

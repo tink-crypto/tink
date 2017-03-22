@@ -6,7 +6,7 @@ load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
 load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_library")
 
 cc_proto_library(
-    name = "cc_core",
+    name = "cc_tink",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
@@ -22,7 +22,7 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_core",
+    name = "java_tink",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
@@ -42,7 +42,7 @@ java_proto_library(
 cc_proto_library(
     name = "cc_ecdsa",
     proto_deps = [
-        ":cc_core",
+        ":cc_tink",
     ],
     protos = [
         "ecdsa.proto",
@@ -54,7 +54,7 @@ cc_proto_library(
 java_proto_library(
     name = "java_ecdsa",
     proto_deps = [
-        ":java_core",
+        ":java_tink",
     ],
     protos = [
         "ecdsa.proto",
@@ -68,7 +68,7 @@ java_proto_library(
 cc_proto_library(
     name = "cc_hmac",
     proto_deps = [
-        ":cc_core",
+        ":cc_tink",
     ],
     protos = [
         "hmac.proto",
@@ -80,7 +80,7 @@ cc_proto_library(
 java_proto_library(
     name = "java_hmac",
     proto_deps = [
-        ":java_core",
+        ":java_tink",
     ],
     protos = [
         "hmac.proto",
@@ -188,7 +188,7 @@ cc_proto_library(
         "@com_github_google_protobuf//:well_known_protos",
     ],
     proto_deps = [
-        ":cc_core",
+        ":cc_tink",
     ],
     protos = [
         "kms_envelope.proto",
@@ -206,7 +206,7 @@ java_proto_library(
         "@com_github_google_protobuf//:well_known_protos",
     ],
     proto_deps = [
-        ":java_core",
+        ":java_tink",
     ],
     protos = [
         "kms_envelope.proto",
@@ -226,7 +226,7 @@ cc_proto_library(
         "@com_github_google_protobuf//:well_known_protos",
     ],
     proto_deps = [
-        ":cc_core",
+        ":cc_tink",
     ],
     protos = [
         "ecies_aead_hkdf.proto",
@@ -244,7 +244,7 @@ java_proto_library(
         "@com_github_google_protobuf//:well_known_protos",
     ],
     proto_deps = [
-        ":java_core",
+        ":java_tink",
     ],
     protos = [
         "ecies_aead_hkdf.proto",

@@ -5,393 +5,73 @@ JAVACOPTS = [
     "-Xlint:deprecation",
 ]
 
-# public interfaces
-
-java_library(
-    name = "public_interfaces",
-    srcs = [
-        "src/main/java/com/google/cloud/crypto/tink/Aead.java",
-        "src/main/java/com/google/cloud/crypto/tink/HybridDecrypt.java",
-        "src/main/java/com/google/cloud/crypto/tink/HybridEncrypt.java",
-        "src/main/java/com/google/cloud/crypto/tink/Mac.java",
-        "src/main/java/com/google/cloud/crypto/tink/PublicKeySign.java",
-        "src/main/java/com/google/cloud/crypto/tink/PublicKeyVerify.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        "@com_google_guava//jar",
-    ],
-)
-
-# common subtle
-
-java_library(
-    name = "common_subtle",
-    srcs = [
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EcUtil.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/Random.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/SubtleUtil.java",
-    ],
-    javacopts = JAVACOPTS,
-)
-
-# restricted APIs
-
-KEYSET_HANDLE_RESTRICTED_SRCS = [
-    # Storing keyset in cleartext usually leads to security incidents.
-    # To discourage users from doing that, the visibility of
-    # CleartextKeysetHandle, which allows loading cleartext keyset,
-    # is restricted.
-    "src/main/java/com/google/cloud/crypto/tink/CleartextKeysetHandle.java",
-]
-
-filegroup(
-    name = "keyset_handle_restricted_srcs",
-    srcs = KEYSET_HANDLE_RESTRICTED_SRCS,
-)
-
-KEY_MANAGEMENT_RESTRICTED_SRCS = [
-    # Normal users should not use this API directly, thus this is restricted.
-    "src/main/java/com/google/cloud/crypto/tink/KeysetManager.java",
-]
-
-filegroup(
-    name = "key_management_restricted_srcs",
-    srcs = KEY_MANAGEMENT_RESTRICTED_SRCS,
-)
-
-# core, without restricted APIs
-
-filegroup(
-    name = "core_srcs",
-    srcs = glob(
-        [
-            "src/main/java/com/google/cloud/crypto/tink/*.java",
-        ],
-        exclude = KEYSET_HANDLE_RESTRICTED_SRCS +
-                  KEY_MANAGEMENT_RESTRICTED_SRCS,
-    ),
-)
-
-java_library(
-    name = "core",
-    srcs = [":core_srcs"],
-    javacopts = JAVACOPTS,
-    deps = [
-        "//java:common_subtle",
-        "//proto:java_core",
-        "//proto:java_core_compile_imports",
-        "@com_google_guava//jar",
-    ],
-)
-
-COMMON_JAVA_DEPS = [
-    "//java:common_subtle",
-    "//java:core",
-    "//proto:java_core",
-]
-
-# aead
-
-java_library(
-    name = "aead_subtle",
-    srcs = [
-        "src/main/java/com/google/cloud/crypto/tink/subtle/AeadBase.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/AesCtrJceCipher.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/AesEaxJce.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/AesGcmJce.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EncryptThenAuthenticate.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/IndCpaCipher.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        "//java:common_subtle",
-        "//java:public_interfaces",
-        "@com_google_guava//jar",
-    ],
-)
-
-AEAD_ENVELOPE_SRCS = [
-    "src/main/java/com/google/cloud/crypto/tink/aead/GoogleCloudKmsAeadKeyManager.java",
-    "src/main/java/com/google/cloud/crypto/tink/aead/GoogleCredentialFactory.java",
-    "src/main/java/com/google/cloud/crypto/tink/subtle/AeadBase.java",
-    "src/main/java/com/google/cloud/crypto/tink/subtle/GoogleCloudKmsAead.java",
-]
-
-filegroup(
-    name = "aead_srcs",
-    srcs = glob(
-        [
-            "src/main/java/com/google/cloud/crypto/tink/aead/*.java",
-        ],
-        exclude = AEAD_ENVELOPE_SRCS,
-    ),
-)
-
-java_library(
-    name = "aead",
-    srcs = [":aead_srcs"],
-    javacopts = JAVACOPTS,
-    deps = COMMON_JAVA_DEPS + [
-        "//java:aead_subtle",
-        "//java:mac",
-        "//proto:java_aes_ctr_hmac_aead",
-        "//proto:java_aes_gcm",
-        "//proto:java_aes_eax",
-        "//proto:java_core_compile_imports",
-        "//proto:java_hmac",
-        "//proto:java_kms_envelope",
-    ],
-)
-
-java_library(
-    name = "aead_envelope",
-    srcs = AEAD_ENVELOPE_SRCS,
-    javacopts = JAVACOPTS,
-    deps = COMMON_JAVA_DEPS + [
-        "//proto:java_core_compile_imports",
-        "//proto:java_googlecloudkms",
-        "@com_google_api_client//jar",
-        "@com_google_cloudkms//jar",
-        "@com_google_guava//jar",
-        "@com_google_http_client//jar",
-        "@com_google_http_client_jackson2//jar",
-        "@com_google_oauth_client//jar",
-    ],
-)
-
-# mac
-
-java_library(
-    name = "mac_subtle",
-    srcs = [
-        "src/main/java/com/google/cloud/crypto/tink/subtle/MacJce.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        "//java:common_subtle",
-        "//java:public_interfaces",
-    ],
-)
-
-filegroup(
-    name = "mac_srcs",
-    srcs = glob(
-        [
-            "src/main/java/com/google/cloud/crypto/tink/mac/*.java",
-        ],
-    ),
-)
-
-java_library(
-    name = "mac",
-    srcs = [":mac_srcs"],
-    javacopts = JAVACOPTS,
-    deps = COMMON_JAVA_DEPS + [
-        "//java:mac_subtle",
-        "//proto:java_core_compile_imports",
-        "//proto:java_hmac",
-    ],
-)
-
-# signature
-
-java_library(
-    name = "signature_subtle",
-    srcs = [
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EcUtil.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EcdsaSignJce.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EcdsaVerifyJce.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        "//java:public_interfaces",
-    ],
-)
-
-filegroup(
-    name = "signature_srcs",
-    srcs = glob(
-        [
-            "src/main/java/com/google/cloud/crypto/tink/signature/*.java",
-        ],
-    ),
-)
-
-java_library(
-    name = "signature",
-    srcs = [":signature_srcs"],
-    javacopts = JAVACOPTS,
-    deps = COMMON_JAVA_DEPS + [
-        "//java:signature_subtle",
-        "//proto:java_core_compile_imports",
-        "//proto:java_ecdsa",
-    ],
-)
-
-# hybrid
-
-filegroup(
-    name = "hybridencrypt_srcs",
-    srcs = [
-        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfAeadFactory.java",
-        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfHybridEncrypt.java",
-        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfPublicKeyManager.java",
-        "src/main/java/com/google/cloud/crypto/tink/hybrid/HybridEncryptFactory.java",
-        "src/main/java/com/google/cloud/crypto/tink/hybrid/HybridUtil.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EcUtil.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EciesHkdfSenderKem.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/Hkdf.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/HybridEncryptBase.java",
-    ],
-)
-
-java_library(
-    name = "hybridencrypt",
-    srcs = [
-        ":hybridencrypt_srcs",
-    ],
-    javacopts = JAVACOPTS,
-    deps = COMMON_JAVA_DEPS + [
-        "//java:aead",
-        "//java:mac",
-        "//proto:java_aes_ctr_hmac_aead",
-        "//proto:java_aes_gcm",
-        "//proto:java_aes_eax",
-        "//proto:java_core_compile_imports",
-        "//proto:java_ecies_aead_hkdf",
-        "//proto:java_hmac",
-        "@com_google_guava//jar",
-    ],
-)
-
-filegroup(
-    name = "hybriddecrypt_srcs",
-    srcs = [
-        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfAeadFactory.java",
-        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfHybridDecrypt.java",
-        "src/main/java/com/google/cloud/crypto/tink/hybrid/EciesAeadHkdfPrivateKeyManager.java",
-        "src/main/java/com/google/cloud/crypto/tink/hybrid/HybridDecryptFactory.java",
-        "src/main/java/com/google/cloud/crypto/tink/hybrid/HybridUtil.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EcUtil.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/EciesHkdfRecipientKem.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/Hkdf.java",
-        "src/main/java/com/google/cloud/crypto/tink/subtle/HybridDecryptBase.java",
-    ],
-)
-
-java_library(
-    name = "hybriddecrypt",
-    srcs = [
-        ":hybriddecrypt_srcs",
-    ],
-    javacopts = JAVACOPTS,
-    deps = COMMON_JAVA_DEPS + [
-        "//java:aead",
-        "//java:mac",
-        "//proto:java_aes_ctr_hmac_aead",
-        "//proto:java_aes_gcm",
-        "//proto:java_aes_eax",
-        "//proto:java_core_compile_imports",
-        "//proto:java_ecies_aead_hkdf",
-        "//proto:java_hmac",
-        "@com_google_guava//jar",
-    ],
-)
-
-# restricted libraries
-
-java_library(
-    name = "keyset_handle_restricted",
-    srcs = [
-        ":keyset_handle_restricted_srcs",
-    ],
-    javacopts = JAVACOPTS,
-    visibility = [
-        "//tools/tinkey:__pkg__",
-    ],
-    deps = COMMON_JAVA_DEPS + [
-        "//proto:java_core_compile_imports",
-    ],
-)
-
-java_library(
-    name = "key_management_restricted",
-    srcs = [
-        ":key_management_restricted_srcs",
-    ],
-    javacopts = JAVACOPTS,
-    visibility = [
-        "//tools/tinkey:__pkg__",
-    ],
-    deps = COMMON_JAVA_DEPS + [
-        "//proto:java_core_compile_imports",
-    ],
-)
-
 # public libraries
 
 java_library(
-    name = "tink",
+    name = "java",
     visibility = [
         "//visibility:public",
     ],
     exports = [
-        "//java:aead",
-        "//java:aead_envelope",
-        "//java:aead_subtle",
-        "//java:common_subtle",
-        "//java:core",
-        "//java:hybriddecrypt",
-        "//java:hybridencrypt",
-        "//java:mac",
-        "//java:mac_subtle",
-        "//java:signature",
-        "//java:signature_subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink",
+        "//java/src/main/java/com/google/cloud/crypto/tink/aead",
+        "//java/src/main/java/com/google/cloud/crypto/tink/aead:aead_envelope",
+        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:hybriddecrypt",
+        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:hybridencrypt",
+        "//java/src/main/java/com/google/cloud/crypto/tink/mac",
+        "//java/src/main/java/com/google/cloud/crypto/tink/signature",
         "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_aes_eax",
         "//proto:java_aes_gcm",
-        "//proto:java_core",
-        "//proto:java_core_compile_imports",
         "//proto:java_ecdsa",
         "//proto:java_ecies_aead_hkdf",
         "//proto:java_googlecloudkms",
         "//proto:java_hmac",
         "//proto:java_kms_envelope",
+        "//proto:java_tink",
+        "//proto:java_tink_compile_imports",
     ],
 )
 
-# like :tink, but include restricted APIs so it can be used for testonly code
+# like :java, but includes restricted APIs and subtle
 java_library(
-    name = "tink_testonly",
+    name = "testonly",
     testonly = 1,
     visibility = [
         "//visibility:public",
     ],
     exports = [
-        "//java:aead",
-        "//java:aead_envelope",
-        "//java:aead_subtle",
-        "//java:common_subtle",
-        "//java:core",
-        "//java:hybriddecrypt",
-        "//java:hybridencrypt",
-        "//java:key_management_restricted",
-        "//java:keyset_handle_restricted",
-        "//java:mac",
-        "//java:mac_subtle",
-        "//java:signature",
-        "//java:signature_subtle",
-        "//proto:java_aes_ctr_hmac_aead",
-        "//proto:java_aes_eax",
-        "//proto:java_aes_gcm",
-        "//proto:java_core",
-        "//proto:java_core_compile_imports",
-        "//proto:java_ecdsa",
-        "//proto:java_ecies_aead_hkdf",
-        "//proto:java_googlecloudkms",
-        "//proto:java_hmac",
-        "//proto:java_kms_envelope",
+        ":java",
+        ":key_management_restricted",
+        ":keyset_handle_restricted",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybriddecrypt_subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybridencrypt_subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:mac_subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:signature_subtle",
+    ],
+)
+
+# restricted
+
+java_library(
+    name = "keyset_handle_restricted",
+    visibility = [
+        "//tools/tinkey:__pkg__",
+    ],
+    exports = [
+        "//java/src/main/java/com/google/cloud/crypto/tink:keyset_handle_restricted",
+    ],
+)
+
+java_library(
+    name = "key_management_restricted",
+    visibility = [
+        "//tools/tinkey:__pkg__",
+    ],
+    exports = [
+        "//java/src/main/java/com/google/cloud/crypto/tink:key_management_restricted",
     ],
 )
 
@@ -403,12 +83,10 @@ java_library(
     name = "generator_test",
     testonly = 1,
     srcs = glob([
-        "src/test/java/**/*.java",
+        "src/test/**/*.java",
     ]),
     deps = [
-        "//java:key_management_restricted",
-        "//java:keyset_handle_restricted",
-        "//java:tink",
+        ":testonly",
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
@@ -419,10 +97,10 @@ java_library(
 
 gen_java_test_rules(
     small_tests = glob([
-        "src/test/java/**/*ProtoTest.java",
+        "src/test/**/*ProtoTest.java",
     ]),
     test_files = glob([
-        "src/test/java/**/*Test.java",
+        "src/test/**/*Test.java",
     ]),
     deps = [
         ":generator_test",

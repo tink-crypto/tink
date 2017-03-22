@@ -30,7 +30,7 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:cc_core",
+        "//proto:cc_tink",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
@@ -40,7 +40,7 @@ cc_library(
     srcs = ["core/keyset_handle.cc"],
     hdrs = ["keyset_handle.h"],
     deps = [
-        "//proto:cc_core",
+        "//proto:cc_tink",
     ],
 )
 

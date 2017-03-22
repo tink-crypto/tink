@@ -13,8 +13,8 @@ java_binary(
     javacopts = JAVACOPTS,
     main_class = "com.google.cloud.crypto.tink.tinkey.Tinkey",
     deps = [
+        "//java",
         "//java:key_management_restricted",
-        "//java:tink",
         "@args4j//jar",
         "@com_google_guava_guava//jar",
     ],
