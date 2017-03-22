@@ -133,7 +133,7 @@ You can accomplish common crypto operations such as data encryption, digital
 signatures, etc. with only a few lines of code. For example, to encrypt a
 piece of data using authenticated encryption you need only 3 lines of code:
 
-``
+```
 // 1. Read a keyset from some storage system
 KeysetHandle keysetHandle = KeysetHandle.newHandle(bytes);
 
@@ -142,7 +142,7 @@ Aead aead = AeadFactory.getPrimitive(keysetHandle);
 
 // 3. Use the primitive.
 byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-``
+```
 
 ### Composability
 
