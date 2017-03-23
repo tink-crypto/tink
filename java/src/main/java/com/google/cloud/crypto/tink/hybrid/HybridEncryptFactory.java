@@ -62,7 +62,7 @@ public final class HybridEncryptFactory {
       AeadFactory.registerStandardKeyTypes();
       MacFactory.registerStandardKeyTypes();
     } catch (GeneralSecurityException e) {
-      logger.severe("Cannot register key managers: " + e);
+      logger.severe("cannot register key managers: " + e);
     }
   }
   /**

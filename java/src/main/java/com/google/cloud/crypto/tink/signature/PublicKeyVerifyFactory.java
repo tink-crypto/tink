@@ -26,6 +26,7 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * PublicKeyVerifyFactory allows obtaining a {@code PublicKeyVerify} primitive from a
@@ -53,6 +54,9 @@ import java.util.List;
  * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
  */
 public final class PublicKeyVerifyFactory {
+  private static final Logger logger =
+      Logger.getLogger(PublicKeyVerifyFactory.class.getName());
+
   /**
    * Registers standard PublicKeyVerify key types and their managers with the {@code Registry}.
    * @throws GeneralSecurityException
@@ -110,6 +114,7 @@ public final class PublicKeyVerifyFactory {
             // If there is no exception, the signature is valid and we can return.
             return;
           } catch (GeneralSecurityException e) {
+            logger.info("signature prefix matches a key, but cannot verify: " + e.toString());
             // Ignored as we want to continue verification with the remaining keys.
           }
         }
@@ -126,7 +131,7 @@ public final class PublicKeyVerifyFactory {
           }
         }
         // nothing works.
-        throw new GeneralSecurityException("Invalid signature");
+        throw new GeneralSecurityException("invalid signature");
       }
     };
   }

@@ -246,7 +246,7 @@ public class RegistryTest {
       KeyManager<Mac, Message, Message> unused = registry.getKeyManager(badTypeUrl);
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("Unsupported"));
+      assertTrue(e.toString().contains("unsupported"));
       assertTrue(e.toString().contains(badTypeUrl));
     }
   }

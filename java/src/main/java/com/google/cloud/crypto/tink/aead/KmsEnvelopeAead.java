@@ -82,7 +82,7 @@ class KmsEnvelopeAead extends AeadBase {
     } catch (IndexOutOfBoundsException
              | BufferUnderflowException
              | NegativeArraySizeException e) {
-      throw new GeneralSecurityException("invalid ciphertext");
+      throw new GeneralSecurityException("invalid ciphertext", e);
     }
   }
 

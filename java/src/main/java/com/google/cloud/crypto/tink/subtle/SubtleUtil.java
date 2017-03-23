@@ -51,7 +51,7 @@ public final class SubtleUtil {
     int length = 0;
     for (byte[] chunk : chunks) {
       if (length > Integer.MAX_VALUE - chunk.length) {
-        throw new GeneralSecurityException("Exceeded size limit");
+        throw new GeneralSecurityException("exceeded size limit");
       }
       length += chunk.length;
     }
@@ -82,7 +82,7 @@ public final class SubtleUtil {
     if (candidate < 0 || candidate > maxExpected) {
       throw new GeneralSecurityException(
           String.format(
-              "Key has version %d. Only keys with version in range [0..%d] are supported",
+              "key has version %d; only keys with version in range [0..%d] are supported",
               candidate,
               maxExpected));
     }

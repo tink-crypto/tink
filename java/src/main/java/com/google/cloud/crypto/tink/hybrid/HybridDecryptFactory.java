@@ -117,6 +117,7 @@ public final class HybridDecryptFactory {
             try {
               return entry.getPrimitive().decrypt(ciphertextNoPrefix, contextInfo);
             } catch (GeneralSecurityException e) {
+              logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e.toString());
               continue;
             }
           }

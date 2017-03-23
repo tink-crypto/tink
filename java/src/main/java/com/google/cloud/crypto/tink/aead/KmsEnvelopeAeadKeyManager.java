@@ -58,7 +58,7 @@ class KmsEnvelopeAeadKeyManager
       KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.parseFrom(serialized);
       return newKey(format);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException(e);
+      throw new GeneralSecurityException("invalid KmsEnvelopeAead key format", e);
     }
   }
 

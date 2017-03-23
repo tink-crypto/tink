@@ -57,7 +57,7 @@ class AesEaxKeyManager implements KeyManager<Aead, AesEaxKey, AesEaxKeyFormat> {
       AesEaxKeyFormat format = AesEaxKeyFormat.parseFrom(serialized);
       return newKey(format);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("cannot generate AesEax key");
+      throw new GeneralSecurityException("invalid AesEax key format", e);
     }
   }
 

@@ -51,7 +51,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyF
       AesCtrKey keyProto = AesCtrKey.parseFrom(serialized);
       return getPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Invalid AesCtr Key");
+      throw new GeneralSecurityException("invalid AesCtr Key");
     }
   }
 
@@ -68,7 +68,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyF
       AesCtrKeyFormat format = AesCtrKeyFormat.parseFrom(serialized);
       return newKey(format);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException(e);
+      throw new GeneralSecurityException("invalid AesCtr key format", e);
     }
   }
 

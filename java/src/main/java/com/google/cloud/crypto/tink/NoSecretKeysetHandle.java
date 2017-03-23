@@ -60,7 +60,7 @@ public final class NoSecretKeysetHandle {
       if (key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL
           || key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.SYMMETRIC
           || key.getKeyData().getKeyMaterialType() == KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
-        throw new GeneralSecurityException("Keyset contains secret key material");
+        throw new GeneralSecurityException("keyset contains secret key material");
       }
     }
   }

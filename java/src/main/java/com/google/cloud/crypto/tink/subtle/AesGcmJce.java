@@ -47,7 +47,7 @@ public final class AesGcmJce extends AeadBase {
       throws GeneralSecurityException {
     // Check that ciphertext is not longer than the max. size of a Java array.
     if (plaintext.length > Integer.MAX_VALUE - IV_SIZE_IN_BYTES - TAG_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("Plaintext too long");
+      throw new GeneralSecurityException("plaintext too long");
     }
     byte[] ciphertext = new byte[IV_SIZE_IN_BYTES + plaintext.length + TAG_SIZE_IN_BYTES];
     byte[] iv = Random.randBytes(IV_SIZE_IN_BYTES);

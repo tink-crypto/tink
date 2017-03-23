@@ -56,7 +56,7 @@ public final class GoogleCloudKmsAead extends AeadBase {
           .execute();
       return response.decodeCiphertext();
     } catch (IOException e) {
-      throw new GeneralSecurityException("decryption failed");
+      throw new GeneralSecurityException("encryption failed", e);
     }
 
   }
@@ -73,7 +73,7 @@ public final class GoogleCloudKmsAead extends AeadBase {
           .execute();
       return response.decodePlaintext();
     } catch (IOException e) {
-      throw new GeneralSecurityException("decryption failed");
+      throw new GeneralSecurityException("decryption failed", e);
     }
 
   }

@@ -223,7 +223,7 @@ public class PrimitiveSetTest {
       pset.addPrimitive(new DummyMac1(), key1);
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("invalid key"));
+      assertTrue(e.toString().contains("unknown output prefix type"));
     }
   }
 }

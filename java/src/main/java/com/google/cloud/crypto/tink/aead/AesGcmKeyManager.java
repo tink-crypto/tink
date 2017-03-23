@@ -57,7 +57,7 @@ class AesGcmKeyManager implements KeyManager<Aead, AesGcmKey, AesGcmKeyFormat> {
       AesGcmKeyFormat format = AesGcmKeyFormat.parseFrom(serialized);
       return newKey(format);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("cannot generate AesGcm key");
+      throw new GeneralSecurityException("invalid AesGcm key format", e);
     }
   }
 

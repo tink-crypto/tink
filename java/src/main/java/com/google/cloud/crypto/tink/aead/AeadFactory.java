@@ -28,6 +28,7 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * AeadFactory allows obtaining a primitive from a {@code KeysetHandle}.
@@ -57,6 +58,8 @@ import java.util.List;
  * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
  */
 public final class AeadFactory {
+  private static final Logger logger =
+      Logger.getLogger(AeadFactory.class.getName());
   /**
    * Registers standard Aead key types and their managers with the {@code Registry}.
    * @throws GeneralSecurityException
@@ -125,6 +128,7 @@ public final class AeadFactory {
             try {
               return entry.getPrimitive().decrypt(ciphertextNoPrefix, aad);
             } catch (GeneralSecurityException e) {
+              logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e.toString());
               continue;
             }
           }

@@ -38,7 +38,7 @@ final class SigUtil {
       case SHA512:
         return "SHA512WithECDSA";
       default:
-        throw new NoSuchAlgorithmException("Hash unsupported for signature: " + hash);
+        throw new NoSuchAlgorithmException("hash unsupported for signature: " + hash);
     }
   }
 
@@ -57,7 +57,7 @@ final class SigUtil {
         break;
       // TODO(quannguyen): support other signature encodings.
       default:
-        throw new GeneralSecurityException("Unsupported signature encoding");
+        throw new GeneralSecurityException("unsupported signature encoding");
     }
     switch(curve) {
       case NIST_P256:

@@ -55,7 +55,7 @@ class AesCtrHmacAeadKeyManager
       Registry.INSTANCE.registerKeyManager(AES_CTR_KEY_TYPE, new AesCtrKeyManager());
       MacFactory.registerStandardKeyTypes();
     } catch (GeneralSecurityException e) {
-      logger.severe("Cannot register key managers: " + e);
+      logger.severe("cannot register key managers: " + e);
     }
   }
 
@@ -84,7 +84,7 @@ class AesCtrHmacAeadKeyManager
       AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.parseFrom(serialized);
       return newKey(format);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("cannot generate AesCtrHmacAead key");
+      throw new GeneralSecurityException("invalid AesCtrHmacAead key format", e);
     }
   }
 

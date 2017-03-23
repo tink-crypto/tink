@@ -58,7 +58,7 @@ public final class AesEaxJce extends AeadBase {
   @SuppressWarnings("InsecureCryptoUsage")
   public AesEaxJce(final byte[] key, int ivSizeInBytes) throws GeneralSecurityException {
     if (ivSizeInBytes != 12 && ivSizeInBytes != 16) {
-      throw new IllegalArgumentException("Iv size should be either 12 or 16 bytes");
+      throw new IllegalArgumentException("IV size should be either 12 or 16 bytes");
     }
     this.ivSizeInBytes = ivSizeInBytes;
     keySpec = new SecretKeySpec(key, "AES");
@@ -158,7 +158,7 @@ public final class AesEaxJce extends AeadBase {
   public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
     // Check that ciphertext is not longer than the max. size of a Java array.
     if (plaintext.length > Integer.MAX_VALUE - ivSizeInBytes - TAG_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("Plaintext too long");
+      throw new GeneralSecurityException("plaintext too long");
     }
     byte[] ciphertext = new byte[ivSizeInBytes + plaintext.length + TAG_SIZE_IN_BYTES];
     byte[] iv = Random.randBytes(ivSizeInBytes);

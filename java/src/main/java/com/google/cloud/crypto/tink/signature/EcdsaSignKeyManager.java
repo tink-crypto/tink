@@ -55,7 +55,7 @@ final class EcdsaSignKeyManager implements
       EcdsaPrivateKey privKeyProto = EcdsaPrivateKey.parseFrom(serialized);
       return getPrimitive(privKeyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Invalid Ecdsa private key");
+      throw new GeneralSecurityException("invalid Ecdsa private key");
     }
   }
 
@@ -75,7 +75,7 @@ final class EcdsaSignKeyManager implements
       EcdsaKeyFormat ecdsaKeyFormat = EcdsaKeyFormat.parseFrom(serialized);
       return newKey(ecdsaKeyFormat);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Invalid Ecdsa key format");
+      throw new GeneralSecurityException("invalid Ecdsa key format", e);
     }
   }
 

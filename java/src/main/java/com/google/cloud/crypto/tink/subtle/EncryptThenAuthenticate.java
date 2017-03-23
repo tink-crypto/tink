@@ -75,7 +75,7 @@ public final class EncryptThenAuthenticate extends AeadBase {
   public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
       throws GeneralSecurityException {
     if (ciphertext.length < macLength) {
-      throw new GeneralSecurityException("Ciphertext too short");
+      throw new GeneralSecurityException("ciphertext too short");
     }
     byte[] rawCiphertext = Arrays.copyOfRange(ciphertext, 0, ciphertext.length - macLength);
     byte[] macValue = Arrays.copyOfRange(ciphertext, ciphertext.length - macLength,

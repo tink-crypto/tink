@@ -33,7 +33,7 @@ final class HybridUtil {
     Util.getCurveSpec(params.getKemParams().getCurveType());
     Util.hashToHmacAlgorithmName(params.getKemParams().getHkdfHashType());
     if (params.getEcPointFormat() == EcPointFormat.UNKNOWN_FORMAT) {
-      throw new GeneralSecurityException("invalid EC point format");
+      throw new GeneralSecurityException("unknown EC point format");
     }
     // Check that we can generate new keys from the DEM AEAD key format.
     Registry.INSTANCE.newKey(params.getDemParams().getAeadDem());

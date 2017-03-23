@@ -43,7 +43,7 @@ class EciesAeadHkdfPublicKeyManager implements
       EciesAeadHkdfPublicKey recipientKeyProto = EciesAeadHkdfPublicKey.parseFrom(serialized);
       return getPrimitive(recipientKeyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Invalid EciesAeadHkdfPublicKey.");
+      throw new GeneralSecurityException("invalid EciesAeadHkdfPublicKey.");
     }
   }
 

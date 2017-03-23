@@ -70,7 +70,7 @@ public final class CryptoFormat {
       case RAW:
         return RAW_PREFIX;
       default:
-        throw new GeneralSecurityException("invalid key");
+        throw new GeneralSecurityException("unknown output prefix type");
     }
   }
 }

@@ -81,7 +81,7 @@ public class Util {
       case COMPRESSED:
         return coordinateSize + 1;
       default:
-        throw new GeneralSecurityException("Unknown format");
+        throw new GeneralSecurityException("unknown EC point format");
     }
   }
 
@@ -103,10 +103,10 @@ public class Util {
       case UNCOMPRESSED:
         {
           if (encoded.length != 2 * coordinateSize + 1) {
-            throw new GeneralSecurityException("Invalid point size");
+            throw new GeneralSecurityException("invalid point size");
           }
           if (encoded[0] != 4) {
-            throw new GeneralSecurityException("Invalid point format");
+            throw new GeneralSecurityException("invalid point format");
           }
           BigInteger x = new BigInteger(1, Arrays.copyOfRange(encoded, 1, coordinateSize + 1));
           BigInteger y =
@@ -127,7 +127,7 @@ public class Util {
           } else if (encoded[0] == 3) {
             lsb = true;
           } else {
-            throw new GeneralSecurityException("Invalid format");
+            throw new GeneralSecurityException("invalid format");
           }
           BigInteger x = new BigInteger(1, Arrays.copyOfRange(encoded, 1, encoded.length));
           if (x.signum() == -1 || x.compareTo(p) != -1) {
@@ -137,7 +137,7 @@ public class Util {
           return new ECPoint(x, y);
         }
       default:
-        throw new GeneralSecurityException("Invalid format:" + format);
+        throw new GeneralSecurityException("invalid format:" + format);
     }
   }
 
@@ -176,7 +176,7 @@ public class Util {
           return encoded;
         }
       default:
-        throw new GeneralSecurityException("Invalid format:" + format);
+        throw new GeneralSecurityException("invalid format:" + format);
     }
   }
 
@@ -196,7 +196,7 @@ public class Util {
       case NIST_P521:
         return EcUtil.getNistP521Params();
       default:
-        throw new NoSuchAlgorithmException("Curve not implemented:" + curve);
+        throw new NoSuchAlgorithmException("curve not implemented:" + curve);
     }
   }
 
@@ -242,7 +242,7 @@ public class Util {
       case SHA512:
         return "HmacSha512";
       default:
-        throw new NoSuchAlgorithmException("Hash unsupported for HMAC: " + hash);
+        throw new NoSuchAlgorithmException("hash unsupported for HMAC: " + hash);
     }
   }
 

@@ -59,7 +59,7 @@ public final class EciesAeadHkdfHybridDecrypt extends HybridDecryptBase {
     EllipticCurve curve = recipientPrivateKey.getParams().getCurve();
     int headerSize = Util.encodingSizeInBytes(curve, ecPointFormat);
     if (ciphertext.length < headerSize) {
-      throw new GeneralSecurityException("Ciphertext too short");
+      throw new GeneralSecurityException("ciphertext too short");
     }
     ECPoint ephemeralPublicPoint = Util.ecPointDecode(curve, ecPointFormat,
         Arrays.copyOfRange(ciphertext, 0, headerSize));

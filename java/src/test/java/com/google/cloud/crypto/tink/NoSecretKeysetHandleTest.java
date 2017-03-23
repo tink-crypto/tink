@@ -94,7 +94,7 @@ public class NoSecretKeysetHandleTest {
       KeysetHandle unused = NoSecretKeysetHandle.parseFrom(keyset.toByteArray());
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("Keyset contains secret key material"));
+      assertTrue(e.toString().contains("keyset contains secret key material"));
     }
 
     KeyFormat format2 = KeyFormat.newBuilder().setTypeUrl(AEAD_TYPE_URL).build();

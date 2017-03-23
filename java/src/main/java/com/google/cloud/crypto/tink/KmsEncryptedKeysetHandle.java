@@ -48,14 +48,14 @@ public final class KmsEncryptedKeysetHandle {
       throws GeneralSecurityException {
     byte[] encryptedKeyset = kmsEncryptedKeyset.getEncryptedKeyset().toByteArray();
     if (encryptedKeyset.length == 0 || !kmsEncryptedKeyset.hasKmsKey()) {
-      throw new GeneralSecurityException("invalid keyset");
+      throw new GeneralSecurityException("invalid keyset, needs encrypted key material");
     }
     Aead aead = Registry.INSTANCE.getPrimitive(kmsEncryptedKeyset.getKmsKey());
     try {
       final Keyset keyset = Keyset.parseFrom(aead.decrypt(encryptedKeyset, null /* aad */));
       return new KeysetHandle(keyset, encryptedKeyset);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid keyset");
+      throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
   }
 }

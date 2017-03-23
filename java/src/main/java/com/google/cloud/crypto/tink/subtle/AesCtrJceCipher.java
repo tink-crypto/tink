@@ -47,7 +47,7 @@ public final class AesCtrJceCipher implements IndCpaCipher {
     this.keySpec = new SecretKeySpec(key, KEY_ALGORITHM);
     this.blockSize = Cipher.getInstance(CIPHER_ALGORITHM).getBlockSize();
     if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > blockSize) {
-      throw new GeneralSecurityException("Invalid iv size");
+      throw new GeneralSecurityException("invalid IV size");
     }
     this.ivSize = ivSize;
   }
@@ -63,7 +63,7 @@ public final class AesCtrJceCipher implements IndCpaCipher {
   @Override
   public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
     if (plaintext.length > Integer.MAX_VALUE - ivSize) {
-      throw new GeneralSecurityException("Plaintext length can not exceed "
+      throw new GeneralSecurityException("plaintext length can not exceed "
           + (Integer.MAX_VALUE - ivSize));
     }
     byte[] ciphertext = new byte[ivSize + plaintext.length];
@@ -84,7 +84,7 @@ public final class AesCtrJceCipher implements IndCpaCipher {
   @Override
   public byte[] decrypt(final byte[] ciphertext) throws GeneralSecurityException {
     if (ciphertext.length < ivSize) {
-      throw new GeneralSecurityException("Ciphertext is too short");
+      throw new GeneralSecurityException("ciphertext too short");
     }
     byte[] iv = new byte[ivSize];
     System.arraycopy(ciphertext, 0, iv, 0, ivSize);
@@ -108,7 +108,7 @@ public final class AesCtrJceCipher implements IndCpaCipher {
     }
     int numBytes = cipher.doFinal(input, inputOffset, inputLen, output, outputOffset);
     if (numBytes != inputLen) {
-      throw new GeneralSecurityException("Stored output's length does not match input's length");
+      throw new GeneralSecurityException("stored output's length does not match input's length");
     }
   }
 }

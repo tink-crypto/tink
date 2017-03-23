@@ -67,7 +67,7 @@ public final class Registry {
   public <P, K extends MessageLite, F extends MessageLite> boolean registerKeyManager(
       String typeUrl, final KeyManager<P, K, F> manager) throws GeneralSecurityException {
     if (manager == null) {
-      throw new NullPointerException("Key manager must be non-null.");
+      throw new NullPointerException("key manager must be non-null.");
     }
     KeyManager<P, K, F> existing = keyManager.putIfAbsent(typeUrl, manager);
     if (existing == null) {
@@ -86,7 +86,7 @@ public final class Registry {
       String typeUrl) throws GeneralSecurityException {
     KeyManager<P, K, F> manager = keyManager.get(typeUrl);
     if (manager == null) {
-      throw new GeneralSecurityException("Unsupported key type: " + typeUrl);
+      throw new GeneralSecurityException("unsupported key type: " + typeUrl);
     }
     return manager;
   }

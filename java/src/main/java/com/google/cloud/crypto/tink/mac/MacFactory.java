@@ -27,6 +27,7 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * MacFactory allows obtaining a primitive from a {@code KeysetHandle}.
@@ -55,6 +56,9 @@ import java.util.List;
  * primitive tries all keys with {@code OutputPrefixType.RAW}.
  */
 public final class MacFactory {
+  private static final Logger logger =
+      Logger.getLogger(MacFactory.class.getName());
+
   /**
    * Registers standard Mac key types and their managers with the {@code Registry}.
    * @throws GeneralSecurityException
@@ -114,7 +118,8 @@ public final class MacFactory {
               entry.getPrimitive().verifyMac(macNoPrefix, data);
               // If there is no exception, the MAC is valid and we can return.
               return;
-            } catch (GeneralSecurityException ignored) {
+            } catch (GeneralSecurityException e) {
+              logger.info("tag prefix matches a key, but cannot verify: " + e.toString());
               // Ignored as we want to continue verification with the remaining keys.
             }
         }
@@ -131,7 +136,7 @@ public final class MacFactory {
           }
         }
         // nothing works.
-        throw new GeneralSecurityException("Invalid MAC");
+        throw new GeneralSecurityException("invalid MAC");
       }
     };
   }

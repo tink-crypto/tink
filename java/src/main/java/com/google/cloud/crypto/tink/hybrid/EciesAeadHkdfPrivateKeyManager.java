@@ -47,7 +47,7 @@ class EciesAeadHkdfPrivateKeyManager
       EciesAeadHkdfPrivateKey recipientKeyProto = EciesAeadHkdfPrivateKey.parseFrom(proto);
       return getPrimitive(recipientKeyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Invalid EciesAeadHkdfPrivateKey.");
+      throw new GeneralSecurityException("invalid EciesAeadHkdfPrivateKey.");
     }
   }
 
@@ -72,7 +72,7 @@ class EciesAeadHkdfPrivateKeyManager
       EciesAeadHkdfKeyFormat eciesKeyFormat = EciesAeadHkdfKeyFormat.parseFrom(serialized);
       return newKey(eciesKeyFormat);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Invalid EciesAeadHkdf key format");
+      throw new GeneralSecurityException("invalid EciesAeadHkdf key format", e);
     }
   }
 

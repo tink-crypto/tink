@@ -74,7 +74,7 @@ final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFormat> {
       case SHA1 : return new MacJce("HMACSHA1", keySpec, tagSize);
       case SHA256 : return new MacJce("HMACSHA256", keySpec, tagSize);
       case SHA512 : return new MacJce("HMACSHA512", keySpec, tagSize);
-      default: throw new GeneralSecurityException("Unknown hash");
+      default: throw new GeneralSecurityException("unknown hash");
     }
   }
 
@@ -84,7 +84,7 @@ final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFormat> {
       HmacKeyFormat format = HmacKeyFormat.parseFrom(serialized);
       return newKey(format);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("cannot generate Hmac key");
+      throw new GeneralSecurityException("invalid Hmac key format", e);
     }
   }
 
