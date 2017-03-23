@@ -48,9 +48,7 @@ class RegistryTest : public ::testing::Test {
   }
 };
 
-template <class K, class F>
-class TestAeadKeyManager :
-      public KeyManager<Aead> {
+class TestAeadKeyManager : public KeyManager<Aead> {
  public:
   TestAeadKeyManager(const std::string& key_type) {
     key_types_.push_back(key_type);
@@ -81,21 +79,33 @@ TEST_F(RegistryTest, testBasic) {
   EXPECT_EQ(util::error::NOT_FOUND,
             manager_result.status().error_code());
 
-  registry.RegisterKeyManager(key_type_1,
-      new TestAeadKeyManager<AesCtrHmacAeadKey,
-                             AesCtrHmacAeadKeyFormat>(key_type_1));
-  registry.RegisterKeyManager(key_type_2,
-      new TestAeadKeyManager<AesGcmKey,
-                             AesGcmKeyFormat>(key_type_2));
+  TestAeadKeyManager* null_key_manager = nullptr;
+  util::Status status = registry.RegisterKeyManager(key_type_1,
+                                                    null_key_manager);
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code()) << status;
+
+  status = registry.RegisterKeyManager(key_type_1,
+      new TestAeadKeyManager(key_type_1));
+  EXPECT_TRUE(status.ok()) << status;
+
+  status = registry.RegisterKeyManager(key_type_1,
+      new TestAeadKeyManager(key_type_1));
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
+
+  status = registry.RegisterKeyManager(key_type_2,
+      new TestAeadKeyManager(key_type_2));
+  EXPECT_TRUE(status.ok()) << status;
 
   manager_result = registry.get_manager<Aead>(key_type_1);
-  EXPECT_TRUE(manager_result.ok());
+  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   auto manager = manager_result.ValueOrDie();
   EXPECT_TRUE(manager->DoesSupport(key_type_1));
   EXPECT_FALSE(manager->DoesSupport(key_type_2));
 
   manager_result = registry.get_manager<Aead>(key_type_2);
-  EXPECT_TRUE(manager_result.ok());
+  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   manager = manager_result.ValueOrDie();
   EXPECT_TRUE(manager->DoesSupport(key_type_2));
   EXPECT_FALSE(manager->DoesSupport(key_type_1));

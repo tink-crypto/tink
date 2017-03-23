@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/mac_factory.h"
+#include "cc/mac/mac_factory.h"
 
 #include "cc/mac.h"
 #include "google/protobuf/stubs/stringpiece.h"

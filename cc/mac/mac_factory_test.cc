@@ -15,7 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "cc/mac.h"
-#include "cc/mac_factory.h"
+#include "cc/mac/mac_factory.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "gtest/gtest.h"

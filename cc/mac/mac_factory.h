@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_MAC_FACTORY_H_
-#define TINK_MAC_FACTORY_H_
+#ifndef TINK_MAC_MAC_FACTORY_H_
+#define TINK_MAC_MAC_FACTORY_H_
 
 #include "cc/key_manager.h"
 #include "cc/keyset_handle.h"
@@ -83,4 +83,4 @@ class MacFactory {
 }  // namespace crypto
 }  // namespace cloud
 
-#endif  // TINK_MAC_FACTORY_H_
+#endif  // TINK_MAC_MAC_FACTORY_H_

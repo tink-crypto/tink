@@ -66,6 +66,10 @@ class Registry {
   template <class P>
   util::Status RegisterKeyManager(const std::string& type_url,
                                   KeyManager<P>* manager) {
+    if (manager == nullptr) {
+      return util::Status(util::error::INVALID_ARGUMENT,
+                    "Parameter 'manager' must be non-null.");
+    }
     std::unique_ptr<void, void(*)(void*)>
         entry(manager, delete_manager<P>);
     if (!manager->DoesSupport(type_url)) {
