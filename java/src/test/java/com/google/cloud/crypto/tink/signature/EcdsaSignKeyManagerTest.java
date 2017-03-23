@@ -100,22 +100,22 @@ public class EcdsaSignKeyManagerTest {
         keys.add(new String(privKeys[3 * j + 2].toByteArray(), "UTF-8"));
       }
       assertEquals(numTests, keys.size());
+      // Tests that generated keys have an adequate size. This is best-effort because keys might
+      // have leading zeros that are stripped off. These tests are flaky; the probability of
+      // failure is 2^-64 which happens when a key has 8 leading zeros.
       for (int j = 0; j < numTests; j++) {
         int keySize = privKeys[j].getKeyValue().toByteArray().length;
         switch(curveType) {
           case NIST_P256:
-            // BigInteger may contain sign bit.
-            assertTrue(256 / 8 <= keySize);
+            assertTrue(256 / 8 - 8 <= keySize);
             assertTrue(256 / 8 + 1 >= keySize);
             break;
           case NIST_P384:
-            // BigInteger may contain sign bit.
-            assertTrue(384 / 8 <= keySize);
+            assertTrue(384 / 8 - 8 <= keySize);
             assertTrue(384 / 8 + 1 >= keySize);
             break;
           case NIST_P521:
-            // BigInteger may contain sign bit.
-            assertTrue(521 / 8 <= keySize);
+            assertTrue(521 / 8 - 8 <= keySize);
             assertTrue(521 / 8 + 1 >= keySize);
             break;
           default:
