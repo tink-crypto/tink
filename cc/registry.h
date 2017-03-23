@@ -1,0 +1,135 @@
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef TINK_REGISTRY_H_
+#define TINK_REGISTRY_H_
+
+#include <typeinfo>
+#include <unordered_map>
+
+#include "cc/key_manager.h"
+#include "cc/util/errors.h"
+#include "cc/util/status.h"
+#include "google/protobuf/message_lite.h"
+#include "google/protobuf/stubs/singleton.h"
+#include "google/protobuf/stubs/stringpiece.h"
+#include "proto/tink.pb.h"
+
+namespace cloud {
+namespace crypto {
+namespace tink {
+
+template <class P>
+void delete_manager(void* t) {
+  delete static_cast<KeyManager<P>*>(t);
+}
+
+// Registry for KeyMangers.
+//
+// It is essentially a big container (map) that for each supported key
+// type holds a corresponding KeyManager object, which "understands"
+// the key type (i.e. the KeyManager can instantiate the primitive
+// corresponding to given key, or can generate new keys of the
+// supported key type).  Registry is initialized at startup, and is
+// later used to instantiate primitives for given keys or keysets.
+// Keeping KeyManagers for all primitives in a single Registry (rather
+// than having a separate KeyManager per primitive) enables modular
+// construction of compound primitives from "simple" ones, e.g.,
+// AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
+//
+// Note that regular users will usually not work directly with
+// Registry, but rather via primitive factories, which in the
+// background query the Registry for specific KeyManagers.  Registry
+// is public though, to enable configurations with custom primitives
+// and KeyManagers.
+class Registry {
+ public:
+  static Registry& get_default_registry() {
+    return *(default_registry_.get());
+  }
+
+  // Registers the given 'manager' for the key type identified by 'type_url'.
+  // Takes ownership of 'manager', which must be non-nullptr.
+  template <class P>
+  util::Status RegisterKeyManager(const std::string& type_url,
+                                  KeyManager<P>* manager) {
+    std::unique_ptr<void, void(*)(void*)>
+        entry(manager, delete_manager<P>);
+    if (!manager->DoesSupport(type_url)) {
+      return ToStatusF(util::error::INVALID_ARGUMENT,
+                       "The manager does not support type '%s'.",
+                       type_url.c_str());
+    }
+    auto curr_manager = type_to_manager_map_.find(type_url);
+    if (curr_manager != type_to_manager_map_.end()) {
+      return ToStatusF(util::error::ALREADY_EXISTS,
+                       "A manager for type '%s' has been already registered.",
+                       type_url.c_str());
+    }
+    type_to_manager_map_.insert(
+        std::make_pair(type_url, std::move(entry)));
+    type_to_primitive_map_.insert(
+        std::make_pair(type_url, typeid(P).name()));
+    return util::Status::OK;
+  }
+
+  // Returns a key manager for the given type_url (if any found).
+  // Keeps the ownership of the manager.
+  // TODO(przydatek): consider changing return value to
+  //   StatusOr<std::reference_wrapper<KeyManager<P>>>
+  // (cannot return reference directly, as StatusOr does not support it,
+  // see https://goo.gl/x0ymDz)
+  template <class P>
+  util::StatusOr<const KeyManager<P>*> get_manager(
+      const std::string& type_url) {
+    auto manager_entry = type_to_manager_map_.find(type_url);
+    if (manager_entry == type_to_manager_map_.end()) {
+      return ToStatusF(util::error::NOT_FOUND,
+                       "No manager for type '%s' has been registered.",
+                       type_url.c_str());
+    }
+    if (type_to_primitive_map_[type_url] != typeid(P).name()) {
+      return ToStatusF(util::error::INVALID_ARGUMENT,
+                       "Wrong Primitive type for key type '%s': "
+                       "got '%s', expected '%s'",
+                       type_url.c_str(),
+                       typeid(P).name(),
+                       type_to_primitive_map_[type_url]);
+    }
+    return static_cast<KeyManager<P>*>(manager_entry->second.get());
+  }
+
+ protected:
+  friend class google::protobuf::internal::Singleton<Registry>;
+  Registry() {}
+
+ private:
+  static google::protobuf::internal::Singleton<Registry> default_registry_;
+  // TODO(przydatek): change to tbb::concurrent_unordered_map for thread safety
+  //     (https://www.threadingbuildingblocks.org/)
+  typedef std::unordered_map<std::string, std::unique_ptr<void, void(*)(void*)>>
+      TypeToManagerMap;
+  typedef std::unordered_map<std::string, const char*>
+      TypeToPrimitiveMap;
+  TypeToManagerMap type_to_manager_map_;
+  TypeToPrimitiveMap type_to_primitive_map_;
+};
+
+}  // namespace tink
+}  // namespace crypto
+}  // namespace cloud
+
+#endif  // TINK_REGISTRY_H_

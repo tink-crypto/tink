@@ -14,26 +14,41 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "cc/mac.h"
+#include "cc/mac_factory.h"
+#include "cc/util/status.h"
+#include "cc/util/statusor.h"
 #include "gtest/gtest.h"
+#include "proto/tink.pb.h"
 
-#include "proto/ecdsa.pb.h"
+using google::cloud::crypto::tink::Keyset;
+using util::Status;
 
-using google::cloud::crypto::tink::EcdsaPublicKey;
+namespace cloud {
+namespace crypto {
+namespace tink {
+namespace {
 
-class EcdsaProtoTest : public ::testing::Test {
+class MacFactoryTest : public ::testing::Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
   }
-
-  virtual void TearDown() {
+  void TearDown() override {
   }
 };
 
-TEST_F(EcdsaProtoTest, testEcdsaPublicKey) {
-  EcdsaPublicKey pubKey;
-  pubKey.set_version(1);
-  EXPECT_EQ(1, pubKey.version());
+TEST_F(MacFactoryTest, testBasic) {
+  EXPECT_EQ(util::error::UNIMPLEMENTED,
+            MacFactory::RegisterStandardKeyTypes().error_code());
+  EXPECT_EQ(util::error::UNIMPLEMENTED,
+            MacFactory::RegisterLegacyKeyTypes().error_code());
 }
+
+}  // namespace
+}  // namespace tink
+}  // namespace crypto
+}  // namespace cloud
+
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);
