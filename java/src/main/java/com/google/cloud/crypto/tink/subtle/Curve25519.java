@@ -754,7 +754,6 @@ public final class Curve25519 {
    * Returns the 32-byte shared key (i.e., privateKey·peersPublicValue on the curve).
    */
   public static byte[] x25519(byte[] privateKey, byte[] peersPublicValue) {
-    byte[] publicKey = new byte[32];
     long[] x = new long[LIMB_CNT];
     long[] z = new long[LIMB_CNT + 1];
     long[] zmone = new long[LIMB_CNT];
