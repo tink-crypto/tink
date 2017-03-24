@@ -30,17 +30,24 @@ public final class MacJce implements Mac {
 
   public MacJce(String algorithm, java.security.Key key, int digestSize)
       throws GeneralSecurityException {
-    this.mac = javax.crypto.Mac.getInstance(algorithm);
     this.algorithm = algorithm;
     this.digestSize = digestSize;
-    mac.init(key);
     this.key = key;
+    this.mac = javax.crypto.Mac.getInstance(algorithm);
+    mac.init(key);
   }
 
   @Override
   public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
-    javax.crypto.Mac tmp = javax.crypto.Mac.getInstance(this.algorithm);
-    tmp.init(this.key);
+    javax.crypto.Mac tmp;
+    try {
+      // Cloning a mac is frequently fast and thread-safe.
+      tmp = (javax.crypto.Mac) this.mac.clone();
+    } catch (java.lang.CloneNotSupportedException ex) {
+      // Unfortunately, the Mac interface in certain versions of Android is not clonable.
+      tmp = javax.crypto.Mac.getInstance(this.algorithm);
+      tmp.init(this.key);
+    }
     tmp.update(data);
     byte[] digest = new byte[digestSize];
     System.arraycopy(tmp.doFinal(), 0, digest, 0, digestSize);

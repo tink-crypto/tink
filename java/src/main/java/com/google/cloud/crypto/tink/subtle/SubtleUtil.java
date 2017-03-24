@@ -87,4 +87,18 @@ public final class SubtleUtil {
               maxExpected));
     }
   }
+
+  /**
+   * Best-effort checks that this is Android.
+   * @return true if running on Android.
+   */
+  public static boolean isAndroid() {
+    try {
+      Class.forName("android.app.Application", /*initialize=*/ false, null);
+      return true;
+    } catch (Exception e) {
+      // If Application isn't loaded, it might as well not be Android.
+      return false;
+    }
+  }
 }
