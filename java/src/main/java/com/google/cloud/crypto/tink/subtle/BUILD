@@ -130,3 +130,16 @@ java_library(
         "@com_google_guava//jar",
     ],
 )
+
+# x25519 subtle
+
+java_library(
+    name = "x25519_subtle",
+    srcs = [
+        "Curve25519.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        "@com_google_guava//jar",
+    ],
+)

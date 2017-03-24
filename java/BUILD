@@ -50,6 +50,7 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybridencrypt_subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:mac_subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:signature_subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:x25519_subtle",
     ],
 )
 
