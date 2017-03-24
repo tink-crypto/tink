@@ -21,7 +21,6 @@ import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
@@ -70,7 +69,7 @@ final class EcdsaVerifyKeyManager
   }
 
   @Override
-  public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented");
   }
 

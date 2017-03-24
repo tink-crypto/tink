@@ -64,7 +64,8 @@ final class EciesAeadHkdfAeadFactory {
         this.aesGcmKey = Registry.INSTANCE.newKey(demFormat.getTypeUrl(), demFormat.getValue());
         this.symmetricKeySize = gcmKeyFormat.getKeySize();
       } catch (InvalidProtocolBufferException e) {
-        throw new GeneralSecurityException("invalid KeyFormat protobuf, expected AesGcmKeyFormat", e);
+        throw new GeneralSecurityException(
+            "invalid KeyFormat protobuf, expected AesGcmKeyFormat", e);
       }
     } else if (keyType.equals(AES_CTR_HMAC_AEAD_KEY_TYPE)) {
       try {
@@ -77,7 +78,8 @@ final class EciesAeadHkdfAeadFactory {
         int hmacKeySize = aesCtrHmacAeadKeyFormat.getHmacKeyFormat().getKeySize();
         this.symmetricKeySize = aesCtrKeySize + hmacKeySize;
       } catch (InvalidProtocolBufferException e) {
-        throw new GeneralSecurityException("invalid KeyFormat protobuf, expected AesGcmKeyFormat", e);
+        throw new GeneralSecurityException(
+            "invalid KeyFormat protobuf, expected AesGcmKeyFormat", e);
       }
     } else {
       throw new GeneralSecurityException("unsupported AEAD DEM key type: " + keyType);

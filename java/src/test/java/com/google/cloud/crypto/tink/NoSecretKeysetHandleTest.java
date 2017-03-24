@@ -60,7 +60,7 @@ public class NoSecretKeysetHandleTest {
       return null;
     }
     @Override
-    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
       return KeyData.newBuilder()
           .setTypeUrl(this.getClass().getSimpleName())
           .setKeyMaterialType(KeyData.KeyMaterialType.REMOTE)

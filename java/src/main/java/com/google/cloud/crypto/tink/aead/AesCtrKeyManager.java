@@ -21,7 +21,6 @@ import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKeyFormat;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrParams;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.cloud.crypto.tink.subtle.IndCpaCipher;
 import com.google.cloud.crypto.tink.subtle.Random;
@@ -83,8 +82,8 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyF
   }
 
   @Override
-  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
-    AesCtrKey key = newKey(keyFormat.getValue());
+  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
+    AesCtrKey key = newKey(serialized);
     return KeyData.newBuilder()
         .setTypeUrl(AES_CTR_KEY_TYPE)
         .setValue(ByteString.copyFrom(key.toByteArray()))

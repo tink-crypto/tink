@@ -222,13 +222,13 @@ public class AesGcmJceTest {
    * message are distinct.
    */
   public void testRandomNonce() throws Exception {
-     final int SAMPLES = 1 << 17;
+     final int samples = 1 << 17;
      byte[] key = Random.randBytes(16);
      byte[] message = new byte[0];
      byte[] aad = new byte[0];
      AesGcmJce gcm = new AesGcmJce(key);
      HashSet<String> ciphertexts = new HashSet<String>();
-     for (int i = 0; i < SAMPLES; i++) {
+     for (int i = 0; i < samples; i++) {
        byte[] ct = gcm.encrypt(message, aad);
        String ctHex = TestUtil.hexEncode(ct);
        assertFalse(ciphertexts.contains(ctHex));

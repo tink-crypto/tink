@@ -117,7 +117,7 @@ public class TestUtil {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
       return KeyData.newBuilder()
           .setTypeUrl(this.getClass().getSimpleName())
           .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
@@ -176,7 +176,7 @@ public class TestUtil {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
       return KeyData.newBuilder()
           .setTypeUrl(this.getClass().getSimpleName())
           .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
@@ -236,7 +236,7 @@ public class TestUtil {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
       return KeyData.newBuilder()
           .setTypeUrl(this.getClass().getSimpleName())
           .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)

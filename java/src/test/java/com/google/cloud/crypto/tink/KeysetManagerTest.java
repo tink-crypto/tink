@@ -81,7 +81,7 @@ public class KeysetManagerTest {
     assertEquals(OutputPrefixType.TINK, keyset.getKey(0).getOutputPrefixType());
 
     // Encrypt the keyset with EchoAead.
-    EchoAead echoAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKey(
+    EchoAead echoAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKeyData(
         KeyFormat.newBuilder().setTypeUrl(echoAeadTypeUrl).build()));
     KeysetHandle keysetHandle = manager.getKeysetHandle(echoAead);
     assertNotNull(keysetHandle.getEncryptedKeyset());
@@ -130,7 +130,7 @@ public class KeysetManagerTest {
     manager.rotate();
 
     // Encrypt with faulty Aead.
-    FaultyAead faultyAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKey(
+    FaultyAead faultyAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKeyData(
         KeyFormat.newBuilder().setTypeUrl(faultyAeadTypeUrl).build()));
     try {
       KeysetHandle unused = manager.getKeysetHandle(faultyAead);

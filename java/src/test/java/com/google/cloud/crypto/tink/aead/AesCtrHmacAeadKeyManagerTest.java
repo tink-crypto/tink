@@ -60,7 +60,7 @@ public class AesCtrHmacAeadKeyManagerTest {
       assertEquals(16, key.getAesCtrKey().getKeyValue().toByteArray().length);
       assertEquals(32, key.getHmacKey().getKeyValue().toByteArray().length);
 
-      KeyData keyData = keyManager.newKey(keyFormat);
+      KeyData keyData = keyManager.newKeyData(keyFormat.getValue());
       key = AesCtrHmacAeadKey.parseFrom(keyData.getValue());
       keys.add(new String(key.getAesCtrKey().getKeyValue().toByteArray(), "UTF-8"));
       keys.add(new String(key.getHmacKey().getKeyValue().toByteArray(), "UTF-8"));
@@ -85,7 +85,7 @@ public class AesCtrHmacAeadKeyManagerTest {
       // Expected
     }
     try {
-      keyManager.newKey(keyFormat);
+      keyManager.newKeyData(keyFormat.getValue());
       fail("Corrupted format, should have thrown exception");
     } catch (GeneralSecurityException expected) {
       // Expected

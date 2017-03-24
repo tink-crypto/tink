@@ -94,7 +94,8 @@ public class EcdsaSignKeyManagerTest {
       for (int j = 0; j < numTests / 3; j++) {
         privKeys[3 * j] = signManager.newKey(ecdsaFormat);
         privKeys[3 * j + 1] = signManager.newKey(serializedFormat);
-        privKeys[3 * j + 2] = EcdsaPrivateKey.parseFrom(signManager.newKey(keyFormat).getValue());
+        privKeys[3 * j + 2] = EcdsaPrivateKey.parseFrom(
+            signManager.newKeyData(keyFormat.getValue()).getValue());
         keys.add(new String(privKeys[3 * j].toByteArray(), "UTF-8"));
         keys.add(new String(privKeys[3 * j + 1].toByteArray(), "UTF-8"));
         keys.add(new String(privKeys[3 * j + 2].toByteArray(), "UTF-8"));
@@ -164,7 +165,7 @@ public class EcdsaSignKeyManagerTest {
       // Expected
     }
     try {
-      keyManager.newKey(keyFormat);
+      keyManager.newKeyData(keyFormat.getValue());
       fail("Corrupted format, should have thrown exception");
     } catch (GeneralSecurityException expected) {
       // Expected

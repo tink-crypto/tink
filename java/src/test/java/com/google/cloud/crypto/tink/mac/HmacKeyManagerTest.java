@@ -61,7 +61,7 @@ public class HmacKeyManagerTest {
       assertEquals(32, key.getKeyValue().toByteArray().length);
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
 
-      key = HmacKey.parseFrom(keyManager.newKey(keyFormat).getValue());
+      key = HmacKey.parseFrom(keyManager.newKeyData(keyFormat.getValue()).getValue());
       assertEquals(32, key.getKeyValue().toByteArray().length);
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
     }
@@ -83,7 +83,7 @@ public class HmacKeyManagerTest {
       // Expected
     }
     try {
-      keyManager.newKey(keyFormat);
+      keyManager.newKeyData(keyFormat.getValue());
       fail("Corrupted format, should have thrown exception");
     } catch (GeneralSecurityException expected) {
       // Expected

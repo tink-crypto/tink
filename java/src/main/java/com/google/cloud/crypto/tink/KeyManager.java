@@ -17,7 +17,6 @@
 package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
@@ -76,10 +75,11 @@ public interface KeyManager<P, K extends MessageLite, F extends MessageLite> {
   // APIs for Key Management
 
   /**
-   * Generates a new key according to specification in {@code keyFormat}.
+   * Generates a new {@code KeyData} according to specification in {@code serialized}.
+   * This should be used solely by the key management API.
    *
    * @return the new generated key.
    * @throws GeneralSecurityException if the specified format is wrong or not supported.
    */
-  KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException;
+  KeyData newKeyData(ByteString serialized) throws GeneralSecurityException;
 }

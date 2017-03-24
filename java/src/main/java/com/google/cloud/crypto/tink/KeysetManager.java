@@ -95,7 +95,7 @@ public class KeysetManager {
    * Setting the new key as the primary key.
    */
   public KeysetManager rotate(KeyFormat keyFormat) throws GeneralSecurityException {
-    KeyData keyData = Registry.INSTANCE.newKey(keyFormat);
+    KeyData keyData = Registry.INSTANCE.newKeyData(keyFormat);
     int keyId = Random.randPositiveInt();
     while (hasKeyWithKeyId(keyId)) {
       keyId = Random.randPositiveInt();

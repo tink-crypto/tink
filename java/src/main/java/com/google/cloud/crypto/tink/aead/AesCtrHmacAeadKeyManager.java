@@ -24,7 +24,6 @@ import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
@@ -101,8 +100,8 @@ class AesCtrHmacAeadKeyManager
   }
 
   @Override
-  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
-    AesCtrHmacAeadKey key = newKey(keyFormat.getValue());
+  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
+    AesCtrHmacAeadKey key = newKey(serialized);
     return KeyData.newBuilder()
         .setTypeUrl(AES_CTR_HMAC_AEAD_KEY_TYPE)
         .setValue(ByteString.copyFrom(key.toByteArray()))

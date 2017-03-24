@@ -113,7 +113,7 @@ public class RegistryTest {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
       return KeyData.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -142,7 +142,7 @@ public class RegistryTest {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
       return KeyData.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -171,7 +171,7 @@ public class RegistryTest {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
       return KeyData.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -200,7 +200,7 @@ public class RegistryTest {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public KeyData newKey(KeyFormat format) throws GeneralSecurityException {
+    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
       return KeyData.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -266,14 +266,14 @@ public class RegistryTest {
 
     // Create some keys and primitives.
     KeyFormat format =  KeyFormat.newBuilder().setTypeUrl(mac2TypeUrl).build();
-    KeyData key = registry.newKey(format);
+    KeyData key = registry.newKeyData(format);
     assertEquals(mac2TypeUrl, key.getTypeUrl());
     Mac mac = registry.getPrimitive(key);
     String computedMac = new String(mac.computeMac(null), "UTF-8");
     assertEquals(mac2TypeUrl, computedMac);
 
     format =  KeyFormat.newBuilder().setTypeUrl(aeadTypeUrl).build();
-    key = registry.newKey(format);
+    key = registry.newKeyData(format);
     assertEquals(aeadTypeUrl, key.getTypeUrl());
     Aead aead = registry.getPrimitive(key);
     String ciphertext = new String(aead.encrypt(null, null), "UTF-8");
@@ -282,9 +282,9 @@ public class RegistryTest {
     // Create a keyset, and get a PrimitiveSet.
     KeyFormat format1 =  KeyFormat.newBuilder().setTypeUrl(mac1TypeUrl).build();
     KeyFormat format2 =  KeyFormat.newBuilder().setTypeUrl(mac2TypeUrl).build();
-    KeyData key1 = registry.newKey(format1);
-    KeyData key2 = registry.newKey(format1);
-    KeyData key3 = registry.newKey(format2);
+    KeyData key1 = registry.newKeyData(format1);
+    KeyData key2 = registry.newKeyData(format1);
+    KeyData key3 = registry.newKeyData(format2);
     KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
@@ -378,7 +378,7 @@ public class RegistryTest {
 
     // Create a keyset.
     KeyFormat format1 =  KeyFormat.newBuilder().setTypeUrl(mac1TypeUrl).build();
-    KeyData key1 = registry.newKey(format1);
+    KeyData key1 = registry.newKeyData(format1);
     // No primary key.
     KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
@@ -427,8 +427,8 @@ public class RegistryTest {
     // Create a keyset.
     KeyFormat format1 =  KeyFormat.newBuilder().setTypeUrl(mac1TypeUrl).build();
     KeyFormat format2 =  KeyFormat.newBuilder().setTypeUrl(mac2TypeUrl).build();
-    KeyData key1 = registry.newKey(format1);
-    KeyData key2 = registry.newKey(format2);
+    KeyData key1 = registry.newKeyData(format1);
+    KeyData key2 = registry.newKeyData(format2);
     KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)

@@ -60,7 +60,7 @@ public class KmsEncryptedKeysetHandleTest {
     Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     // Encrypt the keyset with EchoAeadKey.
-    KeyData echoAeadKey = Registry.INSTANCE.newKey(
+    KeyData echoAeadKey = Registry.INSTANCE.newKeyData(
         KeyFormat.newBuilder().setTypeUrl(echoAeadTypeUrl).build());
     EchoAead echoAead = Registry.INSTANCE.getPrimitive(echoAeadKey);
     KeysetHandle keysetHandle = manager.getKeysetHandle(echoAead);
@@ -86,7 +86,7 @@ public class KmsEncryptedKeysetHandleTest {
     manager.rotate();
 
     // Encrypt the keyset with EchoAeadKey.
-    KeyData echoAeadKey = Registry.INSTANCE.newKey(
+    KeyData echoAeadKey = Registry.INSTANCE.newKeyData(
         KeyFormat.newBuilder().setTypeUrl(echoAeadTypeUrl).build());
     EchoAead echoAead = Registry.INSTANCE.getPrimitive(echoAeadKey);
     KeysetHandle keysetHandle = manager.getKeysetHandle(echoAead);

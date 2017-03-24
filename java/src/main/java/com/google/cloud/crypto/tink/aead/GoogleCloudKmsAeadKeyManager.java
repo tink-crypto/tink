@@ -27,7 +27,6 @@ import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKeyFormat;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.GoogleCloudKmsAead;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
@@ -85,7 +84,7 @@ public class GoogleCloudKmsAeadKeyManager
   }
 
   @Override
-  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not Implemented");
   }
 

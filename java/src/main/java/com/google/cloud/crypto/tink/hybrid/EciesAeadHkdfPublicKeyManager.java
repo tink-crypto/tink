@@ -22,7 +22,6 @@ import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
 import com.google.cloud.crypto.tink.HybridEncrypt;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
@@ -73,7 +72,7 @@ class EciesAeadHkdfPublicKeyManager implements
   }
 
   @Override
-  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
+  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented.");
   }
 

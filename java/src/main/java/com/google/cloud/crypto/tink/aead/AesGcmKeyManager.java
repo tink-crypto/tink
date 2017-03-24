@@ -21,7 +21,6 @@ import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.subtle.AesGcmJce;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
@@ -72,8 +71,8 @@ class AesGcmKeyManager implements KeyManager<Aead, AesGcmKey, AesGcmKeyFormat> {
   }
 
   @Override
-  public KeyData newKey(KeyFormat keyFormat) throws GeneralSecurityException {
-    AesGcmKey key = newKey(keyFormat.getValue());
+  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
+    AesGcmKey key = newKey(serialized);
     return KeyData.newBuilder()
         .setTypeUrl(KEY_TYPE)
         .setValue(ByteString.copyFrom(key.toByteArray()))

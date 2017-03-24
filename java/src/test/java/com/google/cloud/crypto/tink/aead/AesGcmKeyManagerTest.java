@@ -72,7 +72,7 @@ public class AesGcmKeyManagerTest {
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
       assertEquals(16, key.getKeyValue().toByteArray().length);
 
-      KeyData keyData = keyManager.newKey(keyFormat);
+      KeyData keyData = keyManager.newKeyData(keyFormat.getValue());
       key = AesGcmKey.parseFrom(keyData.getValue());
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
       assertEquals(16, key.getKeyValue().toByteArray().length);
@@ -95,7 +95,7 @@ public class AesGcmKeyManagerTest {
       // Expected
     }
     try {
-      keyManager.newKey(keyFormat);
+      keyManager.newKeyData(keyFormat.getValue());
       fail("Corrupted format, should have thrown exception");
     } catch (GeneralSecurityException expected) {
       // Expected

@@ -59,7 +59,7 @@ public class AesCtrKeyManagerTest {
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
       assertEquals(16, key.getKeyValue().toByteArray().length);
 
-      KeyData keyData = keyManager.newKey(keyFormat);
+      KeyData keyData = keyManager.newKeyData(keyFormat.getValue());
       key = AesCtrKey.parseFrom(keyData.getValue());
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
       assertEquals(16, key.getKeyValue().toByteArray().length);
@@ -82,7 +82,7 @@ public class AesCtrKeyManagerTest {
       // Expected
     }
     try {
-      keyManager.newKey(keyFormat);
+      keyManager.newKeyData(keyFormat.getValue());
       fail("Corrupted format, should have thrown exception");
     } catch (GeneralSecurityException expected) {
       // Expected
