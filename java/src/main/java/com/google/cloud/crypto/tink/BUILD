@@ -80,6 +80,15 @@ java_library(
 )
 
 java_library(
+    name = "provider_selector",
+    srcs = [
+        "EngineFactory.java",
+        "EngineWrapper.java",
+    ],
+    javacopts = JAVACOPTS,
+)
+
+java_library(
     name = "keyset_handle_restricted",
     srcs = [
         ":keyset_handle_restricted_srcs",

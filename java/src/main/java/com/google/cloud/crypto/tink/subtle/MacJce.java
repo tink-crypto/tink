@@ -18,6 +18,7 @@ package com.google.cloud.crypto.tink.subtle;
 
 import com.google.cloud.crypto.tink.Mac;
 import java.security.GeneralSecurityException;
+import com.google.cloud.crypto.tink.EngineFactory;
 
 /**
  * Mac implementations in JCE.
@@ -33,7 +34,7 @@ public final class MacJce implements Mac {
     this.algorithm = algorithm;
     this.digestSize = digestSize;
     this.key = key;
-    this.mac = javax.crypto.Mac.getInstance(algorithm);
+    this.mac = EngineFactory.MAC.getInstance(algorithm);
     mac.init(key);
   }
 
@@ -45,7 +46,7 @@ public final class MacJce implements Mac {
       tmp = (javax.crypto.Mac) this.mac.clone();
     } catch (java.lang.CloneNotSupportedException ex) {
       // Unfortunately, the Mac interface in certain versions of Android is not clonable.
-      tmp = javax.crypto.Mac.getInstance(this.algorithm);
+      tmp = EngineFactory.MAC.getInstance(this.algorithm);
       tmp.init(this.key);
     }
     tmp.update(data);

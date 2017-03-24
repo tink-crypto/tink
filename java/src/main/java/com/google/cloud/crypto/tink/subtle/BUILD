@@ -39,6 +39,7 @@ java_library(
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
+        "//java/src/main/java/com/google/cloud/crypto/tink:provider_selector",
         "@com_google_guava//jar",
     ],
 )
@@ -75,6 +76,7 @@ java_library(
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
+        "//java/src/main/java/com/google/cloud/crypto/tink:provider_selector",
     ],
 )
 

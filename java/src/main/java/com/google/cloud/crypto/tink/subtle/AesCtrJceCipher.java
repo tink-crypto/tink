@@ -20,7 +20,7 @@ import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
+import com.google.cloud.crypto.tink.EngineFactory;
 /**
  * The primitive implements AES counter mode with random IVs, using JCE. It is safe against
  * chosen-plaintext attacks, but does not provide ciphertext integrity, thus is unsafe
@@ -45,7 +45,7 @@ public final class AesCtrJceCipher implements IndCpaCipher {
 
   public AesCtrJceCipher(final byte[] key, int ivSize) throws GeneralSecurityException {
     this.keySpec = new SecretKeySpec(key, KEY_ALGORITHM);
-    this.blockSize = Cipher.getInstance(CIPHER_ALGORITHM).getBlockSize();
+    this.blockSize = EngineFactory.CIPHER.getInstance(CIPHER_ALGORITHM).getBlockSize();
     if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > blockSize) {
       throw new GeneralSecurityException("invalid IV size");
     }
@@ -95,7 +95,7 @@ public final class AesCtrJceCipher implements IndCpaCipher {
 
   private void doCtr(final byte[] input, int inputOffset, int inputLen, byte[] output,
       int outputOffset, final byte[] iv, boolean encrypt) throws GeneralSecurityException {
-    Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
+    Cipher cipher = EngineFactory.CIPHER.getInstance(CIPHER_ALGORITHM);
     // The counter is big-endian. The counter is composed of iv and (blockSize - ivSize) of zeros.
     byte[] counter = new byte[blockSize];
     System.arraycopy(iv, 0, counter, 0, ivSize);
