@@ -44,6 +44,15 @@ java_library(
         ":java",
         ":key_management_restricted",
         ":keyset_handle_restricted",
+        ":subtle",
+    ],
+)
+
+# restricted
+
+java_library(
+    name = "subtle",
+    exports = [
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybriddecrypt_subtle",
@@ -53,8 +62,6 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:x25519_subtle",
     ],
 )
-
-# restricted
 
 java_library(
     name = "keyset_handle_restricted",
