@@ -20,7 +20,7 @@ import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKeyFormat;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadParams;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
@@ -47,14 +47,15 @@ public class Util {
   public static final String KEY_FORMAT_SUFFIX = "KeyFormat";
 
   /**
-   * @return a {@code KeyFormat} for {@code keyType} and {@code keyFormat}. For example,
-   * createKeyFormat("AesGcm", "key_size: 32") would return a {@code KeyFormat} of 256-bit AesGcm.
+   * @return a {@code KeyTemplate} for {@code keyType} and {@code keyFormat}. For example,
+   * createKeyTemplate("AesGcm", "key_size: 32") would return a {@code KeyTemplate} of
+   * 256-bit AesGcm key.
    *
    * @param keyType. By convention this is the name of the crypto algorithm, e.g., AesGcm.
    * @param keyFormat. A text format of some XyzKeyFormat-proto.
    * @throws IllegalArgumentException if {@code keyType} has not equivalent proto class.
    */
-  public static KeyFormat createKeyFormat(String keyType, String keyFormat)
+  public static KeyTemplate createKeyTemplate(String keyType, String keyFormat)
       throws Exception {
     // To parse {@code keyFormat}, we need to find the corresponding proto class.
     String keyFormatName = keyType + KEY_FORMAT_SUFFIX;
@@ -65,7 +66,7 @@ public class Util {
     Builder builder = getBuilder(keyFormatClass);
     TextFormat.merge(keyFormat, builder);
 
-    return createKeyFormat(getTypeUrl(keyType), builder.build().toByteString());
+    return createKeyTemplate(getTypeUrl(keyType), builder.build().toByteString());
   }
 
   /**
@@ -105,10 +106,10 @@ public class Util {
   }
 
   /**
-   * @return a {@code KeyFormat} constructed from {@code typeUrl} and {@code format}.
+   * @return a {@code KeyTemplate} constructed from {@code typeUrl} and {@code format}.
    */
-  public static KeyFormat createKeyFormat(String typeUrl, ByteString format) {
-    return KeyFormat.newBuilder()
+  public static KeyTemplate createKeyTemplate(String typeUrl, ByteString format) {
+    return KeyTemplate.newBuilder()
         .setTypeUrl(typeUrl)
         .setValue(format)
         .build();
@@ -133,9 +134,9 @@ public class Util {
    * @return a {@code createKmsEnvelopeAeadKeyFormat}.
    */
   public static KmsEnvelopeAeadKeyFormat createKmsEnvelopeAeadKeyFormat(
-      KeyData kmsKey, KeyFormat dekFormat) throws Exception {
+      KeyData kmsKey, KeyTemplate dekTemplate) throws Exception {
     KmsEnvelopeAeadParams params = KmsEnvelopeAeadParams.newBuilder()
-        .setDekFormat(dekFormat)
+        .setDekTemplate(dekTemplate)
         .setKmsKey(kmsKey)
         .build();
     return KmsEnvelopeAeadKeyFormat.newBuilder()

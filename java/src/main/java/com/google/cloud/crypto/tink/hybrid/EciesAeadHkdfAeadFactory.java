@@ -24,14 +24,14 @@ import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.Registry;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 /**
- * Helper generating {@code Aead}-instances for specified {@code KeyFormat} and key material.
+ * Helper generating {@code Aead}-instances for specified {@code KeyTemplate} and key material.
  */
 final class EciesAeadHkdfAeadFactory {
   private static final String AES_GCM_KEY_TYPE =
@@ -55,13 +55,14 @@ final class EciesAeadHkdfAeadFactory {
   private AesCtrHmacAeadKey aesCtrHmacAeadKey;
   private int aesCtrKeySize;
 
-  public EciesAeadHkdfAeadFactory(KeyFormat demFormat) throws GeneralSecurityException {
-    String keyType = demFormat.getTypeUrl();
+  public EciesAeadHkdfAeadFactory(KeyTemplate demTemplate) throws GeneralSecurityException {
+    String keyType = demTemplate.getTypeUrl();
     if (keyType.equals(AES_GCM_KEY_TYPE)) {
       try {
-        AesGcmKeyFormat gcmKeyFormat = AesGcmKeyFormat.parseFrom(demFormat.getValue());
+        AesGcmKeyFormat gcmKeyFormat = AesGcmKeyFormat.parseFrom(demTemplate.getValue());
         this.demKeyType = DemKeyType.AES_GCM_KEY;
-        this.aesGcmKey = Registry.INSTANCE.newKey(demFormat.getTypeUrl(), demFormat.getValue());
+        this.aesGcmKey = Registry.INSTANCE.newKey(
+            demTemplate.getTypeUrl(), demTemplate.getValue());
         this.symmetricKeySize = gcmKeyFormat.getKeySize();
       } catch (InvalidProtocolBufferException e) {
         throw new GeneralSecurityException(
@@ -70,10 +71,10 @@ final class EciesAeadHkdfAeadFactory {
     } else if (keyType.equals(AES_CTR_HMAC_AEAD_KEY_TYPE)) {
       try {
         AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(
-            demFormat.getValue());
+            demTemplate.getValue());
         this.demKeyType = DemKeyType.AES_CTR_HMAC_AEAD_KEY;
         this.aesCtrHmacAeadKey = Registry.INSTANCE.newKey(
-            demFormat.getTypeUrl(), demFormat.getValue());
+            demTemplate.getTypeUrl(), demTemplate.getValue());
         this.aesCtrKeySize = aesCtrHmacAeadKeyFormat.getAesCtrKeyFormat().getKeySize();
         int hmacKeySize = aesCtrHmacAeadKeyFormat.getHmacKeyFormat().getKeySize();
         this.symmetricKeySize = aesCtrKeySize + hmacKeySize;

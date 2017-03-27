@@ -22,8 +22,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -105,11 +105,11 @@ public class RegistryTest {
       return new DummyMac(this.getClass().getSimpleName());
     }
     @Override
-    public Message newKey(ByteString format) throws GeneralSecurityException {
+    public Message newKey(ByteString template) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public Message newKey(Message format) throws GeneralSecurityException {
+    public Message newKey(Message template) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -134,11 +134,11 @@ public class RegistryTest {
       return new DummyMac(this.getClass().getSimpleName());
     }
     @Override
-    public Message newKey(ByteString format) throws GeneralSecurityException {
+    public Message newKey(ByteString template) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public Message newKey(Message format) throws GeneralSecurityException {
+    public Message newKey(Message template) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -163,11 +163,11 @@ public class RegistryTest {
       return new DummyMac(this.getClass().getSimpleName());
     }
     @Override
-    public Message newKey(ByteString format) throws GeneralSecurityException {
+    public Message newKey(ByteString template) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public Message newKey(Message format) throws GeneralSecurityException {
+    public Message newKey(Message template) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -192,11 +192,11 @@ public class RegistryTest {
       return new DummyAead(this.getClass().getSimpleName());
     }
     @Override
-    public Message newKey(ByteString format) throws GeneralSecurityException {
+    public Message newKey(ByteString template) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
-    public Message newKey(Message format) throws GeneralSecurityException {
+    public Message newKey(Message template) throws GeneralSecurityException {
       return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
     }
     @Override
@@ -265,26 +265,26 @@ public class RegistryTest {
     registry.registerKeyManager(aeadTypeUrl, new AeadKeyManager());
 
     // Create some keys and primitives.
-    KeyFormat format =  KeyFormat.newBuilder().setTypeUrl(mac2TypeUrl).build();
-    KeyData key = registry.newKeyData(format);
+    KeyTemplate template =  KeyTemplate.newBuilder().setTypeUrl(mac2TypeUrl).build();
+    KeyData key = registry.newKeyData(template);
     assertEquals(mac2TypeUrl, key.getTypeUrl());
     Mac mac = registry.getPrimitive(key);
     String computedMac = new String(mac.computeMac(null), "UTF-8");
     assertEquals(mac2TypeUrl, computedMac);
 
-    format =  KeyFormat.newBuilder().setTypeUrl(aeadTypeUrl).build();
-    key = registry.newKeyData(format);
+    template =  KeyTemplate.newBuilder().setTypeUrl(aeadTypeUrl).build();
+    key = registry.newKeyData(template);
     assertEquals(aeadTypeUrl, key.getTypeUrl());
     Aead aead = registry.getPrimitive(key);
     String ciphertext = new String(aead.encrypt(null, null), "UTF-8");
     assertEquals(aeadTypeUrl, ciphertext);
 
     // Create a keyset, and get a PrimitiveSet.
-    KeyFormat format1 =  KeyFormat.newBuilder().setTypeUrl(mac1TypeUrl).build();
-    KeyFormat format2 =  KeyFormat.newBuilder().setTypeUrl(mac2TypeUrl).build();
-    KeyData key1 = registry.newKeyData(format1);
-    KeyData key2 = registry.newKeyData(format1);
-    KeyData key3 = registry.newKeyData(format2);
+    KeyTemplate template1 =  KeyTemplate.newBuilder().setTypeUrl(mac1TypeUrl).build();
+    KeyTemplate template2 =  KeyTemplate.newBuilder().setTypeUrl(mac2TypeUrl).build();
+    KeyData key1 = registry.newKeyData(template1);
+    KeyData key2 = registry.newKeyData(template1);
+    KeyData key3 = registry.newKeyData(template2);
     KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
@@ -377,8 +377,8 @@ public class RegistryTest {
     }
 
     // Create a keyset.
-    KeyFormat format1 =  KeyFormat.newBuilder().setTypeUrl(mac1TypeUrl).build();
-    KeyData key1 = registry.newKeyData(format1);
+    KeyTemplate template1 =  KeyTemplate.newBuilder().setTypeUrl(mac1TypeUrl).build();
+    KeyData key1 = registry.newKeyData(template1);
     // No primary key.
     KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
@@ -425,10 +425,10 @@ public class RegistryTest {
     registry.registerKeyManager(mac2TypeUrl, new Mac2KeyManager());
 
     // Create a keyset.
-    KeyFormat format1 =  KeyFormat.newBuilder().setTypeUrl(mac1TypeUrl).build();
-    KeyFormat format2 =  KeyFormat.newBuilder().setTypeUrl(mac2TypeUrl).build();
-    KeyData key1 = registry.newKeyData(format1);
-    KeyData key2 = registry.newKeyData(format2);
+    KeyTemplate template1 =  KeyTemplate.newBuilder().setTypeUrl(mac1TypeUrl).build();
+    KeyTemplate template2 =  KeyTemplate.newBuilder().setTypeUrl(mac2TypeUrl).build();
+    KeyData key1 = registry.newKeyData(template1);
+    KeyData key2 = registry.newKeyData(template2);
     KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)

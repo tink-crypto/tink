@@ -23,7 +23,7 @@ import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -39,9 +39,9 @@ import org.junit.runners.JUnit4;
 public class AesCtrHmacAeadKeyManagerTest {
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
-    KeyFormat keyFormat = TestUtil.createAesCtrHmacAeadKeyFormat(16, 16, 32, 16);
-    AesCtrHmacAeadKeyFormat aeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(keyFormat.getValue()
-        .toByteArray());
+    KeyTemplate keyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(16, 16, 32, 16);
+    AesCtrHmacAeadKeyFormat aeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(
+        keyTemplate.getValue().toByteArray());
     ByteString serialized = ByteString.copyFrom(aeadKeyFormat.toByteArray());
     AesCtrHmacAeadKeyManager keyManager = new AesCtrHmacAeadKeyManager();
     Set<String> keys = new TreeSet<String>();
@@ -60,7 +60,7 @@ public class AesCtrHmacAeadKeyManagerTest {
       assertEquals(16, key.getAesCtrKey().getKeyValue().toByteArray().length);
       assertEquals(32, key.getHmacKey().getKeyValue().toByteArray().length);
 
-      KeyData keyData = keyManager.newKeyData(keyFormat.getValue());
+      KeyData keyData = keyManager.newKeyData(keyTemplate.getValue());
       key = AesCtrHmacAeadKey.parseFrom(keyData.getValue());
       keys.add(new String(key.getAesCtrKey().getKeyValue().toByteArray(), "UTF-8"));
       keys.add(new String(key.getHmacKey().getKeyValue().toByteArray(), "UTF-8"));
@@ -73,7 +73,7 @@ public class AesCtrHmacAeadKeyManagerTest {
   @Test
   public void testNewKeyWithCorruptedFormat() throws Exception {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
-    KeyFormat keyFormat = KeyFormat.newBuilder()
+    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
         .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey")
         .setValue(serialized)
         .build();
@@ -85,7 +85,7 @@ public class AesCtrHmacAeadKeyManagerTest {
       // Expected
     }
     try {
-      keyManager.newKeyData(keyFormat.getValue());
+      keyManager.newKeyData(keyTemplate.getValue());
       fail("Corrupted format, should have thrown exception");
     } catch (GeneralSecurityException expected) {
       // Expected

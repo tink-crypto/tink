@@ -27,8 +27,8 @@ import com.google.cloud.crypto.tink.TestUtil.EchoAead;
 import com.google.cloud.crypto.tink.TestUtil.EchoAeadKeyManager;
 import com.google.cloud.crypto.tink.TestUtil.FaultyAead;
 import com.google.cloud.crypto.tink.TestUtil.FaultyAeadKeyManager;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
@@ -61,13 +61,13 @@ public class KeysetManagerTest {
       manager.rotate();
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("cannot rotate, needs key format"));
+      assertTrue(e.toString().contains("cannot rotate, needs key template"));
     }
 
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
+    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl(macTypeUrl).build();
     manager = new KeysetManager.Builder()
-        .setKeyFormat(format)
+        .setKeyTemplate(template)
         .build();
     manager.rotate();
 
@@ -82,7 +82,7 @@ public class KeysetManagerTest {
 
     // Encrypt the keyset with EchoAead.
     EchoAead echoAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKeyData(
-        KeyFormat.newBuilder().setTypeUrl(echoAeadTypeUrl).build()));
+        KeyTemplate.newBuilder().setTypeUrl(echoAeadTypeUrl).build()));
     KeysetHandle keysetHandle = manager.getKeysetHandle(echoAead);
     assertNotNull(keysetHandle.getEncryptedKeyset());
 
@@ -97,9 +97,9 @@ public class KeysetManagerTest {
   @Test
   public void testExistingKeyset() throws Exception {
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
+    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl(macTypeUrl).build();
     KeysetManager manager1 = new KeysetManager.Builder()
-        .setKeyFormat(format)
+        .setKeyTemplate(template)
         .build();
     manager1.rotate();
     Keyset keyset1 = manager1.getKeysetHandle().getKeyset();
@@ -107,7 +107,7 @@ public class KeysetManagerTest {
     KeysetManager manager2 = new KeysetManager.Builder()
         .setKeysetHandle(manager1.getKeysetHandle())
         .build();
-    manager2.rotate(format);
+    manager2.rotate(template);
     Keyset keyset2 = manager2.getKeysetHandle().getKeyset();
 
     assertEquals(2, keyset2.getKeyCount());
@@ -123,15 +123,15 @@ public class KeysetManagerTest {
   @Test
   public void testFaultyKms() throws Exception {
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
+    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl(macTypeUrl).build();
     KeysetManager manager = new KeysetManager.Builder()
-        .setKeyFormat(format)
+        .setKeyTemplate(template)
         .build();
     manager.rotate();
 
     // Encrypt with faulty Aead.
     FaultyAead faultyAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKeyData(
-        KeyFormat.newBuilder().setTypeUrl(faultyAeadTypeUrl).build()));
+        KeyTemplate.newBuilder().setTypeUrl(faultyAeadTypeUrl).build()));
     try {
       KeysetHandle unused = manager.getKeysetHandle(faultyAead);
       fail("Expected GeneralSecurityException");

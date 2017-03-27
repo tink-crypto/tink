@@ -27,8 +27,8 @@ import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TestGoogleCredentialFactory;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
 import java.nio.ByteBuffer;
@@ -60,11 +60,11 @@ public class KmsEnvelopeAeadKeyManagerTest {
     int ivSize = 16;
     int hmacKeySize = 16;
     int tagSize = 16;
-    KeyFormat dekFormat = TestUtil.createAesCtrHmacAeadKeyFormat(
+    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
         aesKeySize, ivSize, hmacKeySize, tagSize);
     KeyData kmsKey = TestUtil.createKeyData(TestUtil.createGoogleCloudKmsAeadKey(
         TestGoogleCredentialFactory.RESTRICTED), KeyData.KeyMaterialType.REMOTE);
-    KmsEnvelopeAeadKey kmsEnvelopeAeadKey = TestUtil.createKmsEnvelopeAeadKey(kmsKey, dekFormat);
+    KmsEnvelopeAeadKey kmsEnvelopeAeadKey = TestUtil.createKmsEnvelopeAeadKey(kmsKey, dekTemplate);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(kmsEnvelopeAeadKey, 42,
@@ -80,11 +80,11 @@ public class KmsEnvelopeAeadKeyManagerTest {
     int ivSize = 16;
     int hmacKeySize = 16;
     int tagSize = 16;
-    KeyFormat dekFormat = TestUtil.createAesCtrHmacAeadKeyFormat(
+    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
         aesKeySize, ivSize, hmacKeySize, tagSize);
     KeyData kmsKey = TestUtil.createKeyData(TestUtil.createGoogleCloudKmsAeadKey(
         TestGoogleCredentialFactory.RESTRICTED), KeyData.KeyMaterialType.REMOTE);
-    KmsEnvelopeAeadKey kmsEnvelopeAeadKey = TestUtil.createKmsEnvelopeAeadKey(kmsKey, dekFormat);
+    KmsEnvelopeAeadKey kmsEnvelopeAeadKey = TestUtil.createKmsEnvelopeAeadKey(kmsKey, dekTemplate);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(kmsEnvelopeAeadKey, 42,

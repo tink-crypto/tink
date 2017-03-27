@@ -27,9 +27,9 @@ message KmsEnvelopeAeadParams {
   // This field specifies which KMS to call and how, e.g., GoogleCloudKmsAeadKey.
   // Required.
   KeyData kms_key = 1;
-  // Key format of the Data Encryption Key, e.g., AesCtrHmacAeadKeyFormat.
+  // Key template of the Data Encryption Key, e.g., AesCtrHmacAeadKeyFormat.
   // Required.
-  KeyFormat dek_format = 2;
+  KeyTemplate dek_template = 2;
 }
 
 message KmsEnvelopeAeadKeyFormat {

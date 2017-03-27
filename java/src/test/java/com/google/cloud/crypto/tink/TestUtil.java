@@ -49,8 +49,8 @@ import com.google.cloud.crypto.tink.HmacProto.HmacParams;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadParams;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
@@ -345,9 +345,9 @@ public class TestUtil {
   }
 
   /**
-   * @return a {@code AesCtrHmacAeadKeyFormat}.
+   * @return a {@code KeyTemplate} containing a {@code AesCtrHmacAeadKeyFormat}.
    */
-  public static KeyFormat createAesCtrHmacAeadKeyFormat(int aesKeySize, int ivSize,
+  public static KeyTemplate createAesCtrHmacAeadKeyTemplate(int aesKeySize, int ivSize,
       int hmacKeySize, int tagSize) throws Exception {
     AesCtrKeyFormat aesCtrKeyFormat = AesCtrKeyFormat.newBuilder()
         .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
@@ -362,20 +362,20 @@ public class TestUtil {
         .setAesCtrKeyFormat(aesCtrKeyFormat)
         .setHmacKeyFormat(hmacKeyFormat)
         .build();
-    return KeyFormat.newBuilder()
+    return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey")
         .build();
   }
 
   /**
-   * @return a {@code AesGcmKeyFormat}.
+   * @return a {@code KeyTemplate} containing {@code AesGcmKeyFormat}.
    */
-  public static KeyFormat createAesGcmKeyFormat(int keySize) throws Exception {
+  public static KeyTemplate createAesGcmKeyTemplate(int keySize) throws Exception {
     AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder()
         .setKeySize(keySize)
         .build();
-    return KeyFormat.newBuilder()
+    return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")
         .build();
@@ -406,10 +406,10 @@ public class TestUtil {
   /**
    * @return a {@code KmsEnvelopeAeadKey}.
    */
-  public static KmsEnvelopeAeadKey createKmsEnvelopeAeadKey(KeyData kmsKey, KeyFormat dekFormat)
-      throws Exception {
+  public static KmsEnvelopeAeadKey createKmsEnvelopeAeadKey(KeyData kmsKey,
+      KeyTemplate dekTemplate) throws Exception {
     KmsEnvelopeAeadParams params = KmsEnvelopeAeadParams.newBuilder()
-        .setDekFormat(dekFormat)
+        .setDekTemplate(dekTemplate)
         .setKmsKey(kmsKey)
         .build();
     return KmsEnvelopeAeadKey.newBuilder().setParams(params).build();
@@ -582,7 +582,7 @@ public class TestUtil {
    * parameters.
    */
   public static EciesAeadHkdfPrivateKey generateEciesAeadHkdfPrivKey(EllipticCurveType curve,
-      HashType hashType, EcPointFormat pointFormat, KeyFormat demKeyFormat, byte[] salt)
+      HashType hashType, EcPointFormat pointFormat, KeyTemplate demKeyTemplate, byte[] salt)
       throws Exception {
     ECParameterSpec ecParams;
     switch(curve) {
@@ -605,7 +605,7 @@ public class TestUtil {
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
     ECPoint w = pubKey.getW();
     EciesAeadHkdfPublicKey eciesPubKey = createEciesAeadHkdfPubKey(curve, hashType, pointFormat,
-        demKeyFormat, w.getAffineX().toByteArray(), w.getAffineY().toByteArray(), salt);
+        demKeyTemplate, w.getAffineX().toByteArray(), w.getAffineY().toByteArray(), salt);
     return createEciesAeadHkdfPrivKey(eciesPubKey, privKey.getS().toByteArray());
   }
 
@@ -626,7 +626,7 @@ public class TestUtil {
    *  @return a {@code EciesAeadHkdfParams} with the specified parameters.
    */
   public static EciesAeadHkdfParams createEciesAeadHkdfParams(EllipticCurveType curve,
-      HashType hashType, EcPointFormat ecPointFormat, KeyFormat demKeyFormat,
+      HashType hashType, EcPointFormat ecPointFormat, KeyTemplate demKeyTemplate,
       byte[] salt) throws Exception {
     EciesHkdfKemParams kemParams = EciesHkdfKemParams.newBuilder()
         .setCurveType(curve)
@@ -634,7 +634,7 @@ public class TestUtil {
         .setHkdfSalt(ByteString.copyFrom(salt))
         .build();
     EciesAeadDemParams demParams = EciesAeadDemParams.newBuilder()
-        .setAeadDem(demKeyFormat)
+        .setAeadDem(demKeyTemplate)
         .build();
     return EciesAeadHkdfParams.newBuilder()
         .setKemParams(kemParams)
@@ -647,11 +647,11 @@ public class TestUtil {
    *  @return a {@code EciesAeadHkdfPublicKey} with the specified key material and parameters.
    */
   public static EciesAeadHkdfPublicKey createEciesAeadHkdfPubKey(EllipticCurveType curve,
-      HashType hashType, EcPointFormat ecPointFormat, KeyFormat demKeyFormat,
+      HashType hashType, EcPointFormat ecPointFormat, KeyTemplate demKeyTemplate,
       byte[] pubX, byte[] pubY, byte[] salt) throws Exception {
     final int version = 0;
     EciesAeadHkdfParams params = createEciesAeadHkdfParams(curve, hashType, ecPointFormat,
-        demKeyFormat, salt);
+        demKeyTemplate, salt);
     return EciesAeadHkdfPublicKey.newBuilder()
         .setVersion(version)
         .setParams(params)

@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.TestUtil.DummyMacKeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -83,9 +83,9 @@ public class NoSecretKeysetHandleTest {
 
   @Test
   public void testBasic() throws Exception {
-    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(MAC_TYPE_URL).build();
+    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl(MAC_TYPE_URL).build();
     KeysetManager manager = new KeysetManager.Builder()
-        .setKeyFormat(format)
+        .setKeyTemplate(template)
         .build()
         .rotate();
     assertNull(manager.getKeysetHandle().getEncryptedKeyset());
@@ -97,9 +97,9 @@ public class NoSecretKeysetHandleTest {
       assertTrue(e.toString().contains("keyset contains secret key material"));
     }
 
-    KeyFormat format2 = KeyFormat.newBuilder().setTypeUrl(AEAD_TYPE_URL).build();
+    KeyTemplate template2 = KeyTemplate.newBuilder().setTypeUrl(AEAD_TYPE_URL).build();
     KeysetManager manager2 = new KeysetManager.Builder()
-        .setKeyFormat(format2)
+        .setKeyTemplate(template2)
         .build()
         .rotate();
     Keyset keyset2 = manager2.getKeysetHandle().getKeyset();

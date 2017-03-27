@@ -17,8 +17,8 @@
 package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
@@ -93,16 +93,16 @@ public final class Registry {
 
   /**
    * Convenience method for generating a new {@code KeyData} for the specified
-   * {@code format}.
-   * It looks up a KeyManager identified by {@code format.type_url}, and calls
-   * managers {@code newKeyData(format)}-method.
+   * {@code template}.
+   * It looks up a KeyManager identified by {@code template.type_url}, and calls
+   * managers {@code newKeyData(template)}-method.
    * This method should be used solely for key management.
    * @return a new key.
    */
   public <P, K extends MessageLite, F extends MessageLite> KeyData newKeyData(
-      KeyFormat format) throws GeneralSecurityException {
-    KeyManager<P, K, F> manager = getKeyManager(format.getTypeUrl());
-    return manager.newKeyData(format.getValue());
+      KeyTemplate template) throws GeneralSecurityException {
+    KeyManager<P, K, F> manager = getKeyManager(template.getTypeUrl());
+    return manager.newKeyData(template.getValue());
   }
 
   /**

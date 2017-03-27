@@ -23,7 +23,7 @@ import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
@@ -44,7 +44,7 @@ public class HmacKeyManagerTest {
         .setKeySize(32)
         .build();
     ByteString serialized = ByteString.copyFrom(hmacKeyFormat.toByteArray());
-    KeyFormat keyFormat = KeyFormat.newBuilder()
+    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
         .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.HmacKey")
         .setValue(serialized)
         .build();
@@ -61,7 +61,7 @@ public class HmacKeyManagerTest {
       assertEquals(32, key.getKeyValue().toByteArray().length);
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
 
-      key = HmacKey.parseFrom(keyManager.newKeyData(keyFormat.getValue()).getValue());
+      key = HmacKey.parseFrom(keyManager.newKeyData(keyTemplate.getValue()).getValue());
       assertEquals(32, key.getKeyValue().toByteArray().length);
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
     }
@@ -72,7 +72,7 @@ public class HmacKeyManagerTest {
   public void testNewKeyCorruptedFormat() throws Exception {
     HmacKeyManager keyManager = new HmacKeyManager();
     ByteString serialized = ByteString.copyFrom(new byte[128]);
-    KeyFormat keyFormat = KeyFormat.newBuilder()
+    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
         .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.HmacKey")
         .setValue(serialized)
         .build();
@@ -83,7 +83,7 @@ public class HmacKeyManagerTest {
       // Expected
     }
     try {
-      keyManager.newKeyData(keyFormat.getValue());
+      keyManager.newKeyData(keyTemplate.getValue());
       fail("Corrupted format, should have thrown exception");
     } catch (GeneralSecurityException expected) {
       // Expected

@@ -48,7 +48,7 @@ class KmsEnvelopeAeadKeyManager
   public Aead getPrimitive(KmsEnvelopeAeadKey keyProto) throws GeneralSecurityException {
     validate(keyProto);
     Aead remote = Registry.INSTANCE.getPrimitive(keyProto.getParams().getKmsKey());
-    return new KmsEnvelopeAead(keyProto.getParams().getDekFormat(), remote);
+    return new KmsEnvelopeAead(keyProto.getParams().getDekTemplate(), remote);
   }
 
   @Override

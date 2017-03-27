@@ -30,7 +30,7 @@ import com.google.cloud.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TestUtil;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
@@ -83,7 +83,7 @@ public class EcdsaSignKeyManagerTest {
           .setParams(ecdsaParams)
           .build();
       ByteString serializedFormat = ByteString.copyFrom(ecdsaFormat.toByteArray());
-      KeyFormat keyFormat = KeyFormat.newBuilder()
+      KeyTemplate keyTemplate = KeyTemplate.newBuilder()
           .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey")
           .setValue(serializedFormat)
           .build();
@@ -95,7 +95,7 @@ public class EcdsaSignKeyManagerTest {
         privKeys[3 * j] = signManager.newKey(ecdsaFormat);
         privKeys[3 * j + 1] = signManager.newKey(serializedFormat);
         privKeys[3 * j + 2] = EcdsaPrivateKey.parseFrom(
-            signManager.newKeyData(keyFormat.getValue()).getValue());
+            signManager.newKeyData(keyTemplate.getValue()).getValue());
         keys.add(new String(privKeys[3 * j].toByteArray(), "UTF-8"));
         keys.add(new String(privKeys[3 * j + 1].toByteArray(), "UTF-8"));
         keys.add(new String(privKeys[3 * j + 2].toByteArray(), "UTF-8"));
@@ -153,7 +153,7 @@ public class EcdsaSignKeyManagerTest {
   @Test
   public void testNewKeyWithCorruptedFormat() {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
-    KeyFormat keyFormat = KeyFormat.newBuilder()
+    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
         .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey")
         .setValue(serialized)
         .build();
@@ -165,7 +165,7 @@ public class EcdsaSignKeyManagerTest {
       // Expected
     }
     try {
-      keyManager.newKeyData(keyFormat.getValue());
+      keyManager.newKeyData(keyTemplate.getValue());
       fail("Corrupted format, should have thrown exception");
     } catch (GeneralSecurityException expected) {
       // Expected

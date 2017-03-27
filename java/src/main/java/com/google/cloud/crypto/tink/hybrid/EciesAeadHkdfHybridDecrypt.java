@@ -14,11 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.cloud.crypto.tink.hybrid; // instead of subtle, because it depends on KeyFormat.
+package com.google.cloud.crypto.tink.hybrid; // instead of subtle, because it depends on KeyTemplate.
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.EciesHkdfRecipientKem;
 import com.google.cloud.crypto.tink.subtle.HybridDecryptBase;
@@ -43,14 +43,14 @@ public final class EciesAeadHkdfHybridDecrypt extends HybridDecryptBase {
 
   public EciesAeadHkdfHybridDecrypt(final ECPrivateKey recipientPrivateKey,
       final byte[] hkdfSalt, String hkdfHmacAlgo,
-      KeyFormat aeadDemFormat, EcPointFormat ecPointFormat)
+      KeyTemplate aeadDemTemplate, EcPointFormat ecPointFormat)
       throws GeneralSecurityException {
     this.recipientPrivateKey = recipientPrivateKey;
     this.recipientKem = new EciesHkdfRecipientKem(recipientPrivateKey);
     this.hkdfHmacAlgo = hkdfHmacAlgo;
     this.hkdfSalt = hkdfSalt;
     this.ecPointFormat = ecPointFormat;
-    this.aeadFactory = new EciesAeadHkdfAeadFactory(aeadDemFormat);  // validates the format
+    this.aeadFactory = new EciesAeadHkdfAeadFactory(aeadDemTemplate);  // validates the format
   }
 
   @Override

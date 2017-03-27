@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.TestUtil.DummyMacKeyManager;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
@@ -44,9 +44,9 @@ public class CleartextKeysetHandleTest {
   @Test
   public void testBasic() throws Exception {
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
+    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl(macTypeUrl).build();
     KeysetManager manager = new KeysetManager.Builder()
-        .setKeyFormat(format)
+        .setKeyTemplate(template)
         .build();
     manager.rotate();
 
@@ -59,9 +59,9 @@ public class CleartextKeysetHandleTest {
   @Test
   public void testInvalidKeyset() throws Exception {
     // Create a keyset that contains a single DummyMacKey.
-    KeyFormat format = KeyFormat.newBuilder().setTypeUrl(macTypeUrl).build();
+    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl(macTypeUrl).build();
     KeysetManager manager = new KeysetManager.Builder()
-        .setKeyFormat(format)
+        .setKeyTemplate(template)
         .build();
     manager.rotate();
     Keyset keyset = manager.getKeysetHandle().getKeyset();

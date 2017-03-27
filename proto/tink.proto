@@ -45,11 +45,11 @@ option java_outer_classname = "TinkProto";
 //      include the corresponding Params, since when a factory generates
 //      a key based on KeyFormat, it must add Params to the resulting
 //      key proto with the actual key material.
-// The actual *KeyFormat proto is wrapped in a KeyFormat message.
+// The actual *KeyFormat proto is wrapped in a KeyTemplate message.
 // By convention, the name of the *KeyFormat-proto must be equal
 // to the name of the *Key-proto from type_url-field suffixed with "Format".
 
-message KeyFormat {
+message KeyTemplate {
   string type_url = 1;  // in format type.googleapis.com/packagename.messagename
   bytes value = 2;      // contains specific serialized *KeyFormat proto
 }

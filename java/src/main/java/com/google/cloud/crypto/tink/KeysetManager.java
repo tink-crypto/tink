@@ -17,8 +17,8 @@
 package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
@@ -32,11 +32,11 @@ import java.security.GeneralSecurityException;
  */
 public class KeysetManager {
   private final Keyset.Builder keysetBuilder;
-  private final KeyFormat keyFormat;
+  private final KeyTemplate keyTemplate;
   private final OutputPrefixType outputPrefixType;
 
   private KeysetManager(Builder builder) {
-    keyFormat = builder.keyFormat;
+    keyTemplate = builder.keyTemplate;
     outputPrefixType = builder.outputPrefixType;
 
     if (builder.keysetHandle != null) {
@@ -51,7 +51,7 @@ public class KeysetManager {
    */
   public static class Builder {
     private OutputPrefixType outputPrefixType = OutputPrefixType.TINK;
-    private KeyFormat keyFormat = null;
+    private KeyTemplate keyTemplate = null;
     private KeysetHandle keysetHandle = null;
 
     public Builder() {
@@ -68,8 +68,8 @@ public class KeysetManager {
       return this;
     }
 
-    public Builder setKeyFormat(KeyFormat val) {
-      keyFormat = val;
+    public Builder setKeyTemplate(KeyTemplate val) {
+      keyTemplate = val;
       return this;
     }
 
@@ -79,23 +79,23 @@ public class KeysetManager {
   }
 
   /**
-   * Rotates a keyset by generating a fresh key using a key format.
+   * Rotates a keyset by generating a fresh key using a key template.
    * Setting the new key as the primary key.
    */
   public KeysetManager rotate() throws GeneralSecurityException {
-    if (keyFormat != null) {
-      return rotate(keyFormat);
+    if (keyTemplate != null) {
+      return rotate(keyTemplate);
     } else {
-      throw new GeneralSecurityException("cannot rotate, needs key format");
+      throw new GeneralSecurityException("cannot rotate, needs key template");
     }
   }
 
   /**
-   * Rotates a keyset by generating a fresh key using {@code keyFormat}.
+   * Rotates a keyset by generating a fresh key using {@code keyTemplate}.
    * Setting the new key as the primary key.
    */
-  public KeysetManager rotate(KeyFormat keyFormat) throws GeneralSecurityException {
-    KeyData keyData = Registry.INSTANCE.newKeyData(keyFormat);
+  public KeysetManager rotate(KeyTemplate keyTemplate) throws GeneralSecurityException {
+    KeyData keyData = Registry.INSTANCE.newKeyData(keyTemplate);
     int keyId = Random.randPositiveInt();
     while (hasKeyWithKeyId(keyId)) {
       keyId = Random.randPositiveInt();

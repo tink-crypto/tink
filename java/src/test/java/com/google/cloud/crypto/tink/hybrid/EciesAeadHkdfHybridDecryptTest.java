@@ -24,7 +24,7 @@ import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.HybridDecrypt;
 import com.google.cloud.crypto.tink.HybridEncrypt;
 import com.google.cloud.crypto.tink.TestUtil;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
 import com.google.cloud.crypto.tink.subtle.Random;
@@ -61,15 +61,15 @@ public class EciesAeadHkdfHybridDecryptTest {
     byte[] context = "context info".getBytes("UTF-8");
     String hmacAlgo = "HmacSha256";
 
-    KeyFormat[] keyFormats = new KeyFormat[] {
-      TestUtil.createAesCtrHmacAeadKeyFormat(16, 16, 16, 16),
-      TestUtil.createAesGcmKeyFormat(16)
+    KeyTemplate[] keyTemplates = new KeyTemplate[] {
+      TestUtil.createAesCtrHmacAeadKeyTemplate(16, 16, 16, 16),
+      TestUtil.createAesGcmKeyTemplate(16)
     };
-    for (int i = 0; i < keyFormats.length; i++) {
+    for (int i = 0; i < keyTemplates.length; i++) {
       HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey, salt,
-          hmacAlgo, keyFormats[i], EcPointFormat.UNCOMPRESSED);
+          hmacAlgo, keyTemplates[i], EcPointFormat.UNCOMPRESSED);
       HybridDecrypt hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey, salt,
-          hmacAlgo, keyFormats[i], EcPointFormat.UNCOMPRESSED);
+          hmacAlgo, keyTemplates[i], EcPointFormat.UNCOMPRESSED);
 
       byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
       byte[] decrypted = hybridDecrypt.decrypt(ciphertext, context);
@@ -98,7 +98,7 @@ public class EciesAeadHkdfHybridDecryptTest {
       }
       // Modify salt.
       hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
-          Arrays.copyOf(salt, salt.length - 1), hmacAlgo, keyFormats[i],
+          Arrays.copyOf(salt, salt.length - 1), hmacAlgo, keyTemplates[i],
           EcPointFormat.UNCOMPRESSED);
       try {
         hybridDecrypt.decrypt(ciphertext, context);

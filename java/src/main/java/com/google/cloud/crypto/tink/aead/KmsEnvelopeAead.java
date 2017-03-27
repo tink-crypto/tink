@@ -14,11 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.cloud.crypto.tink.aead; // instead of subtle, because it depends on KeyFormat.
+package com.google.cloud.crypto.tink.aead; // instead of subtle, because it depends on KeyTemplate.
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.Registry;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.subtle.AeadBase;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -37,12 +37,12 @@ import java.security.GeneralSecurityException;
  */
 class KmsEnvelopeAead extends AeadBase {
   private static final byte[] EMPTY_AAD = new byte[0];
-  private final KeyFormat dekFormat;
+  private final KeyTemplate dekTemplate;
   private final Aead remote;
   private static final int LENGTH_ENCRYPTED_DEK = 4;
 
-  KmsEnvelopeAead(KeyFormat dekFormat, Aead remote) {
-    this.dekFormat = dekFormat;
+  KmsEnvelopeAead(KeyTemplate dekTemplate, Aead remote) {
+    this.dekTemplate = dekTemplate;
     this.remote = remote;
   }
 
@@ -50,11 +50,11 @@ class KmsEnvelopeAead extends AeadBase {
   public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
     // Generate a new DEK.
     byte[] dek = Registry.INSTANCE.newKey(
-        dekFormat.getTypeUrl(), dekFormat.getValue()).toByteArray();
+        dekTemplate.getTypeUrl(), dekTemplate.getValue()).toByteArray();
     // Wrap it with remote.
     byte[] encryptedDek = remote.encrypt(dek, EMPTY_AAD);
     // Use DEK to encrypt plaintext.
-    Aead aead = Registry.INSTANCE.getPrimitive(dekFormat.getTypeUrl(), dek);
+    Aead aead = Registry.INSTANCE.getPrimitive(dekTemplate.getTypeUrl(), dek);
     byte[] payload = aead.encrypt(plaintext, aad);
     // Build ciphertext protobuf and return result.
     return buildCiphertext(encryptedDek, payload);
@@ -77,7 +77,7 @@ class KmsEnvelopeAead extends AeadBase {
       // Use remote to decrypt encryptedDek.
       byte[] dek = remote.decrypt(encryptedDek, EMPTY_AAD);
       // Use DEK to decrypt payload.
-      Aead aead = Registry.INSTANCE.getPrimitive(dekFormat.getTypeUrl(), dek);
+      Aead aead = Registry.INSTANCE.getPrimitive(dekTemplate.getTypeUrl(), dek);
       return aead.decrypt(payload, aad);
     } catch (IndexOutOfBoundsException
              | BufferUnderflowException

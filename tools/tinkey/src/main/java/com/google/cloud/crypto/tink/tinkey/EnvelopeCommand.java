@@ -18,7 +18,7 @@ package com.google.cloud.crypto.tink.tinkey;
 
 import com.google.cloud.crypto.tink.KeysetManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.protobuf.TextFormat;
 import java.io.FileOutputStream;
@@ -49,12 +49,12 @@ public class EnvelopeCommand extends EnvelopeOptions implements Command {
   public static Keyset createKeyset(String dekTypeValue, String dekFormatValue,
       String kmsKeyUriValue) throws Exception {
     KeyData kmsKey = Util.createGoogleCloudKmsAeadKeyData(kmsKeyUriValue);
-    KeyFormat dekFormat = Util.createKeyFormat(dekTypeValue, dekFormatValue);
-    KeyFormat keyFormat = Util.createKeyFormat(
+    KeyTemplate dekTemplate = Util.createKeyTemplate(dekTypeValue, dekFormatValue);
+    KeyTemplate keyTemplate = Util.createKeyTemplate(
         KMS_ENVELOPE_AEAD_KEY_TYPE,
-        Util.createKmsEnvelopeAeadKeyFormat(kmsKey, dekFormat).toByteString());
+        Util.createKmsEnvelopeAeadKeyFormat(kmsKey, dekTemplate).toByteString());
     KeysetManager manager = new KeysetManager.Builder()
-        .setKeyFormat(keyFormat)
+        .setKeyTemplate(keyTemplate)
         .build()
         .rotate();
     return manager.getKeysetHandle().getKeyset();

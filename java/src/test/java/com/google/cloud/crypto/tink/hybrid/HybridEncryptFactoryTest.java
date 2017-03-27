@@ -26,8 +26,8 @@ import com.google.cloud.crypto.tink.HybridDecrypt;
 import com.google.cloud.crypto.tink.HybridEncrypt;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.TestUtil;
-import com.google.cloud.crypto.tink.TinkProto.KeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.Random;
@@ -58,15 +58,15 @@ public class HybridEncryptFactoryTest {
     HashType hashType = HashType.SHA256;
     EcPointFormat primaryPointFormat = EcPointFormat.UNCOMPRESSED;
     EcPointFormat rawPointFormat = EcPointFormat.COMPRESSED;
-    KeyFormat primaryDemKeyFormat = TestUtil.createAesCtrHmacAeadKeyFormat(AES_KEY_SIZE, ivSize,
-        HMAC_KEY_SIZE, tagSize);
-    KeyFormat rawDemKeyFormat = TestUtil.createAesGcmKeyFormat(AES_KEY_SIZE);
+    KeyTemplate primaryDemKeyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
+        AES_KEY_SIZE, ivSize, HMAC_KEY_SIZE, tagSize);
+    KeyTemplate rawDemKeyTemplate = TestUtil.createAesGcmKeyTemplate(AES_KEY_SIZE);
     byte[] primarySalt = "some salt".getBytes("UTF-8");
     byte[] rawSalt = "other salt".getBytes("UTF-8");
     byte[] legacySalt = "yet another salt".getBytes("UTF-8");
 
     EciesAeadHkdfPrivateKey primaryPrivProto = TestUtil.generateEciesAeadHkdfPrivKey(curve,
-        hashType, primaryPointFormat, primaryDemKeyFormat, primarySalt);
+        hashType, primaryPointFormat, primaryDemKeyTemplate, primarySalt);
 
     Key primaryPriv = TestUtil.createKey(
         primaryPrivProto,
@@ -80,7 +80,7 @@ public class HybridEncryptFactoryTest {
         OutputPrefixType.RAW);
 
     EciesAeadHkdfPrivateKey rawPrivProto = TestUtil.generateEciesAeadHkdfPrivKey(curve,
-        hashType, rawPointFormat, rawDemKeyFormat, rawSalt);
+        hashType, rawPointFormat, rawDemKeyTemplate, rawSalt);
 
     Key rawPriv = TestUtil.createKey(
         rawPrivProto,
@@ -94,7 +94,7 @@ public class HybridEncryptFactoryTest {
         OutputPrefixType.RAW);
 
     EciesAeadHkdfPrivateKey legacyPrivProto = TestUtil.generateEciesAeadHkdfPrivKey(curve,
-        hashType, primaryPointFormat, rawDemKeyFormat, legacySalt);
+        hashType, primaryPointFormat, rawDemKeyTemplate, legacySalt);
 
     Key legacyPriv = TestUtil.createKey(
         legacyPrivProto,
