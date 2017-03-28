@@ -30,6 +30,22 @@ import java.util.Arrays;
  *   + 2^204·x[8] + 2^230·x[9]
  *
  * i.e. the limbs are 26, 25, 26, 25, ... bits wide.
+ *
+ * Example Usage:
+ *
+ * Alice:
+ * byte[] privateKeyA = Curve25519.GeneratePrivateKey();
+ * byte[] publicKeyA = Curve25519.x25519PublicFromPrivate(privateKeyA);
+ * Bob:
+ * byte[] privateKeyB = Curve25519.GeneratePrivateKey();
+ * byte[] publicKeyB = Curve25519.x25519PublicFromPrivate(privateKeyB);
+ *
+ * Alice sends publicKeyA to Bob and Bob sends publicKeyB to Alice.
+ * Alice:
+ * byte[] sharedSecretA = Curve25519.x25519(privateKeyA, publicKeyB);
+ * Bob:
+ * byte[] sharedSecretB = Curve25519.x25519(privateKeyB, publicKeyA);
+ * such that sharedSecretA == sharedSecretB.
  */
 public final class Curve25519 {
 
@@ -751,7 +767,35 @@ public final class Curve25519 {
   }
 
   /**
+   * Returns a 32-byte private key for Curve25519.
+   *
+   * Note from BoringSSL: All X25519 implementations should decode scalars correctly (see
+   * https://tools.ietf.org/html/rfc7748#section-5). However, if an implementation doesn't then it
+   * might interoperate with random keys a fraction of the time because they'll, randomly, happen to
+   * be correctly formed.
+   *
+   * Thus we do the opposite of the masking here to make sure that our private keys are never
+   * correctly masked and so, hopefully, any incorrect implementations are deterministically broken.
+   *
+   * This does not affect security because, although we're throwing away entropy, a valid
+   * implementation of x25519 should throw away the exact same bits anyway.
+   */
+  public static byte[] GeneratePrivateKey() {
+    byte[] privateKey = Random.randBytes(32);
+
+    privateKey[0] |= 7;
+    privateKey[31] &= 63;
+    privateKey[31] |= 128;
+
+    return privateKey;
+  }
+
+  /**
    * Returns the 32-byte shared key (i.e., privateKey·peersPublicValue on the curve).
+   *
+   * @param privateKey 32-byte private key
+   * @param peersPublicValue 32-byte public value
+   * @return the 32-byte shared key
    */
   public static byte[] x25519(byte[] privateKey, byte[] peersPublicValue) {
     long[] x = new long[LIMB_CNT];
@@ -773,6 +817,9 @@ public final class Curve25519 {
   /**
    * Returns the 32-byte Diffie-Hellman public value based on the given privateKey (i.e.,
    * privateKey·[9] on the curve).
+   *
+   * @param privateKey 32-byte private key
+   * @return 32-byte Diffie-Hellman public value
    */
   public static byte[] x25519PublicFromPrivate(byte[] privateKey) {
     byte[] base = new byte[32]; base[0] = 9;

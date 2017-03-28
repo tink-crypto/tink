@@ -138,4 +138,7 @@ java_library(
         "Curve25519.java",
     ],
     javacopts = JAVACOPTS,
+    deps = [
+        ":subtle",
+    ],
 )

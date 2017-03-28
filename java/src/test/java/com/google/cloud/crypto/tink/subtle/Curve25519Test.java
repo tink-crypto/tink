@@ -105,4 +105,11 @@ public class Curve25519Test {
         "4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742",
         TestUtil.hexEncode(out));
   }
+
+  @Test
+  public void testGeneratePrivateKeyReturnsIntentionallyMalformedKeys() {
+    byte[] privateKey = Curve25519.GeneratePrivateKey();
+    assertEquals(7, privateKey[0] & 7);
+    assertEquals(128, privateKey[31] & 192);
+  }
 }
