@@ -78,7 +78,6 @@ class AeadFactory {
       const KeyManager<Aead>& custom_key_manager) {
     return util::Status::UNKNOWN;
   }
-
 };
 
 }  // namespace tink

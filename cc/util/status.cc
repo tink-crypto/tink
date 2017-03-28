@@ -19,7 +19,6 @@
 #include "cc/util/status.h"
 
 using ::std::ostream;
-using std::string;
 
 namespace util {
 
@@ -43,7 +42,7 @@ const Status& GetUnknown() {
 Status::Status() : code_(::util::error::OK), message_("") {
 }
 
-Status::Status(::util::error::Code error, const string& error_message)
+Status::Status(::util::error::Code error, const std::string& error_message)
     : code_(error), message_(error_message) {
   if (code_ == ::util::error::OK) {
     message_.clear();
@@ -64,7 +63,7 @@ const Status& Status::CANCELLED = GetCancelled();
 const Status& Status::UNKNOWN = GetUnknown();
 const Status& Status::OK = Status();
 
-string Status::ToString() const {
+std::string Status::ToString() const {
   if (code_ == ::util::error::OK) {
     return "OK";
   }
@@ -74,7 +73,7 @@ string Status::ToString() const {
   return oss.str();
 }
 
-string ErrorCodeString(util::error::Code error) {
+std::string ErrorCodeString(util::error::Code error) {
   switch (error) {
     case util::error::OK:
       return "OK";

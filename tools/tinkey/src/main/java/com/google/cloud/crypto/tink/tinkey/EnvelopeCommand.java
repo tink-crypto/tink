@@ -60,3 +60,4 @@ public class EnvelopeCommand extends EnvelopeOptions implements Command {
     return manager.getKeysetHandle().getKeyset();
   }
 }
+

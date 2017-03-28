@@ -41,7 +41,6 @@ java_library(
         "//proto:java_hmac",
         "//proto:java_tink",
         "//proto:java_tink_compile_imports",
-        "@com_google_guava//jar",
     ],
 )
 
@@ -75,6 +74,5 @@ java_library(
         "//proto:java_hmac",
         "//proto:java_tink",
         "//proto:java_tink_compile_imports",
-        "@com_google_guava//jar",
     ],
 )
