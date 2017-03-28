@@ -14,21 +14,25 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/keyset_handle.h"
-#include "proto/tink.pb.h"
+#ifndef TINK_UTIL_VALIDATION_H_
+#define TINK_UTIL_VALIDATION_H_
 
-using google::cloud::crypto::tink::Keyset;
+#include "cc/util/status.h"
+#include "proto/tink.pb.h"
 
 namespace cloud {
 namespace crypto {
 namespace tink {
 
-KeysetHandle::KeysetHandle(const Keyset& keyset) : keyset_(keyset) {}
+// Various validation helpers.
+// TODO(przydatek): write real implementations.
 
-const Keyset& KeysetHandle::get_keyset() const {
-  return keyset_;
+util::Status ValidateKeyset(const google::cloud::crypto::tink::Keyset& keyset) {
+  return util::Status::OK;
 }
 
 }  // namespace tink
 }  // namespace crypto
 }  // namespace cloud
+
+#endif  // TINK_UTIL_VALIDATION_H_

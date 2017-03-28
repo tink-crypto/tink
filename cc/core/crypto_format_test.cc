@@ -1,0 +1,98 @@
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+#include "cc/crypto_format.h"
+#include "cc/util/statusor.h"
+#include "gtest/gtest.h"
+#include "proto/tink.pb.h"
+
+
+using google::cloud::crypto::tink::Keyset;
+using google::cloud::crypto::tink::OutputPrefixType;
+
+namespace cloud {
+namespace crypto {
+namespace tink {
+namespace {
+
+class CryptoFormatTest : public ::testing::Test {
+};
+
+TEST_F(CryptoFormatTest, testConstants) {
+  EXPECT_EQ(5, CryptoFormat::kNonRawPrefixSize);
+  EXPECT_EQ(0, CryptoFormat::kRawPrefixSize);
+  EXPECT_EQ(0x01, CryptoFormat::kTinkStartByte);
+  EXPECT_EQ(0x00, CryptoFormat::kLegacyStartByte);
+  EXPECT_EQ("", CryptoFormat::kRawPrefix);
+}
+
+TEST_F(CryptoFormatTest, testTinkPrefix) {
+  uint32_t key_id = 263829;
+  Keyset::Key key;
+
+  key.set_output_prefix_type(OutputPrefixType::TINK);
+  key.set_key_id(key_id);
+  auto prefix_result = CryptoFormat::get_output_prefix(key);
+  EXPECT_TRUE(prefix_result.ok()) << prefix_result.status();
+  auto prefix = prefix_result.ValueOrDie();
+  EXPECT_EQ(CryptoFormat::kNonRawPrefixSize, prefix.length());
+  EXPECT_EQ(CryptoFormat::kTinkStartByte, prefix[0]);
+  for (int i = 0; i < 4; i++) {
+    EXPECT_EQ((reinterpret_cast<char*>(&key_id))[i],
+              prefix[i+1]) << "Failed at byte " << i << ".";
+  }
+}
+
+TEST_F(CryptoFormatTest, testLegacyPrefix) {
+  uint32_t key_id = 8327256;
+  Keyset::Key key;
+
+  key.set_output_prefix_type(OutputPrefixType::LEGACY);
+  key.set_key_id(key_id);
+  auto prefix_result = CryptoFormat::get_output_prefix(key);
+  EXPECT_TRUE(prefix_result.ok()) << prefix_result.status();
+  auto prefix = prefix_result.ValueOrDie();
+  EXPECT_EQ(CryptoFormat::kNonRawPrefixSize, prefix.length());
+  EXPECT_EQ(CryptoFormat::kLegacyStartByte, prefix[0]);
+  for (int i = 0; i < 4; i++) {
+    EXPECT_EQ((reinterpret_cast<char*>(&key_id))[i],
+              prefix[i+1]) << "Failed at byte " << i << ".";
+  }
+}
+
+TEST_F(CryptoFormatTest, testRawPrefix) {
+  uint32_t key_id = 7662387;
+  Keyset::Key key;
+
+  key.set_output_prefix_type(OutputPrefixType::RAW);
+  key.set_key_id(key_id);
+  auto prefix_result = CryptoFormat::get_output_prefix(key);
+  EXPECT_TRUE(prefix_result.ok()) << prefix_result.status();
+  auto prefix = prefix_result.ValueOrDie();
+  EXPECT_EQ(CryptoFormat::kRawPrefixSize, prefix.length());
+}
+
+}  // namespace
+}  // namespace tink
+}  // namespace crypto
+}  // namespace cloud
+
+
+int main(int ac, char* av[]) {
+  testing::InitGoogleTest(&ac, av);
+  return RUN_ALL_TESTS();
+}

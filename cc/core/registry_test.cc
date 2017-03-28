@@ -18,18 +18,27 @@
 
 #include "cc/aead.h"
 #include "cc/registry.h"
+#include "cc/crypto_format.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
+#include "cc/util/test_util.h"
 #include "google/protobuf/message_lite.h"
+#include "google/protobuf/stubs/stringpiece.h"
 #include "gtest/gtest.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-
+using cloud::crypto::tink::test::DummyAead;
 using google::cloud::crypto::tink::AesCtrHmacAeadKey;
 using google::cloud::crypto::tink::AesGcmKey;
+using google::cloud::crypto::tink::AesGcmKeyFormat;
+using google::cloud::crypto::tink::KeyData;
+using google::cloud::crypto::tink::Keyset;
+using google::cloud::crypto::tink::KeyStatusType;
+using google::cloud::crypto::tink::OutputPrefixType;
 using google::protobuf::MessageLite;
+using google::protobuf::StringPiece;
 using util::Status;
 
 namespace cloud {
@@ -52,26 +61,34 @@ class TestAeadKeyManager : public KeyManager<Aead> {
   }
 
   util::StatusOr<std::unique_ptr<Aead>>
+  GetPrimitive(const KeyData& key) const override {
+    std::unique_ptr<Aead> aead(new DummyAead(key_types_.back()));
+    return std::move(aead);
+  }
+
+  util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const MessageLite& key) const override {
     return util::Status::UNKNOWN;
   }
 
-  util::Status NewKey(const MessageLite& key_format, MessageLite* key) const override {
+  util::Status NewKey(const MessageLite& key_format,
+                      MessageLite* key) const override {
     return util::Status::UNKNOWN;
   }
 
   const std::vector<std::string>&  get_supported_key_types() const override {
     return key_types_;
   }
+
  private:
   std::vector<std::string> key_types_;
 };
 
 TEST_F(RegistryTest, testBasic) {
-  Registry& registry = Registry::get_default_registry();
+  Registry registry;
   std::string key_type_1 = AesCtrHmacAeadKey::descriptor()->full_name();
   std::string key_type_2 = AesGcmKey::descriptor()->full_name();
-  auto manager_result = registry.get_manager<Aead>(key_type_1);
+  auto manager_result = registry.get_key_manager<Aead>(key_type_1);
   EXPECT_FALSE(manager_result.ok());
   EXPECT_EQ(util::error::NOT_FOUND,
             manager_result.status().error_code());
@@ -95,17 +112,131 @@ TEST_F(RegistryTest, testBasic) {
       new TestAeadKeyManager(key_type_2));
   EXPECT_TRUE(status.ok()) << status;
 
-  manager_result = registry.get_manager<Aead>(key_type_1);
+  manager_result = registry.get_key_manager<Aead>(key_type_1);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   auto manager = manager_result.ValueOrDie();
   EXPECT_TRUE(manager->DoesSupport(key_type_1));
   EXPECT_FALSE(manager->DoesSupport(key_type_2));
 
-  manager_result = registry.get_manager<Aead>(key_type_2);
+  manager_result = registry.get_key_manager<Aead>(key_type_2);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   manager = manager_result.ValueOrDie();
   EXPECT_TRUE(manager->DoesSupport(key_type_2));
   EXPECT_FALSE(manager->DoesSupport(key_type_1));
+}
+
+TEST_F(RegistryTest, testGettingPrimitives) {
+  Registry registry;
+  std::string key_type_1 = AesCtrHmacAeadKey::descriptor()->full_name();
+  std::string key_type_2 = AesGcmKey::descriptor()->full_name();
+
+
+  // Prepare keyset.
+  Keyset::Key* key;
+  Keyset keyset;
+
+  uint32_t key_id_1 = 1234543;
+  key = keyset.add_key();
+  key->set_output_prefix_type(OutputPrefixType::TINK);
+  key->set_key_id(key_id_1);
+  key->set_status(KeyStatusType::ENABLED);
+  key->mutable_key_data()->set_type_url(key_type_1);
+
+  uint32_t key_id_2 = 726329;
+  key = keyset.add_key();
+  key->set_output_prefix_type(OutputPrefixType::TINK);
+  key->set_key_id(key_id_2);
+  key->set_status(KeyStatusType::DISABLED);
+  key->mutable_key_data()->set_type_url(key_type_2);
+
+  uint32_t key_id_3 = 7213743;
+  key = keyset.add_key();
+  key->set_output_prefix_type(OutputPrefixType::LEGACY);
+  key->set_key_id(key_id_3);
+  key->set_status(KeyStatusType::ENABLED);
+  key->mutable_key_data()->set_type_url(key_type_2);
+
+  uint32_t key_id_4 = 6268492;
+  key = keyset.add_key();
+  key->set_output_prefix_type(OutputPrefixType::RAW);
+  key->set_key_id(key_id_4);
+  key->set_status(KeyStatusType::ENABLED);
+  key->mutable_key_data()->set_type_url(key_type_1);
+
+  uint32_t key_id_5 = 42;
+  key = keyset.add_key();
+  key->set_output_prefix_type(OutputPrefixType::RAW);
+  key->set_key_id(key_id_5);
+  key->set_status(KeyStatusType::ENABLED);
+  key->mutable_key_data()->set_type_url(key_type_2);
+
+  keyset.set_primary_key_id(key_id_3);
+
+  // Register key managers.
+  util::Status status;
+  status = registry.RegisterKeyManager(key_type_1,
+                                       new TestAeadKeyManager(key_type_1));
+  EXPECT_TRUE(status.ok()) << status;
+  status = registry.RegisterKeyManager(key_type_2,
+                                       new TestAeadKeyManager(key_type_2));
+  EXPECT_TRUE(status.ok()) << status;
+
+  // Get and use primitives.
+  std::string plaintext = "some data";
+  std::string aad = "aad";
+
+  // Key #1.
+  {
+    auto result = registry.GetPrimitive<Aead>(keyset.key(0).key_data());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto aead = std::move(result.ValueOrDie());
+    EXPECT_EQ(plaintext + key_type_1,
+              aead->Encrypt(plaintext, aad).ValueOrDie());
+  }
+
+  // Key #3.
+  {
+    auto result = registry.GetPrimitive<Aead>(keyset.key(2).key_data());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto aead = std::move(result.ValueOrDie());
+    EXPECT_EQ(plaintext + key_type_2,
+              aead->Encrypt(plaintext, aad).ValueOrDie());
+  }
+
+  // Keyset without custom key manager.
+  {
+    auto result = registry.GetPrimitives<Aead>(keyset, nullptr);
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto aead_set = std::move(result.ValueOrDie());
+
+    // Check primary.
+    EXPECT_FALSE(aead_set->get_primary() == nullptr);
+    EXPECT_EQ(CryptoFormat::get_output_prefix(keyset.key(2)).ValueOrDie(),
+              aead_set->get_primary()->get_identifier());
+
+    // Check raw.
+    auto raw = aead_set->get_raw_primitives().ValueOrDie();
+    EXPECT_EQ(2, raw->size());
+    EXPECT_EQ(plaintext + key_type_1,
+              raw->at(0).get_primitive().Encrypt(plaintext, aad).ValueOrDie());
+    EXPECT_EQ(plaintext + key_type_2,
+              raw->at(1).get_primitive().Encrypt(plaintext, aad).ValueOrDie());
+
+    // Check Tink.
+    auto tink = aead_set->get_primitives(CryptoFormat::get_output_prefix(
+        keyset.key(0)).ValueOrDie()).ValueOrDie();
+    EXPECT_EQ(1, tink->size());
+    EXPECT_EQ(plaintext + key_type_1,
+              tink->at(0).get_primitive().Encrypt(plaintext, aad).ValueOrDie());
+
+    // Check DISABLED.
+    auto disabled = aead_set->get_primitives(
+        CryptoFormat::get_output_prefix(keyset.key(1)).ValueOrDie());
+    EXPECT_FALSE(disabled.ok());
+    EXPECT_EQ(util::error::NOT_FOUND, disabled.status().error_code());
+  }
+
+  // TODO(przydatek): add test: Keyset with custom key manager.
 }
 
 }  // namespace

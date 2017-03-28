@@ -26,6 +26,23 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "validation",
+    srcs = ["validation.h"],
+    hdrs = ["validation.h"],
+)
+
+cc_library(
+    name = "test_util",
+    srcs = ["test_util.h"],
+    hdrs = ["test_util.h"],
+    deps = [
+        ":status",
+        "//cc:aead",
+        "//cc:mac",
+    ],
+)
+
 # tests
 
 cc_test(

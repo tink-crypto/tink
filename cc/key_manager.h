@@ -42,6 +42,10 @@ namespace tink {
 template<class P>
 class KeyManager {
  public:
+  // Constructs an instance of P for the given 'key_data'.
+  virtual util::StatusOr<std::unique_ptr<P>>
+  GetPrimitive(const google::cloud::crypto::tink::KeyData& key_data) const = 0;
+
   // Constructs an instance of P for the given 'key'.
   virtual util::StatusOr<std::unique_ptr<P>>
   GetPrimitive(const google::protobuf::MessageLite& key) const = 0;

@@ -41,8 +41,34 @@ cc_library(
     hdrs = ["mac.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "//cc/util:status",
         "//cc/util:statusor",
+        "@com_github_google_protobuf//:protobuf_lite",
+    ],
+)
+
+cc_library(
+    name = "crypto_format",
+    srcs = ["core/crypto_format.cc"],
+    hdrs = ["crypto_format.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//cc/util:errors",
+        "//cc/util:statusor",
+        "//proto:cc_tink",
+        "@com_github_google_protobuf//:protobuf_lite",
+    ],
+)
+
+cc_library(
+    name = "primitive_set",
+    srcs = ["primitive_set.h"],
+    hdrs = ["primitive_set.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":crypto_format",
+        "//cc/util:errors",
+        "//cc/util:statusor",
+        "//proto:cc_tink",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
@@ -54,9 +80,12 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":key_manager",
+        ":keyset_handle",
+        ":primitive_set",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:validation",
         "//proto:cc_tink",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
@@ -94,11 +123,44 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aead",
+        ":crypto_format",
         ":registry",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:test_util",
         "//proto:cc_aes_ctr_hmac_aead",
         "//proto:cc_aes_gcm",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
+    name = "crypto_format_test",
+    size = "small",
+    srcs = ["core/crypto_format_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":crypto_format",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:cc_tink",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
+    name = "primitive_set_test",
+    size = "small",
+    srcs = ["core/primitive_set_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":mac",
+        ":primitive_set",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "//proto:cc_tink",
+        "@com_github_google_protobuf//:protobuf_lite",
         "@gtest//:gtest",
     ],
 )

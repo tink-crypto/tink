@@ -23,17 +23,15 @@ namespace cloud {
 namespace crypto {
 namespace tink {
 
-/**
- * KeysetHandle provides abstracted access to Keysets, to limit
- * the exposure of actual protocol buffers that hold sensitive
- * key material.
- */
+// KeysetHandle provides abstracted access to Keysets, to limit
+// the exposure of actual protocol buffers that hold sensitive
+// key material.
 class KeysetHandle {
  public:
   // TODO(przydatek): refactor to ensure that creation KeysetHandle-objects
   //   can be controlled (as in Java).
   KeysetHandle(const google::cloud::crypto::tink::Keyset& keyset);
-  const google::cloud::crypto::tink::Keyset& get_keyset();
+  const google::cloud::crypto::tink::Keyset& get_keyset() const;
 
  private:
   google::cloud::crypto::tink::Keyset keyset_;

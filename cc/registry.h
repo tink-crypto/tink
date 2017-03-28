@@ -21,8 +21,11 @@
 #include <unordered_map>
 
 #include "cc/key_manager.h"
+#include "cc/keyset_handle.h"
+#include "cc/primitive_set.h"
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
+#include "cc/util/validation.h"
 #include "google/protobuf/message_lite.h"
 #include "google/protobuf/stubs/singleton.h"
 #include "google/protobuf/stubs/stringpiece.h"
@@ -97,7 +100,7 @@ class Registry {
   // (cannot return reference directly, as StatusOr does not support it,
   // see https://goo.gl/x0ymDz)
   template <class P>
-  util::StatusOr<const KeyManager<P>*> get_manager(
+  util::StatusOr<const KeyManager<P>*> get_key_manager(
       const std::string& type_url) {
     auto manager_entry = type_to_manager_map_.find(type_url);
     if (manager_entry == type_to_manager_map_.end()) {
@@ -116,8 +119,47 @@ class Registry {
     return static_cast<KeyManager<P>*>(manager_entry->second.get());
   }
 
- protected:
-  friend class google::protobuf::internal::Singleton<Registry>;
+  template <class P>
+  util::StatusOr<std::unique_ptr<P>> GetPrimitive(
+      const google::cloud::crypto::tink::KeyData& key_data) {
+    auto key_manager_result = get_key_manager<P>(key_data.type_url());
+    if (key_manager_result.ok()) {
+      return key_manager_result.ValueOrDie()->GetPrimitive(key_data);
+    }
+    return key_manager_result.status();
+  }
+
+  template <class P>
+  util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> GetPrimitives(
+      const KeysetHandle& keyset_handle, KeyManager<P>* custom_manager) {
+    util::Status status = ValidateKeyset(keyset_handle.get_keyset());
+    if (!status.ok()) return status;
+    std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());
+    for (const google::cloud::crypto::tink::Keyset::Key& key
+             : keyset_handle.get_keyset().key()) {
+      if (key.status() == google::cloud::crypto::tink::KeyStatusType::ENABLED) {
+        std::unique_ptr<P> primitive;
+        if (custom_manager != nullptr &&
+            custom_manager->DoesSupport(key.key_data().type_url())) {
+          auto primitive_result =
+              custom_manager->GetPrimitive(key.key_data());
+          if (!primitive_result.ok()) return primitive_result.status();
+          primitive = std::move(primitive_result.ValueOrDie());
+        } else {
+          auto primitive_result = GetPrimitive<P>(key.key_data());
+          if (!primitive_result.ok()) return primitive_result.status();
+          primitive = std::move(primitive_result.ValueOrDie());
+        }
+        auto entry_result = primitives->AddPrimitive(std::move(primitive), key);
+        if (!entry_result.ok()) return entry_result.status();
+        if (key.key_id() == keyset_handle.get_keyset().primary_key_id()) {
+          primitives->set_primary(entry_result.ValueOrDie());
+        }
+      }
+    }
+    return std::move(primitives);
+  }
+
   Registry() {}
 
  private:
