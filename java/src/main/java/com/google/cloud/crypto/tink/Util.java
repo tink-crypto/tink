@@ -291,7 +291,6 @@ public class Util {
       throw new GeneralSecurityException("empty keyset");
     }
 
-    Keyset.Key first = keyset.getKey(0);
     int primaryKeyId = keyset.getPrimaryKeyId();
     boolean hasPrimaryKey = false;
     for (Keyset.Key key : keyset.getKeyList()) {

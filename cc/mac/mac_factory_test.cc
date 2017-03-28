@@ -21,9 +21,6 @@
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 
-using google::cloud::crypto::tink::Keyset;
-using util::Status;
-
 namespace cloud {
 namespace crypto {
 namespace tink {

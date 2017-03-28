@@ -48,7 +48,6 @@ public class HmacKeyManagerTest {
         .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.HmacKey")
         .setValue(serialized)
         .build();
-    byte[] plaintext = Random.randBytes(123);
     // Calls newKey multiple times and make sure that we get different HmacKey each time.
     Set<String> keys = new TreeSet<String>();
     int numTests = 27;

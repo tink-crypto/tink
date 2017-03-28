@@ -86,7 +86,7 @@ public class PrimitiveSetTest {
     assertEquals(1, entries.size());
     PrimitiveSet<Mac>.Entry<Mac> entry = entries.get(0);
     assertEquals(DummyMac1.class.getSimpleName(),
-        new String(entry.getPrimitive().computeMac(null)));
+        new String(entry.getPrimitive().computeMac(null), "UTF-8"));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
     assertEquals(CryptoFormat.TINK_START_BYTE, entry.getIdentifier()[0]);
     assertArrayEquals(CryptoFormat.getOutputPrefix(key1), entry.getIdentifier());
@@ -95,7 +95,7 @@ public class PrimitiveSetTest {
     assertEquals(1, entries.size());
     entry = entries.get(0);
     assertEquals(DummyMac2.class.getSimpleName(),
-        new String(entry.getPrimitive().computeMac(null)));
+        new String(entry.getPrimitive().computeMac(null), "UTF-8"));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
     assertEquals(0, entry.getIdentifier().length);
     assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
@@ -104,14 +104,14 @@ public class PrimitiveSetTest {
     assertEquals(1, entries.size());
     entry = entries.get(0);
     assertEquals(DummyMac1.class.getSimpleName(),
-        new String(entry.getPrimitive().computeMac(null)));
+        new String(entry.getPrimitive().computeMac(null), "UTF-8"));
     assertEquals(KeyStatusType.DISABLED, entry.getStatus());
     assertEquals(CryptoFormat.LEGACY_START_BYTE, entry.getIdentifier()[0]);
     assertArrayEquals(CryptoFormat.getOutputPrefix(key3), entry.getIdentifier());
 
     entry = pset.getPrimary();
     assertEquals(DummyMac2.class.getSimpleName(),
-        new String(entry.getPrimitive().computeMac(null)));
+        new String(entry.getPrimitive().computeMac(null), "UTF-8"));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
     assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
   }

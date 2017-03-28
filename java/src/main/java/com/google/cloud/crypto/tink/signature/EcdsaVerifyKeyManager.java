@@ -49,6 +49,7 @@ final class EcdsaVerifyKeyManager
     }
   }
 
+  @Override
   public PublicKeyVerify getPrimitive(EcdsaPublicKey pubKey) throws GeneralSecurityException {
     validateKey(pubKey);
     ECPublicKey publicKey = Util.getEcPublicKey(pubKey.getParams().getCurve(),

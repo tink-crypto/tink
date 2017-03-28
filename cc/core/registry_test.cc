@@ -28,10 +28,7 @@
 
 
 using google::cloud::crypto::tink::AesCtrHmacAeadKey;
-using google::cloud::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::cloud::crypto::tink::AesGcmKey;
-using google::cloud::crypto::tink::AesGcmKeyFormat;
-using google::cloud::crypto::tink::Keyset;
 using google::protobuf::MessageLite;
 using util::Status;
 
