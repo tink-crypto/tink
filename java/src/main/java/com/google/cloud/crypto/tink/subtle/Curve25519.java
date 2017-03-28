@@ -55,6 +55,8 @@ public final class Curve25519 {
 
   private static final int[] EXPAND_START = {0, 3, 6, 9, 12, 16, 19, 22, 25, 28};
   private static final int[] EXPAND_SHIFT = {0, 2, 3, 5, 6, 0, 1, 3, 4, 6};
+  private static final int[] MASK = {0x3ffffff, 0x1ffffff};
+  private static final int[] SHIFT = {26, 25};
 
   /**
    * Sums two numbers: output += in
@@ -339,17 +341,11 @@ public final class Curve25519 {
    */
   private static long[] expand(byte[] input) {
     long[] output = new long[LIMB_CNT];
-    for (int i = 0; i < LIMB_CNT; i += 2) {
+    for (int i = 0; i < LIMB_CNT; i++) {
       output[i] = ((((long) (input[EXPAND_START[i]] & 0xff))
           | ((long) (input[EXPAND_START[i] + 1] & 0xff)) << 8
           | ((long) (input[EXPAND_START[i] + 2] & 0xff)) << 16
-          | ((long) (input[EXPAND_START[i] + 3] & 0xff)) << 24) >> EXPAND_SHIFT[i]) & 0x3ffffff;
-      output[i + 1] = ((((long) (input[EXPAND_START[i + 1]] & 0xff))
-          | ((long) (input[EXPAND_START[i + 1] + 1] & 0xff)) << 8
-          | ((long) (input[EXPAND_START[i + 1] + 2] & 0xff)) << 16
-          | ((long) (input[EXPAND_START[i + 1] + 3] & 0xff)) << 24)
-          >> EXPAND_SHIFT[i + 1]) & 0x1ffffff;
-
+          | ((long) (input[EXPAND_START[i] + 3] & 0xff)) << 24) >> EXPAND_SHIFT[i]) & MASK[i & 1];
     }
     return output;
   }
@@ -386,17 +382,11 @@ public final class Curve25519 {
     long[] input = Arrays.copyOf(inputLimbs, LIMB_CNT);
     for (int j = 0; j < 2; j++) {
       for (int i = 0; i < 9; i++) {
-        if ((i & 1) == 1) {
-          // This calculation is a time-invariant way to make input[i] non-negative by borrowing
-          // from the next-larger limb.
-          int carry = -(int) ((input[i] & (input[i] >> 31)) >> 25);
-          input[i] = input[i] + (carry << 25);
-          input[i + 1] -= carry;
-        } else {
-          int carry = -(int) ((input[i] & (input[i] >> 31)) >> 26);
-          input[i] = input[i] + (carry << 26);
-          input[i + 1] -= carry;
-        }
+        // This calculation is a time-invariant way to make input[i] non-negative by borrowing
+        // from the next-larger limb.
+        int carry = -(int) ((input[i] & (input[i] >> 31)) >> SHIFT[i & 1]);
+        input[i] = input[i] + (carry << SHIFT[i & 1]);
+        input[i + 1] -= carry;
       }
 
       // There's no greater limb for input[9] to borrow from, but we can multiply by 19 and borrow
@@ -432,15 +422,9 @@ public final class Curve25519 {
     // limb which is, nominally, 25 bits wide.
     for (int j = 0; j < 2; j++) {
       for (int i = 0; i < 9; i++) {
-        if ((i & 1) == 1) {
-          int carry = (int) (input[i] >> 25);
-          input[i] &= 0x1ffffff;
-          input[i + 1] += carry;
-        } else {
-          int carry = (int) (input[i] >> 26);
-          input[i] &= 0x3ffffff;
-          input[i + 1] += carry;
-        }
+        int carry = (int) (input[i] >> SHIFT[i & 1]);
+        input[i] &= MASK[i & 1];
+        input[i + 1] += carry;
       }
     }
 
@@ -461,10 +445,8 @@ public final class Curve25519 {
     // input[1..9] must take their maximum value and input[0] must be >= (2^255-19) & 0x3ffffff,
     // which is 0x3ffffed.
     int mask = gte((int) input[0], 0x3ffffed);
-    mask &= eq((int) input[1], 0x1ffffff);
-    for (int i = 2; i < LIMB_CNT; i += 2) {
-      mask &= eq((int) input[i], 0x3ffffff);
-      mask &= eq((int) input[i + 1], 0x1ffffff);
+    for (int i = 1; i < LIMB_CNT; i++) {
+      mask &= eq((int) input[i], MASK[i & 1]);
     }
 
     // mask is either 0xffffffff (if input >= 2^255-19) and zero otherwise. Thus this conditionally
