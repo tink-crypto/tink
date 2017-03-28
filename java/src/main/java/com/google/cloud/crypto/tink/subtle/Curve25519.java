@@ -85,114 +85,99 @@ public final class Curve25519 {
   }
 
   /**
-   * Multiply two numbers: output = in2 * in
+   * Multiply two numbers: out = in2 * in
    *
    * output must be distinct to both inputs. The inputs are reduced coefficient form,
    * the output is not.
    *
-   * output[x] <= 14 * the largest product of the input limbs.
+   * out[x] <= 14 * the largest product of the input limbs.
    */
-  private static void product(long[] output, long[] in2, long[] in) {
-    output[0] =       in2[0] * in[0];
-    output[1] =       in2[0] * in[1] +
-                      in2[1] * in[0];
-    output[2] =   2 * in2[1] * in[1] +
-                      in2[0] * in[2] +
-                      in2[2] * in[0];
-    output[3] =       in2[1] * in[2] +
-                      in2[2] * in[1] +
-                      in2[0] * in[3] +
-                      in2[3] * in[0];
-    output[4] =       in2[2] * in[2] +
-                 2 * (in2[1] * in[3] +
-                      in2[3] * in[1]) +
-                      in2[0] * in[4] +
-                      in2[4] * in[0];
-    output[5] =       in2[2] * in[3] +
-                      in2[3] * in[2] +
-                      in2[1] * in[4] +
-                      in2[4] * in[1] +
-                      in2[0] * in[5] +
-                      in2[5] * in[0];
-    output[6] =  2 * (in2[3] * in[3] +
-                      in2[1] * in[5] +
-                      in2[5] * in[1]) +
-                      in2[2] * in[4] +
-                      in2[4] * in[2] +
-                      in2[0] * in[6] +
-                      in2[6] * in[0];
-    output[7] =       in2[3] * in[4] +
-                      in2[4] * in[3] +
-                      in2[2] * in[5] +
-                      in2[5] * in[2] +
-                      in2[1] * in[6] +
-                      in2[6] * in[1] +
-                      in2[0] * in[7] +
-                      in2[7] * in[0];
-    output[8] =       in2[4] * in[4] +
-                 2 * (in2[3] * in[5] +
-                      in2[5] * in[3] +
-                      in2[1] * in[7] +
-                      in2[7] * in[1]) +
-                      in2[2] * in[6] +
-                      in2[6] * in[2] +
-                      in2[0] * in[8] +
-                      in2[8] * in[0];
-    output[9] =       in2[4] * in[5] +
-                      in2[5] * in[4] +
-                      in2[3] * in[6] +
-                      in2[6] * in[3] +
-                      in2[2] * in[7] +
-                      in2[7] * in[2] +
-                      in2[1] * in[8] +
-                      in2[8] * in[1] +
-                      in2[0] * in[9] +
-                      in2[9] * in[0];
-    output[10] = 2 * (in2[5] * in[5] +
-                      in2[3] * in[7] +
-                      in2[7] * in[3] +
-                      in2[1] * in[9] +
-                      in2[9] * in[1]) +
-                      in2[4] * in[6] +
-                      in2[6] * in[4] +
-                      in2[2] * in[8] +
-                      in2[8] * in[2];
-    output[11] =      in2[5] * in[6] +
-                      in2[6] * in[5] +
-                      in2[4] * in[7] +
-                      in2[7] * in[4] +
-                      in2[3] * in[8] +
-                      in2[8] * in[3] +
-                      in2[2] * in[9] +
-                      in2[9] * in[2];
-    output[12] =      in2[6] * in[6] +
-                 2 * (in2[5] * in[7] +
-                      in2[7] * in[5] +
-                      in2[3] * in[9] +
-                      in2[9] * in[3]) +
-                      in2[4] * in[8] +
-                      in2[8] * in[4];
-    output[13] =      in2[6] * in[7] +
-                      in2[7] * in[6] +
-                      in2[5] * in[8] +
-                      in2[8] * in[5] +
-                      in2[4] * in[9] +
-                      in2[9] * in[4];
-    output[14] = 2 * (in2[7] * in[7] +
-                      in2[5] * in[9] +
-                      in2[9] * in[5]) +
-                      in2[6] * in[8] +
-                      in2[8] * in[6];
-    output[15] =      in2[7] * in[8] +
-                      in2[8] * in[7] +
-                      in2[6] * in[9] +
-                      in2[9] * in[6];
-    output[16] =      in2[8] * in[8] +
-                 2 * (in2[7] * in[9] +
-                      in2[9] * in[7]);
-    output[17] =      in2[8] * in[9] +
-                      in2[9] * in[8];
-    output[18] = 2 *  in2[9] * in[9];
+  private static void product(long[] out, long[] in2, long[] in) {
+    out[0] = in2[0] * in[0];
+    out[1] = in2[0] * in[1]
+        + in2[1] * in[0];
+    out[2] = 2 * in2[1] * in[1]
+        + in2[0] * in[2]
+        + in2[2] * in[0];
+    out[3] = in2[1] * in[2]
+        + in2[2] * in[1]
+        + in2[0] * in[3]
+        + in2[3] * in[0];
+    out[4] = in2[2] * in[2]
+        + 2 * (in2[1] * in[3] + in2[3] * in[1])
+        + in2[0] * in[4]
+        + in2[4] * in[0];
+    out[5] = in2[2] * in[3]
+        + in2[3] * in[2]
+        + in2[1] * in[4]
+        + in2[4] * in[1]
+        + in2[0] * in[5]
+        + in2[5] * in[0];
+    out[6] = 2 * (in2[3] * in[3] + in2[1] * in[5] + in2[5] * in[1])
+        + in2[2] * in[4]
+        + in2[4] * in[2]
+        + in2[0] * in[6]
+        + in2[6] * in[0];
+    out[7] = in2[3] * in[4]
+        + in2[4] * in[3]
+        + in2[2] * in[5]
+        + in2[5] * in[2]
+        + in2[1] * in[6]
+        + in2[6] * in[1]
+        + in2[0] * in[7]
+        + in2[7] * in[0];
+    out[8] = in2[4] * in[4]
+        + 2 * (in2[3] * in[5] + in2[5] * in[3] + in2[1] * in[7] + in2[7] * in[1])
+        + in2[2] * in[6]
+        + in2[6] * in[2]
+        + in2[0] * in[8]
+        + in2[8] * in[0];
+    out[9] = in2[4] * in[5]
+        + in2[5] * in[4]
+        + in2[3] * in[6]
+        + in2[6] * in[3]
+        + in2[2] * in[7]
+        + in2[7] * in[2]
+        + in2[1] * in[8]
+        + in2[8] * in[1]
+        + in2[0] * in[9]
+        + in2[9] * in[0];
+    out[10] =
+        2 * (in2[5] * in[5] + in2[3] * in[7] + in2[7] * in[3] + in2[1] * in[9] + in2[9] * in[1])
+            + in2[4] * in[6]
+            + in2[6] * in[4]
+            + in2[2] * in[8]
+            + in2[8] * in[2];
+    out[11] = in2[5] * in[6]
+        + in2[6] * in[5]
+        + in2[4] * in[7]
+        + in2[7] * in[4]
+        + in2[3] * in[8]
+        + in2[8] * in[3]
+        + in2[2] * in[9]
+        + in2[9] * in[2];
+    out[12] = in2[6] * in[6]
+        + 2 * (in2[5] * in[7] + in2[7] * in[5] + in2[3] * in[9] + in2[9] * in[3])
+        + in2[4] * in[8]
+        + in2[8] * in[4];
+    out[13] = in2[6] * in[7]
+        + in2[7] * in[6]
+        + in2[5] * in[8]
+        + in2[8] * in[5]
+        + in2[4] * in[9]
+        + in2[9] * in[4];
+    out[14] = 2 * (in2[7] * in[7] + in2[5] * in[9] + in2[9] * in[5])
+        + in2[6] * in[8]
+        + in2[8] * in[6];
+    out[15] = in2[7] * in[8]
+        + in2[8] * in[7]
+        + in2[6] * in[9]
+        + in2[9] * in[6];
+    out[16] = in2[8] * in[8]
+        + 2 * (in2[7] * in[9] + in2[9] * in[7]);
+    out[17] = in2[8] * in[9]
+        + in2[9] * in[8];
+    out[18] = 2 * in2[9] * in[9];
   }
 
   /**
@@ -294,69 +279,40 @@ public final class Curve25519 {
   }
 
   /**
-   * Square a number: output = in**2
+   * Square a number: out = in**2
    *
    * output must be distinct from the input. The inputs are reduced coefficient form, the output is
    * not.
    *
-   * output[x] <= 14 * the largest product of the input limbs.
+   * out[x] <= 14 * the largest product of the input limbs.
    */
-  private static void squareInner(long[] output, long[] in) {
-    output[0] =       in[0] * in[0];
-    output[1] =  2 *  in[0] * in[1];
-    output[2] =  2 * (in[1] * in[1] +
-                      in[0] * in[2]);
-    output[3] =  2 * (in[1] * in[2] +
-                      in[0] * in[3]);
-    output[4] =       in[2] * in[2] +
-                 4 *  in[1] * in[3] +
-                 2 *  in[0] * in[4];
-    output[5] =  2 * (in[2] * in[3] +
-                      in[1] * in[4] +
-                      in[0] * in[5]);
-    output[6] =  2 * (in[3] * in[3] +
-                      in[2] * in[4] +
-                      in[0] * in[6] +
-                 2 *  in[1] * in[5]);
-    output[7] =  2 * (in[3] * in[4] +
-                      in[2] * in[5] +
-                      in[1] * in[6] +
-                      in[0] * in[7]);
-    output[8] =       in[4] * in[4] +
-                 2 * (in[2] * in[6] +
-                      in[0] * in[8] +
-                 2 * (in[1] * in[7] +
-                      in[3] * in[5]));
-    output[9] =  2 * (in[4] * in[5] +
-                      in[3] * in[6] +
-                      in[2] * in[7] +
-                      in[1] * in[8] +
-                      in[0] * in[9]);
-    output[10] = 2 * (in[5] * in[5] +
-                      in[4] * in[6] +
-                      in[2] * in[8] +
-                 2 * (in[3] * in[7] +
-                      in[1] * in[9]));
-    output[11] = 2 * (in[5] * in[6] +
-                      in[4] * in[7] +
-                      in[3] * in[8] +
-                      in[2] * in[9]);
-    output[12] =      in[6] * in[6] +
-                 2 * (in[4] * in[8] +
-                 2 * (in[5] * in[7] +
-                      in[3] * in[9]));
-    output[13] = 2 * (in[6] * in[7] +
-                      in[5] * in[8] +
-                      in[4] * in[9]);
-    output[14] = 2 * (in[7] * in[7] +
-                      in[6] * in[8] +
-                 2 *  in[5] * in[9]);
-    output[15] = 2 * (in[7] * in[8] +
-                      in[6] * in[9]);
-    output[16] =      in[8] * in[8] +
-                 4 *  in[7] * in[9];
-    output[17] = 2 *  in[8] * in[9];
-    output[18] = 2 *  in[9] * in[9];
+  private static void squareInner(long[] out, long[] in) {
+    out[0] = in[0] * in[0];
+    out[1] =  2 * in[0] * in[1];
+    out[2] =  2 * (in[1] * in[1] + in[0] * in[2]);
+    out[3] =  2 * (in[1] * in[2] + in[0] * in[3]);
+    out[4] = in[2] * in[2]
+        + 4 * in[1] * in[3]
+        + 2 * in[0] * in[4];
+    out[5] =  2 * (in[2] * in[3] + in[1] * in[4] + in[0] * in[5]);
+    out[6] =  2 * (in[3] * in[3] + in[2] * in[4] + in[0] * in[6] + 2 *  in[1] * in[5]);
+    out[7] =  2 * (in[3] * in[4] + in[2] * in[5] + in[1] * in[6] + in[0] * in[7]);
+    out[8] = in[4] * in[4]
+        + 2 * (in[2] * in[6] + in[0] * in[8] + 2 * (in[1] * in[7] + in[3] * in[5]));
+    out[9] =  2 * (in[4] * in[5] + in[3] * in[6] + in[2] * in[7] + in[1] * in[8] + in[0] * in[9]);
+    out[10] = 2 * (in[5] * in[5]
+        + in[4] * in[6]
+        + in[2] * in[8]
+        + 2 * (in[3] * in[7] + in[1] * in[9]));
+    out[11] = 2 * (in[5] * in[6] + in[4] * in[7] + in[3] * in[8] + in[2] * in[9]);
+    out[12] = in[6] * in[6]
+        + 2 * (in[4] * in[8] + 2 * (in[5] * in[7] + in[3] * in[9]));
+    out[13] = 2 * (in[6] * in[7] + in[5] * in[8] + in[4] * in[9]);
+    out[14] = 2 * (in[7] * in[7] + in[6] * in[8] + 2 *  in[5] * in[9]);
+    out[15] = 2 * (in[7] * in[8] + in[6] * in[9]);
+    out[16] = in[8] * in[8] + 4 * in[7] * in[9];
+    out[17] = 2 *  in[8] * in[9];
+    out[18] = 2 *  in[9] * in[9];
   }
 
   /**
@@ -384,17 +340,15 @@ public final class Curve25519 {
   private static long[] expand(byte[] input) {
     long[] output = new long[LIMB_CNT];
     for (int i = 0; i < LIMB_CNT; i += 2) {
-      output[i] =
-          ((((long) (input[EXPAND_START[i]] & 0xff)) |
-            ((long) (input[EXPAND_START[i] + 1] & 0xff)) << 8 |
-            ((long) (input[EXPAND_START[i] + 2] & 0xff)) << 16 |
-            ((long) (input[EXPAND_START[i] + 3] & 0xff)) << 24) >> EXPAND_SHIFT[i]) & 0x3ffffff;
-      output[i + 1] =
-          ((((long) (input[EXPAND_START[i + 1]] & 0xff)) |
-            ((long) (input[EXPAND_START[i + 1] + 1] & 0xff)) << 8 |
-            ((long) (input[EXPAND_START[i + 1] + 2] & 0xff)) << 16 |
-            ((long) (input[EXPAND_START[i + 1] + 3] & 0xff)) << 24) >> EXPAND_SHIFT[i + 1])
-              & 0x1ffffff;
+      output[i] = ((((long) (input[EXPAND_START[i]] & 0xff))
+          | ((long) (input[EXPAND_START[i] + 1] & 0xff)) << 8
+          | ((long) (input[EXPAND_START[i] + 2] & 0xff)) << 16
+          | ((long) (input[EXPAND_START[i] + 3] & 0xff)) << 24) >> EXPAND_SHIFT[i]) & 0x3ffffff;
+      output[i + 1] = ((((long) (input[EXPAND_START[i + 1]] & 0xff))
+          | ((long) (input[EXPAND_START[i + 1] + 1] & 0xff)) << 8
+          | ((long) (input[EXPAND_START[i + 1] + 2] & 0xff)) << 16
+          | ((long) (input[EXPAND_START[i + 1] + 3] & 0xff)) << 24)
+          >> EXPAND_SHIFT[i + 1]) & 0x1ffffff;
 
     }
     return output;
@@ -699,71 +653,90 @@ public final class Curve25519 {
   /**
    * Computes inverse of z = z(2^255 - 21)
    *
-   * Shamelessly copied from agl's code which was shamelessly copied from djb's code
+   * Shamelessly copied from agl's code which was shamelessly copied from djb's code. Only the
+   * comment format and the variable namings are different from those.
    */
   private static void curveRecip(long[] out, long[] z) {
     long[] z2 = new long[10];
     long[] z9 = new long[10];
     long[] z11 = new long[10];
-    long[] z2_5_0 = new long[10];
-    long[] z2_10_0 = new long[10];
-    long[] z2_20_0 = new long[10];
-    long[] z2_50_0 = new long[10];
-    long[] z2_100_0 = new long[10];
+    long[] z2To5Minus1 = new long[10];
+    long[] z2To10Minus1 = new long[10];
+    long[] z2To20Minus1 = new long[10];
+    long[] z2To50Minus1 = new long[10];
+    long[] z2To100Minus1 = new long[10];
     long[] t0 = new long[10];
     long[] t1 = new long[10];
 
-    /* 2 */ square(z2, z);
-    /* 4 */ square(t1, z2);
-    /* 8 */ square(t0, t1);
-    /* 9 */ mult(z9, t0, z);
-    /* 11 */ mult(z11, z9, z2);
-    /* 22 */ square(t0, z11);
-    /* 2^5 - 2^0 = 31 */ mult(z2_5_0, t0, z9);
+    square(z2, z);                          // 2
+    square(t1, z2);                         // 4
+    square(t0, t1);                         // 8
+    mult(z9, t0, z);                        // 9
+    mult(z11, z9, z2);                      // 11
+    square(t0, z11);                        // 22
+    mult(z2To5Minus1, t0, z9);              // 2^5 - 2^0 = 31
 
-    /* 2^6 - 2^1 */ square(t0, z2_5_0);
-    /* 2^7 - 2^2 */ square(t1, t0);
-    /* 2^8 - 2^3 */ square(t0, t1);
-    /* 2^9 - 2^4 */ square(t1, t0);
-    /* 2^10 - 2^5 */ square(t0, t1);
-    /* 2^10 - 2^0 */ mult(z2_10_0, t0, z2_5_0);
+    square(t0, z2To5Minus1);                // 2^6 - 2^1
+    square(t1, t0);                         // 2^7 - 2^2
+    square(t0, t1);                         // 2^8 - 2^3
+    square(t1, t0);                         // 2^9 - 2^4
+    square(t0, t1);                         // 2^10 - 2^5
+    mult(z2To10Minus1, t0, z2To5Minus1);    // 2^10 - 2^0
 
-    /* 2^11 - 2^1 */ square(t0, z2_10_0);
-    /* 2^12 - 2^2 */ square(t1, t0);
-    /* 2^20 - 2^10 */ for (int i = 2; i < 10; i += 2) { square(t0, t1); square(t1, t0); }
-    /* 2^20 - 2^0 */ mult(z2_20_0, t1, z2_10_0);
+    square(t0, z2To10Minus1);               // 2^11 - 2^1
+    square(t1, t0);                         // 2^12 - 2^2
+    for (int i = 2; i < 10; i += 2) {       // 2^20 - 2^10
+      square(t0, t1);
+      square(t1, t0);
+    }
+    mult(z2To20Minus1, t1, z2To10Minus1);   // 2^20 - 2^0
 
-    /* 2^21 - 2^1 */ square(t0, z2_20_0);
-    /* 2^22 - 2^2 */ square(t1, t0);
-    /* 2^40 - 2^20 */ for (int i = 2; i < 20; i += 2) { square(t0, t1); square(t1, t0); }
-    /* 2^40 - 2^0 */ mult(t0, t1, z2_20_0);
+    square(t0, z2To20Minus1);               // 2^21 - 2^1
+    square(t1, t0);                         // 2^22 - 2^2
+    for (int i = 2; i < 20; i += 2) {       // 2^40 - 2^20
+      square(t0, t1);
+      square(t1, t0);
+    }
+    mult(t0, t1, z2To20Minus1);             // 2^40 - 2^0
 
-    /* 2^41 - 2^1 */ square(t1, t0);
-    /* 2^42 - 2^2 */ square(t0, t1);
-    /* 2^50 - 2^10 */ for (int i = 2; i < 10; i += 2) { square(t1, t0); square(t0, t1); }
-    /* 2^50 - 2^0 */ mult(z2_50_0, t0, z2_10_0);
+    square(t1, t0);                         // 2^41 - 2^1
+    square(t0, t1);                         // 2^42 - 2^2
+    for (int i = 2; i < 10; i += 2) {       // 2^50 - 2^10
+      square(t1, t0);
+      square(t0, t1);
+    }
+    mult(z2To50Minus1, t0, z2To10Minus1);   // 2^50 - 2^0
 
-    /* 2^51 - 2^1 */ square(t0, z2_50_0);
-    /* 2^52 - 2^2 */ square(t1, t0);
-    /* 2^100 - 2^50 */ for (int i = 2; i < 50; i += 2) { square(t0, t1); square(t1, t0); }
-    /* 2^100 - 2^0 */ mult(z2_100_0, t1, z2_50_0);
+    square(t0, z2To50Minus1);               // 2^51 - 2^1
+    square(t1, t0);                         // 2^52 - 2^2
+    for (int i = 2; i < 50; i += 2) {       // 2^100 - 2^50
+      square(t0, t1);
+      square(t1, t0);
+    }
+    mult(z2To100Minus1, t1, z2To50Minus1);  // 2^100 - 2^0
 
-    /* 2^101 - 2^1 */ square(t1, z2_100_0);
-    /* 2^102 - 2^2 */ square(t0, t1);
-    /* 2^200 - 2^100 */ for (int i = 2; i < 100; i += 2) { square(t1, t0); square(t0, t1); }
-    /* 2^200 - 2^0 */ mult(t1, t0, z2_100_0);
+    square(t1, z2To100Minus1);              // 2^101 - 2^1
+    square(t0, t1);                         // 2^102 - 2^2
+    for (int i = 2; i < 100; i += 2) {      // 2^200 - 2^100
+      square(t1, t0);
+      square(t0, t1);
+    }
+    mult(t1, t0, z2To100Minus1);            // 2^200 - 2^0
 
-    /* 2^201 - 2^1 */ square(t0, t1);
-    /* 2^202 - 2^2 */ square(t1, t0);
-    /* 2^250 - 2^50 */ for (int i = 2; i < 50; i += 2) { square(t0, t1); square(t1, t0); }
-    /* 2^250 - 2^0 */ mult(t0, t1, z2_50_0);
+    square(t0, t1);                         // 2^201 - 2^1
+    square(t1, t0);                         // 2^202 - 2^2
+    for (int i = 2; i < 50; i += 2) {       // 2^250 - 2^50
+      square(t0, t1);
+      square(t1, t0);
+    }
+    mult(t0, t1, z2To50Minus1);             // 2^250 - 2^0
 
-    /* 2^251 - 2^1 */ square(t1, t0);
-    /* 2^252 - 2^2 */ square(t0, t1);
-    /* 2^253 - 2^3 */ square(t1, t0);
-    /* 2^254 - 2^4 */ square(t0, t1);
-    /* 2^255 - 2^5 */ square(t1, t0);
-    /* 2^255 - 21 */ mult(out, t1, z11);
+    square(t1, t0);                         // 2^251 - 2^1
+    square(t0, t1);                         // 2^252 - 2^2
+    square(t1, t0);                         // 2^253 - 2^3
+    square(t0, t1);                         // 2^254 - 2^4
+    square(t1, t0);                         // 2^255 - 2^5
+    mult(out, t1, z11);                     // 2^255 - 21
   }
 
   /**
@@ -780,7 +753,7 @@ public final class Curve25519 {
    * This does not affect security because, although we're throwing away entropy, a valid
    * implementation of x25519 should throw away the exact same bits anyway.
    */
-  public static byte[] GeneratePrivateKey() {
+  public static byte[] generatePrivateKey() {
     byte[] privateKey = Random.randBytes(32);
 
     privateKey[0] |= 7;

@@ -108,7 +108,7 @@ public class Curve25519Test {
 
   @Test
   public void testGeneratePrivateKeyReturnsIntentionallyMalformedKeys() {
-    byte[] privateKey = Curve25519.GeneratePrivateKey();
+    byte[] privateKey = Curve25519.generatePrivateKey();
     assertEquals(7, privateKey[0] & 7);
     assertEquals(128, privateKey[31] & 192);
   }
