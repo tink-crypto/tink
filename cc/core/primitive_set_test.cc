@@ -17,8 +17,6 @@
 #include "cc/primitive_set.h"
 #include "cc/crypto_format.h"
 #include "cc/mac.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
 #include "google/protobuf/stubs/stringpiece.h"
 #include "gtest/gtest.h"
@@ -28,8 +26,6 @@ using cloud::crypto::tink::test::DummyMac;
 using google::cloud::crypto::tink::Keyset;
 using google::cloud::crypto::tink::KeyStatusType;
 using google::cloud::crypto::tink::OutputPrefixType;
-using util::Status;
-using util::StatusOr;
 
 namespace cloud {
 namespace crypto {

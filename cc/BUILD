@@ -22,7 +22,14 @@ cc_library(
         ":key_manager",
         ":keyset_handle",
         ":mac",
+        ":primitive_set",
         ":registry",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:validation",
+        "//proto:cc_tink",
+        "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -41,6 +48,7 @@ cc_library(
     hdrs = ["mac.h"],
     visibility = ["//visibility:public"],
     deps = [
+        "//cc/util:status",
         "//cc/util:statusor",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
@@ -55,7 +63,6 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:statusor",
         "//proto:cc_tink",
-        "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -69,7 +76,6 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:statusor",
         "//proto:cc_tink",
-        "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -130,6 +136,7 @@ cc_test(
         "//cc/util:test_util",
         "//proto:cc_aes_ctr_hmac_aead",
         "//proto:cc_aes_gcm",
+        "//proto:cc_tink",
         "@gtest//:gtest",
     ],
 )
@@ -141,8 +148,6 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":crypto_format",
-        "//cc/util:status",
-        "//cc/util:statusor",
         "//proto:cc_tink",
         "@gtest//:gtest",
     ],
@@ -154,10 +159,9 @@ cc_test(
     srcs = ["core/primitive_set_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":crypto_format",
         ":mac",
         ":primitive_set",
-        "//cc/util:status",
-        "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:cc_tink",
         "@com_github_google_protobuf//:protobuf_lite",

@@ -11,6 +11,7 @@ cc_library(
         "//cc:mac",
         "//cc/util:status",
         "//cc/util:statusor",
+        "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -25,7 +26,6 @@ cc_test(
         ":mac_factory",
         "//cc:mac",
         "//cc/util:status",
-        "//cc/util:statusor",
         "@gtest//:gtest",
     ],
 )

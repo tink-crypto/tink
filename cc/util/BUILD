@@ -30,6 +30,10 @@ cc_library(
     name = "validation",
     srcs = ["validation.h"],
     hdrs = ["validation.h"],
+    deps = [
+        ":status",
+        "//proto:cc_tink",
+    ],
 )
 
 cc_library(
@@ -40,6 +44,7 @@ cc_library(
         ":status",
         "//cc:aead",
         "//cc:mac",
+        "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
 

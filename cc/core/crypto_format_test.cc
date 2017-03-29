@@ -16,7 +16,6 @@
 
 
 #include "cc/crypto_format.h"
-#include "cc/util/statusor.h"
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 

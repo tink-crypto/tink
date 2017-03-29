@@ -17,10 +17,9 @@
 #include "cc/aead/aead_factory.h"
 
 #include "cc/aead.h"
-#include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "proto/tink.pb.h"
+#include "google/protobuf/stubs/stringpiece.h"
 
 namespace cloud {
 namespace crypto {

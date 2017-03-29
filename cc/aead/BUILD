@@ -9,9 +9,9 @@ cc_library(
         "//cc:aead",
         "//cc:key_manager",
         "//cc:keyset_handle",
-        "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
+        "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -26,7 +26,6 @@ cc_test(
         ":aead_factory",
         "//cc:aead",
         "//cc/util:status",
-        "//cc/util:statusor",
         "@gtest//:gtest",
     ],
 )

@@ -17,8 +17,9 @@
 #include "cc/mac/mac_factory.h"
 
 #include "cc/mac.h"
+#include "cc/util/status.h"
+#include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
-#include "proto/tink.pb.h"
 
 namespace cloud {
 namespace crypto {
@@ -33,6 +34,12 @@ util::Status MacFactory::RegisterStandardKeyTypes() {
 // static
 util::Status MacFactory::RegisterLegacyKeyTypes() {
   return util::Status(util::error::UNIMPLEMENTED, "Not implemented yet.");
+}
+
+// static
+util::StatusOr<std::unique_ptr<Mac>> GetPrimitive(
+    const KeysetHandle& keyset_handle) {
+  return util::Status::UNKNOWN;
 }
 
 }  // namespace tink
