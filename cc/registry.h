@@ -35,11 +35,6 @@ namespace cloud {
 namespace crypto {
 namespace tink {
 
-template <class P>
-void delete_manager(void* t) {
-  delete static_cast<KeyManager<P>*>(t);
-}
-
 // Registry for KeyMangers.
 //
 // It is essentially a big container (map) that for each supported key
@@ -60,38 +55,13 @@ void delete_manager(void* t) {
 // and KeyManagers.
 class Registry {
  public:
-  static Registry& get_default_registry() {
-    return *(default_registry_.get());
-  }
+  static Registry& get_default_registry();
 
   // Registers the given 'manager' for the key type identified by 'type_url'.
   // Takes ownership of 'manager', which must be non-nullptr.
   template <class P>
   util::Status RegisterKeyManager(const std::string& type_url,
-                                  KeyManager<P>* manager) {
-    if (manager == nullptr) {
-      return util::Status(util::error::INVALID_ARGUMENT,
-                    "Parameter 'manager' must be non-null.");
-    }
-    std::unique_ptr<void, void(*)(void*)>
-        entry(manager, delete_manager<P>);
-    if (!manager->DoesSupport(type_url)) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "The manager does not support type '%s'.",
-                       type_url.c_str());
-    }
-    auto curr_manager = type_to_manager_map_.find(type_url);
-    if (curr_manager != type_to_manager_map_.end()) {
-      return ToStatusF(util::error::ALREADY_EXISTS,
-                       "A manager for type '%s' has been already registered.",
-                       type_url.c_str());
-    }
-    type_to_manager_map_.insert(
-        std::make_pair(type_url, std::move(entry)));
-    type_to_primitive_map_.insert(
-        std::make_pair(type_url, typeid(P).name()));
-    return util::Status::OK;
-  }
+                                  KeyManager<P>* manager);
 
   // Returns a key manager for the given type_url (if any found).
   // Keeps the ownership of the manager.
@@ -101,64 +71,25 @@ class Registry {
   // see https://goo.gl/x0ymDz)
   template <class P>
   util::StatusOr<const KeyManager<P>*> get_key_manager(
-      const std::string& type_url) {
-    auto manager_entry = type_to_manager_map_.find(type_url);
-    if (manager_entry == type_to_manager_map_.end()) {
-      return ToStatusF(util::error::NOT_FOUND,
-                       "No manager for type '%s' has been registered.",
-                       type_url.c_str());
-    }
-    if (type_to_primitive_map_[type_url] != typeid(P).name()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Wrong Primitive type for key type '%s': "
-                       "got '%s', expected '%s'",
-                       type_url.c_str(),
-                       typeid(P).name(),
-                       type_to_primitive_map_[type_url]);
-    }
-    return static_cast<KeyManager<P>*>(manager_entry->second.get());
-  }
+      const std::string& type_url);
 
+  // Convenience method for creating a new primitive for the key given
+  // in 'key_data'.  It looks up a KeyManager identified by key_data.type_url,
+  // and calls manager's getPrimitive(key_data)-method.
   template <class P>
   util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      const google::cloud::crypto::tink::KeyData& key_data) {
-    auto key_manager_result = get_key_manager<P>(key_data.type_url());
-    if (key_manager_result.ok()) {
-      return key_manager_result.ValueOrDie()->GetPrimitive(key_data);
-    }
-    return key_manager_result.status();
-  }
+      const google::cloud::crypto::tink::KeyData& key_data);
 
+  // Creates a set of primitives corresponding to the keys with
+  // status=ENABLED in the keyset given in 'keyset_handle',
+  // assuming all the corresponding key managers are present (keys
+  // with status != ENABLED are skipped).
+  //
+  // The returned set is usually later "wrapped" into a class that
+  // implements the corresponding Primitive-interface.
   template <class P>
   util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> GetPrimitives(
-      const KeysetHandle& keyset_handle, KeyManager<P>* custom_manager) {
-    util::Status status = ValidateKeyset(keyset_handle.get_keyset());
-    if (!status.ok()) return status;
-    std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());
-    for (const google::cloud::crypto::tink::Keyset::Key& key
-             : keyset_handle.get_keyset().key()) {
-      if (key.status() == google::cloud::crypto::tink::KeyStatusType::ENABLED) {
-        std::unique_ptr<P> primitive;
-        if (custom_manager != nullptr &&
-            custom_manager->DoesSupport(key.key_data().type_url())) {
-          auto primitive_result =
-              custom_manager->GetPrimitive(key.key_data());
-          if (!primitive_result.ok()) return primitive_result.status();
-          primitive = std::move(primitive_result.ValueOrDie());
-        } else {
-          auto primitive_result = GetPrimitive<P>(key.key_data());
-          if (!primitive_result.ok()) return primitive_result.status();
-          primitive = std::move(primitive_result.ValueOrDie());
-        }
-        auto entry_result = primitives->AddPrimitive(std::move(primitive), key);
-        if (!entry_result.ok()) return entry_result.status();
-        if (key.key_id() == keyset_handle.get_keyset().primary_key_id()) {
-          primitives->set_primary(entry_result.ValueOrDie());
-        }
-      }
-    }
-    return std::move(primitives);
-  }
+      const KeysetHandle& keyset_handle, KeyManager<P>* custom_manager);
 
   Registry() {}
 
@@ -173,6 +104,107 @@ class Registry {
   TypeToManagerMap type_to_manager_map_;
   TypeToPrimitiveMap type_to_primitive_map_;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// Implementation details.
+
+template <class P>
+void delete_manager(void* t) {
+  delete static_cast<KeyManager<P>*>(t);
+}
+
+// static
+Registry& Registry::get_default_registry() {
+  return *(default_registry_.get());
+}
+
+template <class P>
+util::Status Registry::RegisterKeyManager(const std::string& type_url,
+                                          KeyManager<P>* manager) {
+  if (manager == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Parameter 'manager' must be non-null.");
+  }
+  std::unique_ptr<void, void(*)(void*)>
+      entry(manager, delete_manager<P>);
+  if (!manager->DoesSupport(type_url)) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "The manager does not support type '%s'.",
+                     type_url.c_str());
+  }
+  auto curr_manager = type_to_manager_map_.find(type_url);
+  if (curr_manager != type_to_manager_map_.end()) {
+    return ToStatusF(util::error::ALREADY_EXISTS,
+                     "A manager for type '%s' has been already registered.",
+                     type_url.c_str());
+  }
+  type_to_manager_map_.insert(
+      std::make_pair(type_url, std::move(entry)));
+  type_to_primitive_map_.insert(
+      std::make_pair(type_url, typeid(P).name()));
+  return util::Status::OK;
+}
+
+template <class P>
+util::StatusOr<const KeyManager<P>*> Registry::get_key_manager(
+    const std::string& type_url) {
+  auto manager_entry = type_to_manager_map_.find(type_url);
+  if (manager_entry == type_to_manager_map_.end()) {
+    return ToStatusF(util::error::NOT_FOUND,
+                     "No manager for type '%s' has been registered.",
+                     type_url.c_str());
+  }
+  if (type_to_primitive_map_[type_url] != typeid(P).name()) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Wrong Primitive type for key type '%s': "
+                     "got '%s', expected '%s'",
+                     type_url.c_str(),
+                     typeid(P).name(),
+                     type_to_primitive_map_[type_url]);
+  }
+  return static_cast<KeyManager<P>*>(manager_entry->second.get());
+}
+
+template <class P>
+util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
+    const google::cloud::crypto::tink::KeyData& key_data) {
+  auto key_manager_result = get_key_manager<P>(key_data.type_url());
+  if (key_manager_result.ok()) {
+    return key_manager_result.ValueOrDie()->GetPrimitive(key_data);
+  }
+  return key_manager_result.status();
+}
+
+template <class P>
+util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> Registry::GetPrimitives(
+    const KeysetHandle& keyset_handle, KeyManager<P>* custom_manager) {
+  util::Status status = ValidateKeyset(keyset_handle.get_keyset());
+  if (!status.ok()) return status;
+  std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());
+  for (const google::cloud::crypto::tink::Keyset::Key& key
+           : keyset_handle.get_keyset().key()) {
+    if (key.status() == google::cloud::crypto::tink::KeyStatusType::ENABLED) {
+      std::unique_ptr<P> primitive;
+      if (custom_manager != nullptr &&
+          custom_manager->DoesSupport(key.key_data().type_url())) {
+        auto primitive_result =
+            custom_manager->GetPrimitive(key.key_data());
+        if (!primitive_result.ok()) return primitive_result.status();
+        primitive = std::move(primitive_result.ValueOrDie());
+      } else {
+        auto primitive_result = GetPrimitive<P>(key.key_data());
+        if (!primitive_result.ok()) return primitive_result.status();
+        primitive = std::move(primitive_result.ValueOrDie());
+      }
+      auto entry_result = primitives->AddPrimitive(std::move(primitive), key);
+      if (!entry_result.ok()) return entry_result.status();
+      if (key.key_id() == keyset_handle.get_keyset().primary_key_id()) {
+        primitives->set_primary(entry_result.ValueOrDie());
+      }
+    }
+  }
+  return std::move(primitives);
+}
 
 }  // namespace tink
 }  // namespace crypto
