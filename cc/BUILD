@@ -116,6 +116,7 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//proto:cc_tink",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
 )

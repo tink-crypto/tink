@@ -38,6 +38,7 @@ public interface EngineWrapper<T> {
    */
   class TCipher implements EngineWrapper<Cipher> {
     @SuppressWarnings("InsecureCryptoUsage")
+    @Override
     public Cipher getInstance(String algorithm, Provider provider) throws GeneralSecurityException {
       if (provider == null) {
         return Cipher.getInstance(algorithm);
@@ -52,6 +53,7 @@ public interface EngineWrapper<T> {
    */
   class TMac implements EngineWrapper<Mac> {
     @SuppressWarnings("InsecureCryptoUsage")
+    @Override
     public Mac getInstance(String algorithm, Provider provider) throws GeneralSecurityException {
       if (provider == null) {
         return Mac.getInstance(algorithm);
@@ -66,6 +68,7 @@ public interface EngineWrapper<T> {
    */
   class TKeyPairGenerator implements EngineWrapper<KeyPairGenerator> {
     @SuppressWarnings("InsecureCryptoUsage")
+    @Override
     public KeyPairGenerator getInstance(String algorithm, Provider provider)
         throws GeneralSecurityException {
       if (provider == null) {
@@ -81,6 +84,7 @@ public interface EngineWrapper<T> {
    */
   class TMessageDigest implements EngineWrapper<MessageDigest> {
     @SuppressWarnings("InsecureCryptoUsage")
+    @Override
     public MessageDigest getInstance(String algorithm, Provider provider)
         throws GeneralSecurityException {
       if (provider == null) {
@@ -96,6 +100,7 @@ public interface EngineWrapper<T> {
    */
   class TSignature implements EngineWrapper<Signature> {
     @SuppressWarnings("InsecureCryptoUsage")
+    @Override
     public Signature getInstance(String algorithm, Provider provider)
         throws GeneralSecurityException {
       if (provider == null) {
@@ -111,6 +116,7 @@ public interface EngineWrapper<T> {
    */
   class TKeyFactory implements EngineWrapper<KeyFactory> {
     @SuppressWarnings("InsecureCryptoUsage")
+    @Override
     public KeyFactory getInstance(String algorithm, Provider provider)
         throws GeneralSecurityException {
       if (provider == null) {
@@ -126,6 +132,7 @@ public interface EngineWrapper<T> {
    */
   class TKeyAgreement implements EngineWrapper<KeyAgreement> {
     @SuppressWarnings("InsecureCryptoUsage")
+    @Override
     public KeyAgreement getInstance(String algorithm, Provider provider)
         throws GeneralSecurityException {
       if (provider == null) {

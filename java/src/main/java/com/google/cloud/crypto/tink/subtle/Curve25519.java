@@ -378,6 +378,7 @@ public final class Curve25519 {
    *
    * On entry: |input_limbs[i]| < 2^26
    */
+  @SuppressWarnings("NarrowingCompoundAssignment")
   private static byte[] contract(long[] inputLimbs) {
     long[] input = Arrays.copyOf(inputLimbs, LIMB_CNT);
     for (int j = 0; j < 2; j++) {
@@ -735,6 +736,7 @@ public final class Curve25519 {
    * This does not affect security because, although we're throwing away entropy, a valid
    * implementation of x25519 should throw away the exact same bits anyway.
    */
+  @SuppressWarnings("NarrowingCompoundAssignment")
   public static byte[] generatePrivateKey() {
     byte[] privateKey = Random.randBytes(32);
 
@@ -752,6 +754,7 @@ public final class Curve25519 {
    * @param peersPublicValue 32-byte public value
    * @return the 32-byte shared key
    */
+  @SuppressWarnings("NarrowingCompoundAssignment")
   public static byte[] x25519(byte[] privateKey, byte[] peersPublicValue) {
     long[] x = new long[LIMB_CNT];
     long[] z = new long[LIMB_CNT + 1];

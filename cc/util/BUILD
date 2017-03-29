@@ -42,6 +42,7 @@ cc_library(
     hdrs = ["test_util.h"],
     deps = [
         ":status",
+        ":statusor",
         "//cc:aead",
         "//cc:mac",
         "@com_github_google_protobuf//:protobuf_lite",

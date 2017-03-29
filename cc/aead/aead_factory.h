@@ -20,7 +20,6 @@
 #include "cc/aead.h"
 #include "cc/key_manager.h"
 #include "cc/keyset_handle.h"
-#include "cc/util/errors.h"
 #include "cc/util/statusor.h"
 
 namespace cloud {
