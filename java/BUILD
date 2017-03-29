@@ -103,10 +103,13 @@ java_library(
     ],
 )
 
+# Anything in test_files will be a small sized test unless specified in an explicit category.
+# Don't hesitate to increase the length when writing legitimately longer tests.
 gen_java_test_rules(
-    small_tests = glob([
-        "src/test/**/*ProtoTest.java",
-    ]),
+    default_test_size = "small",
+    medium_tests = [
+        "src/test/java/com/google/cloud/crypto/tink/subtle/AesGcmJceTest.java",
+    ],
     test_files = glob([
         "src/test/**/*Test.java",
     ]),
