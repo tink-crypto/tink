@@ -35,7 +35,7 @@ public final class EcdsaSignJce implements PublicKeySign {
 
   @Override
   public byte[] sign(final byte[] data) throws GeneralSecurityException {
-    Signature signer = Signature.getInstance(signatureAlgorithm);
+    Signature signer = EngineFactory.SIGNATURE.getInstance(signatureAlgorithm);
     signer.initSign(privateKey);
     signer.update(data);
     return signer.sign();

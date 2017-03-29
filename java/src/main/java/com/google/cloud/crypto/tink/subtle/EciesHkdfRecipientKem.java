@@ -40,7 +40,7 @@ public final class EciesHkdfRecipientKem {
       throws GeneralSecurityException {
     ECParameterSpec spec = recipientPrivateKey.getParams();
     ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ephemeralPublicPoint, spec);
-    KeyFactory kf = KeyFactory.getInstance("EC");
+    KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     ECPublicKey ephemeralPublicKey = (ECPublicKey) kf.generatePublic(publicKeySpec);
     byte[] sharedSecret = getSharedSecret(ephemeralPublicKey);
     return Hkdf.computeEciesHkdfSymmetricKey(ephemeralPublicKey,
@@ -51,7 +51,7 @@ public final class EciesHkdfRecipientKem {
       throws GeneralSecurityException {
     ECParameterSpec spec = recipientPrivateKey.getParams();
     EcUtil.checkPointOnCurve(publicKey.getW(), spec.getCurve());
-    KeyAgreement ka = KeyAgreement.getInstance("ECDH");
+    KeyAgreement ka = EngineFactory.KEY_AGREEMENT.getInstance("ECDH");
     ka.init(recipientPrivateKey);
     ka.doPhase(publicKey, true);
     return ka.generateSecret();

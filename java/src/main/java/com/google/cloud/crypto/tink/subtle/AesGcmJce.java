@@ -17,9 +17,7 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -38,8 +36,8 @@ public final class AesGcmJce extends AeadBase {
     keySpec = new SecretKeySpec(key, "AES");
   }
 
-  private Cipher instance() throws NoSuchAlgorithmException, NoSuchPaddingException {
-    return Cipher.getInstance("AES/GCM/NoPadding");
+  private Cipher instance() throws GeneralSecurityException {
+    return EngineFactory.CIPHER.getInstance("AES/GCM/NoPadding");
   }
 
   @Override

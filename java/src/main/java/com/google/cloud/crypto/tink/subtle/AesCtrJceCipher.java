@@ -20,7 +20,7 @@ import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import com.google.cloud.crypto.tink.EngineFactory;
+
 /**
  * The primitive implements AES counter mode with random IVs, using JCE. It is safe against
  * chosen-plaintext attacks, but does not provide ciphertext integrity, thus is unsafe

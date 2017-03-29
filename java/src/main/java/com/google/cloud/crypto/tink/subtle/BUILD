@@ -17,6 +17,8 @@ java_library(
     name = "subtle",
     srcs = [
         "EcUtil.java",
+        "EngineFactory.java",
+        "EngineWrapper.java",
         "Random.java",
         "SubtleUtil.java",
     ],
@@ -39,7 +41,6 @@ java_library(
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
-        "//java/src/main/java/com/google/cloud/crypto/tink:provider_selector",
         "@com_google_guava//jar",
     ],
 )
@@ -75,7 +76,6 @@ java_library(
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
-        "//java/src/main/java/com/google/cloud/crypto/tink:provider_selector",
     ],
 )
 
@@ -90,6 +90,7 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
+        ":subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
     ],
 )

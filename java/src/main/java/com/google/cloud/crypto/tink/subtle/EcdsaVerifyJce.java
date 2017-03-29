@@ -38,7 +38,7 @@ public final class EcdsaVerifyJce implements PublicKeyVerify {
   @Override
   public void verify(final byte[] signature, final byte[] data)
       throws GeneralSecurityException {
-    Signature verifier = Signature.getInstance(signatureAlgorithm);
+    Signature verifier = EngineFactory.SIGNATURE.getInstance(signatureAlgorithm);
     verifier.initVerify(publicKey);
     verifier.update(data);
     boolean verified = false;

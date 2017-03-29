@@ -46,7 +46,7 @@ public class Hkdf {
    */
   public static byte[] computeHkdf(String macAlgorithm, byte[] ikm, byte[] salt, byte[] info,
       int size) throws GeneralSecurityException {
-    Mac mac = Mac.getInstance(macAlgorithm);
+    Mac mac = EngineFactory.MAC.getInstance(macAlgorithm);
     if (size > 255 * mac.getMacLength()) {
       throw new GeneralSecurityException("size too large");
     }

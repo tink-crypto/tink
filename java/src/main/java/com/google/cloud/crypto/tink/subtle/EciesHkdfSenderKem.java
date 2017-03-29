@@ -68,7 +68,7 @@ public final class EciesHkdfSenderKem {
   private KeyPair generateEphemeralKey()
       throws GeneralSecurityException {
     ECParameterSpec spec = recipientPublicKey.getParams();
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+    KeyPairGenerator keyGen = EngineFactory.KEY_PAIR_GENERATOR.getInstance("EC");
     keyGen.initialize(spec);
     return keyGen.generateKeyPair();
   }
@@ -78,7 +78,7 @@ public final class EciesHkdfSenderKem {
     ECPoint publicPoint = recipientPublicKey.getW();
     ECParameterSpec spec = recipientPublicKey.getParams();
     EcUtil.checkPointOnCurve(publicPoint, spec.getCurve());
-    KeyAgreement ka = KeyAgreement.getInstance("ECDH");
+    KeyAgreement ka = EngineFactory.KEY_AGREEMENT.getInstance("ECDH");
     ka.init(senderPrivateKey);
     ka.doPhase(recipientPublicKey, true);
     return ka.generateSecret();

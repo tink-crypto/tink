@@ -18,7 +18,6 @@ package com.google.cloud.crypto.tink.subtle;
 
 import com.google.cloud.crypto.tink.Mac;
 import java.security.GeneralSecurityException;
-import com.google.cloud.crypto.tink.EngineFactory;
 
 /**
  * Mac implementations in JCE.
