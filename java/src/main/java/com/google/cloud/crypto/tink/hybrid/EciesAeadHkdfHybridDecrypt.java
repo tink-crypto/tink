@@ -20,6 +20,7 @@ import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.Util;
+import com.google.cloud.crypto.tink.subtle.EcUtil;
 import com.google.cloud.crypto.tink.subtle.EciesHkdfRecipientKem;
 import com.google.cloud.crypto.tink.subtle.HybridDecryptBase;
 import java.security.GeneralSecurityException;
@@ -38,7 +39,7 @@ public final class EciesAeadHkdfHybridDecrypt extends HybridDecryptBase {
   private final EciesHkdfRecipientKem recipientKem;
   private final byte[] hkdfSalt;
   private final String hkdfHmacAlgo;
-  private final EcPointFormat ecPointFormat;
+  private final EcUtil.PointFormat ecPointFormat;
   private final EciesAeadHkdfAeadFactory aeadFactory;
 
   public EciesAeadHkdfHybridDecrypt(final ECPrivateKey recipientPrivateKey,
@@ -49,7 +50,7 @@ public final class EciesAeadHkdfHybridDecrypt extends HybridDecryptBase {
     this.recipientKem = new EciesHkdfRecipientKem(recipientPrivateKey);
     this.hkdfHmacAlgo = hkdfHmacAlgo;
     this.hkdfSalt = hkdfSalt;
-    this.ecPointFormat = ecPointFormat;
+    this.ecPointFormat = Util.getPointFormat(ecPointFormat);
     this.aeadFactory = new EciesAeadHkdfAeadFactory(aeadDemTemplate);  // validates the format
   }
 
@@ -57,14 +58,13 @@ public final class EciesAeadHkdfHybridDecrypt extends HybridDecryptBase {
   public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
       throws GeneralSecurityException {
     EllipticCurve curve = recipientPrivateKey.getParams().getCurve();
-    int headerSize = Util.encodingSizeInBytes(curve, ecPointFormat);
+    int headerSize = EcUtil.encodingSizeInBytes(curve, ecPointFormat);
     if (ciphertext.length < headerSize) {
       throw new GeneralSecurityException("ciphertext too short");
     }
-    ECPoint ephemeralPublicPoint = Util.ecPointDecode(curve, ecPointFormat,
-        Arrays.copyOfRange(ciphertext, 0, headerSize));
-    byte[] symmetricKey = recipientKem.generateKey(ephemeralPublicPoint,
-        hkdfHmacAlgo, hkdfSalt, contextInfo, aeadFactory.getSymmetricKeySize());
+    byte[] kem = Arrays.copyOfRange(ciphertext, 0, headerSize);
+    byte[] symmetricKey = recipientKem.generateKey(
+        kem, hkdfHmacAlgo, hkdfSalt, contextInfo, aeadFactory.getSymmetricKeySize(), ecPointFormat);
     Aead aead = aeadFactory.getAead(symmetricKey);
     return aead.decrypt(Arrays.copyOfRange(ciphertext, headerSize, ciphertext.length), EMPTY_AAD);
   }

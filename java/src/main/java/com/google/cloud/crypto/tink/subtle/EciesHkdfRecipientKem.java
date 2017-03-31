@@ -35,15 +35,16 @@ public final class EciesHkdfRecipientKem {
     this.recipientPrivateKey = recipientPrivateKey;
   }
 
-  public byte[] generateKey(final ECPoint ephemeralPublicPoint, String hmacAlgo,
-      final byte[] hkdfSalt, final byte[] hkdfInfo, int keySizeInBytes)
-      throws GeneralSecurityException {
+  public byte[] generateKey(byte[] kemBytes, String hmacAlgo, final byte[] hkdfSalt,
+     final byte[] hkdfInfo, int keySizeInBytes, EcUtil.PointFormat pointFormat)
+       throws GeneralSecurityException {
     ECParameterSpec spec = recipientPrivateKey.getParams();
+    ECPoint ephemeralPublicPoint = EcUtil.ecPointDecode(spec.getCurve(), pointFormat, kemBytes);
     ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ephemeralPublicPoint, spec);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     ECPublicKey ephemeralPublicKey = (ECPublicKey) kf.generatePublic(publicKeySpec);
     byte[] sharedSecret = getSharedSecret(ephemeralPublicKey);
-    return Hkdf.computeEciesHkdfSymmetricKey(ephemeralPublicKey,
+    return Hkdf.computeEciesHkdfSymmetricKey(kemBytes,
         sharedSecret, hmacAlgo, hkdfSalt, hkdfInfo, keySizeInBytes);
   }
 

@@ -83,13 +83,25 @@ public class Hkdf {
 
   /**
    * Computes symmetric key for ECIES with HKDF from the provided parameters.
+   * @param ephemeralPublicKeyBytes the encoded ephemeral public key, i.e. the KEM part of the
+   *        the hybrid encryption. In some versions of ECIES (e.g. IEEE P1363a) this argument
+   *        is optional. Shoup strongly prefers the inclusion of this argument in
+   *        http://eprint.iacr.org/2001/112.pdf (see discussion of the value C0 in Section 15.6,
+   *        and 15.6.1)
+   * @param sharedSecret the shared DH secret. This typically is the x-coordinate of the
+   *        secret point.
+   * @param hmacAlgo the HMAC used (e.g. "HmacSha256")
+   * @param hkdfInfo TODO(bleichen): determine what are good values for Info and salt and what
+   *        are not good values. The ISO standard proposal http://eprint.iacr.org/2001/112.pdf
+   *        does not allow additional values for the key derivation (see Section 15.6.2)
+   * @param hkdfSalt
+   * @param keySizeInBytes the size of the key material for the DEM key.
+   * @throws GeneralSecurityException if hmacAlgo is not supported
    */
-  public static byte[] computeEciesHkdfSymmetricKey(final ECPublicKey ephemeralPublicKey,
-      final byte[] sharedSecret, String hmacAlgo, final byte[] hkdfSalt, final byte[] hkdfInfo,
-      int keySizeInBytes) throws GeneralSecurityException {
-    byte[] ephemeralPublicKeyBytes = ephemeralPublicKey.getEncoded();
+  public static byte[] computeEciesHkdfSymmetricKey(final byte[] ephemeralPublicKeyBytes,
+       final byte[] sharedSecret, String hmacAlgo, final byte[] hkdfSalt, final byte[] hkdfInfo,
+       int keySizeInBytes) throws GeneralSecurityException {
     byte[] hkdfInput = SubtleUtil.concat(ephemeralPublicKeyBytes, sharedSecret);
-    byte[] symmetricKey = Hkdf.computeHkdf(hmacAlgo, hkdfInput, hkdfSalt, hkdfInfo, keySizeInBytes);
-    return symmetricKey;
+    return Hkdf.computeHkdf(hmacAlgo, hkdfInput, hkdfSalt, hkdfInfo, keySizeInBytes);
   }
 }

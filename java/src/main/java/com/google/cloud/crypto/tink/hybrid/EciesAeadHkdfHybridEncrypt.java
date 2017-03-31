@@ -37,7 +37,7 @@ public final class EciesAeadHkdfHybridEncrypt extends HybridEncryptBase {
   private final EciesHkdfSenderKem senderKem;
   private final String hkdfHmacAlgo;
   private final byte[] hkdfSalt;
-  private final EcPointFormat ecPointFormat;
+  private final EcUtil.PointFormat ecPointFormat;
   private final EciesAeadHkdfAeadFactory aeadFactory;
 
   public EciesAeadHkdfHybridEncrypt(final ECPublicKey recipientPublicKey,
@@ -49,7 +49,7 @@ public final class EciesAeadHkdfHybridEncrypt extends HybridEncryptBase {
     this.senderKem = new EciesHkdfSenderKem(recipientPublicKey);
     this.hkdfSalt = hkdfSalt;
     this.hkdfHmacAlgo = hkdfHmacAlgo;
-    this.ecPointFormat = ecPointFormat;
+    this.ecPointFormat = Util.getPointFormat(ecPointFormat);
     this.aeadFactory = new EciesAeadHkdfAeadFactory(aeadDemTemplate);  // validates the format
   }
 
@@ -63,13 +63,10 @@ public final class EciesAeadHkdfHybridEncrypt extends HybridEncryptBase {
   public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
       throws GeneralSecurityException {
     EciesHkdfSenderKem.KemKey kemKey =  senderKem.generateKey(hkdfHmacAlgo, hkdfSalt,
-        contextInfo, aeadFactory.getSymmetricKeySize());
+        contextInfo, aeadFactory.getSymmetricKeySize(), ecPointFormat);
     Aead aead = aeadFactory.getAead(kemKey.getSymmetricKey());
     byte[] ciphertext = aead.encrypt(plaintext, EMPTY_AAD);
-    byte[] header = Util.ecPointEncode(
-        recipientPublicKey.getParams().getCurve(),
-        ecPointFormat,
-        kemKey.getEphemeralPublicKey().getW());
+    byte[] header = kemKey.getKemBytes();
     return ByteBuffer.allocate(header.length + ciphertext.length)
         .put(header)
         .put(ciphertext)

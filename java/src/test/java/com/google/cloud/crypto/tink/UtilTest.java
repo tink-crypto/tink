@@ -28,6 +28,7 @@ import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.subtle.EcUtil;
 import com.google.protobuf.TextFormat;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -400,7 +401,7 @@ public class UtilTest {
   public void testPointDecode() throws Exception {
     for (TestVector test : testVector) {
       EllipticCurve curve = Util.getCurveSpec(test.curve).getCurve();
-      ECPoint p = Util.ecPointDecode(curve, test.format, test.encoded);
+      ECPoint p = EcUtil.ecPointDecode(curve, Util.getPointFormat(test.format), test.encoded);
       assertEquals(p.getAffineX(), test.x);
       assertEquals(p.getAffineY(), test.y);
     }
@@ -411,7 +412,7 @@ public class UtilTest {
     for (TestVector test : testVector) {
       EllipticCurve curve = Util.getCurveSpec(test.curve).getCurve();
       ECPoint p = new ECPoint(test.x, test.y);
-      byte[] encoded = Util.ecPointEncode(curve, test.format, p);
+      byte[] encoded = EcUtil.ecPointEncode(curve, Util.getPointFormat(test.format), p);
       assertEquals(TestUtil.hexEncode(encoded), TestUtil.hexEncode(test.encoded));
     }
   }

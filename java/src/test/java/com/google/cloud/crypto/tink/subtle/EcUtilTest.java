@@ -24,6 +24,7 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
+import java.security.spec.EllipticCurve;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -43,6 +44,23 @@ public class EcUtilTest {
       this.curve = curve;
       this.pubX = pubX;
       this.pubY = pubY;
+    }
+
+    public ECParameterSpec getCurveSpec() throws NoSuchAlgorithmException {
+      switch(curve) {
+        case NIST_P256:
+          return EcUtil.getNistP256Params();
+        case NIST_P384:
+          return EcUtil.getNistP384Params();
+        case NIST_P521:
+          return EcUtil.getNistP521Params();
+        default:
+          throw new NoSuchAlgorithmException("Curve not implemented:" + curve);
+      }
+    }
+
+    public EllipticCurve getCurve() throws NoSuchAlgorithmException {
+      return getCurveSpec().getCurve();
     }
   }
 
@@ -108,11 +126,10 @@ public class EcUtilTest {
   @Test
   public void testPointOnCurve() throws Exception {
     for (int i = 0; i < testVectors.length; i++) {
-      ECParameterSpec spec = getCurveSpec(testVectors[i].curve);
       ECPoint pubPoint = new ECPoint(
           new BigInteger(testVectors[i].pubX, 16), new BigInteger(testVectors[i].pubY, 16));
       try {
-        EcUtil.checkPointOnCurve(pubPoint, spec.getCurve());
+        EcUtil.checkPointOnCurve(pubPoint, testVectors[i].getCurve());
       } catch (GeneralSecurityException ex) {
         fail("The valid public point is not on the curve: " + ex.getMessage());
       }
@@ -122,30 +139,14 @@ public class EcUtilTest {
   @Test
   public void testPointNotOnCurve() throws Exception {
     for (int i = 0; i < testVectors.length; i++) {
-      ECParameterSpec spec = getCurveSpec(testVectors[i].curve);
       ECPoint pubPoint = new ECPoint(new BigInteger(testVectors[i].pubX, 16),
           new BigInteger(testVectors[i].pubY, 16).subtract(BigInteger.ONE));
       try {
-        EcUtil.checkPointOnCurve(pubPoint, spec.getCurve());
+        EcUtil.checkPointOnCurve(pubPoint, testVectors[i].getCurve());
         fail("The point is not on the curve");
       } catch (GeneralSecurityException expected) {
         // Expected
       }
     }
   }
-
-  private ECParameterSpec getCurveSpec(EllipticCurveType curve)
-      throws NoSuchAlgorithmException {
-        switch(curve) {
-          case NIST_P256:
-            return EcUtil.getNistP256Params();
-          case NIST_P384:
-            return EcUtil.getNistP384Params();
-          case NIST_P521:
-            return EcUtil.getNistP521Params();
-          default:
-            throw new NoSuchAlgorithmException("Curve not implemented:" + curve);
-        }
-      }
-
 }
