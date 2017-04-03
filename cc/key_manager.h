@@ -23,7 +23,7 @@
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/message_lite.h"
+#include "google/protobuf/message.h"
 #include "proto/tink.pb.h"
 
 namespace cloud {
@@ -48,20 +48,20 @@ class KeyManager {
 
   // Constructs an instance of P for the given 'key'.
   virtual util::StatusOr<std::unique_ptr<P>>
-  GetPrimitive(const google::protobuf::MessageLite& key) const = 0;
+  GetPrimitive(const google::protobuf::Message& key) const = 0;
 
-  // Generates a new random key, based on the specified 'key_format'.
-  virtual util::Status NewKey(
-      const google::protobuf::MessageLite& key_format,
-      google::protobuf::MessageLite* key) const = 0;
+  // Generates a new random key, based on the specified 'key_template'.
+  virtual util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+      const google::cloud::crypto::tink::KeyTemplate& key_template) const = 0;
 
-  // Returns a vector of type_url-strings that identify the key types
-  // of keys handled by this manager.
-  virtual const std::vector<std::string>&  get_supported_key_types() const = 0;
+  // Returns the type_url identifying the key type handled by this manager.
+  virtual const std::string& get_key_type() const = 0;
+
+  // Returns the version of this key manager.
+  virtual int get_version() const = 0;
 
   bool DoesSupport(const std::string& key_type) const {
-    auto types = get_supported_key_types();
-    return (std::find(types.begin(), types.end(), key_type) != types.end());
+    return (key_type == get_key_type());
   }
 
   virtual ~KeyManager<P>() {}

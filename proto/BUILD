@@ -6,7 +6,7 @@ load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
 load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_library")
 
 cc_proto_library(
-    name = "cc_tink",
+    name = "cc_common",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
@@ -15,6 +15,21 @@ cc_proto_library(
     ],
     protos = [
         "common.proto",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+cc_proto_library(
+    name = "cc_tink",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        ":cc_common",
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    protos = [
         "tink.proto",
     ],
     verbose = 0,
@@ -42,6 +57,7 @@ java_proto_library(
 cc_proto_library(
     name = "cc_ecdsa",
     proto_deps = [
+        ":cc_common",
         ":cc_tink",
     ],
     protos = [
@@ -68,6 +84,7 @@ java_proto_library(
 cc_proto_library(
     name = "cc_hmac",
     proto_deps = [
+        ":cc_common",
         ":cc_tink",
     ],
     protos = [
@@ -94,6 +111,7 @@ java_proto_library(
 cc_proto_library(
     name = "cc_aes_ctr_hmac_aead",
     proto_deps = [
+        ":cc_common",
         ":cc_hmac",
     ],
     protos = [
@@ -226,6 +244,7 @@ cc_proto_library(
         "@com_github_google_protobuf//:well_known_protos",
     ],
     proto_deps = [
+        ":cc_common",
         ":cc_tink",
     ],
     protos = [

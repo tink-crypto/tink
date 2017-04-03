@@ -31,6 +31,7 @@ cc_library(
     srcs = ["validation.h"],
     hdrs = ["validation.h"],
     deps = [
+        ":errors",
         ":status",
         "//proto:cc_tink",
     ],

@@ -36,8 +36,9 @@ using google::cloud::crypto::tink::AesGcmKeyFormat;
 using google::cloud::crypto::tink::KeyData;
 using google::cloud::crypto::tink::Keyset;
 using google::cloud::crypto::tink::KeyStatusType;
+using google::cloud::crypto::tink::KeyTemplate;
 using google::cloud::crypto::tink::OutputPrefixType;
-using google::protobuf::MessageLite;
+using google::protobuf::Message;
 using google::protobuf::StringPiece;
 using util::Status;
 
@@ -56,32 +57,35 @@ class RegistryTest : public ::testing::Test {
 
 class TestAeadKeyManager : public KeyManager<Aead> {
  public:
-  TestAeadKeyManager(const std::string& key_type) {
-    key_types_.push_back(key_type);
+  TestAeadKeyManager(const std::string& key_type) : key_type_(key_type) {
   }
 
   util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const KeyData& key) const override {
-    std::unique_ptr<Aead> aead(new DummyAead(key_types_.back()));
+    std::unique_ptr<Aead> aead(new DummyAead(key_type_));
     return std::move(aead);
   }
 
   util::StatusOr<std::unique_ptr<Aead>>
-  GetPrimitive(const MessageLite& key) const override {
+  GetPrimitive(const Message& key) const override {
     return util::Status::UNKNOWN;
   }
 
-  util::Status NewKey(const MessageLite& key_format,
-                      MessageLite* key) const override {
+  virtual util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+      const KeyTemplate& key_template) const {
     return util::Status::UNKNOWN;
   }
 
-  const std::vector<std::string>&  get_supported_key_types() const override {
-    return key_types_;
+  int get_version() const {
+    return 0;
+  }
+
+  const std::string& get_key_type() const {
+    return key_type_;
   }
 
  private:
-  std::vector<std::string> key_types_;
+  std::string key_type_;
 };
 
 TEST_F(RegistryTest, testBasic) {

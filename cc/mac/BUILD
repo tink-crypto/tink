@@ -15,6 +15,26 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "hmac_key_manager",
+    srcs = ["hmac_key_manager.cc"],
+    hdrs = ["hmac_key_manager.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//cc:key_manager",
+        "//cc:mac",
+        "//cc/subtle:hmac_openssl",
+        "//cc/subtle:random",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:validation",
+        "//proto:cc_common",
+        "//proto:cc_hmac",
+        "//proto:cc_tink",
+        "@com_github_google_protobuf//:protobuf_lite",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -26,6 +46,24 @@ cc_test(
         ":mac_factory",
         "//cc:mac",
         "//cc/util:status",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
+    name = "hmac_key_manager_test",
+    size = "small",
+    srcs = ["hmac_key_manager_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":hmac_key_manager",
+        "//cc:mac",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:cc_aes_ctr_hmac_aead",
+        "//proto:cc_common",
+        "//proto:cc_hmac",
+        "//proto:cc_tink",
         "@gtest//:gtest",
     ],
 )

@@ -14,37 +14,23 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_UTIL_VALIDATION_H_
-#define TINK_UTIL_VALIDATION_H_
+#ifndef TINK_SUBTLE_RANDOM_H_
+#define TINK_SUBTLE_RANDOM_H_
 
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "proto/tink.pb.h"
+#include <memory>
 
 namespace cloud {
 namespace crypto {
 namespace tink {
 
-// Various validation helpers.
-// TODO(przydatek): write real implementations.
-
-util::Status ValidateKeyset(const google::cloud::crypto::tink::Keyset& keyset) {
-  return util::Status::OK;
-}
-
-util::Status ValidateVersion(int candidate, int max_expected) {
-  if (candidate < 0 || candidate > max_expected) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key has version '%d'; "
-                     "only keys with version in range [0..%d] are supported.",
-                     candidate, max_expected);
-  }
-  return util::Status::OK;
-}
-
+class Random {
+ public:
+  // Returns a random string of desired length.
+  static std::string GetRandomBytes(int length);
+};
 
 }  // namespace tink
 }  // namespace crypto
 }  // namespace cloud
 
-#endif  // TINK_UTIL_VALIDATION_H_
+#endif  // TINK_SUBTLE_HMAC_RANDOM_H_
