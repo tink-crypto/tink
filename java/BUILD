@@ -108,7 +108,7 @@ java_library(
 gen_java_test_rules(
     default_test_size = "small",
     medium_tests = [
-        "src/test/java/com/google/cloud/crypto/tink/subtle/AesGcmJceTest.java",
+        "src/test/java/com/google/cloud/crypto/tink/subtle/AesGcmJceTest",
     ],
     test_files = glob([
         "src/test/**/*Test.java",
