@@ -104,7 +104,7 @@ class AesCtrHmacAeadKeyManager
     AesCtrHmacAeadKey key = newKey(serialized);
     return KeyData.newBuilder()
         .setTypeUrl(AES_CTR_HMAC_AEAD_KEY_TYPE)
-        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
         .build();
   }

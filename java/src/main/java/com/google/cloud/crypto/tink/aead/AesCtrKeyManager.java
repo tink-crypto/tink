@@ -86,7 +86,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyF
     AesCtrKey key = newKey(serialized);
     return KeyData.newBuilder()
         .setTypeUrl(AES_CTR_KEY_TYPE)
-        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
         .build();
   }

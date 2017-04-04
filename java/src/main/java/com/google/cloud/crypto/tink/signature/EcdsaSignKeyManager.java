@@ -108,7 +108,7 @@ final class EcdsaSignKeyManager implements
     EcdsaPrivateKey key = newKey(serialized);
     return KeyData.newBuilder()
         .setTypeUrl(ECDSA_PRIVATE_KEY_TYPE)
-        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE)
         .build();
   }

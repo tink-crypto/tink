@@ -75,7 +75,7 @@ class AesGcmKeyManager implements KeyManager<Aead, AesGcmKey, AesGcmKeyFormat> {
     AesGcmKey key = newKey(serialized);
     return KeyData.newBuilder()
         .setTypeUrl(KEY_TYPE)
-        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
         .build();
   }

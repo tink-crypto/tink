@@ -107,7 +107,7 @@ class EciesAeadHkdfPrivateKeyManager
     EciesAeadHkdfPrivateKey key = newKey(serialized);
     return KeyData.newBuilder()
         .setTypeUrl(ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE)
-        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE)
         .build();
   }

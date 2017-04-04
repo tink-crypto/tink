@@ -102,7 +102,7 @@ final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFormat> {
     HmacKey key = newKey(serialized);
     return KeyData.newBuilder()
         .setTypeUrl(TYPE_URL)
-        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
         .build();
   }

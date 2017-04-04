@@ -75,7 +75,7 @@ class AesEaxKeyManager implements KeyManager<Aead, AesEaxKey, AesEaxKeyFormat> {
     AesEaxKey key = newKey(serialized);
     return KeyData.newBuilder()
         .setTypeUrl(KEY_TYPE)
-        .setValue(ByteString.copyFrom(key.toByteArray()))
+        .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
         .build();
   }
