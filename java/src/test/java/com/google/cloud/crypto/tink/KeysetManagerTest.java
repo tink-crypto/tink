@@ -22,11 +22,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.crypto.tink.TestUtil.DummyAead;
+import com.google.cloud.crypto.tink.TestUtil.DummyAeadKeyManager;
 import com.google.cloud.crypto.tink.TestUtil.DummyMacKeyManager;
-import com.google.cloud.crypto.tink.TestUtil.EchoAead;
-import com.google.cloud.crypto.tink.TestUtil.EchoAeadKeyManager;
-import com.google.cloud.crypto.tink.TestUtil.FaultyAead;
-import com.google.cloud.crypto.tink.TestUtil.FaultyAeadKeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
@@ -44,14 +42,12 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class KeysetManagerTest {
   private final String macTypeUrl = DummyMacKeyManager.class.getSimpleName();
-  private final String echoAeadTypeUrl = EchoAeadKeyManager.class.getSimpleName();
-  private final String faultyAeadTypeUrl = FaultyAeadKeyManager.class.getSimpleName();
+  private final String dummyAeadTypeUrl = DummyAeadKeyManager.class.getSimpleName();
 
   @Before
   public void setUp() throws GeneralSecurityException {
     Registry.INSTANCE.registerKeyManager(macTypeUrl, new DummyMacKeyManager());
-    Registry.INSTANCE.registerKeyManager(echoAeadTypeUrl, new EchoAeadKeyManager());
-    Registry.INSTANCE.registerKeyManager(faultyAeadTypeUrl, new FaultyAeadKeyManager());
+    Registry.INSTANCE.registerKeyManager(dummyAeadTypeUrl, new DummyAeadKeyManager());
   }
 
   @Test
@@ -80,10 +76,10 @@ public class KeysetManagerTest {
     assertEquals(KeyStatusType.ENABLED, keyset.getKey(0).getStatus());
     assertEquals(OutputPrefixType.TINK, keyset.getKey(0).getOutputPrefixType());
 
-    // Encrypt the keyset with EchoAead.
-    EchoAead echoAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKeyData(
-        KeyTemplate.newBuilder().setTypeUrl(echoAeadTypeUrl).build()));
-    KeysetHandle keysetHandle = manager.getKeysetHandle(echoAead);
+    // Encrypt the keyset with DummyAead.
+    DummyAead dummyAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKeyData(
+        KeyTemplate.newBuilder().setTypeUrl(dummyAeadTypeUrl).build()));
+    KeysetHandle keysetHandle = manager.getKeysetHandle(dummyAead);
     assertNotNull(keysetHandle.getEncryptedKeyset());
 
     KeysetInfo keysetInfo = keysetHandle.getKeysetInfo();
@@ -130,13 +126,12 @@ public class KeysetManagerTest {
     manager.rotate();
 
     // Encrypt with faulty Aead.
-    FaultyAead faultyAead = Registry.INSTANCE.getPrimitive(Registry.INSTANCE.newKeyData(
-        KeyTemplate.newBuilder().setTypeUrl(faultyAeadTypeUrl).build()));
+    DummyAead faultyAead = new DummyAead("Faulty AEAD", true /* faulty */);
     try {
       KeysetHandle unused = manager.getKeysetHandle(faultyAead);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("encryption with KMS failed"));
+      assertTrue(e.toString().contains("Faulty"));
     }
   }
 }

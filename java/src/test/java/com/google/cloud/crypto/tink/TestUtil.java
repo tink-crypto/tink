@@ -56,11 +56,13 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
 import com.google.cloud.crypto.tink.subtle.Random;
+import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
+import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -83,10 +85,17 @@ public class TestUtil {
    * A dummy Mac for testing.
    */
   public static class DummyMac implements Mac {
-    public DummyMac() {}
+    private byte[] label;
+    public DummyMac(String label) {
+      try {
+        this.label = label.getBytes("UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        this.label = new byte[0];
+      }
+    }
     @Override
     public byte[] computeMac(byte[] data) throws GeneralSecurityException {
-      return data;
+      return label;
     }
     @Override
     public void verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
@@ -102,19 +111,19 @@ public class TestUtil {
 
     @Override
     public Mac getPrimitive(ByteString serialized) throws GeneralSecurityException {
-      return new DummyMac();
+      return new DummyMac(this.getClass().getSimpleName());
     }
     @Override
     public Mac getPrimitive(Message proto) throws GeneralSecurityException {
-      return new DummyMac();
+      return new DummyMac(this.getClass().getSimpleName());
     }
     @Override
     public Message newKey(ByteString serialized) throws GeneralSecurityException {
-      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+      throw new GeneralSecurityException("Not Implemented");
     }
     @Override
     public Message newKey(Message format) throws GeneralSecurityException {
-      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+      throw new GeneralSecurityException("Not Implemented");
     }
     @Override
     public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
@@ -130,18 +139,40 @@ public class TestUtil {
   }
 
   /**
-   * A dummy Aead-implementation that just returns the plaintext.
+   * A dummy Aead-implementation.
    */
-  public static class EchoAead implements Aead {
-    public EchoAead() {}
-
+  public static class DummyAead implements Aead {
+    private byte[] label;
+    private boolean faulty;
+    public DummyAead(String label) {
+      try {
+        this.label = label.getBytes("UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        this.label = new byte[0];
+      }
+      this.faulty = false;
+    }
+    public DummyAead(String label, boolean faulty) {
+      try {
+        this.label = label.getBytes("UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        this.label = new byte[0];
+      }
+      this.faulty = faulty;
+    }
     @Override
     public byte[] encrypt(byte[] plaintext, byte[] aad) throws GeneralSecurityException {
-      return plaintext;
+      if (this.faulty) {
+        throw new GeneralSecurityException("Faulty");
+      }
+      return SubtleUtil.concat(label, plaintext);
     }
     @Override
     public byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException {
-      return ciphertext;
+      if (this.faulty) {
+        throw new GeneralSecurityException("Faulty");
+      }
+      return Arrays.copyOfRange(ciphertext, label.length, ciphertext.length);
     }
     @Override
     public ListenableFuture<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) {
@@ -154,86 +185,26 @@ public class TestUtil {
   }
 
   /**
-   * A key manager for EchoAead keys that just echo plaintext.
+   * A key manager for DummyAead keys that just echo plaintext.
    */
-  public static class EchoAeadKeyManager implements KeyManager<Aead, Message, Message> {
-    public EchoAeadKeyManager() {}
+  public static class DummyAeadKeyManager implements KeyManager<Aead, Message, Message> {
+    public DummyAeadKeyManager() {}
 
     @Override
     public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
-      return new EchoAead();
+      return new DummyAead(this.getClass().getSimpleName());
     }
     @Override
     public Aead getPrimitive(Message proto) throws GeneralSecurityException {
-      return new EchoAead();
+      return new DummyAead(this.getClass().getSimpleName());
     }
     @Override
     public Message newKey(ByteString serialized) throws GeneralSecurityException {
-      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+      throw new GeneralSecurityException("Not Implemented");
     }
     @Override
     public Message newKey(Message format) throws GeneralSecurityException {
-      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
-    }
-    @Override
-    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
-      return KeyData.newBuilder()
-          .setTypeUrl(this.getClass().getSimpleName())
-          .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
-          .build();
-    }
-    @Override
-    public boolean doesSupport(String typeUrl) {
-      return typeUrl.equals(this.getClass().getSimpleName());
-    }
-  }
-
-  /**
-   * A dummy Aead-Implementation that returns empty byte arrays.
-   */
-  public static class FaultyAead implements Aead {
-    public FaultyAead() {}
-
-    @Override
-    public byte[] encrypt(byte[] plaintext, byte[] aad) throws GeneralSecurityException {
-      return new byte[0];
-    }
-    @Override
-    public byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException {
-      return new byte[0];
-    }
-    @Override
-    public ListenableFuture<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) {
-      return null;
-    }
-    @Override
-    public ListenableFuture<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad) {
-      return null;
-    }
-  }
-
-  /**
-   * A key manager for FaultyAead keys that always return an empty byte array on all encrypt or
-   * decrypt requests.
-   */
-  public static class FaultyAeadKeyManager implements KeyManager<Aead, Message, Message> {
-    public FaultyAeadKeyManager() {}
-
-    @Override
-    public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
-      return new FaultyAead();
-    }
-    @Override
-    public Aead getPrimitive(Message proto) throws GeneralSecurityException {
-      return new FaultyAead();
-    }
-    @Override
-    public Message newKey(ByteString serialized) throws GeneralSecurityException {
-      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
-    }
-    @Override
-    public Message newKey(Message format) throws GeneralSecurityException {
-      return Any.newBuilder().setTypeUrl(this.getClass().getSimpleName()).build();
+      throw new GeneralSecurityException("Not Implemented");
     }
     @Override
     public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
