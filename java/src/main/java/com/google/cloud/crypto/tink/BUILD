@@ -73,6 +73,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
+        "//proto:java_common",
         "//proto:java_tink",
         "//proto:java_tink_compile_imports",
         "@com_google_guava//jar",
@@ -87,6 +88,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         ":tink",
+        "//proto:java_common",
         "//proto:java_tink",
         "//proto:java_tink_compile_imports",
     ],
@@ -101,6 +103,7 @@ java_library(
     deps = [
         ":tink",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
+        "//proto:java_common",
         "//proto:java_tink",
         "//proto:java_tink_compile_imports",
     ],

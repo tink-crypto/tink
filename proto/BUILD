@@ -7,12 +7,6 @@ load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_library")
 
 cc_proto_library(
     name = "cc_common",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     protos = [
         "common.proto",
     ],
@@ -37,15 +31,24 @@ cc_proto_library(
 )
 
 java_proto_library(
+    name = "java_common",
+    protos = [
+        "common.proto",
+    ],
+    verbose = 0,
+    with_grpc = False,
+)
+
+java_proto_library(
     name = "java_tink",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
     inputs = [
+        ":java_common",
         "@com_github_google_protobuf//:well_known_protos",
     ],
     protos = [
-        "common.proto",
         "tink.proto",
     ],
     verbose = 0,
@@ -70,6 +73,7 @@ cc_proto_library(
 java_proto_library(
     name = "java_ecdsa",
     proto_deps = [
+        ":java_common",
         ":java_tink",
     ],
     protos = [
@@ -97,6 +101,7 @@ cc_proto_library(
 java_proto_library(
     name = "java_hmac",
     proto_deps = [
+        ":java_common",
         ":java_tink",
     ],
     protos = [
@@ -125,6 +130,7 @@ cc_proto_library(
 java_proto_library(
     name = "java_aes_ctr_hmac_aead",
     proto_deps = [
+        ":java_common",
         ":java_hmac",
     ],
     protos = [
@@ -263,6 +269,7 @@ java_proto_library(
         "@com_github_google_protobuf//:well_known_protos",
     ],
     proto_deps = [
+        ":java_common",
         ":java_tink",
     ],
     protos = [

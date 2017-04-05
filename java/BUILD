@@ -23,6 +23,7 @@ java_library(
         "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_aes_eax",
         "//proto:java_aes_gcm",
+        "//proto:java_common",
         "//proto:java_ecdsa",
         "//proto:java_ecies_aead_hkdf",
         "//proto:java_googlecloudkms",
