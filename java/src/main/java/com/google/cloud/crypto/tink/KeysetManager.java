@@ -125,10 +125,10 @@ public class KeysetManager {
    */
   public KeysetHandle getKeysetHandle(Aead aead) throws GeneralSecurityException {
     Keyset keyset = keysetBuilder.build();
-    byte[] encryptedKeyset = aead.encrypt(keyset.toByteArray(), null /* aad */);
+    byte[] encryptedKeyset = aead.encrypt(keyset.toByteArray(), new byte[0] /* aad */);
     // Check if we can decrypt encryptedKeyset, to detect errors
     try {
-      byte[] cleartext = aead.decrypt(encryptedKeyset, null /* aad */);
+      byte[] cleartext = aead.decrypt(encryptedKeyset, new byte[0] /* aad */);
       Keyset keyset2 = Keyset.parseFrom(cleartext);
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("encryption with KMS failed");

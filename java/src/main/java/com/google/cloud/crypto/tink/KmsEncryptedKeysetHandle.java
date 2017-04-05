@@ -52,7 +52,7 @@ public final class KmsEncryptedKeysetHandle {
     }
     Aead aead = Registry.INSTANCE.getPrimitive(kmsEncryptedKeyset.getKmsKey());
     try {
-      final Keyset keyset = Keyset.parseFrom(aead.decrypt(encryptedKeyset, null /* aad */));
+      final Keyset keyset = Keyset.parseFrom(aead.decrypt(encryptedKeyset, new byte[0] /* aad */));
       return new KeysetHandle(keyset, encryptedKeyset);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("invalid keyset, corrupted key material");

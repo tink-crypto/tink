@@ -20,10 +20,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.crypto.tink.TestUtil.DummyMacKeyManager;
+import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
+import com.google.cloud.crypto.tink.aead.AeadFactory;
+import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import java.security.GeneralSecurityException;
@@ -37,53 +39,17 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class NoSecretKeysetHandleTest {
-  /**
-   * A dummy key manager that just returns a remote {@code KeyData}.
-   */
-  private static class RemoteAeadKeyManager implements KeyManager<Aead, Message, Message> {
-    public RemoteAeadKeyManager() {}
-
-    @Override
-    public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
-      return null;
-    }
-    @Override
-    public Aead getPrimitive(Message proto) throws GeneralSecurityException {
-      return null;
-    }
-    @Override
-    public Message newKey(ByteString serialized) throws GeneralSecurityException {
-      return null;
-    }
-    @Override
-    public Message newKey(Message format) throws GeneralSecurityException {
-      return null;
-    }
-    @Override
-    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
-      return KeyData.newBuilder()
-          .setTypeUrl(this.getClass().getSimpleName())
-          .setKeyMaterialType(KeyData.KeyMaterialType.REMOTE)
-          .build();
-    }
-    @Override
-    public boolean doesSupport(String typeUrl) {
-      return true;
-    }
-  }
-
-  private static final String MAC_TYPE_URL = DummyMacKeyManager.class.getSimpleName();
-  private static final String AEAD_TYPE_URL = RemoteAeadKeyManager.class.getSimpleName();
-
   @Before
   public void setUp() throws GeneralSecurityException {
-    Registry.INSTANCE.registerKeyManager(MAC_TYPE_URL, new DummyMacKeyManager());
-    Registry.INSTANCE.registerKeyManager(AEAD_TYPE_URL, new RemoteAeadKeyManager());
+    AeadFactory.registerStandardKeyTypes();
+    MacFactory.registerStandardKeyTypes();
   }
 
   @Test
   public void testBasic() throws Exception {
-    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl(MAC_TYPE_URL).build();
+    // Create a keyset that contains a single HmacKey.
+    KeyTemplate template = TestUtil.createHmacKeyTemplate(
+        16 /* key size */, 16 /* tag size */, HashType.SHA256);
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyTemplate(template)
         .build()
@@ -97,7 +63,9 @@ public class NoSecretKeysetHandleTest {
       assertTrue(e.toString().contains("keyset contains secret key material"));
     }
 
-    KeyTemplate template2 = KeyTemplate.newBuilder().setTypeUrl(AEAD_TYPE_URL).build();
+    // This is a REMOTE key.
+    KeyTemplate template2 = TestUtil.createKmsEnvelopeAeadKeyTemplate(
+        KeyData.newBuilder().build(), KeyTemplate.newBuilder().build());
     KeysetManager manager2 = new KeysetManager.Builder()
         .setKeyTemplate(template2)
         .build()

@@ -60,7 +60,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
     int ivSize = 16;
     int hmacKeySize = 16;
     int tagSize = 16;
-    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyDataTemplate(
+    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
         aesKeySize, ivSize, hmacKeySize, tagSize);
     KeyData kmsKey = TestUtil.createGoogleCloudKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
@@ -81,7 +81,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
     int ivSize = 16;
     int hmacKeySize = 16;
     int tagSize = 16;
-    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyDataTemplate(
+    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
         aesKeySize, ivSize, hmacKeySize, tagSize);
     KeyData kmsKey = TestUtil.createGoogleCloudKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(

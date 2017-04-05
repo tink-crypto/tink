@@ -21,13 +21,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.crypto.tink.TestUtil.DummyAead;
-import com.google.cloud.crypto.tink.TestUtil.DummyAeadKeyManager;
-import com.google.cloud.crypto.tink.TestUtil.DummyMacKeyManager;
+import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
+import com.google.cloud.crypto.tink.aead.AeadFactory;
+import com.google.cloud.crypto.tink.mac.MacFactory;
+import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
@@ -40,35 +41,33 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class KmsEncryptedKeysetHandleTest {
-  private final String macTypeUrl = DummyMacKeyManager.class.getSimpleName();
-  private final String dummyAeadTypeUrl = DummyAeadKeyManager.class.getSimpleName();
-
   @Before
   public void setUp() throws GeneralSecurityException {
-    Registry.INSTANCE.registerKeyManager(macTypeUrl, new DummyMacKeyManager());
-    Registry.INSTANCE.registerKeyManager(dummyAeadTypeUrl, new DummyAeadKeyManager());
+    AeadFactory.registerStandardKeyTypes();
+    MacFactory.registerStandardKeyTypes();
   }
 
   @Test
   public void testBasic() throws Exception {
-    // Create a keyset that contains a single DummyMacKey.
-    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl(macTypeUrl).build();
+    // Create a keyset that contains a single HmacKey.
+    KeyTemplate template = TestUtil.createHmacKeyTemplate(
+        16 /* key size */, 16 /* tag size */, HashType.SHA256);
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyTemplate(template)
-        .build();
-    manager.rotate();
+        .build()
+        .rotate();
     Keyset keyset = manager.getKeysetHandle().getKeyset();
 
-    // Encrypt the keyset with DummyAeadKey.
-    KeyData dummyAeadKey = Registry.INSTANCE.newKeyData(
-        KeyTemplate.newBuilder().setTypeUrl(dummyAeadTypeUrl).build());
-    DummyAead dummyAead = Registry.INSTANCE.getPrimitive(dummyAeadKey);
-    KeysetHandle keysetHandle = manager.getKeysetHandle(dummyAead);
+    // Encrypt the keyset with an AeadKey.
+    template = TestUtil.createAesGcmKeyTemplate(16 /* key size */);
+    KeyData aeadKeyData = Registry.INSTANCE.newKeyData(template);
+    Aead aead = Registry.INSTANCE.getPrimitive(aeadKeyData);
+    KeysetHandle keysetHandle = manager.getKeysetHandle(aead);
     assertNotNull(keysetHandle.getEncryptedKeyset());
 
     KmsEncryptedKeyset encryptedKeyset = KmsEncryptedKeyset.newBuilder()
         .setEncryptedKeyset(ByteString.copyFrom(keysetHandle.getEncryptedKeyset()))
-        .setKmsKey(dummyAeadKey)
+        .setKmsKey(aeadKeyData)
         .setKeysetInfo(keysetHandle.getKeysetInfo())
         .build();
 
@@ -78,23 +77,25 @@ public class KmsEncryptedKeysetHandleTest {
 
   @Test
   public void testInvalidKeyset() throws Exception {
-    // Create a keyset that contains a single DummyMacKey.
-    KeyTemplate template = KeyTemplate.newBuilder().setTypeUrl(macTypeUrl).build();
+    // Create a keyset that contains a single HmacKey.
+    KeyTemplate template = TestUtil.createHmacKeyTemplate(
+        16 /* key size */, 16 /* tag size */, HashType.SHA256);
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyTemplate(template)
-        .build();
-    manager.rotate();
+        .build()
+        .rotate();
+    Keyset keyset = manager.getKeysetHandle().getKeyset();
 
-    // Encrypt the keyset with DummyAeadKey.
-    KeyData dummyAeadKey = Registry.INSTANCE.newKeyData(
-        KeyTemplate.newBuilder().setTypeUrl(dummyAeadTypeUrl).build());
-    DummyAead dummyAead = Registry.INSTANCE.getPrimitive(dummyAeadKey);
-    KeysetHandle keysetHandle = manager.getKeysetHandle(dummyAead);
+    // Encrypt the keyset with an AeadKey.
+    template = TestUtil.createAesGcmKeyTemplate(16 /* key size */);
+    KeyData aeadKeyData = Registry.INSTANCE.newKeyData(template);
+    Aead aead = Registry.INSTANCE.getPrimitive(aeadKeyData);
+    KeysetHandle keysetHandle = manager.getKeysetHandle(aead);
     assertNotNull(keysetHandle.getEncryptedKeyset());
 
     KmsEncryptedKeyset encryptedKeyset = KmsEncryptedKeyset.newBuilder()
         .setEncryptedKeyset(ByteString.copyFrom(keysetHandle.getEncryptedKeyset()))
-        .setKmsKey(dummyAeadKey)
+        .setKmsKey(aeadKeyData)
         .setKeysetInfo(keysetHandle.getKeysetInfo())
         .build();
 

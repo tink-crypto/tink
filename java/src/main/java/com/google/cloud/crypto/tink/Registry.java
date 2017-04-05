@@ -106,16 +106,16 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for generating a new key for the specified {@code serialized}.
-   * It looks up a KeyManager identified by {@code typeUrl}, and calls
-   * managers {@code newKey(serialized)}-method.
+   * Convenience method for generating a new key for the specified {@code keyTemplate}.
+   * It looks up a KeyManager identified by {@code keyTemplate.typeUrl}, and calls
+   * managers {@code newKey(keyTemplate.value)}-method.
    *
    * @return a new key.
    */
   public <P, K extends MessageLite, F extends MessageLite> K newKey(
-      String typeUrl, ByteString serialized) throws GeneralSecurityException {
-    KeyManager<P, K, F> manager = getKeyManager(typeUrl);
-    return manager.newKey(serialized);
+      KeyTemplate keyTemplate) throws GeneralSecurityException {
+    KeyManager<P, K, F> manager = getKeyManager(keyTemplate.getTypeUrl());
+    return manager.newKey(keyTemplate.getValue());
   }
 
   /**

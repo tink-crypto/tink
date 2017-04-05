@@ -47,6 +47,7 @@ import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
+import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKeyFormat;
 import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadParams;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
@@ -81,97 +82,17 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class TestUtil {
   /**
-   * A dummy Mac for testing.
-   */
-  public static class DummyMac implements Mac {
-    private byte[] label;
-    public DummyMac(String label) {
-      try {
-        this.label = label.getBytes("UTF-8");
-      } catch (UnsupportedEncodingException e) {
-        this.label = new byte[0];
-      }
-    }
-    @Override
-    public byte[] computeMac(byte[] data) throws GeneralSecurityException {
-      return label;
-    }
-    @Override
-    public void verifyMac(byte[] mac, byte[] data) throws GeneralSecurityException {
-      return;
-    }
-  }
-
-  /**
-   * A key manager for DummyMac keys.
-   */
-  public static class DummyMacKeyManager implements KeyManager<Mac, Message, Message> {
-    public DummyMacKeyManager() {}
-
-    @Override
-    public Mac getPrimitive(ByteString serialized) throws GeneralSecurityException {
-      return new DummyMac(this.getClass().getSimpleName());
-    }
-    @Override
-    public Mac getPrimitive(Message proto) throws GeneralSecurityException {
-      return new DummyMac(this.getClass().getSimpleName());
-    }
-    @Override
-    public Message newKey(ByteString serialized) throws GeneralSecurityException {
-      throw new GeneralSecurityException("Not Implemented");
-    }
-    @Override
-    public Message newKey(Message format) throws GeneralSecurityException {
-      throw new GeneralSecurityException("Not Implemented");
-    }
-    @Override
-    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
-      return KeyData.newBuilder()
-          .setTypeUrl(this.getClass().getSimpleName())
-          .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
-          .build();
-    }
-    @Override
-    public boolean doesSupport(String typeUrl) {
-      return typeUrl.equals(this.getClass().getSimpleName());
-    }
-  }
-
-  /**
-   * A dummy Aead-implementation.
+   * A dummy Aead-implementation that just throws exception.
    */
   public static class DummyAead implements Aead {
-    private byte[] label;
-    private boolean faulty;
-    public DummyAead(String label) {
-      try {
-        this.label = label.getBytes("UTF-8");
-      } catch (UnsupportedEncodingException e) {
-        this.label = new byte[0];
-      }
-      this.faulty = false;
-    }
-    public DummyAead(String label, boolean faulty) {
-      try {
-        this.label = label.getBytes("UTF-8");
-      } catch (UnsupportedEncodingException e) {
-        this.label = new byte[0];
-      }
-      this.faulty = faulty;
-    }
+    public DummyAead() {}
     @Override
     public byte[] encrypt(byte[] plaintext, byte[] aad) throws GeneralSecurityException {
-      if (this.faulty) {
-        throw new GeneralSecurityException("Faulty");
-      }
-      return SubtleUtil.concat(label, plaintext);
+      throw new GeneralSecurityException("dummy");
     }
     @Override
     public byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException {
-      if (this.faulty) {
-        throw new GeneralSecurityException("Faulty");
-      }
-      return Arrays.copyOfRange(ciphertext, label.length, ciphertext.length);
+      throw new GeneralSecurityException("dummy");
     }
     @Override
     public ListenableFuture<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) {
@@ -180,41 +101,6 @@ public class TestUtil {
     @Override
     public ListenableFuture<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad) {
       return null;
-    }
-  }
-
-  /**
-   * A key manager for DummyAead keys that just echo plaintext.
-   */
-  public static class DummyAeadKeyManager implements KeyManager<Aead, Message, Message> {
-    public DummyAeadKeyManager() {}
-
-    @Override
-    public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
-      return new DummyAead(this.getClass().getSimpleName());
-    }
-    @Override
-    public Aead getPrimitive(Message proto) throws GeneralSecurityException {
-      return new DummyAead(this.getClass().getSimpleName());
-    }
-    @Override
-    public Message newKey(ByteString serialized) throws GeneralSecurityException {
-      throw new GeneralSecurityException("Not Implemented");
-    }
-    @Override
-    public Message newKey(Message format) throws GeneralSecurityException {
-      throw new GeneralSecurityException("Not Implemented");
-    }
-    @Override
-    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
-      return KeyData.newBuilder()
-          .setTypeUrl(this.getClass().getSimpleName())
-          .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
-          .build();
-    }
-    @Override
-    public boolean doesSupport(String typeUrl) {
-      return typeUrl.equals(this.getClass().getSimpleName());
     }
   }
 
@@ -379,7 +265,7 @@ public class TestUtil {
   /**
    * @return a {@code KeyTemplate} containing a {@code AesCtrHmacAeadKeyFormat}.
    */
-  public static KeyTemplate createAesCtrHmacAeadKeyDataTemplate(int aesKeySize, int ivSize,
+  public static KeyTemplate createAesCtrHmacAeadKeyTemplate(int aesKeySize, int ivSize,
       int hmacKeySize, int tagSize) throws Exception {
     AesCtrKeyFormat aesCtrKeyFormat = AesCtrKeyFormat.newBuilder()
         .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
@@ -403,7 +289,7 @@ public class TestUtil {
   /**
    * @return a {@code KeyTemplate} containing {@code AesGcmKeyFormat}.
    */
-  public static KeyTemplate createAesGcmKeyDataTemplate(int keySize) throws Exception {
+  public static KeyTemplate createAesGcmKeyTemplate(int keySize) throws Exception {
     AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder()
         .setKeySize(keySize)
         .build();
@@ -413,6 +299,42 @@ public class TestUtil {
         .build();
   }
 
+  /**
+   * @return a {@code KeyTemplate} containing {@code HmacKey}.
+   */
+  public static KeyTemplate createHmacKeyTemplate(int keySize, int tagSize, HashType hash)
+      throws Exception {
+    HmacParams params = HmacParams.newBuilder()
+        .setHash(HashType.SHA256)
+        .setTagSize(tagSize)
+        .build();
+    HmacKeyFormat format = HmacKeyFormat.newBuilder()
+        .setParams(params)
+        .setKeySize(keySize)
+        .build();
+    return KeyTemplate.newBuilder()
+        .setValue(format.toByteString())
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.HmacKey")
+        .build();
+  }
+
+  /**
+   * @return a {@code KeyTemplate} containing {@code KmsEnvelopeAeadKey}.
+   */
+  public static KeyTemplate createKmsEnvelopeAeadKeyTemplate(KeyData kmsKey,
+      KeyTemplate dekTemplate) throws Exception {
+    KmsEnvelopeAeadParams params = KmsEnvelopeAeadParams.newBuilder()
+        .setDekTemplate(dekTemplate)
+        .setKmsKey(kmsKey)
+        .build();
+    KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.newBuilder()
+        .setParams(params)
+        .build();
+    return KeyTemplate.newBuilder()
+        .setValue(format.toByteString())
+        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.KmsEnvelopeAeadKey")
+        .build();
+  }
   /**
    * @return a KMS key URI in a format defined by Google Cloud KMS.
    */

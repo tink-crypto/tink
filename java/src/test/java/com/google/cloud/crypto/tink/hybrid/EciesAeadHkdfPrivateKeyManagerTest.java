@@ -61,7 +61,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     EllipticCurveType curve = EllipticCurveType.NIST_P384;
     HashType hashType = HashType.SHA256;
     EcPointFormat pointFormat = EcPointFormat.UNCOMPRESSED;
-    KeyTemplate demKeyTemplate = TestUtil.createAesCtrHmacAeadKeyDataTemplate(AES_KEY_SIZE, ivSize,
+    KeyTemplate demKeyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(AES_KEY_SIZE, ivSize,
         HMAC_KEY_SIZE, tagSize);
     byte[] salt = "some salt".getBytes("UTF-8");
     EciesAeadHkdfParams params = TestUtil.createEciesAeadHkdfParams(curve, hashType, pointFormat,

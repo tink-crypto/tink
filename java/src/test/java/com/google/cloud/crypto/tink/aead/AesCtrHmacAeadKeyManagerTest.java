@@ -39,7 +39,7 @@ import org.junit.runners.JUnit4;
 public class AesCtrHmacAeadKeyManagerTest {
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
-    KeyTemplate keyTemplate = TestUtil.createAesCtrHmacAeadKeyDataTemplate(16, 16, 32, 16);
+    KeyTemplate keyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(16, 16, 32, 16);
     AesCtrHmacAeadKeyFormat aeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(
         keyTemplate.getValue().toByteArray());
     ByteString serialized = ByteString.copyFrom(aeadKeyFormat.toByteArray());

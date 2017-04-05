@@ -62,8 +62,8 @@ public class EciesAeadHkdfHybridDecryptTest {
     String hmacAlgo = "HmacSha256";
 
     KeyTemplate[] keyTemplates = new KeyTemplate[] {
-      TestUtil.createAesCtrHmacAeadKeyDataTemplate(16, 16, 16, 16),
-      TestUtil.createAesGcmKeyDataTemplate(16)
+      TestUtil.createAesCtrHmacAeadKeyTemplate(16, 16, 16, 16),
+      TestUtil.createAesGcmKeyTemplate(16)
     };
     for (int i = 0; i < keyTemplates.length; i++) {
       HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey, salt,

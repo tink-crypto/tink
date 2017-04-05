@@ -61,8 +61,7 @@ final class EciesAeadHkdfAeadFactory {
       try {
         AesGcmKeyFormat gcmKeyFormat = AesGcmKeyFormat.parseFrom(demTemplate.getValue());
         this.demKeyType = DemKeyType.AES_GCM_KEY;
-        this.aesGcmKey = Registry.INSTANCE.newKey(
-            demTemplate.getTypeUrl(), demTemplate.getValue());
+        this.aesGcmKey = Registry.INSTANCE.newKey(demTemplate);
         this.symmetricKeySize = gcmKeyFormat.getKeySize();
       } catch (InvalidProtocolBufferException e) {
         throw new GeneralSecurityException(
@@ -73,8 +72,7 @@ final class EciesAeadHkdfAeadFactory {
         AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(
             demTemplate.getValue());
         this.demKeyType = DemKeyType.AES_CTR_HMAC_AEAD_KEY;
-        this.aesCtrHmacAeadKey = Registry.INSTANCE.newKey(
-            demTemplate.getTypeUrl(), demTemplate.getValue());
+        this.aesCtrHmacAeadKey = Registry.INSTANCE.newKey(demTemplate);
         this.aesCtrKeySize = aesCtrHmacAeadKeyFormat.getAesCtrKeyFormat().getKeySize();
         int hmacKeySize = aesCtrHmacAeadKeyFormat.getHmacKeyFormat().getKeySize();
         this.symmetricKeySize = aesCtrKeySize + hmacKeySize;

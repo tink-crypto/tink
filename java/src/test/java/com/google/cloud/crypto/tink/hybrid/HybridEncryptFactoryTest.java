@@ -59,9 +59,9 @@ public class HybridEncryptFactoryTest {
     HashType hashType = HashType.SHA256;
     EcPointFormat primaryPointFormat = EcPointFormat.UNCOMPRESSED;
     EcPointFormat rawPointFormat = EcPointFormat.COMPRESSED;
-    KeyTemplate primaryDemKeyTemplate = TestUtil.createAesCtrHmacAeadKeyDataTemplate(
+    KeyTemplate primaryDemKeyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
         AES_KEY_SIZE, ivSize, HMAC_KEY_SIZE, tagSize);
-    KeyTemplate rawDemKeyTemplate = TestUtil.createAesGcmKeyDataTemplate(AES_KEY_SIZE);
+    KeyTemplate rawDemKeyTemplate = TestUtil.createAesGcmKeyTemplate(AES_KEY_SIZE);
     byte[] primarySalt = "some salt".getBytes("UTF-8");
     byte[] rawSalt = "other salt".getBytes("UTF-8");
     byte[] legacySalt = "yet another salt".getBytes("UTF-8");

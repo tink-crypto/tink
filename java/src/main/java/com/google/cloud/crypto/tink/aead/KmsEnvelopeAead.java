@@ -49,8 +49,7 @@ class KmsEnvelopeAead extends AeadBase {
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
     // Generate a new DEK.
-    byte[] dek = Registry.INSTANCE.newKey(
-        dekTemplate.getTypeUrl(), dekTemplate.getValue()).toByteArray();
+    byte[] dek = Registry.INSTANCE.newKey(dekTemplate).toByteArray();
     // Wrap it with remote.
     byte[] encryptedDek = remote.encrypt(dek, EMPTY_AAD);
     // Use DEK to encrypt plaintext.
