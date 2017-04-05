@@ -20,7 +20,7 @@
 
 #include "cc/mac.h"
 #include "cc/key_manager.h"
-#include "cc/subtle/hmac_openssl.h"
+#include "cc/subtle/hmac_boringssl.h"
 #include "cc/subtle/random.h"
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
@@ -94,7 +94,7 @@ StatusOr<std::unique_ptr<Mac>>
 HmacKeyManager::GetPrimitiveImpl(const HmacKey& hmac_key) const {
   Status status = Validate(hmac_key);
   if (!status.ok()) return status;
-  auto hmac_result = HmacOpenSsl::New(hmac_key.params().hash(),
+  auto hmac_result = HmacBoringSsl::New(hmac_key.params().hash(),
                                       hmac_key.params().tag_size(),
                                       hmac_key.key_value());
   if (!hmac_result.ok()) return hmac_result.status();

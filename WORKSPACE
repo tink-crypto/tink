@@ -5,6 +5,12 @@ git_repository(
   commit = "be63ed9cb3140ec23e4df5118fca9a3f98640cf6",
 )
 
+git_repository(
+    name = "boringssl",
+    commit = "e06766691547514e5bf756e4a0d926e8ca680e5a",
+    remote = "https://boringssl.googlesource.com/boringssl",
+)
+
 load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_repositories")
 java_proto_repositories()
 

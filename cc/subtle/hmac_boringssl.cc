@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/hmac_openssl.h"
+#include "cc/subtle/hmac_boringssl.h"
 
 #include "cc/mac.h"
 #include "cc/util/errors.h"
@@ -22,6 +22,7 @@
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/common.pb.h"
+#include "openssl/hmac.h"
 
 using google::cloud::crypto::tink::HashType;
 
@@ -30,24 +31,24 @@ namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::unique_ptr<Mac>> HmacOpenSsl::New(
+util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
     HashType hash_type, int tag_size, const std::string& key_value) {
   std::unique_ptr<Mac> hmac(
-      new HmacOpenSsl(hash_type, tag_size, key_value));
+      new HmacBoringSsl(hash_type, tag_size, key_value));
   return std::move(hmac);
 }
 
-HmacOpenSsl::HmacOpenSsl(
+HmacBoringSsl::HmacBoringSsl(
     HashType hash_type, int tag_size, const std::string& key_value)
     : hash_type_(hash_type), tag_size_(tag_size), key_value_(key_value) {
 }
 
-util::StatusOr<std::string> HmacOpenSsl::ComputeMac(
+util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     google::protobuf::StringPiece data) const {
   return util::Status::UNKNOWN;
 }
 
-util::Status HmacOpenSsl::VerifyMac(
+util::Status HmacBoringSsl::VerifyMac(
     google::protobuf::StringPiece mac,
     google::protobuf::StringPiece data) const {
   return util::Status::UNKNOWN;

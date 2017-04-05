@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/hmac_openssl.h"
+#include "cc/subtle/hmac_boringssl.h"
 
 #include "cc/mac.h"
 #include "cc/util/status.h"
@@ -29,11 +29,11 @@ namespace crypto {
 namespace tink {
 namespace {
 
-class HmacOpenSslTest : public ::testing::Test {
+class HmacBoringSslTest : public ::testing::Test {
 };
 
-TEST_F(HmacOpenSslTest, testBasic) {
-  auto hmac_result = HmacOpenSsl::New(HashType::SHA1, 16, "some key value");
+TEST_F(HmacBoringSslTest, testBasic) {
+  auto hmac_result = HmacBoringSsl::New(HashType::SHA1, 16, "some key value");
   EXPECT_TRUE(hmac_result.ok()) << hmac_result.status();
   auto hmac = std::move(hmac_result.ValueOrDie());
 

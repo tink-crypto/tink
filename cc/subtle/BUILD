@@ -3,15 +3,16 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//cc:__subpackages__"])
 
 cc_library(
-    name = "hmac_openssl",
-    srcs = ["hmac_openssl.cc"],
-    hdrs = ["hmac_openssl.h"],
+    name = "hmac_boringssl",
+    srcs = ["hmac_boringssl.cc"],
+    hdrs = ["hmac_boringssl.h"],
     deps = [
         "//cc:mac",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:cc_common",
+        "@boringssl//:crypto",
     ],
 )
 
@@ -26,12 +27,12 @@ cc_library(
 # tests
 
 cc_test(
-    name = "hmac_openssl_test",
+    name = "hmac_boringssl_test",
     size = "small",
-    srcs = ["hmac_openssl_test.cc"],
+    srcs = ["hmac_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        ":hmac_openssl",
+        ":hmac_boringssl",
         "//cc:mac",
         "//cc/util:status",
         "//cc/util:statusor",

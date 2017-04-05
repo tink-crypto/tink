@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_SUBTLE_HMAC_OPENSSL_H_
-#define TINK_SUBTLE_HMAC_OPENSSL_H_
+#ifndef TINK_SUBTLE_HMAC_BORINGSSL_H_
+#define TINK_SUBTLE_HMAC_BORINGSSL_H_
 
 #include <memory>
 
@@ -29,7 +29,7 @@ namespace cloud {
 namespace crypto {
 namespace tink {
 
-class HmacOpenSsl : public Mac {
+class HmacBoringSsl : public Mac {
  public:
   static util::StatusOr<std::unique_ptr<Mac>> New(
       google::cloud::crypto::tink::HashType hash_type,
@@ -45,11 +45,11 @@ class HmacOpenSsl : public Mac {
       google::protobuf::StringPiece mac,
       google::protobuf::StringPiece data) const override;
 
-  virtual ~HmacOpenSsl() {}
+  virtual ~HmacBoringSsl() {}
 
  private:
-  HmacOpenSsl() {}
-  HmacOpenSsl(google::cloud::crypto::tink::HashType hash_type,
+  HmacBoringSsl() {}
+  HmacBoringSsl(google::cloud::crypto::tink::HashType hash_type,
               int tag_size, const std::string& key_value);
 
   google::cloud::crypto::tink::HashType hash_type_;
@@ -61,4 +61,4 @@ class HmacOpenSsl : public Mac {
 }  // namespace crypto
 }  // namespace cloud
 
-#endif  // TINK_SUBTLE_HMAC_OPENSSL_H_
+#endif  // TINK_SUBTLE_HMAC_BORINGSSL_H_

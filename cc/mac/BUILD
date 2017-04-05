@@ -23,7 +23,7 @@ cc_library(
     deps = [
         "//cc:key_manager",
         "//cc:mac",
-        "//cc/subtle:hmac_openssl",
+        "//cc/subtle:hmac_boringssl",
         "//cc/subtle:random",
         "//cc/util:status",
         "//cc/util:statusor",
