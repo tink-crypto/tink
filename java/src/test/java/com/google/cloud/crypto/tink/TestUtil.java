@@ -58,7 +58,6 @@ import com.google.cloud.crypto.tink.subtle.EcUtil;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
@@ -220,6 +219,13 @@ public class TestUtil {
   }
 
   /**
+   * @return a keyset handle from a {@code keyset}.
+   */
+  public static KeysetHandle createKeysetHandle(final Keyset keyset) throws Exception {
+    return new KeysetHandle(keyset);
+  }
+
+  /**
    * @return a keyset from a list of keys. The first key is primary.
    */
   public static Keyset createKeyset(Key primary, Key... keys) throws Exception {
@@ -235,19 +241,10 @@ public class TestUtil {
   /**
    * @return a key with some specified properties.
    */
-  public static Key createKey(Message proto, int keyId, KeyStatusType status,
+  public static Key createKey(KeyData keyData, int keyId, KeyStatusType status,
       OutputPrefixType prefixType) throws Exception {
-    return createKey(proto, keyId, status, prefixType,
-        KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL);
-  }
-
-  /**
-   * @return a key with some specified properties.
-   */
-  public static Key createKey(Message proto, int keyId, KeyStatusType status,
-      OutputPrefixType prefixType, KeyData.KeyMaterialType type) throws Exception {
     return Key.newBuilder()
-        .setKeyData(createKeyData(proto, type))
+        .setKeyData(keyData)
         .setStatus(status)
         .setKeyId(keyId)
         .setOutputPrefixType(prefixType)
@@ -270,6 +267,28 @@ public class TestUtil {
   }
 
   /**
+   * @return a {@code KeyData} from a specified key.
+   */
+  public static KeyData createKeyData(Message key, String typeUrl, KeyData.KeyMaterialType type)
+      throws Exception {
+    return KeyData.newBuilder()
+        .setValue(key.toByteString())
+        .setTypeUrl(typeUrl)
+        .setKeyMaterialType(type)
+        .build();
+  }
+
+  /**
+   * @return a {@code KeyData} containing a {@code HmacKey}.
+   */
+  public static KeyData createHmacKeyData(byte[] keyValue, int tagSize) throws Exception {
+    return createKeyData(
+        createHmacKey(keyValue, tagSize),
+        "type.googleapis.com/google.cloud.crypto.tink.HmacKey",
+        KeyData.KeyMaterialType.SYMMETRIC);
+  }
+
+  /**
    * @return a {@code AesCtrKey}.
    */
   public static AesCtrKey createAesCtrKey(byte[] keyValue, int ivSize) throws Exception {
@@ -283,42 +302,84 @@ public class TestUtil {
   }
 
   /**
-   * @return a {@code AesCtrHmacAeadKey}.
+   * @return a {@code KeyData} containing a {@code AesCtrHmacAeadKey}.
    */
-  public static AesCtrHmacAeadKey createAesCtrHmacAeadKey(byte[] aesCtrKeyValue, int ivSize,
+  public static KeyData createAesCtrHmacAeadKeyData(byte[] aesCtrKeyValue, int ivSize,
       byte[] hmacKeyValue, int tagSize) throws Exception {
     AesCtrKey aesCtrKey = createAesCtrKey(aesCtrKeyValue, ivSize);
     HmacKey hmacKey = createHmacKey(hmacKeyValue, tagSize);
 
-    return AesCtrHmacAeadKey.newBuilder()
+    AesCtrHmacAeadKey keyProto = AesCtrHmacAeadKey.newBuilder()
         .setAesCtrKey(aesCtrKey)
         .setHmacKey(hmacKey)
         .build();
+    return createKeyData(
+        keyProto,
+        "type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey",
+        KeyData.KeyMaterialType.SYMMETRIC);
   }
 
   /**
-   * @return a {@code AesGcmKey}.
+   * @return a {@code KeyData} containing a {@code AesGcmKey}.
    */
-  public static AesGcmKey createAesGcmKey(byte[] keyValue) throws Exception {
-    return AesGcmKey.newBuilder()
+  public static KeyData createAesGcmKeyData(byte[] keyValue) throws Exception {
+    AesGcmKey keyProto = AesGcmKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(keyValue))
         .build();
+    return createKeyData(
+        keyProto,
+        "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey",
+        KeyData.KeyMaterialType.SYMMETRIC);
   }
 
   /**
-   * @return a {@code AesEaxKey}.
+   * @return a {@code KeyData} containing a {@code AesEaxKey}.
    */
-  public static AesEaxKey createAesEaxKey(byte[] keyValue, int ivSizeInBytes) throws Exception {
-    return AesEaxKey.newBuilder()
+  public static KeyData createAesEaxKeyData(byte[] keyValue, int ivSizeInBytes) throws Exception {
+    AesEaxKey keyProto = AesEaxKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(keyValue))
         .setParams(AesEaxParams.newBuilder().setIvSize(ivSizeInBytes).build())
         .build();
+    return createKeyData(
+        keyProto,
+        "type.googleapis.com/google.cloud.crypto.tink.AesEaxKey",
+        KeyData.KeyMaterialType.SYMMETRIC);
+  }
+
+  /**
+   * @return a {@code KeyData} containing a {@code GoogleCloudKmsAeadKey}.
+   */
+  public static KeyData createGoogleCloudKmsAeadKeyData(String kmsKeyUri)
+      throws Exception {
+    GoogleCloudKmsAeadKey keyProto = GoogleCloudKmsAeadKey.newBuilder()
+        .setKmsKeyUri(kmsKeyUri)
+        .build();
+    return createKeyData(
+        keyProto,
+        "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
+        KeyData.KeyMaterialType.REMOTE);
+  }
+
+  /**
+   * @return a {@code KeyData} containing a {@code KmsEnvelopeAeadKey}.
+   */
+  public static KeyData createKmsEnvelopeAeadKeyData(KeyData kmsKey,
+      KeyTemplate dekTemplate) throws Exception {
+    KmsEnvelopeAeadParams params = KmsEnvelopeAeadParams.newBuilder()
+        .setDekTemplate(dekTemplate)
+        .setKmsKey(kmsKey)
+        .build();
+    KmsEnvelopeAeadKey keyProto = KmsEnvelopeAeadKey.newBuilder().setParams(params).build();
+    return createKeyData(
+        keyProto,
+        "type.googleapis.com/google.cloud.crypto.tink.KmsEnvelopeAeadKey",
+        KeyData.KeyMaterialType.REMOTE);
   }
 
   /**
    * @return a {@code KeyTemplate} containing a {@code AesCtrHmacAeadKeyFormat}.
    */
-  public static KeyTemplate createAesCtrHmacAeadKeyTemplate(int aesKeySize, int ivSize,
+  public static KeyTemplate createAesCtrHmacAeadKeyDataTemplate(int aesKeySize, int ivSize,
       int hmacKeySize, int tagSize) throws Exception {
     AesCtrKeyFormat aesCtrKeyFormat = AesCtrKeyFormat.newBuilder()
         .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
@@ -342,7 +403,7 @@ public class TestUtil {
   /**
    * @return a {@code KeyTemplate} containing {@code AesGcmKeyFormat}.
    */
-  public static KeyTemplate createAesGcmKeyTemplate(int keySize) throws Exception {
+  public static KeyTemplate createAesGcmKeyDataTemplate(int keySize) throws Exception {
     AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder()
         .setKeySize(keySize)
         .build();
@@ -353,40 +414,6 @@ public class TestUtil {
   }
 
   /**
-   * @return a {@code KeyData} from a specified key.
-   */
-  public static KeyData createKeyData(Message key, KeyData.KeyMaterialType type)
-      throws Exception {
-    return KeyData.newBuilder()
-        .setValue(key.toByteString())
-        .setTypeUrl(Any.pack(key).getTypeUrl())
-        .setKeyMaterialType(type)
-        .build();
-  }
-
-  /**
-   * @return a {@code GoogleCloudKmsAeadKey}.
-   */
-  public static GoogleCloudKmsAeadKey createGoogleCloudKmsAeadKey(String kmsKeyUri)
-      throws Exception {
-    return GoogleCloudKmsAeadKey.newBuilder()
-        .setKmsKeyUri(kmsKeyUri)
-        .build();
-  }
-
-  /**
-   * @return a {@code KmsEnvelopeAeadKey}.
-   */
-  public static KmsEnvelopeAeadKey createKmsEnvelopeAeadKey(KeyData kmsKey,
-      KeyTemplate dekTemplate) throws Exception {
-    KmsEnvelopeAeadParams params = KmsEnvelopeAeadParams.newBuilder()
-        .setDekTemplate(dekTemplate)
-        .setKmsKey(kmsKey)
-        .build();
-    return KmsEnvelopeAeadKey.newBuilder().setParams(params).build();
-  }
-
-  /**
    * @return a KMS key URI in a format defined by Google Cloud KMS.
    */
   public static String createGoogleCloudKmsKeyUri(
@@ -394,81 +421,6 @@ public class TestUtil {
     return String.format(
         "projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
         projectId, location, ringId, keyId);
-  }
-
-  /**
-   * @return a keyset handle from a {@code keyset}.
-   */
-  public static KeysetHandle createKeysetHandle(final Keyset keyset) throws Exception {
-    return new KeysetHandle(keyset);
-  }
-
-  /**
-   * @return a keyset handle from a {@code keyset} which must be a Keyset proto in text format.
-   */
-  public static KeysetHandle createKeysetHandle(final String keyset) throws Exception {
-    try {
-      Keyset.Builder keysetBuilder = Keyset.newBuilder();
-      TextFormat.merge(keyset, keysetBuilder);
-      return createKeysetHandle(keysetBuilder.build());
-    } catch (Exception e) {
-      System.out.println(e);
-      return null;
-    }
-  }
-
-  /**
-   * Runs basic tests against an Aead primitive.
-   */
-  public static void runBasicTests(Aead aead) throws Exception {
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    byte[] decrypted = aead.decrypt(ciphertext, associatedData);
-    assertArrayEquals(plaintext, decrypted);
-
-    byte original = ciphertext[0];
-    ciphertext[0] = (byte) ~original;
-    try {
-      aead.decrypt(ciphertext, associatedData);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decryption failed"));
-    }
-    ciphertext[0] = original;
-    original = ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE];
-    ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE] = (byte) ~original;
-    try {
-      aead.decrypt(ciphertext, associatedData);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decryption failed"));
-    }
-
-    ciphertext[0] = original;
-    original = associatedData[0];
-    associatedData[0] = (byte) ~original;
-    try {
-      aead.decrypt(ciphertext, associatedData);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decryption failed"));
-    }
-
-    // async tests
-    ciphertext = aead.asyncEncrypt(plaintext, associatedData).get();
-    decrypted = aead.asyncDecrypt(ciphertext, associatedData).get();
-    assertArrayEquals(plaintext, decrypted);
-    for (int length = 0; length < ciphertext.length; length++) {
-      byte[] truncated = Arrays.copyOf(ciphertext, length);
-      try {
-        byte[] unused = aead.asyncDecrypt(truncated, associatedData).get();
-        fail("Decrypting a truncated ciphertext should fail");
-      } catch (ExecutionException ex) {
-        // The decryption should fail because the ciphertext has been truncated.
-        assertTrue(ex.getCause() instanceof GeneralSecurityException);
-      }
-    }
   }
 
   /**
@@ -581,7 +533,8 @@ public class TestUtil {
   }
 
   /**
-   *  @return a {@code EciesAeadHkdfPrivateKey} with the specified key material and parameters.
+   *  @return a {@code KeyData} containing a {@code EciesAeadHkdfPrivateKey} with the specified key
+   *  material and parameters.
    */
   public static EciesAeadHkdfPrivateKey createEciesAeadHkdfPrivKey(EciesAeadHkdfPublicKey pubKey,
       byte[] privKeyValue) throws Exception {
@@ -629,6 +582,60 @@ public class TestUtil {
         .setX(ByteString.copyFrom(pubX))
         .setY(ByteString.copyFrom(pubY))
         .build();
+  }
+
+  /**
+   * Runs basic tests against an Aead primitive.
+   */
+  public static void runBasicTests(Aead aead) throws Exception {
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    byte[] decrypted = aead.decrypt(ciphertext, associatedData);
+    assertArrayEquals(plaintext, decrypted);
+
+    byte original = ciphertext[0];
+    ciphertext[0] = (byte) ~original;
+    try {
+      aead.decrypt(ciphertext, associatedData);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("decryption failed"));
+    }
+    ciphertext[0] = original;
+    original = ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE];
+    ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE] = (byte) ~original;
+    try {
+      aead.decrypt(ciphertext, associatedData);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("decryption failed"));
+    }
+
+    ciphertext[0] = original;
+    original = associatedData[0];
+    associatedData[0] = (byte) ~original;
+    try {
+      aead.decrypt(ciphertext, associatedData);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("decryption failed"));
+    }
+
+    // async tests
+    ciphertext = aead.asyncEncrypt(plaintext, associatedData).get();
+    decrypted = aead.asyncDecrypt(ciphertext, associatedData).get();
+    assertArrayEquals(plaintext, decrypted);
+    for (int length = 0; length < ciphertext.length; length++) {
+      byte[] truncated = Arrays.copyOf(ciphertext, length);
+      try {
+        byte[] unused = aead.asyncDecrypt(truncated, associatedData).get();
+        fail("Decrypting a truncated ciphertext should fail");
+      } catch (ExecutionException ex) {
+        // The decryption should fail because the ciphertext has been truncated.
+        assertTrue(ex.getCause() instanceof GeneralSecurityException);
+      }
+    }
   }
 
   /**

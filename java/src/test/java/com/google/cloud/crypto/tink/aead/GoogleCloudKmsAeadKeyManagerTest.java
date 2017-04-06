@@ -49,7 +49,7 @@ public class GoogleCloudKmsAeadKeyManagerTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createGoogleCloudKmsAeadKey(TestGoogleCredentialFactory.RESTRICTED),
+                TestUtil.createGoogleCloudKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));

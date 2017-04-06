@@ -26,6 +26,7 @@ import com.google.cloud.crypto.tink.HybridDecrypt;
 import com.google.cloud.crypto.tink.HybridEncrypt;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.TestUtil;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
@@ -58,9 +59,9 @@ public class HybridEncryptFactoryTest {
     HashType hashType = HashType.SHA256;
     EcPointFormat primaryPointFormat = EcPointFormat.UNCOMPRESSED;
     EcPointFormat rawPointFormat = EcPointFormat.COMPRESSED;
-    KeyTemplate primaryDemKeyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
+    KeyTemplate primaryDemKeyTemplate = TestUtil.createAesCtrHmacAeadKeyDataTemplate(
         AES_KEY_SIZE, ivSize, HMAC_KEY_SIZE, tagSize);
-    KeyTemplate rawDemKeyTemplate = TestUtil.createAesGcmKeyTemplate(AES_KEY_SIZE);
+    KeyTemplate rawDemKeyTemplate = TestUtil.createAesGcmKeyDataTemplate(AES_KEY_SIZE);
     byte[] primarySalt = "some salt".getBytes("UTF-8");
     byte[] rawSalt = "other salt".getBytes("UTF-8");
     byte[] legacySalt = "yet another salt".getBytes("UTF-8");
@@ -69,12 +70,18 @@ public class HybridEncryptFactoryTest {
         hashType, primaryPointFormat, primaryDemKeyTemplate, primarySalt);
 
     Key primaryPriv = TestUtil.createKey(
-        primaryPrivProto,
+        TestUtil.createKeyData(
+            primaryPrivProto,
+            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey",
+            KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
         8,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key primaryPub = TestUtil.createKey(
-        primaryPrivProto.getPublicKey(),
+        TestUtil.createKeyData(
+            primaryPrivProto.getPublicKey(),
+            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
+            KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
@@ -83,33 +90,25 @@ public class HybridEncryptFactoryTest {
         hashType, rawPointFormat, rawDemKeyTemplate, rawSalt);
 
     Key rawPriv = TestUtil.createKey(
-        rawPrivProto,
+        TestUtil.createKeyData(
+            rawPrivProto,
+            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey",
+            KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
         11,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key rawPub = TestUtil.createKey(
-        rawPrivProto.getPublicKey(),
+        TestUtil.createKeyData(
+            rawPrivProto.getPublicKey(),
+            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
+            KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
         43,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
-
-    EciesAeadHkdfPrivateKey legacyPrivProto = TestUtil.generateEciesAeadHkdfPrivKey(curve,
-        hashType, primaryPointFormat, rawDemKeyTemplate, legacySalt);
-
-    Key legacyPriv = TestUtil.createKey(
-        legacyPrivProto,
-        23,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.LEGACY);
-    Key legacyPub = TestUtil.createKey(
-        legacyPrivProto.getPublicKey(),
-        44,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.LEGACY);
     KeysetHandle keysetHandlePub = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primaryPub, rawPub, legacyPub));
+        TestUtil.createKeyset(primaryPub, rawPub));
     KeysetHandle keysetHandlePriv = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primaryPriv, rawPriv, legacyPriv));
+        TestUtil.createKeyset(primaryPriv, rawPriv));
     HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(keysetHandlePub);
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandlePriv);
     byte[] plaintext = Random.randBytes(20);

@@ -28,6 +28,7 @@ import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.TestUtil;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
@@ -69,9 +70,30 @@ public class PublicKeySignFactoryTest {
       TestUtil.generateEcdsaPrivKey(EllipticCurveType.NIST_P256, HashType.SHA256,
           EcdsaSignatureEncoding.DER)};
     Key[] keys = new Key[] {
-      TestUtil.createKey(ecdsaPrivKeys[0], 1, KeyStatusType.ENABLED, OutputPrefixType.TINK),
-      TestUtil.createKey(ecdsaPrivKeys[1], 2, KeyStatusType.ENABLED, OutputPrefixType.RAW),
-      TestUtil.createKey(ecdsaPrivKeys[2], 3, KeyStatusType.ENABLED, OutputPrefixType.LEGACY)};
+      TestUtil.createKey(
+          TestUtil.createKeyData(
+              ecdsaPrivKeys[0],
+              "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
+              KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
+          1,
+          KeyStatusType.ENABLED,
+          OutputPrefixType.TINK),
+      TestUtil.createKey(
+          TestUtil.createKeyData(
+              ecdsaPrivKeys[1],
+              "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
+              KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
+          2,
+          KeyStatusType.ENABLED,
+          OutputPrefixType.RAW),
+      TestUtil.createKey(
+          TestUtil.createKeyData(
+              ecdsaPrivKeys[2],
+              "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
+              KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
+          3,
+          KeyStatusType.ENABLED,
+          OutputPrefixType.LEGACY)};
     for (int i = 0; i < ids.length; i++) {
       KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(keys[ids[i][0]], keys[ids[i][1]], keys[ids[i][2]]));
@@ -87,8 +109,15 @@ public class PublicKeySignFactoryTest {
       // Verifying with the primary public key should work.
       PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(
           TestUtil.createKeysetHandle(
-              TestUtil.createKeyset(TestUtil.createKey(ecdsaPrivKeys[ids[i][0]].getPublicKey(),
-                  ids[i][0] + 1, KeyStatusType.ENABLED, keys[ids[i][0]].getOutputPrefixType()))));
+              TestUtil.createKeyset(
+                  TestUtil.createKey(
+                      TestUtil.createKeyData(
+                          ecdsaPrivKeys[ids[i][0]].getPublicKey(),
+                          "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
+                          KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
+                      ids[i][0] + 1,
+                      KeyStatusType.ENABLED,
+                      keys[ids[i][0]].getOutputPrefixType()))));
       try {
         verifier.verify(sig, plaintext);
       } catch (GeneralSecurityException ex) {
@@ -98,8 +127,15 @@ public class PublicKeySignFactoryTest {
       // Verifying with a non-primary public key should fail.
       verifier = PublicKeyVerifyFactory.getPrimitive(
           TestUtil.createKeysetHandle(
-              TestUtil.createKeyset(TestUtil.createKey(ecdsaPrivKeys[ids[i][1]].getPublicKey(),
-                  ids[i][1] + 1, KeyStatusType.ENABLED, keys[ids[i][1]].getOutputPrefixType()))));
+              TestUtil.createKeyset(
+                  TestUtil.createKey(
+                      TestUtil.createKeyData(
+                          ecdsaPrivKeys[ids[i][1]].getPublicKey(),
+                          "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
+                          KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
+                      ids[i][1] + 1,
+                      KeyStatusType.ENABLED,
+                      keys[ids[i][1]].getOutputPrefixType()))));
       try {
         verifier.verify(sig, plaintext);
         fail("Invalid signature, should have thrown exception");
@@ -110,8 +146,15 @@ public class PublicKeySignFactoryTest {
           EllipticCurveType.NIST_P521, HashType.SHA512, EcdsaSignatureEncoding.DER);
       verifier = PublicKeyVerifyFactory.getPrimitive(
           TestUtil.createKeysetHandle(
-              TestUtil.createKeyset(TestUtil.createKey(randomPrivKey.getPublicKey(),
-                  ids[i][0] + 1, KeyStatusType.ENABLED, keys[ids[i][0]].getOutputPrefixType()))));
+              TestUtil.createKeyset(
+                  TestUtil.createKey(
+                      TestUtil.createKeyData(
+                          randomPrivKey.getPublicKey(),
+                          "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
+                          KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
+                      ids[i][0] + 1,
+                      KeyStatusType.ENABLED,
+                      keys[ids[i][0]].getOutputPrefixType()))));
       try {
         verifier.verify(sig, plaintext);
         fail("Invalid signature, should have thrown exception");

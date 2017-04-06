@@ -60,15 +60,16 @@ public class KmsEnvelopeAeadKeyManagerTest {
     int ivSize = 16;
     int hmacKeySize = 16;
     int tagSize = 16;
-    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
+    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyDataTemplate(
         aesKeySize, ivSize, hmacKeySize, tagSize);
-    KeyData kmsKey = TestUtil.createKeyData(TestUtil.createGoogleCloudKmsAeadKey(
-        TestGoogleCredentialFactory.RESTRICTED), KeyData.KeyMaterialType.REMOTE);
-    KmsEnvelopeAeadKey kmsEnvelopeAeadKey = TestUtil.createKmsEnvelopeAeadKey(kmsKey, dekTemplate);
+    KeyData kmsKey = TestUtil.createGoogleCloudKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
-            TestUtil.createKey(kmsEnvelopeAeadKey, 42,
-                KeyStatusType.ENABLED, OutputPrefixType.TINK)));
+            TestUtil.createKey(
+                TestUtil.createKmsEnvelopeAeadKeyData(kmsKey, dekTemplate),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK)));
 
     Aead aead = AeadFactory.getPrimitive(keysetHandle);
     TestUtil.runBasicTests(aead);
@@ -80,15 +81,16 @@ public class KmsEnvelopeAeadKeyManagerTest {
     int ivSize = 16;
     int hmacKeySize = 16;
     int tagSize = 16;
-    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
+    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyDataTemplate(
         aesKeySize, ivSize, hmacKeySize, tagSize);
-    KeyData kmsKey = TestUtil.createKeyData(TestUtil.createGoogleCloudKmsAeadKey(
-        TestGoogleCredentialFactory.RESTRICTED), KeyData.KeyMaterialType.REMOTE);
-    KmsEnvelopeAeadKey kmsEnvelopeAeadKey = TestUtil.createKmsEnvelopeAeadKey(kmsKey, dekTemplate);
+    KeyData kmsKey = TestUtil.createGoogleCloudKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
-            TestUtil.createKey(kmsEnvelopeAeadKey, 42,
-                KeyStatusType.ENABLED, OutputPrefixType.RAW)));
+            TestUtil.createKey(
+                TestUtil.createKmsEnvelopeAeadKeyData(kmsKey, dekTemplate),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.RAW)));
 
     Aead aead = AeadFactory.getPrimitive(keysetHandle);
     byte[] plaintext = Random.randBytes(20);

@@ -47,11 +47,10 @@ public class UtilTest {
   public void testValidateKeyset() throws Exception {
     String keyValue = "01234567890123456";
     Keyset keyset =  TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+        TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
         42,
         KeyStatusType.ENABLED,
-        OutputPrefixType.TINK,
-        KeyData.KeyMaterialType.SYMMETRIC));
+        OutputPrefixType.TINK));
     try {
       Util.validateKeyset(keyset);
     } catch (GeneralSecurityException e) {
@@ -68,11 +67,10 @@ public class UtilTest {
 
     // Primary key is disabled.
     Keyset invalidKeyset = TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+        TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
         42,
         KeyStatusType.DISABLED,
-        OutputPrefixType.TINK,
-        KeyData.KeyMaterialType.SYMMETRIC));
+        OutputPrefixType.TINK));
     try {
       Util.validateKeyset(invalidKeyset);
       fail("Invalid keyset. Expect GeneralSecurityException");
@@ -83,17 +81,15 @@ public class UtilTest {
     // Multiple primary keys.
     invalidKeyset = TestUtil.createKeyset(
         TestUtil.createKey(
-            TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+            TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
             42,
             KeyStatusType.ENABLED,
-            OutputPrefixType.TINK,
-            KeyData.KeyMaterialType.SYMMETRIC),
+            OutputPrefixType.TINK),
         TestUtil.createKey(
-            TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+            TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
             42,
             KeyStatusType.ENABLED,
-            OutputPrefixType.TINK,
-            KeyData.KeyMaterialType.SYMMETRIC)
+            OutputPrefixType.TINK)
     );
     try {
       Util.validateKeyset(invalidKeyset);
@@ -110,7 +106,7 @@ public class UtilTest {
   public void testGetKeysetInfo() throws Exception {
     String keyValue = "01234567890123456";
     Keyset keyset =  TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+        TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK));

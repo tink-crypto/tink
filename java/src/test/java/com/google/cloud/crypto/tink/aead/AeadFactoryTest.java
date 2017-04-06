@@ -61,7 +61,7 @@ public class AeadFactoryTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+                TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));
@@ -77,25 +77,23 @@ public class AeadFactoryTest {
     int tagSize = 16;
 
     Key primary = TestUtil.createKey(
-        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK);
     Key raw = TestUtil.createKey(
-        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         43,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key legacy = TestUtil.createKey(
-        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         44,
         KeyStatusType.ENABLED,
         OutputPrefixType.LEGACY);
 
-    AesCtrHmacAeadKey aeadKey = TestUtil.createAesCtrHmacAeadKey(
-        aesCtrKeyValue, ivSize, hmacKeyValue, tagSize);
     Key tink = TestUtil.createKey(
-        aeadKey,
+        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         45,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK);
@@ -125,7 +123,7 @@ public class AeadFactoryTest {
     byte[] aesCtrKeyValue2 = Random.randBytes(AES_KEY_SIZE);
     byte[] hmacKeyValue2 = Random.randBytes(HMAC_KEY_SIZE);
     Key random = TestUtil.createKey(
-        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue2, ivSize, hmacKeyValue2, tagSize),
+        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue2, ivSize, hmacKeyValue2, tagSize),
         44,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK);
@@ -149,17 +147,17 @@ public class AeadFactoryTest {
     int tagSize = 16;
 
     Key primary = TestUtil.createKey(
-        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key raw = TestUtil.createKey(
-        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         43,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key legacy = TestUtil.createKey(
-        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         44,
         KeyStatusType.ENABLED,
         OutputPrefixType.LEGACY);
@@ -183,7 +181,7 @@ public class AeadFactoryTest {
     int tagSize = 16;
 
     Key primary = TestUtil.createKey(
-        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
@@ -210,7 +208,7 @@ public class AeadFactoryTest {
     int tagSize = 16;
 
     Key primary = TestUtil.createKey(
-        TestUtil.createAesCtrHmacAeadKey(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK);

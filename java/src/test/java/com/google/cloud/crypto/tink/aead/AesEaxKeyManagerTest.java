@@ -235,7 +235,7 @@ public class AesEaxKeyManagerTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createAesEaxKey(keyValue, ivSizeInBytes),
+                TestUtil.createAesEaxKeyData(keyValue, ivSizeInBytes),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.RAW)));
@@ -248,7 +248,7 @@ public class AesEaxKeyManagerTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createAesEaxKey(keyValue, 12),
+                TestUtil.createAesEaxKeyData(keyValue, 12),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));
@@ -263,7 +263,7 @@ public class AesEaxKeyManagerTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createAesEaxKey(keyValue, 16),
+                TestUtil.createAesEaxKeyData(keyValue, 16),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));

@@ -53,23 +53,22 @@ public class MacFactoryTest {
   public void testMultipleKeys() throws Exception {
     byte[] keyValue = Random.randBytes(HMAC_KEY_SIZE);
     Key primary = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createHmacKeyData(keyValue, 16),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK);
     Key raw = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createHmacKeyData(keyValue, 16),
         43,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key legacy = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createHmacKeyData(keyValue, 16),
         44,
         KeyStatusType.ENABLED,
         OutputPrefixType.LEGACY);
-    HmacKey hmacKey = TestUtil.createHmacKey(keyValue, 16);
     Key tink = TestUtil.createKey(
-        hmacKey,
+        TestUtil.createHmacKeyData(keyValue, 16),
         44,
         KeyStatusType.ENABLED,
         OutputPrefixType.LEGACY);
@@ -117,7 +116,7 @@ public class MacFactoryTest {
     // mac with a random key not in the keyset, verify with the keyset should fail
     byte[] keyValue2 = Random.randBytes(HMAC_KEY_SIZE);
     Key random = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue2, 16),
+        TestUtil.createHmacKeyData(keyValue2, 16),
         44,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK);
@@ -137,17 +136,17 @@ public class MacFactoryTest {
   public void testRawKeyAsPrimary() throws Exception {
     byte[] keyValue = Random.randBytes(HMAC_KEY_SIZE);
     Key primary = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createHmacKeyData(keyValue, 16),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key raw = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createHmacKeyData(keyValue, 16),
         43,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key legacy = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createHmacKeyData(keyValue, 16),
         44,
         KeyStatusType.ENABLED,
         OutputPrefixType.LEGACY);
@@ -169,7 +168,7 @@ public class MacFactoryTest {
   public void testSmallPlaintextWithRawKey() throws Exception {
     byte[] keyValue = Random.randBytes(HMAC_KEY_SIZE);
     Key primary = TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue, 16),
+        TestUtil.createHmacKeyData(keyValue, 16),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);

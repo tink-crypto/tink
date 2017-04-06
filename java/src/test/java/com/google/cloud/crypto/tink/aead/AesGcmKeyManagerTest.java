@@ -411,7 +411,7 @@ public class AesGcmKeyManagerTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createAesGcmKey(keyValue),
+                TestUtil.createAesGcmKeyData(keyValue),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.RAW)));
@@ -424,7 +424,7 @@ public class AesGcmKeyManagerTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createAesGcmKey(keyValue),
+                TestUtil.createAesGcmKeyData(keyValue),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));
@@ -439,7 +439,7 @@ public class AesGcmKeyManagerTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createAesGcmKey(keyValue),
+                TestUtil.createAesGcmKeyData(keyValue),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));

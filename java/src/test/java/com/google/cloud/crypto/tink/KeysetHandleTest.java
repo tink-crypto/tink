@@ -40,7 +40,7 @@ public class KeysetHandleTest {
   public void testToString() throws Exception {
     String keyValue = "01234567890123456";
     Keyset keyset =  TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+        TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK));

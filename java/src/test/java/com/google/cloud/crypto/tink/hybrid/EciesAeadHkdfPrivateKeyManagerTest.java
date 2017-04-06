@@ -29,6 +29,7 @@ import com.google.cloud.crypto.tink.HybridDecrypt;
 import com.google.cloud.crypto.tink.HybridEncrypt;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.TestUtil;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
@@ -60,7 +61,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     EllipticCurveType curve = EllipticCurveType.NIST_P384;
     HashType hashType = HashType.SHA256;
     EcPointFormat pointFormat = EcPointFormat.UNCOMPRESSED;
-    KeyTemplate demKeyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(AES_KEY_SIZE, ivSize,
+    KeyTemplate demKeyTemplate = TestUtil.createAesCtrHmacAeadKeyDataTemplate(AES_KEY_SIZE, ivSize,
         HMAC_KEY_SIZE, tagSize);
     byte[] salt = "some salt".getBytes("UTF-8");
     EciesAeadHkdfParams params = TestUtil.createEciesAeadHkdfParams(curve, hashType, pointFormat,
@@ -72,12 +73,18 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     assertEquals(params, keyProto.getPublicKey().getParams());
 
     Key primaryPriv = TestUtil.createKey(
-        keyProto,
+        TestUtil.createKeyData(
+            keyProto,
+            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey",
+            KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
         8,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
     Key primaryPub = TestUtil.createKey(
-        keyProto.getPublicKey(),
+        TestUtil.createKeyData(
+            keyProto.getPublicKey(),
+            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
+            KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);

@@ -37,7 +37,7 @@ public class CryptoFormatTest {
     String keyValue = "01234567890123456";
     for (int keyId : keyIds) {
       Key key = TestUtil.createKey(
-          TestUtil.createHmacKey(keyValue.getBytes("UTF-8"), 16),
+          TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
           keyId,
           KeyStatusType.ENABLED,
           type);
