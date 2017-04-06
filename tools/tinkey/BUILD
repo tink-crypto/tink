@@ -16,6 +16,6 @@ java_binary(
         "//java",
         "//java:key_management_restricted",
         "@args4j//jar",
-        "@com_google_guava_guava//jar",
+        "@com_google_guava//jar",
     ],
 )

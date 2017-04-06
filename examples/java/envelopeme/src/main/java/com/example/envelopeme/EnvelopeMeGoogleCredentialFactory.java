@@ -17,7 +17,7 @@
 package com.example.envelopeme;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.services.cloudkms.v1beta1.CloudKMSScopes;
+import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
 import com.google.cloud.crypto.tink.aead.GoogleCredentialFactory;
 import java.io.ByteArrayInputStream;

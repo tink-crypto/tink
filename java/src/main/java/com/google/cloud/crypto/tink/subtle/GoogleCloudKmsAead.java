@@ -16,11 +16,11 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
-import com.google.api.services.cloudkms.v1beta1.CloudKMS;
-import com.google.api.services.cloudkms.v1beta1.model.DecryptRequest;
-import com.google.api.services.cloudkms.v1beta1.model.DecryptResponse;
-import com.google.api.services.cloudkms.v1beta1.model.EncryptRequest;
-import com.google.api.services.cloudkms.v1beta1.model.EncryptResponse;
+import com.google.api.services.cloudkms.v1.CloudKMS;
+import com.google.api.services.cloudkms.v1.model.DecryptRequest;
+import com.google.api.services.cloudkms.v1.model.DecryptResponse;
+import com.google.api.services.cloudkms.v1.model.EncryptRequest;
+import com.google.api.services.cloudkms.v1.model.EncryptResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 

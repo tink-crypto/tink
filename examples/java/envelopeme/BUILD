@@ -15,7 +15,6 @@ java_binary(
     deps = [
         "//java",
         "@args4j//jar",
-        "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
         "@com_google_oauth_client//jar",

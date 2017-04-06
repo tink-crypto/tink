@@ -11,7 +11,6 @@ cc_proto_library(
         "common.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 cc_proto_library(
@@ -27,7 +26,6 @@ cc_proto_library(
         "tink.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 java_proto_library(
@@ -36,7 +34,6 @@ java_proto_library(
         "common.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 java_proto_library(
@@ -52,7 +49,6 @@ java_proto_library(
         "tink.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 # ecdsa
@@ -67,7 +63,6 @@ cc_proto_library(
         "ecdsa.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 java_proto_library(
@@ -80,7 +75,6 @@ java_proto_library(
         "ecdsa.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 # hmac
@@ -95,7 +89,6 @@ cc_proto_library(
         "hmac.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 java_proto_library(
@@ -108,7 +101,6 @@ java_proto_library(
         "hmac.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 # aes_ctr_hmac_aead
@@ -124,7 +116,6 @@ cc_proto_library(
         "aes_ctr_hmac_aead.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 java_proto_library(
@@ -138,7 +129,6 @@ java_proto_library(
         "aes_ctr_hmac_aead.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 # aes_gcm
@@ -149,7 +139,6 @@ cc_proto_library(
         "aes_gcm.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 java_proto_library(
@@ -158,7 +147,6 @@ java_proto_library(
         "aes_gcm.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 # aes_eax
@@ -169,7 +157,6 @@ cc_proto_library(
         "aes_eax.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 java_proto_library(
@@ -178,7 +165,6 @@ java_proto_library(
         "aes_eax.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 # googlecloudkms
@@ -189,7 +175,6 @@ cc_proto_library(
         "googlecloudkms.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 java_proto_library(
@@ -198,7 +183,6 @@ java_proto_library(
         "googlecloudkms.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 # kms_envelope
@@ -218,7 +202,6 @@ cc_proto_library(
         "kms_envelope.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 java_proto_library(
@@ -236,7 +219,6 @@ java_proto_library(
         "kms_envelope.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 # ECIES hybrid encryption with AEAD and HKDF
@@ -257,7 +239,6 @@ cc_proto_library(
         "ecies_aead_hkdf.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
 
 java_proto_library(
@@ -276,5 +257,4 @@ java_proto_library(
         "ecies_aead_hkdf.proto",
     ],
     verbose = 0,
-    with_grpc = False,
 )
