@@ -16,7 +16,7 @@ new_git_repository(
     name = "gtest",
     remote = "https://github.com/google/googletest.git",
     commit = "ed9d1e1ff92ce199de5ca2667a667cd0a368482a",
-    build_file = "//build:gtest.BUILD",
+    build_file = "//tools:gtest.BUILD",
 )
 
 load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_repositories")

@@ -16,6 +16,8 @@
 
 #include "cc/subtle/random.h"
 
+#include <string>
+
 namespace cloud {
 namespace crypto {
 namespace tink {

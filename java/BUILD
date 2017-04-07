@@ -86,7 +86,7 @@ java_library(
 
 # tests
 
-load("//build:gen_java_test_rules.bzl", "gen_java_test_rules")
+load("//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
 
 java_library(
     name = "generator_test",
