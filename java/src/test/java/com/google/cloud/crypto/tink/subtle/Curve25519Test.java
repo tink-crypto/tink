@@ -16,8 +16,8 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
-import static org.junit.Assert.assertEquals;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.crypto.tink.TestUtil;
 import org.junit.Test;

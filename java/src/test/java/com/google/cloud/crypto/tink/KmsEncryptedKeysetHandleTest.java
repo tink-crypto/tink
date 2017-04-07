@@ -28,7 +28,6 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
-import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import org.junit.Before;

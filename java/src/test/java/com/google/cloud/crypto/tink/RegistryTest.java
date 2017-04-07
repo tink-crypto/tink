@@ -130,7 +130,8 @@ public class RegistryTest {
 
     String badTypeUrl = "bad type URL";
     try {
-      KeyManager<Mac, MessageLite, MessageLite> unused = Registry.INSTANCE.getKeyManager(badTypeUrl);
+      KeyManager<Mac, MessageLite, MessageLite> unused =
+          Registry.INSTANCE.getKeyManager(badTypeUrl);
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("unsupported"));

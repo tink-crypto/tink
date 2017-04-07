@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.KeysetHandle;
-import com.google.cloud.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TestGoogleCredentialFactory;
 import com.google.cloud.crypto.tink.TestUtil;

@@ -25,7 +25,6 @@ import com.google.cloud.crypto.tink.subtle.EciesHkdfRecipientKem;
 import com.google.cloud.crypto.tink.subtle.HybridDecryptBase;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
-import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
 import java.util.Arrays;
 

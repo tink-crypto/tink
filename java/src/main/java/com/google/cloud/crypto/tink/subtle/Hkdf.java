@@ -17,7 +17,6 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import java.security.GeneralSecurityException;
-import java.security.interfaces.ECPublicKey;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 

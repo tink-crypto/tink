@@ -26,8 +26,6 @@ import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
