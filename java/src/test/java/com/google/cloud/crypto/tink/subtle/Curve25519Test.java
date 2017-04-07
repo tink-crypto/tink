@@ -17,6 +17,7 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.cloud.crypto.tink.TestUtil;
 import org.junit.Test;
@@ -111,5 +112,54 @@ public class Curve25519Test {
     byte[] privateKey = Curve25519.generatePrivateKey();
     assertEquals(7, privateKey[0] & 7);
     assertEquals(128, privateKey[31] & 192);
+  }
+
+  private static void x25519Helper(int privateKeyLen, int peersPublicValueLen, String errorMsg) {
+    byte[] privateKey = new byte[privateKeyLen];
+    byte[] base = new byte[peersPublicValueLen]; base[0] = 9;
+    try {
+      Curve25519.x25519(privateKey, base);
+    } catch (IllegalArgumentException expected) {
+      assertThat(expected).hasMessageThat().containsMatch(errorMsg);
+    }
+  }
+
+  @Test
+  public void testX25519ThrowsIllegalArgExceptionWhenPrivateKeySizeIsLessThan32Bytes() {
+    x25519Helper(31, 32, "Private key must have 32 bytes.");
+  }
+
+  @Test
+  public void testX25519ThrowsIllegalArgExceptionWhenPrivateKeySizeIsGreaterThan32Bytes() {
+    x25519Helper(33, 32, "Private key must have 32 bytes.");
+  }
+
+  @Test
+  public void testX25519ThrowsIllegalArgExceptionWhenPeersPublicValueIsLessThan32Bytes() {
+    x25519Helper(32, 31, "Peer's public key must have 32 bytes.");
+  }
+
+  @Test
+  public void testX25519ThrowsIllegalArgExceptionWhenPeersPublicValueIsGreaterThan32Bytes() {
+    x25519Helper(32, 33, "Peer's public key must have 32 bytes.");
+  }
+
+  private static void x25519PublicFromPrivateHelper(int privateKeyLen, String errorMsg) {
+    byte[] privateKey = new byte[privateKeyLen];
+    try {
+      Curve25519.x25519PublicFromPrivate(privateKey);
+    } catch (IllegalArgumentException expected) {
+      assertThat(expected).hasMessageThat().containsMatch(errorMsg);
+    }
+  }
+
+  @Test
+  public void testX25519PublicFromPrivateThrowsIllegalArgExWhenPrivateKeyIsLessThan32Bytes() {
+    x25519PublicFromPrivateHelper(31, "Private key must have 32 bytes.");
+  }
+
+  @Test
+  public void testX25519PublicFromPrivateThrowsIllegalArgExWhenPrivateKeyIsGreaterThan32Bytes() {
+    x25519PublicFromPrivateHelper(33, "Private key must have 32 bytes.");
   }
 }

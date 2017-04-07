@@ -16,6 +16,8 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.Arrays;
 
 /**
@@ -49,6 +51,7 @@ import java.util.Arrays;
  */
 public final class Curve25519 {
 
+  private static final int BYTE_LEN = 32;
   private static final int LIMB_CNT = 10;
   private static final long TWO_TO_25 = 1 << 25;
   private static final long TWO_TO_26 = TWO_TO_25 << 1;
@@ -462,7 +465,7 @@ public final class Curve25519 {
     for (int i = 0; i < LIMB_CNT; i++) {
       input[i] <<= EXPAND_SHIFT[i];
     }
-    byte[] output = new byte[32];
+    byte[] output = new byte[BYTE_LEN];
     for (int i = 0; i < LIMB_CNT; i++) {
       output[EXPAND_START[i]] |= input[i] & 0xff;
       output[EXPAND_START[i] + 1] |= (input[i] >> 8) & 0xff;
@@ -603,8 +606,8 @@ public final class Curve25519 {
 
     System.arraycopy(q, 0, nqpqx, 0, LIMB_CNT);
 
-    for (int i = 0; i < 32; i++) {
-      int b = n[31 - i] & 0xff;
+    for (int i = 0; i < BYTE_LEN; i++) {
+      int b = n[BYTE_LEN - i - 1] & 0xff;
       for (int j = 0; j < 8; j++) {
         int bit = (b >> (7 - j)) & 1;
 
@@ -738,7 +741,7 @@ public final class Curve25519 {
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
   public static byte[] generatePrivateKey() {
-    byte[] privateKey = Random.randBytes(32);
+    byte[] privateKey = Random.randBytes(BYTE_LEN);
 
     privateKey[0] |= 7;
     privateKey[31] &= 63;
@@ -753,14 +756,18 @@ public final class Curve25519 {
    * @param privateKey 32-byte private key
    * @param peersPublicValue 32-byte public value
    * @return the 32-byte shared key
+   * @throws IllegalArgumentException when either {@code privateKey} or {@code peersPublicValue} is
+   * not 32 bytes.
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
   public static byte[] x25519(byte[] privateKey, byte[] peersPublicValue) {
+    checkArgument(privateKey.length == BYTE_LEN, "Private key must have 32 bytes.");
+    checkArgument(peersPublicValue.length == BYTE_LEN, "Peer's public key must have 32 bytes.");
     long[] x = new long[LIMB_CNT];
     long[] z = new long[LIMB_CNT + 1];
     long[] zmone = new long[LIMB_CNT];
 
-    byte[] e = Arrays.copyOf(privateKey, 32);
+    byte[] e = Arrays.copyOf(privateKey, BYTE_LEN);
     e[0] &= 248;
     e[31] &= 127;
     e[31] |= 64;
@@ -773,14 +780,16 @@ public final class Curve25519 {
   }
 
   /**
-   * Returns the 32-byte Diffie-Hellman public value based on the given privateKey (i.e.,
-   * privateKey·[9] on the curve).
+   * Returns the 32-byte Diffie-Hellman public value based on the given  {@code privateKey} (i.e.,
+   * {@code privateKey}·[9] on the curve).
    *
    * @param privateKey 32-byte private key
    * @return 32-byte Diffie-Hellman public value
+   * @throws IllegalArgumentException when the {@code privateKey} is not 32 bytes.
    */
   public static byte[] x25519PublicFromPrivate(byte[] privateKey) {
-    byte[] base = new byte[32]; base[0] = 9;
+    checkArgument(privateKey.length == BYTE_LEN, "Private key must have 32 bytes.");
+    byte[] base = new byte[BYTE_LEN]; base[0] = 9;
     return x25519(privateKey, base);
   }
 }

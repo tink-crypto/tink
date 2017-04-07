@@ -141,5 +141,6 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         ":subtle",
+        "@com_google_guava//jar",
     ],
 )

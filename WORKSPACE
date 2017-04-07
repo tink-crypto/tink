@@ -78,3 +78,9 @@ maven_jar(
     artifact = "junit:junit:jar:4.12",
     sha1 = "2973d150c0dc1fefe998f834810d68f278ea58ec",
 )
+
+maven_jar(
+    name = "com_google_truth",
+    artifact = "com.google.truth:truth:jar:0.32",
+    sha1 = "e996fb4b41dad04365112786796c945f909cfdf7",
+)
