@@ -23,7 +23,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.api.services.cloudkms.v1.CloudKMSScopes;
-import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
+import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
@@ -130,16 +130,16 @@ public class TinkeyUtil {
   }
 
   /**
-   * @return a {@code KeyData} containing a {@code GoogleCloudKmsAeadKey}.
+   * @return a {@code KeyData} containing a {@code GcpKmsAeadKey}.
    */
-  public static KeyData createGoogleCloudKmsAeadKeyData(String kmsKeyUri)
+  public static KeyData createGcpKmsAeadKeyData(String kmsKeyUri)
       throws Exception {
-    GoogleCloudKmsAeadKey keyProto = GoogleCloudKmsAeadKey.newBuilder()
+    GcpKmsAeadKey keyProto = GcpKmsAeadKey.newBuilder()
         .setKmsKeyUri(kmsKeyUri)
         .build();
     return createKeyData(
         keyProto,
-        "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
+        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
         KeyData.KeyMaterialType.REMOTE);
   }
 

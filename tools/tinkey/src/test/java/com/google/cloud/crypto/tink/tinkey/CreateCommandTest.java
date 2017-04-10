@@ -23,7 +23,7 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.cloud.crypto.tink.CleartextKeysetHandle;
-import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
+import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.KmsEncryptedKeysetHandle;
 import com.google.cloud.crypto.tink.Registry;
@@ -35,7 +35,7 @@ import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
-import com.google.cloud.crypto.tink.aead.GoogleCloudKmsAeadKeyManager;
+import com.google.cloud.crypto.tink.aead.GcpKmsAeadKeyManager;
 import com.google.cloud.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
@@ -64,8 +64,8 @@ public class CreateCommandTest {
     PublicKeyVerifyFactory.registerStandardKeyTypes();
 
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
-        new GoogleCloudKmsAeadKeyManager(new TestGoogleCredentialFactory()));
+        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
+        new GcpKmsAeadKeyManager(new TestGoogleCredentialFactory()));
   }
 
   @Test
@@ -127,10 +127,10 @@ public class CreateCommandTest {
     TextFormat.merge(outputStream.toString(), builder);
     KmsEncryptedKeyset encryptedKeyset = builder.build();
     KeyData kmsKey = encryptedKeyset.getKmsKey();
-    assertEquals("type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
+    assertEquals("type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
         kmsKey.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.REMOTE, kmsKey.getKeyMaterialType());
-    GoogleCloudKmsAeadKey cloudKey = GoogleCloudKmsAeadKey.parseFrom(kmsKey.getValue());
+    GcpKmsAeadKey cloudKey = GcpKmsAeadKey.parseFrom(kmsKey.getValue());
     assertEquals(gcpKmsMasterKeyValue, cloudKey.getKmsKeyUri());
 
     KeysetInfo keysetInfo = encryptedKeyset.getKeysetInfo();

@@ -17,7 +17,7 @@
 package com.google.cloud.crypto.tink.aead;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
+import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
 import java.io.IOException;
 
 /**
@@ -25,5 +25,5 @@ import java.io.IOException;
  * {@code key}.
  */
 public interface GoogleCredentialFactory {
-  GoogleCredential getCredential(GoogleCloudKmsAeadKey key) throws IOException;
+  GoogleCredential getCredential(GcpKmsAeadKey key) throws IOException;
 }

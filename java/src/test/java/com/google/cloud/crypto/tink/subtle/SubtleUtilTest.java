@@ -38,7 +38,7 @@ public class SubtleUtilTest {
       assertTrue(e.toString().contains("Invalid Google Cloud KMS Key URI"));
     }
 
-    String cryptoKey = TestUtil.createGoogleCloudKmsKeyUri(
+    String cryptoKey = TestUtil.createGcpKmsKeyUri(
         "projectId", "locationId", "ringId", "cryptoKeyId");
     try {
       SubtleUtil.validateCloudKmsCryptoKeyUri(cryptoKey);

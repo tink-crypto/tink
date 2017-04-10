@@ -47,12 +47,12 @@ public class KmsEnvelopeAeadKeyManagerTest {
   public void setUp() throws GeneralSecurityException {
     AeadFactory.registerStandardKeyTypes();
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
-        new GoogleCloudKmsAeadKeyManager(new TestGoogleCredentialFactory()));
+        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
+        new GcpKmsAeadKeyManager(new TestGoogleCredentialFactory()));
   }
 
   @Test
-  public void testGoogleCloudKmsKeyRestricted() throws Exception {
+  public void testGcpKmsKeyRestricted() throws Exception {
     // This key is restricted, use the cred of
     // tink-unit-tests@testing-cloud-kms-159306.iam.gserviceaccount.com.
     int aesKeySize = 16;
@@ -61,7 +61,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
     int tagSize = 16;
     KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
         aesKeySize, ivSize, hmacKeySize, tagSize);
-    KeyData kmsKey = TestUtil.createGoogleCloudKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED);
+    KeyData kmsKey = TestUtil.createGcpKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
@@ -82,7 +82,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
     int tagSize = 16;
     KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
         aesKeySize, ivSize, hmacKeySize, tagSize);
-    KeyData kmsKey = TestUtil.createGoogleCloudKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED);
+    KeyData kmsKey = TestUtil.createGcpKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(

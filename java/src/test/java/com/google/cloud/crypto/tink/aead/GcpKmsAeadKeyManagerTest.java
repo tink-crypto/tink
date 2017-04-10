@@ -30,26 +30,26 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for GoogleCloudKmsAead and its key manager.
+ * Tests for GcpKmsAead and its key manager.
  */
 @RunWith(JUnit4.class)
-public class GoogleCloudKmsAeadKeyManagerTest {
+public class GcpKmsAeadKeyManagerTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
-        new GoogleCloudKmsAeadKeyManager(new TestGoogleCredentialFactory()));
+        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
+        new GcpKmsAeadKeyManager(new TestGoogleCredentialFactory()));
   }
 
   @Test
-  public void testGoogleCloudKmsKeyRestricted() throws Exception {
+  public void testGcpKmsKeyRestricted() throws Exception {
     // This key is restricted, use the cred of
     // tink-unit-tests@testing-cloud-kms-159306.iam.gserviceaccount.com.
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createGoogleCloudKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED),
+                TestUtil.createGcpKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));

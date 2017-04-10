@@ -18,7 +18,7 @@ package com.example.envelopeme;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.cloudkms.v1.CloudKMSScopes;
-import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
+import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
 import com.google.cloud.crypto.tink.aead.GoogleCredentialFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class EnvelopeMeGoogleCredentialFactory implements GoogleCredentialFactor
    * Depending on {@code key}, produces either a default credential or a hardcoded one.
    */
   @Override
-  public GoogleCredential getCredential(GoogleCloudKmsAeadKey key) throws IOException {
+  public GoogleCredential getCredential(GcpKmsAeadKey key) throws IOException {
     GoogleCredential cred = createGoogleCredential(this.serviceAccount);
     // Depending on the environment that provides the default credentials (e.g. Compute Engine, App
     // Engine), the credentials may require us to specify the scopes we need explicitly.

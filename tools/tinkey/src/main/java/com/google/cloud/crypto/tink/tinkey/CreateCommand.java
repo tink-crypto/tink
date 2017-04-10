@@ -21,7 +21,7 @@ import com.google.cloud.crypto.tink.KeysetManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
-import com.google.cloud.crypto.tink.subtle.GoogleCloudKmsAead;
+import com.google.cloud.crypto.tink.subtle.GcpKmsAead;
 import com.google.protobuf.Message;
 import java.io.File;
 import java.io.OutputStream;
@@ -85,11 +85,11 @@ public class CreateCommand extends CreateOptions implements Command {
         .setKeyTemplate(keyTemplate)
         .build()
         .rotate();
-    GoogleCloudKmsAead aead = new GoogleCloudKmsAead(
+    GcpKmsAead aead = new GcpKmsAead(
         TinkeyUtil.createCloudKmsClient(credentialFile), gcpKmsMasterKeyUriValue);
     KeysetHandle handle = manager.getKeysetHandle(aead);
     return TinkeyUtil.createKmsEncryptedKeyset(
-        TinkeyUtil.createGoogleCloudKmsAeadKeyData(gcpKmsMasterKeyUriValue),
+        TinkeyUtil.createGcpKmsAeadKeyData(gcpKmsMasterKeyUriValue),
         handle);
   }
 

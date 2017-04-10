@@ -42,7 +42,7 @@ import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
-import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
+import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.HmacProto.HmacParams;
@@ -230,16 +230,16 @@ public class TestUtil {
   }
 
   /**
-   * @return a {@code KeyData} containing a {@code GoogleCloudKmsAeadKey}.
+   * @return a {@code KeyData} containing a {@code GcpKmsAeadKey}.
    */
-  public static KeyData createGoogleCloudKmsAeadKeyData(String kmsKeyUri)
+  public static KeyData createGcpKmsAeadKeyData(String kmsKeyUri)
       throws Exception {
-    GoogleCloudKmsAeadKey keyProto = GoogleCloudKmsAeadKey.newBuilder()
+    GcpKmsAeadKey keyProto = GcpKmsAeadKey.newBuilder()
         .setKmsKeyUri(kmsKeyUri)
         .build();
     return createKeyData(
         keyProto,
-        "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
+        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
         KeyData.KeyMaterialType.REMOTE);
   }
 
@@ -335,7 +335,7 @@ public class TestUtil {
   /**
    * @return a KMS key URI in a format defined by Google Cloud KMS.
    */
-  public static String createGoogleCloudKmsKeyUri(
+  public static String createGcpKmsKeyUri(
     String projectId, String location, String ringId, String keyId) {
     return String.format(
         "projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",

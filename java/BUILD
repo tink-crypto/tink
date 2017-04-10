@@ -54,7 +54,7 @@ java_library(
         "//proto:java_common",
         "//proto:java_ecdsa",
         "//proto:java_ecies_aead_hkdf",
-        "//proto:java_googlecloudkms",
+        "//proto:java_gcp_kms",
         "//proto:java_hmac",
         "//proto:java_kms_envelope",
         "//proto:java_tink",

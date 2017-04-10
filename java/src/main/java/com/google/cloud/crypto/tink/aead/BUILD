@@ -12,7 +12,7 @@ JAVACOPTS = [
 ]
 
 AEAD_ENVELOPE_SRCS = [
-    "GoogleCloudKmsAeadKeyManager.java",
+    "GcpKmsAeadKeyManager.java",
     "GoogleCredentialFactory.java",
 ]
 
@@ -55,7 +55,7 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_envelope_subtle",
         "//proto:java_common",
-        "//proto:java_googlecloudkms",
+        "//proto:java_gcp_kms",
         "//proto:java_tink",
         "//proto:java_tink_compile_imports",
         "@com_google_api_client//jar",

@@ -172,20 +172,20 @@ java_proto_library(
     verbose = 0,
 )
 
-# googlecloudkms
+# gcp_kms
 
 cc_proto_library(
-    name = "cc_googlecloudkms",
+    name = "cc_gcp_kms",
     protos = [
-        "googlecloudkms.proto",
+        "gcp_kms.proto",
     ],
     verbose = 0,
 )
 
 java_proto_library(
-    name = "java_googlecloudkms",
+    name = "java_gcp_kms",
     protos = [
-        "googlecloudkms.proto",
+        "gcp_kms.proto",
     ],
     verbose = 0,
 )

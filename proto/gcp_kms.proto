@@ -19,15 +19,15 @@ syntax = "proto3";
 package google.cloud.crypto.tink;
 
 option java_package = "com.google.cloud.crypto.tink";
-option java_outer_classname = "GoogleCloudKmsProto";
+option java_outer_classname = "GcpKmsProto";
 
-message GoogleCloudKmsAeadParams {
+message GcpKmsAeadParams {
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey
-message GoogleCloudKmsAeadKey {
+// key_type: type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey
+message GcpKmsAeadKey {
   int32 version = 1;
-  GoogleCloudKmsAeadParams params = 2;
+  GcpKmsAeadParams params = 2;
   // Required.
   // The location of a CryptoKey in Google Cloud KMS.
   // Valid values have this format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
@@ -37,6 +37,6 @@ message GoogleCloudKmsAeadKey {
   string kms_key_uri = 3;
 }
 
-message GoogleCloudKmsAeadKeyFormat {
-  GoogleCloudKmsAeadParams params = 1;
+message GcpKmsAeadKeyFormat {
+  GcpKmsAeadParams params = 1;
 }

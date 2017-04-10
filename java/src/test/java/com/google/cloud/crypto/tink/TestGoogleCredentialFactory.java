@@ -18,7 +18,7 @@ package com.google.cloud.crypto.tink;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.cloudkms.v1.CloudKMSScopes;
-import com.google.cloud.crypto.tink.GoogleCloudKmsProto.GoogleCloudKmsAeadKey;
+import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
 import com.google.cloud.crypto.tink.aead.GoogleCredentialFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -29,14 +29,14 @@ import java.nio.charset.StandardCharsets;
  */
 public class TestGoogleCredentialFactory implements GoogleCredentialFactory {
   // This key is restricted to the service account created by {@code createGoogleCredential}.
-  public static final String RESTRICTED = TestUtil.createGoogleCloudKmsKeyUri(
+  public static final String RESTRICTED = TestUtil.createGcpKmsKeyUri(
       "testing-cloud-kms-159306", "global", "tink_unit_tests", "restricted");
 
   /**
    * Depending on {@code key}, produces either a default credential or a hardcoded one.
    */
   @Override
-  public GoogleCredential getCredential(GoogleCloudKmsAeadKey key) throws IOException {
+  public GoogleCredential getCredential(GcpKmsAeadKey key) throws IOException {
     GoogleCredential cred;
     if (key.getKmsKeyUri().equals(RESTRICTED)) {
       cred = createGoogleCredential();

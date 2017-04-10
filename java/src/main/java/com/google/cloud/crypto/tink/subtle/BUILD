@@ -51,7 +51,7 @@ java_library(
     name = "aead_envelope_subtle",
     srcs = [
         "AeadBase.java",
-        "GoogleCloudKmsAead.java",
+        "GcpKmsAead.java",
     ],
     javacopts = JAVACOPTS,
     deps = [

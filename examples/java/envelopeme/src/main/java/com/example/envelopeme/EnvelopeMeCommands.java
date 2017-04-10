@@ -15,7 +15,7 @@
 package com.example.envelopeme;
 
 import com.google.cloud.crypto.tink.Registry;
-import com.google.cloud.crypto.tink.aead.GoogleCloudKmsAeadKeyManager;
+import com.google.cloud.crypto.tink.aead.GcpKmsAeadKeyManager;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,8 +65,8 @@ class EnvelopeMeCommands {
     @Override
     public void run() throws Exception {
       Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
-        new GoogleCloudKmsAeadKeyManager(
+        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
+        new GcpKmsAeadKeyManager(
             new EnvelopeMeGoogleCredentialFactory(
                 Files.readAllBytes(credentialFile.toPath()))));
 
@@ -87,8 +87,8 @@ class EnvelopeMeCommands {
     @Override
     public void run() throws Exception {
       Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.GoogleCloudKmsAeadKey",
-        new GoogleCloudKmsAeadKeyManager(
+        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
+        new GcpKmsAeadKeyManager(
             new EnvelopeMeGoogleCredentialFactory(
                 Files.readAllBytes(credentialFile.toPath()))));
 
