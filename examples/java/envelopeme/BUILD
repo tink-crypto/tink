@@ -14,6 +14,7 @@ java_binary(
     main_class = "com.example.envelopeme.EnvelopeMe",
     deps = [
         "//java",
+        "//java:protos",
         "//java:subtle",
         "@args4j//jar",
         "@com_google_api_client//jar",

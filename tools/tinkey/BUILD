@@ -19,6 +19,7 @@ java_library(
     deps = [
         "//java",
         "//java:key_management_restricted",
+        "//java:protos",
         "//java:subtle",
         "@args4j//jar",
         "@com_google_api_client//jar",
@@ -60,6 +61,7 @@ java_library(
         "//java",
         "//java:key_management_restricted",
         "//java:keyset_handle_restricted",
+        "//java:protos",
         "//java:subtle",
         "@args4j//jar",
         "@com_fasterxml_jackson_core//jar",

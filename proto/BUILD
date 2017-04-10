@@ -1,6 +1,11 @@
 licenses(["notice"])  # Apache 2.0
 
-package(default_visibility = ["//visibility:public"])
+package(
+    default_visibility = [
+        "//cc:__subpackages__",
+        "//java:__subpackages__",
+    ],
+)
 
 load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
 load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_library")

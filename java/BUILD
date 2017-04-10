@@ -20,6 +20,34 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:hybridencrypt",
         "//java/src/main/java/com/google/cloud/crypto/tink/mac",
         "//java/src/main/java/com/google/cloud/crypto/tink/signature",
+    ],
+)
+
+# like :java, but includes protos, restricted APIs and subtle
+java_library(
+    name = "testonly",
+    testonly = 1,
+    visibility = [
+        "//visibility:public",
+    ],
+    exports = [
+        ":java",
+        ":key_management_restricted",
+        ":keyset_handle_restricted",
+        ":protos",
+        ":subtle",
+    ],
+)
+
+# restricted
+
+java_library(
+    name = "protos",
+    visibility = [
+        "//examples/java/envelopeme:__pkg__",
+        "//tools/tinkey:__pkg__",
+    ],
+    exports = [
         "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_aes_eax",
         "//proto:java_aes_gcm",
@@ -33,23 +61,6 @@ java_library(
         "//proto:java_tink_compile_imports",
     ],
 )
-
-# like :java, but includes restricted APIs and subtle
-java_library(
-    name = "testonly",
-    testonly = 1,
-    visibility = [
-        "//visibility:public",
-    ],
-    exports = [
-        ":java",
-        ":key_management_restricted",
-        ":keyset_handle_restricted",
-        ":subtle",
-    ],
-)
-
-# restricted
 
 java_library(
     name = "subtle",
