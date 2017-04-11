@@ -17,7 +17,6 @@
 package com.google.cloud.crypto.tink.subtle;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.common.base.Optional;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -46,7 +45,7 @@ public class ServiceAccountGcpCredentialFactory implements GcpCredentialFactory 
     } else {
       cred = GoogleCredential.getApplicationDefault();
     }
-    cred = cred.createScoped(CloudKMSScopes.all());
+    cred = cred.createScoped(GcpScopes.all());
     return cred;
   }
 

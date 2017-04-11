@@ -71,12 +71,12 @@ java_library(
     name = "gcp_credential",
     srcs = [
         "GcpCredentialFactory.java",
+        "GcpScopes.java",
         "ServiceAccountGcpCredentialFactory.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
         "@com_google_api_client//jar",
-        "@com_google_cloudkms//jar",
         "@com_google_guava//jar",
         "@com_google_http_client//jar",
         "@com_google_oauth_client//jar",
