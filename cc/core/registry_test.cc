@@ -22,7 +22,6 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
-#include "google/protobuf/message_lite.h"
 #include "google/protobuf/stubs/stringpiece.h"
 #include "gtest/gtest.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"

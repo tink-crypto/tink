@@ -26,7 +26,6 @@
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/validation.h"
-#include "google/protobuf/message_lite.h"
 #include "google/protobuf/stubs/singleton.h"
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
