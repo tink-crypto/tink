@@ -39,7 +39,7 @@ public class TestGoogleCredentialFactory implements GoogleCredentialFactory {
   // This is a credential of a service account that is granted access to
   // {@code RESTRICTED_CRYPTO_KEY_URI}.
   public static final File CREDENTIAL_FILE = Paths.get(
-      "tools/tinkey/src/test/java/com/google/cloud/crypto/tink/tinkey/testdata/credential.json")
+      "testdata/credential.json")
       .toFile();
 
 

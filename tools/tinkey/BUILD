@@ -74,7 +74,7 @@ java_library(
 
 gen_java_test_rules(
     data = [
-        ":src/test/java/com/google/cloud/crypto/tink/tinkey/testdata/credential.json",
+        "//testdata:credentials",
     ],
     test_files = glob([
         "src/test/**/*Test.java",
