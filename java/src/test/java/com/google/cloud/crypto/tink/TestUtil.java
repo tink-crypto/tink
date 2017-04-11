@@ -57,9 +57,12 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
 import com.google.cloud.crypto.tink.subtle.Random;
+import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import java.io.File;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -78,6 +81,17 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class TestUtil {
+  // This GCP KMS CryptoKey is restricted to the service account in {@code SERVICE_ACCOUNT_FILE}.
+  public static final String RESTRICTED_CRYPTO_KEY_URI = String.format(
+        "projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+        "testing-cloud-kms-159306", "global", "tink_unit_tests", "restricted");
+
+  // This is a credential of a service account that is granted access to
+  // {@code RESTRICTED_CRYPTO_KEY_URI}.
+  public static final Optional<File> SERVICE_ACCOUNT_FILE = Optional.of(Paths.get(
+      "testdata/credential.json")
+      .toFile());
+
   /**
    * A dummy Aead-implementation that just throws exception.
    */

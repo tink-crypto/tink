@@ -14,16 +14,18 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.cloud.crypto.tink.aead;
+package com.google.cloud.crypto.tink.subtle;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
 import java.io.IOException;
 
 /**
- * This interface produces a {@code GoogleCredential} based on information from
- * {@code key}.
+ * This interface produces {@code GoogleCredential} that can be used to authorize
+ * calls to Google Cloud.
  */
-public interface GoogleCredentialFactory {
-  GoogleCredential getCredential(GcpKmsAeadKey key) throws IOException;
+public interface GcpCredentialFactory {
+  /**
+   * Produces {@code GoogleCredential} for the Google Cloud KMS key at {@code kmsKeyUri}.
+   */
+  public GoogleCredential createCredential(String kmsKeyUri) throws IOException;
 }

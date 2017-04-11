@@ -27,7 +27,7 @@ java_library(
     deps = [
         "//java/src/main/java/com/google/cloud/crypto/tink",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:signature_subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:signature",
         "//proto:java_common",
         "//proto:java_ecdsa",
         "//proto:java_tink",

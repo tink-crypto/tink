@@ -28,7 +28,7 @@ java_library(
 # aead subtle
 
 java_library(
-    name = "aead_subtle",
+    name = "aead",
     srcs = [
         "AeadBase.java",
         "AesCtrJceCipher.java",
@@ -48,7 +48,7 @@ java_library(
 # aead envelope subtle
 
 java_library(
-    name = "aead_envelope_subtle",
+    name = "aead_envelope",
     srcs = [
         "AeadBase.java",
         "GcpKmsAead.java",
@@ -65,10 +65,28 @@ java_library(
     ],
 )
 
+# Google credential subtle
+
+java_library(
+    name = "gcp_credential",
+    srcs = [
+        "GcpCredentialFactory.java",
+        "ServiceAccountGcpCredentialFactory.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        "@com_google_api_client//jar",
+        "@com_google_cloudkms//jar",
+        "@com_google_guava//jar",
+        "@com_google_http_client//jar",
+        "@com_google_oauth_client//jar",
+    ],
+)
+
 # mac subtle
 
 java_library(
-    name = "mac_subtle",
+    name = "mac",
     srcs = [
         "MacJce.java",
     ],
@@ -82,7 +100,7 @@ java_library(
 # signature subtle
 
 java_library(
-    name = "signature_subtle",
+    name = "signature",
     srcs = [
         "EcUtil.java",
         "EcdsaSignJce.java",
@@ -98,7 +116,7 @@ java_library(
 # hybridencrypt subtle
 
 java_library(
-    name = "hybridencrypt_subtle",
+    name = "hybridencrypt",
     srcs = [
         "EcUtil.java",
         "EciesHkdfSenderKem.java",
@@ -116,7 +134,7 @@ java_library(
 # hybriddecrypt subtle
 
 java_library(
-    name = "hybriddecrypt_subtle",
+    name = "hybriddecrypt",
     srcs = [
         "EcUtil.java",
         "EciesHkdfRecipientKem.java",
@@ -134,7 +152,7 @@ java_library(
 # x25519 subtle
 
 java_library(
-    name = "x25519_subtle",
+    name = "x25519",
     srcs = [
         "Curve25519.java",
     ],

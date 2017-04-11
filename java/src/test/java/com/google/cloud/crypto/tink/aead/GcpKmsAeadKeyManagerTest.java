@@ -19,10 +19,10 @@ package com.google.cloud.crypto.tink.aead;
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.Registry;
-import com.google.cloud.crypto.tink.TestGoogleCredentialFactory;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.subtle.ServiceAccountGcpCredentialFactory;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,22 +39,29 @@ public class GcpKmsAeadKeyManagerTest {
   public void setUp() throws GeneralSecurityException {
     Registry.INSTANCE.registerKeyManager(
         "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
-        new GcpKmsAeadKeyManager(new TestGoogleCredentialFactory()));
+        new GcpKmsAeadKeyManager(new ServiceAccountGcpCredentialFactory(
+            TestUtil.SERVICE_ACCOUNT_FILE)));
   }
 
   @Test
   public void testGcpKmsKeyRestricted() throws Exception {
-    // This key is restricted, use the cred of
-    // tink-unit-tests@testing-cloud-kms-159306.iam.gserviceaccount.com.
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
             TestUtil.createKey(
-                TestUtil.createGcpKmsAeadKeyData(TestGoogleCredentialFactory.RESTRICTED),
+                // This key is restricted to {@code TestUtil.SERVICE_ACCOUNT_FILE}.
+                TestUtil.createGcpKmsAeadKeyData(TestUtil.RESTRICTED_CRYPTO_KEY_URI),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));
 
     Aead aead = AeadFactory.getPrimitive(keysetHandle);
+    TestUtil.runBasicTests(aead);
+
+    // Now with {@code GcpKmsAeadKeyManager} as a custom key manager.
+    GcpKmsAeadKeyManager customKeyManager =
+        new GcpKmsAeadKeyManager(new ServiceAccountGcpCredentialFactory(
+            TestUtil.SERVICE_ACCOUNT_FILE));
+    aead = AeadFactory.getPrimitive(keysetHandle);
     TestUtil.runBasicTests(aead);
   }
 }

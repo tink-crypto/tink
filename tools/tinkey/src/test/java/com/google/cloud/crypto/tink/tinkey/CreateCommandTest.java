@@ -27,6 +27,7 @@ import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.KmsEncryptedKeysetHandle;
 import com.google.cloud.crypto.tink.Registry;
+import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
@@ -41,6 +42,7 @@ import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.signature.PublicKeySignFactory;
 import com.google.cloud.crypto.tink.signature.PublicKeyVerifyFactory;
+import com.google.cloud.crypto.tink.subtle.ServiceAccountGcpCredentialFactory;
 import com.google.protobuf.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -65,7 +67,8 @@ public class CreateCommandTest {
 
     Registry.INSTANCE.registerKeyManager(
         "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
-        new GcpKmsAeadKeyManager(new TestGoogleCredentialFactory()));
+        new GcpKmsAeadKeyManager(
+            new ServiceAccountGcpCredentialFactory(TestUtil.SERVICE_ACCOUNT_FILE)));
   }
 
   @Test
@@ -116,9 +119,9 @@ public class CreateCommandTest {
     String keyFormat = "key_size: 16";
     KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(typeUrl, keyFormat);
     String awsKmsMasterKeyValue = null;
-    String gcpKmsMasterKeyValue = TestGoogleCredentialFactory.RESTRICTED_CRYPTO_KEY_URI;
-    // This is the service account allowed to access the key master key above.
-    File credentialFile = TestGoogleCredentialFactory.CREDENTIAL_FILE;
+    String gcpKmsMasterKeyValue = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
+    // This is the service account allowed to access the Google Cloud master key above.
+    File credentialFile = TestUtil.SERVICE_ACCOUNT_FILE.get();
 
     String outFormat = "TEXT";
     CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,

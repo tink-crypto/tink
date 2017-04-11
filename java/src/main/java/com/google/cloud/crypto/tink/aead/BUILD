@@ -13,7 +13,6 @@ JAVACOPTS = [
 
 AEAD_ENVELOPE_SRCS = [
     "GcpKmsAeadKeyManager.java",
-    "GoogleCredentialFactory.java",
 ]
 
 filegroup(
@@ -34,7 +33,7 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink",
         "//java/src/main/java/com/google/cloud/crypto/tink/mac",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead",
         "//proto:java_aes_ctr_hmac_aead",
         "//proto:java_aes_eax",
         "//proto:java_aes_gcm",
@@ -53,7 +52,8 @@ java_library(
     deps = [
         "//java/src/main/java/com/google/cloud/crypto/tink",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_envelope_subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_envelope",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:gcp_credential",
         "//proto:java_common",
         "//proto:java_gcp_kms",
         "//proto:java_tink",

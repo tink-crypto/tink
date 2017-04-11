@@ -23,22 +23,6 @@ java_library(
     ],
 )
 
-# like :java, but includes protos, restricted APIs and subtle
-java_library(
-    name = "testonly",
-    testonly = 1,
-    visibility = [
-        "//visibility:public",
-    ],
-    exports = [
-        ":java",
-        ":key_management_restricted",
-        ":keyset_handle_restricted",
-        ":protos",
-        ":subtle",
-    ],
-)
-
 # restricted
 
 java_library(
@@ -70,13 +54,14 @@ java_library(
     ],
     exports = [
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_envelope_subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybriddecrypt_subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybridencrypt_subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:mac_subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:signature_subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:x25519_subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_envelope",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:gcp_credential",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybriddecrypt",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybridencrypt",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:mac",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:signature",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:x25519",
     ],
 )
 
@@ -97,6 +82,40 @@ java_library(
     ],
     exports = [
         "//java/src/main/java/com/google/cloud/crypto/tink:key_management_restricted",
+    ],
+)
+
+# targets for tests
+
+# like :java, but includes protos, restricted APIs and subtle
+java_library(
+    name = "testonly",
+    testonly = 1,
+    visibility = [
+        "//visibility:public",
+    ],
+    exports = [
+        ":java",
+        ":key_management_restricted",
+        ":keyset_handle_restricted",
+        ":protos",
+        ":subtle",
+    ],
+)
+
+java_library(
+    name = "test_util",
+    testonly = 1,
+    srcs = glob([
+        "src/test/**/TestUtil.java",
+    ]),
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        ":testonly",
+        "@com_google_guava//jar",
+        "@junit_junit_4//jar",
     ],
 )
 
@@ -124,6 +143,9 @@ java_library(
 # Anything in test_files will be a small sized test unless specified in an explicit category.
 # Don't hesitate to increase the length when writing legitimately longer tests.
 gen_java_test_rules(
+    data = [
+        "//testdata:credentials",
+    ],
     default_test_size = "small",
     medium_tests = [
         "src/test/java/com/google/cloud/crypto/tink/subtle/AesGcmJceTest",
