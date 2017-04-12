@@ -36,7 +36,7 @@ namespace test {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Converts a hexadecimal string into a string of bytes.
-// Returns a status if the size of the input is odd or it the input contains
+// Returns a status if the size of the input is odd or if the input contains
 // characters that are not hexadecimal.
 util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex) {
   if (hex.size() % 2 != 0) {

@@ -45,7 +45,7 @@ static util::StatusOr<const EVP_MD*> EvpHash(HashType hash_type) {
     case HashType::SHA224: return EVP_sha224();
     case HashType::SHA256: return EVP_sha256();
     case HashType::SHA512: return EVP_sha512();
-    default: 
+    default:
       return util::Status(util::error::UNIMPLEMENTED, "Unsupported hash");
   }
 }
@@ -86,7 +86,7 @@ util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     // TODO(bleichen): We expect that BoringSSL supports the
     //   hashes that we use. Maybe we should have a status that indicates
     //   such mismatches between expected and actual behaviour.
-    return util::Status(util::error::UNIMPLEMENTED, "HMAC failed");
+    return util::Status(util::error::INTERNAL, "BoringSSL failed to compute HMAC");
   }
   return std::string(reinterpret_cast<char *>(buf), tag_size_);
 }
@@ -104,7 +104,7 @@ util::Status HmacBoringSsl::VerifyMac(
            reinterpret_cast<const uint8_t*>(data.data()), data.size(),
            buf, &out_len);
   if (res == nullptr) {
-    return util::Status(util::error::UNIMPLEMENTED, "HMAC failed");
+    return util::Status(util::error::INTERNAL, "BoringSSL failed to compute HMAC");
   }
   uint8_t diff = 0;
   for (int i = 0; i < tag_size_; i++) {
@@ -113,8 +113,7 @@ util::Status HmacBoringSsl::VerifyMac(
   if (diff == 0) {
     return util::Status::OK;
   } else {
-    // TODO(bleichen): We should have a status for failed verification.
-    return util::Status(util::error::UNKNOWN, "verification failed");
+    return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
   }
 }
 

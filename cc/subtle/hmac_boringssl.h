@@ -52,7 +52,7 @@ class HmacBoringSsl : public Mac {
   HmacBoringSsl() {}
   HmacBoringSsl(const EVP_MD* md, int tag_size, const std::string& key_value);
 
-  // HmacBoringSsl is not owner of md. These are singletons owned by BoringSSL.
+  // HmacBoringSsl is not owner of md (it is owned by BoringSSL).
   const EVP_MD* md_;
   int tag_size_;
   std::string key_value_;

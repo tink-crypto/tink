@@ -34,7 +34,7 @@ namespace {
 
 class HmacBoringSslTest : public ::testing::Test {
  public:
-  // utility to simplify testing with test vectors.
+  // Utility to simplify testing with test vectors.
   // Arguments and result are hexadecimal.
   bool HmacVerifyHex(
       HashType hash,
