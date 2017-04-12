@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 licenses(["notice"])  # Apache 2.0
 
 JAVACOPTS = [
@@ -129,6 +131,9 @@ java_library(
     srcs = glob([
         "src/test/**/*.java",
     ]),
+    visibility = [
+        "//visibility:private",
+    ],
     deps = [
         ":testonly",
         "@com_fasterxml_jackson_core//jar",
