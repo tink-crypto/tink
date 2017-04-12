@@ -125,8 +125,7 @@ TEST_F(HmacKeyManagerTest, testPrimitives) {
     EXPECT_TRUE(result.ok()) << result.status();
     auto hmac = std::move(result.ValueOrDie());
     auto hmac_result = hmac->ComputeMac("some data");
-    EXPECT_FALSE(hmac_result.ok());
-    EXPECT_EQ(util::error::UNKNOWN, hmac_result.status().error_code());
+    EXPECT_TRUE(hmac_result.ok());
   }
 
   {  // Using KeyData proto.
@@ -137,8 +136,7 @@ TEST_F(HmacKeyManagerTest, testPrimitives) {
     EXPECT_TRUE(result.ok()) << result.status();
     auto hmac = std::move(result.ValueOrDie());
     auto hmac_result = hmac->ComputeMac("some data");
-    EXPECT_FALSE(hmac_result.ok());
-    EXPECT_EQ(util::error::UNKNOWN, hmac_result.status().error_code());
+    EXPECT_TRUE(hmac_result.ok());
   }
 }
 

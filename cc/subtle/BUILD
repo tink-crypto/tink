@@ -11,6 +11,7 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:test_util",
         "//proto:cc_common",
         "@boringssl//:crypto",
     ],

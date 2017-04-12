@@ -23,6 +23,7 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
+#include "openssl/evp.h"
 #include "proto/common.pb.h"
 
 namespace cloud {
@@ -49,10 +50,10 @@ class HmacBoringSsl : public Mac {
 
  private:
   HmacBoringSsl() {}
-  HmacBoringSsl(google::cloud::crypto::tink::HashType hash_type,
-              int tag_size, const std::string& key_value);
+  HmacBoringSsl(const EVP_MD* md, int tag_size, const std::string& key_value);
 
-  google::cloud::crypto::tink::HashType hash_type_;
+  // HmacBoringSsl is not owner of md. These are singletons owned by BoringSSL.
+  const EVP_MD* md_;
   int tag_size_;
   std::string key_value_;
 };
