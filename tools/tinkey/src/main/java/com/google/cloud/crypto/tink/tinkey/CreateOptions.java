@@ -38,20 +38,21 @@ class CreateOptions extends OutOptions {
 
   @Option(name = "--gcp-kms-key-uri",
       required = false,
-      usage = "The Google Cloud KMS master key to encrypt the keyset with.",
-      forbids = {"--aws-kms-key-arn"})
+      usage = "The Google Cloud KMS master key to encrypt the keyset with.")
   String gcpKmsMasterKeyUriValue;
 
   @Option(name = "--aws-kms-key-arn",
       required = false,
-      usage = "The AWS KMS master key to encrypt the keyset with.",
-      forbids = {"--gcp-kms-key-uri"})
+      usage = "The AWS KMS master key to encrypt the keyset with.")
   String awsKmsMasterKeyUriValue;
 
   @Override
   void validate() {
     super.validate();
     try {
+      if (gcpKmsMasterKeyUriValue != null && awsKmsMasterKeyUriValue != null) {
+        SubtleUtil.die("Cannot set both --gcp-kms-key-uri and --aws-kms-key-arn");
+      }
       if (gcpKmsMasterKeyUriValue != null) {
         SubtleUtil.validateCloudKmsCryptoKeyUri(gcpKmsMasterKeyUriValue);
       }

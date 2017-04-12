@@ -61,7 +61,7 @@ public class GcpKmsAeadKeyManagerTest {
     GcpKmsAeadKeyManager customKeyManager =
         new GcpKmsAeadKeyManager(new ServiceAccountGcpCredentialFactory(
             TestUtil.SERVICE_ACCOUNT_FILE));
-    aead = AeadFactory.getPrimitive(keysetHandle);
+    aead = AeadFactory.getPrimitive(keysetHandle, customKeyManager);
     TestUtil.runBasicTests(aead);
   }
 }

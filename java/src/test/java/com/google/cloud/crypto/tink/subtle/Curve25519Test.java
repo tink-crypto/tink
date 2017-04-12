@@ -18,6 +18,7 @@ package com.google.cloud.crypto.tink.subtle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.TestUtil;
 import org.junit.Test;
@@ -119,6 +120,7 @@ public class Curve25519Test {
     byte[] base = new byte[peersPublicValueLen]; base[0] = 9;
     try {
       Curve25519.x25519(privateKey, base);
+      fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException expected) {
       assertThat(expected).hasMessageThat().containsMatch(errorMsg);
     }
@@ -148,6 +150,7 @@ public class Curve25519Test {
     byte[] privateKey = new byte[privateKeyLen];
     try {
       Curve25519.x25519PublicFromPrivate(privateKey);
+      fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException expected) {
       assertThat(expected).hasMessageThat().containsMatch(errorMsg);
     }

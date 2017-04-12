@@ -1,6 +1,6 @@
-licenses(["notice"])  # Apache 2.0
-
 package(default_visibility = ["//cc:__subpackages__"])
+
+licenses(["notice"])  # Apache 2.0
 
 cc_library(
     name = "hmac_boringssl",

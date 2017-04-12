@@ -122,7 +122,8 @@ public class RegistryTest {
         16 /* key size */, 16 /* tag size */, HashType.SHA256);
     HmacKey hmacKey = Registry.INSTANCE.newKey(template);
     try {
-      Aead aead = wrongType.getPrimitive(hmacKey);
+      Aead unused = wrongType.getPrimitive(hmacKey);
+      fail("Expected ClassCastException");
     } catch (ClassCastException e) {
       assertTrue(e.toString().contains(
           "MacJce cannot be cast to com.google.cloud.crypto.tink.Aead"));

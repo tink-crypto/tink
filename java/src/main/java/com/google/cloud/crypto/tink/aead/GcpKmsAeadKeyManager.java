@@ -103,7 +103,7 @@ public class GcpKmsAeadKeyManager
         .build();
   }
 
-  private void validate(GcpKmsAeadKey key) throws GeneralSecurityException {
+  private static void validate(GcpKmsAeadKey key) throws GeneralSecurityException {
     SubtleUtil.validateVersion(key.getVersion(), VERSION);
   }
 }

@@ -83,7 +83,6 @@ public class KmsEncryptedKeysetHandleTest {
         .setKeyTemplate(template)
         .build()
         .rotate();
-    Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     // Encrypt the keyset with an AeadKey.
     template = TestUtil.createAesGcmKeyTemplate(16 /* key size */);

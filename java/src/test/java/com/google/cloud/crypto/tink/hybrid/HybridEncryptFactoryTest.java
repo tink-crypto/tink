@@ -64,7 +64,6 @@ public class HybridEncryptFactoryTest {
     KeyTemplate rawDemKeyTemplate = TestUtil.createAesGcmKeyTemplate(AES_KEY_SIZE);
     byte[] primarySalt = "some salt".getBytes("UTF-8");
     byte[] rawSalt = "other salt".getBytes("UTF-8");
-    byte[] legacySalt = "yet another salt".getBytes("UTF-8");
 
     EciesAeadHkdfPrivateKey primaryPrivProto = TestUtil.generateEciesAeadHkdfPrivKey(curve,
         hashType, primaryPointFormat, primaryDemKeyTemplate, primarySalt);

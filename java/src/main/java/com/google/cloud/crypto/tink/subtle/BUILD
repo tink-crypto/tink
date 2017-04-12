@@ -56,8 +56,6 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "//java/src/main/java/com/google/cloud/crypto/tink",
-        "//proto:java_tink",
-        "//proto:java_tink_compile_imports",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
         "@com_google_guava//jar",

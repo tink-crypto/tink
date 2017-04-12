@@ -31,7 +31,6 @@ using google::cloud::crypto::tink::HmacKey;
 using google::cloud::crypto::tink::HmacKeyFormat;
 using google::cloud::crypto::tink::KeyData;
 using google::cloud::crypto::tink::KeyTemplate;
-using google::protobuf::Message;
 
 namespace cloud {
 namespace crypto {

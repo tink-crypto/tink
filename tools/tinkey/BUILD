@@ -28,6 +28,7 @@ java_library(
         "@com_google_guava//jar",
         "@com_google_http_client//jar",
         "@com_google_http_client_jackson2//jar",
+        "@com_google_oauth_client//jar",
         "@com_google_protobuf_protobuf_java_util//jar",
     ],
 )
