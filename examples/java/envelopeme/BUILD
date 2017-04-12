@@ -16,9 +16,6 @@ java_binary(
         "//java",
         "//java:subtle",
         "@args4j//jar",
-        "@com_google_api_client//jar",
-        "@com_google_cloudkms//jar",
         "@com_google_guava//jar",
-        "@com_google_oauth_client//jar",
     ],
 )

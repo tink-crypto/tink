@@ -133,7 +133,6 @@ java_library(
         ":testonly",
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
-        "@com_google_cloudkms//jar",
         "@com_google_guava//jar",
         "@com_google_truth//jar",
         "@junit_junit_4//jar",
