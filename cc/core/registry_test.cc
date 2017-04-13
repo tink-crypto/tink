@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <thread>
+#include <thread>  // NOLINT(build/c++11)
 #include <vector>
 
 #include "cc/aead.h"
@@ -71,7 +71,7 @@ class TestAeadKeyManager : public KeyManager<Aead> {
     return util::Status::UNKNOWN;
   }
 
-  virtual util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+  util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
       const KeyTemplate& key_template) const override {
     return util::Status::UNKNOWN;
   }

@@ -17,7 +17,7 @@
 #ifndef TINK_REGISTRY_H_
 #define TINK_REGISTRY_H_
 
-#include <mutex>
+#include <mutex>  // NOLINT(build/c++11)
 #include <typeinfo>
 #include <unordered_map>
 

@@ -86,7 +86,8 @@ util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     // TODO(bleichen): We expect that BoringSSL supports the
     //   hashes that we use. Maybe we should have a status that indicates
     //   such mismatches between expected and actual behaviour.
-    return util::Status(util::error::INTERNAL, "BoringSSL failed to compute HMAC");
+    return util::Status(util::error::INTERNAL,
+        "BoringSSL failed to compute HMAC");
   }
   return std::string(reinterpret_cast<char *>(buf), tag_size_);
 }
@@ -104,7 +105,8 @@ util::Status HmacBoringSsl::VerifyMac(
            reinterpret_cast<const uint8_t*>(data.data()), data.size(),
            buf, &out_len);
   if (res == nullptr) {
-    return util::Status(util::error::INTERNAL, "BoringSSL failed to compute HMAC");
+    return util::Status(util::error::INTERNAL,
+        "BoringSSL failed to compute HMAC");
   }
   uint8_t diff = 0;
   for (int i = 0; i < tag_size_; i++) {
