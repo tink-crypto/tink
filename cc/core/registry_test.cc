@@ -14,6 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <thread>
 #include <vector>
 
 #include "cc/aead.h"
@@ -71,21 +72,79 @@ class TestAeadKeyManager : public KeyManager<Aead> {
   }
 
   virtual util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
-      const KeyTemplate& key_template) const {
+      const KeyTemplate& key_template) const override {
     return util::Status::UNKNOWN;
   }
 
-  int get_version() const {
+  int get_version() const override {
     return 0;
   }
 
-  const std::string& get_key_type() const {
+  const std::string& get_key_type() const override {
     return key_type_;
   }
 
  private:
   std::string key_type_;
 };
+
+void register_test_managers(Registry* registry,
+                            const std::string& key_type_prefix,
+                            int manager_count) {
+  for (int i = 0; i < manager_count; i++) {
+    std::string key_type = key_type_prefix + std::to_string(i);
+    util::Status status = registry->RegisterKeyManager(
+        key_type, new TestAeadKeyManager(key_type));
+    EXPECT_TRUE(status.ok()) << status;
+  }
+}
+
+void verify_test_managers(Registry* registry,
+                          const std::string& key_type_prefix,
+                          int manager_count) {
+  for (int i = 0; i < manager_count; i++) {
+    std::string key_type = key_type_prefix + std::to_string(i);
+    auto manager_result = registry->get_key_manager<Aead>(key_type);
+    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+    auto manager = manager_result.ValueOrDie();
+    EXPECT_EQ(key_type, manager->get_key_type());
+  }
+}
+
+TEST_F(RegistryTest, testConcurrentRegistration) {
+  Registry registry;
+  std::string key_type_prefix_a = "key_type_a_";
+  std::string key_type_prefix_b = "key_type_b_";
+  int count_a = 42;
+  int count_b = 72;
+
+  // Register some managers.
+  std::thread register_a(register_test_managers, &registry,
+                       key_type_prefix_a, count_a);
+  std::thread register_b(register_test_managers, &registry,
+                       key_type_prefix_b, count_b);
+  register_a.join();
+  register_b.join();
+
+  // Check that the managers were registered.
+  std::thread verify_a(verify_test_managers, &registry,
+                       key_type_prefix_a, count_a);
+  std::thread verify_b(verify_test_managers, &registry,
+                       key_type_prefix_b, count_b);
+  verify_a.join();
+  verify_b.join();
+
+  // Check that there are no extra managers.
+  std::string key_type = key_type_prefix_a + std::to_string(count_a-1);
+  auto manager_result = registry.get_key_manager<Aead>(key_type);
+  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+  EXPECT_EQ(key_type, manager_result.ValueOrDie()->get_key_type());
+
+  key_type = key_type_prefix_a + std::to_string(count_a);
+  manager_result = registry.get_key_manager<Aead>(key_type);
+  EXPECT_FALSE(manager_result.ok());
+  EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+}
 
 TEST_F(RegistryTest, testBasic) {
   Registry registry;
@@ -132,7 +191,6 @@ TEST_F(RegistryTest, testGettingPrimitives) {
   Registry registry;
   std::string key_type_1 = AesCtrHmacAeadKey::descriptor()->full_name();
   std::string key_type_2 = AesGcmKey::descriptor()->full_name();
-
 
   // Prepare keyset.
   Keyset::Key* key;

@@ -17,6 +17,7 @@
 #ifndef TINK_REGISTRY_H_
 #define TINK_REGISTRY_H_
 
+#include <mutex>
 #include <typeinfo>
 #include <unordered_map>
 
@@ -74,15 +75,15 @@ class Registry {
 
   // Convenience method for creating a new primitive for the key given
   // in 'key_data'.  It looks up a KeyManager identified by key_data.type_url,
-  // and calls manager's getPrimitive(key_data)-method.
+  // and calls manager's GetPrimitive(key_data)-method.
   template <class P>
   util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const google::cloud::crypto::tink::KeyData& key_data);
 
   // Creates a set of primitives corresponding to the keys with
-  // status=ENABLED in the keyset given in 'keyset_handle',
+  // (status == ENABLED) in the keyset given in 'keyset_handle',
   // assuming all the corresponding key managers are present (keys
-  // with status != ENABLED are skipped).
+  // with (status != ENABLED) are skipped).
   //
   // The returned set is usually later "wrapped" into a class that
   // implements the corresponding Primitive-interface.
@@ -94,14 +95,14 @@ class Registry {
 
  private:
   static google::protobuf::internal::Singleton<Registry> default_registry_;
-  // TODO(przydatek): change to tbb::concurrent_unordered_map for thread safety
-  //     (https://www.threadingbuildingblocks.org/)
   typedef std::unordered_map<std::string, std::unique_ptr<void, void(*)(void*)>>
       TypeToManagerMap;
   typedef std::unordered_map<std::string, const char*>
       TypeToPrimitiveMap;
-  TypeToManagerMap type_to_manager_map_;
-  TypeToPrimitiveMap type_to_primitive_map_;
+
+  std::mutex maps_mutex_;
+  TypeToManagerMap type_to_manager_map_;       // guarded by maps_mutex_
+  TypeToPrimitiveMap type_to_primitive_map_;   // guarded by maps_mutex_
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -131,6 +132,7 @@ util::Status Registry::RegisterKeyManager(const std::string& type_url,
                      "The manager does not support type '%s'.",
                      type_url.c_str());
   }
+  std::lock_guard<std::mutex> lock(maps_mutex_);
   auto curr_manager = type_to_manager_map_.find(type_url);
   if (curr_manager != type_to_manager_map_.end()) {
     return ToStatusF(util::error::ALREADY_EXISTS,
@@ -147,6 +149,7 @@ util::Status Registry::RegisterKeyManager(const std::string& type_url,
 template <class P>
 util::StatusOr<const KeyManager<P>*> Registry::get_key_manager(
     const std::string& type_url) {
+  std::lock_guard<std::mutex> lock(maps_mutex_);
   auto manager_entry = type_to_manager_map_.find(type_url);
   if (manager_entry == type_to_manager_map_.end()) {
     return ToStatusF(util::error::NOT_FOUND,
