@@ -3,6 +3,19 @@ package(default_visibility = ["//cc:__subpackages__"])
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
+    name = "ec_util",
+    srcs = ["ec_util.cc"],
+    hdrs = ["ec_util.h"],
+    deps = [
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:cc_common",
+        "@boringssl//:crypto",
+        "@com_github_google_protobuf//:protobuf_lite",
+    ],
+)
+
+cc_library(
     name = "hmac_boringssl",
     srcs = ["hmac_boringssl.cc"],
     hdrs = ["hmac_boringssl.h"],
@@ -26,6 +39,19 @@ cc_library(
 )
 
 # tests
+
+cc_test(
+    name = "ec_util_test",
+    size = "small",
+    srcs = ["ec_util_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":ec_util",
+        "//cc/util:test_util",
+        "//proto:cc_common",
+        "@gtest//:gtest",
+    ],
+)
 
 cc_test(
     name = "hmac_boringssl_test",
