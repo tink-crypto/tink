@@ -22,21 +22,23 @@ namespace crypto {
 namespace tink {
 namespace {
 
-class RandomTest : public ::testing::Test {
-};
+class RandomTest : public ::testing::Test {};
 
 TEST_F(RandomTest, testBasic) {
-  EXPECT_EQ("a", Random::GetRandomBytes(1));
-  EXPECT_EQ("aaa", Random::GetRandomBytes(3));
-  EXPECT_EQ("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            Random::GetRandomBytes(42));
+  int numTests = 32;
+  std::set<std::string> rand_strings;
+  for (int i = 0; i < numTests; i++) {
+    std::string s = Random::GetRandomBytes(16);
+    EXPECT_EQ(16, s.length());
+    rand_strings.insert(s);
+  }
+  EXPECT_EQ(numTests, rand_strings.size());
 }
 
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
 }  // namespace cloud
-
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);

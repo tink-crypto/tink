@@ -21,6 +21,7 @@ cc_library(
     srcs = ["random.cc"],
     hdrs = ["random.h"],
     deps = [
+        "@boringssl//:crypto",
     ],
 )
 

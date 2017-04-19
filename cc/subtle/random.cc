@@ -15,17 +15,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/random.h"
-
 #include <string>
+#include "openssl/rand.h"
 
 namespace cloud {
 namespace crypto {
 namespace tink {
 
-// TODO(przydatek): do it real random.
 // static
 std::string Random::GetRandomBytes(int length) {
-  return std::string(length, 'a');
+  std::unique_ptr<uint8_t> buf(new uint8_t[length]);
+  // BoringSSL documentation says that it always returns 1; while
+  // OpenSSL documentation says that it returns 1 on success, 0 otherwise. We
+  // use BoringSSL, so we don't check the return value.
+  RAND_bytes(buf.get(), length);
+  return std::string(reinterpret_cast<const char *>(buf.get()), length);
 }
 
 }  // namespace tink
