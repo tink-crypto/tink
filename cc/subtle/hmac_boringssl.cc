@@ -19,41 +19,26 @@
 #include <string>
 
 #include "cc/mac.h"
+#include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
-#include "proto/common.pb.h"
 #include "openssl/digest.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
-
+#include "proto/common.pb.h"
 using google::cloud::crypto::tink::HashType;
 
 namespace cloud {
 namespace crypto {
 namespace tink {
 
-// Utility functions
-
-// Returns an EVP structure for a hash function.
-// The EVP_MD instances are sigletons owned by BoringSSL.
-static util::StatusOr<const EVP_MD*> EvpHash(HashType hash_type) {
-  switch (hash_type) {
-    case HashType::SHA1: return EVP_sha1();
-    case HashType::SHA224: return EVP_sha224();
-    case HashType::SHA256: return EVP_sha256();
-    case HashType::SHA512: return EVP_sha512();
-    default:
-      return util::Status(util::error::UNIMPLEMENTED, "Unsupported hash");
-  }
-}
-
 // static
 util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
     HashType hash_type, int tag_size, const std::string& key_value) {
-  util::StatusOr<const EVP_MD*> res = EvpHash(hash_type);
+  util::StatusOr<const EVP_MD*> res = SubtleUtilBoringSSL::EvpHash(hash_type);
   if (!res.ok()) {
     return res.status();
   }
@@ -64,32 +49,29 @@ util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
     // If this fails then something is wrong with the key manager.
     return util::Status(util::error::INTERNAL, "invalid tag size");
   }
-  std::unique_ptr<Mac> hmac(
-      new HmacBoringSsl(md, tag_size, key_value));
+  std::unique_ptr<Mac> hmac(new HmacBoringSsl(md, tag_size, key_value));
   return std::move(hmac);
 }
 
-HmacBoringSsl::HmacBoringSsl(
-    const EVP_MD* md, int tag_size, const std::string& key_value)
-    : md_(md), tag_size_(tag_size), key_value_(key_value) {
-}
+HmacBoringSsl::HmacBoringSsl(const EVP_MD* md, int tag_size,
+                             const std::string& key_value)
+    : md_(md), tag_size_(tag_size), key_value_(key_value) {}
 
 util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     google::protobuf::StringPiece data) const {
   uint8_t buf[EVP_MAX_MD_SIZE];
   unsigned int out_len;
-  const uint8_t *res =
-      HMAC(md_, key_value_.data(), key_value_.size(),
-           reinterpret_cast<const uint8_t*>(data.data()), data.size(),
-           buf, &out_len);
+  const uint8_t* res = HMAC(md_, key_value_.data(), key_value_.size(),
+                            reinterpret_cast<const uint8_t*>(data.data()),
+                            data.size(), buf, &out_len);
   if (res == nullptr) {
     // TODO(bleichen): We expect that BoringSSL supports the
     //   hashes that we use. Maybe we should have a status that indicates
     //   such mismatches between expected and actual behaviour.
     return util::Status(util::error::INTERNAL,
-        "BoringSSL failed to compute HMAC");
+                        "BoringSSL failed to compute HMAC");
   }
-  return std::string(reinterpret_cast<char *>(buf), tag_size_);
+  return std::string(reinterpret_cast<char*>(buf), tag_size_);
 }
 
 util::Status HmacBoringSsl::VerifyMac(
@@ -100,13 +82,12 @@ util::Status HmacBoringSsl::VerifyMac(
   }
   uint8_t buf[EVP_MAX_MD_SIZE];
   unsigned int out_len;
-  const uint8_t *res =
-      HMAC(md_, key_value_.data(), key_value_.size(),
-           reinterpret_cast<const uint8_t*>(data.data()), data.size(),
-           buf, &out_len);
+  const uint8_t* res = HMAC(md_, key_value_.data(), key_value_.size(),
+                            reinterpret_cast<const uint8_t*>(data.data()),
+                            data.size(), buf, &out_len);
   if (res == nullptr) {
     return util::Status(util::error::INTERNAL,
-        "BoringSSL failed to compute HMAC");
+                        "BoringSSL failed to compute HMAC");
   }
   uint8_t diff = 0;
   for (int i = 0; i < tag_size_; i++) {
