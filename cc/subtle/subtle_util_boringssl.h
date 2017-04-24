@@ -19,16 +19,28 @@
 
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
+#include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/evp.h"
 #include "proto/common.pb.h"
 
 using google::cloud::crypto::tink::HashType;
+using google::cloud::crypto::tink::EllipticCurveType;
+using google::cloud::crypto::tink::EcPointFormat;
+using google::protobuf::StringPiece;
 namespace cloud {
 namespace crypto {
 namespace tink {
 
 class SubtleUtilBoringSSL {
  public:
+  static util::StatusOr<EC_GROUP *> GetEcGroup(EllipticCurveType curve_type);
+
+  static util::StatusOr<EC_POINT *> EcPointDecode(EllipticCurveType curve,
+                                                  EcPointFormat format,
+                                                  StringPiece encoded);
+  static util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
+                                                   EcPointFormat format,
+                                                   const EC_POINT *point);
   // Returns an EVP structure for a hash function.
   // The EVP_MD instances are sigletons owned by BoringSSL.
   static util::StatusOr<const EVP_MD *> EvpHash(HashType hash_type);

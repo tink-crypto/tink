@@ -7,6 +7,7 @@ cc_library(
     srcs = ["ec_util.cc"],
     hdrs = ["ec_util.h"],
     deps = [
+        ":subtle_util_boringssl",
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:cc_common",
@@ -120,6 +121,22 @@ cc_test(
     linkopts = ["-pthread"],
     deps = [
         ":random",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
+    name = "subtle_util_boringssl_test",
+    size = "small",
+    srcs = ["subtle_util_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-pthread"],
+    deps = [
+        ":subtle_util_boringssl",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@boringssl//:crypto",
         "@gtest//:gtest",
     ],
 )

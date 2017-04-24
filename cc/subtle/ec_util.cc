@@ -17,6 +17,7 @@
 #include "cc/subtle/ec_util.h"
 #include <memory>
 #include <string>
+#include "cc/subtle/subtle_util_boringssl.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/x509.h"
@@ -24,22 +25,6 @@
 namespace cloud {
 namespace crypto {
 namespace tink {
-
-static util::StatusOr<EC_GROUP *> GetEcGroup(EllipticCurveType curve_type) {
-  switch (curve_type) {
-    case EllipticCurveType::NIST_P224:
-      return EC_GROUP_new_by_curve_name(NID_secp224r1);
-    case EllipticCurveType::NIST_P256:
-      return EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
-    case EllipticCurveType::NIST_P384:
-      return EC_GROUP_new_by_curve_name(NID_secp384r1);
-    case EllipticCurveType::NIST_P521:
-      return EC_GROUP_new_by_curve_name(NID_secp521r1);
-    default:
-      return util::Status(util::error::UNIMPLEMENTED,
-                          "Unsupported elliptic curve");
-  }
-}
 
 // static
 util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
@@ -58,7 +43,7 @@ util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
       bn_y.get() == nullptr) {
     return util::Status(util::error::INTERNAL, "BN_bin2bn failed");
   }
-  auto status_or_ec_group = GetEcGroup(curve);
+  auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();
   }
