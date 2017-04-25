@@ -22,7 +22,7 @@ namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
+StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
     EllipticCurveType curve_type) {
   switch (curve_type) {
     case EllipticCurveType::NIST_P224:
@@ -40,8 +40,7 @@ util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
 }
 
 // static
-util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
-    HashType hash_type) {
+StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(HashType hash_type) {
   switch (hash_type) {
     case HashType::SHA1:
       return EVP_sha1();
@@ -57,8 +56,64 @@ util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
 }
 
 // static
-util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
-    EllipticCurveType curve, EcPointFormat format, StringPiece encoded) {
+StatusOr<string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
+    EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key) {
+  auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
+  if (!status_or_ec_group.ok()) {
+    return status_or_ec_group.status();
+  }
+  bssl::UniquePtr<EC_GROUP> priv_group(status_or_ec_group.ValueOrDie());
+  bssl::UniquePtr<EC_POINT> shared_point(EC_POINT_new(priv_group.get()));
+  // BoringSSL's EC_POINT_set_affine_coordinates_GFp documentation says that
+  // "unlike with OpenSSL, it's considered an error if the point is not on the
+  // curve". To be sure, we double check here.
+  if (1 != EC_POINT_is_on_curve(priv_group.get(), pub_key, nullptr)) {
+    return util::Status(util::error::INTERNAL, "Point is not on curve");
+  }
+  // Compute the shared point.
+  if (1 != EC_POINT_mul(priv_group.get(), shared_point.get(), nullptr, pub_key,
+                        priv_key, nullptr)) {
+    return util::Status(util::error::INTERNAL, "Point multiplication failed");
+  }
+  // Check for buggy computation.
+  if (1 !=
+      EC_POINT_is_on_curve(priv_group.get(), shared_point.get(), nullptr)) {
+    return util::Status(util::error::INTERNAL, "Shared point is not on curve");
+  }
+  bssl::UniquePtr<BIGNUM> shared_x(BN_new());
+  bssl::UniquePtr<BIGNUM> shared_y(BN_new());
+  if (1 != EC_POINT_get_affine_coordinates_GFp(
+               priv_group.get(), shared_point.get(), shared_x.get(),
+               shared_y.get(), nullptr)) {
+    return util::Status(util::error::INTERNAL,
+                        "EC_POINT_get_affine_coordinates_GFp failed");
+  }
+
+  // Get shared point's x coordinate.
+  unsigned curve_size_in_bits = EC_GROUP_get_degree(priv_group.get());
+  unsigned curve_size_in_bytes = (curve_size_in_bits + 7) / 8;
+  size_t x_size_in_bytes = BN_num_bytes(shared_x.get());
+  std::unique_ptr<uint8_t> shared_secret_bytes(
+      new uint8_t[curve_size_in_bytes]);
+  memset(shared_secret_bytes.get(), 0, curve_size_in_bytes);
+  if (curve_size_in_bytes < x_size_in_bytes) {
+    return util::Status(util::error::INTERNAL,
+                        "The x-coordinate of the shared point is larger than "
+                        "the size of the curve");
+  }
+  int zeros = int(curve_size_in_bytes - x_size_in_bytes);
+  int written = BN_bn2bin(shared_x.get(), &shared_secret_bytes.get()[zeros]);
+  if (written != int(x_size_in_bytes)) {
+    return util::Status(util::error::INTERNAL, "BN_bn_2bin failed");
+  }
+  return std::string(reinterpret_cast<char *>(shared_secret_bytes.get()),
+                     curve_size_in_bytes);
+}
+
+// static
+StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(EllipticCurveType curve,
+                                                        EcPointFormat format,
+                                                        StringPiece encoded) {
   auto status_or_ec_group = GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();
@@ -102,8 +157,9 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
 }
 
 // static
-util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
-    EllipticCurveType curve, EcPointFormat format, const EC_POINT *point) {
+StatusOr<string> SubtleUtilBoringSSL::EcPointEncode(EllipticCurveType curve,
+                                                    EcPointFormat format,
+                                                    const EC_POINT *point) {
   auto status_or_ec_group = GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();
@@ -123,8 +179,8 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
       if (size != 1 + 2 * curve_size_in_bytes) {
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
-      return std::string(reinterpret_cast<const char *>(encoded.get()),
-                         1 + 2 * curve_size_in_bytes);
+      return string(reinterpret_cast<const char *>(encoded.get()),
+                    1 + 2 * curve_size_in_bytes);
     }
     case EcPointFormat::COMPRESSED: {
       std::unique_ptr<uint8_t> encoded(new uint8_t[1 + curve_size_in_bytes]);
@@ -134,8 +190,8 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
       if (size != 1 + curve_size_in_bytes) {
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
-      return std::string(reinterpret_cast<const char *>(encoded.get()),
-                         1 + curve_size_in_bytes);
+      return string(reinterpret_cast<const char *>(encoded.get()),
+                    1 + curve_size_in_bytes);
     }
     default:
       return util::Status(util::error::INTERNAL, "Unsupported point format");

@@ -14,14 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
-#define TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
+#ifndef TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_H_
+#define TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_H_
 
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
-#include "openssl/bn.h"
-#include "openssl/evp.h"
 #include "proto/common.pb.h"
 
 using google::cloud::crypto::tink::HashType;
@@ -34,28 +32,22 @@ namespace cloud {
 namespace crypto {
 namespace tink {
 
-class SubtleUtilBoringSSL {
+class EciesHkdfRecipientKemBoringSsl {
  public:
-  static StatusOr<EC_GROUP *> GetEcGroup(EllipticCurveType curve_type);
+  EciesHkdfRecipientKemBoringSsl(EllipticCurveType curve,
+                                 const string& priv_key);
+  StatusOr<string> GenerateKey(StringPiece kem_bytes, HashType hash,
+                               StringPiece hkdf_salt, StringPiece hkdf_info,
+                               int key_size_in_bytes,
+                               EcPointFormat point_format);
 
-  static StatusOr<EC_POINT *> EcPointDecode(EllipticCurveType curve,
-                                            EcPointFormat format,
-                                            StringPiece encoded);
-  static StatusOr<string> EcPointEncode(EllipticCurveType curve,
-                                        EcPointFormat format,
-                                        const EC_POINT *point);
-
-  static StatusOr<string> ComputeEcdhSharedSecret(EllipticCurveType curve,
-                                                  const BIGNUM *priv_key,
-                                                  const EC_POINT *pub_key);
-
-  // Returns an EVP structure for a hash function.
-  // The EVP_MD instances are sigletons owned by BoringSSL.
-  static StatusOr<const EVP_MD *> EvpHash(HashType hash_type);
+ private:
+  EllipticCurveType curve_;
+  string priv_;
 };
 
 }  // namespace tink
 }  // namespace crypto
 }  // namespace cloud
 
-#endif  // TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
+#endif  // TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_H_

@@ -55,51 +55,8 @@ util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
     return util::Status(util::error::INTERNAL,
                         "EC_POINT_set_affine_coordinates_GFp failed");
   }
-  bssl::UniquePtr<EC_POINT> shared_point(EC_POINT_new(priv_group.get()));
-  // BoringSSL's EC_POINT_set_affine_coordinates_GFp documentation says that
-  // "unlike with OpenSSL, it's considered an error if the point is not on the
-  // curve". To be sure, we make this security critical check.
-  if (1 != EC_POINT_is_on_curve(priv_group.get(), pub_key.get(), nullptr)) {
-    return util::Status(util::error::INTERNAL, "Point is not on curve");
-  }
-  // Compute the shared point.
-  if (1 != EC_POINT_mul(priv_group.get(), shared_point.get(), nullptr,
-                        pub_key.get(), priv_key.get(), nullptr)) {
-    return util::Status(util::error::INTERNAL, "Point multiplication failed");
-  }
-  // Check for buggy computation.
-  if (1 !=
-      EC_POINT_is_on_curve(priv_group.get(), shared_point.get(), nullptr)) {
-    return util::Status(util::error::INTERNAL, "Shared point is not on curve");
-  }
-  bssl::UniquePtr<BIGNUM> shared_x(BN_new());
-  bssl::UniquePtr<BIGNUM> shared_y(BN_new());
-  if (1 != EC_POINT_get_affine_coordinates_GFp(
-               priv_group.get(), shared_point.get(), shared_x.get(),
-               shared_y.get(), nullptr)) {
-    return util::Status(util::error::INTERNAL,
-                        "EC_POINT_get_affine_coordinates_GFp failed");
-  }
-
-  // Get shared point's x coordinate.
-  unsigned curve_size_in_bits = EC_GROUP_get_degree(priv_group.get());
-  unsigned curve_size_in_bytes = (curve_size_in_bits + 7) / 8;
-  size_t x_size_in_bytes = BN_num_bytes(shared_x.get());
-  std::unique_ptr<uint8_t> shared_secret_bytes(
-      new uint8_t[curve_size_in_bytes]);
-  memset(shared_secret_bytes.get(), 0, curve_size_in_bytes);
-  if (curve_size_in_bytes < x_size_in_bytes) {
-    return util::Status(util::error::INTERNAL,
-                        "The x-coordinate of the shared point is larger than "
-                        "the size of the curve");
-  }
-  int zeros = int(curve_size_in_bytes - x_size_in_bytes);
-  int written = BN_bn2bin(shared_x.get(), &shared_secret_bytes.get()[zeros]);
-  if (written != int(x_size_in_bytes)) {
-    return util::Status(util::error::INTERNAL, "BN_bn_2bin failed");
-  }
-  return std::string(reinterpret_cast<char *>(shared_secret_bytes.get()),
-                     curve_size_in_bytes);
+  return SubtleUtilBoringSSL::ComputeEcdhSharedSecret(curve, priv_key.get(),
+                                                      pub_key.get());
 }
 
 }  // namespace tink
