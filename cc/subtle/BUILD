@@ -40,6 +40,23 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:test_util",
+        "//proto:cc_common",
+        "@boringssl//:crypto",
+    ],
+)
+
+cc_library(
+    name = "aes_gcm_boringssl",
+    srcs = ["aes_gcm_boringssl.cc"],
+    hdrs = ["aes_gcm_boringssl.h"],
+    deps = [
+        ":random",
+        "//cc:aead",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
         "//proto:cc_common",
         "@boringssl//:crypto",
     ],
@@ -107,7 +124,21 @@ cc_test(
         "//cc:mac",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//cc/util:test_util",
+        "//proto:cc_common",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
+    name = "aes_gcm_boringssl_test",
+    size = "small",
+    srcs = ["aes_gcm_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aes_gcm_boringssl",
+        "//cc:aead",
+        "//cc/util:status",
+        "//cc/util:statusor",
         "//proto:cc_common",
         "@gtest//:gtest",
     ],
