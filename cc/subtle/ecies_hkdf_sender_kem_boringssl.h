@@ -14,12 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
-#define TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
+#ifndef TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
+#define TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
+#include "openssl/ec.h"
 #include "proto/common.pb.h"
 
 using google::cloud::crypto::tink::HashType;
@@ -27,33 +28,49 @@ using google::cloud::crypto::tink::EllipticCurveType;
 using google::cloud::crypto::tink::EcPointFormat;
 using google::protobuf::StringPiece;
 using util::StatusOr;
+using util::Status;
 using std::string;
 
 namespace cloud {
 namespace crypto {
 namespace tink {
 
-class EciesHkdfRecipientKemBoringSsl {
+class EciesHkdfSenderKemBoringSsl {
  public:
-  // Constructor based on elliptic curve type and private key. The private key
-  // is big-endian byte array.
-  explicit EciesHkdfRecipientKemBoringSsl(EllipticCurveType curve,
-                                          const string& priv_key);
-  // Computes the ecdh's shared secret from our private key and peer's encoded
-  // public key, then uses hkdf to derive the symmetric key from the shared
-  // secret, hkdf info and hkdf salt.
-  StatusOr<string> GenerateKey(StringPiece kem_bytes, HashType hash,
-                               StringPiece hkdf_salt, StringPiece hkdf_info,
-                               int key_size_in_bytes,
+  class KemKey {
+   public:
+    KemKey() {}
+    explicit KemKey(const string& kem_bytes, const string& symmetric_key);
+    string get_kem_bytes();
+
+    string get_symmetric_key();
+
+   private:
+    string kem_bytes_;
+    string symmetric_key_;
+  };
+
+  // Constructor based on elliptic curve type and peer's public key point. The
+  // public key's coordinates are big-endian byte array.
+  explicit EciesHkdfSenderKemBoringSsl(EllipticCurveType curve,
+                                       const string& pubx, const string& puby);
+
+  // Generates ephemeral key pairs, computes ecdh's shared secret based on
+  // generated private key and peer's public key, then uses hkdf to derive the
+  // symmetric key from the shared secret, hkdf info and hkdf salt.
+  StatusOr<KemKey> GenerateKey(HashType hash, StringPiece hkdf_salt,
+                               StringPiece hkdf_info, int key_size_in_bytes,
                                EcPointFormat point_format) const;
 
  private:
   EllipticCurveType curve_;
-  string priv_;
+  string pubx_;
+  string puby_;
+  bssl::UniquePtr<EC_POINT> peer_pub_key_;
 };
 
 }  // namespace tink
 }  // namespace crypto
 }  // namespace cloud
 
-#endif  // TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
+#endif  // TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_

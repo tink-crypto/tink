@@ -40,6 +40,33 @@ StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
 }
 
 // static
+StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(EllipticCurveType curve,
+                                                     StringPiece pubx,
+                                                     StringPiece puby) {
+  bssl::UniquePtr<BIGNUM> bn_x(
+      BN_bin2bn(reinterpret_cast<const unsigned char *>(pubx.data()),
+                pubx.size(), nullptr));
+  bssl::UniquePtr<BIGNUM> bn_y(
+      BN_bin2bn(reinterpret_cast<const unsigned char *>(puby.data()),
+                puby.length(), nullptr));
+  if (bn_x.get() == nullptr || bn_y.get() == nullptr) {
+    return util::Status(util::error::INTERNAL, "BN_bin2bn failed");
+  }
+  auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
+  if (!status_or_ec_group.ok()) {
+    return status_or_ec_group.status();
+  }
+  bssl::UniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
+  bssl::UniquePtr<EC_POINT> pub_key(EC_POINT_new(group.get()));
+  if (1 != EC_POINT_set_affine_coordinates_GFp(
+               group.get(), pub_key.get(), bn_x.get(), bn_y.get(), nullptr)) {
+    return util::Status(util::error::INTERNAL,
+                        "EC_POINT_set_affine_coordinates_GFp failed");
+  }
+  return pub_key.release();
+}
+
+// static
 StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(HashType hash_type) {
   switch (hash_type) {
     case HashType::SHA1:

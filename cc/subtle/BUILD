@@ -18,6 +18,21 @@ cc_library(
 )
 
 cc_library(
+    name = "ecies_hkdf_sender_kem_boringssl",
+    srcs = ["ecies_hkdf_sender_kem_boringssl.cc"],
+    hdrs = ["ecies_hkdf_sender_kem_boringssl.h"],
+    deps = [
+        ":hkdf",
+        ":subtle_util_boringssl",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:cc_common",
+        "@boringssl//:crypto",
+        "@com_github_google_protobuf//:protobuf_lite",
+    ],
+)
+
+cc_library(
     name = "ec_util",
     srcs = ["ec_util.cc"],
     hdrs = ["ec_util.h"],
@@ -108,6 +123,20 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":ecies_hkdf_recipient_kem_boringssl",
+        "//cc/util:test_util",
+        "//proto:cc_common",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
+    name = "ecies_hkdf_sender_kem_boringssl_test",
+    size = "small",
+    srcs = ["ecies_hkdf_sender_kem_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":ecies_hkdf_recipient_kem_boringssl",
+        ":ecies_hkdf_sender_kem_boringssl",
         "//cc/util:test_util",
         "//proto:cc_common",
         "@gtest//:gtest",
