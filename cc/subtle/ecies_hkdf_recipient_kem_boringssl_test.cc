@@ -32,12 +32,12 @@ struct TestVector {
   EllipticCurveType curve;
   HashType hash;
   EcPointFormat point_format;
-  string pub_encoded_hex;
-  string priv_hex;
-  string salt_hex;
-  string info_hex;
+  std::string pub_encoded_hex;
+  std::string priv_hex;
+  std::string salt_hex;
+  std::string info_hex;
   int out_len;
-  string out_key_hex;
+  std::string out_key_hex;
 };
 
 static const std::vector<TestVector> test_vector(

@@ -26,8 +26,6 @@ using google::cloud::crypto::tink::HashType;
 using google::cloud::crypto::tink::EllipticCurveType;
 using google::cloud::crypto::tink::EcPointFormat;
 using google::protobuf::StringPiece;
-using util::StatusOr;
-using std::string;
 
 namespace cloud {
 namespace crypto {
@@ -38,18 +36,19 @@ class EciesHkdfRecipientKemBoringSsl {
   // Constructor based on elliptic curve type and private key. The private key
   // is big-endian byte array.
   explicit EciesHkdfRecipientKemBoringSsl(EllipticCurveType curve,
-                                          const string& priv_key);
+                                          const std::string& priv_key);
   // Computes the ecdh's shared secret from our private key and peer's encoded
   // public key, then uses hkdf to derive the symmetric key from the shared
   // secret, hkdf info and hkdf salt.
-  StatusOr<string> GenerateKey(StringPiece kem_bytes, HashType hash,
-                               StringPiece hkdf_salt, StringPiece hkdf_info,
-                               int key_size_in_bytes,
-                               EcPointFormat point_format) const;
+  util::StatusOr<std::string> GenerateKey(StringPiece kem_bytes, HashType hash,
+                                          StringPiece hkdf_salt,
+                                          StringPiece hkdf_info,
+                                          int key_size_in_bytes,
+                                          EcPointFormat point_format) const;
 
  private:
   EllipticCurveType curve_;
-  string priv_;
+  std::string priv_;
 };
 
 }  // namespace tink

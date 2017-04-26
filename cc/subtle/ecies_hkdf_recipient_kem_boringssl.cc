@@ -20,18 +20,16 @@
 #include "openssl/ec.h"
 
 using google::protobuf::StringPiece;
-using util::StatusOr;
-using std::string;
 
 namespace cloud {
 namespace crypto {
 namespace tink {
 
 EciesHkdfRecipientKemBoringSsl::EciesHkdfRecipientKemBoringSsl(
-    EllipticCurveType curve, const string& priv)
+    EllipticCurveType curve, const std::string& priv)
     : curve_(curve), priv_(priv) {}
 
-StatusOr<string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
+util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
     StringPiece kem_bytes, HashType hash, StringPiece hkdf_salt,
     StringPiece hkdf_info, int key_size_in_bytes,
     EcPointFormat point_format) const {

@@ -22,7 +22,7 @@ namespace crypto {
 namespace tink {
 
 // static
-StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
+util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
     EllipticCurveType curve_type) {
   switch (curve_type) {
     case EllipticCurveType::NIST_P224:
@@ -40,9 +40,8 @@ StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
 }
 
 // static
-StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(EllipticCurveType curve,
-                                                     StringPiece pubx,
-                                                     StringPiece puby) {
+util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
+    EllipticCurveType curve, StringPiece pubx, StringPiece puby) {
   bssl::UniquePtr<BIGNUM> bn_x(
       BN_bin2bn(reinterpret_cast<const unsigned char *>(pubx.data()),
                 pubx.size(), nullptr));
@@ -67,7 +66,8 @@ StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(EllipticCurveType curve,
 }
 
 // static
-StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(HashType hash_type) {
+util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
+    HashType hash_type) {
   switch (hash_type) {
     case HashType::SHA1:
       return EVP_sha1();
@@ -83,7 +83,7 @@ StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(HashType hash_type) {
 }
 
 // static
-StatusOr<string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
+util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
     EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key) {
   auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
@@ -138,9 +138,8 @@ StatusOr<string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
 }
 
 // static
-StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(EllipticCurveType curve,
-                                                        EcPointFormat format,
-                                                        StringPiece encoded) {
+util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
+    EllipticCurveType curve, EcPointFormat format, StringPiece encoded) {
   auto status_or_ec_group = GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();
@@ -184,9 +183,8 @@ StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(EllipticCurveType curve,
 }
 
 // static
-StatusOr<string> SubtleUtilBoringSSL::EcPointEncode(EllipticCurveType curve,
-                                                    EcPointFormat format,
-                                                    const EC_POINT *point) {
+util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
+    EllipticCurveType curve, EcPointFormat format, const EC_POINT *point) {
   auto status_or_ec_group = GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();
@@ -206,8 +204,8 @@ StatusOr<string> SubtleUtilBoringSSL::EcPointEncode(EllipticCurveType curve,
       if (size != 1 + 2 * curve_size_in_bytes) {
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
-      return string(reinterpret_cast<const char *>(encoded.get()),
-                    1 + 2 * curve_size_in_bytes);
+      return std::string(reinterpret_cast<const char *>(encoded.get()),
+                         1 + 2 * curve_size_in_bytes);
     }
     case EcPointFormat::COMPRESSED: {
       std::unique_ptr<uint8_t> encoded(new uint8_t[1 + curve_size_in_bytes]);
@@ -217,8 +215,8 @@ StatusOr<string> SubtleUtilBoringSSL::EcPointEncode(EllipticCurveType curve,
       if (size != 1 + curve_size_in_bytes) {
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
-      return string(reinterpret_cast<const char *>(encoded.get()),
-                    1 + curve_size_in_bytes);
+      return std::string(reinterpret_cast<const char *>(encoded.get()),
+                         1 + curve_size_in_bytes);
     }
     default:
       return util::Status(util::error::INTERNAL, "Unsupported point format");

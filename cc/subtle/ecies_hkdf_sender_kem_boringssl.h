@@ -27,9 +27,6 @@ using google::cloud::crypto::tink::HashType;
 using google::cloud::crypto::tink::EllipticCurveType;
 using google::cloud::crypto::tink::EcPointFormat;
 using google::protobuf::StringPiece;
-using util::StatusOr;
-using util::Status;
-using std::string;
 
 namespace cloud {
 namespace crypto {
@@ -40,32 +37,35 @@ class EciesHkdfSenderKemBoringSsl {
   class KemKey {
    public:
     KemKey() {}
-    explicit KemKey(const string& kem_bytes, const string& symmetric_key);
-    string get_kem_bytes();
+    explicit KemKey(const std::string& kem_bytes,
+                    const std::string& symmetric_key);
+    std::string get_kem_bytes();
 
-    string get_symmetric_key();
+    std::string get_symmetric_key();
 
    private:
-    string kem_bytes_;
-    string symmetric_key_;
+    std::string kem_bytes_;
+    std::string symmetric_key_;
   };
 
   // Constructor based on elliptic curve type and peer's public key point. The
   // public key's coordinates are big-endian byte array.
   explicit EciesHkdfSenderKemBoringSsl(EllipticCurveType curve,
-                                       const string& pubx, const string& puby);
+                                       const std::string& pubx,
+                                       const std::string& puby);
 
   // Generates ephemeral key pairs, computes ecdh's shared secret based on
   // generated private key and peer's public key, then uses hkdf to derive the
   // symmetric key from the shared secret, hkdf info and hkdf salt.
-  StatusOr<KemKey> GenerateKey(HashType hash, StringPiece hkdf_salt,
-                               StringPiece hkdf_info, int key_size_in_bytes,
-                               EcPointFormat point_format) const;
+  util::StatusOr<KemKey> GenerateKey(HashType hash, StringPiece hkdf_salt,
+                                     StringPiece hkdf_info,
+                                     int key_size_in_bytes,
+                                     EcPointFormat point_format) const;
 
  private:
   EllipticCurveType curve_;
-  string pubx_;
-  string puby_;
+  std::string pubx_;
+  std::string puby_;
   bssl::UniquePtr<EC_POINT> peer_pub_key_;
 };
 

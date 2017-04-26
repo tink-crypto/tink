@@ -33,8 +33,8 @@ struct TestVector {
   EllipticCurveType curve;
   HashType hash;
   EcPointFormat point_format;
-  string salt_hex;
-  string info_hex;
+  std::string salt_hex;
+  std::string info_hex;
   int out_len;
 };
 
@@ -48,11 +48,12 @@ static const std::vector<TestVector> test_vector(
          EcPointFormat::COMPRESSED, "0b0b0b0b", "0b0b0b0b0b0b0b0b", 32,
      }});
 
-string bn2str(const BIGNUM* bn) {
+std::string bn2str(const BIGNUM* bn) {
   size_t bn_size_in_bytes = BN_num_bytes(bn);
   std::unique_ptr<uint8_t> res(new uint8_t[bn_size_in_bytes]);
   BN_bn2bin(bn, &res.get()[0]);
-  return string(reinterpret_cast<const char*>(res.get()), bn_size_in_bytes);
+  return std::string(reinterpret_cast<const char*>(res.get()),
+                     bn_size_in_bytes);
 }
 
 TEST_F(EciesHkdfSenderKemBoringSslTest, testSenderRecipientBasic) {
@@ -68,15 +69,15 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, testSenderRecipientBasic) {
     bssl::UniquePtr<BIGNUM> pub1y_bn(BN_new());
     EC_POINT_get_affine_coordinates_GFp(group.get(), pub1, pub1x_bn.get(),
                                         pub1y_bn.get(), nullptr);
-    string pub1x_str = bn2str(pub1x_bn.get());
-    string pub1y_str = bn2str(pub1y_bn.get());
+    std::string pub1x_str = bn2str(pub1x_bn.get());
+    std::string pub1y_str = bn2str(pub1y_bn.get());
     EciesHkdfSenderKemBoringSsl ecies_sender(test.curve, pub1x_str, pub1y_str);
     auto status_or_kem_key = ecies_sender.GenerateKey(
         test.hash, test::HexDecodeOrDie(test.salt_hex),
         test::HexDecodeOrDie(test.info_hex), test.out_len, test.point_format);
     EciesHkdfSenderKemBoringSsl::KemKey kem_key =
         status_or_kem_key.ValueOrDie();
-    string priv1_str = bn2str(priv1);
+    std::string priv1_str = bn2str(priv1);
     EciesHkdfRecipientKemBoringSsl ecies_recipient(test.curve, priv1_str);
     auto status_or_shared_secret = ecies_recipient.GenerateKey(
         kem_key.get_kem_bytes(), test.hash, test::HexDecodeOrDie(test.salt_hex),

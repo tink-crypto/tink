@@ -23,20 +23,20 @@ namespace cloud {
 namespace crypto {
 namespace tink {
 
-EciesHkdfSenderKemBoringSsl::KemKey::KemKey(const string& kem_bytes,
-                                            const string& symmetric_key)
+EciesHkdfSenderKemBoringSsl::KemKey::KemKey(const std::string& kem_bytes,
+                                            const std::string& symmetric_key)
     : kem_bytes_(kem_bytes), symmetric_key_(symmetric_key){};
 
-string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_kem_bytes() {
+std::string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_kem_bytes() {
   return kem_bytes_;
 }
 
-string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_symmetric_key() {
+std::string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_symmetric_key() {
   return symmetric_key_;
 }
 
 EciesHkdfSenderKemBoringSsl::EciesHkdfSenderKemBoringSsl(
-    EllipticCurveType curve, const string& pubx, const string& puby)
+    EllipticCurveType curve, const std::string& pubx, const std::string& puby)
     : curve_(curve), pubx_(pubx), puby_(puby), peer_pub_key_(nullptr) {
   auto status_or_ec_point =
       SubtleUtilBoringSSL::GetEcPoint(curve_, pubx_, puby_);
@@ -45,13 +45,14 @@ EciesHkdfSenderKemBoringSsl::EciesHkdfSenderKemBoringSsl(
   }
 }
 
-StatusOr<EciesHkdfSenderKemBoringSsl::KemKey>
+util::StatusOr<EciesHkdfSenderKemBoringSsl::KemKey>
 EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, StringPiece hkdf_salt,
                                          StringPiece hkdf_info,
                                          int key_size_in_bytes,
                                          EcPointFormat point_format) const {
   if (peer_pub_key_.get() == nullptr) {
-    return Status(util::error::INTERNAL, "peer_pub_key_ wasn't initialized");
+    return util::Status(util::error::INTERNAL,
+                        "peer_pub_key_ wasn't initialized");
   }
 
   auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve_);
