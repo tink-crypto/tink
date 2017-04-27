@@ -25,7 +25,7 @@ namespace tink {
 
 EciesHkdfSenderKemBoringSsl::KemKey::KemKey(const std::string& kem_bytes,
                                             const std::string& symmetric_key)
-    : kem_bytes_(kem_bytes), symmetric_key_(symmetric_key){};
+    : kem_bytes_(kem_bytes), symmetric_key_(symmetric_key) {}
 
 std::string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_kem_bytes() {
   return kem_bytes_;

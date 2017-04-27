@@ -128,9 +128,9 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
                         "The x-coordinate of the shared point is larger than "
                         "the size of the curve");
   }
-  int zeros = int(curve_size_in_bytes - x_size_in_bytes);
+  int zeros = static_cast<int>(curve_size_in_bytes - x_size_in_bytes);
   int written = BN_bn2bin(shared_x.get(), &shared_secret_bytes.get()[zeros]);
-  if (written != int(x_size_in_bytes)) {
+  if (written != static_cast<int>(x_size_in_bytes)) {
     return util::Status(util::error::INTERNAL, "BN_bn_2bin failed");
   }
   return std::string(reinterpret_cast<char *>(shared_secret_bytes.get()),
@@ -148,7 +148,7 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
   bssl::UniquePtr<EC_POINT> point(EC_POINT_new(group.get()));
   switch (format) {
     case EcPointFormat::UNCOMPRESSED:
-      if (encoded[0] != char(0x04)) {
+      if (static_cast<int>(encoded[0]) != 0x04) {
         return util::Status(
             util::error::INTERNAL,
             "Uncompressed point should start with 0x04, but input doesn't");
@@ -161,7 +161,8 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
       }
       break;
     case EcPointFormat::COMPRESSED:
-      if (encoded[0] != char(0x03) && encoded[0] != char(0x02)) {
+      if (static_cast<int>(encoded[0]) != 0x03 &&
+          static_cast<int>(encoded[0]) != 0x02) {
         return util::Status(util::error::INTERNAL,
                             "Compressed point should start with either 0x02 or "
                             "0x03, but input doesn't");

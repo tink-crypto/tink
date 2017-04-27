@@ -28,8 +28,6 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 
-using google::cloud::crypto::tink::HashType;
-
 namespace cloud {
 namespace crypto {
 namespace tink {

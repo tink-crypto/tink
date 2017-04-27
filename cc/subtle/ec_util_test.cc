@@ -80,8 +80,8 @@ TEST_F(EcUtilTest, testBasic) {
     EXPECT_EQ(test.shared_hex, test::HexEncode(computed_shared.ValueOrDie()));
 
     // Modify the y coordinate of public key.
-    puby =
-        puby.substr(0, puby.length() - 1) + char(puby[puby.length() - 1] + 1);
+    puby = puby.substr(0, puby.length() - 1) +
+           static_cast<char>(puby[puby.length() - 1] + 1);
     auto modified_shared =
         EcUtil::ComputeEcdhSharedSecret(test.curve, priv, pubx, puby);
     EXPECT_FALSE(modified_shared.ok());

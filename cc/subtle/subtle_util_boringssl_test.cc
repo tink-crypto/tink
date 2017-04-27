@@ -69,9 +69,9 @@ TEST_F(SubtleUtilBoringSSLTest, testEcPointEncode) {
                   y_str.length(), nullptr));
     auto status_or_group = SubtleUtilBoringSSL::GetEcGroup(test.curve);
     bssl::UniquePtr<EC_POINT> point(EC_POINT_new(status_or_group.ValueOrDie()));
-    EXPECT_TRUE(1 == EC_POINT_set_affine_coordinates_GFp(
-                         status_or_group.ValueOrDie(), point.get(), x.get(),
-                         y.get(), nullptr));
+    EXPECT_EQ(1, EC_POINT_set_affine_coordinates_GFp(
+                     status_or_group.ValueOrDie(), point.get(), x.get(),
+                     y.get(), nullptr));
     auto status_or_string = SubtleUtilBoringSSL::EcPointEncode(
         test.curve, test.format, point.get());
     EXPECT_TRUE(status_or_string.ok());
@@ -92,9 +92,9 @@ TEST_F(SubtleUtilBoringSSLTest, testEcPointDecode) {
                   y_str.length(), nullptr));
     auto status_or_group = SubtleUtilBoringSSL::GetEcGroup(test.curve);
     bssl::UniquePtr<EC_POINT> point(EC_POINT_new(status_or_group.ValueOrDie()));
-    EXPECT_TRUE(1 == EC_POINT_set_affine_coordinates_GFp(
-                         status_or_group.ValueOrDie(), point.get(), x.get(),
-                         y.get(), nullptr));
+    EXPECT_EQ(1, EC_POINT_set_affine_coordinates_GFp(
+                     status_or_group.ValueOrDie(), point.get(), x.get(),
+                     y.get(), nullptr));
     auto status_or_ec_point = SubtleUtilBoringSSL::EcPointDecode(
         test.curve, test.format, encoded_str);
     EXPECT_TRUE(status_or_ec_point.ok());
