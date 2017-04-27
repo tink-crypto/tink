@@ -120,7 +120,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
   unsigned curve_size_in_bits = EC_GROUP_get_degree(priv_group.get());
   unsigned curve_size_in_bytes = (curve_size_in_bits + 7) / 8;
   size_t x_size_in_bytes = BN_num_bytes(shared_x.get());
-  std::unique_ptr<uint8_t> shared_secret_bytes(
+  std::unique_ptr<uint8_t[]> shared_secret_bytes(
       new uint8_t[curve_size_in_bytes]);
   memset(shared_secret_bytes.get(), 0, curve_size_in_bytes);
   if (curve_size_in_bytes < x_size_in_bytes) {
@@ -196,7 +196,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
   }
   switch (format) {
     case EcPointFormat::UNCOMPRESSED: {
-      std::unique_ptr<uint8_t> encoded(
+      std::unique_ptr<uint8_t[]> encoded(
           new uint8_t[1 + 2 * curve_size_in_bytes]);
       size_t size = EC_POINT_point2oct(
           group.get(), point, POINT_CONVERSION_UNCOMPRESSED, encoded.get(),
@@ -208,7 +208,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
                          1 + 2 * curve_size_in_bytes);
     }
     case EcPointFormat::COMPRESSED: {
-      std::unique_ptr<uint8_t> encoded(new uint8_t[1 + curve_size_in_bytes]);
+      std::unique_ptr<uint8_t[]> encoded(new uint8_t[1 + curve_size_in_bytes]);
       size_t size = EC_POINT_point2oct(
           group.get(), point, POINT_CONVERSION_COMPRESSED, encoded.get(),
           1 + 2 * curve_size_in_bytes, nullptr);

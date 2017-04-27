@@ -36,19 +36,23 @@ namespace tink {
 
 static const EVP_CIPHER* GetCipherForKeySize(int size_in_bytes) {
   switch (size_in_bytes) {
-    case 16 : return EVP_aes_128_gcm();
-    case 24 : return EVP_aes_192_gcm();
-    case 32 : return EVP_aes_256_gcm();
-    default : return nullptr;
+    case 16:
+      return EVP_aes_128_gcm();
+    case 24:
+      return EVP_aes_192_gcm();
+    case 32:
+      return EVP_aes_256_gcm();
+    default:
+      return nullptr;
   }
 }
 
-AesGcmBoringSsl::AesGcmBoringSsl(
-    const std::string& key_value, const EVP_CIPHER *cipher)
+AesGcmBoringSsl::AesGcmBoringSsl(const std::string& key_value,
+                                 const EVP_CIPHER* cipher)
     : key_(key_value), cipher_(cipher) {}
 
-util::StatusOr<std::unique_ptr<Aead>>
-AesGcmBoringSsl::New(const std::string& key_value) {
+util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
+    const std::string& key_value) {
   const EVP_CIPHER* cipher = GetCipherForKeySize(key_value.size());
   if (cipher == nullptr) {
     return util::Status(util::error::INTERNAL, "invalid key size");
@@ -60,7 +64,6 @@ AesGcmBoringSsl::New(const std::string& key_value) {
 util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
     const google::protobuf::StringPiece& plaintext,
     const google::protobuf::StringPiece& additional_data) const {
- 
   bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
@@ -71,37 +74,36 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "EVP_EncryptInit_ex failed");
   }
-  ret =
-      EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_IVLEN, IV_SIZE_IN_BYTES,
-                          nullptr);
+  ret = EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_IVLEN, IV_SIZE_IN_BYTES,
+                            nullptr);
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "IV length not supported");
   }
   const std::string iv = Random::GetRandomBytes(IV_SIZE_IN_BYTES);
   ret = EVP_EncryptInit_ex(ctx.get(), nullptr, nullptr,
-                           reinterpret_cast<const uint8_t *>(key_.data()),
-                           reinterpret_cast<const uint8_t *>(iv.data()));
+                           reinterpret_cast<const uint8_t*>(key_.data()),
+                           reinterpret_cast<const uint8_t*>(iv.data()));
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "Could not initialize ctx");
   }
   int len;
   ret = EVP_EncryptUpdate(
       ctx.get(), nullptr, &len,
-      reinterpret_cast<const uint8_t *>(additional_data.data()),
+      reinterpret_cast<const uint8_t*>(additional_data.data()),
       additional_data.size());
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "AAD is not supported");
   }
-  size_t ciphertext_size = iv.size() + plaintext.size() +
-      TAG_SIZE_IN_BYTES;
+  size_t ciphertext_size = iv.size() + plaintext.size() + TAG_SIZE_IN_BYTES;
   // TODO(bleichen): Check if it is OK to work on a string.
   //   This is unclear since some compiler may use copy-on-write.
-  std::vector<uint8_t> ct(ciphertext_size);
-  memcpy(&ct[0], reinterpret_cast<const uint8_t *>(iv.data()), iv.size());
+  // Allocates 1 byte more than necessary because we may potentially access
+  // &ct[ciphertext_size] causing vector range check error.
+  std::vector<uint8_t> ct(ciphertext_size + 1);
+  memcpy(&ct[0], reinterpret_cast<const uint8_t*>(iv.data()), iv.size());
   size_t written = iv.size();
-  ret = EVP_EncryptUpdate(ctx.get(),
-                          &ct[written], &len,
-                          reinterpret_cast<const uint8_t *>(plaintext.data()),
+  ret = EVP_EncryptUpdate(ctx.get(), &ct[written], &len,
+                          reinterpret_cast<const uint8_t*>(plaintext.data()),
                           plaintext.size());
   if (ret != 1) {
     util::Status(util::error::INTERNAL, "Encryption failed");
@@ -142,9 +144,8 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
     return util::Status(util::error::INTERNAL, "EVP_DecryptInit_ex failed");
   }
   // Set IV and tag length.
-  ret =
-      EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_IVLEN, IV_SIZE_IN_BYTES,
-                          nullptr);
+  ret = EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_IVLEN, IV_SIZE_IN_BYTES,
+                            nullptr);
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "IV length not supported");
   }
@@ -160,19 +161,21 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
   int len;
   ret = EVP_DecryptUpdate(
       ctx.get(), nullptr, &len,
-      reinterpret_cast<const uint8_t *>(additional_data.data()),
+      reinterpret_cast<const uint8_t*>(additional_data.data()),
       additional_data.size());
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "AAD is not supported");
   }
-  size_t plaintext_size = ciphertext.size() - IV_SIZE_IN_BYTES -
-      TAG_SIZE_IN_BYTES;
-  std::vector<uint8_t> pt(plaintext_size);
+  size_t plaintext_size =
+      ciphertext.size() - IV_SIZE_IN_BYTES - TAG_SIZE_IN_BYTES;
+  // Allocates 1 byte more than necessary because we may potentially access
+  // &pt[plaintext_size] causing vector range check error.
+  std::vector<uint8_t> pt(plaintext_size + 1);
   size_t read = IV_SIZE_IN_BYTES;
   size_t written = 0;
   ret = EVP_DecryptUpdate(
       ctx.get(), &pt[written], &len,
-      reinterpret_cast<const uint8_t *>(&ciphertext.data()[read]),
+      reinterpret_cast<const uint8_t*>(&ciphertext.data()[read]),
       plaintext_size);
   if (ret != 1) {
     util::Status(util::error::INTERNAL, "Decryption failed");
@@ -183,8 +186,8 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
   uint8_t tag[TAG_SIZE_IN_BYTES];
   memcpy(tag, &ciphertext.data()[ciphertext.size() - TAG_SIZE_IN_BYTES],
          TAG_SIZE_IN_BYTES);
-  ret = EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_TAG,
-                            TAG_SIZE_IN_BYTES, tag);
+  ret = EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_TAG, TAG_SIZE_IN_BYTES,
+                            tag);
   if (ret != 1) {
     return util::Status(util::error::INTERNAL, "Could not set tag");
   }

@@ -54,7 +54,7 @@ static const std::vector<TestVector> test_vector(
 
 std::string bn2str(const BIGNUM* bn) {
   size_t bn_size_in_bytes = BN_num_bytes(bn);
-  std::unique_ptr<uint8_t> res(new uint8_t[bn_size_in_bytes]);
+  std::unique_ptr<uint8_t[]> res(new uint8_t[bn_size_in_bytes]);
   BN_bn2bin(bn, &res.get()[0]);
   return std::string(reinterpret_cast<const char*>(res.get()),
                      bn_size_in_bytes);

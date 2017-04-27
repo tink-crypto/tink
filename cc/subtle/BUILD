@@ -142,6 +142,7 @@ cc_test(
     deps = [
         ":ecies_hkdf_recipient_kem_boringssl",
         ":ecies_hkdf_sender_kem_boringssl",
+        ":subtle_util_boringssl",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
@@ -191,6 +192,7 @@ cc_test(
         "//cc:mac",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:test_util",
         "//proto:cc_common",
         "@gtest//:gtest",
     ],
@@ -206,6 +208,7 @@ cc_test(
         "//cc:aead",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:test_util",
         "//proto:cc_common",
         "@gtest//:gtest",
     ],

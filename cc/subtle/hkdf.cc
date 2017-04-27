@@ -34,7 +34,7 @@ util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash, StringPiece ikm,
   if (!status_or_evp_md.ok()) {
     return status_or_evp_md.status();
   }
-  std::unique_ptr<uint8_t> out_key(new uint8_t[out_len]);
+  std::unique_ptr<uint8_t[]> out_key(new uint8_t[out_len]);
   if (1 != HKDF(out_key.get(), out_len, status_or_evp_md.ValueOrDie(),
                 reinterpret_cast<const uint8_t *>(ikm.data()), ikm.size(),
                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size(),
