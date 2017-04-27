@@ -15,12 +15,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/hkdf.h"
-#include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
-#include "openssl/evp.h"
 
 namespace cloud {
 namespace crypto {

@@ -36,12 +36,8 @@ class HmacBoringSslTest : public ::testing::Test {
  public:
   // Utility to simplify testing with test vectors.
   // Arguments and result are hexadecimal.
-  bool HmacVerifyHex(
-      HashType hash,
-      int tag_size,
-      const std::string &key_hex,
-      const std::string &tag_hex,
-      const std::string &data_hex) {
+  bool HmacVerifyHex(HashType hash, int tag_size, const std::string &key_hex,
+                     const std::string &tag_hex, const std::string &data_hex) {
     std::string key = test::HexDecodeOrDie(key_hex);
     std::string tag = test::HexDecodeOrDie(tag_hex);
     std::string data = test::HexDecodeOrDie(data_hex);
@@ -65,9 +61,8 @@ TEST_F(HmacBoringSslTest, testBasic) {
   std::string tag = res.ValueOrDie();
   EXPECT_EQ(tag_size, tag.size());
   auto status = hmac->VerifyMac(tag, data);
-  EXPECT_TRUE(status.ok())
-      << "tag:" << test::HexEncode(tag)
-      << " status:" << status.ToString();
+  EXPECT_TRUE(status.ok()) << "tag:" << test::HexEncode(tag)
+                           << " status:" << status.ToString();
 }
 
 TEST_F(HmacBoringSslTest, testModification) {
@@ -84,8 +79,8 @@ TEST_F(HmacBoringSslTest, testModification) {
     std::string modified_tag = tag;
     modified_tag[i / 8] ^= 1 << (i % 8);
     EXPECT_FALSE(hmac->VerifyMac(modified_tag, data).ok())
-       << "tag:" << test::HexEncode(tag)
-       << " modified:" << test::HexEncode(modified_tag);
+        << "tag:" << test::HexEncode(tag)
+        << " modified:" << test::HexEncode(modified_tag);
   }
 }
 
@@ -101,8 +96,8 @@ TEST_F(HmacBoringSslTest, testTruncation) {
   for (size_t i = 0; i < tag.size(); i++) {
     std::string modified_tag(tag, 0, i);
     EXPECT_FALSE(hmac->VerifyMac(modified_tag, data).ok())
-       << "tag:" << test::HexEncode(tag)
-       << " modified:" << test::HexEncode(modified_tag);
+        << "tag:" << test::HexEncode(tag)
+        << " modified:" << test::HexEncode(modified_tag);
   }
 }
 
@@ -124,8 +119,7 @@ TEST_F(HmacBoringSslTest, testTruncation) {
 }  // namespace crypto
 }  // namespace cloud
 
-
-int main(int ac, char* av[]) {
+int main(int ac, char *av[]) {
   testing::InitGoogleTest(&ac, av);
   return RUN_ALL_TESTS();
 }

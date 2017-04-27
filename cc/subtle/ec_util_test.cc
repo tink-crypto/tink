@@ -15,6 +15,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/ec_util.h"
+#include "cc/util/status.h"
+#include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 

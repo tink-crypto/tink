@@ -126,6 +126,8 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":ecies_hkdf_recipient_kem_boringssl",
+        "//cc/util:status",
+        "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:cc_common",
         "@gtest//:gtest",
@@ -140,8 +142,11 @@ cc_test(
     deps = [
         ":ecies_hkdf_recipient_kem_boringssl",
         ":ecies_hkdf_sender_kem_boringssl",
+        "//cc/util:status",
+        "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:cc_common",
+        "@boringssl//:crypto",
         "@gtest//:gtest",
     ],
 )
@@ -153,6 +158,8 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":ec_util",
+        "//cc/util:status",
+        "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:cc_common",
         "@gtest//:gtest",

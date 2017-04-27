@@ -16,6 +16,8 @@
 
 #include "cc/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
+#include "cc/util/status.h"
+#include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 
