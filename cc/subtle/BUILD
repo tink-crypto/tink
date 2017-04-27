@@ -55,6 +55,7 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//proto:cc_common",
         "@boringssl//:crypto",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
@@ -73,6 +74,7 @@ cc_library(
         "//cc/util:test_util",
         "//proto:cc_common",
         "@boringssl//:crypto",
+        "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -89,6 +91,7 @@ cc_library(
         "//cc/util:test_util",
         "//proto:cc_common",
         "@boringssl//:crypto",
+        "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -166,6 +169,7 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
+        "//proto:cc_common",
         "@gtest//:gtest",
     ],
 )
