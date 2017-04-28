@@ -342,7 +342,7 @@ public final class Curve25519 {
   /**
    * Takes a little-endian, 32-byte number and expands it into polynomial form.
    */
-  private static long[] expand(byte[] input) {
+  static long[] expand(byte[] input) {
     long[] output = new long[LIMB_CNT];
     for (int i = 0; i < LIMB_CNT; i++) {
       output[i] = ((((long) (input[EXPAND_START[i]] & 0xff))

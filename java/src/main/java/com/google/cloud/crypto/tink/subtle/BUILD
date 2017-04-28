@@ -160,3 +160,14 @@ java_library(
         "@com_google_guava//jar",
     ],
 )
+
+java_binary(
+    name = "Ed25519ConstantsGenerator",
+    srcs = [
+        "Ed25519ConstantsGenerator.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":x25519",
+    ],
+)
