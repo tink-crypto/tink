@@ -111,33 +111,17 @@ java_library(
     ],
 )
 
-# hybridencrypt subtle
+# hybrid subtle
 
 java_library(
-    name = "hybridencrypt",
-    srcs = [
-        "EcUtil.java",
-        "EciesHkdfSenderKem.java",
-        "Hkdf.java",
-        "HybridEncryptBase.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        ":subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
-        "@com_google_guava//jar",
-    ],
-)
-
-# hybriddecrypt subtle
-
-java_library(
-    name = "hybriddecrypt",
+    name = "hybrid",
     srcs = [
         "EcUtil.java",
         "EciesHkdfRecipientKem.java",
+        "EciesHkdfSenderKem.java",
         "Hkdf.java",
         "HybridDecryptBase.java",
+        "HybridEncryptBase.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
