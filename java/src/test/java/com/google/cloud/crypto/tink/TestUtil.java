@@ -60,7 +60,7 @@ import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
+import com.google.protobuf.MessageLite;
 import java.io.File;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -166,7 +166,7 @@ public class TestUtil {
   /**
    * @return a {@code KeyData} from a specified key.
    */
-  public static KeyData createKeyData(Message key, String typeUrl, KeyData.KeyMaterialType type)
+  public static KeyData createKeyData(MessageLite key, String typeUrl, KeyData.KeyMaterialType type)
       throws Exception {
     return KeyData.newBuilder()
         .setValue(key.toByteString())

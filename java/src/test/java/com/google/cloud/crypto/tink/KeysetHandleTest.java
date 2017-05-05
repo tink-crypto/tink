@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
-import com.google.protobuf.TextFormat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -49,6 +48,6 @@ public class KeysetHandleTest {
 
     String keysetInfo = handle.toString();
     assertFalse(keysetInfo.contains(keyValue));
-    assertTrue(TextFormat.printToUnicodeString(handle.getKeyset()).contains(keyValue));
+    assertTrue(handle.getKeyset().toString().contains(keyValue));
   }
 }

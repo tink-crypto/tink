@@ -28,7 +28,6 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
-import com.google.protobuf.TextFormat;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.spec.ECPoint;
@@ -109,10 +108,10 @@ public class UtilTest {
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK));
-    assertTrue(TextFormat.printToUnicodeString(keyset).contains(keyValue));
+    assertTrue(keyset.toString().contains(keyValue));
 
     KeysetInfo keysetInfo = Util.getKeysetInfo(keyset);
-    assertFalse(TextFormat.printToUnicodeString(keysetInfo).contains(keyValue));
+    assertFalse(keysetInfo.toString().contains(keyValue));
   }
 
   /**
