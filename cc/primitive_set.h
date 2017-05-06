@@ -90,7 +90,7 @@ class PrimitiveSet {
     return get_primitives(CryptoFormat::kRawPrefix);
   }
 
-  // Returns the entries with primitive identifed by 'identifier'.
+  // Returns the entries with primitives identifed by 'identifier'.
   util::StatusOr<Primitives*> get_primitives(
       const std::string& identifier) {
     typename CiphertextPrefixToPrimitivesMap::iterator found =

@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_AEAD_FACTORY_H_
-#define TINK_AEAD_FACTORY_H_
+#ifndef TINK_AEAD_AEAD_FACTORY_H_
+#define TINK_AEAD_AEAD_FACTORY_H_
 
 #include "cc/aead.h"
 #include "cc/key_manager.h"
@@ -49,7 +49,8 @@ namespace tink {
 //
 //   AeadFactory.RegisterStandardKeyTypes();
 //   KeysetHandle keyset_handle = ...;
-//   Aead aead = AeadFactory.GetPrimitive(keyset_handle);
+//   std::unique_ptr<Aead> aead =
+//       std::move(AeadFactory.GetPrimitive(keyset_handle).ValueOrDie());
 //   string plaintext = ...;
 //   string aad = ...;
 //   string ciphertext = aead.Encrypt(plaintext, aad).ValueOrDie();
@@ -65,22 +66,21 @@ class AeadFactory {
   // Returns an Aead-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
   static util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
-      const KeysetHandle& keyset_handle) {
-    return util::Status::UNKNOWN;
-  }
+      const KeysetHandle& keyset_handle);
 
   // Returns an Aead-primitive that uses key material from the keyset
   // specified via 'keyset_handle' and is instantiated by the given
   // 'custom_key_manager' (instead of the key manager from the Registry).
   static util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
       const KeysetHandle& keyset_handle,
-      const KeyManager<Aead>& custom_key_manager) {
-    return util::Status::UNKNOWN;
-  }
+      const KeyManager<Aead>* custom_key_manager);
+
+ private:
+  AeadFactory() {}
 };
 
 }  // namespace tink
 }  // namespace crypto
 }  // namespace cloud
 
-#endif  // TINK_AEAD_FACTORY_H_
+#endif  // TINK_AEAD_AEAD_FACTORY_H_

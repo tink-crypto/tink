@@ -17,6 +17,10 @@
 #include "cc/aead/aead_factory.h"
 
 #include "cc/aead.h"
+#include "cc/keyset_handle.h"
+#include "cc/registry.h"
+#include "cc/aead/aes_gcm_key_manager.h"
+#include "cc/aead/aead_set_wrapper.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
@@ -27,19 +31,35 @@ namespace tink {
 
 // static
 util::Status AeadFactory::RegisterStandardKeyTypes() {
-  return util::Status(util::error::UNIMPLEMENTED, "Not implemented yet.");
+  util::Status status = Registry::get_default_registry().RegisterKeyManager(
+      "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey",
+      new AesGcmKeyManager());
+  return status;
 }
 
 // static
 util::Status AeadFactory::RegisterLegacyKeyTypes() {
-  return util::Status(util::error::UNIMPLEMENTED, "Not implemented yet.");
+  return util::Status::OK;
 }
 
 // static
-util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
+util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
     const KeysetHandle& keyset_handle) {
-  return util::Status::UNKNOWN;
+  return GetPrimitive(keyset_handle, nullptr);
 }
+
+// static
+util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
+    const KeysetHandle& keyset_handle,
+    const KeyManager<Aead>* custom_key_manager) {
+  auto primitives_result = Registry::get_default_registry().GetPrimitives<Aead>(
+      keyset_handle, custom_key_manager);
+  if (primitives_result.ok()) {
+    return AeadSetWrapper::NewAead(std::move(primitives_result.ValueOrDie()));
+  }
+  return primitives_result.status();
+}
+
 
 }  // namespace tink
 }  // namespace crypto

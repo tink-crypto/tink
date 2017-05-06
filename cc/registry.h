@@ -89,7 +89,7 @@ class Registry {
   // implements the corresponding Primitive-interface.
   template <class P>
   util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> GetPrimitives(
-      const KeysetHandle& keyset_handle, KeyManager<P>* custom_manager);
+      const KeysetHandle& keyset_handle, const KeyManager<P>* custom_manager);
 
   Registry() {}
 
@@ -179,7 +179,7 @@ util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
 
 template <class P>
 util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> Registry::GetPrimitives(
-    const KeysetHandle& keyset_handle, KeyManager<P>* custom_manager) {
+    const KeysetHandle& keyset_handle, const KeyManager<P>* custom_manager) {
   util::Status status = ValidateKeyset(keyset_handle.get_keyset());
   if (!status.ok()) return status;
   std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());

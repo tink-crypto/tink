@@ -29,6 +29,9 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
+using cloud::crypto::tink::test::AddLegacyKey;
+using cloud::crypto::tink::test::AddRawKey;
+using cloud::crypto::tink::test::AddTinkKey;
 using cloud::crypto::tink::test::DummyAead;
 using google::cloud::crypto::tink::AesCtrHmacAeadKey;
 using google::cloud::crypto::tink::AesGcmKey;
@@ -37,7 +40,6 @@ using google::cloud::crypto::tink::KeyData;
 using google::cloud::crypto::tink::Keyset;
 using google::cloud::crypto::tink::KeyStatusType;
 using google::cloud::crypto::tink::KeyTemplate;
-using google::cloud::crypto::tink::OutputPrefixType;
 using google::protobuf::Message;
 using google::protobuf::StringPiece;
 using util::Status;
@@ -191,45 +193,31 @@ TEST_F(RegistryTest, testGettingPrimitives) {
   Registry registry;
   std::string key_type_1 = AesCtrHmacAeadKey::descriptor()->full_name();
   std::string key_type_2 = AesGcmKey::descriptor()->full_name();
+  AesCtrHmacAeadKey dummy_key_1;
+  AesGcmKey dummy_key_2;
 
   // Prepare keyset.
-  Keyset::Key* key;
   Keyset keyset;
 
   uint32_t key_id_1 = 1234543;
-  key = keyset.add_key();
-  key->set_output_prefix_type(OutputPrefixType::TINK);
-  key->set_key_id(key_id_1);
-  key->set_status(KeyStatusType::ENABLED);
-  key->mutable_key_data()->set_type_url(key_type_1);
+  AddTinkKey(key_type_1, key_id_1, dummy_key_1, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  key = keyset.add_key();
-  key->set_output_prefix_type(OutputPrefixType::TINK);
-  key->set_key_id(key_id_2);
-  key->set_status(KeyStatusType::DISABLED);
-  key->mutable_key_data()->set_type_url(key_type_2);
+  AddTinkKey(key_type_2, key_id_2, dummy_key_2, KeyStatusType::DISABLED,
+             KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  key = keyset.add_key();
-  key->set_output_prefix_type(OutputPrefixType::LEGACY);
-  key->set_key_id(key_id_3);
-  key->set_status(KeyStatusType::ENABLED);
-  key->mutable_key_data()->set_type_url(key_type_2);
+  AddLegacyKey(key_type_2, key_id_3, dummy_key_2, KeyStatusType::ENABLED,
+               KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_4 = 6268492;
-  key = keyset.add_key();
-  key->set_output_prefix_type(OutputPrefixType::RAW);
-  key->set_key_id(key_id_4);
-  key->set_status(KeyStatusType::ENABLED);
-  key->mutable_key_data()->set_type_url(key_type_1);
+  AddRawKey(key_type_1, key_id_4, dummy_key_1, KeyStatusType::ENABLED,
+            KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_5 = 42;
-  key = keyset.add_key();
-  key->set_output_prefix_type(OutputPrefixType::RAW);
-  key->set_key_id(key_id_5);
-  key->set_status(KeyStatusType::ENABLED);
-  key->mutable_key_data()->set_type_url(key_type_2);
+  AddRawKey(key_type_2, key_id_5, dummy_key_2, KeyStatusType::ENABLED,
+            KeyData::SYMMETRIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
 

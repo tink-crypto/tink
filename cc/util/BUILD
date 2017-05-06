@@ -39,13 +39,14 @@ cc_library(
 
 cc_library(
     name = "test_util",
-    srcs = ["test_util.h"],
+    srcs = ["test_util.cc"],
     hdrs = ["test_util.h"],
     deps = [
         ":status",
         ":statusor",
         "//cc:aead",
         "//cc:mac",
+        "//proto:cc_tink",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
