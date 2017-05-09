@@ -67,7 +67,7 @@ cc_test(
         "//cc:primitive_set",
         "//cc/util:status",
         "//cc/util:test_util",
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
         "@gtest//:gtest",
     ],
 )
@@ -84,7 +84,7 @@ cc_test(
         "//cc:mac",
         "//cc/util:status",
         "//cc/util:test_util",
-        "//proto:cc_hmac",
+        "//proto:hmac_cc_proto",
         "@gtest//:gtest",
     ],
 )

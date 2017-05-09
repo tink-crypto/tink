@@ -34,3 +34,18 @@ java_library(
         "//proto:tink_java_proto_compile_imports",
     ],
 )
+
+java_library(
+    name = "android",
+    srcs = [":mac_srcs"],
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java/src/main/java/com/google/cloud/crypto/tink",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:mac",
+        "//proto:common_java_proto_lite",
+        "//proto:hmac_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//proto:tink_java_proto_lite_compile_imports",
+    ],
+)

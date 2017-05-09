@@ -7,7 +7,7 @@ JAVACOPTS = [
     "-Xlint:deprecation",
 ]
 
-# public libraries
+# PUBLIC
 
 java_library(
     name = "java",
@@ -18,14 +18,28 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink",
         "//java/src/main/java/com/google/cloud/crypto/tink/aead",
         "//java/src/main/java/com/google/cloud/crypto/tink/aead:aead_envelope",
-        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:hybriddecrypt",
-        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:hybridencrypt",
+        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:decrypt",
+        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:encrypt",
         "//java/src/main/java/com/google/cloud/crypto/tink/mac",
         "//java/src/main/java/com/google/cloud/crypto/tink/signature",
     ],
 )
 
-# restricted
+# like :java, but for Android
+java_library(
+    name = "android",
+    visibility = ["//visibility:public"],
+    exports = [
+        "//java/src/main/java/com/google/cloud/crypto/tink:android",
+        "//java/src/main/java/com/google/cloud/crypto/tink/aead:android",
+        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:decrypt_android",
+        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:encrypt_android",
+        "//java/src/main/java/com/google/cloud/crypto/tink/mac:android",
+        "//java/src/main/java/com/google/cloud/crypto/tink/signature:android",
+    ],
+)
+
+# RESTRICTED
 
 java_library(
     name = "protos",
@@ -87,9 +101,8 @@ java_library(
     ],
 )
 
-# targets for tests
+# TEST
 
-# like :java, but includes protos, restricted APIs and subtle
 java_library(
     name = "testonly",
     testonly = 1,
@@ -102,6 +115,17 @@ java_library(
         ":keyset_handle_restricted",
         ":protos",
         ":subtle",
+    ],
+)
+
+java_library(
+    name = "testonly_android",
+    testonly = 1,
+    visibility = ["//visibility:public"],
+    exports = [
+        ":android",
+        ":subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink:keyset_handle_restricted_android",
     ],
 )
 

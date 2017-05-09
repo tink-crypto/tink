@@ -46,7 +46,7 @@ cc_library(
         ":statusor",
         "//cc:aead",
         "//cc:mac",
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
 )

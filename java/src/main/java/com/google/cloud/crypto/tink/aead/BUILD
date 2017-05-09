@@ -46,6 +46,26 @@ java_library(
 )
 
 java_library(
+    name = "android",
+    srcs = [":aead_srcs"],
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java/src/main/java/com/google/cloud/crypto/tink:android",
+        "//java/src/main/java/com/google/cloud/crypto/tink/mac:android",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead",
+        "//proto:aes_ctr_hmac_aead_java_proto_lite",
+        "//proto:aes_eax_java_proto_lite",
+        "//proto:aes_gcm_java_proto_lite",
+        "//proto:common_java_proto_lite",
+        "//proto:hmac_java_proto_lite",
+        "//proto:kms_envelope_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//proto:tink_java_proto_lite_compile_imports",
+    ],
+)
+
+java_library(
     name = "aead_envelope",
     srcs = AEAD_ENVELOPE_SRCS,
     javacopts = JAVACOPTS,

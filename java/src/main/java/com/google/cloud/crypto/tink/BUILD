@@ -81,6 +81,19 @@ java_library(
 )
 
 java_library(
+    name = "android",
+    srcs = [":tink_srcs"],
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
+        "//proto:common_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//proto:tink_java_proto_lite_compile_imports",
+        "@com_google_guava//jar",
+    ],
+)
+
+java_library(
     name = "keyset_handle_restricted",
     srcs = [
         ":keyset_handle_restricted_srcs",
@@ -91,6 +104,20 @@ java_library(
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
         "//proto:tink_java_proto_compile_imports",
+    ],
+)
+
+java_library(
+    name = "keyset_handle_restricted_android",
+    srcs = [
+        ":keyset_handle_restricted_srcs",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":tink",
+        "//proto:common_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//proto:tink_java_proto_lite_compile_imports",
     ],
 )
 
