@@ -49,9 +49,10 @@ namespace tink {
 //
 //   MacFactory.RegisterStandardKeyTypes();
 //   KeysetHandle keyset_handle = ...;
-//   Mac mac = MacFactory.GetPrimitive(keyset_handle);
-//   string data = ...;
-//   string tag = mac.ComputeMac(data).ValueOrDie();
+//   std::unique_ptr<Mac> mac =
+//       std::move(MacFactory.GetPrimitive(keyset_handle).ValueOrDie());
+//   std::string data = ...;
+//   std::string mac_value = mac.ComputeMac(data).ValueOrDie();
 //
 class MacFactory {
  public:
@@ -64,18 +65,17 @@ class MacFactory {
   // Returns a Mac-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
   static util::StatusOr<std::unique_ptr<Mac>> GetPrimitive(
-      const KeysetHandle& keyset_handle) {
-    return util::Status::UNKNOWN;
-  }
+      const KeysetHandle& keyset_handle);
 
   // Returns a Mac-primitive that uses key material from the keyset
   // specified via 'keyset_handle' and is instantiated by the given
   // 'custom_key_manager' (instead of the key manager from the Registry).
   static util::StatusOr<std::unique_ptr<Mac>> GetPrimitive(
       const KeysetHandle& keyset_handle,
-      const KeyManager<Mac>& custom_key_manager) {
-    return util::Status::UNKNOWN;
-  }
+      const KeyManager<Mac>* custom_key_manager);
+
+ private:
+  MacFactory() {}
 };
 
 }  // namespace tink

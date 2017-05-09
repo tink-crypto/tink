@@ -38,7 +38,7 @@ class Mac {
   // Verifies if 'mac' is a correct authentication code (MAC) for 'data'.
   // Returns Status::OK if 'mac' is correct, and a non-OK-Status otherwise.
   virtual util::Status VerifyMac(
-      google::protobuf::StringPiece mac,
+      google::protobuf::StringPiece mac_value,
       google::protobuf::StringPiece data) const = 0;
 
   virtual ~Mac() {}

@@ -1,14 +1,32 @@
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
+    name = "mac_set_wrapper",
+    srcs = ["mac_set_wrapper.cc"],
+    hdrs = ["mac_set_wrapper.h"],
+    visibility = ["//visibility:private"],
+    deps = [
+        "//cc:crypto_format",
+        "//cc:mac",
+        "//cc:primitive_set",
+        "//cc/util:status",
+        "//cc/util:statusor",
+    ],
+)
+
+cc_library(
     name = "mac_factory",
     srcs = ["mac_factory.cc"],
     hdrs = ["mac_factory.h"],
     visibility = ["//visibility:public"],
     deps = [
+        ":hmac_key_manager",
+        ":mac_set_wrapper",
         "//cc:key_manager",
         "//cc:keyset_handle",
         "//cc:mac",
+        "//cc:primitive_set",
+        "//cc:registry",
         "//cc/util:status",
         "//cc/util:statusor",
         "@com_github_google_protobuf//:protobuf_lite",
@@ -39,14 +57,34 @@ cc_library(
 # tests
 
 cc_test(
+    name = "mac_set_wrapper_test",
+    size = "small",
+    srcs = ["mac_set_wrapper_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":mac_set_wrapper",
+        "//cc:mac",
+        "//cc:primitive_set",
+        "//cc/util:status",
+        "//cc/util:test_util",
+        "//proto:cc_tink",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
     name = "mac_factory_test",
     size = "small",
     srcs = ["mac_factory_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":mac_factory",
+        ":mac_set_wrapper",
+        "//cc:crypto_format",
         "//cc:mac",
         "//cc/util:status",
+        "//cc/util:test_util",
+        "//proto:cc_hmac",
         "@gtest//:gtest",
     ],
 )
