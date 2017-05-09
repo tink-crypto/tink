@@ -51,8 +51,8 @@ util::StatusOr<std::unique_ptr<Aead>> AeadSetWrapper::NewAead(
 }
 
 util::StatusOr<std::string> AeadSetWrapper::Encrypt(
-    const google::protobuf::StringPiece& plaintext,
-    const google::protobuf::StringPiece& aad) const {
+    google::protobuf::StringPiece plaintext,
+    google::protobuf::StringPiece aad) const {
   auto encrypt_result =
       aead_set_->get_primary()->get_primitive().Encrypt(plaintext, aad);
   if (!encrypt_result.ok()) return encrypt_result.status();
@@ -61,8 +61,8 @@ util::StatusOr<std::string> AeadSetWrapper::Encrypt(
 }
 
 util::StatusOr<std::string> AeadSetWrapper::Decrypt(
-    const google::protobuf::StringPiece& ciphertext,
-    const google::protobuf::StringPiece& aad) const {
+    google::protobuf::StringPiece ciphertext,
+    google::protobuf::StringPiece aad) const {
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
     std::string key_id = ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize);
     auto primitives_result = aead_set_->get_primitives(key_id);

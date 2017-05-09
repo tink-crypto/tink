@@ -23,6 +23,7 @@
 #include "cc/crypto_format.h"
 #include "cc/util/errors.h"
 #include "cc/util/statusor.h"
+#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
 namespace cloud {
@@ -55,10 +56,11 @@ class PrimitiveSet {
   template <class P2>
   class Entry {
    public:
-    Entry(std::unique_ptr<P2> primitive, std::string identifier,
+    Entry(std::unique_ptr<P2> primitive,
+          google::protobuf::StringPiece identifier,
           google::cloud::crypto::tink::KeyStatusType status) :
         primitive_(std::move(primitive)),
-        identifier_(identifier),
+        identifier_(identifier.ToString()),
         status_(status) {
     }
     P2& get_primitive() const {
@@ -92,13 +94,13 @@ class PrimitiveSet {
 
   // Returns the entries with primitives identifed by 'identifier'.
   util::StatusOr<Primitives*> get_primitives(
-      const std::string& identifier) {
+      google::protobuf::StringPiece identifier) {
     typename CiphertextPrefixToPrimitivesMap::iterator found =
-        primitives_.find(identifier);
+        primitives_.find(identifier.ToString());
     if (found == primitives_.end()) {
       return ToStatusF(util::error::NOT_FOUND,
                        "No primitives found for identifier '%s'.",
-                       identifier.c_str());
+                       identifier.ToString().c_str());
     }
     return &(found->second);
   }

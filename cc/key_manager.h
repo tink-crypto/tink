@@ -24,6 +24,7 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/message.h"
+#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
 namespace cloud {
@@ -60,7 +61,7 @@ class KeyManager {
   // Returns the version of this key manager.
   virtual int get_version() const = 0;
 
-  bool DoesSupport(const std::string& key_type) const {
+  bool DoesSupport(google::protobuf::StringPiece key_type) const {
     return (key_type == get_key_type());
   }
 

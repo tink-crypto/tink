@@ -40,12 +40,12 @@ class AeadSetWrapper : public Aead {
       std::unique_ptr<PrimitiveSet<Aead>> aead_set);
 
   util::StatusOr<std::string> Encrypt(
-      const google::protobuf::StringPiece& plaintext,
-      const google::protobuf::StringPiece& additional_data) const override;
+      google::protobuf::StringPiece plaintext,
+      google::protobuf::StringPiece additional_data) const override;
 
   util::StatusOr<std::string> Decrypt(
-      const google::protobuf::StringPiece& ciphertext,
-      const google::protobuf::StringPiece& additional_data) const override;
+      google::protobuf::StringPiece ciphertext,
+      google::protobuf::StringPiece additional_data) const override;
 
   virtual ~AeadSetWrapper() {}
 

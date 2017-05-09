@@ -26,8 +26,6 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
-using google::protobuf::StringPiece;
-
 namespace cloud {
 namespace crypto {
 namespace tink {
@@ -85,19 +83,19 @@ void AddRawKey(
 // as a parameter of the constructor.
 class DummyAead : public Aead {
  public:
-  DummyAead(const std::string& aead_name) : aead_name_(aead_name) {}
+  DummyAead(google::protobuf::StringPiece aead_name) : aead_name_(aead_name) {}
 
   // Computes a dummy ciphertext, which is concatenation of provided 'plaintext'
   // with the name of this DummyAead.
   util::StatusOr<std::string> Encrypt(
-      const StringPiece& plaintext,
-      const StringPiece& additional_data) const override {
+      google::protobuf::StringPiece plaintext,
+      google::protobuf::StringPiece additional_data) const override {
     return plaintext.ToString().append(aead_name_);
   }
 
   util::StatusOr<std::string> Decrypt(
-      const StringPiece& ciphertext,
-      const StringPiece& additional_data) const override {
+      google::protobuf::StringPiece ciphertext,
+      google::protobuf::StringPiece additional_data) const override {
     std::string c = ciphertext.ToString();
     size_t pos = c.rfind(aead_name_);
     if (pos != std::string::npos &&

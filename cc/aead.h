@@ -37,8 +37,8 @@ class Aead {
   // The ciphertext allows for checking authenticity and integrity
   // of the additional data , but does not guarantee its secrecy.
   virtual util::StatusOr<std::string> Encrypt(
-      const google::protobuf::StringPiece& plaintext,
-      const google::protobuf::StringPiece& additional_data) const = 0;
+      google::protobuf::StringPiece plaintext,
+      google::protobuf::StringPiece additional_data) const = 0;
 
   // Decrypts 'ciphertext' with 'additional_data' as additional
   // authenticated data, and returns the resulting plaintext.
@@ -46,8 +46,8 @@ class Aead {
   // of the additional data, but there are no guarantees wrt. secrecy
   // of that data.
   virtual util::StatusOr<std::string> Decrypt(
-      const google::protobuf::StringPiece& ciphertext,
-      const google::protobuf::StringPiece& additional_data) const = 0;
+      google::protobuf::StringPiece ciphertext,
+      google::protobuf::StringPiece additional_data) const = 0;
 
   virtual ~Aead() {}
 

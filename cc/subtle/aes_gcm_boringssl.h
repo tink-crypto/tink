@@ -33,15 +33,15 @@ namespace tink {
 class AesGcmBoringSsl : public Aead {
  public:
   static util::StatusOr<std::unique_ptr<Aead>> New(
-      const std::string& key_value);
+      google::protobuf::StringPiece key_value);
 
   util::StatusOr<std::string> Encrypt(
-      const google::protobuf::StringPiece& plaintext,
-      const google::protobuf::StringPiece& additional_data) const override;
+      google::protobuf::StringPiece plaintext,
+      google::protobuf::StringPiece additional_data) const override;
 
   util::StatusOr<std::string> Decrypt(
-      const google::protobuf::StringPiece& ciphertext,
-      const google::protobuf::StringPiece& additional_data) const override;
+      google::protobuf::StringPiece ciphertext,
+      google::protobuf::StringPiece additional_data) const override;
 
   virtual ~AesGcmBoringSsl() {}
 
@@ -50,7 +50,8 @@ class AesGcmBoringSsl : public Aead {
   static const int TAG_SIZE_IN_BYTES = 16;
 
   AesGcmBoringSsl() {}
-  AesGcmBoringSsl(const std::string& key_value, const EVP_CIPHER *cipher);
+  AesGcmBoringSsl(google::protobuf::StringPiece key_value,
+                  const EVP_CIPHER *cipher);
 
   const std::string key_;
   // cipher_ is a singleton owned by BoringSsl.

@@ -60,7 +60,7 @@ class Registry {
   // Registers the given 'manager' for the key type identified by 'type_url'.
   // Takes ownership of 'manager', which must be non-nullptr.
   template <class P>
-  util::Status RegisterKeyManager(const std::string& type_url,
+  util::Status RegisterKeyManager(google::protobuf::StringPiece type_url,
                                   KeyManager<P>* manager);
 
   // Returns a key manager for the given type_url (if any found).
@@ -71,7 +71,7 @@ class Registry {
   // see https://goo.gl/x0ymDz)
   template <class P>
   util::StatusOr<const KeyManager<P>*> get_key_manager(
-      const std::string& type_url);
+      google::protobuf::StringPiece type_url);
 
   // Convenience method for creating a new primitive for the key given
   // in 'key_data'.  It looks up a KeyManager identified by key_data.type_url,
@@ -119,8 +119,8 @@ Registry& Registry::get_default_registry() {
 }
 
 template <class P>
-util::Status Registry::RegisterKeyManager(const std::string& type_url,
-                                          KeyManager<P>* manager) {
+util::Status Registry::RegisterKeyManager(
+    google::protobuf::StringPiece type_url, KeyManager<P>* manager) {
   if (manager == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Parameter 'manager' must be non-null.");
@@ -130,14 +130,14 @@ util::Status Registry::RegisterKeyManager(const std::string& type_url,
   if (!manager->DoesSupport(type_url)) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "The manager does not support type '%s'.",
-                     type_url.c_str());
+                     type_url.ToString().c_str());
   }
   std::lock_guard<std::mutex> lock(maps_mutex_);
   auto curr_manager = type_to_manager_map_.find(type_url);
   if (curr_manager != type_to_manager_map_.end()) {
     return ToStatusF(util::error::ALREADY_EXISTS,
                      "A manager for type '%s' has been already registered.",
-                     type_url.c_str());
+                     type_url.ToString().c_str());
   }
   type_to_manager_map_.insert(
       std::make_pair(type_url, std::move(entry)));
@@ -148,19 +148,19 @@ util::Status Registry::RegisterKeyManager(const std::string& type_url,
 
 template <class P>
 util::StatusOr<const KeyManager<P>*> Registry::get_key_manager(
-    const std::string& type_url) {
+    google::protobuf::StringPiece type_url) {
   std::lock_guard<std::mutex> lock(maps_mutex_);
   auto manager_entry = type_to_manager_map_.find(type_url);
   if (manager_entry == type_to_manager_map_.end()) {
     return ToStatusF(util::error::NOT_FOUND,
                      "No manager for type '%s' has been registered.",
-                     type_url.c_str());
+                     type_url.ToString().c_str());
   }
   if (type_to_primitive_map_[type_url] != typeid(P).name()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Wrong Primitive type for key type '%s': "
                      "got '%s', expected '%s'",
-                     type_url.c_str(),
+                     type_url.ToString().c_str(),
                      typeid(P).name(),
                      type_to_primitive_map_[type_url]);
   }

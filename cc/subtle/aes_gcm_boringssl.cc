@@ -45,12 +45,12 @@ static const EVP_CIPHER* GetCipherForKeySize(int size_in_bytes) {
   }
 }
 
-AesGcmBoringSsl::AesGcmBoringSsl(const std::string& key_value,
+AesGcmBoringSsl::AesGcmBoringSsl(google::protobuf::StringPiece key_value,
                                  const EVP_CIPHER* cipher)
     : key_(key_value), cipher_(cipher) {}
 
 util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
-    const std::string& key_value) {
+    google::protobuf::StringPiece key_value) {
   const EVP_CIPHER* cipher = GetCipherForKeySize(key_value.size());
   if (cipher == nullptr) {
     return util::Status(util::error::INTERNAL, "invalid key size");
@@ -60,8 +60,8 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
 }
 
 util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
-    const google::protobuf::StringPiece& plaintext,
-    const google::protobuf::StringPiece& additional_data) const {
+    google::protobuf::StringPiece plaintext,
+    google::protobuf::StringPiece additional_data) const {
   bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
@@ -125,8 +125,8 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
 }
 
 util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
-    const google::protobuf::StringPiece& ciphertext,
-    const google::protobuf::StringPiece& additional_data) const {
+    google::protobuf::StringPiece ciphertext,
+    google::protobuf::StringPiece additional_data) const {
   if (ciphertext.size() < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
     return util::Status(util::error::INTERNAL, "Ciphertext too short");
   }
