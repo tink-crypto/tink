@@ -24,11 +24,12 @@ import java.util.Arrays;
  */
 public class Ed25519ConstantsGenerator {
 
-  private static BigInteger P = BigInteger.valueOf(2).pow(255).subtract(BigInteger.valueOf(19));
-  private static BigInteger D = BigInteger.valueOf(-121665).multiply(
+  private static final BigInteger P = BigInteger.valueOf(2).pow(255).subtract(
+      BigInteger.valueOf(19));
+  private static final BigInteger D = BigInteger.valueOf(-121665).multiply(
       BigInteger.valueOf(121666).modInverse(P)).mod(P);
-  private static BigInteger D2 = BigInteger.valueOf(2).multiply(D).mod(P);
-  private static BigInteger SQRTM1 = BigInteger.valueOf(2).modPow(
+  private static final BigInteger D2 = BigInteger.valueOf(2).multiply(D).mod(P);
+  private static final BigInteger SQRTM1 = BigInteger.valueOf(2).modPow(
       P.subtract(BigInteger.ONE).divide(BigInteger.valueOf(4)), P);
 
   private static class Point {
@@ -41,7 +42,7 @@ public class Ed25519ConstantsGenerator {
     BigInteger xx = y.pow(2).subtract(BigInteger.ONE)
         .multiply(D.multiply(y.pow(2)).add(BigInteger.ONE).modInverse(P));
     BigInteger x = xx.modPow(P.add(BigInteger.valueOf(3)).divide(BigInteger.valueOf(8)), P);
-    if (x.pow(2).subtract(xx).mod(P) != BigInteger.ZERO) {
+    if (!x.pow(2).subtract(xx).mod(P).equals(BigInteger.ZERO)) {
       x = x.multiply(SQRTM1).mod(P);
     }
     if (x.testBit(0)) {
