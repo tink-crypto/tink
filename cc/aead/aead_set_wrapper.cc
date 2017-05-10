@@ -64,10 +64,11 @@ util::StatusOr<std::string> AeadSetWrapper::Decrypt(
     google::protobuf::StringPiece ciphertext,
     google::protobuf::StringPiece aad) const {
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
-    std::string key_id = ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize);
+    google::protobuf::StringPiece key_id = ciphertext.substr(0,
+        CryptoFormat::kNonRawPrefixSize);
     auto primitives_result = aead_set_->get_primitives(key_id);
     if (primitives_result.ok()) {
-      std::string raw_ciphertext =
+      google::protobuf::StringPiece raw_ciphertext =
           ciphertext.substr(CryptoFormat::kNonRawPrefixSize);
       for (auto& aead_entry : *(primitives_result.ValueOrDie())) {
         Aead& aead = aead_entry.get_primitive();

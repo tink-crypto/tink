@@ -29,7 +29,6 @@
 using cloud::crypto::tink::test::AddRawKey;
 using cloud::crypto::tink::test::AddTinkKey;
 using google::cloud::crypto::tink::HashType;
-using google::cloud::crypto::tink::HmacKey;
 using google::cloud::crypto::tink::HmacKeyFormat;
 using google::cloud::crypto::tink::KeyData;
 using google::cloud::crypto::tink::Keyset;

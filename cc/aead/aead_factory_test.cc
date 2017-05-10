@@ -26,7 +26,6 @@
 
 using cloud::crypto::tink::test::AddRawKey;
 using cloud::crypto::tink::test::AddTinkKey;
-using google::cloud::crypto::tink::AesGcmKey;
 using google::cloud::crypto::tink::AesGcmKeyFormat;
 using google::cloud::crypto::tink::KeyData;
 using google::cloud::crypto::tink::Keyset;

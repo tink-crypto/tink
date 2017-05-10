@@ -11,6 +11,8 @@ cc_library(
         "//cc:primitive_set",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+        "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -78,11 +80,14 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aead_factory",
+        ":aes_gcm_key_manager",
         "//cc:aead",
         "//cc:crypto_format",
+        "//cc:keyset_handle",
         "//cc/util:status",
         "//cc/util:test_util",
         "//proto:aes_gcm_cc_proto",
+        "//proto:tink_cc_proto",
         "@gtest//:gtest",
     ],
 )

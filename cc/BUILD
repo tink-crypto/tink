@@ -76,6 +76,7 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
+        "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
 

@@ -11,6 +11,7 @@ cc_library(
         "//cc:primitive_set",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//proto:tink_cc_proto",
     ],
 )
 
@@ -81,10 +82,14 @@ cc_test(
         ":mac_factory",
         ":mac_set_wrapper",
         "//cc:crypto_format",
+        "//cc:keyset_handle",
         "//cc:mac",
+        "//cc/mac:hmac_key_manager",
         "//cc/util:status",
         "//cc/util:test_util",
+        "//proto:common_cc_proto",
         "//proto:hmac_cc_proto",
+        "//proto:tink_cc_proto",
         "@gtest//:gtest",
     ],
 )
