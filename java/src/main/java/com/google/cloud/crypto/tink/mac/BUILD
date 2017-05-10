@@ -28,9 +28,9 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:mac",
-        "//proto:java_common",
-        "//proto:java_hmac",
-        "//proto:java_tink",
-        "//proto:java_tink_compile_imports",
+        "//proto:common_java_proto",
+        "//proto:hmac_java_proto",
+        "//proto:tink_java_proto",
+        "//proto:tink_java_proto_compile_imports",
     ],
 )

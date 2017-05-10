@@ -33,7 +33,7 @@ cc_library(
     deps = [
         ":errors",
         ":status",
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
     ],
 )
 

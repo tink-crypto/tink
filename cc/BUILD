@@ -28,7 +28,7 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:validation",
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
@@ -62,7 +62,7 @@ cc_library(
     deps = [
         "//cc/util:errors",
         "//cc/util:statusor",
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
     ],
 )
 
@@ -75,7 +75,7 @@ cc_library(
         ":crypto_format",
         "//cc/util:errors",
         "//cc/util:statusor",
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
     ],
 )
 
@@ -92,7 +92,7 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:validation",
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
@@ -103,7 +103,7 @@ cc_library(
     hdrs = ["keyset_handle.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
     ],
 )
 
@@ -116,7 +116,7 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
         "@com_github_google_protobuf//:protobuf_lite",
     ],
 )
@@ -135,9 +135,9 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
-        "//proto:cc_aes_ctr_hmac_aead",
-        "//proto:cc_aes_gcm",
-        "//proto:cc_tink",
+        "//proto:aes_ctr_hmac_aead_cc_proto",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:tink_cc_proto",
         "@gtest//:gtest",
     ],
 )
@@ -149,7 +149,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":crypto_format",
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
         "@gtest//:gtest",
     ],
 )
@@ -164,7 +164,7 @@ cc_test(
         ":mac",
         ":primitive_set",
         "//cc/util:test_util",
-        "//proto:cc_tink",
+        "//proto:tink_cc_proto",
         "@com_github_google_protobuf//:protobuf_lite",
         "@gtest//:gtest",
     ],

@@ -8,23 +8,56 @@ package(
 licenses(["notice"])  # Apache 2.0
 
 load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
-load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_library")
+load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_library", "java_lite_proto_library")
 
+# common
 cc_proto_library(
-    name = "cc_common",
+    name = "common_cc_proto",
     protos = [
         "common.proto",
     ],
     verbose = 0,
 )
 
+java_lite_proto_library(
+    name = "common_java_proto_lite",
+    protos = [
+        "common.proto",
+    ],
+    verbose = 0,
+)
+
+java_proto_library(
+    name = "common_java_proto",
+    protos = [
+        "common.proto",
+    ],
+    verbose = 0,
+)
+
+# tink
 cc_proto_library(
-    name = "cc_tink",
+    name = "tink_cc_proto",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
     inputs = [
-        ":cc_common",
+        ":common_cc_proto",
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    protos = [
+        "tink.proto",
+    ],
+    verbose = 0,
+)
+
+java_lite_proto_library(
+    name = "tink_java_proto_lite",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        ":common_java_proto_lite",
         "@com_github_google_protobuf//:well_known_protos",
     ],
     protos = [
@@ -34,20 +67,12 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_common",
-    protos = [
-        "common.proto",
-    ],
-    verbose = 0,
-)
-
-java_proto_library(
-    name = "java_tink",
+    name = "tink_java_proto",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
     inputs = [
-        ":java_common",
+        ":common_java_proto",
         "@com_github_google_protobuf//:well_known_protos",
     ],
     protos = [
@@ -57,12 +82,23 @@ java_proto_library(
 )
 
 # ecdsa
-
 cc_proto_library(
-    name = "cc_ecdsa",
+    name = "ecdsa_cc_proto",
     proto_deps = [
-        ":cc_common",
-        ":cc_tink",
+        ":common_cc_proto",
+        ":tink_cc_proto",
+    ],
+    protos = [
+        "ecdsa.proto",
+    ],
+    verbose = 0,
+)
+
+java_lite_proto_library(
+    name = "ecdsa_java_proto_lite",
+    proto_deps = [
+        ":common_java_proto_lite",
+        ":tink_java_proto_lite",
     ],
     protos = [
         "ecdsa.proto",
@@ -71,10 +107,10 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_ecdsa",
+    name = "ecdsa_java_proto",
     proto_deps = [
-        ":java_common",
-        ":java_tink",
+        ":common_java_proto",
+        ":tink_java_proto",
     ],
     protos = [
         "ecdsa.proto",
@@ -83,12 +119,23 @@ java_proto_library(
 )
 
 # hmac
-
 cc_proto_library(
-    name = "cc_hmac",
+    name = "hmac_cc_proto",
     proto_deps = [
-        ":cc_common",
-        ":cc_tink",
+        ":common_cc_proto",
+        ":tink_cc_proto",
+    ],
+    protos = [
+        "hmac.proto",
+    ],
+    verbose = 0,
+)
+
+java_lite_proto_library(
+    name = "hmac_java_proto_lite",
+    proto_deps = [
+        ":common_java_proto_lite",
+        ":tink_java_proto_lite",
     ],
     protos = [
         "hmac.proto",
@@ -97,10 +144,10 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_hmac",
+    name = "hmac_java_proto",
     proto_deps = [
-        ":java_common",
-        ":java_tink",
+        ":common_java_proto",
+        ":tink_java_proto",
     ],
     protos = [
         "hmac.proto",
@@ -109,12 +156,24 @@ java_proto_library(
 )
 
 # aes_ctr_hmac_aead
-
 cc_proto_library(
-    name = "cc_aes_ctr_hmac_aead",
+    name = "aes_ctr_hmac_aead_cc_proto",
     proto_deps = [
-        ":cc_common",
-        ":cc_hmac",
+        ":common_cc_proto",
+        ":hmac_cc_proto",
+    ],
+    protos = [
+        "aes_ctr.proto",
+        "aes_ctr_hmac_aead.proto",
+    ],
+    verbose = 0,
+)
+
+java_lite_proto_library(
+    name = "aes_ctr_hmac_aead_java_proto_lite",
+    proto_deps = [
+        ":common_java_proto_lite",
+        ":hmac_java_proto_lite",
     ],
     protos = [
         "aes_ctr.proto",
@@ -124,10 +183,10 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_aes_ctr_hmac_aead",
+    name = "aes_ctr_hmac_aead_java_proto",
     proto_deps = [
-        ":java_common",
-        ":java_hmac",
+        ":common_java_proto",
+        ":hmac_java_proto",
     ],
     protos = [
         "aes_ctr.proto",
@@ -137,9 +196,16 @@ java_proto_library(
 )
 
 # aes_gcm
-
 cc_proto_library(
-    name = "cc_aes_gcm",
+    name = "aes_gcm_cc_proto",
+    protos = [
+        "aes_gcm.proto",
+    ],
+    verbose = 0,
+)
+
+java_lite_proto_library(
+    name = "aes_gcm_java_proto_lite",
     protos = [
         "aes_gcm.proto",
     ],
@@ -147,7 +213,7 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_aes_gcm",
+    name = "aes_gcm_java_proto",
     protos = [
         "aes_gcm.proto",
     ],
@@ -155,9 +221,16 @@ java_proto_library(
 )
 
 # aes_eax
-
 cc_proto_library(
-    name = "cc_aes_eax",
+    name = "aes_eax_cc_proto",
+    protos = [
+        "aes_eax.proto",
+    ],
+    verbose = 0,
+)
+
+java_lite_proto_library(
+    name = "aes_eax_java_proto_lite",
     protos = [
         "aes_eax.proto",
     ],
@@ -165,7 +238,7 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_aes_eax",
+    name = "aes_eax_java_proto",
     protos = [
         "aes_eax.proto",
     ],
@@ -173,9 +246,16 @@ java_proto_library(
 )
 
 # gcp_kms
-
 cc_proto_library(
-    name = "cc_gcp_kms",
+    name = "gcp_kms_cc_proto",
+    protos = [
+        "gcp_kms.proto",
+    ],
+    verbose = 0,
+)
+
+java_lite_proto_library(
+    name = "gcp_java_proto_lite",
     protos = [
         "gcp_kms.proto",
     ],
@@ -183,7 +263,7 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_gcp_kms",
+    name = "gcp_kms_java_proto",
     protos = [
         "gcp_kms.proto",
     ],
@@ -191,9 +271,8 @@ java_proto_library(
 )
 
 # kms_envelope
-
 cc_proto_library(
-    name = "cc_kms_envelope",
+    name = "kms_envelope_cc_proto",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
@@ -201,7 +280,24 @@ cc_proto_library(
         "@com_github_google_protobuf//:well_known_protos",
     ],
     proto_deps = [
-        ":cc_tink",
+        ":tink_cc_proto",
+    ],
+    protos = [
+        "kms_envelope.proto",
+    ],
+    verbose = 0,
+)
+
+java_lite_proto_library(
+    name = "kms_envelope_java_proto_lite",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    inputs = [
+        "@com_github_google_protobuf//:well_known_protos",
+    ],
+    proto_deps = [
+        ":tink_java_proto_lite",
     ],
     protos = [
         "kms_envelope.proto",
@@ -210,7 +306,7 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_kms_envelope",
+    name = "kms_envelope_java_proto",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
@@ -218,7 +314,7 @@ java_proto_library(
         "@com_github_google_protobuf//:well_known_protos",
     ],
     proto_deps = [
-        ":java_tink",
+        ":tink_java_proto",
     ],
     protos = [
         "kms_envelope.proto",
@@ -227,9 +323,8 @@ java_proto_library(
 )
 
 # ECIES hybrid encryption with AEAD and HKDF
-
 cc_proto_library(
-    name = "cc_ecies_aead_hkdf",
+    name = "ecies_aead_hkdf_cc_proto",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
@@ -237,8 +332,23 @@ cc_proto_library(
         "@com_github_google_protobuf//:well_known_protos",
     ],
     proto_deps = [
-        ":cc_common",
-        ":cc_tink",
+        ":common_cc_proto",
+        ":tink_cc_proto",
+    ],
+    protos = [
+        "ecies_aead_hkdf.proto",
+    ],
+    verbose = 0,
+)
+
+java_lite_proto_library(
+    name = "ecies_aead_hkdf_java_proto_lite",
+    imports = [
+        "external/com_github_google_protobuf/src/",
+    ],
+    proto_deps = [
+        ":common_java_proto_lite",
+        ":tink_java_proto_lite",
     ],
     protos = [
         "ecies_aead_hkdf.proto",
@@ -247,16 +357,13 @@ cc_proto_library(
 )
 
 java_proto_library(
-    name = "java_ecies_aead_hkdf",
+    name = "ecies_aead_hkdf_java_proto",
     imports = [
         "external/com_github_google_protobuf/src/",
     ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     proto_deps = [
-        ":java_common",
-        ":java_tink",
+        ":common_java_proto",
+        ":tink_java_proto",
     ],
     protos = [
         "ecies_aead_hkdf.proto",
