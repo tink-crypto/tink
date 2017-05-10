@@ -51,8 +51,8 @@ import java.util.Arrays;
  */
 public final class Curve25519 {
 
-  private static final int BYTE_LEN = 32;
-  private static final int LIMB_CNT = 10;
+  static final int BYTE_LEN = 32;
+  static final int LIMB_CNT = 10;
   private static final long TWO_TO_25 = 1 << 25;
   private static final long TWO_TO_26 = TWO_TO_25 << 1;
 
@@ -62,11 +62,28 @@ public final class Curve25519 {
   private static final int[] SHIFT = {26, 25};
 
   /**
+   * Sums two numbers: output = in1 + in2
+   */
+  static void sum(long[] output, long[] in1, long[] in2) {
+    for (int i = 0; i < LIMB_CNT; i++) {
+      output[i] = in1[i] + in2[i];
+    }
+  }
+
+  /**
    * Sums two numbers: output += in
    */
   private static void sum(long[] output, long[] in) {
+    sum(output, output, in);
+  }
+
+  /**
+   * Find the difference of two numbers: output = in1 - in2
+   * (note the order of the arguments!).
+   */
+  static void sub(long[] output, long[] in1, long[] in2) {
     for (int i = 0; i < LIMB_CNT; i++) {
-      output[i] += in[i];
+      output[i] = in1[i] - in2[i];
     }
   }
 
@@ -75,9 +92,7 @@ public final class Curve25519 {
    * (note the order of the arguments!).
   */
   private static void sub(long[] output, long[] in) {
-    for (int i = 0; i < LIMB_CNT; i++) {
-      output[i] = in[i] - output[i];
-    }
+    sub(output, in, output);
   }
 
   /**
@@ -273,7 +288,7 @@ public final class Curve25519 {
    * The output is reduced degree (indeed, one need only provide storage for 10 limbs) and
    * |output[i]| < 2^26.
    */
-  private static void mult(long[] output, long[] in, long[] in2) {
+  static void mult(long[] output, long[] in, long[] in2) {
     long[] t = new long[19];
     product(t, in, in2);
     // |t[i]| < 14*2^54
@@ -328,7 +343,7 @@ public final class Curve25519 {
    * On exit: The |output| argument is in reduced coefficients form (indeed, one need only provide
    * storage for 10 limbs) and |out[i]| < 2^26.
    */
-  private static void square(long[] output, long[] in) {
+  static void square(long[] output, long[] in) {
     long[] t = new long[19];
     squareInner(t, in);
     // |t[i]| < 14*2^54 because the largest product of two limbs will be < 2^(27+27) and SquareInner
@@ -382,7 +397,7 @@ public final class Curve25519 {
    * On entry: |input_limbs[i]| < 2^26
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
-  private static byte[] contract(long[] inputLimbs) {
+  static byte[] contract(long[] inputLimbs) {
     long[] input = Arrays.copyOf(inputLimbs, LIMB_CNT);
     for (int j = 0; j < 2; j++) {
       for (int i = 0; i < 9; i++) {
@@ -568,20 +583,38 @@ public final class Curve25519 {
   }
 
   /**
-   * Conditionally swap two reduced-form limb arrays if 'iswap' is 1, but leave them unchanged if
-   * 'iswap' is 0.  Runs in data-invariant time to avoid side-channel attacks.
+   * Conditionally swap two reduced-form limb arrays if {@code iswap} is 1, but leave them unchanged
+   * if {@code iswap} is 0.  Runs in data-invariant time to avoid side-channel attacks.
    *
-   * NOTE that this function requires that 'iswap' be 1 or 0; other values give wrong results.
+   * NOTE that this function requires that {@code iswap} be 1 or 0; other values give wrong results.
    * Also, the two limb arrays must be in reduced-coefficient, reduced-degree form: the values in
    * a[10..19] or b[10..19] aren't swapped, and all all values in a[0..9],b[0..9] must have
    * magnitude less than Integer.MAX_VALUE.
    */
-  private static void swapConditional(long[] a, long[] b, int iswap) {
+  static void swapConditional(long[] a, long[] b, int iswap) {
     int swap = -iswap;
     for (int i = 0; i < LIMB_CNT; i++) {
       int x = swap & (((int) a[i]) ^ ((int) b[i]));
       a[i] = ((int) a[i]) ^ x;
       b[i] = ((int) b[i]) ^ x;
+    }
+  }
+
+  /**
+   * Conditionally copies a reduced-form limb arrays {@code b} into {@code a} if {@code icopy} is 1,
+   * but leave {@code a} unchanged if 'iswap' is 0.  Runs in data-invariant time to avoid
+   * side-channel attacks.
+   *
+   * NOTE that this function requires that {@code icopy} be 1 or 0; other values give wrong results.
+   * Also, the two limb arrays must be in reduced-coefficient, reduced-degree form: the values in
+   * a[10..19] or b[10..19] aren't swapped, and all all values in a[0..9],b[0..9] must have
+   * magnitude less than Integer.MAX_VALUE.
+   */
+  static void copyConditional(long[] a, long[] b, int icopy) {
+    int copy = -icopy;
+    for (int i = 0; i < LIMB_CNT; i++) {
+      int x = copy & (((int) a[i]) ^ ((int) b[i]));
+      a[i] = ((int) a[i]) ^ x;
     }
   }
 
@@ -642,17 +675,17 @@ public final class Curve25519 {
    * Shamelessly copied from agl's code which was shamelessly copied from djb's code. Only the
    * comment format and the variable namings are different from those.
    */
-  private static void curveRecip(long[] out, long[] z) {
-    long[] z2 = new long[10];
-    long[] z9 = new long[10];
-    long[] z11 = new long[10];
-    long[] z2To5Minus1 = new long[10];
-    long[] z2To10Minus1 = new long[10];
-    long[] z2To20Minus1 = new long[10];
-    long[] z2To50Minus1 = new long[10];
-    long[] z2To100Minus1 = new long[10];
-    long[] t0 = new long[10];
-    long[] t1 = new long[10];
+  static void curveRecip(long[] out, long[] z) {
+    long[] z2 = new long[LIMB_CNT];
+    long[] z9 = new long[LIMB_CNT];
+    long[] z11 = new long[LIMB_CNT];
+    long[] z2To5Minus1 = new long[LIMB_CNT];
+    long[] z2To10Minus1 = new long[LIMB_CNT];
+    long[] z2To20Minus1 = new long[LIMB_CNT];
+    long[] z2To50Minus1 = new long[LIMB_CNT];
+    long[] z2To100Minus1 = new long[LIMB_CNT];
+    long[] t0 = new long[LIMB_CNT];
+    long[] t1 = new long[LIMB_CNT];
 
     square(z2, z);                          // 2
     square(t1, z2);                         // 4

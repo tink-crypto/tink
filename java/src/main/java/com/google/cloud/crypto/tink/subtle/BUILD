@@ -145,6 +145,21 @@ java_library(
     ],
 )
 
+# Ed25519 subtle
+
+java_library(
+    name = "ed25519",
+    srcs = [
+        "Ed25519.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":subtle",
+        ":x25519",
+        "@com_google_guava//jar",
+    ],
+)
+
 java_binary(
     name = "Ed25519ConstantsGenerator",
     srcs = [
