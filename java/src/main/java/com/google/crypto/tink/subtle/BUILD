@@ -100,11 +100,16 @@ java_library(
         "EcUtil.java",
         "EcdsaSignJce.java",
         "EcdsaVerifyJce.java",
+        "Ed25519Sign.java",
+        "Ed25519Verify.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
+        ":ed25519_internal",
         ":subtle",
+        ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
+        "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
 
@@ -152,22 +157,6 @@ java_library(
     deps = [
         ":subtle",
         ":x25519",
-    ],
-)
-
-java_library(
-    name = "ed25519",
-    srcs = [
-        "Ed25519Sign.java",
-        "Ed25519Verify.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        ":ed25519_internal",
-        ":subtle",
-        ":x25519",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
 

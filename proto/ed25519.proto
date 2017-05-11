@@ -22,37 +22,26 @@ syntax = "proto3";
 package google.crypto.tink;
 
 option java_package = "com.google.crypto.tink";
-option java_outer_classname = "Ed25519";
-
-message Ed25519Params {
-  // Nothing here because Ed25519 hardcodes all parameters.
-}
+option java_outer_classname = "Ed25519Proto";
 
 // key_type: type.googleapis.com/google.crypto.tink.Ed25519PublicKey
 message Ed25519PublicKey {
   // Required.
   uint32 version = 1;
-  // Required.
-  Ed25519Params params = 2;
   // The public key is 32 bytes, encoded according to
   // https://tools.ietf.org/html/rfc8032#section-5.1.2.
   // Required.
-  bytes key_value = 3;
+  bytes key_value = 2;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.Ed25519PrivateKey
 message Ed25519PrivateKey {
   // Required.
   uint32 version = 1;
-  // Required.
-  Ed25519PublicKey public_key = 2;
-  // The private key is 32 bytes, interpreted as a little-endian integer.
+  // The private key is 32 bytes of cryptographically secure random data.
   // See https://tools.ietf.org/html/rfc8032#section-5.1.5.
   // Required.
-  bytes key_value = 3;
-}
-
-message Ed25519KeyFormat {
-  // Required.
-  Ed25519Params params = 2;
+  bytes key_value = 2;
+  // The corresponding public key.
+  Ed25519PublicKey public_key = 3;
 }

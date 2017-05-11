@@ -36,7 +36,7 @@ import java.security.SignatureException;
  * }
  */
 @Immutable
-public class Ed25519Verify implements PublicKeyVerify {
+public final class Ed25519Verify implements PublicKeyVerify {
 
   public static final int PUBLIC_KEY_LEN = Curve25519.FIELD_LEN;
   public static final int SIGNATURE_LEN = Curve25519.FIELD_LEN * 2;

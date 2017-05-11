@@ -42,6 +42,7 @@ public final class PublicKeySignConfig {
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     registerKeyManager(new EcdsaSignKeyManager());
+    registerKeyManager(new Ed25519PrivateKeyManager());
   }
 
   /**

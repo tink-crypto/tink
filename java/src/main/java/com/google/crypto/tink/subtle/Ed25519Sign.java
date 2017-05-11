@@ -29,7 +29,7 @@ import java.util.Arrays;
  * Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
  * byte[] signature = signer.sign(message);
  */
-public class Ed25519Sign implements PublicKeySign {
+public final class Ed25519Sign implements PublicKeySign {
 
   public static final int SECRET_KEY_LEN = Curve25519.FIELD_LEN;
 

@@ -42,6 +42,7 @@ public final class PublicKeyVerifyConfig {
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     registerKeyManager(new EcdsaVerifyKeyManager());
+    registerKeyManager(new Ed25519PublicKeyManager());
   }
 
   /**

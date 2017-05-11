@@ -39,7 +39,6 @@ java_library(
     exports = [
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:aead",
-        "//java/src/main/java/com/google/crypto/tink/subtle:ed25519",
         "//java/src/main/java/com/google/crypto/tink/subtle:gcp_credential",
         "//java/src/main/java/com/google/crypto/tink/subtle:hybrid",
         "//java/src/main/java/com/google/crypto/tink/subtle:mac",
@@ -64,6 +63,7 @@ java_library(
         "//proto:common_java_proto",
         "//proto:ecdsa_java_proto",
         "//proto:ecies_aead_hkdf_java_proto",
+        "//proto:ed25519_java_proto",
         "//proto:gcp_kms_java_proto",
         "//proto:hmac_java_proto",
         "//proto:kms_envelope_java_proto",
