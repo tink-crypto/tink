@@ -36,7 +36,8 @@ public class CreateKeyTemplateCommand extends CreateKeyTemplateOptions implement
   public static void create(OutputStream outputStream, String typeUrlValue,
       String keyFormatValue) throws Exception {
     KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(typeUrlValue, keyFormatValue);
-    String comment = "# Format: https://github.com/google/tink/blob/master/proto/tink.proto#L52\n"
+    String comment = "# Format: KeyTemplate in text format, "
+        + "see https://github.com/google/tink/blob/master/proto/tink.proto\n"
         + "# Generated with command:\n"
         + "#     tinkey create-key-template \\\n"
         + String.format("#     --type-url %s \\\n", typeUrlValue)

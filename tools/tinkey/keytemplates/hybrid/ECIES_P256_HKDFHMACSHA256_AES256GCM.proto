@@ -1,0 +1,7 @@
+# Format: KeyTemplate in text format, see https://github.com/google/tink/blob/master/proto/tink.proto
+# Generated with command:
+#     tinkey create-key-template \
+#     --type-url type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey \
+#     --key-format "params{dem_params{aead_dem{type_url:"type.googleapis.com/google.cloud.crypto.tink.AesGcmKey",value:"\020 "}}kem_params{hkdf_hash_type:SHA256,curve_type:NIST_P256}ec_point_format:UNCOMPRESSED}"
+type_url: "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey"
+value: "\nH\n\004\b\002\020\003\022>\022<\n6type.googleapis.com/google.cloud.crypto.tink.AesGcmKey\022\002\020 \030\001"

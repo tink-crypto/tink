@@ -57,6 +57,13 @@ public class TinkeyUtil {
   public static final String KEY_FORMAT_SUFFIX = "Format";
 
   /**
+   * By convention, the key format proto of XyzPrivateKey would be XyzKeyFormat.
+   * For example, the key format proto of EcdsaPrivateKey is EcdsaKeyFormat, i.e.,
+   * the string "Private" has to be removed from the name.
+   */
+  public static final String PRIVATE = "Private";
+
+  /**
    * @return a {@code KeyTemplate} for {@code typeUrl} and {@code keyFormat}. For example,
    * createKeyTemplateFromText(
    *    "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey",
@@ -70,6 +77,7 @@ public class TinkeyUtil {
     try {
       // To parse {@code keyFormat}, we need to find the corresponding proto class.
       String keyFormatName = SubtleUtil.getProtoClassName(typeUrl) + KEY_FORMAT_SUFFIX;
+      keyFormatName = keyFormatName.replace(PRIVATE, "");
       Class<?> keyFormatClass = loadClass(keyFormatName);
       Builder builder = getBuilder(keyFormatClass);
       TextFormat.merge(keyFormat, builder);
