@@ -86,7 +86,6 @@ cc_proto_library(
     name = "ecdsa_cc_proto",
     proto_deps = [
         ":common_cc_proto",
-        ":tink_cc_proto",
     ],
     protos = [
         "ecdsa.proto",
@@ -98,7 +97,6 @@ java_lite_proto_library(
     name = "ecdsa_java_proto_lite",
     proto_deps = [
         ":common_java_proto_lite",
-        ":tink_java_proto_lite",
     ],
     protos = [
         "ecdsa.proto",
@@ -110,10 +108,34 @@ java_proto_library(
     name = "ecdsa_java_proto",
     proto_deps = [
         ":common_java_proto",
-        ":tink_java_proto",
     ],
     protos = [
         "ecdsa.proto",
+    ],
+    verbose = 0,
+)
+
+# ed25519
+cc_proto_library(
+    name = "ed25519_cc_proto",
+    protos = [
+        "ed25519.proto",
+    ],
+    verbose = 0,
+)
+
+java_lite_proto_library(
+    name = "ed25519_java_proto_lite",
+    protos = [
+        "ed25519.proto",
+    ],
+    verbose = 0,
+)
+
+java_proto_library(
+    name = "ed25519_java_proto",
+    protos = [
+        "ed25519.proto",
     ],
     verbose = 0,
 )
@@ -123,7 +145,6 @@ cc_proto_library(
     name = "hmac_cc_proto",
     proto_deps = [
         ":common_cc_proto",
-        ":tink_cc_proto",
     ],
     protos = [
         "hmac.proto",
@@ -135,7 +156,6 @@ java_lite_proto_library(
     name = "hmac_java_proto_lite",
     proto_deps = [
         ":common_java_proto_lite",
-        ":tink_java_proto_lite",
     ],
     protos = [
         "hmac.proto",
@@ -147,7 +167,6 @@ java_proto_library(
     name = "hmac_java_proto",
     proto_deps = [
         ":common_java_proto",
-        ":tink_java_proto",
     ],
     protos = [
         "hmac.proto",
