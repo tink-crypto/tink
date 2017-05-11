@@ -14,6 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <thread>  // NOLINT(build/c++11)
+
 #include "cc/primitive_set.h"
 #include "cc/crypto_format.h"
 #include "cc/mac.h"
@@ -34,6 +36,73 @@ namespace {
 
 class PrimitiveSetTest : public ::testing::Test {
 };
+
+void add_primitives(PrimitiveSet<Mac>* primitive_set,
+                    int key_id_offset,
+                    int primitives_count) {
+  for (int i = 0; i < primitives_count; i++) {
+    int key_id = key_id_offset + i;
+    Keyset::Key key;
+    key.set_output_prefix_type(OutputPrefixType::TINK);
+    key.set_key_id(key_id);
+    key.set_status(KeyStatusType::ENABLED);
+    std::unique_ptr<Mac> mac(new DummyMac("Mac#" + key_id));
+    auto add_result = primitive_set->AddPrimitive(std::move(mac), key);
+    EXPECT_TRUE(add_result.ok()) << add_result.status();
+  }
+}
+
+void access_primitives(PrimitiveSet<Mac>* primitive_set,
+                       int key_id_offset,
+                       int primitives_count) {
+  for (int i = 0; i < primitives_count; i++) {
+    int key_id = key_id_offset + i;
+    Keyset::Key key;
+    key.set_output_prefix_type(OutputPrefixType::TINK);
+    key.set_key_id(key_id);
+    key.set_status(KeyStatusType::ENABLED);
+    std::string prefix = CryptoFormat::get_output_prefix(key).ValueOrDie();
+    auto get_result = primitive_set->get_primitives(prefix);
+    EXPECT_TRUE(get_result.ok()) << get_result.status();
+    EXPECT_GE(get_result.ValueOrDie()->size(), 1);
+  }
+}
+
+TEST_F(PrimitiveSetTest, testConcurrentOperations) {
+  PrimitiveSet<Mac> mac_set;
+  int offset_a = 100;
+  int offset_b = 150;
+  int count = 100;
+
+  // Add some primitives.
+  std::thread add_primitives_a(add_primitives, &mac_set, offset_a, count);
+  std::thread add_primitives_b(add_primitives, &mac_set, offset_b, count);
+  add_primitives_a.join();
+  add_primitives_b.join();
+
+  // Access primitives.
+  std::thread access_primitives_a(access_primitives, &mac_set, offset_a, count);
+  std::thread access_primitives_b(access_primitives, &mac_set, offset_b, count);
+  access_primitives_a.join();
+  access_primitives_b.join();
+
+  // Verify the common key ids added by both threads.
+  for (int key_id = offset_a; key_id < offset_b + count; key_id++) {
+    Keyset::Key key;
+    key.set_output_prefix_type(OutputPrefixType::TINK);
+    key.set_key_id(key_id);
+    key.set_status(KeyStatusType::ENABLED);
+    std::string prefix = CryptoFormat::get_output_prefix(key).ValueOrDie();
+    auto get_result = mac_set.get_primitives(prefix);
+    EXPECT_TRUE(get_result.ok()) << get_result.status();
+    auto macs = get_result.ValueOrDie();
+    if (key_id >= offset_b && key_id < offset_a + count) {
+      EXPECT_EQ(2, macs->size());  // overlapping key_id range
+    } else {
+      EXPECT_EQ(1, macs->size());
+    }
+  }
+}
 
 TEST_F(PrimitiveSetTest, testBasic) {
   std::string mac_name_1 = "MAC#1";
@@ -113,49 +182,56 @@ TEST_F(PrimitiveSetTest, testBasic) {
   add_primitive_result = primitive_set.AddPrimitive(std::move(mac_6), key_6);
   EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
 
-  // Check the primary.
   std::string data = "some data";
-  auto primary = primitive_set.get_primary();
-  EXPECT_FALSE(primary == nullptr);
-  EXPECT_EQ(KeyStatusType::ENABLED, primary->get_status());
-  EXPECT_EQ(data + mac_name_3,
-            primary->get_primitive().ComputeMac(data).ValueOrDie());
 
-  // Check raw primitives.
-  auto primitives = primitive_set.get_raw_primitives().ValueOrDie();
-  EXPECT_EQ(2, primitives->size());
-  EXPECT_EQ(data + mac_name_4,
-            primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
-  EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
-  EXPECT_EQ(data + mac_name_5,
-            primitives->at(1).get_primitive().ComputeMac(data).ValueOrDie());
-  EXPECT_EQ(KeyStatusType::DISABLED, primitives->at(1).get_status());
+  {  // Check the primary.
+    auto primary = primitive_set.get_primary();
+    EXPECT_FALSE(primary == nullptr);
+    EXPECT_EQ(KeyStatusType::ENABLED, primary->get_status());
+    EXPECT_EQ(data + mac_name_3,
+              primary->get_primitive().ComputeMac(data).ValueOrDie());
+  }
 
-  // Check Tink primitives.
-  std::string prefix = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
-  primitives = primitive_set.get_primitives(prefix).ValueOrDie();
-  EXPECT_EQ(2, primitives->size());
-  EXPECT_EQ(data + mac_name_1,
-            primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
-  EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
-  EXPECT_EQ(data + mac_name_6,
-            primitives->at(1).get_primitive().ComputeMac(data).ValueOrDie());
-  EXPECT_EQ(KeyStatusType::DISABLED, primitives->at(1).get_status());
+  {  // Check raw primitives.
+    auto primitives = primitive_set.get_raw_primitives().ValueOrDie();
+    EXPECT_EQ(2, primitives->size());
+    EXPECT_EQ(data + mac_name_4,
+              primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
+    EXPECT_EQ(data + mac_name_5,
+              primitives->at(1).get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::DISABLED, primitives->at(1).get_status());
+  }
 
-  prefix = CryptoFormat::get_output_prefix(key_3).ValueOrDie();
-  primitives = primitive_set.get_primitives(prefix).ValueOrDie();
-  EXPECT_EQ(1, primitives->size());
-  EXPECT_EQ(data + mac_name_3,
-            primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
-  EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
+  {  // Check Tink primitives.
+    std::string prefix = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
+    auto primitives = primitive_set.get_primitives(prefix).ValueOrDie();
+    EXPECT_EQ(2, primitives->size());
+    EXPECT_EQ(data + mac_name_1,
+              primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
+    EXPECT_EQ(data + mac_name_6,
+              primitives->at(1).get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::DISABLED, primitives->at(1).get_status());
+  }
 
-  // Check legacy primitive.
-  prefix = CryptoFormat::get_output_prefix(key_2).ValueOrDie();
-  primitives = primitive_set.get_primitives(prefix).ValueOrDie();
-  EXPECT_EQ(1, primitives->size());
-  EXPECT_EQ(data + mac_name_2,
-            primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
-  EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
+  {  // Check another Tink primitive.
+    std::string prefix = CryptoFormat::get_output_prefix(key_3).ValueOrDie();
+    auto primitives = primitive_set.get_primitives(prefix).ValueOrDie();
+    EXPECT_EQ(1, primitives->size());
+    EXPECT_EQ(data + mac_name_3,
+              primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
+  }
+
+  {  // Check legacy primitive.
+    std::string prefix = CryptoFormat::get_output_prefix(key_2).ValueOrDie();
+    auto primitives = primitive_set.get_primitives(prefix).ValueOrDie();
+    EXPECT_EQ(1, primitives->size());
+    EXPECT_EQ(data + mac_name_2,
+              primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
+  }
 }
 
 }  // namespace

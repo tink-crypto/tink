@@ -17,6 +17,7 @@
 #ifndef TINK_PRIMITIVE_SET_H_
 #define TINK_PRIMITIVE_SET_H_
 
+#include <mutex>  // NOLINT(build/c++11)
 #include <unordered_map>
 #include <vector>
 
@@ -44,15 +45,14 @@ namespace tink {
 // keys in the keyset, and uses the set members to do the actual
 // crypto operations: to encrypt data the primary Aead-primitive from
 // the set is used, and upon decryption the ciphertext's prefix
-// determines the id of the primitive from the set.
+// determines the identifier of the primitive from the set.
 //
 // PrimitiveSet is a public class to allow its use in implementations
 // of custom primitives.
-//
-// TODO(przydatek): make it thread-safe.
 template <class P>
 class PrimitiveSet {
  public:
+  // Entry-objects hold individual instances of primitives in the set.
   template <class P2>
   class Entry {
    public:
@@ -78,31 +78,23 @@ class PrimitiveSet {
     google::cloud::crypto::tink::KeyStatusType status_;
   };
 
-  PrimitiveSet<P>() : primary_(nullptr) {}
-
   typedef std::vector<Entry<P>> Primitives;
 
-  // Returns the entry with the primary primitive.
-  const Entry<P>* get_primary() const {
-    return primary_;
-  }
+  // Constructs an empty PrimitiveSet.
+  PrimitiveSet<P>() : primary_(nullptr) {}
 
-  // Returns all primitives that use RAW prefix.
-  util::StatusOr<Primitives*> get_raw_primitives() {
-    return get_primitives(CryptoFormat::kRawPrefix);
-  }
+  // Adds 'primitive' to this set for the specified 'key'.
+  util::StatusOr<Entry<P>*> AddPrimitive(
+      std::unique_ptr<P> primitive,
+      google::cloud::crypto::tink::Keyset::Key key);
 
   // Returns the entries with primitives identifed by 'identifier'.
-  util::StatusOr<Primitives*> get_primitives(
-      google::protobuf::StringPiece identifier) {
-    typename CiphertextPrefixToPrimitivesMap::iterator found =
-        primitives_.find(identifier.ToString());
-    if (found == primitives_.end()) {
-      return ToStatusF(util::error::NOT_FOUND,
-                       "No primitives found for identifier '%s'.",
-                       identifier.ToString().c_str());
-    }
-    return &(found->second);
+  util::StatusOr<const Primitives*> get_primitives(
+      google::protobuf::StringPiece identifier);
+
+  // Returns all primitives that use RAW prefix.
+  util::StatusOr<const Primitives*> get_raw_primitives() {
+    return get_primitives(CryptoFormat::kRawPrefix);
   }
 
   // Sets the given 'primary' as as the primary primitive of this set.
@@ -110,26 +102,48 @@ class PrimitiveSet {
     primary_ = primary;
   }
 
-  // Adds 'primitive' to this set for the specified 'key'.
-  util::StatusOr<Entry<P>*> AddPrimitive(
-      std::unique_ptr<P> primitive,
-      google::cloud::crypto::tink::Keyset::Key key) {
-    auto identifier_result = CryptoFormat::get_output_prefix(key);
-    if (!identifier_result.ok()) return identifier_result.status();
-    std::string identifier = identifier_result.ValueOrDie();
-    primitives_[identifier].push_back(Entry<P>(std::move(primitive),
-                                               identifier,
-                                               key.status()));
-    return &(primitives_[identifier].back());
+  // Returns the entry with the primary primitive.
+  const Entry<P>* get_primary() const {
+    return primary_;
   }
 
  private:
-  Entry<P>* primary_;
   typedef std::unordered_map<std::string, Primitives>
       CiphertextPrefixToPrimitivesMap;
-  CiphertextPrefixToPrimitivesMap primitives_;
+  Entry<P>* primary_;
+  std::mutex primitives_mutex_;
+  CiphertextPrefixToPrimitivesMap primitives_;  // guarded by primitives_mutex_
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// Implementation details.
+
+template <class P>
+util::StatusOr<PrimitiveSet<P>::Entry<P>*> PrimitiveSet<P>::AddPrimitive(
+    std::unique_ptr<P> primitive,
+    google::cloud::crypto::tink::Keyset::Key key) {
+  auto identifier_result = CryptoFormat::get_output_prefix(key);
+  if (!identifier_result.ok()) return identifier_result.status();
+  std::string identifier = identifier_result.ValueOrDie();
+  std::lock_guard<std::mutex> lock(primitives_mutex_);
+  primitives_[identifier].push_back(
+      Entry<P>(std::move(primitive), identifier, key.status()));
+  return &(primitives_[identifier].back());
+}
+
+template <class P>
+util::StatusOr<const std::vector<PrimitiveSet<P>::Entry<P>>*>
+PrimitiveSet<P>::get_primitives(google::protobuf::StringPiece identifier) {
+  std::lock_guard<std::mutex> lock(primitives_mutex_);
+  typename CiphertextPrefixToPrimitivesMap::iterator found =
+      primitives_.find(identifier.ToString());
+  if (found == primitives_.end()) {
+    return ToStatusF(util::error::NOT_FOUND,
+                     "No primitives found for identifier '%s'.",
+                     identifier.ToString().c_str());
+  }
+  return &(found->second);
+}
 
 }  // namespace tink
 }  // namespace crypto
