@@ -37,15 +37,15 @@ public class Ed25519Test {
   public void testSignVerifyRandomKeys() throws GeneralSecurityException {
     for (int i = 0; i < 1000; i++) {
       byte[] rand = Random.randBytes(new java.util.Random().nextInt(300));
-      Ed25519.KeyPair keyPair = Ed25519.keyPair();
-      byte[] s = Ed25519.sign(rand, keyPair.getPrivateKey());
+      Ed25519.KeyPair keyPair = Ed25519.generateRandomKeyPair();
+      byte[] s = Ed25519.sign(rand, keyPair.getPublicKey(), keyPair.getPrivateKey());
       assertTrue(
           String.format(
               "\nMessage: %s\n\nSignature: %s\n\nPrivateKey: %s\n\nPublicKey %s",
               TestUtil.hexEncode(rand), TestUtil.hexEncode(s),
               TestUtil.hexEncode(keyPair.getPrivateKey()),
               TestUtil.hexEncode(keyPair.getPublicKey())),
-          Ed25519.verify(s, keyPair.getPublicKey()));
+          Ed25519.verify(rand, s, keyPair.getPublicKey()));
     }
   }
 
@@ -53,8 +53,8 @@ public class Ed25519Test {
 
     private String hexPublicKey = "";
     private String hexPrivateKey = "";
-    private String message = "";
-    private String signature = "";
+    private String hexMessage = "";
+    private String hexSignature = "";
 
     TestVectors appendPublicKey(String publicKeyPart) {
       hexPublicKey += publicKeyPart;
@@ -66,36 +66,30 @@ public class Ed25519Test {
       return this;
     }
 
-    TestVectors appendPublicKeyToPrivateKey() {
-      hexPrivateKey += hexPublicKey;
-      return this;
-    }
-
     TestVectors appendMessage(String messagePart) {
-      message += messagePart;
+      hexMessage += messagePart;
       return this;
     }
 
     TestVectors appendSignature(String signaturePart) {
-      signature += signaturePart;
-      return this;
-    }
-
-    TestVectors appendMessageToSignature() {
-      signature += message;
+      hexSignature += signaturePart;
       return this;
     }
 
     void test() throws GeneralSecurityException {
+      byte[] publicKey = TestUtil.hexDecode(hexPublicKey);
       byte[] privateKey = TestUtil.hexDecode(hexPrivateKey);
-      byte[] s = Ed25519.sign(TestUtil.hexDecode(message), privateKey);
-      assertEquals(signature, TestUtil.hexEncode(s));
-      assertTrue(Ed25519.verify(s, TestUtil.hexDecode(hexPublicKey)));
+      byte[] message = TestUtil.hexDecode(hexMessage);
+      byte[] sig = Ed25519.sign(message, publicKey, privateKey);
+      assertEquals(hexSignature, TestUtil.hexEncode(sig));
+      assertTrue(Ed25519.verify(message, sig, publicKey));
     }
 
     private void testSignForIllegalArgExp(String errorMsg) throws GeneralSecurityException  {
       try {
-        Ed25519.sign(TestUtil.hexDecode(message), TestUtil.hexDecode(hexPrivateKey));
+        Ed25519.sign(TestUtil.hexDecode(hexMessage),
+            TestUtil.hexDecode(hexPublicKey),
+            TestUtil.hexDecode(hexPrivateKey));
         fail("Expected IllegalArgumentException");
       } catch (IllegalArgumentException expected) {
         assertThat(expected).hasMessageThat().containsMatch(errorMsg);
@@ -104,7 +98,8 @@ public class Ed25519Test {
 
     private void testVerifyForIllegalArgExp(String errorMsg) throws GeneralSecurityException  {
       try {
-        Ed25519.verify(TestUtil.hexDecode(signature), TestUtil.hexDecode(hexPublicKey));
+        Ed25519.verify(TestUtil.hexDecode(hexMessage),
+            TestUtil.hexDecode(hexSignature), TestUtil.hexDecode(hexPublicKey));
         fail("Expected IllegalArgumentException");
       } catch (IllegalArgumentException expected) {
         assertThat(expected).hasMessageThat().containsMatch(errorMsg);
@@ -113,27 +108,24 @@ public class Ed25519Test {
   }
 
   @Test
-  public void testSignThrowsIllegalArgExpWhenPrivateKeyLengthIsLessThan64()
+  public void testSignThrowsIllegalArgExpWhenPrivateKeyLengthIsLessThan32()
       throws GeneralSecurityException {
     new TestVectors()
         .appendPublicKey("d75a980182b10ab7d54bfed3c964073a")
         .appendPublicKey("0ee172f3daa62325af021a68f707511a")
-        .appendPrivateKey("9d61b19deffd5a60ba844af492ec2cc4")
-        .appendPrivateKey("4449c5697b326919703bac031cae7f")
-        .appendPublicKeyToPrivateKey()
-        .testSignForIllegalArgExp("Given private key's length is not 64");
+        .appendPrivateKey("9d61b19deffd5a60ba844af492ec")
+        .testSignForIllegalArgExp("Given private key's length is not 32");
   }
 
   @Test
-  public void testSignThrowsIllegalArgExpWhenPrivateKeyLengthIsGreaterThan64()
+  public void testSignThrowsIllegalArgExpWhenPrivateKeyLengthIsGreaterThan32()
       throws GeneralSecurityException {
     new TestVectors()
         .appendPublicKey("d75a980182b10ab7d54bfed3c964073a")
         .appendPublicKey("0ee172f3daa62325af021a68f707511a")
         .appendPrivateKey("9d61b19deffd5a60ba844af492ec2cc4")
         .appendPrivateKey("4449c5697b326919703bac031cae7f0000")
-        .appendPublicKeyToPrivateKey()
-        .testSignForIllegalArgExp("Given private key's length is not 64");
+        .testSignForIllegalArgExp("Given private key's length is not 32");
   }
 
   @Test
@@ -146,7 +138,7 @@ public class Ed25519Test {
         .appendSignature("84877f1eb8e5d974d873e06522490155")
         .appendSignature("5fb8821590a33bacc61e39701cf9b46b")
         .appendSignature("d25bf5f0595bbe24655141438e7a10")
-        .testVerifyForIllegalArgExp("The length of the signed message must be at least 64");
+        .testVerifyForIllegalArgExp("The length of the signature is not 64");
   }
 
   @Test
@@ -196,13 +188,11 @@ public class Ed25519Test {
         .appendPublicKey("0ee172f3daa62325af021a68f707511a")
         .appendPrivateKey("9d61b19deffd5a60ba844af492ec2cc4")
         .appendPrivateKey("4449c5697b326919703bac031cae7f60")
-        .appendPublicKeyToPrivateKey()
         .appendMessage("")
         .appendSignature("e5564300c360ac729086e2cc806e828a")
         .appendSignature("84877f1eb8e5d974d873e06522490155")
         .appendSignature("5fb8821590a33bacc61e39701cf9b46b")
         .appendSignature("d25bf5f0595bbe24655141438e7a100b")
-        .appendMessageToSignature()
         .test();
   }
 
@@ -213,13 +203,11 @@ public class Ed25519Test {
         .appendPublicKey("9c982ccf2ec4968cc0cd55f12af4660c")
         .appendPrivateKey("4ccd089b28ff96da9db6c346ec114e0f")
         .appendPrivateKey("5b8a319f35aba624da8cf6ed4fb8a6fb")
-        .appendPublicKeyToPrivateKey()
         .appendMessage("72")
         .appendSignature("92a009a9f0d4cab8720e820b5f642540")
         .appendSignature("a2b27b5416503f8fb3762223ebdb69da")
         .appendSignature("085ac1e43e15996e458f3613d0f11d8c")
         .appendSignature("387b2eaeb4302aeeb00d291612bb0c00")
-        .appendMessageToSignature()
         .test();
   }
 
@@ -230,13 +218,11 @@ public class Ed25519Test {
         .appendPublicKey("0816ed13ba3303ac5deb911548908025")
         .appendPrivateKey("c5aa8df43f9f837bedb7442f31dcb7b1")
         .appendPrivateKey("66d38535076f094b85ce3a2e0b4458f7")
-        .appendPublicKeyToPrivateKey()
         .appendMessage("af82")
         .appendSignature("6291d657deec24024827e69c3abe01a3")
         .appendSignature("0ce548a284743a445e3680d7db5ac3ac")
         .appendSignature("18ff9b538d16f290ae67f760984dc659")
         .appendSignature("4a7c15e9716ed28dc027beceea1ec40a")
-        .appendMessageToSignature()
         .test();
   }
 
@@ -247,7 +233,6 @@ public class Ed25519Test {
         .appendPublicKey("ceffbf2b2428c9c51fef7c597f1d426e")
         .appendPrivateKey("f5e5767cf153319517630f226876b86c")
         .appendPrivateKey("8160cc583bc013744c6bf255f5cc0ee5")
-        .appendPublicKeyToPrivateKey()
         .appendMessage("08b8b2b733424243760fe426a4b54908")
         .appendMessage("632110a66c2f6591eabd3345e3e4eb98")
         .appendMessage("fa6e264bf09efe12ee50f8f54e9f77b1")
@@ -316,7 +301,6 @@ public class Ed25519Test {
         .appendSignature("87df5e4843b2cbdb67cbf6e460fec350")
         .appendSignature("aa5371b1508f9f4528ecea23c436d94b")
         .appendSignature("5e8fcd4f681e30a6ac00a9704a188a03")
-        .appendMessageToSignature()
         .test();
   }
 
@@ -327,7 +311,6 @@ public class Ed25519Test {
         .appendPublicKey("c35467ef2efd4d64ebf819683467e2bf")
         .appendPrivateKey("833fe62409237b9d62ec77587520911e")
         .appendPrivateKey("9a759cec1d19755b7da901b96dca3d42")
-        .appendPublicKeyToPrivateKey()
         .appendMessage("ddaf35a193617abacc417349ae204131")
         .appendMessage("12e6fa4e89a97ea20a9eeee64b55d39a")
         .appendMessage("2192992a274fc1a836ba3c23a3feebbd")
@@ -336,7 +319,6 @@ public class Ed25519Test {
         .appendSignature("201009a3efbf3ecb69bea2186c26b589")
         .appendSignature("09351fc9ac90b3ecfdfbc7c66431e030")
         .appendSignature("3dca179c138ac17ad9bef1177331a704")
-        .appendMessageToSignature()
         .test();
   }
 }

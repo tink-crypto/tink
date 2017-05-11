@@ -51,7 +51,7 @@ import java.util.Arrays;
  */
 public final class Curve25519 {
 
-  static final int BYTE_LEN = 32;
+  static final int FIELD_LEN = 32;
   static final int LIMB_CNT = 10;
   private static final long TWO_TO_25 = 1 << 25;
   private static final long TWO_TO_26 = TWO_TO_25 << 1;
@@ -480,7 +480,7 @@ public final class Curve25519 {
     for (int i = 0; i < LIMB_CNT; i++) {
       input[i] <<= EXPAND_SHIFT[i];
     }
-    byte[] output = new byte[BYTE_LEN];
+    byte[] output = new byte[FIELD_LEN];
     for (int i = 0; i < LIMB_CNT; i++) {
       output[EXPAND_START[i]] |= input[i] & 0xff;
       output[EXPAND_START[i] + 1] |= (input[i] >> 8) & 0xff;
@@ -639,8 +639,8 @@ public final class Curve25519 {
 
     System.arraycopy(q, 0, nqpqx, 0, LIMB_CNT);
 
-    for (int i = 0; i < BYTE_LEN; i++) {
-      int b = n[BYTE_LEN - i - 1] & 0xff;
+    for (int i = 0; i < FIELD_LEN; i++) {
+      int b = n[FIELD_LEN - i - 1] & 0xff;
       for (int j = 0; j < 8; j++) {
         int bit = (b >> (7 - j)) & 1;
 
@@ -774,7 +774,7 @@ public final class Curve25519 {
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
   public static byte[] generatePrivateKey() {
-    byte[] privateKey = Random.randBytes(BYTE_LEN);
+    byte[] privateKey = Random.randBytes(FIELD_LEN);
 
     privateKey[0] |= 7;
     privateKey[31] &= 63;
@@ -794,13 +794,13 @@ public final class Curve25519 {
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
   public static byte[] x25519(byte[] privateKey, byte[] peersPublicValue) {
-    checkArgument(privateKey.length == BYTE_LEN, "Private key must have 32 bytes.");
-    checkArgument(peersPublicValue.length == BYTE_LEN, "Peer's public key must have 32 bytes.");
+    checkArgument(privateKey.length == FIELD_LEN, "Private key must have 32 bytes.");
+    checkArgument(peersPublicValue.length == FIELD_LEN, "Peer's public key must have 32 bytes.");
     long[] x = new long[LIMB_CNT];
     long[] z = new long[LIMB_CNT + 1];
     long[] zmone = new long[LIMB_CNT];
 
-    byte[] e = Arrays.copyOf(privateKey, BYTE_LEN);
+    byte[] e = Arrays.copyOf(privateKey, FIELD_LEN);
     e[0] &= 248;
     e[31] &= 127;
     e[31] |= 64;
@@ -821,8 +821,8 @@ public final class Curve25519 {
    * @throws IllegalArgumentException when the {@code privateKey} is not 32 bytes.
    */
   public static byte[] x25519PublicFromPrivate(byte[] privateKey) {
-    checkArgument(privateKey.length == BYTE_LEN, "Private key must have 32 bytes.");
-    byte[] base = new byte[BYTE_LEN]; base[0] = 9;
+    checkArgument(privateKey.length == FIELD_LEN, "Private key must have 32 bytes.");
+    byte[] base = new byte[FIELD_LEN]; base[0] = 9;
     return x25519(privateKey, base);
   }
 }
