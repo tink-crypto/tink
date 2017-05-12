@@ -22,7 +22,6 @@ import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.Registry;
-import com.google.cloud.crypto.tink.subtle.AeadBase;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
@@ -105,7 +104,7 @@ public final class AeadFactory {
       throws GeneralSecurityException {
     PrimitiveSet<Aead> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
-    return new AeadBase() {
+    return new Aead() {
       @Override
       public byte[] encrypt(final byte[] plaintext, final byte[] aad)
           throws GeneralSecurityException {

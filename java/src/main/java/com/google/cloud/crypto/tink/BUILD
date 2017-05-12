@@ -24,9 +24,6 @@ java_library(
         "PublicKeyVerify.java",
     ],
     javacopts = JAVACOPTS,
-    deps = [
-        "@com_google_guava//jar",
-    ],
 )
 
 # restricted APIs
@@ -76,7 +73,6 @@ java_library(
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
         "//proto:tink_java_proto_compile_imports",
-        "@com_google_guava//jar",
     ],
 )
 
@@ -89,7 +85,6 @@ java_library(
         "//proto:common_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//proto:tink_java_proto_lite_compile_imports",
-        "@com_google_guava//jar",
     ],
 )
 

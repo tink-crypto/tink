@@ -16,6 +16,7 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
+import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.Mac;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -29,7 +30,7 @@ import java.util.Arrays;
  * <a href="http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05">Authenticated
  * Encryption with AES-CBC and HMAC-SHA</a>.
  */
-public final class EncryptThenAuthenticate extends AeadBase {
+public final class EncryptThenAuthenticate implements Aead {
   private final IndCpaCipher cipher;
   private final Mac mac;
   private final int macLength;

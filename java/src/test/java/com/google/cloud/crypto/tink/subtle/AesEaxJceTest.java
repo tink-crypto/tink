@@ -33,7 +33,6 @@ import org.junit.runners.JUnit4;
  * Unit tests for AesEax
  * TODO(bleichen): Add more tests:
  *   - maybe add NIST style verification.
- *   - more tests for asynchronous encryption.
  *   - tests with long ciphertexts (e.g. BC had a bug with messages of size 8k or longer)
  *   - check that IVs are distinct.
  */
@@ -321,31 +320,6 @@ public class AesEaxJceTest {
         } catch (AEADBadTagException ex) {
           // This is expected.
         }
-      }
-    }
-  }
-
-  @Test
-  /**
-   * A very basic test for asynchronous encryption.
-   */
-  public void testAsync() throws Exception {
-    byte[] aad = new byte[] {1, 2, 3};
-    byte[] key = Random.randBytes(KEY_SIZE);
-    AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
-    byte[] plaintext = Random.randBytes(20);
-
-    byte[] ciphertext = eax.asyncEncrypt(plaintext, aad).get();
-    byte[] decrypted = eax.asyncDecrypt(ciphertext, aad).get();
-    assertArrayEquals(plaintext, decrypted);
-    for (int length = 0; length < ciphertext.length; length++) {
-      byte[] truncated = Arrays.copyOf(ciphertext, length);
-      try {
-        byte[] unused = eax.asyncDecrypt(truncated, aad).get();
-        fail("Decrypting a truncated ciphertext should fail");
-      } catch (ExecutionException ex) {
-        // The decryption should fail because the ciphertext has been truncated.
-        assertTrue(ex.getCause() instanceof GeneralSecurityException);
       }
     }
   }

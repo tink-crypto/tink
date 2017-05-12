@@ -21,6 +21,7 @@ import com.google.api.services.cloudkms.v1.model.DecryptRequest;
 import com.google.api.services.cloudkms.v1.model.DecryptResponse;
 import com.google.api.services.cloudkms.v1.model.EncryptRequest;
 import com.google.api.services.cloudkms.v1.model.EncryptResponse;
+import com.google.cloud.crypto.tink.Aead;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -28,7 +29,7 @@ import java.security.GeneralSecurityException;
  * This primitive forwards encryption/decryption requests to a key in Google Cloud KMS.
  * As of March 2017, Google Cloud KMS supports only AES-256-GCM keys.
  */
-public final class GcpKmsAead extends AeadBase {
+public final class GcpKmsAead implements Aead {
 
   /**
    * This client knows how to talk to Google Cloud KMS.

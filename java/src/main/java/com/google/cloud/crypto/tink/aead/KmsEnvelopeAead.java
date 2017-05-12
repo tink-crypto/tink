@@ -19,7 +19,6 @@ package com.google.cloud.crypto.tink.aead; // instead of subtle, because it depe
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
-import com.google.cloud.crypto.tink.subtle.AeadBase;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -35,7 +34,7 @@ import java.security.GeneralSecurityException;
  *   - Encrypted DEK: variable length that is equal to the value specified in the last 4 bytes.
  *   - AEAD payload: variable length.
  */
-class KmsEnvelopeAead extends AeadBase {
+class KmsEnvelopeAead implements Aead {
   private static final byte[] EMPTY_AAD = new byte[0];
   private final KeyTemplate dekTemplate;
   private final Aead remote;

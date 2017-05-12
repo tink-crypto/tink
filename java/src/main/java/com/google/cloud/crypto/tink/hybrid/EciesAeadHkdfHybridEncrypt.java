@@ -17,12 +17,12 @@
 package com.google.cloud.crypto.tink.hybrid; // instead of subtle, because it depends on KeyTemplate.
 
 import com.google.cloud.crypto.tink.Aead;
+import com.google.cloud.crypto.tink.HybridEncrypt;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
 import com.google.cloud.crypto.tink.subtle.EciesHkdfSenderKem;
-import com.google.cloud.crypto.tink.subtle.HybridEncryptBase;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
@@ -31,7 +31,7 @@ import java.security.interfaces.ECPublicKey;
  * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and
  * AEAD-DEM (data encapsulation mechanism).
  */
-public final class EciesAeadHkdfHybridEncrypt extends HybridEncryptBase {
+public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
   private static final byte[] EMPTY_AAD = new byte[0];
   private final ECPublicKey recipientPublicKey;
   private final EciesHkdfSenderKem senderKem;

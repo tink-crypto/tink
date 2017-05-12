@@ -195,40 +195,4 @@ public class AeadFactoryTest {
         CryptoFormat.RAW_PREFIX_SIZE + plaintext.length  + ivSize + tagSize,
         ciphertext.length);
   }
-
-  /**
-   * A very basic test for asynchronous encryption.
-   */
-  @Test
-  public void testAsync() throws Exception {
-    byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
-    byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
-    int ivSize = 12;
-    int tagSize = 16;
-
-    Key primary = TestUtil.createKey(
-        TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
-        42,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.TINK);
-
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primary));
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
-    byte[] ciphertext = aead.asyncEncrypt(plaintext, associatedData).get();
-    byte[] decrypted = aead.asyncDecrypt(ciphertext, associatedData).get();
-    assertArrayEquals(plaintext, decrypted);
-    for (int length = 0; length < ciphertext.length; length++) {
-      byte[] truncated = Arrays.copyOf(ciphertext, length);
-      try {
-        byte[] unused = aead.asyncDecrypt(truncated, associatedData).get();
-        fail("Decrypting a truncated ciphertext should fail");
-      } catch (ExecutionException ex) {
-        // The decryption should fail because the ciphertext has been truncated.
-        assertTrue(ex.getCause() instanceof GeneralSecurityException);
-      }
-    }
-  }
 }

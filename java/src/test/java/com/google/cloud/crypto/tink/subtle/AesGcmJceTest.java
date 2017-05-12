@@ -35,7 +35,6 @@ import org.junit.runners.JUnit4;
  * Unit tests for AesGcm
  * TODO(bleichen): Add more tests.
  *   - maybe add NIST style verification.
- *   - more tests for asynchronous encryption.
  */
 @RunWith(JUnit4.class)
 public class AesGcmJceTest {
@@ -234,30 +233,5 @@ public class AesGcmJceTest {
        assertFalse(ciphertexts.contains(ctHex));
        ciphertexts.add(ctHex);
      }
-  }
-
-  @Test
-  /**
-   * A very basic test for asynchronous encryption.
-   */
-  public void testAsync() throws Exception {
-    byte[] aad = new byte[] {1, 2, 3};
-    byte[] key = Random.randBytes(16);
-    AesGcmJce gcm = new AesGcmJce(key);
-    byte[] plaintext = Random.randBytes(20);
-
-    byte[] ciphertext = gcm.asyncEncrypt(plaintext, aad).get();
-    byte[] decrypted = gcm.asyncDecrypt(ciphertext, aad).get();
-    assertArrayEquals(plaintext, decrypted);
-    for (int length = 0; length < ciphertext.length; length++) {
-      byte[] truncated = Arrays.copyOf(ciphertext, length);
-      try {
-        byte[] unused = gcm.asyncDecrypt(truncated, aad).get();
-        fail("Decrypting a truncated ciphertext should fail");
-      } catch (ExecutionException ex) {
-        // The decryption should fail because the ciphertext has been truncated.
-        assertTrue(ex.getCause() instanceof GeneralSecurityException);
-      }
-    }
   }
 }

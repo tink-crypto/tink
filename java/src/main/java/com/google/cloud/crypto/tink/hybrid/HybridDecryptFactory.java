@@ -23,7 +23,6 @@ import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
-import com.google.cloud.crypto.tink.subtle.HybridDecryptBase;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -101,7 +100,7 @@ public final class HybridDecryptFactory {
       throws GeneralSecurityException {
     PrimitiveSet<HybridDecrypt> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
-    return new HybridDecryptBase() {
+    return new HybridDecrypt() {
       @Override
       public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
           throws GeneralSecurityException {

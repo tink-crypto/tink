@@ -80,7 +80,6 @@ java_library(
         "//proto:tink_java_proto_compile_imports",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
-        "@com_google_guava//jar",
         "@com_google_http_client//jar",
         "@com_google_http_client_jackson2//jar",
         "@com_google_oauth_client//jar",

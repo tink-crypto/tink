@@ -106,14 +106,6 @@ public class TestUtil {
     public byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException {
       throw new GeneralSecurityException("dummy");
     }
-    @Override
-    public ListenableFuture<byte[]> asyncEncrypt(byte[] plaintext, byte[] aad) {
-      return null;
-    }
-    @Override
-    public ListenableFuture<byte[]> asyncDecrypt(byte[] ciphertext, byte[] aad) {
-      return null;
-    }
   }
 
   /**
@@ -569,21 +561,6 @@ public class TestUtil {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("decryption failed"));
-    }
-
-    // async tests
-    ciphertext = aead.asyncEncrypt(plaintext, associatedData).get();
-    decrypted = aead.asyncDecrypt(ciphertext, associatedData).get();
-    assertArrayEquals(plaintext, decrypted);
-    for (int length = 0; length < ciphertext.length; length++) {
-      byte[] truncated = Arrays.copyOf(ciphertext, length);
-      try {
-        byte[] unused = aead.asyncDecrypt(truncated, associatedData).get();
-        fail("Decrypting a truncated ciphertext should fail");
-      } catch (ExecutionException ex) {
-        // The decryption should fail because the ciphertext has been truncated.
-        assertTrue(ex.getCause() instanceof GeneralSecurityException);
-      }
     }
   }
 

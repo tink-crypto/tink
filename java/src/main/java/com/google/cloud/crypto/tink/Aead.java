@@ -16,7 +16,6 @@
 
 package com.google.cloud.crypto.tink;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import java.security.GeneralSecurityException;
 
 /**
@@ -45,30 +44,4 @@ public interface Aead {
    */
   byte[] decrypt(final byte[] ciphertext, final byte[] additionalData)
       throws GeneralSecurityException;
-
-  /**
-   * Encrypts {@code plaintext} with {@code additionalData} as additional authenticated data.
-   * The resulting ciphertext allows for checking the authenticity and integrity
-   * of the additional data, but does not guarantee its secrecy.
-   *
-   * If the encryption fails for some reason then future's {@code get()} method
-   * will return {@code ExecutionException} whose {@code getCause()} method returns
-   * {@code GeneralSecurityException}.
-   *
-   * @return a {@code ListenableFuture} that holds the resulting ciphertext.
-   */
-  ListenableFuture<byte[]> asyncEncrypt(final byte[] plaintext, final byte[] additionalData);
-
-  /**
-   * Decrypts {@code ciphertext} with {@code additionalData} as additional authenticated data.
-   * The decryption verifies the authenticity and integrity of the additional data,
-   * but there are no guarantees wrt. secrecy of that data.
-   *
-   * If the ciphertext is invalid or unauthenticated, or if the decryption fails for some
-   * other reason, then future's {@code get()} method will return {@code ExecutionException}
-   * whose {@code getCause()} method returns {@code GeneralSecurityException}.
-   *
-   * @return a {@code ListenableFuture} that holds the resulting plaintext.
-   */
-  ListenableFuture<byte[]> asyncDecrypt(final  byte[] ciphertext, final  byte[] additionalData);
 }

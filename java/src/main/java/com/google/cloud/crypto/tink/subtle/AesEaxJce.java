@@ -16,6 +16,7 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
+import com.google.cloud.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import javax.crypto.AEADBadTagException;
@@ -44,7 +45,7 @@ import javax.crypto.spec.SecretKeySpec;
  *   that the encryption modes "AES/ECB/NOPADDING" and "AES/CTR/NOPADDING" are
  *   implemented. Our plan is to implement a native version of EAX.
  */
-public final class AesEaxJce extends AeadBase {
+public final class AesEaxJce implements Aead {
   static final int BLOCK_SIZE_IN_BYTES = 16;
   static final int TAG_SIZE_IN_BYTES = 16;
 

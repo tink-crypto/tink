@@ -30,7 +30,6 @@ java_library(
 java_library(
     name = "aead",
     srcs = [
-        "AeadBase.java",
         "AesCtrJceCipher.java",
         "AesEaxJce.java",
         "AesGcmJce.java",
@@ -41,7 +40,6 @@ java_library(
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
-        "@com_google_guava//jar",
     ],
 )
 
@@ -50,15 +48,13 @@ java_library(
 java_library(
     name = "aead_envelope",
     srcs = [
-        "AeadBase.java",
         "GcpKmsAead.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
-        "//java/src/main/java/com/google/cloud/crypto/tink",
+        "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
-        "@com_google_guava//jar",
         "@com_google_http_client//jar",
     ],
 )
@@ -120,14 +116,11 @@ java_library(
         "EciesHkdfRecipientKem.java",
         "EciesHkdfSenderKem.java",
         "Hkdf.java",
-        "HybridDecryptBase.java",
-        "HybridEncryptBase.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
-        "@com_google_guava//jar",
     ],
 )
 

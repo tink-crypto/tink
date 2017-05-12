@@ -16,6 +16,7 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
+import com.google.cloud.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
@@ -24,7 +25,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * This primitive implements AesGcm using JCE.
  */
-public final class AesGcmJce extends AeadBase {
+public final class AesGcmJce implements Aead {
 
   // All instances of this class use a 12 byte IV and a 16 byte tag.
   private static final int IV_SIZE_IN_BYTES = 12;
