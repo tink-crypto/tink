@@ -46,7 +46,7 @@ void add_primitives(PrimitiveSet<Mac>* primitive_set,
     key.set_output_prefix_type(OutputPrefixType::TINK);
     key.set_key_id(key_id);
     key.set_status(KeyStatusType::ENABLED);
-    std::unique_ptr<Mac> mac(new DummyMac("Mac#" + key_id));
+    std::unique_ptr<Mac> mac(new DummyMac("dummy MAC"));
     auto add_result = primitive_set->AddPrimitive(std::move(mac), key);
     EXPECT_TRUE(add_result.ok()) << add_result.status();
   }

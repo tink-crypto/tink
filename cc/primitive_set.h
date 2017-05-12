@@ -86,11 +86,29 @@ class PrimitiveSet {
   // Adds 'primitive' to this set for the specified 'key'.
   util::StatusOr<Entry<P>*> AddPrimitive(
       std::unique_ptr<P> primitive,
-      google::cloud::crypto::tink::Keyset::Key key);
+      google::cloud::crypto::tink::Keyset::Key key) {
+    auto identifier_result = CryptoFormat::get_output_prefix(key);
+    if (!identifier_result.ok()) return identifier_result.status();
+    std::string identifier = identifier_result.ValueOrDie();
+    std::lock_guard<std::mutex> lock(primitives_mutex_);
+    primitives_[identifier].push_back(
+        Entry<P>(std::move(primitive), identifier, key.status()));
+    return &(primitives_[identifier].back());
+  }
 
   // Returns the entries with primitives identifed by 'identifier'.
   util::StatusOr<const Primitives*> get_primitives(
-      google::protobuf::StringPiece identifier);
+      google::protobuf::StringPiece identifier) {
+    std::lock_guard<std::mutex> lock(primitives_mutex_);
+    typename CiphertextPrefixToPrimitivesMap::iterator found =
+        primitives_.find(identifier.ToString());
+    if (found == primitives_.end()) {
+      return ToStatusF(util::error::NOT_FOUND,
+                       "No primitives found for identifier '%s'.",
+                       identifier.ToString().c_str());
+    }
+    return &(found->second);
+  }
 
   // Returns all primitives that use RAW prefix.
   util::StatusOr<const Primitives*> get_raw_primitives() {
@@ -114,36 +132,6 @@ class PrimitiveSet {
   std::mutex primitives_mutex_;
   CiphertextPrefixToPrimitivesMap primitives_;  // guarded by primitives_mutex_
 };
-
-///////////////////////////////////////////////////////////////////////////////
-// Implementation details.
-
-template <class P>
-util::StatusOr<PrimitiveSet<P>::Entry<P>*> PrimitiveSet<P>::AddPrimitive(
-    std::unique_ptr<P> primitive,
-    google::cloud::crypto::tink::Keyset::Key key) {
-  auto identifier_result = CryptoFormat::get_output_prefix(key);
-  if (!identifier_result.ok()) return identifier_result.status();
-  std::string identifier = identifier_result.ValueOrDie();
-  std::lock_guard<std::mutex> lock(primitives_mutex_);
-  primitives_[identifier].push_back(
-      Entry<P>(std::move(primitive), identifier, key.status()));
-  return &(primitives_[identifier].back());
-}
-
-template <class P>
-util::StatusOr<const std::vector<PrimitiveSet<P>::Entry<P>>*>
-PrimitiveSet<P>::get_primitives(google::protobuf::StringPiece identifier) {
-  std::lock_guard<std::mutex> lock(primitives_mutex_);
-  typename CiphertextPrefixToPrimitivesMap::iterator found =
-      primitives_.find(identifier.ToString());
-  if (found == primitives_.end()) {
-    return ToStatusF(util::error::NOT_FOUND,
-                     "No primitives found for identifier '%s'.",
-                     identifier.ToString().c_str());
-  }
-  return &(found->second);
-}
 
 }  // namespace tink
 }  // namespace crypto
