@@ -98,11 +98,10 @@ public class IntegrationTest {
   @Test
   public void testWithTinkeyEciesAesGcmHkdf() throws Exception {
     // Generated with
-    // tinkey create --key-type EciesAeadHkdf
-    // --key-format "params { kem_params { curve_type: NIST_P256 hkdf_hash_type: SHA256}
-    // dem_params { aead_dem {type_url: \"type.googleapis.com/google.cloud.crypto.tink.AesGcmKey\"
-    // value: \"\020\020\"} } ec_point_format: UNCOMPRESSED}"  --out ../private_key.cfg
-    final String PRIVATE_KEYSET =
+    // tinkey create \
+    // --key-template ECIES_P256_HKDFHMACSHA256_AES128GCM.proto \
+    // --out private_key.cfg
+    final String privateKeyset =
         "CKqtvK8HEo0CCoACCkR0eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5jbG91ZC5j"
         + "cnlwdG8udGluay5FY2llc0FlYWRIa2RmUHJpdmF0ZUtleRK1ARKQARJICgQIAhAD"
         + "Ej4SPAo2dHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY2xvdWQuY3J5cHRvLnRp"
@@ -110,10 +109,9 @@ public class IntegrationTest {
         + "AR1PZk0iIQDQZRrtrcrj+PH7cGAiXjAtG/jLPYC46AQFOuZAfuitqxogWbIJkYNY"
         + "WiJ7D4NMku5zLgH5e6Fcy5vXEuYeHSbgvPQYAhABGKqtvK8HIAE=";
 
-
     // Generated with
-    // tinkey create-public-keyset --in ../private_key.cfg --out ../public_key.cfg
-    final String PUBLIC_KEYSET =
+    // tinkey create-public-keyset --in private_key.cfg --out public_key.cfg
+    final String publicKeyset =
         "CKqtvK8HEucBCtoBCkN0eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5jbG91ZC5j"
         + "cnlwdG8udGluay5FY2llc0FlYWRIa2RmUHVibGljS2V5EpABEkgKBAgCEAMSPhI8"
         + "CjZ0eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5jbG91ZC5jcnlwdG8udGluay5B"
@@ -122,10 +120,10 @@ public class IntegrationTest {
 
 
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
-        CleartextKeysetHandle.parseFrom(base64().decode(PRIVATE_KEYSET)));
+        CleartextKeysetHandle.parseFrom(base64().decode(privateKeyset)));
 
     HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(
-        CleartextKeysetHandle.parseFrom(base64().decode(PUBLIC_KEYSET)));
+        CleartextKeysetHandle.parseFrom(base64().decode(publicKeyset)));
 
     byte[] plaintext = Random.randBytes(20);
     byte[] contextInfo = Random.randBytes(20);
@@ -138,7 +136,10 @@ public class IntegrationTest {
    */
   @Test
   public void testWithTinkeyEciesAesCtrHmacAead() throws Exception {
-    final String PRIVATE_KEYSET =
+    // tinkey create \
+    // --key-template ECIES_P256_HKDFHMACSHA256_AES256CTR_128BITIV_HMACSHA256_256BITTAG.proto \
+    // --out private_key.cfg
+    final String privateKeyset =
         "CJG2oOEFEqUCCpgCCkR0eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5jbG91ZC5j"
         + "cnlwdG8udGluay5FY2llc0FlYWRIa2RmUHJpdmF0ZUtleRLNARKoARJgCgQIAhAD"
         + "ElYSVAo+dHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY2xvdWQuY3J5cHRvLnRp"
@@ -147,7 +148,7 @@ public class IntegrationTest {
         + "Y0Ns0WkLRX3wo6IAEszPahogWYL4SpaHlwYZaBYNVTibJueOdaPbeaLHiyCVBAkn"
         + "YAwYAhABGJG2oOEFIAE=";
 
-    final String PUBLIC_KEYSET =
+    final String publicKeyset =
         "CJG2oOEFEv8BCvIBCkN0eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5jbG91ZC5j"
         + "cnlwdG8udGluay5FY2llc0FlYWRIa2RmUHVibGljS2V5EqgBEmAKBAgCEAMSVhJU"
         + "Cj50eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5jbG91ZC5jcnlwdG8udGluay5B"
@@ -157,10 +158,10 @@ public class IntegrationTest {
 
 
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
-        CleartextKeysetHandle.parseFrom(base64().decode(PRIVATE_KEYSET)));
+        CleartextKeysetHandle.parseFrom(base64().decode(privateKeyset)));
 
     HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(
-        CleartextKeysetHandle.parseFrom(base64().decode(PUBLIC_KEYSET)));
+        CleartextKeysetHandle.parseFrom(base64().decode(publicKeyset)));
 
     byte[] plaintext = Random.randBytes(20);
     byte[] contextInfo = Random.randBytes(20);

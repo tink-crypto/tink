@@ -18,27 +18,18 @@ package com.google.cloud.crypto.tink.tinkey;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
-import com.google.cloud.crypto.tink.CleartextKeysetHandle;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
 import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
-import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
-import com.google.cloud.crypto.tink.KeysetHandle;
-import com.google.cloud.crypto.tink.KmsEncryptedKeysetHandle;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TestUtil;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
-import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
-import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
 import com.google.cloud.crypto.tink.aead.GcpKmsAeadKeyManager;

@@ -25,9 +25,9 @@ import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
-import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 
 /**
