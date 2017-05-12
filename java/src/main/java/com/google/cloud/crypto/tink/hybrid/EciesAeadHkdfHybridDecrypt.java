@@ -17,8 +17,8 @@
 package com.google.cloud.crypto.tink.hybrid; // instead of subtle, because it depends on KeyTemplate.
 
 import com.google.cloud.crypto.tink.Aead;
-import com.google.cloud.crypto.tink.HybridDecrypt;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
+import com.google.cloud.crypto.tink.HybridDecrypt;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.EcUtil;

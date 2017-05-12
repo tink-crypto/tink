@@ -59,7 +59,6 @@ import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.io.File;
@@ -72,8 +71,6 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
-import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
