@@ -38,12 +38,8 @@ java_proto_library(
 # tink
 cc_proto_library(
     name = "tink_cc_proto",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
     inputs = [
         ":common_cc_proto",
-        "@com_github_google_protobuf//:well_known_protos",
     ],
     protos = [
         "tink.proto",
@@ -53,12 +49,8 @@ cc_proto_library(
 
 java_lite_proto_library(
     name = "tink_java_proto_lite",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
     inputs = [
         ":common_java_proto_lite",
-        "@com_github_google_protobuf//:well_known_protos",
     ],
     protos = [
         "tink.proto",
@@ -68,12 +60,8 @@ java_lite_proto_library(
 
 java_proto_library(
     name = "tink_java_proto",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
     inputs = [
         ":common_java_proto",
-        "@com_github_google_protobuf//:well_known_protos",
     ],
     protos = [
         "tink.proto",
@@ -292,12 +280,6 @@ java_proto_library(
 # kms_envelope
 cc_proto_library(
     name = "kms_envelope_cc_proto",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     proto_deps = [
         ":tink_cc_proto",
     ],
@@ -309,12 +291,6 @@ cc_proto_library(
 
 java_lite_proto_library(
     name = "kms_envelope_java_proto_lite",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     proto_deps = [
         ":tink_java_proto_lite",
     ],
@@ -326,12 +302,6 @@ java_lite_proto_library(
 
 java_proto_library(
     name = "kms_envelope_java_proto",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     proto_deps = [
         ":tink_java_proto",
     ],
@@ -344,12 +314,6 @@ java_proto_library(
 # ECIES hybrid encryption with AEAD and HKDF
 cc_proto_library(
     name = "ecies_aead_hkdf_cc_proto",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
-    inputs = [
-        "@com_github_google_protobuf//:well_known_protos",
-    ],
     proto_deps = [
         ":common_cc_proto",
         ":tink_cc_proto",
@@ -362,9 +326,6 @@ cc_proto_library(
 
 java_lite_proto_library(
     name = "ecies_aead_hkdf_java_proto_lite",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
     proto_deps = [
         ":common_java_proto_lite",
         ":tink_java_proto_lite",
@@ -377,9 +338,6 @@ java_lite_proto_library(
 
 java_proto_library(
     name = "ecies_aead_hkdf_java_proto",
-    imports = [
-        "external/com_github_google_protobuf/src/",
-    ],
     proto_deps = [
         ":common_java_proto",
         ":tink_java_proto",

@@ -19,8 +19,6 @@ syntax = "proto3";
 
 package google.cloud.crypto.tink;
 
-import "google/protobuf/timestamp.proto";
-
 option java_package = "com.google.cloud.crypto.tink";
 option java_outer_classname = "TinkProto";
 
@@ -130,11 +128,6 @@ message Keyset {
     int32 key_id = 3;
 
     OutputPrefixType output_prefix_type = 4;
-
-    // Optional fields, used by key management tools, but not used
-    // by actual cryptographic operations.
-    google.protobuf.Timestamp generated_at = 101;
-    google.protobuf.Timestamp valid_until = 102;
   }
 
   // Identifies key used to generate new crypto data (encrypt, sign).
@@ -163,12 +156,6 @@ message KeysetInfo {
 
     // See Keyset.Key.output_prefix_type.
     OutputPrefixType output_prefix_type = 4;
-
-    // See Keyset.Key.generated_at.
-    google.protobuf.Timestamp generated_at = 101;
-
-    // See Keyset.Key.valid_until.
-    google.protobuf.Timestamp valid_until = 102;
   }
 
   // See Keyset.primary_key_id.

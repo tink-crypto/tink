@@ -62,8 +62,6 @@ public class Util {
         .setStatus(key.getStatus())
         .setOutputPrefixType(key.getOutputPrefixType())
         .setKeyId(key.getKeyId())
-        .setGeneratedAt(key.getGeneratedAt())
-        .setValidUntil(key.getValidUntil())
         .build();
   }
 
