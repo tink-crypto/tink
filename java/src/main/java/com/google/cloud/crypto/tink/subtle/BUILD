@@ -144,6 +144,7 @@ java_library(
     name = "ed25519",
     srcs = [
         "Ed25519.java",
+        "Ed25519Constants.java",
     ],
     javacopts = JAVACOPTS,
     deps = [

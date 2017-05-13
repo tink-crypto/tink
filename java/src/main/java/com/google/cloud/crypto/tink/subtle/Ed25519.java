@@ -18,6 +18,11 @@ package com.google.cloud.crypto.tink.subtle;
 
 import static com.google.cloud.crypto.tink.subtle.Curve25519.FIELD_LEN;
 import static com.google.cloud.crypto.tink.subtle.Curve25519.LIMB_CNT;
+import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.B_TABLE;
+import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.D;
+import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.D2;
+import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.SQRTM1;
+
 
 import com.google.common.base.Preconditions;
 import java.security.GeneralSecurityException;
@@ -40,31 +45,13 @@ public final class Ed25519 {
   public static final int PUBLIC_KEY_LEN = FIELD_LEN;
   public static final int SIGNATURE_LEN = FIELD_LEN * 2;
 
-  // d = -121665 / 121666 mod 2^255-19
-  static final long[] D = {
-      56195235, 13857412, 51736253, 6949390, 114729, 24766616, 60832955, 30306712, 48412415,
-      21499315};
-  // 2d
-  private static final long[] D2 = {
-      45281625, 27714825, 36363642, 13898781, 229458, 15978800, 54557047, 27058993, 29715967,
-      9444199};
-  // 2^((p-1)/4) mod p where p = 2^255-19
-  private static final long[] SQRTM1 = {
-      34513072, 25610706, 9377949, 3500415, 12389472, 33281959, 41962654, 31548777, 326685,
-      11406482};
-
   /**
    * Base point for the Edwards twisted curve = (x, 4/5)
    * This is calculated by setting y = 4/5 and recovering x from the equation.
    * See {@link Ed25519ConstantsGenerator}.
    */
-  private static final CachedXYT B = new CachedXYT(
-      new long[]{25967493, 19198397, 29566455, 3660896, 54414519, 4014786, 27544626, 21800161,
-          61029707, 2047604},
-      new long[]{54563134, 934261, 64385954, 3049989, 66381436, 9406985, 12720692, 5043384,
-          19500929, 18085054},
-      new long[]{58370664, 4489569, 9688441, 18769238, 10184608, 21191052, 29287918, 11864899,
-          42594502, 29115885});
+  // TODO(anergiz): remove this when vartime doubleScalarMultVarTime is implemented.
+  private static final CachedXYT B = B_TABLE[0][0];
 
   // (x = 0, y = 1) point
   private static final CachedXYT CACHED_NEUTRAL = new CachedXYT(
@@ -280,7 +267,7 @@ public final class Ed25519 {
    * Hisil H., Wong K.KH., Carter G., Dawson E. (2008) Twisted Edwards Curves Revisited.
    * with Z = 1.
    */
-  private static class CachedXYT {
+  static class CachedXYT {
     final long[] yPlusX;
     final long[] yMinusX;
     final long[] t2d;
@@ -309,14 +296,14 @@ public final class Ed25519 {
     }
 
     // z is one implicitly, so this just copies {@code in} to {@code output}.
-    public void multByZ(long[] output, long[] in) {
+    void multByZ(long[] output, long[] in) {
       System.arraycopy(in, 0, output, 0, LIMB_CNT);
     }
 
     /**
      * If icopy is 1, copies {@code other} into this point. Time invariant wrt to icopy value.
      */
-    private void copyConditional(CachedXYT other, int icopy) {
+    void copyConditional(CachedXYT other, int icopy) {
       Curve25519.copyConditional(yPlusX, other.yPlusX, icopy);
       Curve25519.copyConditional(yMinusX, other.yMinusX, icopy);
       Curve25519.copyConditional(t2d, other.t2d, icopy);
@@ -508,6 +495,7 @@ public final class Ed25519 {
   /**
    * Computes {@code a}*{@code pointA}
    */
+  // TODO(anergiz): Remove this when varied time doubleScalarMultVarTime is implemented.
   private static PartialXYZT scalarMult2PartialXYZT(byte[] a, CachedXYT pointA) {
     PartialXYZT ret = new PartialXYZT(NEUTRAL);
     XYZ xyz = new XYZ();
@@ -517,25 +505,125 @@ public final class Ed25519 {
       for (int j = 0; j < 8; j++) {
         int bit = (b >> (7 - j)) & 1;
         doubleXYZ(ret, XYZ.fromPartialXYZT(xyz, ret));
-        CachedXYT t = new CachedXYT(CACHED_NEUTRAL);
-        t.copyConditional(pointA, bit);
-        add(ret, XYZT.fromPartialXYZT(xyzt, ret), t);
+        add(ret, XYZT.fromPartialXYZT(xyzt, ret), bit == 0 ? CACHED_NEUTRAL : pointA);
       }
     }
     return ret;
   }
 
   /**
-   * Computes {@code b}*B where B is the generator point.
+   * Compares two byte values in constant time.
+   *
+   * Please note that this doesn't reuse {@link Curve25519#eq} method since the below inputs are
+   * byte values.
    */
-  private static XYZ scalarMult(byte[] b) {
-    return new XYZ(scalarMult2PartialXYZT(b, B));
+  private static int eq(int a, int b) {
+    int r = ~(a ^ b) & 0xff;
+    r &= r << 4;
+    r &= r << 2;
+    r &= r << 1;
+    return (r >> 7) & 1;
+  }
+
+  /**
+   * This is a constant time operation where point b*B*256^pos is stored in {@code t}.
+   * When b is 0, t remains the same (i.e., neutral point).
+   *
+   * Although B_TABLE[32][8] (B_TABLE[i][j] = (j+1)*B*256^i) has j values in [0, 7], the select
+   * method negates the corresponding point if b is negative (which is straight forward in elliptic
+   * curves by just negating y coordinate). Therefore we can get multiples of B with the half of
+   * memory requirements.
+   *
+   * @param t neutral element (i.e., point 0), also serves as output.
+   * @param pos in B[pos][j] = (j+1)*B*256^pos
+   * @param b value in [-8, 8] range.
+   */
+  private static void select(CachedXYT t, int pos, byte b) {
+    int bnegative = (b & 0xff) >> 7;
+    int babs = b - (((-bnegative) & b) << 1);
+
+    t.copyConditional(B_TABLE[pos][0], eq(babs, 1));
+    t.copyConditional(B_TABLE[pos][1], eq(babs, 2));
+    t.copyConditional(B_TABLE[pos][2], eq(babs, 3));
+    t.copyConditional(B_TABLE[pos][3], eq(babs, 4));
+    t.copyConditional(B_TABLE[pos][4], eq(babs, 5));
+    t.copyConditional(B_TABLE[pos][5], eq(babs, 6));
+    t.copyConditional(B_TABLE[pos][6], eq(babs, 7));
+    t.copyConditional(B_TABLE[pos][7], eq(babs, 8));
+
+    long[] yPlusX = Arrays.copyOf(t.yMinusX, LIMB_CNT);
+    long[] yMinusX = Arrays.copyOf(t.yPlusX, LIMB_CNT);
+    long[] t2d = Arrays.copyOf(t.t2d, LIMB_CNT);
+    neg(t2d, t2d);
+    CachedXYT minust = new CachedXYT(yPlusX, yMinusX, t2d);
+    t.copyConditional(minust, bnegative);
+  }
+
+  /**
+   * Computes {@code a}*B where B is the generator point.
+   * where a = a[0]+256*a[1]+...+256^31 a[31] B is the Ed25519 base point (x,4/5) with x positive.
+   *
+   * Preconditions:
+   * a[31] <= 127
+   */
+  private static XYZ scalarMult(byte[] a) {
+    byte[] e = new byte[2 * FIELD_LEN];
+    for (int i = 0; i < FIELD_LEN; i++) {
+      e[2 * i + 0] = (byte) (((a[i] & 0xff) >> 0) & 0xf);
+      e[2 * i + 1] = (byte) (((a[i] & 0xff) >> 4) & 0xf);
+    }
+    // each e[i] is between 0 and 15
+    // e[63] is between 0 and 7
+
+    // Rewrite e in a way that each e[i] is in [-8, 8].
+    // This can be done since a[63] is in [0, 7], the carry-over onto the most significant byte
+    // a[63] can be at most 1.
+    int carry = 0;
+    for (int i = 0; i < e.length - 1; i++) {
+      e[i] += carry;
+      carry = e[i] + 8;
+      carry >>= 4;
+      e[i] -= carry << 4;
+    }
+    e[e.length - 1] += carry;
+
+    PartialXYZT ret = new PartialXYZT(NEUTRAL);
+    XYZT xyzt = new XYZT();
+    // Although B_TABLE's i can be at most 31 (stores only 32 4bit multiples of B) and we have 64
+    // 4bit values in e array, the below for loop adds cached values by iterating e by two in odd
+    // indices. After the result, we can double the result point 4 times to shift the multiplication
+    // scalar by 4 bits.
+    for (int i = 1; i < e.length; i += 2) {
+      CachedXYT t = new CachedXYT(CACHED_NEUTRAL);
+      select(t, i / 2, e[i]);
+      add(ret, XYZT.fromPartialXYZT(xyzt, ret), t);
+    }
+
+    // Doubles the result 4 times to shift the multiplication scalar 4 bits to get the actual result
+    // for the odd indices in e.
+    XYZ xyz = new XYZ();
+    doubleXYZ(ret, XYZ.fromPartialXYZT(xyz, ret));
+    doubleXYZ(ret, XYZ.fromPartialXYZT(xyz, ret));
+    doubleXYZ(ret, XYZ.fromPartialXYZT(xyz, ret));
+    doubleXYZ(ret, XYZ.fromPartialXYZT(xyz, ret));
+
+    // Add multiples of B for even indices of e.
+    for (int i = 0; i < e.length; i += 2) {
+      CachedXYT t = new CachedXYT(CACHED_NEUTRAL);
+      select(t, i / 2, e[i]);
+      add(ret, XYZT.fromPartialXYZT(xyzt, ret), t);
+    }
+
+    return new XYZ(ret);
   }
 
   /**
    * Computes {@code a}*{@code pointA}+{@code b}*B where B is the generator point.
+   *
+   * This is used in verification of signatures thus this can be implemented varied time.
    */
-  private static XYZ doubleScalarMult(byte[] a, XYZT pointA, byte[] b) {
+  // TODO(anergiz): Implement this in varied time since this is only used in verification.
+  private static XYZ doubleScalarMultVarTime(byte[] a, XYZT pointA, byte[] b) {
     PartialXYZT ret = scalarMult2PartialXYZT(a, new CachedXYZT(pointA));
     add(ret, new XYZT(ret), new CachedXYZT(new XYZT(scalarMult2PartialXYZT(b, B))));
     return new XYZ(ret);
@@ -1419,7 +1507,7 @@ public final class Ed25519 {
     reduce(h);
 
     XYZT negPublicKey = XYZT.fromBytesNegateVarTime(publicKey);
-    XYZ xyz = doubleScalarMult(h, negPublicKey,
+    XYZ xyz = doubleScalarMultVarTime(h, negPublicKey,
         Arrays.copyOfRange(signature, FIELD_LEN, SIGNATURE_LEN));
     byte[] expectedR = xyz.toBytes();
     for (int i = 0; i < FIELD_LEN; i++) {

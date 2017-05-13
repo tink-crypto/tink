@@ -51,8 +51,21 @@ public class Ed25519ConstantsGenerator {
     return x;
   }
 
+  private static Point edwards(Point a, Point b) {
+    Point o = new Point();
+    o.x = (a.x.multiply(b.y).add(b.x.multiply(a.y))).multiply(
+        BigInteger.ONE.add(D.multiply(a.x.multiply(b.x).multiply(a.y).multiply(b.y)))
+            .modInverse(P)).mod(P);
+    o.y = (a.y.multiply(b.y).add(a.x.multiply(b.x))).multiply(
+        BigInteger.ONE.subtract(D.multiply(a.x.multiply(b.x).multiply(a.y).multiply(b.y)))
+            .modInverse(P)).mod(P);
+    return o;
+  }
+
   private static byte[] toLittleEndian(BigInteger n) {
-    byte[] b = n.toByteArray();
+    byte[] b = new byte[32];
+    byte[] nBytes = n.toByteArray();
+    System.arraycopy(nBytes, 0, b, 32 - nBytes.length, nBytes.length);
     for (int i = 0; i < b.length / 2; i++) {
       byte t = b[i];
       b[i] = b[b.length - i - 1];
@@ -63,6 +76,21 @@ public class Ed25519ConstantsGenerator {
 
   private static String replaceBrackets(String array) {
     return array.replace("[", "{").replace("]", "}");
+  }
+
+  private static String getCachedXYTStr(Point p) {
+    String decl = "new CachedXYT(\n";
+    decl += "new long[]"
+        + replaceBrackets(
+            Arrays.toString(Curve25519.expand(toLittleEndian(p.y.add(p.x).mod(P))))) + ",\n";
+    decl += "new long[]"
+        + replaceBrackets(
+            Arrays.toString(Curve25519.expand(toLittleEndian(p.y.subtract(p.x).mod(P))))) + ",\n";
+    decl += "new long[]"
+        + replaceBrackets(
+            Arrays.toString(
+                Curve25519.expand(toLittleEndian(D2.multiply(p.x).multiply(p.y).mod(P))))) + ")";
+    return decl;
   }
 
   public static void main(String[] args) {
@@ -80,17 +108,21 @@ public class Ed25519ConstantsGenerator {
     System.out.println("// 2^((p-1)/4) mod p where p = 2^255-19");
     System.out.println(decl + " SQRTM1 = "
         + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(SQRTM1)))) + ";");
-    System.out.println("// (x, 4/5)");
-    System.out.println("private static final CachedXYT B = new CachedXYT(");
-    System.out.println("new long[]"
-        + replaceBrackets(
-            Arrays.toString(Curve25519.expand(toLittleEndian(b.y.add(b.x).mod(P))))) + ",");
-    System.out.println("new long[]"
-        + replaceBrackets(
-            Arrays.toString(Curve25519.expand(toLittleEndian(b.y.subtract(b.x).mod(P))))) + ",");
-    System.out.println("new long[]"
-        + replaceBrackets(
-            Arrays.toString(
-                Curve25519.expand(toLittleEndian(D2.multiply(b.x).multiply(b.y).mod(P))))) + ");");
+    //System.out.println("// (x, 4/5)");
+    Point bi = b;
+    System.out.println("private static final CachedXYT[][] B_TABLE = new CachedXYT[][]{");
+    for (int i = 0; i < 32; i++) {
+      System.out.println("{");
+      Point bij = bi;
+      for (int j = 0; j < 8; j++) {
+        System.out.println(getCachedXYTStr(bij) + ",");
+        bij = edwards(bij, bi);
+      }
+      System.out.println("},");
+      for (int j = 0; j < 8; j++) {
+        bi = edwards(bi, bi);
+      }
+    }
+    System.out.println("};");
   }
 }
