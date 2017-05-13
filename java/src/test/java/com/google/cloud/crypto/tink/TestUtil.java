@@ -82,7 +82,7 @@ public class TestUtil {
   // This GCP KMS CryptoKey is restricted to the service account in {@code SERVICE_ACCOUNT_FILE}.
   public static final String RESTRICTED_CRYPTO_KEY_URI = String.format(
         "projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-        "testing-cloud-kms-159306", "global", "tink_unit_tests", "restricted");
+        "tink-test-infrastructure", "global", "unit-and-integration-testing", "aead-key");
 
   // This is a credential of a service account that is granted access to
   // {@code RESTRICTED_CRYPTO_KEY_URI}.
