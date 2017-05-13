@@ -1,9 +1,8 @@
 # Tink presubmit and continous test
 
-![presubmit status](https://storage.googleapis.com/tink-kokoro-build-badges/tink.png)
+![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink.png)
 
-Tink is testing continously with [Kokoro]
-(https://www.cloudbees.com/sites/default/files/2016-jenkins-world-jenkins_inside_google.pdf)
+Tink is testing continously with [Kokoro](https://www.cloudbees.com/sites/default/files/2016-jenkins-world-jenkins_inside_google.pdf)
 an internal deployment of Jenkins at Google.
 
 Kokoro will poll from this repo every 5 minutes and trigger a continuous build
