@@ -18,6 +18,7 @@ package com.google.cloud.crypto.tink.subtle;
 
 import static com.google.cloud.crypto.tink.subtle.Curve25519.FIELD_LEN;
 import static com.google.cloud.crypto.tink.subtle.Curve25519.LIMB_CNT;
+import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.B2;
 import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.B_TABLE;
 import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.D;
 import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.D2;
@@ -45,14 +46,6 @@ public final class Ed25519 {
   public static final int PUBLIC_KEY_LEN = FIELD_LEN;
   public static final int SIGNATURE_LEN = FIELD_LEN * 2;
 
-  /**
-   * Base point for the Edwards twisted curve = (x, 4/5)
-   * This is calculated by setting y = 4/5 and recovering x from the equation.
-   * See {@link Ed25519ConstantsGenerator}.
-   */
-  // TODO(anergiz): remove this when vartime doubleScalarMultVarTime is implemented.
-  private static final CachedXYT B = B_TABLE[0][0];
-
   // (x = 0, y = 1) point
   private static final CachedXYT CACHED_NEUTRAL = new CachedXYT(
       new long[]{1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -77,6 +70,7 @@ public final class Ed25519 {
    * https://hyperelliptic.org/EFD/g1p/auto-twisted-projective.html
    */
   private static class XYZ {
+
     final long[] x;
     final long[] y;
     final long[] z;
@@ -148,6 +142,7 @@ public final class Ed25519 {
    * https://hyperelliptic.org/EFD/g1p/auto-twisted-extended.html
    */
   private static class XYZT {
+
     final XYZ xyz;
     final long[] t;
 
@@ -244,6 +239,7 @@ public final class Ed25519 {
    * T1 = X * Y = x * Z * y * T = x * y * Z1 = X1Y1 / Z1
    */
   private static class PartialXYZT {
+
     final XYZ xyz;
     final long[] t;
 
@@ -268,6 +264,7 @@ public final class Ed25519 {
    * with Z = 1.
    */
   static class CachedXYT {
+
     final long[] yPlusX;
     final long[] yMinusX;
     final long[] t2d;
@@ -311,6 +308,7 @@ public final class Ed25519 {
   }
 
   private static class CachedXYZT extends CachedXYT {
+
     private final long[] z;
 
     CachedXYZT() {
@@ -493,25 +491,6 @@ public final class Ed25519 {
   }
 
   /**
-   * Computes {@code a}*{@code pointA}
-   */
-  // TODO(anergiz): Remove this when varied time doubleScalarMultVarTime is implemented.
-  private static PartialXYZT scalarMult2PartialXYZT(byte[] a, CachedXYT pointA) {
-    PartialXYZT ret = new PartialXYZT(NEUTRAL);
-    XYZ xyz = new XYZ();
-    XYZT xyzt = new XYZT();
-    for (int i = 0; i < FIELD_LEN; i++) {
-      int b = a[FIELD_LEN - i - 1] & 0xff;
-      for (int j = 0; j < 8; j++) {
-        int bit = (b >> (7 - j)) & 1;
-        doubleXYZ(ret, XYZ.fromPartialXYZT(xyz, ret));
-        add(ret, XYZT.fromPartialXYZT(xyzt, ret), bit == 0 ? CACHED_NEUTRAL : pointA);
-      }
-    }
-    return ret;
-  }
-
-  /**
    * Compares two byte values in constant time.
    *
    * Please note that this doesn't reuse {@link Curve25519#eq} method since the below inputs are
@@ -617,16 +596,89 @@ public final class Ed25519 {
     return new XYZ(ret);
   }
 
+  private static byte[] slide(byte[] a) {
+
+    byte[] r = new byte[256];
+    // Writes each bit in a[0..31] into r[0..255]:
+    // a = a[0]+256*a[1]+...+256^31*a[31] is equal to
+    // r = r[0]+2*r[1]+...+2^255*r[255]
+    for (int i = 0; i < 256; i++) {
+      r[i] = (byte) (1 & ((a[i >> 3] & 0xff) >> (i & 7)));
+    }
+
+    // Transforms r[i] as odd values in [-15, 15]
+    for (int i = 0; i < 256; i++) {
+      if (r[i] != 0) {
+        for (int b = 1; b <= 6 && i + b < 256; b++) {
+          if (r[i + b] != 0) {
+            if (r[i] + (r[i + b] << b) <= 15) {
+              r[i] += r[i + b] << b;
+              r[i + b] = 0;
+            } else if (r[i] - (r[i + b] << b) >= -15) {
+              r[i] -= r[i + b] << b;
+              for (int k = i + b; k < 256; k++) {
+                if (r[k] == 0) {
+                  r[k] = 1;
+                  break;
+                }
+                r[k] = 0;
+              }
+            } else {
+              break;
+            }
+          }
+        }
+      }
+    }
+    return r;
+  }
+
   /**
-   * Computes {@code a}*{@code pointA}+{@code b}*B where B is the generator point.
+   * Computes {@code a}*{@code pointA}+{@code b}*B
+   * where a = a[0]+256*a[1]+...+256^31*a[31].
+   * and b = b[0]+256*b[1]+...+256^31*b[31].
+   * B is the Ed25519 base point (x,4/5) with x positive.
    *
-   * This is used in verification of signatures thus this can be implemented varied time.
+   * Note that execution time varies based on the input since this will only be used in verification
+   * of signatures.
    */
-  // TODO(anergiz): Implement this in varied time since this is only used in verification.
   private static XYZ doubleScalarMultVarTime(byte[] a, XYZT pointA, byte[] b) {
-    PartialXYZT ret = scalarMult2PartialXYZT(a, new CachedXYZT(pointA));
-    add(ret, new XYZT(ret), new CachedXYZT(new XYZT(scalarMult2PartialXYZT(b, B))));
-    return new XYZ(ret);
+    // pointA, 3*pointA, 5*pointA, 7*pointA, 9*pointA, 11*pointA, 13*pointA, 15*pointA
+    CachedXYZT[] pointAArray = new CachedXYZT[8];
+    pointAArray[0] = new CachedXYZT(pointA);
+    PartialXYZT t = new PartialXYZT();
+    doubleXYZT(t, pointA);
+    XYZT doubleA = new XYZT(t);
+    for (int i = 1; i < pointAArray.length; i++) {
+      add(t, doubleA, pointAArray[i - 1]);
+      pointAArray[i] = new CachedXYZT(new XYZT(t));
+    }
+
+    byte[] aSlide = slide(a);
+    byte[] bSlide = slide(b);
+    t = new PartialXYZT(NEUTRAL);
+    XYZT u = new XYZT();
+    int i = 255;
+    for (; i >= 0; i--) {
+      if (aSlide[i] != 0 || bSlide[i] != 0) {
+        break;
+      }
+    }
+    for (; i >= 0; i--) {
+      doubleXYZ(t, new XYZ(t));
+      if (aSlide[i] > 0) {
+        add(t, XYZT.fromPartialXYZT(u, t), pointAArray[aSlide[i] / 2]);
+      } else if (aSlide[i] < 0) {
+        sub(t, XYZT.fromPartialXYZT(u, t), pointAArray[-aSlide[i] / 2]);
+      }
+      if (bSlide[i] > 0) {
+        add(t, XYZT.fromPartialXYZT(u, t), B2[bSlide[i] / 2]);
+      } else if (bSlide[i] < 0) {
+        sub(t, XYZT.fromPartialXYZT(u, t), B2[-bSlide[i] / 2]);
+      }
+    }
+
+    return new XYZ(t);
   }
 
   /**
@@ -1404,6 +1456,7 @@ public final class Ed25519 {
    * Defines the KeyPair consisting of a private key and its corresponding public key.
    */
   public static final class KeyPair {
+
     private final byte[] publicKey;
     private final byte[] privateKey;
 

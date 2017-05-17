@@ -97,7 +97,7 @@ public class Ed25519ConstantsGenerator {
     Point b = new Point();
     b.y = BigInteger.valueOf(4).multiply(BigInteger.valueOf(5).modInverse(P)).mod(P);
     b.x = recoverX(b.y);
-    String decl = "private static final long[]";
+    String decl = "static final long[]";
 
     System.out.println("// d = -121665 / 121666 mod 2^255-19");
     System.out.println(decl + " D = "
@@ -110,7 +110,7 @@ public class Ed25519ConstantsGenerator {
         + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(SQRTM1)))) + ";");
     //System.out.println("// (x, 4/5)");
     Point bi = b;
-    System.out.println("private static final CachedXYT[][] B_TABLE = new CachedXYT[][]{");
+    System.out.println("static final CachedXYT[][] B_TABLE = new CachedXYT[][]{");
     for (int i = 0; i < 32; i++) {
       System.out.println("{");
       Point bij = bi;
@@ -122,6 +122,14 @@ public class Ed25519ConstantsGenerator {
       for (int j = 0; j < 8; j++) {
         bi = edwards(bi, bi);
       }
+    }
+    System.out.println("};");
+    bi = b;
+    Point b2 = edwards(b, b);
+    System.out.println("static final CachedXYT[] B2 = new CachedXYT[]{");
+    for (int i = 0; i < 8; i++) {
+      System.out.println(getCachedXYTStr(bi) + ",");
+      bi = edwards(bi, b2);
     }
     System.out.println("};");
   }
