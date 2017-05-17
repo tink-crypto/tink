@@ -24,7 +24,6 @@ import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.D;
 import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.D2;
 import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.SQRTM1;
 
-
 import com.google.common.base.Preconditions;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;

@@ -27,6 +27,10 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
+/**
+ * This key manager generates new {@code KmsEnvelopeAeadKey} keys and produces new instances
+ * of {@code KmsEnvelopeAead}.
+ */
 public final class KmsEnvelopeAeadKeyManager
     implements KeyManager<Aead, KmsEnvelopeAeadKey, KmsEnvelopeAeadKeyFormat> {
   KmsEnvelopeAeadKeyManager() {}

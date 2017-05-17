@@ -28,6 +28,10 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
+/**
+ * This key manager generates new {@code AesGcmKey} keys and produces new instances
+ * of {@code AesGcmJce}.
+ */
 public final class AesGcmKeyManager implements KeyManager<Aead, AesGcmKey, AesGcmKeyFormat> {
   AesGcmKeyManager() {}
 

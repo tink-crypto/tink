@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * This key manager produces new instances of GcpKmsAead.
+ * This key manager produces new instances of {@code GcpKmsAead}.
  * Currently it doesn't support key generation. To use it one must
  * provide an implementation of {@code GcpCredentialFactory}.
  */

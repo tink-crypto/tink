@@ -34,6 +34,10 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 
+/**
+ * This key manager generates new {@code EcdsaPrivateKey} keys and produces new instances
+ * of {@code EcdsaSignJce}.
+ */
 public final class EcdsaSignKeyManager implements
     KeyManager<PublicKeySign, EcdsaPrivateKey, EcdsaKeyFormat> {
   EcdsaSignKeyManager() {}

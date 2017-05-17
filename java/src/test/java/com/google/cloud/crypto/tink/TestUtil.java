@@ -56,7 +56,6 @@ import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
-import com.google.cloud.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.cloud.crypto.tink.aead.AesEaxKeyManager;
 import com.google.cloud.crypto.tink.aead.AesGcmKeyManager;
 import com.google.cloud.crypto.tink.aead.GcpKmsAeadKeyManager;

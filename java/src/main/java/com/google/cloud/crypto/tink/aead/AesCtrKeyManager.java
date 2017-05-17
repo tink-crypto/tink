@@ -29,6 +29,10 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
+/**
+ * This key manager generates new {@code AesCtrKey} keys and produces new instances
+ * of {@code AesCtrJceCipher}.
+ */
 class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyFormat> {
   private static final int VERSION = 0;
 

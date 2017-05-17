@@ -33,6 +33,10 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
+/**
+ * This key manager generates new {@code AesCtrHmacAeadKey} keys and produces new instances
+ * of {@code EncryptThenAuthenticate}.
+ */
 public final class AesCtrHmacAeadKeyManager
     implements KeyManager<Aead, AesCtrHmacAeadKey, AesCtrHmacAeadKeyFormat> {
   AesCtrHmacAeadKeyManager() {}

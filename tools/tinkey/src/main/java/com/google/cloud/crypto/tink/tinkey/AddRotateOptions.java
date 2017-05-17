@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 package com.google.cloud.crypto.tink.tinkey;
+
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import org.kohsuke.args4j.Option;
 

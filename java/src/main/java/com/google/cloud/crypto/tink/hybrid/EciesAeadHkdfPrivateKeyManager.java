@@ -33,6 +33,10 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 
+/**
+ * This key manager generates new {@code EciesAeadHkdfPrivateKey} keys and produces new instances
+ * of {@code EciesAeadHkdfHybridDecrypt}.
+ */
 public final class EciesAeadHkdfPrivateKeyManager
     implements KeyManager<HybridDecrypt, EciesAeadHkdfPrivateKey, EciesAeadHkdfKeyFormat> {
   EciesAeadHkdfPrivateKeyManager() {}

@@ -29,6 +29,10 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
+/**
+ * This key manager produces new instances of {@code EciesAeadHkdfHybridEncrypt}.
+ * It doesn't support key generation.
+ */
 public final class EciesAeadHkdfPublicKeyManager implements
     KeyManager<HybridEncrypt, EciesAeadHkdfPublicKey, EciesAeadHkdfKeyFormat> {
   EciesAeadHkdfPublicKeyManager() {}
