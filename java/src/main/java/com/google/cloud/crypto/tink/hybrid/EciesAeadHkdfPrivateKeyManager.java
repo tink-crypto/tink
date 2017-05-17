@@ -33,11 +33,13 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 
-class EciesAeadHkdfPrivateKeyManager
+public final class EciesAeadHkdfPrivateKeyManager
     implements KeyManager<HybridDecrypt, EciesAeadHkdfPrivateKey, EciesAeadHkdfKeyFormat> {
+  EciesAeadHkdfPrivateKeyManager() {}
+
   private static final int VERSION = 0;
 
-  private static final String ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE =
+  public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey";
 
   @Override
@@ -106,7 +108,7 @@ class EciesAeadHkdfPrivateKeyManager
   public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
     EciesAeadHkdfPrivateKey key = newKey(serialized);
     return KeyData.newBuilder()
-        .setTypeUrl(ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE)
+        .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE)
         .build();
@@ -114,7 +116,7 @@ class EciesAeadHkdfPrivateKeyManager
 
   @Override
   public boolean doesSupport(String typeUrl) {
-    return ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE.equals(typeUrl);
+    return TYPE_URL.equals(typeUrl);
   }
 
   private void validate(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {

@@ -44,7 +44,7 @@ public class HmacKeyManagerTest {
         .build();
     ByteString serialized = ByteString.copyFrom(hmacKeyFormat.toByteArray());
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.HmacKey")
+        .setTypeUrl(HmacKeyManager.TYPE_URL)
         .setValue(serialized)
         .build();
     // Calls newKey multiple times and make sure that we get different HmacKey each time.
@@ -71,7 +71,7 @@ public class HmacKeyManagerTest {
     HmacKeyManager keyManager = new HmacKeyManager();
     ByteString serialized = ByteString.copyFrom(new byte[128]);
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.HmacKey")
+        .setTypeUrl(HmacKeyManager.TYPE_URL)
         .setValue(serialized)
         .build();
     try {

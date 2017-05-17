@@ -58,7 +58,7 @@ public final class PublicKeySignFactory {
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
+        EcdsaSignKeyManager.TYPE_URL,
         new EcdsaSignKeyManager());
   }
 

@@ -56,6 +56,12 @@ import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.Keyset.Key;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.cloud.crypto.tink.aead.AesCtrHmacAeadKeyManager;
+import com.google.cloud.crypto.tink.aead.AesEaxKeyManager;
+import com.google.cloud.crypto.tink.aead.AesGcmKeyManager;
+import com.google.cloud.crypto.tink.aead.GcpKmsAeadKeyManager;
+import com.google.cloud.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
+import com.google.cloud.crypto.tink.mac.HmacKeyManager;
 import com.google.cloud.crypto.tink.subtle.EcUtil;
 import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.common.base.Optional;
@@ -171,7 +177,7 @@ public class TestUtil {
   public static KeyData createHmacKeyData(byte[] keyValue, int tagSize) throws Exception {
     return createKeyData(
         createHmacKey(keyValue, tagSize),
-        "type.googleapis.com/google.cloud.crypto.tink.HmacKey",
+        HmacKeyManager.TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 
@@ -215,7 +221,7 @@ public class TestUtil {
         .build();
     return createKeyData(
         keyProto,
-        "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey",
+        AesGcmKeyManager.TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 
@@ -229,7 +235,7 @@ public class TestUtil {
         .build();
     return createKeyData(
         keyProto,
-        "type.googleapis.com/google.cloud.crypto.tink.AesEaxKey",
+        AesEaxKeyManager.TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 
@@ -243,7 +249,7 @@ public class TestUtil {
         .build();
     return createKeyData(
         keyProto,
-        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
+        GcpKmsAeadKeyManager.TYPE_URL,
         KeyData.KeyMaterialType.REMOTE);
   }
 
@@ -296,7 +302,7 @@ public class TestUtil {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")
+        .setTypeUrl(AesGcmKeyManager.TYPE_URL)
         .build();
   }
 
@@ -315,7 +321,7 @@ public class TestUtil {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.HmacKey")
+        .setTypeUrl(HmacKeyManager.TYPE_URL)
         .build();
   }
 
@@ -479,7 +485,7 @@ public class TestUtil {
         .setParams(createEciesAeadHkdfParams(curve, hashType, ecPointFormat, demKeyTemplate, salt))
         .build();
     return KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey")
+        .setTypeUrl(EciesAeadHkdfPrivateKeyManager.TYPE_URL)
         .setValue(format.toByteString())
         .build();
   }

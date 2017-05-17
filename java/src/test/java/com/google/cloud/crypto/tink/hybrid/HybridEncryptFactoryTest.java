@@ -71,7 +71,7 @@ public class HybridEncryptFactoryTest {
     Key primaryPriv = TestUtil.createKey(
         TestUtil.createKeyData(
             primaryPrivProto,
-            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey",
+            EciesAeadHkdfPrivateKeyManager.TYPE_URL,
             KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
         8,
         KeyStatusType.ENABLED,
@@ -79,7 +79,7 @@ public class HybridEncryptFactoryTest {
     Key primaryPub = TestUtil.createKey(
         TestUtil.createKeyData(
             primaryPrivProto.getPublicKey(),
-            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
+            EciesAeadHkdfPublicKeyManager.TYPE_URL,
             KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
         42,
         KeyStatusType.ENABLED,
@@ -91,7 +91,7 @@ public class HybridEncryptFactoryTest {
     Key rawPriv = TestUtil.createKey(
         TestUtil.createKeyData(
             rawPrivProto,
-            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey",
+            EciesAeadHkdfPrivateKeyManager.TYPE_URL,
             KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
         11,
         KeyStatusType.ENABLED,
@@ -99,7 +99,7 @@ public class HybridEncryptFactoryTest {
     Key rawPub = TestUtil.createKey(
         TestUtil.createKeyData(
             rawPrivProto.getPublicKey(),
-            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
+            EciesAeadHkdfPublicKeyManager.TYPE_URL,
             KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
         43,
         KeyStatusType.ENABLED,

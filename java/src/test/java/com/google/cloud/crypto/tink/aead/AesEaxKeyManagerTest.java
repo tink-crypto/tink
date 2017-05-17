@@ -55,7 +55,7 @@ public class AesEaxKeyManagerTest {
         .build();
     ByteString serialized = ByteString.copyFrom(eaxKeyFormat.toByteArray());
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesEaxKey")
+        .setTypeUrl(AesEaxKeyManager.TYPE_URL)
         .setValue(serialized)
         .build();
     AesEaxKeyManager keyManager = new AesEaxKeyManager();
@@ -83,7 +83,7 @@ public class AesEaxKeyManagerTest {
   public void testNewKeyWithCorruptedFormat() throws Exception {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesEaxKey")
+        .setTypeUrl(AesEaxKeyManager.TYPE_URL)
         .setValue(serialized)
         .build();
     AesEaxKeyManager keyManager = new AesEaxKeyManager();

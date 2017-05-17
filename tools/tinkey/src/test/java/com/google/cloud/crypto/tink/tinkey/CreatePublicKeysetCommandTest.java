@@ -33,6 +33,7 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
 import com.google.cloud.crypto.tink.aead.GcpKmsAeadKeyManager;
+import com.google.cloud.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.cloud.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
@@ -66,7 +67,7 @@ public class CreatePublicKeysetCommandTest {
     PublicKeyVerifyFactory.registerStandardKeyTypes();
 
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
+        GcpKmsAeadKeyManager.TYPE_URL,
         new GcpKmsAeadKeyManager(
             new ServiceAccountGcpCredentialFactory(TestUtil.SERVICE_ACCOUNT_FILE)));
   }
@@ -117,7 +118,7 @@ public class CreatePublicKeysetCommandTest {
     assertEquals(OutputPrefixType.TINK, publicKeyset.getKey(0).getOutputPrefixType());
 
     KeyData publicKeyData = publicKeyset.getKey(0).getKeyData();
-    assertEquals("type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
+    assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL,
         publicKeyData.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
     assertArrayEquals(privateKey.getPublicKey().toByteArray(),

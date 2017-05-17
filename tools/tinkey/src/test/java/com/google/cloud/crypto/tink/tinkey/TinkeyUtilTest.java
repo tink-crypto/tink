@@ -25,6 +25,8 @@ import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
+import com.google.cloud.crypto.tink.aead.AesCtrHmacAeadKeyManager;
+import com.google.cloud.crypto.tink.aead.AesGcmKeyManager;
 import com.google.cloud.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
@@ -52,13 +54,13 @@ public class TinkeyUtilTest {
 
   @Test
   public void testCreateKeyTemplate() throws Exception {
-    String keyType = "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
+    String keyType = AesGcmKeyManager.TYPE_URL;
     String keyFormat = "key_size: 16";
     KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
     AesGcmKey keyProto1 = Registry.INSTANCE.newKey(keyTemplate);
     assertEquals(16, keyProto1.getKeyValue().size());
 
-    keyType = "type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey";
+    keyType = AesCtrHmacAeadKeyManager.TYPE_URL;
     keyFormat = "aes_ctr_key_format {params { iv_size: 12}, key_size: 16}, "
         + "hmac_key_format {params {hash: SHA256, tag_size: 10}, key_size: 32}";
     keyTemplate = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
@@ -71,7 +73,7 @@ public class TinkeyUtilTest {
 
   @Test
   public void testCreateKeyTemplateInvalid() throws Exception {
-    String keyType = "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
+    String keyType = AesGcmKeyManager.TYPE_URL;
     String keyFormat = "key_size: 17";
     try {
       KeyTemplate unused = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);

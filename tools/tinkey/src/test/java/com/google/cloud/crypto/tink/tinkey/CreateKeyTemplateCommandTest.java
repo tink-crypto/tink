@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
+import com.google.cloud.crypto.tink.aead.AesGcmKeyManager;
 import com.google.cloud.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
@@ -53,7 +54,7 @@ public class CreateKeyTemplateCommandTest {
   @Test
   public void testCreate() throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String typeUrl = "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
+    String typeUrl = AesGcmKeyManager.TYPE_URL;
     String keyFormat = "key_size: 16";
     CreateKeyTemplateCommand.create(outputStream, typeUrl, keyFormat);
 
@@ -68,7 +69,7 @@ public class CreateKeyTemplateCommandTest {
   @Test
   public void testCreateInvalid() throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String typeUrl = "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
+    String typeUrl = AesGcmKeyManager.TYPE_URL;
     String keyFormat = "key_size: 17";
     try {
       CreateKeyTemplateCommand.create(outputStream, typeUrl, keyFormat);

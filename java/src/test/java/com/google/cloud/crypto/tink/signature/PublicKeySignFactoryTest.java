@@ -73,7 +73,7 @@ public class PublicKeySignFactoryTest {
       TestUtil.createKey(
           TestUtil.createKeyData(
               ecdsaPrivKeys[0],
-              "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
+              EcdsaSignKeyManager.TYPE_URL,
               KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
           1,
           KeyStatusType.ENABLED,
@@ -81,7 +81,7 @@ public class PublicKeySignFactoryTest {
       TestUtil.createKey(
           TestUtil.createKeyData(
               ecdsaPrivKeys[1],
-              "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
+              EcdsaSignKeyManager.TYPE_URL,
               KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
           2,
           KeyStatusType.ENABLED,
@@ -89,7 +89,7 @@ public class PublicKeySignFactoryTest {
       TestUtil.createKey(
           TestUtil.createKeyData(
               ecdsaPrivKeys[2],
-              "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
+              EcdsaSignKeyManager.TYPE_URL,
               KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
           3,
           KeyStatusType.ENABLED,
@@ -113,7 +113,7 @@ public class PublicKeySignFactoryTest {
                   TestUtil.createKey(
                       TestUtil.createKeyData(
                           ecdsaPrivKeys[ids[i][0]].getPublicKey(),
-                          "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
+                          EcdsaVerifyKeyManager.TYPE_URL,
                           KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
                       ids[i][0] + 1,
                       KeyStatusType.ENABLED,
@@ -131,7 +131,7 @@ public class PublicKeySignFactoryTest {
                   TestUtil.createKey(
                       TestUtil.createKeyData(
                           ecdsaPrivKeys[ids[i][1]].getPublicKey(),
-                          "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
+                          EcdsaVerifyKeyManager.TYPE_URL,
                           KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
                       ids[i][1] + 1,
                       KeyStatusType.ENABLED,
@@ -150,7 +150,7 @@ public class PublicKeySignFactoryTest {
                   TestUtil.createKey(
                       TestUtil.createKeyData(
                           randomPrivKey.getPublicKey(),
-                          "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
+                          EcdsaVerifyKeyManager.TYPE_URL,
                           KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
                       ids[i][0] + 1,
                       KeyStatusType.ENABLED,

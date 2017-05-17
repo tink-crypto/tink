@@ -26,6 +26,7 @@ import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
+import com.google.cloud.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.cloud.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.cloud.crypto.tink.subtle.Random;
@@ -78,7 +79,7 @@ public class IntegrationTest {
     KeysetManager managerPublic = managerPrivate.transformToPublicKeyset();
     assertEquals(1, managerPublic.getKeysetHandle().getKeyset().getKeyCount());
     KeyData publicKeyData = managerPublic.getKeysetHandle().getKeyset().getKey(0).getKeyData();
-    assertEquals("type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
+    assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL,
         publicKeyData.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
     assertArrayEquals(privateKey.getPublicKey().toByteArray(),

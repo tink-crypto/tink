@@ -35,8 +35,10 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
+import com.google.cloud.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.cloud.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
+import com.google.cloud.crypto.tink.mac.HmacKeyManager;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
@@ -54,7 +56,7 @@ public class KeysetManagerTest {
   private static final int HMAC_KEY_SIZE = 20;
 
   private String hmacKeyTypeUrl =
-      "type.googleapis.com/google.cloud.crypto.tink.HmacKey";
+      HmacKeyManager.TYPE_URL;
 
   @Before
   public void setUp() throws GeneralSecurityException {
@@ -183,7 +185,7 @@ public class KeysetManagerTest {
     KeysetManager managerPublic = managerPrivate.transformToPublicKeyset();
     assertEquals(1, managerPublic.getKeysetHandle().getKeyset().getKeyCount());
     KeyData publicKeyData = managerPublic.getKeysetHandle().getKeyset().getKey(0).getKeyData();
-    assertEquals("type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
+    assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL,
         publicKeyData.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
     assertArrayEquals(privateKey.getPublicKey().toByteArray(),

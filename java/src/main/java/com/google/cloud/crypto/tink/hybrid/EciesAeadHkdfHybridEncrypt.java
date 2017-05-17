@@ -31,7 +31,7 @@ import java.security.interfaces.ECPublicKey;
  * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and
  * AEAD-DEM (data encapsulation mechanism).
  */
-public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
+class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
   private static final byte[] EMPTY_AAD = new byte[0];
   private final ECPublicKey recipientPublicKey;
   private final EciesHkdfSenderKem senderKem;
@@ -40,7 +40,7 @@ public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
   private final EcUtil.PointFormat ecPointFormat;
   private final EciesAeadHkdfAeadFactory aeadFactory;
 
-  public EciesAeadHkdfHybridEncrypt(final ECPublicKey recipientPublicKey,
+  EciesAeadHkdfHybridEncrypt(final ECPublicKey recipientPublicKey,
       final byte[] hkdfSalt, String hkdfHmacAlgo,
       KeyTemplate aeadDemTemplate, EcPointFormat ecPointFormat)
       throws GeneralSecurityException {

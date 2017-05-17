@@ -43,7 +43,7 @@ public class AesCtrKeyManagerTest {
         .build();
     ByteString serialized = ByteString.copyFrom(ctrKeyFormat.toByteArray());
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesCtrKey")
+        .setTypeUrl(AesCtrKeyManager.TYPE_URL)
         .setValue(serialized)
         .build();
     AesCtrKeyManager keyManager = new AesCtrKeyManager();
@@ -71,7 +71,7 @@ public class AesCtrKeyManagerTest {
   public void testNewKeyWithCorruptedFormat() throws Exception {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesCtrKey")
+        .setTypeUrl(AesCtrKeyManager.TYPE_URL)
         .setValue(serialized)
         .build();
     AesCtrKeyManager keyManager = new AesCtrKeyManager();

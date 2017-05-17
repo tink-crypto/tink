@@ -34,7 +34,7 @@ import java.security.GeneralSecurityException;
  *   - Encrypted DEK: variable length that is equal to the value specified in the last 4 bytes.
  *   - AEAD payload: variable length.
  */
-class KmsEnvelopeAead implements Aead {
+public final class KmsEnvelopeAead implements Aead {
   private static final byte[] EMPTY_AAD = new byte[0];
   private final KeyTemplate dekTemplate;
   private final Aead remote;

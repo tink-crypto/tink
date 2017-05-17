@@ -24,6 +24,7 @@ import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
+import com.google.cloud.crypto.tink.mac.HmacKeyManager;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
@@ -32,26 +33,22 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
-class AesCtrHmacAeadKeyManager
+public final class AesCtrHmacAeadKeyManager
     implements KeyManager<Aead, AesCtrHmacAeadKey, AesCtrHmacAeadKeyFormat> {
+  AesCtrHmacAeadKeyManager() {}
+
   private static final Logger logger =
       Logger.getLogger(AesCtrHmacAeadKeyManager.class.getName());
 
   private static final int VERSION = 0;
 
-  private static final String AES_CTR_KEY_TYPE =
-      "type.googleapis.com/google.cloud.crypto.tink.AesCtrKey";
-
-  private static final String HMAC_KEY_TYPE =
-      "type.googleapis.com/google.cloud.crypto.tink.HmacKey";
-
-  private static final String AES_CTR_HMAC_AEAD_KEY_TYPE =
+  public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey";
 
   static {
     try {
       // TODO(thaidn): this could be IndCpaCipherFactory.registerStandardKeyTypes();
-      Registry.INSTANCE.registerKeyManager(AES_CTR_KEY_TYPE, new AesCtrKeyManager());
+      Registry.INSTANCE.registerKeyManager(AesCtrKeyManager.TYPE_URL, new AesCtrKeyManager());
       MacFactory.registerStandardKeyTypes();
     } catch (GeneralSecurityException e) {
       logger.severe("cannot register key managers: " + e);
@@ -72,8 +69,8 @@ class AesCtrHmacAeadKeyManager
   public Aead getPrimitive(AesCtrHmacAeadKey keyProto) throws GeneralSecurityException {
     validate(keyProto);
     return new EncryptThenAuthenticate(
-        Registry.INSTANCE.getPrimitive(AES_CTR_KEY_TYPE, keyProto.getAesCtrKey()),
-        Registry.INSTANCE.getPrimitive(HMAC_KEY_TYPE, keyProto.getHmacKey()),
+        Registry.INSTANCE.getPrimitive(AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey()),
+        Registry.INSTANCE.getPrimitive(HmacKeyManager.TYPE_URL, keyProto.getHmacKey()),
         keyProto.getHmacKey().getParams().getTagSize());
   }
 
@@ -90,8 +87,8 @@ class AesCtrHmacAeadKeyManager
   @Override
   public AesCtrHmacAeadKey newKey(AesCtrHmacAeadKeyFormat format) throws GeneralSecurityException {
     AesCtrKey aesCtrKey = Registry.INSTANCE.newKey(
-        AES_CTR_KEY_TYPE, format.getAesCtrKeyFormat());
-    HmacKey hmacKey = Registry.INSTANCE.newKey(HMAC_KEY_TYPE, format.getHmacKeyFormat());
+        AesCtrKeyManager.TYPE_URL, format.getAesCtrKeyFormat());
+    HmacKey hmacKey = Registry.INSTANCE.newKey(HmacKeyManager.TYPE_URL, format.getHmacKeyFormat());
     return AesCtrHmacAeadKey.newBuilder()
         .setAesCtrKey(aesCtrKey)
         .setHmacKey(hmacKey)
@@ -103,7 +100,7 @@ class AesCtrHmacAeadKeyManager
   public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
     AesCtrHmacAeadKey key = newKey(serialized);
     return KeyData.newBuilder()
-        .setTypeUrl(AES_CTR_HMAC_AEAD_KEY_TYPE)
+        .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
         .build();
@@ -111,7 +108,7 @@ class AesCtrHmacAeadKeyManager
 
   @Override
   public boolean doesSupport(String typeUrl) {
-    return typeUrl.equals(AES_CTR_HMAC_AEAD_KEY_TYPE);
+    return typeUrl.equals(TYPE_URL);
   }
 
   private void validate(AesCtrHmacAeadKey key) throws GeneralSecurityException {

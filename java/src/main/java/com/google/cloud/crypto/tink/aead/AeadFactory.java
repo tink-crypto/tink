@@ -65,16 +65,16 @@ public final class AeadFactory {
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey",
+        AesCtrHmacAeadKeyManager.TYPE_URL,
         new AesCtrHmacAeadKeyManager());
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.KmsEnvelopeAeadKey",
+        KmsEnvelopeAeadKeyManager.TYPE_URL,
         new KmsEnvelopeAeadKeyManager());
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey",
+        AesGcmKeyManager.TYPE_URL,
         new AesGcmKeyManager());
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.AesEaxKey",
+        AesEaxKeyManager.TYPE_URL,
         new AesEaxKeyManager());
   }
 

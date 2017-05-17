@@ -32,7 +32,7 @@ import java.security.GeneralSecurityException;
 class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyFormat> {
   private static final int VERSION = 0;
 
-  private static final String AES_CTR_KEY_TYPE =
+  static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.AesCtrKey";
 
   // In counter mode each message is encrypted with an initialization vector (IV) that must be
@@ -85,7 +85,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyF
   public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
     AesCtrKey key = newKey(serialized);
     return KeyData.newBuilder()
-        .setTypeUrl(AES_CTR_KEY_TYPE)
+        .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
         .build();
@@ -93,7 +93,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyF
 
   @Override
   public boolean doesSupport(String typeUrl) {
-    return typeUrl.equals(AES_CTR_KEY_TYPE);
+    return typeUrl.equals(TYPE_URL);
   }
 
   private void validate(AesCtrKey key) throws GeneralSecurityException {

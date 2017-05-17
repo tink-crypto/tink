@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.cloud.crypto.tink.hybrid; // instead of subtle, because it depends on KeyTemplate.
+package com.google.cloud.crypto.tink.hybrid; // not subtle, because it depends on KeyTemplate.
 
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
@@ -32,7 +32,7 @@ import java.util.Arrays;
  * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and
  * AEAD-DEM (data encapsulation mechanism).
  */
-public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
+class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   private static final byte[] EMPTY_AAD = new byte[0];
   private final ECPrivateKey recipientPrivateKey;
   private final EciesHkdfRecipientKem recipientKem;
@@ -41,7 +41,7 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   private final EcUtil.PointFormat ecPointFormat;
   private final EciesAeadHkdfAeadFactory aeadFactory;
 
-  public EciesAeadHkdfHybridDecrypt(final ECPrivateKey recipientPrivateKey,
+  EciesAeadHkdfHybridDecrypt(final ECPrivateKey recipientPrivateKey,
       final byte[] hkdfSalt, String hkdfHmacAlgo,
       KeyTemplate aeadDemTemplate, EcPointFormat ecPointFormat)
       throws GeneralSecurityException {

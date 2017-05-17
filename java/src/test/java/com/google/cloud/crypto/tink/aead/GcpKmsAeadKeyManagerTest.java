@@ -38,7 +38,7 @@ public class GcpKmsAeadKeyManagerTest {
   @Before
   public void setUp() throws GeneralSecurityException {
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
+        GcpKmsAeadKeyManager.TYPE_URL,
         new GcpKmsAeadKeyManager(new ServiceAccountGcpCredentialFactory(
             TestUtil.SERVICE_ACCOUNT_FILE)));
   }

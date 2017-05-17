@@ -40,11 +40,11 @@ import java.security.GeneralSecurityException;
  * Currently it doesn't support key generation. To use it one must
  * provide an implementation of {@code GcpCredentialFactory}.
  */
-public class GcpKmsAeadKeyManager
+public final class GcpKmsAeadKeyManager
     implements KeyManager<Aead, GcpKmsAeadKey, GcpKmsAeadKeyFormat> {
   private static final int VERSION = 0;
 
-  private static final String KEY_TYPE =
+  public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey";
 
   private final GcpCredentialFactory credFactory;
@@ -91,7 +91,7 @@ public class GcpKmsAeadKeyManager
 
   @Override
   public boolean doesSupport(String typeUrl) {
-    return typeUrl.equals(KEY_TYPE);
+    return typeUrl.equals(TYPE_URL);
   }
 
   private CloudKMS createCloudKmsClient(GcpKmsAeadKey key) throws IOException {

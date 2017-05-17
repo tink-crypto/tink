@@ -34,12 +34,14 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 
-final class EcdsaSignKeyManager implements
+public final class EcdsaSignKeyManager implements
     KeyManager<PublicKeySign, EcdsaPrivateKey, EcdsaKeyFormat> {
+  EcdsaSignKeyManager() {}
+
   /**
    * Type url that this manager supports
    */
-  static final String ECDSA_PRIVATE_KEY_TYPE =
+  public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey";
 
   /**
@@ -107,7 +109,7 @@ final class EcdsaSignKeyManager implements
   public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
     EcdsaPrivateKey key = newKey(serialized);
     return KeyData.newBuilder()
-        .setTypeUrl(ECDSA_PRIVATE_KEY_TYPE)
+        .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE)
         .build();
@@ -115,7 +117,7 @@ final class EcdsaSignKeyManager implements
 
   @Override
   public boolean doesSupport(String typeUrl) {
-    return ECDSA_PRIVATE_KEY_TYPE.equals(typeUrl);
+    return TYPE_URL.equals(typeUrl);
   }
 
   private void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {

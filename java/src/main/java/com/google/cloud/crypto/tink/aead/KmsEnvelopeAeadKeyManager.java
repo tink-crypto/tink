@@ -27,11 +27,13 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
-class KmsEnvelopeAeadKeyManager
+public final class KmsEnvelopeAeadKeyManager
     implements KeyManager<Aead, KmsEnvelopeAeadKey, KmsEnvelopeAeadKeyFormat> {
+  KmsEnvelopeAeadKeyManager() {}
+
   private static final int VERSION = 0;
 
-  private static final String KEY_TYPE =
+  public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.KmsEnvelopeAeadKey";
 
   @Override
@@ -74,7 +76,7 @@ class KmsEnvelopeAeadKeyManager
   public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
     KmsEnvelopeAeadKey key = newKey(serialized);
     return KeyData.newBuilder()
-        .setTypeUrl(KEY_TYPE)
+        .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.REMOTE)
         .build();
@@ -82,7 +84,7 @@ class KmsEnvelopeAeadKeyManager
 
   @Override
   public boolean doesSupport(String typeUrl) {
-    return typeUrl.equals(KEY_TYPE);
+    return typeUrl.equals(TYPE_URL);
   }
 
   private void validate(KmsEnvelopeAeadKey key) throws GeneralSecurityException {

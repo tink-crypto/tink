@@ -76,7 +76,7 @@ public class PublicKeyVerifyFactoryTest {
       TestUtil.createKey(
           TestUtil.createKeyData(
               ecdsaPubKeys[0],
-              "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
+              EcdsaVerifyKeyManager.TYPE_URL,
               KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
           1,
           KeyStatusType.ENABLED,
@@ -84,7 +84,7 @@ public class PublicKeyVerifyFactoryTest {
       TestUtil.createKey(
           TestUtil.createKeyData(
               ecdsaPubKeys[1],
-              "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
+              EcdsaVerifyKeyManager.TYPE_URL,
               KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
           2,
           KeyStatusType.ENABLED,
@@ -92,7 +92,7 @@ public class PublicKeyVerifyFactoryTest {
       TestUtil.createKey(
           TestUtil.createKeyData(
               ecdsaPubKeys[2],
-              "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey",
+              EcdsaVerifyKeyManager.TYPE_URL,
               KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
           3,
           KeyStatusType.ENABLED,
@@ -109,7 +109,7 @@ public class PublicKeyVerifyFactoryTest {
                   TestUtil.createKey(
                       TestUtil.createKeyData(
                           ecdsaPrivKeys[j],
-                          "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
+                          EcdsaSignKeyManager.TYPE_URL,
                           KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
                       j + 1,
                       KeyStatusType.ENABLED,
@@ -131,7 +131,7 @@ public class PublicKeyVerifyFactoryTest {
                   TestUtil.createKey(
                       TestUtil.createKeyData(
                           randomPrivKey,
-                          "type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey",
+                          EcdsaSignKeyManager.TYPE_URL,
                           KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
                       1,
                       KeyStatusType.ENABLED,

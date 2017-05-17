@@ -31,11 +31,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
 
-final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFormat> {
+public final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFormat> {
+  HmacKeyManager() {}
   /**
    * Type url that this manager does support.
    */
-  static final String TYPE_URL = "type.googleapis.com/google.cloud.crypto.tink.HmacKey";
+  public static final String TYPE_URL = "type.googleapis.com/google.cloud.crypto.tink.HmacKey";
   /**
    * Current version of this key manager.
    * Keys with version equal or smaller are supported.

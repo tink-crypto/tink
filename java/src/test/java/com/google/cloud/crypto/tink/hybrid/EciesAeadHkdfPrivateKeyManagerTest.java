@@ -75,7 +75,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     Key primaryPriv = TestUtil.createKey(
         TestUtil.createKeyData(
             keyProto,
-            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey",
+            EciesAeadHkdfPrivateKeyManager.TYPE_URL,
             KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
         8,
         KeyStatusType.ENABLED,
@@ -83,7 +83,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     Key primaryPub = TestUtil.createKey(
         TestUtil.createKeyData(
             keyProto.getPublicKey(),
-            "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey",
+            EciesAeadHkdfPublicKeyManager.TYPE_URL,
             KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
         42,
         KeyStatusType.ENABLED,

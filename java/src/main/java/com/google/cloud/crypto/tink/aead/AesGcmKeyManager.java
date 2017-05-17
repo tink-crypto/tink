@@ -28,10 +28,12 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
-class AesGcmKeyManager implements KeyManager<Aead, AesGcmKey, AesGcmKeyFormat> {
+public final class AesGcmKeyManager implements KeyManager<Aead, AesGcmKey, AesGcmKeyFormat> {
+  AesGcmKeyManager() {}
+
   private static final int VERSION = 0;
 
-  private static final String KEY_TYPE =
+  public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
 
   @Override
@@ -74,7 +76,7 @@ class AesGcmKeyManager implements KeyManager<Aead, AesGcmKey, AesGcmKeyFormat> {
   public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
     AesGcmKey key = newKey(serialized);
     return KeyData.newBuilder()
-        .setTypeUrl(KEY_TYPE)
+        .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
         .build();
@@ -82,7 +84,7 @@ class AesGcmKeyManager implements KeyManager<Aead, AesGcmKey, AesGcmKeyFormat> {
 
   @Override
   public boolean doesSupport(String typeUrl) {
-    return typeUrl.equals(KEY_TYPE);
+    return typeUrl.equals(TYPE_URL);
   }
 
   private void validate(AesGcmKey key) throws GeneralSecurityException {

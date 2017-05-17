@@ -56,7 +56,7 @@ public class AesGcmKeyManagerTest {
         .build();
     ByteString serialized = ByteString.copyFrom(gcmKeyFormat.toByteArray());
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")
+        .setTypeUrl(AesGcmKeyManager.TYPE_URL)
         .setValue(serialized)
         .build();
     AesGcmKeyManager keyManager = new AesGcmKeyManager();
@@ -84,7 +84,7 @@ public class AesGcmKeyManagerTest {
   public void testNewKeyWithCorruptedFormat() throws Exception {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey")
+        .setTypeUrl(AesGcmKeyManager.TYPE_URL)
         .setValue(serialized)
         .build();
     AesGcmKeyManager keyManager = new AesGcmKeyManager();

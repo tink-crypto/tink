@@ -73,7 +73,7 @@ public final class HybridDecryptFactory {
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey",
+        EciesAeadHkdfPrivateKeyManager.TYPE_URL,
         new EciesAeadHkdfPrivateKeyManager());
   }
   /**

@@ -29,9 +29,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
-final class EcdsaVerifyKeyManager
+public final class EcdsaVerifyKeyManager
     implements KeyManager<PublicKeyVerify, EcdsaPublicKey, EcdsaKeyFormat> {
-  private static final String ECDSA_PUBLIC_KEY_TYPE =
+  EcdsaVerifyKeyManager() {}
+
+  public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey";
   /**
    * Current version of this key manager.
@@ -76,7 +78,7 @@ final class EcdsaVerifyKeyManager
 
   @Override
   public boolean doesSupport(String typeUrl) {
-    return ECDSA_PUBLIC_KEY_TYPE.equals(typeUrl);
+    return TYPE_URL.equals(typeUrl);
   }
 
   private void validateKey(EcdsaPublicKey pubKey) throws GeneralSecurityException {

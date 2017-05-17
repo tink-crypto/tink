@@ -84,7 +84,7 @@ public class EcdsaSignKeyManagerTest {
           .build();
       ByteString serializedFormat = ByteString.copyFrom(ecdsaFormat.toByteArray());
       KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-          .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey")
+          .setTypeUrl(EcdsaSignKeyManager.TYPE_URL)
           .setValue(serializedFormat)
           .build();
       // Call newKey multiple times and make sure that it generates different keys.
@@ -154,7 +154,7 @@ public class EcdsaSignKeyManagerTest {
   public void testNewKeyWithCorruptedFormat() {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey")
+        .setTypeUrl(EcdsaSignKeyManager.TYPE_URL)
         .setValue(serialized)
         .build();
     EcdsaSignKeyManager keyManager = new EcdsaSignKeyManager();

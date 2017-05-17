@@ -36,6 +36,7 @@ import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
+import com.google.cloud.crypto.tink.aead.AesGcmKeyManager;
 import com.google.cloud.crypto.tink.aead.GcpKmsAeadKeyManager;
 import com.google.cloud.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
@@ -66,7 +67,7 @@ public class CreateCommandTest {
     PublicKeyVerifyFactory.registerStandardKeyTypes();
 
     Registry.INSTANCE.registerKeyManager(
-        "type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
+        GcpKmsAeadKeyManager.TYPE_URL,
         new GcpKmsAeadKeyManager(
             new ServiceAccountGcpCredentialFactory(TestUtil.SERVICE_ACCOUNT_FILE)));
   }
@@ -74,7 +75,7 @@ public class CreateCommandTest {
   @Test
   public void testCreateCleartextKeyset() throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String typeUrl = "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
+    String typeUrl = AesGcmKeyManager.TYPE_URL;
     String keyFormat = "key_size: 16";
     KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(typeUrl, keyFormat);
     String awsKmsMasterKeyValue = null;
@@ -115,7 +116,7 @@ public class CreateCommandTest {
   @Test
   public void testCreateEncryptedKeysetWithGcp() throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String typeUrl = "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
+    String typeUrl = AesGcmKeyManager.TYPE_URL;
     String keyFormat = "key_size: 16";
     KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(typeUrl, keyFormat);
     String awsKmsMasterKeyValue = null;
@@ -130,8 +131,7 @@ public class CreateCommandTest {
     TextFormat.merge(outputStream.toString(), builder);
     KmsEncryptedKeyset encryptedKeyset = builder.build();
     KeyData kmsKey = encryptedKeyset.getKmsKey();
-    assertEquals("type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey",
-        kmsKey.getTypeUrl());
+    assertEquals(GcpKmsAeadKeyManager.TYPE_URL, kmsKey.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.REMOTE, kmsKey.getKeyMaterialType());
     GcpKmsAeadKey cloudKey = GcpKmsAeadKey.parseFrom(kmsKey.getValue());
     assertEquals(gcpKmsMasterKeyValue, cloudKey.getKmsKeyUri());
@@ -172,7 +172,7 @@ public class CreateCommandTest {
   @Test
   public void testCreateEncryptedKeysetWithAws() throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String typeUrl = "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
+    String typeUrl = AesGcmKeyManager.TYPE_URL;
     String keyFormat = "key_size: 16";
     KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(typeUrl, keyFormat);
     String awsKmsMasterKeyValue = "blah";

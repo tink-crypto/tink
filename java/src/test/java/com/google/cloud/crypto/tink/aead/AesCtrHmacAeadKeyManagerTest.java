@@ -74,7 +74,7 @@ public class AesCtrHmacAeadKeyManagerTest {
   public void testNewKeyWithCorruptedFormat() throws Exception {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
     KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl("type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey")
+        .setTypeUrl(AesCtrHmacAeadKeyManager.TYPE_URL)
         .setValue(serialized)
         .build();
     AesCtrHmacAeadKeyManager keyManager = new AesCtrHmacAeadKeyManager();

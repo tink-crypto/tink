@@ -36,7 +36,9 @@ import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
+import com.google.cloud.crypto.tink.aead.AesGcmKeyManager;
 import com.google.cloud.crypto.tink.mac.MacFactory;
+import com.google.cloud.crypto.tink.mac.HmacKeyManager;
 import com.google.cloud.crypto.tink.subtle.AesGcmJce;
 import com.google.cloud.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.cloud.crypto.tink.subtle.MacJce;
@@ -78,16 +80,16 @@ public class RegistryTest {
     }
     @Override
     public boolean doesSupport(String typeUrl) {  // supports same keys as AesGcmKey
-      return typeUrl.equals("type.googleapis.com/google.cloud.crypto.tink.AesGcmKey");
+      return typeUrl.equals(AesGcmKeyManager.TYPE_URL);
     }
   }
 
   private String aesCtrHmacAeadTypeUrl =
       "type.googleapis.com/google.cloud.crypto.tink.AesCtrHmacAeadKey";
   private String aesGcmTypeUrl =
-      "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
+      AesGcmKeyManager.TYPE_URL;
   private String hmacKeyTypeUrl =
-      "type.googleapis.com/google.cloud.crypto.tink.HmacKey";
+      HmacKeyManager.TYPE_URL;
 
   @Before
   public void setUp() throws GeneralSecurityException {

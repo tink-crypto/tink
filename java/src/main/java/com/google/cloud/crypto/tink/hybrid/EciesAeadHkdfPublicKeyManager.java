@@ -29,11 +29,13 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
-class EciesAeadHkdfPublicKeyManager implements
+public final class EciesAeadHkdfPublicKeyManager implements
     KeyManager<HybridEncrypt, EciesAeadHkdfPublicKey, EciesAeadHkdfKeyFormat> {
+  EciesAeadHkdfPublicKeyManager() {}
+
   private static final int VERSION = 0;
 
-  private static final String ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE =
+  public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey";
 
   @Override
@@ -78,7 +80,7 @@ class EciesAeadHkdfPublicKeyManager implements
 
   @Override
   public boolean doesSupport(String typeUrl) {
-    return ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE.equals(typeUrl);
+    return TYPE_URL.equals(typeUrl);
   }
 
   private void validate(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {
