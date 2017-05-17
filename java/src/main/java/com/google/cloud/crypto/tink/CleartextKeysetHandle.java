@@ -16,9 +16,8 @@
 
 package com.google.cloud.crypto.tink;
 
-import com.google.cloud.crypto.tink.KeysetManager;
-import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
+import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 

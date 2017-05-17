@@ -16,7 +16,6 @@
 
 package com.google.cloud.crypto.tink.signature;
 
-import com.google.cloud.crypto.tink.EcdsaProto.EcdsaKeyFormat;
 import com.google.cloud.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
@@ -26,6 +25,7 @@ import com.google.cloud.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
@@ -33,8 +33,7 @@ import java.security.interfaces.ECPublicKey;
  * This key manager produces new instances of {@code EcdsaVerifyJce}.
  * It doesn't support key generation.
  */
-public final class EcdsaVerifyKeyManager
-    implements KeyManager<PublicKeyVerify, EcdsaPublicKey, EcdsaKeyFormat> {
+public final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   EcdsaVerifyKeyManager() {}
 
   public static final String TYPE_URL =
@@ -45,36 +44,58 @@ public final class EcdsaVerifyKeyManager
    */
   private static final int VERSION = 0;
 
+  /**
+   * @param serializedKey  serialized {@code EcdsaPublicKey} proto
+   */
   @Override
-  public PublicKeyVerify getPrimitive(ByteString serialized) throws GeneralSecurityException {
+  public PublicKeyVerify getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      EcdsaPublicKey pubKey = EcdsaPublicKey.parseFrom(serialized);
+      EcdsaPublicKey pubKey = EcdsaPublicKey.parseFrom(serializedKey);
       return getPrimitive(pubKey);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException(e);
+      throw new GeneralSecurityException("expected serialized EcdsaPublicKey proto", e);
     }
   }
 
+  /**
+   * @param key  {@code EcdsaPublicKey} proto
+   */
   @Override
-  public PublicKeyVerify getPrimitive(EcdsaPublicKey pubKey) throws GeneralSecurityException {
-    validateKey(pubKey);
-    ECPublicKey publicKey = Util.getEcPublicKey(pubKey.getParams().getCurve(),
-        pubKey.getX().toByteArray(), pubKey.getY().toByteArray());
+  public PublicKeyVerify getPrimitive(MessageLite key) throws GeneralSecurityException {
+    if (!(key instanceof EcdsaPublicKey)) {
+      throw new GeneralSecurityException("expected EcdsaPublicKey proto");
+    }
+    EcdsaPublicKey keyProto = (EcdsaPublicKey) key;
+    validateKey(keyProto);
+    ECPublicKey publicKey = Util.getEcPublicKey(keyProto.getParams().getCurve(),
+        keyProto.getX().toByteArray(), keyProto.getY().toByteArray());
     return new EcdsaVerifyJce(publicKey,
-        SigUtil.hashToEcdsaAlgorithmName(pubKey.getParams().getHashType()));
+        SigUtil.hashToEcdsaAlgorithmName(keyProto.getParams().getHashType()));
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code EcdsaKeyFormat} proto
+   * @return new {@code EcdsaPublicKey} proto
+   */
   @Override
-  public EcdsaPublicKey newKey(ByteString serialized) throws GeneralSecurityException {
+  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented");
   }
 
 
+  /**
+   * @param keyFormat  {@code EcdsaKeyFormat} proto
+   * @return new {@code EcdsaPublicKey} proto
+   */
   @Override
-  public EcdsaPublicKey newKey(EcdsaKeyFormat format) throws GeneralSecurityException {
+  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented");
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code EcdsaKeyFormat} proto
+   * @return {@code KeyData} with a new {@code EcdsaPublicKey} proto
+   */
   @Override
   public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented");

@@ -68,7 +68,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
         demKeyTemplate, salt);
 
     EciesAeadHkdfPrivateKeyManager manager = new EciesAeadHkdfPrivateKeyManager();
-    EciesAeadHkdfPrivateKey keyProto = manager.newKey(
+    EciesAeadHkdfPrivateKey keyProto = (EciesAeadHkdfPrivateKey) manager.newKey(
         EciesAeadHkdfKeyFormat.newBuilder().setParams(params).build());
     assertEquals(params, keyProto.getPublicKey().getParams());
 

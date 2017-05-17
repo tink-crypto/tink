@@ -27,13 +27,14 @@ import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
  * This key manager generates new {@code AesCtrKey} keys and produces new instances
  * of {@code AesCtrJceCipher}.
  */
-class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyFormat> {
+class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   private static final int VERSION = 0;
 
   static final String TYPE_URL =
@@ -48,35 +49,57 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyF
   // 2^-33 (i.e., less than one in eight billion).
   private static final int MIN_IV_SIZE_IN_BYTES = 12;
 
+  /**
+   * @param serializedKey  serialized {@code AesCtrKey} proto
+   */
   @Override
-  public AesCtrJceCipher getPrimitive(ByteString serialized) throws GeneralSecurityException {
+  public AesCtrJceCipher getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      AesCtrKey keyProto = AesCtrKey.parseFrom(serialized);
+      AesCtrKey keyProto = AesCtrKey.parseFrom(serializedKey);
       return getPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid AesCtr Key");
+      throw new GeneralSecurityException("expected serialized AesCtrKey proto", e);
     }
   }
 
+  /**
+   * @param key  {@code AesCtrKey} proto
+   */
   @Override
-  public AesCtrJceCipher getPrimitive(AesCtrKey keyProto) throws GeneralSecurityException {
+  public AesCtrJceCipher getPrimitive(MessageLite key) throws GeneralSecurityException {
+    if (!(key instanceof AesCtrKey)) {
+      throw new GeneralSecurityException("expected AesCtrKey proto");
+    }
+    AesCtrKey keyProto = (AesCtrKey) key;
     validate(keyProto);
     return new AesCtrJceCipher(keyProto.getKeyValue().toByteArray(),
         keyProto.getParams().getIvSize());
   }
 
+  /**
+   * @param serializedKeyFormat serialized {@code AesCtrKeyFormat} proto
+   * @return new {@code AesCtrKey} proto
+   */
   @Override
-  public AesCtrKey newKey(ByteString serialized) throws GeneralSecurityException {
+  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
     try {
-      AesCtrKeyFormat format = AesCtrKeyFormat.parseFrom(serialized);
+      AesCtrKeyFormat format = AesCtrKeyFormat.parseFrom(serializedKeyFormat);
       return newKey(format);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid AesCtr key format", e);
+      throw new GeneralSecurityException("expected serialized AesCtrKeyFormat proto", e);
     }
   }
 
+  /**
+   * @param keyFormat  {@code AesCtrKeyFormat} proto
+   * @return new {@code AesCtrKey} proto
+   */
   @Override
-  public AesCtrKey newKey(AesCtrKeyFormat format) throws GeneralSecurityException {
+  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
+    if (!(keyFormat instanceof AesCtrKeyFormat)) {
+      throw new GeneralSecurityException("expected AesCtrKeyFormat proto");
+    }
+    AesCtrKeyFormat format = (AesCtrKeyFormat) keyFormat;
     validate(format);
     return AesCtrKey.newBuilder()
         .setParams(format.getParams())
@@ -85,9 +108,13 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher, AesCtrKey, AesCtrKeyF
         .build();
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code AesCtrKeyFormat} proto
+   * @return {@code KeyData} proto with a new {@code AesCtrKey} proto
+   */
   @Override
-  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
-    AesCtrKey key = newKey(serialized);
+  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    AesCtrKey key = (AesCtrKey) newKey(serializedKeyFormat);
     return KeyData.newBuilder()
         .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())

@@ -48,13 +48,13 @@ public class AesCtrHmacAeadKeyManagerTest {
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 24;
     for (int i = 0; i < numTests / 6; i++) {
-      AesCtrHmacAeadKey key = keyManager.newKey(aeadKeyFormat);
+      AesCtrHmacAeadKey key = (AesCtrHmacAeadKey) keyManager.newKey(aeadKeyFormat);
       keys.add(new String(key.getAesCtrKey().getKeyValue().toByteArray(), "UTF-8"));
       keys.add(new String(key.getHmacKey().getKeyValue().toByteArray(), "UTF-8"));
       assertEquals(16, key.getAesCtrKey().getKeyValue().toByteArray().length);
       assertEquals(32, key.getHmacKey().getKeyValue().toByteArray().length);
 
-      key = keyManager.newKey(serialized);
+      key = (AesCtrHmacAeadKey) keyManager.newKey(serialized);
       keys.add(new String(key.getAesCtrKey().getKeyValue().toByteArray(), "UTF-8"));
       keys.add(new String(key.getHmacKey().getKeyValue().toByteArray(), "UTF-8"));
       assertEquals(16, key.getAesCtrKey().getKeyValue().toByteArray().length);

@@ -51,11 +51,11 @@ public class HmacKeyManagerTest {
     Set<String> keys = new TreeSet<String>();
     int numTests = 27;
     for (int i = 0; i < numTests / 3; i++) {
-      HmacKey key = keyManager.newKey(hmacKeyFormat);
+      HmacKey key = (HmacKey) keyManager.newKey(hmacKeyFormat);
       assertEquals(32, key.getKeyValue().toByteArray().length);
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
 
-      key = keyManager.newKey(serialized);
+      key = (HmacKey) keyManager.newKey(serialized);
       assertEquals(32, key.getKeyValue().toByteArray().length);
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
 

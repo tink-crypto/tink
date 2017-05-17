@@ -64,12 +64,12 @@ public final class Registry {
    * there already exists a key manager for {@code typeUrl}.
    */
   @SuppressWarnings("unchecked")
-  public <P, K extends MessageLite, F extends MessageLite> boolean registerKeyManager(
-      String typeUrl, final KeyManager<P, K, F> manager) throws GeneralSecurityException {
+  public <P> boolean registerKeyManager(String typeUrl, final KeyManager<P> manager)
+      throws GeneralSecurityException {
     if (manager == null) {
       throw new NullPointerException("key manager must be non-null.");
     }
-    KeyManager<P, K, F> existing = keyManager.putIfAbsent(typeUrl, manager);
+    KeyManager<P> existing = keyManager.putIfAbsent(typeUrl, manager);
     if (existing == null) {
       return true;
     }
@@ -82,9 +82,8 @@ public final class Registry {
    * TODO(przydatek): find a way for verifying the primitive type.
    */
   @SuppressWarnings("unchecked")
-  public <P, K extends MessageLite, F extends MessageLite> KeyManager<P, K, F> getKeyManager(
-      String typeUrl) throws GeneralSecurityException {
-    KeyManager<P, K, F> manager = keyManager.get(typeUrl);
+  public <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
+    KeyManager<P> manager = keyManager.get(typeUrl);
     if (manager == null) {
       throw new GeneralSecurityException("unsupported key type: " + typeUrl);
     }
@@ -99,9 +98,8 @@ public final class Registry {
    * This method should be used solely for key management.
    * @return a new key.
    */
-  public <P, K extends MessageLite, F extends MessageLite> KeyData newKeyData(
-      KeyTemplate template) throws GeneralSecurityException {
-    KeyManager<P, K, F> manager = getKeyManager(template.getTypeUrl());
+  public <P> KeyData newKeyData(KeyTemplate template) throws GeneralSecurityException {
+    KeyManager<P> manager = getKeyManager(template.getTypeUrl());
     return manager.newKeyData(template.getValue());
   }
 
@@ -112,9 +110,8 @@ public final class Registry {
    *
    * @return a new key.
    */
-  public <P, K extends MessageLite, F extends MessageLite> K newKey(
-      KeyTemplate keyTemplate) throws GeneralSecurityException {
-    KeyManager<P, K, F> manager = getKeyManager(keyTemplate.getTypeUrl());
+  public <P> MessageLite newKey(KeyTemplate keyTemplate) throws GeneralSecurityException {
+    KeyManager<P> manager = getKeyManager(keyTemplate.getTypeUrl());
     return manager.newKey(keyTemplate.getValue());
   }
 
@@ -125,9 +122,9 @@ public final class Registry {
    *
    * @return a new key.
    */
-  public <P, K extends MessageLite, F extends MessageLite> K newKey(String typeUrl, F format)
+  public <P> MessageLite newKey(String typeUrl, MessageLite format)
       throws GeneralSecurityException {
-    KeyManager<P, K, F> manager = getKeyManager(typeUrl);
+    KeyManager<P> manager = getKeyManager(typeUrl);
     return manager.newKey(format);
   }
 
@@ -138,10 +135,9 @@ public final class Registry {
    *
    * @return a new primitive.
    */
-  public <P, K extends MessageLite, F extends MessageLite> P getPrimitive(String typeUrl, K proto)
-      throws GeneralSecurityException {
-    KeyManager<P, K, F> manager = getKeyManager(typeUrl);
-    return manager.getPrimitive(proto);
+  public <P> P getPrimitive(String typeUrl, MessageLite key) throws GeneralSecurityException {
+    KeyManager<P> manager = getKeyManager(typeUrl);
+    return manager.getPrimitive(key);
   }
 
   /**
@@ -151,9 +147,9 @@ public final class Registry {
    *
    * @return a new primitive.
    */
-  public <P, K extends MessageLite, F extends MessageLite> P getPrimitive(
-      String typeUrl, ByteString serialized) throws GeneralSecurityException {
-    KeyManager<P, K, F> manager = getKeyManager(typeUrl);
+  public <P> P getPrimitive(String typeUrl, ByteString serialized)
+      throws GeneralSecurityException {
+    KeyManager<P> manager = getKeyManager(typeUrl);
     return manager.getPrimitive(serialized);
   }
 
@@ -195,9 +191,10 @@ public final class Registry {
   }
   /**
    * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset
-   * given in {@code keysetHandle}, using {@code customManager} (instead of registered key managers)
-   * for keys supported by it.  Keys not supported by {@code customManager} are handled by matching
-   * registered key managers (if present), and keys with status!=ENABLED are skipped. <p>
+   * given in {@code keysetHandle}, using {@code customManager} (instead of registered
+   * key managers) for keys supported by it.  Keys not supported by {@code customManager}
+   * are handled by matching registered key managers (if present), and keys with status!=ENABLED
+   * are skipped. <p>
    *
    * This enables custom treatment of keys, for example providing extra context (e.g. credentials
    * for accessing keys managed by a KMS), or gathering custom monitoring/profiling information.
@@ -207,8 +204,8 @@ public final class Registry {
    *
    * @return a PrimitiveSet with all instantiated primitives.
    */
-    public <P, K extends MessageLite, F extends MessageLite> PrimitiveSet<P> getPrimitives(
-        KeysetHandle keysetHandle, final KeyManager<P, K, F> customManager)
+    public <P> PrimitiveSet<P> getPrimitives(
+        KeysetHandle keysetHandle, final KeyManager<P> customManager)
         throws GeneralSecurityException {
       Util.validateKeyset(keysetHandle.getKeyset());
       PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();

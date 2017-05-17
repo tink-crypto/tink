@@ -27,6 +27,7 @@ import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
@@ -37,8 +38,7 @@ import java.security.spec.ECPoint;
  * This key manager generates new {@code EciesAeadHkdfPrivateKey} keys and produces new instances
  * of {@code EciesAeadHkdfHybridDecrypt}.
  */
-public final class EciesAeadHkdfPrivateKeyManager
-    implements KeyManager<HybridDecrypt, EciesAeadHkdfPrivateKey, EciesAeadHkdfKeyFormat> {
+public final class EciesAeadHkdfPrivateKeyManager implements KeyManager<HybridDecrypt> {
   EciesAeadHkdfPrivateKeyManager() {}
 
   private static final int VERSION = 0;
@@ -46,19 +46,28 @@ public final class EciesAeadHkdfPrivateKeyManager
   public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey";
 
+  /**
+   * @param serializedKey  serialized {@code EciesAeadHkdfPrivateKey} proto
+   */
   @Override
-  public HybridDecrypt getPrimitive(ByteString proto) throws GeneralSecurityException {
+  public HybridDecrypt getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      EciesAeadHkdfPrivateKey recipientKeyProto = EciesAeadHkdfPrivateKey.parseFrom(proto);
+      EciesAeadHkdfPrivateKey recipientKeyProto = EciesAeadHkdfPrivateKey.parseFrom(serializedKey);
       return getPrimitive(recipientKeyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid EciesAeadHkdfPrivateKey.");
+      throw new GeneralSecurityException("expected serialized EciesAeadHkdfPrivateKey proto", e);
     }
   }
 
+  /**
+   * @param recipientKey  {@code EciesAeadHkdfPrivateKey} proto
+   */
   @Override
-  public HybridDecrypt getPrimitive(EciesAeadHkdfPrivateKey recipientKeyProto)
-      throws GeneralSecurityException {
+  public HybridDecrypt getPrimitive(MessageLite recipientKey) throws GeneralSecurityException {
+    if (!(recipientKey instanceof EciesAeadHkdfPrivateKey)) {
+      throw new GeneralSecurityException("expected EciesAeadHkdfPrivateKey proto");
+    }
+    EciesAeadHkdfPrivateKey recipientKeyProto = (EciesAeadHkdfPrivateKey) recipientKey;
     validate(recipientKeyProto);
     EciesHkdfKemParams kemParams = recipientKeyProto.getPublicKey().getParams().getKemParams();
 
@@ -71,21 +80,31 @@ public final class EciesAeadHkdfPrivateKeyManager
         recipientKeyProto.getPublicKey().getParams().getEcPointFormat());
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code EciesAeadHkdfKeyFormat} proto
+   * @return new {@code EciesAeadHkdfPrivateKey} proto
+   */
   @Override
-  public EciesAeadHkdfPrivateKey newKey(ByteString serialized) throws GeneralSecurityException {
+  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
     try {
-      EciesAeadHkdfKeyFormat eciesKeyFormat = EciesAeadHkdfKeyFormat.parseFrom(serialized);
+      EciesAeadHkdfKeyFormat eciesKeyFormat = EciesAeadHkdfKeyFormat.parseFrom(serializedKeyFormat);
       return newKey(eciesKeyFormat);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("invalid EciesAeadHkdf key format", e);
     }
   }
 
+  /**
+   * @param keyFormat  {@code EciesAeadHkdfKeyFormat} proto
+   * @return new {@code EciesAeadHkdfPrivateKey} proto
+   */
   @Override
-  public EciesAeadHkdfPrivateKey newKey(EciesAeadHkdfKeyFormat eciesKeyFormat)
-      throws GeneralSecurityException {
+  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
+    if (!(keyFormat instanceof EciesAeadHkdfKeyFormat)) {
+      throw new GeneralSecurityException("expected EciesAeadHkdfKeyFormat proto");
+    }
+    EciesAeadHkdfKeyFormat eciesKeyFormat = (EciesAeadHkdfKeyFormat) keyFormat;
     HybridUtil.validate(eciesKeyFormat.getParams());
-
     EciesHkdfKemParams kemParams = eciesKeyFormat.getParams().getKemParams();
     KeyPair keyPair = Util.generateKeyPair(kemParams.getCurveType());
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
@@ -108,9 +127,13 @@ public final class EciesAeadHkdfPrivateKeyManager
         .build();
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code EciesAeadHkdfKeyFormat} proto
+   * @return {@code KeyData} with a new {@code EciesAeadHkdfPrivateKey} proto
+   */
   @Override
-  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
-    EciesAeadHkdfPrivateKey key = newKey(serialized);
+  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    EciesAeadHkdfPrivateKey key = (EciesAeadHkdfPrivateKey) newKey(serializedKeyFormat);
     return KeyData.newBuilder()
         .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())

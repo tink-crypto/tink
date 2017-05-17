@@ -23,7 +23,6 @@ import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -99,8 +98,7 @@ public final class AeadFactory {
    * @return a Aead primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static <K extends MessageLite, F extends MessageLite> Aead getPrimitive(
-      KeysetHandle keysetHandle, final KeyManager<Aead, K, F> keyManager)
+  public static Aead getPrimitive(KeysetHandle keysetHandle, final KeyManager<Aead> keyManager)
       throws GeneralSecurityException {
     PrimitiveSet<Aead> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);

@@ -22,7 +22,6 @@ import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.PublicKeySign;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
@@ -83,8 +82,8 @@ public final class PublicKeySignFactory {
    * @return a PublicKeySign primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static <K extends MessageLite, F extends MessageLite> PublicKeySign getPrimitive(
-      KeysetHandle keysetHandle, final KeyManager<PublicKeySign, K, F> keyManager)
+  public static PublicKeySign getPrimitive(
+      KeysetHandle keysetHandle, final KeyManager<PublicKeySign> keyManager)
       throws GeneralSecurityException {
         PrimitiveSet<PublicKeySign> primitives =
             Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);

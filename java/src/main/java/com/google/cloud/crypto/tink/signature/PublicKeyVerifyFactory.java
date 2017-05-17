@@ -22,7 +22,6 @@ import com.google.cloud.crypto.tink.KeysetHandle;
 import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.PublicKeyVerify;
 import com.google.cloud.crypto.tink.Registry;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -89,8 +88,8 @@ public final class PublicKeyVerifyFactory {
    * {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static <K extends MessageLite, F extends MessageLite> PublicKeyVerify getPrimitive(
-      KeysetHandle keysetHandle, final KeyManager<PublicKeyVerify, K, F> keyManager)
+  public static PublicKeyVerify getPrimitive(
+      KeysetHandle keysetHandle, final KeyManager<PublicKeyVerify> keyManager)
       throws GeneralSecurityException {
     PrimitiveSet<PublicKeyVerify> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);

@@ -30,6 +30,7 @@ import com.google.cloud.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
@@ -37,8 +38,7 @@ import java.util.logging.Logger;
  * This key manager generates new {@code AesCtrHmacAeadKey} keys and produces new instances
  * of {@code EncryptThenAuthenticate}.
  */
-public final class AesCtrHmacAeadKeyManager
-    implements KeyManager<Aead, AesCtrHmacAeadKey, AesCtrHmacAeadKeyFormat> {
+public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
   AesCtrHmacAeadKeyManager() {}
 
   private static final Logger logger =
@@ -59,18 +59,28 @@ public final class AesCtrHmacAeadKeyManager
     }
   }
 
+  /**
+   * @param serializedKey  serialized {@code AesCtrHmacAeadKey} proto
+   */
   @Override
-  public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
+  public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      AesCtrHmacAeadKey keyProto = AesCtrHmacAeadKey.parseFrom(serialized);
+      AesCtrHmacAeadKey keyProto = AesCtrHmacAeadKey.parseFrom(serializedKey);
       return getPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid AesCtrHmacAead key");
+      throw new GeneralSecurityException("expected serialized AesCtrHmacAeadKey proto", e);
     }
   }
 
+  /**
+   * @param key  {@code AesCtrHmacAeadKey} proto
+   */
   @Override
-  public Aead getPrimitive(AesCtrHmacAeadKey keyProto) throws GeneralSecurityException {
+  public Aead getPrimitive(MessageLite key) throws GeneralSecurityException {
+    if (!(key instanceof AesCtrHmacAeadKey)) {
+      throw new GeneralSecurityException("expected AesCtrHmacAeadKey proto");
+    }
+    AesCtrHmacAeadKey keyProto = (AesCtrHmacAeadKey) key;
     validate(keyProto);
     return new EncryptThenAuthenticate(
         Registry.INSTANCE.getPrimitive(AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey()),
@@ -78,21 +88,34 @@ public final class AesCtrHmacAeadKeyManager
         keyProto.getHmacKey().getParams().getTagSize());
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code AesCtrHmacAeadKeyFormat} proto
+   * @return new {@code AesCtrHmacAeadKey} proto
+   */
   @Override
-  public AesCtrHmacAeadKey newKey(ByteString serialized) throws GeneralSecurityException {
+  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
     try {
-      AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.parseFrom(serialized);
+      AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.parseFrom(serializedKeyFormat);
       return newKey(format);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid AesCtrHmacAead key format", e);
+      throw new GeneralSecurityException("expected serialized AesCtrHmacAeadKeyFormat proto", e);
     }
   }
 
+  /**
+   * @param keyFormat  {@code AesCtrHmacAeadKeyFormat} proto
+   * @return new {@code AesCtrHmacAeadKey} proto
+   */
   @Override
-  public AesCtrHmacAeadKey newKey(AesCtrHmacAeadKeyFormat format) throws GeneralSecurityException {
-    AesCtrKey aesCtrKey = Registry.INSTANCE.newKey(
+  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
+    if (!(keyFormat instanceof AesCtrHmacAeadKeyFormat)) {
+      throw new GeneralSecurityException("expected AesCtrHmacAeadKeyFormat proto");
+    }
+    AesCtrHmacAeadKeyFormat format = (AesCtrHmacAeadKeyFormat) keyFormat;
+    AesCtrKey aesCtrKey = (AesCtrKey) Registry.INSTANCE.newKey(
         AesCtrKeyManager.TYPE_URL, format.getAesCtrKeyFormat());
-    HmacKey hmacKey = Registry.INSTANCE.newKey(HmacKeyManager.TYPE_URL, format.getHmacKeyFormat());
+    HmacKey hmacKey = (HmacKey) Registry.INSTANCE.newKey(
+        HmacKeyManager.TYPE_URL, format.getHmacKeyFormat());
     return AesCtrHmacAeadKey.newBuilder()
         .setAesCtrKey(aesCtrKey)
         .setHmacKey(hmacKey)
@@ -100,9 +123,13 @@ public final class AesCtrHmacAeadKeyManager
         .build();
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code AesCtrHmacAeadKeyFormat} proto
+   * @return {@code KeyData} proto with a new {@code AesCtrHmacAeadKey} proto
+   */
   @Override
-  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
-    AesCtrHmacAeadKey key = newKey(serialized);
+  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    AesCtrHmacAeadKey key = (AesCtrHmacAeadKey) newKey(serializedKeyFormat);
     return KeyData.newBuilder()
         .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())

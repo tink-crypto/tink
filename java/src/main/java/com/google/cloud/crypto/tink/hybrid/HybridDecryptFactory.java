@@ -23,7 +23,6 @@ import com.google.cloud.crypto.tink.PrimitiveSet;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -95,8 +94,8 @@ public final class HybridDecryptFactory {
    * @return a HybridDecrypt primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static <K extends MessageLite, F extends MessageLite> HybridDecrypt getPrimitive(
-      KeysetHandle keysetHandle, final KeyManager<HybridDecrypt, K, F> keyManager)
+  public static HybridDecrypt getPrimitive(
+      KeysetHandle keysetHandle, final KeyManager<HybridDecrypt> keyManager)
       throws GeneralSecurityException {
     PrimitiveSet<HybridDecrypt> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);

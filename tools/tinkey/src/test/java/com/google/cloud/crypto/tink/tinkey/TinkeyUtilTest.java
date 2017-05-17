@@ -57,14 +57,14 @@ public class TinkeyUtilTest {
     String keyType = AesGcmKeyManager.TYPE_URL;
     String keyFormat = "key_size: 16";
     KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
-    AesGcmKey keyProto1 = Registry.INSTANCE.newKey(keyTemplate);
+    AesGcmKey keyProto1 = (AesGcmKey) Registry.INSTANCE.newKey(keyTemplate);
     assertEquals(16, keyProto1.getKeyValue().size());
 
     keyType = AesCtrHmacAeadKeyManager.TYPE_URL;
     keyFormat = "aes_ctr_key_format {params { iv_size: 12}, key_size: 16}, "
         + "hmac_key_format {params {hash: SHA256, tag_size: 10}, key_size: 32}";
     keyTemplate = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
-    AesCtrHmacAeadKey keyProto2 = Registry.INSTANCE.newKey(keyTemplate);
+    AesCtrHmacAeadKey keyProto2 = (AesCtrHmacAeadKey) Registry.INSTANCE.newKey(keyTemplate);
     assertEquals(16, keyProto2.getAesCtrKey().getKeyValue().size());
     assertEquals(12, keyProto2.getAesCtrKey().getParams().getIvSize());
     assertEquals(32, keyProto2.getHmacKey().getKeyValue().size());

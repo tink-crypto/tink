@@ -22,13 +22,9 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
-import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
-import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKeyFormat;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
-import com.google.cloud.crypto.tink.HmacProto.HmacKeyFormat;
 import com.google.cloud.crypto.tink.TestUtil.DummyAead;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
@@ -56,7 +52,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class RegistryTest {
-  private static class CustomAeadKeyManager implements KeyManager<Aead, MessageLite, MessageLite> {
+  private static class CustomAeadKeyManager implements KeyManager<Aead> {
     public CustomAeadKeyManager() {}
     @Override
     public Aead getPrimitive(ByteString proto) throws GeneralSecurityException {
@@ -100,29 +96,21 @@ public class RegistryTest {
   @Test
   public void testKeyManagerRegistration() throws Exception {
     // Retrieve some key managers.
-    KeyManager<Aead, AesCtrHmacAeadKey, AesCtrHmacAeadKeyFormat> aesCtrHmacAeadManager =
-        Registry.INSTANCE.getKeyManager(aesCtrHmacAeadTypeUrl);
-    assertTrue(aesCtrHmacAeadManager.getClass().toString().contains(
-        "AesCtrHmacAeadKeyManager"));
+    KeyManager<Aead> aesCtrHmacAeadManager = Registry.INSTANCE.getKeyManager(aesCtrHmacAeadTypeUrl);
+    assertTrue(aesCtrHmacAeadManager.getClass().toString().contains("AesCtrHmacAeadKeyManager"));
 
-    KeyManager<Aead, AesGcmKey, AesGcmKeyFormat> aesGcmManager =
-        Registry.INSTANCE.getKeyManager(aesGcmTypeUrl);
-    assertTrue(aesGcmManager.getClass().toString().contains(
-        "AesGcmKeyManager"));
+    KeyManager<Aead> aesGcmManager = Registry.INSTANCE.getKeyManager(aesGcmTypeUrl);
+    assertTrue(aesGcmManager.getClass().toString().contains("AesGcmKeyManager"));
 
-    KeyManager<Mac, HmacKey, HmacKeyFormat> hmacManager =
-        Registry.INSTANCE.getKeyManager(hmacKeyTypeUrl);
-    assertTrue(hmacManager.getClass().toString().contains(
-        "HmacKeyManager"));
+    KeyManager<Mac> hmacManager = Registry.INSTANCE.getKeyManager(hmacKeyTypeUrl);
+    assertTrue(hmacManager.getClass().toString().contains("HmacKeyManager"));
 
     // TODO(thaidn): make this assignment throw some exception.
-    KeyManager<Aead, HmacKey, HmacKeyFormat> wrongType =
-        Registry.INSTANCE.getKeyManager(hmacKeyTypeUrl);
-    assertTrue(wrongType.getClass().toString().contains(
-        "HmacKeyManager"));
+    KeyManager<Aead> wrongType = Registry.INSTANCE.getKeyManager(hmacKeyTypeUrl);
+    assertTrue(wrongType.getClass().toString().contains("HmacKeyManager"));
     KeyTemplate template = TestUtil.createHmacKeyTemplate(
         16 /* key size */, 16 /* tag size */, HashType.SHA256);
-    HmacKey hmacKey = Registry.INSTANCE.newKey(template);
+    HmacKey hmacKey = (HmacKey) Registry.INSTANCE.newKey(template);
     try {
       Aead unused = wrongType.getPrimitive(hmacKey);
       fail("Expected ClassCastException");
@@ -133,8 +121,7 @@ public class RegistryTest {
 
     String badTypeUrl = "bad type URL";
     try {
-      KeyManager<Mac, MessageLite, MessageLite> unused =
-          Registry.INSTANCE.getKeyManager(badTypeUrl);
+      KeyManager<Mac> unused = Registry.INSTANCE.getKeyManager(badTypeUrl);
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("unsupported"));
@@ -146,7 +133,7 @@ public class RegistryTest {
   public void testKeyAndPrimitiveCreation() throws Exception {
     // Create some keys and primitives.
     KeyTemplate template =  TestUtil.createAesGcmKeyTemplate(16 /* key_size */);
-    AesGcmKey aesGcmKey = Registry.INSTANCE.newKey(template);
+    AesGcmKey aesGcmKey = (AesGcmKey) Registry.INSTANCE.newKey(template);
     assertEquals(16, aesGcmKey.getKeyValue().size());
     KeyData aesGcmKeyData = Registry.INSTANCE.newKeyData(template);
     assertEquals(aesGcmTypeUrl, aesGcmKeyData.getTypeUrl());
@@ -156,7 +143,7 @@ public class RegistryTest {
 
     template = TestUtil.createHmacKeyTemplate(
         16 /* key size */, 10 /* tag size */, HashType.SHA256);
-    HmacKey hmacKey = Registry.INSTANCE.newKey(template);
+    HmacKey hmacKey = (HmacKey) Registry.INSTANCE.newKey(template);
     assertEquals(16, hmacKey.getKeyValue().size());
     assertEquals(10, hmacKey.getParams().getTagSize());
     assertEquals(HashType.SHA256, hmacKey.getParams().getHash());
@@ -239,8 +226,7 @@ public class RegistryTest {
     // This should not overwrite the existing manager.
     assertFalse(Registry.INSTANCE.registerKeyManager(aesCtrHmacAeadTypeUrl,
         new CustomAeadKeyManager()));
-    KeyManager<Aead, MessageLite, MessageLite> manager =
-       Registry.INSTANCE.getKeyManager(aesCtrHmacAeadTypeUrl);
+    KeyManager<Aead> manager = Registry.INSTANCE.getKeyManager(aesCtrHmacAeadTypeUrl);
     assertNotEquals(CustomAeadKeyManager.class, manager.getClass());
     assertTrue(manager.getClass().toString().contains(
         "AesCtrHmacAeadKeyManager"));
@@ -333,7 +319,7 @@ public class RegistryTest {
     assertEquals(EncryptThenAuthenticate.class, aead2List.get(0).getPrimitive().getClass());
 
     // Get a PrimitiveSet using a custom key manager for key1.
-    KeyManager<Aead, MessageLite, MessageLite> customManager = new CustomAeadKeyManager();
+    KeyManager<Aead> customManager = new CustomAeadKeyManager();
     aeadSet = Registry.INSTANCE.getPrimitives(keysetHandle, customManager);
     aead1List = aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(0));
     aead2List = aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(1));

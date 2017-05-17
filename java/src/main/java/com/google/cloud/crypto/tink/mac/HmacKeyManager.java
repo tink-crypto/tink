@@ -28,6 +28,7 @@ import com.google.cloud.crypto.tink.subtle.Random;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -35,8 +36,9 @@ import javax.crypto.spec.SecretKeySpec;
  * This key manager generates new {@code HmacKey} keys and produces new instances
  * of {@code MacJce}.
  */
-public final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFormat> {
+public final class HmacKeyManager implements KeyManager<Mac> {
   HmacKeyManager() {}
+
   /**
    * Type url that this manager does support.
    */
@@ -57,18 +59,28 @@ public final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFor
    */
   private static final int MIN_TAG_SIZE_IN_BYTES = 10;
 
+  /**
+   * @param serializedKey  serialized {@code HmacKey} proto
+   */
   @Override
-  public Mac getPrimitive(ByteString serialized) throws GeneralSecurityException {
+  public Mac getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      HmacKey keyProto = HmacKey.parseFrom(serialized);
+      HmacKey keyProto = HmacKey.parseFrom(serializedKey);
       return getPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid Hmac key");
+      throw new GeneralSecurityException("expected serialized HmacKey proto", e);
     }
   }
 
+  /**
+   * @param key  {@code HmacKey} proto
+   */
   @Override
-  public Mac getPrimitive(HmacKey keyProto) throws GeneralSecurityException {
+  public Mac getPrimitive(MessageLite key) throws GeneralSecurityException {
+    if (!(key instanceof HmacKey)) {
+      throw new GeneralSecurityException("expected HmacKey proto");
+    }
+    HmacKey keyProto = (HmacKey) key;
     validate(keyProto);
     HashType hash = keyProto.getParams().getHash();
     byte[] keyValue = keyProto.getKeyValue().toByteArray();
@@ -82,18 +94,30 @@ public final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFor
     }
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code HmacKeyFormat} proto
+   * @return new {@code HmacKey} proto
+   */
   @Override
-  public HmacKey newKey(ByteString serialized) throws GeneralSecurityException {
+  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
     try {
-      HmacKeyFormat format = HmacKeyFormat.parseFrom(serialized);
+      HmacKeyFormat format = HmacKeyFormat.parseFrom(serializedKeyFormat);
       return newKey(format);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid Hmac key format", e);
+      throw new GeneralSecurityException("expected serialized HmacKeyFormat proto", e);
     }
   }
 
+  /**
+   * @param keyFormat  {@code HmacKeyFormat} proto
+   * @return new {@code HmacKey} proto
+   */
   @Override
-  public HmacKey newKey(HmacKeyFormat format) throws GeneralSecurityException {
+  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
+    if (!(keyFormat instanceof HmacKeyFormat)) {
+      throw new GeneralSecurityException("expected HmacKeyFormat proto");
+    }
+    HmacKeyFormat format = (HmacKeyFormat) keyFormat;
     validate(format);
     return HmacKey.newBuilder()
         .setVersion(VERSION)
@@ -102,9 +126,13 @@ public final class HmacKeyManager implements KeyManager<Mac, HmacKey, HmacKeyFor
         .build();
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code HmacKeyFormat} proto
+   * @return {@code KeyData} with a new {@code HmacKey} proto
+   */
   @Override
-  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
-    HmacKey key = newKey(serialized);
+  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    HmacKey key = (HmacKey) newKey(serializedKeyFormat);
     return KeyData.newBuilder()
         .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())

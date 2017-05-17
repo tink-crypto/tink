@@ -63,11 +63,11 @@ public class AesEaxKeyManagerTest {
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 27;
     for (int i = 0; i < numTests / 3; i++) {
-      AesEaxKey key = keyManager.newKey(eaxKeyFormat);
+      AesEaxKey key = (AesEaxKey) keyManager.newKey(eaxKeyFormat);
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
       assertEquals(16, key.getKeyValue().toByteArray().length);
 
-      key = keyManager.newKey(serialized);
+      key = (AesEaxKey) keyManager.newKey(serialized);
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
       assertEquals(16, key.getKeyValue().toByteArray().length);
 

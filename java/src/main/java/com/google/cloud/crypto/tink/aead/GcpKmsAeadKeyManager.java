@@ -24,7 +24,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.cloud.crypto.tink.Aead;
 import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
-import com.google.cloud.crypto.tink.GcpKmsProto.GcpKmsAeadKeyFormat;
 import com.google.cloud.crypto.tink.KeyManager;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.subtle.GcpCredentialFactory;
@@ -32,6 +31,7 @@ import com.google.cloud.crypto.tink.subtle.GcpKmsAead;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -40,8 +40,7 @@ import java.security.GeneralSecurityException;
  * Currently it doesn't support key generation. To use it one must
  * provide an implementation of {@code GcpCredentialFactory}.
  */
-public final class GcpKmsAeadKeyManager
-    implements KeyManager<Aead, GcpKmsAeadKey, GcpKmsAeadKeyFormat> {
+public final class GcpKmsAeadKeyManager implements KeyManager<Aead> {
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =
@@ -53,39 +52,61 @@ public final class GcpKmsAeadKeyManager
     this.credFactory = credFactory;
   }
 
+  /**
+   * @param serializedKey  serialized {@code GcpKmsAeadKey} proto
+   */
   @Override
-  public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
+  public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      GcpKmsAeadKey keyProto = GcpKmsAeadKey.parseFrom(serialized);
+      GcpKmsAeadKey keyProto = GcpKmsAeadKey.parseFrom(serializedKey);
       return getPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid GcpKmsAead key", e);
+      throw new GeneralSecurityException("expected GcpKmsAeadKey proto", e);
     }
   }
 
+  /**
+   * @param key  {@code GcpKmsAeadKey} proto
+   */
   @Override
-  public Aead getPrimitive(GcpKmsAeadKey keyProto) throws GeneralSecurityException {
+  public Aead getPrimitive(MessageLite key) throws GeneralSecurityException {
+    if (!(key instanceof GcpKmsAeadKey)) {
+      throw new GeneralSecurityException("expected GcpKmsAeadKey proto");
+    }
+    GcpKmsAeadKey keyProto = (GcpKmsAeadKey) key;
     try {
       validate(keyProto);
       return new GcpKmsAead(createCloudKmsClient(keyProto), keyProto.getKmsKeyUri());
     } catch (IOException e) {
-      throw new GeneralSecurityException("invalid GcpKmsAead key", e);
+      throw new GeneralSecurityException("expected GcpKmsAeadKey proto", e);
     }
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code GcpKmsAeadKeyFormat} proto
+   * @return new {@code GcpKmsAeadKey} proto
+   */
   @Override
-  public GcpKmsAeadKey newKey(ByteString serialized) throws GeneralSecurityException {
+  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not Implemented");
   }
 
+  /**
+   * @param keyFormat  {@code GcpKmsAeadKeyFormat} proto
+   * @return new {@code GcpKmsAeadKey} proto
+   */
   @Override
-  public GcpKmsAeadKey newKey(GcpKmsAeadKeyFormat format)
+  public MessageLite newKey(MessageLite keyFormat)
       throws GeneralSecurityException {
     throw new GeneralSecurityException("Not Implemented");
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code GcpKmsAeadKeyFormat} proto
+   * @return {@code KeyData} with a new {@code GcpKmsAeadKey} proto
+   */
   @Override
-  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
+  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not Implemented");
   }
 

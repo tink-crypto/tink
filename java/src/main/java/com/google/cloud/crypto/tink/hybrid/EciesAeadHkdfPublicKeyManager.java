@@ -16,7 +16,6 @@
 
 package com.google.cloud.crypto.tink.hybrid;
 
-import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfKeyFormat;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
 import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
 import com.google.cloud.crypto.tink.HybridEncrypt;
@@ -26,6 +25,7 @@ import com.google.cloud.crypto.tink.Util;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
@@ -33,8 +33,7 @@ import java.security.interfaces.ECPublicKey;
  * This key manager produces new instances of {@code EciesAeadHkdfHybridEncrypt}.
  * It doesn't support key generation.
  */
-public final class EciesAeadHkdfPublicKeyManager implements
-    KeyManager<HybridEncrypt, EciesAeadHkdfPublicKey, EciesAeadHkdfKeyFormat> {
+public final class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   EciesAeadHkdfPublicKeyManager() {}
 
   private static final int VERSION = 0;
@@ -42,19 +41,28 @@ public final class EciesAeadHkdfPublicKeyManager implements
   public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey";
 
+  /**
+   * @param serializedKey  serialized {@code EciesAeadHkdfPublicKey} proto
+   */
   @Override
-  public HybridEncrypt getPrimitive(ByteString serialized) throws GeneralSecurityException {
+  public HybridEncrypt getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      EciesAeadHkdfPublicKey recipientKeyProto = EciesAeadHkdfPublicKey.parseFrom(serialized);
+      EciesAeadHkdfPublicKey recipientKeyProto = EciesAeadHkdfPublicKey.parseFrom(serializedKey);
       return getPrimitive(recipientKeyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid EciesAeadHkdfPublicKey.");
+      throw new GeneralSecurityException("expected serialized EciesAeadHkdfPublicKey proto", e);
     }
   }
 
+  /**
+   * @param recipientKey  {@code EciesAeadHkdfPublicKey} proto
+   */
   @Override
-  public HybridEncrypt getPrimitive(EciesAeadHkdfPublicKey recipientKeyProto)
-      throws GeneralSecurityException {
+  public HybridEncrypt getPrimitive(MessageLite recipientKey) throws GeneralSecurityException {
+    if (!(recipientKey instanceof EciesAeadHkdfPublicKey)) {
+      throw new GeneralSecurityException("expected EciesAeadHkdfPublicKey proto");
+    }
+    EciesAeadHkdfPublicKey recipientKeyProto = (EciesAeadHkdfPublicKey) recipientKey;
     validate(recipientKeyProto);
     EciesHkdfKemParams kemParams = recipientKeyProto.getParams().getKemParams();
     ECPublicKey recipientPublicKey = Util.getEcPublicKey(kemParams.getCurveType(),
@@ -66,19 +74,30 @@ public final class EciesAeadHkdfPublicKeyManager implements
         recipientKeyProto.getParams().getEcPointFormat());
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code EciesAeadHkdfKeyFormat} proto
+   * @return new {@code EciesAeadHkdfPublicKey} proto
+   */
   @Override
-  public EciesAeadHkdfPublicKey newKey(ByteString serialized) throws GeneralSecurityException {
+  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented.");
   }
 
+  /**
+   * @param keyFormat  {@code EciesAeadHkdfKeyFormat} proto
+   * @return new {@code EciesAeadHkdfPublicKey} proto
+   */
   @Override
-  public EciesAeadHkdfPublicKey newKey(EciesAeadHkdfKeyFormat keyFormat)
-      throws GeneralSecurityException {
+  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented.");
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code EciesAeadHkdfKeyFormat} proto
+   * @return {@code KeyData} with a new {@code EciesAeadHkdfPrivateKey} proto
+   */
   @Override
-  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
+  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented.");
   }
 

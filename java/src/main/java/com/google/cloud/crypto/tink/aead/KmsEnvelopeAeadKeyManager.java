@@ -25,14 +25,14 @@ import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
  * This key manager generates new {@code KmsEnvelopeAeadKey} keys and produces new instances
  * of {@code KmsEnvelopeAead}.
  */
-public final class KmsEnvelopeAeadKeyManager
-    implements KeyManager<Aead, KmsEnvelopeAeadKey, KmsEnvelopeAeadKeyFormat> {
+public final class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
   KmsEnvelopeAeadKeyManager() {}
 
   private static final int VERSION = 0;
@@ -40,45 +40,71 @@ public final class KmsEnvelopeAeadKeyManager
   public static final String TYPE_URL =
       "type.googleapis.com/google.cloud.crypto.tink.KmsEnvelopeAeadKey";
 
+  /**
+   * @param serializedKey  serialized {@code KmsEnvelopeAeadKey} proto
+   */
   @Override
-  public Aead getPrimitive(ByteString serialized) throws GeneralSecurityException {
+  public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      KmsEnvelopeAeadKey keyProto = KmsEnvelopeAeadKey.parseFrom(serialized);
+      KmsEnvelopeAeadKey keyProto = KmsEnvelopeAeadKey.parseFrom(serializedKey);
       return getPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid KMSEnvelopeAead key");
+      throw new GeneralSecurityException("expected serialized KmSEnvelopeAeadKey proto", e);
     }
   }
 
+  /**
+   * @param key  {@code KmsEnvelopeAeadKey} proto
+   */
   @Override
-  public Aead getPrimitive(KmsEnvelopeAeadKey keyProto) throws GeneralSecurityException {
+  public Aead getPrimitive(MessageLite key) throws GeneralSecurityException {
+    if (!(key instanceof KmsEnvelopeAeadKey)) {
+      throw new GeneralSecurityException("expected KmsEnvelopeAeadKey proto");
+    }
+    KmsEnvelopeAeadKey keyProto = (KmsEnvelopeAeadKey) key;
     validate(keyProto);
     Aead remote = Registry.INSTANCE.getPrimitive(keyProto.getParams().getKmsKey());
     return new KmsEnvelopeAead(keyProto.getParams().getDekTemplate(), remote);
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code KmsEnvelopeAeadKeyFormat} proto
+   * @return new {@code KmsEnvelopeAeadKey} proto
+   */
   @Override
-  public KmsEnvelopeAeadKey newKey(ByteString serialized) throws GeneralSecurityException {
+  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
     try {
-      KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.parseFrom(serialized);
+      KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.parseFrom(serializedKeyFormat);
       return newKey(format);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid KmsEnvelopeAead key format", e);
+      throw new GeneralSecurityException("expected serialized KmsEnvelopeAeadKeyFormat proto", e);
     }
   }
 
+  /**
+   * @param keyFormat  {@code KmsEnvelopeAeadKeyFormat} proto
+   * @return new {@code KmsEnvelopeAeadKey} proto
+   */
   @Override
-  public KmsEnvelopeAeadKey newKey(KmsEnvelopeAeadKeyFormat format)
+  public MessageLite newKey(MessageLite keyFormat)
       throws GeneralSecurityException {
+    if (!(keyFormat instanceof KmsEnvelopeAeadKeyFormat)) {
+      throw new GeneralSecurityException("expected KmsEnvelopeAeadKeyFormat proto");
+    }
+    KmsEnvelopeAeadKeyFormat format = (KmsEnvelopeAeadKeyFormat) keyFormat;
     return KmsEnvelopeAeadKey.newBuilder()
         .setParams(format.getParams())
         .setVersion(VERSION)
         .build();
   }
 
+  /**
+   * @param serializedKeyFormat  serialized {@code KmsEnvelopeAeadKeyFormat} proto
+   * @return {@code KeyData} with a new {@code KmsEnvelopeAeadKey} proto
+   */
   @Override
-  public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
-    KmsEnvelopeAeadKey key = newKey(serialized);
+  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    KmsEnvelopeAeadKey key = (KmsEnvelopeAeadKey) newKey(serializedKeyFormat);
     return KeyData.newBuilder()
         .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())

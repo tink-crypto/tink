@@ -92,8 +92,8 @@ public class EcdsaSignKeyManagerTest {
       EcdsaPrivateKey[] privKeys = new EcdsaPrivateKey[numTests];
       Set<String> keys = new TreeSet<String>();
       for (int j = 0; j < numTests / 3; j++) {
-        privKeys[3 * j] = signManager.newKey(ecdsaFormat);
-        privKeys[3 * j + 1] = signManager.newKey(serializedFormat);
+        privKeys[3 * j] = (EcdsaPrivateKey) signManager.newKey(ecdsaFormat);
+        privKeys[3 * j + 1] = (EcdsaPrivateKey) signManager.newKey(serializedFormat);
         privKeys[3 * j + 2] = EcdsaPrivateKey.parseFrom(
             signManager.newKeyData(keyTemplate.getValue()).getValue());
         keys.add(new String(privKeys[3 * j].toByteArray(), "UTF-8"));
@@ -214,7 +214,7 @@ public class EcdsaSignKeyManagerTest {
           .setParams(ecdsaParams)
           .build();
       try {
-        EcdsaPrivateKey unusedPrivKey = signManager.newKey(ecdsaFormat);
+        EcdsaPrivateKey unusedPrivKey = (EcdsaPrivateKey) signManager.newKey(ecdsaFormat);
         fail("Unsupported key format, should have thrown exception: " + hashType + " "
             + curveType);
       } catch (GeneralSecurityException expected) {
