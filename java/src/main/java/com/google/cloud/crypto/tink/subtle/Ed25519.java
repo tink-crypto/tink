@@ -90,13 +90,6 @@ public final class Ed25519 {
       z = Arrays.copyOf(xyz.z, LIMB_CNT);
     }
 
-    /**
-     * ge_p3_to_p2.c
-     */
-    XYZ(XYZT xyzt) {
-      this(xyzt.xyz);
-    }
-
     XYZ(PartialXYZT partialXYZT) {
       this();
       fromPartialXYZT(this, partialXYZT);
@@ -538,8 +531,9 @@ public final class Ed25519 {
   }
 
   /**
-   * Computes {@code a}*B where B is the generator point.
-   * where a = a[0]+256*a[1]+...+256^31 a[31] B is the Ed25519 base point (x,4/5) with x positive.
+   * Computes {@code a}*B
+   * where a = a[0]+256*a[1]+...+256^31 a[31] and
+   * B is the Ed25519 base point (x,4/5) with x positive.
    *
    * Preconditions:
    * a[31] <= 127
@@ -593,6 +587,18 @@ public final class Ed25519 {
     }
 
     return new XYZ(ret);
+  }
+
+  /**
+   * Computes {@code a}*B
+   * where a = a[0]+256*a[1]+...+256^31 a[31] and
+   * B is the Ed25519 base point (x,4/5) with x positive.
+   *
+   * Preconditions:
+   * a[31] <= 127
+   */
+  static byte[] scalarMultToBytes(byte[] a) {
+    return scalarMult(a).toBytes();
   }
 
   private static byte[] slide(byte[] a) {
@@ -1451,33 +1457,7 @@ public final class Ed25519 {
     s[31] = (byte) (s11 >> 17);
   }
 
-  /**
-   * Defines the KeyPair consisting of a private key and its corresponding public key.
-   */
-  public static final class KeyPair {
-
-    private final byte[] publicKey;
-    private final byte[] privateKey;
-
-    private KeyPair(final byte[] publicKey, final byte[] privateKey) {
-      Preconditions.checkArgument(publicKey.length == PUBLIC_KEY_LEN,
-          "Given public key's length is not %s", PUBLIC_KEY_LEN);
-      Preconditions.checkArgument(privateKey.length == SECRET_KEY_LEN,
-          "Given private key's length is not %s", SECRET_KEY_LEN);
-      this.publicKey = publicKey;
-      this.privateKey = privateKey;
-    }
-
-    public byte[] getPrivateKey() {
-      return Arrays.copyOf(privateKey, privateKey.length);
-    }
-
-    public byte[] getPublicKey() {
-      return Arrays.copyOf(publicKey, publicKey.length);
-    }
-  }
-
-  private static byte[] getHashedScalar(final byte[] privateKey)
+  static byte[] getHashedScalar(final byte[] privateKey)
       throws GeneralSecurityException {
     MessageDigest digest = EngineFactory.MESSAGE_DIGEST.getInstance("SHA-512");
     digest.update(privateKey, 0, FIELD_LEN);
@@ -1493,33 +1473,19 @@ public final class Ed25519 {
   }
 
   /**
-   * Returns a key pair for Ed25519.
+   * Returns the EdDSA signature for the {@code message} based on the {@code hashedPrivateKey}.
    *
+   * @param message to sign
+   * @param publicKey {@link Ed25519#scalarMultToBytes(byte[])} of {@code hashedPrivateKey}
+   * @param hashedPrivateKey {@link Ed25519#getHashedScalar(byte[])} of the private key
+   * @return signature for the {@code message}.
    * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in
    * {@link EngineFactory}.MESSAGE_DIGEST.
    */
-  public static KeyPair generateRandomKeyPair() throws GeneralSecurityException {
-    byte[] privateKey = Random.randBytes(FIELD_LEN);
-
-    byte[] publicKey = scalarMult(getHashedScalar(privateKey)).toBytes();
-    return new KeyPair(publicKey, privateKey);
-  }
-
-  /**
-   * Returns the EdDSA signature for the {@code message} based on the {@code privateKey}.
-   *
-   * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in
-   * {@link EngineFactory}.MESSAGE_DIGEST.
-   */
-  public static byte[] sign(final byte[] message, final byte[] publicKey, final byte[] privateKey)
+  static byte[] sign(final byte[] message, final byte[] publicKey, final byte[] hashedPrivateKey)
       throws GeneralSecurityException {
-    Preconditions.checkArgument(publicKey.length == PUBLIC_KEY_LEN,
-        "Given public key's length is not %s", PUBLIC_KEY_LEN);
-    Preconditions.checkArgument(privateKey.length == SECRET_KEY_LEN,
-        "Given private key's length is not %s", SECRET_KEY_LEN);
     MessageDigest digest = EngineFactory.MESSAGE_DIGEST.getInstance("SHA-512");
-    byte[] az = getHashedScalar(privateKey);
-    digest.update(az, FIELD_LEN, FIELD_LEN);
+    digest.update(hashedPrivateKey, FIELD_LEN, FIELD_LEN);
     digest.update(message);
     byte[] r = digest.digest();
     reduce(r);
@@ -1531,8 +1497,8 @@ public final class Ed25519 {
     digest.update(message);
     byte[] hram = digest.digest();
     reduce(hram);
-    mulAdd(az, hram, az, r);
-    return SubtleUtil.concat(rB, Arrays.copyOfRange(az, 0, FIELD_LEN));
+    mulAdd(hashedPrivateKey, hram, hashedPrivateKey, r);
+    return SubtleUtil.concat(rB, Arrays.copyOfRange(hashedPrivateKey, 0, FIELD_LEN));
   }
 
   /**
@@ -1542,15 +1508,8 @@ public final class Ed25519 {
    * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in
    * {@link EngineFactory}.MESSAGE_DIGEST.
    */
-  public static boolean verify(final byte[] message, final byte[] signature,
+  static boolean verify(final byte[] message, final byte[] signature,
       final byte[] publicKey) throws GeneralSecurityException {
-    Preconditions.checkArgument(signature.length == SIGNATURE_LEN,
-        "The length of the signature is not %s.", SIGNATURE_LEN);
-    Preconditions.checkArgument(((signature[SIGNATURE_LEN - 1] & 0xff) & 224) == 0,
-        "Given signature's 3 most significant bits must be 0.");
-    Preconditions.checkArgument(publicKey.length == PUBLIC_KEY_LEN,
-        "Given public key's length is not %s.", PUBLIC_KEY_LEN);
-
     MessageDigest digest = EngineFactory.MESSAGE_DIGEST.getInstance("SHA-512");
     digest.update(signature, 0, FIELD_LEN);
     digest.update(publicKey);

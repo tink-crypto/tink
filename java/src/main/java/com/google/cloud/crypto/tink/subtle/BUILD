@@ -141,15 +141,32 @@ java_library(
 # Ed25519 subtle
 
 java_library(
-    name = "ed25519",
+    name = "ed25519_internal",
     srcs = [
         "Ed25519.java",
         "Ed25519Constants.java",
     ],
     javacopts = JAVACOPTS,
+    visibility = ["//visibility:private"],
     deps = [
         ":subtle",
         ":x25519",
+        "@com_google_guava//jar",
+    ],
+)
+
+java_library(
+    name = "ed25519",
+    srcs = [
+        "Ed25519Sign.java",
+        "Ed25519Verify.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":ed25519_internal",
+        ":subtle",
+        ":x25519",
+        "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
         "@com_google_guava//jar",
     ],
 )

@@ -18,11 +18,11 @@ package com.google.cloud.crypto.tink.subtle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.TestUtil;
 import java.security.GeneralSecurityException;
+import java.security.SignatureException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -37,15 +37,19 @@ public class Ed25519Test {
   public void testSignVerifyRandomKeys() throws GeneralSecurityException {
     for (int i = 0; i < 1000; i++) {
       byte[] rand = Random.randBytes(new java.util.Random().nextInt(300));
-      Ed25519.KeyPair keyPair = Ed25519.generateRandomKeyPair();
-      byte[] s = Ed25519.sign(rand, keyPair.getPublicKey(), keyPair.getPrivateKey());
-      assertTrue(
-          String.format(
-              "\nMessage: %s\n\nSignature: %s\n\nPrivateKey: %s\n\nPublicKey %s",
-              TestUtil.hexEncode(rand), TestUtil.hexEncode(s),
-              TestUtil.hexEncode(keyPair.getPrivateKey()),
-              TestUtil.hexEncode(keyPair.getPublicKey())),
-          Ed25519.verify(rand, s, keyPair.getPublicKey()));
+      Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
+      Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
+      Ed25519Verify verifier = new Ed25519Verify(keyPair.getPublicKey());
+      byte[] s = signer.sign(rand);
+      try {
+        verifier.verify(s, rand);
+      } catch (SignatureException e) {
+        fail(String.format(
+            "\n\nMessage: %s\nSignature: %s\nPrivateKey: %s\nPublicKey: %s\n",
+            TestUtil.hexEncode(rand), TestUtil.hexEncode(s),
+            TestUtil.hexEncode(keyPair.getPrivateKey()),
+            TestUtil.hexEncode(keyPair.getPublicKey())));
+      }
     }
   }
 
@@ -80,26 +84,27 @@ public class Ed25519Test {
       byte[] publicKey = TestUtil.hexDecode(hexPublicKey);
       byte[] privateKey = TestUtil.hexDecode(hexPrivateKey);
       byte[] message = TestUtil.hexDecode(hexMessage);
-      byte[] sig = Ed25519.sign(message, publicKey, privateKey);
+      Ed25519Sign signer = new Ed25519Sign(privateKey);
+      Ed25519Verify verifier = new Ed25519Verify(publicKey);
+      byte[] sig = signer.sign(message);
       assertEquals(hexSignature, TestUtil.hexEncode(sig));
-      assertTrue(Ed25519.verify(message, sig, publicKey));
+      verifier.verify(sig, message);
     }
 
-    private void testSignForIllegalArgExp(String errorMsg) throws GeneralSecurityException  {
+    void testSignForIllegalArgExp(String errorMsg) throws GeneralSecurityException  {
       try {
-        Ed25519.sign(TestUtil.hexDecode(hexMessage),
-            TestUtil.hexDecode(hexPublicKey),
-            TestUtil.hexDecode(hexPrivateKey));
+        Ed25519Sign signer = new Ed25519Sign(TestUtil.hexDecode(hexPrivateKey));
+        signer.sign(TestUtil.hexDecode(hexMessage));
         fail("Expected IllegalArgumentException");
       } catch (IllegalArgumentException expected) {
         assertThat(expected).hasMessageThat().containsMatch(errorMsg);
       }
     }
 
-    private void testVerifyForIllegalArgExp(String errorMsg) throws GeneralSecurityException  {
+    void testVerifyForIllegalArgExp(String errorMsg) throws GeneralSecurityException  {
       try {
-        Ed25519.verify(TestUtil.hexDecode(hexMessage),
-            TestUtil.hexDecode(hexSignature), TestUtil.hexDecode(hexPublicKey));
+        Ed25519Verify verifier = new Ed25519Verify(TestUtil.hexDecode(hexPublicKey));
+        verifier.verify(TestUtil.hexDecode(hexSignature), TestUtil.hexDecode(hexMessage));
         fail("Expected IllegalArgumentException");
       } catch (IllegalArgumentException expected) {
         assertThat(expected).hasMessageThat().containsMatch(errorMsg);
