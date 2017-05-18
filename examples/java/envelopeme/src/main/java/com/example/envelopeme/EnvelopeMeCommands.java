@@ -53,7 +53,7 @@ class EnvelopeMeCommands {
 
     void validate() {
       try {
-        SubtleUtil.validateNotExist(outFile);
+        SubtleUtil.validateNotExists(outFile);
         SubtleUtil.validateExists(configFile);
         SubtleUtil.validateExists(credentialFile);
         SubtleUtil.validateExists(inFile);

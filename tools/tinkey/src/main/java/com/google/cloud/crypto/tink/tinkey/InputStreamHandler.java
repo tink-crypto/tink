@@ -45,7 +45,7 @@ public class InputStreamHandler extends OptionHandler<InputStream> {
     final String token = params.getParameter(0);
     try {
       File inFile = Paths.get(token).toFile();
-      SubtleUtil.validateNotExist(inFile);
+      SubtleUtil.validateExists(inFile);
       setter.addValue(new FileInputStream(inFile));
     } catch (IOException e) {
       throw new CmdLineException(owner, e.getMessage(), e);

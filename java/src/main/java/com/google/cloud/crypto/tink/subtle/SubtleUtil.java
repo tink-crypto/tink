@@ -108,7 +108,7 @@ public final class SubtleUtil {
   /*
    * @throws IOException if {@code f} exists.
    */
-  public static void validateNotExist(File f) throws IOException {
+  public static void validateNotExists(File f) throws IOException {
     if (f.exists()) {
       throw new IOException(
           String.format("%s exists, please choose another file\n", f.toString()));
