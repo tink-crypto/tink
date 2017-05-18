@@ -65,7 +65,7 @@ public final class KmsEnvelopeAead implements Aead {
       // TODO(thaidn): more efficient parsing?
       ByteBuffer buffer = ByteBuffer.wrap(ciphertext);
       int encryptedDekSize = buffer.getInt();
-      if (encryptedDekSize < 0 || encryptedDekSize > (ciphertext.length - LENGTH_ENCRYPTED_DEK)) {
+      if (encryptedDekSize <= 0 || encryptedDekSize > (ciphertext.length - LENGTH_ENCRYPTED_DEK)) {
         throw new GeneralSecurityException("invalid ciphertext");
       }
       byte[] encryptedDek = new byte[encryptedDekSize];
