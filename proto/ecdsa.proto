@@ -51,7 +51,7 @@ message EcdsaParams {
 // key_type: type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey
 message EcdsaPublicKey {
   // Required.
-  int32 version = 1;
+  uint32 version = 1;
   // Required.
   EcdsaParams params = 2;
   // Affine coordinates of the public key in bigendian representation. The
@@ -67,7 +67,7 @@ message EcdsaPublicKey {
 // key_type: type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey
 message EcdsaPrivateKey {
   // Required.
-  int32 version = 1;
+  uint32 version = 1;
   // Required.
   EcdsaPublicKey public_key = 2;
   // Unsigned big integer in bigendian representation.

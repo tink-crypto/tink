@@ -43,14 +43,14 @@ util::StatusOr<std::string> CryptoFormat::get_output_prefix(
     case OutputPrefixType::TINK: {
       std::string prefix;
       prefix.assign(reinterpret_cast<const char*>(&kTinkStartByte), 1);
-      int32_t key_id = key.key_id();
+      uint32_t key_id = key.key_id();
       prefix.append(reinterpret_cast<char*>(&key_id), 4);
       return prefix;
     }
     case OutputPrefixType::LEGACY: {
       std::string prefix;
       prefix.assign(reinterpret_cast<const char*>(&kLegacyStartByte), 1);
-      int32_t key_id = key.key_id();
+      uint32_t key_id = key.key_id();
       prefix.append(reinterpret_cast<char*>(&key_id), 4);
       return prefix;
     }

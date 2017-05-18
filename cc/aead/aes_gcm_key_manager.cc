@@ -52,7 +52,7 @@ const std::string& AesGcmKeyManager::get_key_type() const {
   return key_type_;
 }
 
-int AesGcmKeyManager::get_version() const {
+uint32_t AesGcmKeyManager::get_version() const {
   return 0;
 }
 
@@ -128,7 +128,7 @@ Status AesGcmKeyManager::Validate(const AesGcmParams& params) const {
 Status AesGcmKeyManager::Validate(const AesGcmKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  int key_size = key.key_value().size();
+  uint32_t key_size = key.key_value().size();
   if (key_size < kMinKeySizeInBytes) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid AesGcmKey: key_value is too short.");

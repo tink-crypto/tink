@@ -59,7 +59,7 @@ class KeyManager {
   virtual const std::string& get_key_type() const = 0;
 
   // Returns the version of this key manager.
-  virtual int get_version() const = 0;
+  virtual uint32_t get_version() const = 0;
 
   bool DoesSupport(google::protobuf::StringPiece key_type) const {
     return (key_type == get_key_type());

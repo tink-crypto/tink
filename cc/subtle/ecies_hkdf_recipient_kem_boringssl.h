@@ -43,7 +43,7 @@ class EciesHkdfRecipientKemBoringSsl {
   util::StatusOr<std::string> GenerateKey(StringPiece kem_bytes, HashType hash,
                                           StringPiece hkdf_salt,
                                           StringPiece hkdf_info,
-                                          int key_size_in_bytes,
+                                          uint32_t key_size_in_bytes,
                                           EcPointFormat point_format) const;
 
  private:

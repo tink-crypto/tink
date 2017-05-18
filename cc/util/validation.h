@@ -32,8 +32,8 @@ util::Status ValidateKeyset(const google::cloud::crypto::tink::Keyset& keyset) {
   return util::Status::OK;
 }
 
-util::Status ValidateVersion(int candidate, int max_expected) {
-  if (candidate < 0 || candidate > max_expected) {
+util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected) {
+  if (candidate > max_expected) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Key has version '%d'; "
                      "only keys with version in range [0..%d] are supported.",

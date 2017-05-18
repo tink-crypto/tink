@@ -26,7 +26,7 @@ namespace tink {
 class Random {
  public:
   // Returns a random string of desired length.
-  static std::string GetRandomBytes(int length);
+  static std::string GetRandomBytes(size_t length);
 };
 
 }  // namespace tink

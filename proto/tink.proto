@@ -125,14 +125,14 @@ message Keyset {
 
     // Identifies a key within a keyset, is a part of metadata
     // of a ciphertext/signature.
-    int32 key_id = 3;
+    uint32 key_id = 3;
 
     OutputPrefixType output_prefix_type = 4;
   }
 
   // Identifies key used to generate new crypto data (encrypt, sign).
   // Required.
-  int32 primary_key_id = 1;
+  uint32 primary_key_id = 1;
 
   // Actual keys in the Keyset.
   // Required.
@@ -152,14 +152,14 @@ message KeysetInfo {
     KeyStatusType status = 2;
 
     // See Keyset.Key.key_id.
-    int32 key_id = 3;
+    uint32 key_id = 3;
 
     // See Keyset.Key.output_prefix_type.
     OutputPrefixType output_prefix_type = 4;
   }
 
   // See Keyset.primary_key_id.
-  int32 primary_key_id = 1;
+  uint32 primary_key_id = 1;
 
   // KeyInfos in the KeysetInfo.
   // Each KeyInfo is corresponding to a Key in the corresponding Keyset.

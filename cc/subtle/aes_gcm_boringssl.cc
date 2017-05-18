@@ -32,7 +32,7 @@ namespace cloud {
 namespace crypto {
 namespace tink {
 
-static const EVP_CIPHER* GetCipherForKeySize(int size_in_bytes) {
+static const EVP_CIPHER* GetCipherForKeySize(uint32_t size_in_bytes) {
   switch (size_in_bytes) {
     case 16:
       return EVP_aes_128_gcm();

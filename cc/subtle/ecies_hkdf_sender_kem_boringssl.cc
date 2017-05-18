@@ -48,7 +48,7 @@ EciesHkdfSenderKemBoringSsl::EciesHkdfSenderKemBoringSsl(
 util::StatusOr<EciesHkdfSenderKemBoringSsl::KemKey>
 EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, StringPiece hkdf_salt,
                                          StringPiece hkdf_info,
-                                         int key_size_in_bytes,
+                                         uint32_t key_size_in_bytes,
                                          EcPointFormat point_format) const {
   if (peer_pub_key_.get() == nullptr) {
     return util::Status(util::error::INTERNAL,

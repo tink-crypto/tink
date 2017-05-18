@@ -54,7 +54,7 @@ class AesGcmKeyManager : public KeyManager<Aead> {
   const std::string& get_key_type() const override;
 
   // Returns the version of this key manager.
-  int get_version() const override;
+  uint32_t get_version() const override;
 
   virtual ~AesGcmKeyManager() {}
 

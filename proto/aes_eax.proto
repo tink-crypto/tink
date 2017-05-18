@@ -24,17 +24,17 @@ option java_outer_classname = "AesEaxProto";
 // only allowing tag size in bytes = 16
 message AesEaxParams {
   // possible value is 12 or 16 bytes.
-  int32 iv_size = 1;
+  uint32 iv_size = 1;
 }
 
 message AesEaxKeyFormat {
   AesEaxParams params = 1;
-  int32 key_size = 2;
+  uint32 key_size = 2;
 }
 
 // key_type: type.googleapis.com/google.cloud.crypto.tink.AesEaxKey
 message AesEaxKey {
-  int32 version = 1;
+  uint32 version = 1;
   AesEaxParams params = 2;
   bytes key_value = 3;
 }

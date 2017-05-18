@@ -28,12 +28,12 @@ message AesGcmParams {
 
 message AesGcmKeyFormat {
   AesGcmParams params = 1;
-  int32 key_size = 2;
+  uint32 key_size = 2;
 }
 
 // key_type: type.googleapis.com/google.cloud.crypto.tink.AesGcmKey
 message AesGcmKey {
-  int32 version = 1;
+  uint32 version = 1;
   AesGcmParams params = 2;
   bytes key_value = 3;
 }

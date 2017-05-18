@@ -22,17 +22,17 @@ option java_package = "com.google.cloud.crypto.tink";
 option java_outer_classname = "AesCtrProto";
 
 message AesCtrParams {
-  int32 iv_size = 1;
+  uint32 iv_size = 1;
 }
 
 message AesCtrKeyFormat {
   AesCtrParams params = 1;
-  int32 key_size = 2;
+  uint32 key_size = 2;
 }
 
 // key_type: type.googleapis.com/google.cloud.crypto.tink.AesCtrKey
 message AesCtrKey {
-  int32 version = 1;
+  uint32 version = 1;
   AesCtrParams params = 2;
   bytes key_value = 3;
 }

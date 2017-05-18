@@ -31,7 +31,7 @@ message Ed25519Params {
 // key_type: type.googleapis.com/google.cloud.crypto.tink.Ed25519PublicKey
 message Ed25519PublicKey {
   // Required.
-  int32 version = 1;
+  uint32 version = 1;
   // Required.
   Ed25519Params params = 2;
   // The public key is 32 bytes, encoded according to
@@ -43,7 +43,7 @@ message Ed25519PublicKey {
 // key_type: type.googleapis.com/google.cloud.crypto.tink.Ed25519PrivateKey
 message Ed25519PrivateKey {
   // Required.
-  int32 version = 1;
+  uint32 version = 1;
   // Required.
   Ed25519PublicKey public_key = 2;
   // The private key is 32 bytes, interpreted as a little-endian integer.

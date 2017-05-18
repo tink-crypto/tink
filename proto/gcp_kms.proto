@@ -26,7 +26,7 @@ message GcpKmsAeadParams {
 
 // key_type: type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey
 message GcpKmsAeadKey {
-  int32 version = 1;
+  uint32 version = 1;
   GcpKmsAeadParams params = 2;
   // Required.
   // The location of a CryptoKey in Google Cloud KMS.

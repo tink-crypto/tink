@@ -36,7 +36,7 @@ message AesCtrHmacAeadKeyFormat {
 
 // key_type: type.googleapis.com/google.cloud.crypto.tink.AesCtrKey
 message AesCtrHmacAeadKey {
-  int32 version = 1;
+  uint32 version = 1;
   AesCtrKey aes_ctr_key = 2;
   HmacKey hmac_key = 3;
 }

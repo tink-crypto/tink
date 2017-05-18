@@ -37,13 +37,13 @@ namespace tink {
 
 // static
 util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
-    HashType hash_type, int tag_size, const std::string& key_value) {
+    HashType hash_type, uint32_t tag_size, const std::string& key_value) {
   util::StatusOr<const EVP_MD*> res = SubtleUtilBoringSSL::EvpHash(hash_type);
   if (!res.ok()) {
     return res.status();
   }
   const EVP_MD* md = res.ValueOrDie();
-  if (static_cast<int>(EVP_MD_size(md)) < tag_size || tag_size <= 0) {
+  if (EVP_MD_size(md) < tag_size) {
     // The key manager is responsible to security policies.
     // The checks here just ensure the preconditions of the primitive.
     // If this fails then something is wrong with the key manager.
@@ -53,7 +53,7 @@ util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
   return std::move(hmac);
 }
 
-HmacBoringSsl::HmacBoringSsl(const EVP_MD* md, int tag_size,
+HmacBoringSsl::HmacBoringSsl(const EVP_MD* md, uint32_t tag_size,
                              const std::string& key_value)
     : md_(md), tag_size_(tag_size), key_value_(key_value) {}
 
@@ -90,7 +90,7 @@ util::Status HmacBoringSsl::VerifyMac(
                         "BoringSSL failed to compute HMAC");
   }
   uint8_t diff = 0;
-  for (int i = 0; i < tag_size_; i++) {
+  for (uint32_t i = 0; i < tag_size_; i++) {
     diff |= buf[i] ^ static_cast<uint8_t>(mac[i]);
   }
   if (diff == 0) {

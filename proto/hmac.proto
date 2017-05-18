@@ -25,17 +25,17 @@ option java_outer_classname = "HmacProto";
 
 message HmacParams {
   HashType hash = 1;    // HashType is an enum.
-  int32 tag_size = 2;
+  uint32 tag_size = 2;
 }
 
 // key_type: type.googleapis.com/google.cloud.crypto.tink.HmacKey
 message HmacKey {
-  int32 version = 1;
+  uint32 version = 1;
   HmacParams params = 2;
   bytes key_value = 3;
 }
 
 message HmacKeyFormat {
   HmacParams params = 1;
-  int32 key_size = 2;
+  uint32 key_size = 2;
 }

@@ -59,7 +59,7 @@ class EciesHkdfSenderKemBoringSsl {
   // symmetric key from the shared secret, hkdf info and hkdf salt.
   util::StatusOr<KemKey> GenerateKey(HashType hash, StringPiece hkdf_salt,
                                      StringPiece hkdf_info,
-                                     int key_size_in_bytes,
+                                     uint32_t key_size_in_bytes,
                                      EcPointFormat point_format) const;
 
  private:

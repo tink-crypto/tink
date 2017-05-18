@@ -23,7 +23,7 @@ namespace crypto {
 namespace tink {
 
 // static
-std::string Random::GetRandomBytes(int length) {
+std::string Random::GetRandomBytes(size_t length) {
   std::unique_ptr<uint8_t[]> buf(new uint8_t[length]);
   // BoringSSL documentation says that it always returns 1; while
   // OpenSSL documentation says that it returns 1 on success, 0 otherwise. We

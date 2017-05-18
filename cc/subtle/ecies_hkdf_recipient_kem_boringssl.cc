@@ -31,7 +31,7 @@ EciesHkdfRecipientKemBoringSsl::EciesHkdfRecipientKemBoringSsl(
 
 util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
     StringPiece kem_bytes, HashType hash, StringPiece hkdf_salt,
-    StringPiece hkdf_info, int key_size_in_bytes,
+    StringPiece hkdf_info, uint32_t key_size_in_bytes,
     EcPointFormat point_format) const {
   auto status_or_ec_point =
       SubtleUtilBoringSSL::EcPointDecode(curve_, point_format, kem_bytes);

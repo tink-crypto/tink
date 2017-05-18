@@ -78,7 +78,7 @@ class TestAeadKeyManager : public KeyManager<Aead> {
     return util::Status::UNKNOWN;
   }
 
-  int get_version() const override {
+  uint32_t get_version() const override {
     return 0;
   }
 

@@ -34,7 +34,7 @@ class HmacBoringSsl : public Mac {
  public:
   static util::StatusOr<std::unique_ptr<Mac>> New(
       google::cloud::crypto::tink::HashType hash_type,
-      int tag_size, const std::string& key_value);
+      uint32_t tag_size, const std::string& key_value);
 
   // Computes and returns the HMAC for 'data'.
   util::StatusOr<std::string> ComputeMac(
@@ -50,11 +50,11 @@ class HmacBoringSsl : public Mac {
 
  private:
   HmacBoringSsl() {}
-  HmacBoringSsl(const EVP_MD* md, int tag_size, const std::string& key_value);
+  HmacBoringSsl(const EVP_MD* md, uint32_t tag_size, const std::string& key_value);
 
   // HmacBoringSsl is not owner of md (it is owned by BoringSSL).
   const EVP_MD* md_;
-  int tag_size_;
+  uint32_t tag_size_;
   std::string key_value_;
 };
 

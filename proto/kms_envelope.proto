@@ -38,6 +38,6 @@ message KmsEnvelopeAeadKeyFormat {
 
 // There is no actual key material in the key.
 message KmsEnvelopeAeadKey {
-  int32 version = 1;
+  uint32 version = 1;
   KmsEnvelopeAeadParams params = 2;
 }

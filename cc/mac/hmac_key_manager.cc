@@ -55,7 +55,7 @@ const std::string& HmacKeyManager::get_key_type() const {
   return key_type_;
 }
 
-int HmacKeyManager::get_version() const {
+uint32_t HmacKeyManager::get_version() const {
   return 0;
 }
 

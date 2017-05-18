@@ -119,7 +119,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
   // Get shared point's x coordinate.
   unsigned curve_size_in_bits = EC_GROUP_get_degree(priv_group.get());
   unsigned curve_size_in_bytes = (curve_size_in_bits + 7) / 8;
-  size_t x_size_in_bytes = BN_num_bytes(shared_x.get());
+  unsigned x_size_in_bytes = BN_num_bytes(shared_x.get());
   std::unique_ptr<uint8_t[]> shared_secret_bytes(
       new uint8_t[curve_size_in_bytes]);
   memset(shared_secret_bytes.get(), 0, curve_size_in_bytes);
@@ -128,9 +128,9 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
                         "The x-coordinate of the shared point is larger than "
                         "the size of the curve");
   }
-  int zeros = static_cast<int>(curve_size_in_bytes - x_size_in_bytes);
-  int written = BN_bn2bin(shared_x.get(), &shared_secret_bytes.get()[zeros]);
-  if (written != static_cast<int>(x_size_in_bytes)) {
+  unsigned zeros = curve_size_in_bytes - x_size_in_bytes;
+  size_t written = BN_bn2bin(shared_x.get(), &shared_secret_bytes.get()[zeros]);
+  if (written != x_size_in_bytes) {
     return util::Status(util::error::INTERNAL, "BN_bn_2bin failed");
   }
   return std::string(reinterpret_cast<char *>(shared_secret_bytes.get()),

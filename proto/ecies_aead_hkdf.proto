@@ -74,7 +74,7 @@ message EciesAeadHkdfParams {
 // key_type: type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey
 message EciesAeadHkdfPublicKey {
   // Required.
-  int32 version = 1;
+  uint32 version = 1;
   // Required.
   EciesAeadHkdfParams params = 2;
 
@@ -90,7 +90,7 @@ message EciesAeadHkdfPublicKey {
 // key_type: type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey
 message EciesAeadHkdfPrivateKey {
   // Required.
-  int32 version = 1;
+  uint32 version = 1;
 
   // Required.
   EciesAeadHkdfPublicKey public_key = 2;
