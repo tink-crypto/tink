@@ -49,8 +49,11 @@ public final class CryptoFormat {
   public static final byte[] RAW_PREFIX = new byte[0];
 
   /**
-   * Convenience method for generating the prefix of all ciphertexts or signatures
-   * produced by the specified {@code key}.
+   * Generates the prefix of all cryptographic outputs (ciphertexts,
+   * signatures, MACs, ...)  produced by the specified {@code key}.
+   * The prefix can be either empty (for RAW-type prefix), or consists
+   * of a 1-byte indicator of the type of the prefix, followed by 4
+   * bytes of {@code key.key_id} in Big Endian encoding.
    *
    * @throws GeneralSecurityException if the prefix type of {@code key} is unknown.
    * @return a prefix.
@@ -58,12 +61,12 @@ public final class CryptoFormat {
   public static byte[] getOutputPrefix(Key key) throws GeneralSecurityException {
     switch (key.getOutputPrefixType()) {
       case LEGACY:
-        return ByteBuffer.allocate(LEGACY_PREFIX_SIZE)
+        return ByteBuffer.allocate(LEGACY_PREFIX_SIZE)  // BIG_ENDIAN by default
             .put(LEGACY_START_BYTE)
             .putInt(key.getKeyId())
             .array();
       case TINK:
-        return ByteBuffer.allocate(TINK_PREFIX_SIZE)
+        return ByteBuffer.allocate(TINK_PREFIX_SIZE)    // BIG_ENDIAN by default
             .put(TINK_START_BYTE)
             .putInt(key.getKeyId())
             .array();

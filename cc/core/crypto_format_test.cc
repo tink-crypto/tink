@@ -50,9 +50,10 @@ TEST_F(CryptoFormatTest, testTinkPrefix) {
   auto prefix = prefix_result.ValueOrDie();
   EXPECT_EQ(CryptoFormat::kNonRawPrefixSize, prefix.length());
   EXPECT_EQ(CryptoFormat::kTinkStartByte, prefix[0]);
-  for (int i = 0; i < 4; i++) {
-    EXPECT_EQ((reinterpret_cast<char*>(&key_id))[i],
-              prefix[i+1]) << "Failed at byte " << i << ".";
+  // key_id should follow in BigEndian order
+  for (int i = 1; i <= 4; i++) {
+    EXPECT_EQ(0xff & (key_id >> ((4-i)*8)), 0xff & prefix[i])
+        << "Failed at byte " << i << ".";
   }
 }
 
@@ -67,9 +68,10 @@ TEST_F(CryptoFormatTest, testLegacyPrefix) {
   auto prefix = prefix_result.ValueOrDie();
   EXPECT_EQ(CryptoFormat::kNonRawPrefixSize, prefix.length());
   EXPECT_EQ(CryptoFormat::kLegacyStartByte, prefix[0]);
-  for (int i = 0; i < 4; i++) {
-    EXPECT_EQ((reinterpret_cast<char*>(&key_id))[i],
-              prefix[i+1]) << "Failed at byte " << i << ".";
+  // key_id should follow in BigEndian order
+  for (int i = 1; i <= 4; i++) {
+    EXPECT_EQ(0xff & (key_id >> ((4-i)*8)), 0xff & prefix[i])
+        << "Failed at byte " << i << ".";
   }
 }
 
