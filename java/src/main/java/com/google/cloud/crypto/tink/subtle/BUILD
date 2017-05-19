@@ -151,7 +151,6 @@ java_library(
     deps = [
         ":subtle",
         ":x25519",
-        "@com_google_guava//jar",
     ],
 )
 
@@ -167,7 +166,6 @@ java_library(
         ":subtle",
         ":x25519",
         "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
-        "@com_google_guava//jar",
     ],
 )
 

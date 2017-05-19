@@ -19,7 +19,6 @@ package com.google.cloud.crypto.tink.subtle;
 import static com.google.cloud.crypto.tink.subtle.Curve25519.FIELD_LEN;
 
 import com.google.cloud.crypto.tink.PublicKeySign;
-import com.google.common.base.Preconditions;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -47,8 +46,11 @@ public class Ed25519Sign implements PublicKeySign {
    */
   public Ed25519Sign(final byte[] privateKey)
       throws GeneralSecurityException {
-    Preconditions.checkArgument(privateKey.length == SECRET_KEY_LEN,
-        "Given private key's length is not %s", SECRET_KEY_LEN);
+    if (privateKey.length != SECRET_KEY_LEN) {
+      throw new IllegalArgumentException(
+          String.format("Given private key's length is not %s", SECRET_KEY_LEN));
+    }
+
     this.hashedPrivateKey = Ed25519.getHashedScalar(privateKey);
     this.publicKey = Ed25519.scalarMultToBytes(this.hashedPrivateKey);
   }

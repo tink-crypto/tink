@@ -24,7 +24,6 @@ import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.D;
 import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.D2;
 import static com.google.cloud.crypto.tink.subtle.Ed25519Constants.SQRTM1;
 
-import com.google.common.base.Preconditions;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -197,15 +196,17 @@ public final class Ed25519 {
       Curve25519.sub(check, vxx, u);  // vx^2-u
       if (isNonZeroVarTime(check)) {
         Curve25519.sum(check, vxx, u);  // vx^2+u
-        Preconditions.checkArgument(isNonZeroVarTime(check),
-            "Cannot convert given bytes to extended projective coordinates. "
-                + "No square root exists for modulo 2^255-19");
+        if (!isNonZeroVarTime(check)) {
+          throw new IllegalArgumentException("Cannot convert given bytes to extended projective "
+              + "coordinates. No square root exists for modulo 2^255-19");
+        }
         Curve25519.mult(x, x, SQRTM1);
       }
 
-      Preconditions.checkArgument(isNonZeroVarTime(x) || (s[31] & 0xff) >> 7 == 0,
-          "Cannot convert given bytes to extended projective coordinates. Computed x is zero and "
-              + "encoded x's least significant bit is zero");
+      if (!isNonZeroVarTime(x) && (s[31] & 0xff) >> 7 != 0) {
+        throw new IllegalArgumentException("Cannot convert given bytes to extended projective "
+            + "coordinates. Computed x is zero and encoded x's least significant bit is zero");
+      }
       if (getLsb(x) == ((s[31] & 0xff) >> 7)) {
         neg(x, x);
       }

@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Unit tests for Curve25519.
+ * Unit tests for Ed25519.
  */
 @RunWith(JUnit4.class)
 public class Ed25519Test {

@@ -19,7 +19,6 @@ package com.google.cloud.crypto.tink.subtle;
 import static com.google.cloud.crypto.tink.subtle.Curve25519.FIELD_LEN;
 
 import com.google.cloud.crypto.tink.PublicKeyVerify;
-import com.google.common.base.Preconditions;
 import java.security.GeneralSecurityException;
 import java.security.SignatureException;
 
@@ -46,17 +45,22 @@ public class Ed25519Verify implements PublicKeyVerify {
 
   public Ed25519Verify(final byte[] publicKey)
       throws GeneralSecurityException {
-    Preconditions.checkArgument(publicKey.length == PUBLIC_KEY_LEN,
-        "Given public key's length is not %s.", PUBLIC_KEY_LEN);
+    if (publicKey.length != PUBLIC_KEY_LEN) {
+      throw new IllegalArgumentException(
+          String.format("Given public key's length is not %s.", PUBLIC_KEY_LEN));
+    }
     this.publicKey = publicKey;
   }
 
   @Override
   public void verify(byte[] signature, byte[] data) throws GeneralSecurityException {
-    Preconditions.checkArgument(signature.length == SIGNATURE_LEN,
-        "The length of the signature is not %s.", SIGNATURE_LEN);
-    Preconditions.checkArgument(((signature[SIGNATURE_LEN - 1] & 0xff) & 224) == 0,
-        "Given signature's 3 most significant bits must be 0.");
+    if (signature.length != SIGNATURE_LEN) {
+      throw new IllegalArgumentException(
+          String.format("The length of the signature is not %s.", SIGNATURE_LEN));
+    }
+    if (((signature[SIGNATURE_LEN - 1] & 0xff) & 224) != 0) {
+      throw new IllegalArgumentException("Given signature's 3 most significant bits must be 0.");
+    }
     if (!Ed25519.verify(data, signature, publicKey)) {
       throw new SignatureException("Signature check failed.");
     }
