@@ -35,12 +35,13 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybrid",
         "//proto:aes_ctr_hmac_aead_java_proto",
+        "//proto:aes_ctr_java_proto",
         "//proto:aes_gcm_java_proto",
         "//proto:common_java_proto",
         "//proto:ecies_aead_hkdf_java_proto",
         "//proto:hmac_java_proto",
         "//proto:tink_java_proto",
-        "//proto:tink_java_proto_compile_imports",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )
 
@@ -57,12 +58,13 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybrid",
         "//proto:aes_ctr_hmac_aead_java_proto_lite",
+        "//proto:aes_ctr_java_proto_lite",
         "//proto:aes_gcm_java_proto_lite",
         "//proto:common_java_proto_lite",
         "//proto:ecies_aead_hkdf_java_proto_lite",
         "//proto:hmac_java_proto_lite",
         "//proto:tink_java_proto_lite",
-        "//proto:tink_java_proto_lite_compile_imports",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )
 
@@ -90,12 +92,13 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybrid",
         "//proto:aes_ctr_hmac_aead_java_proto",
+        "//proto:aes_ctr_java_proto",
         "//proto:aes_gcm_java_proto",
         "//proto:common_java_proto",
         "//proto:ecies_aead_hkdf_java_proto",
         "//proto:hmac_java_proto",
         "//proto:tink_java_proto",
-        "//proto:tink_java_proto_compile_imports",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )
 
@@ -112,11 +115,12 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybrid",
         "//proto:aes_ctr_hmac_aead_java_proto_lite",
+        "//proto:aes_ctr_java_proto_lite",
         "//proto:aes_gcm_java_proto_lite",
         "//proto:common_java_proto_lite",
         "//proto:ecies_aead_hkdf_java_proto_lite",
         "//proto:hmac_java_proto_lite",
         "//proto:tink_java_proto_lite",
-        "//proto:tink_java_proto_lite_compile_imports",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )

@@ -29,7 +29,7 @@ cc_library(
         "//cc/util:statusor",
         "//cc/util:validation",
         "//proto:tink_cc_proto",
-        "@com_github_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -39,7 +39,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
-        "@com_github_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -50,7 +50,7 @@ cc_library(
     deps = [
         "//cc/util:status",
         "//cc/util:statusor",
-        "@com_github_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -76,7 +76,7 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
-        "@com_github_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -94,7 +94,7 @@ cc_library(
         "//cc/util:statusor",
         "//cc/util:validation",
         "//proto:tink_cc_proto",
-        "@com_github_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -118,7 +118,7 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
-        "@com_github_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -166,7 +166,7 @@ cc_test(
         ":primitive_set",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
-        "@com_github_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf_lite",
         "@gtest//:gtest",
     ],
 )

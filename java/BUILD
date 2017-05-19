@@ -49,6 +49,7 @@ java_library(
     ],
     exports = [
         "//proto:aes_ctr_hmac_aead_java_proto",
+        "//proto:aes_ctr_java_proto",
         "//proto:aes_eax_java_proto",
         "//proto:aes_gcm_java_proto",
         "//proto:common_java_proto",
@@ -58,7 +59,6 @@ java_library(
         "//proto:hmac_java_proto",
         "//proto:kms_envelope_java_proto",
         "//proto:tink_java_proto",
-        "//proto:tink_java_proto_compile_imports",
     ],
 )
 
@@ -141,6 +141,7 @@ java_library(
     deps = [
         ":testonly",
         "@com_google_guava//jar",
+        "@com_google_protobuf_java//:protobuf_java",
         "@junit_junit_4//jar",
     ],
 )
@@ -163,6 +164,7 @@ java_library(
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
         "@com_google_guava//jar",
+        "@com_google_protobuf_java//:protobuf_java",
         "@com_google_truth//jar",
         "@junit_junit_4//jar",
     ],

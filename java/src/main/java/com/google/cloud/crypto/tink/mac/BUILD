@@ -31,7 +31,7 @@ java_library(
         "//proto:common_java_proto",
         "//proto:hmac_java_proto",
         "//proto:tink_java_proto",
-        "//proto:tink_java_proto_compile_imports",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )
 
@@ -46,6 +46,6 @@ java_library(
         "//proto:common_java_proto_lite",
         "//proto:hmac_java_proto_lite",
         "//proto:tink_java_proto_lite",
-        "//proto:tink_java_proto_lite_compile_imports",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )

@@ -72,7 +72,7 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
-        "//proto:tink_java_proto_compile_imports",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )
 
@@ -84,7 +84,7 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//proto:common_java_proto_lite",
         "//proto:tink_java_proto_lite",
-        "//proto:tink_java_proto_lite_compile_imports",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )
 
@@ -98,7 +98,7 @@ java_library(
         ":tink",
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
-        "//proto:tink_java_proto_compile_imports",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )
 
@@ -112,7 +112,7 @@ java_library(
         ":tink",
         "//proto:common_java_proto_lite",
         "//proto:tink_java_proto_lite",
-        "//proto:tink_java_proto_lite_compile_imports",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )
 
@@ -127,7 +127,7 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
-        "//proto:tink_java_proto_compile_imports",
         "@com_google_guava//jar",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )

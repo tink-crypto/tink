@@ -30,6 +30,7 @@ java_library(
         "@com_google_http_client//jar",
         "@com_google_http_client_jackson2//jar",
         "@com_google_oauth_client//jar",
+        "@com_google_protobuf_java//:protobuf_java",
     ],
 )
 
@@ -66,6 +67,7 @@ java_library(
         "//java:subtle",
         "//java:test_util",
         "@com_fasterxml_jackson_core//jar",
+        "@com_google_protobuf_java//:protobuf_java",
         "@junit_junit_4//jar",
     ],
 )

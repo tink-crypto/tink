@@ -47,7 +47,7 @@ cc_library(
         "//cc:aead",
         "//cc:mac",
         "//proto:tink_cc_proto",
-        "@com_github_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 

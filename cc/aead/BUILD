@@ -12,7 +12,7 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
-        "@com_github_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -51,7 +51,7 @@ cc_library(
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
-        "@com_github_google_protobuf//:protobuf_lite",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
