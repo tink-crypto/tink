@@ -16,7 +16,9 @@
 
 package com.google.cloud.crypto.tink;
 
+import com.google.cloud.crypto.tink.KeysetManager;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
+import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -47,5 +49,19 @@ public final class CleartextKeysetHandle {
   public static final KeysetHandle parseFrom(Keyset keyset)
       throws GeneralSecurityException {
     return new KeysetHandle(keyset);
+  }
+
+  /**
+   * @return a new keyset handle that contains a single fresh key generated
+   * according to the {@code keyTemplate}.
+   * @throws GeneralSecurityException
+   */
+  public static final KeysetHandle generateNew(KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
+    return new KeysetManager.Builder()
+        .setKeyTemplate(keyTemplate)
+        .build()
+        .rotate()
+        .getKeysetHandle();
   }
 }

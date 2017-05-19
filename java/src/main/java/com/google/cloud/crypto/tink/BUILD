@@ -95,6 +95,7 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
+        ":key_management_restricted",
         ":tink",
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
@@ -109,6 +110,7 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
+        ":key_management_restricted",
         ":tink",
         "//proto:common_java_proto_lite",
         "//proto:tink_java_proto_lite",

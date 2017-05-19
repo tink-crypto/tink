@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
@@ -55,6 +56,14 @@ public class CleartextKeysetHandleTest {
     Keyset keyset1 = manager.getKeysetHandle().getKeyset();
     KeysetHandle handle1 = CleartextKeysetHandle.parseFrom(keyset1.toByteArray());
     assertEquals(keyset1, handle1.getKeyset());
+
+    KeysetHandle handle2 = CleartextKeysetHandle.generateNew(template);
+    Keyset keyset2 = handle2.getKeyset();
+    assertEquals(1, keyset2.getKeyCount());
+    Keyset.Key key2 = keyset2.getKey(0);
+    assertEquals(keyset2.getPrimaryKeyId(), key2.getKeyId());
+    assertEquals(template.getTypeUrl(), key2.getKeyData().getTypeUrl());
+    Mac mac = MacFactory.getPrimitive(handle2);  // instantiation should succeed
   }
 
   @Test
