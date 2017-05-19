@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentMap;
  * PrimitiveSet is an auxiliary class used for supporting key rotation: primitives in a set
  * correspond to keys in a keyset.  Users will usually work with primitive instances,
  * which essentially wrap primitive sets.  For example an instance of an Aead-primitive
- * for a given keyset holds a set of Aead-primitives corresponding to the keys in the keyset,
+ * for a given keyset holds a set of Aead-primitivies corresponding to the keys in the keyset,
  * and uses the set members to do the actual crypto operations: to encrypt data the primary
  * Aead-primitive from the set is used, and upon decryption the ciphertext's prefix
  * determines the id of the primitive from the set. <p>

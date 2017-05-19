@@ -538,6 +538,7 @@ public final class Ed25519 {
    * Preconditions:
    * a[31] <= 127
    */
+  @SuppressWarnings("NarrowingCompoundAssignment")
   private static XYZ scalarMult(byte[] a) {
     byte[] e = new byte[2 * FIELD_LEN];
     for (int i = 0; i < FIELD_LEN; i++) {
@@ -601,8 +602,8 @@ public final class Ed25519 {
     return scalarMult(a).toBytes();
   }
 
+  @SuppressWarnings("NarrowingCompoundAssignment")
   private static byte[] slide(byte[] a) {
-
     byte[] r = new byte[256];
     // Writes each bit in a[0..31] into r[0..255]:
     // a = a[0]+256*a[1]+...+256^31*a[31] is equal to

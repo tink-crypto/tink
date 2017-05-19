@@ -22,9 +22,9 @@ two operations:
    ciphertext
  * `decrypt(ciphertext, associated_data)`, which decrypts the given `ciphertext`
    (using `associated_data` as additional AEAD-input) and returns the resulting
-   plaintext
+   ciphertext
 
-Currently Tink already provides primitives for several common cryptographic
+Currently Tink already provides primitives for several common crryptographic
 operations (like symmetric encryption, message authentication codes, digital
 signatures, hybrid encryption), and additional primitives are in preparation.
 Moreover, adding new primitives or adding custom implementations of existing
@@ -34,7 +34,7 @@ The basic use of Tink proceeds in three steps:
 
 1. Load or generate the cryptographic key material.
 2. Use the key material to get an instance of a primitive.
-3. Use the primitive to accomplish the cryptographic task.
+3. Use the primitive to acomplish the cryptographic task.
 
 To be more concrete, here is how these steps would look like to perform
 symmetric encryption (AEAD) in a Java program:
@@ -83,7 +83,7 @@ primitive:
 
 Before a specific implementation of a primitive can be used the Tink library
 must be the initialized so that it "knows" the desired implementations. This
-initialization happens via _registration_ of the implementations.  For
+intialization happens via _registration_ of the implementations.  For
 example if one would like to use the standard implementations of AEAD and MAC
 primitives offered by Tink, the initialization would look as follows:
 
@@ -101,7 +101,7 @@ Now that you already know how to use Tink (it is really that simple!), you can
 proceed with using it in your code.  Alternatively, you can continue reading the
 sections below to get more information about the library: its features,
 security, structure, extensibility, and more.  To get direct instructions on how
-to accomplish certain tasks with Tink
+to acomplish certain tasks with Tink
 see [Java HOW-TO](https://github.com/google/tink/blob/master/doc/JAVA-HOWTO.md).
 
 ## Tink overview
@@ -131,7 +131,7 @@ data and DEK, use the KMS to decrypt DEK, and use decrypted DEK to decrypt the
 data.
 
 **Key Management** In addition to cryptographic operations Tink provides also
-support for key management features like key versioning, key rotation, storing
+support for key management featuers like key versioning, key rotation, storing
 and loading keys from key management systems, and more. For example, if a
 cryptographic scheme is found broken, one can switch to a new implementation of
 the primitive by rotating the key without changing or recompiling code.
@@ -212,7 +212,7 @@ type.
 To take advantage of key rotation and other key management features, a Tink user
 works usually not with single keys, but with **keysets**, which are just sets of
 keys with some additional parameters and metadata.  In particular, this extra
-information in the keyset determines which key is _primary_ (i.e. will be used to
+information in the keyset dermines which key is _primary_ (i.e. will be used to
 create new cryptographic data like ciphertexts, or signatures), which keys are
 _enabled_ (i.e. can be used to process existing cryptographic data, like decrypt
 ciphertext or verify signatures), and which keys should not be used any more.

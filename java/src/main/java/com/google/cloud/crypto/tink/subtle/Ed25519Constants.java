@@ -16,7 +16,7 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
-import static com.google.cloud.crypto.tink.subtle.Ed25519.CachedXYT;
+import com.google.cloud.crypto.tink.subtle.Ed25519.CachedXYT;
 
 /**
  * Constants used in {@link Ed25519}.
