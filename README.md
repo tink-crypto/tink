@@ -6,6 +6,9 @@ cryptographers and security engineers at Google, but it is **not an official
 Google product**.  In particular, is not meant as a replacement or successor
 of [Keyczar](https://github.com/google/keyczar).
 
+**IMPORTANT: Tink is still a work-in-progress, and API might change or be
+deprecated without a notice.**
+
 ## Getting started
 
 Tink performs cryptographic tasks via so-called _primitives_, each of which is
