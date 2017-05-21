@@ -24,7 +24,7 @@ two operations:
    (using `associated_data` as additional AEAD-input) and returns the resulting
    ciphertext
 
-Currently Tink already provides primitives for several common crryptographic
+Currently Tink already provides primitives for several common cryptographic
 operations (like symmetric encryption, message authentication codes, digital
 signatures, hybrid encryption), and additional primitives are in preparation.
 Moreover, adding new primitives or adding custom implementations of existing
