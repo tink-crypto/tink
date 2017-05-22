@@ -22,7 +22,7 @@ two operations:
    ciphertext
  * `decrypt(ciphertext, associated_data)`, which decrypts the given `ciphertext`
    (using `associated_data` as additional AEAD-input) and returns the resulting
-   ciphertext
+   plaintext
 
 Currently Tink already provides primitives for several common crryptographic
 operations (like symmetric encryption, message authentication codes, digital
