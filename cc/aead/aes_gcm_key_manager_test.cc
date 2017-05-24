@@ -193,7 +193,7 @@ TEST_F(AesGcmKeyManagerTest, testPrimitives) {
     KeyData key_data;
     key_data.set_type_url(key_type_prefix + key.GetDescriptor()->full_name());
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key);
+    auto result = key_manager.GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
     auto aes_gcm = std::move(result.ValueOrDie());
     auto encrypt_result = aes_gcm->Encrypt(plaintext, aad);

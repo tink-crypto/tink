@@ -11,6 +11,8 @@ cc_library(
     name = "cc",
     hdrs = [
         "aead.h",
+        "hybrid_decrypt.h",
+        "hybrid_encrypt.h",
         "key_manager.h",
         "keyset_handle.h",
         "mac.h",
@@ -19,6 +21,8 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":aead",
+        ":hybrid_decrypt",
+        ":hybrid_encrypt",
         ":key_manager",
         ":keyset_handle",
         ":mac",
@@ -36,6 +40,26 @@ cc_library(
 cc_library(
     name = "aead",
     hdrs = ["aead.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//cc/util:statusor",
+        "@com_google_protobuf//:protobuf_lite",
+    ],
+)
+
+cc_library(
+    name = "hybrid_decrypt",
+    hdrs = ["hybrid_decrypt.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//cc/util:statusor",
+        "@com_google_protobuf//:protobuf_lite",
+    ],
+)
+
+cc_library(
+    name = "hybrid_encrypt",
+    hdrs = ["hybrid_encrypt.h"],
     visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",

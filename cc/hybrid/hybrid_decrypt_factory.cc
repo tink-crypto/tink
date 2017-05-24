@@ -14,12 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/mac/mac_factory.h"
+#include "cc/hybrid/hybrid_decrypt_factory.h"
 
-#include "cc/mac.h"
+#include "cc/hybrid_decrypt.h"
+#include "cc/key_manager.h"
+#include "cc/keyset_handle.h"
 #include "cc/registry.h"
-#include "cc/mac/hmac_key_manager.h"
-#include "cc/mac/mac_set_wrapper.h"
+#include "cc/hybrid/ecies_aead_hkdf_private_key_manager.h"
+#include "cc/hybrid/hybrid_decrypt_set_wrapper.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
@@ -28,32 +30,33 @@ namespace crypto {
 namespace tink {
 
 // static
-util::Status MacFactory::RegisterStandardKeyTypes() {
-  auto manager = new HmacKeyManager();
+util::Status HybridDecryptFactory::RegisterStandardKeyTypes() {
+  auto manager = new EciesAeadHkdfPrivateKeyManager();
   util::Status status = Registry::get_default_registry().RegisterKeyManager(
       manager->get_key_type(), manager);
   return status;
 }
 
 // static
-util::Status MacFactory::RegisterLegacyKeyTypes() {
+util::Status HybridDecryptFactory::RegisterLegacyKeyTypes() {
   return util::Status::OK;
 }
 
 // static
-util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
-    const KeysetHandle& keyset_handle) {
+util::StatusOr<std::unique_ptr<HybridDecrypt>>
+HybridDecryptFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
   return GetPrimitive(keyset_handle, nullptr);
 }
 
 // static
-util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
-    const KeysetHandle& keyset_handle,
-    const KeyManager<Mac>* custom_key_manager) {
-  auto primitives_result = Registry::get_default_registry().GetPrimitives<Mac>(
-      keyset_handle, custom_key_manager);
+util::StatusOr<std::unique_ptr<HybridDecrypt>>
+HybridDecryptFactory::GetPrimitive(const KeysetHandle& keyset_handle,
+    const KeyManager<HybridDecrypt>* custom_key_manager) {
+  auto primitives_result = Registry::get_default_registry()
+      .GetPrimitives<HybridDecrypt>(keyset_handle, custom_key_manager);
   if (primitives_result.ok()) {
-    return MacSetWrapper::NewMac(std::move(primitives_result.ValueOrDie()));
+    return HybridDecryptSetWrapper::NewHybridDecrypt(
+        std::move(primitives_result.ValueOrDie()));
   }
   return primitives_result.status();
 }

@@ -36,15 +36,18 @@ class AesGcmKeyManager : public KeyManager<Aead> {
  public:
   AesGcmKeyManager() : key_type_(kKeyType) {}
 
-  // Constructs an instance of AES-GCM Aead for the given 'key'.
+  // Constructs an instance of AES-GCM Aead for the given 'key_data',
+  // which must contain AesGcmKey-proto.
   util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
       const google::crypto::tink::KeyData& key_data) const override;
 
-  // Constructs an instance of AES-GCM Aead for the given 'key'.
+  // Constructs an instance of AES-GCM Aead for the given 'key',
+  // which must be AesGcmKey-proto.
   util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const google::protobuf::Message& key) const override;
 
-  // Generates a new random AES-GCM key, based on the specified 'key_template'.
+  // Generates a new random AesGcmKey, based on the specified 'key_template',
+  // which must contain AesGcmKeyFormat-proto.
   util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
       const google::crypto::tink::KeyTemplate& key_template)
       const override;

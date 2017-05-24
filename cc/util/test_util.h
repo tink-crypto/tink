@@ -20,6 +20,8 @@
 #include <string>
 
 #include "cc/aead.h"
+#include "cc/hybrid_decrypt.h"
+#include "cc/hybrid_encrypt.h"
 #include "cc/mac.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
@@ -106,6 +108,52 @@ class DummyAead : public Aead {
 
  private:
   std::string aead_name_;
+};
+
+// A dummy implementation of HybridEncrypt-interface.
+// An instance of DummyHybridEncrypt can be identified by a name specified
+// as a parameter of the constructor.
+class DummyHybridEncrypt : public HybridEncrypt {
+ public:
+  DummyHybridEncrypt(google::protobuf::StringPiece hybrid_name)
+      : hybrid_name_(hybrid_name) {}
+
+  // Computes a dummy ciphertext, which is concatenation of provided 'plaintext'
+  // with the name of this DummyHybridEncrypt.
+  util::StatusOr<std::string> Encrypt(
+      google::protobuf::StringPiece plaintext,
+      google::protobuf::StringPiece context_info) const override {
+    return plaintext.ToString().append(hybrid_name_);
+  }
+
+ private:
+  std::string hybrid_name_;
+};
+
+// A dummy implementation of HybridDecrypt-interface.
+// An instance of DummyHybridDecrypt can be identified by a name specified
+// as a parameter of the constructor.
+class DummyHybridDecrypt : public HybridDecrypt {
+ public:
+  DummyHybridDecrypt(google::protobuf::StringPiece hybrid_name)
+      : hybrid_name_(hybrid_name) {}
+
+  // Decrypts a dummy ciphertext, which should be a concatenation
+  // of a plaintext with the name of this DummyHybridDecrypt.
+  util::StatusOr<std::string> Decrypt(
+      google::protobuf::StringPiece ciphertext,
+      google::protobuf::StringPiece additional_data) const override {
+    std::string c = ciphertext.ToString();
+    size_t pos = c.rfind(hybrid_name_);
+    if (pos != std::string::npos &&
+        ciphertext.length() == (unsigned)(hybrid_name_.length() + pos)) {
+      return c.substr(0, pos);
+    }
+    return util::Status(util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
+  }
+
+ private:
+  std::string hybrid_name_;
 };
 
 // A dummy implementation of Mac-interface.

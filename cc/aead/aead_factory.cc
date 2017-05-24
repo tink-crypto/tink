@@ -17,6 +17,7 @@
 #include "cc/aead/aead_factory.h"
 
 #include "cc/aead.h"
+#include "cc/key_manager.h"
 #include "cc/keyset_handle.h"
 #include "cc/registry.h"
 #include "cc/aead/aes_gcm_key_manager.h"
@@ -30,9 +31,9 @@ namespace tink {
 
 // static
 util::Status AeadFactory::RegisterStandardKeyTypes() {
+  auto manager = new AesGcmKeyManager();
   util::Status status = Registry::get_default_registry().RegisterKeyManager(
-      "type.googleapis.com/google.crypto.tink.AesGcmKey",
-      new AesGcmKeyManager());
+      manager->get_key_type(), manager);
   return status;
 }
 

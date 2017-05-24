@@ -45,6 +45,8 @@ cc_library(
         ":status",
         ":statusor",
         "//cc:aead",
+        "//cc:hybrid_decrypt",
+        "//cc:hybrid_encrypt",
         "//cc:mac",
         "//proto:tink_cc_proto",
         "@com_google_protobuf//:protobuf_lite",

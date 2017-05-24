@@ -17,37 +17,37 @@
 #include <algorithm>
 #include <vector>
 
-#ifndef TINK_MAC_HMAC_KEY_MANAGER_H_
-#define TINK_MAC_HMAC_KEY_MANAGER_H_
+#ifndef TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
+#define TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
 
-#include "cc/mac.h"
+#include "cc/hybrid_decrypt.h"
 #include "cc/key_manager.h"
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/message.h"
-#include "proto/hmac.pb.h"
+#include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
-class HmacKeyManager : public KeyManager<Mac> {
+class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
  public:
-  HmacKeyManager() : key_type_(kKeyType) {}
+  EciesAeadHkdfPrivateKeyManager() : key_type_(kKeyType) {}
 
-  // Constructs an instance of HMAC-Mac for the given 'key_data',
-  // which must contain HmacKey-proto.
-  util::StatusOr<std::unique_ptr<Mac>> GetPrimitive(
+  // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
+  // for the given 'key_data', which must contain EciesAeadHkdfPrivateKey-proto.
+  util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitive(
       const google::crypto::tink::KeyData& key_data) const override;
 
-  // Constructs an instance of HMAC-Mac for the given 'key',
-  // which must be HmacKey-proto.
-  util::StatusOr<std::unique_ptr<Mac>>
+  // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
+  // for the given 'key', which must be EciesAeadHkdfPrivateKey-proto.
+  util::StatusOr<std::unique_ptr<HybridDecrypt>>
   GetPrimitive(const google::protobuf::Message& key) const override;
 
-  // Generates a new random HmacKey, based on the specified 'key_template',
-  // which must contain HmacKeyFormat-proto.
+  // Generates a new random EciesAeadHkdfPrivateKey, based on
+  // the given 'key_template', which must contain EciesAeadHkdfKeyFormat-proto.
   util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
       const google::crypto::tink::KeyTemplate& key_template)
       const override;
@@ -58,28 +58,29 @@ class HmacKeyManager : public KeyManager<Mac> {
   // Returns the version of this key manager.
   uint32_t get_version() const override;
 
-  virtual ~HmacKeyManager() {}
+  virtual ~EciesAeadHkdfPrivateKeyManager() {}
 
  private:
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
   static constexpr char kKeyType[] =
-      "type.googleapis.com/google.crypto.tink.HmacKey";
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
 
   std::string key_type_;
 
-  // Constructs an instance of HMAC-Mac for the given 'key'.
-  util::StatusOr<std::unique_ptr<Mac>>
-  GetPrimitiveImpl(const google::crypto::tink::HmacKey& key) const;
+  // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
+  // for the given 'key'.
+  util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitiveImpl(
+      const google::crypto::tink::EciesAeadHkdfPrivateKey& key) const;
 
   util::Status Validate(
-      const google::crypto::tink::HmacParams& params) const;
+      const google::crypto::tink::EciesAeadHkdfParams& params) const;
   util::Status Validate(
-      const google::crypto::tink::HmacKey& key) const;
+      const google::crypto::tink::EciesAeadHkdfPrivateKey& key) const;
   util::Status Validate(
-      const google::crypto::tink::HmacKeyFormat& key_format) const;
+      const google::crypto::tink::EciesAeadHkdfKeyFormat& format) const;
 };
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_MAC_HMAC_KEY_MANAGER_H_
+#endif  // TINK_HYBRID_ECIES_AEAD_HKDF_PUBLIC_KEY_MANAGER_H_
