@@ -292,7 +292,7 @@ Tink is maintained by:
 
 ## Contact and mailing list
 
-If you want to contribute, please read [CONTRIBUTING](https://github.com/google/tink/blob/master/CONTRIBUTING.md) and send us pull requests.
+If you want to contribute, please read CONTRIBUTING and send us pull requests.
 You can also report bugs or request new tests.
 
 If you'd like to talk to our developers or get notified about major new tests,

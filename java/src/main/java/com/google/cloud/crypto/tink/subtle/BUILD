@@ -179,3 +179,16 @@ java_binary(
         ":x25519",
     ],
 )
+
+# ChaCha20-Poly1305 subtle
+java_library(
+    name = "chacha20",
+    srcs = [
+        "ChaCha20.java",
+        "IndCpaCipher.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":subtle",
+    ],
+)

@@ -72,6 +72,7 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_envelope",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:chacha20",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:ed25519",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:gcp_credential",
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybrid",
