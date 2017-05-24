@@ -7,7 +7,8 @@ Google product**.  In particular, is not meant as a replacement or successor
 of [Keyczar](https://github.com/google/keyczar).
 
 **IMPORTANT: Tink is still a work-in-progress, and API might change or be
-deprecated without a notice.**
+deprecated without a notice. We hope to change this policy once Tink
+stabilizes.**
 
 ## Getting started
 
@@ -22,28 +23,29 @@ two operations:
    ciphertext
  * `decrypt(ciphertext, associated_data)`, which decrypts the given `ciphertext`
    (using `associated_data` as additional AEAD-input) and returns the resulting
-   ciphertext
+   plaintext
 
-Currently Tink already provides primitives for several common crryptographic
+Currently Tink already provides primitives for several common cryptographic
 operations (like symmetric encryption, message authentication codes, digital
 signatures, hybrid encryption), and additional primitives are in preparation.
-Moreover, adding new primitives or adding custom implementations of existing
-primitives is quite straightforward.
+Moreover, Tink lets users add new primitives or custom implementations of
+existing primitives, which allows them to build upon Tink's core architecture
+and key manangement abilities without having to fork the library.
 
 The basic use of Tink proceeds in three steps:
 
-1. Load or generate the cryptographic key material.
-2. Use the key material to get an instance of a primitive.
-3. Use the primitive to acomplish the cryptographic task.
+1. Load or generate the cryptographic key material (a `Keyset` in Tink terms).
+2. Use the key material to get an instance of the chosen primitive.
+3. Use that primitive to accomplish the cryptographic task.
 
-To be more concrete, here is how these steps would look like to perform
+To be more concrete, here is how these steps would look like when performing
 symmetric encryption (AEAD) in a Java program:
 
 ``` java
     import com.google.cloud.crypto.tink.Aead;
     import com.google.cloud.crypto.tink.aead.AeadFactory;
     import com.google.cloud.crypto.tink.KeysetHandle;
-    // (...)
+    // [...]
 
     // 1. Get the key material.
     KeysetHandle keysetHandle = ...;
@@ -53,25 +55,25 @@ symmetric encryption (AEAD) in a Java program:
     byte[] ciphertext = aead.encrypt(plaintext, aad);
 ```
 
-In Step #1 above one can get a keysetHandle to an existing keyset kept in a
+In Step #1 above one can get a `KeysetHandle` to an existing keyset kept in a
 storage system...
 
 `KeysetHandle keysetHandle = SomeKeyStorage.loadKeyset(keysetId);`
 
-... or generate a fresh key material using the factory with a template which defines
-the properties of the key that should be generated:
+... or generate fresh key material by using a template, which defines the shape
+of the key:
 
 `KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(keyTemplate);`
 
-For other primitives the flow is analogous, we just have to use a corresponding
-factory.  For example here is how to use Message Authentication Code (MAC)
-primitive:
+The flow is identical for other primitives. For instance, here is how to use
+the Message Authentication Code (MAC) primitive (notice the usage of
+`MacFactory`):
 
 ``` java
     import com.google.cloud.crypto.tink.Mac;
     import com.google.cloud.crypto.tink.mac.MacFactory;
     import com.google.cloud.crypto.tink.KeysetHandle;
-    // (...)
+    // [...]
 
     // 1. Get the key material.
     KeysetHandle keysetHandle = ...;
@@ -81,16 +83,16 @@ primitive:
     byte[] macValue = mac.computeMac(data);
 ```
 
-Before a specific implementation of a primitive can be used the Tink library
-must be the initialized so that it "knows" the desired implementations. This
-intialization happens via _registration_ of the implementations.  For
-example if one would like to use the standard implementations of AEAD and MAC
-primitives offered by Tink, the initialization would look as follows:
+Before a specific implementation of a primitive can be used, it must be
+registered at runtime in the Tink library, so that it "knows" the desired
+implementations. For example, if one would like to use the standard
+implementations of AEAD and MAC primitives offered by Tink, the initialization
+looks as follows:
 
 ``` java
     import com.google.cloud.crypto.tink.aead.AeadFactory;
     import com.google.cloud.crypto.tink.mac.MacFactory;
-    // (...)
+    // [...]
 
     // Register standard implementations of AEAD and MAC primitives.
     AeadFactory.registerStandardKeyTypes();
@@ -101,14 +103,14 @@ Now that you already know how to use Tink (it is really that simple!), you can
 proceed with using it in your code.  Alternatively, you can continue reading the
 sections below to get more information about the library: its features,
 security, structure, extensibility, and more.  To get direct instructions on how
-to acomplish certain tasks with Tink
+to accomplish certain tasks with Tink
 see [Java HOW-TO](https://github.com/google/tink/blob/master/doc/JAVA-HOWTO.md).
 
 ## Tink overview
 
 **Basic Features** Tink provides a set of basic tools to perform common crypto
 tasks in a variety of environments. The main operations are accessible via
-so-called _primitives_, which represent the corresponding cryptographic tools.
+so-called _primitives_, which represent cryptographic tools.
 Currently Tink supports the following cryptographic operations:
 
 - authenticated encryption with associated data (primitive: AEAD)
@@ -125,18 +127,18 @@ pseudorandom permutation (e.g., HEH).
 [encryption](https://cloud.google.com/kms/docs/data-encryption-keys) (a.k.a. KMS
 Envelope) which is getting popular with Cloud users. In this mode, Cloud users
 generate a data encryption key (DEK) locally, encrypt data with DEK, send DEK to
-a KMS such as AWS KMS or Google Cloud KMS to be encrypted, and stores encrypted
-DEK with encrypted data; at a later point Cloud users can retrieve encrypted
-data and DEK, use the KMS to decrypt DEK, and use decrypted DEK to decrypt the
-data.
+a Key Management System (KMS) such as AWS KMS or Google Cloud KMS to be
+encrypted, and stores encrypted DEK with encrypted data; at a later point Cloud
+users can retrieve encrypted data and DEK, use the KMS to decrypt DEK, and use
+decrypted DEK to decrypt the data.
 
 **Key Management** In addition to cryptographic operations Tink provides also
-support for key management featuers like key versioning, key rotation, storing
+support for key management features like key versioning, key rotation, storing
 and loading keys from key management systems, and more. For example, if a
 cryptographic scheme is found broken, one can switch to a new implementation of
 the primitive by rotating the key without changing or recompiling code.
 
-Currently tink supports the following key management systems:
+Currently, Tink supports the following key management systems:
 
 - Google Cloud KMS
 - Amazon KMS
@@ -147,10 +149,10 @@ One can easily add support for in-house key management system, without having
 to change anything in Tink.
 
 **Composability, Extensibility, and Interoperability** The core of Tink is
-relatively small, and most components are recombinant. They can be selected and
+relatively small, and most components can be selected and
 assembled in various combinations to satisfy specific user requirements about
 code size or performance. For example, if you need only digital signatures, you
-don't have to include authenticated encryption.
+don't have to include authenticated encryption in your compiled code.
 
 It is easy to add new primitives, protocols or interfaces to Tink.
 Without touching the core library, can easily add support for new
@@ -165,8 +167,8 @@ a high-level abstraction of them, it supports ciphertext formats and algorithms
 supported by these libraries.
 
 **Languages and Platforms** Tink for Java is field tested and ready for
-production. C++ is in active development and support for Go, Python, Javascript
-is in planning.  Tink supports Android, Linux (Google Cloud Engine or Amazon
+production. C++ is in active development and we're planning support for Go,
+Python, Javascript.  Tink supports Android, Linux (Google Cloud Engine or Amazon
 EC2), Google App Engine. iOS support is in active development.
 
 
@@ -178,9 +180,10 @@ operations are offered by the primitive.  A primitive can have multiple
 implementations, and user chooses a desired implementation by using a key of
 corresponding type (see the [next section](#key-keyset-and-keysethandle) for details).
 Although the implementations of a given primitive can be totally independent of
-each other, they all have to fulfill some baseline requirements, to assure that
-the use of a particular primitive does provide sufficient protections and does
-not introduce security risks (see [Security and Safety](#security-and-safety) below).
+each other, they all have to fulfill a clearly-defined security contract, to
+assure that the use of a particular primitive does provide sufficient
+protections and does not introduce security risks (see
+[Security and Safety](#security-and-safety) below).
 
 The following table summarizes Java implementations of primitives that are
 currently available or planned (the latter are listed in brackets).
@@ -193,9 +196,8 @@ currently available or planned (the latter are listed in brackets).
 | Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)          |
 
 Tink user accesses implementations of a primitive via a factory that corresponds
-to the primitive: AEAD-primitives are accessed via `AeadFactory`, MAC-primitives
-via `MacFactory`, etc. where each factory offers corresponding
-`getPrimitive(...)` methods.
+to the primitive: AEAD via `AeadFactory`, MAC via `MacFactory`, etc. where each
+factory offers corresponding `getPrimitive(...)` methods.
 
 ### Key, Keyset, and KeysetHandle
 
@@ -212,7 +214,7 @@ type.
 To take advantage of key rotation and other key management features, a Tink user
 works usually not with single keys, but with **keysets**, which are just sets of
 keys with some additional parameters and metadata.  In particular, this extra
-information in the keyset dermines which key is _primary_ (i.e. will be used to
+information in the keyset determines which key is _primary_ (i.e. will be used to
 create new cryptographic data like ciphertexts, or signatures), which keys are
 _enabled_ (i.e. can be used to process existing cryptographic data, like decrypt
 ciphertext or verify signatures), and which keys should not be used any more.
