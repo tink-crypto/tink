@@ -25,6 +25,8 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashSet;
 import javax.crypto.AEADBadTagException;
+import javax.crypto.Cipher;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -37,7 +39,18 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class AesGcmJceTest {
 
-  private static final int[] KEY_SIZES_IN_BYTES = new int[] {16, 24, 32};
+  private int[] keySizeInBytes;
+
+  @Before
+  public void setUp() throws Exception {
+    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
+        System.out.println("Unlimited Strength Jurisdiction Policy Files are required"
+            + " but not installed. Skip tests with keys larger than 128 bits.");
+      keySizeInBytes = new int[] {16};
+    } else {
+      keySizeInBytes = new int[] {16, 24, 32};
+    }
+  }
 
   /** Test vectors */
   public static class GcmTestVector {
@@ -120,6 +133,11 @@ public class AesGcmJceTest {
    */
   public void testRegression() throws Exception {
     for (GcmTestVector test : GCM_TEST_VECTORS) {
+      if (Cipher.getMaxAllowedKeyLength("AES") < 256 && test.key.length > 16) {
+          System.out.println("Unlimited Strength Jurisdiction Policy Files are required"
+              + " but not installed. Skip tests with keys larger than 128 bits.");
+          continue;
+      }
       AesGcmJce gcm = new AesGcmJce(test.key);
       byte[] pt = gcm.decrypt(test.ct, test.aad);
       assertArrayEquals(test.pt, pt);
@@ -129,7 +147,7 @@ public class AesGcmJceTest {
   @Test
   public void testEncryptDecrypt() throws Exception {
     byte[] aad = new byte[] {1, 2, 3};
-    for (int keySize : KEY_SIZES_IN_BYTES) {
+    for (int keySize : keySizeInBytes) {
       byte[] key = Random.randBytes(keySize);
       AesGcmJce gcm = new AesGcmJce(key);
       for (int messageSize = 0; messageSize < 75; messageSize++) {
@@ -150,7 +168,7 @@ public class AesGcmJceTest {
     while (dataSize <= (1 << 24)) {
       byte[] plaintext = Random.randBytes(dataSize);
       byte[] aad = Random.randBytes(dataSize / 3);
-      for (int keySize : KEY_SIZES_IN_BYTES) {
+      for (int keySize : keySizeInBytes) {
         byte[] key = Random.randBytes(keySize);
         AesGcmJce gcm = new AesGcmJce(key);
         byte[] ciphertext = gcm.encrypt(plaintext, aad);
