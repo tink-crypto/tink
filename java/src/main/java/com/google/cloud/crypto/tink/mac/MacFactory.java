@@ -93,7 +93,7 @@ public final class MacFactory {
   public static <K extends MessageLite, F extends MessageLite> Mac getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)
       throws GeneralSecurityException {
-    PrimitiveSet<Mac> primitives =
+    final PrimitiveSet<Mac> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
     return new Mac() {
       @Override

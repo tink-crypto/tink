@@ -91,7 +91,7 @@ public final class PublicKeyVerifyFactory {
   public static PublicKeyVerify getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<PublicKeyVerify> keyManager)
       throws GeneralSecurityException {
-    PrimitiveSet<PublicKeyVerify> primitives =
+    final PrimitiveSet<PublicKeyVerify> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
     return new PublicKeyVerify() {
       @Override

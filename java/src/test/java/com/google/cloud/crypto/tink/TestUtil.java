@@ -76,13 +76,10 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Test helpers.
  */
-@RunWith(JUnit4.class)
 public class TestUtil {
   // This GCP KMS CryptoKey is restricted to the service account in {@code SERVICE_ACCOUNT_FILE}.
   public static final String RESTRICTED_CRYPTO_KEY_URI = String.format(

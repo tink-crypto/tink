@@ -100,7 +100,7 @@ public final class AeadFactory {
    */
   public static Aead getPrimitive(KeysetHandle keysetHandle, final KeyManager<Aead> keyManager)
       throws GeneralSecurityException {
-    PrimitiveSet<Aead> primitives =
+    final PrimitiveSet<Aead> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
     return new Aead() {
       @Override

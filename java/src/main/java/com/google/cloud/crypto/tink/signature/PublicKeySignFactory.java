@@ -85,7 +85,7 @@ public final class PublicKeySignFactory {
   public static PublicKeySign getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<PublicKeySign> keyManager)
       throws GeneralSecurityException {
-        PrimitiveSet<PublicKeySign> primitives =
+        final PrimitiveSet<PublicKeySign> primitives =
             Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
         return new PublicKeySign() {
           @Override

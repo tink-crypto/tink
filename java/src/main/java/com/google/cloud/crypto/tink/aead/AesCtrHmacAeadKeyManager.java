@@ -17,6 +17,7 @@
 package com.google.cloud.crypto.tink.aead;
 
 import com.google.cloud.crypto.tink.Aead;
+import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
@@ -27,6 +28,7 @@ import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.mac.HmacKeyManager;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.subtle.EncryptThenAuthenticate;
+import com.google.cloud.crypto.tink.subtle.IndCpaCipher;
 import com.google.cloud.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -83,8 +85,8 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
     AesCtrHmacAeadKey keyProto = (AesCtrHmacAeadKey) key;
     validate(keyProto);
     return new EncryptThenAuthenticate(
-        Registry.INSTANCE.getPrimitive(AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey()),
-        Registry.INSTANCE.getPrimitive(HmacKeyManager.TYPE_URL, keyProto.getHmacKey()),
+        (IndCpaCipher) Registry.INSTANCE.getPrimitive(AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey()),
+        (Mac) Registry.INSTANCE.getPrimitive(HmacKeyManager.TYPE_URL, keyProto.getHmacKey()),
         keyProto.getHmacKey().getParams().getTagSize());
   }
 

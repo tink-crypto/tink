@@ -94,7 +94,7 @@ public final class HybridEncryptFactory {
   public static HybridEncrypt getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<HybridEncrypt> keyManager)
       throws GeneralSecurityException {
-    PrimitiveSet<HybridEncrypt> primitives =
+    final PrimitiveSet<HybridEncrypt> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
     return new HybridEncrypt() {
       @Override
