@@ -112,8 +112,8 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
-        ":key_management_restricted",
-        ":tink",
+        ":android",
+        ":key_management_restricted_android",
         "//proto:common_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "@com_google_protobuf_java//:protobuf_java",
@@ -131,7 +131,21 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
-        "@com_google_guava//jar",
+        "@com_google_protobuf_java//:protobuf_java",
+    ],
+)
+
+java_library(
+    name = "key_management_restricted_android",
+    srcs = [
+        ":key_management_restricted_srcs",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":android",
+        "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
+        "//proto:common_java_proto_lite",
+        "//proto:tink_java_proto_lite",
         "@com_google_protobuf_java//:protobuf_java",
     ],
 )

@@ -17,12 +17,12 @@
 package com.google.cloud.crypto.tink.aead;
 
 import com.google.cloud.crypto.tink.Aead;
-import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
 import com.google.cloud.crypto.tink.AesCtrProto.AesCtrKey;
 import com.google.cloud.crypto.tink.HmacProto.HmacKey;
 import com.google.cloud.crypto.tink.KeyManager;
+import com.google.cloud.crypto.tink.Mac;
 import com.google.cloud.crypto.tink.Registry;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.mac.HmacKeyManager;
@@ -85,7 +85,8 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
     AesCtrHmacAeadKey keyProto = (AesCtrHmacAeadKey) key;
     validate(keyProto);
     return new EncryptThenAuthenticate(
-        (IndCpaCipher) Registry.INSTANCE.getPrimitive(AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey()),
+        (IndCpaCipher) Registry.INSTANCE.getPrimitive(
+            AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey()),
         (Mac) Registry.INSTANCE.getPrimitive(HmacKeyManager.TYPE_URL, keyProto.getHmacKey()),
         keyProto.getHmacKey().getParams().getTagSize());
   }

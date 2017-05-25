@@ -16,17 +16,13 @@
 
 package com.google.cloud.crypto.tink;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
-import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.cloud.crypto.tink.CommonProto.HashType;
-import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
 import com.google.cloud.crypto.tink.TestUtil.DummyAead;
 import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
@@ -35,12 +31,10 @@ import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
 import com.google.cloud.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
-import com.google.cloud.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.cloud.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.cloud.crypto.tink.mac.HmacKeyManager;
 import com.google.cloud.crypto.tink.mac.MacFactory;
-import com.google.cloud.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -153,51 +147,5 @@ public class KeysetManagerTest {
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("dummy"));
     }
-  }
-
-  /**
-   * Tests a public keyset is extracted properly from a private keyset.
-   * TODO(thaidn): move this to integration test?
-   */
-  @Test
-  public void testExtractPublicKey() throws Exception {
-    int ivSize = 12;
-    int tagSize = 16;
-    EllipticCurveType curve = EllipticCurveType.NIST_P256;
-    HashType hashType = HashType.SHA256;
-    EcPointFormat pointFormat = EcPointFormat.UNCOMPRESSED;
-    KeyTemplate demKeyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(AES_KEY_SIZE, ivSize,
-        HMAC_KEY_SIZE, tagSize);
-    byte[] salt = "some salt".getBytes("UTF-8");
-    KeyTemplate keyTemplate = TestUtil.createEciesAeadHkdfKeyTemplate(curve, hashType, pointFormat,
-        demKeyTemplate, salt);
-
-    KeysetManager managerPrivate = new KeysetManager.Builder()
-        .setKeyTemplate(keyTemplate)
-        .build()
-        .rotate();
-    KeyData privateKeyData = managerPrivate.getKeysetHandle().getKeyset().getKey(0).getKeyData();
-    EciesAeadHkdfPrivateKey privateKey = EciesAeadHkdfPrivateKey.parseFrom(
-        privateKeyData.getValue());
-    HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
-        managerPrivate.getKeysetHandle());
-
-    KeysetManager managerPublic = managerPrivate.transformToPublicKeyset();
-    assertEquals(1, managerPublic.getKeysetHandle().getKeyset().getKeyCount());
-    KeyData publicKeyData = managerPublic.getKeysetHandle().getKeyset().getKey(0).getKeyData();
-    assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL,
-        publicKeyData.getTypeUrl());
-    assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
-    assertArrayEquals(privateKey.getPublicKey().toByteArray(),
-        publicKeyData.getValue().toByteArray());
-
-    HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(
-        managerPublic.getKeysetHandle());
-    byte[] plaintext = Random.randBytes(20);
-    byte[] contextInfo = Random.randBytes(20);
-    byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
-    assertArrayEquals(plaintext, hybridDecrypt.decrypt(ciphertext, contextInfo));
-
-
   }
 }

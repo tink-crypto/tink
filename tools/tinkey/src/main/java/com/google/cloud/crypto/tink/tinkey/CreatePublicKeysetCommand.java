@@ -39,8 +39,8 @@ public class CreatePublicKeysetCommand extends InOptions implements Command {
     KeysetManager manager = new KeysetManager.Builder()
         .setKeysetHandle(
             TinkeyUtil.getKeysetHandle(inputStream, inFormat, credentialFile))
-        .build()
-        .transformToPublicKeyset();
-    TinkeyUtil.writeProto(manager.getKeysetHandle().getKeyset(), outputStream, outFormat);
+        .build();
+    TinkeyUtil.writeProto(TinkeyUtil.createPublicKeyset(
+        manager.getKeysetHandle().getKeyset()), outputStream, outFormat);
   }
 }

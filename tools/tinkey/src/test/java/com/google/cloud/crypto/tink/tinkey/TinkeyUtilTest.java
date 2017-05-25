@@ -16,22 +16,36 @@
 
 package com.google.cloud.crypto.tink.tinkey;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
 import com.google.cloud.crypto.tink.AesGcmProto.AesGcmKey;
+import com.google.cloud.crypto.tink.CleartextKeysetHandle;
+import com.google.cloud.crypto.tink.CommonProto.EcPointFormat;
+import com.google.cloud.crypto.tink.CommonProto.EllipticCurveType;
+import com.google.cloud.crypto.tink.CommonProto.HashType;
+import com.google.cloud.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
+import com.google.cloud.crypto.tink.HybridDecrypt;
+import com.google.cloud.crypto.tink.HybridEncrypt;
+import com.google.cloud.crypto.tink.KeysetManager;
 import com.google.cloud.crypto.tink.Registry;
+import com.google.cloud.crypto.tink.TestUtil;
+import com.google.cloud.crypto.tink.TinkProto.KeyData;
 import com.google.cloud.crypto.tink.TinkProto.KeyTemplate;
+import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.aead.AeadFactory;
 import com.google.cloud.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.cloud.crypto.tink.aead.AesGcmKeyManager;
+import com.google.cloud.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.cloud.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.cloud.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.cloud.crypto.tink.mac.MacFactory;
 import com.google.cloud.crypto.tink.signature.PublicKeySignFactory;
 import com.google.cloud.crypto.tink.signature.PublicKeyVerifyFactory;
+import com.google.cloud.crypto.tink.subtle.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +56,9 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class TinkeyUtilTest {
+  private static final int AES_KEY_SIZE = 16;
+  private static final int HMAC_KEY_SIZE = 20;
+
   @Before
   public void setUp() throws Exception {
     AeadFactory.registerStandardKeyTypes();
@@ -90,5 +107,50 @@ public class TinkeyUtilTest {
     } catch (IllegalArgumentException e) {
       assertTrue(e.toString().contains("invalid type URL or key format"));
     }
+  }
+
+  /**
+   * Tests a public keyset is extracted properly from a private keyset.
+   * TODO(thaidn): move this to integration test?
+   */
+  @Test
+  public void testExtractPublicKey() throws Exception {
+    int ivSize = 12;
+    int tagSize = 16;
+    EllipticCurveType curve = EllipticCurveType.NIST_P256;
+    HashType hashType = HashType.SHA256;
+    EcPointFormat pointFormat = EcPointFormat.UNCOMPRESSED;
+    KeyTemplate demKeyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(AES_KEY_SIZE, ivSize,
+        HMAC_KEY_SIZE, tagSize);
+    byte[] salt = "some salt".getBytes("UTF-8");
+    KeyTemplate keyTemplate = TestUtil.createEciesAeadHkdfKeyTemplate(curve, hashType, pointFormat,
+        demKeyTemplate, salt);
+
+    KeysetManager managerPrivate = new KeysetManager.Builder()
+        .setKeyTemplate(keyTemplate)
+        .build()
+        .rotate();
+    KeyData privateKeyData = managerPrivate.getKeysetHandle().getKeyset().getKey(0).getKeyData();
+    EciesAeadHkdfPrivateKey privateKey = EciesAeadHkdfPrivateKey.parseFrom(
+        privateKeyData.getValue());
+    HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
+        managerPrivate.getKeysetHandle());
+
+    Keyset publicKeyset = TinkeyUtil.createPublicKeyset(
+        managerPrivate.getKeysetHandle().getKeyset());
+    assertEquals(1, publicKeyset.getKeyCount());
+    KeyData publicKeyData = publicKeyset.getKey(0).getKeyData();
+    assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL,
+        publicKeyData.getTypeUrl());
+    assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
+    assertArrayEquals(privateKey.getPublicKey().toByteArray(),
+        publicKeyData.getValue().toByteArray());
+
+    HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(
+        CleartextKeysetHandle.parseFrom(publicKeyset));
+    byte[] plaintext = Random.randBytes(20);
+    byte[] contextInfo = Random.randBytes(20);
+    byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
+    assertArrayEquals(plaintext, hybridDecrypt.decrypt(ciphertext, contextInfo));
   }
 }
