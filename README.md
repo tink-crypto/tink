@@ -1,5 +1,7 @@
 # Tink
 
+![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink.png)
+
 Tink is a cryptographic library that provides a safe, simple, agile and fast way
 to accomplish common cryptographic tasks. It is written by a group of
 cryptographers and security engineers at Google, but it is **not an official
@@ -292,8 +294,8 @@ Tink is maintained by:
 
 ## Contact and mailing list
 
-If you want to contribute, please read CONTRIBUTING and send us pull requests.
-You can also report bugs or request new tests.
+If you want to contribute, please read [CONTRIBUTING](https://github.com/google/tink/blob/master/CONTRIBUTING.md)
+and send us pull requests. You can also report bugs or request new tests.
 
 If you'd like to talk to our developers or get notified about major new tests,
 you may want to subscribe to our
