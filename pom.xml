@@ -426,6 +426,64 @@
       </plugin>
 
       <plugin>
+        <!-- Create javadoc.jar. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.3</version>
+        <configuration>
+          <notimestamp>true</notimestamp>
+          <windowtitle>Tink Java Cryptography Library</windowtitle>
+          <author>false</author>
+          <doctitle>
+            <![CDATA[
+              <h1>Tink Java Cryptography Library</h1>
+              <h4>Complete javadoc for developers.</h4>
+            ]]>
+          </doctitle>
+          <bottom>
+            <![CDATA[
+              <div id="footer">
+              <div id="footerlogo" style="float:left">
+                <img src="http://www.google.com/images/art.gif" alt="Google colored balls">
+              </div>
+              <div id="copyright" style="float:left">
+                <p>&copy; Google -
+                  <a href="http://www.google.com/privacy.html">Privacy Policy</a> -
+                  <a href="http://www.google.com/terms_of_service.html">Terms and Conditions</a> -
+                  <a href="http://www.google.com/about.html">About Google</a>
+                </p>
+              </div>
+            ]]>
+          </bottom>
+          <!-- Ignore javadoc errors. -->
+          <failOnError>false</failOnError>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadoc</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <!-- Create sources.jar. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <!-- Allow publishing to Maven Central via
           `mvn -P release clean deploy`.
           See http://central.sonatype.org/pages/apache-maven.html. -->
