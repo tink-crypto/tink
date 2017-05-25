@@ -45,6 +45,7 @@ import java.util.concurrent.ConcurrentMap;
 public final class Registry {
   public static final Registry INSTANCE = new Registry();  // Default registry used by factories.
 
+  @SuppressWarnings("rawtypes")
   private final ConcurrentMap<String, KeyManager> keyManager =
       new ConcurrentHashMap<String, KeyManager>();         // typeUrl -> KeyManager mapping
 
@@ -135,6 +136,7 @@ public final class Registry {
    *
    * @return a new primitive.
    */
+  @SuppressWarnings("TypeParameterUnusedInFormals")
   public <P> P getPrimitive(String typeUrl, MessageLite key) throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(typeUrl);
     return manager.getPrimitive(key);
@@ -147,6 +149,7 @@ public final class Registry {
    *
    * @return a new primitive.
    */
+  @SuppressWarnings("TypeParameterUnusedInFormals")
   public <P> P getPrimitive(String typeUrl, ByteString serialized)
       throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(typeUrl);
@@ -160,6 +163,7 @@ public final class Registry {
    *
    * @return a new primitive.
    */
+  @SuppressWarnings("TypeParameterUnusedInFormals")
   public <P> P getPrimitive(String typeUrl, byte[] serialized) throws GeneralSecurityException {
     return getPrimitive(typeUrl, ByteString.copyFrom(serialized));
   }
@@ -171,6 +175,7 @@ public final class Registry {
    *
    * @return a new primitive.
    */
+  @SuppressWarnings("TypeParameterUnusedInFormals")
   public <P> P getPrimitive(KeyData keyData) throws GeneralSecurityException {
     return getPrimitive(keyData.getTypeUrl(), keyData.getValue());
   }
@@ -218,7 +223,7 @@ public final class Registry {
             primitive = getPrimitive(key.getKeyData().getTypeUrl(),
                 key.getKeyData().getValue());
           }
-          PrimitiveSet<P>.Entry<P> entry = primitives.addPrimitive(primitive, key);
+          PrimitiveSet.Entry<P> entry = primitives.addPrimitive(primitive, key);
           if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {
             primitives.setPrimary(entry);
           }

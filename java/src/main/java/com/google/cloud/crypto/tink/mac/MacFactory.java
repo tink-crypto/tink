@@ -113,8 +113,8 @@ public final class MacFactory {
         byte[] prefix = Arrays.copyOfRange(mac, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
         byte[] macNoPrefix = Arrays.copyOfRange(mac, CryptoFormat.NON_RAW_PREFIX_SIZE,
               mac.length);
-        List<PrimitiveSet<Mac>.Entry<Mac>> entries = primitives.getPrimitive(prefix);
-        for (PrimitiveSet<Mac>.Entry<Mac> entry : entries) {
+        List<PrimitiveSet.Entry<Mac>> entries = primitives.getPrimitive(prefix);
+        for (PrimitiveSet.Entry<Mac> entry : entries) {
             try {
               entry.getPrimitive().verifyMac(macNoPrefix, data);
               // If there is no exception, the MAC is valid and we can return.
@@ -127,7 +127,7 @@ public final class MacFactory {
 
         // None "non-raw" key matched, so let's try the raw keys (if any exist).
         entries = primitives.getRawPrimitives();
-        for (PrimitiveSet<Mac>.Entry<Mac> entry : entries) {
+        for (PrimitiveSet.Entry<Mac> entry : entries) {
           try {
             entry.getPrimitive().verifyMac(mac, data);
             // If there is no exception, the MAC is valid and we can return.

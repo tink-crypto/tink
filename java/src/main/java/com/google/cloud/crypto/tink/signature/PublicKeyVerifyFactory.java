@@ -105,9 +105,9 @@ public final class PublicKeyVerifyFactory {
         byte[] prefix = Arrays.copyOfRange(signature, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
         byte[] sigNoPrefix = Arrays.copyOfRange(signature, CryptoFormat.NON_RAW_PREFIX_SIZE,
             signature.length);
-        List<PrimitiveSet<PublicKeyVerify>.Entry<PublicKeyVerify>> entries =
+        List<PrimitiveSet.Entry<PublicKeyVerify>> entries =
             primitives.getPrimitive(prefix);
-        for (PrimitiveSet<PublicKeyVerify>.Entry<PublicKeyVerify> entry : entries) {
+        for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
           try {
             entry.getPrimitive().verify(sigNoPrefix, data);
             // If there is no exception, the signature is valid and we can return.
@@ -120,7 +120,7 @@ public final class PublicKeyVerifyFactory {
 
         // None "non-raw" key matched, so let's try the raw keys (if any exist).
         entries = primitives.getRawPrimitives();
-        for (PrimitiveSet<PublicKeyVerify>.Entry<PublicKeyVerify> entry : entries) {
+        for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
           try {
             entry.getPrimitive().verify(signature, data);
             // If there is no exception, the signature is valid and we can return.

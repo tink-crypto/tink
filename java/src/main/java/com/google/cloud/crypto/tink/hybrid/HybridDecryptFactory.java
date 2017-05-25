@@ -109,9 +109,9 @@ public final class HybridDecryptFactory {
               ciphertext,
               CryptoFormat.NON_RAW_PREFIX_SIZE,
               ciphertext.length);
-          List<PrimitiveSet<HybridDecrypt>.Entry<HybridDecrypt>> entries =
+          List<PrimitiveSet.Entry<HybridDecrypt>> entries =
               primitives.getPrimitive(prefix);
-          for (PrimitiveSet<HybridDecrypt>.Entry<HybridDecrypt> entry : entries) {
+          for (PrimitiveSet.Entry<HybridDecrypt> entry : entries) {
             try {
               return entry.getPrimitive().decrypt(ciphertextNoPrefix, contextInfo);
             } catch (GeneralSecurityException e) {
@@ -121,9 +121,9 @@ public final class HybridDecryptFactory {
           }
         }
         // Let's try all RAW keys.
-        List<PrimitiveSet<HybridDecrypt>.Entry<HybridDecrypt>> entries =
+        List<PrimitiveSet.Entry<HybridDecrypt>> entries =
             primitives.getRawPrimitives();
-        for (PrimitiveSet<HybridDecrypt>.Entry<HybridDecrypt> entry : entries) {
+        for (PrimitiveSet.Entry<HybridDecrypt> entry : entries) {
           try {
             return entry.getPrimitive().decrypt(ciphertext, contextInfo);
           } catch (GeneralSecurityException e) {

@@ -51,7 +51,7 @@ public final class PrimitiveSet<P> {
    * some extra information about the primitive.
    */
   @Immutable(containerOf={"P"})
-  public class Entry<P> {
+  public final static class Entry<P> {
     // The actual primitive.
     private final P primitive;
     // Identifies the primitive within the set.

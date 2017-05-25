@@ -82,9 +82,9 @@ public class PrimitiveSetTest {
         .build();
     pset.addPrimitive(new DummyMac1(), key3);
 
-    List<PrimitiveSet<Mac>.Entry<Mac>> entries = pset.getPrimitive(key1);
+    List<PrimitiveSet.Entry<Mac>> entries = pset.getPrimitive(key1);
     assertEquals(1, entries.size());
-    PrimitiveSet<Mac>.Entry<Mac> entry = entries.get(0);
+    PrimitiveSet.Entry<Mac> entry = entries.get(0);
     assertEquals(DummyMac1.class.getSimpleName(),
         new String(entry.getPrimitive().computeMac(null), "UTF-8"));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
@@ -162,9 +162,9 @@ public class PrimitiveSetTest {
     pset.addPrimitive(new DummyMac1(), key6);
 
     // tink keys
-    List<PrimitiveSet<Mac>.Entry<Mac>> entries = pset.getPrimitive(key1);
+    List<PrimitiveSet.Entry<Mac>> entries = pset.getPrimitive(key1);
     assertEquals(1, entries.size());
-    PrimitiveSet<Mac>.Entry<Mac> entry = entries.get(0);
+    PrimitiveSet.Entry<Mac> entry = entries.get(0);
     assertEquals(DummyMac1.class.getSimpleName(),
         new String(entry.getPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());

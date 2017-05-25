@@ -6,10 +6,7 @@ package(
     ],
 )
 
-JAVACOPTS = [
-    "-Xlint:unchecked",
-    "-Xlint:deprecation",
-]
+load("//java/build_defs:javac.bzl", "JAVACOPTS")
 
 AEAD_ENVELOPE_SRCS = [
     "GcpKmsAeadKeyManager.java",

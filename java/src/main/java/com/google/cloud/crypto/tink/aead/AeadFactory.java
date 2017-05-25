@@ -120,8 +120,8 @@ public final class AeadFactory {
               ciphertext,
               CryptoFormat.NON_RAW_PREFIX_SIZE,
               ciphertext.length);
-          List<PrimitiveSet<Aead>.Entry<Aead>> entries = primitives.getPrimitive(prefix);
-          for (PrimitiveSet<Aead>.Entry<Aead> entry : entries) {
+          List<PrimitiveSet.Entry<Aead>> entries = primitives.getPrimitive(prefix);
+          for (PrimitiveSet.Entry<Aead> entry : entries) {
             try {
               return entry.getPrimitive().decrypt(ciphertextNoPrefix, aad);
             } catch (GeneralSecurityException e) {
@@ -132,8 +132,8 @@ public final class AeadFactory {
         }
 
         // Let's try all RAW keys.
-        List<PrimitiveSet<Aead>.Entry<Aead>> entries = primitives.getRawPrimitives();
-        for (PrimitiveSet<Aead>.Entry<Aead> entry : entries) {
+        List<PrimitiveSet.Entry<Aead>> entries = primitives.getRawPrimitives();
+        for (PrimitiveSet.Entry<Aead> entry : entries) {
           try {
             return entry.getPrimitive().decrypt(ciphertext, aad);
           } catch (GeneralSecurityException e) {

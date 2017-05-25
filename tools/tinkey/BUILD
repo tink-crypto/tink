@@ -1,9 +1,6 @@
 licenses(["notice"])  # Apache 2.0
 
-JAVACOPTS = [
-    "-Xlint:unchecked",
-    "-Xlint:deprecation",
-]
+load("//java/build_defs:javac.bzl", "JAVACOPTS")
 
 java_library(
     name = "libtinkey",

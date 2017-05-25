@@ -6,10 +6,7 @@ package(
     ],
 )
 
-JAVACOPTS = [
-    "-Xlint:unchecked",
-    "-Xlint:deprecation",
-]
+load("//java/build_defs:javac.bzl", "JAVACOPTS")
 
 filegroup(
     name = "mac_srcs",

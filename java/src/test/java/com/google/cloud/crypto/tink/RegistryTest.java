@@ -309,9 +309,9 @@ public class RegistryTest {
         .build());
     // Get a PrimitiveSet using registered key managers.
     PrimitiveSet<Aead> aeadSet = Registry.INSTANCE.getPrimitives(keysetHandle);
-    List<PrimitiveSet<Aead>.Entry<Aead>> aead1List =
+    List<PrimitiveSet.Entry<Aead>> aead1List =
         aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(0));
-    List<PrimitiveSet<Aead>.Entry<Aead>> aead2List =
+    List<PrimitiveSet.Entry<Aead>> aead2List =
         aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(1));
     assertEquals(1, aead1List.size());
     assertEquals(AesGcmJce.class, aead1List.get(0).getPrimitive().getClass());
