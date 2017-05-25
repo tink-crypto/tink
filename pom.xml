@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.google.cloud.crypto.tink</groupId>
-  <artifactId>google-cloud-crypto-tink-java-library</artifactId>
+  <artifactId>tink</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
   <name>Tink Java Cryptography Library</name>
