@@ -19,6 +19,7 @@ package com.google.cloud.crypto.tink.subtle;
 import static com.google.cloud.crypto.tink.subtle.Curve25519.FIELD_LEN;
 
 import com.google.cloud.crypto.tink.PublicKeyVerify;
+import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.SignatureException;
 
@@ -36,12 +37,13 @@ import java.security.SignatureException;
  *   // all the rest of security exceptions.
  * }
  */
+@Immutable
 public class Ed25519Verify implements PublicKeyVerify {
 
   public static final int PUBLIC_KEY_LEN = FIELD_LEN;
   public static final int SIGNATURE_LEN = FIELD_LEN * 2;
 
-  private final byte[] publicKey;
+  private final ImmutableByteArray publicKey;
 
   public Ed25519Verify(final byte[] publicKey)
       throws GeneralSecurityException {
@@ -49,7 +51,7 @@ public class Ed25519Verify implements PublicKeyVerify {
       throw new IllegalArgumentException(
           String.format("Given public key's length is not %s.", PUBLIC_KEY_LEN));
     }
-    this.publicKey = publicKey;
+    this.publicKey = ImmutableByteArray.of(publicKey);
   }
 
   @Override
@@ -61,7 +63,7 @@ public class Ed25519Verify implements PublicKeyVerify {
     if (((signature[SIGNATURE_LEN - 1] & 0xff) & 224) != 0) {
       throw new IllegalArgumentException("Given signature's 3 most significant bits must be 0.");
     }
-    if (!Ed25519.verify(data, signature, publicKey)) {
+    if (!Ed25519.verify(data, signature, publicKey.getBytes())) {
       throw new SignatureException("Signature check failed.");
     }
   }

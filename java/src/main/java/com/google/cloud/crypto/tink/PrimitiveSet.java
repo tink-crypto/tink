@@ -18,6 +18,8 @@ package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.KeyStatusType;
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
+import com.google.cloud.crypto.tink.subtle.ImmutableByteArray;
+import com.google.errorprone.annotations.Immutable;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ import java.util.concurrent.ConcurrentMap;
  * PrimitiveSet is an auxiliary class used for supporting key rotation: primitives in a set
  * correspond to keys in a keyset.  Users will usually work with primitive instances,
  * which essentially wrap primitive sets.  For example an instance of an Aead-primitive
- * for a given keyset holds a set of Aead-primitivies corresponding to the keys in the keyset,
+ * for a given keyset holds a set of Aead-primitives corresponding to the keys in the keyset,
  * and uses the set members to do the actual crypto operations: to encrypt data the primary
  * Aead-primitive from the set is used, and upon decryption the ciphertext's prefix
  * determines the id of the primitive from the set. <p>
@@ -48,18 +50,19 @@ public final class PrimitiveSet<P> {
    * A single entry in the set. In addition to the actual primitive it holds also
    * some extra information about the primitive.
    */
+  @Immutable(containerOf={"P"})
   public class Entry<P> {
     // The actual primitive.
     private final P primitive;
     // Identifies the primitive within the set.
     // It is the ciphertext prefix of the correponding key.
-    private final byte[] identifier;
+    private final ImmutableByteArray identifier;
     // The status of the key represented by the primitive.
     private final KeyStatusType status;
 
     public Entry(P primitive, final byte[] identifier, KeyStatusType status) {
       this.primitive = primitive;
-      this.identifier = identifier;
+      this.identifier = ImmutableByteArray.of(identifier);
       this.status = status;
     }
     public P getPrimitive() {
@@ -69,7 +72,11 @@ public final class PrimitiveSet<P> {
       return status;
     }
     public final byte[] getIdentifier() {
-      return identifier;
+      if (identifier == null) {
+        return null;
+      } else {
+        return identifier.getBytes();
+      }
     }
   }
 

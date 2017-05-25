@@ -19,10 +19,14 @@ java_library(
         "EcUtil.java",
         "EngineFactory.java",
         "EngineWrapper.java",
+        "ImmutableByteArray.java",
         "Random.java",
         "SubtleUtil.java",
     ],
     javacopts = JAVACOPTS,
+    deps = [
+        "@com_google_errorprone_error_prone_annotations//jar",
+    ],
 )
 
 # aead subtle
@@ -121,6 +125,7 @@ java_library(
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
+        "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
 
@@ -166,6 +171,7 @@ java_library(
         ":subtle",
         ":x25519",
         "//java/src/main/java/com/google/cloud/crypto/tink:primitives",
+        "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
 

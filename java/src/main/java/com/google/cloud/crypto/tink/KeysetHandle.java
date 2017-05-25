@@ -18,11 +18,14 @@ package com.google.cloud.crypto.tink;
 
 import com.google.cloud.crypto.tink.TinkProto.Keyset;
 import com.google.cloud.crypto.tink.TinkProto.KeysetInfo;
+import com.google.cloud.crypto.tink.subtle.ImmutableByteArray;
+import com.google.errorprone.annotations.Immutable;
 
 /**
  * KeysetHandle provides abstracted access to Keysets, to limit the exposure
  * of actual protocol buffers that hold sensitive key material.
  */
+@Immutable
 public final class KeysetHandle {
   /**
    * The {@code Keyset}.
@@ -32,7 +35,7 @@ public final class KeysetHandle {
   /**
    * {@code Keyset} encrypted with some key.
    */
-  private final byte[] encryptedKeyset;
+  private final ImmutableByteArray encryptedKeyset;
 
   /**
    * This constructor is package-private. To get a new instance, users have to use one of
@@ -51,7 +54,7 @@ public final class KeysetHandle {
    */
   KeysetHandle(Keyset keyset, final byte[] encryptedKeyset) {
     this.keyset = keyset;
-    this.encryptedKeyset = encryptedKeyset;
+    this.encryptedKeyset = ImmutableByteArray.of(encryptedKeyset);
   }
 
   /**
@@ -72,7 +75,11 @@ public final class KeysetHandle {
    * @return the actual keyset data.
    */
   public byte[] getEncryptedKeyset() {
-    return encryptedKeyset;
+    if (encryptedKeyset == null) {
+      return null;
+    } else {
+      return encryptedKeyset.getBytes();
+    }
   }
 
   /**

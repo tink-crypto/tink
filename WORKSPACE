@@ -116,3 +116,9 @@ maven_jar(
     artifact = "com.google.truth:truth:jar:0.32",
     sha1 = "e996fb4b41dad04365112786796c945f909cfdf7",
 )
+
+maven_jar(
+    name = "com_google_errorprone_error_prone_annotations",
+    artifact = "com.google.errorprone:error_prone_annotations:2.0.19",
+    sha1 = "c3754a0bdd545b00ddc26884f9e7624f8b6a14de",
+)

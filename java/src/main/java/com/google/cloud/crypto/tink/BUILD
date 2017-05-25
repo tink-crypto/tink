@@ -72,6 +72,7 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
+        "@com_google_errorprone_error_prone_annotations//jar",
         "@com_google_protobuf_java//:protobuf_java",
     ],
 )
@@ -84,6 +85,7 @@ java_library(
         "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
         "//proto:common_java_proto_lite",
         "//proto:tink_java_proto_lite",
+        "@com_google_errorprone_error_prone_annotations//jar",
         "@com_google_protobuf_java//:protobuf_java",
     ],
 )
