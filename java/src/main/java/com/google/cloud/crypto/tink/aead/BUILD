@@ -65,7 +65,7 @@ java_library(
 )
 
 java_library(
-    name = "aead_envelope",
+    name = "envelope",
     srcs = AEAD_ENVELOPE_SRCS,
     javacopts = JAVACOPTS,
     deps = [

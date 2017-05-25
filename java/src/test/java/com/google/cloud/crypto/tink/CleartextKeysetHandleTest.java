@@ -62,7 +62,7 @@ public class CleartextKeysetHandleTest {
     Keyset.Key key2 = keyset2.getKey(0);
     assertEquals(keyset2.getPrimaryKeyId(), key2.getKeyId());
     assertEquals(template.getTypeUrl(), key2.getKeyData().getTypeUrl());
-    Mac mac = MacFactory.getPrimitive(handle2);  // instantiation should succeed
+    Mac unused = MacFactory.getPrimitive(handle2);  // instantiation should succeed
   }
 
   @Test

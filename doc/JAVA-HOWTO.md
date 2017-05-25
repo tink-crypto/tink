@@ -7,7 +7,7 @@ common tasks in [Tink](https://github.com/google/tink).
 
 Tink provides customizable initialization, which allows for choosing specific
 implementations (identified by _key types_) of desired primitives.  This
-intialization happens via _registration_ of the implementations.  To register
+initialization happens via _registration_ of the implementations.  To register
 standard implementations of primtives one can use
 `registerStandardKeyTypes()`-methods of corresponding factories.  Example if one
 wants to use the standard implementations of AEAD and MAC primitives offered by

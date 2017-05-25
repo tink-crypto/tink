@@ -46,9 +46,6 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class KeysetManagerTest {
-  private static final int AES_KEY_SIZE = 16;
-  private static final int HMAC_KEY_SIZE = 20;
-
   private String hmacKeyTypeUrl =
       HmacKeyManager.TYPE_URL;
 

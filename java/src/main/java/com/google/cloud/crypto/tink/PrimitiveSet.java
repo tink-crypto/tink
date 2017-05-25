@@ -50,7 +50,7 @@ public final class PrimitiveSet<P> {
    * A single entry in the set. In addition to the actual primitive it holds also
    * some extra information about the primitive.
    */
-  @Immutable(containerOf={"P"})
+  @Immutable(containerOf = {"P"})
   public final static class Entry<P> {
     // The actual primitive.
     private final P primitive;

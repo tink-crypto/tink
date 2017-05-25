@@ -16,8 +16,6 @@
 
 package com.google.cloud.crypto.tink.subtle;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.util.Arrays;
 
 /**
@@ -794,8 +792,12 @@ public final class Curve25519 {
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
   public static byte[] x25519(byte[] privateKey, byte[] peersPublicValue) {
-    checkArgument(privateKey.length == FIELD_LEN, "Private key must have 32 bytes.");
-    checkArgument(peersPublicValue.length == FIELD_LEN, "Peer's public key must have 32 bytes.");
+    if (privateKey.length != FIELD_LEN) {
+      throw new IllegalArgumentException("Private key must have 32 bytes.");
+    }
+    if (peersPublicValue.length != FIELD_LEN) {
+      throw new IllegalArgumentException("Peer's public key must have 32 bytes.");
+    }
     long[] x = new long[LIMB_CNT];
     long[] z = new long[LIMB_CNT + 1];
     long[] zmone = new long[LIMB_CNT];
@@ -821,7 +823,9 @@ public final class Curve25519 {
    * @throws IllegalArgumentException when the {@code privateKey} is not 32 bytes.
    */
   public static byte[] x25519PublicFromPrivate(byte[] privateKey) {
-    checkArgument(privateKey.length == FIELD_LEN, "Private key must have 32 bytes.");
+    if (privateKey.length != FIELD_LEN) {
+      throw new IllegalArgumentException("Private key must have 32 bytes.");
+    }
     byte[] base = new byte[FIELD_LEN]; base[0] = 9;
     return x25519(privateKey, base);
   }
