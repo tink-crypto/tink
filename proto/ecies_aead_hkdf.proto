@@ -21,7 +21,7 @@ package google.crypto.tink;
 import "proto/common.proto";
 import "proto/tink.proto";
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "EciesAeadHkdfProto";
 
 // Protos for keys for ECIES with HKDF and AEAD encryption.
@@ -71,7 +71,7 @@ message EciesAeadHkdfParams {
 }
 
 // EciesAeadHkdfPublicKey represents HybridEncryption primitive.
-// key_type: type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPublicKey
+// key_type: type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey
 message EciesAeadHkdfPublicKey {
   // Required.
   uint32 version = 1;
@@ -87,7 +87,7 @@ message EciesAeadHkdfPublicKey {
 }
 
 // EciesKdfAeadPrivateKey represents HybridDecryption primitive.
-// key_type: type.googleapis.com/google.cloud.crypto.tink.EciesAeadHkdfPrivateKey
+// key_type: type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey
 message EciesAeadHkdfPrivateKey {
   // Required.
   uint32 version = 1;

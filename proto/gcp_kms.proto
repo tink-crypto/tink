@@ -18,13 +18,13 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "GcpKmsProto";
 
 message GcpKmsAeadParams {
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.GcpKmsAeadKey
+// key_type: type.googleapis.com/google.crypto.tink.GcpKmsAeadKey
 message GcpKmsAeadKey {
   uint32 version = 1;
   GcpKmsAeadParams params = 2;

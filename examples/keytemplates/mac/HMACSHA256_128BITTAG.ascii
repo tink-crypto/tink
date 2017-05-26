@@ -1,0 +1,7 @@
+# Format: KeyTemplate in text format, see https://github.com/google/tink/blob/master/proto/tink.proto
+# Generated with command:
+#     tinkey create-key-template \
+#     --type-url type.googleapis.com/google.crypto.tink.HmacKey \
+#     --key-format "params{hash:SHA256,tag_size:16}key_size:32"
+type_url: "type.googleapis.com/google.crypto.tink.HmacKey"
+value: "\n\004\b\003\020\020\020 "

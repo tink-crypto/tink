@@ -18,7 +18,7 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "AesCtrProto";
 
 message AesCtrParams {
@@ -30,7 +30,7 @@ message AesCtrKeyFormat {
   uint32 key_size = 2;
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.AesCtrKey
+// key_type: type.googleapis.com/google.crypto.tink.AesCtrKey
 message AesCtrKey {
   uint32 version = 1;
   AesCtrParams params = 2;

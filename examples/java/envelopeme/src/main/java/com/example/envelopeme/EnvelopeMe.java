@@ -14,11 +14,11 @@
 
 package com.example.envelopeme;
 
-import com.google.cloud.crypto.tink.Aead;
-import com.google.cloud.crypto.tink.KeysetHandle;
-import com.google.cloud.crypto.tink.NoSecretKeysetHandle;
-import com.google.cloud.crypto.tink.aead.AeadFactory;
-import com.google.cloud.crypto.tink.mac.MacFactory;
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.NoSecretKeysetHandle;
+import com.google.crypto.tink.aead.AeadFactory;
+import com.google.crypto.tink.mac.MacFactory;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 

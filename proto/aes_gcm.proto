@@ -18,7 +18,7 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "AesGcmProto";
 
 // only allowing IV size in bytes = 12 and tag size in bytes = 16
@@ -31,7 +31,7 @@ message AesGcmKeyFormat {
   uint32 key_size = 2;
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.AesGcmKey
+// key_type: type.googleapis.com/google.crypto.tink.AesGcmKey
 message AesGcmKey {
   uint32 version = 1;
   AesGcmParams params = 2;

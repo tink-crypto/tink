@@ -20,7 +20,7 @@ package google.crypto.tink;
 
 import "proto/tink.proto";
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "KmsEnvelopeProto";
 
 message KmsEnvelopeAeadParams {

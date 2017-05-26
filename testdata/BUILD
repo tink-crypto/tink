@@ -2,12 +2,33 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
-exports_files(["LICENSE"])
-
 filegroup(
     name = "credentials",
     testonly = 1,
     srcs = [
         "credential.json",
+    ],
+)
+
+filegroup(
+    name = "ecies_keysets",
+    testonly = 1,
+    srcs = [
+        # Generated with
+        # tinkey create \
+        # --key-template examples/keytemplates/ECIES_P256_HKDFHMACSHA256_AES128CTR_128BITIV_HMACSHA256_128BITTAG.ascii \
+        # --out testdata/ecies_private_keyset2.bin --out-format BINARY
+        "ecies_private_keyset.bin",
+
+        # Generated with
+        # tinkey create \
+        # --key-template examples/keytemplates/ECIES_P256_HKDFHMACSHA256_AES128GCM.ascii \
+        # --out testdata/ecies_private_keyset2.bin --out-format BINARY
+        "ecies_private_keyset2.bin",
+
+        # tinkey create-public-keyset --in testdata/ecies_private_keyset.bin --in-form BINARY \
+        # --out testdata/ecies_public_keyset.bin --out-form BINARY
+        "ecies_public_keyset.bin",
+        "ecies_public_keyset2.bin",
     ],
 )

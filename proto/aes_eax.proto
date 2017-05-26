@@ -18,7 +18,7 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "AesEaxProto";
 
 // only allowing tag size in bytes = 16
@@ -32,7 +32,7 @@ message AesEaxKeyFormat {
   uint32 key_size = 2;
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.AesEaxKey
+// key_type: type.googleapis.com/google.crypto.tink.AesEaxKey
 message AesEaxKey {
   uint32 version = 1;
   AesEaxParams params = 2;

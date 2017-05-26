@@ -9,7 +9,7 @@ java_library(
             "src/main/**/*.java",
         ],
         exclude = [
-            "src/main/java/com/google/cloud/crypto/tink/tinkey/Tinkey.java",
+            "src/main/java/com/google/crypto/tink/tinkey/Tinkey.java",
         ],
     ),
     javacopts = JAVACOPTS,
@@ -35,10 +35,10 @@ java_library(
 java_binary(
     name = "tinkey",
     srcs = [
-        "src/main/java/com/google/cloud/crypto/tink/tinkey/Tinkey.java",
+        "src/main/java/com/google/crypto/tink/tinkey/Tinkey.java",
     ],
     javacopts = JAVACOPTS,
-    main_class = "com.google.cloud.crypto.tink.tinkey.Tinkey",
+    main_class = "com.google.crypto.tink.tinkey.Tinkey",
     deps = [
         ":libtinkey",
         "//java",

@@ -21,14 +21,14 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "Ed25519";
 
 message Ed25519Params {
   // Nothing here because Ed25519 hardcodes all parameters.
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.Ed25519PublicKey
+// key_type: type.googleapis.com/google.crypto.tink.Ed25519PublicKey
 message Ed25519PublicKey {
   // Required.
   uint32 version = 1;
@@ -40,7 +40,7 @@ message Ed25519PublicKey {
   bytes key_value = 3;
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.Ed25519PrivateKey
+// key_type: type.googleapis.com/google.crypto.tink.Ed25519PrivateKey
 message Ed25519PrivateKey {
   // Required.
   uint32 version = 1;

@@ -21,7 +21,7 @@ package google.crypto.tink;
 import "proto/aes_ctr.proto";
 import "proto/hmac.proto";
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "AesCtrHmacAeadProto";
 
 message AesCtrHmacAeadParams {
@@ -34,7 +34,7 @@ message AesCtrHmacAeadKeyFormat {
   HmacKeyFormat hmac_key_format = 2;
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.AesCtrKey
+// key_type: type.googleapis.com/google.crypto.tink.AesCtrKey
 message AesCtrHmacAeadKey {
   uint32 version = 1;
   AesCtrKey aes_ctr_key = 2;

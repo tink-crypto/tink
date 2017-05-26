@@ -20,7 +20,7 @@ package google.crypto.tink;
 
 import "proto/common.proto";
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "HmacProto";
 
 message HmacParams {
@@ -28,7 +28,7 @@ message HmacParams {
   uint32 tag_size = 2;
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.HmacKey
+// key_type: type.googleapis.com/google.crypto.tink.HmacKey
 message HmacKey {
   uint32 version = 1;
   HmacParams params = 2;

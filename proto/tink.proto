@@ -19,7 +19,7 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "TinkProto";
 
 // Each instantiation of a Tink primitive is identified by type_url,
@@ -145,7 +145,7 @@ message Keyset {
 message KeysetInfo {
   message KeyInfo {
     // the type url of this key,
-    // e.g., type.googleapis.com/google.cloud.crypto.tink.HmacKey.
+    // e.g., type.googleapis.com/google.crypto.tink.HmacKey.
     string type_url = 1;
 
     // See Keyset.Key.status.

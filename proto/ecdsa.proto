@@ -20,7 +20,7 @@ syntax = "proto3";
 package google.crypto.tink;
 import "proto/common.proto";
 
-option java_package = "com.google.cloud.crypto.tink";
+option java_package = "com.google.crypto.tink";
 option java_outer_classname = "EcdsaProto";
 
 enum EcdsaSignatureEncoding {
@@ -48,7 +48,7 @@ message EcdsaParams {
   EcdsaSignatureEncoding encoding = 3;
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.EcdsaPublicKey
+// key_type: type.googleapis.com/google.crypto.tink.EcdsaPublicKey
 message EcdsaPublicKey {
   // Required.
   uint32 version = 1;
@@ -64,7 +64,7 @@ message EcdsaPublicKey {
   bytes y = 4;
 }
 
-// key_type: type.googleapis.com/google.cloud.crypto.tink.EcdsaPrivateKey
+// key_type: type.googleapis.com/google.crypto.tink.EcdsaPrivateKey
 message EcdsaPrivateKey {
   // Required.
   uint32 version = 1;

@@ -10,12 +10,12 @@ java_library(
         "//visibility:public",
     ],
     exports = [
-        "//java/src/main/java/com/google/cloud/crypto/tink",
-        "//java/src/main/java/com/google/cloud/crypto/tink/aead",
-        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:decrypt",
-        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:encrypt",
-        "//java/src/main/java/com/google/cloud/crypto/tink/mac",
-        "//java/src/main/java/com/google/cloud/crypto/tink/signature",
+        "//java/src/main/java/com/google/crypto/tink",
+        "//java/src/main/java/com/google/crypto/tink/aead",
+        "//java/src/main/java/com/google/crypto/tink/hybrid:decrypt",
+        "//java/src/main/java/com/google/crypto/tink/hybrid:encrypt",
+        "//java/src/main/java/com/google/crypto/tink/mac",
+        "//java/src/main/java/com/google/crypto/tink/signature",
     ],
 )
 
@@ -24,12 +24,12 @@ java_library(
     name = "android",
     visibility = ["//visibility:public"],
     exports = [
-        "//java/src/main/java/com/google/cloud/crypto/tink:android",
-        "//java/src/main/java/com/google/cloud/crypto/tink/aead:android",
-        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:decrypt_android",
-        "//java/src/main/java/com/google/cloud/crypto/tink/hybrid:encrypt_android",
-        "//java/src/main/java/com/google/cloud/crypto/tink/mac:android",
-        "//java/src/main/java/com/google/cloud/crypto/tink/signature:android",
+        "//java/src/main/java/com/google/crypto/tink:android",
+        "//java/src/main/java/com/google/crypto/tink/aead:android",
+        "//java/src/main/java/com/google/crypto/tink/hybrid:decrypt_android",
+        "//java/src/main/java/com/google/crypto/tink/hybrid:encrypt_android",
+        "//java/src/main/java/com/google/crypto/tink/mac:android",
+        "//java/src/main/java/com/google/crypto/tink/signature:android",
     ],
 )
 
@@ -37,14 +37,14 @@ java_library(
     name = "subtle",
     visibility = ["//visibility:public"],
     exports = [
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:ed25519",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:gcp_credential",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:hybrid",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:mac",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:signature",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:x25519",
+        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "//java/src/main/java/com/google/crypto/tink/subtle:aead",
+        "//java/src/main/java/com/google/crypto/tink/subtle:ed25519",
+        "//java/src/main/java/com/google/crypto/tink/subtle:gcp_credential",
+        "//java/src/main/java/com/google/crypto/tink/subtle:hybrid",
+        "//java/src/main/java/com/google/crypto/tink/subtle:mac",
+        "//java/src/main/java/com/google/crypto/tink/subtle:signature",
+        "//java/src/main/java/com/google/crypto/tink/subtle:x25519",
     ],
 )
 
@@ -78,8 +78,8 @@ java_library(
         "//tools/tinkey:__pkg__",
     ],
     exports = [
-        "//java/src/main/java/com/google/cloud/crypto/tink/aead:envelope",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:aead_envelope",
+        "//java/src/main/java/com/google/crypto/tink/aead:envelope",
+        "//java/src/main/java/com/google/crypto/tink/subtle:aead_envelope",
     ],
 )
 
@@ -89,7 +89,7 @@ java_library(
         "//tools/tinkey:__pkg__",
     ],
     exports = [
-        "//java/src/main/java/com/google/cloud/crypto/tink:keyset_handle",
+        "//java/src/main/java/com/google/crypto/tink:keyset_handle",
     ],
 )
 
@@ -99,7 +99,7 @@ java_library(
         "//tools/tinkey:__pkg__",
     ],
     exports = [
-        "//java/src/main/java/com/google/cloud/crypto/tink:key_management",
+        "//java/src/main/java/com/google/crypto/tink:key_management",
     ],
 )
 
@@ -128,7 +128,7 @@ java_library(
     exports = [
         ":android",
         ":subtle",
-        "//java/src/main/java/com/google/cloud/crypto/tink:keyset_handle_android",
+        "//java/src/main/java/com/google/crypto/tink:keyset_handle_android",
     ],
 )
 
@@ -164,7 +164,7 @@ java_library(
     ],
     deps = [
         ":testonly",
-        "//java/src/main/java/com/google/cloud/crypto/tink/subtle:chacha20",
+        "//java/src/main/java/com/google/crypto/tink/subtle:chacha20",
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
         "@com_google_guava//jar",
@@ -179,10 +179,11 @@ java_library(
 gen_java_test_rules(
     data = [
         "//testdata:credentials",
+        "//testdata:ecies_keysets",
     ],
     default_test_size = "small",
     medium_tests = [
-        "src/test/java/com/google/cloud/crypto/tink/subtle/AesGcmJceTest",
+        "src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest",
     ],
     test_files = glob([
         "src/test/**/*Test.java",
