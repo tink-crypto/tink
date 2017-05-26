@@ -24,14 +24,13 @@
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
 // static
 util::Status MacFactory::RegisterStandardKeyTypes() {
   util::Status status = Registry::get_default_registry().RegisterKeyManager(
-      "type.googleapis.com/google.cloud.crypto.tink.HmacKey",
+      "type.googleapis.com/google.crypto.tink.HmacKey",
       new HmacKeyManager());
   return status;
 }
@@ -61,4 +60,3 @@ util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

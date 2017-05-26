@@ -26,7 +26,6 @@
 #include "openssl/evp.h"
 #include "proto/common.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -64,6 +63,5 @@ class AesGcmBoringSsl : public Aead {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_SUBTLE_AES_GCM_BORINGSSL_H_

@@ -29,7 +29,6 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -39,7 +38,7 @@ class AesGcmKeyManager : public KeyManager<Aead> {
 
   // Constructs an instance of AES-GCM Aead for the given 'key'.
   util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
-      const google::cloud::crypto::tink::KeyData& key_data) const override;
+      const google::crypto::tink::KeyData& key_data) const override;
 
   // Constructs an instance of AES-GCM Aead for the given 'key'.
   util::StatusOr<std::unique_ptr<Aead>>
@@ -47,7 +46,7 @@ class AesGcmKeyManager : public KeyManager<Aead> {
 
   // Generates a new random AES-GCM key, based on the specified 'key_template'.
   util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
-      const google::cloud::crypto::tink::KeyTemplate& key_template)
+      const google::crypto::tink::KeyTemplate& key_template)
       const override;
 
   // Returns the type_url identifying the key type handled by this manager.
@@ -61,24 +60,23 @@ class AesGcmKeyManager : public KeyManager<Aead> {
  private:
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
   static constexpr char kKeyType[] =
-      "type.googleapis.com/google.cloud.crypto.tink.AesGcmKey";
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
 
   std::string key_type_;
 
   // Constructs an instance of HMAC-Aead for the given 'key'.
   util::StatusOr<std::unique_ptr<Aead>>
-  GetPrimitiveImpl(const google::cloud::crypto::tink::AesGcmKey& key) const;
+  GetPrimitiveImpl(const google::crypto::tink::AesGcmKey& key) const;
 
   util::Status Validate(
-      const google::cloud::crypto::tink::AesGcmParams& params) const;
+      const google::crypto::tink::AesGcmParams& params) const;
   util::Status Validate(
-      const google::cloud::crypto::tink::AesGcmKey& key) const;
+      const google::crypto::tink::AesGcmKey& key) const;
   util::Status Validate(
-      const google::cloud::crypto::tink::AesGcmKeyFormat& key_format) const;
+      const google::crypto::tink::AesGcmKeyFormat& key_format) const;
 };
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_AEAD_AES_GCM_KEY_MANAGER_H_

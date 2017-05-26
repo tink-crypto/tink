@@ -17,9 +17,8 @@
 #include "cc/keyset_handle.h"
 #include "proto/tink.pb.h"
 
-using google::cloud::crypto::tink::Keyset;
+using google::crypto::tink::Keyset;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -31,4 +30,3 @@ const Keyset& KeysetHandle::get_keyset() const {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

@@ -17,7 +17,6 @@
 #include "cc/subtle/random.h"
 #include "gtest/gtest.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -38,7 +37,6 @@ TEST_F(RandomTest, testBasic) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);

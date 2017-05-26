@@ -26,16 +26,15 @@
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
-using cloud::crypto::tink::test::AddRawKey;
-using cloud::crypto::tink::test::AddTinkKey;
-using google::cloud::crypto::tink::HashType;
-using google::cloud::crypto::tink::HmacKeyFormat;
-using google::cloud::crypto::tink::KeyData;
-using google::cloud::crypto::tink::Keyset;
-using google::cloud::crypto::tink::KeyStatusType;
-using google::cloud::crypto::tink::KeyTemplate;
+using crypto::tink::test::AddRawKey;
+using crypto::tink::test::AddTinkKey;
+using google::crypto::tink::HashType;
+using google::crypto::tink::HmacKeyFormat;
+using google::crypto::tink::KeyData;
+using google::crypto::tink::Keyset;
+using google::crypto::tink::KeyStatusType;
+using google::crypto::tink::KeyTemplate;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -135,7 +134,6 @@ TEST_F(MacFactoryTest, testPrimitive) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 
 int main(int ac, char* av[]) {

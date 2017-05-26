@@ -25,14 +25,13 @@
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
-using google::cloud::crypto::tink::AesCtrKey;
-using google::cloud::crypto::tink::HashType;
-using google::cloud::crypto::tink::HmacKey;
-using google::cloud::crypto::tink::HmacKeyFormat;
-using google::cloud::crypto::tink::KeyData;
-using google::cloud::crypto::tink::KeyTemplate;
+using google::crypto::tink::AesCtrKey;
+using google::crypto::tink::HashType;
+using google::crypto::tink::HmacKey;
+using google::crypto::tink::HmacKeyFormat;
+using google::crypto::tink::KeyData;
+using google::crypto::tink::KeyTemplate;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -41,14 +40,14 @@ class HmacKeyManagerTest : public ::testing::Test {
  protected:
   std::string key_type_prefix = "type.googleapis.com/";
   std::string hmac_key_type =
-      "type.googleapis.com/google.cloud.crypto.tink.HmacKey";
+      "type.googleapis.com/google.crypto.tink.HmacKey";
 };
 
 TEST_F(HmacKeyManagerTest, testBasic) {
   HmacKeyManager key_manager;
 
   EXPECT_EQ(0, key_manager.get_version());
-  EXPECT_EQ("type.googleapis.com/google.cloud.crypto.tink.HmacKey",
+  EXPECT_EQ("type.googleapis.com/google.crypto.tink.HmacKey",
             key_manager.get_key_type());
   EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
 }
@@ -59,7 +58,7 @@ TEST_F(HmacKeyManagerTest, testKeyDataErrors) {
   {  // Bad key type.
     KeyData key_data;
     std::string bad_key_type =
-        "type.googleapis.com/google.cloud.crypto.tink.SomeOtherKey";
+        "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_data.set_type_url(bad_key_type);
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
@@ -147,7 +146,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyErrors) {
     KeyTemplate key_template;
     KeyData key_data;
     std::string bad_key_type =
-        "type.googleapis.com/google.cloud.crypto.tink.SomeOtherKey";
+        "type.googleapis.com/google.crypto.tink.SomeOtherKey";
     key_template.set_type_url(bad_key_type);
     auto result = key_manager.NewKey(key_template);
     EXPECT_FALSE(result.ok());
@@ -258,7 +257,6 @@ TEST_F(HmacKeyManagerTest, testNewKeyBasic) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 
 int main(int ac, char* av[]) {

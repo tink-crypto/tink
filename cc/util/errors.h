@@ -23,7 +23,6 @@
 #define PRINTF_ATTRIBUTE(string_index, first_to_check)                  \
     __attribute__((__format__ (__printf__, string_index, first_to_check)))
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -34,6 +33,5 @@ util::Status ToStatusF(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_UTIL_ERRORS_H_

@@ -22,7 +22,6 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -97,4 +96,3 @@ util::Status MacSetWrapper::VerifyMac(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

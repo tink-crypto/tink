@@ -30,16 +30,15 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-using google::cloud::crypto::tink::AesGcmKey;
-using google::cloud::crypto::tink::AesGcmKeyFormat;
-using google::cloud::crypto::tink::AesGcmParams;
-using google::cloud::crypto::tink::KeyData;
-using google::cloud::crypto::tink::KeyTemplate;
+using google::crypto::tink::AesGcmKey;
+using google::crypto::tink::AesGcmKeyFormat;
+using google::crypto::tink::AesGcmParams;
+using google::crypto::tink::KeyData;
+using google::crypto::tink::KeyTemplate;
 using google::protobuf::Message;
 using util::Status;
 using util::StatusOr;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -151,4 +150,3 @@ Status AesGcmKeyManager::Validate(const AesGcmKeyFormat& key_format) const {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

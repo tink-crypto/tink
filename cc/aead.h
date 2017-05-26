@@ -20,7 +20,6 @@
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -56,6 +55,5 @@ class Aead {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_AEAD_H_

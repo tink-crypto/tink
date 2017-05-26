@@ -25,7 +25,6 @@
 #include "gtest/gtest.h"
 #include "proto/common.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -196,7 +195,6 @@ TEST(AesGcmBoringSslTest, testModification) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);

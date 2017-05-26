@@ -24,7 +24,6 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -58,6 +57,5 @@ class MacSetWrapper : public Mac {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_MAC_MAC_SET_WRAPPER_H_

@@ -26,7 +26,6 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace test {
@@ -54,9 +53,9 @@ void AddTinkKey(
     const std::string& key_type,
     uint32_t key_id,
     const google::protobuf::Message& key,
-    google::cloud::crypto::tink::KeyStatusType key_status,
-    google::cloud::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::cloud::crypto::tink::Keyset* keyset);
+    google::crypto::tink::KeyStatusType key_status,
+    google::crypto::tink::KeyData::KeyMaterialType material_type,
+    google::crypto::tink::Keyset* keyset);
 
 // Adds the given 'key' with specified parameters and output_prefix_type=LEGACY
 // to the specified 'keyset'.
@@ -64,9 +63,9 @@ void AddLegacyKey(
     const std::string& key_type,
     uint32_t key_id,
     const google::protobuf::Message& key,
-    google::cloud::crypto::tink::KeyStatusType key_status,
-    google::cloud::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::cloud::crypto::tink::Keyset* keyset);
+    google::crypto::tink::KeyStatusType key_status,
+    google::crypto::tink::KeyData::KeyMaterialType material_type,
+    google::crypto::tink::Keyset* keyset);
 
 // Adds the given 'key' with specified parameters and output_prefix_type=RAW
 // to the specified 'keyset'.
@@ -74,9 +73,9 @@ void AddRawKey(
     const std::string& key_type,
     uint32_t key_id,
     const google::protobuf::Message& key,
-    google::cloud::crypto::tink::KeyStatusType key_status,
-    google::cloud::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::cloud::crypto::tink::Keyset* keyset);
+    google::crypto::tink::KeyStatusType key_status,
+    google::crypto::tink::KeyData::KeyMaterialType material_type,
+    google::crypto::tink::Keyset* keyset);
 
 // A dummy implementation of Aead-interface.
 // An instance of DummyAead can be identified by a name specified
@@ -140,6 +139,5 @@ class DummyMac : public Mac {
 }  // namespace test
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_UTIL_TEST_UTIL_H_

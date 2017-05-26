@@ -22,7 +22,6 @@
 #include "cc/util/statusor.h"
 #include "proto/tink.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -48,11 +47,10 @@ class CryptoFormat {
   // Generates the prefix for the outputs handled by the specified 'key'.
   // Returns an error if the prefix type of 'key' is invalid.
   static util::StatusOr<std::string> get_output_prefix(
-      const google::cloud::crypto::tink::Keyset::Key& key);
+      const google::crypto::tink::Keyset::Key& key);
 };
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_CRYPTO_FORMAT_H_

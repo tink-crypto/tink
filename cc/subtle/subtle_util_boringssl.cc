@@ -17,7 +17,6 @@
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "openssl/ec.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -226,4 +225,3 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

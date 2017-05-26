@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package google.cloud.crypto.tink;
+package google.crypto.tink;
 
 import "proto/aes_ctr.proto";
 import "proto/hmac.proto";

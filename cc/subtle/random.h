@@ -19,7 +19,6 @@
 
 #include <memory>
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -31,6 +30,5 @@ class Random {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_SUBTLE_HMAC_RANDOM_H_

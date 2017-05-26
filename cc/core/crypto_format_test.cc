@@ -20,10 +20,9 @@
 #include "proto/tink.pb.h"
 
 
-using google::cloud::crypto::tink::Keyset;
-using google::cloud::crypto::tink::OutputPrefixType;
+using google::crypto::tink::Keyset;
+using google::crypto::tink::OutputPrefixType;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -90,7 +89,6 @@ TEST_F(CryptoFormatTest, testRawPrefix) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 
 int main(int ac, char* av[]) {

@@ -21,14 +21,13 @@
 #include "cc/util/status.h"
 #include "proto/tink.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
 // Various validation helpers.
 // TODO(przydatek): write real implementations.
 
-util::Status ValidateKeyset(const google::cloud::crypto::tink::Keyset& keyset) {
+util::Status ValidateKeyset(const google::crypto::tink::Keyset& keyset) {
   return util::Status::OK;
 }
 
@@ -45,6 +44,5 @@ util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected) {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_UTIL_VALIDATION_H_

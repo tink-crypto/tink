@@ -22,7 +22,6 @@
 #include "openssl/ec.h"
 #include "openssl/x509.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -44,4 +43,3 @@ util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

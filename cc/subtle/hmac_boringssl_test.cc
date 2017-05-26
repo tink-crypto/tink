@@ -25,9 +25,8 @@
 #include "gtest/gtest.h"
 #include "proto/common.pb.h"
 
-using google::cloud::crypto::tink::HashType;
+using google::crypto::tink::HashType;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -117,7 +116,6 @@ TEST_F(HmacBoringSslTest, testTruncation) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 int main(int ac, char *av[]) {
   testing::InitGoogleTest(&ac, av);

@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package google.cloud.crypto.tink;
+package google.crypto.tink;
 
 option java_package = "com.google.cloud.crypto.tink";
 option java_outer_classname = "AesCtrProto";

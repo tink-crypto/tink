@@ -22,10 +22,9 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/common.pb.h"
 
-using google::cloud::crypto::tink::EllipticCurveType;
+using google::crypto::tink::EllipticCurveType;
 using google::protobuf::StringPiece;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 class EcUtil {
@@ -40,6 +39,5 @@ class EcUtil {
 };
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_SUBTLE_EC_UTIL_H_

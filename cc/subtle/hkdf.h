@@ -22,10 +22,9 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/common.pb.h"
 
-using google::cloud::crypto::tink::HashType;
+using google::crypto::tink::HashType;
 using google::protobuf::StringPiece;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -40,6 +39,5 @@ class Hkdf {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_SUBTLE_HKDF_H_

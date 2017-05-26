@@ -26,14 +26,13 @@
 #include "openssl/evp.h"
 #include "proto/common.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
 class HmacBoringSsl : public Mac {
  public:
   static util::StatusOr<std::unique_ptr<Mac>> New(
-      google::cloud::crypto::tink::HashType hash_type,
+      google::crypto::tink::HashType hash_type,
       uint32_t tag_size, const std::string& key_value);
 
   // Computes and returns the HMAC for 'data'.
@@ -60,6 +59,5 @@ class HmacBoringSsl : public Mac {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_SUBTLE_HMAC_BORINGSSL_H_

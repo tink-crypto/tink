@@ -22,7 +22,6 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -98,4 +97,3 @@ util::StatusOr<std::string> AeadSetWrapper::Decrypt(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

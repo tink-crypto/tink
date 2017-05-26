@@ -24,12 +24,11 @@
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 
-using cloud::crypto::tink::test::DummyMac;
-using google::cloud::crypto::tink::Keyset;
-using google::cloud::crypto::tink::KeyStatusType;
-using google::cloud::crypto::tink::OutputPrefixType;
+using crypto::tink::test::DummyMac;
+using google::crypto::tink::Keyset;
+using google::crypto::tink::KeyStatusType;
+using google::crypto::tink::OutputPrefixType;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -237,7 +236,6 @@ TEST_F(PrimitiveSetTest, testBasic) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 
 int main(int ac, char* av[]) {

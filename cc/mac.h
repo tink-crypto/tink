@@ -21,7 +21,6 @@
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -48,6 +47,5 @@ class Mac {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_MAC_H_

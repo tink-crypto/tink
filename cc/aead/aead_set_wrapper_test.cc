@@ -21,11 +21,10 @@
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 
-using cloud::crypto::tink::test::DummyAead;
-using google::cloud::crypto::tink::OutputPrefixType;
-using google::cloud::crypto::tink::Keyset;
+using crypto::tink::test::DummyAead;
+using google::crypto::tink::OutputPrefixType;
+using google::crypto::tink::Keyset;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -119,7 +118,6 @@ TEST_F(AeadSetWrapperTest, testBasic) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 
 int main(int ac, char* av[]) {

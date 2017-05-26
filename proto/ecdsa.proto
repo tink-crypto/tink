@@ -17,7 +17,7 @@
 // Definitions for Elliptic Curve Digital Signature Algorithm (ECDSA).
 syntax = "proto3";
 
-package google.cloud.crypto.tink;
+package google.crypto.tink;
 import "proto/common.proto";
 
 option java_package = "com.google.cloud.crypto.tink";

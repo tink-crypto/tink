@@ -20,7 +20,6 @@
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -113,7 +112,6 @@ TEST_F(HkdfTest, testLongOutput) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);

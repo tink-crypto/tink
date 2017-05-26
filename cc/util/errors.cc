@@ -24,7 +24,6 @@
 using util::error::Code;
 using util::Status;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -42,4 +41,3 @@ Status ToStatusF(Code code, const char* format, ...) {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

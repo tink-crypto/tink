@@ -29,7 +29,6 @@
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -39,7 +38,7 @@ class HmacKeyManager : public KeyManager<Mac> {
 
   // Constructs an instance of HMAC-Mac for the given 'key'.
   util::StatusOr<std::unique_ptr<Mac>> GetPrimitive(
-      const google::cloud::crypto::tink::KeyData& key_data) const override;
+      const google::crypto::tink::KeyData& key_data) const override;
 
   // Constructs an instance of HMAC-Mac for the given 'key'.
   util::StatusOr<std::unique_ptr<Mac>>
@@ -47,7 +46,7 @@ class HmacKeyManager : public KeyManager<Mac> {
 
   // Generates a new random HMAC key, based on the specified 'key_template'.
   util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
-      const google::cloud::crypto::tink::KeyTemplate& key_template)
+      const google::crypto::tink::KeyTemplate& key_template)
       const override;
 
   // Returns the type_url identifying the key type handled by this manager.
@@ -61,24 +60,23 @@ class HmacKeyManager : public KeyManager<Mac> {
  private:
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
   static constexpr char kKeyType[] =
-      "type.googleapis.com/google.cloud.crypto.tink.HmacKey";
+      "type.googleapis.com/google.crypto.tink.HmacKey";
 
   std::string key_type_;
 
   // Constructs an instance of HMAC-Mac for the given 'key'.
   util::StatusOr<std::unique_ptr<Mac>>
-  GetPrimitiveImpl(const google::cloud::crypto::tink::HmacKey& key) const;
+  GetPrimitiveImpl(const google::crypto::tink::HmacKey& key) const;
 
   util::Status Validate(
-      const google::cloud::crypto::tink::HmacParams& params) const;
+      const google::crypto::tink::HmacParams& params) const;
   util::Status Validate(
-      const google::cloud::crypto::tink::HmacKey& key) const;
+      const google::crypto::tink::HmacKey& key) const;
   util::Status Validate(
-      const google::cloud::crypto::tink::HmacKeyFormat& key_format) const;
+      const google::crypto::tink::HmacKeyFormat& key_format) const;
 };
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_MAC_HMAC_KEY_MANAGER_H_

@@ -23,7 +23,6 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -80,6 +79,5 @@ class MacFactory {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_MAC_MAC_FACTORY_H_

@@ -23,7 +23,6 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -58,6 +57,5 @@ class AeadSetWrapper : public Aead {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_AEAD_AEAD_SET_WRAPPER_H_

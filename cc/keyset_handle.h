@@ -19,7 +19,6 @@
 
 #include "proto/tink.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -30,15 +29,14 @@ class KeysetHandle {
  public:
   // TODO(przydatek): refactor to ensure that creation KeysetHandle-objects
   //   can be controlled (as in Java).
-  KeysetHandle(const google::cloud::crypto::tink::Keyset& keyset);
-  const google::cloud::crypto::tink::Keyset& get_keyset() const;
+  KeysetHandle(const google::crypto::tink::Keyset& keyset);
+  const google::crypto::tink::Keyset& get_keyset() const;
 
  private:
-  google::cloud::crypto::tink::Keyset keyset_;
+  google::crypto::tink::Keyset keyset_;
 };
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_KEYSET_HANDLE_H_

@@ -29,22 +29,21 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-using cloud::crypto::tink::test::AddLegacyKey;
-using cloud::crypto::tink::test::AddRawKey;
-using cloud::crypto::tink::test::AddTinkKey;
-using cloud::crypto::tink::test::DummyAead;
-using google::cloud::crypto::tink::AesCtrHmacAeadKey;
-using google::cloud::crypto::tink::AesGcmKey;
-using google::cloud::crypto::tink::AesGcmKeyFormat;
-using google::cloud::crypto::tink::KeyData;
-using google::cloud::crypto::tink::Keyset;
-using google::cloud::crypto::tink::KeyStatusType;
-using google::cloud::crypto::tink::KeyTemplate;
+using crypto::tink::test::AddLegacyKey;
+using crypto::tink::test::AddRawKey;
+using crypto::tink::test::AddTinkKey;
+using crypto::tink::test::DummyAead;
+using google::crypto::tink::AesCtrHmacAeadKey;
+using google::crypto::tink::AesGcmKey;
+using google::crypto::tink::AesGcmKeyFormat;
+using google::crypto::tink::KeyData;
+using google::crypto::tink::Keyset;
+using google::crypto::tink::KeyStatusType;
+using google::crypto::tink::KeyTemplate;
 using google::protobuf::Message;
 using google::protobuf::StringPiece;
 using util::Status;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -291,7 +290,6 @@ TEST_F(RegistryTest, testGettingPrimitives) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 
 int main(int ac, char* av[]) {

@@ -31,17 +31,16 @@
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
-using google::cloud::crypto::tink::HashType;
-using google::cloud::crypto::tink::HmacKey;
-using google::cloud::crypto::tink::HmacKeyFormat;
-using google::cloud::crypto::tink::HmacParams;
-using google::cloud::crypto::tink::KeyData;
-using google::cloud::crypto::tink::KeyTemplate;
+using google::crypto::tink::HashType;
+using google::crypto::tink::HmacKey;
+using google::crypto::tink::HmacKeyFormat;
+using google::crypto::tink::HmacParams;
+using google::crypto::tink::KeyData;
+using google::crypto::tink::KeyTemplate;
 using google::protobuf::Message;
 using util::Status;
 using util::StatusOr;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -169,4 +168,3 @@ Status HmacKeyManager::Validate(const HmacKeyFormat& key_format) const {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

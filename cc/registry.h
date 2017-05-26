@@ -31,7 +31,6 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -78,7 +77,7 @@ class Registry {
   // and calls manager's GetPrimitive(key_data)-method.
   template <class P>
   util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      const google::cloud::crypto::tink::KeyData& key_data);
+      const google::crypto::tink::KeyData& key_data);
 
   // Creates a set of primitives corresponding to the keys with
   // (status == ENABLED) in the keyset given in 'keyset_handle',
@@ -169,7 +168,7 @@ util::StatusOr<const KeyManager<P>*> Registry::get_key_manager(
 
 template <class P>
 util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
-    const google::cloud::crypto::tink::KeyData& key_data) {
+    const google::crypto::tink::KeyData& key_data) {
   auto key_manager_result = get_key_manager<P>(key_data.type_url());
   if (key_manager_result.ok()) {
     return key_manager_result.ValueOrDie()->GetPrimitive(key_data);
@@ -183,9 +182,9 @@ util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> Registry::GetPrimitives(
   util::Status status = ValidateKeyset(keyset_handle.get_keyset());
   if (!status.ok()) return status;
   std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());
-  for (const google::cloud::crypto::tink::Keyset::Key& key
+  for (const google::crypto::tink::Keyset::Key& key
            : keyset_handle.get_keyset().key()) {
-    if (key.status() == google::cloud::crypto::tink::KeyStatusType::ENABLED) {
+    if (key.status() == google::crypto::tink::KeyStatusType::ENABLED) {
       std::unique_ptr<P> primitive;
       if (custom_manager != nullptr &&
           custom_manager->DoesSupport(key.key_data().type_url())) {
@@ -210,6 +209,5 @@ util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> Registry::GetPrimitives(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_REGISTRY_H_

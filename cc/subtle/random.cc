@@ -18,7 +18,6 @@
 #include <string>
 #include "openssl/rand.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -34,4 +33,3 @@ std::string Random::GetRandomBytes(size_t length) {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

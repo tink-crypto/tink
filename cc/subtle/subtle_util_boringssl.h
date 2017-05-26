@@ -24,12 +24,11 @@
 #include "openssl/evp.h"
 #include "proto/common.pb.h"
 
-using google::cloud::crypto::tink::HashType;
-using google::cloud::crypto::tink::EllipticCurveType;
-using google::cloud::crypto::tink::EcPointFormat;
+using google::crypto::tink::HashType;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::EcPointFormat;
 using google::protobuf::StringPiece;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -76,6 +75,5 @@ class SubtleUtilBoringSSL {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_

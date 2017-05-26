@@ -21,7 +21,6 @@
 #include "openssl/evp.h"
 #include "openssl/hkdf.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -46,4 +45,3 @@ util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash, StringPiece ikm,
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

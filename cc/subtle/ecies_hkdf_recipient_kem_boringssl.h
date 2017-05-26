@@ -22,12 +22,11 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/common.pb.h"
 
-using google::cloud::crypto::tink::HashType;
-using google::cloud::crypto::tink::EllipticCurveType;
-using google::cloud::crypto::tink::EcPointFormat;
+using google::crypto::tink::HashType;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::EcPointFormat;
 using google::protobuf::StringPiece;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -53,6 +52,5 @@ class EciesHkdfRecipientKemBoringSsl {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_

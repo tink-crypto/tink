@@ -19,7 +19,6 @@
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "openssl/bn.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -94,4 +93,3 @@ EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, StringPiece hkdf_salt,
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

@@ -27,7 +27,6 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -58,7 +57,7 @@ class PrimitiveSet {
    public:
     Entry(std::unique_ptr<P2> primitive,
           google::protobuf::StringPiece identifier,
-          google::cloud::crypto::tink::KeyStatusType status) :
+          google::crypto::tink::KeyStatusType status) :
         primitive_(std::move(primitive)),
         identifier_(identifier.ToString()),
         status_(status) {
@@ -69,13 +68,13 @@ class PrimitiveSet {
     const std::string& get_identifier() const {
       return identifier_;
     }
-    const google::cloud::crypto::tink::KeyStatusType get_status() const {
+    const google::crypto::tink::KeyStatusType get_status() const {
       return status_;
     }
    private:
     std::unique_ptr<P> primitive_;
     std::string identifier_;
-    google::cloud::crypto::tink::KeyStatusType status_;
+    google::crypto::tink::KeyStatusType status_;
   };
 
   typedef std::vector<Entry<P>> Primitives;
@@ -86,7 +85,7 @@ class PrimitiveSet {
   // Adds 'primitive' to this set for the specified 'key'.
   util::StatusOr<Entry<P>*> AddPrimitive(
       std::unique_ptr<P> primitive,
-      google::cloud::crypto::tink::Keyset::Key key) {
+      google::crypto::tink::Keyset::Key key) {
     auto identifier_result = CryptoFormat::get_output_prefix(key);
     if (!identifier_result.ok()) return identifier_result.status();
     std::string identifier = identifier_result.ValueOrDie();
@@ -135,6 +134,5 @@ class PrimitiveSet {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_PRIMITIVE_SET_H_

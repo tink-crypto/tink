@@ -29,9 +29,8 @@
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
 #include "proto/common.pb.h"
-using google::cloud::crypto::tink::HashType;
+using google::crypto::tink::HashType;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -102,4 +101,3 @@ util::Status HmacBoringSsl::VerifyMac(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

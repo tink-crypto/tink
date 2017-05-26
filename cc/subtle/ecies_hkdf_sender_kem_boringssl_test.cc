@@ -26,7 +26,6 @@
 
 // TODO(quannguyen): Add extensive tests.
 // It's important to test compatability with Java.
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -94,7 +93,6 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, testSenderRecipientBasic) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);

@@ -21,7 +21,6 @@
 
 using google::protobuf::StringPiece;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -53,4 +52,3 @@ util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

@@ -24,12 +24,11 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
-using google::cloud::crypto::tink::Keyset;
-using google::cloud::crypto::tink::OutputPrefixType;
+using google::crypto::tink::Keyset;
+using google::crypto::tink::OutputPrefixType;
 using util::error::Code;
 using util::Status;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace test {
@@ -70,10 +69,10 @@ void AddKey(
     const std::string& key_type,
     uint32_t key_id,
     const google::protobuf::Message& new_key,
-    google::cloud::crypto::tink::OutputPrefixType output_prefix,
-    google::cloud::crypto::tink::KeyStatusType key_status,
-    google::cloud::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::cloud::crypto::tink::Keyset* keyset) {
+    google::crypto::tink::OutputPrefixType output_prefix,
+    google::crypto::tink::KeyStatusType key_status,
+    google::crypto::tink::KeyData::KeyMaterialType material_type,
+    google::crypto::tink::Keyset* keyset) {
   Keyset::Key* key = keyset->add_key();
   key->set_output_prefix_type(output_prefix);
   key->set_key_id(key_id);
@@ -87,9 +86,9 @@ void AddTinkKey(
     const std::string& key_type,
     uint32_t key_id,
     const google::protobuf::Message& key,
-    google::cloud::crypto::tink::KeyStatusType key_status,
-    google::cloud::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::cloud::crypto::tink::Keyset* keyset) {
+    google::crypto::tink::KeyStatusType key_status,
+    google::crypto::tink::KeyData::KeyMaterialType material_type,
+    google::crypto::tink::Keyset* keyset) {
   AddKey(key_type, key_id, key, OutputPrefixType::TINK,
          key_status, material_type, keyset);
 }
@@ -98,9 +97,9 @@ void AddLegacyKey(
     const std::string& key_type,
     uint32_t key_id,
     const google::protobuf::Message& key,
-    google::cloud::crypto::tink::KeyStatusType key_status,
-    google::cloud::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::cloud::crypto::tink::Keyset* keyset) {
+    google::crypto::tink::KeyStatusType key_status,
+    google::crypto::tink::KeyData::KeyMaterialType material_type,
+    google::crypto::tink::Keyset* keyset) {
   AddKey(key_type, key_id, key, OutputPrefixType::LEGACY,
          key_status, material_type, keyset);
 }
@@ -109,9 +108,9 @@ void AddRawKey(
     const std::string& key_type,
     uint32_t key_id,
     const google::protobuf::Message& key,
-    google::cloud::crypto::tink::KeyStatusType key_status,
-    google::cloud::crypto::tink::KeyData::KeyMaterialType material_type,
-    google::cloud::crypto::tink::Keyset* keyset) {
+    google::crypto::tink::KeyStatusType key_status,
+    google::crypto::tink::KeyData::KeyMaterialType material_type,
+    google::crypto::tink::Keyset* keyset) {
   AddKey(key_type, key_id, key, OutputPrefixType::RAW,
          key_status, material_type, keyset);
 }
@@ -119,4 +118,3 @@ void AddRawKey(
 }  // namespace test
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

@@ -20,7 +20,6 @@
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -52,7 +51,6 @@ TEST_F(ErrorsTest, ToStatusFTest) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);

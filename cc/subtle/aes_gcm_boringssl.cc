@@ -28,7 +28,6 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -203,4 +202,3 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

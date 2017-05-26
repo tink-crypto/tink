@@ -19,10 +19,9 @@
 #include "cc/util/statusor.h"
 #include "proto/tink.pb.h"
 
-using google::cloud::crypto::tink::Keyset;
-using google::cloud::crypto::tink::OutputPrefixType;
+using google::crypto::tink::Keyset;
+using google::crypto::tink::OutputPrefixType;
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -78,4 +77,3 @@ util::StatusOr<std::string> CryptoFormat::get_output_prefix(
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud

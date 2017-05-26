@@ -22,7 +22,6 @@
 #include "cc/keyset_handle.h"
 #include "cc/util/statusor.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 
@@ -81,6 +80,5 @@ class AeadFactory {
 
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 #endif  // TINK_AEAD_AEAD_FACTORY_H_

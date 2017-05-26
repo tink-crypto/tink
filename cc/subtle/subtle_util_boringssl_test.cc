@@ -23,7 +23,6 @@
 #include "openssl/evp.h"
 #include "openssl/x509.h"
 
-namespace cloud {
 namespace crypto {
 namespace tink {
 namespace {
@@ -113,7 +112,6 @@ TEST_F(SubtleUtilBoringSSLTest, testEcPointDecode) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-}  // namespace cloud
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);
