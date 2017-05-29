@@ -23,7 +23,6 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.subtle.SubtleUtil;
-
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -32,19 +31,12 @@ import java.util.logging.Logger;
 /**
  * AeadFactory allows obtaining a primitive from a {@code KeysetHandle}.
  *
- * AeadFactory gets primitives from the {@code Registry}. The factory allows initalizing the
- * {@code Registry} with native key types and their managers that Tink supports out of the box.
- * These key types are divided in two groups:
- *   - standard: secure and safe to use in new code. Over time, with new developments in
- *               cryptanalysis and computing power, some standard key types might become legacy.
- *   - legacy: deprecated and insecure or obsolete, should not be used in new code. Existing users
- *             should upgrade to one of the standard key types.
- * This divison allows for gradual retiring insecure or obsolete key types.
- *
- * For example, here is how one can obtain and use a Aead primitive:
+ * AeadFactory gets primitives from the {@code Registry.INSTANCE}, which can be initialized
+ * via convenience methods from {@code AeadConfig}. Here is an example how one can obtain
+ * and use a Aead primitive:
  * <pre>   {@code
  *   KeysetHandle keysetHandle = ...;
- *   AeadFactory.registerStandardKeyTypes();
+ *   AeadConfig.registerStandardKeyTypes();
  *   Aead aead = AeadFactory.getPrimitive(keysetHandle);
  *   byte[] plaintext = ...;
  *   byte[] aad = ...;
@@ -57,34 +49,7 @@ import java.util.logging.Logger;
  * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
  */
 public final class AeadFactory {
-  private static final Logger logger =
-      Logger.getLogger(AeadFactory.class.getName());
-  /**
-   * Registers standard Aead key types and their managers with the {@code Registry}.
-   * @throws GeneralSecurityException
-   */
-  public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    Registry.INSTANCE.registerKeyManager(
-        AesCtrHmacAeadKeyManager.TYPE_URL,
-        new AesCtrHmacAeadKeyManager());
-    Registry.INSTANCE.registerKeyManager(
-        KmsEnvelopeAeadKeyManager.TYPE_URL,
-        new KmsEnvelopeAeadKeyManager());
-    Registry.INSTANCE.registerKeyManager(
-        AesGcmKeyManager.TYPE_URL,
-        new AesGcmKeyManager());
-    Registry.INSTANCE.registerKeyManager(
-        AesEaxKeyManager.TYPE_URL,
-        new AesEaxKeyManager());
-  }
-
-  /**
-   * Registers legacy Aead key types and their managers with the {@code Registry}.
-   * @throws GeneralSecurityException
-   */
-  public static void registerLegacyKeyTypes() throws GeneralSecurityException {
-    ;
-  }
+  private static final Logger logger = Logger.getLogger(AeadFactory.class.getName());
 
   /**
    * @return a Aead primitive from a {@code keysetHandle}.

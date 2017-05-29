@@ -20,7 +20,6 @@ import com.google.crypto.tink.CommonProto.EcPointFormat;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.Util;
-
 import java.security.GeneralSecurityException;
 
 final class HybridUtil {

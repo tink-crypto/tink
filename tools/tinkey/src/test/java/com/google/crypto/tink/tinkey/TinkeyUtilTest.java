@@ -36,15 +36,17 @@ import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
-import com.google.crypto.tink.aead.AeadFactory;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
+import com.google.crypto.tink.hybrid.HybridDecryptConfig;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
+import com.google.crypto.tink.hybrid.HybridEncryptConfig;
 import com.google.crypto.tink.hybrid.HybridEncryptFactory;
-import com.google.crypto.tink.mac.MacFactory;
-import com.google.crypto.tink.signature.PublicKeySignFactory;
-import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
+import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.signature.PublicKeySignConfig;
+import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
 import com.google.crypto.tink.subtle.Random;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,12 +63,12 @@ public class TinkeyUtilTest {
 
   @Before
   public void setUp() throws Exception {
-    AeadFactory.registerStandardKeyTypes();
-    MacFactory.registerStandardKeyTypes();
-    HybridDecryptFactory.registerStandardKeyTypes();
-    HybridEncryptFactory.registerStandardKeyTypes();
-    PublicKeySignFactory.registerStandardKeyTypes();
-    PublicKeyVerifyFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
+    MacConfig.registerStandardKeyTypes();
+    HybridDecryptConfig.registerStandardKeyTypes();
+    HybridEncryptConfig.registerStandardKeyTypes();
+    PublicKeySignConfig.registerStandardKeyTypes();
+    PublicKeyVerifyConfig.registerStandardKeyTypes();
   }
 
   @Test

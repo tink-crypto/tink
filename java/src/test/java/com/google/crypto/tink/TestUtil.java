@@ -21,6 +21,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Optional;
 import com.google.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.AesCtrProto.AesCtrKey;
@@ -63,7 +64,6 @@ import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.Random;
-import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.io.File;

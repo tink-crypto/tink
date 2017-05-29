@@ -22,7 +22,6 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
-
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -32,19 +31,12 @@ import java.util.logging.Logger;
  * PublicKeyVerifyFactory allows obtaining a {@code PublicKeyVerify} primitive from a
  * {@code KeysetHandle}.
  *
- * PublicKeyVerifyFactory gets primitives from the {@code Registry}. The factory allows initalizing
- * the {@code Registry} with native key types and their managers that Tink supports out of the box.
- * These key types are divided in two groups:
- *   - standard: secure and safe to use in new code. Over time, with new developments in
- *               cryptanalysis and computing power, some standard key types might become legacy.
- *   - legacy: deprecated and insecure or obsolete, should not be used in new code. Existing users
- *             should upgrade to one of the standard key types.
- * This divison allows for gradual retiring insecure or obsolete key types.
- *
- * For example, here is how one can obtain and use a PublicKeyVerify primitive:
+ * PublicKeyVerifyFactory gets primitives from the {@code Registry.INSTANCE}, which can be
+ * initialized via convenience methods from {@code PublicKeyVerifyConfig}. Here is an example
+ * how one can obtain and use a PublicKeyVerify primitive:
  * <pre>   {@code
  *   KeysetHandle keysetHandle = ...;
- *   PublicKeyVerifyFactory.registerStandardKeyTypes();
+ *   PublicKeyVerifyConfig.registerStandardKeyTypes();
  *   PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle);
  *   verifier.verify(signature, data);
  *  }</pre>
@@ -54,26 +46,7 @@ import java.util.logging.Logger;
  * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
  */
 public final class PublicKeyVerifyFactory {
-  private static final Logger logger =
-      Logger.getLogger(PublicKeyVerifyFactory.class.getName());
-
-  /**
-   * Registers standard PublicKeyVerify key types and their managers with the {@code Registry}.
-   * @throws GeneralSecurityException
-   */
-  public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    Registry.INSTANCE.registerKeyManager(
-        EcdsaVerifyKeyManager.TYPE_URL,
-        new EcdsaVerifyKeyManager());
-  }
-
-  /**
-   * Registers legacy PublicKeyVerify key types and their managers with the {@code Registry}.
-   * @throws GeneralSecurityException
-   */
-  public static void registerLegacyKeyTypes() throws GeneralSecurityException {
-    ;
-  }
+  private static final Logger logger = Logger.getLogger(PublicKeyVerifyFactory.class.getName());
 
   /**
    * @return a PublicKeyVerify primitive from a {@code keysetHandle}.

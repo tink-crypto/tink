@@ -17,7 +17,6 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Mac;
-
 import java.security.GeneralSecurityException;
 
 /**

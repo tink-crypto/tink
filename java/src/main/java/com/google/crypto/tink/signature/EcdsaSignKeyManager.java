@@ -150,6 +150,11 @@ public final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
     return TYPE_URL.equals(typeUrl);
   }
 
+  @Override
+  public String getKeyType() {
+    return TYPE_URL;
+  }
+
   private void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {
     SubtleUtil.validateVersion(privKey.getVersion(), VERSION);
     SigUtil.validateEcdsaParams(privKey.getPublicKey().getParams());

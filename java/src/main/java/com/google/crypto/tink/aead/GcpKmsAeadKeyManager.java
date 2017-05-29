@@ -115,6 +115,11 @@ public final class GcpKmsAeadKeyManager implements KeyManager<Aead> {
     return typeUrl.equals(TYPE_URL);
   }
 
+  @Override
+  public String getKeyType() {
+    return TYPE_URL;
+  }
+
   private CloudKMS createCloudKmsClient(GcpKmsAeadKey key) throws IOException {
     HttpTransport transport = new NetHttpTransport();
     JsonFactory jsonFactory = new JacksonFactory();

@@ -23,7 +23,6 @@ import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.Util;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EciesHkdfRecipientKem;
-
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.EllipticCurve;

@@ -19,7 +19,9 @@ package com.google.crypto.tink;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.google.crypto.tink.hybrid.HybridDecryptConfig;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
+import com.google.crypto.tink.hybrid.HybridEncryptConfig;
 import com.google.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.crypto.tink.subtle.Random;
 import java.nio.file.Files;
@@ -37,8 +39,8 @@ import org.junit.runners.JUnit4;
 public class IntegrationTest {
   @Before
   public void setUp() throws GeneralSecurityException {
-    HybridEncryptFactory.registerStandardKeyTypes();
-    HybridDecryptFactory.registerStandardKeyTypes();
+    HybridEncryptConfig.registerStandardKeyTypes();
+    HybridDecryptConfig.registerStandardKeyTypes();
   }
 
   /**

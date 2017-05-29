@@ -20,29 +20,21 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.aead.AeadFactory;
-import com.google.crypto.tink.mac.MacFactory;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.subtle.SubtleUtil;
-
 import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
 /**
- * HybridEncryptFactory allows obtaining a HybridEncrypt-primitive from a {@code KeysetHandle}.
+ * HybridEncryptFactory allows obtaining a HybridEncrypt primitive from a {@code KeysetHandle}.
  *
- * HybridEncryptFactory gets primitives from the {@code Registry}. The factory allows initalizing
- * the {@code Registry} with native key types and their managers that Tink supports out of the box.
- * These key types are divided in two groups:
- *   - standard: secure and safe to use in new code. Over time, with new developments in
- *               cryptanalysis and computing power, some standard key types might become legacy.
- *   - legacy: deprecated and insecure or obsolete, should not be used in new code. Existing users
- *             should upgrade to one of the standard key types.
- * This divison allows for gradual retiring insecure or obsolete key types.
- *
- * For example, here is how one can obtain and use a HybridEncrypt primitive:
+ * HybridEncryptFactory gets primitives from the {@code Registry.INSTANCE}, which can be initialized
+ * via convenience methods from {@code HybridEncryptConfig}. Here is an example how one can obtain
+ * and use a HybridEncrypt primitive:
  * <pre>   {@code
  *   KeysetHandle keysetHandle = ...;
- *   HybridEncryptFactory.registerStandardKeyTypes();
+ *   HybridEncryptConfig.registerStandardKeyTypes();
  *   HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(keysetHandle);
  *   byte[] plaintext = ...;
  *   byte[] contextInfo = ...;
@@ -53,13 +45,12 @@ import java.util.logging.Logger;
  * associated with the primary key.
  */
 public final class HybridEncryptFactory {
-  private static final Logger logger =
-      Logger.getLogger(HybridEncryptFactory.class.getName());
+  private static final Logger logger = Logger.getLogger(HybridEncryptFactory.class.getName());
 
   static {
     try {
-      AeadFactory.registerStandardKeyTypes();
-      MacFactory.registerStandardKeyTypes();
+      AeadConfig.registerStandardKeyTypes();
+      MacConfig.registerStandardKeyTypes();
     } catch (GeneralSecurityException e) {
       logger.severe("cannot register key managers: " + e);
     }

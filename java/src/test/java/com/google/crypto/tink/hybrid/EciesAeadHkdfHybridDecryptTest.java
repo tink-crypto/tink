@@ -26,9 +26,8 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.Util;
-import com.google.crypto.tink.aead.AeadFactory;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.subtle.Random;
-
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -46,7 +45,7 @@ import org.junit.runners.JUnit4;
 public class EciesAeadHkdfHybridDecryptTest {
   @Before
   public void setUp() throws GeneralSecurityException {
-    AeadFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
   }
 
   @Test

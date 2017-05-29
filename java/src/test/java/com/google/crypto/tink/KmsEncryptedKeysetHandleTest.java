@@ -26,8 +26,8 @@ import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.KmsEncryptedKeyset;
-import com.google.crypto.tink.aead.AeadFactory;
-import com.google.crypto.tink.mac.MacFactory;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
@@ -42,8 +42,8 @@ import org.junit.runners.JUnit4;
 public class KmsEncryptedKeysetHandleTest {
   @Before
   public void setUp() throws GeneralSecurityException {
-    AeadFactory.registerStandardKeyTypes();
-    MacFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
+    MacConfig.registerStandardKeyTypes();
   }
 
   @Test

@@ -45,7 +45,7 @@ public class MacFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    MacFactory.registerStandardKeyTypes();
+    MacConfig.registerStandardKeyTypes();
   }
 
   @Test

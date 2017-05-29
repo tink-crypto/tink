@@ -92,13 +92,13 @@ implementations of AEAD and MAC primitives offered by Tink, the initialization
 looks as follows:
 
 ``` java
-    import com.google.cloud.crypto.tink.aead.AeadFactory;
-    import com.google.cloud.crypto.tink.mac.MacFactory;
+    import com.google.cloud.crypto.tink.aead.AeadConfig;
+    import com.google.cloud.crypto.tink.mac.MacConfig;
     // [...]
 
     // Register standard implementations of AEAD and MAC primitives.
-    AeadFactory.registerStandardKeyTypes();
-    MacFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
+    MacConfig.registerStandardKeyTypes();
 ```
 
 Now that you already know how to use Tink (it is really that simple!), you can
@@ -199,7 +199,10 @@ currently available or planned (the latter are listed in brackets).
 
 Tink user accesses implementations of a primitive via a factory that corresponds
 to the primitive: AEAD via `AeadFactory`, MAC via `MacFactory`, etc. where each
-factory offers corresponding `getPrimitive(...)` methods.
+factory offers corresponding `getPrimitive(...)` methods.  Before factories can
+be used, the underlying `Registry` has to be initialized, which can be
+accomplished using corresponding `Config`-classes: `AeadConfig` for AEAD,
+`MacConfig` for MAC, etc.
 
 ### Key, Keyset, and KeysetHandle
 

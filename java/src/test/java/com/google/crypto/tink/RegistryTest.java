@@ -31,10 +31,10 @@ import com.google.crypto.tink.TinkProto.KeyStatusType;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
-import com.google.crypto.tink.aead.AeadFactory;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.mac.HmacKeyManager;
-import com.google.crypto.tink.mac.MacFactory;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.MacJce;
@@ -78,6 +78,11 @@ public class RegistryTest {
     public boolean doesSupport(String typeUrl) {  // supports same keys as AesGcmKey
       return typeUrl.equals(AesGcmKeyManager.TYPE_URL);
     }
+    @Override
+    public String getKeyType() {
+      return AesGcmKeyManager.TYPE_URL;
+    }
+
   }
 
   private String aesCtrHmacAeadTypeUrl =
@@ -89,8 +94,8 @@ public class RegistryTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {
-    AeadFactory.registerStandardKeyTypes();
-    MacFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
+    MacConfig.registerStandardKeyTypes();
   }
 
   @Test

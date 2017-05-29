@@ -146,6 +146,11 @@ public final class EciesAeadHkdfPrivateKeyManager implements KeyManager<HybridDe
     return TYPE_URL.equals(typeUrl);
   }
 
+  @Override
+  public String getKeyType() {
+    return TYPE_URL;
+  }
+
   private void validate(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {
     // TODO(przydatek): add more checks.
     SubtleUtil.validateVersion(keyProto.getVersion(), VERSION);

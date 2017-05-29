@@ -106,6 +106,11 @@ public final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> 
     return TYPE_URL.equals(typeUrl);
   }
 
+  @Override
+  public String getKeyType() {
+    return TYPE_URL;
+  }
+
   private void validateKey(EcdsaPublicKey pubKey) throws GeneralSecurityException {
     SubtleUtil.validateVersion(pubKey.getVersion(), VERSION);
     SigUtil.validateEcdsaParams(pubKey.getParams());

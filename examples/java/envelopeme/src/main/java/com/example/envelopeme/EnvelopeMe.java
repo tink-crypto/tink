@@ -17,8 +17,9 @@ package com.example.envelopeme;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.NoSecretKeysetHandle;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadFactory;
-import com.google.crypto.tink.mac.MacFactory;
+import com.google.crypto.tink.mac.MacConfig;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -48,8 +49,8 @@ public class EnvelopeMe {
   }
 
   public static void main(String[] args) throws Exception {
-    AeadFactory.registerStandardKeyTypes();
-    MacFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
+    MacConfig.registerStandardKeyTypes();
 
     EnvelopeMeCommands commands = new EnvelopeMeCommands();
     CmdLineParser parser = new CmdLineParser(commands);

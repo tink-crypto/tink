@@ -47,8 +47,8 @@ public class HybridEncryptFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    HybridEncryptFactory.registerStandardKeyTypes();
-    HybridDecryptFactory.registerStandardKeyTypes();
+    HybridEncryptConfig.registerStandardKeyTypes();
+    HybridDecryptConfig.registerStandardKeyTypes();
   }
 
   @Test

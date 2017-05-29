@@ -22,7 +22,6 @@ import static org.junit.Assert.assertArrayEquals;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.TestUtil;
-
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import javax.crypto.Cipher;

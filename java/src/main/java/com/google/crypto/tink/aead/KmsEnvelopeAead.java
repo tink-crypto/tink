@@ -19,7 +19,6 @@ package com.google.crypto.tink.aead; // instead of subtle, because it depends on
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
-
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;

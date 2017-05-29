@@ -74,6 +74,11 @@ public interface KeyManager<P> {
    */
   boolean doesSupport(String typeUrl);
 
+  /**
+   * @return the type URL that identifes the key type of keys managed by this KeyManager.
+   */
+  String getKeyType();
+
   // APIs for Key Management
 
   /**

@@ -21,29 +21,20 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.aead.AeadFactory;
-import com.google.crypto.tink.mac.MacFactory;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * HybridDecryptFactory allows obtaining a HybridDecrypt-primitive from a {@code KeysetHandle}.
+ * HybridDecryptFactory allows obtaining a HybridDecrypt primitive from a {@code KeysetHandle}.
  *
- * HybridDecryptFactory gets primitives from the {@code Registry}. The factory allows initalizing
- * the {@code Registry} with native key types and their managers that Tink supports out of the box.
- * These key types are divided in two groups:
- *   - standard: secure and safe to use in new code. Over time, with new developments in
- *               cryptanalysis and computing power, some standard key types might become legacy.
- *   - legacy: deprecated and insecure or obsolete, should not be used in new code. Existing users
- *             should upgrade to one of the standard key types.
- * This divison allows for gradual retiring insecure or obsolete key types.
- *
- * For example, here is how one can obtain and use a HybridDecrypt primitive:
+ * HybridDecryptFactory gets primitives from the {@code Registry.INSTANCE}, which can be initialized
+ * via convenience methods from {@code HybridDecryptConfig}. Here is an example how one can obtain
+ * and use a HybridDecrypt primitive:
  * <pre>   {@code
  *   KeysetHandle keysetHandle = ...;
- *   HybridDecryptFactory.registerStandardKeyTypes();
+ *   HybridDecryptConfig.registerStandardKeyTypes();
  *   HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandle);
  *   byte[] ciphertext = ...;
  *   byte[] contextInfo = ...;
@@ -55,33 +46,8 @@ import java.util.logging.Logger;
  * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
  */
 public final class HybridDecryptFactory {
-  private static final Logger logger =
-      Logger.getLogger(HybridDecryptFactory.class.getName());
+  private static final Logger logger = Logger.getLogger(HybridDecryptFactory.class.getName());
 
-  static {
-    try {
-      AeadFactory.registerStandardKeyTypes();
-      MacFactory.registerStandardKeyTypes();
-    } catch (GeneralSecurityException e) {
-      logger.severe("Cannot register key managers: " + e);
-    }
-  }
-  /**
-   * Registers standard HybridDecrypt key types and their managers with the {@code Registry}.
-   * @throws GeneralSecurityException
-   */
-  public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    Registry.INSTANCE.registerKeyManager(
-        EciesAeadHkdfPrivateKeyManager.TYPE_URL,
-        new EciesAeadHkdfPrivateKeyManager());
-  }
-  /**
-   * Registers legacy HybridDecrypt key types and their managers with the {@code Registry}.
-   * @throws GeneralSecurityException
-   */
-  public static void registerLegacyKeyTypes() throws GeneralSecurityException {
-    ;
-  }
   /**
    * @return a HybridDecrypt primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException

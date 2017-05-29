@@ -45,7 +45,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {
-    AeadFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
     Registry.INSTANCE.registerKeyManager(
         GcpKmsAeadKeyManager.TYPE_URL,
         new GcpKmsAeadKeyManager(new ServiceAccountGcpCredentialFactory(

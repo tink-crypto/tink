@@ -35,7 +35,6 @@ import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset.Key;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,8 +50,8 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
 
   @Before
   public void setUp() throws Exception {
-    HybridEncryptFactory.registerStandardKeyTypes();
-    HybridDecryptFactory.registerStandardKeyTypes();
+    HybridEncryptConfig.registerStandardKeyTypes();
+    HybridDecryptConfig.registerStandardKeyTypes();
   }
 
   @Test

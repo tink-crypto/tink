@@ -24,7 +24,6 @@ import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.KeysetInfo;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.subtle.EcUtil;
-
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;

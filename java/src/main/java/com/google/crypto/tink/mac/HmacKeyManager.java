@@ -145,6 +145,11 @@ public final class HmacKeyManager implements KeyManager<Mac> {
     return typeUrl.equals(TYPE_URL);
   }
 
+  @Override
+  public String getKeyType() {
+    return TYPE_URL;
+  }
+
   private void validate(HmacKey key) throws GeneralSecurityException {
     SubtleUtil.validateVersion(key.getVersion(), VERSION);
     if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {

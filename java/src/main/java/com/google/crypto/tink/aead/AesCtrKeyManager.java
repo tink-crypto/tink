@@ -127,6 +127,11 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
     return typeUrl.equals(TYPE_URL);
   }
 
+  @Override
+  public String getKeyType() {
+    return TYPE_URL;
+  }
+
   private void validate(AesCtrKey key) throws GeneralSecurityException {
     SubtleUtil.validateVersion(key.getVersion(), VERSION);
     SubtleUtil.validateAesKeySize(key.getKeyValue().size());

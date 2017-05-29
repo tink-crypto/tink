@@ -117,6 +117,11 @@ public final class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
     return typeUrl.equals(TYPE_URL);
   }
 
+  @Override
+  public String getKeyType() {
+    return TYPE_URL;
+  }
+
   private void validate(KmsEnvelopeAeadKey key) throws GeneralSecurityException {
     SubtleUtil.validateVersion(key.getVersion(), VERSION);
   }

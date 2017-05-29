@@ -106,6 +106,11 @@ public final class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEnc
     return TYPE_URL.equals(typeUrl);
   }
 
+  @Override
+  public String getKeyType() {
+    return TYPE_URL;
+  }
+
   private void validate(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {
     // TODO(przydatek): add more checks.
     SubtleUtil.validateVersion(key.getVersion(), VERSION);

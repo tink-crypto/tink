@@ -14,11 +14,11 @@
 
 package com.example.envelopeme;
 
+import com.google.common.base.Optional;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.GcpKmsAeadKeyManager;
 import com.google.crypto.tink.subtle.ServiceAccountGcpCredentialFactory;
 import com.google.crypto.tink.subtle.SubtleUtil;
-import com.google.common.base.Optional;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;

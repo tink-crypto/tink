@@ -33,7 +33,6 @@ import com.google.crypto.tink.TinkProto.KeyStatusType;
 import com.google.crypto.tink.TinkProto.Keyset.Key;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
-
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import org.junit.Before;
@@ -48,8 +47,8 @@ public class PublicKeySignFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    PublicKeySignFactory.registerStandardKeyTypes();
-    PublicKeyVerifyFactory.registerStandardKeyTypes();
+    PublicKeySignConfig.registerStandardKeyTypes();
+    PublicKeyVerifyConfig.registerStandardKeyTypes();
   }
 
   @Test

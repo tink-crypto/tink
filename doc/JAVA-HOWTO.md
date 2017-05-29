@@ -9,18 +9,18 @@ Tink provides customizable initialization, which allows for choosing specific
 implementations (identified by _key types_) of desired primitives.  This
 initialization happens via _registration_ of the implementations.  To register
 standard implementations of primtives one can use
-`registerStandardKeyTypes()`-methods of corresponding factories.  Example if one
-wants to use the standard implementations of AEAD and MAC primitives offered by
-Tink, the initialization would look as follows:
+`registerStandardKeyTypes()`-methods of corresponding `Config`-classes.  For
+example if one wants to use the standard implementations of AEAD and MAC
+primitives offered by Tink, the initialization would look as follows:
 
 ``` java
-    import com.google.cloud.crypto.tink.aead.AeadFactory;
-    import com.google.cloud.crypto.tink.mac.MacFactory;
+    import com.google.cloud.crypto.tink.aead.AeadConfig;
+    import com.google.cloud.crypto.tink.mac.MacConfig;
     // (...)
 
     // Register standard implementations of AEAD and MAC primitives.
-    AeadFactory.registerStandardKeyTypes();
-    MacFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
+    MacConfig.registerStandardKeyTypes();
 ```
 
 For custom initialization the registration proceeds directly via `Registry`-class:

@@ -29,11 +29,11 @@ import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.KeysetInfo;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
-import com.google.crypto.tink.aead.AeadFactory;
-import com.google.crypto.tink.hybrid.HybridDecryptFactory;
-import com.google.crypto.tink.hybrid.HybridEncryptFactory;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.hybrid.HybridDecryptConfig;
+import com.google.crypto.tink.hybrid.HybridEncryptConfig;
 import com.google.crypto.tink.mac.HmacKeyManager;
-import com.google.crypto.tink.mac.MacFactory;
+import com.google.crypto.tink.mac.MacConfig;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,10 +50,10 @@ public class KeysetManagerTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {
-    AeadFactory.registerStandardKeyTypes();
-    MacFactory.registerStandardKeyTypes();
-    HybridEncryptFactory.registerStandardKeyTypes();
-    HybridDecryptFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
+    MacConfig.registerStandardKeyTypes();
+    HybridEncryptConfig.registerStandardKeyTypes();
+    HybridDecryptConfig.registerStandardKeyTypes();
   }
 
   @Test

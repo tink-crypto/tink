@@ -46,12 +46,12 @@ public class AeadFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    AeadFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
   }
 
   @Test
   public void testBasicAesCtrHmacAead() throws Exception {
-    AeadFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
     byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
     byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
     int ivSize = 12;

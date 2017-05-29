@@ -214,7 +214,7 @@ public class AesEaxKeyManagerTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {
-    AeadFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
   }
 
   @Test
@@ -258,7 +258,7 @@ public class AesEaxKeyManagerTest {
 
   @Test
   public void testCiphertextSize() throws Exception {
-    AeadFactory.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes();
     byte[] keyValue = Random.randBytes(AES_KEY_SIZE);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(

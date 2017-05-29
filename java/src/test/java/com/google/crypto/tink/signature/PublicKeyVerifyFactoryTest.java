@@ -45,8 +45,8 @@ public class PublicKeyVerifyFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    PublicKeyVerifyFactory.registerStandardKeyTypes();
-    PublicKeySignFactory.registerStandardKeyTypes();
+    PublicKeyVerifyConfig.registerStandardKeyTypes();
+    PublicKeySignConfig.registerStandardKeyTypes();
   }
 
   @Test
