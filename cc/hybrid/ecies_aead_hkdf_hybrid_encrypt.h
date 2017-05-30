@@ -17,7 +17,11 @@
 #ifndef TINK_HYBRID_ECIES_AEAD_HKDF_HYBRID_ENCRYPT_H_
 #define TINK_HYBRID_ECIES_AEAD_HKDF_HYBRID_ENCRYPT_H_
 
+#include "cc/aead.h"
 #include "cc/hybrid_encrypt.h"
+#include "cc/key_manager.h"
+#include "cc/hybrid/ecies_aead_hkdf_dem_helper.h"
+#include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/ecies_aead_hkdf.pb.h"
@@ -42,11 +46,19 @@ class EciesAeadHkdfHybridEncrypt : public HybridEncrypt {
   virtual ~EciesAeadHkdfHybridEncrypt() {}
 
  private:
+  static util::Status Validate(
+      const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key);
+
   EciesAeadHkdfHybridEncrypt(
-      const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key)
-      : recipient_key_(recipient_key) {}
+      const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key,
+      std::unique_ptr<EciesHkdfSenderKemBoringSsl> sender_kem,
+      std::unique_ptr<EciesAeadHkdfDemHelper> dem_helper)
+      : recipient_key_(recipient_key), sender_kem_(std::move(sender_kem)),
+        dem_helper_(std::move(dem_helper)) {}
 
   google::crypto::tink::EciesAeadHkdfPublicKey recipient_key_;
+  std::unique_ptr<EciesHkdfSenderKemBoringSsl> sender_kem_;
+  std::unique_ptr<EciesAeadHkdfDemHelper> dem_helper_;
 };
 
 }  // namespace tink

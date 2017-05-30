@@ -21,6 +21,10 @@
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
+
 // TODO(quannguyen): Add extensive tests.
 // It's important to test compatability with Java.
 namespace crypto {
@@ -52,10 +56,10 @@ static const std::vector<TestVector> test_vector(
 
 TEST_F(EciesHkdfRecipientKemBoringSslTest, testBasic) {
   for (const TestVector& test : test_vector) {
-    EciesHkdfRecipientKemBoringSsl ecies_kem(
-        test.curve, test::HexDecodeOrDie(test.priv_hex));
+    auto ecies_kem(std::move(EciesHkdfRecipientKemBoringSsl::New(
+        test.curve, test::HexDecodeOrDie(test.priv_hex)).ValueOrDie()));
     auto status_or_string =
-        ecies_kem.EciesHkdfRecipientKemBoringSsl::GenerateKey(
+        ecies_kem->EciesHkdfRecipientKemBoringSsl::GenerateKey(
             test::HexDecodeOrDie(test.pub_encoded_hex), test.hash,
             test::HexDecodeOrDie(test.salt_hex),
             test::HexDecodeOrDie(test.info_hex), test.out_len,

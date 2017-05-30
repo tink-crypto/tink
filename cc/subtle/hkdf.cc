@@ -21,6 +21,9 @@
 #include "openssl/evp.h"
 #include "openssl/hkdf.h"
 
+using google::crypto::tink::HashType;
+using google::protobuf::StringPiece;
+
 namespace crypto {
 namespace tink {
 

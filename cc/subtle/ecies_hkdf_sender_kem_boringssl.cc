@@ -17,7 +17,14 @@
 #include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
 #include "cc/subtle/hkdf.h"
 #include "cc/subtle/subtle_util_boringssl.h"
+#include "cc/util/ptr_util.h"
 #include "openssl/bn.h"
+#include "proto/common.pb.h"
+
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
+using google::protobuf::StringPiece;
 
 namespace crypto {
 namespace tink {
@@ -35,16 +42,24 @@ std::string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_symmetric_key() {
 }
 
 EciesHkdfSenderKemBoringSsl::EciesHkdfSenderKemBoringSsl(
-    EllipticCurveType curve, const std::string& pubx, const std::string& puby)
+EllipticCurveType curve, const std::string& pubx, const std::string& puby)
     : curve_(curve), pubx_(pubx), puby_(puby), peer_pub_key_(nullptr) {
-  auto status_or_ec_point =
-      SubtleUtilBoringSSL::GetEcPoint(curve_, pubx_, puby_);
-  if (status_or_ec_point.ok()) {
-    peer_pub_key_.reset(status_or_ec_point.ValueOrDie());
-  }
 }
 
-util::StatusOr<EciesHkdfSenderKemBoringSsl::KemKey>
+// static
+util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+EciesHkdfSenderKemBoringSsl::New(
+    EllipticCurveType curve, const std::string& pubx, const std::string& puby) {
+  auto status_or_ec_point =
+      SubtleUtilBoringSSL::GetEcPoint(curve, pubx, puby);
+  if (!status_or_ec_point.ok()) return status_or_ec_point.status();
+  auto sender_kem = util::wrap_unique(
+      new EciesHkdfSenderKemBoringSsl(curve, pubx, puby));
+  sender_kem->peer_pub_key_.reset(status_or_ec_point.ValueOrDie());
+  return std::move(sender_kem);
+}
+
+util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl::KemKey>>
 EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, StringPiece hkdf_salt,
                                          StringPiece hkdf_info,
                                          uint32_t key_size_in_bytes,
@@ -85,10 +100,10 @@ EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, StringPiece hkdf_salt,
   if (!status_or_string_symmetric_key.ok()) {
     return status_or_string_symmetric_key.status();
   }
-  EciesHkdfSenderKemBoringSsl::KemKey kem_key(
+  auto kem_key = util::make_unique<KemKey>(
       status_or_string_kem.ValueOrDie(),
       status_or_string_symmetric_key.ValueOrDie());
-  return kem_key;
+  return std::move(kem_key);
 }
 
 }  // namespace tink

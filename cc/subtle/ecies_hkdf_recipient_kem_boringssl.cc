@@ -15,14 +15,35 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/ecies_hkdf_recipient_kem_boringssl.h"
+
 #include "cc/subtle/hkdf.h"
 #include "cc/subtle/subtle_util_boringssl.h"
+#include "cc/util/errors.h"
+#include "cc/util/ptr_util.h"
+#include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/ec.h"
 
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
 using google::protobuf::StringPiece;
 
 namespace crypto {
 namespace tink {
+
+// static
+util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
+EciesHkdfRecipientKemBoringSsl::New(
+    EllipticCurveType curve, const std::string& priv_key) {
+  auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
+  if (!status_or_ec_group.ok()) return status_or_ec_group.status();
+  auto recipient_kem = util::wrap_unique(
+      new EciesHkdfRecipientKemBoringSsl(curve, priv_key));
+  // TODO(przydatek): consider refactoring SubtleUtilBoringSSL,
+  //     so that the saved group can be used for KEM operations.
+  recipient_kem->ec_group_.reset(status_or_ec_group.ValueOrDie());
+  return std::move(recipient_kem);
+}
 
 EciesHkdfRecipientKemBoringSsl::EciesHkdfRecipientKemBoringSsl(
     EllipticCurveType curve, const std::string& priv)
@@ -35,7 +56,9 @@ util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
   auto status_or_ec_point =
       SubtleUtilBoringSSL::EcPointDecode(curve_, point_format, kem_bytes);
   if (!status_or_ec_point.ok()) {
-    return status_or_ec_point.status();
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Invalid KEM bytes: %s",
+                     status_or_ec_point.status().error_message().c_str());
   }
   bssl::UniquePtr<EC_POINT> pub_key(status_or_ec_point.ValueOrDie());
   bssl::UniquePtr<BIGNUM> priv_key(

@@ -24,24 +24,32 @@
 #include "openssl/evp.h"
 #include "proto/common.pb.h"
 
-using google::crypto::tink::HashType;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::EcPointFormat;
-using google::protobuf::StringPiece;
-
 namespace crypto {
 namespace tink {
 
 class SubtleUtilBoringSSL {
  public:
+  struct EcKey {
+    google::crypto::tink::EllipticCurveType curve;
+    std::string pub_x;   // affine coordinates in bigendian representation
+    std::string pub_y;
+    std::string priv;    // big integer in bigendian represnetation
+  };
+
   // Returns BoringSSL's EC_GROUP constructed from the curve type.
-  static util::StatusOr<EC_GROUP *> GetEcGroup(EllipticCurveType curve_type);
+  static util::StatusOr<EC_GROUP *> GetEcGroup(
+      google::crypto::tink::EllipticCurveType curve_type);
 
   // Returns BoringSSL's EC_POINT constructed from the curve type, big-endian
   // representation of public key's x-coordinate and y-coordinate.
-  static util::StatusOr<EC_POINT *> GetEcPoint(EllipticCurveType curve,
-                                               StringPiece pubx,
-                                               StringPiece puby);
+  static util::StatusOr<EC_POINT *> GetEcPoint(
+      google::crypto::tink::EllipticCurveType curve,
+      google::protobuf::StringPiece pubx,
+      google::protobuf::StringPiece puby);
+
+  // Returns a new EC key for the specified curve.
+  static util::StatusOr<EcKey> GetNewEcKey(
+      google::crypto::tink::EllipticCurveType curve_type);
 
   // Returns BoringSSL's EC_POINT constructed from curve type, point format and
   // encoded public key's point. The uncompressed point is encoded as
@@ -49,9 +57,10 @@ class SubtleUtilBoringSSL {
   // The compressed point is encoded as 1-byte || x where x is
   // curve_size_in_bytes big-endian byte array and if the least significant bit
   // of y is 1, the 1st byte is 0x03, otherwise it's 0x02.
-  static util::StatusOr<EC_POINT *> EcPointDecode(EllipticCurveType curve,
-                                                  EcPointFormat format,
-                                                  StringPiece encoded);
+  static util::StatusOr<EC_POINT *> EcPointDecode(
+      google::crypto::tink::EllipticCurveType curve,
+      google::crypto::tink::EcPointFormat format,
+      google::protobuf::StringPiece encoded);
 
   // Returns the encoded public key based on curve type, point format and
   // BoringSSL's EC_POINT public key point. The uncompressed point is encoded as
@@ -59,18 +68,21 @@ class SubtleUtilBoringSSL {
   // The compressed point is encoded as 1-byte || x where x is
   // curve_size_in_bytes big-endian byte array and if the least significant bit
   // of y is 1, the 1st byte is 0x03, otherwise it's 0x02.
-  static util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
-                                                   EcPointFormat format,
-                                                   const EC_POINT *point);
+  static util::StatusOr<std::string> EcPointEncode(
+      google::crypto::tink::EllipticCurveType curve,
+      google::crypto::tink::EcPointFormat format,
+      const EC_POINT *point);
 
-  // Returns the ecdh's shared secret based on our private key and peer's public
+  // Returns the ECDH's shared secret based on our private key and peer's public
   // key. Returns error if the public key is not on private key's curve.
   static util::StatusOr<std::string> ComputeEcdhSharedSecret(
-      EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key);
+      google::crypto::tink::EllipticCurveType curve,
+      const BIGNUM *priv_key, const EC_POINT *pub_key);
 
   // Returns an EVP structure for a hash function.
   // The EVP_MD instances are sigletons owned by BoringSSL.
-  static util::StatusOr<const EVP_MD *> EvpHash(HashType hash_type);
+  static util::StatusOr<const EVP_MD *> EvpHash(
+      google::crypto::tink::HashType hash_type);
 };
 
 }  // namespace tink

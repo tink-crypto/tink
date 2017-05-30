@@ -20,6 +20,8 @@
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 
+using google::crypto::tink::HashType;
+
 namespace crypto {
 namespace tink {
 namespace {

@@ -49,7 +49,8 @@ class HmacBoringSsl : public Mac {
 
  private:
   HmacBoringSsl() {}
-  HmacBoringSsl(const EVP_MD* md, uint32_t tag_size, const std::string& key_value);
+  HmacBoringSsl(const EVP_MD* md, uint32_t tag_size,
+                const std::string& key_value);
 
   // HmacBoringSsl is not owner of md (it is owned by BoringSSL).
   const EVP_MD* md_;

@@ -67,7 +67,7 @@ class AesGcmKeyManager : public KeyManager<Aead> {
 
   std::string key_type_;
 
-  // Constructs an instance of HMAC-Aead for the given 'key'.
+  // Constructs an instance of AES-GCM Aead for the given 'key'.
   util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitiveImpl(const google::crypto::tink::AesGcmKey& key) const;
 

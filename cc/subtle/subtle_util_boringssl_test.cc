@@ -23,6 +23,9 @@
 #include "openssl/evp.h"
 #include "openssl/x509.h"
 
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+
 namespace crypto {
 namespace tink {
 namespace {

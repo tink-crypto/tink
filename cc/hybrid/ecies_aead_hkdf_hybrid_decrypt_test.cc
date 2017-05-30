@@ -17,11 +17,25 @@
 #include "cc/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 
 #include "cc/hybrid_decrypt.h"
+#include "cc/registry.h"
+#include "cc/aead/aes_gcm_key_manager.h"
+#include "cc/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
+#include "cc/subtle/random.h"
+#include "cc/subtle/subtle_util_boringssl.h"
+#include "cc/util/ptr_util.h"
 #include "cc/util/statusor.h"
+#include "cc/util/test_util.h"
+#include "proto/aes_gcm.pb.h"
+#include "proto/common.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "gtest/gtest.h"
 
+using google::crypto::tink::AesGcmKeyFormat;
+using google::crypto::tink::EciesAeadHkdfPublicKey;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
 using util::Status;
 using util::StatusOr;
 
@@ -37,19 +51,146 @@ class EciesAeadHkdfHybridDecryptTest : public ::testing::Test {
   }
 };
 
-TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
-  EciesAeadHkdfPrivateKey recipient_key;
-  auto result = EciesAeadHkdfHybridDecrypt::New(recipient_key);
-  EXPECT_TRUE(result.ok()) << result.status();
+TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
+  {  // No fields set.
+    EciesAeadHkdfPrivateKey recipient_key;
+    auto result = EciesAeadHkdfHybridDecrypt::New(recipient_key);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "missing required fields",
+                        result.status().error_message());
+  }
 
-  std::string ciphertext = "some ciphertext";
+  {  // Only some fields set.
+    EciesAeadHkdfPrivateKey recipient_key;
+    recipient_key.set_version(0);
+    recipient_key.mutable_public_key()->set_x("some x bytes");
+    recipient_key.mutable_public_key()->set_y("some y bytes");
+    auto result(EciesAeadHkdfHybridDecrypt::New(recipient_key));
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "missing required fields",
+                        result.status().error_message());
+  }
+
+  {  // Wrong EC type.
+    EciesAeadHkdfPrivateKey recipient_key;
+    recipient_key.set_version(0);
+    recipient_key.set_key_value("some key value bytes");
+    recipient_key.mutable_public_key()->set_x("some x bytes");
+    recipient_key.mutable_public_key()->set_y("some y bytes");
+    recipient_key.mutable_public_key()->mutable_params();
+    auto result(EciesAeadHkdfHybridDecrypt::New(recipient_key));
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported elliptic curve",
+                        result.status().error_message());
+  }
+
+  {  // Unsupported DEM key type.
+    EllipticCurveType curve = EllipticCurveType::NIST_P256;
+    auto test_key = SubtleUtilBoringSSL::GetNewEcKey(curve).ValueOrDie();
+    EciesAeadHkdfPrivateKey recipient_key;
+    recipient_key.set_version(0);
+    recipient_key.set_key_value("some key value bytes");
+    recipient_key.mutable_public_key()->set_x(test_key.pub_x);
+    recipient_key.mutable_public_key()->set_y(test_key.pub_y);
+    auto params = recipient_key.mutable_public_key()->mutable_params();
+    params->mutable_kem_params()->set_curve_type(curve);
+    params->mutable_kem_params()->set_hkdf_hash_type(HashType::SHA256);
+    auto aead_dem = params->mutable_dem_params()->mutable_aead_dem();
+    aead_dem->set_type_url("some.type.url/that.is.not.supported");
+    auto result(EciesAeadHkdfHybridDecrypt::New(recipient_key));
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported DEM",
+                        result.status().error_message());
+  }
+}
+
+TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
+  // Prepare an ECIES key.
+  auto ecies_key = test::GetEciesAesGcmHkdfTestKey(
+      EllipticCurveType::NIST_P256,
+      EcPointFormat::UNCOMPRESSED,
+      HashType::SHA256,
+      24);
+
+  // Try to get a HybridEncrypt primitive without DEM key manager.
+  auto bad_result(EciesAeadHkdfHybridDecrypt::New(ecies_key));
+  EXPECT_FALSE(bad_result.ok());
+  EXPECT_EQ(util::error::FAILED_PRECONDITION, bad_result.status().error_code());
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "No manager for DEM",
+                      bad_result.status().error_message());
+
+  // Register DEM key manager.
+  auto key_manager = util::make_unique<AesGcmKeyManager>();
+  std::string dem_key_type = key_manager->get_key_type();
+  ASSERT_TRUE(Registry::get_default_registry().RegisterKeyManager(
+      dem_key_type, key_manager.release()).ok());
+
+  // Generate and test many keys with various parameters.
   std::string context_info = "some context info";
-  auto hybrid_decrypt = std::move(result.ValueOrDie());
-  auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
-  EXPECT_FALSE(decrypt_result.ok());
-  EXPECT_EQ(util::error::UNIMPLEMENTED, decrypt_result.status().error_code());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented",
-                      decrypt_result.status().error_message());
+  for (auto curve :
+      {EllipticCurveType::NIST_P224, EllipticCurveType::NIST_P256,
+       EllipticCurveType::NIST_P384, EllipticCurveType::NIST_P521}) {
+    for (auto ec_point_format :
+        {EcPointFormat::UNCOMPRESSED, EcPointFormat::COMPRESSED}) {
+      for (auto hash_type :
+          {HashType::SHA224, HashType::SHA256, HashType::SHA512}) {
+        for (uint32_t aes_gcm_key_size : {16, 24, 32}) {
+          for (uint32_t plaintext_size : {1, 10, 100, 1000}) {
+            ecies_key = test::GetEciesAesGcmHkdfTestKey(
+                curve, ec_point_format, hash_type, aes_gcm_key_size);
+
+            auto result(EciesAeadHkdfHybridDecrypt::New(ecies_key));
+            ASSERT_TRUE(result.ok()) << result.status()
+                                     << ecies_key.DebugString();
+            std::unique_ptr<HybridDecrypt> hybrid_decrypt(
+                std::move(result.ValueOrDie()));
+
+            std::unique_ptr<HybridEncrypt> hybrid_encrypt(std::move(
+                EciesAeadHkdfHybridEncrypt::New(
+                    ecies_key.public_key()).ValueOrDie()));
+
+            // Use the primitive.
+            std::string plaintext = Random::GetRandomBytes(plaintext_size);
+            auto ciphertext =
+                hybrid_encrypt->Encrypt(plaintext, context_info).ValueOrDie();
+            {  // Regular decryption.
+              auto decrypt_result =
+                  hybrid_decrypt->Decrypt(ciphertext, context_info);
+              EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
+              EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+            }
+            {  // Short bad ciphertext.
+              auto decrypt_result = hybrid_decrypt->Decrypt(
+                  Random::GetRandomBytes(16), context_info);
+              EXPECT_FALSE(decrypt_result.ok());
+              EXPECT_EQ(util::error::INVALID_ARGUMENT,
+                        decrypt_result.status().error_code());
+              EXPECT_PRED_FORMAT2(testing::IsSubstring, "ciphertext too short",
+                                  decrypt_result.status().error_message());
+            }
+            {  // Long but still bad ciphertext.
+              auto decrypt_result = hybrid_decrypt->Decrypt(
+                      Random::GetRandomBytes(142), context_info);
+              EXPECT_FALSE(decrypt_result.ok());
+              EXPECT_EQ(util::error::INVALID_ARGUMENT,
+                        decrypt_result.status().error_code());
+            }
+            {  // Bad context info
+              auto decrypt_result = hybrid_decrypt->Decrypt(
+                  ciphertext, Random::GetRandomBytes(14));
+              EXPECT_FALSE(decrypt_result.ok());
+              EXPECT_EQ(util::error::INTERNAL,
+                        decrypt_result.status().error_code());
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 }  // namespace

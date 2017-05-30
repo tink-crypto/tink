@@ -17,8 +17,12 @@
 #include "cc/hybrid/ecies_aead_hkdf_private_key_manager.h"
 
 #include "cc/hybrid_decrypt.h"
+#include "cc/registry.h"
+#include "cc/aead/aes_gcm_key_manager.h"
+#include "cc/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
+#include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/common.pb.h"
@@ -27,6 +31,9 @@
 
 using google::crypto::tink::AesEaxKey;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 
@@ -36,6 +43,12 @@ namespace {
 
 class EciesAeadHkdfPrivateKeyManagerTest : public ::testing::Test {
  protected:
+  static void SetUpTestCase() {
+    auto aes_gcm_key_manager = new AesGcmKeyManager();
+    ASSERT_TRUE(Registry::get_default_registry().RegisterKeyManager(
+        aes_gcm_key_manager->get_key_type(), aes_gcm_key_manager).ok());
+  }
+
   std::string key_type_prefix = "type.googleapis.com/";
   std::string aes_gcm_key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
@@ -108,36 +121,35 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyMessageErrors) {
 }
 
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPrimitives) {
-  std::string ciphertext = "some ciphertext";
+  std::string plaintext = "some plaintext";
   std::string context_info = "some context info";
-  EciesAeadHkdfPrivateKeyManager key_manager;
-  EciesAeadHkdfPrivateKey key;
-
-  key.set_version(0);
+  EciesAeadHkdfPublicKeyManager public_key_manager;
+  EciesAeadHkdfPrivateKeyManager private_key_manager;
+  EciesAeadHkdfPrivateKey key = test::GetEciesAesGcmHkdfTestKey(
+      EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
+      HashType::SHA256, 24);
+  auto hybrid_encrypt = std::move(public_key_manager.GetPrimitive(
+      key.public_key()).ValueOrDie());
+  std::string ciphertext =
+      hybrid_encrypt->Encrypt(plaintext, context_info).ValueOrDie();
 
   {  // Using Key proto.
-    auto result = key_manager.GetPrimitive(key);
+    auto result = private_key_manager.GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto hybrid_decrypt = std::move(result.ValueOrDie());
     auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
-    EXPECT_FALSE(decrypt_result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, decrypt_result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented",
-                        decrypt_result.status().error_message());
+    EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
   }
 
   {  // Using KeyData proto.
     KeyData key_data;
     key_data.set_type_url(key_type_prefix + key.GetDescriptor()->full_name());
     key_data.set_value(key.SerializeAsString());
-    auto result = key_manager.GetPrimitive(key_data);
+    auto result = private_key_manager.GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
     auto hybrid_decrypt = std::move(result.ValueOrDie());
     auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
-    EXPECT_FALSE(decrypt_result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, decrypt_result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented",
-                        decrypt_result.status().error_message());
+    EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
   }
 }
 

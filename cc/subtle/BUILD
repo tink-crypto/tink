@@ -9,6 +9,8 @@ cc_library(
     deps = [
         ":hkdf",
         ":subtle_util_boringssl",
+        "//cc/util:errors",
+        "//cc/util:ptr_util",
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:common_cc_proto",
@@ -24,6 +26,7 @@ cc_library(
     deps = [
         ":hkdf",
         ":subtle_util_boringssl",
+        "//cc/util:ptr_util",
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:common_cc_proto",
@@ -38,6 +41,7 @@ cc_library(
     hdrs = ["ec_util.h"],
     deps = [
         ":subtle_util_boringssl",
+        "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:common_cc_proto",
@@ -88,7 +92,6 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//cc/util:test_util",
         "//proto:common_cc_proto",
         "@boringssl//:crypto",
         "@com_google_protobuf//:protobuf_lite",
@@ -147,7 +150,6 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:common_cc_proto",
-        "@boringssl//:crypto",
         "@gtest//:gtest",
     ],
 )

@@ -22,11 +22,9 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/common.pb.h"
 
-using google::crypto::tink::EllipticCurveType;
-using google::protobuf::StringPiece;
-
 namespace crypto {
 namespace tink {
+
 class EcUtil {
  public:
   // Computes and returns the ECDH shared secret, which is the x-coordinate of
@@ -34,9 +32,23 @@ class EcUtil {
   // Returns an error if the public key is not a valid point on the private
   // key's curve.
   static util::StatusOr<std::string> ComputeEcdhSharedSecret(
-      EllipticCurveType curve, StringPiece priv_key, StringPiece pubx,
-      StringPiece puby);
+      google::crypto::tink::EllipticCurveType curve_type,
+      google::protobuf::StringPiece priv,
+      google::protobuf::StringPiece pub_x,
+      google::protobuf::StringPiece pub_y);
+
+  // Returns the encoding size of a point on the specified elliptic curve
+  // when the given 'point_format' is used.
+  static util::StatusOr<uint32_t> EncodingSizeInBytes(
+      google::crypto::tink::EllipticCurveType curve_type,
+      google::crypto::tink::EcPointFormat point_format);
+
+  // Returns the size (in bytes) of an element of the field over which
+  // the curve is defined.
+  static uint32_t FieldSizeInBytes(
+      google::crypto::tink::EllipticCurveType curve_type);
 };
+
 }  // namespace tink
 }  // namespace crypto
 

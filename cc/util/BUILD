@@ -12,6 +12,12 @@ cc_library(
 )
 
 cc_library(
+    name = "ptr_util",
+    srcs = ["ptr_util.h"],
+    hdrs = ["ptr_util.h"],
+)
+
+cc_library(
     name = "status",
     srcs = ["status.cc"],
     hdrs = ["status.h"],
@@ -48,6 +54,11 @@ cc_library(
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",
         "//cc:mac",
+        "//cc/aead:aes_gcm_key_manager",
+        "//cc/subtle:subtle_util_boringssl",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_protobuf//:protobuf_lite",
     ],

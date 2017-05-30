@@ -28,6 +28,10 @@
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::EciesAeadHkdfKeyFormat;
+using google::crypto::tink::EciesAeadHkdfPublicKey;
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
@@ -44,6 +48,13 @@ class HybridEncryptFactoryTest : public ::testing::Test {
   void TearDown() override {
   }
 };
+
+EciesAeadHkdfPublicKey GetNewEciesPublicKey() {
+  auto ecies_key = test::GetEciesAesGcmHkdfTestKey(
+      EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
+      HashType::SHA256, 24);
+  return ecies_key.public_key();
+}
 
 TEST_F(HybridEncryptFactoryTest, testBasic) {
   EXPECT_TRUE(HybridEncryptFactory::RegisterStandardKeyTypes().ok());
@@ -63,23 +74,20 @@ TEST_F(HybridEncryptFactoryTest, testBasic) {
 TEST_F(HybridEncryptFactoryTest, testPrimitive) {
   // Prepare a Keyset.
   Keyset keyset;
-  Keyset::Key new_key;
   std::string key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
 
   uint32_t key_id_1 = 1234543;
-  // TODO(przydatek): init the new_key properly.
-  AddTinkKey(key_type, key_id_1, new_key, KeyStatusType::ENABLED,
+
+  AddTinkKey(key_type, key_id_1, GetNewEciesPublicKey(), KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PUBLIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  // TODO(przydatek): init the new_key properly.
-  AddRawKey(key_type, key_id_2, new_key, KeyStatusType::ENABLED,
+  AddRawKey(key_type, key_id_2, GetNewEciesPublicKey(), KeyStatusType::ENABLED,
             KeyData::ASYMMETRIC_PUBLIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  // TODO(przydatek): init the new_key properly.
-  AddTinkKey(key_type, key_id_3, new_key, KeyStatusType::ENABLED,
+  AddTinkKey(key_type, key_id_3, GetNewEciesPublicKey(), KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PUBLIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
@@ -96,8 +104,7 @@ TEST_F(HybridEncryptFactoryTest, testPrimitive) {
   std::string context_info = "some context info";
 
   auto encrypt_result = hybrid_encrypt->Encrypt(plaintext, context_info);
-  EXPECT_FALSE(encrypt_result.ok());
-  EXPECT_EQ(util::error::UNIMPLEMENTED, encrypt_result.status().error_code());
+  EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
 }
 
 }  // namespace

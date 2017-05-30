@@ -26,6 +26,8 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
+#include "proto/common.pb.h"
+#include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -78,6 +80,15 @@ void AddRawKey(
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset);
+
+
+// Generates a fresh test key for ECIES-AEAD-HKDF for the given curve,
+// using AesGcm with the specified key size as AEAD, and HKDF with 'hash_type'.
+google::crypto::tink::EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
+    google::crypto::tink::EllipticCurveType curve_type,
+    google::crypto::tink::EcPointFormat ec_point_format,
+    google::crypto::tink::HashType hash_type,
+    uint32_t aes_gcm_key_size);
 
 // A dummy implementation of Aead-interface.
 // An instance of DummyAead can be identified by a name specified

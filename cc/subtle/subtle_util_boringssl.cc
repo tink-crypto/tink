@@ -17,8 +17,26 @@
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "openssl/ec.h"
 
+using google::crypto::tink::HashType;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::EcPointFormat;
+using google::protobuf::StringPiece;
+
 namespace crypto {
 namespace tink {
+
+namespace {
+
+std::string bn2str(const BIGNUM* bn) {
+  size_t bn_size_in_bytes = BN_num_bytes(bn);
+  std::unique_ptr<uint8_t[]> res(new uint8_t[bn_size_in_bytes]);
+  BN_bn2bin(bn, &res.get()[0]);
+  return std::string(reinterpret_cast<const char*>(res.get()),
+                     bn_size_in_bytes);
+}
+
+}  // namespace
+
 
 // static
 util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
@@ -65,6 +83,32 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
 }
 
 // static
+util::StatusOr<SubtleUtilBoringSSL::EcKey>
+SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType curve) {
+  auto status_or_group(SubtleUtilBoringSSL::GetEcGroup(curve));
+  if (!status_or_group.ok()) return status_or_group.status();
+  bssl::UniquePtr<EC_GROUP> group(status_or_group.ValueOrDie());
+  bssl::UniquePtr<EC_KEY> key(EC_KEY_new());
+  EC_KEY_set_group(key.get(), group.get());
+  EC_KEY_generate_key(key.get());
+  const BIGNUM* priv_key = EC_KEY_get0_private_key(key.get());
+  const EC_POINT* pub_key = EC_KEY_get0_public_key(key.get());
+  bssl::UniquePtr<BIGNUM> pub_key_x_bn(BN_new());
+  bssl::UniquePtr<BIGNUM> pub_key_y_bn(BN_new());
+  if (!EC_POINT_get_affine_coordinates_GFp(group.get(), pub_key,
+          pub_key_x_bn.get(), pub_key_y_bn.get(), nullptr)) {
+    return util::Status(util::error::INTERNAL,
+                        "EC_POINT_get_affine_coordinates_GFp failed");
+  }
+  EcKey ec_key;
+  ec_key.curve = curve;
+  ec_key.pub_x = bn2str(pub_key_x_bn.get());
+  ec_key.pub_y = bn2str(pub_key_y_bn.get());
+  ec_key.priv = bn2str(priv_key);
+  return ec_key;
+}
+
+// static
 util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
     HashType hash_type) {
   switch (hash_type) {
@@ -108,9 +152,8 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
   }
   bssl::UniquePtr<BIGNUM> shared_x(BN_new());
   bssl::UniquePtr<BIGNUM> shared_y(BN_new());
-  if (1 != EC_POINT_get_affine_coordinates_GFp(
-               priv_group.get(), shared_point.get(), shared_x.get(),
-               shared_y.get(), nullptr)) {
+  if (1 != EC_POINT_get_affine_coordinates_GFp(priv_group.get(),
+               shared_point.get(), shared_x.get(), shared_y.get(), nullptr)) {
     return util::Status(util::error::INTERNAL,
                         "EC_POINT_get_affine_coordinates_GFp failed");
   }

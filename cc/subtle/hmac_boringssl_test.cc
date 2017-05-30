@@ -35,8 +35,11 @@ class HmacBoringSslTest : public ::testing::Test {
  public:
   // Utility to simplify testing with test vectors.
   // Arguments and result are hexadecimal.
-  bool HmacVerifyHex(HashType hash, uint32_t tag_size, const std::string &key_hex,
-                     const std::string &tag_hex, const std::string &data_hex) {
+  bool HmacVerifyHex(HashType hash,
+                     uint32_t tag_size,
+                     const std::string &key_hex,
+                     const std::string &tag_hex,
+                     const std::string &data_hex) {
     std::string key = test::HexDecodeOrDie(key_hex);
     std::string tag = test::HexDecodeOrDie(tag_hex);
     std::string data = test::HexDecodeOrDie(data_hex);

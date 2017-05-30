@@ -17,8 +17,11 @@
 #include "cc/hybrid/hybrid_decrypt_factory.h"
 
 #include "cc/hybrid_decrypt.h"
+#include "cc/hybrid_encrypt.h"
 #include "cc/crypto_format.h"
 #include "cc/keyset_handle.h"
+#include "cc/hybrid/ecies_aead_hkdf_public_key_manager.h"
+#include "cc/util/ptr_util.h"
 #include "cc/util/status.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
@@ -28,6 +31,10 @@
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::EciesAeadHkdfKeyFormat;
+using google::crypto::tink::EciesAeadHkdfPrivateKey;
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
@@ -44,6 +51,12 @@ class HybridDecryptFactoryTest : public ::testing::Test {
   void TearDown() override {
   }
 };
+
+EciesAeadHkdfPrivateKey GetNewEciesPrivateKey() {
+  return test::GetEciesAesGcmHkdfTestKey(
+      EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
+      HashType::SHA256, 24);
+}
 
 TEST_F(HybridDecryptFactoryTest, testBasic) {
   EXPECT_TRUE(HybridDecryptFactory::RegisterStandardKeyTypes().ok());
@@ -63,26 +76,32 @@ TEST_F(HybridDecryptFactoryTest, testBasic) {
 TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   // Prepare a Keyset.
   Keyset keyset;
-  Keyset::Key new_key;
   std::string key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
 
   uint32_t key_id_1 = 1234543;
-  // TODO(przydatek): init the new_key properly.
-  AddTinkKey(key_type, key_id_1, new_key, KeyStatusType::ENABLED,
+  auto ecies_key_1 = GetNewEciesPrivateKey();
+  AddTinkKey(key_type, key_id_1, ecies_key_1, KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PRIVATE, &keyset);
 
   uint32_t key_id_2 = 726329;
-  // TODO(przydatek): init the new_key properly.
-  AddRawKey(key_type, key_id_2, new_key, KeyStatusType::ENABLED,
+  auto ecies_key_2 = GetNewEciesPrivateKey();
+  AddRawKey(key_type, key_id_2, ecies_key_2, KeyStatusType::ENABLED,
             KeyData::ASYMMETRIC_PRIVATE, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  // TODO(przydatek): init the new_key properly.
-  AddTinkKey(key_type, key_id_3, new_key, KeyStatusType::ENABLED,
+  auto ecies_key_3 = GetNewEciesPrivateKey();
+  AddTinkKey(key_type, key_id_3, ecies_key_3, KeyStatusType::ENABLED,
              KeyData::ASYMMETRIC_PRIVATE, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
+
+  // Prepare HybridEncrypt-instances.
+  auto ecies_key_manager = util::make_unique<EciesAeadHkdfPublicKeyManager>();
+  std::unique_ptr<HybridEncrypt> ecies_1 = std::move(
+      ecies_key_manager->GetPrimitive(ecies_key_1.public_key()).ValueOrDie());
+  std::unique_ptr<HybridEncrypt> ecies_2 = std::move(
+      ecies_key_manager->GetPrimitive(ecies_key_2.public_key()).ValueOrDie());
 
   // Create a KeysetHandle and use it with the factory.
   KeysetHandle keyset_handle(keyset);
@@ -92,15 +111,35 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   auto hybrid_decrypt = std::move(hybrid_decrypt_result.ValueOrDie());
 
   // Test the resulting HybridDecrypt-instance.
-  std::string ciphertext = "some ciphertext";
+  std::string plaintext = "some plaintext";
   std::string context_info = "some context info";
+  auto ciphertext_1 =
+      CryptoFormat::get_output_prefix(keyset.key(0)).ValueOrDie() +
+      ecies_1->Encrypt(plaintext, context_info).ValueOrDie();
+  auto ciphertext_2 =
+      CryptoFormat::get_output_prefix(keyset.key(1)).ValueOrDie() +
+      ecies_2->Encrypt(plaintext, context_info).ValueOrDie();
 
-  auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
-  EXPECT_FALSE(decrypt_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-      decrypt_result.status().error_code());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-      decrypt_result.status().error_message());
+  {  // Regular decryption with key_1.
+    auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext_1, context_info);
+    EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
+    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+  }
+
+  {  // Regular decryption with key_2.
+    auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext_2, context_info);
+    EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
+    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+  }
+
+  {  // Wrong context_info.
+    auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext_1, "bad context");
+    EXPECT_FALSE(decrypt_result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT,
+              decrypt_result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
+                        decrypt_result.status().error_message());
+  }
 }
 
 }  // namespace

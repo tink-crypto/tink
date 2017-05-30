@@ -19,11 +19,21 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include "cc/aead/aes_gcm_key_manager.h"
+#include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
+#include "proto/aes_gcm.pb.h"
+#include "proto/common.pb.h"
+#include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
+using google::crypto::tink::AesGcmKeyFormat;
+using google::crypto::tink::EciesAeadHkdfPrivateKey;
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::OutputPrefixType;
 using util::error::Code;
@@ -113,6 +123,34 @@ void AddRawKey(
     google::crypto::tink::Keyset* keyset) {
   AddKey(key_type, key_id, key, OutputPrefixType::RAW,
          key_status, material_type, keyset);
+}
+
+EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
+    EllipticCurveType curve_type,
+    EcPointFormat ec_point_format,
+    HashType hash_type,
+    uint32_t aes_gcm_key_size) {
+  auto test_key = SubtleUtilBoringSSL::GetNewEcKey(curve_type).ValueOrDie();
+  EciesAeadHkdfPrivateKey ecies_key;
+  ecies_key.set_version(0);
+  ecies_key.set_key_value(test_key.priv);
+  auto public_key = ecies_key.mutable_public_key();
+  public_key->set_version(0);
+  public_key->set_x(test_key.pub_x);
+  public_key->set_y(test_key.pub_y);
+  auto params = public_key->mutable_params();
+  params->set_ec_point_format(ec_point_format);
+  params->mutable_kem_params()->set_curve_type(curve_type);
+  params->mutable_kem_params()->set_hkdf_hash_type(hash_type);
+
+  AesGcmKeyFormat key_format;
+  key_format.set_key_size(24);
+  auto aead_dem = params->mutable_dem_params()->mutable_aead_dem();
+  std::unique_ptr<AesGcmKeyManager> key_manager(new AesGcmKeyManager());
+  std::string dem_key_type = key_manager->get_key_type();
+  aead_dem->set_type_url(dem_key_type);
+  aead_dem->set_value(key_format.SerializeAsString());
+  return ecies_key;
 }
 
 }  // namespace test

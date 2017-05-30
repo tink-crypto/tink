@@ -17,37 +17,43 @@
 #ifndef TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 #define TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 
-#include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
+#include "openssl/ec.h"
 #include "proto/common.pb.h"
-
-using google::crypto::tink::HashType;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::EcPointFormat;
-using google::protobuf::StringPiece;
 
 namespace crypto {
 namespace tink {
 
+// HKDF-based KEM (key encapsulation mechanism) for ECIES recipient,
+// using Boring SSL for the underlying cryptographic operations.
 class EciesHkdfRecipientKemBoringSsl {
  public:
-  // Constructor based on elliptic curve type and private key. The private key
-  // is big-endian byte array.
-  explicit EciesHkdfRecipientKemBoringSsl(EllipticCurveType curve,
-                                          const std::string& priv_key);
+  // Constructs a recipient KEM for the specified curve and recipient's
+  // private key, which must be a big-endian byte array.
+  static util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>> New(
+      google::crypto::tink::EllipticCurveType curve,
+      const std::string& priv_key);
+
   // Computes the ecdh's shared secret from our private key and peer's encoded
   // public key, then uses hkdf to derive the symmetric key from the shared
   // secret, hkdf info and hkdf salt.
-  util::StatusOr<std::string> GenerateKey(StringPiece kem_bytes, HashType hash,
-                                          StringPiece hkdf_salt,
-                                          StringPiece hkdf_info,
-                                          uint32_t key_size_in_bytes,
-                                          EcPointFormat point_format) const;
+  util::StatusOr<std::string> GenerateKey(
+      google::protobuf::StringPiece kem_bytes,
+      google::crypto::tink::HashType hash,
+      google::protobuf::StringPiece hkdf_salt,
+      google::protobuf::StringPiece hkdf_info,
+      uint32_t key_size_in_bytes,
+      google::crypto::tink::EcPointFormat point_format) const;
 
  private:
-  EllipticCurveType curve_;
+  EciesHkdfRecipientKemBoringSsl(
+      google::crypto::tink::EllipticCurveType curve,
+      const std::string& priv_key);
+
+  google::crypto::tink::EllipticCurveType curve_;
   std::string priv_;
+  bssl::UniquePtr<EC_GROUP> ec_group_;
 };
 
 }  // namespace tink

@@ -22,19 +22,18 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/common.pb.h"
 
-using google::crypto::tink::HashType;
-using google::protobuf::StringPiece;
-
 namespace crypto {
 namespace tink {
 
 class Hkdf {
  public:
   // Computes hkdf according to RFC5869.
-  static util::StatusOr<std::string> ComputeHkdf(HashType hash, StringPiece ikm,
-                                                 StringPiece salt,
-                                                 StringPiece info,
-                                                 size_t out_len);
+  static util::StatusOr<std::string> ComputeHkdf(
+      google::crypto::tink::HashType hash,
+      google::protobuf::StringPiece ikm,
+      google::protobuf::StringPiece salt,
+      google::protobuf::StringPiece info,
+      size_t out_len);
 };
 
 }  // namespace tink

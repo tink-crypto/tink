@@ -131,9 +131,9 @@ Status HmacKeyManager::Validate(const HmacParams& params) const {
                      "Invalid HmacParams: tag_size %d is too small.",
                      params.tag_size());
   }
-  std::map<HashType, int> max_tag_size = {{HashType::SHA1, 20},
-                                          {HashType::SHA256, 32},
-                                          {HashType::SHA512, 64}};
+  std::map<HashType, uint32_t> max_tag_size = {{HashType::SHA1, 20},
+                                               {HashType::SHA256, 32},
+                                               {HashType::SHA512, 64}};
   if (max_tag_size.find(params.hash()) == max_tag_size.end()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid HmacParams: HashType '%s' not supported.",

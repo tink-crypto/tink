@@ -17,8 +17,11 @@
 #include "cc/hybrid/ecies_aead_hkdf_public_key_manager.h"
 
 #include "cc/hybrid_encrypt.h"
+#include "cc/registry.h"
+#include "cc/aead/aes_gcm_key_manager.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
+#include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/common.pb.h"
@@ -27,6 +30,9 @@
 
 using google::crypto::tink::AesEaxKey;
 using google::crypto::tink::EciesAeadHkdfPublicKey;
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 
@@ -36,6 +42,12 @@ namespace {
 
 class EciesAeadHkdfPublicKeyManagerTest : public ::testing::Test {
  protected:
+  static void SetUpTestCase() {
+    auto aes_gcm_key_manager = new AesGcmKeyManager();
+    ASSERT_TRUE(Registry::get_default_registry().RegisterKeyManager(
+        aes_gcm_key_manager->get_key_type(), aes_gcm_key_manager).ok());
+  }
+
   std::string key_type_prefix = "type.googleapis.com/";
   std::string ecies_key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
@@ -111,19 +123,16 @@ TEST_F(EciesAeadHkdfPublicKeyManagerTest, testPrimitives) {
   std::string plaintext = "some plaintext";
   std::string context_info = "some context info";
   EciesAeadHkdfPublicKeyManager key_manager;
-  EciesAeadHkdfPublicKey key;
-
-  key.set_version(0);
+  EciesAeadHkdfPublicKey key = test::GetEciesAesGcmHkdfTestKey(
+      EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
+      HashType::SHA256, 24).public_key();
 
   {  // Using Key proto.
     auto result = key_manager.GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
     auto hybrid_encrypt = std::move(result.ValueOrDie());
     auto encrypt_result = hybrid_encrypt->Encrypt(plaintext, context_info);
-    EXPECT_FALSE(encrypt_result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, encrypt_result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented",
-                        encrypt_result.status().error_message());
+    EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
   }
 
   {  // Using KeyData proto.
@@ -134,10 +143,7 @@ TEST_F(EciesAeadHkdfPublicKeyManagerTest, testPrimitives) {
     EXPECT_TRUE(result.ok()) << result.status();
     auto hybrid_encrypt = std::move(result.ValueOrDie());
     auto encrypt_result = hybrid_encrypt->Encrypt(plaintext, context_info);
-    EXPECT_FALSE(encrypt_result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, encrypt_result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented",
-                        encrypt_result.status().error_message());
+    EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
   }
 }
 
