@@ -23,10 +23,14 @@ import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.subtle.Ed25519Verify;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.MessageLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
+/**
+ * This key manager produces new instances of {@code Ed25519Verify}.
+ * It doesn't support key generation.
+ */
 public final class Ed25519PublicKeyManager implements
     KeyManager<PublicKeyVerify> {
   Ed25519PublicKeyManager() {}

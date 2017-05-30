@@ -24,10 +24,14 @@ import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.MessageLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
+/**
+ * This instance of {@code KeyManager} generates new {@code Ed25519PrivateKey} keys and
+ * produces new instances of {@code Ed25519Sign}.
+ */
 public final class Ed25519PrivateKeyManager implements KeyManager<PublicKeySign> {
   Ed25519PrivateKeyManager() {}
   /**

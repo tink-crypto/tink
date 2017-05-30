@@ -33,7 +33,6 @@ import java.security.interfaces.ECPublicKey;
  */
 class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
   private static final byte[] EMPTY_AAD = new byte[0];
-  private final ECPublicKey recipientPublicKey;
   private final EciesHkdfSenderKem senderKem;
   private final String hkdfHmacAlgo;
   private final byte[] hkdfSalt;
@@ -45,7 +44,6 @@ class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
       KeyTemplate aeadDemTemplate, EcPointFormat ecPointFormat)
       throws GeneralSecurityException {
     EcUtil.checkPublicKey(recipientPublicKey);
-    this.recipientPublicKey = recipientPublicKey;
     this.senderKem = new EciesHkdfSenderKem(recipientPublicKey);
     this.hkdfSalt = hkdfSalt;
     this.hkdfHmacAlgo = hkdfHmacAlgo;
