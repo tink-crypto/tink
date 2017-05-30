@@ -67,13 +67,11 @@ public class KeysetManagerTest {
     }
 
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = TestUtil.createHmacKeyTemplate(
-        16 /* key size */, 16 /* tag size */, HashType.SHA256);
     manager = new KeysetManager.Builder()
-        .setKeyTemplate(template)
+        .setKeyTemplate(TestUtil.createHmacKeyTemplate(
+            16 /* key size */, 16 /* tag size */, HashType.SHA256))
         .build()
         .rotate();
-
     assertNull(manager.getKeysetHandle().getEncryptedKeyset());
     Keyset keyset = manager.getKeysetHandle().getKeyset();
     assertEquals(1, keyset.getKeyCount());
@@ -82,14 +80,22 @@ public class KeysetManagerTest {
     assertEquals(hmacKeyTypeUrl, keyset.getKey(0).getKeyData().getTypeUrl());
     assertEquals(KeyStatusType.ENABLED, keyset.getKey(0).getStatus());
     assertEquals(OutputPrefixType.TINK, keyset.getKey(0).getOutputPrefixType());
+  }
 
-    // Encrypt the keyset with an AeadKey.
-    template = TestUtil.createAesGcmKeyTemplate(16 /* key size */);
-    KeyData aeadKeyData = Registry.INSTANCE.newKeyData(template);
-    Aead aead = Registry.INSTANCE.getPrimitive(aeadKeyData);
-    KeysetHandle keysetHandle = manager.getKeysetHandle(aead);
+  @Test
+  public void testEncryptedKeyset() throws Exception {
+    // Create an encrypted keyset that contains a single HmacKey.
+    KeyTemplate masterKeyTemplate = TestUtil.createAesGcmKeyTemplate(16 /* key size */);
+    KeyData aeadKeyData = Registry.INSTANCE.newKeyData(masterKeyTemplate);
+    Aead masterKey = Registry.INSTANCE.getPrimitive(aeadKeyData);
+    KeysetManager manager = new KeysetManager.Builder()
+        .setKeyTemplate(TestUtil.createHmacKeyTemplate(
+            16 /* key size */, 16 /* tag size */, HashType.SHA256))
+        .setMasterKey(masterKey)
+        .build()
+        .rotate();
+    KeysetHandle keysetHandle = manager.getKeysetHandle();
     assertNotNull(keysetHandle.getEncryptedKeyset());
-
     KeysetInfo keysetInfo = keysetHandle.getKeysetInfo();
     assertEquals(1, keysetInfo.getKeyInfoCount());
     assertEquals(keysetInfo.getPrimaryKeyId(), keysetInfo.getKeyInfo(0).getKeyId());
@@ -127,18 +133,16 @@ public class KeysetManagerTest {
    */
   @Test
   public void testFaultyKms() throws Exception {
-    // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = TestUtil.createHmacKeyTemplate(
-        16 /* key size */, 16 /* tag size */, HashType.SHA256);
-    KeysetManager manager = new KeysetManager.Builder()
-        .setKeyTemplate(template)
-        .build()
-        .rotate();
-
     // Encrypt with dummy Aead.
-    TestUtil.DummyAead aead = new TestUtil.DummyAead();
+    TestUtil.DummyAead masterKey = new TestUtil.DummyAead();
     try {
-      KeysetHandle unused = manager.getKeysetHandle(aead);
+      KeysetHandle unused = new KeysetManager.Builder()
+          .setKeyTemplate(TestUtil.createHmacKeyTemplate(
+              16 /* key size */, 16 /* tag size */, HashType.SHA256))
+          .setMasterKey(masterKey)
+          .build()
+          .rotate()
+          .getKeysetHandle();
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("dummy"));

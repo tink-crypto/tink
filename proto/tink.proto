@@ -169,11 +169,8 @@ message KeysetInfo {
   repeated KeyInfo key_info = 2;
 }
 
-// Represents a keyset that is encrypted with a key in a KMS.
-// The library assumes that the KMS key implements the Aead interface.
-message KmsEncryptedKeyset {
-  // Required.
-  KeyData kms_key = 1;
+// Represents a keyset that is encrypted with a master key.
+message EncryptedKeyset {
   // Required.
   bytes encrypted_keyset = 2;
   // Optional.

@@ -16,16 +16,14 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.TinkProto.EncryptedKeyset;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.KeysetInfo;
-import com.google.crypto.tink.subtle.ImmutableByteArray;
-import com.google.errorprone.annotations.Immutable;
 
 /**
  * KeysetHandle provides abstracted access to Keysets, to limit the exposure
  * of actual protocol buffers that hold sensitive key material.
  */
-@Immutable
 public final class KeysetHandle {
   /**
    * The {@code Keyset}.
@@ -33,14 +31,13 @@ public final class KeysetHandle {
   private final Keyset keyset;
 
   /**
-   * {@code Keyset} encrypted with some key.
+   * The {@code EncryptedKeyset}.
    */
-  private final ImmutableByteArray encryptedKeyset;
+  private final EncryptedKeyset encryptedKeyset;
 
   /**
    * This constructor is package-private. To get a new instance, users have to use one of
-   * the public factories, e.g., {@code CleartextKeysetHandle} or
-   * {@code KmsEncryptedKeysetHandle}).
+   * the public factories, e.g., {@code CleartextKeysetHandle}.
    */
   KeysetHandle(Keyset keyset) {
     this.keyset = keyset;
@@ -49,12 +46,11 @@ public final class KeysetHandle {
 
   /**
    * This constructor is package-private. To get a new instance, users have to use one of
-   * the public factories, e.g., {@code CleartextKeysetHandle} or
-   * {@code KmsEncryptedKeysetHandle}).
+   * the public factories, e.g., {@code EncryptedKeysetHandle}).
    */
-  KeysetHandle(Keyset keyset, final byte[] encryptedKeyset) {
+  KeysetHandle(Keyset keyset, EncryptedKeyset encryptedKeyset) {
     this.keyset = keyset;
-    this.encryptedKeyset = ImmutableByteArray.of(encryptedKeyset);
+    this.encryptedKeyset = encryptedKeyset;
   }
 
   /**
@@ -65,26 +61,21 @@ public final class KeysetHandle {
   }
 
   /**
-   * @return the actual keyset data.
+   * @return the {@code KeysetInfo} that doesn't contain actual key material.
    */
   public KeysetInfo getKeysetInfo() {
     return Util.getKeysetInfo(keyset);
   }
 
   /**
-   * @return the actual keyset data.
+   * @return the encrypted keyset data.
    */
-  public byte[] getEncryptedKeyset() {
-    if (encryptedKeyset == null) {
-      return null;
-    } else {
-      return encryptedKeyset.getBytes();
-    }
+  public EncryptedKeyset getEncryptedKeyset() {
+    return encryptedKeyset;
   }
 
   /**
-   * Prints out the keyset but without actual key material, but only names of key types
-   * and the key format proto.
+   * Prints out the {@code KeysetInfo}.
    */
   @Override
   public String toString() {

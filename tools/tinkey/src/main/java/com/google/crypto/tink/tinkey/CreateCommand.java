@@ -16,11 +16,10 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
+import com.google.crypto.tink.TinkProto.EncryptedKeyset;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
-import com.google.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.crypto.tink.subtle.GcpKmsAead;
 import com.google.protobuf.Message;
 import java.io.File;
@@ -65,11 +64,12 @@ public class CreateCommand extends CreateOptions implements Command {
    * @return the resulting keyset.
    */
   public static final Keyset createCleartextKeyset(KeyTemplate keyTemplate) throws Exception {
-    KeysetManager manager = new KeysetManager.Builder()
+    return new KeysetManager.Builder()
         .setKeyTemplate(keyTemplate)
         .build()
-        .rotate();
-    return manager.getKeysetHandle().getKeyset();
+        .rotate()
+        .getKeysetHandle()
+        .getKeyset();
   }
 
   /**
@@ -78,19 +78,18 @@ public class CreateCommand extends CreateOptions implements Command {
    * @return the resulting encrypted keyset.
    * @throws GeneralSecurityException if failed to encrypt keyset.
    */
-  public static final KmsEncryptedKeyset createEncryptedKeysetWithGcp(
+  public static final EncryptedKeyset createEncryptedKeysetWithGcp(
       File credentialFile, KeyTemplate keyTemplate,
       String gcpKmsMasterKeyUriValue) throws Exception {
-    KeysetManager manager = new KeysetManager.Builder()
-        .setKeyTemplate(keyTemplate)
-        .build()
-        .rotate();
-    GcpKmsAead aead = new GcpKmsAead(
+    GcpKmsAead masterKey = new GcpKmsAead(
         TinkeyUtil.createCloudKmsClient(credentialFile), gcpKmsMasterKeyUriValue);
-    KeysetHandle handle = manager.getKeysetHandle(aead);
-    return TinkeyUtil.createKmsEncryptedKeyset(
-        TinkeyUtil.createGcpKmsAeadKeyData(gcpKmsMasterKeyUriValue),
-        handle);
+    return new KeysetManager.Builder()
+        .setKeyTemplate(keyTemplate)
+        .setMasterKey(masterKey)
+        .build()
+        .rotate()
+        .getKeysetHandle()
+        .getEncryptedKeyset();
   }
 
   /**
@@ -99,7 +98,7 @@ public class CreateCommand extends CreateOptions implements Command {
    * @return the resulting keyset in text format.
    * @throws GeneralSecurityException if failed to encrypt keyset.
    */
-  public static final KmsEncryptedKeyset createEncryptedKeysetWithAws(
+  public static final EncryptedKeyset createEncryptedKeysetWithAws(
       File credentialFile, KeyTemplate keyTemplate,
       String awsKmsMasterKeyUriValue) throws Exception {
     throw new Exception("Not Implemented Yet");

@@ -38,16 +38,6 @@ filegroup(
     srcs = KEYSET_HANDLE_SRCS,
 )
 
-KEY_MANAGEMENT_SRCS = [
-    # Normal users should not use this API directly, thus this is restricted.
-    "KeysetManager.java",
-]
-
-filegroup(
-    name = "key_management_srcs",
-    srcs = KEY_MANAGEMENT_SRCS,
-)
-
 # core, without restricted APIs
 
 filegroup(
@@ -56,8 +46,7 @@ filegroup(
         [
             "*.java",
         ],
-        exclude = KEYSET_HANDLE_SRCS +
-                  KEY_MANAGEMENT_SRCS,
+        exclude = KEYSET_HANDLE_SRCS,
     ),
 )
 
@@ -94,7 +83,6 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
-        ":key_management",
         ":tink",
         "//proto:common_java_proto",
         "//proto:tink_java_proto",
@@ -110,37 +98,6 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         ":android",
-        ":key_management_android",
-        "//proto:common_java_proto_lite",
-        "//proto:tink_java_proto_lite",
-        "@com_google_protobuf_java//:protobuf_java",
-    ],
-)
-
-java_library(
-    name = "key_management",
-    srcs = [
-        ":key_management_srcs",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        ":tink",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//proto:common_java_proto",
-        "//proto:tink_java_proto",
-        "@com_google_protobuf_java//:protobuf_java",
-    ],
-)
-
-java_library(
-    name = "key_management_android",
-    srcs = [
-        ":key_management_srcs",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        ":android",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
         "//proto:common_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "@com_google_protobuf_java//:protobuf_java",

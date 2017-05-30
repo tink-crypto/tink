@@ -16,12 +16,14 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.TinkProto.EncryptedKeyset;
 import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.TinkProto.KeyStatusType;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
@@ -34,10 +36,12 @@ public class KeysetManager {
   private final Keyset.Builder keysetBuilder;
   private final KeyTemplate keyTemplate;
   private final OutputPrefixType outputPrefixType;
+  private final Aead masterKey;
 
   private KeysetManager(Builder builder) {
     keyTemplate = builder.keyTemplate;
     outputPrefixType = builder.outputPrefixType;
+    masterKey = builder.masterKey;
 
     if (builder.keysetHandle != null) {
       keysetBuilder = builder.keysetHandle.getKeyset().toBuilder();
@@ -53,6 +57,7 @@ public class KeysetManager {
     private OutputPrefixType outputPrefixType = OutputPrefixType.TINK;
     private KeyTemplate keyTemplate = null;
     private KeysetHandle keysetHandle = null;
+    private Aead masterKey = null;
 
     public Builder() {
     }
@@ -65,6 +70,11 @@ public class KeysetManager {
 
     public Builder setKeysetHandle(KeysetHandle val) {
       keysetHandle = val;
+      return this;
+    }
+
+    public Builder setMasterKey(Aead val) {
+      masterKey = val;
       return this;
     }
 
@@ -113,31 +123,28 @@ public class KeysetManager {
   /**
    * @return return {@code KeysetHandle} of the managed keyset.
    */
-  public KeysetHandle getKeysetHandle() {
-    return new KeysetHandle(keysetBuilder.build());
-  }
-
-  /**
-   * Encrypts the managed keyset with {@code aead} and returns a {@code KeysetHandle} of
-   * the encrypted result.
-   * @return a {@code KeysetHandle} of an encrypted keyset.
-   * @throws GeneralSecurityException
-   */
-  public KeysetHandle getKeysetHandle(Aead aead) throws GeneralSecurityException {
+  public KeysetHandle getKeysetHandle() throws GeneralSecurityException {
+    if (masterKey == null) {
+      return new KeysetHandle(keysetBuilder.build());
+    }
     Keyset keyset = keysetBuilder.build();
-    byte[] encryptedKeyset = aead.encrypt(keyset.toByteArray(), new byte[0] /* aad */);
-    // Check if we can decrypt encryptedKeyset, to detect errors
+    byte[] encryptedKeyset = masterKey.encrypt(keyset.toByteArray(),
+        new byte[0] /* aad */);
+    // Check if we can decrypt, to detect errors
     try {
-      byte[] cleartext = aead.decrypt(encryptedKeyset, new byte[0] /* aad */);
-      Keyset keyset2 = Keyset.parseFrom(cleartext);
+      final Keyset keyset2 = Keyset.parseFrom(masterKey.decrypt(
+          encryptedKeyset, new byte[0] /* aad */));
       if (!keyset2.equals(keyset)) {
-        throw new GeneralSecurityException("encryption with KMS failed");
+        throw new GeneralSecurityException("cannot encrypt keyset");
       }
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("encryption with KMS failed");
+      throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
-
-    return new KeysetHandle(keyset, encryptedKeyset);
+    EncryptedKeyset proto = EncryptedKeyset.newBuilder()
+        .setEncryptedKeyset(ByteString.copyFrom(encryptedKeyset))
+        .setKeysetInfo(Util.getKeysetInfo(keyset))
+        .build();
+    return new KeysetHandle(keyset, proto);
   }
 
   private boolean hasKeyWithKeyId(int keyId) {

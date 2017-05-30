@@ -16,7 +16,6 @@ java_library(
     deps = [
         "//java",
         "//java:aead_envelope",
-        "//java:key_management",
         "//java:keyset_handle",
         "//java:protos",
         "//java:subtle",

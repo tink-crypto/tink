@@ -23,17 +23,15 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
+import com.google.crypto.tink.EncryptedKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KmsEncryptedKeysetHandle;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.TinkProto.KeyData;
+import com.google.crypto.tink.TinkProto.EncryptedKeyset;
 import com.google.crypto.tink.TinkProto.KeyStatusType;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.KeysetInfo;
-import com.google.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
@@ -43,6 +41,7 @@ import com.google.crypto.tink.hybrid.HybridEncryptConfig;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.signature.PublicKeySignConfig;
 import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
+import com.google.crypto.tink.subtle.GcpKmsAead;
 import com.google.crypto.tink.subtle.ServiceAccountGcpCredentialFactory;
 import com.google.protobuf.TextFormat;
 import java.io.ByteArrayOutputStream;
@@ -127,15 +126,9 @@ public class CreateCommandTest {
     String outFormat = "TEXT";
     CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
         gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-    KmsEncryptedKeyset.Builder builder = KmsEncryptedKeyset.newBuilder();
+    EncryptedKeyset.Builder builder = EncryptedKeyset.newBuilder();
     TextFormat.merge(outputStream.toString(), builder);
-    KmsEncryptedKeyset encryptedKeyset = builder.build();
-    KeyData kmsKey = encryptedKeyset.getKmsKey();
-    assertEquals(GcpKmsAeadKeyManager.TYPE_URL, kmsKey.getTypeUrl());
-    assertEquals(KeyData.KeyMaterialType.REMOTE, kmsKey.getKeyMaterialType());
-    GcpKmsAeadKey cloudKey = GcpKmsAeadKey.parseFrom(kmsKey.getValue());
-    assertEquals(gcpKmsMasterKeyValue, cloudKey.getKmsKeyUri());
-
+    EncryptedKeyset encryptedKeyset = builder.build();
     KeysetInfo keysetInfo = encryptedKeyset.getKeysetInfo();
     assertEquals(1, keysetInfo.getKeyInfoCount());
     assertEquals(keysetInfo.getPrimaryKeyId(), keysetInfo.getKeyInfo(0).getKeyId());
@@ -147,8 +140,10 @@ public class CreateCommandTest {
     outFormat = "BINARY";
     CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
         gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-
-    KeysetHandle handle = KmsEncryptedKeysetHandle.parseFrom(outputStream.toByteArray());
+    GcpKmsAead masterKey = new GcpKmsAead(
+        TinkeyUtil.createCloudKmsClient(credentialFile), gcpKmsMasterKeyValue);
+    KeysetHandle handle = EncryptedKeysetHandle.parseFrom(
+        outputStream.toByteArray(), masterKey);
     assertNotNull(handle.getEncryptedKeyset());
 
     Keyset keyset = handle.getKeyset();

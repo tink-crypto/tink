@@ -93,16 +93,6 @@ java_library(
     ],
 )
 
-java_library(
-    name = "key_management",
-    visibility = [
-        "//tools/tinkey:__pkg__",
-    ],
-    exports = [
-        "//java/src/main/java/com/google/crypto/tink:key_management",
-    ],
-)
-
 # TEST
 
 java_library(
@@ -114,7 +104,6 @@ java_library(
     exports = [
         ":aead_envelope",
         ":java",
-        ":key_management",
         ":keyset_handle",
         ":protos",
         ":subtle",

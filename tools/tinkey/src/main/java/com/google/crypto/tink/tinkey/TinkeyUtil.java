@@ -34,7 +34,6 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
-import com.google.crypto.tink.TinkProto.KmsEncryptedKeyset;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -209,7 +208,7 @@ public class TinkeyUtil {
 
   /**
    * Returns a {@code KeysetHandle} from either a cleartext {@code Keyset} or a
-   * {@code KmsEncryptedKeyset}, read from {@code inputStream}.
+   * {@code EncryptedKeyset}, read from {@code inputStream}.
    * Closes {code inputStream} afterward.
    */
   public static KeysetHandle getKeysetHandle(InputStream inputStream, String inFormat,
@@ -236,23 +235,6 @@ public class TinkeyUtil {
     JsonFactory jsonFactory = new JacksonFactory();
     return new CloudKMS.Builder(transport, jsonFactory, readGoogleCredential(credentialFile))
         .setApplicationName("Tinkey")
-        .build();
-  }
-
-  /**
-   * @return a {@code KmsEncryptedKeyset} proto using {@code kmsKey} and the information from
-   * {@code keysetHandle}.
-   * @throws IllegalArgumentException if {code keysetHandle} doesn't contain an encrypted keyset.
-   */
-  public static KmsEncryptedKeyset createKmsEncryptedKeyset(
-      KeyData kmsKey, KeysetHandle keysetHandle) throws IllegalArgumentException {
-    if (keysetHandle.getEncryptedKeyset() == null) {
-      throw new IllegalArgumentException("keyset handle doesn't contain encrypted keyset");
-    }
-    return KmsEncryptedKeyset.newBuilder()
-        .setKmsKey(kmsKey)
-        .setEncryptedKeyset(ByteString.copyFrom(keysetHandle.getEncryptedKeyset()))
-        .setKeysetInfo(keysetHandle.getKeysetInfo())
         .build();
   }
 
