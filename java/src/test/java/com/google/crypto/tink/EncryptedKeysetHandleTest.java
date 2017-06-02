@@ -22,11 +22,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.TinkProto.EncryptedKeyset;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.mac.MacKeyTemplates;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,12 +48,12 @@ public class EncryptedKeysetHandleTest {
   @Test
   public void testBasic() throws Exception {
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate masterKeyTemplate = TestUtil.createAesGcmKeyTemplate(16 /* key size */);
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
     Aead masterKey = Registry.INSTANCE.getPrimitive(
         Registry.INSTANCE.newKeyData(masterKeyTemplate));
     // Create a encrypted keyset that contains a single HmacKey.
     KeysetHandle handle = EncryptedKeysetHandle.generateNew(
-        TestUtil.createHmacKeyTemplate(16 /* key size */, 16 /* tag size */, HashType.SHA256),
+        MacKeyTemplates.HMAC_SHA256,
         masterKey);
     assertNotNull(handle.getEncryptedKeyset());
     KeysetHandle handle2 = EncryptedKeysetHandle.parseFrom(
@@ -63,16 +64,14 @@ public class EncryptedKeysetHandleTest {
   @Test
   public void testWithExistingKeyset() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = TestUtil.createHmacKeyTemplate(
-        16 /* key size */, 16 /* tag size */, HashType.SHA256);
     KeysetHandle handle1 = new KeysetManager.Builder()
-        .setKeyTemplate(template)
+        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256)
         .build()
         .rotate()
         .getKeysetHandle();
 
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate masterKeyTemplate = TestUtil.createAesGcmKeyTemplate(16 /* key size */);
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
     Aead masterKey = Registry.INSTANCE.getPrimitive(
         Registry.INSTANCE.newKeyData(masterKeyTemplate));
 
@@ -94,12 +93,12 @@ public class EncryptedKeysetHandleTest {
   @Test
   public void testInvalidKeyset() throws Exception {
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate masterKeyTemplate = TestUtil.createAesGcmKeyTemplate(16 /* key size */);
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
     Aead masterKey = Registry.INSTANCE.getPrimitive(
         Registry.INSTANCE.newKeyData(masterKeyTemplate));
     // Create a encrypted keyset that contains a single HmacKey.
     KeysetHandle handle = EncryptedKeysetHandle.generateNew(
-        TestUtil.createHmacKeyTemplate(16 /* key size */, 16 /* tag size */, HashType.SHA256),
+        MacKeyTemplates.HMAC_SHA256,
         masterKey);
 
     EncryptedKeyset encryptedKeyset = handle.getEncryptedKeyset();

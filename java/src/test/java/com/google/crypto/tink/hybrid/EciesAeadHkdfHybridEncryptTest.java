@@ -23,10 +23,10 @@ import com.google.crypto.tink.CommonProto.EcPointFormat;
 import com.google.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.Util;
 import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -66,8 +66,8 @@ public class EciesAeadHkdfHybridEncryptTest {
     String hmacAlgo = "HmacSha256";
 
     KeyTemplate[] keyTemplates = new KeyTemplate[] {
-      TestUtil.createAesCtrHmacAeadKeyTemplate(16, 16, 16, 16),
-      TestUtil.createAesGcmKeyTemplate(16)
+      AeadKeyTemplates.AES_128_CTR_128BITIV_HMAC_SHA256,
+      AeadKeyTemplates.AES_128_GCM,
     };
     for (int i = 0; i < keyTemplates.length; i++) {
       HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey, salt,

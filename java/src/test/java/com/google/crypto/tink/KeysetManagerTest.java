@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.TinkProto.KeyStatusType;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
@@ -30,10 +29,12 @@ import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.KeysetInfo;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.hybrid.HybridDecryptConfig;
 import com.google.crypto.tink.hybrid.HybridEncryptConfig;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.mac.MacKeyTemplates;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,8 +69,7 @@ public class KeysetManagerTest {
 
     // Create a keyset that contains a single HmacKey.
     manager = new KeysetManager.Builder()
-        .setKeyTemplate(TestUtil.createHmacKeyTemplate(
-            16 /* key size */, 16 /* tag size */, HashType.SHA256))
+        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256)
         .build()
         .rotate();
     assertNull(manager.getKeysetHandle().getEncryptedKeyset());
@@ -85,12 +85,11 @@ public class KeysetManagerTest {
   @Test
   public void testEncryptedKeyset() throws Exception {
     // Create an encrypted keyset that contains a single HmacKey.
-    KeyTemplate masterKeyTemplate = TestUtil.createAesGcmKeyTemplate(16 /* key size */);
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
     KeyData aeadKeyData = Registry.INSTANCE.newKeyData(masterKeyTemplate);
     Aead masterKey = Registry.INSTANCE.getPrimitive(aeadKeyData);
     KeysetManager manager = new KeysetManager.Builder()
-        .setKeyTemplate(TestUtil.createHmacKeyTemplate(
-            16 /* key size */, 16 /* tag size */, HashType.SHA256))
+        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256)
         .setMasterKey(masterKey)
         .build()
         .rotate();
@@ -107,8 +106,7 @@ public class KeysetManagerTest {
   @Test
   public void testExistingKeyset() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = TestUtil.createHmacKeyTemplate(
-        16 /* key size */, 16 /* tag size */, HashType.SHA256);
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256;
     KeysetManager manager1 = new KeysetManager.Builder()
         .setKeyTemplate(template)
         .build()
@@ -137,8 +135,7 @@ public class KeysetManagerTest {
     TestUtil.DummyAead masterKey = new TestUtil.DummyAead();
     try {
       KeysetHandle unused = new KeysetManager.Builder()
-          .setKeyTemplate(TestUtil.createHmacKeyTemplate(
-              16 /* key size */, 16 /* tag size */, HashType.SHA256))
+          .setKeyTemplate(MacKeyTemplates.HMAC_SHA256)
           .setMasterKey(masterKey)
           .build()
           .rotate()

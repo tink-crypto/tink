@@ -54,12 +54,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
   @Test
   public void testGcpKmsKeyRestricted() throws Exception {
-    int aesKeySize = 16;
-    int ivSize = 16;
-    int hmacKeySize = 16;
-    int tagSize = 16;
-    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
-        aesKeySize, ivSize, hmacKeySize, tagSize);
+    KeyTemplate dekTemplate = AeadKeyTemplates.AES_128_CTR_128BITIV_HMAC_SHA256;
     // This key is restricted to {@code TestUtil.SERVICE_ACCOUNT_FILE}.
     KeyData kmsKey = TestUtil.createGcpKmsAeadKeyData(
         TestUtil.RESTRICTED_CRYPTO_KEY_URI);
@@ -84,12 +79,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
   @Test
   public void testParsingInvalidCiphertexts() throws Exception {
-    int aesKeySize = 16;
-    int ivSize = 16;
-    int hmacKeySize = 16;
-    int tagSize = 16;
-    KeyTemplate dekTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
-        aesKeySize, ivSize, hmacKeySize, tagSize);
+    KeyTemplate dekTemplate = AeadKeyTemplates.AES_128_CTR_128BITIV_HMAC_SHA256;
     KeyData kmsKey = TestUtil.createGcpKmsAeadKeyData(
         TestUtil.RESTRICTED_CRYPTO_KEY_URI);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(

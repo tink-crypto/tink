@@ -266,62 +266,6 @@ public class TestUtil {
   }
 
   /**
-   * @return a {@code KeyTemplate} containing a {@code AesCtrHmacAeadKeyFormat}.
-   */
-  public static KeyTemplate createAesCtrHmacAeadKeyTemplate(int aesKeySize, int ivSize,
-      int hmacKeySize, int tagSize) throws Exception {
-    AesCtrKeyFormat aesCtrKeyFormat = AesCtrKeyFormat.newBuilder()
-        .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
-        .setKeySize(aesKeySize)
-        .build();
-    HmacKeyFormat hmacKeyFormat = HmacKeyFormat.newBuilder()
-        .setParams(
-            HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(tagSize).build())
-        .setKeySize(hmacKeySize)
-        .build();
-    AesCtrHmacAeadKeyFormat format = AesCtrHmacAeadKeyFormat.newBuilder()
-        .setAesCtrKeyFormat(aesCtrKeyFormat)
-        .setHmacKeyFormat(hmacKeyFormat)
-        .build();
-    return KeyTemplate.newBuilder()
-        .setValue(format.toByteString())
-        .setTypeUrl("type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey")
-        .build();
-  }
-
-  /**
-   * @return a {@code KeyTemplate} containing {@code AesGcmKeyFormat}.
-   */
-  public static KeyTemplate createAesGcmKeyTemplate(int keySize) throws Exception {
-    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder()
-        .setKeySize(keySize)
-        .build();
-    return KeyTemplate.newBuilder()
-        .setValue(format.toByteString())
-        .setTypeUrl(AesGcmKeyManager.TYPE_URL)
-        .build();
-  }
-
-  /**
-   * @return a {@code KeyTemplate} containing {@code HmacKey}.
-   */
-  public static KeyTemplate createHmacKeyTemplate(int keySize, int tagSize, HashType hash)
-      throws Exception {
-    HmacParams params = HmacParams.newBuilder()
-        .setHash(HashType.SHA256)
-        .setTagSize(tagSize)
-        .build();
-    HmacKeyFormat format = HmacKeyFormat.newBuilder()
-        .setParams(params)
-        .setKeySize(keySize)
-        .build();
-    return KeyTemplate.newBuilder()
-        .setValue(format.toByteString())
-        .setTypeUrl(HmacKeyManager.TYPE_URL)
-        .build();
-  }
-
-  /**
    * @return a {@code KeyTemplate} containing {@code KmsEnvelopeAeadKey}.
    */
   public static KeyTemplate createKmsEnvelopeAeadKeyTemplate(KeyData kmsKey,
@@ -338,6 +282,7 @@ public class TestUtil {
         .setTypeUrl("type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey")
         .build();
   }
+  
   /**
    * @return a KMS key URI in a format defined by Google Cloud KMS.
    */

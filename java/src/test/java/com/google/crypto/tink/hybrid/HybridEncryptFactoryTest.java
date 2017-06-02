@@ -31,6 +31,7 @@ import com.google.crypto.tink.TinkProto.KeyStatusType;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset.Key;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,9 +43,6 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class HybridEncryptFactoryTest {
-  private static final int AES_KEY_SIZE = 16;
-  private static final int HMAC_KEY_SIZE = 20;
-
   @Before
   public void setUp() throws Exception {
     HybridEncryptConfig.registerStandardKeyTypes();
@@ -53,15 +51,13 @@ public class HybridEncryptFactoryTest {
 
   @Test
   public void testBasicEncryption() throws Exception {
-    int ivSize = 12;
-    int tagSize = 16;
     EllipticCurveType curve = EllipticCurveType.NIST_P384;
     HashType hashType = HashType.SHA256;
     EcPointFormat primaryPointFormat = EcPointFormat.UNCOMPRESSED;
     EcPointFormat rawPointFormat = EcPointFormat.COMPRESSED;
-    KeyTemplate primaryDemKeyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(
-        AES_KEY_SIZE, ivSize, HMAC_KEY_SIZE, tagSize);
-    KeyTemplate rawDemKeyTemplate = TestUtil.createAesGcmKeyTemplate(AES_KEY_SIZE);
+    KeyTemplate primaryDemKeyTemplate = AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
+
+    KeyTemplate rawDemKeyTemplate = AeadKeyTemplates.AES_128_GCM;
     byte[] primarySalt = "some salt".getBytes("UTF-8");
     byte[] rawSalt = "other salt".getBytes("UTF-8");
 

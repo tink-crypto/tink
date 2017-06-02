@@ -37,6 +37,7 @@ import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
@@ -58,9 +59,6 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class TinkeyUtilTest {
-  private static final int AES_KEY_SIZE = 16;
-  private static final int HMAC_KEY_SIZE = 20;
-
   @Before
   public void setUp() throws Exception {
     AeadConfig.registerStandardKeyTypes();
@@ -117,13 +115,10 @@ public class TinkeyUtilTest {
    */
   @Test
   public void testExtractPublicKey() throws Exception {
-    int ivSize = 12;
-    int tagSize = 16;
     EllipticCurveType curve = EllipticCurveType.NIST_P256;
     HashType hashType = HashType.SHA256;
     EcPointFormat pointFormat = EcPointFormat.UNCOMPRESSED;
-    KeyTemplate demKeyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(AES_KEY_SIZE, ivSize,
-        HMAC_KEY_SIZE, tagSize);
+    KeyTemplate demKeyTemplate = AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
     byte[] salt = "some salt".getBytes("UTF-8");
     KeyTemplate keyTemplate = TestUtil.createEciesAeadHkdfKeyTemplate(curve, hashType, pointFormat,
         demKeyTemplate, salt);

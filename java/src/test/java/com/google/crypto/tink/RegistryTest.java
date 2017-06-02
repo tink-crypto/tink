@@ -32,9 +32,11 @@ import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.MacJce;
@@ -113,8 +115,7 @@ public class RegistryTest {
     // TODO(thaidn): make this assignment throw some exception.
     KeyManager<Aead> wrongType = Registry.INSTANCE.getKeyManager(hmacKeyTypeUrl);
     assertTrue(wrongType.getClass().toString().contains("HmacKeyManager"));
-    KeyTemplate template = TestUtil.createHmacKeyTemplate(
-        16 /* key size */, 16 /* tag size */, HashType.SHA256);
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256;
     HmacKey hmacKey = (HmacKey) Registry.INSTANCE.newKey(template);
     try {
       Aead unused = wrongType.getPrimitive(hmacKey);
@@ -137,7 +138,7 @@ public class RegistryTest {
   @Test
   public void testKeyAndPrimitiveCreation() throws Exception {
     // Create some keys and primitives.
-    KeyTemplate template =  TestUtil.createAesGcmKeyTemplate(16 /* key_size */);
+    KeyTemplate template =  AeadKeyTemplates.AES_128_GCM;
     AesGcmKey aesGcmKey = (AesGcmKey) Registry.INSTANCE.newKey(template);
     assertEquals(16, aesGcmKey.getKeyValue().size());
     KeyData aesGcmKeyData = Registry.INSTANCE.newKeyData(template);
@@ -146,11 +147,10 @@ public class RegistryTest {
     // This might break when we add native implementations.
     assertEquals(AesGcmJce.class, aead.getClass());
 
-    template = TestUtil.createHmacKeyTemplate(
-        16 /* key size */, 10 /* tag size */, HashType.SHA256);
+    template = MacKeyTemplates.HMAC_SHA256;
     HmacKey hmacKey = (HmacKey) Registry.INSTANCE.newKey(template);
-    assertEquals(16, hmacKey.getKeyValue().size());
-    assertEquals(10, hmacKey.getParams().getTagSize());
+    assertEquals(32, hmacKey.getKeyValue().size());
+    assertEquals(16, hmacKey.getParams().getTagSize());
     assertEquals(HashType.SHA256, hmacKey.getParams().getHash());
     KeyData hmacKeyData = Registry.INSTANCE.newKeyData(template);
     assertEquals(hmacKeyTypeUrl, hmacKeyData.getTypeUrl());
@@ -159,12 +159,8 @@ public class RegistryTest {
     assertEquals(MacJce.class, mac.getClass());
 
     // Create a keyset, and get a PrimitiveSet.
-    KeyTemplate template1 =  TestUtil.createAesGcmKeyTemplate(16 /* key_size */);
-    KeyTemplate template2 =  TestUtil.createAesCtrHmacAeadKeyTemplate(
-        16 /* AES key size */,
-        12 /* IV size */,
-        16 /* HMAC key size */,
-        10 /* tag size */);
+    KeyTemplate template1 =  AeadKeyTemplates.AES_128_GCM;
+    KeyTemplate template2 =  AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.INSTANCE.newKeyData(template1);
     KeyData key2 = Registry.INSTANCE.newKeyData(template1);
     KeyData key3 = Registry.INSTANCE.newKeyData(template2);
@@ -248,8 +244,7 @@ public class RegistryTest {
     }
 
     // Create a keyset.
-    KeyTemplate template1 =  TestUtil.createHmacKeyTemplate(
-        16 /* key size */, 10 /* tag size */, HashType.SHA256);
+    KeyTemplate template1 = MacKeyTemplates.HMAC_SHA256;
     KeyData key1 = Registry.INSTANCE.newKeyData(template1);
     // No primary key.
     KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
@@ -289,12 +284,8 @@ public class RegistryTest {
   @Test
   public void testCustomKeyManagerHandling() throws Exception {
     // Create a keyset.
-    KeyTemplate template1 =  TestUtil.createAesGcmKeyTemplate(16 /* key_size */);
-    KeyTemplate template2 =  TestUtil.createAesCtrHmacAeadKeyTemplate(
-        16 /* AES key size */,
-        12 /* IV size */,
-        16 /* HMAC key size */,
-        10 /* tag size */);
+    KeyTemplate template1 =  AeadKeyTemplates.AES_128_GCM;
+    KeyTemplate template2 =  AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.INSTANCE.newKeyData(template1);
     KeyData key2 = Registry.INSTANCE.newKeyData(template2);
     KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()

@@ -21,11 +21,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacFactory;
+import com.google.crypto.tink.mac.MacKeyTemplates;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,8 +45,7 @@ public class CleartextKeysetHandleTest {
   @Test
   public void testBasic() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = TestUtil.createHmacKeyTemplate(
-        16 /* key size */, 16 /* tag size */, HashType.SHA256);
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256;
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyTemplate(template)
         .build()
@@ -69,8 +68,7 @@ public class CleartextKeysetHandleTest {
   @Test
   public void testInvalidKeyset() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = TestUtil.createHmacKeyTemplate(
-        16 /* key size */, 16 /* tag size */, HashType.SHA256);
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256;
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyTemplate(template)
         .build()

@@ -32,6 +32,7 @@ import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.aead.GcpKmsAeadKeyManager;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.crypto.tink.hybrid.HybridDecryptConfig;
@@ -54,9 +55,6 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class CreatePublicKeysetCommandTest {
-  private static final int AES_KEY_SIZE = 16;
-  private static final int HMAC_KEY_SIZE = 20;
-
   @Before
   public void setUp() throws Exception {
     AeadConfig.registerStandardKeyTypes();
@@ -75,13 +73,10 @@ public class CreatePublicKeysetCommandTest {
   @Test
   public void testCreate() throws Exception {
     // Create a keyset that contains a single private key of type EciesAeadHkdfPrivateKey.
-    int ivSize = 12;
-    int tagSize = 16;
     EllipticCurveType curve = EllipticCurveType.NIST_P256;
     HashType hashType = HashType.SHA256;
     EcPointFormat pointFormat = EcPointFormat.UNCOMPRESSED;
-    KeyTemplate demKeyTemplate = TestUtil.createAesCtrHmacAeadKeyTemplate(AES_KEY_SIZE, ivSize,
-        HMAC_KEY_SIZE, tagSize);
+    KeyTemplate demKeyTemplate = AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
     byte[] salt = "some salt".getBytes("UTF-8");
     KeyTemplate keyTemplate = TestUtil.createEciesAeadHkdfKeyTemplate(curve, hashType, pointFormat,
         demKeyTemplate, salt);
