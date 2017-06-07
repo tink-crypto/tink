@@ -47,11 +47,11 @@ public class ChaCha20 implements IndCpaCipher {
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link ChaCha20#KEY_BYTE_SIZE}.
    */
-  public ChaCha20(byte[] key) {
+  public ChaCha20(final byte[] key) {
     if (key.length != KEY_BYTE_SIZE) {
       throw new IllegalArgumentException("The key length in bytes must be 32.");
     }
-    this.key = key;
+    this.key = Arrays.copyOf(key, key.length);
   }
 
   private static int rotateLeft(int x, int y) {
@@ -90,7 +90,7 @@ public class ChaCha20 implements IndCpaCipher {
     output.asIntBuffer().put(x);
   }
 
-  void update(ByteBuffer output, final byte[] input, int inPos, byte[] nonce, int counter) {
+  void process(ByteBuffer output, final byte[] input, int inPos, byte[] nonce, int counter) {
     // Set the initial state based on https://tools.ietf.org/html/rfc7539#section-2.3
     int[] state = new int[BLOCK_INT_SIZE];
     int pos = 0;
@@ -125,19 +125,23 @@ public class ChaCha20 implements IndCpaCipher {
     byte[] nonce = Random.randBytes(NONCE_BYTE_SIZE);
     ByteBuffer ciphertext = ByteBuffer.allocate(plaintext.length + NONCE_BYTE_SIZE);
     ciphertext.put(nonce);
-    update(ciphertext, plaintext, 0, nonce, 1);
+    process(ciphertext, plaintext, 0, nonce, 1);
     return ciphertext.array();
+  }
+
+  byte[] decrypt(final byte[] ciphertext, int startPos) throws GeneralSecurityException {
+    if (ciphertext.length < NONCE_BYTE_SIZE + startPos) {
+      throw new GeneralSecurityException("ciphertext too short");
+    }
+    byte[] nonce = new byte[NONCE_BYTE_SIZE];
+    System.arraycopy(ciphertext, startPos, nonce, 0, NONCE_BYTE_SIZE);
+    ByteBuffer plaintext = ByteBuffer.allocate(ciphertext.length - NONCE_BYTE_SIZE - startPos);
+    process(plaintext, ciphertext, startPos + NONCE_BYTE_SIZE, nonce, 1);
+    return plaintext.array();
   }
 
   @Override
   public byte[] decrypt(final byte[] ciphertext) throws GeneralSecurityException {
-    if (ciphertext.length < NONCE_BYTE_SIZE) {
-      throw new GeneralSecurityException("ciphertext too short");
-    }
-    byte[] nonce = new byte[NONCE_BYTE_SIZE];
-    System.arraycopy(ciphertext, 0, nonce, 0, NONCE_BYTE_SIZE);
-    ByteBuffer plaintext = ByteBuffer.allocate(ciphertext.length - NONCE_BYTE_SIZE);
-    update(plaintext, ciphertext, NONCE_BYTE_SIZE, nonce, 1);
-    return plaintext.array();
+    return decrypt(ciphertext, 0);
   }
 }

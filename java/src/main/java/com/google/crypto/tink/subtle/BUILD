@@ -34,6 +34,8 @@ java_library(
         "AesCtrJceCipher.java",
         "AesEaxJce.java",
         "AesGcmJce.java",
+        "ChaCha20.java",
+        "ChaCha20Poly1305.java",
         "EncryptThenAuthenticate.java",
         "IndCpaCipher.java",
     ],
@@ -168,18 +170,5 @@ java_binary(
     javacopts = JAVACOPTS,
     deps = [
         ":x25519",
-    ],
-)
-
-# ChaCha20-Poly1305 subtle
-java_library(
-    name = "chacha20",
-    srcs = [
-        "ChaCha20.java",
-        "IndCpaCipher.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        ":subtle",
     ],
 )

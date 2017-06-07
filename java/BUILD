@@ -153,7 +153,6 @@ java_library(
     ],
     deps = [
         ":testonly",
-        "//java/src/main/java/com/google/crypto/tink/subtle:chacha20",
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
         "@com_google_guava//jar",
