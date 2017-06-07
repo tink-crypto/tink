@@ -1,6 +1,9 @@
 licenses(["notice"])  # Apache 2.0
 
-package(default_visibility = ["//cc:__subpackages__"])
+package(default_visibility = [
+    "//cc:__subpackages__",
+    "//objc:__subpackages__",
+])
 
 cc_library(
     name = "errors",

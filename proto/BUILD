@@ -2,6 +2,7 @@ package(
     default_visibility = [
         "//cc:__subpackages__",
         "//java:__subpackages__",
+        "//objc:__subpackages__",
     ],
 )
 

@@ -5,3 +5,6 @@
 /target
 .idea
 *.iml
+*.tulsiconf-user
+tulsi-includes
+tulsigen-*
