@@ -19,6 +19,7 @@ package com.google.crypto.tink;
 import com.google.crypto.tink.TinkProto.EncryptedKeyset;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.KeysetInfo;
+import java.security.GeneralSecurityException;
 
 /**
  * KeysetHandle provides abstracted access to Keysets, to limit the exposure
@@ -81,4 +82,16 @@ public final class KeysetHandle {
   public String toString() {
     return getKeysetInfo().toString();
   }
+
+  /**
+   * Validate that an keyset handle contains enough key material to build a keyset on, and throws
+   * otherwise.
+   * @throws GeneralSecurityException
+   */
+  public static void assertEnoughKeyMaterial(Keyset keyset) throws GeneralSecurityException {
+    if (keyset == null || keyset.getKeyCount() <= 0) {
+      throw new GeneralSecurityException("empty keyset");
+    }
+  }
+
 }

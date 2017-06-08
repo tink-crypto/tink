@@ -28,6 +28,7 @@ import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -118,7 +119,40 @@ public class EncryptedKeysetHandleTest {
       KeysetHandle unused = EncryptedKeysetHandle.parseFrom(encryptedKeySet2, masterKey);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("invalid keyset"));
+      assertTrue(e.toString().contains("empty keyset"));
     }
+  }
+
+  @Test
+  public void testVoidInputs() throws Exception {
+    KeysetHandle unused;
+
+    // Encrypt the keyset with an AeadKey.
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
+    Aead masterKey = Registry.INSTANCE.getPrimitive(
+        Registry.INSTANCE.newKeyData(masterKeyTemplate));
+
+    try {
+      unused = EncryptedKeysetHandle.parseFrom(new ByteArrayInputStream(new byte[0]), masterKey);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
+    }
+
+    try {
+      unused = EncryptedKeysetHandle.parseFrom(new byte[0], masterKey);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
+    }
+
+    try {
+      unused = EncryptedKeysetHandle.parseFrom((ByteArrayInputStream) null, masterKey);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
+    }
+
+    // If someone feels adventurous, try encrypting empty strings and use the result as wrapped keys
   }
 }

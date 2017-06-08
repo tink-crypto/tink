@@ -20,6 +20,8 @@ import com.google.crypto.tink.TinkProto.EncryptedKeyset;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
 /**
@@ -35,6 +37,23 @@ public final class EncryptedKeysetHandle {
       throws GeneralSecurityException {
     try {
       EncryptedKeyset keyset = EncryptedKeyset.parseFrom(serialized);
+      EncryptedKeysetHandle.assertEnoughKeyMaterial(keyset);
+      return parseFrom(keyset, masterKey);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("invalid keyset");
+    }
+  }
+
+  /**
+   * @return a new {@code KeysetHandle} from {@code inputStream} which reads a serialized
+   * {@code EncryptedKeyset}. The keyset is encrypted with {@code masterKey}.
+   * @throws GeneralSecurityException, IOException
+   */
+  public static final KeysetHandle parseFrom(final InputStream inputStream, Aead masterKey)
+      throws GeneralSecurityException, IOException {
+    try {
+      EncryptedKeyset keyset = EncryptedKeyset.parseFrom(inputStream);
+      EncryptedKeysetHandle.assertEnoughKeyMaterial(keyset);
       return parseFrom(keyset, masterKey);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("invalid keyset");
@@ -48,10 +67,12 @@ public final class EncryptedKeysetHandle {
    */
   public static final KeysetHandle parseFrom(EncryptedKeyset proto, Aead masterKey)
       throws GeneralSecurityException {
-    validate(proto);
+    EncryptedKeysetHandle.assertEnoughKeyMaterial(proto);
     try {
       final Keyset keyset = Keyset.parseFrom(masterKey.decrypt(
           proto.getEncryptedKeyset().toByteArray(), new byte[0] /* aad */));
+      // check emptiness here too, in case the encrypted keys unwrapped to nothing?
+      KeysetHandle.assertEnoughKeyMaterial(keyset);
       return new KeysetHandle(keyset, proto);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
@@ -74,13 +95,16 @@ public final class EncryptedKeysetHandle {
   }
 
   /**
-   * Validates that {@code proto} contains encrypted keyset material.
-   * @throws GeneralSecurityException if {@code keyset} doesn't contain encrypted key material.
+   * Validate that an encrypted keyset contains enough key material to build a keyset on, and throws
+   * otherwise.
+   * @throws GeneralSecurityException
    */
-  private static void validate(EncryptedKeyset proto) throws GeneralSecurityException {
-    if (proto.getEncryptedKeyset() == null
-        || proto.getEncryptedKeyset().size() == 0) {
-      throw new GeneralSecurityException("invalid keyset, needs encrypted key material");
+  public static void assertEnoughKeyMaterial(EncryptedKeyset keyset)
+      throws GeneralSecurityException {
+    if (keyset == null
+        || keyset.getEncryptedKeyset() == null
+        || keyset.getEncryptedKeyset().size() == 0) {
+      throw new GeneralSecurityException("empty keyset");
     }
   }
 }

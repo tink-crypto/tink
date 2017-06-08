@@ -26,6 +26,7 @@ import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacFactory;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +54,13 @@ public class CleartextKeysetHandleTest {
 
     assertNull(manager.getKeysetHandle().getEncryptedKeyset());
     Keyset keyset1 = manager.getKeysetHandle().getKeyset();
+
+    // Parse directly from a byte array
     KeysetHandle handle1 = CleartextKeysetHandle.parseFrom(keyset1.toByteArray());
+    assertEquals(keyset1, handle1.getKeyset());
+
+    // Parse from an inputStream
+    handle1 = CleartextKeysetHandle.parseFrom(new ByteArrayInputStream(keyset1.toByteArray()));
     assertEquals(keyset1, handle1.getKeyset());
 
     KeysetHandle handle2 = CleartextKeysetHandle.generateNew(template);
@@ -82,6 +89,39 @@ public class CleartextKeysetHandleTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("invalid keyset"));
+    }
+
+    try {
+      KeysetHandle unused = CleartextKeysetHandle.parseFrom(new ByteArrayInputStream(proto));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("invalid keyset"));
+    }
+  }
+
+  @Test
+  public void testVoidInputs() throws Exception {
+    KeysetHandle unused;
+
+    try {
+      unused = CleartextKeysetHandle.parseFrom(new ByteArrayInputStream(new byte[0]));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
+    }
+
+    try {
+      unused = CleartextKeysetHandle.parseFrom(new byte[0]);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
+    }
+
+    try {
+      unused = CleartextKeysetHandle.parseFrom((ByteArrayInputStream) null);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
     }
   }
 }

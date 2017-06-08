@@ -19,6 +19,8 @@ package com.google.crypto.tink;
 import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
 /**
@@ -35,6 +37,22 @@ public final class NoSecretKeysetHandle {
       throws GeneralSecurityException {
     try {
       Keyset keyset = Keyset.parseFrom(serialized);
+      KeysetHandle.assertEnoughKeyMaterial(keyset);
+      return parseFrom(keyset);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("invalid keyset");
+    }
+  }
+
+  /**
+   * @return a new keyset handle from {@code inputStream}, which reads a serialized {@code Keyset}.
+   * @throws GeneralSecurityException, IOException
+   */
+  public static final KeysetHandle parseFrom(final InputStream inputStream)
+      throws GeneralSecurityException, IOException {
+    try {
+      Keyset keyset = Keyset.parseFrom(inputStream);
+      KeysetHandle.assertEnoughKeyMaterial(keyset);
       return parseFrom(keyset);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("invalid keyset");
@@ -48,6 +66,7 @@ public final class NoSecretKeysetHandle {
   public static final KeysetHandle parseFrom(Keyset keyset)
       throws GeneralSecurityException {
     validate(keyset);
+    KeysetHandle.assertEnoughKeyMaterial(keyset);
     return new KeysetHandle(keyset);
   }
 

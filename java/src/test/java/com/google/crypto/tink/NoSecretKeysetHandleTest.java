@@ -26,6 +26,7 @@ import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,6 +73,32 @@ public class NoSecretKeysetHandleTest {
       KeysetHandle unused = NoSecretKeysetHandle.parseFrom(keyset2.toByteArray());
     } catch (GeneralSecurityException e) {
       fail("Should be allowed to load non secret keyset");
+    }
+  }
+
+  @Test
+  public void testVoidInputs() throws Exception {
+    KeysetHandle unused;
+
+    try {
+      unused = NoSecretKeysetHandle.parseFrom(new ByteArrayInputStream(new byte[0]));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
+    }
+
+    try {
+      unused = NoSecretKeysetHandle.parseFrom(new byte[0]);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
+    }
+
+    try {
+      unused = NoSecretKeysetHandle.parseFrom((ByteArrayInputStream) null);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("empty keyset"));
     }
   }
 }
