@@ -41,6 +41,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle:hybrid",
         "//java/src/main/java/com/google/crypto/tink/subtle:mac",
         "//java/src/main/java/com/google/crypto/tink/subtle:signature",
+        "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
         "//java/src/main/java/com/google/crypto/tink/subtle:x25519",
     ],
 )
@@ -170,6 +171,9 @@ gen_java_test_rules(
         "//testdata:ecies_keysets",
     ],
     default_test_size = "small",
+    large_tests = [
+        "src/test/java/com/google/crypto/tink/subtle/AesGcmStreamingTest",
+    ],
     medium_tests = [
         "src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest",
     ],

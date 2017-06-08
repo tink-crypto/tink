@@ -140,6 +140,20 @@ java_library(
     ],
 )
 
+java_library(
+    name = "streaming",
+    srcs = [
+        "AesGcmStreaming.java",
+        "Hkdf.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":subtle",
+        "//java/src/main/java/com/google/crypto/tink:primitives",
+        "@com_google_errorprone_error_prone_annotations//jar",
+    ],
+)
+
 # x25519 subtle
 
 java_library(

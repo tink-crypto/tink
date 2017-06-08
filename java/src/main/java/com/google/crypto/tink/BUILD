@@ -19,6 +19,7 @@ java_library(
         "Mac.java",
         "PublicKeySign.java",
         "PublicKeyVerify.java",
+        "StreamingEncryption.java",
     ],
     javacopts = JAVACOPTS,
 )
