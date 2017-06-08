@@ -11,12 +11,11 @@ load("//java/build_defs:javac.bzl", "JAVACOPTS")
 filegroup(
     name = "encrypt_srcs",
     srcs = [
-        "EciesAeadHkdfAeadFactory.java",
-        "EciesAeadHkdfHybridEncrypt.java",
         "EciesAeadHkdfPublicKeyManager.java",
         "HybridEncryptConfig.java",
         "HybridEncryptFactory.java",
         "HybridUtil.java",
+        "RegistryEciesAeadHkdfDemHelper.java",
     ],
 )
 
@@ -69,12 +68,11 @@ java_library(
 filegroup(
     name = "decrypt_srcs",
     srcs = [
-        "EciesAeadHkdfAeadFactory.java",
-        "EciesAeadHkdfHybridDecrypt.java",
         "EciesAeadHkdfPrivateKeyManager.java",
         "HybridDecryptConfig.java",
         "HybridDecryptFactory.java",
         "HybridUtil.java",
+        "RegistryEciesAeadHkdfDemHelper.java",
     ],
 )
 

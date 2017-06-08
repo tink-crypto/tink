@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.hybrid; // not subtle, because it depends on Tink-protos.
+package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
@@ -27,6 +27,7 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
@@ -34,8 +35,10 @@ import java.util.Arrays;
 
 /**
  * Helper generating {@code Aead}-instances for specified {@code KeyTemplate} and key material.
+ * It uses selected {@code KeyManager}-instances from the {@code Registry} to obtain the
+ * instances of {@code Aead}.
  */
-public final class EciesAeadHkdfAeadFactory {
+public final class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
   private enum DemKeyType {
     AES_GCM_KEY,
     AES_CTR_HMAC_AEAD_KEY
@@ -51,7 +54,7 @@ public final class EciesAeadHkdfAeadFactory {
   private AesCtrHmacAeadKey aesCtrHmacAeadKey;
   private int aesCtrKeySize;
 
-  EciesAeadHkdfAeadFactory(KeyTemplate demTemplate) throws GeneralSecurityException {
+  RegistryEciesAeadHkdfDemHelper(KeyTemplate demTemplate) throws GeneralSecurityException {
     String keyType = demTemplate.getTypeUrl();
     if (keyType.equals(AesGcmKeyManager.TYPE_URL)) {
       try {
@@ -81,10 +84,12 @@ public final class EciesAeadHkdfAeadFactory {
     }
   }
 
-  public int getSymmetricKeySize() {
+  @Override
+  public int getSymmetricKeySizeInBytes() {
     return symmetricKeySize;
   }
 
+  @Override
   public Aead getAead(final byte[] symmetricKeyValue) throws GeneralSecurityException {
     if (demKeyType == DemKeyType.AES_GCM_KEY) {
       AesGcmKey aeadKey = AesGcmKey.newBuilder()

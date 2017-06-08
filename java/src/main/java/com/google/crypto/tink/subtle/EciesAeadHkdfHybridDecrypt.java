@@ -14,15 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.hybrid; // not subtle, because it depends on KeyTemplate.
+package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CommonProto.EcPointFormat;
+import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.Util;
-import com.google.crypto.tink.subtle.EcUtil;
-import com.google.crypto.tink.subtle.EciesHkdfRecipientKem;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.EllipticCurve;
@@ -32,25 +30,25 @@ import java.util.Arrays;
  * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and
  * AEAD-DEM (data encapsulation mechanism).
  */
-class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
+public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   private static final byte[] EMPTY_AAD = new byte[0];
   private final ECPrivateKey recipientPrivateKey;
   private final EciesHkdfRecipientKem recipientKem;
-  private final byte[] hkdfSalt;
   private final String hkdfHmacAlgo;
+  private final byte[] hkdfSalt;
   private final EcUtil.PointFormat ecPointFormat;
-  private final EciesAeadHkdfAeadFactory aeadFactory;
+  private final EciesAeadHkdfDemHelper demHelper;
 
-  EciesAeadHkdfHybridDecrypt(final ECPrivateKey recipientPrivateKey,
-      final byte[] hkdfSalt, String hkdfHmacAlgo,
-      KeyTemplate aeadDemTemplate, EcPointFormat ecPointFormat)
+  public EciesAeadHkdfHybridDecrypt(final ECPrivateKey recipientPrivateKey,
+      final byte[] hkdfSalt, HashType hkdfHashType, EcPointFormat ecPointFormat,
+      EciesAeadHkdfDemHelper demHelper)
       throws GeneralSecurityException {
     this.recipientPrivateKey = recipientPrivateKey;
     this.recipientKem = new EciesHkdfRecipientKem(recipientPrivateKey);
-    this.hkdfHmacAlgo = hkdfHmacAlgo;
     this.hkdfSalt = hkdfSalt;
+    this.hkdfHmacAlgo = Util.hashToHmacAlgorithmName(hkdfHashType);
     this.ecPointFormat = Util.getPointFormat(ecPointFormat);
-    this.aeadFactory = new EciesAeadHkdfAeadFactory(aeadDemTemplate);  // validates the format
+    this.demHelper = demHelper;
   }
 
   @Override
@@ -61,10 +59,10 @@ class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
     if (ciphertext.length < headerSize) {
       throw new GeneralSecurityException("ciphertext too short");
     }
-    byte[] kem = Arrays.copyOfRange(ciphertext, 0, headerSize);
-    byte[] symmetricKey = recipientKem.generateKey(
-        kem, hkdfHmacAlgo, hkdfSalt, contextInfo, aeadFactory.getSymmetricKeySize(), ecPointFormat);
-    Aead aead = aeadFactory.getAead(symmetricKey);
+    byte[] kemBytes = Arrays.copyOfRange(ciphertext, 0, headerSize);
+    byte[] symmetricKey = recipientKem.generateKey(kemBytes, hkdfHmacAlgo, hkdfSalt,
+        contextInfo, demHelper.getSymmetricKeySizeInBytes(), ecPointFormat);
+    Aead aead = demHelper.getAead(symmetricKey);
     return aead.decrypt(Arrays.copyOfRange(ciphertext, headerSize, ciphertext.length), EMPTY_AAD);
   }
 }

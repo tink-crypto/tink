@@ -21,12 +21,15 @@ import static org.junit.Assert.assertArrayEquals;
 
 import com.google.crypto.tink.CommonProto.EcPointFormat;
 import com.google.crypto.tink.CommonProto.EllipticCurveType;
+import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.Util;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
+import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -63,17 +66,19 @@ public class EciesAeadHkdfHybridEncryptTest {
     byte[] salt = "some salt".getBytes("UTF-8");
     byte[] plaintext = Random.randBytes(111);
     byte[] context = "context info".getBytes("UTF-8");
-    String hmacAlgo = "HmacSha256";
+    HashType hkdfHashType = HashType.SHA256;
 
     KeyTemplate[] keyTemplates = new KeyTemplate[] {
       AeadKeyTemplates.AES_128_CTR_128BITIV_HMAC_SHA256,
       AeadKeyTemplates.AES_128_GCM,
     };
     for (int i = 0; i < keyTemplates.length; i++) {
-      HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey, salt,
-          hmacAlgo, keyTemplates[i], EcPointFormat.UNCOMPRESSED);
-      HybridDecrypt hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey, salt,
-          hmacAlgo, keyTemplates[i], EcPointFormat.UNCOMPRESSED);
+      HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey,
+          salt, hkdfHashType, EcPointFormat.UNCOMPRESSED,
+          new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
+      HybridDecrypt hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
+          salt, hkdfHashType, EcPointFormat.UNCOMPRESSED,
+          new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
 
       // Makes sure that the encryption is randomized.
       Set<String> ciphertexts = new TreeSet<String>();

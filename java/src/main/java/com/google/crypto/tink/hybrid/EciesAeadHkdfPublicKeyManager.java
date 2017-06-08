@@ -16,12 +16,15 @@
 
 package com.google.crypto.tink.hybrid;
 
+import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.Util;
+import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
+import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -64,14 +67,17 @@ public final class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEnc
     }
     EciesAeadHkdfPublicKey recipientKeyProto = (EciesAeadHkdfPublicKey) recipientKey;
     validate(recipientKeyProto);
-    EciesHkdfKemParams kemParams = recipientKeyProto.getParams().getKemParams();
+    EciesAeadHkdfParams eciesParams = recipientKeyProto.getParams();
+    EciesHkdfKemParams kemParams = eciesParams.getKemParams();
     ECPublicKey recipientPublicKey = Util.getEcPublicKey(kemParams.getCurveType(),
         recipientKeyProto.getX().toByteArray(), recipientKeyProto.getY().toByteArray());
+    EciesAeadHkdfDemHelper demHelper = new RegistryEciesAeadHkdfDemHelper(
+        eciesParams.getDemParams().getAeadDem());
     return new EciesAeadHkdfHybridEncrypt(recipientPublicKey,
         kemParams.getHkdfSalt().toByteArray(),
-        Util.hashToHmacAlgorithmName(kemParams.getHkdfHashType()),
-        recipientKeyProto.getParams().getDemParams().getAeadDem(),
-        recipientKeyProto.getParams().getEcPointFormat());
+        kemParams.getHkdfHashType(),
+        eciesParams.getEcPointFormat(),
+        demHelper);
   }
 
   /**

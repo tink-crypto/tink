@@ -123,6 +123,9 @@ java_library(
     name = "hybrid",
     srcs = [
         "EcUtil.java",
+        "EciesAeadHkdfDemHelper.java",
+        "EciesAeadHkdfHybridDecrypt.java",
+        "EciesAeadHkdfHybridEncrypt.java",
         "EciesHkdfRecipientKem.java",
         "EciesHkdfSenderKem.java",
         "Hkdf.java",
@@ -130,7 +133,9 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         ":subtle",
+        "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//proto:common_java_proto_lite",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )

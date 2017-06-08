@@ -17,6 +17,7 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfKeyFormat;
+import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
@@ -24,6 +25,8 @@ import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.Util;
+import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
+import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -69,15 +72,18 @@ public final class EciesAeadHkdfPrivateKeyManager implements KeyManager<HybridDe
     }
     EciesAeadHkdfPrivateKey recipientKeyProto = (EciesAeadHkdfPrivateKey) recipientKey;
     validate(recipientKeyProto);
-    EciesHkdfKemParams kemParams = recipientKeyProto.getPublicKey().getParams().getKemParams();
+    EciesAeadHkdfParams eciesParams = recipientKeyProto.getPublicKey().getParams();
+    EciesHkdfKemParams kemParams = eciesParams.getKemParams();
 
     ECPrivateKey recipientPrivateKey = Util.getEcPrivateKey(kemParams.getCurveType(),
         recipientKeyProto.getKeyValue().toByteArray());
+    EciesAeadHkdfDemHelper demHelper = new RegistryEciesAeadHkdfDemHelper(
+        eciesParams.getDemParams().getAeadDem());
     return new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
         kemParams.getHkdfSalt().toByteArray(),
-        Util.hashToHmacAlgorithmName(kemParams.getHkdfHashType()),
-        recipientKeyProto.getPublicKey().getParams().getDemParams().getAeadDem(),
-        recipientKeyProto.getPublicKey().getParams().getEcPointFormat());
+        kemParams.getHkdfHashType(),
+        eciesParams.getEcPointFormat(),
+        demHelper);
   }
 
   /**
