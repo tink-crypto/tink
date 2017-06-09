@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -35,7 +36,7 @@ public class SubtleUtilTest {
       SubtleUtil.validateCloudKmsCryptoKeyUri("a");
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException e) {
-      assertTrue(e.toString().contains("Invalid Google Cloud KMS Key URI"));
+      assertExceptionContains(e, "Invalid Google Cloud KMS Key URI");
     }
 
     String cryptoKey = TestUtil.createGcpKmsKeyUri(
@@ -51,8 +52,7 @@ public class SubtleUtilTest {
       SubtleUtil.validateCloudKmsCryptoKeyUri(cryptoVersion);
       fail("CryptoKeyVersion is not a valid CryptoKey");
     } catch (IllegalArgumentException e) {
-      assertTrue(e.toString().contains(
-          "The URI must point to a CryptoKey, not a CryptoKeyVersion"));
+      assertExceptionContains(e, "The URI must point to a CryptoKey, not a CryptoKeyVersion");
     }
   }
 }

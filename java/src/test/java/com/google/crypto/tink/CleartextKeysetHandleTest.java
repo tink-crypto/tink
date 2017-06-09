@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -88,14 +89,14 @@ public class CleartextKeysetHandleTest {
       KeysetHandle unused = CleartextKeysetHandle.parseFrom(proto);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("invalid keyset"));
+      assertExceptionContains(e, "invalid keyset");
     }
 
     try {
       KeysetHandle unused = CleartextKeysetHandle.parseFrom(new ByteArrayInputStream(proto));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("invalid keyset"));
+      assertExceptionContains(e, "invalid keyset");
     }
   }
 
@@ -107,21 +108,21 @@ public class CleartextKeysetHandleTest {
       unused = CleartextKeysetHandle.parseFrom(new ByteArrayInputStream(new byte[0]));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
 
     try {
       unused = CleartextKeysetHandle.parseFrom(new byte[0]);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
 
     try {
       unused = CleartextKeysetHandle.parseFrom((ByteArrayInputStream) null);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
   }
 }

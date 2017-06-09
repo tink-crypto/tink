@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.aead;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -119,7 +120,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
       aead.decrypt(ciphertext2, aad);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decryption failed"));
+      assertExceptionContains(e, "decryption failed");
     }
 
     // length larger than actual value
@@ -132,7 +133,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
       aead.decrypt(ciphertext2, aad);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decryption failed"));
+      assertExceptionContains(e, "decryption failed");
     }
 
     // length larger than total ciphertext length
@@ -145,7 +146,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
       aead.decrypt(ciphertext2, aad);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decryption failed"));
+      assertExceptionContains(e, "decryption failed");
     }
   }
 }

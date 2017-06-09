@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -109,7 +110,7 @@ public class EncryptedKeysetHandleTest {
       KeysetHandle unused = EncryptedKeysetHandle.parseFrom(proto, masterKey);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("invalid keyset"));
+      assertExceptionContains(e, "invalid keyset");
     }
 
     EncryptedKeyset encryptedKeySet2 = encryptedKeyset.toBuilder()
@@ -119,7 +120,7 @@ public class EncryptedKeysetHandleTest {
       KeysetHandle unused = EncryptedKeysetHandle.parseFrom(encryptedKeySet2, masterKey);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
   }
 
@@ -136,21 +137,21 @@ public class EncryptedKeysetHandleTest {
       unused = EncryptedKeysetHandle.parseFrom(new ByteArrayInputStream(new byte[0]), masterKey);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
 
     try {
       unused = EncryptedKeysetHandle.parseFrom(new byte[0], masterKey);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
 
     try {
       unused = EncryptedKeysetHandle.parseFrom((ByteArrayInputStream) null, masterKey);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
 
     // If someone feels adventurous, try encrypting empty strings and use the result as wrapped keys

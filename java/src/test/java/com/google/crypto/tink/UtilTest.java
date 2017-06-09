@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -29,6 +30,7 @@ import com.google.crypto.tink.TinkProto.KeysetInfo;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.subtle.EcUtil;
 import java.math.BigInteger;
+import java.lang.AssertionError;
 import java.security.GeneralSecurityException;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
@@ -60,7 +62,7 @@ public class UtilTest {
       Util.validateKeyset(Keyset.newBuilder().build());
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
 
     // Primary key is disabled.
@@ -73,7 +75,7 @@ public class UtilTest {
       Util.validateKeyset(invalidKeyset);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("keyset doesn't contain a valid primary key"));
+      assertExceptionContains(e, "keyset doesn't contain a valid primary key");
     }
 
     // Multiple primary keys.
@@ -93,7 +95,7 @@ public class UtilTest {
       Util.validateKeyset(invalidKeyset);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("keyset contains multiple primary keys"));
+      assertExceptionContains(e, "keyset contains multiple primary keys");
     }
   }
 
@@ -408,6 +410,18 @@ public class UtilTest {
       ECPoint p = new ECPoint(test.x, test.y);
       byte[] encoded = EcUtil.ecPointEncode(curve, Util.getPointFormat(test.format), p);
       assertEquals(TestUtil.hexEncode(encoded), TestUtil.hexEncode(test.encoded));
+    }
+  }
+
+  @Test
+  public void testAssertExceptionContains() throws Exception {
+    assertExceptionContains(new GeneralSecurityException("abc"), "abc");
+
+    try {
+      assertExceptionContains(new GeneralSecurityException("abc"), "def");
+    } catch (AssertionError e) {
+      assertExceptionContains(
+        e, "Got exception with message \"abc\", expected it to contain \"def\".");
     }
   }
 

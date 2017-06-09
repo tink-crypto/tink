@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -71,7 +72,7 @@ public class Ed25519PublicKeyManagerTest {
         verifier.verify(signature, copy);
         fail("Expected GeneralSecurityException");
       } catch (GeneralSecurityException e) {
-        assertTrue(e.toString().contains("Signature check failed."));
+        assertExceptionContains(e, "Signature check failed.");
       }
     }
 
@@ -83,8 +84,7 @@ public class Ed25519PublicKeyManagerTest {
       verifier.verify(copySig, message);
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException e) {
-      assertTrue(e.toString().contains(
-          "Given signature's 3 most significant bits must be 0."));
+      assertExceptionContains(e, "Given signature's 3 most significant bits must be 0.");
     }
     // Flip other bytes.
     for (int i = 0; i < signature.length - 1; i++) {
@@ -94,7 +94,7 @@ public class Ed25519PublicKeyManagerTest {
         verifier.verify(copy, message);
         fail("Expected GeneralSecurityException");
       } catch (GeneralSecurityException e) {
-        assertTrue(e.toString().contains("Signature check failed."));
+        assertExceptionContains(e, "Signature check failed.");
       }
     }
   }

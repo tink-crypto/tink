@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -223,7 +224,7 @@ public class PrimitiveSetTest {
       pset.addPrimitive(new DummyMac1(), key1);
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("unknown output prefix type"));
+      assertExceptionContains(e, "unknown output prefix type");
     }
   }
 }

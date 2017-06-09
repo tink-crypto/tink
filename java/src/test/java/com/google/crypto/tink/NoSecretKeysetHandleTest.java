@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -58,7 +59,7 @@ public class NoSecretKeysetHandleTest {
       KeysetHandle unused = NoSecretKeysetHandle.parseFrom(keyset.toByteArray());
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("keyset contains secret key material"));
+      assertExceptionContains(e, "keyset contains secret key material");
     }
 
     // This is a REMOTE key.
@@ -84,21 +85,21 @@ public class NoSecretKeysetHandleTest {
       unused = NoSecretKeysetHandle.parseFrom(new ByteArrayInputStream(new byte[0]));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
 
     try {
       unused = NoSecretKeysetHandle.parseFrom(new byte[0]);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
 
     try {
       unused = NoSecretKeysetHandle.parseFrom((ByteArrayInputStream) null);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
   }
 }

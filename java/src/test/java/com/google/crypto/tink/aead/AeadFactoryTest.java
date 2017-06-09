@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.aead;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -133,7 +134,7 @@ public class AeadFactoryTest {
       aead.decrypt(ciphertext, associatedData);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decryption failed"));
+      assertExceptionContains(e, "decryption failed");
     }
   }
 

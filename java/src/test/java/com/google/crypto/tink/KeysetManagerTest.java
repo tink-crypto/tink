@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -64,7 +65,7 @@ public class KeysetManagerTest {
       manager.rotate();
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("cannot rotate, needs key template"));
+      assertExceptionContains(e, "cannot rotate, needs key template");
     }
 
     // Create a keyset that contains a single HmacKey.
@@ -142,7 +143,7 @@ public class KeysetManagerTest {
           .getKeysetHandle();
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("dummy"));
+      assertExceptionContains(e, "dummy");
     }
   }
 }

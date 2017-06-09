@@ -282,7 +282,7 @@ public class TestUtil {
         .setTypeUrl("type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey")
         .build();
   }
-  
+
   /**
    * @return a KMS key URI in a format defined by Google Cloud KMS.
    */
@@ -485,8 +485,9 @@ public class TestUtil {
       aead.decrypt(ciphertext, associatedData);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decryption failed"));
+      // expected
     }
+
     ciphertext[0] = original;
     original = ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE];
     ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE] = (byte) ~original;
@@ -494,7 +495,7 @@ public class TestUtil {
       aead.decrypt(ciphertext, associatedData);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decryption failed"));
+      // expected
     }
 
     ciphertext[0] = original;
@@ -504,7 +505,7 @@ public class TestUtil {
       aead.decrypt(ciphertext, associatedData);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("decryption failed"));
+      // expected
     }
   }
 
@@ -520,5 +521,16 @@ public class TestUtil {
    */
   public static String hexEncode(byte[] data) {
     return base16().lowerCase().encode(data);
+  }
+
+  /**
+   * Assertion that an exception's message contains the right message. When this fails, the
+   * exception's message and the expected value will be in the failure log.
+   */
+  public static void assertExceptionContains(Throwable e, String contains) {
+    String message =
+      "Got exception with message \"" + e.getMessage() +
+      "\", expected it to contain \"" + contains + "\".";
+    assertTrue(message, e.getMessage().contains(contains));
   }
 }

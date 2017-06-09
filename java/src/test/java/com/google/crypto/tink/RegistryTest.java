@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -121,8 +122,7 @@ public class RegistryTest {
       Aead unused = wrongType.getPrimitive(hmacKey);
       fail("Expected ClassCastException");
     } catch (ClassCastException e) {
-      assertTrue(e.toString().contains(
-          "MacJce cannot be cast to com.google.crypto.tink.Aead"));
+      assertExceptionContains(e, "MacJce cannot be cast to com.google.crypto.tink.Aead");
     }
 
     String badTypeUrl = "bad type URL";
@@ -130,8 +130,8 @@ public class RegistryTest {
       KeyManager<Mac> unused = Registry.INSTANCE.getKeyManager(badTypeUrl);
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("unsupported"));
-      assertTrue(e.toString().contains(badTypeUrl));
+      assertExceptionContains(e, "unsupported");
+      assertExceptionContains(e, badTypeUrl);
     }
   }
 
@@ -240,7 +240,7 @@ public class RegistryTest {
       Registry.INSTANCE.getPrimitives(new KeysetHandle(Keyset.newBuilder().build()));
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("empty keyset"));
+      assertExceptionContains(e, "empty keyset");
     }
 
     // Create a keyset.
@@ -260,7 +260,7 @@ public class RegistryTest {
       Registry.INSTANCE.getPrimitives(keysetHandle);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("keyset doesn't contain a valid primary key"));
+      assertExceptionContains(e, "keyset doesn't contain a valid primary key");
     }
 
     // Primary key is disabled.
@@ -277,7 +277,7 @@ public class RegistryTest {
       Registry.INSTANCE.getPrimitives(keysetHandle);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertTrue(e.toString().contains("keyset doesn't contain a valid primary key"));
+      assertExceptionContains(e, "keyset doesn't contain a valid primary key");
     }
   }
 
