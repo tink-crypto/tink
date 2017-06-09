@@ -19,7 +19,6 @@ package com.google.crypto.tink;
 import static com.google.common.io.BaseEncoding.base16;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
 import com.google.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
@@ -53,6 +52,7 @@ import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.Keyset.Key;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.aead.GcpKmsAeadKeyManager;
@@ -466,43 +466,24 @@ public class TestUtil {
   }
 
   /**
-   * Runs basic tests against an Aead primitive.
+   * Runs basic tests against an Aead primitive. The given keysetHandle should
+   * be an Aead key type.
    */
-  public static void runBasicTests(Aead aead) throws Exception {
+  public static void runBasicAeadFactoryTests(KeysetHandle keysetHandle) throws Exception {
+    runBasicAeadFactoryTests(keysetHandle, /* keyManager*/ null);
+  }
+  /**
+   * Runs basic tests against an Aead primitive. The given keysetHandle should
+   * be an Aead key type.
+   */
+  public static void runBasicAeadFactoryTests(
+      KeysetHandle keysetHandle, KeyManager<Aead> keyManager) throws Exception {
+    Aead aead = AeadFactory.getPrimitive(keysetHandle, keyManager);
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
     byte[] decrypted = aead.decrypt(ciphertext, associatedData);
     assertArrayEquals(plaintext, decrypted);
-
-    byte original = ciphertext[0];
-    ciphertext[0] = (byte) ~original;
-    try {
-      aead.decrypt(ciphertext, associatedData);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-
-    ciphertext[0] = original;
-    original = ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE];
-    ciphertext[CryptoFormat.NON_RAW_PREFIX_SIZE] = (byte) ~original;
-    try {
-      aead.decrypt(ciphertext, associatedData);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-
-    ciphertext[0] = original;
-    original = associatedData[0];
-    associatedData[0] = (byte) ~original;
-    try {
-      aead.decrypt(ciphertext, associatedData);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
   }
 
   /**

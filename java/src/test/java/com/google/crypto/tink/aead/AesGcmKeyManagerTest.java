@@ -428,8 +428,7 @@ public class AesGcmKeyManagerTest {
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
-    TestUtil.runBasicTests(aead);
+    TestUtil.runBasicAeadFactoryTests(keysetHandle);
   }
 
   @Test

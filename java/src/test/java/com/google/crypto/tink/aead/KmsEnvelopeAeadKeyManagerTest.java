@@ -66,16 +66,13 @@ public class KmsEnvelopeAeadKeyManagerTest {
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));
-
-    Aead aead = AeadFactory.getPrimitive(keysetHandle);
-    TestUtil.runBasicTests(aead);
+    TestUtil.runBasicAeadFactoryTests(keysetHandle);
 
     // Now with {@code GcpKmsAeadKeyManager} as a custom key manager.
     GcpKmsAeadKeyManager customKeyManager =
         new GcpKmsAeadKeyManager(new ServiceAccountGcpCredentialFactory(
             TestUtil.SERVICE_ACCOUNT_FILE));
-    aead = AeadFactory.getPrimitive(keysetHandle, customKeyManager);
-    TestUtil.runBasicTests(aead);
+    TestUtil.runBasicAeadFactoryTests(keysetHandle, customKeyManager);
   }
 
   @Test
