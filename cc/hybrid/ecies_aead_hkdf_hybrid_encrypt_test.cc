@@ -27,7 +27,6 @@
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "gtest/gtest.h"
 
-using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::EciesAeadHkdfPublicKey;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;

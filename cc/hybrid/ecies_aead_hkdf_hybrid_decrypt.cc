@@ -66,7 +66,7 @@ util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ciphertext too short");
   }
-  std::string kem_bytes = ciphertext.substr(0, header_size);
+  std::string kem_bytes = std::string(ciphertext.substr(0, header_size));
 
   // Use KEM to get a symmetric key.
   auto symmetric_key_result = recipient_kem_->GenerateKey(

@@ -46,8 +46,8 @@ EciesHkdfRecipientKemBoringSsl::New(
 }
 
 EciesHkdfRecipientKemBoringSsl::EciesHkdfRecipientKemBoringSsl(
-    EllipticCurveType curve, const std::string& priv)
-    : curve_(curve), priv_(priv) {}
+    EllipticCurveType curve, const std::string& priv_key_value)
+    : curve_(curve), priv_key_value_(priv_key_value) {}
 
 util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
     StringPiece kem_bytes, HashType hash, StringPiece hkdf_salt,
@@ -62,8 +62,8 @@ util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
   }
   bssl::UniquePtr<EC_POINT> pub_key(status_or_ec_point.ValueOrDie());
   bssl::UniquePtr<BIGNUM> priv_key(
-      BN_bin2bn(reinterpret_cast<const unsigned char*>(priv_.data()),
-                priv_.size(), nullptr));
+      BN_bin2bn(reinterpret_cast<const unsigned char*>(priv_key_value_.data()),
+                priv_key_value_.size(), nullptr));
   auto status_or_string = SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
       curve_, priv_key.get(), pub_key.get());
   if (!status_or_string.ok()) {

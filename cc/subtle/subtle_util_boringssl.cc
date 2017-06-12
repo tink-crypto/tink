@@ -84,8 +84,8 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
 
 // static
 util::StatusOr<SubtleUtilBoringSSL::EcKey>
-SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType curve) {
-  auto status_or_group(SubtleUtilBoringSSL::GetEcGroup(curve));
+SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType curve_type) {
+  auto status_or_group(SubtleUtilBoringSSL::GetEcGroup(curve_type));
   if (!status_or_group.ok()) return status_or_group.status();
   bssl::UniquePtr<EC_GROUP> group(status_or_group.ValueOrDie());
   bssl::UniquePtr<EC_KEY> key(EC_KEY_new());
@@ -101,7 +101,7 @@ SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType curve) {
                         "EC_POINT_get_affine_coordinates_GFp failed");
   }
   EcKey ec_key;
-  ec_key.curve = curve;
+  ec_key.curve = curve_type;
   ec_key.pub_x = bn2str(pub_key_x_bn.get());
   ec_key.pub_y = bn2str(pub_key_y_bn.get());
   ec_key.priv = bn2str(priv_key);

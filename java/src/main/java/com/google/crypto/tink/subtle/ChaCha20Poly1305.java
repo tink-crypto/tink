@@ -120,25 +120,25 @@ public class ChaCha20Poly1305 implements Aead {
       h4 += load26(buf, 12, 8) | (buf[BLOCK_SIZE_IN_BYTES] << 24);
 
       // d = r * h
-      d0 = h0*r0 + h1*s4 + h2*s3 + h3*s2 + h4*s1;
-      d1 = h0*r1 + h1*r0 + h2*s4 + h3*s3 + h4*s2;
-      d2 = h0*r2 + h1*r1 + h2*r0 + h3*s4 + h4*s3;
-      d3 = h0*r3 + h1*r2 + h2*r1 + h3*r0 + h4*s4;
-      d4 = h0*r4 + h1*r3 + h2*r2 + h3*r1 + h4*r0;
+      d0 = h0 * r0 + h1 * s4 + h2 * s3 + h3 * s2 + h4 * s1;
+      d1 = h0 * r1 + h1 * r0 + h2 * s4 + h3 * s3 + h4 * s2;
+      d2 = h0 * r2 + h1 * r1 + h2 * r0 + h3 * s4 + h4 * s3;
+      d3 = h0 * r3 + h1 * r2 + h2 * r1 + h3 * r0 + h4 * s4;
+      d4 = h0 * r4 + h1 * r3 + h2 * r2 + h3 * r1 + h4 * r0;
 
       // Partial reduction mod 2^130-5, resulting h1 might not be 26bits.
       c = d0 >> 26; h0 = d0 & 0x3ffffff; d1 += c;
       c = d1 >> 26; h1 = d1 & 0x3ffffff; d2 += c;
       c = d2 >> 26; h2 = d2 & 0x3ffffff; d3 += c;
       c = d3 >> 26; h3 = d3 & 0x3ffffff; d4 += c;
-      c = d4 >> 26; h4 = d4 & 0x3ffffff; h0 += c*5;
+      c = d4 >> 26; h4 = d4 & 0x3ffffff; h0 += c * 5;
       c = h0 >> 26; h0 = h0 & 0x3ffffff; h1 += c;
     }
     // Do final reduction mod 2^130-5
     c = h1 >> 26; h1 = h1 & 0x3ffffff; h2 += c;
     c = h2 >> 26; h2 = h2 & 0x3ffffff; h3 += c;
     c = h3 >> 26; h3 = h3 & 0x3ffffff; h4 += c;
-    c = h4 >> 26; h4 = h4 & 0x3ffffff; h0 += c * 5;  // c*5 can be at most 5
+    c = h4 >> 26; h4 = h4 & 0x3ffffff; h0 += c * 5;  // c * 5 can be at most 5
     c = h0 >> 26; h0 = h0 & 0x3ffffff; h1 += c;
 
     // Compute h - p

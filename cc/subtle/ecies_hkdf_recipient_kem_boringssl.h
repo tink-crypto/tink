@@ -49,10 +49,10 @@ class EciesHkdfRecipientKemBoringSsl {
  private:
   EciesHkdfRecipientKemBoringSsl(
       google::crypto::tink::EllipticCurveType curve,
-      const std::string& priv_key);
+      const std::string& priv_key_value);
 
   google::crypto::tink::EllipticCurveType curve_;
-  std::string priv_;
+  std::string priv_key_value_;
   bssl::UniquePtr<EC_GROUP> ec_group_;
 };
 

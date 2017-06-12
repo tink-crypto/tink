@@ -30,8 +30,6 @@
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "gtest/gtest.h"
 
-using google::crypto::tink::AesGcmKeyFormat;
-using google::crypto::tink::EciesAeadHkdfPublicKey;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
@@ -176,6 +174,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
               auto decrypt_result = hybrid_decrypt->Decrypt(
                       Random::GetRandomBytes(142), context_info);
               EXPECT_FALSE(decrypt_result.ok());
+              // TODO(przydatek): add more checks while avoiding flakiness.
             }
             {  // Bad context info
               auto decrypt_result = hybrid_decrypt->Decrypt(

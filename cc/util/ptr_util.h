@@ -17,6 +17,7 @@
 #ifndef TINK_UTIL_MAKE_UNIQUE_H_
 #define TINK_UTIL_MAKE_UNIQUE_H_
 
+#include <memory>
 
 namespace util {
 

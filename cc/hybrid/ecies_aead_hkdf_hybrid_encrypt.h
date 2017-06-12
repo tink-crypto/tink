@@ -47,7 +47,7 @@ class EciesAeadHkdfHybridEncrypt : public HybridEncrypt {
 
  private:
   static util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key);
+      const google::crypto::tink::EciesAeadHkdfPublicKey& key);
 
   EciesAeadHkdfHybridEncrypt(
       const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key,

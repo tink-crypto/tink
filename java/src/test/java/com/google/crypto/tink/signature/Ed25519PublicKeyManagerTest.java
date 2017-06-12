@@ -67,7 +67,7 @@ public class Ed25519PublicKeyManagerTest {
     // Flip bits in message.
     for (int i = 0; i < message.length; i++) {
       byte[] copy = Arrays.copyOf(message, message.length);
-      copy[i] ^= 0xff;
+      copy[i] = (byte) (copy[i] ^ 0xff);
       try {
         verifier.verify(signature, copy);
         fail("Expected GeneralSecurityException");
@@ -79,7 +79,7 @@ public class Ed25519PublicKeyManagerTest {
     // Flip bits in signature.
     // Flip the last byte.
     byte[] copySig = Arrays.copyOf(signature, signature.length);
-    copySig[copySig.length - 1] ^= 0xff;
+    copySig[copySig.length - 1] = (byte) (copySig[copySig.length - 1] ^ 0xff);
     try {
       verifier.verify(copySig, message);
       fail("Expected IllegalArgumentException");
@@ -89,7 +89,7 @@ public class Ed25519PublicKeyManagerTest {
     // Flip other bytes.
     for (int i = 0; i < signature.length - 1; i++) {
       byte[] copy = Arrays.copyOf(signature, signature.length);
-      copy[i] ^= 0xff;
+      copy[i] = (byte) (copy[i] ^ 0xff);
       try {
         verifier.verify(copy, message);
         fail("Expected GeneralSecurityException");

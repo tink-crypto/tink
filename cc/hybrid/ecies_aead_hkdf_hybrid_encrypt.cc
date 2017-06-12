@@ -28,10 +28,7 @@
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
-using google::crypto::tink::AesGcmKey;
-using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::EciesAeadHkdfPublicKey;
-using google::crypto::tink::KeyTemplate;
 using util::Status;
 using util::StatusOr;
 

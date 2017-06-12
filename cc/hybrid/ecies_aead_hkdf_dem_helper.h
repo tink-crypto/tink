@@ -43,7 +43,7 @@ class EciesAeadHkdfDemHelper {
   // the key material given in 'symmetric_key', which must
   // be of length dem_key_size_in_bytes().
   util::StatusOr<std::unique_ptr<Aead>> GetAead(
-      const std::string& symmetric_key) const;
+      const std::string& symmetric_key_value) const;
 
  private:
   enum DemKeyType {

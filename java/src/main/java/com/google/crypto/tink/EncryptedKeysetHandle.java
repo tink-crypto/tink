@@ -95,15 +95,13 @@ public final class EncryptedKeysetHandle {
   }
 
   /**
-   * Validate that an encrypted keyset contains enough key material to build a keyset on, and throws
-   * otherwise.
+   * Validates that an encrypted keyset contains enough key material to build a keyset on,
+   * and throws otherwise.
    * @throws GeneralSecurityException
    */
   public static void assertEnoughKeyMaterial(EncryptedKeyset keyset)
       throws GeneralSecurityException {
-    if (keyset == null
-        || keyset.getEncryptedKeyset() == null
-        || keyset.getEncryptedKeyset().size() == 0) {
+    if (keyset == null || keyset.getEncryptedKeyset().size() == 0) {
       throw new GeneralSecurityException("empty keyset");
     }
   }
