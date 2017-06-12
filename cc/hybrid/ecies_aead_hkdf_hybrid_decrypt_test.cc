@@ -176,8 +176,6 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
               auto decrypt_result = hybrid_decrypt->Decrypt(
                       Random::GetRandomBytes(142), context_info);
               EXPECT_FALSE(decrypt_result.ok());
-              EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                        decrypt_result.status().error_code());
             }
             {  // Bad context info
               auto decrypt_result = hybrid_decrypt->Decrypt(
