@@ -57,5 +57,6 @@ public class CryptoFormatTest {
     testPrefix(OutputPrefixType.RAW, 0, -1, 2147483647 /* INT_MAX */, -2147483648 /* INT_MIN */);
     testPrefix(OutputPrefixType.TINK, 0, -1, 2147483647, -2147483648);
     testPrefix(OutputPrefixType.LEGACY, 0, -1, 2147483647, -2147483648);
+    testPrefix(OutputPrefixType.CRUNCHY, 0, -1, 2147483647, -2147483648);
   }
 }

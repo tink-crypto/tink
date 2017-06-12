@@ -21,7 +21,9 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -83,7 +85,13 @@ public final class PublicKeyVerifyFactory {
             primitives.getPrimitive(prefix);
         for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
           try {
-            entry.getPrimitive().verify(sigNoPrefix, data);
+            if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
+              final byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
+              final byte[] dataWithFormatVersion = SubtleUtil.concat(data, formatVersion);
+              entry.getPrimitive().verify(sigNoPrefix, dataWithFormatVersion);
+            } else {
+              entry.getPrimitive().verify(sigNoPrefix, data);
+            }
             // If there is no exception, the signature is valid and we can return.
             return;
           } catch (GeneralSecurityException e) {

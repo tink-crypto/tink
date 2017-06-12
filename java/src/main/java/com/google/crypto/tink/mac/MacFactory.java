@@ -21,9 +21,9 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -64,14 +64,21 @@ public final class MacFactory {
    * @return a Mac primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static <K extends MessageLite, F extends MessageLite> Mac getPrimitive(
+  public static Mac getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)
       throws GeneralSecurityException {
     final PrimitiveSet<Mac> primitives =
         Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
+    final byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
     return new Mac() {
       @Override
       public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
+        if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
+          return SubtleUtil.concat(
+              primitives.getPrimary().getIdentifier(),
+              primitives.getPrimary().getPrimitive().computeMac(
+                  SubtleUtil.concat(data, formatVersion)));
+        }
         return SubtleUtil.concat(
             primitives.getPrimary().getIdentifier(),
             primitives.getPrimary().getPrimitive().computeMac(data));
@@ -90,7 +97,12 @@ public final class MacFactory {
         List<PrimitiveSet.Entry<Mac>> entries = primitives.getPrimitive(prefix);
         for (PrimitiveSet.Entry<Mac> entry : entries) {
             try {
-              entry.getPrimitive().verifyMac(macNoPrefix, data);
+              if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
+                entry.getPrimitive().verifyMac(macNoPrefix,
+                    SubtleUtil.concat(data, formatVersion));
+              } else {
+                entry.getPrimitive().verifyMac(macNoPrefix, data);
+              }
               // If there is no exception, the MAC is valid and we can return.
               return;
             } catch (GeneralSecurityException e) {

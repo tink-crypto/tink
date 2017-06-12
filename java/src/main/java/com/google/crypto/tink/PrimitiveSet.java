@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.TinkProto.KeyStatusType;
 import com.google.crypto.tink.TinkProto.Keyset;
+import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.subtle.ImmutableByteArray;
 import com.google.errorprone.annotations.Immutable;
 import java.nio.charset.Charset;
@@ -59,17 +60,24 @@ public final class PrimitiveSet<P> {
     private final ImmutableByteArray identifier;
     // The status of the key represented by the primitive.
     private final KeyStatusType status;
+    // The output prefix type of the key represented by the primitive.
+    private final OutputPrefixType outputPrefixType;
 
-    public Entry(P primitive, final byte[] identifier, KeyStatusType status) {
+    public Entry(P primitive, final byte[] identifier, KeyStatusType status,
+      OutputPrefixType outputPrefixType) {
       this.primitive = primitive;
       this.identifier = ImmutableByteArray.of(identifier);
       this.status = status;
+      this.outputPrefixType = outputPrefixType;
     }
     public P getPrimitive() {
       return this.primitive;
     }
     public KeyStatusType getStatus() {
       return status;
+    }
+    public OutputPrefixType getOutputPrefixType() {
+      return outputPrefixType;
     }
     public final byte[] getIdentifier() {
       if (identifier == null) {
@@ -139,7 +147,8 @@ public final class PrimitiveSet<P> {
     */
   protected Entry<P> addPrimitive(final P primitive, Keyset.Key key)
       throws GeneralSecurityException {
-    Entry<P> entry = new Entry<P>(primitive, CryptoFormat.getOutputPrefix(key), key.getStatus());
+    Entry<P> entry = new Entry<P>(primitive, CryptoFormat.getOutputPrefix(key), key.getStatus(),
+        key.getOutputPrefixType());
     List<Entry<P>> list = new ArrayList<Entry<P>>();
     list.add(entry);
     // Cannot use [] as keys in hash map, convert to string.

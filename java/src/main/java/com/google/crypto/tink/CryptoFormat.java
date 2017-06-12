@@ -31,7 +31,7 @@ public final class CryptoFormat {
   public static final int NON_RAW_PREFIX_SIZE = 5;
 
   /**
-   * Legacy prefix starts with \x00 and followed by a 4-byte key id.
+   * Legacy or Crunchy prefix starts with \x00 and followed by a 4-byte key id.
    */
   public static final int LEGACY_PREFIX_SIZE = NON_RAW_PREFIX_SIZE;
   public static final byte LEGACY_START_BYTE = (byte) 0;
@@ -60,7 +60,8 @@ public final class CryptoFormat {
    */
   public static byte[] getOutputPrefix(Key key) throws GeneralSecurityException {
     switch (key.getOutputPrefixType()) {
-      case LEGACY:
+      case LEGACY: // fall through
+      case CRUNCHY:
         return ByteBuffer.allocate(LEGACY_PREFIX_SIZE)  // BIG_ENDIAN by default
             .put(LEGACY_START_BYTE)
             .putInt(key.getKeyId())

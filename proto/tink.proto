@@ -76,6 +76,8 @@ enum OutputPrefixType {
   TINK = 1;
   LEGACY = 2;
   RAW = 3;
+  // Crunchy is like LEGACY, but with some subtle differences.
+  CRUNCHY = 4;
 }
 
 // Each *Key proto by convention contains a version field, which
