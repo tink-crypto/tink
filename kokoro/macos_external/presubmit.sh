@@ -30,7 +30,7 @@ DISABLE_SANDBOX="--strategy=CppCompile=standalone \
 --strategy=GenProto=standalone --strategy=GenProtoDescriptorSet=standalone \
 --strategy=ObjcCompile=standalone"
 
-cd git/cloudcryptosdk
+cd github/tink/
 
 # build the iOS targets
 bazel build \

@@ -36,8 +36,10 @@ java_library(
         "AesGcmJce.java",
         "ChaCha20.java",
         "ChaCha20Poly1305.java",
+        "DJBCipher.java",
         "EncryptThenAuthenticate.java",
         "IndCpaCipher.java",
+        "XSalsa20.java",
     ],
     javacopts = JAVACOPTS,
     deps = [

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +13,21 @@
 # limitations under the License.
 ####################################################################################
 
+#!/bin/bash
+
 # Fail on any error.
 set -e
 
-# Display commands being run.
+# Display commands to stderr.
 set -x
 
-# Build everything.
-# bazel sandbox currently doesn't work with Kokoro's MacOS image.
-bazel build --strategy=CppCompile=standalone --strategy=Turbine=standalone --strategy=ProtoCompile=standalone //...
+cd git/cloudcryptosdk
 
-# Run all tests
-bazel test --strategy=CppCompile=standalone --strategy=Turbine=standalone --strategy=ProtoCompile=standalone --test_output=all //...
+# bazel sandbox doesn't work with Kokoro's MacOS image, see b/38040081.
+bazel build --strategy=CppCompile=standalone --strategy=Turbine=standalone \
+--strategy=ProtoCompile=standalone --strategy=GenProto=standalone \
+--strategy=GenProtoDescriptorSet=standalone //...
 
-exit 0
+# Run all tests.
+bazel test --strategy=TestRunner=standalone --test_output=all //...
+

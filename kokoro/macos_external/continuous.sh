@@ -21,5 +21,5 @@ set -e
 # Display commands to stderr.
 set -x
 
-cd git/cloudcryptosdk
+cd github/tink/
 mvn package

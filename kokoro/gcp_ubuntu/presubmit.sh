@@ -21,7 +21,7 @@ set -e
 # Display commands to stderr.
 set -x
 
-cd git/cloudcryptosdk
+cd github/tink/
 
 # bazel sandbox doesn't work with Kokoro's MacOS image, see b/38040081.
 bazel build --strategy=CppCompile=standalone --strategy=Turbine=standalone \

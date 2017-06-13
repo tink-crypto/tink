@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +13,13 @@
 # limitations under the License.
 ####################################################################################
 
+#!/bin/bash
+
 # Fail on any error.
 set -e
 
-# Display commands being run.
+# Display commands to stderr.
 set -x
 
-cd github/tink
-./kokoro/build.sh
+cd git/cloudcryptosdk
+mvn package

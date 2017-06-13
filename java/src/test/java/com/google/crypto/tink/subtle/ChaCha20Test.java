@@ -16,17 +16,10 @@
 
 package com.google.crypto.tink.subtle;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import com.google.common.truth.Truth;
-import com.google.crypto.tink.TestUtil;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -35,22 +28,13 @@ import org.junit.runners.JUnit4;
  * Unit tests for ChaCha20.
  */
 @RunWith(JUnit4.class)
-public class ChaCha20Test {
+public class ChaCha20Test extends DJBCipherTestBase<ChaCha20> {
 
-  private static int[] twosCompInt(long[] a) {
-    int[] ret = new int[a.length];
-    for (int i = 0; i < a.length; i++) {
-      ret[i] = (int) (a[i] - (a[i] > Integer.MAX_VALUE ? (1L << 32) : 0));
-    }
-    return ret;
-  }
+  private static ChaCha20 dummyCipher = new ChaCha20(new byte[32]);
 
-  private static byte[] twosCompByte(int[] a) {
-    byte[] ret = new byte[a.length];
-    for (int i = 0; i < a.length; i++) {
-      ret[i] = (byte) (a[i] - (a[i] > Byte.MAX_VALUE ? (1 << 8) : 0));
-    }
-    return ret;
+  @Override
+  protected ChaCha20 createInstance(byte[] key) {
+    return new ChaCha20(key);
   }
 
   /**
@@ -94,7 +78,7 @@ public class ChaCha20Test {
         0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c,
         0x00000001, 0x09000000, 0x4a000000, 0x00000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    ChaCha20.chaChaCore(buf, in);
+    dummyCipher.shuffleAdd(buf, in);
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0x10, 0xf1, 0xe7, 0xe4, 0xd1, 0x3b, 0x59, 0x15,
         0x50, 0x0f, 0xdd, 0x1f, 0xa3, 0x20, 0x71, 0xc4,
@@ -155,7 +139,7 @@ public class ChaCha20Test {
         0x00000000, 0x00000000, 0x00000000, 0x00000000,
         0x00000000, 0x00000000, 0x00000000, 0x00000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    ChaCha20.chaChaCore(buf, in);
+    dummyCipher.shuffleAdd(buf, in);
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0x76, 0xb8, 0xe0, 0xad, 0xa0, 0xf1, 0x3d, 0x90,
         0x40, 0x5d, 0x6a, 0xe5, 0x53, 0x86, 0xbd, 0x28,
@@ -180,7 +164,7 @@ public class ChaCha20Test {
         0x00000000, 0x00000000, 0x00000000, 0x00000000,
         0x00000001, 0x00000000, 0x00000000, 0x00000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    ChaCha20.chaChaCore(buf, in);
+    dummyCipher.shuffleAdd(buf, in);
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0x9f, 0x07, 0xe7, 0xbe, 0x55, 0x51, 0x38, 0x7a,
         0x98, 0xba, 0x97, 0x7c, 0x73, 0x2d, 0x08, 0x0d,
@@ -205,7 +189,7 @@ public class ChaCha20Test {
         0x00000000, 0x00000000, 0x00000000, 0x01000000,
         0x00000001, 0x00000000, 0x00000000, 0x00000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    ChaCha20.chaChaCore(buf, in);
+    dummyCipher.shuffleAdd(buf, in);
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0x3a, 0xeb, 0x52, 0x24, 0xec, 0xf8, 0x49, 0x92,
         0x9b, 0x9d, 0x82, 0x8d, 0xb1, 0xce, 0xd4, 0xdd,
@@ -230,7 +214,7 @@ public class ChaCha20Test {
         0x00000000, 0x00000000, 0x00000000, 0x00000000,
         0x00000002, 0x00000000, 0x00000000, 0x00000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    ChaCha20.chaChaCore(buf, in);
+    dummyCipher.shuffleAdd(buf, in);
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0x72, 0xd5, 0x4d, 0xfb, 0xf1, 0x2e, 0xc4, 0x4b,
         0x36, 0x26, 0x92, 0xdf, 0x94, 0x13, 0x7f, 0x32,
@@ -255,7 +239,7 @@ public class ChaCha20Test {
         0x00000000, 0x00000000, 0x00000000, 0x00000000,
         0x00000000, 0x00000000, 0x00000000, 0x02000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    ChaCha20.chaChaCore(buf, in);
+    dummyCipher.shuffleAdd(buf, in);
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0xc2, 0xc6, 0x4d, 0x37, 0x8c, 0xd5, 0x36, 0x37,
         0x4a, 0xe2, 0x04, 0xb9, 0xef, 0x93, 0x3f, 0xcd,
@@ -411,57 +395,5 @@ public class ChaCha20Test {
         0x50, 0xd6, 0x15, 0x4b, 0x6d, 0xa7, 0x31, 0xb1,
         0x87, 0xb5, 0x8d, 0xfd, 0x72, 0x8a, 0xfa, 0x36,
         0x75, 0x7a, 0x79, 0x7a, 0xc1, 0x88, 0xd1}));
-  }
-
-  @Test
-  public void testRandomChaCha20() throws GeneralSecurityException {
-    for (int i = 0; i < 1000; i++) {
-      byte[] expectedInput = Random.randBytes(new java.util.Random().nextInt(300));
-      byte[] key = Random.randBytes(32);
-      ChaCha20 cipher = new ChaCha20(key);
-      byte[] output = cipher.encrypt(expectedInput);
-      byte[] nonce = Arrays.copyOf(output, ChaCha20.NONCE_BYTE_SIZE);
-      byte[] actualInput = cipher.decrypt(output);
-      assertTrue(
-          String.format(
-              "\n\nMessage: %s\nKey: %s\nNonce: %s\nOutput: %s\nDecrypted Msg: %s\n",
-              TestUtil.hexEncode(expectedInput),
-              TestUtil.hexEncode(key),
-              TestUtil.hexEncode(nonce),
-              TestUtil.hexEncode(output),
-              TestUtil.hexEncode(actualInput)),
-          Arrays.equals(expectedInput, actualInput));
-    }
-  }
-
-  @Test
-  public void testChaCha20ThrowsIllegalArgExpWhenKeyLenIsLessThan32() {
-    try {
-      new ChaCha20(new byte[1]);
-      fail("Expected IllegalArgumentException.");
-    } catch (IllegalArgumentException e) {
-      assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
-    }
-  }
-
-  @Test
-  public void testChaCha20ThrowsIllegalArgExpWhenKeyLenIsGreaterThan32() {
-    try {
-      new ChaCha20(new byte[33]);
-      fail("Expected IllegalArgumentException.");
-    } catch (IllegalArgumentException e) {
-      assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
-    }
-  }
-
-  @Test
-  public void testChaCha20DecryptThrowsGeneralSecurityExpWhenCiphertextIsTooShort() {
-    ChaCha20 chaCha20 = new ChaCha20(new byte[32]);
-    try {
-      chaCha20.decrypt(new byte[2]);
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertThat(e).hasMessageThat().containsMatch("ciphertext too short");
-    }
   }
 }

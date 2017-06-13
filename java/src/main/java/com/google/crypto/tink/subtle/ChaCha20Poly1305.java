@@ -16,8 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import static com.google.crypto.tink.subtle.ChaCha20.KEY_BYTE_SIZE;
-import static com.google.crypto.tink.subtle.ChaCha20.NONCE_BYTE_SIZE;
+import static com.google.crypto.tink.subtle.DJBCipher.KEY_SIZE_IN_BYTES;
 
 import com.google.crypto.tink.Aead;
 import java.nio.ByteBuffer;
@@ -42,7 +41,8 @@ public class ChaCha20Poly1305 implements Aead {
   /**
    * Constructs a new ChaCha20Poly1305 cipher with the supplied {@code key}.
    *
-   * @throws IllegalArgumentException when {@code key} length is not {@link ChaCha20#KEY_BYTE_SIZE}.
+   * @throws IllegalArgumentException when {@code key} length is not
+   * {@link DJBCipher#KEY_SIZE_IN_BYTES}.
    */
   public ChaCha20Poly1305(final byte[] key) {
     chaCha20 = new ChaCha20(key);
@@ -83,7 +83,7 @@ public class ChaCha20Poly1305 implements Aead {
 
   // Package private for testing
   static byte[] poly1305Mac(byte[] msg, byte[] key) {
-    if (key.length < KEY_BYTE_SIZE) {
+    if (key.length < KEY_SIZE_IN_BYTES) {
       throw new IllegalArgumentException("The key length in bytes must be 32.");
     }
     long h0 = 0;
@@ -203,7 +203,7 @@ public class ChaCha20Poly1305 implements Aead {
   }
 
   private byte[] computeTag(ByteBuffer ciphertextBuf, byte[] additionalData) {
-    byte[] nonce = new byte[NONCE_BYTE_SIZE];
+    byte[] nonce = new byte[chaCha20.nonceSizeInBytes()];
     ciphertextBuf.get(nonce);
     return poly1305Mac(macData(additionalData, ciphertextBuf), poly1305KeyGen(nonce));
   }
@@ -222,7 +222,7 @@ public class ChaCha20Poly1305 implements Aead {
   @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] additionalData)
       throws GeneralSecurityException {
-    if (ciphertext.length < BLOCK_SIZE_IN_BYTES + NONCE_BYTE_SIZE) {
+    if (ciphertext.length < BLOCK_SIZE_IN_BYTES + chaCha20.nonceSizeInBytes()) {
       throw new GeneralSecurityException("ciphertext too short");
     }
     byte[] tag = new byte[BLOCK_SIZE_IN_BYTES];
