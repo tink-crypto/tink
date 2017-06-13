@@ -17,6 +17,7 @@
 #ifndef TINK_UTIL_STATUSOR_H_
 #define TINK_UTIL_STATUSOR_H_
 
+#include <iostream>
 #include <utility>
 
 #include "cc/util/status.h"
@@ -66,11 +67,17 @@ class StatusOr {
 
   // Returns value or crashes if ok() is false.
   inline const T& ValueOrDie() const {
-    // CHECK(ok()) << "Attempting to fetch value of non-OK StatusOr";
+    if (!ok()) {
+      std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
+      exit(1);
+    }
     return value_;
   }
   inline T& ValueOrDie() {
-    // CHECK(ok()) << "Attempting to fetch value of non-OK StatusOr";
+    if (!ok()) {
+      std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
+      exit(1);
+    }
     return value_;
   }
 

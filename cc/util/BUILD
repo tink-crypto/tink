@@ -24,12 +24,14 @@ cc_library(
     name = "status",
     srcs = ["status.cc"],
     hdrs = ["status.h"],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
     name = "statusor",
     srcs = ["statusor.h"],
     hdrs = ["statusor.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":status",
     ],
@@ -37,7 +39,7 @@ cc_library(
 
 cc_library(
     name = "validation",
-    srcs = ["validation.h"],
+    srcs = ["validation.cc"],
     hdrs = ["validation.h"],
     deps = [
         ":errors",

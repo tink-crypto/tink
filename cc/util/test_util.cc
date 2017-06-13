@@ -64,6 +64,10 @@ util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex) {
   return decoded;
 }
 
+std::string HexDecodeOrDie(google::protobuf::StringPiece hex) {
+  return HexDecode(hex).ValueOrDie();
+}
+
 std::string HexEncode(google::protobuf::StringPiece bytes) {
   std::string hexchars = "0123456789abcdef";
   std::string res(bytes.size() * 2, static_cast<char>(255));

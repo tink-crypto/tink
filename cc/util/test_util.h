@@ -44,9 +44,7 @@ util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex);
 
 // Converts a hexadecimal string into a string of bytes.
 // Dies if the input is not a valid hexadecimal string.
-std::string HexDecodeOrDie(google::protobuf::StringPiece hex) {
-  return HexDecode(hex).ValueOrDie();
-}
+std::string HexDecodeOrDie(google::protobuf::StringPiece hex);
 
 // Converts a string of bytes into a hexadecimal string.
 std::string HexEncode(google::protobuf::StringPiece bytes);

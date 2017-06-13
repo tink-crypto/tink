@@ -53,7 +53,7 @@ TEST_F(AeadFactoryTest, testBasic) {
   auto aead_result = AeadFactory::GetPrimitive(keyset_handle);
   EXPECT_FALSE(aead_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, aead_result.status().error_code());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
                       aead_result.status().error_message());
 }
 

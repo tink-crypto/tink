@@ -67,7 +67,7 @@ TEST_F(HybridEncryptFactoryTest, testBasic) {
   EXPECT_FALSE(hybrid_encrypt_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
       hybrid_encrypt_result.status().error_code());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
       hybrid_encrypt_result.status().error_message());
 }
 

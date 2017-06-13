@@ -14,22 +14,31 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_UTIL_VALIDATION_H_
-#define TINK_UTIL_VALIDATION_H_
+#ifndef TINK_CLEARTEXT_KEYSET_HANDLE_H_
+#define TINK_CLEARTEXT_KEYSET_HANDLE_H_
 
-#include "cc/util/status.h"
-#include "proto/tink.pb.h"
+#include <istream>
+#include <sstream>
+
+#include "cc/keyset_handle.h"
+#include "cc/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 
-// Various validation helpers.
-
-util::Status ValidateKeyset(const google::crypto::tink::Keyset& keyset);
-
-util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected);
+// Creates keyset handles from cleartext keysets. This API allows
+// loading cleartext keysets, thus its usage should be restricted.
+class CleartextKeysetHandle {
+ public:
+  static util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(
+      const std::string& serialized_keyset);
+  static util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(
+      std::istream* keyset_stream);
+ private:
+  CleartextKeysetHandle() {};
+};
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_UTIL_VALIDATION_H_
+#endif  // TINK_CLEARTEXT_KEYSET_HANDLE_H_

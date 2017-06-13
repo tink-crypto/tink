@@ -54,7 +54,10 @@ namespace tink {
 // and KeyManagers.
 class Registry {
  public:
-  static Registry& get_default_registry();
+  static Registry& get_default_registry() {
+    return *(default_registry_.get());
+  }
+
 
   // Registers the given 'manager' for the key type identified by 'type_url'.
   // Takes ownership of 'manager', which must be non-nullptr.
@@ -110,11 +113,6 @@ class Registry {
 template <class P>
 void delete_manager(void* t) {
   delete static_cast<KeyManager<P>*>(t);
-}
-
-// static
-Registry& Registry::get_default_registry() {
-  return *(default_registry_.get());
 }
 
 template <class P>

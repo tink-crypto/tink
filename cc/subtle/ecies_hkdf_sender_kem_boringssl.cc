@@ -88,21 +88,21 @@ EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, StringPiece hkdf_salt,
   if (!status_or_string_kem.ok()) {
     return status_or_string_kem.status();
   }
+  std::string kem_bytes(status_or_string_kem.ValueOrDie());
   auto status_or_string_shared_secret =
       SubtleUtilBoringSSL::ComputeEcdhSharedSecret(curve_, ephemeral_priv,
                                                    peer_pub_key_.get());
   if (!status_or_string_shared_secret.ok()) {
     return status_or_string_shared_secret.status();
   }
-  auto status_or_string_symmetric_key =
-      Hkdf::ComputeHkdf(hash, status_or_string_shared_secret.ValueOrDie(),
-                        hkdf_salt, hkdf_info, key_size_in_bytes);
+  std::string shared_secret(status_or_string_shared_secret.ValueOrDie());
+  auto status_or_string_symmetric_key = Hkdf::ComputeEciesHkdfSymmetricKey(
+      hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
   if (!status_or_string_symmetric_key.ok()) {
     return status_or_string_symmetric_key.status();
   }
-  auto kem_key = util::make_unique<KemKey>(
-      status_or_string_kem.ValueOrDie(),
-      status_or_string_symmetric_key.ValueOrDie());
+  std::string symmetric_key(status_or_string_symmetric_key.ValueOrDie());
+  auto kem_key = util::make_unique<KemKey>(kem_bytes, symmetric_key);
   return std::move(kem_key);
 }
 

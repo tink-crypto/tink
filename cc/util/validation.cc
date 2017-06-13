@@ -14,22 +14,35 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_UTIL_VALIDATION_H_
-#define TINK_UTIL_VALIDATION_H_
+#include "cc/util/validation.h"
 
+#include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 
-// Various validation helpers.
+// TODO(przydatek): add more validation checks
 
-util::Status ValidateKeyset(const google::crypto::tink::Keyset& keyset);
+util::Status ValidateKeyset(const google::crypto::tink::Keyset& keyset) {
+  if (keyset.key_size() < 1) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "A valid keyset must contain at least one key.");
+  }
+  return util::Status::OK;
+}
 
-util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected);
+util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected) {
+  if (candidate > max_expected) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Key has version '%d'; "
+                     "only keys with version in range [0..%d] are supported.",
+                     candidate, max_expected);
+  }
+  return util::Status::OK;
+}
+
 
 }  // namespace tink
 }  // namespace crypto
-
-#endif  // TINK_UTIL_VALIDATION_H_

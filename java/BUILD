@@ -86,6 +86,7 @@ java_library(
 java_library(
     name = "keyset_handle",
     visibility = [
+        "//tools/testing:__subpackages__",
         "//tools/tinkey:__pkg__",
     ],
     exports = [

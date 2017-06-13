@@ -56,7 +56,7 @@ TEST_F(MacFactoryTest, testBasic) {
   auto mac_result = MacFactory::GetPrimitive(keyset_handle);
   EXPECT_FALSE(mac_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, mac_result.status().error_code());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
                       mac_result.status().error_message());
 }
 

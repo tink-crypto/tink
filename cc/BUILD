@@ -133,6 +133,20 @@ cc_library(
 )
 
 cc_library(
+    name = "cleartext_keyset_handle",
+    srcs = ["core/cleartext_keyset_handle.cc"],
+    hdrs = ["cleartext_keyset_handle.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":keyset_handle",
+        "//cc/util:ptr_util",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
     name = "key_manager",
     srcs = ["key_manager.h"],
     hdrs = ["key_manager.h"],
@@ -174,6 +188,20 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":crypto_format",
+        "//proto:tink_cc_proto",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
+    name = "cleartext_keyset_handle_test",
+    size = "small",
+    srcs = ["core/cleartext_keyset_handle_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":cleartext_keyset_handle",
+        ":keyset_handle",
+        "//cc/util:test_util",
         "//proto:tink_cc_proto",
         "@gtest//:gtest",
     ],

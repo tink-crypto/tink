@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/hkdf.h"
+
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
@@ -28,7 +29,8 @@ namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash, StringPiece ikm,
+util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
+                                              StringPiece ikm,
                                               StringPiece salt,
                                               StringPiece info,
                                               size_t out_len) {
@@ -44,6 +46,19 @@ util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash, StringPiece ikm,
     return util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
   }
   return std::string(reinterpret_cast<const char *>(out_key.get()), out_len);
+}
+
+// static
+util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
+    HashType hash,
+    StringPiece kem_bytes,
+    StringPiece shared_secret,
+    StringPiece salt,
+    StringPiece info,
+    size_t out_len) {
+  std::string ikm(kem_bytes);
+  ikm.append(shared_secret);
+  return Hkdf::ComputeHkdf(hash, ikm, salt, info, out_len);
 }
 
 }  // namespace tink

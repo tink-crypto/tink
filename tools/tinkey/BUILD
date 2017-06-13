@@ -38,6 +38,7 @@ java_binary(
     ],
     javacopts = JAVACOPTS,
     main_class = "com.google.crypto.tink.tinkey.Tinkey",
+    visibility = ["//tools/testing:__subpackages__"],
     deps = [
         ":libtinkey",
         "//java",

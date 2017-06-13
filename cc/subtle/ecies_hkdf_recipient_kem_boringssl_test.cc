@@ -52,7 +52,7 @@ static const std::vector<TestVector> test_vector(
       "db71e509e3fd9b060ddb20ba5c51dcc5948d46fbf640dfe0441782cab85fa4ac",
       "7d7dc5f71eb29ddaf80d6214632eeae03d9058af1fb6d22ed80badb62bc1a534",
       "0b0b0b0b", "0b0b0b0b0b0b0b0b", 32,
-      "6304d90d10e6755e09a948ccc25a233d567de816c3f6d62d16163c426dab0742"}});
+      "0f19c0f322fc0a4b73b32bac6a66baa274de261db38a57f11ee4896ede24dbba"}});
 
 TEST_F(EciesHkdfRecipientKemBoringSslTest, testBasic) {
   for (const TestVector& test : test_vector) {

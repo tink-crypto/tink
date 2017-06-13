@@ -69,8 +69,9 @@ util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
   if (!status_or_string.ok()) {
     return status_or_string.status();
   }
-  return Hkdf::ComputeHkdf(hash, status_or_string.ValueOrDie(), hkdf_salt,
-                           hkdf_info, key_size_in_bytes);
+  std::string shared_secret(status_or_string.ValueOrDie());
+  return Hkdf::ComputeEciesHkdfSymmetricKey(
+      hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
 }
 
 }  // namespace tink

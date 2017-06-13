@@ -34,6 +34,18 @@ class Hkdf {
       google::protobuf::StringPiece salt,
       google::protobuf::StringPiece info,
       size_t out_len);
+
+  // Computes symmetric key for ECIES with HKDF from the provided parameters.
+  // This function follows Shoup's recommendation of including ECIES
+  // ephemeral KEM bytes into the commputation of the symmetric key
+  // (cf. http://eprint.iacr.org/2001/112.pdf, Sections 15.6 and 15.6.1)
+  static util::StatusOr<std::string> ComputeEciesHkdfSymmetricKey(
+      google::crypto::tink::HashType hash,
+      google::protobuf::StringPiece kem_bytes,
+      google::protobuf::StringPiece shared_secret,
+      google::protobuf::StringPiece salt,
+      google::protobuf::StringPiece info,
+      size_t out_len);
 };
 
 }  // namespace tink
