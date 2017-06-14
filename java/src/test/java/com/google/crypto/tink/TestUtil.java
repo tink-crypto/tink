@@ -505,9 +505,10 @@ public class TestUtil {
    * exception's message and the expected value will be in the failure log.
    */
   public static void assertExceptionContains(Throwable e, String contains) {
-    String message =
-      "Got exception with message \"" + e.getMessage() +
-      "\", expected it to contain \"" + contains + "\".";
+    String message = String.format(
+        "Got exception with message \"%s\", expected it to contain \"%s\".",
+        e.getMessage(),
+        contains);
     assertTrue(message, e.getMessage().contains(contains));
   }
 }

@@ -21,8 +21,8 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 

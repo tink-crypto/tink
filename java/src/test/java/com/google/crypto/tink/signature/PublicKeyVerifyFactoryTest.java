@@ -21,7 +21,6 @@ import static junit.framework.Assert.fail;
 import com.google.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.EcdsaProto.EcdsaPrivateKey;
-import com.google.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;

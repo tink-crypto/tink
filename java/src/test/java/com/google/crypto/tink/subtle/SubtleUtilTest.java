@@ -17,7 +17,6 @@
 package com.google.crypto.tink.subtle;
 
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
