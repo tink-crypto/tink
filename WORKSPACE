@@ -178,6 +178,12 @@ maven_jar(
 )
 
 maven_jar(
+    name = "json",
+    artifact = "org.json:json:20170516",
+    sha1 = "949abe1460757b8dc9902c562f83e49675444572",
+)
+
+maven_jar(
     name = "junit_junit_4",
     artifact = "junit:junit:jar:4.12",
     sha1 = "2973d150c0dc1fefe998f834810d68f278ea58ec",

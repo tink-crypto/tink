@@ -23,6 +23,7 @@ import java.security.GeneralSecurityException;
 /**
  * Helper methods.
  */
+// TODO(thaidn): tests these functions.
 public final class SubtleUtil {
   /**
    * Best effort fix-timing array comparison.
@@ -144,5 +145,55 @@ public final class SubtleUtil {
   public static void die(String error) {
     System.err.print(String.format("Error: %s\n", error));
     System.exit(1);
+  }
+
+  // TODO(thaidn): add checks for boundary conditions/overflows.
+  /**
+   * Transforms a passed value to a LSB first byte array with the size of
+   * the specified capacity
+   *
+   * @param capacity size of the resulting byte array
+   * @param value that should be represented as a byte array
+   */
+  public static byte[] intToByteArray(int capacity, int value) {
+    final byte[] result = new byte[capacity];
+    for (int i = 0; i < capacity; i++) {
+      result[i] = (byte) ((value >> (8 * i)) & 0xFF);
+    }
+    return result;
+  }
+
+  /**
+   * Transforms a passed LSB first byte array to an int
+   *
+   * @param bytes that should be transformed to a byte array
+   */
+  public static int byteArrayToInt(byte[] bytes) {
+    return byteArrayToInt(bytes, bytes.length);
+  }
+
+  /**
+   * Transforms a passed LSB first byte array to an int
+   *
+   * @param bytes that should be transformed to a byte array
+   * @param length amount of the passed {@code bytes} that should be transformed
+   */
+  public static int byteArrayToInt(byte[] bytes, int length) {
+    return byteArrayToInt(bytes, 0, length);
+  }
+
+  /**
+   * Transforms a passed LSB first byte array to an int
+   *
+   * @param bytes that should be transformed to a byte array
+   * @param offset start index to start the transformation
+   * @param length amount of the passed {@code bytes} that should be transformed
+   */
+  public static int byteArrayToInt(byte[] bytes, int offset, int length) {
+    int value = 0;
+    for (int i = 0; i < length; i++) {
+      value += (bytes[i + offset] & 0xFF) << (i * 8);
+    }
+    return value;
   }
 }
