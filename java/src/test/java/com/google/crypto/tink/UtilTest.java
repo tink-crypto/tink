@@ -47,7 +47,7 @@ public class UtilTest {
     String keyValue = "01234567890123456";
     Keyset keyset =  TestUtil.createKeyset(TestUtil.createKey(
         TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
-        42,
+        -42,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK));
     try {

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 package com.google.crypto.tink;
 
@@ -37,25 +37,18 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 
-/**
- * Various helpers.
- */
+/** Various helpers. */
 public class Util {
-  /**
-   * @return a KeysetInfo-proto from a {@code keyset} protobuf.
-   */
+  /** @return a KeysetInfo-proto from a {@code keyset} protobuf. */
   public static KeysetInfo getKeysetInfo(Keyset keyset) {
-    KeysetInfo.Builder info = KeysetInfo.newBuilder()
-        .setPrimaryKeyId(keyset.getPrimaryKeyId());
+    KeysetInfo.Builder info = KeysetInfo.newBuilder().setPrimaryKeyId(keyset.getPrimaryKeyId());
     for (Keyset.Key key : keyset.getKeyList()) {
       info.addKeyInfo(getKeyInfo(key));
     }
     return info.build();
   }
 
-  /**
-   * @return a KeyInfo-proto from a {@code key} protobuf.
-   */
+  /** @return a KeyInfo-proto from a {@code key} protobuf. */
   public static KeysetInfo.KeyInfo getKeyInfo(Keyset.Key key) {
     return KeysetInfo.KeyInfo.newBuilder()
         .setTypeUrl(key.getKeyData().getTypeUrl())
@@ -65,8 +58,6 @@ public class Util {
         .build();
   }
 
-
-
   /**
    * Returns the ECParameterSpec for a named curve.
    *
@@ -75,7 +66,7 @@ public class Util {
    */
   public static ECParameterSpec getCurveSpec(EllipticCurveType curve)
       throws NoSuchAlgorithmException {
-    switch(curve) {
+    switch (curve) {
       case NIST_P256:
         return EcUtil.getNistP256Params();
       case NIST_P384:
@@ -88,11 +79,10 @@ public class Util {
   }
 
   /**
-   * Returns an {@code ECPublicKey} from {@code curve} type and {@code x} and {@code y}
-   * coordinates.
+   * Returns an {@code ECPublicKey} from {@code curve} type and {@code x} and {@code y} coordinates.
    */
-  public static ECPublicKey getEcPublicKey(EllipticCurveType curve,
-      final byte[] x, final byte[] y) throws GeneralSecurityException {
+  public static ECPublicKey getEcPublicKey(EllipticCurveType curve, final byte[] x, final byte[] y)
+      throws GeneralSecurityException {
     ECParameterSpec ecParams = getCurveSpec(curve);
     BigInteger pubX = new BigInteger(1, x);
     BigInteger pubY = new BigInteger(1, y);
@@ -103,11 +93,9 @@ public class Util {
     return (ECPublicKey) kf.generatePublic(spec);
   }
 
-  /**
-   * Returns an {@code ECPrivateKey} from {@code curve} type and {@code keyValue}.
-   */
-  public static ECPrivateKey getEcPrivateKey(EllipticCurveType curve,
-      final byte[] keyValue) throws GeneralSecurityException {
+  /** Returns an {@code ECPrivateKey} from {@code curve} type and {@code keyValue}. */
+  public static ECPrivateKey getEcPrivateKey(EllipticCurveType curve, final byte[] keyValue)
+      throws GeneralSecurityException {
     ECParameterSpec ecParams = getCurveSpec(curve);
     BigInteger privValue = new BigInteger(1, keyValue);
     ECPrivateKeySpec spec = new ECPrivateKeySpec(privValue, ecParams);
@@ -122,7 +110,7 @@ public class Util {
    * @return the JCE's HMAC algorithm name for the hash.
    */
   public static String hashToHmacAlgorithmName(HashType hash) throws NoSuchAlgorithmException {
-    switch(hash) {
+    switch (hash) {
       case SHA1:
         return "HmacSha1";
       case SHA256:
@@ -134,9 +122,7 @@ public class Util {
     }
   }
 
-  /**
-   * Generates a new key pair for {@code curve}.
-   */
+  /** Generates a new key pair for {@code curve}. */
   public static KeyPair generateKeyPair(EllipticCurveType curve) throws GeneralSecurityException {
     ECParameterSpec ecParams = getCurveSpec(curve);
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
@@ -146,12 +132,12 @@ public class Util {
 
   /**
    * Validates a {@code key}.
+   *
    * @throws GeneralSecurityException if {@code key} is invalid.
    */
   public static void validateKey(Keyset.Key key) throws GeneralSecurityException {
     if (!key.hasKeyData()) {
-      throw new GeneralSecurityException(
-          String.format("key %d has no key data", key.getKeyId()));
+      throw new GeneralSecurityException(String.format("key %d has no key data", key.getKeyId()));
     }
 
     if (key.getOutputPrefixType() == OutputPrefixType.UNKNOWN_PREFIX) {
@@ -163,15 +149,11 @@ public class Util {
       throw new GeneralSecurityException(
           String.format("key %d has unknown status", key.getKeyId()));
     }
-
-    if (key.getKeyId() <= 0) {
-      throw new GeneralSecurityException(
-          String.format("key has a non-positive key id: %d", key.getKeyId()));
-    }
   }
 
   /**
    * Validates a {@code Keyset}.
+   *
    * @throws GeneralSecurityException if {@code keyset} is invalid.
    */
   public static void validateKeyset(Keyset keyset) throws GeneralSecurityException {
@@ -197,14 +179,13 @@ public class Util {
   }
 
   /**
-   * Converts com.google.crypto.tink.CommonProto.EcPointFormat
-   * into com.google.crypto.tink.subtle.PointFormat.
-   * The duplication of the enum for the point compression format is necessary because subtle is
-   * independent of protocol buffers.
+   * Converts com.google.crypto.tink.CommonProto.EcPointFormat into
+   * com.google.crypto.tink.subtle.PointFormat. The duplication of the enum for the point
+   * compression format is necessary because subtle is independent of protocol buffers.
    */
   public static EcUtil.PointFormat getPointFormat(EcPointFormat format)
       throws GeneralSecurityException {
-    switch(format) {
+    switch (format) {
       case COMPRESSED:
         return EcUtil.PointFormat.COMPRESSED;
       case UNCOMPRESSED:
