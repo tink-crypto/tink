@@ -73,7 +73,7 @@ public class XSalsa20Test extends DJBCipherTestBase<XSalsa20> {
     int[] x = matrix(in);
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
     for (int i = 0; i < count; i++) {
-      dummy.shuffleAdd(buf, x);
+      buf.asIntBuffer().put(dummy.shuffleAdd(x));
       x = DJBCipher.toIntArray(buf);
     }
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(output));
@@ -321,7 +321,7 @@ public class XSalsa20Test extends DJBCipherTestBase<XSalsa20> {
     int[] state = cipher.initialState(nonce, 0);
     ByteBuffer out = ByteBuffer.allocate(4194304).order(ByteOrder.LITTLE_ENDIAN);
     for (int i = 0; i < 65536; i++) {
-      cipher.shuffleAdd(out, state);
+      out.asIntBuffer().put(cipher.shuffleAdd(state));
       cipher.incrementCounter(state);
       out.position(out.position() + 64);
     }

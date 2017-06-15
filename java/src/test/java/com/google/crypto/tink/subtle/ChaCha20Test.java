@@ -78,7 +78,7 @@ public class ChaCha20Test extends DJBCipherTestBase<ChaCha20> {
         0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c,
         0x00000001, 0x09000000, 0x4a000000, 0x00000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    dummyCipher.shuffleAdd(buf, in);
+    buf.asIntBuffer().put(dummyCipher.shuffleAdd(in));
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0x10, 0xf1, 0xe7, 0xe4, 0xd1, 0x3b, 0x59, 0x15,
         0x50, 0x0f, 0xdd, 0x1f, 0xa3, 0x20, 0x71, 0xc4,
@@ -139,7 +139,7 @@ public class ChaCha20Test extends DJBCipherTestBase<ChaCha20> {
         0x00000000, 0x00000000, 0x00000000, 0x00000000,
         0x00000000, 0x00000000, 0x00000000, 0x00000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    dummyCipher.shuffleAdd(buf, in);
+    buf.asIntBuffer().put(dummyCipher.shuffleAdd(in));
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0x76, 0xb8, 0xe0, 0xad, 0xa0, 0xf1, 0x3d, 0x90,
         0x40, 0x5d, 0x6a, 0xe5, 0x53, 0x86, 0xbd, 0x28,
@@ -164,7 +164,7 @@ public class ChaCha20Test extends DJBCipherTestBase<ChaCha20> {
         0x00000000, 0x00000000, 0x00000000, 0x00000000,
         0x00000001, 0x00000000, 0x00000000, 0x00000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    dummyCipher.shuffleAdd(buf, in);
+    buf.asIntBuffer().put(dummyCipher.shuffleAdd(in));
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0x9f, 0x07, 0xe7, 0xbe, 0x55, 0x51, 0x38, 0x7a,
         0x98, 0xba, 0x97, 0x7c, 0x73, 0x2d, 0x08, 0x0d,
@@ -189,7 +189,7 @@ public class ChaCha20Test extends DJBCipherTestBase<ChaCha20> {
         0x00000000, 0x00000000, 0x00000000, 0x01000000,
         0x00000001, 0x00000000, 0x00000000, 0x00000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    dummyCipher.shuffleAdd(buf, in);
+    buf.asIntBuffer().put(dummyCipher.shuffleAdd(in));
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0x3a, 0xeb, 0x52, 0x24, 0xec, 0xf8, 0x49, 0x92,
         0x9b, 0x9d, 0x82, 0x8d, 0xb1, 0xce, 0xd4, 0xdd,
@@ -214,7 +214,7 @@ public class ChaCha20Test extends DJBCipherTestBase<ChaCha20> {
         0x00000000, 0x00000000, 0x00000000, 0x00000000,
         0x00000002, 0x00000000, 0x00000000, 0x00000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    dummyCipher.shuffleAdd(buf, in);
+    buf.asIntBuffer().put(dummyCipher.shuffleAdd(in));
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0x72, 0xd5, 0x4d, 0xfb, 0xf1, 0x2e, 0xc4, 0x4b,
         0x36, 0x26, 0x92, 0xdf, 0x94, 0x13, 0x7f, 0x32,
@@ -239,7 +239,7 @@ public class ChaCha20Test extends DJBCipherTestBase<ChaCha20> {
         0x00000000, 0x00000000, 0x00000000, 0x00000000,
         0x00000000, 0x00000000, 0x00000000, 0x02000000};
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
-    dummyCipher.shuffleAdd(buf, in);
+    buf.asIntBuffer().put(dummyCipher.shuffleAdd(in));
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(new int[]{
         0xc2, 0xc6, 0x4d, 0x37, 0x8c, 0xd5, 0x36, 0x37,
         0x4a, 0xe2, 0x04, 0xb9, 0xef, 0x93, 0x3f, 0xcd,

@@ -58,14 +58,13 @@ public abstract class DJBCipher implements IndCpaCipher {
 
   abstract void shuffle(final int[] state);
 
-  void shuffleAdd(ByteBuffer output, final int[] state) {
+  int[] shuffleAdd(final int[] state) {
     int[] x = Arrays.copyOf(state, state.length);
     shuffle(x);
     for (int i = 0; i < state.length; i++) {
       x[i] += state[i];
     }
-    output.asIntBuffer().put(x);
-
+    return x;
   }
 
   abstract int[] initialState(byte[] nonce, int counter);
@@ -84,9 +83,9 @@ public abstract class DJBCipher implements IndCpaCipher {
     int todo;
     while (inLen > 0) {
       todo = inLen < BLOCK_SIZE_IN_BYTES ? inLen : BLOCK_SIZE_IN_BYTES;
-      shuffleAdd(buf, state);
+      buf.asIntBuffer().put(shuffleAdd(state));
       for (int j = 0; j < todo; j++, pos++) {
-        output.put((byte) (input[pos] ^ buf.array()[j]));
+        output.put((byte) (input[pos] ^ buf.get(j)));
       }
       inLen -= todo;
       incrementCounter(state);

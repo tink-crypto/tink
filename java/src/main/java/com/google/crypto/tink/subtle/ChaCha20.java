@@ -30,7 +30,8 @@ public class ChaCha20 extends DJBCipher {
   /**
    * Constructs a new ChaCha20 cipher with the supplied {@code key}.
    *
-   * @throws IllegalArgumentException when {@code key} length is not {@link ChaCha20#KEY_BYTE_SIZE}.
+   * @throws IllegalArgumentException when {@code key} length is not
+   * {@link DJBCipher#KEY_SIZE_IN_BYTES}.
    */
   public ChaCha20(final byte[] key) {
     super(key);
