@@ -1,13 +1,15 @@
-# Presubmit test for Tink on GoB
+# Tink presubmit tests and continuous integration
+  
+![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink.png)
+  
+Tink is testing continously with 
+[Kokoro](https://www.cloudbees.com/sites/default/files/2016-jenkins-world-jenkins_inside_google.pdf)
+an internal deployment of Jenkins at Google.
 
-This repo uses Kokoro for presubmit tests.
+A presubmit build will be triggered for the pull request if one of the following conditions is met:
 
-  * build config: https://ise-crypto-internal.git.corp.google.com/cloudcryptosdk/+/master/kokoro/.
-  * job config: https://cs.corp.google.com/piper///depot/google3/devtools/kokoro/config/prod/tink/gob/.
+ - Pull request is created by a Googler.
 
-There are two jobs: Ubuntu and MacOS. MacOS is failing and disabled because of
-outdated JDK, see b/35928521.
+ - Pull request is attached with a kokoro:run label.
 
-See also https://goto.google.com/tink-presubmit for how presubmit is set up on
-GitHub or Piper.
-
+Continuous and presubmit builds are done on Ubuntu and macOS. 
