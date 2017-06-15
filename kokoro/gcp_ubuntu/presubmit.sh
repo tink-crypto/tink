@@ -30,4 +30,3 @@ bazel build --strategy=CppCompile=standalone --strategy=Turbine=standalone \
 
 # Run all tests.
 bazel test --strategy=TestRunner=standalone --test_output=all -- //... -//objc/...
-

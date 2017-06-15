@@ -56,4 +56,3 @@ echo "bazel c++ / java passed"
 
 # Run all tests.
 bazel test --strategy=TestRunner=standalone --test_output=all -- //... -//objc/...
-

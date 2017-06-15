@@ -1,6 +1,7 @@
 # Tink
 
-![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink.png)
+![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png)
+![Kokoro macOS](https://storage.googleapis.com/tink-kokoro-build-badges/tink-macos.png)
 
 Tink is a cryptographic library that provides a safe, simple, agile and fast way
 to accomplish common cryptographic tasks. It is written by a group of
