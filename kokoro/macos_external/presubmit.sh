@@ -34,13 +34,25 @@ DISABLE_SANDBOX="--strategy=CppCompile=standalone \
 
 export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
 
-# See https://groups.google.com/a/google.com/d/msg/kokoro-users/ddpTkIzLprs/UOiFYVheFwAJ
+pushd "$TMP"
+mkdir jdk; cd jdk;
+cp "${KOKORO_GFILE_DIR}/jdk-8u131-macosx-x64.tgz" ./
+tar xf jdk-8u131-macosx-x64.tgz
+
+export JAVA_HOME="${PWD}/Home"
+export PATH="${JAVA_HOME}/bin:$PATH"
+chmod -R a+rx "${JAVA_HOME}"
+popd
+
 chmod +x "${BAZEL_BIN}"
 
 cd github/tink/
 
 echo "using bazel binary: ${BAZEL_BIN}"
 ${BAZEL_BIN} version
+
+echo "using java binary: " `which java`
+java -version
 
 # Build the iOS targets.
 ${BAZEL_BIN} build \
