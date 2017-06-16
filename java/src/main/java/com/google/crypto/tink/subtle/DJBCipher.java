@@ -73,9 +73,57 @@ public abstract class DJBCipher implements IndCpaCipher {
 
   abstract int nonceSizeInBytes();
 
-  void process(ByteBuffer output, final byte[] input, int inPos, byte[] nonce, int counter) {
-    int[] state = initialState(nonce, counter);
+  /**
+   * State generator for DJBCipher types.
+   * Stateful and <b>not</b> thread-safe.
+   * {@link StateGen} is not stored as an instance variable in {@link DJBCipher} types to preserve
+   * their stateless guarantee. Instead, it is used in local scope to easily maintain the local
+   * state inside of a single call (i.e., encrypt or decrypt).
+   */
+  static class StateGen {
 
+    private DJBCipher djbCipher;
+    private int[] state;
+    private int[] shuffledState;
+    private int[] cachedShuffledState;
+    private int currentPos;
+    private boolean readCalled;
+
+    StateGen(DJBCipher djbCipher, final byte[] nonce, int counter) {
+      this.djbCipher = djbCipher;
+      cachedShuffledState = new int[BLOCK_SIZE_IN_INTS];
+      currentPos = 0;
+      state = djbCipher.initialState(nonce, counter);
+      shuffledState = djbCipher.shuffleAdd(state);
+      readCalled = false;
+    }
+
+    int[] read(int length) {
+      if (readCalled) {
+        throw new IllegalStateException("read can only be called once and before next().");
+      }
+      if (length >= BLOCK_SIZE_IN_INTS) {
+        throw new IllegalArgumentException(
+            String.format("length must be less than 16. length: %d", length));
+      }
+      readCalled = true;
+      currentPos = length;
+      return Arrays.copyOf(shuffledState, length);
+    }
+
+    int[] next() {
+      readCalled = true;
+      System.arraycopy(
+          shuffledState, currentPos, cachedShuffledState, 0, BLOCK_SIZE_IN_INTS - currentPos);
+      djbCipher.incrementCounter(state);
+      shuffledState = djbCipher.shuffleAdd(state);
+      System.arraycopy(
+          shuffledState, 0, cachedShuffledState, BLOCK_SIZE_IN_INTS - currentPos, currentPos);
+      return cachedShuffledState;
+    }
+  }
+
+  void process(ByteBuffer output, final byte[] input, int inPos, StateGen stateGen) {
     // xor the underlying cipher stream with the input.
     ByteBuffer buf = ByteBuffer.allocate(BLOCK_SIZE_IN_BYTES).order(ByteOrder.LITTLE_ENDIAN);
     int pos = inPos;
@@ -83,13 +131,16 @@ public abstract class DJBCipher implements IndCpaCipher {
     int todo;
     while (inLen > 0) {
       todo = inLen < BLOCK_SIZE_IN_BYTES ? inLen : BLOCK_SIZE_IN_BYTES;
-      buf.asIntBuffer().put(shuffleAdd(state));
+      buf.asIntBuffer().put(stateGen.next());
       for (int j = 0; j < todo; j++, pos++) {
         output.put((byte) (input[pos] ^ buf.get(j)));
       }
       inLen -= todo;
-      incrementCounter(state);
     }
+  }
+
+  void process(ByteBuffer output, final byte[] input, int inPos, final byte[] nonce, int counter) {
+    process(output, input, inPos, new StateGen(this, nonce, counter));
   }
 
   @Override

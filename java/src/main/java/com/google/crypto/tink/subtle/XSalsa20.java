@@ -17,12 +17,15 @@
 package com.google.crypto.tink.subtle;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * DJB's XSalsa20 stream cipher.
  * https://cr.yp.to/snuffle/xsalsa-20081128.pdf
  */
 public class XSalsa20 extends DJBCipher {
+
+  private static final byte[] ZERO = new byte[16];
 
   /**
    * Constructs a new {@link XSalsa20} cipher with the supplied {@code key}.
@@ -55,8 +58,7 @@ public class XSalsa20 extends DJBCipher {
     quarterRound(state, 15, 12, 13, 14);
   }
 
-  @Override
-  void shuffle(final int[] state) {
+  static void shuffleInternal(final int[] state) {
     for (int i = 0; i < 10; i++) {
       columnRound(state);
       rowRound(state);
@@ -64,40 +66,56 @@ public class XSalsa20 extends DJBCipher {
   }
 
   @Override
-  int[] initialState(byte[] nonce, int counter) {
-    // Set the initial state based on https://cr.yp.to/snuffle/xsalsa-20081128.pdf
-    int[] state = new int[BLOCK_SIZE_IN_INTS];
+  void shuffle(final int[] state) {
+    shuffleInternal(state);
+  }
+
+  private static void setSigma(int[] state) {
     state[0] = SIGMA[0];
     state[5] = SIGMA[1];
     state[10] = SIGMA[2];
     state[15] = SIGMA[3];
+  }
+
+  private static void setKey(int[] state, final byte[] key) {
     int[] keyInt = toIntArray(ByteBuffer.wrap(key));
-    state[1] = keyInt[0];
-    state[2] = keyInt[1];
-    state[3] = keyInt[2];
-    state[4] = keyInt[3];
-    state[11] = keyInt[4];
-    state[12] = keyInt[5];
-    state[13] = keyInt[6];
-    state[14] = keyInt[7];
+    System.arraycopy(keyInt, 0, state, 1, 4);
+    System.arraycopy(keyInt, 4, state, 11, 4);
+  }
+
+  static byte[] hSalsa20(final byte[] key) {
+    return hSalsa20(key, ZERO);
+  }
+
+  static byte[] hSalsa20(final byte[] key, final byte[] nonce) {
+    int[] state = new int[BLOCK_SIZE_IN_INTS];
+    setSigma(state);
+    setKey(state, key);
     int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
     state[6] = nonceInt[0];
     state[7] = nonceInt[1];
     state[8] = nonceInt[2];
     state[9] = nonceInt[3];
-    shuffle(state);
-    state[1] = state[0];
-    state[2] = state[5];
-    state[3] = state[10];
-    state[4] = state[15];
-    state[11] = state[6];
-    state[12] = state[7];
-    state[13] = state[8];
-    state[14] = state[9];
-    state[0] = SIGMA[0];
-    state[5] = SIGMA[1];
-    state[10] = SIGMA[2];
-    state[15] = SIGMA[3];
+    shuffleInternal(state);
+    state[1] = state[5];
+    state[2] = state[10];
+    state[3] = state[15];
+    state[4] = state[6];
+    state[5] = state[7];
+    state[6] = state[8];
+    state[7] = state[9];
+    ByteBuffer buf = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN);
+    buf.asIntBuffer().put(state, 0, 8);
+    return buf.array();
+  }
+
+  @Override
+  int[] initialState(final byte[] nonce, int counter) {
+    // Set the initial state based on https://cr.yp.to/snuffle/xsalsa-20081128.pdf
+    int[] state = new int[BLOCK_SIZE_IN_INTS];
+    setSigma(state);
+    setKey(state, hSalsa20(key, nonce));
+    int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
     state[6] = nonceInt[4];
     state[7] = nonceInt[5];
     state[8] = counter;

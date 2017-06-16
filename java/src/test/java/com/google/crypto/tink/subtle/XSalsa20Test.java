@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Unit tests for XSalsa20.
+ * Unit tests for {@link XSalsa20}.
  */
 @RunWith(JUnit4.class)
 public class XSalsa20Test extends DJBCipherTestBase<XSalsa20> {
