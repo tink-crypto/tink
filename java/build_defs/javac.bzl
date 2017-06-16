@@ -4,6 +4,7 @@ XLINT_OPTS = [
     "-Werror",
     "-Xlint:all",
     "-Xlint:-serial",
+    "-Xlint:-classfile",
 ]
 
 # errorprone checks primarily related to coding style, enabled to
