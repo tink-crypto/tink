@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.aead;
 
+import com.google.crypto.tink.EnvelopeTestUtil;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
@@ -48,7 +49,7 @@ public class GcpKmsAeadKeyManagerTest {
         TestUtil.createKeyset(
             TestUtil.createKey(
                 // This key is restricted to {@code TestUtil.SERVICE_ACCOUNT_FILE}.
-                TestUtil.createGcpKmsAeadKeyData(TestUtil.RESTRICTED_CRYPTO_KEY_URI),
+                EnvelopeTestUtil.createGcpKmsAeadKeyData(TestUtil.RESTRICTED_CRYPTO_KEY_URI),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK)));

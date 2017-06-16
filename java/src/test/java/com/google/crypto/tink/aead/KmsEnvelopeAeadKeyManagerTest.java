@@ -21,6 +21,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.EnvelopeTestUtil;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
@@ -56,7 +57,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
   public void testGcpKmsKeyRestricted() throws Exception {
     KeyTemplate dekTemplate = AeadKeyTemplates.AES_128_CTR_128BITIV_HMAC_SHA256;
     // This key is restricted to {@code TestUtil.SERVICE_ACCOUNT_FILE}.
-    KeyData kmsKey = TestUtil.createGcpKmsAeadKeyData(
+    KeyData kmsKey = EnvelopeTestUtil.createGcpKmsAeadKeyData(
         TestUtil.RESTRICTED_CRYPTO_KEY_URI);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
@@ -77,7 +78,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
   @Test
   public void testParsingInvalidCiphertexts() throws Exception {
     KeyTemplate dekTemplate = AeadKeyTemplates.AES_128_CTR_128BITIV_HMAC_SHA256;
-    KeyData kmsKey = TestUtil.createGcpKmsAeadKeyData(
+    KeyData kmsKey = EnvelopeTestUtil.createGcpKmsAeadKeyData(
         TestUtil.RESTRICTED_CRYPTO_KEY_URI);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(

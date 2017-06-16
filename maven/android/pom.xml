@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <name>Tink Cryptography Library for Android</name>
+  <description>Tink is a small cryptographic library that provides a safe, simple, agile and fast way to accomplish some common cryptographic tasks. It is written by a group of cryptographers and security engineers at Google, but it is not an official Google product.
+  </description>
+
+  <parent>
+    <groupId>com.google.crypto.tink</groupId>
+    <artifactId>parentpom</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>tink-android</artifactId>
+  <packaging>jar</packaging>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.errorprone</groupId>
+      <artifactId>error_prone_annotations</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.truth</groupId>
+      <artifactId>truth</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+
+    <sourceDirectory>${tink.source.dir}</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>${tink.source.dir}</directory>
+        <excludes>
+          <exclude>**/GcpKmsAeadKeyManager.java</exclude>
+          <exclude>**/GcpKmsAead.java</exclude>
+          <exclude>**/GcpCredentialFactory.java</exclude>
+          <exclude>**/GcpScopes.java</exclude>
+          <exclude>**/ServiceAccountGcpCredentialFactory.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+
+    <testSourceDirectory>${tink.test.dir}</testSourceDirectory>
+    <testResources>
+      <testResource>
+        <filtering>false</filtering>
+        <directory>${tink.test.dir}</directory>
+        <excludes>
+          <exclude>**/EnvelopeTestUtil.java</exclude>
+          <exclude>**/GcpKmsAeadKeyManagerTest.java</exclude>
+          <exclude>**/KmsEnvelopeAeadKeyManagerTest.java</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
+
+    <extensions>
+      <extension>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>${os-maven-plugin.version}</version>
+      </extension>
+    </extensions>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.3.1</version>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <configuration>
+              <rules>
+                <DependencyConvergence/>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.10</version>
+          <executions>
+              <execution>
+                  <id>regex-property</id>
+                  <goals>
+                      <goal>regex-property</goal>
+                  </goals>
+                  <configuration>
+                      <name>tink.basedir</name>
+                      <value>${project.basedir}</value>
+                      <regex>maven\/[\w]+$</regex>
+                      <replacement></replacement>
+                      <failIfNoMatch>true</failIfNoMatch>
+                  </configuration>
+              </execution>
+          </executions>
+      </plugin>
+
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.7.2</version>
+          <configuration>
+              <workingDirectory>${tink.basedir}</workingDirectory>
+          </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.5.1</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <compilerArgument>-Werror</compilerArgument>
+          <compilerArgument>-Xlint:deprecation</compilerArgument>
+          <excludes>
+            <exclude>**/GcpKmsAeadKeyManager.java</exclude>
+            <exclude>**/GcpKmsAead.java</exclude>
+            <exclude>**/GcpCredentialFactory.java</exclude>
+            <exclude>**/GcpScopes.java</exclude>
+            <exclude>**/ServiceAccountGcpCredentialFactory.java</exclude>
+          </excludes>
+          <testExcludes>
+            <exclude>**/EnvelopeTestUtil.java</exclude>
+            <exclude>**/GcpKmsAeadKeyManagerTest.java</exclude>
+            <exclude>**/KmsEnvelopeAeadKeyManagerTest.java</exclude>
+          </testExcludes>
+        </configuration>
+      </plugin>
+
+      <!-- download os-appropriate protoc binaries into build directory -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>${maven-dependency-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>copy-protoc-binaries</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+
+                <artifactItem>
+                  <groupId>com.google.protobuf</groupId>
+                  <artifactId>protoc</artifactId>
+                  <version>${protobuf.version}</version>
+                  <classifier>${os.detected.classifier}</classifier>
+                  <type>exe</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                </artifactItem>
+
+                <artifactItem>
+                  <groupId>com.google.protobuf</groupId>
+                  <artifactId>protoc-gen-javalite</artifactId>
+                  <version>${protoc-gen-javalite.version}</version>
+                  <classifier>${os.detected.classifier}</classifier>
+                  <type>exe</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                </artifactItem>
+
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>${maven-antrun-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>generate-sources</id>
+            <phase>generate-sources</phase>
+            <configuration>
+              <target>
+                <property
+                    name="protoc.filename"
+                    value="protoc-${protobuf.version}-${os.detected.classifier}.exe"/>
+                <property
+                    name="protoc.filepath"
+                    value="${project.build.directory}/${protoc.filename}"/>
+
+                <chmod file="${protoc.filepath}" perm="ugo+rx"/>
+
+                <property
+                    name="protoc-plugin.filename"
+                    value="protoc-gen-javalite-${protoc-gen-javalite.version}-${os.detected.classifier}.exe"/>
+                <property
+                    name="protoc-plugin.filepath"
+                    value="${project.build.directory}/${protoc-plugin.filename}"/>
+                <chmod file="${protoc-plugin.filepath}" perm="ugo+rx"/>
+
+                <mkdir dir="${protobuf.output.dir}" />
+
+                <path id="protobuf.input.filepaths.path">
+                  <fileset dir="${tink.basedir}/proto">
+                    <include name="**/*.proto"/>
+                    <exclude name="**/gcp_kms.proto"/>
+                  </fileset>
+                </path>
+
+                <pathconvert
+                    pathsep=" "
+                    property="protobuf.input.filepaths"
+                    refid="protobuf.input.filepaths.path"/>
+
+                <exec executable="${protoc.filepath}" failonerror="true">
+                  <arg value="--proto_path=${tink.basedir}"/>
+                  <arg value="--plugin=protoc-gen-javalite=${protoc-plugin.filepath}" />
+                  <arg value="--javalite_out=${protobuf.output.dir}" />
+                  <arg line="${protobuf.input.filepaths}"/>
+                </exec>
+              </target>
+              <sourceRoot>${protobuf.output.dir}</sourceRoot>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <!-- Create javadoc.jar. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.3</version>
+        <configuration>
+          <notimestamp>true</notimestamp>
+          <windowtitle>Tink Cryptography Library for Android</windowtitle>
+          <author>false</author>
+          <doctitle>
+            <![CDATA[
+              <h1>Tink Cryptography Library for Android</h1>
+              <h4>Complete javadoc for developers.</h4>
+            ]]>
+          </doctitle>
+          <bottom>
+            <![CDATA[
+              <div id="footer">
+              <div id="footerlogo" style="float:left">
+                <img src="http://www.google.com/images/art.gif" alt="Google colored balls">
+              </div>
+              <div id="copyright" style="float:left">
+                <p>&copy; Google -
+                  <a href="http://www.google.com/privacy.html">Privacy Policy</a> -
+                  <a href="http://www.google.com/terms_of_service.html">Terms and Conditions</a> -
+                  <a href="http://www.google.com/about.html">About Google</a>
+                </p>
+              </div>
+            ]]>
+          </bottom>
+          <!-- Ignore javadoc errors. -->
+          <failOnError>false</failOnError>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadoc</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <!-- Create sources.jar. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

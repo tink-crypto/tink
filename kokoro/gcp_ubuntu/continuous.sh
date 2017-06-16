@@ -21,5 +21,5 @@ set -e
 # Display commands to stderr.
 set -x
 
-cd github/tink/
+cd github/tink//maven
 mvn package

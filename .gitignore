@@ -2,7 +2,7 @@
 /bazel-*
 *.swp
 *~
-/target
+**/target
 .idea
 *.iml
 *.tulsiconf-user

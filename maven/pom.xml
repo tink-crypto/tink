@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.google.crypto.tink</groupId>
+  <artifactId>parentpom</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Parent pom.xml</name>
+  <description>Parent POM for the artifacts for Tink for Java</description>
+  <url>https://github.com/google/tink</url>
+  <inceptionYear>2016</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/google/tink/issues</url>
+  </issueManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>tink-users</name>
+      <subscribe>tink-users+subscribe@googlegroups.com</subscribe>
+      <unsubscribe>tink-users+unsubscribe@googlegroups.com</unsubscribe>
+      <post>tink-users@googlegroups.com</post>
+      <archive>https://groups.google.com/group/tink-users</archive>
+    </mailingList>
+  </mailingLists>
+
+  <developers>
+    <developer>
+      <organization>Google Inc.</organization>
+      <organizationUrl>https://www.google.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:google/tink.git</connection>
+    <developerConnection>scm:git:git@github.com:google/tink.git</developerConnection>
+    <url>https://github.com/google/tink.git</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <modules>
+    <module>android</module>
+    <module>tink</module>
+  </modules>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>1.7</java.version>
+
+    <!-- plugin versions -->
+    <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
+    <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+    <maven-dependency-plugin.version>3.0.1</maven-dependency-plugin.version>
+    <os-maven-plugin.version>1.2.0.Final</os-maven-plugin.version>
+
+    <!-- library versions -->
+    <error-prone-annotations.version>2.0.19</error-prone-annotations.version>
+    <google-api-client.version>1.22.0</google-api-client.version>
+    <google-api-services-cloudkms.version>v1-rev9-1.22.0</google-api-services-cloudkms.version>
+    <gson.version>2.8.0</gson.version>
+    <guava.version>21.0</guava.version>
+    <junit.version>4.12</junit.version>
+    <protobuf.version>3.3.0</protobuf.version>
+    <protoc-gen-javalite.version>3.0.0</protoc-gen-javalite.version>
+    <truth.version>0.32</truth.version>
+ 
+    <!-- sources paths -->
+    <tink.source.dir>../../java/src/main/java</tink.source.dir>
+    <tink.test.dir>../../java/src/test/java</tink.test.dir>
+
+    <!-- protobuf paths -->
+    <protobuf.output.dir>
+      ${project.build.directory}/generated-sources
+    </protobuf.output.dir>
+
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.api-client</groupId>
+        <artifactId>google-api-client</artifactId>
+        <version>${google-api-client.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.apis</groupId>
+        <artifactId>google-api-services-cloudkms</artifactId>
+        <version>${google-api-services-cloudkms.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>${gson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>${protobuf.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.errorprone</groupId>
+        <artifactId>error_prone_annotations</artifactId>
+        <version>${error-prone-annotations.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.truth</groupId>
+        <artifactId>truth</artifactId>
+        <version>${truth.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <plugins>
+      <!-- Staging repository configuration: http://central.sonatype.org/pages/apache-maven.html#nexus-staging-maven-plugin-for-deployment-and-release -->
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.7</version>
+        <extensions>true</extensions>
+        <configuration>
+           <serverId>ossrh</serverId>
+           <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+
+           <autoReleaseAfterClose>false</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
+      <!-- GPG signed components: http://central.sonatype.org/pages/apache-maven.html#gpg-signed-components -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

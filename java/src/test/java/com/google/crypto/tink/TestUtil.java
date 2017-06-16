@@ -40,7 +40,6 @@ import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
-import com.google.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
 import com.google.crypto.tink.HmacProto.HmacKey;
 import com.google.crypto.tink.HmacProto.HmacParams;
 import com.google.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
@@ -55,7 +54,6 @@ import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
-import com.google.crypto.tink.aead.GcpKmsAeadKeyManager;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.subtle.EcUtil;
@@ -229,20 +227,6 @@ public class TestUtil {
         keyProto,
         AesEaxKeyManager.TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
-  }
-
-  /**
-   * @return a {@code KeyData} containing a {@code GcpKmsAeadKey}.
-   */
-  public static KeyData createGcpKmsAeadKeyData(String kmsKeyUri)
-      throws Exception {
-    GcpKmsAeadKey keyProto = GcpKmsAeadKey.newBuilder()
-        .setKmsKeyUri(kmsKeyUri)
-        .build();
-    return createKeyData(
-        keyProto,
-        GcpKmsAeadKeyManager.TYPE_URL,
-        KeyData.KeyMaterialType.REMOTE);
   }
 
   /**
