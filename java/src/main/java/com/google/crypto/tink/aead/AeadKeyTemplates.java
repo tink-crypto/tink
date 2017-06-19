@@ -134,6 +134,14 @@ public final class AeadKeyTemplates {
       createAesCtrHmacAeadKeyTemplate(32, 16, 32, 32, HashType.SHA256);
 
   /**
+   * A {@code KeyTemplate} that generates new instances of {@code ChaCha20Poly1305Key}.
+   */
+  public static final KeyTemplate CHACHA20_POLY1305 =
+      KeyTemplate.newBuilder()
+        .setTypeUrl(ChaCha20Poly1305KeyManager.TYPE_URL)
+        .build();
+
+  /**
    * @return a {@code KeyTemplate} containing a {@code AesGcmKeyFormat} with some specified
    * parameters.
    */

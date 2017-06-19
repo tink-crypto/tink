@@ -12,7 +12,9 @@ licenses(["notice"])  # Apache 2.0
 load("//third_party/rules_protobuf/javalite:rules.bzl", "java_lite_proto_library")
 load("@org_pubref_rules_protobuf//go:rules.bzl", "go_proto_library")
 
+# -----------------------------------------------
 # common
+# -----------------------------------------------
 proto_library(
     name = "common",
     srcs = [
@@ -45,7 +47,9 @@ go_proto_library(
     ],
 )
 
+# -----------------------------------------------
 # tink
+# -----------------------------------------------
 proto_library(
     name = "tink",
     srcs = [
@@ -87,7 +91,9 @@ go_proto_library(
     ],
 )
 
+# -----------------------------------------------
 # ecdsa
+# -----------------------------------------------
 proto_library(
     name = "ecdsa",
     srcs = [
@@ -129,7 +135,9 @@ go_proto_library(
     ],
 )
 
+# -----------------------------------------------
 # ed25519
+# -----------------------------------------------
 proto_library(
     name = "ed25519",
     srcs = [
@@ -162,7 +170,9 @@ go_proto_library(
     ],
 )
 
+# -----------------------------------------------
 # hmac
+# -----------------------------------------------
 proto_library(
     name = "hmac",
     srcs = [
@@ -202,7 +212,9 @@ go_proto_library(
     ],
 )
 
+# -----------------------------------------------
 # aes_ctr
+# -----------------------------------------------
 proto_library(
     name = "aes_ctr",
     srcs = [
@@ -235,7 +247,9 @@ go_proto_library(
     ],
 )
 
+# -----------------------------------------------
 # aes_ctr_hmac_aead
+# -----------------------------------------------
 proto_library(
     name = "aes_ctr_hmac_aead",
     srcs = [
@@ -281,7 +295,9 @@ go_proto_library(
     ],
 )
 
+# -----------------------------------------------
 # aes_gcm
+# -----------------------------------------------
 proto_library(
     name = "aes_gcm",
     srcs = [
@@ -314,7 +330,9 @@ go_proto_library(
     ],
 )
 
+# -----------------------------------------------
 # aes_eax
+# -----------------------------------------------
 proto_library(
     name = "aes_eax",
     srcs = [
@@ -347,7 +365,44 @@ go_proto_library(
     ],
 )
 
+# -----------------------------------------------
+# chacha20_poly1305
+# -----------------------------------------------
+proto_library(
+    name = "chacha20_poly1305",
+    srcs = [
+        "chacha20_poly1305.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "chacha20_poly1305_cc_proto",
+    deps = [":chacha20_poly1305"],
+)
+
+java_proto_library(
+    name = "chacha20_poly1305_java_proto",
+    deps = [":chacha20_poly1305"],
+)
+
+java_lite_proto_library(
+    name = "chacha20_poly1305_java_proto_lite",
+    protos = [
+        "chacha20_poly1305.proto",
+    ],
+    verbose = 0,
+)
+
+go_proto_library(
+    name = "chacha20_poly1305_go_proto",
+    protos = [
+        "chacha20_poly1305.proto",
+    ],
+)
+
+# -----------------------------------------------
 # gcp_kms
+# -----------------------------------------------
 proto_library(
     name = "gcp_kms",
     srcs = [
@@ -380,7 +435,9 @@ go_proto_library(
     ],
 )
 
+# -----------------------------------------------
 # kms_envelope
+# -----------------------------------------------
 proto_library(
     name = "kms_envelope",
     srcs = [
@@ -420,7 +477,9 @@ go_proto_library(
     ],
 )
 
-# ECIES hybrid encryption with AEAD and HKDF
+# -----------------------------------------------
+# ecies_aead_hkdf
+# -----------------------------------------------
 proto_library(
     name = "ecies_aead_hkdf",
     srcs = [

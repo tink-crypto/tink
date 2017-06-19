@@ -60,6 +60,7 @@ java_library(
         "//proto:aes_ctr_java_proto",
         "//proto:aes_eax_java_proto",
         "//proto:aes_gcm_java_proto",
+        "//proto:chacha20_poly1305_java_proto",
         "//proto:common_java_proto",
         "//proto:ecdsa_java_proto",
         "//proto:ecies_aead_hkdf_java_proto",

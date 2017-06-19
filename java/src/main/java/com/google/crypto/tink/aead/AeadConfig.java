@@ -45,6 +45,7 @@ public final class AeadConfig {
     registerKeyManager(new KmsEnvelopeAeadKeyManager());
     registerKeyManager(new AesGcmKeyManager());
     registerKeyManager(new AesEaxKeyManager());
+    registerKeyManager(new ChaCha20Poly1305KeyManager());
   }
 
   /**
