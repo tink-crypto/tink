@@ -28,6 +28,8 @@ import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.subtle.Random;
+import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
@@ -102,21 +104,21 @@ public class EncryptedKeysetHandleTest {
         MacKeyTemplates.HMAC_SHA256,
         masterKey);
 
-    EncryptedKeyset encryptedKeyset = handle.getEncryptedKeyset();
-    byte[] proto = encryptedKeyset.toByteArray();
-    proto[0] = (byte) ~proto[0];
+    EncryptedKeyset encryptedKeyset = EncryptedKeyset.newBuilder()
+        .setEncryptedKeyset(ByteString.copyFrom(Random.randBytes(100)))
+        .build();
     try {
-      KeysetHandle unused = EncryptedKeysetHandle.parseFrom(proto, masterKey);
+      KeysetHandle unused = EncryptedKeysetHandle.parseFrom(encryptedKeyset, masterKey);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "invalid keyset");
+      // expected.
     }
 
-    EncryptedKeyset encryptedKeySet2 = encryptedKeyset.toBuilder()
+    EncryptedKeyset encryptedKeySet3 = encryptedKeyset.toBuilder()
         .clearEncryptedKeyset()
         .build();
     try {
-      KeysetHandle unused = EncryptedKeysetHandle.parseFrom(encryptedKeySet2, masterKey);
+      KeysetHandle unused = EncryptedKeysetHandle.parseFrom(encryptedKeySet3, masterKey);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");

@@ -119,7 +119,7 @@ public final class AeadKeyTemplates {
    *   - HMAC hash function: SHA256
    */
   public static final KeyTemplate AES_128_CTR_128BITIV_HMAC_SHA256 =
-      createAesCtrHmacAeadKeyTemplate(32, 16, 32, 32, HashType.SHA256);
+      createAesCtrHmacAeadKeyTemplate(16, 16, 32, 32, HashType.SHA256);
 
   /**
    * A {@code KeyTemplate} that generates new instances of {@code AesCtrHmacAeadKey} with the
