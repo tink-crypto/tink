@@ -59,7 +59,7 @@ public class KeysetHandleTest {
 
   @Test
   public void testWrite() throws Exception {
-    KeysetHandle handle = CleartextKeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256);
+    KeysetHandle handle = CleartextKeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     handle.write(outputStream);
     ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
@@ -71,10 +71,11 @@ public class KeysetHandleTest {
   public void testWriteEncryptedKeyset() throws Exception {
     AeadConfig.registerStandardKeyTypes();
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
     Aead masterKey = Registry.INSTANCE.getPrimitive(
         Registry.INSTANCE.newKeyData(masterKeyTemplate));
-    KeysetHandle handle = EncryptedKeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256, masterKey);
+    KeysetHandle handle = EncryptedKeysetHandle.generateNew(
+        MacKeyTemplates.HMAC_SHA256_128BITTAG, masterKey);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     handle.write(outputStream);
     ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());

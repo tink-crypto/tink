@@ -116,7 +116,7 @@ public class RegistryTest {
     // TODO(thaidn): make this assignment throw some exception.
     KeyManager<Aead> wrongType = Registry.INSTANCE.getKeyManager(hmacKeyTypeUrl);
     assertTrue(wrongType.getClass().toString().contains("HmacKeyManager"));
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256;
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     HmacKey hmacKey = (HmacKey) Registry.INSTANCE.newKey(template);
     try {
       Aead unused = wrongType.getPrimitive(hmacKey);
@@ -138,7 +138,7 @@ public class RegistryTest {
   @Test
   public void testKeyAndPrimitiveCreation() throws Exception {
     // Create some keys and primitives.
-    KeyTemplate template =  AeadKeyTemplates.AES_128_GCM;
+    KeyTemplate template =  AeadKeyTemplates.AES128_GCM;
     AesGcmKey aesGcmKey = (AesGcmKey) Registry.INSTANCE.newKey(template);
     assertEquals(16, aesGcmKey.getKeyValue().size());
     KeyData aesGcmKeyData = Registry.INSTANCE.newKeyData(template);
@@ -147,7 +147,7 @@ public class RegistryTest {
     // This might break when we add native implementations.
     assertEquals(AesGcmJce.class, aead.getClass());
 
-    template = MacKeyTemplates.HMAC_SHA256;
+    template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     HmacKey hmacKey = (HmacKey) Registry.INSTANCE.newKey(template);
     assertEquals(32, hmacKey.getKeyValue().size());
     assertEquals(16, hmacKey.getParams().getTagSize());
@@ -159,8 +159,8 @@ public class RegistryTest {
     assertEquals(MacJce.class, mac.getClass());
 
     // Create a keyset, and get a PrimitiveSet.
-    KeyTemplate template1 =  AeadKeyTemplates.AES_128_GCM;
-    KeyTemplate template2 =  AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
+    KeyTemplate template1 =  AeadKeyTemplates.AES128_GCM;
+    KeyTemplate template2 =  AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.INSTANCE.newKeyData(template1);
     KeyData key2 = Registry.INSTANCE.newKeyData(template1);
     KeyData key3 = Registry.INSTANCE.newKeyData(template2);
@@ -244,7 +244,7 @@ public class RegistryTest {
     }
 
     // Create a keyset.
-    KeyTemplate template1 = MacKeyTemplates.HMAC_SHA256;
+    KeyTemplate template1 = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeyData key1 = Registry.INSTANCE.newKeyData(template1);
     // No primary key.
     KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
@@ -284,8 +284,8 @@ public class RegistryTest {
   @Test
   public void testCustomKeyManagerHandling() throws Exception {
     // Create a keyset.
-    KeyTemplate template1 =  AeadKeyTemplates.AES_128_GCM;
-    KeyTemplate template2 =  AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
+    KeyTemplate template1 =  AeadKeyTemplates.AES128_GCM;
+    KeyTemplate template2 =  AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.INSTANCE.newKeyData(template1);
     KeyData key2 = Registry.INSTANCE.newKeyData(template2);
     KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()

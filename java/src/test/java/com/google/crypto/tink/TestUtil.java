@@ -54,7 +54,7 @@ import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
-import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
+import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.Random;
@@ -397,50 +397,14 @@ public class TestUtil {
   }
 
   /**
-   *  @return a {@code KeyTemplate} containing a {code EciesAeadHkdfKeyFormat}.
-   */
-  public static KeyTemplate createEciesAeadHkdfKeyTemplate(EllipticCurveType curve,
-      HashType hashType, EcPointFormat ecPointFormat, KeyTemplate demKeyTemplate,
-      byte[] salt) throws Exception {
-    EciesAeadHkdfKeyFormat format = EciesAeadHkdfKeyFormat.newBuilder()
-        .setParams(createEciesAeadHkdfParams(curve, hashType, ecPointFormat, demKeyTemplate, salt))
-        .build();
-    return KeyTemplate.newBuilder()
-        .setTypeUrl(EciesAeadHkdfPrivateKeyManager.TYPE_URL)
-        .setValue(format.toByteString())
-        .build();
-  }
-
-  /**
-   *  @return a {@code EciesAeadHkdfParams} with the specified parameters.
-   */
-  public static EciesAeadHkdfParams createEciesAeadHkdfParams(EllipticCurveType curve,
-      HashType hashType, EcPointFormat ecPointFormat, KeyTemplate demKeyTemplate,
-      byte[] salt) throws Exception {
-    EciesHkdfKemParams kemParams = EciesHkdfKemParams.newBuilder()
-        .setCurveType(curve)
-        .setHkdfHashType(hashType)
-        .setHkdfSalt(ByteString.copyFrom(salt))
-        .build();
-    EciesAeadDemParams demParams = EciesAeadDemParams.newBuilder()
-        .setAeadDem(demKeyTemplate)
-        .build();
-    return EciesAeadHkdfParams.newBuilder()
-        .setKemParams(kemParams)
-        .setDemParams(demParams)
-        .setEcPointFormat(ecPointFormat)
-        .build();
-  }
-
-  /**
    *  @return a {@code EciesAeadHkdfPublicKey} with the specified key material and parameters.
    */
   public static EciesAeadHkdfPublicKey createEciesAeadHkdfPubKey(EllipticCurveType curve,
       HashType hashType, EcPointFormat ecPointFormat, KeyTemplate demKeyTemplate,
       byte[] pubX, byte[] pubY, byte[] salt) throws Exception {
     final int version = 0;
-    EciesAeadHkdfParams params = createEciesAeadHkdfParams(curve, hashType, ecPointFormat,
-        demKeyTemplate, salt);
+    EciesAeadHkdfParams params = HybridKeyTemplates.createEciesAeadHkdfParams(
+        curve, hashType, ecPointFormat, demKeyTemplate, salt);
     return EciesAeadHkdfPublicKey.newBuilder()
         .setVersion(version)
         .setParams(params)

@@ -7,7 +7,7 @@ CC_DECRYPT_CLI="$ROOT_DIR/tools/testing/cc/hybrid_decrypt_cli_cc"
 JAVA_ENCRYPT_CLI="$ROOT_DIR/tools/testing/hybrid_encrypt_cli_java"
 JAVA_DECRYPT_CLI="$ROOT_DIR/tools/testing/hybrid_decrypt_cli_java"
 
-KEY_TEMPLATE="$ROOT_DIR/examples/keytemplates/hybrid/ECIES_P256_HKDFHMACSHA256_AES256GCM.ascii"
+KEY_TEMPLATE="$ROOT_DIR/examples/keytemplates/hybrid/ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM.ascii"
 
 #############################################################################
 ##### Helper functions.

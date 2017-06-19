@@ -1,0 +1,7 @@
+# Format: KeyTemplate in text format, see https://github.com/google/tink/blob/master/proto/tink.proto
+# Generated with command:
+#     tinkey create-key-template \
+#     --type-url type.googleapis.com/google.crypto.tink.EcdsaPrivateKey \
+#     --key-format "params{hash_type:SHA512,curve:NIST_P384,encoding:DER}"
+type_url: "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey"
+value: "\022\006\b\004\020\003\030\002"

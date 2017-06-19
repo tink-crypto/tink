@@ -1,0 +1,5 @@
+# Format: KeyTemplate in text format, see https://github.com/google/tink/blob/master/proto/tink.proto
+# Generated with command:
+#     tinkey create-key-template \
+#     --type-url type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key \
+type_url: "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key"

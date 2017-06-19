@@ -70,7 +70,7 @@ public class KeysetManagerTest {
 
     // Create a keyset that contains a single HmacKey.
     manager = new KeysetManager.Builder()
-        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256)
+        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
         .build()
         .rotate();
     assertNull(manager.getKeysetHandle().getEncryptedKeyset());
@@ -86,11 +86,11 @@ public class KeysetManagerTest {
   @Test
   public void testEncryptedKeyset() throws Exception {
     // Create an encrypted keyset that contains a single HmacKey.
-    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
     KeyData aeadKeyData = Registry.INSTANCE.newKeyData(masterKeyTemplate);
     Aead masterKey = Registry.INSTANCE.getPrimitive(aeadKeyData);
     KeysetManager manager = new KeysetManager.Builder()
-        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256)
+        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
         .setMasterKey(masterKey)
         .build()
         .rotate();
@@ -107,7 +107,7 @@ public class KeysetManagerTest {
   @Test
   public void testExistingKeyset() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256;
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetManager manager1 = new KeysetManager.Builder()
         .setKeyTemplate(template)
         .build()
@@ -136,7 +136,7 @@ public class KeysetManagerTest {
     TestUtil.DummyAead masterKey = new TestUtil.DummyAead();
     try {
       KeysetHandle unused = new KeysetManager.Builder()
-          .setKeyTemplate(MacKeyTemplates.HMAC_SHA256)
+          .setKeyTemplate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
           .setMasterKey(masterKey)
           .build()
           .rotate()

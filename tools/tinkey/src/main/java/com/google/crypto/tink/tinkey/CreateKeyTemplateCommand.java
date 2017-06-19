@@ -35,13 +35,21 @@ public class CreateKeyTemplateCommand extends CreateKeyTemplateOptions implement
    */
   public static void create(OutputStream outputStream, String typeUrlValue,
       String keyFormatValue) throws Exception {
-    KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(typeUrlValue, keyFormatValue);
+    KeyTemplate keyTemplate;
+    if (keyFormatValue != null) {
+      keyTemplate = TinkeyUtil.createKeyTemplateFromText(typeUrlValue, keyFormatValue);
+    } else {
+      keyTemplate = KeyTemplate.newBuilder().setTypeUrl(typeUrlValue).build();
+    }
     String comment = "# Format: KeyTemplate in text format, "
         + "see https://github.com/google/tink/blob/master/proto/tink.proto\n"
         + "# Generated with command:\n"
         + "#     tinkey create-key-template \\\n"
-        + String.format("#     --type-url %s \\\n", typeUrlValue)
-        + String.format("#     --key-format \"%s\"\n", keyFormatValue);
+        + String.format("#     --type-url %s \\\n", typeUrlValue);
+    if (keyFormatValue != null) {
+      comment += String.format("#     --key-format \"%s\"\n", keyFormatValue);
+    }
+
     outputStream.write(comment.getBytes("UTF-8"));
     TinkeyUtil.writeProto(keyTemplate, outputStream, "TEXT" /* outFormat */);
   }

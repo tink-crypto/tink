@@ -34,7 +34,7 @@ class CreateKeyTemplateOptions {
   @Option(
       name = "--key-format",
       metaVar = "\"key_size: 32\"",
-      required = true,
+      required = false,
       usage = "The key format of the key template, formatted as text proto")
   String keyFormatValue;
 

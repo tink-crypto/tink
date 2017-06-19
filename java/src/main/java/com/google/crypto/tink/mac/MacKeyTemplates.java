@@ -28,7 +28,7 @@ import com.google.crypto.tink.TinkProto.KeyTemplate;
  * {@code HmacKey}, one can do:
  * <pre>
  *   MacConfig.registerStandardKeyTypes();
- *   KeysetHandle handle = CleartextKeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256);
+ *   KeysetHandle handle = CleartextKeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
  *   Mac mac = MacFactory.getPrimitive(handle);
  * </pre>
  */
@@ -40,7 +40,7 @@ public final class MacKeyTemplates {
    *   - Tag size: 16 bytes
    *   - Hash function: SHA256
    */
-  public static final KeyTemplate HMAC_SHA256 = createHmacKeyTemplate(
+  public static final KeyTemplate HMAC_SHA256_128BITTAG = createHmacKeyTemplate(
       32, 16, HashType.SHA256);
 
   /**

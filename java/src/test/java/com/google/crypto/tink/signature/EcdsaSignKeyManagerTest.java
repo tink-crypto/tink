@@ -66,36 +66,23 @@ public class EcdsaSignKeyManagerTest {
   final byte[] msg = Random.randBytes(1281);
   @Test
   public void testNewKeyWithVerifier() throws Exception {
-    HashAndCurveType[] hashAndCurves = {
-      new HashAndCurveType(HashType.SHA256, EllipticCurveType.NIST_P256),
-      new HashAndCurveType(HashType.SHA512, EllipticCurveType.NIST_P384),
-      new HashAndCurveType(HashType.SHA512, EllipticCurveType.NIST_P521)};
-    for (int i = 0; i < hashAndCurves.length; i++) {
-      HashType hashType = hashAndCurves[i].hashType;
-      EllipticCurveType curveType = hashAndCurves[i].curveType;
-      EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
-      EcdsaParams ecdsaParams = EcdsaParams.newBuilder()
-          .setHashType(hashType)
-          .setCurve(curveType)
-          .setEncoding(EcdsaSignatureEncoding.DER)
-          .build();
-      EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder()
-          .setParams(ecdsaParams)
-          .build();
-      ByteString serializedFormat = ByteString.copyFrom(ecdsaFormat.toByteArray());
-      KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-          .setTypeUrl(EcdsaSignKeyManager.TYPE_URL)
-          .setValue(serializedFormat)
-          .build();
+    KeyTemplate[] keyTemplates = new KeyTemplate[] {
+        SignatureKeyTemplates.ECDSA_P256,
+        SignatureKeyTemplates.ECDSA_P384,
+        SignatureKeyTemplates.ECDSA_P521
+    };
+    for (int i = 0; i < keyTemplates.length; i++) {
       // Call newKey multiple times and make sure that it generates different keys.
       int numTests = 27;
       EcdsaPrivateKey[] privKeys = new EcdsaPrivateKey[numTests];
+      EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
       Set<String> keys = new TreeSet<String>();
       for (int j = 0; j < numTests / 3; j++) {
-        privKeys[3 * j] = (EcdsaPrivateKey) signManager.newKey(ecdsaFormat);
-        privKeys[3 * j + 1] = (EcdsaPrivateKey) signManager.newKey(serializedFormat);
+        privKeys[3 * j] = (EcdsaPrivateKey) signManager.newKey(
+            EcdsaKeyFormat.parseFrom(keyTemplates[i].getValue()));
+        privKeys[3 * j + 1] = (EcdsaPrivateKey) signManager.newKey(keyTemplates[i].getValue());
         privKeys[3 * j + 2] = EcdsaPrivateKey.parseFrom(
-            signManager.newKeyData(keyTemplate.getValue()).getValue());
+            signManager.newKeyData(keyTemplates[i].getValue()).getValue());
         keys.add(new String(privKeys[3 * j].toByteArray(), "UTF-8"));
         keys.add(new String(privKeys[3 * j + 1].toByteArray(), "UTF-8"));
         keys.add(new String(privKeys[3 * j + 2].toByteArray(), "UTF-8"));
@@ -106,7 +93,8 @@ public class EcdsaSignKeyManagerTest {
       // failure is 2^-64 which happens when a key has 8 leading zeros.
       for (int j = 0; j < numTests; j++) {
         int keySize = privKeys[j].getKeyValue().toByteArray().length;
-        switch(curveType) {
+        EcdsaKeyFormat ecdsaKeyFormat = EcdsaKeyFormat.parseFrom(keyTemplates[i].getValue());
+        switch(ecdsaKeyFormat.getParams().getCurve()) {
           case NIST_P256:
             assertTrue(256 / 8 - 8 <= keySize);
             assertTrue(256 / 8 + 1 >= keySize);

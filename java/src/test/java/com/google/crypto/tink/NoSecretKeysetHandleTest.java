@@ -47,7 +47,7 @@ public class NoSecretKeysetHandleTest {
   @Test
   public void testBasic() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256;
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetManager manager = new KeysetManager.Builder()
         .setKeyTemplate(template)
         .build()

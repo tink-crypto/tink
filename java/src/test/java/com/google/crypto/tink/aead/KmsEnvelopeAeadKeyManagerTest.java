@@ -55,7 +55,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
   @Test
   public void testGcpKmsKeyRestricted() throws Exception {
-    KeyTemplate dekTemplate = AeadKeyTemplates.AES_128_CTR_128BITIV_HMAC_SHA256;
+    KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     // This key is restricted to {@code TestUtil.SERVICE_ACCOUNT_FILE}.
     KeyData kmsKey = EnvelopeTestUtil.createGcpKmsAeadKeyData(
         TestUtil.RESTRICTED_CRYPTO_KEY_URI);
@@ -77,7 +77,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
   @Test
   public void testParsingInvalidCiphertexts() throws Exception {
-    KeyTemplate dekTemplate = AeadKeyTemplates.AES_128_CTR_128BITIV_HMAC_SHA256;
+    KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData kmsKey = EnvelopeTestUtil.createGcpKmsAeadKeyData(
         TestUtil.RESTRICTED_CRYPTO_KEY_URI);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(

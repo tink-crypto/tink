@@ -51,12 +51,12 @@ public class EncryptedKeysetHandleTest {
   @Test
   public void testBasic() throws Exception {
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
     Aead masterKey = Registry.INSTANCE.getPrimitive(
         Registry.INSTANCE.newKeyData(masterKeyTemplate));
     // Create a encrypted keyset that contains a single HmacKey.
     KeysetHandle handle = EncryptedKeysetHandle.generateNew(
-        MacKeyTemplates.HMAC_SHA256,
+        MacKeyTemplates.HMAC_SHA256_128BITTAG,
         masterKey);
     assertNotNull(handle.getEncryptedKeyset());
     KeysetHandle handle2 = EncryptedKeysetHandle.parseFrom(
@@ -68,13 +68,13 @@ public class EncryptedKeysetHandleTest {
   public void testWithExistingKeyset() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeysetHandle handle1 = new KeysetManager.Builder()
-        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256)
+        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
         .build()
         .rotate()
         .getKeysetHandle();
 
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
     Aead masterKey = Registry.INSTANCE.getPrimitive(
         Registry.INSTANCE.newKeyData(masterKeyTemplate));
 
@@ -96,12 +96,12 @@ public class EncryptedKeysetHandleTest {
   @Test
   public void testInvalidKeyset() throws Exception {
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
     Aead masterKey = Registry.INSTANCE.getPrimitive(
         Registry.INSTANCE.newKeyData(masterKeyTemplate));
     // Create a encrypted keyset that contains a single HmacKey.
     KeysetHandle handle = EncryptedKeysetHandle.generateNew(
-        MacKeyTemplates.HMAC_SHA256,
+        MacKeyTemplates.HMAC_SHA256_128BITTAG,
         masterKey);
 
     EncryptedKeyset encryptedKeyset = EncryptedKeyset.newBuilder()
@@ -130,7 +130,7 @@ public class EncryptedKeysetHandleTest {
     KeysetHandle unused;
 
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES_128_GCM;
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
     Aead masterKey = Registry.INSTANCE.getPrimitive(
         Registry.INSTANCE.newKeyData(masterKeyTemplate));
 

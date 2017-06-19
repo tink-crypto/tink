@@ -57,11 +57,11 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     EllipticCurveType curve = EllipticCurveType.NIST_P384;
     HashType hashType = HashType.SHA256;
     EcPointFormat pointFormat = EcPointFormat.UNCOMPRESSED;
-    KeyTemplate demKeyTemplate = AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
+    KeyTemplate demKeyTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
 
     byte[] salt = "some salt".getBytes("UTF-8");
-    EciesAeadHkdfParams params = TestUtil.createEciesAeadHkdfParams(curve, hashType, pointFormat,
-        demKeyTemplate, salt);
+    EciesAeadHkdfParams params = HybridKeyTemplates.createEciesAeadHkdfParams(
+        curve, hashType, pointFormat, demKeyTemplate, salt);
 
     EciesAeadHkdfPrivateKeyManager manager = new EciesAeadHkdfPrivateKeyManager();
     EciesAeadHkdfPrivateKey keyProto = (EciesAeadHkdfPrivateKey) manager.newKey(

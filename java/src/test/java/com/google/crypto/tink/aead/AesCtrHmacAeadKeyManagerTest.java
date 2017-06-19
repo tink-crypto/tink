@@ -38,7 +38,7 @@ import org.junit.runners.JUnit4;
 public class AesCtrHmacAeadKeyManagerTest {
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
-    KeyTemplate keyTemplate = AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
+    KeyTemplate keyTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     AesCtrHmacAeadKeyFormat aeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(
         keyTemplate.getValue().toByteArray());
     ByteString serialized = ByteString.copyFrom(aeadKeyFormat.toByteArray());

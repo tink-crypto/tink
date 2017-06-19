@@ -20,9 +20,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.crypto.tink.CommonProto.EcPointFormat;
-import com.google.crypto.tink.CommonProto.EllipticCurveType;
-import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
@@ -37,6 +34,7 @@ import com.google.crypto.tink.aead.GcpKmsAeadKeyManager;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.crypto.tink.hybrid.HybridDecryptConfig;
 import com.google.crypto.tink.hybrid.HybridEncryptConfig;
+import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.signature.PublicKeySignConfig;
 import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
@@ -73,13 +71,7 @@ public class CreatePublicKeysetCommandTest {
   @Test
   public void testCreate() throws Exception {
     // Create a keyset that contains a single private key of type EciesAeadHkdfPrivateKey.
-    EllipticCurveType curve = EllipticCurveType.NIST_P256;
-    HashType hashType = HashType.SHA256;
-    EcPointFormat pointFormat = EcPointFormat.UNCOMPRESSED;
-    KeyTemplate demKeyTemplate = AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
-    byte[] salt = "some salt".getBytes("UTF-8");
-    KeyTemplate keyTemplate = TestUtil.createEciesAeadHkdfKeyTemplate(curve, hashType, pointFormat,
-        demKeyTemplate, salt);
+    KeyTemplate keyTemplate = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256;
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     String outFormat = "TEXT";
     String awsKmsMasterKeyValue = null;

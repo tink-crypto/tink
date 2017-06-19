@@ -24,13 +24,10 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.AesGcmProto.AesGcmKey;
 import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.CommonProto.EcPointFormat;
-import com.google.crypto.tink.CommonProto.EllipticCurveType;
-import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.KeysetManager;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.TinkProto.KeyData;
@@ -45,6 +42,7 @@ import com.google.crypto.tink.hybrid.HybridDecryptConfig;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.crypto.tink.hybrid.HybridEncryptConfig;
 import com.google.crypto.tink.hybrid.HybridEncryptFactory;
+import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.signature.PublicKeySignConfig;
 import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
@@ -115,26 +113,15 @@ public class TinkeyUtilTest {
    */
   @Test
   public void testExtractPublicKey() throws Exception {
-    EllipticCurveType curve = EllipticCurveType.NIST_P256;
-    HashType hashType = HashType.SHA256;
-    EcPointFormat pointFormat = EcPointFormat.UNCOMPRESSED;
-    KeyTemplate demKeyTemplate = AeadKeyTemplates.AES_128_CTR_HMAC_SHA256;
-    byte[] salt = "some salt".getBytes("UTF-8");
-    KeyTemplate keyTemplate = TestUtil.createEciesAeadHkdfKeyTemplate(curve, hashType, pointFormat,
-        demKeyTemplate, salt);
-
-    KeysetManager managerPrivate = new KeysetManager.Builder()
-        .setKeyTemplate(keyTemplate)
-        .build()
-        .rotate();
-    KeyData privateKeyData = managerPrivate.getKeysetHandle().getKeyset().getKey(0).getKeyData();
+    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(
+        HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256);
+    KeyData privateKeyData = keysetHandle.getKeyset().getKey(0).getKeyData();
     EciesAeadHkdfPrivateKey privateKey = EciesAeadHkdfPrivateKey.parseFrom(
         privateKeyData.getValue());
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
-        managerPrivate.getKeysetHandle());
+        keysetHandle);
 
-    Keyset publicKeyset = TinkeyUtil.createPublicKeyset(
-        managerPrivate.getKeysetHandle().getKeyset());
+    Keyset publicKeyset = TinkeyUtil.createPublicKeyset(keysetHandle.getKeyset());
     assertEquals(1, publicKeyset.getKeyCount());
     KeyData publicKeyData = publicKeyset.getKey(0).getKeyData();
     assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL,

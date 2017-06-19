@@ -65,8 +65,8 @@ public class EciesAeadHkdfHybridDecryptTest {
     HashType hkdfHashType = HashType.SHA256;
 
     KeyTemplate[] keyTemplates = new KeyTemplate[] {
-      AeadKeyTemplates.AES_128_CTR_128BITIV_HMAC_SHA256,
-      AeadKeyTemplates.AES_128_GCM
+      AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
+      AeadKeyTemplates.AES128_GCM
     };
     for (int i = 0; i < keyTemplates.length; i++) {
       HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey,

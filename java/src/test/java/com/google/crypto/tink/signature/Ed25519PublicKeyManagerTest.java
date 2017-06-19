@@ -46,9 +46,7 @@ public class Ed25519PublicKeyManagerTest {
   @Test
   public void testModifiedSignature() throws Exception {
     Ed25519PrivateKeyManager manager = new Ed25519PrivateKeyManager();
-    KeyTemplate template = KeyTemplate.newBuilder()
-        .setTypeUrl(manager.getKeyType())
-        .build();
+    KeyTemplate template = SignatureKeyTemplates.ED25519;
     MessageLite key = manager.newKey(template);
     Ed25519PrivateKey keyProto = (Ed25519PrivateKey) key;
 
