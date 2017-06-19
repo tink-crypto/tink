@@ -1,6 +1,7 @@
 package(
     default_visibility = [
         "//cc:__subpackages__",
+        "//go:__subpackages__",
         "//java:__subpackages__",
         "//objc:__subpackages__",
     ],
@@ -9,6 +10,7 @@ package(
 licenses(["notice"])  # Apache 2.0
 
 load("//third_party/rules_protobuf/javalite:rules.bzl", "java_lite_proto_library")
+load("@org_pubref_rules_protobuf//go:rules.bzl", "go_proto_library")
 
 # common
 proto_library(
@@ -34,6 +36,13 @@ java_lite_proto_library(
         "common.proto",
     ],
     verbose = 0,
+)
+
+go_proto_library(
+    name = "common_go_proto",
+    protos = [
+        "common.proto",
+    ],
 )
 
 # tink
@@ -68,6 +77,16 @@ java_lite_proto_library(
     verbose = 0,
 )
 
+go_proto_library(
+    name = "tink_go_proto",
+    proto_deps = [
+        ":common_go_proto",
+    ],
+    protos = [
+        "tink.proto",
+    ],
+)
+
 # ecdsa
 proto_library(
     name = "ecdsa",
@@ -100,6 +119,16 @@ java_lite_proto_library(
     verbose = 0,
 )
 
+go_proto_library(
+    name = "ecdsa_go_proto",
+    proto_deps = [
+        ":common_go_proto",
+    ],
+    protos = [
+        "ecdsa.proto",
+    ],
+)
+
 # ed25519
 proto_library(
     name = "ed25519",
@@ -124,6 +153,13 @@ java_lite_proto_library(
         "ed25519.proto",
     ],
     verbose = 0,
+)
+
+go_proto_library(
+    name = "ed25519_go_proto",
+    protos = [
+        "ed25519.proto",
+    ],
 )
 
 # hmac
@@ -156,6 +192,16 @@ java_lite_proto_library(
     verbose = 0,
 )
 
+go_proto_library(
+    name = "hmac_go_proto",
+    proto_deps = [
+        ":common_go_proto",
+    ],
+    protos = [
+        "hmac.proto",
+    ],
+)
+
 # aes_ctr
 proto_library(
     name = "aes_ctr",
@@ -180,6 +226,13 @@ java_lite_proto_library(
         "aes_ctr.proto",
     ],
     verbose = 0,
+)
+
+go_proto_library(
+    name = "aes_ctr_go_proto",
+    protos = [
+        "aes_ctr.proto",
+    ],
 )
 
 # aes_ctr_hmac_aead
@@ -217,6 +270,17 @@ java_lite_proto_library(
     verbose = 0,
 )
 
+go_proto_library(
+    name = "aes_ctr_hmac_aead_go_proto",
+    proto_deps = [
+        ":aes_ctr_go_proto",
+        ":hmac_go_proto",
+    ],
+    protos = [
+        "aes_ctr_hmac_aead.proto",
+    ],
+)
+
 # aes_gcm
 proto_library(
     name = "aes_gcm",
@@ -241,6 +305,13 @@ java_lite_proto_library(
         "aes_gcm.proto",
     ],
     verbose = 0,
+)
+
+go_proto_library(
+    name = "aes_gcm_go_proto",
+    protos = [
+        "aes_gcm.proto",
+    ],
 )
 
 # aes_eax
@@ -269,6 +340,13 @@ java_lite_proto_library(
     verbose = 0,
 )
 
+go_proto_library(
+    name = "aes_eax_go_proto",
+    protos = [
+        "aes_eax.proto",
+    ],
+)
+
 # gcp_kms
 proto_library(
     name = "gcp_kms",
@@ -293,6 +371,13 @@ java_lite_proto_library(
         "gcp_kms.proto",
     ],
     verbose = 0,
+)
+
+go_proto_library(
+    name = "gcp_kms_go_proto",
+    protos = [
+        "gcp_kms.proto",
+    ],
 )
 
 # kms_envelope
@@ -323,6 +408,16 @@ java_lite_proto_library(
         "kms_envelope.proto",
     ],
     verbose = 0,
+)
+
+go_proto_library(
+    name = "kms_envelope_go_proto",
+    proto_deps = [
+        ":tink_go_proto",
+    ],
+    protos = [
+        "kms_envelope.proto",
+    ],
 )
 
 # ECIES hybrid encryption with AEAD and HKDF
@@ -357,4 +452,15 @@ java_lite_proto_library(
         "ecies_aead_hkdf.proto",
     ],
     verbose = 0,
+)
+
+go_proto_library(
+    name = "ecies_aead_hkdf_go_proto",
+    proto_deps = [
+        ":common_go_proto",
+        ":tink_go_proto",
+    ],
+    protos = [
+        "ecies_aead_hkdf.proto",
+    ],
 )
