@@ -19,6 +19,8 @@ package com.google.crypto.tink;
 import com.google.crypto.tink.TinkProto.EncryptedKeyset;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.KeysetInfo;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 
 /**
@@ -73,6 +75,18 @@ public final class KeysetHandle {
    */
   public EncryptedKeyset getEncryptedKeyset() {
     return encryptedKeyset;
+  }
+
+  /**
+   * Serializes and writes the keyset to {@code outputStream}.
+   */
+  public void write(OutputStream outputStream) throws IOException {
+    if (encryptedKeyset != null) {
+      outputStream.write(encryptedKeyset.toByteArray());
+      return;
+    }
+    outputStream.write(keyset.toByteArray());
+    return;
   }
 
   /**
