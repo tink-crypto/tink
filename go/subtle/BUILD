@@ -29,3 +29,22 @@ go_test(
         "//go:mac_interface",
     ],
 )
+
+# random
+RANDOM_SRCS = [
+    "random.go",
+]
+
+RANDOM_TEST_SRCS = [
+    "random_test.go",
+]
+
+go_library(
+    name = "random",
+    srcs = RANDOM_SRCS,
+)
+
+go_test(
+    name = "random_test",
+    srcs = RANDOM_SRCS + RANDOM_TEST_SRCS,
+)
