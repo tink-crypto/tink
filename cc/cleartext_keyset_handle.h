@@ -22,6 +22,7 @@
 
 #include "cc/keyset_handle.h"
 #include "cc/util/statusor.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -30,6 +31,8 @@ namespace tink {
 // loading cleartext keysets, thus its usage should be restricted.
 class CleartextKeysetHandle {
  public:
+  static util::StatusOr<std::unique_ptr<KeysetHandle>> New(
+      const google::crypto::tink::Keyset& keyset);
   static util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(
       const std::string& serialized_keyset);
   static util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(

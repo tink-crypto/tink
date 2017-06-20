@@ -37,6 +37,12 @@ namespace {
 class CleartextKeysetHandleTest : public ::testing::Test {
 };
 
+TEST_F(CleartextKeysetHandleTest, testFromKeysetProto) {
+  Keyset keyset;
+  auto result = CleartextKeysetHandle::New(keyset);
+  EXPECT_TRUE(result.ok()) << result.status();
+}
+
 TEST_F(CleartextKeysetHandleTest, testFromString) {
   {  // Bad serialization.
     auto result = CleartextKeysetHandle::ParseFrom("bad serialized keyset");
