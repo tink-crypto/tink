@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
-package subtle
+package hmac
 
 import (
     "testing"
     "crypto/sha256"
     "crypto/sha512"
     "encoding/hex"
-    mac "github.com/google/tink/go/mac_interface"
+    "github.com/google/tink/go/tink/tink"
     "fmt"
 )
 
@@ -123,5 +123,5 @@ func TestTooBigTagSize(t *testing.T) {
 
 func testMacInterface(t *testing.T) {
   // This line throws an error if Hmac doesn't implement Mac interface
-  var _ mac.Mac = (*Hmac)(nil)
+  var _ tink.Mac = (*Hmac)(nil)
 }

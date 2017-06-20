@@ -19,7 +19,7 @@
 
 //TODO(thaidn): enforce some minimal value for key size and tag size.
 
-package subtle
+package hmac
 
 import (
     "crypto/hmac"

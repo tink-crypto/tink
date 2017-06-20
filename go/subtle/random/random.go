@@ -12,20 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
-package subtle
+package random
 
 import (
-    "testing"
+    "crypto/rand"
 )
 
-func TestGetRandomBytes(t *testing.T) {
-  for i := 0; i <= 32; i++ {
-    buf, err := GetRandomBytes(uint32(i))
-    if len(buf) != i {
-      t.Errorf("length of the output doesn't match the input")
-    }
-    if err != nil {
-      t.Errorf("unexpected error")
-    }
-  }
+/**
+ * Generates random bytes.
+ */
+func GetRandomBytes(n uint32) ([]byte, error) {
+  buf := make([]byte, n)
+  _, err := rand.Read(buf)
+  return buf, err
 }

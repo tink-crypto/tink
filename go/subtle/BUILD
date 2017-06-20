@@ -10,11 +10,11 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 # hmac subtle
 HMAC_SRCS = [
-    "hmac.go",
+    "hmac/hmac.go",
 ]
 
 HMAC_TEST_SRCS = [
-    "hmac_test.go",
+    "hmac/hmac_test.go",
 ]
 
 go_library(
@@ -26,17 +26,17 @@ go_test(
     name = "hmac_test",
     srcs = HMAC_SRCS + HMAC_TEST_SRCS,
     deps = [
-        "//go:mac_interface",
+        "//go/tink",
     ],
 )
 
 # random
 RANDOM_SRCS = [
-    "random.go",
+    "random/random.go",
 ]
 
 RANDOM_TEST_SRCS = [
-    "random_test.go",
+    "random/random_test.go",
 ]
 
 go_library(
