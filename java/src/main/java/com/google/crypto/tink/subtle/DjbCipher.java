@@ -23,9 +23,9 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 /**
- * Abstract base class for class of DJB's ciphers.
+ * Abstract base class for class of Djb's ciphers.
  */
-public abstract class DJBCipher implements IndCpaCipher {
+public abstract class DjbCipher implements IndCpaCipher {
 
   static final int BLOCK_SIZE_IN_INTS = 16;
   public static final int BLOCK_SIZE_IN_BYTES = BLOCK_SIZE_IN_INTS * 4;
@@ -38,7 +38,7 @@ public abstract class DJBCipher implements IndCpaCipher {
   // TODO(anergiz): change this to ImmutableByteArray.
   protected final byte[] key;
 
-  public DJBCipher(final byte[] key) {
+  public DjbCipher(final byte[] key) {
     if (key.length != KEY_SIZE_IN_BYTES) {
       throw new IllegalArgumentException("The key length in bytes must be 32.");
     }
@@ -74,22 +74,22 @@ public abstract class DJBCipher implements IndCpaCipher {
   abstract int nonceSizeInBytes();
 
   /**
-   * State generator for DJBCipher types.
+   * State generator for DjbCipher types.
    * Stateful and <b>not</b> thread-safe.
-   * {@link StateGen} is not stored as an instance variable in {@link DJBCipher} types to preserve
+   * {@link StateGen} is not stored as an instance variable in {@link DjbCipher} types to preserve
    * their stateless guarantee. Instead, it is used in local scope to easily maintain the local
    * state inside of a single call (i.e., encrypt or decrypt).
    */
   static class StateGen {
 
-    private DJBCipher djbCipher;
+    private DjbCipher djbCipher;
     private int[] state;
     private int[] shuffledState;
     private int[] cachedShuffledState;
     private int currentPos;
     private boolean readCalled;
 
-    StateGen(DJBCipher djbCipher, final byte[] nonce, int counter) {
+    StateGen(DjbCipher djbCipher, final byte[] nonce, int counter) {
       this.djbCipher = djbCipher;
       cachedShuffledState = new int[BLOCK_SIZE_IN_INTS];
       currentPos = 0;
@@ -98,17 +98,23 @@ public abstract class DJBCipher implements IndCpaCipher {
       readCalled = false;
     }
 
-    int[] read(int length) {
+    byte[] read(int length) {
       if (readCalled) {
         throw new IllegalStateException("read can only be called once and before next().");
       }
-      if (length >= BLOCK_SIZE_IN_INTS) {
+      if (length >= BLOCK_SIZE_IN_BYTES) {
         throw new IllegalArgumentException(
-            String.format("length must be less than 16. length: %d", length));
+            String.format("length must be less than 64. length: %d", length));
+      }
+      if (length % 4 != 0) {
+        throw new IllegalArgumentException(
+            String.format("length must be a multiple of 8. length: %d", length));
       }
       readCalled = true;
-      currentPos = length;
-      return Arrays.copyOf(shuffledState, length);
+      currentPos = length / 4;
+      ByteBuffer out = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+      out.asIntBuffer().put(shuffledState, 0, length / 4);
+      return out.array();
     }
 
     int[] next() {
@@ -139,20 +145,38 @@ public abstract class DJBCipher implements IndCpaCipher {
     }
   }
 
-  void process(ByteBuffer output, final byte[] input, int inPos, final byte[] nonce, int counter) {
+  // TestOnly
+  void process(ByteBuffer output, final byte[] input, int inPos, byte[] nonce, int counter) {
     process(output, input, inPos, new StateGen(this, nonce, counter));
   }
 
-  @Override
-  public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
+  /**
+   * Returns the AEAD sub key.
+   */
+  abstract byte[] getAeadSubKey(final byte[] nonce);
+
+  /**
+   * Constructs a {@link StateGen} to be used in encryption and decryption for sequence generation.
+   */
+  abstract StateGen constructForEncDec(final byte[] nonce);
+
+  public byte[] encrypt(final byte[] plaintext, byte[] aeadSubKey) throws GeneralSecurityException {
     if (plaintext.length > Integer.MAX_VALUE - nonceSizeInBytes()) {
       throw new GeneralSecurityException("plaintext too long");
     }
     byte[] nonce = Random.randBytes(nonceSizeInBytes());
+    if (aeadSubKey != null) {
+      System.arraycopy(getAeadSubKey(nonce), 0, aeadSubKey, 0, aeadSubKey.length);
+    }
     ByteBuffer ciphertext = ByteBuffer.allocate(plaintext.length + nonceSizeInBytes());
     ciphertext.put(nonce);
-    process(ciphertext, plaintext, 0, nonce, 1);
+    process(ciphertext, plaintext, 0, constructForEncDec(nonce));
     return ciphertext.array();
+  }
+
+  @Override
+  public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
+    return encrypt(plaintext, null);
   }
 
   byte[] decrypt(final byte[] ciphertext, int startPos) throws GeneralSecurityException {
@@ -162,7 +186,7 @@ public abstract class DJBCipher implements IndCpaCipher {
     byte[] nonce = new byte[nonceSizeInBytes()];
     System.arraycopy(ciphertext, startPos, nonce, 0, nonceSizeInBytes());
     ByteBuffer plaintext = ByteBuffer.allocate(ciphertext.length - nonceSizeInBytes() - startPos);
-    process(plaintext, ciphertext, startPos + nonceSizeInBytes(), nonce, 1);
+    process(plaintext, ciphertext, startPos + nonceSizeInBytes(), constructForEncDec(nonce));
     return plaintext.array();
   }
 

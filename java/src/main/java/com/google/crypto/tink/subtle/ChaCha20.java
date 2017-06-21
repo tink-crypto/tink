@@ -19,10 +19,10 @@ package com.google.crypto.tink.subtle;
 import java.nio.ByteBuffer;
 
 /**
- * DJB's {@link ChaCha20} stream cipher based on RFC7539 (i.e., uses 96-bit random nonces).
+ * Djb's {@link ChaCha20} stream cipher based on RFC7539 (i.e., uses 96-bit random nonces).
  * https://tools.ietf.org/html/rfc7539
  */
-public class ChaCha20 extends DJBCipher {
+public class ChaCha20 extends DjbCipher {
 
   public static final int NONCE_SIZE_IN_BYTES = 12;
   private static final int COUNTER_POS = SIGMA.length + KEY_SIZE_IN_INTS;
@@ -31,7 +31,7 @@ public class ChaCha20 extends DJBCipher {
    * Constructs a new ChaCha20 cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not
-   * {@link DJBCipher#KEY_SIZE_IN_BYTES}.
+   * {@link DjbCipher#KEY_SIZE_IN_BYTES}.
    */
   public ChaCha20(final byte[] key) {
     super(key);
@@ -80,5 +80,15 @@ public class ChaCha20 extends DJBCipher {
   @Override
   int nonceSizeInBytes() {
     return NONCE_SIZE_IN_BYTES;
+  }
+
+  @Override
+  byte[] getAeadSubKey(byte[] nonce) {
+    return new StateGen(this, nonce, 0).read(32);
+  }
+
+  @Override
+  StateGen constructForEncDec(byte[] nonce) {
+    return new StateGen(this, nonce, 1);
   }
 }

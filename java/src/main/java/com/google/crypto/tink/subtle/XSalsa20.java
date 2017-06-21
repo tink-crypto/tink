@@ -20,10 +20,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * DJB's XSalsa20 stream cipher.
+ * Djb's XSalsa20 stream cipher.
  * https://cr.yp.to/snuffle/xsalsa-20081128.pdf
  */
-public class XSalsa20 extends DJBCipher {
+public class XSalsa20 extends DjbCipher {
 
   private static final byte[] ZERO = new byte[16];
 
@@ -31,7 +31,7 @@ public class XSalsa20 extends DJBCipher {
    * Constructs a new {@link XSalsa20} cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not
-   * {@link DJBCipher#KEY_SIZE_IN_BYTES}.
+   * {@link DjbCipher#KEY_SIZE_IN_BYTES}.
    */
   public XSalsa20(byte[] key) {
     super(key);
@@ -134,5 +134,17 @@ public class XSalsa20 extends DJBCipher {
   @Override
   int nonceSizeInBytes() {
     return 24;
+  }
+
+  @Override
+  byte[] getAeadSubKey(byte[] nonce) {
+    return new StateGen(this, nonce, 0).read(32);
+  }
+
+  @Override
+  StateGen constructForEncDec(byte[] nonce) {
+    StateGen stateGen = new StateGen(this, nonce, 0);
+    stateGen.read(32);  // skip the aead sub key.
+    return stateGen;
   }
 }

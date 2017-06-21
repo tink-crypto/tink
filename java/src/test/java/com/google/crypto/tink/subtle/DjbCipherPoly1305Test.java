@@ -29,10 +29,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Unit tests for ChaCha20Poly1305.
+ * Unit tests for DjbCipherPoly1305.
  */
 @RunWith(JUnit4.class)
-public class ChaCha20Poly1305Test {
+public class DjbCipherPoly1305Test {
 
   /**
    * Tests against the test vectors in Section 2.5.2 of RFC 7539.
@@ -44,7 +44,7 @@ public class ChaCha20Poly1305Test {
         + "85d6be7857556d337f4452fe42d506a8"
         + "0103808afb0db2fd4abff6af4149f51b");
     byte[] in = ("Cryptographic Forum Research Group").getBytes(StandardCharsets.US_ASCII);
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "a8061dc1305136c6c22b8baf0c0127a9"));
   }
@@ -59,8 +59,8 @@ public class ChaCha20Poly1305Test {
         + "808182838485868788898a8b8c8d8e8f"
         + "909192939495969798999a9b9c9d9e9f");
     byte[] nonce = TestUtil.hexDecode("000000000001020304050607");
-    ChaCha20Poly1305 aead = new ChaCha20Poly1305(key);
-    Truth.assertThat(aead.poly1305KeyGen(nonce)).isEqualTo(TestUtil.hexDecode(""
+    ChaCha20 cipher = new ChaCha20(key);
+    Truth.assertThat(cipher.getAeadSubKey(nonce)).isEqualTo(TestUtil.hexDecode(""
         + "8ad5a08b905f81cc815040274ab29471"
         + "a833b637e3fd0da508dbb8e2fdd1a646"));
   }
@@ -86,7 +86,7 @@ public class ChaCha20Poly1305Test {
         + "3ff4def08e4b7a9de576d26586cec64b"
         + "6116");
     byte[] aad = TestUtil.hexDecode("50515253c0c1c2c3c4c5c6c7");
-    ChaCha20Poly1305 aead = new ChaCha20Poly1305(key);
+    DjbCipherPoly1305 aead = DjbCipherPoly1305.constructChaCha20Poly1305(key);
     Truth.assertThat(aead.decrypt(ciphertext, aad)).isEqualTo(
         ("Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the "
             + "future, sunscreen would be it.").getBytes(StandardCharsets.US_ASCII));
@@ -110,7 +110,7 @@ public class ChaCha20Poly1305Test {
         + "6116");
     byte[] aad = TestUtil.hexDecode("50515253c0c1c2c3c4c5c6c7");
     try {
-      new ChaCha20Poly1305(key).decrypt(ciphertext, aad);
+      DjbCipherPoly1305.constructChaCha20Poly1305(key).decrypt(ciphertext, aad);
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       Truth.assertThat(e).hasMessageThat().containsMatch("Tags do not match.");
@@ -132,7 +132,7 @@ public class ChaCha20Poly1305Test {
         + "00000000000000000000000000000000"
         + "00000000000000000000000000000000"
         + "00000000000000000000000000000000");
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "00000000000000000000000000000000"));
   }
@@ -152,7 +152,7 @@ public class ChaCha20Poly1305Test {
         + "statements in IETF sessions, as well as written and electronic communications made at "
         + "any time or place, which are addressed to")
         .getBytes(StandardCharsets.US_ASCII);
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "36e5f6b5c5e06070f0efca96227a863e"));
   }
@@ -172,7 +172,7 @@ public class ChaCha20Poly1305Test {
         + "statements in IETF sessions, as well as written and electronic communications made at "
         + "any time or place, which are addressed to")
         .getBytes(StandardCharsets.US_ASCII);
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "f3477e7cd95417af89a6b8794c310cf0"));
   }
@@ -195,7 +195,7 @@ public class ChaCha20Poly1305Test {
         + "6572652074686520626f726f676f7665"
         + "732c0a416e6420746865206d6f6d6520"
         + "7261746873206f757467726162652e");
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "4541669a7eaaee61e708dc7cbcc5eb62"));
   }
@@ -211,7 +211,7 @@ public class ChaCha20Poly1305Test {
         + "00000000000000000000000000000000");
     byte[] in = TestUtil.hexDecode(""
         + "ffffffffffffffffffffffffffffffff");
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "03000000000000000000000000000000"));
   }
@@ -227,7 +227,7 @@ public class ChaCha20Poly1305Test {
         + "ffffffffffffffffffffffffffffffff");
     byte[] in = TestUtil.hexDecode(""
         + "02000000000000000000000000000000");
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "03000000000000000000000000000000"));
   }
@@ -245,7 +245,7 @@ public class ChaCha20Poly1305Test {
         + "ffffffffffffffffffffffffffffffff"
         + "f0ffffffffffffffffffffffffffffff"
         + "11000000000000000000000000000000");
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "05000000000000000000000000000000"));
   }
@@ -263,7 +263,7 @@ public class ChaCha20Poly1305Test {
         + "ffffffffffffffffffffffffffffffff"
         + "fbfefefefefefefefefefefefefefefe"
         + "01010101010101010101010101010101");
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "00000000000000000000000000000000"));
   }
@@ -279,7 +279,7 @@ public class ChaCha20Poly1305Test {
         + "00000000000000000000000000000000");
     byte[] in = TestUtil.hexDecode(""
         + "fdffffffffffffffffffffffffffffff");
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "faffffffffffffffffffffffffffffff"));
   }
@@ -298,7 +298,7 @@ public class ChaCha20Poly1305Test {
         + "3394d7505e4379cd0100000000000000"
         + "00000000000000000000000000000000"
         + "01000000000000000000000000000000");
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "14000000000000005500000000000000"));
   }
@@ -316,7 +316,7 @@ public class ChaCha20Poly1305Test {
         + "e33594d7505e43b90000000000000000"
         + "3394d7505e4379cd0100000000000000"
         + "00000000000000000000000000000000");
-    byte[] mac = ChaCha20Poly1305.poly1305Mac(in, key);
+    byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
     Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
         + "13000000000000000000000000000000"));
   }
@@ -331,8 +331,8 @@ public class ChaCha20Poly1305Test {
         + "00000000000000000000000000000000"
         + "00000000000000000000000000000000");
     byte[] nonce = TestUtil.hexDecode("000000000000000000000000");
-    ChaCha20Poly1305 aead = new ChaCha20Poly1305(key);
-    Truth.assertThat(aead.poly1305KeyGen(nonce)).isEqualTo(TestUtil.hexDecode(""
+    ChaCha20 cipher = new ChaCha20(key);
+    Truth.assertThat(cipher.getAeadSubKey(nonce)).isEqualTo(TestUtil.hexDecode(""
         + "76b8e0ada0f13d90405d6ae55386bd28"
         + "bdd219b8a08ded1aa836efcc8b770dc7"));
   }
@@ -347,8 +347,8 @@ public class ChaCha20Poly1305Test {
         + "00000000000000000000000000000000"
         + "00000000000000000000000000000001");
     byte[] nonce = TestUtil.hexDecode("000000000000000000000002");
-    ChaCha20Poly1305 aead = new ChaCha20Poly1305(key);
-    Truth.assertThat(aead.poly1305KeyGen(nonce)).isEqualTo(TestUtil.hexDecode(""
+    ChaCha20 cipher = new ChaCha20(key);
+    Truth.assertThat(cipher.getAeadSubKey(nonce)).isEqualTo(TestUtil.hexDecode(""
         + "ecfa254f845f647473d3cb140da9e876"
         + "06cb33066c447b87bc2666dde3fbb739"));
   }
@@ -363,8 +363,8 @@ public class ChaCha20Poly1305Test {
         + "1c9240a5eb55d38af333888604f6b5f0"
         + "473917c1402b80099dca5cbc207075c0");
     byte[] nonce = TestUtil.hexDecode("000000000000000000000002");
-    ChaCha20Poly1305 aead = new ChaCha20Poly1305(key);
-    Truth.assertThat(aead.poly1305KeyGen(nonce)).isEqualTo(TestUtil.hexDecode(""
+    ChaCha20 cipher = new ChaCha20(key);
+    Truth.assertThat(cipher.getAeadSubKey(nonce)).isEqualTo(TestUtil.hexDecode(""
         + "965e3bc6f9ec7ed9560808f4d229f94b"
         + "137ff275ca9b3fcbdd59deaad23310ae"));
   }
@@ -400,7 +400,7 @@ public class ChaCha20Poly1305Test {
         + "a6ad5cb4022b02709b");
     byte[] aad = TestUtil.hexDecode(""
         + "f33388860000000000004e91");
-    ChaCha20Poly1305 aead = new ChaCha20Poly1305(key);
+    DjbCipherPoly1305 aead = DjbCipherPoly1305.constructChaCha20Poly1305(key);
     Truth.assertThat(aead.decrypt(ciphertext, aad)).isEqualTo(TestUtil.hexDecode(""
         + "496e7465726e65742d44726166747320"
         + "61726520647261667420646f63756d65"
@@ -425,13 +425,13 @@ public class ChaCha20Poly1305Test {
   public void testRandomChaCha20Poly1305() throws GeneralSecurityException {
     for (int i = 0; i < 1000; i++) {
       byte[] expectedInput = Random.randBytes(new java.util.Random().nextInt(300));
-      byte[] aad = Random.randBytes(ChaCha20Poly1305.BLOCK_SIZE_IN_BYTES);
+      byte[] aad = Random.randBytes(DjbCipherPoly1305.BLOCK_SIZE_IN_BYTES);
       byte[] key = Random.randBytes(32);
-      ChaCha20Poly1305 cipher = new ChaCha20Poly1305(key);
+      DjbCipherPoly1305 cipher = DjbCipherPoly1305.constructChaCha20Poly1305(key);
       byte[] output = cipher.encrypt(expectedInput, aad);
       byte[] nonce = Arrays.copyOfRange(
-          output, ChaCha20Poly1305.BLOCK_SIZE_IN_BYTES,
-          ChaCha20.NONCE_SIZE_IN_BYTES + ChaCha20Poly1305.BLOCK_SIZE_IN_BYTES);
+          output, DjbCipherPoly1305.BLOCK_SIZE_IN_BYTES,
+          ChaCha20.NONCE_SIZE_IN_BYTES + DjbCipherPoly1305.BLOCK_SIZE_IN_BYTES);
       byte[] actualInput = null;
       try {
         actualInput = cipher.decrypt(output, aad);
@@ -454,9 +454,9 @@ public class ChaCha20Poly1305Test {
 
   @Test
   public void testEncryptingEmptyString() throws GeneralSecurityException {
-    byte[] aad = Random.randBytes(ChaCha20Poly1305.BLOCK_SIZE_IN_BYTES);
+    byte[] aad = Random.randBytes(DjbCipherPoly1305.BLOCK_SIZE_IN_BYTES);
     byte[] key = Random.randBytes(32);
-    ChaCha20Poly1305 cipher = new ChaCha20Poly1305(key);
+    DjbCipherPoly1305 cipher = DjbCipherPoly1305.constructChaCha20Poly1305(key);
     byte[] ciphertext = cipher.encrypt(new byte[0], aad);
     Truth.assertThat(cipher.decrypt(ciphertext, aad)).isEqualTo(new byte[0]);
   }
@@ -464,7 +464,7 @@ public class ChaCha20Poly1305Test {
   @Test
   public void testChaChaPoly1305ThrowsIllegalArgExpWhenKeyLenIsGreaterThan32() {
     try {
-      new ChaCha20Poly1305(new byte[33]);
+      DjbCipherPoly1305.constructChaCha20Poly1305(new byte[33]);
       fail("Expected IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
       Truth.assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
@@ -474,7 +474,7 @@ public class ChaCha20Poly1305Test {
   @Test
   public void testChaChaPoly1305ThrowsIllegalArgExpWhenKeyLenIsLessThan32() {
     try {
-      new ChaCha20Poly1305(new byte[31]);
+      DjbCipherPoly1305.constructChaCha20Poly1305(new byte[31]);
       fail("Expected IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
       Truth.assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
@@ -483,7 +483,7 @@ public class ChaCha20Poly1305Test {
 
   @Test
   public void testChaCha20DecryptThrowsGeneralSecurityExpWhenCiphertextIsTooShort() {
-    ChaCha20Poly1305 cipher = new ChaCha20Poly1305(new byte[32]);
+    DjbCipherPoly1305 cipher = DjbCipherPoly1305.constructChaCha20Poly1305(new byte[32]);
     try {
       cipher.decrypt(new byte[27], new byte[1]);
       fail("Expected GeneralSecurityException.");

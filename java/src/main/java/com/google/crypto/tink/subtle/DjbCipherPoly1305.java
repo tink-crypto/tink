@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import static com.google.crypto.tink.subtle.DJBCipher.KEY_SIZE_IN_BYTES;
+import static com.google.crypto.tink.subtle.DjbCipher.KEY_SIZE_IN_BYTES;
 
 import com.google.crypto.tink.Aead;
 import java.nio.ByteBuffer;
@@ -25,34 +25,30 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 /**
- * an {@code Aead} construction with DJB's ChaCha20 and Poly1305, based on
+ * an {@code Aead} construction with a {@link DjbCipher} and Poly1305, based on
  * <a href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC 7539, section 2.8</a>.
  *
  * The implementation is based on poly1305 implementation by Andrew Moon
  * (https://github.com/floodyberry/poly1305-donna) and released as public domain.
  */
-public class ChaCha20Poly1305 implements Aead {
+public class DjbCipherPoly1305 implements Aead {
 
-  private static final byte[] ZERO_INPUT_32 = new byte[32];
   public static final int BLOCK_SIZE_IN_BYTES = 16;
 
-  private final ChaCha20 chaCha20;
+  private final DjbCipher djbCipher;
+
+  private DjbCipherPoly1305(DjbCipher djbCipher) {
+    this.djbCipher = djbCipher;
+  }
 
   /**
    * Constructs a new ChaCha20Poly1305 cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not
-   * {@link DJBCipher#KEY_SIZE_IN_BYTES}.
+   * {@link DjbCipher#KEY_SIZE_IN_BYTES}.
    */
-  public ChaCha20Poly1305(final byte[] key) {
-    chaCha20 = new ChaCha20(key);
-  }
-
-  // Package private for testing
-  byte[] poly1305KeyGen(byte[] nonce) {
-    ByteBuffer out = ByteBuffer.allocate(32);
-    chaCha20.process(out, ZERO_INPUT_32, 0, nonce, 0);
-    return out.array();
+  public static DjbCipherPoly1305 constructChaCha20Poly1305(final byte[] key) {
+    return new DjbCipherPoly1305(new ChaCha20(key));
   }
 
   private static long load32(byte[] in, int idx) {
@@ -202,17 +198,19 @@ public class ChaCha20Poly1305 implements Aead {
     return macData.array();
   }
 
-  private byte[] computeTag(ByteBuffer ciphertextBuf, byte[] additionalData) {
-    byte[] nonce = new byte[chaCha20.nonceSizeInBytes()];
-    ciphertextBuf.get(nonce);
-    return poly1305Mac(macData(additionalData, ciphertextBuf), poly1305KeyGen(nonce));
+  private byte[] computeTag(ByteBuffer ciphertextBuf, byte[] additionalData, byte[] aeadSubKey) {
+
+    return poly1305Mac(macData(additionalData, ciphertextBuf), aeadSubKey);
   }
 
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] additionalData)
       throws GeneralSecurityException {
-    byte[] ciphertext = chaCha20.encrypt(plaintext);
-    byte[] tag = computeTag(ByteBuffer.wrap(ciphertext), additionalData);
+    byte[] aeadSubKey = new byte[KEY_SIZE_IN_BYTES];
+    byte[] ciphertext = djbCipher.encrypt(plaintext, aeadSubKey);
+    ByteBuffer ciphertextBuf = ByteBuffer.wrap(ciphertext);
+    ciphertextBuf.position(djbCipher.nonceSizeInBytes());
+    byte[] tag = computeTag(ciphertextBuf, additionalData, aeadSubKey);
     ByteBuffer ciphertextWithTag = ByteBuffer.allocate(ciphertext.length + tag.length);
     ciphertextWithTag.put(tag);
     ciphertextWithTag.put(ciphertext);
@@ -222,16 +220,18 @@ public class ChaCha20Poly1305 implements Aead {
   @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] additionalData)
       throws GeneralSecurityException {
-    if (ciphertext.length < BLOCK_SIZE_IN_BYTES + chaCha20.nonceSizeInBytes()) {
+    if (ciphertext.length < BLOCK_SIZE_IN_BYTES + djbCipher.nonceSizeInBytes()) {
       throw new GeneralSecurityException("ciphertext too short");
     }
     byte[] tag = new byte[BLOCK_SIZE_IN_BYTES];
     ByteBuffer ciphertextBuf = ByteBuffer.wrap(ciphertext);
     ciphertextBuf.get(tag);
-    byte[] expectedTag = computeTag(ciphertextBuf, additionalData);
+    byte[] nonce = new byte[djbCipher.nonceSizeInBytes()];
+    ciphertextBuf.get(nonce);
+    byte[] expectedTag = computeTag(ciphertextBuf, additionalData, djbCipher.getAeadSubKey(nonce));
     if (!SubtleUtil.arrayEquals(tag, expectedTag)) {
       throw new GeneralSecurityException("Tags do not match.");
     }
-    return chaCha20.decrypt(ciphertext, BLOCK_SIZE_IN_BYTES);
+    return djbCipher.decrypt(ciphertext, BLOCK_SIZE_IN_BYTES);
   }
 }

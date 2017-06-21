@@ -20,8 +20,8 @@ import com.google.crypto.tink.ChaCha20Poly1305Key;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.TinkProto.KeyData;
-import com.google.crypto.tink.subtle.ChaCha20Poly1305;
-import com.google.crypto.tink.subtle.DJBCipher;
+import com.google.crypto.tink.subtle.DjbCipher;
+import com.google.crypto.tink.subtle.DjbCipherPoly1305;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
@@ -64,7 +64,7 @@ public final class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
     }
     ChaCha20Poly1305Key keyProto = (ChaCha20Poly1305Key) key;
     validateKey(keyProto);
-    return new ChaCha20Poly1305(keyProto.getKeyValue().toByteArray());
+    return DjbCipherPoly1305.constructChaCha20Poly1305(keyProto.getKeyValue().toByteArray());
   }
 
   @Override
@@ -100,13 +100,13 @@ public final class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
   private ChaCha20Poly1305Key newKey() throws GeneralSecurityException {
     return ChaCha20Poly1305Key.newBuilder()
         .setVersion(VERSION)
-        .setKeyValue(ByteString.copyFrom(Random.randBytes(DJBCipher.KEY_SIZE_IN_BYTES)))
+        .setKeyValue(ByteString.copyFrom(Random.randBytes(DjbCipher.KEY_SIZE_IN_BYTES)))
         .build();
   }
 
   private void validateKey(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
     SubtleUtil.validateVersion(keyProto.getVersion(), VERSION);
-    if (keyProto.getKeyValue().size() != DJBCipher.KEY_SIZE_IN_BYTES) {
+    if (keyProto.getKeyValue().size() != DjbCipher.KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("invalid ChaCha20Poly1305Key: incorrect key length");
     }
   }

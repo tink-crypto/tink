@@ -26,9 +26,9 @@ import java.util.Arrays;
 import org.junit.Test;
 
 /**
- * Base unit test class for DJBCiphers.
+ * Base unit test class for DjbCiphers.
  */
-public abstract class DJBCipherTestBase<T extends DJBCipher> {
+public abstract class DjbCipherTestBase<T extends DjbCipher> {
 
   protected abstract T createInstance(byte[] key);
 
@@ -53,7 +53,7 @@ public abstract class DJBCipherTestBase<T extends DJBCipher> {
     for (int i = 0; i < 1000; i++) {
       byte[] expectedInput = Random.randBytes(new java.util.Random().nextInt(300));
       byte[] key = Random.randBytes(32);
-      DJBCipher cipher = createInstance(key);
+      DjbCipher cipher = createInstance(key);
       byte[] output = cipher.encrypt(expectedInput);
       byte[] nonce = Arrays.copyOf(output, cipher.nonceSizeInBytes());
       byte[] actualInput = cipher.decrypt(output);
@@ -91,7 +91,7 @@ public abstract class DJBCipherTestBase<T extends DJBCipher> {
 
   @Test
   public void testDecryptThrowsGeneralSecurityExpWhenCiphertextIsTooShort() {
-    DJBCipher cipher = createInstance(new byte[32]);
+    DjbCipher cipher = createInstance(new byte[32]);
     try {
       cipher.decrypt(new byte[2]);
       fail("Expected GeneralSecurityException.");

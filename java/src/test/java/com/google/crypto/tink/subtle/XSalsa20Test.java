@@ -30,7 +30,7 @@ import org.junit.runners.JUnit4;
  * Unit tests for {@link XSalsa20}.
  */
 @RunWith(JUnit4.class)
-public class XSalsa20Test extends DJBCipherTestBase<XSalsa20> {
+public class XSalsa20Test extends DjbCipherTestBase<XSalsa20> {
 
   private static final XSalsa20 dummy = new XSalsa20(new byte[32]);
 
@@ -40,7 +40,7 @@ public class XSalsa20Test extends DJBCipherTestBase<XSalsa20> {
   }
 
   private static int[] matrix(int[] bytes) {
-    return DJBCipher.toIntArray(
+    return DjbCipher.toIntArray(
         ByteBuffer.wrap(twosCompByte(bytes)).order(ByteOrder.LITTLE_ENDIAN));
   }
 
@@ -74,7 +74,7 @@ public class XSalsa20Test extends DJBCipherTestBase<XSalsa20> {
     ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
     for (int i = 0; i < count; i++) {
       buf.asIntBuffer().put(dummy.shuffleAdd(x));
-      x = DJBCipher.toIntArray(buf);
+      x = DjbCipher.toIntArray(buf);
     }
     Truth.assertThat(buf.array()).isEqualTo(twosCompByte(output));
   }

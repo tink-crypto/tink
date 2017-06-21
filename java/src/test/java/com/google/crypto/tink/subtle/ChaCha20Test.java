@@ -28,7 +28,7 @@ import org.junit.runners.JUnit4;
  * Unit tests for ChaCha20.
  */
 @RunWith(JUnit4.class)
-public class ChaCha20Test extends DJBCipherTestBase<ChaCha20> {
+public class ChaCha20Test extends DjbCipherTestBase<ChaCha20> {
 
   private static ChaCha20 dummyCipher = new ChaCha20(new byte[32]);
 
