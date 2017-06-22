@@ -64,7 +64,7 @@ public final class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
     }
     ChaCha20Poly1305Key keyProto = (ChaCha20Poly1305Key) key;
     validateKey(keyProto);
-    return DjbCipherPoly1305.constructChaCha20Poly1305(keyProto.getKeyValue().toByteArray());
+    return DjbCipherPoly1305.constructChaCha20Poly1305Ietf(keyProto.getKeyValue().toByteArray());
   }
 
   @Override

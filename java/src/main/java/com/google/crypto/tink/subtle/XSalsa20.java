@@ -16,12 +16,16 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.crypto.tink.subtle.DjbCipherPoly1305.MAC_KEY_SIZE_IN_BYTES;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
  * Djb's XSalsa20 stream cipher.
  * https://cr.yp.to/snuffle/xsalsa-20081128.pdf
+ *
+ * This cipher is meant to be used to construct an AEAD with Poly1305.
  */
 public class XSalsa20 extends DjbCipher {
 
@@ -58,7 +62,7 @@ public class XSalsa20 extends DjbCipher {
     quarterRound(state, 15, 12, 13, 14);
   }
 
-  static void shuffleInternal(final int[] state) {
+  private static void shuffleInternal(final int[] state) {
     for (int i = 0; i < 10; i++) {
       columnRound(state);
       rowRound(state);
@@ -87,7 +91,7 @@ public class XSalsa20 extends DjbCipher {
     return hSalsa20(key, ZERO);
   }
 
-  static byte[] hSalsa20(final byte[] key, final byte[] nonce) {
+  private static byte[] hSalsa20(final byte[] key, final byte[] nonce) {
     int[] state = new int[BLOCK_SIZE_IN_INTS];
     setSigma(state);
     setKey(state, key);
@@ -137,14 +141,9 @@ public class XSalsa20 extends DjbCipher {
   }
 
   @Override
-  byte[] getAeadSubKey(byte[] nonce) {
-    return new StateGen(this, nonce, 0).read(32);
-  }
-
-  @Override
-  StateGen constructForEncDec(byte[] nonce) {
-    StateGen stateGen = new StateGen(this, nonce, 0);
-    stateGen.read(32);  // skip the aead sub key.
-    return stateGen;
+  KeyStream getKeyStream(byte[] nonce) {
+    KeyStream keyStream = new KeyStream(this, nonce, 0);
+    keyStream.first(MAC_KEY_SIZE_IN_BYTES);  // skip the aead sub key.
+    return keyStream;
   }
 }

@@ -19,7 +19,7 @@ package com.google.crypto.tink.subtle;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.subtle.DjbCipher.StateGen;
+import com.google.crypto.tink.subtle.DjbCipher.KeyStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -64,12 +64,7 @@ public class DjbCipherTest {
     }
 
     @Override
-    byte[] getAeadSubKey(byte[] nonce) {
-      return new byte[0];
-    }
-
-    @Override
-    StateGen constructForEncDec(byte[] nonce) {
+    KeyStream getKeyStream(byte[] nonce) {
       return null;
     }
   }
@@ -81,10 +76,10 @@ public class DjbCipherTest {
     nonce[4] = 2;
     nonce[8] = 2;
     nonce[12] = 2;
-    StateGen stateGen = new StateGen(new MockDjbCipher(new byte[32]), nonce, 3);
-    assertThat(stateGen.next()).isEqualTo(
+    KeyStream keyStream = new KeyStream(new MockDjbCipher(new byte[32]), nonce, 3);
+    assertThat(keyStream.next()).isEqualTo(
         new int[] {8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 12});
-    assertThat(stateGen.next()).isEqualTo(
+    assertThat(keyStream.next()).isEqualTo(
         new int[] {10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 20});
   }
 
@@ -95,20 +90,20 @@ public class DjbCipherTest {
     nonce[4] = 2;
     nonce[8] = 2;
     nonce[12] = 2;
-    StateGen stateGen = new StateGen(new MockDjbCipher(new byte[32]), nonce, 3);
-    assertThat(stateGen.read(20)).isEqualTo(
+    KeyStream keyStream = new KeyStream(new MockDjbCipher(new byte[32]), nonce, 3);
+    assertThat(keyStream.first(20)).isEqualTo(
         new byte[] {8, 0, 0, 0, 8, 0, 0, 0, 8, 0, 0, 0, 8, 0, 0, 0, 4, 0, 0, 0});
-    assertThat(stateGen.next()).isEqualTo(
+    assertThat(keyStream.next()).isEqualTo(
         new int[] {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 12, 10, 10, 10, 10, 5});
-    assertThat(stateGen.next()).isEqualTo(
+    assertThat(keyStream.next()).isEqualTo(
         new int[] {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 20, 12, 12, 12, 12, 6});
   }
 
   @Test
   public void testStateGenReadLengthGT16ThrowsIllegalArgException() {
-    StateGen stateGen = new StateGen(new MockDjbCipher(new byte[32]), new byte[16], 3);
+    KeyStream keyStream = new KeyStream(new MockDjbCipher(new byte[32]), new byte[16], 3);
     try {
-      stateGen.read(64);
+      keyStream.first(64);
       fail("Expected IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
       assertThat(e).hasMessageThat().containsMatch("length must be less than 64. length: 64");
@@ -117,27 +112,27 @@ public class DjbCipherTest {
 
   @Test
   public void testStateGenReadCalledTwiceThrowsIllegalStateException() {
-    StateGen stateGen = new StateGen(new MockDjbCipher(new byte[32]), new byte[16], 3);
-    stateGen.read(60);
+    KeyStream keyStream = new KeyStream(new MockDjbCipher(new byte[32]), new byte[16], 3);
+    keyStream.first(60);
     try {
-      stateGen.read(4);
+      keyStream.first(4);
       fail("Expected IllegalStateException.");
     } catch (IllegalStateException e) {
       assertThat(e).hasMessageThat().containsMatch(
-          "read can only be called once and before next().");
+          "first can only be called once and before next().");
     }
   }
 
   @Test
   public void testStateGenReadCalledAfterNextThrowsIllegalStateException() {
-    StateGen stateGen = new StateGen(new MockDjbCipher(new byte[32]), new byte[16], 3);
-    stateGen.next();
+    KeyStream keyStream = new KeyStream(new MockDjbCipher(new byte[32]), new byte[16], 3);
+    keyStream.next();
     try {
-      stateGen.read(1);
+      keyStream.first(1);
       fail("Expected IllegalStateException.");
     } catch (IllegalStateException e) {
       assertThat(e).hasMessageThat().containsMatch(
-          "read can only be called once and before next().");
+          "first can only be called once and before next().");
     }
   }
 }

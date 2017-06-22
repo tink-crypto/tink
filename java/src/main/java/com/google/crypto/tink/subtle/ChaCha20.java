@@ -21,6 +21,8 @@ import java.nio.ByteBuffer;
 /**
  * Djb's {@link ChaCha20} stream cipher based on RFC7539 (i.e., uses 96-bit random nonces).
  * https://tools.ietf.org/html/rfc7539
+ *
+ * This cipher is meant to be used to construct an AEAD with Poly1305.
  */
 public class ChaCha20 extends DjbCipher {
 
@@ -83,12 +85,7 @@ public class ChaCha20 extends DjbCipher {
   }
 
   @Override
-  byte[] getAeadSubKey(byte[] nonce) {
-    return new StateGen(this, nonce, 0).read(32);
-  }
-
-  @Override
-  StateGen constructForEncDec(byte[] nonce) {
-    return new StateGen(this, nonce, 1);
+  KeyStream getKeyStream(byte[] nonce) {
+    return new KeyStream(this, nonce, 1);
   }
 }

@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.crypto.tink.subtle.DjbCipherPoly1305.MAC_KEY_SIZE_IN_BYTES;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -24,6 +26,8 @@ import java.util.Arrays;
 
 /**
  * Abstract base class for class of Djb's ciphers.
+ *
+ * Class of Djb's ciphers that are meant to be used to construct an AEAD with Poly1305.
  */
 public abstract class DjbCipher implements IndCpaCipher {
 
@@ -36,7 +40,7 @@ public abstract class DjbCipher implements IndCpaCipher {
       new byte[]{'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k' }));
 
   // TODO(anergiz): change this to ImmutableByteArray.
-  protected final byte[] key;
+  final byte[] key;
 
   public DjbCipher(final byte[] key) {
     if (key.length != KEY_SIZE_IN_BYTES) {
@@ -56,9 +60,7 @@ public abstract class DjbCipher implements IndCpaCipher {
     return ret;
   }
 
-  abstract void shuffle(final int[] state);
-
-  int[] shuffleAdd(final int[] state) {
+  int[] shuffleAdd(int[] state) {
     int[] x = Arrays.copyOf(state, state.length);
     shuffle(x);
     for (int i = 0; i < state.length; i++) {
@@ -67,69 +69,87 @@ public abstract class DjbCipher implements IndCpaCipher {
     return x;
   }
 
-  abstract int[] initialState(byte[] nonce, int counter);
+  /**
+   * Returns a one-time authenticator key as part of an AEAD algorithm (e.g., Poly1305).
+   */
+  byte[] getAuthenticatorKey(byte[] nonce) {
+    return new KeyStream(this, nonce, 0).first(MAC_KEY_SIZE_IN_BYTES);
+  }
+
+  abstract void shuffle(int[] state);
+
+  abstract int[] initialState(final byte[] nonce, int counter);
 
   abstract void incrementCounter(int[] state);
 
   abstract int nonceSizeInBytes();
 
   /**
+   * Constructs a {@link KeyStream} to be used in encryption and decryption for sequence generation.
+   */
+  abstract KeyStream getKeyStream(final byte[] nonce);
+
+  /**
    * State generator for DjbCipher types.
    * Stateful and <b>not</b> thread-safe.
-   * {@link StateGen} is not stored as an instance variable in {@link DjbCipher} types to preserve
+   * {@link KeyStream} is not stored as an instance variable in {@link DjbCipher} types to preserve
    * their stateless guarantee. Instead, it is used in local scope to easily maintain the local
    * state inside of a single call (i.e., encrypt or decrypt).
    */
-  static class StateGen {
+  static class KeyStream {
 
     private DjbCipher djbCipher;
     private int[] state;
-    private int[] shuffledState;
-    private int[] cachedShuffledState;
-    private int currentPos;
+    private int[] keyStreamBlock;
+    // The blocks that is returned, can be unaligned from the actual key stream blocks if first is
+    // called before next.
+    private int[] keyStreamBlockReturn;
+    private int currentPosInBlock;
     private boolean readCalled;
 
-    StateGen(DjbCipher djbCipher, final byte[] nonce, int counter) {
+    KeyStream(DjbCipher djbCipher, final byte[] nonce, int counter) {
       this.djbCipher = djbCipher;
-      cachedShuffledState = new int[BLOCK_SIZE_IN_INTS];
-      currentPos = 0;
+      keyStreamBlockReturn = new int[BLOCK_SIZE_IN_INTS];
+      currentPosInBlock = 0;
       state = djbCipher.initialState(nonce, counter);
-      shuffledState = djbCipher.shuffleAdd(state);
+      keyStreamBlock = djbCipher.shuffleAdd(state);
       readCalled = false;
     }
 
-    byte[] read(int length) {
+    byte[] first(int byteLength) {
       if (readCalled) {
-        throw new IllegalStateException("read can only be called once and before next().");
+        throw new IllegalStateException("first can only be called once and before next().");
       }
-      if (length >= BLOCK_SIZE_IN_BYTES) {
+      if (byteLength >= BLOCK_SIZE_IN_BYTES) {
         throw new IllegalArgumentException(
-            String.format("length must be less than 64. length: %d", length));
+            String.format("length must be less than 64. length: %d", byteLength));
       }
-      if (length % 4 != 0) {
+      if (byteLength % 4 != 0) {
         throw new IllegalArgumentException(
-            String.format("length must be a multiple of 8. length: %d", length));
+            String.format("length must be a multiple of 4. length: %d", byteLength));
       }
       readCalled = true;
-      currentPos = length / 4;
-      ByteBuffer out = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
-      out.asIntBuffer().put(shuffledState, 0, length / 4);
+      currentPosInBlock = byteLength / 4;
+      ByteBuffer out = ByteBuffer.allocate(byteLength).order(ByteOrder.LITTLE_ENDIAN);
+      out.asIntBuffer().put(keyStreamBlock, 0, byteLength / 4);
       return out.array();
     }
 
     int[] next() {
       readCalled = true;
       System.arraycopy(
-          shuffledState, currentPos, cachedShuffledState, 0, BLOCK_SIZE_IN_INTS - currentPos);
+          keyStreamBlock,
+          currentPosInBlock, keyStreamBlockReturn, 0, BLOCK_SIZE_IN_INTS - currentPosInBlock);
       djbCipher.incrementCounter(state);
-      shuffledState = djbCipher.shuffleAdd(state);
+      keyStreamBlock = djbCipher.shuffleAdd(state);
       System.arraycopy(
-          shuffledState, 0, cachedShuffledState, BLOCK_SIZE_IN_INTS - currentPos, currentPos);
-      return cachedShuffledState;
+          keyStreamBlock, 0, keyStreamBlockReturn, BLOCK_SIZE_IN_INTS - currentPosInBlock,
+          currentPosInBlock);
+      return keyStreamBlockReturn;
     }
   }
 
-  void process(ByteBuffer output, final byte[] input, int inPos, StateGen stateGen) {
+  private void process(ByteBuffer output, final byte[] input, int inPos, KeyStream keyStream) {
     // xor the underlying cipher stream with the input.
     ByteBuffer buf = ByteBuffer.allocate(BLOCK_SIZE_IN_BYTES).order(ByteOrder.LITTLE_ENDIAN);
     int pos = inPos;
@@ -137,7 +157,7 @@ public abstract class DjbCipher implements IndCpaCipher {
     int todo;
     while (inLen > 0) {
       todo = inLen < BLOCK_SIZE_IN_BYTES ? inLen : BLOCK_SIZE_IN_BYTES;
-      buf.asIntBuffer().put(stateGen.next());
+      buf.asIntBuffer().put(keyStream.next());
       for (int j = 0; j < todo; j++, pos++) {
         output.put((byte) (input[pos] ^ buf.get(j)));
       }
@@ -147,36 +167,19 @@ public abstract class DjbCipher implements IndCpaCipher {
 
   // TestOnly
   void process(ByteBuffer output, final byte[] input, int inPos, byte[] nonce, int counter) {
-    process(output, input, inPos, new StateGen(this, nonce, counter));
-  }
-
-  /**
-   * Returns the AEAD sub key.
-   */
-  abstract byte[] getAeadSubKey(final byte[] nonce);
-
-  /**
-   * Constructs a {@link StateGen} to be used in encryption and decryption for sequence generation.
-   */
-  abstract StateGen constructForEncDec(final byte[] nonce);
-
-  public byte[] encrypt(final byte[] plaintext, byte[] aeadSubKey) throws GeneralSecurityException {
-    if (plaintext.length > Integer.MAX_VALUE - nonceSizeInBytes()) {
-      throw new GeneralSecurityException("plaintext too long");
-    }
-    byte[] nonce = Random.randBytes(nonceSizeInBytes());
-    if (aeadSubKey != null) {
-      System.arraycopy(getAeadSubKey(nonce), 0, aeadSubKey, 0, aeadSubKey.length);
-    }
-    ByteBuffer ciphertext = ByteBuffer.allocate(plaintext.length + nonceSizeInBytes());
-    ciphertext.put(nonce);
-    process(ciphertext, plaintext, 0, constructForEncDec(nonce));
-    return ciphertext.array();
+    process(output, input, inPos, new KeyStream(this, nonce, counter));
   }
 
   @Override
   public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
-    return encrypt(plaintext, null);
+    if (plaintext.length > Integer.MAX_VALUE - nonceSizeInBytes()) {
+      throw new GeneralSecurityException("plaintext too long");
+    }
+    byte[] nonce = Random.randBytes(nonceSizeInBytes());
+    ByteBuffer ciphertext = ByteBuffer.allocate(plaintext.length + nonceSizeInBytes());
+    ciphertext.put(nonce);
+    process(ciphertext, plaintext, 0, getKeyStream(nonce));
+    return ciphertext.array();
   }
 
   byte[] decrypt(final byte[] ciphertext, int startPos) throws GeneralSecurityException {
@@ -186,7 +189,7 @@ public abstract class DjbCipher implements IndCpaCipher {
     byte[] nonce = new byte[nonceSizeInBytes()];
     System.arraycopy(ciphertext, startPos, nonce, 0, nonceSizeInBytes());
     ByteBuffer plaintext = ByteBuffer.allocate(ciphertext.length - nonceSizeInBytes() - startPos);
-    process(plaintext, ciphertext, startPos + nonceSizeInBytes(), constructForEncDec(nonce));
+    process(plaintext, ciphertext, startPos + nonceSizeInBytes(), getKeyStream(nonce));
     return plaintext.array();
   }
 

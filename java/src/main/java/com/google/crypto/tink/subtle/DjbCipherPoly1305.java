@@ -25,15 +25,15 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 /**
- * an {@code Aead} construction with a {@link DjbCipher} and Poly1305, based on
- * <a href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC 7539, section 2.8</a>.
+ * an {@code Aead} construction with a {@link DjbCipher} and Poly1305.
  *
  * The implementation is based on poly1305 implementation by Andrew Moon
  * (https://github.com/floodyberry/poly1305-donna) and released as public domain.
  */
-public class DjbCipherPoly1305 implements Aead {
+public abstract class DjbCipherPoly1305 implements Aead {
 
-  public static final int BLOCK_SIZE_IN_BYTES = 16;
+  public static final int MAC_TAG_SIZE_IN_BYTES = 16;
+  public static final int MAC_KEY_SIZE_IN_BYTES = 32;
 
   private final DjbCipher djbCipher;
 
@@ -42,13 +42,71 @@ public class DjbCipherPoly1305 implements Aead {
   }
 
   /**
-   * Constructs a new ChaCha20Poly1305 cipher with the supplied {@code key}.
+   * Based on <a href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC 7539, section 2.8</a>.
+   */
+  private static class DjbCipherPoly1305Ietf extends DjbCipherPoly1305 {
+
+    private DjbCipherPoly1305Ietf(DjbCipher djbCipher) {
+      super(djbCipher);
+    }
+
+    @Override
+    byte[] macData(byte[] aad, ByteBuffer ciphertext)  {
+      int aadCeilLen = blockSizeMultipleCeil(aad.length);
+      int ciphertextLen = ciphertext.remaining();
+      int ciphertextCeilLen = blockSizeMultipleCeil(ciphertextLen);
+      ByteBuffer macData = ByteBuffer.allocate(
+          aadCeilLen + ciphertextCeilLen + 16).order(ByteOrder.LITTLE_ENDIAN);
+      macData.put(aad);
+      macData.position(aadCeilLen);
+      macData.put(ciphertext);
+      macData.position(aadCeilLen + ciphertextCeilLen);
+      macData.putLong(aad.length);
+      macData.putLong(ciphertextLen);
+      return macData.array();
+    }
+  }
+
+  /**
+   * DJB's NaCl box compatible Poly1305.
+   */
+  private static class DjbCipherPoly1305Nacl extends DjbCipherPoly1305 {
+
+    private DjbCipherPoly1305Nacl(DjbCipher djbCipher) {
+      super(djbCipher);
+    }
+
+    @Override
+    byte[] macData(byte[] aad, ByteBuffer ciphertext)  {
+      byte[] macData = new byte[ciphertext.remaining()];
+      ciphertext.get(macData);
+      return macData;
+    }
+  }
+
+  /**
+   * Constructs a new ChaCha20Poly1305 cipher with the supplied {@code key}. Compatible with
+   * RFC 7539.
    *
    * @throws IllegalArgumentException when {@code key} length is not
    * {@link DjbCipher#KEY_SIZE_IN_BYTES}.
    */
-  public static DjbCipherPoly1305 constructChaCha20Poly1305(final byte[] key) {
-    return new DjbCipherPoly1305(new ChaCha20(key));
+  public static DjbCipherPoly1305 constructChaCha20Poly1305Ietf(final byte[] key) {
+    return new DjbCipherPoly1305Ietf(new ChaCha20(key));
+  }
+
+  /**
+   * Constructs a new NaCl compatible XSalsa20Poly1305 cipher with the supplied {@code key}.
+   *
+   * @throws IllegalArgumentException when {@code key} length is not
+   * {@link DjbCipher#KEY_SIZE_IN_BYTES}.
+   */
+  public static DjbCipherPoly1305 constructXSalsa20Poly1305Nacl(final byte[] key) {
+    // We need this as XSalsa20.hSalsa20 does not check the length.
+    if (key.length != KEY_SIZE_IN_BYTES) {
+      throw new IllegalArgumentException("The key length in bytes must be 32.");
+    }
+    return new DjbCipherPoly1305Nacl(new XSalsa20(XSalsa20.hSalsa20(key)));
   }
 
   private static long load32(byte[] in, int idx) {
@@ -69,10 +127,10 @@ public class DjbCipherPoly1305 implements Aead {
   }
 
   private static void copyBlockSize(byte[] output, byte[] in, int idx) {
-    int copyCount = Math.min(BLOCK_SIZE_IN_BYTES, in.length - idx);
+    int copyCount = Math.min(MAC_TAG_SIZE_IN_BYTES, in.length - idx);
     System.arraycopy(in, idx, output, 0, copyCount);
     output[copyCount] = 1;
-    if (copyCount != BLOCK_SIZE_IN_BYTES) {
+    if (copyCount != MAC_TAG_SIZE_IN_BYTES) {
       Arrays.fill(output, copyCount + 1, output.length, (byte) 0);
     }
   }
@@ -106,14 +164,14 @@ public class DjbCipherPoly1305 implements Aead {
     long s3 = r3 * 5;
     long s4 = r4 * 5;
 
-    byte[] buf = new byte[BLOCK_SIZE_IN_BYTES + 1];
-    for (int i = 0; i < msg.length; i += BLOCK_SIZE_IN_BYTES) {
+    byte[] buf = new byte[MAC_TAG_SIZE_IN_BYTES + 1];
+    for (int i = 0; i < msg.length; i += MAC_TAG_SIZE_IN_BYTES) {
       copyBlockSize(buf, msg, i);
       h0 += load26(buf, 0, 0);
       h1 += load26(buf, 3, 2);
       h2 += load26(buf, 6, 4);
       h3 += load26(buf, 9, 6);
-      h4 += load26(buf, 12, 8) | (buf[BLOCK_SIZE_IN_BYTES] << 24);
+      h4 += load26(buf, 12, 8) | (buf[MAC_TAG_SIZE_IN_BYTES] << 24);
 
       // d = r * h
       d0 = h0 * r0 + h1 * s4 + h2 * s3 + h3 * s2 + h4 * s1;
@@ -170,7 +228,7 @@ public class DjbCipherPoly1305 implements Aead {
     c = h2 + load32(key, 24) + (c >> 32); h2 = c & 0xffffffffL;
     c = h3 + load32(key, 28) + (c >> 32); h3 = c & 0xffffffffL;
 
-    byte[] mac = new byte[BLOCK_SIZE_IN_BYTES];
+    byte[] mac = new byte[MAC_TAG_SIZE_IN_BYTES];
     toByteArray(mac, h0, 0);
     toByteArray(mac, h1, 4);
     toByteArray(mac, h2, 8);
@@ -179,37 +237,24 @@ public class DjbCipherPoly1305 implements Aead {
     return mac;
   }
 
-  private int blockSizeMultipleCeil(int x) {
-    return ((x + BLOCK_SIZE_IN_BYTES - 1) / BLOCK_SIZE_IN_BYTES) * BLOCK_SIZE_IN_BYTES;
+  private static int blockSizeMultipleCeil(int x) {
+    return ((x + MAC_TAG_SIZE_IN_BYTES - 1) / MAC_TAG_SIZE_IN_BYTES) * MAC_TAG_SIZE_IN_BYTES;
   }
 
-  private byte[] macData(byte[] aad, ByteBuffer ciphertext) {
-    int aadCeilLen = blockSizeMultipleCeil(aad.length);
-    int ciphertextLen = ciphertext.remaining();
-    int ciphertextCeilLen = blockSizeMultipleCeil(ciphertextLen);
-    ByteBuffer macData = ByteBuffer.allocate(
-        aadCeilLen + ciphertextCeilLen + 16).order(ByteOrder.LITTLE_ENDIAN);
-    macData.put(aad);
-    macData.position(aadCeilLen);
-    macData.put(ciphertext);
-    macData.position(aadCeilLen + ciphertextCeilLen);
-    macData.putLong(aad.length);
-    macData.putLong(ciphertextLen);
-    return macData.array();
-  }
+  abstract byte[] macData(byte[] aad, ByteBuffer ciphertext);
 
   private byte[] computeTag(ByteBuffer ciphertextBuf, byte[] additionalData, byte[] aeadSubKey) {
-
     return poly1305Mac(macData(additionalData, ciphertextBuf), aeadSubKey);
   }
 
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] additionalData)
       throws GeneralSecurityException {
-    byte[] aeadSubKey = new byte[KEY_SIZE_IN_BYTES];
-    byte[] ciphertext = djbCipher.encrypt(plaintext, aeadSubKey);
+    byte[] ciphertext = djbCipher.encrypt(plaintext);
     ByteBuffer ciphertextBuf = ByteBuffer.wrap(ciphertext);
-    ciphertextBuf.position(djbCipher.nonceSizeInBytes());
+    byte[] nonce = new byte[djbCipher.nonceSizeInBytes()];
+    ciphertextBuf.get(nonce);
+    byte[] aeadSubKey = djbCipher.getAuthenticatorKey(nonce);
     byte[] tag = computeTag(ciphertextBuf, additionalData, aeadSubKey);
     ByteBuffer ciphertextWithTag = ByteBuffer.allocate(ciphertext.length + tag.length);
     ciphertextWithTag.put(tag);
@@ -220,18 +265,18 @@ public class DjbCipherPoly1305 implements Aead {
   @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] additionalData)
       throws GeneralSecurityException {
-    if (ciphertext.length < BLOCK_SIZE_IN_BYTES + djbCipher.nonceSizeInBytes()) {
+    if (ciphertext.length < MAC_TAG_SIZE_IN_BYTES + djbCipher.nonceSizeInBytes()) {
       throw new GeneralSecurityException("ciphertext too short");
     }
-    byte[] tag = new byte[BLOCK_SIZE_IN_BYTES];
+    byte[] tag = new byte[MAC_TAG_SIZE_IN_BYTES];
     ByteBuffer ciphertextBuf = ByteBuffer.wrap(ciphertext);
     ciphertextBuf.get(tag);
     byte[] nonce = new byte[djbCipher.nonceSizeInBytes()];
     ciphertextBuf.get(nonce);
-    byte[] expectedTag = computeTag(ciphertextBuf, additionalData, djbCipher.getAeadSubKey(nonce));
+    byte[] expectedTag = computeTag(ciphertextBuf, additionalData, djbCipher.getAuthenticatorKey(nonce));
     if (!SubtleUtil.arrayEquals(tag, expectedTag)) {
       throw new GeneralSecurityException("Tags do not match.");
     }
-    return djbCipher.decrypt(ciphertext, BLOCK_SIZE_IN_BYTES);
+    return djbCipher.decrypt(ciphertext, MAC_TAG_SIZE_IN_BYTES);
   }
 }
