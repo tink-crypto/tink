@@ -29,7 +29,6 @@ import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.aead.GcpKmsAeadKeyManager;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.crypto.tink.hybrid.HybridDecryptConfig;

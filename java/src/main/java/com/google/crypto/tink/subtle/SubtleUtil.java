@@ -16,9 +16,11 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.CommonProto.HashType;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 
 /**
@@ -183,5 +185,24 @@ public final class SubtleUtil {
     validate(typeUrl);
     int dot = typeUrl.lastIndexOf(".");
     return typeUrl.substring(dot + 1);
+  }
+
+  /**
+   * Returns the HMAC algorithm name corresponding to a hash type.
+   *
+   * @param hash the hash type
+   * @return the JCE's HMAC algorithm name for the hash.
+   */
+  public static String hashToHmacAlgorithmName(HashType hash) throws NoSuchAlgorithmException {
+    switch (hash) {
+      case SHA1:
+        return "HmacSha1";
+      case SHA256:
+        return "HmacSha256";
+      case SHA512:
+        return "HmacSha512";
+      default:
+        throw new NoSuchAlgorithmException("hash unsupported for HMAC: " + hash);
+    }
   }
 }

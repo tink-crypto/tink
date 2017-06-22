@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.CommonProto.EcPointFormat;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.interfaces.ECPrivateKey;
@@ -36,7 +37,7 @@ public final class EciesHkdfRecipientKem {
   }
 
   public byte[] generateKey(byte[] kemBytes, String hmacAlgo, final byte[] hkdfSalt,
-     final byte[] hkdfInfo, int keySizeInBytes, EcUtil.PointFormat pointFormat)
+     final byte[] hkdfInfo, int keySizeInBytes, EcPointFormat pointFormat)
        throws GeneralSecurityException {
     ECParameterSpec spec = recipientPrivateKey.getParams();
     ECPoint ephemeralPublicPoint = EcUtil.ecPointDecode(spec.getCurve(), pointFormat, kemBytes);

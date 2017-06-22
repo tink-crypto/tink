@@ -40,7 +40,7 @@ java_library(
     deps = [
         "//java/src/main/java/com/google/crypto/tink:android",
         "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle:signature",
+        "//java/src/main/java/com/google/crypto/tink/subtle:signature_android",
         "//proto:common_java_proto_lite",
         "//proto:ecdsa_java_proto_lite",
         "//proto:ed25519_java_proto_lite",

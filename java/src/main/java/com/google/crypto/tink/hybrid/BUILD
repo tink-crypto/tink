@@ -51,7 +51,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/aead:android",
         "//java/src/main/java/com/google/crypto/tink/mac:android",
         "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle:hybrid",
+        "//java/src/main/java/com/google/crypto/tink/subtle:hybrid_android",
         "//proto:aes_ctr_hmac_aead_java_proto_lite",
         "//proto:aes_ctr_java_proto_lite",
         "//proto:aes_gcm_java_proto_lite",

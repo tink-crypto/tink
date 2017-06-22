@@ -25,9 +25,9 @@ import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
-import com.google.crypto.tink.Util;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.Random;
@@ -53,7 +53,7 @@ public class EciesAeadHkdfHybridDecryptTest {
 
   @Test
   public void testModifyDecrypt() throws Exception {
-    ECParameterSpec spec = Util.getCurveSpec(EllipticCurveType.NIST_P256);
+    ECParameterSpec spec = EcUtil.getCurveSpec(EllipticCurveType.NIST_P256);
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(spec);
     KeyPair recipientKey = keyGen.generateKeyPair();

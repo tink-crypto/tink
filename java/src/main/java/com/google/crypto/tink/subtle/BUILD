@@ -13,7 +13,6 @@ load("//java/build_defs:javac.bzl", "JAVACOPTS")
 java_library(
     name = "subtle",
     srcs = [
-        "EcUtil.java",
         "EngineFactory.java",
         "EngineWrapper.java",
         "ImmutableByteArray.java",
@@ -22,6 +21,23 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
+        "//proto:common_java_proto",
+        "@com_google_errorprone_error_prone_annotations//jar",
+    ],
+)
+
+java_library(
+    name = "android",
+    srcs = [
+        "EngineFactory.java",
+        "EngineWrapper.java",
+        "ImmutableByteArray.java",
+        "Random.java",
+        "SubtleUtil.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        "//proto:common_java_proto_lite",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
@@ -113,6 +129,27 @@ java_library(
         ":subtle",
         ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//proto:common_java_proto",
+        "@com_google_errorprone_error_prone_annotations//jar",
+    ],
+)
+
+java_library(
+    name = "signature_android",
+    srcs = [
+        "EcUtil.java",
+        "EcdsaSignJce.java",
+        "EcdsaVerifyJce.java",
+        "Ed25519Sign.java",
+        "Ed25519Verify.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":ed25519_internal",
+        ":subtle",
+        ":x25519",
+        "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//proto:common_java_proto_lite",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
@@ -121,6 +158,26 @@ java_library(
 
 java_library(
     name = "hybrid",
+    srcs = [
+        "EcUtil.java",
+        "EciesAeadHkdfDemHelper.java",
+        "EciesAeadHkdfHybridDecrypt.java",
+        "EciesAeadHkdfHybridEncrypt.java",
+        "EciesHkdfRecipientKem.java",
+        "EciesHkdfSenderKem.java",
+        "Hkdf.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":subtle",
+        "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//proto:common_java_proto",
+        "@com_google_errorprone_error_prone_annotations//jar",
+    ],
+)
+
+java_library(
+    name = "hybrid_android",
     srcs = [
         "EcUtil.java",
         "EciesAeadHkdfDemHelper.java",

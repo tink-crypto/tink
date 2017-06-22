@@ -23,7 +23,7 @@ import com.google.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.TinkProto.KeyData;
-import com.google.crypto.tink.Util;
+import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
@@ -77,7 +77,7 @@ public final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
     }
     EcdsaPrivateKey keyProto = (EcdsaPrivateKey) key;
     validateKey(keyProto);
-    ECPrivateKey privateKey = Util.getEcPrivateKey(
+    ECPrivateKey privateKey = EcUtil.getEcPrivateKey(
         keyProto.getPublicKey().getParams().getCurve(),
         keyProto.getKeyValue().toByteArray());
     return new EcdsaSignJce(privateKey,
@@ -110,7 +110,7 @@ public final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
     EcdsaKeyFormat format = (EcdsaKeyFormat) keyFormat;
     EcdsaParams ecdsaParams = format.getParams();
     SigUtil.validateEcdsaParams(ecdsaParams);
-    KeyPair keyPair = Util.generateKeyPair(ecdsaParams.getCurve());
+    KeyPair keyPair = EcUtil.generateKeyPair(ecdsaParams.getCurve());
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
     ECPoint w = pubKey.getW();

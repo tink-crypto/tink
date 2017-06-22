@@ -31,7 +31,7 @@ import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
-import com.google.crypto.tink.Util;
+import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
@@ -220,7 +220,7 @@ public class EcdsaSignKeyManagerTest {
     for (int i = 0; i < hashAndCurves.length; i++) {
       HashType hashType = hashAndCurves[i].hashType;
       EllipticCurveType curveType = hashAndCurves[i].curveType;
-      ECParameterSpec ecParams = Util.getCurveSpec(curveType);
+      ECParameterSpec ecParams = EcUtil.getCurveSpec(curveType);
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();
@@ -256,7 +256,7 @@ public class EcdsaSignKeyManagerTest {
     for (int i = 0; i < hashAndCurves.length; i++) {
       HashType hashType = hashAndCurves[i].hashType;
       EllipticCurveType curveType = hashAndCurves[i].curveType;
-      ECParameterSpec ecParams = Util.getCurveSpec(curveType);
+      ECParameterSpec ecParams = EcUtil.getCurveSpec(curveType);
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();

@@ -57,7 +57,8 @@ util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
     StringPiece info,
     size_t out_len) {
   std::string ikm(kem_bytes);
-  ikm.append(shared_secret);
+  std::string shared_secret_string(shared_secret);
+  ikm.append(shared_secret_string);
   return Hkdf::ComputeHkdf(hash, ikm, salt, info, out_len);
 }
 

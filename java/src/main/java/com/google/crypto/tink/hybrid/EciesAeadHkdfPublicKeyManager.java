@@ -22,7 +22,7 @@ import com.google.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.TinkProto.KeyData;
-import com.google.crypto.tink.Util;
+import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.SubtleUtil;
@@ -69,7 +69,7 @@ public final class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEnc
     validate(recipientKeyProto);
     EciesAeadHkdfParams eciesParams = recipientKeyProto.getParams();
     EciesHkdfKemParams kemParams = eciesParams.getKemParams();
-    ECPublicKey recipientPublicKey = Util.getEcPublicKey(kemParams.getCurveType(),
+    ECPublicKey recipientPublicKey = EcUtil.getEcPublicKey(kemParams.getCurveType(),
         recipientKeyProto.getX().toByteArray(), recipientKeyProto.getY().toByteArray());
     EciesAeadHkdfDemHelper demHelper = new RegistryEciesAeadHkdfDemHelper(
         eciesParams.getDemParams().getAeadDem());

@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
   std::clog << "Using keyset from file " << keyset_filename
             << " to encrypt file " << plaintext_filename
             << " with context info '" << context_info << "'.\n"
-            << "The resulting ciphertext will be writen to file "
+            << "The resulting ciphertext will be written to file "
             << output_filename << std::endl;
 
   // Read the keyset.

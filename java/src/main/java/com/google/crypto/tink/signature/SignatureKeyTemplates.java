@@ -18,10 +18,9 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.crypto.tink.CommonProto.HashType;
-import com.google.crypto.tink.EcdsaProto.EcdsaParams;
 import com.google.crypto.tink.EcdsaProto.EcdsaKeyFormat;
+import com.google.crypto.tink.EcdsaProto.EcdsaParams;
 import com.google.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
-
 import com.google.crypto.tink.TinkProto.KeyTemplate;
 
 /**

@@ -16,26 +16,11 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.CommonProto.EcPointFormat;
-import com.google.crypto.tink.CommonProto.EllipticCurveType;
-import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.TinkProto.KeyStatusType;
 import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.TinkProto.KeysetInfo;
 import com.google.crypto.tink.TinkProto.OutputPrefixType;
-import com.google.crypto.tink.subtle.EcUtil;
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPrivateKeySpec;
-import java.security.spec.ECPublicKeySpec;
 
 /** Various helpers. */
 public class Util {
@@ -56,78 +41,6 @@ public class Util {
         .setOutputPrefixType(key.getOutputPrefixType())
         .setKeyId(key.getKeyId())
         .build();
-  }
-
-  /**
-   * Returns the ECParameterSpec for a named curve.
-   *
-   * @param curve the curve type
-   * @return the ECParameterSpec for the curve.
-   */
-  public static ECParameterSpec getCurveSpec(EllipticCurveType curve)
-      throws NoSuchAlgorithmException {
-    switch (curve) {
-      case NIST_P256:
-        return EcUtil.getNistP256Params();
-      case NIST_P384:
-        return EcUtil.getNistP384Params();
-      case NIST_P521:
-        return EcUtil.getNistP521Params();
-      default:
-        throw new NoSuchAlgorithmException("curve not implemented:" + curve);
-    }
-  }
-
-  /**
-   * Returns an {@code ECPublicKey} from {@code curve} type and {@code x} and {@code y} coordinates.
-   */
-  public static ECPublicKey getEcPublicKey(EllipticCurveType curve, final byte[] x, final byte[] y)
-      throws GeneralSecurityException {
-    ECParameterSpec ecParams = getCurveSpec(curve);
-    BigInteger pubX = new BigInteger(1, x);
-    BigInteger pubY = new BigInteger(1, y);
-    ECPoint w = new ECPoint(pubX, pubY);
-    EcUtil.checkPointOnCurve(w, ecParams.getCurve());
-    ECPublicKeySpec spec = new ECPublicKeySpec(w, ecParams);
-    KeyFactory kf = KeyFactory.getInstance("EC");
-    return (ECPublicKey) kf.generatePublic(spec);
-  }
-
-  /** Returns an {@code ECPrivateKey} from {@code curve} type and {@code keyValue}. */
-  public static ECPrivateKey getEcPrivateKey(EllipticCurveType curve, final byte[] keyValue)
-      throws GeneralSecurityException {
-    ECParameterSpec ecParams = getCurveSpec(curve);
-    BigInteger privValue = new BigInteger(1, keyValue);
-    ECPrivateKeySpec spec = new ECPrivateKeySpec(privValue, ecParams);
-    KeyFactory kf = KeyFactory.getInstance("EC");
-    return (ECPrivateKey) kf.generatePrivate(spec);
-  }
-
-  /**
-   * Returns the HMAC algorithm name corresponding to a hash type.
-   *
-   * @param hash the hash type
-   * @return the JCE's HMAC algorithm name for the hash.
-   */
-  public static String hashToHmacAlgorithmName(HashType hash) throws NoSuchAlgorithmException {
-    switch (hash) {
-      case SHA1:
-        return "HmacSha1";
-      case SHA256:
-        return "HmacSha256";
-      case SHA512:
-        return "HmacSha512";
-      default:
-        throw new NoSuchAlgorithmException("hash unsupported for HMAC: " + hash);
-    }
-  }
-
-  /** Generates a new key pair for {@code curve}. */
-  public static KeyPair generateKeyPair(EllipticCurveType curve) throws GeneralSecurityException {
-    ECParameterSpec ecParams = getCurveSpec(curve);
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
-    keyGen.initialize(ecParams);
-    return keyGen.generateKeyPair();
   }
 
   /**
@@ -175,24 +88,6 @@ public class Util {
     }
     if (!hasPrimaryKey) {
       throw new GeneralSecurityException("keyset doesn't contain a valid primary key");
-    }
-  }
-
-  /**
-   * Converts com.google.crypto.tink.CommonProto.EcPointFormat into
-   * com.google.crypto.tink.subtle.PointFormat. The duplication of the enum for the point
-   * compression format is necessary because subtle is independent of protocol buffers.
-   */
-  public static EcUtil.PointFormat getPointFormat(EcPointFormat format)
-      throws GeneralSecurityException {
-    switch (format) {
-      case COMPRESSED:
-        return EcUtil.PointFormat.COMPRESSED;
-      case UNCOMPRESSED:
-        return EcUtil.PointFormat.UNCOMPRESSED;
-      default:
-        // Should not happen.
-        throw new GeneralSecurityException("Unsupported point format:" + format);
     }
   }
 }

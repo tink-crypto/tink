@@ -88,7 +88,7 @@
     <protobuf.version>3.3.0</protobuf.version>
     <protoc-gen-javalite.version>3.0.0</protoc-gen-javalite.version>
     <truth.version>0.32</truth.version>
- 
+
     <!-- sources paths -->
     <tink.source.dir>../../java/src/main/java</tink.source.dir>
     <tink.test.dir>../../java/src/test/java</tink.test.dir>

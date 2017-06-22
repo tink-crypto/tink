@@ -20,7 +20,6 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CommonProto.EcPointFormat;
 import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.Util;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.EllipticCurve;
@@ -36,7 +35,7 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   private final EciesHkdfRecipientKem recipientKem;
   private final String hkdfHmacAlgo;
   private final byte[] hkdfSalt;
-  private final EcUtil.PointFormat ecPointFormat;
+  private final EcPointFormat ecPointFormat;
   private final EciesAeadHkdfDemHelper demHelper;
 
   public EciesAeadHkdfHybridDecrypt(final ECPrivateKey recipientPrivateKey,
@@ -46,8 +45,8 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
     this.recipientPrivateKey = recipientPrivateKey;
     this.recipientKem = new EciesHkdfRecipientKem(recipientPrivateKey);
     this.hkdfSalt = hkdfSalt;
-    this.hkdfHmacAlgo = Util.hashToHmacAlgorithmName(hkdfHashType);
-    this.ecPointFormat = Util.getPointFormat(ecPointFormat);
+    this.hkdfHmacAlgo = SubtleUtil.hashToHmacAlgorithmName(hkdfHashType);
+    this.ecPointFormat = ecPointFormat;
     this.demHelper = demHelper;
   }
 

@@ -25,8 +25,6 @@ using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 
-// TODO(quannguyen): Add extensive tests.
-// It's important to test compatability with Java.
 namespace crypto {
 namespace tink {
 namespace {

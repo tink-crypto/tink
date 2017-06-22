@@ -46,6 +46,20 @@ java_library(
     ],
 )
 
+java_library(
+    name = "subtle_android",
+    visibility = ["//visibility:public"],
+    exports = [
+        "//java/src/main/java/com/google/crypto/tink/subtle:aead",
+        "//java/src/main/java/com/google/crypto/tink/subtle:android",
+        "//java/src/main/java/com/google/crypto/tink/subtle:gcp_credential",
+        "//java/src/main/java/com/google/crypto/tink/subtle:hybrid_android",
+        "//java/src/main/java/com/google/crypto/tink/subtle:mac",
+        "//java/src/main/java/com/google/crypto/tink/subtle:signature_android",
+        "//java/src/main/java/com/google/crypto/tink/subtle:x25519",
+    ],
+)
+
 # RESTRICTED
 
 java_library(
@@ -117,7 +131,7 @@ java_library(
     visibility = ["//visibility:public"],
     exports = [
         ":android",
-        ":subtle",
+        ":subtle_android",
         "//java/src/main/java/com/google/crypto/tink:keyset_handle_android",
     ],
 )

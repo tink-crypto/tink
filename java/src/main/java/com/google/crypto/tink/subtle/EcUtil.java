@@ -16,13 +16,22 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.CommonProto.EcPointFormat;
+import com.google.crypto.tink.CommonProto.EllipticCurveType;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
+import java.security.spec.ECPrivateKeySpec;
+import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.util.Arrays;
 
@@ -30,14 +39,6 @@ import java.util.Arrays;
  * Utility functions for elliptic curve crypto, used in ECDSA and ECDH.
  */
 public final class EcUtil {
-
-  /**
-   * The format used to encode points on elliptic curves.
-   */
-  public enum PointFormat {
-    COMPRESSED,
-    UNCOMPRESSED
-  }
 
   public static ECParameterSpec getNistP256Params() {
     return getNistCurveSpec(
@@ -300,7 +301,7 @@ public final class EcUtil {
    * @throws GeneralSecurityException if the point format is unknown or
    *   if the elliptic curve is not supported
    */
-  public static int encodingSizeInBytes(EllipticCurve curve, PointFormat format)
+  public static int encodingSizeInBytes(EllipticCurve curve, EcPointFormat format)
       throws GeneralSecurityException {
     int coordinateSize = EcUtil.fieldSizeInBytes(curve);
     switch (format) {
@@ -324,7 +325,7 @@ public final class EcUtil {
    * is invalid or if the curve or format are not supported.
    */
   public static ECPoint ecPointDecode(
-      EllipticCurve curve, PointFormat format, byte[] encoded)
+      EllipticCurve curve, EcPointFormat format, byte[] encoded)
       throws GeneralSecurityException {
     int coordinateSize = EcUtil.fieldSizeInBytes(curve);
     switch (format) {
@@ -379,7 +380,7 @@ public final class EcUtil {
    * @throws GeneralSecurityException if the point is not on the curve or
    *     if the format is not supported.
    */
-  public static byte[] ecPointEncode(EllipticCurve curve, PointFormat format, ECPoint point)
+  public static byte[] ecPointEncode(EllipticCurve curve, EcPointFormat format, ECPoint point)
       throws GeneralSecurityException {
     EcUtil.checkPointOnCurve(point, curve);
     int coordinateSize = EcUtil.fieldSizeInBytes(curve);
@@ -408,4 +409,56 @@ public final class EcUtil {
     }
   }
 
+  /**
+   * Returns the ECParameterSpec for a named curve.
+   *
+   * @param curve the curve type
+   * @return the ECParameterSpec for the curve.
+   */
+  public static ECParameterSpec getCurveSpec(EllipticCurveType curve)
+      throws NoSuchAlgorithmException {
+    switch (curve) {
+      case NIST_P256:
+        return getNistP256Params();
+      case NIST_P384:
+        return getNistP384Params();
+      case NIST_P521:
+        return getNistP521Params();
+      default:
+        throw new NoSuchAlgorithmException("curve not implemented:" + curve);
+    }
+  }
+
+  /**
+   * Returns an {@code ECPublicKey} from {@code curve} type and {@code x} and {@code y} coordinates.
+   */
+  public static ECPublicKey getEcPublicKey(EllipticCurveType curve, final byte[] x, final byte[] y)
+      throws GeneralSecurityException {
+    ECParameterSpec ecParams = getCurveSpec(curve);
+    BigInteger pubX = new BigInteger(1, x);
+    BigInteger pubY = new BigInteger(1, y);
+    ECPoint w = new ECPoint(pubX, pubY);
+    EcUtil.checkPointOnCurve(w, ecParams.getCurve());
+    ECPublicKeySpec spec = new ECPublicKeySpec(w, ecParams);
+    KeyFactory kf = KeyFactory.getInstance("EC");
+    return (ECPublicKey) kf.generatePublic(spec);
+  }
+
+  /** Returns an {@code ECPrivateKey} from {@code curve} type and {@code keyValue}. */
+  public static ECPrivateKey getEcPrivateKey(EllipticCurveType curve, final byte[] keyValue)
+      throws GeneralSecurityException {
+    ECParameterSpec ecParams = getCurveSpec(curve);
+    BigInteger privValue = new BigInteger(1, keyValue);
+    ECPrivateKeySpec spec = new ECPrivateKeySpec(privValue, ecParams);
+    KeyFactory kf = KeyFactory.getInstance("EC");
+    return (ECPrivateKey) kf.generatePrivate(spec);
+  }
+
+  /** Generates a new key pair for {@code curve}. */
+  public static KeyPair generateKeyPair(EllipticCurveType curve) throws GeneralSecurityException {
+    ECParameterSpec ecParams = getCurveSpec(curve);
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+    keyGen.initialize(ecParams);
+    return keyGen.generateKeyPair();
+  }
 }

@@ -16,8 +16,6 @@
 
 package com.google.crypto.tink.aead;
 
-import static junit.framework.Assert.fail;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import com.google.crypto.tink.Aead;
@@ -27,17 +25,10 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.TinkProto.KeyData;
-import com.google.crypto.tink.TinkProto.KeyStatusType;
 import com.google.crypto.tink.TinkProto.KeyTemplate;
-import com.google.crypto.tink.TinkProto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.SubtleUtil;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.crypto.Cipher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,8 +39,6 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class ChaCha20Poly1305KeyManagerTest {
-  private static final int KEY_SIZE = 32;
-
   @Before
   public void setUp() throws GeneralSecurityException {
     AeadConfig.registerStandardKeyTypes();
@@ -82,7 +71,7 @@ public class ChaCha20Poly1305KeyManagerTest {
     Set<String> keys = new TreeSet<String>();
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 10;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < numTests; i++) {
       ChaCha20Poly1305Key key = (ChaCha20Poly1305Key) keyManager.newKey(keyTemplate.getValue());
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
       assertEquals(32, key.getKeyValue().toByteArray().length);
@@ -92,6 +81,6 @@ public class ChaCha20Poly1305KeyManagerTest {
       keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
       assertEquals(32, key.getKeyValue().toByteArray().length);
     }
-    assertEquals(10 * 2, keys.size());
+    assertEquals(numTests * 2, keys.size());
   }
 }

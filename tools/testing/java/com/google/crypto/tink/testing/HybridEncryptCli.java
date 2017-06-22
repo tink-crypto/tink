@@ -16,20 +16,19 @@
 
 package com.google.crypto.tink.testing;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.nio.file.Paths;
-
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.hybrid.HybridEncryptConfig;
 import com.google.crypto.tink.hybrid.HybridEncryptFactory;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Paths;
 
 /**
  * A command-line utility for testing HybridEncrypt-primitives.
@@ -62,7 +61,7 @@ public class HybridEncryptCli {
     String outputFilename = args[3];
     System.out.println("Using keyset from file " + keysetFilename + " to encrypt file "
         + plaintextFilename + " with context info '" + contextInfo + "'.");
-    System.out.println("The resulting ciphertext will be writen to file " + outputFilename);
+    System.out.println("The resulting ciphertext will be written to file " + outputFilename);
 
     // Read the keyset.
     System.out.println("Reading the keyset...");

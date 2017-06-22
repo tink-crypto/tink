@@ -27,11 +27,11 @@ import com.google.crypto.tink.TinkProto.OutputPrefixType;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 
 /**
  * Tests for KeysetHandle.

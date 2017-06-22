@@ -35,7 +35,7 @@ class CleartextKeysetHandle {
   static util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(
       std::istream* keyset_stream);
  private:
-  CleartextKeysetHandle() {};
+  CleartextKeysetHandle() {}
 };
 
 }  // namespace tink

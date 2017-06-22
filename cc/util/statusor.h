@@ -97,7 +97,10 @@ inline StatusOr<T>::StatusOr() : status_(::util::error::UNKNOWN, "") {
 
 template <typename T>
 inline StatusOr<T>::StatusOr(const ::util::Status& status) : status_(status) {
-  // CHECK(!status.ok()) << "::util::OkStatus() is not a valid argument to StatusOr";
+  if (status.ok()) {
+    std::cerr << "::util::OkStatus() is not a valid argument to StatusOr\n";
+    exit(1);
+  }
 }
 
 template <typename T>
