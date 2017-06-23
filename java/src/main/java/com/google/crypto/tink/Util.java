@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
@@ -76,6 +77,7 @@ public class Util {
 
     int primaryKeyId = keyset.getPrimaryKeyId();
     boolean hasPrimaryKey = false;
+    boolean containsOnlyPublicKeyMaterial = true;
     for (Keyset.Key key : keyset.getKeyList()) {
       validateKey(key);
       if (key.getStatus() == KeyStatusType.ENABLED && key.getKeyId() == primaryKeyId) {
@@ -84,9 +86,12 @@ public class Util {
         }
         hasPrimaryKey = true;
       }
+      if (key.getKeyData().getKeyMaterialType() != KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC) {
+        containsOnlyPublicKeyMaterial = false;
+      }
       // TODO(thaidn): use TypeLiteral to ensure that all keys are of the same primitive.
     }
-    if (!hasPrimaryKey) {
+    if (!hasPrimaryKey && !containsOnlyPublicKeyMaterial) {
       throw new GeneralSecurityException("keyset doesn't contain a valid primary key");
     }
   }

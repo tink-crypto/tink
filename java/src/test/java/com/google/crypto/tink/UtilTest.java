@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
@@ -57,21 +58,8 @@ public class UtilTest {
       assertExceptionContains(e, "empty keyset");
     }
 
-    // Primary key is disabled.
-    Keyset invalidKeyset = TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
-        42,
-        KeyStatusType.DISABLED,
-        OutputPrefixType.TINK));
-    try {
-      Util.validateKeyset(invalidKeyset);
-      fail("Invalid keyset. Expect GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset doesn't contain a valid primary key");
-    }
-
     // Multiple primary keys.
-    invalidKeyset = TestUtil.createKeyset(
+    Keyset invalidKeyset = TestUtil.createKeyset(
         TestUtil.createKey(
             TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
             42,
@@ -88,6 +76,54 @@ public class UtilTest {
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset contains multiple primary keys");
+    }
+
+    // Primary key is disabled.
+    invalidKeyset = TestUtil.createKeyset(TestUtil.createKey(
+        TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+        42,
+        KeyStatusType.DISABLED,
+        OutputPrefixType.TINK));
+    try {
+      Util.validateKeyset(invalidKeyset);
+      fail("Invalid keyset. Expect GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset doesn't contain a valid primary key");
+    }
+
+    // No primary key.
+    invalidKeyset = Keyset.newBuilder()
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16))
+            .setKeyId(1)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build())
+        .build();
+    try {
+      Util.validateKeyset(invalidKeyset);
+      fail("Invalid keyset. Expect GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset doesn't contain a valid primary key");
+    }
+
+    // No primary key, but contains only public key material.
+    Keyset validKeyset = Keyset.newBuilder()
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(TestUtil.createKeyData(
+                KeyData.newBuilder().build(),
+                "typeUrl",
+                KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC))
+            .setKeyId(1)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build())
+        .setPrimaryKeyId(1)
+        .build();
+    try {
+      Util.validateKeyset(validKeyset);
+    } catch (GeneralSecurityException e) {
+      fail("Valid keyset, should not fail: " + e);
     }
   }
 

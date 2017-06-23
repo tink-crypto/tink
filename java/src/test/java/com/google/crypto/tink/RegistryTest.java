@@ -279,6 +279,29 @@ public class RegistryTest {
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset doesn't contain a valid primary key");
     }
+
+    // Multiple primary keys.
+    keysetHandle = new KeysetHandle(Keyset.newBuilder()
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key1)
+            .setKeyId(1)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build())
+        .addKey(Keyset.Key.newBuilder()
+            .setKeyData(key1)
+            .setKeyId(1)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build())
+        .setPrimaryKeyId(1)
+        .build());
+    try {
+      Registry.INSTANCE.getPrimitives(keysetHandle);
+      fail("Invalid keyset. Expect GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "keyset contains multiple primary keys");
+    }
   }
 
   @Test
