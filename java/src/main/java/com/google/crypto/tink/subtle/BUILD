@@ -197,10 +197,15 @@ java_library(
     ],
 )
 
+# Streaming
+
 java_library(
     name = "streaming",
     srcs = [
-        "AesGcmStreaming.java",
+        "AesGcmHkdfDecryptingChannel.java",
+        "AesGcmHkdfEncryptingChannel.java",
+        "AesGcmHkdfSeekableDecryptingChannel.java",
+        "AesGcmHkdfStreaming.java",
         "Hkdf.java",
     ],
     javacopts = JAVACOPTS,

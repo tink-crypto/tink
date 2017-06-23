@@ -186,7 +186,7 @@ gen_java_test_rules(
     ],
     default_test_size = "small",
     large_tests = [
-        "src/test/java/com/google/crypto/tink/subtle/AesGcmStreamingTest",
+        "src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest",
     ],
     medium_tests = [
         "src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest",

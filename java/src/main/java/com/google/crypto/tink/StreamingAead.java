@@ -23,17 +23,17 @@ import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
 
 /**
- * An interface for streaming encryption.
+ * An interface for streaming authenticated encryption with additional data.
  *
  * Streaming encryption is typically used for encrypting large plaintexts such as large files.
- * Tink may eventually contain multiple interfaces for streaming encryption depending on the 
+ * Tink may eventually contain multiple interfaces for streaming encryption depending on the
  * supported properties. This interface supports a streaming interface for symmetric encryption
  * with authentication. The underlying encryption modes are selected so that partial plaintext
  * can be obtained fast by decrypting and authenticating just part of the ciphertext.
  *
  * Security:
  * =========
- * Instances of StreamingEncryption must follow the OAE2 definition as proposed in the paper
+ * Instances of StreamingAead must follow the OAE2 definition as proposed in the paper
  * "Online Authenticated-Encryption and its Nonce-Reuse Misuse-Resistance" by Hoang, Reyhanitabar,
  * Rogaway and Vizár https://eprint.iacr.org/2015/189.pdf
  *
@@ -65,8 +65,8 @@ import java.security.GeneralSecurityException;
  *
  * Sample encryption:
  * ==================
- * 
- * StreamingEncryption s = ...
+ *
+ * StreamingAead s = ...
  * java.nio.channels.FileChannel ct =
  *     FileChannel.open(path,
  *                      java.nio.file.StandardOpenOption.CREATE,
@@ -81,13 +81,13 @@ import java.security.GeneralSecurityException;
  *
  * Sample full decryption:
  * =======================
- * StreamingEncryption s = ...
+ * StreamingAead s = ...
  * java.nio.channels.FileChannel ct =
  *     FileChannel.open(path, java.nio.file.StandardOpenOption.READ);
  * byte[] aad = ...
  * SeekableByteChannel chan = s.newDecryptingChannel(ct, aad);
  * int chunkSize = ...
- * ByteBuffer buffer = ByteBuffer.allocate(chunkSize); 
+ * ByteBuffer buffer = ByteBuffer.allocate(chunkSize);
  * do {
  *   buffer.clear();
  *   int cnt = chan.read(buffer);
@@ -102,8 +102,8 @@ import java.security.GeneralSecurityException;
  * }
  */
 
-public interface StreamingEncryption {
- 
+public interface StreamingAead {
+
   /**
    * Returns a WritableByteChannel for plaintext.
    * @param ciphertextDestination the channel to which the ciphertext is written.
@@ -112,9 +112,9 @@ public interface StreamingEncryption {
    */
   WritableByteChannel newEncryptingChannel(
       WritableByteChannel ciphertextDestination,
-      byte[] associatedData) 
+      byte[] associatedData)
       throws GeneralSecurityException, IOException;
- 
+
   /**
    * Returns a SeekableByteChannel that allows to access the plaintext.
    * @param ciphertextSource the ciphertext
@@ -123,13 +123,13 @@ public interface StreamingEncryption {
    *    The following methods of SeekableByteChannel are implemented:
    *    <ul>
    *    <li> <code>long position()</code> Returns the channel's position in the plaintext.
-   *    <li> <code>SeekableByteChannel  position(long newPosition)</code> 
+   *    <li> <code>SeekableByteChannel  position(long newPosition)</code>
    *         Sets the channel's position. Setting the position to a value greater than
-   *         the plaintext size is legal. A later attempt to read byte will immediately 
+   *         the plaintext size is legal. A later attempt to read byte will immediately
    *         return an end-of-file indication.
    *    <li> <code>int read(ByteBuffer dst)</code>
    *         Bytes are read starting at the channel's position, and then the position is updated
-   *         with the number of bytes actually read. 
+   *         with the number of bytes actually read.
    *         All bytes returned have been authenticated. If the end of the stream has been
    *         reached -1 is returned. A result of -1 is authenticated (e.g. by checking the MAC of
    *         the last ciphertext chunk.) Throws java.io.IOException if a MAC verification failed.
@@ -141,11 +141,11 @@ public interface StreamingEncryption {
    *    <li> <code>long size()</code> Returns the size of the plaintext.
    *         (TODO: Decide whether the result should be authenticated)
    *    <li> <code>SeekableByteChannel truncate(long size)</code>
-   *         throws NonWritableChannelException because the channel is read-only. 
+   *         throws NonWritableChannelException because the channel is read-only.
    *    <li> <code>int write(ByteBuffer src)</code> throws NonWritableChannelException because
    *         the channel is read-only.
    *    <li> <code>close()</code> closes the channel
-   *    <li> <code>isOpen()</code> 
+   *    <li> <code>isOpen()</code>
    *    </ul>
    * @throws GeneralSecurityException if the header of the ciphertext is corrupt or if the
    *    associatedData is not correct.

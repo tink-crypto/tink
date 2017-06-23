@@ -48,7 +48,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class AesGcmStreamingTest {
+public class AesGcmHkdfStreamingTest {
   /**
    * TODO(bleichen): Some things that are not yet tested:
    *   - Thread-safety (i.e. operations should be atomic but more importantly
@@ -239,7 +239,7 @@ public class AesGcmStreamingTest {
    * @returns the ciphertext including a prefix of size ags.firstSegmentOffset
    */
   private byte[] encrypt(
-      AesGcmStreaming ags,
+      AesGcmHkdfStreaming ags,
       byte[] plaintext,
       byte[] aad) throws Exception {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -255,7 +255,7 @@ public class AesGcmStreamingTest {
   }
 
   private void isValidCiphertext(
-      AesGcmStreaming ags,
+      AesGcmHkdfStreaming ags,
       byte[] plaintext,
       byte[] aad,
       byte[] ciphertext) throws Exception {
@@ -287,7 +287,7 @@ public class AesGcmStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmStreaming ags = new AesGcmStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -324,7 +324,7 @@ public class AesGcmStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmStreaming ags = new AesGcmStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -456,7 +456,7 @@ public class AesGcmStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmStreaming ags = new AesGcmStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
 
     String stringWithNonAsciiChars = "αβγδ áéíóúý ∀∑∊∫≅⊕⊄";
     int repetitions = 1000;
@@ -503,7 +503,7 @@ public class AesGcmStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmStreaming ags = new AesGcmStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     int ciphertextLength = (int) ags.expectedCiphertextSize(plaintextSize);
     ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
@@ -531,7 +531,7 @@ public class AesGcmStreamingTest {
    * or it must throw an IOException.
    */
   private void tryDecryptModifiedCiphertext(
-      AesGcmStreaming ags,
+      AesGcmHkdfStreaming ags,
       byte[] modifiedCiphertext,
       byte[] aad,
       int chunkSize,
@@ -580,7 +580,7 @@ public class AesGcmStreamingTest {
     int segmentSize = 256;
     int offset = 8;
     int plaintextSize = 512;
-    AesGcmStreaming ags = new AesGcmStreaming(ikm, keySize, segmentSize, offset);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -637,7 +637,7 @@ public class AesGcmStreamingTest {
    * or it must throw an IOException.
    */
   private void tryDecryptModifiedCiphertextWithSeekableByteChannel(
-      AesGcmStreaming ags,
+      AesGcmHkdfStreaming ags,
       byte[] modifiedCiphertext,
       byte[] aad,
       byte[] plaintext) throws Exception {
@@ -690,7 +690,7 @@ public class AesGcmStreamingTest {
     int segmentSize = 256;
     int offset = 8;
     int plaintextSize = 2000;
-    AesGcmStreaming ags = new AesGcmStreaming(ikm, keySize, segmentSize, offset);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -751,7 +751,7 @@ public class AesGcmStreamingTest {
    * @throws RuntimeException if something goes wrong.
    */
   private void encryptChannel(
-      AesGcmStreaming ags,
+      AesGcmHkdfStreaming ags,
       ReadableByteChannel plaintext,
       WritableByteChannel ciphertext,
       byte[] aad,
@@ -781,7 +781,7 @@ public class AesGcmStreamingTest {
    * TODO(bleichen): Using PipedInputStream may have performance problems.
    */
   private ReadableByteChannel ciphertextChannel(
-      AesGcmStreaming ags,
+      AesGcmHkdfStreaming ags,
       ReadableByteChannel plaintext,
       byte[] aad,
       int chunkSize) throws Exception {
@@ -803,7 +803,7 @@ public class AesGcmStreamingTest {
     int segmentSize = 1 << 20;
     long plaintextSize = (1L << 32) + 1234567;
     int offset = 0;
-    AesGcmStreaming ags = new AesGcmStreaming(ikm, keySize, segmentSize, offset);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
     ReadableByteChannel plaintext = new PseudorandomReadableByteChannel(plaintextSize);
     ReadableByteChannel copy = new PseudorandomReadableByteChannel(plaintextSize);
     ReadableByteChannel ciphertext = ciphertextChannel(ags, plaintext, aad, 1 << 20);
@@ -835,7 +835,7 @@ public class AesGcmStreamingTest {
     int keySize = 128;
     int segmentSize = 4096;
     int offset = 0;
-    AesGcmStreaming ags = new AesGcmStreaming(ikm, keySize, segmentSize, offset);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
 
     // Encrypt to file
     String tmpDir = java.lang.System.getenv("TEST_TMPDIR");
