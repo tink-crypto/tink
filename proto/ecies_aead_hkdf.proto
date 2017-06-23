@@ -21,8 +21,8 @@ package google.crypto.tink;
 import "proto/common.proto";
 import "proto/tink.proto";
 
-option java_package = "com.google.crypto.tink";
-option java_outer_classname = "EciesAeadHkdfProto";
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
 
 // Protos for keys for ECIES with HKDF and AEAD encryption.
 //

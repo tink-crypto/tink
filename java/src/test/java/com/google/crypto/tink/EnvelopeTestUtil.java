@@ -16,9 +16,9 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.GcpKmsProto.GcpKmsAeadKey;
-import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.aead.GcpKmsAeadKeyManager;
+import com.google.crypto.tink.proto.GcpKmsAeadKey;
+import com.google.crypto.tink.proto.KeyData;
 
 /**
  * Test helpers for envelope encryption.

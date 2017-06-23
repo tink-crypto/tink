@@ -17,16 +17,16 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
-import com.google.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
-import com.google.crypto.tink.AesCtrProto.AesCtrKey;
-import com.google.crypto.tink.AesGcmProto.AesGcmKey;
-import com.google.crypto.tink.AesGcmProto.AesGcmKeyFormat;
-import com.google.crypto.tink.HmacProto.HmacKey;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
+import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
+import com.google.crypto.tink.proto.AesCtrKey;
+import com.google.crypto.tink.proto.AesGcmKey;
+import com.google.crypto.tink.proto.AesGcmKeyFormat;
+import com.google.crypto.tink.proto.HmacKey;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;

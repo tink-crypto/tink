@@ -16,10 +16,10 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.TinkProto.KeyStatusType;
-import com.google.crypto.tink.TinkProto.Keyset;
-import com.google.crypto.tink.TinkProto.KeysetInfo;
-import com.google.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.proto.KeysetInfo;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import java.security.GeneralSecurityException;
 
 /** Various helpers. */
@@ -91,3 +91,4 @@ public class Util {
     }
   }
 }
+

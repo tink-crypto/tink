@@ -22,12 +22,12 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TinkProto.EncryptedKeyset;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.proto.EncryptedKeyset;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;

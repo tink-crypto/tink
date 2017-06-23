@@ -20,8 +20,8 @@ package google.crypto.tink;
 
 import "proto/common.proto";
 
-option java_package = "com.google.crypto.tink";
-option java_outer_classname = "HmacProto";
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
 
 message HmacParams {
   HashType hash = 1;    // HashType is an enum.

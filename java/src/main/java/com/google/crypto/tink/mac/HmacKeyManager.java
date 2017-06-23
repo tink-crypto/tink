@@ -16,13 +16,13 @@
 
 package com.google.crypto.tink.mac;
 
-import com.google.crypto.tink.CommonProto.HashType;
-import com.google.crypto.tink.HmacProto.HmacKey;
-import com.google.crypto.tink.HmacProto.HmacKeyFormat;
-import com.google.crypto.tink.HmacProto.HmacParams;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.TinkProto.KeyData;
+import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.HmacKey;
+import com.google.crypto.tink.proto.HmacKeyFormat;
+import com.google.crypto.tink.proto.HmacParams;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.MacJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.SubtleUtil;

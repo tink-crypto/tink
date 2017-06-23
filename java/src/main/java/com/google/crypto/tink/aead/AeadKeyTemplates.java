@@ -16,16 +16,16 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
-import com.google.crypto.tink.AesCtrProto.AesCtrKeyFormat;
-import com.google.crypto.tink.AesCtrProto.AesCtrParams;
-import com.google.crypto.tink.AesEaxProto.AesEaxKeyFormat;
-import com.google.crypto.tink.AesEaxProto.AesEaxParams;
-import com.google.crypto.tink.AesGcmProto.AesGcmKeyFormat;
-import com.google.crypto.tink.CommonProto.HashType;
-import com.google.crypto.tink.HmacProto.HmacKeyFormat;
-import com.google.crypto.tink.HmacProto.HmacParams;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
+import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
+import com.google.crypto.tink.proto.AesCtrKeyFormat;
+import com.google.crypto.tink.proto.AesCtrParams;
+import com.google.crypto.tink.proto.AesEaxKeyFormat;
+import com.google.crypto.tink.proto.AesEaxParams;
+import com.google.crypto.tink.proto.AesGcmKeyFormat;
+import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.HmacKeyFormat;
+import com.google.crypto.tink.proto.HmacParams;
+import com.google.crypto.tink.proto.KeyTemplate;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code Aead} keys. One can use these templates

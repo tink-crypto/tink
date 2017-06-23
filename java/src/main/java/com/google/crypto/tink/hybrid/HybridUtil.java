@@ -16,9 +16,9 @@
 
 package com.google.crypto.tink.hybrid;
 
-import com.google.crypto.tink.CommonProto.EcPointFormat;
-import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.proto.EcPointFormat;
+import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;

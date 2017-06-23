@@ -17,12 +17,11 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.ChaCha20Poly1305Key;
 import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.TinkProto.KeyData;
+import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.DjbCipher;
 import com.google.crypto.tink.subtle.DjbCipherPoly1305;
-import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;

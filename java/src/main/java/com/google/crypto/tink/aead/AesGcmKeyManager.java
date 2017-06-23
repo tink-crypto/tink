@@ -17,10 +17,10 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.AesGcmProto.AesGcmKey;
-import com.google.crypto.tink.AesGcmProto.AesGcmKeyFormat;
 import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.TinkProto.KeyData;
+import com.google.crypto.tink.proto.AesGcmKey;
+import com.google.crypto.tink.proto.AesGcmKeyFormat;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.SubtleUtil;

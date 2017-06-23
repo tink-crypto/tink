@@ -19,9 +19,9 @@ package com.google.crypto.tink.subtle;
 import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
-import com.google.crypto.tink.CommonProto.EcPointFormat;
-import com.google.crypto.tink.CommonProto.EllipticCurveType;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.proto.EcPointFormat;
+import com.google.crypto.tink.proto.EllipticCurveType;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;

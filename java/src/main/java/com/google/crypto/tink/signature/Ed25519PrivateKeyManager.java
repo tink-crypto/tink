@@ -16,11 +16,11 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.Ed25519Proto.Ed25519PrivateKey;
-import com.google.crypto.tink.Ed25519Proto.Ed25519PublicKey;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.TinkProto.KeyData;
+import com.google.crypto.tink.proto.Ed25519PrivateKey;
+import com.google.crypto.tink.proto.Ed25519PublicKey;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;

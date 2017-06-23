@@ -16,9 +16,9 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.TinkProto.KeyStatusType;
-import com.google.crypto.tink.TinkProto.Keyset;
-import com.google.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.ImmutableByteArray;
 import com.google.errorprone.annotations.Immutable;
 import java.nio.charset.Charset;

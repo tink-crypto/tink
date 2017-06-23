@@ -19,11 +19,11 @@ package com.google.crypto.tink.aead;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 
-import com.google.crypto.tink.AesCtrProto.AesCtrKey;
-import com.google.crypto.tink.AesCtrProto.AesCtrKeyFormat;
-import com.google.crypto.tink.AesCtrProto.AesCtrParams;
-import com.google.crypto.tink.TinkProto.KeyData;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
+import com.google.crypto.tink.proto.AesCtrKey;
+import com.google.crypto.tink.proto.AesCtrKeyFormat;
+import com.google.crypto.tink.proto.AesCtrParams;
+import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Set;

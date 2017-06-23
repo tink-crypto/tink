@@ -19,14 +19,14 @@ package com.google.crypto.tink.hybrid;
 import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertArrayEquals;
 
-import com.google.crypto.tink.CommonProto.EcPointFormat;
-import com.google.crypto.tink.CommonProto.EllipticCurveType;
-import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.proto.EcPointFormat;
+import com.google.crypto.tink.proto.EllipticCurveType;
+import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;

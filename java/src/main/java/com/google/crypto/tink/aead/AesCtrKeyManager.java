@@ -16,11 +16,11 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.AesCtrProto.AesCtrKey;
-import com.google.crypto.tink.AesCtrProto.AesCtrKeyFormat;
-import com.google.crypto.tink.AesCtrProto.AesCtrParams;
 import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.TinkProto.KeyData;
+import com.google.crypto.tink.proto.AesCtrKey;
+import com.google.crypto.tink.proto.AesCtrKeyFormat;
+import com.google.crypto.tink.proto.AesCtrParams;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.crypto.tink.subtle.IndCpaCipher;
 import com.google.crypto.tink.subtle.Random;

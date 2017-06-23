@@ -16,10 +16,10 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.EcdsaProto.EcdsaPublicKey;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.TinkProto.KeyData;
+import com.google.crypto.tink.proto.EcdsaPublicKey;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.crypto.tink.subtle.SubtleUtil;

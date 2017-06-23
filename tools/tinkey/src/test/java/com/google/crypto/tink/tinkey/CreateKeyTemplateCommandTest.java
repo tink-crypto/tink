@@ -20,13 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.AesGcmProto.AesGcmKeyFormat;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.hybrid.HybridDecryptConfig;
 import com.google.crypto.tink.hybrid.HybridEncryptConfig;
 import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.proto.AesGcmKeyFormat;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.signature.PublicKeySignConfig;
 import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
 import com.google.protobuf.TextFormat;

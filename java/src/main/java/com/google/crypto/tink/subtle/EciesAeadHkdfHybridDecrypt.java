@@ -17,9 +17,9 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CommonProto.EcPointFormat;
-import com.google.crypto.tink.CommonProto.HashType;
 import com.google.crypto.tink.HybridDecrypt;
+import com.google.crypto.tink.proto.EcPointFormat;
+import com.google.crypto.tink.proto.HashType;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.EllipticCurve;

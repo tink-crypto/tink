@@ -18,10 +18,10 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKey;
-import com.google.crypto.tink.KmsEnvelopeProto.KmsEnvelopeAeadKeyFormat;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.TinkProto.KeyData;
+import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KmsEnvelopeAeadKey;
+import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;

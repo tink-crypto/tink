@@ -16,14 +16,14 @@
 
 package com.google.crypto.tink.hybrid;
 
-import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfKeyFormat;
-import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfParams;
-import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPrivateKey;
-import com.google.crypto.tink.EciesAeadHkdfProto.EciesAeadHkdfPublicKey;
-import com.google.crypto.tink.EciesAeadHkdfProto.EciesHkdfKemParams;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.TinkProto.KeyData;
+import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
+import com.google.crypto.tink.proto.EciesAeadHkdfParams;
+import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
+import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
+import com.google.crypto.tink.proto.EciesHkdfKemParams;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;

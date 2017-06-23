@@ -20,12 +20,12 @@ import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TinkProto.KeyData;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
-import com.google.crypto.tink.TinkProto.Keyset;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.Keyset;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import org.junit.Before;

@@ -16,12 +16,12 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.TinkProto.EncryptedKeyset;
-import com.google.crypto.tink.TinkProto.KeyData;
-import com.google.crypto.tink.TinkProto.KeyStatusType;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
-import com.google.crypto.tink.TinkProto.Keyset;
-import com.google.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.crypto.tink.proto.EncryptedKeyset;
+import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;

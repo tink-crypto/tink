@@ -20,10 +20,10 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-import com.google.crypto.tink.Ed25519Proto.Ed25519PrivateKey;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
+import com.google.crypto.tink.proto.Ed25519PrivateKey;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.subtle.Ed25519Verify;
 import com.google.crypto.tink.subtle.Random;

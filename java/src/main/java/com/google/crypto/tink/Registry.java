@@ -16,10 +16,10 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.TinkProto.KeyData;
-import com.google.crypto.tink.TinkProto.KeyStatusType;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
-import com.google.crypto.tink.TinkProto.Keyset;
+import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.Keyset;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;

@@ -18,12 +18,12 @@ package com.google.crypto.tink.signature;
 
 import static junit.framework.Assert.fail;
 
-import com.google.crypto.tink.CommonProto.EllipticCurveType;
-import com.google.crypto.tink.CommonProto.HashType;
-import com.google.crypto.tink.EcdsaProto.EcdsaPublicKey;
-import com.google.crypto.tink.EcdsaProto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.proto.EcdsaPublicKey;
+import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
+import com.google.crypto.tink.proto.EllipticCurveType;
+import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.Random;
 import java.nio.ByteBuffer;

@@ -19,13 +19,13 @@ package com.google.crypto.tink.aead;
 import static org.junit.Assert.assertEquals;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.ChaCha20Poly1305Key;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.TinkProto.KeyData;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
+import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
+import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyTemplate;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;

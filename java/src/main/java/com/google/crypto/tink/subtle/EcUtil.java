@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.CommonProto.EcPointFormat;
-import com.google.crypto.tink.CommonProto.EllipticCurveType;
+import com.google.crypto.tink.proto.EcPointFormat;
+import com.google.crypto.tink.proto.EllipticCurveType;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;

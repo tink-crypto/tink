@@ -16,9 +16,9 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.TinkProto.EncryptedKeyset;
-import com.google.crypto.tink.TinkProto.Keyset;
-import com.google.crypto.tink.TinkProto.KeysetInfo;
+import com.google.crypto.tink.proto.EncryptedKeyset;
+import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.proto.KeysetInfo;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;

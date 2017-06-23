@@ -17,16 +17,16 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKey;
-import com.google.crypto.tink.AesCtrHmacAeadProto.AesCtrHmacAeadKeyFormat;
-import com.google.crypto.tink.AesCtrProto.AesCtrKey;
-import com.google.crypto.tink.HmacProto.HmacKey;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.TinkProto.KeyData;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
+import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
+import com.google.crypto.tink.proto.AesCtrKey;
+import com.google.crypto.tink.proto.HmacKey;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.IndCpaCipher;
 import com.google.crypto.tink.subtle.SubtleUtil;

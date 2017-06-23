@@ -21,8 +21,8 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-option java_package = "com.google.crypto.tink";
-option java_outer_classname = "Ed25519Proto";
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
 
 // key_type: type.googleapis.com/google.crypto.tink.Ed25519PublicKey
 message Ed25519PublicKey {

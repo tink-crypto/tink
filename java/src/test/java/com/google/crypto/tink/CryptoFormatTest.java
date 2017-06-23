@@ -18,9 +18,9 @@ package com.google.crypto.tink;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.crypto.tink.TinkProto.KeyStatusType;
-import com.google.crypto.tink.TinkProto.Keyset.Key;
-import com.google.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.Keyset.Key;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

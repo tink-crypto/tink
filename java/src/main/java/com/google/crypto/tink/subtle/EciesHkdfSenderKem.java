@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.CommonProto.EcPointFormat;
+import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;

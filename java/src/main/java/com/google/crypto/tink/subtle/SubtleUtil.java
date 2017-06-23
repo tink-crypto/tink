@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.CommonProto.HashType;
+import com.google.crypto.tink.proto.HashType;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;

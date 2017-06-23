@@ -20,8 +20,8 @@ package google.crypto.tink;
 
 import "proto/tink.proto";
 
-option java_package = "com.google.crypto.tink";
-option java_outer_classname = "KmsEnvelopeProto";
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
 
 message KmsEnvelopeAeadParams {
   // This field specifies which KMS to call and how, e.g., GoogleCloudKmsAeadKey.

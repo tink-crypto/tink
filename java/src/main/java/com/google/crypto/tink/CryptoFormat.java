@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.TinkProto.Keyset.Key;
+import com.google.crypto.tink.proto.Keyset.Key;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 

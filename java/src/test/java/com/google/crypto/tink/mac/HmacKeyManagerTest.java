@@ -19,11 +19,11 @@ package com.google.crypto.tink.mac;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 
-import com.google.crypto.tink.CommonProto.HashType;
-import com.google.crypto.tink.HmacProto.HmacKey;
-import com.google.crypto.tink.HmacProto.HmacKeyFormat;
-import com.google.crypto.tink.HmacProto.HmacParams;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
+import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.HmacKey;
+import com.google.crypto.tink.proto.HmacKeyFormat;
+import com.google.crypto.tink.proto.HmacParams;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Set;

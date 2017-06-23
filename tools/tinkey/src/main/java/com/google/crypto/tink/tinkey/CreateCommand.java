@@ -17,9 +17,9 @@
 package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.KeysetManager;
-import com.google.crypto.tink.TinkProto.EncryptedKeyset;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
-import com.google.crypto.tink.TinkProto.Keyset;
+import com.google.crypto.tink.proto.EncryptedKeyset;
+import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.GcpKmsAead;
 import com.google.protobuf.Message;
 import java.io.File;

@@ -16,10 +16,10 @@
 
 package com.google.crypto.tink.mac;
 
-import com.google.crypto.tink.CommonProto.HashType;
-import com.google.crypto.tink.HmacProto.HmacKeyFormat;
-import com.google.crypto.tink.HmacProto.HmacParams;
-import com.google.crypto.tink.TinkProto.KeyTemplate;
+import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.HmacKeyFormat;
+import com.google.crypto.tink.proto.HmacParams;
+import com.google.crypto.tink.proto.KeyTemplate;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code Mac}. One can use these templates

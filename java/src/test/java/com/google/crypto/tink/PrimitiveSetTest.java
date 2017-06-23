@@ -22,9 +22,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TinkProto.KeyStatusType;
-import com.google.crypto.tink.TinkProto.Keyset.Key;
-import com.google.crypto.tink.TinkProto.OutputPrefixType;
+import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.Keyset.Key;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.junit.Test;

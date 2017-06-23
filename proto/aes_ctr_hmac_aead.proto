@@ -21,8 +21,8 @@ package google.crypto.tink;
 import "proto/aes_ctr.proto";
 import "proto/hmac.proto";
 
-option java_package = "com.google.crypto.tink";
-option java_outer_classname = "AesCtrHmacAeadProto";
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
 
 message AesCtrHmacAeadParams {
   AesCtrParams aes_ctr_params = 1;

@@ -19,7 +19,6 @@ package com.google.crypto.tink.subtle;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.common.truth.Truth;
 import com.google.crypto.tink.subtle.DjbCipher.StateGen;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

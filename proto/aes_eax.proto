@@ -18,8 +18,8 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-option java_package = "com.google.crypto.tink";
-option java_outer_classname = "AesEaxProto";
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
 
 // only allowing tag size in bytes = 16
 message AesEaxParams {
