@@ -45,7 +45,7 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
     this.recipientPrivateKey = recipientPrivateKey;
     this.recipientKem = new EciesHkdfRecipientKem(recipientPrivateKey);
     this.hkdfSalt = hkdfSalt;
-    this.hkdfHmacAlgo = SubtleUtil.hashToHmacAlgorithmName(hkdfHashType);
+    this.hkdfHmacAlgo = ProtoUtil.hashToHmacAlgorithmName(hkdfHashType);
     this.ecPointFormat = ecPointFormat;
     this.demHelper = demHelper;
   }

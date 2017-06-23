@@ -50,8 +50,8 @@ java_library(
     name = "subtle_android",
     visibility = ["//visibility:public"],
     exports = [
+        "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:aead",
-        "//java/src/main/java/com/google/crypto/tink/subtle:android",
         "//java/src/main/java/com/google/crypto/tink/subtle:gcp_credential",
         "//java/src/main/java/com/google/crypto/tink/subtle:hybrid_android",
         "//java/src/main/java/com/google/crypto/tink/subtle:mac",

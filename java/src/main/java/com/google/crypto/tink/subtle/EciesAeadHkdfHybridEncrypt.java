@@ -43,7 +43,7 @@ public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
     EcUtil.checkPublicKey(recipientPublicKey);
     this.senderKem = new EciesHkdfSenderKem(recipientPublicKey);
     this.hkdfSalt = hkdfSalt;
-    this.hkdfHmacAlgo = SubtleUtil.hashToHmacAlgorithmName(hkdfHashType);
+    this.hkdfHmacAlgo = ProtoUtil.hashToHmacAlgorithmName(hkdfHashType);
     this.ecPointFormat = ecPointFormat;
     this.demHelper = demHelper;
   }

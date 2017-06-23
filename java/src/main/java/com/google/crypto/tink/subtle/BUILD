@@ -21,23 +21,6 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
-        "//proto:common_java_proto",
-        "@com_google_errorprone_error_prone_annotations//jar",
-    ],
-)
-
-java_library(
-    name = "android",
-    srcs = [
-        "EngineFactory.java",
-        "EngineWrapper.java",
-        "ImmutableByteArray.java",
-        "Random.java",
-        "SubtleUtil.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        "//proto:common_java_proto_lite",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
@@ -166,6 +149,7 @@ java_library(
         "EciesHkdfRecipientKem.java",
         "EciesHkdfSenderKem.java",
         "Hkdf.java",
+        "ProtoUtil.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
@@ -186,11 +170,11 @@ java_library(
         "EciesHkdfRecipientKem.java",
         "EciesHkdfSenderKem.java",
         "Hkdf.java",
+        "ProtoUtil.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
         ":subtle",
-        "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "//proto:common_java_proto_lite",
         "@com_google_errorprone_error_prone_annotations//jar",

@@ -118,7 +118,6 @@ public class UtilTest {
             .setStatus(KeyStatusType.ENABLED)
             .setOutputPrefixType(OutputPrefixType.TINK)
             .build())
-        .setPrimaryKeyId(1)
         .build();
     try {
       Util.validateKeyset(validKeyset);

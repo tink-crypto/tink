@@ -20,10 +20,10 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.subtle.EcUtil;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.ProtoUtil;
 import java.security.GeneralSecurityException;
 
-final class HybridUtil {
+class HybridUtil {
   /**
    * Validates EciesAeadHkdf params.
    *
@@ -32,7 +32,7 @@ final class HybridUtil {
    */
   public static void validate(EciesAeadHkdfParams params) throws GeneralSecurityException {
     EcUtil.getCurveSpec(params.getKemParams().getCurveType());
-    SubtleUtil.hashToHmacAlgorithmName(params.getKemParams().getHkdfHashType());
+    ProtoUtil.hashToHmacAlgorithmName(params.getKemParams().getHkdfHashType());
     if (params.getEcPointFormat() == EcPointFormat.UNKNOWN_FORMAT) {
       throw new GeneralSecurityException("unknown EC point format");
     }
