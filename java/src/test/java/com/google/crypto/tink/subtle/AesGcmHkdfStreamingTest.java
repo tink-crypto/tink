@@ -730,7 +730,11 @@ public class AesGcmHkdfStreamingTest {
     PipedOutputStream output = new PipedOutputStream();
     PipedInputStream result = new PipedInputStream(output);
     WritableByteChannel ciphertext = Channels.newChannel(output);
-    new Thread(() -> encryptChannel(ags, plaintext, ciphertext, aad, chunkSize)).start();
+    new Thread(new Runnable() {
+      public void run() {
+        encryptChannel(ags, plaintext, ciphertext, aad, chunkSize);
+      }
+    }).start();
     return Channels.newChannel(result);
   }
 
