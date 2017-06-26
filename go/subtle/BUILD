@@ -52,3 +52,31 @@ go_test(
         ":random",
     ],
 )
+
+# util
+UTIL_SRCS = [
+    "util/util.go",
+]
+
+UTIL_TEST_SRCS = [
+    "util/util_test.go",
+]
+
+UTIL_DEPS = [
+    "//proto:common_go_proto",
+    "//proto:tink_go_proto",
+]
+
+go_library(
+    name = "util",
+    srcs = UTIL_SRCS,
+    deps = UTIL_DEPS,
+)
+
+go_test(
+    name = "util_test",
+    srcs = UTIL_TEST_SRCS,
+    deps = UTIL_DEPS + [
+        ":util",
+    ],
+)
