@@ -15,6 +15,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/hybrid",
         "//java/src/main/java/com/google/crypto/tink/mac",
         "//java/src/main/java/com/google/crypto/tink/signature",
+        "//java/src/main/java/com/google/crypto/tink/streamingaead",
     ],
 )
 
@@ -28,6 +29,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/hybrid:android",
         "//java/src/main/java/com/google/crypto/tink/mac:android",
         "//java/src/main/java/com/google/crypto/tink/signature:android",
+        "//java/src/main/java/com/google/crypto/tink/streamingaead:android",
     ],
 )
 
@@ -72,6 +74,7 @@ java_library(
         "//proto:aes_ctr_hmac_aead_java_proto",
         "//proto:aes_ctr_java_proto",
         "//proto:aes_eax_java_proto",
+        "//proto:aes_gcm_hkdf_streaming_java_proto",
         "//proto:aes_gcm_java_proto",
         "//proto:chacha20_poly1305_java_proto",
         "//proto:common_java_proto",

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.TestUtil.ByteBufferChannel;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -33,7 +34,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
-import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -47,6 +47,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+/**
+ * Test for {@code AesGcmHkdfStreaming}-implementaiton of {@code StreamingAead}-primitive.
+ */
 @RunWith(JUnit4.class)
 public class AesGcmHkdfStreamingTest {
   /**
@@ -56,123 +59,6 @@ public class AesGcmHkdfStreamingTest {
    *   - Reading beyond the end of the file
    *   - regression for c++ implementation
    */
-
-  /**
-   * Implements a SeekableByteChannel for testing.
-   * The implementation is backed by a ByteBuffer.
-   */
-  class ByteBufferChannel implements SeekableByteChannel {
-    private final ByteBuffer buffer;
-
-    /**
-     * Defines the maximal size of a chunk that is transfered with a single write.
-     * This can be used to test the behavior of streaming encryption with channels
-     * where not always sufficiently many bytes are available during reads and writes.
-     */
-    private final int maxChunkSize;
-
-    /**
-     * keeps track whether the channel is still open.
-     */
-    private boolean isopen;
-
-    public ByteBufferChannel(ByteBuffer buffer) {
-      this.buffer = buffer.duplicate();
-      maxChunkSize = java.lang.Integer.MAX_VALUE;
-      isopen = true;
-    }
-
-    public ByteBufferChannel(ByteBuffer buffer, int maxChunkSize) {
-      this.buffer = buffer.duplicate();
-      this.maxChunkSize = maxChunkSize;
-      isopen = true;
-    }
-
-    public ByteBufferChannel(byte[] bytes) {
-      this.buffer = ByteBuffer.wrap(bytes);
-      maxChunkSize = java.lang.Integer.MAX_VALUE;
-      isopen = true;
-    }
-
-    private void checkIsOpen() throws ClosedChannelException {
-      if (!isopen) {
-        throw new ClosedChannelException();
-      }
-    }
-
-    @Override
-    public long position() throws ClosedChannelException {
-      checkIsOpen();
-      return buffer.position();
-    }
-
-    @Override
-    public synchronized ByteBufferChannel position(long newPosition)
-        throws ClosedChannelException {
-      checkIsOpen();
-      if (newPosition < 0) {
-        throw new IllegalArgumentException("negative position");
-      }
-      if (newPosition > buffer.limit()) {
-        newPosition = buffer.limit();
-      }
-      buffer.position((int) newPosition);
-      return this;
-    }
-
-    @Override
-    public synchronized int read(ByteBuffer dst) throws IOException {
-      checkIsOpen();
-      if (buffer.remaining() == 0) {
-        return -1;
-      }
-      // Not the most efficient way.
-      int size = Math.min(buffer.remaining(), dst.remaining());
-      size = Math.min(size, maxChunkSize);
-      byte[] bytes = new byte[size];
-      buffer.get(bytes);
-      dst.put(bytes);
-      return size;
-    }
-
-    @Override
-    public int write(ByteBuffer src) throws IOException {
-      checkIsOpen();
-      // not the most efficient way
-      int size = Math.min(buffer.remaining(), src.remaining());
-      size = Math.min(size, maxChunkSize);
-      byte[] bytes = new byte[size];
-      src.get(bytes);
-      buffer.put(bytes);
-      return size;
-    }
-
-    @Override
-    public long size() throws ClosedChannelException {
-      checkIsOpen();
-      return buffer.limit();
-    }
-
-    @Override
-    public SeekableByteChannel truncate(long size) throws NonWritableChannelException {
-      throw new NonWritableChannelException();
-    }
-
-    @Override
-    public void close() throws IOException {
-      isopen = false;
-    }
-
-    @Override
-    public boolean isOpen() {
-      return isopen;
-    }
-
-    public void rewind() {
-      isopen = true;
-      buffer.rewind();
-    }
-  }
 
   class PseudorandomReadableByteChannel implements ReadableByteChannel {
     private long size;
@@ -287,7 +173,8 @@ public class AesGcmHkdfStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
+    AesGcmHkdfStreaming ags =
+        new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -301,7 +188,9 @@ public class AesGcmHkdfStreamingTest {
     while (true) {
       ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
       int read = ptChannel.read(chunk);
-      if (read == -1) break;
+      if (read == -1) {
+        break;
+      }
       assertEquals(read, chunk.position());
       byte[] expectedPlaintext = Arrays.copyOfRange(plaintext, decryptedSize, decryptedSize + read);
       assertArrayEquals(expectedPlaintext, Arrays.copyOf(chunk.array(), read));
@@ -324,7 +213,8 @@ public class AesGcmHkdfStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
+    AesGcmHkdfStreaming ags =
+        new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -448,7 +338,7 @@ public class AesGcmHkdfStreamingTest {
    * Encrypts and decrypts a with non-ASCII characters using CharsetEncoders
    * and CharsetDecoders.
    */
-  @Test 
+  @Test
   public void testEncryptDecryptString() throws Exception {
     int segmentSize = 512;
     int firstSegmentOffset = 0;
@@ -456,7 +346,8 @@ public class AesGcmHkdfStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
+    AesGcmHkdfStreaming ags =
+        new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
 
     String stringWithNonAsciiChars = "αβγδ áéíóúý ∀∑∊∫≅⊕⊄";
     int repetitions = 1000;
@@ -470,14 +361,14 @@ public class AesGcmHkdfStreamingTest {
     }
     writer.close();
     byte[] ciphertext = bos.toByteArray();
- 
+
     // Decrypts a sequence of strings.
     // channels.newReader does not always return the requested number of characters.
-    ByteBufferChannel ctBuffer = new ByteBufferChannel(ByteBuffer.wrap(ciphertext));   
+    ByteBufferChannel ctBuffer = new ByteBufferChannel(ByteBuffer.wrap(ciphertext));
     Reader reader = Channels.newReader(ags.newSeekableDecryptingChannel(ctBuffer, aad), "UTF-8");
     for (int i = 0; i < repetitions; i++) {
       char[] chunk = new char[stringWithNonAsciiChars.length()];
-      int position = 0; 
+      int position = 0;
       while (position < stringWithNonAsciiChars.length()) {
         int read = reader.read(chunk, position, stringWithNonAsciiChars.length() - position);
         assertTrue("read:" + read,  read > 0);
@@ -486,7 +377,7 @@ public class AesGcmHkdfStreamingTest {
       assertEquals("i:" + i, stringWithNonAsciiChars, new String(chunk));
     }
     int res = reader.read();
-    assertEquals(-1, res);    
+    assertEquals(-1, res);
   }
 
   /**
@@ -503,7 +394,8 @@ public class AesGcmHkdfStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
+    AesGcmHkdfStreaming ags =
+        new AesGcmHkdfStreaming(ikm, keySizeInBits, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     int ciphertextLength = (int) ags.expectedCiphertextSize(plaintextSize);
     ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
@@ -716,9 +608,9 @@ public class AesGcmHkdfStreamingTest {
 
     // delete segments
     for (int segment = 0; segment < (ciphertext.length / segmentSize); segment++) {
-      byte[] modifiedCiphertext =
-          concatBytes(Arrays.copyOf(ciphertext, segment * segmentSize),
-                      Arrays.copyOfRange(ciphertext, (segment + 1) * segmentSize, ciphertext.length));
+      byte[] modifiedCiphertext = concatBytes(
+          Arrays.copyOf(ciphertext, segment * segmentSize),
+          Arrays.copyOfRange(ciphertext, (segment + 1) * segmentSize, ciphertext.length));
       tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
     }
 
@@ -735,7 +627,8 @@ public class AesGcmHkdfStreamingTest {
     for (int pos = 0; pos < aad.length; pos++) {
       byte[] modifiedAad = Arrays.copyOf(aad, aad.length);
       modifiedAad[pos] ^= (byte) 1;
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, ciphertext, modifiedAad, new byte[0]);
+      tryDecryptModifiedCiphertextWithSeekableByteChannel(
+          ags, ciphertext, modifiedAad, new byte[0]);
     }
   }
 
