@@ -51,6 +51,6 @@ public class CreateKeyTemplateCommand extends CreateKeyTemplateOptions implement
     }
 
     outputStream.write(comment.getBytes("UTF-8"));
-    TinkeyUtil.writeProto(keyTemplate, outputStream, "TEXT" /* outFormat */);
+    TinkeyUtil.writeProto(keyTemplate, outputStream, /* outFormat= */"TEXT");
   }
 }

@@ -77,7 +77,7 @@ public final class HybridEncryptFactory {
    */
   public static HybridEncrypt getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, null /* keyManager */);
+    return getPrimitive(keysetHandle, /* keyManager= */null);
   }
   /**
    * @return a HybridEncrypt primitive from a {@code keysetHandle} and a custom {@code keyManager}.

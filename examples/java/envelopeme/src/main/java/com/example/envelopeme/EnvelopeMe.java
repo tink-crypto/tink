@@ -35,7 +35,7 @@ public class EnvelopeMe {
       throws Exception {
     KeysetHandle handle = NoSecretKeysetHandle.parseFrom(config);
     Aead aead = AeadFactory.getPrimitive(handle);
-    return aead.encrypt(plaintext, null /* aad */);
+    return aead.encrypt(plaintext, /* additionalData= */null);
   }
 
   /**
@@ -45,7 +45,7 @@ public class EnvelopeMe {
       throws Exception {
     KeysetHandle handle = NoSecretKeysetHandle.parseFrom(config);
     Aead aead = AeadFactory.getPrimitive(handle);
-    return aead.decrypt(ciphertext, null /* aad */);
+    return aead.decrypt(ciphertext, /* additionalData= */null);
   }
 
   public static void main(String[] args) throws Exception {

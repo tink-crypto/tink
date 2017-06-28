@@ -129,11 +129,11 @@ public class KeysetManager {
     }
     Keyset keyset = keysetBuilder.build();
     byte[] encryptedKeyset = masterKey.encrypt(keyset.toByteArray(),
-        new byte[0] /* aad */);
+        /* additionalData= */new byte[0]);
     // Check if we can decrypt, to detect errors
     try {
       final Keyset keyset2 = Keyset.parseFrom(masterKey.decrypt(
-          encryptedKeyset, new byte[0] /* aad */));
+          encryptedKeyset, /* additionalData= */new byte[0]));
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("cannot encrypt keyset");
       }

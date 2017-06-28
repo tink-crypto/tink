@@ -54,7 +54,7 @@ public final class HybridDecryptFactory {
    */
   public static HybridDecrypt getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, null /* keyManager */);
+    return getPrimitive(keysetHandle, /* keyManager= */null);
   }
   /**
    * @return a HybridDecrypt primitive from a {@code keysetHandle} and a custom {@code keyManager}.

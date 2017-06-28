@@ -56,7 +56,7 @@ public final class PublicKeyVerifyFactory {
    */
   public static PublicKeyVerify getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-        return getPrimitive(keysetHandle, null /* keyManager */);
+        return getPrimitive(keysetHandle, /* keyManager= */null);
       }
 
   /**

@@ -192,7 +192,7 @@ public final class Registry {
    */
   public <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitives(keysetHandle, null /* customManager */);
+    return getPrimitives(keysetHandle, /* customManager= */null);
   }
   /**
    * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset

@@ -57,7 +57,7 @@ public final class MacFactory {
    */
   public static Mac getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, null /* keyManager */);
+    return getPrimitive(keysetHandle, /* keyManager= */null);
   }
 
   /**

@@ -70,7 +70,7 @@ public final class EncryptedKeysetHandle {
     EncryptedKeysetHandle.assertEnoughKeyMaterial(proto);
     try {
       final Keyset keyset = Keyset.parseFrom(masterKey.decrypt(
-          proto.getEncryptedKeyset().toByteArray(), new byte[0] /* aad */));
+          proto.getEncryptedKeyset().toByteArray(), /* additionalData= */new byte[0]));
       // check emptiness here too, in case the encrypted keys unwrapped to nothing?
       KeysetHandle.assertEnoughKeyMaterial(keyset);
       return new KeysetHandle(keyset, proto);

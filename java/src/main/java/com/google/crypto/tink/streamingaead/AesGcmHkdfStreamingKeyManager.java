@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 package com.google.crypto.tink.streamingaead;
 
@@ -32,8 +32,8 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * This key manager generates new {@code AesGcmHkdfStreamingKey} keys and produces new instances
- * of {@code AesGcmHkdfStreaming}.
+ * This key manager generates new {@code AesGcmHkdfStreamingKey} keys and produces new instances of
+ * {@code AesGcmHkdfStreaming}.
  */
 public final class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
   AesGcmHkdfStreamingKeyManager() {}
@@ -43,9 +43,7 @@ public final class AesGcmHkdfStreamingKeyManager implements KeyManager<Streaming
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey";
 
-  /**
-   * @param serializedKey  serialized {@code AesGcmHkdfStreamingKey} proto
-   */
+  /** @param serializedKey serialized {@code AesGcmHkdfStreamingKey} proto */
   @Override
   public StreamingAead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
@@ -56,9 +54,7 @@ public final class AesGcmHkdfStreamingKeyManager implements KeyManager<Streaming
     }
   }
 
-  /**
-   * @param key  {@code AesGcmHkdfStreamingKey} proto
-   */
+  /** @param key {@code AesGcmHkdfStreamingKey} proto */
   @Override
   public StreamingAead getPrimitive(MessageLite key) throws GeneralSecurityException {
     if (!(key instanceof AesGcmHkdfStreamingKey)) {
@@ -70,11 +66,11 @@ public final class AesGcmHkdfStreamingKeyManager implements KeyManager<Streaming
         keyProto.getKeyValue().toByteArray(),
         keyProto.getParams().getDerivedKeySize() * 8,
         keyProto.getParams().getCiphertextSegmentSize(),
-        0 /* no firstSegmentOffset */);
+        /* firstSegmentOffset= */ 0);
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code AesGcmHkdfStreamingKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code AesGcmHkdfStreamingKeyFormat} proto
    * @return new {@code AesGcmHkdfStreamingKey} proto
    */
   @Override

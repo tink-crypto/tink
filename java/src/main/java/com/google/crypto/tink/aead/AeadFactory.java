@@ -57,7 +57,7 @@ public final class AeadFactory {
    */
   public static Aead getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, null /* keyManager */);
+    return getPrimitive(keysetHandle, /* keyManager= */null);
   }
 
   /**
