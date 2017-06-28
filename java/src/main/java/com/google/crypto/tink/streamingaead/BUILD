@@ -23,7 +23,6 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "//java/src/main/java/com/google/crypto/tink",
-        "//java/src/main/java/com/google/crypto/tink/mac",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
         "//proto:aes_gcm_hkdf_streaming_java_proto",
@@ -39,7 +38,6 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "//java/src/main/java/com/google/crypto/tink:android",
-        "//java/src/main/java/com/google/crypto/tink/mac:android",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
         "//proto:aes_gcm_hkdf_streaming_java_proto_lite",

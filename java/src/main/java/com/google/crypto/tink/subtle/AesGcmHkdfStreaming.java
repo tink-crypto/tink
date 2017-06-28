@@ -278,8 +278,8 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
 
     /**
      * Encrypt a segment consisting of two parts.
-     * This method simplifies the case where one part of the plaintext is buffered and the other part
-     * is passed in by the caller.
+     * This method simplifies the case where one part of the plaintext is buffered and the other
+     * part is passed in by the caller.
      */
     public synchronized void encryptSegment(
         ByteBuffer part1, ByteBuffer part2, boolean isLastSegment, ByteBuffer ciphertext)

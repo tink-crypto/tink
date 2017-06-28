@@ -27,8 +27,8 @@ set -x
 
 BAZEL_BIN="${KOKORO_GFILE_DIR}/bazel-0.5.1-darwin-x86_64"
 
-DISABLE_SANDBOX="--strategy=CppCompile=standalone \
---strategy=Turbine=standalone --strategy=ProtoCompile=standalone \
+DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
+--strategy=CppCompile=standalone --strategy=ProtoCompile=standalone \
 --strategy=GenProto=standalone --strategy=GenProtoDescriptorSet=standalone \
 --strategy=ObjcCompile=standalone"
 
@@ -61,6 +61,7 @@ ${BAZEL_BIN} build \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \
   --ios_cpu=x86_64 \
+  --sandbox_tmpfs_path=$TMP \
   --experimental_enable_objc_cc_deps \
   --ios_sdk_version="${IOS_SDK_VERSION}" \
   --xcode_version="${XCODE_VERSION}" \
@@ -72,9 +73,9 @@ echo "bazel obj-c passed"
 
 # Build all targets except iOS.
 # bazel sandbox doesn't work with Kokoro's MacOS image, see b/38040081.
-${BAZEL_BIN} build $DISABLE_SANDBOX -- //... -//objc/... || ( ls -l ; df -h / ; exit 1 )
+${BAZEL_BIN} build --sandbox_tmpfs_path=$TMP $DISABLE_SANDBOX -- //... -//objc/... || ( ls -l ; df -h / ; exit 1 )
 
 echo "bazel c++ / java passed"
 
 # Run all non-iOS tests.
-${BAZEL_BIN} test --strategy=TestRunner=standalone --test_output=all -- //... -//objc/...
+${BAZEL_BIN} test --sandbox_tmpfs_path=$TMP --strategy=TestRunner=standalone --test_output=all -- //... -//objc/...

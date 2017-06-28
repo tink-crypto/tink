@@ -48,7 +48,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Test for {@code AesGcmHkdfStreaming}-implementaiton of {@code StreamingAead}-primitive.
+ * Test for {@code AesGcmHkdfStreaming}-implementation of {@code StreamingAead}-primitive.
  */
 @RunWith(JUnit4.class)
 public class AesGcmHkdfStreamingTest {

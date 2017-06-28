@@ -125,7 +125,7 @@ class AesGcmHkdfSeekableDecryptingChannel implements SeekableByteChannel {
        .append(" limit:").append(header.position())
        .append("\ncurrentSegmentNr:").append(currentSegmentNr)
        .append("\nciphertextSgement")
-       .append(" postion:").append(ciphertextSegment.position())
+       .append(" position:").append(ciphertextSegment.position())
        .append(" limit:").append(ciphertextSegment.limit())
        .append("\nisCurrentSegmentDecrypted:").append(isCurrentSegmentDecrypted)
        .append("\nplaintextSegment")
@@ -135,7 +135,7 @@ class AesGcmHkdfSeekableDecryptingChannel implements SeekableByteChannel {
   }
 
   /**
-   * Returns the position of of this channel.
+   * Returns the position of this channel.
    * The position is relative to the plaintext.
    */
   @Override
@@ -246,9 +246,9 @@ class AesGcmHkdfSeekableDecryptingChannel implements SeekableByteChannel {
    * and this has been verified, by decrypting the last segment.
    */
   private boolean reachedEnd() {
-    return (isCurrentSegmentDecrypted &&
-            currentSegmentNr == numberOfSegments - 1 &&
-            plaintextSegment.remaining() == 0);
+    return (isCurrentSegmentDecrypted
+        && currentSegmentNr == numberOfSegments - 1
+        && plaintextSegment.remaining() == 0);
   }
 
   @Override

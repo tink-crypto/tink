@@ -252,7 +252,7 @@ public class AesGcmHkdfStreamingKeyManagerTest {
         .setKeySize(16)
         .build();
     serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
-    AesGcmHkdfStreamingKey key = (AesGcmHkdfStreamingKey) keyManager.newKey(keyFormat);
-    key = (AesGcmHkdfStreamingKey) keyManager.newKey(serializedKeyFormat);
+    AesGcmHkdfStreamingKey unusedKey = (AesGcmHkdfStreamingKey) keyManager.newKey(keyFormat);
+    unusedKey = (AesGcmHkdfStreamingKey) keyManager.newKey(serializedKeyFormat);
   }
 }

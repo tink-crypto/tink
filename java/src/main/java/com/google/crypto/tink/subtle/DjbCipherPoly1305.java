@@ -273,7 +273,8 @@ public abstract class DjbCipherPoly1305 implements Aead {
     ciphertextBuf.get(tag);
     byte[] nonce = new byte[djbCipher.nonceSizeInBytes()];
     ciphertextBuf.get(nonce);
-    byte[] expectedTag = computeTag(ciphertextBuf, additionalData, djbCipher.getAuthenticatorKey(nonce));
+    byte[] expectedTag =
+        computeTag(ciphertextBuf, additionalData, djbCipher.getAuthenticatorKey(nonce));
     if (!SubtleUtil.arrayEquals(tag, expectedTag)) {
       throw new GeneralSecurityException("Tags do not match.");
     }

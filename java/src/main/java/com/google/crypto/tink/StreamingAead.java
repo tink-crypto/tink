@@ -55,12 +55,12 @@ import java.security.GeneralSecurityException;
  * decryption have the same property. That is encryption always processes all the plaintext passed
  * in and waits until complete segments have been written to the ciphertext channel. Similarly,
  * decryption blocks until sufficiently many bytes have been read from the ciphertext channel until
- * all the requested plaintext has been decrypted and authenticated, an IOException occured, or the
+ * all the requested plaintext has been decrypted and authenticated, an IOException occurred, or the
  * end of the plaintext has been reached.
  *
  * If the channel provided to the streaming encryption is in non-blocking mode, then encryption and
  * decryption are also non-blocking. Since encryption and decryption is done in segments it is
- * possible that for exmaple a call attempting to read() returns no plaintext at all even if
+ * possible that for example a call attempting to read() returns no plaintext at all even if
  * partial ciphertext was read from the underlying channel.
  *
  * Sample encryption:
@@ -149,7 +149,7 @@ public interface StreamingAead {
    *    </ul>
    * @throws GeneralSecurityException if the header of the ciphertext is corrupt or if the
    *    associatedData is not correct.
-   * @throws IOException if an IOException occured while reading from ciphertextDestination.
+   * @throws IOException if an IOException occurred while reading from ciphertextDestination.
    */
   SeekableByteChannel newSeekableDecryptingChannel(
       SeekableByteChannel ciphertextSource,

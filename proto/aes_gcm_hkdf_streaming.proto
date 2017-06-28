@@ -14,7 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Definitions for streaming encryption using AES-GCM with HKDF as key derivation function.
+// Definitions for streaming encryption using AES-GCM
+// with HKDF as key derivation function.
 syntax = "proto3";
 
 package google.crypto.tink;
@@ -25,13 +26,13 @@ option java_multiple_files = true;
 
 message AesGcmHkdfStreamingParams {
   uint32 ciphertext_segment_size = 1;
-  uint32 derived_key_size = 2;
+  uint32 derived_key_size = 2;  // size of AES-GCM keys derived for each segment
   HashType hkdf_hash_type = 3;
 }
 
 message AesGcmHkdfStreamingKeyFormat {
   AesGcmHkdfStreamingParams params = 1;
-  uint32 key_size = 2;
+  uint32 key_size = 2;  // size of the main key (aka. "ikm", input key material)
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey

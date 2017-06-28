@@ -111,7 +111,7 @@ public class TestUtil {
     private final ByteBuffer buffer;
 
     /**
-     * Defines the maximal size of a chunk that is transfered with a single write.
+     * Defines the maximal size of a chunk that is transferred with a single write.
      * This can be used to test the behavior of streaming encryption with channels
      * where not always sufficiently many bytes are available during reads and writes.
      */

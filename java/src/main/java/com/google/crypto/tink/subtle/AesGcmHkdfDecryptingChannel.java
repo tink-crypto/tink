@@ -60,7 +60,7 @@ class AesGcmHkdfDecryptingChannel implements ReadableByteChannel {
   /**
    * Indicates whether this stream is in a defined state.
    * Currently the state of this instance becomes undefined when
-   * an authentication error has occured.
+   * an authentication error has occurred.
    */
   private boolean definedState;
 
@@ -276,7 +276,7 @@ class AesGcmHkdfDecryptingChannel implements ReadableByteChannel {
        .append(" position:").append(header.position())
        .append(" limit:").append(header.position())
        .append("\nciphertextSgement")
-       .append(" postion:").append(ciphertextSegment.position())
+       .append(" position:").append(ciphertextSegment.position())
        .append(" limit:").append(ciphertextSegment.limit())
        .append("\nplaintextSegment")
        .append(" position:").append(plaintextSegment.position())
