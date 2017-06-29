@@ -723,13 +723,13 @@ public class AesGcmHkdfStreamingTest {
    * TODO(bleichen): Using PipedInputStream may have performance problems.
    */
   private ReadableByteChannel ciphertextChannel(
-      AesGcmHkdfStreaming ags,
-      ReadableByteChannel plaintext,
-      byte[] aad,
-      int chunkSize) throws Exception {
+      final AesGcmHkdfStreaming ags,
+      final ReadableByteChannel plaintext,
+      final byte[] aad,
+      final int chunkSize) throws Exception {
     PipedOutputStream output = new PipedOutputStream();
     PipedInputStream result = new PipedInputStream(output);
-    WritableByteChannel ciphertext = Channels.newChannel(output);
+    final WritableByteChannel ciphertext = Channels.newChannel(output);
     new Thread(new Runnable() {
       public void run() {
         encryptChannel(ags, plaintext, ciphertext, aad, chunkSize);
