@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.subtle;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -60,15 +59,52 @@ public class AesGcmHkdfStreamingTest {
    *   - regression for c++ implementation
    */
 
+  /**
+   * Replacement for org.junit.Assert.assertEquals, since
+   * org.junit.Assert.assertEquals is quite slow.
+   */
+  public void assertByteArrayEquals(String txt, byte[] expected, byte[] actual) throws Exception {
+    assertEquals(txt + " arrays not of the same length", expected.length, actual.length);
+    for (int i = 0; i < expected.length; i++) {
+      if (expected[i] != actual[i]) {
+        assertEquals(txt + " difference at position:" + i, expected[i], actual[i]);
+      }
+    }
+  }
+
+  public void assertByteArrayEquals(byte[] expected, byte[] actual) throws Exception {
+    assertByteArrayEquals("", expected, actual);
+  }
+
+  /**
+   * Checks whether the bytes from buffer.position() to buffer.limit() are the
+   * same bytes as expected.
+   */
+  public void assertByteBufferContains(String txt, byte[] expected, ByteBuffer buffer)
+      throws Exception {
+    assertEquals(txt + " unexpected number of bytes in buffer", expected.length,
+        buffer.remaining());
+    byte[] content = new byte[buffer.remaining()];
+    buffer.duplicate().get(content);
+    assertByteArrayEquals(txt, expected, content);
+  }
+
+  public void assertByteBufferContains(byte[] expected, ByteBuffer buffer) throws Exception {
+    assertByteBufferContains("", expected, buffer);
+  }
+
   class PseudorandomReadableByteChannel implements ReadableByteChannel {
     private long size;
     private long position;
     private boolean open;
+    private byte[] repeatedBlock;
+    private static final int BLOCK_SIZE = 1024;
 
     public PseudorandomReadableByteChannel(long size) {
       this.size = size;
       this.position = 0;
       this.open = true;
+      this.repeatedBlock = generatePlaintext(BLOCK_SIZE);
     }
 
     @Override
@@ -80,11 +116,21 @@ public class AesGcmHkdfStreamingTest {
         return -1;
       }
       long start = position;
-      while (dst.remaining() > 0 && position < size) {
-        // Just fill dst with bytes that are deterministically determined form position.
-        dst.put((byte) (position + (position >> 7)));
-        position++;
+      long end = java.lang.Math.min(size, start + dst.remaining());
+      long firstBlock = start / BLOCK_SIZE;
+      long lastBlock = end / BLOCK_SIZE;
+      int startOffset = (int) (start % BLOCK_SIZE);
+      int endOffset = (int) (end % BLOCK_SIZE);
+      if (firstBlock == lastBlock) {
+        dst.put(repeatedBlock, startOffset, endOffset - startOffset);
+      } else {
+        dst.put(repeatedBlock, startOffset, BLOCK_SIZE - startOffset);
+        for (long block = firstBlock + 1; block < lastBlock; block++) {
+          dst.put(repeatedBlock);
+        }
+        dst.put(repeatedBlock, 0, endOffset);
       }
+      position = end;
       return (int) (position - start);
     }
 
@@ -150,8 +196,8 @@ public class AesGcmHkdfStreamingTest {
     ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, aad);
     ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length + 1);
     ptChannel.read(decrypted);
-    assertEquals(plaintext.length, decrypted.position());
-    assertArrayEquals(plaintext, Arrays.copyOf(decrypted.array(), decrypted.position()));
+    decrypted.flip();
+    assertByteBufferContains(plaintext, decrypted);
   }
 
   /**
@@ -180,7 +226,8 @@ public class AesGcmHkdfStreamingTest {
 
     // Construct an InputStream from the ciphertext where the first
     // firstSegmentOffset bytes have already been read.
-    ReadableByteChannel ctChannel = new ByteBufferChannel(ciphertext).position(firstSegmentOffset);
+    ReadableByteChannel ctChannel =
+        new ByteBufferChannel(ciphertext).position(firstSegmentOffset);
 
     // Construct an InputStream that returns the plaintext.
     ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, aad);
@@ -192,8 +239,9 @@ public class AesGcmHkdfStreamingTest {
         break;
       }
       assertEquals(read, chunk.position());
-      byte[] expectedPlaintext = Arrays.copyOfRange(plaintext, decryptedSize, decryptedSize + read);
-      assertArrayEquals(expectedPlaintext, Arrays.copyOf(chunk.array(), read));
+      byte[] expectedPlaintext =
+          Arrays.copyOfRange(plaintext, decryptedSize, decryptedSize + read);
+      assertByteArrayEquals(expectedPlaintext, Arrays.copyOf(chunk.array(), read));
       decryptedSize += read;
       // ptChannel should fill chunk, unless the end of the plaintext has been reached.
       if (decryptedSize < plaintextSize) {
@@ -445,7 +493,7 @@ public class AesGcmHkdfStreamingTest {
       if (read > 0) {
         assertTrue("Read more plaintext than expected", position + read <= plaintext.length);
         // Everything decrypted must be equal to the original plaintext.
-        assertArrayEquals(
+        assertByteArrayEquals(
             "Returned modified plaintext position:" + position + " size:" + read,
             Arrays.copyOf(chunk.array(), read),
             Arrays.copyOfRange(plaintext, position, position + read));
@@ -608,9 +656,10 @@ public class AesGcmHkdfStreamingTest {
 
     // delete segments
     for (int segment = 0; segment < (ciphertext.length / segmentSize); segment++) {
-      byte[] modifiedCiphertext = concatBytes(
-          Arrays.copyOf(ciphertext, segment * segmentSize),
-          Arrays.copyOfRange(ciphertext, (segment + 1) * segmentSize, ciphertext.length));
+      byte[] modifiedCiphertext =
+          concatBytes(Arrays.copyOf(ciphertext, segment * segmentSize),
+                      Arrays.copyOfRange(
+                          ciphertext, (segment + 1) * segmentSize, ciphertext.length));
       tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
     }
 
@@ -710,7 +759,7 @@ public class AesGcmHkdfStreamingTest {
         ByteBuffer expected = ByteBuffer.allocate(read);
         int cnt = copy.read(expected);
         decryptedBytes += read;
-        assertArrayEquals(expected.array(), Arrays.copyOf(chunk, read));
+        assertByteArrayEquals(expected.array(), Arrays.copyOf(chunk, read));
       }
     } while (read != -1);
     assertEquals(plaintextSize, decryptedBytes);
@@ -721,7 +770,7 @@ public class AesGcmHkdfStreamingTest {
    */
   @Test
   public void testFileEncrytion() throws Exception {
-    int plaintextSize = 1 << 24;
+    int plaintextSize = 1 << 18;
     ByteBufferChannel plaintext = new ByteBufferChannel(generatePlaintext(plaintextSize));
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
@@ -760,7 +809,8 @@ public class AesGcmHkdfStreamingTest {
       if (read > 0) {
         ByteBuffer expected = ByteBuffer.allocate(read);
         plaintext.read(expected);
-        assertArrayEquals(expected.array(), Arrays.copyOf(decrypted.array(), read));
+        decrypted.flip();
+        assertByteBufferContains(expected.array(), decrypted);
         decryptedSize += read;
       }
     } while (read != -1);
@@ -786,7 +836,8 @@ public class AesGcmHkdfStreamingTest {
       byte[] expected = new byte[read];
       plaintext.position(start);
       plaintext.read(ByteBuffer.wrap(expected));
-      assertArrayEquals(expected, Arrays.copyOf(decrypted.array(), read));
+      decrypted.flip();
+      assertByteBufferContains(expected, decrypted);
     }
   }
 }
