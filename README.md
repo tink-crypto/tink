@@ -33,7 +33,7 @@ operations (like symmetric encryption, message authentication codes, digital
 signatures, hybrid encryption), and additional primitives are in preparation.
 Moreover, Tink lets users add new primitives or custom implementations of
 existing primitives, which allows them to build upon Tink's core architecture
-and key manangement abilities without having to fork the library.
+and key management abilities without having to fork the library.
 
 The basic use of Tink proceeds in three steps:
 
@@ -45,9 +45,9 @@ To be more concrete, here is how these steps would look like when performing
 symmetric encryption (AEAD) in a Java program:
 
 ``` java
-    import com.google.cloud.crypto.tink.Aead;
-    import com.google.cloud.crypto.tink.aead.AeadFactory;
-    import com.google.cloud.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.Aead;
+    import com.google.crypto.tink.aead.AeadFactory;
+    import com.google.crypto.tink.KeysetHandle;
     // [...]
 
     // 1. Get the key material.
@@ -73,9 +73,9 @@ the Message Authentication Code (MAC) primitive (notice the usage of
 `MacFactory`):
 
 ``` java
-    import com.google.cloud.crypto.tink.Mac;
-    import com.google.cloud.crypto.tink.mac.MacFactory;
-    import com.google.cloud.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.Mac;
+    import com.google.crypto.tink.mac.MacFactory;
+    import com.google.crypto.tink.KeysetHandle;
     // [...]
 
     // 1. Get the key material.
@@ -93,8 +93,8 @@ implementations of AEAD and MAC primitives offered by Tink, the initialization
 looks as follows:
 
 ``` java
-    import com.google.cloud.crypto.tink.aead.AeadConfig;
-    import com.google.cloud.crypto.tink.mac.MacConfig;
+    import com.google.crypto.tink.aead.AeadConfig;
+    import com.google.crypto.tink.mac.MacConfig;
     // [...]
 
     // Register standard implementations of AEAD and MAC primitives.
@@ -111,9 +111,9 @@ see [Java HOW-TO](https://github.com/google/tink/blob/master/doc/JAVA-HOWTO.md).
 
 ## Tink overview
 
-**Basic Features** Tink provides a set of basic tools to perform common crypto
-tasks in a variety of environments. The main operations are accessible via
-so-called _primitives_, which represent cryptographic tools.
+**Basic Features** Tink provides a set of basic tools to perform common
+cryptographic tasks in a variety of environments. The main operations are
+accessible via so-called _primitives_, which represent cryptographic tools.
 Currently Tink supports the following cryptographic operations:
 
 - authenticated encryption with associated data (primitive: AEAD)
