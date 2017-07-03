@@ -26,30 +26,17 @@ namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// HybridEncryptFactory allows obtaining a primitive from a KeysetHandle.
+// HybridEncryptFactory allows for obtaining an HybridEncrypt primitive
+// from a KeysetHandle.
 //
-// HybridEncryptFactory gets primitives from the Registry. The factory allows
-// initalizing the Registry with native key types and their managers
-// that Tink supports out of the box.  These key types are divided in
-// two groups:
+// HybridEncryptFactory gets primitives from the Registry, which can
+// be initialized via convenience methods from HybridEncryptConfig-class.
+// Here is an example how one can obtain and use a HybridEncrypt primitive:
 //
-//  - standard: secure and safe to use in new code. Over time, with
-//    new developments in cryptanalysis and computing power, some
-//    standard key types might become legacy.
-//
-//  - legacy: deprecated and insecure or obsolete, should not be used
-//    in new code. Existing users should upgrade to one of the standard
-//    key types.
-//
-// This divison allows for gradual retiring insecure or
-// obsolete key types.
-//
-// For example, here is how one can obtain and use an HybridEncrypt primitive:
-//
-//   HybridEncryptFactory.RegisterStandardKeyTypes();
+//   HybridEncryptConfig.RegisterStandardKeyTypes();
 //   KeysetHandle keyset_handle = ...;
 //   std::unique_ptr<HybridEncrypt> hybrid_encrypt = std::move(
-//       HybridEncryptFactory.GetPrimitive(keyset_handle).ValueOrDie());
+//           HybridEncryptFactory.GetPrimitive(keyset_handle).ValueOrDie());
 //   string plaintext = ...;
 //   string context_info = ...;
 //   string ciphertext =
@@ -57,14 +44,6 @@ namespace tink {
 //
 class HybridEncryptFactory {
  public:
-  // Registers standard HybridEncrypt key types and their managers
-  // with the Registry.
-  static util::Status RegisterStandardKeyTypes();
-
-  // Registers legacy HybridEncrypt key types and their managers
-  // with the Registry.
-  static util::Status RegisterLegacyKeyTypes();
-
   // Returns a HybridEncrypt-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
   static util::StatusOr<std::unique_ptr<HybridEncrypt>> GetPrimitive(

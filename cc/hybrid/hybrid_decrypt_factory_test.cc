@@ -21,6 +21,7 @@
 #include "cc/crypto_format.h"
 #include "cc/keyset_handle.h"
 #include "cc/hybrid/ecies_aead_hkdf_public_key_manager.h"
+#include "cc/hybrid/hybrid_decrypt_config.h"
 #include "cc/util/ptr_util.h"
 #include "cc/util/status.h"
 #include "cc/util/test_util.h"
@@ -45,11 +46,6 @@ namespace tink {
 namespace {
 
 class HybridDecryptFactoryTest : public ::testing::Test {
- protected:
-  void SetUp() override {
-  }
-  void TearDown() override {
-  }
 };
 
 EciesAeadHkdfPrivateKey GetNewEciesPrivateKey() {
@@ -59,9 +55,6 @@ EciesAeadHkdfPrivateKey GetNewEciesPrivateKey() {
 }
 
 TEST_F(HybridDecryptFactoryTest, testBasic) {
-  EXPECT_TRUE(HybridDecryptFactory::RegisterStandardKeyTypes().ok());
-  EXPECT_TRUE(HybridDecryptFactory::RegisterLegacyKeyTypes().ok());
-
   Keyset keyset;
   KeysetHandle keyset_handle(keyset);
   auto hybrid_decrypt_result =
@@ -95,6 +88,9 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
              KeyData::ASYMMETRIC_PRIVATE, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
+
+  // Initialize the registry.
+  ASSERT_TRUE(HybridDecryptConfig::RegisterStandardKeyTypes().ok());;
 
   // Prepare HybridEncrypt-instances.
   auto ecies_key_manager = util::make_unique<EciesAeadHkdfPublicKeyManager>();

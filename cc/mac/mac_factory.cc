@@ -18,27 +18,12 @@
 
 #include "cc/mac.h"
 #include "cc/registry.h"
-#include "cc/mac/hmac_key_manager.h"
 #include "cc/mac/mac_set_wrapper.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace crypto {
 namespace tink {
-
-// static
-util::Status MacFactory::RegisterStandardKeyTypes() {
-  auto manager = new HmacKeyManager();
-  util::Status status = Registry::get_default_registry().RegisterKeyManager(
-      manager->get_key_type(), manager);
-  return status;
-}
-
-// static
-util::Status MacFactory::RegisterLegacyKeyTypes() {
-  return util::Status::OK;
-}
 
 // static
 util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(

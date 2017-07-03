@@ -26,27 +26,13 @@ namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// AeadFactory allows obtaining a primitive from a KeysetHandle.
+// AeadFactory allows for obtaining an Aead primitive from a KeysetHandle.
 //
-// AeadFactory gets primitives from the Registry. The factory allows
-// initalizing the Registry with native key types and their managers
-// that Tink supports out of the box.  These key types are divided in
-// two groups:
+// AeadFactory gets primitives from the Registry, which can be initialized
+// via convenience methods from AeadConfig-class. Here is an example
+// how one can obtain and use a Aead primitive:
 //
-//  - standard: secure and safe to use in new code. Over time, with
-//    new developments in cryptanalysis and computing power, some
-//    standard key types might become legacy.
-//
-//  - legacy: deprecated and insecure or obsolete, should not be used
-//    in new code. Existing users should upgrade to one of the standard
-//    key types.
-//
-// This divison allows for gradual retiring insecure or
-// obsolete key types.
-//
-// For example, here is how one can obtain and use an Aead primitive:
-//
-//   AeadFactory.RegisterStandardKeyTypes();
+//   AeadConfig.RegisterStandardKeyTypes();
 //   KeysetHandle keyset_handle = ...;
 //   std::unique_ptr<Aead> aead =
 //       std::move(AeadFactory.GetPrimitive(keyset_handle).ValueOrDie());
@@ -56,12 +42,6 @@ namespace tink {
 //
 class AeadFactory {
  public:
-  // Registers standard Aead key types and their managers with the Registry.
-  static util::Status RegisterStandardKeyTypes();
-
-  // Registers legacy Aead key types and their managers with the Registry.
-  static util::Status RegisterLegacyKeyTypes();
-
   // Returns an Aead-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
   static util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(

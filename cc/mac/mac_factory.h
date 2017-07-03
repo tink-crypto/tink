@@ -27,40 +27,21 @@ namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// MacFactory allows obtaining a primitive from a KeysetHandle.
+// MacFactory allows for obtaining a Mac primitive from a KeysetHandle.
 //
-// MacFactory gets primitives from the Registry. The factory allows
-// initalizing the Registry with native key types and their managers
-// that Tink supports out of the box. These key types are divided in
-// two groups:
+// MacFactory gets primitives from the Registry, which can be initialized
+// via convenience methods from MacConfig-class. Here is an example
+// how one can obtain and use a Mac primitive:
 //
-// - standard: secure and safe to use in new code. Over time, with new
-//   developments in cryptanalysis and computing power, some standard
-//   key types might become legacy.
-//
-// - legacy: deprecated and insecure or obsolete, should not be used
-//   in new code.  Existing users should upgrade to one of the
-//   standard key types.
-//
-// This divison allows for gradual retiring insecure or obsolete key types.
-//
-// For example, here is how one can obtain and use a Mac primitive:
-//
-//   MacFactory.RegisterStandardKeyTypes();
+//   MacConfig.RegisterStandardKeyTypes();
 //   KeysetHandle keyset_handle = ...;
 //   std::unique_ptr<Mac> mac =
 //       std::move(MacFactory.GetPrimitive(keyset_handle).ValueOrDie());
-//   std::string data = ...;
-//   std::string mac_value = mac.ComputeMac(data).ValueOrDie();
+//   string data = ...;
+//   string mac_value = mac.ComputeMac(data).ValueOrDie();
 //
 class MacFactory {
  public:
-  // Registers standard Mac key types and their managers with the Registry.
-  static util::Status RegisterStandardKeyTypes();
-
-  // Registers legacy Mac key types and their managers with the Registry.
-  static util::Status RegisterLegacyKeyTypes();
-
   // Returns a Mac-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
   static util::StatusOr<std::unique_ptr<Mac>> GetPrimitive(

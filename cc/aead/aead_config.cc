@@ -14,39 +14,35 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/aead/aead_factory.h"
+#include "cc/aead/aead_config.h"
 
-#include "cc/aead.h"
 #include "cc/key_manager.h"
-#include "cc/keyset_handle.h"
 #include "cc/registry.h"
-#include "cc/aead/aead_set_wrapper.h"
 #include "cc/aead/aes_gcm_key_manager.h"
 #include "cc/util/status.h"
-#include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
-    const KeysetHandle& keyset_handle) {
-  return GetPrimitive(keyset_handle, nullptr);
+util::Status AeadConfig::RegisterStandardKeyTypes() {
+  return RegisterKeyManager(new AesGcmKeyManager());
 }
 
 // static
-util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
-    const KeysetHandle& keyset_handle,
-    const KeyManager<Aead>* custom_key_manager) {
-  auto primitives_result = Registry::get_default_registry().GetPrimitives<Aead>(
-      keyset_handle, custom_key_manager);
-  if (primitives_result.ok()) {
-    return AeadSetWrapper::NewAead(std::move(primitives_result.ValueOrDie()));
-  }
-  return primitives_result.status();
+util::Status AeadConfig::RegisterLegacyKeyTypes() {
+  return util::Status::OK;
 }
 
+// static
+util::Status AeadConfig::RegisterKeyManager(KeyManager<Aead>* key_manager) {
+  if (key_manager == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Parameter 'key_manager' must be non-null.");
+  }
+  return Registry::get_default_registry().RegisterKeyManager(
+      key_manager->get_key_type(), key_manager);
+}
 
 }  // namespace tink
 }  // namespace crypto

@@ -7,6 +7,7 @@ cc_binary(
     deps = [
         "//cc",
         "//cc:cleartext_keyset_handle",
+        "//cc/hybrid:hybrid_encrypt_config",
         "//cc/hybrid:hybrid_encrypt_factory",
         "//cc/util:status",
     ],
@@ -19,6 +20,7 @@ cc_binary(
     deps = [
         "//cc",
         "//cc:cleartext_keyset_handle",
+        "//cc/hybrid:hybrid_decrypt_config",
         "//cc/hybrid:hybrid_decrypt_factory",
         "//cc/util:status",
     ],

@@ -33,21 +33,51 @@ cc_library(
 )
 
 cc_library(
+    name = "hybrid_decrypt_config",
+    srcs = ["hybrid_decrypt_config.cc"],
+    hdrs = ["hybrid_decrypt_config.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":ecies_aead_hkdf_private_key_manager",
+        "//cc:hybrid_decrypt",
+        "//cc:key_manager",
+        "//cc:registry",
+        "//cc/aead:aead_config",
+        "//cc/aead:aes_gcm_key_manager",
+        "//cc/util:status",
+    ],
+)
+
+cc_library(
     name = "hybrid_decrypt_factory",
     srcs = ["hybrid_decrypt_factory.cc"],
     hdrs = ["hybrid_decrypt_factory.h"],
     visibility = ["//visibility:public"],
     deps = [
-        ":ecies_aead_hkdf_private_key_manager",
         ":hybrid_decrypt_set_wrapper",
         "//cc:hybrid_decrypt",
         "//cc:key_manager",
         "//cc:keyset_handle",
         "//cc:primitive_set",
         "//cc:registry",
-        "//cc/aead:aes_gcm_key_manager",
         "//cc/util:status",
         "//cc/util:statusor",
+    ],
+)
+
+cc_library(
+    name = "hybrid_encrypt_config",
+    srcs = ["hybrid_encrypt_config.cc"],
+    hdrs = ["hybrid_encrypt_config.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":ecies_aead_hkdf_public_key_manager",
+        "//cc:hybrid_encrypt",
+        "//cc:key_manager",
+        "//cc:registry",
+        "//cc/aead:aead_config",
+        "//cc/aead:aes_gcm_key_manager",
+        "//cc/util:status",
     ],
 )
 
@@ -57,14 +87,12 @@ cc_library(
     hdrs = ["hybrid_encrypt_factory.h"],
     visibility = ["//visibility:public"],
     deps = [
-        ":ecies_aead_hkdf_public_key_manager",
         ":hybrid_encrypt_set_wrapper",
         "//cc:hybrid_encrypt",
         "//cc:key_manager",
         "//cc:keyset_handle",
         "//cc:primitive_set",
         "//cc:registry",
-        "//cc/aead:aes_gcm_key_manager",
         "//cc/util:status",
         "//cc/util:statusor",
     ],
@@ -198,12 +226,26 @@ cc_test(
 )
 
 cc_test(
+    name = "hybrid_decrypt_config_test",
+    size = "small",
+    srcs = ["hybrid_decrypt_config_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":hybrid_decrypt_config",
+        "//cc:registry",
+        "//cc/util:status",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
     name = "hybrid_decrypt_factory_test",
     size = "small",
     srcs = ["hybrid_decrypt_factory_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":ecies_aead_hkdf_public_key_manager",
+        ":hybrid_decrypt_config",
         ":hybrid_decrypt_factory",
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",
@@ -218,11 +260,25 @@ cc_test(
 )
 
 cc_test(
+    name = "hybrid_encrypt_config_test",
+    size = "small",
+    srcs = ["hybrid_encrypt_config_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":hybrid_encrypt_config",
+        "//cc:registry",
+        "//cc/util:status",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
     name = "hybrid_encrypt_factory_test",
     size = "small",
     srcs = ["hybrid_encrypt_factory_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":hybrid_encrypt_config",
         ":hybrid_encrypt_factory",
         "//cc:hybrid_encrypt",
         "//cc:keyset_handle",

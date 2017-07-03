@@ -14,11 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "cc/mac/mac_factory.h"
+
 #include "cc/mac.h"
 #include "cc/crypto_format.h"
 #include "cc/keyset_handle.h"
 #include "cc/mac/hmac_key_manager.h"
-#include "cc/mac/mac_factory.h"
+#include "cc/mac/mac_config.h"
 #include "cc/util/status.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
@@ -40,17 +42,9 @@ namespace tink {
 namespace {
 
 class MacFactoryTest : public ::testing::Test {
- protected:
-  void SetUp() override {
-  }
-  void TearDown() override {
-  }
 };
 
 TEST_F(MacFactoryTest, testBasic) {
-  EXPECT_TRUE(MacFactory::RegisterStandardKeyTypes().ok());
-  EXPECT_TRUE(MacFactory::RegisterLegacyKeyTypes().ok());
-
   Keyset keyset;
   KeysetHandle keyset_handle(keyset);
   auto mac_result = MacFactory::GetPrimitive(keyset_handle);
@@ -91,6 +85,9 @@ TEST_F(MacFactoryTest, testPrimitive) {
              KeyData::SYMMETRIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
+
+  // Initialize the registry.
+  ASSERT_TRUE(MacConfig::RegisterStandardKeyTypes().ok());;
 
   // Create a KeysetHandle and use it with the factory.
   KeysetHandle keyset_handle(keyset);

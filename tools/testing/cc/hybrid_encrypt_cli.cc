@@ -20,9 +20,11 @@
 #include "cc/cleartext_keyset_handle.h"
 #include "cc/hybrid_encrypt.h"
 #include "cc/keyset_handle.h"
+#include "cc/hybrid/hybrid_encrypt_config.h"
 #include "cc/hybrid/hybrid_encrypt_factory.h"
 #include "cc/util/status.h"
 
+using crypto::tink::HybridEncryptConfig;
 using crypto::tink::HybridEncryptFactory;
 using crypto::tink::CleartextKeysetHandle;
 using crypto::tink::KeysetHandle;
@@ -66,7 +68,7 @@ int main(int argc, char** argv) {
 
   // Get the primitive.
   std::clog << "Initializing the factory...\n";
-  auto status = HybridEncryptFactory::RegisterStandardKeyTypes();
+  auto status = HybridEncryptConfig::RegisterStandardKeyTypes();
   if (!status.ok()) {
     std::clog << "Factory initialization failed: "
               << status.error_message() << std::endl;

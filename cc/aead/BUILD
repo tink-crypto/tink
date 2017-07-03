@@ -17,6 +17,19 @@ cc_library(
 )
 
 cc_library(
+    name = "aead_config",
+    srcs = ["aead_config.cc"],
+    hdrs = ["aead_config.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":aes_gcm_key_manager",
+        "//cc:key_manager",
+        "//cc:registry",
+        "//cc/util:status",
+    ],
+)
+
+cc_library(
     name = "aead_factory",
     srcs = ["aead_factory.cc"],
     hdrs = ["aead_factory.h"],
@@ -74,11 +87,25 @@ cc_test(
 )
 
 cc_test(
+    name = "aead_config_test",
+    size = "small",
+    srcs = ["aead_config_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aead_config",
+        "//cc:registry",
+        "//cc/util:status",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
     name = "aead_factory_test",
     size = "small",
     srcs = ["aead_factory_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":aead_config",
         ":aead_factory",
         ":aes_gcm_key_manager",
         "//cc:aead",

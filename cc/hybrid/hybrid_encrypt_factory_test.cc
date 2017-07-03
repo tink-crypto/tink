@@ -19,6 +19,7 @@
 #include "cc/hybrid_encrypt.h"
 #include "cc/crypto_format.h"
 #include "cc/keyset_handle.h"
+#include "cc/hybrid/hybrid_encrypt_config.h"
 #include "cc/util/status.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
@@ -42,11 +43,6 @@ namespace tink {
 namespace {
 
 class HybridEncryptFactoryTest : public ::testing::Test {
- protected:
-  void SetUp() override {
-  }
-  void TearDown() override {
-  }
 };
 
 EciesAeadHkdfPublicKey GetNewEciesPublicKey() {
@@ -57,9 +53,6 @@ EciesAeadHkdfPublicKey GetNewEciesPublicKey() {
 }
 
 TEST_F(HybridEncryptFactoryTest, testBasic) {
-  EXPECT_TRUE(HybridEncryptFactory::RegisterStandardKeyTypes().ok());
-  EXPECT_TRUE(HybridEncryptFactory::RegisterLegacyKeyTypes().ok());
-
   Keyset keyset;
   KeysetHandle keyset_handle(keyset);
   auto hybrid_encrypt_result =
@@ -91,6 +84,9 @@ TEST_F(HybridEncryptFactoryTest, testPrimitive) {
              KeyData::ASYMMETRIC_PUBLIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
+
+  // Initialize the registry.
+  ASSERT_TRUE(HybridEncryptConfig::RegisterStandardKeyTypes().ok());;
 
   // Create a KeysetHandle and use it with the factory.
   KeysetHandle keyset_handle(keyset);

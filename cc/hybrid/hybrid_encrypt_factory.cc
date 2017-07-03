@@ -20,8 +20,6 @@
 #include "cc/key_manager.h"
 #include "cc/keyset_handle.h"
 #include "cc/registry.h"
-#include "cc/aead/aes_gcm_key_manager.h"
-#include "cc/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "cc/hybrid/hybrid_encrypt_set_wrapper.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
@@ -29,27 +27,6 @@
 
 namespace crypto {
 namespace tink {
-
-// static
-util::Status HybridEncryptFactory::RegisterStandardKeyTypes() {
-  auto aes_gcm_key_manager = new AesGcmKeyManager();
-  // We intentionally ignore the status of registration of AesGcmKeyManager,
-  // as the registration may fail if AeadFactory::RegisterStandardKeyTypes()
-  // was called before.
-  // TODO(przydatek): this is not really a good solution,
-  //     find a better way of dealing with such situations.
-  util::Status status = Registry::get_default_registry().RegisterKeyManager(
-      aes_gcm_key_manager->get_key_type(), aes_gcm_key_manager);
-  auto ecies_key_manager = new EciesAeadHkdfPublicKeyManager();
-  status = Registry::get_default_registry().RegisterKeyManager(
-      ecies_key_manager->get_key_type(), ecies_key_manager);
-  return status;
-}
-
-// static
-util::Status HybridEncryptFactory::RegisterLegacyKeyTypes() {
-  return util::Status::OK;
-}
 
 // static
 util::StatusOr<std::unique_ptr<HybridEncrypt>>

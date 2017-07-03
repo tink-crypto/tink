@@ -16,12 +16,24 @@ cc_library(
 )
 
 cc_library(
+    name = "mac_config",
+    srcs = ["mac_config.cc"],
+    hdrs = ["mac_config.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":hmac_key_manager",
+        "//cc:key_manager",
+        "//cc:registry",
+        "//cc/util:status",
+    ],
+)
+
+cc_library(
     name = "mac_factory",
     srcs = ["mac_factory.cc"],
     hdrs = ["mac_factory.h"],
     visibility = ["//visibility:public"],
     deps = [
-        ":hmac_key_manager",
         ":mac_set_wrapper",
         "//cc:key_manager",
         "//cc:keyset_handle",
@@ -30,7 +42,6 @@ cc_library(
         "//cc:registry",
         "//cc/util:status",
         "//cc/util:statusor",
-        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -74,11 +85,25 @@ cc_test(
 )
 
 cc_test(
+    name = "mac_config_test",
+    size = "small",
+    srcs = ["mac_config_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":mac_config",
+        "//cc:registry",
+        "//cc/util:status",
+        "@gtest//:gtest",
+    ],
+)
+
+cc_test(
     name = "mac_factory_test",
     size = "small",
     srcs = ["mac_factory_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":mac_config",
         ":mac_factory",
         ":mac_set_wrapper",
         "//cc:crypto_format",

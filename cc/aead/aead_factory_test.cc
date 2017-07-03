@@ -13,15 +13,17 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+#include "cc/aead/aead_factory.h"
 
 #include "cc/aead.h"
 #include "cc/crypto_format.h"
 #include "cc/keyset_handle.h"
+#include "cc/aead/aead_config.h"
 #include "cc/aead/aes_gcm_key_manager.h"
-#include "cc/aead/aead_factory.h"
 #include "cc/util/status.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
+#include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
 using crypto::tink::test::AddRawKey;
@@ -37,17 +39,9 @@ namespace tink {
 namespace {
 
 class AeadFactoryTest : public ::testing::Test {
- protected:
-  void SetUp() override {
-  }
-  void TearDown() override {
-  }
 };
 
 TEST_F(AeadFactoryTest, testBasic) {
-  EXPECT_TRUE(AeadFactory::RegisterStandardKeyTypes().ok());
-  EXPECT_TRUE(AeadFactory::RegisterLegacyKeyTypes().ok());
-
   Keyset keyset;
   KeysetHandle keyset_handle(keyset);
   auto aead_result = AeadFactory::GetPrimitive(keyset_handle);
@@ -86,6 +80,9 @@ TEST_F(AeadFactoryTest, testPrimitive) {
              KeyData::SYMMETRIC, &keyset);
 
   keyset.set_primary_key_id(key_id_3);
+
+  // Initialize the registry.
+  ASSERT_TRUE(AeadConfig::RegisterStandardKeyTypes().ok());;
 
   // Create a KeysetHandle and use it with the factory.
   KeysetHandle keyset_handle(keyset);
