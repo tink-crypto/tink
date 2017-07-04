@@ -42,6 +42,8 @@ import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import javax.crypto.Cipher;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -58,6 +60,18 @@ public class AesGcmHkdfStreamingTest {
    *   - Reading beyond the end of the file
    *   - regression for c++ implementation
    */
+
+  private boolean skipTestsWithLargerKeys;
+  @Before
+  public void setUp() throws Exception {
+    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
+      System.out.println("WARNING: Unlimited Strength Jurisdiction Policy Files are required"
+          + " but not installed. Skipping tests with keys larger than 128 bits.");
+      skipTestsWithLargerKeys = true;
+    } else {
+      skipTestsWithLargerKeys = false;
+    }
+  }
 
   /**
    * Replacement for org.junit.Assert.assertEquals, since
@@ -216,6 +230,10 @@ public class AesGcmHkdfStreamingTest {
       int plaintextSize,
       int chunkSize)
       throws Exception {
+    if (keySizeInBits > 128 && skipTestsWithLargerKeys) {
+      System.out.println("WARNING: skipping a test with key size over 128 bits.");
+      return;
+    }
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
@@ -258,6 +276,10 @@ public class AesGcmHkdfStreamingTest {
   public void testEncryptDecryptRandomAccess(
       int keySizeInBits, int segmentSize, int firstSegmentOffset, int plaintextSize)
       throws Exception {
+    if (keySizeInBits > 128 && skipTestsWithLargerKeys) {
+      System.out.println("WARNING: skipping a test with key size over 128 bits.");
+      return;
+    }
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
