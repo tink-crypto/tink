@@ -192,6 +192,7 @@ gen_java_test_rules(
         "src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest",
     ],
     medium_tests = [
+        "src/test/java/com/google/crypto/tink/subtle/AesCtrHmacStreamingTest",
         "src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest",
     ],
     test_files = glob([

@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.subtle.AesGcmHkdfStreaming.AesGcmHkdfStreamDecrypter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -38,7 +37,7 @@ class AesGcmHkdfSeekableDecryptingChannel implements SeekableByteChannel {
   private final int numberOfSegments;  // unverified number of segments
   private final int lastCiphertextSegmentSize;  // unverified size of the last segment.
   private final byte[] aad;
-  private final AesGcmHkdfStreamDecrypter decrypter;
+  private final StreamSegmentDecrypter decrypter;
   private long plaintextPosition;
   private long plaintextSize;
   private boolean headerRead;
@@ -51,7 +50,7 @@ class AesGcmHkdfSeekableDecryptingChannel implements SeekableByteChannel {
   private final int firstSegmentOffset;
 
   public AesGcmHkdfSeekableDecryptingChannel(
-      AesGcmHkdfStreamDecrypter decrypter,
+      StreamSegmentDecrypter decrypter,
       SeekableByteChannel ciphertext,
       byte[] associatedData,
       int plaintextSegmentSize,
@@ -247,8 +246,8 @@ class AesGcmHkdfSeekableDecryptingChannel implements SeekableByteChannel {
    */
   private boolean reachedEnd() {
     return (isCurrentSegmentDecrypted
-        && currentSegmentNr == numberOfSegments - 1
-        && plaintextSegment.remaining() == 0);
+            && currentSegmentNr == numberOfSegments - 1
+            && plaintextSegment.remaining() == 0);
   }
 
   @Override

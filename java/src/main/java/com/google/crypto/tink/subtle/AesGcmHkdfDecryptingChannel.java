@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.subtle.AesGcmHkdfStreaming.AesGcmHkdfStreamDecrypter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
@@ -80,13 +79,13 @@ class AesGcmHkdfDecryptingChannel implements ReadableByteChannel {
    */
   private int segmentNr;
 
-  private final AesGcmHkdfStreamDecrypter decrypter;
+  private final StreamSegmentDecrypter decrypter;
   private final int plaintextSegmentSize;
   private final int ciphertextSegmentSize;
   private final int ciphertextOffset;
 
   public AesGcmHkdfDecryptingChannel(
-      AesGcmHkdfStreamDecrypter decrypter,
+      StreamSegmentDecrypter decrypter,
       ReadableByteChannel ciphertextChannel,
       byte[] associatedData,
       int plaintextSegmentSize,

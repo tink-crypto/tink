@@ -16,18 +16,19 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.subtle.AesGcmHkdfStreaming.AesGcmHkdfStreamEncrypter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
 
 /**
- * An instance of {WritableByteChannel} that encrypts the input.
+ * An instance of {WritableByteChannel} that encrypts the input
+ * using a nonce based online authentication scheme.
  */
+// TODO(bleichen): Rename. The implementation is generic an can use any AEAD cipher
 class AesGcmHkdfEncryptingChannel implements WritableByteChannel {
   private WritableByteChannel ciphertextChannel;
-  private AesGcmHkdfStreamEncrypter encrypter;
+  private StreamSegmentEncrypter encrypter;
   ByteBuffer ptBuffer;  // contains plaintext that has not yet been encrypted.
   ByteBuffer ctBuffer;  // contains ciphertext that has not been written to ciphertextChannel.
   private int plaintextSegmentSize;
@@ -35,7 +36,7 @@ class AesGcmHkdfEncryptingChannel implements WritableByteChannel {
   boolean open = true;
 
   public AesGcmHkdfEncryptingChannel(
-      AesGcmHkdfStreamEncrypter encrypter,
+      StreamSegmentEncrypter encrypter,
       WritableByteChannel ciphertextChannel,
       int plaintextSegmentSize,
       int ciphertextSegmentSize,

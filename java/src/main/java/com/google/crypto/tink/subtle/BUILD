@@ -186,11 +186,14 @@ java_library(
 java_library(
     name = "streaming",
     srcs = [
+        "AesCtrHmacStreaming.java",
         "AesGcmHkdfDecryptingChannel.java",
         "AesGcmHkdfEncryptingChannel.java",
         "AesGcmHkdfSeekableDecryptingChannel.java",
         "AesGcmHkdfStreaming.java",
         "Hkdf.java",
+        "StreamSegmentDecrypter.java",
+        "StreamSegmentEncrypter.java",
     ],
     javacopts = JAVACOPTS,
     deps = [

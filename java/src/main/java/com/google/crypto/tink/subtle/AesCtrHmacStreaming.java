@@ -27,14 +27,15 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;
 import javax.crypto.Cipher;
-import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.Mac;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Streaming encryption using AES-GCM with HKDF as key derivation function.
+ * Streaming encryption using AES-CTR and HMAC.
  *
- * Each ciphertext uses a new AES-GCM key that is derived from the key derivation key,
- * a randomly chosen salt of the same size as the key and a nonce prefix.
+ * Each ciphertext uses a new AES-CTR key and HMAC key that ared derived from the key derivation
+ * key, a randomly chosen salt of the same size as the key and a nonce prefix using HKDF.
  *
  * The the format of a ciphertext is
  *   header || segment_0 || segment_1 || ... || segment_k.
@@ -49,7 +50,7 @@ import javax.crypto.spec.SecretKeySpec;
  * is ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header
  * and other information of size firstSegmentOffset align with ciphertextSegmentSize.
  */
-public final class AesGcmHkdfStreaming implements StreamingAead {
+public final class AesCtrHmacStreaming implements StreamingAead {
   // TODO(bleichen): Some things that are not yet decided:
   //   - What can we assume about the state of objects after getting an exception?
   //   - Should there be a simple test to detect invalid ciphertext offsets?
@@ -61,25 +62,28 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
   //   - This implementation fixes a number of parameters. Should there be more options?
   //   - Should we authenticate ciphertextSegmentSize and firstSegmentSize?
   //     If an attacker can change these parameters then this would allow to move
-  //     the position of plaintext in the file. While these parameters are currently
-  //     specified by the key it is unclear whether this will remain so in the future.
+  //     the position of plaintext in the file.
   //
-  // The size of the IVs for GCM
-  private static final int NONCE_SIZE_IN_BYTES = 12;
+  // The size of the nonce for AES-CTR
+  private static final int NONCE_SIZE_IN_BYTES = 16;
 
-  // The nonce has the format nonce_prefix || ctr || last_block
+  // The nonce has the format nonce_prefix || ctr || last_block || 0 0 0 0
   // The nonce_prefix is constant for the whole file.
   // The ctr is a 32 bit ctr, the last_block is 1 if this is the
   // last block of the file and 0 otherwise.
   private static final int NONCE_PREFIX_IN_BYTES = 7;
 
-  // The size of the tags of each ciphertext segment.
-  private static final int TAG_SIZE_IN_BYTES = 16;
-
   // The MAC algorithm used for the key derivation
-  private static final String MAC_ALGORITHM = "HMACSHA256";
+  private static final String HKDF_ALGORITHM = "HMACSHA256";
 
-  private int keySizeInBits;
+  // The MAC algorithm used for authentication
+  // TODO(bleichen): Probably should be a parameter.
+  private static final String TAG_ALGORITHM = "HMACSHA256";
+
+  private static final int HMAC_KEY_SIZE_IN_BYTES = 32;
+
+  private int keySizeInBytes;
+  private int tagSizeInBytes;
   private int ciphertextSegmentSize;
   private int plaintextSegmentSize;
   private int firstSegmentOffset;
@@ -88,42 +92,58 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
   /**
    * Initializes a streaming primitive with a key derivation key and encryption parameters.
    * @params ikm input keying material used to derive sub keys.
-   * @keySizeInBits the key size of the sub keys
+   * @keySizeInBytes the key size of the sub keys
    * @ciphertextSegmentSize the size of ciphertext segments.
    * @firstSegmentOffset the offset of the first ciphertext segment. That means the first
    *    segment has size ciphertextSegmentSize - headerLength() - firstSegmentOffset
    * @throws InvalidAlgorithmParameterException if ikm is too short, the key size not supported or
    *    ciphertextSegmentSize is to short.
    */
-  public AesGcmHkdfStreaming(
+  public AesCtrHmacStreaming(
       byte[] ikm,
-      int keySizeInBits,
+      int keySizeInBytes,
+      int tagSizeInBytes,
       int ciphertextSegmentSize,
       int firstSegmentOffset) throws InvalidAlgorithmParameterException {
-    // Checks
-    if (ikm.length < 16) {
+    validateParameters(ikm.length, keySizeInBytes, tagSizeInBytes, ciphertextSegmentSize,
+                       firstSegmentOffset);
+    this.ikm = Arrays.copyOf(ikm, ikm.length);
+    this.keySizeInBytes = keySizeInBytes;
+    this.tagSizeInBytes = tagSizeInBytes;
+    this.ciphertextSegmentSize = ciphertextSegmentSize;
+    this.firstSegmentOffset = firstSegmentOffset;
+    this.plaintextSegmentSize = ciphertextSegmentSize - tagSizeInBytes;
+  }
+
+  private static void validateParameters(      
+      int ikmSize,
+      int keySizeInBytes,
+      int tagSizeInBytes,
+      int ciphertextSegmentSize,
+      int firstSegmentOffset) throws InvalidAlgorithmParameterException {
+    if (ikmSize < keySizeInBytes) {
       throw new InvalidAlgorithmParameterException("ikm to short");
     }
-    boolean isValidKeySize = keySizeInBits == 128 || keySizeInBits == 192 || keySizeInBits == 256;
+    boolean isValidKeySize = keySizeInBytes == 16 || keySizeInBytes == 24 || keySizeInBytes == 32;
     if (!isValidKeySize) {
       throw new InvalidAlgorithmParameterException("Invalid key size");
     }
-    if (ciphertextSegmentSize <= firstSegmentOffset + headerLength() + TAG_SIZE_IN_BYTES) {
+    if (tagSizeInBytes < 12 || tagSizeInBytes > 32) {
+      throw new InvalidAlgorithmParameterException("Invalid tag size " + tagSizeInBytes);
+    }
+    int firstPlaintextSegment = ciphertextSegmentSize - firstSegmentOffset - tagSizeInBytes
+        - keySizeInBytes - NONCE_PREFIX_IN_BYTES - 1;
+    if (firstPlaintextSegment <= 0) {
       throw new InvalidAlgorithmParameterException("ciphertextSegmentSize too small");
     }
-    this.ikm = Arrays.copyOf(ikm, ikm.length);
-    this.keySizeInBits = keySizeInBits;
-    this.ciphertextSegmentSize = ciphertextSegmentSize;
-    this.firstSegmentOffset = firstSegmentOffset;
-    this.plaintextSegmentSize = ciphertextSegmentSize - TAG_SIZE_IN_BYTES;
   }
 
   public int getFirstSegmentOffset() {
     return firstSegmentOffset;
   }
 
-  private int headerLength() {
-    return 1 + keySizeInBits / 8 + NONCE_PREFIX_IN_BYTES;
+  public int headerLength() {
+    return 1 + keySizeInBytes + NONCE_PREFIX_IN_BYTES;
   }
 
   private int ciphertextOffset() {
@@ -136,7 +156,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
    * Typically this is the size of the tag.
    */
   private int ciphertextOverhead() {
-    return TAG_SIZE_IN_BYTES;
+    return tagSizeInBytes;
   }
 
   /**
@@ -149,41 +169,56 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
     long ciphertextSize = fullSegments * ciphertextSegmentSize;
     long lastSegmentSize = (plaintextSize + offset) % plaintextSegmentSize;
     if (lastSegmentSize > 0) {
-      ciphertextSize += lastSegmentSize + TAG_SIZE_IN_BYTES;
+      ciphertextSize += lastSegmentSize + tagSizeInBytes;
     }
     return ciphertextSize;
   }
 
   private static Cipher cipherInstance() throws GeneralSecurityException {
-    return EngineFactory.CIPHER.getInstance("AES/GCM/NoPadding");
+    return EngineFactory.CIPHER.getInstance("AES/CTR/NoPadding");
+  }
+
+  private static Mac macInstance() throws GeneralSecurityException {
+    return EngineFactory.MAC.getInstance(TAG_ALGORITHM);
   }
 
   private byte[] randomSalt() {
-    return Random.randBytes(keySizeInBits / 8);
+    return Random.randBytes(keySizeInBytes);
   }
 
   public int getCiphertextSegmentSize() {
     return ciphertextSegmentSize;
   }
 
-  private GCMParameterSpec paramsForSegment(byte[] prefix, int segmentNr, boolean last) {
+
+  private byte[] nonceForSegment(byte[] prefix, int segmentNr, boolean last) {
     ByteBuffer nonce = ByteBuffer.allocate(NONCE_SIZE_IN_BYTES);
     nonce.order(ByteOrder.BIG_ENDIAN);
     nonce.put(prefix);
     nonce.putInt(segmentNr);
     nonce.put((byte) (last ? 1 : 0));
-    return new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, nonce.array());
+    nonce.putInt(0);
+    return nonce.array();
   }
 
   private byte[] randomNonce() {
     return Random.randBytes(NONCE_PREFIX_IN_BYTES);
   }
 
-  private SecretKeySpec deriveKeySpec(
+  private byte[] deriveKeyMaterial(
       byte[] salt,
       byte[] aad) throws GeneralSecurityException {
-    byte[] key = Hkdf.computeHkdf(MAC_ALGORITHM, ikm, salt, aad, keySizeInBits / 8);
-    return new SecretKeySpec(key, "AES");
+    int keyMaterialSize = keySizeInBytes + HMAC_KEY_SIZE_IN_BYTES;
+    return  Hkdf.computeHkdf(HKDF_ALGORITHM, ikm, salt, aad, keyMaterialSize);
+  }
+
+  private SecretKeySpec deriveKeySpec(byte[] keyMaterial) throws GeneralSecurityException {
+    return new SecretKeySpec(keyMaterial, 0, keySizeInBytes, "AES");
+  }
+
+  private SecretKeySpec deriveHmacKeySpec(byte[] keyMaterial) throws GeneralSecurityException {
+    return new SecretKeySpec(keyMaterial, keySizeInBytes, HMAC_KEY_SIZE_IN_BYTES, 
+                             TAG_ALGORITHM);
   }
 
   /**
@@ -196,7 +231,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
   public WritableByteChannel newEncryptingChannel(
       WritableByteChannel ciphertextChannel, byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    AesGcmHkdfStreamEncrypter encrypter = new AesGcmHkdfStreamEncrypter(associatedData);
+    AesCtrHmacStreamEncrypter encrypter = new AesCtrHmacStreamEncrypter(associatedData);
     return new AesGcmHkdfEncryptingChannel(
         encrypter,
         ciphertextChannel,
@@ -211,7 +246,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
       byte[] associatedData)
       throws GeneralSecurityException, IOException {
     return new AesGcmHkdfDecryptingChannel(
-        new AesGcmHkdfStreamDecrypter(),
+        new AesCtrHmacStreamDecrypter(),
         ciphertextChannel,
         associatedData,
         plaintextSegmentSize,
@@ -226,7 +261,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
       byte[] associatedData)
       throws GeneralSecurityException, IOException {
     return new AesGcmHkdfSeekableDecryptingChannel(
-        new AesGcmHkdfStreamDecrypter(),
+        new AesCtrHmacStreamDecrypter(),
         ciphertextSource,
         associatedData,
         plaintextSegmentSize,
@@ -243,15 +278,18 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
    * By enforcing that only the method encryptSegment can increment this state,
    * we can guarantee that the IV does not repeat.
    */
-  class AesGcmHkdfStreamEncrypter implements StreamSegmentEncrypter {
+  class AesCtrHmacStreamEncrypter implements StreamSegmentEncrypter {
     private final SecretKeySpec keySpec;
+    private final SecretKeySpec hmacKeySpec;
     private final Cipher cipher;
+    private final Mac mac;
     private final byte[] noncePrefix;
     private ByteBuffer header;
     private int encryptedSegments = 0;
 
-    public AesGcmHkdfStreamEncrypter(byte[] aad) throws GeneralSecurityException {
+    public AesCtrHmacStreamEncrypter(byte[] aad) throws GeneralSecurityException {
       cipher = cipherInstance();
+      mac = macInstance();
       encryptedSegments = 0;
       byte[] salt = randomSalt();
       noncePrefix = randomNonce();
@@ -260,7 +298,9 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
       header.put(salt);
       header.put(noncePrefix);
       header.flip();
-      keySpec = deriveKeySpec(salt, aad);
+      byte[] keymaterial = deriveKeyMaterial(salt, aad);
+      keySpec = deriveKeySpec(keymaterial);
+      hmacKeySpec = deriveHmacKeySpec(keymaterial);
     }
 
     @Override
@@ -276,10 +316,19 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
     public synchronized void encryptSegment(
         ByteBuffer plaintext, boolean isLastSegment, ByteBuffer ciphertext)
         throws GeneralSecurityException {
-      cipher.init(Cipher.ENCRYPT_MODE, keySpec,
-          paramsForSegment(noncePrefix, encryptedSegments, isLastSegment));
+      int position = ciphertext.position();
+      byte[] nonce = nonceForSegment(noncePrefix, encryptedSegments, isLastSegment);
+      cipher.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(nonce));
       encryptedSegments++;
       cipher.doFinal(plaintext, ciphertext);
+      ByteBuffer ctCopy = ciphertext.duplicate();
+      ctCopy.flip();
+      ctCopy.position(position);
+      mac.init(hmacKeySpec);
+      mac.update(nonce);
+      mac.update(ctCopy);
+      byte[] tag = mac.doFinal();
+      ciphertext.put(tag, 0, tagSizeInBytes);
     }
 
     /**
@@ -291,11 +340,20 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
     public synchronized void encryptSegment(
         ByteBuffer part1, ByteBuffer part2, boolean isLastSegment, ByteBuffer ciphertext)
         throws GeneralSecurityException {
-      cipher.init(Cipher.ENCRYPT_MODE, keySpec,
-          paramsForSegment(noncePrefix, encryptedSegments, isLastSegment));
+      int position = ciphertext.position();
+      byte[] nonce = nonceForSegment(noncePrefix, encryptedSegments, isLastSegment);
+      cipher.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(nonce));
       encryptedSegments++;
       cipher.update(part1, ciphertext);
       cipher.doFinal(part2, ciphertext);
+      ByteBuffer ctCopy = ciphertext.duplicate();
+      ctCopy.flip();
+      ctCopy.position(position);
+      mac.init(hmacKeySpec);
+      mac.update(nonce);
+      mac.update(ctCopy);
+      byte[] tag = mac.doFinal();
+      ciphertext.put(tag, 0, tagSizeInBytes);
     }
 
     @Override
@@ -307,16 +365,17 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
   /**
    * An instance of a crypter used to decrypt a ciphertext stream.
    */
-  class AesGcmHkdfStreamDecrypter implements StreamSegmentDecrypter {
+  class AesCtrHmacStreamDecrypter implements StreamSegmentDecrypter {
     private SecretKeySpec keySpec;
+    private SecretKeySpec hmacKeySpec;
     private Cipher cipher;
+    private Mac mac;
     private byte[] noncePrefix;
 
-    AesGcmHkdfStreamDecrypter() {};
+    AesCtrHmacStreamDecrypter() {};
 
     @Override
-    public synchronized void init(ByteBuffer header, byte[] aad)
-        throws GeneralSecurityException {
+    public synchronized void init(ByteBuffer header, byte[] aad) throws GeneralSecurityException {
       if (header.remaining() != headerLength()) {
         throw new InvalidAlgorithmParameterException("Invalid header length");
       }
@@ -328,19 +387,50 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
         throw new GeneralSecurityException("Invalid ciphertext");
       }
       noncePrefix = new byte[NONCE_PREFIX_IN_BYTES];
-      byte[] salt = new byte[keySizeInBits / 8];
+      byte[] salt = new byte[keySizeInBytes];
       header.get(salt);
       header.get(noncePrefix);
-      keySpec = deriveKeySpec(salt, aad);
+      byte[] keymaterial = deriveKeyMaterial(salt, aad);
+      keySpec = deriveKeySpec(keymaterial);
+      hmacKeySpec = deriveHmacKeySpec(keymaterial);
       cipher = cipherInstance();
+      mac = macInstance();
     }
 
-   @Override
-   public synchronized void decryptSegment(
+    @Override
+    public synchronized void decryptSegment(
         ByteBuffer ciphertext, int segmentNr, boolean isLastSegment, ByteBuffer plaintext)
         throws GeneralSecurityException {
-      GCMParameterSpec params = paramsForSegment(noncePrefix, segmentNr, isLastSegment);
-      cipher.init(Cipher.DECRYPT_MODE, keySpec, params);
+      int position = ciphertext.position();
+      byte[] nonce = nonceForSegment(noncePrefix, segmentNr, isLastSegment);
+      int ctLength = ciphertext.remaining();
+      if (ctLength < tagSizeInBytes) {
+        throw new GeneralSecurityException("Ciphertext too short");
+      }
+      int ptLength = ctLength - tagSizeInBytes;
+      int startOfTag = position + ptLength;
+      ByteBuffer ct = ciphertext.duplicate();
+      ct.limit(startOfTag);
+      ByteBuffer tagBuffer = ciphertext.duplicate();
+      tagBuffer.position(startOfTag);
+
+      assert mac != null;
+      assert hmacKeySpec != null;
+      mac.init(hmacKeySpec);
+      mac.update(nonce);
+      mac.update(ct);
+      byte[] tag = mac.doFinal();
+      tag = Arrays.copyOf(tag, tagSizeInBytes);
+      byte[] expectedTag = new byte[tagSizeInBytes];
+      assert tagBuffer.remaining() == tagSizeInBytes;
+      tagBuffer.get(expectedTag);
+      assert expectedTag.length == tag.length;
+      if (!SubtleUtil.arrayEquals(expectedTag, tag)) {
+        throw new GeneralSecurityException("Tag mismatch");
+      }
+
+      ciphertext.limit(startOfTag);
+      cipher.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(nonce));
       cipher.doFinal(ciphertext, plaintext);
     }
   }
