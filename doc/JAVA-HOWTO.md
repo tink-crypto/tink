@@ -118,11 +118,11 @@ be rotated, and a specification of the new key via a
 ```
 
 Some common specifications are available as pre-generated templates
-in [examples/keytemplates](https://github.com/google/tink/tree/master/examples/keytemplates)-folder, and can be accessed via `...KeyTemplates.java`
-classes of the respective primitives.  After a successful rotation
-the resulting keyset contains a new key generated according to the 
-specification in `keyTemplate`, and the new key becomes 
-the _primary key_ of the keyset.  For the rotation to succeed the
+in [examples/keytemplates](https://github.com/google/tink/tree/master/examples/keytemplates)-folder,
+and can be accessed via `...KeyTemplates.java` classes of the respective
+primitives.  After a successful rotation the resulting keyset contains a new key
+generated according to the specification in `keyTemplate`, and the new key
+becomes the _primary key_ of the keyset.  For the rotation to succeed the
 `Registry` must contain a key manager for the key type specified in
 `keyTemplate`.
 
@@ -156,12 +156,13 @@ To create a custom implementation of a primitive proceed as follows:
 2. Define protocol buffers that hold key material and parameters for the custom
    cryptographic scheme; the name of the key protocol buffer (a.k.a. type URL)
    determines the _key type_ for the custom implementation.
-3. Implement [`KeyManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeyManager.java) interface for the _primitive_
-   from step #1 and the _key type_ from step #2.
+3. Implement [`KeyManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeyManager.java) 
+   interface for the _primitive_ from step #1 and the _key type_ from step #2.
 
 To use a custom implementation of a primitive in an application, register with
-the [`Registry`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Registry.java) the  custom `KeyManager`-implementation 
-(from step #3 above) for the custom key type (from step #2 above):
+the [`Registry`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Registry.java)
+the custom `KeyManager`-implementation (from step #3 above) for the custom key
+type (from step #2 above):
 
 ``` java
     Registry.INSTANCE.registerKeyManager(keyType, keyManager);
@@ -172,9 +173,7 @@ corresponding to the primitive (when keys of the specific key type are in use),
 or can be retrieved directly via `Registry.getKeyManager(keyType)`.
 
 When defining the protocol buffers for the key material and parameters (step #2
-above), one should provide definitions of three messages
-(see [tink.proto](https://github.com/google/tink/blob/master/proto/tink.proto)
-for details):
+above), one should provide definitions of three messages:
 
  * `...Params`: parameters of an instantiation of the primitive,
    needed when a key is being used.
@@ -182,14 +181,25 @@ for details):
    corresponding `...Params`-proto.
  * `...KeyFormat`: parameters needed to generate a new key.
 
+Here are a few conventions/recommendations wrt. defining these messages
+(see [tink.proto](https://github.com/google/tink/blob/master/proto/tink.proto)
+and defintions of [existing key types](https://github.com/google/tink/blob/master/proto/)
+for details):
+
+ * `...Key` should contain a version field (a monotonic counter, `uint32 version;`),
+   which identifies the version of implementation that can work with this key.
+ * `...Params` should be a field of `...Key`, as by definition `...Params`
+   contains parameters needed when the key is being used.
+ * `...Params` should be also a field of `...KeyFormat`, so that given `...KeyFormat`
+   one has all information it needs to generate a new `...Key` message.
+
 Alternatively, depending on the use case requirements, one can skip step #2
 entirely and re-use for the key material an existing protocol buffer messages.
 In such a case one should not configure the Registry via the method
 `registerStandardKeyTypes()` of the corresponding `Config`-class, but rather
 register the needed `KeyManager`-instances manually.
 
-For a concrete example, let's assume that we'd like a custom implementation
-of
+For a concrete example, let's assume that we'd like a custom implementation of
 [`Aead`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Aead.java)-primitive
 (step #1).  We define then three protocol buffer messages (step #2):
 
@@ -197,13 +207,35 @@ of
  * `MyCustomAeadKey`: holds the actual key material and parameters needed for its use.
  * `MyCustomAeadKeyFormat`: holds parameters needed for generation of a new `MyCustomAeadKey`-key.
 
-The corresponding _key type_ is defined as
+``` protocol-buffer
+    syntax = "proto3";
+    package mycompany.mypackage;
+
+    message MyCustomAeadParams {
+      uint32 iv_size = 1;     // size of initialization vector in bytes
+    }
+
+    message MyCustomAeadKeyFormat {
+      MyCustomAeadParams params = 1;
+      uint32 key_size = 2;    // key size in bytes
+    }
+
+    // key_type: type.googleapis.com/mycompany.mypackage.MyCustomAeadKey
+    message MyCustomAeadKey {
+        uint32 version = 1;
+        MyCustomAeadParams params = 2;
+        bytes key_value = 3;  // the actual key material
+    }
+```
+
+The corresponding _key type_ in Java is defined as
 
 ``` java
     String keyType = "type.googleapis.com/mycompany.mypackage.MyCustomAeadKey";`
 ```
 
-and the corresponding _key manager_ implements (step #3) the interface [`KeyManager<Aead>`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeyManager.java)
+and the corresponding _key manager_ implements (step #3) the interface
+[`KeyManager<Aead>`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeyManager.java)
 
 ``` java
     class MyCustomAeadKeyManager implements KeyManager<Aead> {
