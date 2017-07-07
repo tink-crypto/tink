@@ -28,7 +28,7 @@ import java.util.Arrays;
  * An instance of {code SeekableByteChannel} that allows random access to the plaintext of
  * some ciphertext.
  */
-class AesGcmHkdfSeekableDecryptingChannel implements SeekableByteChannel {
+class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
   private final SeekableByteChannel ciphertextChannel;
   private final ByteBuffer ciphertextSegment;
   private final ByteBuffer plaintextSegment;
@@ -49,7 +49,7 @@ class AesGcmHkdfSeekableDecryptingChannel implements SeekableByteChannel {
   private final int ciphertextOffset;
   private final int firstSegmentOffset;
 
-  public AesGcmHkdfSeekableDecryptingChannel(
+  public StreamingAeadSeekableDecryptingChannel(
       StreamSegmentDecrypter decrypter,
       SeekableByteChannel ciphertext,
       byte[] associatedData,
@@ -97,7 +97,7 @@ class AesGcmHkdfSeekableDecryptingChannel implements SeekableByteChannel {
   }
 
   /**
-   * A description of the state of this AesGcmHkdfSeekableDecryptingChannel.
+   * A description of the state of this StreamingAeadSeekableDecryptingChannel.
    * While this description does not contain plaintext or key material
    * it contains length information that might be confidential.
    */
@@ -111,7 +111,7 @@ class AesGcmHkdfSeekableDecryptingChannel implements SeekableByteChannel {
     } catch (IOException ex) {
       ctChannel = "position: n/a";
     }
-    res.append("AesGcmHkdfSeekableDecryptingChannel")
+    res.append("StreamingAeadSeekableDecryptingChannel")
        .append("\nciphertextChannel").append(ctChannel)
        .append("\nciphertextChannelSize:").append(ciphertextChannelSize)
        .append("\nplaintextSize:").append(plaintextSize)

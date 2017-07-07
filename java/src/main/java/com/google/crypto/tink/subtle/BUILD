@@ -187,13 +187,13 @@ java_library(
     name = "streaming",
     srcs = [
         "AesCtrHmacStreaming.java",
-        "AesGcmHkdfDecryptingChannel.java",
-        "AesGcmHkdfEncryptingChannel.java",
-        "AesGcmHkdfSeekableDecryptingChannel.java",
         "AesGcmHkdfStreaming.java",
         "Hkdf.java",
         "StreamSegmentDecrypter.java",
         "StreamSegmentEncrypter.java",
+        "StreamingAeadDecryptingChannel.java",
+        "StreamingAeadEncryptingChannel.java",
+        "StreamingAeadSeekableDecryptingChannel.java",
     ],
     javacopts = JAVACOPTS,
     deps = [

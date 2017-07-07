@@ -87,10 +87,10 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
 
   /**
    * Initializes a streaming primitive with a key derivation key and encryption parameters.
-   * @params ikm input keying material used to derive sub keys.
-   * @keySizeInBits the key size of the sub keys
-   * @ciphertextSegmentSize the size of ciphertext segments.
-   * @firstSegmentOffset the offset of the first ciphertext segment. That means the first
+   * @param ikm input keying material used to derive sub keys.
+   * @param keySizeInBits the key size of the sub keys
+   * @param ciphertextSegmentSize the size of ciphertext segments.
+   * @param firstSegmentOffset the offset of the first ciphertext segment. That means the first
    *    segment has size ciphertextSegmentSize - headerLength() - firstSegmentOffset
    * @throws InvalidAlgorithmParameterException if ikm is too short, the key size not supported or
    *    ciphertextSegmentSize is to short.
@@ -197,7 +197,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
       WritableByteChannel ciphertextChannel, byte[] associatedData)
       throws GeneralSecurityException, IOException {
     AesGcmHkdfStreamEncrypter encrypter = new AesGcmHkdfStreamEncrypter(associatedData);
-    return new AesGcmHkdfEncryptingChannel(
+    return new StreamingAeadEncryptingChannel(
         encrypter,
         ciphertextChannel,
         plaintextSegmentSize,
@@ -210,7 +210,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
       ReadableByteChannel ciphertextChannel,
       byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    return new AesGcmHkdfDecryptingChannel(
+    return new StreamingAeadDecryptingChannel(
         new AesGcmHkdfStreamDecrypter(),
         ciphertextChannel,
         associatedData,
@@ -225,7 +225,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
       SeekableByteChannel ciphertextSource,
       byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    return new AesGcmHkdfSeekableDecryptingChannel(
+    return new StreamingAeadSeekableDecryptingChannel(
         new AesGcmHkdfStreamDecrypter(),
         ciphertextSource,
         associatedData,
@@ -284,8 +284,8 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
 
     /**
      * Encrypt a segment consisting of two parts.
-     * This method simplifies the case where one part of the plaintext is buffered and the other part
-     * is passed in by the caller.
+     * This method simplifies the case where one part of the plaintext is buffered
+     * and the other part is passed in by the caller.
      */
     @Override
     public synchronized void encryptSegment(

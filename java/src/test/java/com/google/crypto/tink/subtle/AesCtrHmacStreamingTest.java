@@ -238,30 +238,30 @@ public class AesCtrHmacStreamingTest {
   /**
    * Encrypts and decrypts some plaintext in a stream and checks that the expected
    * plaintext is returned.
-   * @param keySizeInBits the size of the AES key.
+   * @param keySizeInBytes the size of the AES key.
+   * @param tagSizeInBytes the size of authentication tag.
    * @param segmentSize the size of the ciphertext segments.
    * @param firstSegmentOffset number of bytes prepended to the ciphertext stream.
    * @param plaintextSize the size of the plaintext
    * @param chunkSize decryption read chunks of this size.
    */
   public void testEncryptDecrypt(
-      int keySizeInBits,
+      int keySizeInBytes,
       int tagSizeInBytes,
       int segmentSize,
       int firstSegmentOffset,
       int plaintextSize,
       int chunkSize)
       throws Exception {
-    if (!isAesKeySizeSupported(keySizeInBits)) {
-      System.out.println("Skipping a test with key size:" + keySizeInBits);
+    if (!isAesKeySizeSupported(8 * keySizeInBytes)) {
+      System.out.println("Skipping a test with key size:" + (8 * keySizeInBytes) + " bits.");
       return;
     }
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesCtrHmacStreaming ags =
-        new AesCtrHmacStreaming(ikm, keySizeInBits / 8, tagSizeInBytes, segmentSize,
-                                firstSegmentOffset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(
+        ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -297,18 +297,17 @@ public class AesCtrHmacStreamingTest {
    * Encrypt and then decrypt partially, and check that the result is the same.
    */
   public void testEncryptDecryptRandomAccess(
-      int keySizeInBits, int tagSizeInBytes, int segmentSize, int firstSegmentOffset,
+      int keySizeInBytes, int tagSizeInBytes, int segmentSize, int firstSegmentOffset,
       int plaintextSize) throws Exception {
-    if (!isAesKeySizeSupported(keySizeInBits)) {
-      System.out.println("Skipping a test with key size:" + keySizeInBits);
+    if (!isAesKeySizeSupported(8 * keySizeInBytes)) {
+      System.out.println("Skipping a test with key size:" + (8 * keySizeInBytes) + " bits.");
       return;
     }
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesCtrHmacStreaming ags =
-        new AesCtrHmacStreaming(ikm, keySizeInBits / 8, tagSizeInBytes, segmentSize, 
-                                firstSegmentOffset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(
+        ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -335,116 +334,116 @@ public class AesCtrHmacStreamingTest {
   /* The ciphertext is smaller than 1 segment */
   @Test
   public void testEncryptDecryptSmall() throws Exception {
-    testEncryptDecrypt(128, 12, 256, 0, 20, 64);
-    testEncryptDecrypt(128, 12, 512, 0, 400, 64);
+    testEncryptDecrypt(16, 12, 256, 0, 20, 64);
+    testEncryptDecrypt(16, 12, 512, 0, 400, 64);
   }
 
   /* The ciphertext has a non-zero offset */
   @Test
   public void testEncryptDecryptSmallWithOffset() throws Exception {
-    testEncryptDecrypt(128, 12, 256, 8, 20, 64);
-    testEncryptDecrypt(128, 12, 512, 8, 400, 64);
+    testEncryptDecrypt(16, 12, 256, 8, 20, 64);
+    testEncryptDecrypt(16, 12, 512, 8, 400, 64);
   }
 
   /* Empty plaintext */
   @Test
   public void testEncryptDecryptEmpty() throws Exception {
-    testEncryptDecrypt(128, 12, 256, 0, 0, 128);
-    testEncryptDecrypt(128, 12, 256, 8, 0, 128);
+    testEncryptDecrypt(16, 12, 256, 0, 0, 128);
+    testEncryptDecrypt(16, 12, 256, 8, 0, 128);
   }
 
   /* The ciphertext contains more than 1 segment. */
   @Test
   public void testEncryptDecryptMedium() throws Exception {
-    testEncryptDecrypt(128, 12, 256, 0, 1024, 128);
-    testEncryptDecrypt(128, 12, 512, 0, 3086, 128);
-    testEncryptDecrypt(256, 12, 1024, 0, 12345, 128);
+    testEncryptDecrypt(16, 12, 256, 0, 1024, 128);
+    testEncryptDecrypt(16, 12, 512, 0, 3086, 128);
+    testEncryptDecrypt(32, 12, 1024, 0, 12345, 128);
   }
 
   /* Test with different tag sizes */
   @Test
   public void testEncryptDecryptTagSize() throws Exception {
-    testEncryptDecrypt(128, 12, 512, 0, 5000, 128);
-    testEncryptDecrypt(128, 16, 512, 0, 5000, 128);
-    testEncryptDecrypt(128, 20, 512, 0, 5000, 128);
-    testEncryptDecrypt(128, 32, 512, 0, 5000, 128);
+    testEncryptDecrypt(16, 12, 512, 0, 5000, 128);
+    testEncryptDecrypt(16, 16, 512, 0, 5000, 128);
+    testEncryptDecrypt(16, 20, 512, 0, 5000, 128);
+    testEncryptDecrypt(16, 32, 512, 0, 5000, 128);
   }
 
   /* During decryption large plaintext chunks are requested */
   @Test
   public void testEncryptDecryptLargeChunks() throws Exception {
-    testEncryptDecrypt(128, 12, 256, 0, 1024, 4096);
-    testEncryptDecrypt(128, 12, 512, 0, 5086, 4096);
-    testEncryptDecrypt(256, 16, 1024, 0, 12345, 5000);
+    testEncryptDecrypt(16, 12, 256, 0, 1024, 4096);
+    testEncryptDecrypt(16, 12, 512, 0, 5086, 4096);
+    testEncryptDecrypt(32, 16, 1024, 0, 12345, 5000);
   }
 
   @Test
   public void testEncryptDecryptMediumWithOffset() throws Exception {
-    testEncryptDecrypt(128, 12, 256, 8, 1024, 64);
-    testEncryptDecrypt(128, 12, 512, 20, 3086, 256);
-    testEncryptDecrypt(256, 16, 1024, 10, 12345, 5000);
+    testEncryptDecrypt(16, 12, 256, 8, 1024, 64);
+    testEncryptDecrypt(16, 12, 512, 20, 3086, 256);
+    testEncryptDecrypt(32, 16, 1024, 10, 12345, 5000);
   }
 
   /* The ciphertext ends at a segment boundary. */
   @Test
   public void testEncryptDecryptLastSegmentFull() throws Exception {
-    testEncryptDecrypt(128, 12, 256, 0, 216, 64);
-    testEncryptDecrypt(128, 12, 256, 16, 200, 256);
-    testEncryptDecrypt(128, 12, 256, 16, 440, 1024);
+    testEncryptDecrypt(16, 12, 256, 0, 216, 64);
+    testEncryptDecrypt(16, 12, 256, 16, 200, 256);
+    testEncryptDecrypt(16, 12, 256, 16, 440, 1024);
   }
 
   /* The ciphertext is smaller than 1 segment. */
   @Test
   public void testEncryptDecryptRandomAccessSmall() throws Exception {
-    testEncryptDecryptRandomAccess(128, 12, 256, 0, 100);
-    testEncryptDecryptRandomAccess(128, 12, 512, 0, 400);
+    testEncryptDecryptRandomAccess(16, 12, 256, 0, 100);
+    testEncryptDecryptRandomAccess(16, 12, 512, 0, 400);
   }
 
   @Test
   public void testEncryptDecryptRandomAccessSmallWithOffset() throws Exception {
-    testEncryptDecryptRandomAccess(128, 12, 256, 8, 20);
-    testEncryptDecryptRandomAccess(128, 12, 256, 8, 100);
-    testEncryptDecryptRandomAccess(128, 12, 512, 8, 400);
+    testEncryptDecryptRandomAccess(16, 12, 256, 8, 20);
+    testEncryptDecryptRandomAccess(16, 12, 256, 8, 100);
+    testEncryptDecryptRandomAccess(16, 12, 512, 8, 400);
   }
 
   /* Empty plaintext */
   @Test
   public void testEncryptDecryptRandomAccessEmpty() throws Exception {
-    testEncryptDecryptRandomAccess(128, 12, 256, 0, 0);
-    testEncryptDecryptRandomAccess(128, 12, 256, 8, 0);
+    testEncryptDecryptRandomAccess(16, 12, 256, 0, 0);
+    testEncryptDecryptRandomAccess(16, 12, 256, 8, 0);
   }
 
   @Test
   public void testEncryptDecryptRandomAccessMedium() throws Exception {
-    testEncryptDecryptRandomAccess(128, 12, 256, 0, 2048);
-    testEncryptDecryptRandomAccess(128, 12, 256, 0, 4096);
-    testEncryptDecryptRandomAccess(256, 16, 1024, 0, 12345);
+    testEncryptDecryptRandomAccess(16, 12, 256, 0, 2048);
+    testEncryptDecryptRandomAccess(16, 12, 256, 0, 4096);
+    testEncryptDecryptRandomAccess(32, 16, 1024, 0, 12345);
   }
 
   @Test
   public void testEncryptDecryptRandomAccessMediumWithOffset() throws Exception {
-    testEncryptDecryptRandomAccess(128, 12, 256, 8, 2048);
-    testEncryptDecryptRandomAccess(128, 12, 256, 10, 4096);
-    testEncryptDecryptRandomAccess(256, 16, 1024, 20, 12345);
-    testEncryptDecryptRandomAccess(128, 12, 4096, 0, 123456);
+    testEncryptDecryptRandomAccess(16, 12, 256, 8, 2048);
+    testEncryptDecryptRandomAccess(16, 12, 256, 10, 4096);
+    testEncryptDecryptRandomAccess(32, 16, 1024, 20, 12345);
+    testEncryptDecryptRandomAccess(16, 12, 4096, 0, 123456);
   }
 
   /* Test with different tag sizes */
   @Test
   public void testEncryptDecryptRandomAccessTagSize() throws Exception {
-    testEncryptDecryptRandomAccess(128, 12, 512, 0, 12345);
-    testEncryptDecryptRandomAccess(128, 16, 512, 0, 5000);
-    testEncryptDecryptRandomAccess(128, 20, 512, 0, 4096);
-    testEncryptDecryptRandomAccess(128, 32, 512, 0, 4096);
-    testEncryptDecryptRandomAccess(128, 16, 256, 16, 440);
+    testEncryptDecryptRandomAccess(16, 12, 512, 0, 12345);
+    testEncryptDecryptRandomAccess(16, 16, 512, 0, 5000);
+    testEncryptDecryptRandomAccess(16, 20, 512, 0, 4096);
+    testEncryptDecryptRandomAccess(16, 32, 512, 0, 4096);
+    testEncryptDecryptRandomAccess(16, 16, 256, 16, 440);
   }
 
   /* The ciphertext ends at a segment boundary. */
   @Test
   public void testEncryptDecryptRandomAccessLastSegmentFull() throws Exception {
-    testEncryptDecryptRandomAccess(128, 12, 256, 0, 216);
-    testEncryptDecryptRandomAccess(128, 12, 256, 16, 200);
-    testEncryptDecryptRandomAccess(128, 12, 256, 16, 440);
+    testEncryptDecryptRandomAccess(16, 12, 256, 0, 216);
+    testEncryptDecryptRandomAccess(16, 12, 256, 16, 200);
+    testEncryptDecryptRandomAccess(16, 12, 256, 16, 440);
   }
 
   /**
@@ -455,14 +454,13 @@ public class AesCtrHmacStreamingTest {
   public void testEncryptDecryptString() throws Exception {
     int segmentSize = 512;
     int firstSegmentOffset = 0;
-    int keySizeInBits = 128;
+    int keySizeInBytes = 16;
     int tagSizeInBytes = 12;
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesCtrHmacStreaming ags =
-        new AesCtrHmacStreaming(ikm, keySizeInBits / 8, tagSizeInBytes, segmentSize,
-                                firstSegmentOffset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(
+        ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
 
     String stringWithNonAsciiChars = "αβγδ áéíóúý ∀∑∊∫≅⊕⊄";
     int repetitions = 1000;
@@ -505,14 +503,13 @@ public class AesCtrHmacStreamingTest {
     int maxChunkSize = 100;
     int segmentSize = 512;
     int firstSegmentOffset = 0;
-    int keySizeInBits = 128;
+    int keySizeInBytes = 16;
     int tagSizeInBytes = 12;
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesCtrHmacStreaming ags =
-        new AesCtrHmacStreaming(ikm, keySizeInBits / 8, tagSizeInBytes, segmentSize,
-                                firstSegmentOffset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(
+        ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     int ciphertextLength = (int) ags.expectedCiphertextSize(plaintextSize);
     ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
@@ -585,12 +582,12 @@ public class AesCtrHmacStreamingTest {
   public void testModifiedCiphertext() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    int keySize = 128;
+    int keySize = 16;
     int tagSize = 12;
     int segmentSize = 256;
     int offset = 8;
     int plaintextSize = 512;
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize / 8, tagSize, segmentSize, offset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -696,12 +693,12 @@ public class AesCtrHmacStreamingTest {
   public void testModifiedCiphertextWithSeekableByteChannel() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    int keySize = 128;
+    int keySize = 16;
     int tagSize = 12;
     int segmentSize = 256;
     int offset = 8;
     int plaintextSize = 2000;
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize / 8, tagSize, segmentSize, offset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -762,14 +759,14 @@ public class AesCtrHmacStreamingTest {
     HashSet<String> ciphertextBlocks = new HashSet<String>();
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    int keySize = 128;
+    int keySize = 16;
     int tagSize = 12;
     int segmentSize = 256;
     int offset = 0;
     int plaintextSize = 2000;
     int samples = 8;
     int blocksize = 16;
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize / 8, tagSize, segmentSize, offset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
     byte[] plaintext = new byte[plaintextSize];
     for (int sample = 0; sample < samples; sample++) {
       byte[] ciphertext = encrypt(ags, plaintext, aad);
@@ -779,7 +776,7 @@ public class AesCtrHmacStreamingTest {
         if (!ciphertextBlocks.add(block)) {
           fail("Ciphertext contains a repeating block " +  block + " at position " + pos);
         }
-      } 
+      }
     }
   }
 
@@ -843,7 +840,7 @@ public class AesCtrHmacStreamingTest {
   public void testEncryptDecryptLong() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    int keySize = 128;
+    int keySize = 16;
     int tagSize = 12;
     int segmentSize = 1 << 20;
     // TODO(bleichen): If possible this test should encrypt more than 4GB to detect potential
@@ -851,7 +848,7 @@ public class AesCtrHmacStreamingTest {
     //   Hence the plaintext size is much lower than what it ideally should be.
     long plaintextSize = (1L << 26) + 1234567;
     int offset = 0;
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize / 8, tagSize, segmentSize, offset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
     ReadableByteChannel plaintext = new PseudorandomReadableByteChannel(plaintextSize);
     ReadableByteChannel copy = new PseudorandomReadableByteChannel(plaintextSize);
     ReadableByteChannel ciphertext = ciphertextChannel(ags, plaintext, aad, 1 << 20);
@@ -880,11 +877,11 @@ public class AesCtrHmacStreamingTest {
     ByteBufferChannel plaintext = new ByteBufferChannel(generatePlaintext(plaintextSize));
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    int keySize = 128;
+    int keySize = 16;
     int tagSize = 12;
     int segmentSize = 4096;
     int offset = 0;
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize / 8, tagSize, segmentSize, offset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
 
     // Encrypt to file
     String tmpDir = java.lang.System.getenv("TEST_TMPDIR");

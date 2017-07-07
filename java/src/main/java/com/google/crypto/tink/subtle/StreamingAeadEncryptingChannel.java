@@ -25,8 +25,7 @@ import java.security.GeneralSecurityException;
  * An instance of {WritableByteChannel} that encrypts the input
  * using a nonce based online authentication scheme.
  */
-// TODO(bleichen): Rename. The implementation is generic an can use any AEAD cipher
-class AesGcmHkdfEncryptingChannel implements WritableByteChannel {
+class StreamingAeadEncryptingChannel implements WritableByteChannel {
   private WritableByteChannel ciphertextChannel;
   private StreamSegmentEncrypter encrypter;
   ByteBuffer ptBuffer;  // contains plaintext that has not yet been encrypted.
@@ -35,7 +34,7 @@ class AesGcmHkdfEncryptingChannel implements WritableByteChannel {
   private int ciphertextSegmentSize;
   boolean open = true;
 
-  public AesGcmHkdfEncryptingChannel(
+  public StreamingAeadEncryptingChannel(
       StreamSegmentEncrypter encrypter,
       WritableByteChannel ciphertextChannel,
       int plaintextSegmentSize,

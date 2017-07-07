@@ -25,7 +25,7 @@ import java.util.Arrays;
 /**
  * An instance of a ReadableByteChannel that returns the plaintext for some ciphertext.
  */
-class AesGcmHkdfDecryptingChannel implements ReadableByteChannel {
+class StreamingAeadDecryptingChannel implements ReadableByteChannel {
   /* The stream containing the ciphertext */
   private ReadableByteChannel ciphertextChannel;
 
@@ -84,7 +84,7 @@ class AesGcmHkdfDecryptingChannel implements ReadableByteChannel {
   private final int ciphertextSegmentSize;
   private final int ciphertextOffset;
 
-  public AesGcmHkdfDecryptingChannel(
+  public StreamingAeadDecryptingChannel(
       StreamSegmentDecrypter decrypter,
       ReadableByteChannel ciphertextChannel,
       byte[] associatedData,
@@ -206,7 +206,7 @@ class AesGcmHkdfDecryptingChannel implements ReadableByteChannel {
   @Override
   public synchronized int read(ByteBuffer dst) throws IOException {
     if (!definedState) {
-      throw new IOException("This AesGcmHkdfDecryptingChannel is in an undefined state");
+      throw new IOException("This StreamingAeadDecryptingChannel is in an undefined state");
     }
     if (!headerRead) {
       if (!tryReadHeader()) {
@@ -263,7 +263,7 @@ class AesGcmHkdfDecryptingChannel implements ReadableByteChannel {
   public String toString() {
     StringBuilder res =
       new StringBuilder();
-    res.append("AesGcmHkdfDecryptingChannel")
+    res.append("StreamingAeadDecryptingChannel")
        .append("\nplaintextPosition:").append(plaintextPosition)
        .append("\nsegmentNr:").append(segmentNr)
        .append("\nciphertextSegmentSize:").append(ciphertextSegmentSize)
