@@ -22,18 +22,18 @@
 package hmac
 
 import (
-    "crypto/hmac"
-    "fmt"
-    "hash"
+  "crypto/hmac"
+  "fmt"
+  "hash"
 )
 
 // Context used for logging error
 var context = "subtle/hmac"
 
 type Hmac struct {
-    HashFunc func() hash.Hash
-    Key []byte
-    TagSize uint32
+  HashFunc func() hash.Hash
+  Key []byte
+  TagSize uint32
 }
 
 /**

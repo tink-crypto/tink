@@ -12,44 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
-package hmac
+package hmac_test
 
 import (
-    "testing"
-    "crypto/sha256"
-    "crypto/sha512"
-    "encoding/hex"
-    "github.com/google/tink/go/tink/tink"
-    "fmt"
+  "fmt"
+  "testing"
+  "crypto/sha256"
+  "crypto/sha512"
+  "encoding/hex"
+  "github.com/google/tink/go/tink/tink"
+  "github.com/google/tink/go/subtle/hmac"
 )
 
 type HmacTest struct {
-    h Hmac
-    data []byte
-    expectedMac string
+  h hmac.Hmac
+  data []byte
+  expectedMac string
 }
 
 var key, _ = hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 var data = []byte("Hello")
 
 var hmacTests = []HmacTest{
-    HmacTest{
-      h: Hmac{HashFunc: sha256.New, Key: key, TagSize: 32},
-      data: data,
-      expectedMac: "e0ff02553d9a619661026c7aa1ddf59b7b44eac06a9908ff9e19961d481935d4",
-    },
-    HmacTest{
-      h: Hmac{HashFunc: sha512.New, Key: key, TagSize: 64},
-      data: data,
-      expectedMac: "481e10d823ba64c15b94537a3de3f253c16642451ac45124dd4dde120bf1e5c15" +
-          "e55487d55ba72b43039f235226e7954cd5854b30abc4b5b53171a4177047c9b",
-    },
-    // empty data
-    HmacTest{
-      h: Hmac{HashFunc: sha256.New, Key: key, TagSize: 32},
-      data: []byte{},
-      expectedMac: "07eff8b326b7798c9ccfcbdbe579489ac785a7995a04618b1a2813c26744777d",
-    },
+  HmacTest{
+    h: hmac.Hmac{HashFunc: sha256.New, Key: key, TagSize: 32},
+    data: data,
+    expectedMac: "e0ff02553d9a619661026c7aa1ddf59b7b44eac06a9908ff9e19961d481935d4",
+  },
+  HmacTest{
+    h: hmac.Hmac{HashFunc: sha512.New, Key: key, TagSize: 64},
+    data: data,
+    expectedMac: "481e10d823ba64c15b94537a3de3f253c16642451ac45124dd4dde120bf1e5c15" +
+        "e55487d55ba72b43039f235226e7954cd5854b30abc4b5b53171a4177047c9b",
+  },
+  // empty data
+  HmacTest{
+    h: hmac.Hmac{HashFunc: sha256.New, Key: key, TagSize: 32},
+    data: []byte{},
+    expectedMac: "07eff8b326b7798c9ccfcbdbe579489ac785a7995a04618b1a2813c26744777d",
+  },
 }
 
 func TestBasic(t *testing.T) {
@@ -123,5 +124,5 @@ func TestTooBigTagSize(t *testing.T) {
 
 func testMacInterface(t *testing.T) {
   // This line throws an error if Hmac doesn't implement Mac interface
-  var _ tink.Mac = (*Hmac)(nil)
+  var _ tink.Mac = (*hmac.Hmac)(nil)
 }

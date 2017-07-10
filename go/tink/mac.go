@@ -21,17 +21,17 @@
 package tink
 
 type Mac interface {
-    /**
-    * Computes message authentication code (MAC) for {@code data}.
-    *
-    * @return MAC value.
-    */
-    ComputeMac(data []byte) ([]byte, error)
+  /**
+  * Computes message authentication code (MAC) for {@code data}.
+  *
+  * @return MAC value.
+  */
+  ComputeMac(data []byte) ([]byte, error)
 
-    /**
-    * Verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
-    *
-    * @return 0 if {@code mac} is correct; 1 otherwise.
-    */
-    VerifyMac(mac []byte, data []byte) (bool, error)
+  /**
+  * Verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
+  *
+  * @return 0 if {@code mac} is correct; 1 otherwise.
+  */
+  VerifyMac(mac []byte, data []byte) (bool, error)
 }

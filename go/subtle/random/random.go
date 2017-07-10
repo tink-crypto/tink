@@ -15,14 +15,23 @@
 package random
 
 import (
-    "crypto/rand"
+  "crypto/rand"
+  "encoding/binary"
 )
 
 /**
  * Generates random bytes.
  */
-func GetRandomBytes(n uint32) ([]byte, error) {
+func GetRandomBytes(n uint32) []byte {
   buf := make([]byte, n)
   _, err := rand.Read(buf)
-  return buf, err
+  if err != nil {
+    panic(err)  // out of randomness, should never happen
+  }
+  return buf
+}
+
+func GetRandomUint32() uint32 {
+  b := GetRandomBytes(4)
+  return binary.BigEndian.Uint32(b)
 }

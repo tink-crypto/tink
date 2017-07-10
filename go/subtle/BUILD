@@ -24,8 +24,9 @@ go_library(
 
 go_test(
     name = "hmac_test",
-    srcs = HMAC_SRCS + HMAC_TEST_SRCS,
+    srcs = HMAC_TEST_SRCS,
     deps = [
+        ":hmac",
         "//go/tink",
     ],
 )
@@ -46,5 +47,8 @@ go_library(
 
 go_test(
     name = "random_test",
-    srcs = RANDOM_SRCS + RANDOM_TEST_SRCS,
+    srcs = RANDOM_TEST_SRCS,
+    deps = [
+        ":random",
+    ],
 )
