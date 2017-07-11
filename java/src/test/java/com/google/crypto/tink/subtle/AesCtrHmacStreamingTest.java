@@ -825,7 +825,7 @@ public class AesCtrHmacStreamingTest {
       final AesCtrHmacStreaming ags,
       final ReadableByteChannel plaintext,
       final byte[] aad,
-      int chunkSize) throws Exception {
+      final int chunkSize) throws Exception {
     PipedOutputStream output = new PipedOutputStream();
     PipedInputStream result = new PipedInputStream(output);
     final WritableByteChannel ciphertext = Channels.newChannel(output);
