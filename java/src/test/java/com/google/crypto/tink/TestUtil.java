@@ -63,11 +63,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
@@ -577,5 +580,14 @@ public class TestUtil {
         e.getMessage(),
         contains);
     assertTrue(message, e.getMessage().contains(contains));
+  }
+
+  /**
+   * Generates and returns a random, temporary file path.
+   */
+  public static Path generateRandomPath(String prefix) {
+    String tmpDir = java.lang.System.getenv("TEST_TMPDIR");
+    String tmpFilename = String.format("%s.%s.tmp", prefix, new SecureRandom().nextLong());
+    return FileSystems.getDefault().getPath(tmpDir, tmpFilename);
   }
 }

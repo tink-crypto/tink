@@ -36,7 +36,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
@@ -806,8 +805,7 @@ public class AesGcmHkdfStreamingTest {
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
 
     // Encrypt to file
-    String tmpDir = java.lang.System.getenv("TEST_TMPDIR");
-    Path path = FileSystems.getDefault().getPath(tmpDir, "testFileEncryption.tmp");
+    Path path = TestUtil.generateRandomPath("testFileEncryption");
     FileChannel ctChannel =
         FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
     WritableByteChannel bc = ags.newEncryptingChannel(ctChannel, aad);

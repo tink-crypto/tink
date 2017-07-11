@@ -21,5 +21,8 @@ set -e
 # Display commands to stderr.
 set -x
 
+# Some tests depend on TEST_TMPDIR.
+export TEST_TMPDIR=$TMP
+
 cd github/tink//maven
 mvn package
