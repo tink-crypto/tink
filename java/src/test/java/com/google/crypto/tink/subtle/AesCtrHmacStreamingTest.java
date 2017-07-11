@@ -822,14 +822,18 @@ public class AesCtrHmacStreamingTest {
    * TODO(bleichen): Using PipedInputStream may have performance problems.
    */
   private ReadableByteChannel ciphertextChannel(
-      AesCtrHmacStreaming ags,
-      ReadableByteChannel plaintext,
-      byte[] aad,
+      final AesCtrHmacStreaming ags,
+      final ReadableByteChannel plaintext,
+      final byte[] aad,
       int chunkSize) throws Exception {
     PipedOutputStream output = new PipedOutputStream();
     PipedInputStream result = new PipedInputStream(output);
-    WritableByteChannel ciphertext = Channels.newChannel(output);
-    new Thread(() -> encryptChannel(ags, plaintext, ciphertext, aad, chunkSize)).start();
+    final WritableByteChannel ciphertext = Channels.newChannel(output);
+    new Thread(new Runnable() {
+      public void run() {
+        encryptChannel(ags, plaintext, ciphertext, aad, chunkSize);
+      }
+    }).start();
     return Channels.newChannel(result);
   }
 
