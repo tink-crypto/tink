@@ -10,6 +10,8 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 TINK_SRCS = [
     "mac.go",
     "aead.go",
+    "public_key_sign.go",
+    "public_key_verify.go",
     "key_manager.go",
 ]
 
