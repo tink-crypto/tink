@@ -92,7 +92,7 @@ public abstract class DjbCipherPoly1305 implements Aead {
    * {@link DjbCipher#KEY_SIZE_IN_BYTES}.
    */
   public static DjbCipherPoly1305 constructChaCha20Poly1305Ietf(final byte[] key) {
-    return new DjbCipherPoly1305Ietf(new ChaCha20(key));
+    return new DjbCipherPoly1305Ietf(DjbCipher.chaCha20(key));
   }
 
   /**
@@ -106,7 +106,7 @@ public abstract class DjbCipherPoly1305 implements Aead {
     if (key.length != KEY_SIZE_IN_BYTES) {
       throw new IllegalArgumentException("The key length in bytes must be 32.");
     }
-    return new DjbCipherPoly1305Nacl(new XSalsa20(XSalsa20.hSalsa20(key)));
+    return new DjbCipherPoly1305Nacl(DjbCipher.xSalsa20(DjbCipher.XSalsa20.hSalsa20(key)));
   }
 
   private static long load32(byte[] in, int idx) {
@@ -245,6 +245,10 @@ public abstract class DjbCipherPoly1305 implements Aead {
 
   private byte[] computeTag(ByteBuffer ciphertextBuf, byte[] additionalData, byte[] aeadSubKey) {
     return poly1305Mac(macData(additionalData, ciphertextBuf), aeadSubKey);
+  }
+
+  public int nonceSizeInBytes() {
+    return djbCipher.nonceSizeInBytes();
   }
 
   @Override

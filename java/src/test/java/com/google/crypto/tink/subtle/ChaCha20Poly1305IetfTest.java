@@ -20,6 +20,7 @@ import static org.junit.Assert.fail;
 
 import com.google.common.truth.Truth;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.subtle.DjbCipher.ChaCha20;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class ChaCha20Poly1305IetfTest extends DjbCipherPoly1305TestBase {
         + "808182838485868788898a8b8c8d8e8f"
         + "909192939495969798999a9b9c9d9e9f");
     byte[] nonce = TestUtil.hexDecode("000000000001020304050607");
-    ChaCha20 cipher = new ChaCha20(key);
+    DjbCipher cipher = DjbCipher.chaCha20(key);
     Truth.assertThat(cipher.getAuthenticatorKey(nonce)).isEqualTo(TestUtil.hexDecode(""
         + "8ad5a08b905f81cc815040274ab29471"
         + "a833b637e3fd0da508dbb8e2fdd1a646"));
@@ -116,7 +117,7 @@ public class ChaCha20Poly1305IetfTest extends DjbCipherPoly1305TestBase {
         + "00000000000000000000000000000000"
         + "00000000000000000000000000000000");
     byte[] nonce = TestUtil.hexDecode("000000000000000000000000");
-    ChaCha20 cipher = new ChaCha20(key);
+    DjbCipher cipher = DjbCipher.chaCha20(key);
     Truth.assertThat(cipher.getAuthenticatorKey(nonce)).isEqualTo(TestUtil.hexDecode(""
         + "76b8e0ada0f13d90405d6ae55386bd28"
         + "bdd219b8a08ded1aa836efcc8b770dc7"));
@@ -132,7 +133,7 @@ public class ChaCha20Poly1305IetfTest extends DjbCipherPoly1305TestBase {
         + "00000000000000000000000000000000"
         + "00000000000000000000000000000001");
     byte[] nonce = TestUtil.hexDecode("000000000000000000000002");
-    ChaCha20 cipher = new ChaCha20(key);
+    DjbCipher cipher = DjbCipher.chaCha20(key);
     Truth.assertThat(cipher.getAuthenticatorKey(nonce)).isEqualTo(TestUtil.hexDecode(""
         + "ecfa254f845f647473d3cb140da9e876"
         + "06cb33066c447b87bc2666dde3fbb739"));
@@ -148,7 +149,7 @@ public class ChaCha20Poly1305IetfTest extends DjbCipherPoly1305TestBase {
         + "1c9240a5eb55d38af333888604f6b5f0"
         + "473917c1402b80099dca5cbc207075c0");
     byte[] nonce = TestUtil.hexDecode("000000000000000000000002");
-    ChaCha20 cipher = new ChaCha20(key);
+    DjbCipher cipher = DjbCipher.chaCha20(key);
     Truth.assertThat(cipher.getAuthenticatorKey(nonce)).isEqualTo(TestUtil.hexDecode(""
         + "965e3bc6f9ec7ed9560808f4d229f94b"
         + "137ff275ca9b3fcbdd59deaad23310ae"));

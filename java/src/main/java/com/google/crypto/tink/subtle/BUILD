@@ -33,12 +33,10 @@ java_library(
         "AesCtrJceCipher.java",
         "AesEaxJce.java",
         "AesGcmJce.java",
-        "ChaCha20.java",
         "DjbCipher.java",
         "DjbCipherPoly1305.java",
         "EncryptThenAuthenticate.java",
         "IndCpaCipher.java",
-        "XSalsa20.java",
     ],
     javacopts = JAVACOPTS,
     deps = [

@@ -36,17 +36,48 @@ public abstract class DjbCipher implements IndCpaCipher {
   static final int KEY_SIZE_IN_INTS = 8;
   public static final int KEY_SIZE_IN_BYTES = KEY_SIZE_IN_INTS * 4;
 
+  private static final byte[] ZERO_16_BYTES = new byte[16];
+
   static final int[] SIGMA = toIntArray(ByteBuffer.wrap(
-      new byte[]{'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k' }));
+      new byte[]{'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k'}));
 
-  // TODO(anergiz): change this to ImmutableByteArray.
-  final byte[] key;
+  final ImmutableByteArray key;
 
-  public DjbCipher(final byte[] key) {
+  DjbCipher(final byte[] key) {
     if (key.length != KEY_SIZE_IN_BYTES) {
       throw new IllegalArgumentException("The key length in bytes must be 32.");
     }
-    this.key = Arrays.copyOf(key, key.length);
+    this.key = ImmutableByteArray.of(key);
+  }
+
+  /**
+   * Constructs a new ChaCha20 cipher with the supplied {@code key}.
+   *
+   * @throws IllegalArgumentException when {@code key} length is not {@link
+   * DjbCipher#KEY_SIZE_IN_BYTES}.
+   */
+  static DjbCipher chaCha20(final byte[] key) {
+    return new ChaCha20(key);
+  }
+
+  /**
+   * Constructs a new XChaCha20 cipher with the supplied {@code key}.
+   *
+   * @throws IllegalArgumentException when {@code key} length is not {@link
+   * DjbCipher#KEY_SIZE_IN_BYTES}.
+   */
+  static DjbCipher xChaCha20(final byte[] key) {
+    return new XChaCha20(key);
+  }
+
+  /**
+   * Constructs a new XSalsa20 cipher with the supplied {@code key}.
+   *
+   * @throws IllegalArgumentException when {@code key} length is not {@link
+   * DjbCipher#KEY_SIZE_IN_BYTES}.
+   */
+  static DjbCipher xSalsa20(final byte[] key) {
+    return new XSalsa20(key);
   }
 
   static int rotateLeft(int x, int y) {
@@ -196,5 +227,292 @@ public abstract class DjbCipher implements IndCpaCipher {
   @Override
   public byte[] decrypt(final byte[] ciphertext) throws GeneralSecurityException {
     return decrypt(ciphertext, 0);
+  }
+
+  abstract static class ChaCha20Base extends DjbCipher {
+
+    private ChaCha20Base(final byte[] key) {
+      super(key);
+    }
+
+    static void quarterRound(int[] x, int a, int b, int c, int d) {
+      x[a] += x[b];
+      x[d] = rotateLeft(x[d] ^ x[a], 16);
+      x[c] += x[d];
+      x[b] = rotateLeft(x[b] ^ x[c], 12);
+      x[a] += x[b];
+      x[d] = rotateLeft(x[d] ^ x[a], 8);
+      x[c] += x[d];
+      x[b] = rotateLeft(x[b] ^ x[c], 7);
+    }
+
+    static void shuffleInternal(final int[] state) {
+      for (int i = 0; i < 10; i++) {
+        quarterRound(state, 0, 4, 8, 12);
+        quarterRound(state, 1, 5, 9, 13);
+        quarterRound(state, 2, 6, 10, 14);
+        quarterRound(state, 3, 7, 11, 15);
+        quarterRound(state, 0, 5, 10, 15);
+        quarterRound(state, 1, 6, 11, 12);
+        quarterRound(state, 2, 7, 8, 13);
+        quarterRound(state, 3, 4, 9, 14);
+      }
+    }
+
+    @Override
+    void shuffle(final int[] state) {
+      shuffleInternal(state);
+    }
+
+    private static void setSigma(int[] state) {
+      System.arraycopy(SIGMA, 0, state, 0, SIGMA.length);
+    }
+
+    private static void setKey(int[] state, final byte[] key) {
+      int[] keyInt = toIntArray(ByteBuffer.wrap(key));
+      System.arraycopy(keyInt, 0, state, 4, keyInt.length);
+    }
+  }
+
+  /**
+   * Djb's {@link ChaCha20} stream cipher based on RFC7539 (i.e., uses 96-bit random nonces).
+   * https://tools.ietf.org/html/rfc7539
+   *
+   * This cipher is meant to be used to construct an AEAD with Poly1305.
+   */
+  static class ChaCha20 extends ChaCha20Base {
+
+    private ChaCha20(byte[] key) {
+      super(key);
+    }
+
+    @Override
+    int[] initialState(final byte[] nonce, int counter) {
+      // Set the initial state based on https://tools.ietf.org/html/rfc7539#section-2.3
+      int[] state = new int[BLOCK_SIZE_IN_INTS];
+      ChaCha20Base.setSigma(state);
+      ChaCha20Base.setKey(state, key.getBytes());
+      state[12] = counter;
+      System.arraycopy(toIntArray(ByteBuffer.wrap(nonce)), 0, state, 13, nonceSizeInBytes() / 4);
+      return state;
+    }
+
+    @Override
+    void incrementCounter(int[] state) {
+      state[12]++;
+    }
+
+    @Override
+    int nonceSizeInBytes() {
+      return 12;
+    }
+
+    @Override
+    KeyStream getKeyStream(byte[] nonce) {
+      return new KeyStream(this, nonce, 1);
+    }
+  }
+
+  /**
+   * Djb's {@link XChaCha20} stream cipher based on
+   * https://download.libsodium.org/doc/advanced/xchacha20.html
+   *
+   * This cipher is meant to be used to construct an AEAD with Poly1305.
+   */
+  static class XChaCha20 extends ChaCha20Base {
+
+    /**
+     * Constructs a new XChaCha20 cipher with the supplied {@code key}.
+     *
+     * @throws IllegalArgumentException when {@code key} length is not {@link
+     * DjbCipher#KEY_SIZE_IN_BYTES}.
+     */
+    private XChaCha20(byte[] key) {
+      super(key);
+    }
+
+    static byte[] hChaCha20(final byte[] key) {
+      return hChaCha20(key, ZERO_16_BYTES);
+    }
+
+    static byte[] hChaCha20(final byte[] key, final byte[] nonce) {
+      int[] state = new int[BLOCK_SIZE_IN_INTS];
+      ChaCha20Base.setSigma(state);
+      ChaCha20Base.setKey(state, key);
+      int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
+      state[12] = nonceInt[0];
+      state[13] = nonceInt[1];
+      state[14] = nonceInt[2];
+      state[15] = nonceInt[3];
+      shuffleInternal(state);
+      // state[0] = state[0], state[1] = state[1], state[2] = state[2], state[3] = state[3]
+      state[4] = state[12];
+      state[5] = state[13];
+      state[6] = state[14];
+      state[7] = state[15];
+      ByteBuffer buf = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN);
+      buf.asIntBuffer().put(state, 0, 8);
+      return buf.array();
+    }
+
+    @Override
+    int[] initialState(final byte[] nonce, int counter) {
+      // Set the initial state based on https://cr.yp.to/snuffle/xsalsa-20081128.pdf
+      int[] state = new int[BLOCK_SIZE_IN_INTS];
+      ChaCha20Base.setSigma(state);
+      ChaCha20Base.setKey(state, hChaCha20(key.getBytes(), nonce));
+      int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
+      state[14] = nonceInt[4];
+      state[15] = nonceInt[5];
+      state[12] = counter;
+      state[13] = 0;
+      return state;
+    }
+
+    @Override
+    void incrementCounter(int[] state) {
+      state[12]++;
+      if (state[12] == 0) {
+        state[13]++;
+      }
+    }
+
+    @Override
+    int nonceSizeInBytes() {
+      return 24;
+    }
+
+    @Override
+    KeyStream getKeyStream(byte[] nonce) {
+      KeyStream keyStream = new KeyStream(this, nonce, 0);
+      keyStream.first(MAC_KEY_SIZE_IN_BYTES);  // skip the aead sub key.
+      return keyStream;
+    }
+  }
+
+  /**
+   * Djb's XSalsa20 stream cipher.
+   * https://cr.yp.to/snuffle/xsalsa-20081128.pdf
+   *
+   * This cipher is meant to be used to construct an AEAD with Poly1305.
+   */
+  static class XSalsa20 extends DjbCipher {
+
+    /**
+     * Constructs a new {@link XSalsa20} cipher with the supplied {@code key}.
+     *
+     * @throws IllegalArgumentException when {@code key} length is not {@link
+     * DjbCipher#KEY_SIZE_IN_BYTES}.
+     */
+    private XSalsa20(byte[] key) {
+      super(key);
+    }
+
+    static void quarterRound(int[] x, int a, int b, int c, int d) {
+      x[b] ^= rotateLeft(x[a] + x[d], 7);
+      x[c] ^= rotateLeft(x[b] + x[a], 9);
+      x[d] ^= rotateLeft(x[c] + x[b], 13);
+      x[a] ^= rotateLeft(x[d] + x[c], 18);
+    }
+
+    static void columnRound(final int[] state) {
+      quarterRound(state, 0, 4, 8, 12);
+      quarterRound(state, 5, 9, 13, 1);
+      quarterRound(state, 10, 14, 2, 6);
+      quarterRound(state, 15, 3, 7, 11);
+    }
+
+    static void rowRound(final int[] state) {
+      quarterRound(state, 0, 1, 2, 3);
+      quarterRound(state, 5, 6, 7, 4);
+      quarterRound(state, 10, 11, 8, 9);
+      quarterRound(state, 15, 12, 13, 14);
+    }
+
+    private static void shuffleInternal(final int[] state) {
+      for (int i = 0; i < 10; i++) {
+        columnRound(state);
+        rowRound(state);
+      }
+    }
+
+    @Override
+    void shuffle(final int[] state) {
+      shuffleInternal(state);
+    }
+
+    private static void setSigma(int[] state) {
+      state[0] = SIGMA[0];
+      state[5] = SIGMA[1];
+      state[10] = SIGMA[2];
+      state[15] = SIGMA[3];
+    }
+
+    private static void setKey(int[] state, final byte[] key) {
+      int[] keyInt = toIntArray(ByteBuffer.wrap(key));
+      System.arraycopy(keyInt, 0, state, 1, 4);
+      System.arraycopy(keyInt, 4, state, 11, 4);
+    }
+
+    static byte[] hSalsa20(final byte[] key) {
+      return hSalsa20(key, ZERO_16_BYTES);
+    }
+
+    private static byte[] hSalsa20(final byte[] key, final byte[] nonce) {
+      int[] state = new int[BLOCK_SIZE_IN_INTS];
+      setSigma(state);
+      setKey(state, key);
+      int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
+      state[6] = nonceInt[0];
+      state[7] = nonceInt[1];
+      state[8] = nonceInt[2];
+      state[9] = nonceInt[3];
+      shuffleInternal(state);
+      // state[0] = state[0]
+      state[1] = state[5];
+      state[2] = state[10];
+      state[3] = state[15];
+      state[4] = state[6];
+      state[5] = state[7];
+      state[6] = state[8];
+      state[7] = state[9];
+      ByteBuffer buf = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN);
+      buf.asIntBuffer().put(state, 0, 8);
+      return buf.array();
+    }
+
+    @Override
+    int[] initialState(final byte[] nonce, int counter) {
+      // Set the initial state based on https://cr.yp.to/snuffle/xsalsa-20081128.pdf
+      int[] state = new int[BLOCK_SIZE_IN_INTS];
+      setSigma(state);
+      setKey(state, hSalsa20(key.getBytes(), nonce));
+      int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
+      state[6] = nonceInt[4];
+      state[7] = nonceInt[5];
+      state[8] = counter;
+      state[9] = 0;
+      return state;
+    }
+
+    @Override
+    void incrementCounter(int[] state) {
+      state[8]++;
+      if (state[8] == 0) {
+        state[9]++;
+      }
+    }
+
+    @Override
+    int nonceSizeInBytes() {
+      return 24;
+    }
+
+    @Override
+    KeyStream getKeyStream(byte[] nonce) {
+      KeyStream keyStream = new KeyStream(this, nonce, 0);
+      keyStream.first(MAC_KEY_SIZE_IN_BYTES);  // skip the aead sub key.
+      return keyStream;
+    }
   }
 }

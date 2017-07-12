@@ -43,7 +43,7 @@ public abstract class DjbCipherPoly1305TestBase {
       byte[] output = cipher.encrypt(expectedInput, aad);
       byte[] nonce = Arrays.copyOfRange(
           output, DjbCipherPoly1305.MAC_TAG_SIZE_IN_BYTES,
-          ChaCha20.NONCE_SIZE_IN_BYTES + DjbCipherPoly1305.MAC_TAG_SIZE_IN_BYTES);
+          cipher.nonceSizeInBytes() + DjbCipherPoly1305.MAC_TAG_SIZE_IN_BYTES);
       byte[] actualInput = null;
       try {
         actualInput = cipher.decrypt(output, aad);
