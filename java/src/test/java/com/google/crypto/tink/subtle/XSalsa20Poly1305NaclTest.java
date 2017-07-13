@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import static com.google.crypto.tink.subtle.DjbCipherTestBase.twosCompByte;
+import static com.google.crypto.tink.subtle.DjbCipherTest.twosCompByte;
 
 import com.google.common.truth.Truth;
 import java.security.GeneralSecurityException;

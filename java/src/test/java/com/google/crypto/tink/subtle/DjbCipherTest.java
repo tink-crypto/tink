@@ -87,6 +87,22 @@ public class DjbCipherTest {
     }
   }
 
+  static int[] twosCompInt(long[] a) {
+    int[] ret = new int[a.length];
+    for (int i = 0; i < a.length; i++) {
+      ret[i] = (int) (a[i] - (a[i] > Integer.MAX_VALUE ? (1L << 32) : 0));
+    }
+    return ret;
+  }
+
+  static byte[] twosCompByte(int[] a) {
+    byte[] ret = new byte[a.length];
+    for (int i = 0; i < a.length; i++) {
+      ret[i] = (byte) (a[i] - (a[i] > Byte.MAX_VALUE ? (1 << 8) : 0));
+    }
+    return ret;
+  }
+
   /**
    * Unit tests for {@link DjbCipher} abstract class.
    */
@@ -163,22 +179,6 @@ public class DjbCipherTest {
   private abstract static class DjbCipherTestBase {
 
     protected abstract DjbCipher createInstance(byte[] key);
-
-    static int[] twosCompInt(long[] a) {
-      int[] ret = new int[a.length];
-      for (int i = 0; i < a.length; i++) {
-        ret[i] = (int) (a[i] - (a[i] > Integer.MAX_VALUE ? (1L << 32) : 0));
-      }
-      return ret;
-    }
-
-    static byte[] twosCompByte(int[] a) {
-      byte[] ret = new byte[a.length];
-      for (int i = 0; i < a.length; i++) {
-        ret[i] = (byte) (a[i] - (a[i] > Byte.MAX_VALUE ? (1 << 8) : 0));
-      }
-      return ret;
-    }
 
     @Test
     public void testRandomInputs() throws GeneralSecurityException {
@@ -611,7 +611,7 @@ public class DjbCipherTest {
   /**
    * Unit tests for {@link DjbCipher#xSalsa20(byte[])}
    */
-  public static class XSalsa20Test extends com.google.crypto.tink.subtle.DjbCipherTestBase {
+  public static class XSalsa20Test extends DjbCipherTestBase {
 
     private static final DjbCipher dummyCipher = DjbCipher.xSalsa20(new byte[32]);
 
