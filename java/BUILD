@@ -72,6 +72,7 @@ java_library(
     ],
     exports = [
         "//proto:aes_ctr_hmac_aead_java_proto",
+        "//proto:aes_ctr_hmac_streaming_java_proto",
         "//proto:aes_ctr_java_proto",
         "//proto:aes_eax_java_proto",
         "//proto:aes_gcm_hkdf_streaming_java_proto",

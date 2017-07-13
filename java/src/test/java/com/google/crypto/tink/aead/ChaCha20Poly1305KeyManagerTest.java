@@ -73,12 +73,12 @@ public class ChaCha20Poly1305KeyManagerTest {
     int numTests = 10;
     for (int i = 0; i < numTests; i++) {
       ChaCha20Poly1305Key key = (ChaCha20Poly1305Key) keyManager.newKey(keyTemplate.getValue());
-      keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
+      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
       assertEquals(32, key.getKeyValue().toByteArray().length);
 
       KeyData keyData = keyManager.newKeyData(keyTemplate.getValue());
       key = ChaCha20Poly1305Key.parseFrom(keyData.getValue());
-      keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
+      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
       assertEquals(32, key.getKeyValue().toByteArray().length);
     }
     assertEquals(numTests * 2, keys.size());

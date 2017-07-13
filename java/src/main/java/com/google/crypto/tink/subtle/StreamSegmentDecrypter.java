@@ -19,7 +19,6 @@ package com.google.crypto.tink.subtle;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
-
 /**
  * StreamSegmentDecrypter is a helper class that decrypts individual segments of a stream.
  * Instances of this interfaces are passed to ...DecryptingChannel.

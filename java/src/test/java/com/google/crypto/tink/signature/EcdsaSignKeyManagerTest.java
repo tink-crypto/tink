@@ -83,9 +83,9 @@ public class EcdsaSignKeyManagerTest {
         privKeys[3 * j + 1] = (EcdsaPrivateKey) signManager.newKey(keyTemplates[i].getValue());
         privKeys[3 * j + 2] = EcdsaPrivateKey.parseFrom(
             signManager.newKeyData(keyTemplates[i].getValue()).getValue());
-        keys.add(new String(privKeys[3 * j].toByteArray(), "UTF-8"));
-        keys.add(new String(privKeys[3 * j + 1].toByteArray(), "UTF-8"));
-        keys.add(new String(privKeys[3 * j + 2].toByteArray(), "UTF-8"));
+        keys.add(TestUtil.hexEncode(privKeys[3 * j].toByteArray()));
+        keys.add(TestUtil.hexEncode(privKeys[3 * j + 1].toByteArray()));
+        keys.add(TestUtil.hexEncode(privKeys[3 * j + 2].toByteArray()));
       }
       assertEquals(numTests, keys.size());
       // Tests that generated keys have an adequate size. This is best-effort because keys might

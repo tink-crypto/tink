@@ -93,6 +93,7 @@ public final class AesCtrHmacStreaming implements StreamingAead {
    * Initializes a streaming primitive with a key derivation key and encryption parameters.
    * @param ikm input keying material used to derive sub keys.
    * @param keySizeInBytes the key size of the sub keys
+   * @param tagSizeInBytes the size authentication tags
    * @param ciphertextSegmentSize the size of ciphertext segments.
    * @param firstSegmentOffset the offset of the first ciphertext segment. That means the first
    *    segment has size ciphertextSegmentSize - headerLength() - firstSegmentOffset

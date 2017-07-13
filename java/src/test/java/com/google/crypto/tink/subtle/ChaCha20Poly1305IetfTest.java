@@ -20,7 +20,6 @@ import static org.junit.Assert.fail;
 
 import com.google.common.truth.Truth;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.subtle.DjbCipher.ChaCha20;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import org.junit.Test;

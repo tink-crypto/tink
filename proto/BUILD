@@ -331,6 +331,51 @@ go_proto_library(
 )
 
 # -----------------------------------------------
+# aes_ctr_hmac_streaming
+# -----------------------------------------------
+proto_library(
+    name = "aes_ctr_hmac_streaming",
+    srcs = ["aes_ctr_hmac_streaming.proto"],
+    deps = [
+        ":common",
+        ":hmac",
+    ],
+)
+
+cc_proto_library(
+    name = "aes_ctr_hmac_streaming_cc_proto",
+    deps = [":aes_ctr_hmac_streaming"],
+)
+
+java_proto_library(
+    name = "aes_ctr_hmac_streaming_java_proto",
+    deps = [":aes_ctr_hmac_streaming"],
+)
+
+java_lite_proto_library(
+    name = "aes_ctr_hmac_streaming_java_proto_lite",
+    proto_deps = [
+        ":common_java_proto_lite",
+        ":hmac_java_proto_lite",
+    ],
+    protos = [
+        "aes_ctr_hmac_streaming.proto",
+    ],
+    verbose = 0,
+)
+
+go_proto_library(
+    name = "aes_ctr_hmac_streaming_go_proto",
+    proto_deps = [
+        ":common_go_proto",
+        ":hmac_go_proto",
+    ],
+    protos = [
+        "aes_ctr_hmac_streaming.proto",
+    ],
+)
+
+# -----------------------------------------------
 # aes_gcm_hkdf_streaming
 # -----------------------------------------------
 proto_library(

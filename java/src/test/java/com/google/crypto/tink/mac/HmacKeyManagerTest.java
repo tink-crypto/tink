@@ -19,6 +19,7 @@ package com.google.crypto.tink.mac;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 
+import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
@@ -53,15 +54,15 @@ public class HmacKeyManagerTest {
     for (int i = 0; i < numTests / 3; i++) {
       HmacKey key = (HmacKey) keyManager.newKey(hmacKeyFormat);
       assertEquals(32, key.getKeyValue().toByteArray().length);
-      keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
+      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
 
       key = (HmacKey) keyManager.newKey(serialized);
       assertEquals(32, key.getKeyValue().toByteArray().length);
-      keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
+      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
 
       key = HmacKey.parseFrom(keyManager.newKeyData(keyTemplate.getValue()).getValue());
       assertEquals(32, key.getKeyValue().toByteArray().length);
-      keys.add(new String(key.getKeyValue().toByteArray(), "UTF-8"));
+      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
     }
     assertEquals(numTests, keys.size());
   }
