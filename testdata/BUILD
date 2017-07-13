@@ -3,6 +3,14 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])  # Apache 2.0
 
 filegroup(
+    name = "aes_gcm",
+    testonly = 1,
+    srcs = [
+        "aes_gcm_test.json",
+    ],
+)
+
+filegroup(
     name = "credentials",
     testonly = 1,
     srcs = [

@@ -31,6 +31,38 @@ go_test(
     ],
 )
 
+# aead subtles
+AEAD_SRCS = [
+    "aead/aes_gcm.go",
+]
+
+AEAD_TEST_SRCS = [
+    "aead/aes_gcm_test.go",
+]
+
+AEAD_DEPS = [
+    ":random",
+    ":util",
+    "//go/tink",
+]
+
+go_library(
+    name = "aead",
+    srcs = AEAD_SRCS,
+    deps = AEAD_DEPS,
+)
+
+go_test(
+    name = "aead_test",
+    srcs = AEAD_TEST_SRCS,
+    data = [
+        "//testdata:aes_gcm",
+    ],
+    deps = AEAD_DEPS + [
+        ":aead",
+    ],
+)
+
 # random
 RANDOM_SRCS = [
     "random/random.go",

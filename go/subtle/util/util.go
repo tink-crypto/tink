@@ -54,3 +54,15 @@ func GetHashFunc(hashType commonpb.HashType) func() hash.Hash {
       return nil
   }
 }
+
+/**
+ * Checks if {@code sizeInBytes} is a valid AES key size.
+ */
+func ValidateAesKeySize(sizeInBytes uint32) error {
+  switch sizeInBytes {
+    case 16, 24, 32:
+      return nil
+    default:
+      return fmt.Errorf("invalid AES key size %d", sizeInBytes)
+  }
+}

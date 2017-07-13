@@ -39,3 +39,15 @@ func TestGetHashFunc(t *testing.T) {
     t.Errorf("unexpected result for invalid hash types")
   }
 }
+
+func TestValidateAesKeySize(t *testing.T) {
+  keySizes := []uint32{16, 24, 32}
+  for _, size := range keySizes {
+    if err := util.ValidateAesKeySize(size); err != nil {
+      t.Errorf("unexpected error when key size is valid")
+    }
+    if err := util.ValidateAesKeySize(size+1); err == nil {
+      t.Errorf("expect an error when key size is invalid")
+    }
+  }
+}
