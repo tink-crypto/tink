@@ -102,11 +102,17 @@ public abstract class DjbCipherPoly1305 implements Aead {
    * {@link DjbCipher#KEY_SIZE_IN_BYTES}.
    */
   public static DjbCipherPoly1305 constructXSalsa20Poly1305Nacl(final byte[] key) {
-    // We need this as XSalsa20.hSalsa20 does not check the length.
-    if (key.length != KEY_SIZE_IN_BYTES) {
-      throw new IllegalArgumentException("The key length in bytes must be 32.");
-    }
-    return new DjbCipherPoly1305Nacl(DjbCipher.xSalsa20(DjbCipher.XSalsa20.hSalsa20(key)));
+    return new DjbCipherPoly1305Nacl(DjbCipher.xSalsa20(key));
+  }
+
+  /**
+   * Constructs a new libsodium compatible XChaCha20Poly1305 cipher with the supplied {@code key}.
+   *
+   * @throws IllegalArgumentException when {@code key} length is not
+   * {@link DjbCipher#KEY_SIZE_IN_BYTES}.
+   */
+  public static DjbCipherPoly1305 constructXChaCha20Poly1305Nacl(final byte[] key) {
+    return new DjbCipherPoly1305Nacl(DjbCipher.xChaCha20(key));
   }
 
   private static long load32(byte[] in, int idx) {

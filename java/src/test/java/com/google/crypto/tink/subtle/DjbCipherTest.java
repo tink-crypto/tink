@@ -995,7 +995,7 @@ public class DjbCipherTest {
   public static class XChaCha20Test extends DjbCipherTestBase {
 
     // From libsodium's test/default/xchacha20.c (tv_hchacha20)
-    private static String hChaCha20Tvs[][] = {
+    private static String[][] hChaCha20Tvs = {
         {"24f11cce8a1b3d61e441561a696c1c1b7e173d084fd4812425435a8896a013dc",
             "d9660c5900ae19ddad28d6e06e45fe5e",
             "5966b3eec3bff1189f831f06afe4d4e3be97fa9235ec8c20d08acfbbb4e851e3"},
@@ -1029,7 +1029,7 @@ public class DjbCipherTest {
     };
 
     // From libsodium's test/default/xchacha20.c (tv_stream_xchacha20)
-    private static String xChaCha20Tvs[][] = {
+    private static String[][] xChaCha20Tvs = {
         {"79c99798ac67300bbb2704c95c341e3245f3dcb21761b98e52ff45b24f304fc4",
             "b33ffd3096479bcfbc9aee49417688a0a2554f8d95389419",
             "c6e9758160083ac604ef90e712ce6e75d7797590744e0cf060f013739c"},
