@@ -13,6 +13,11 @@ TINK_SRCS = [
     "public_key_sign.go",
     "public_key_verify.go",
     "key_manager.go",
+    "crypto_format.go",
+]
+
+TINK_TEST_SRCS = [
+    "crypto_format_test.go",
 ]
 
 TINK_DEPS = [
@@ -28,6 +33,8 @@ go_library(
 
 go_test(
     name = "tink_test",
-    srcs = TINK_SRCS,
-    deps = TINK_DEPS,
+    srcs = TINK_TEST_SRCS,
+    deps = TINK_DEPS + [
+        ":tink",
+    ],
 )
