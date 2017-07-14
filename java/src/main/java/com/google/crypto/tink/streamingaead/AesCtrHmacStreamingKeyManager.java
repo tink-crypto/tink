@@ -128,6 +128,11 @@ public final class AesCtrHmacStreamingKeyManager implements KeyManager<Streaming
     return TYPE_URL;
   }
 
+  @Override
+  public int getVersion() {
+    return VERSION;
+  }
+
   private void validate(AesCtrHmacStreamingKey key) throws GeneralSecurityException {
     SubtleUtil.validateVersion(key.getVersion(), VERSION);
     if (key.getKeyValue().size() < 16) {

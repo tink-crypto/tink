@@ -25,6 +25,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.integration.CloudKmsClient;
 import com.google.crypto.tink.integration.GcpKmsClient;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -32,7 +33,7 @@ import com.google.crypto.tink.subtle.KmsClient;
 import com.google.crypto.tink.subtle.Random;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -42,15 +43,15 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class KmsEnvelopeAeadKeyManagerTest {
-  @Before
-  public void setUp() throws Exception {
+  @BeforeClass
+  public static void setUp() throws Exception {
+    Config.register(Config.TINK_AEAD_1_0_0);
     KmsClient kmsClient = new CloudKmsClient()
         .withGcpKmsClient(GcpKmsClient.fromServiceAccount(
             TestUtil.SERVICE_ACCOUNT_FILE));
     Registry.registerKeyManager(
         KmsEnvelopeAeadKeyManager.TYPE_URL,
         new KmsEnvelopeAeadKeyManager(kmsClient));
-    AeadConfig.registerStandardKeyTypes();
   }
 
   @Test

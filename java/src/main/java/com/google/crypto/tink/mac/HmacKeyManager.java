@@ -37,7 +37,7 @@ import javax.crypto.spec.SecretKeySpec;
  * of {@code MacJce}.
  */
 public final class HmacKeyManager implements KeyManager<Mac> {
-  HmacKeyManager() {}
+  public HmacKeyManager() {}
 
   /**
    * Type url that this manager does support.
@@ -148,6 +148,11 @@ public final class HmacKeyManager implements KeyManager<Mac> {
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private void validate(HmacKey key) throws GeneralSecurityException {

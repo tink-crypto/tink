@@ -21,8 +21,8 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -51,7 +51,7 @@ import org.junit.runners.JUnit4;
 public class EciesAeadHkdfHybridEncryptTest {
   @Before
   public void setUp() throws GeneralSecurityException {
-    AeadConfig.registerStandardKeyTypes();
+    Config.register(Config.TINK_AEAD_1_0_0);
   }
 
   @Test

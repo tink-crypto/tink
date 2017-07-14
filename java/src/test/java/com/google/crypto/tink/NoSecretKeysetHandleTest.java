@@ -19,13 +19,12 @@ package com.google.crypto.tink;
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import java.security.GeneralSecurityException;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -35,10 +34,9 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class NoSecretKeysetHandleTest {
-  @Before
-  public void setUp() throws GeneralSecurityException {
-    AeadConfig.registerStandardKeyTypes();
-    MacConfig.registerStandardKeyTypes();
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
+    Config.register(Config.TINK_AEAD_1_0_0);
   }
 
   @Test

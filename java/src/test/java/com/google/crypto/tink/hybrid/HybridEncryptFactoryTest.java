@@ -23,6 +23,7 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.proto.EllipticCurveType;
@@ -33,7 +34,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -43,10 +44,9 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class HybridEncryptFactoryTest {
-  @Before
-  public void setUp() throws Exception {
-    HybridEncryptConfig.registerStandardKeyTypes();
-    HybridDecryptConfig.registerStandardKeyTypes();
+  @BeforeClass
+  public static void setUp() throws Exception {
+    Config.register(Config.TINK_HYBRID_1_0_0);
   }
 
   @Test

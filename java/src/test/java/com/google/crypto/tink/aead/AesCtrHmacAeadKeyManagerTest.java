@@ -19,6 +19,7 @@ package com.google.crypto.tink.aead;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
@@ -27,6 +28,7 @@ import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -36,6 +38,11 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class AesCtrHmacAeadKeyManagerTest {
+  @BeforeClass
+  public static void setUp() throws Exception {
+    Config.register(Config.TINK_MAC_1_0_0);
+  }
+
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
     KeyTemplate keyTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;

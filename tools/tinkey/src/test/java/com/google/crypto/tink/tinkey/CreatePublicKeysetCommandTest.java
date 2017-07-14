@@ -20,25 +20,20 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
-import com.google.crypto.tink.hybrid.HybridDecryptConfig;
-import com.google.crypto.tink.hybrid.HybridEncryptConfig;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
-import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.signature.PublicKeySignConfig;
-import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
 import com.google.protobuf.TextFormat;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -48,14 +43,9 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class CreatePublicKeysetCommandTest {
-  @Before
-  public void setUp() throws Exception {
-    AeadConfig.registerStandardKeyTypes();
-    MacConfig.registerStandardKeyTypes();
-    HybridDecryptConfig.registerStandardKeyTypes();
-    HybridEncryptConfig.registerStandardKeyTypes();
-    PublicKeySignConfig.registerStandardKeyTypes();
-    PublicKeyVerifyConfig.registerStandardKeyTypes();
+  @BeforeClass
+  public static void setUp() throws Exception {
+    Config.register(Config.TINK_1_0_0);
   }
 
   @Test

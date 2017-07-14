@@ -25,13 +25,14 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -44,14 +45,13 @@ public class AeadFactoryTest {
   private static final int AES_KEY_SIZE = 16;
   private static final int HMAC_KEY_SIZE = 20;
 
-  @Before
-  public void setUp() throws Exception {
-    AeadConfig.registerStandardKeyTypes();
+  @BeforeClass
+  public static void setUp() throws Exception {
+    Config.register(Config.TINK_AEAD_1_0_0);
   }
 
   @Test
   public void testBasicAesCtrHmacAead() throws Exception {
-    AeadConfig.registerStandardKeyTypes();
     byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
     byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
     int ivSize = 12;

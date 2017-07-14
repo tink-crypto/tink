@@ -21,7 +21,6 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.mac.HmacKeyManager;
-import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKey;
@@ -41,7 +40,7 @@ import java.util.logging.Logger;
  * of {@code EncryptThenAuthenticate}.
  */
 public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
-  AesCtrHmacAeadKeyManager() {}
+  public AesCtrHmacAeadKeyManager() {}
 
   private static final Logger logger =
       Logger.getLogger(AesCtrHmacAeadKeyManager.class.getName());
@@ -55,7 +54,6 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
     try {
       // TODO(thaidn): this could be IndCpaCipherFactory.registerStandardKeyTypes();
       Registry.registerKeyManager(AesCtrKeyManager.TYPE_URL, new AesCtrKeyManager());
-      MacConfig.registerStandardKeyTypes();
     } catch (GeneralSecurityException e) {
       logger.severe("cannot register key managers: " + e);
     }
@@ -148,6 +146,11 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private void validate(AesCtrHmacAeadKey key) throws GeneralSecurityException {

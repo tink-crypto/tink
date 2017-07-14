@@ -33,10 +33,11 @@ import java.security.GeneralSecurityException;
  * produces new instances of {@code Ed25519Sign}.
  */
 public final class Ed25519PrivateKeyManager implements PrivateKeyManager<PublicKeySign> {
-  Ed25519PrivateKeyManager() {}
+  public Ed25519PrivateKeyManager() {}
   /**
    * Type url that this manager supports
    */
+
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
 
@@ -108,6 +109,11 @@ public final class Ed25519PrivateKeyManager implements PrivateKeyManager<PublicK
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private Ed25519PrivateKey newKey() throws GeneralSecurityException {

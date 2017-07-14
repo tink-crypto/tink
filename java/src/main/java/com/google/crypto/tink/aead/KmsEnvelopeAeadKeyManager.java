@@ -33,6 +33,7 @@ import java.security.GeneralSecurityException;
  * of {@code KmsEnvelopeAead}.
  */
 public final class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
+
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =
@@ -124,6 +125,11 @@ public final class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private void validate(KmsEnvelopeAeadKey key) throws GeneralSecurityException {

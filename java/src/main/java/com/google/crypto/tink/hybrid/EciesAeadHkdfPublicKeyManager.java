@@ -37,7 +37,7 @@ import java.security.interfaces.ECPublicKey;
  * It doesn't support key generation.
  */
 public final class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
-  EciesAeadHkdfPublicKeyManager() {}
+  public EciesAeadHkdfPublicKeyManager() {}
 
   private static final int VERSION = 0;
 
@@ -116,6 +116,11 @@ public final class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEnc
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private void validate(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {

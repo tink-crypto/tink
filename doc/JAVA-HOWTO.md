@@ -7,23 +7,25 @@ common tasks in [Tink](https://github.com/google/tink).
 
 Tink provides customizable initialization, which allows for choosing specific
 implementations (identified by _key types_) of desired primitives.  This
-initialization happens via _registration_ of the implementations.  To register
-standard implementations of primitives one can use
-`registerStandardKeyTypes()`-methods of corresponding `Config`-classes.  For
-example if one wants to use the standard implementations of AEAD and MAC
-primitives offered by Tink, the initialization would look as follows:
+initialization happens via _registration_ of the implementations: for each
+_key type_ to be used one has to register a corresponding `KeyManager`-object,
+that "understands" the given _key type_.
+
+In a simple case when only Tink implementations of a single primitive are needed
+one can use `registerStandardKeyTypes()`-method from the corresponding
+convenience`Config`-class, which registers standard key types for the given
+release of Tink library.  For example if one wants to use the standard
+implementations of AEAD primitive, the initialization would look as follows:
 
 ``` java
     import com.google.crypto.tink.aead.AeadConfig;
-    import com.google.crypto.tink.mac.MacConfig;
     // (...)
 
-    // Register standard implementations of AEAD and MAC primitives.
+    // Register standard implementations of AEAD primitive.
     AeadConfig.registerStandardKeyTypes();
-    MacConfig.registerStandardKeyTypes();
 ```
 
-For custom initialization the registration proceeds directly via `Registry`-class:
+For custom initialization the registration can proceed directly via `Registry`-class:
 
 ``` java
     import com.google.crypto.tink.Registry;
@@ -32,14 +34,64 @@ For custom initialization the registration proceeds directly via `Registry`-clas
     // (...)
 
     // Register only one Tink-implementation of AEAD.
-    Registry.INSTANCE.registerKeyManager(
-        AesCtrHmacAeadKeyManager.TYPE_URL, new AesCtrHmacAeadKeyManager());
+    Registry.registerKeyManager(AesCtrHmacAeadKeyManager.TYPE_URL, new AesCtrHmacAeadKeyManager());
 
     // Register a custom implementation of AEAD.
-    Registry.INSTANCE.registerKeyManager(
-        MyAeadKeyManager.TYPE_URL, new MyAeadKeyManager());
+    Registry.registerKeyManager(MyAeadKeyManager.TYPE_URL, new MyAeadKeyManager());
 
 ```
+
+For more complex use cases, with multiple primitives and custom implementations,
+one can use Tink configuration tools from [`com.google.crypto.tink.config`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config)-package, 
+which provides a configuration language for specifying key types and their key
+managers to be used by Tink at runtime, and utilities for handling the
+configurations.  This allows for customizable configuration without need of
+recompilation, and for cross-platform and cross-language synchronization
+wrt. supported implementations of primitives.  [`Config`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config/Config.java)-class
+contains pre-defined configurations for specific primitives offered by a Tink
+release. For example to register standard implementations of AEAD primitive from
+Tink release 1 one can write:
+
+``` java
+    import com.google.crypto.tink.config.Config;
+    // (...)
+
+    // Register standard implementations of AEAD primitive from release 1.
+    Config.register(Config.TINK_JAVA_AEAD_REL_1);
+```
+
+To register all standard key types of **all primitives** offered by Tink release
+1 one would just use different pre-defined configuration:
+
+``` java
+    import com.google.crypto.tink.config.Config;
+    // (...)
+
+    // Register standard implementations of AEAD primitive from release 1.
+    Config.register(Config.TINK_JAVA_REL_1);
+```
+
+The registration mechanism and Tink configurations provide also support for
+deprecation of _key types_: the corresponding key manager can be registered in a
+"no new key"-mode, which allows for usage of existing keys forbids generation of
+new key material for the given _key type_ (see [`Registry`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Registry.java)-class
+and `KeyTypeEntry`in [`config.proto`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/proto/config.proto)).
+
+**NOTE**: Registration of a _key type_ is a one-time operation, and replacing a
+key manager registered for a _key type_ is forbidden (it will result in an
+exception).  Since some primitives are used as building blocks for more complex
+primitives (e.g. an AEAD primitive can use a MAC primitive as a sub-primitive),
+the order of standard registrations is important, as standard registration for a
+primitive covers also the required sub-primitives . For example if one first
+registers AEAD implementations using `AeadConfig.registerStandardKeyTypes();`
+then a subsequent attempt to register MAC implementations via
+`MacConfig.registerStandardKeyTypes();` (or via
+`Config.register(Config.TINK_JAVA_MAC_REL_1);` will fail, as the
+AEAD-registration already includes MAC-registration.  Please refer for details
+to the documentation of the corresponding primitives and their configs.
+
+
+
 
 ## Generating New Key(set)s
 
@@ -165,7 +217,7 @@ the custom `KeyManager`-implementation (from step #3 above) for the custom key
 type (from step #2 above):
 
 ``` java
-    Registry.INSTANCE.registerKeyManager(keyType, keyManager);
+    Registry.registerKeyManager(keyType, keyManager);
 ```
 
 Afterwards the implementation will be accessed automatically by the `Factory`

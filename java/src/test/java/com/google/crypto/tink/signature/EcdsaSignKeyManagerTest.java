@@ -47,7 +47,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.util.Set;
 import java.util.TreeSet;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -58,8 +58,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class EcdsaSignKeyManagerTest {
-  @Before
-  public void setUp() throws Exception {
+  @BeforeClass
+  public static void setUp() throws Exception {
     PublicKeySignConfig.registerStandardKeyTypes();
     PublicKeyVerifyConfig.registerStandardKeyTypes();
   }

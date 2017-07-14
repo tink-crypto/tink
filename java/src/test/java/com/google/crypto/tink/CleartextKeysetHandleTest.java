@@ -29,7 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -39,8 +39,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class CleartextKeysetHandleTest {
-  @Before
-  public void setUp() throws GeneralSecurityException {
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
     MacConfig.registerStandardKeyTypes();
   }
 

@@ -38,7 +38,7 @@ import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.crypto.Cipher;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -379,8 +379,8 @@ public class AesGcmKeyManagerTest {
           "a44a8266ee1c8eb0c8b5d4cf5ae9f19a"),
   };
 
-  @Before
-  public void setUp() throws GeneralSecurityException {
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
     AeadConfig.registerStandardKeyTypes();
   }
 
@@ -433,7 +433,6 @@ public class AesGcmKeyManagerTest {
 
   @Test
   public void testCiphertextSize() throws Exception {
-    AeadConfig.registerStandardKeyTypes();
     byte[] keyValue = Random.randBytes(AES_KEY_SIZE);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(

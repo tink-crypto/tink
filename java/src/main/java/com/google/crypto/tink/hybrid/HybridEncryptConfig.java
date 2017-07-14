@@ -19,50 +19,41 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.mac.MacConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * HybridEncryptConfig offers convenience methods for initializing {@code HybridEncryptFactory}
- * and the underlying {@code Registry}.  In particular, it  allows for initalizing the
- * {@code Registry} with native key types and their managers that Tink supports out of the box.
- * These key types are divided in two groups:
- *   - standard: secure and safe to use in new code. Over time, with new developments in
- *               cryptanalysis and computing power, some standard key types might become legacy.
- *   - legacy: deprecated and insecure or obsolete, should not be used in new code. Existing users
- *             should upgrade to one of the standard key types.
- * This divison allows for gradual retiring insecure or obsolete key types.
+ * HybridEncryptConfig offers convenience methods for initializing
+ * {@code HybridEncryptFactory} and the underlying {@code Registry}.
  *
  * For more information on how to obtain and use HybridEncrypt primitives,
  * see {@code HybridEncryptFactory}.
  */
 public final class HybridEncryptConfig {
   /**
-   * Registers standard HybridEncrypt key types and their managers with the {@code Registry}.
+   * Registers standard (for the current release) HybridEncrypt key types
+   * and their managers with the {@code Registry}.
+   *
+   * Deprecated-yet-still-supported key types are registered in
+   * so-called "no new key"-mode, which allows for usage of existing
+   * keys forbids generation of new key material.
+   *
+   * NOTE: as some HybridEncrypt key types use Aead-primitives, this method registers
+   *       also standard Aead key types via {@code AeadConfig.registerStandardKeyTypes()}.
+   *
    * @throws GeneralSecurityException
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    AeadConfig.registerStandardKeyTypes();
-    MacConfig.registerStandardKeyTypes();
+    AeadConfig.registerStandardKeyTypes(); // calls also MacConfig.registerStandardKeyTypes()
     registerKeyManager(new EciesAeadHkdfPublicKeyManager());
   }
 
   /**
-   * Registers legacy HybridEncrypt key types and their managers with the {@code Registry}.
-   * @throws GeneralSecurityException
-   */
-  public static void registerLegacyKeyTypes() throws GeneralSecurityException {
-    ;
-  }
-
-  /**
    * Registers the given {@code keyManager} for the key type {@code keyManager.getKeyType()}.
-   * @return true if registration of {@code keyManager} was successful, false if
-   *         there already exisits a key manager for {@code keyManager.getKeyType()}.
+   *
    * @throws GeneralSecurityException
    */
-  public static boolean registerKeyManager(final KeyManager<HybridEncrypt> keyManager)
+  public static void registerKeyManager(final KeyManager<HybridEncrypt> keyManager)
       throws GeneralSecurityException {
-    return Registry.registerKeyManager(keyManager.getKeyType(), keyManager);
+    Registry.registerKeyManager(keyManager.getKeyType(), keyManager);
   }
 }

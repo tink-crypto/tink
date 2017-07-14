@@ -16,12 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.hybrid.HybridDecryptConfig;
-import com.google.crypto.tink.hybrid.HybridEncryptConfig;
-import com.google.crypto.tink.mac.MacConfig;
-import com.google.crypto.tink.signature.PublicKeySignConfig;
-import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
+import com.google.crypto.tink.config.Config;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -30,13 +25,7 @@ import org.kohsuke.args4j.CmdLineParser;
  */
 public class Tinkey {
   public static void main(String[] args) throws Exception {
-    AeadConfig.registerStandardKeyTypes();
-    MacConfig.registerStandardKeyTypes();
-    HybridDecryptConfig.registerStandardKeyTypes();
-    HybridEncryptConfig.registerStandardKeyTypes();
-    PublicKeySignConfig.registerStandardKeyTypes();
-    PublicKeyVerifyConfig.registerStandardKeyTypes();
-
+    Config.register(Config.TINK_1_0_0);
     TinkeyCommands commands = new TinkeyCommands();
     CmdLineParser parser = new CmdLineParser(commands);
 

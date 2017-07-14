@@ -100,6 +100,41 @@ objc_proto_compile(
 )
 
 # -----------------------------------------------
+# config
+# -----------------------------------------------
+proto_library(
+    name = "config",
+    srcs = [
+        "config.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "config_cc_proto",
+    deps = [":config"],
+)
+
+java_proto_library(
+    name = "config_java_proto",
+    deps = [":config"],
+)
+
+java_lite_proto_library(
+    name = "config_java_proto_lite",
+    deps = [":config"],
+)
+
+go_proto_library(
+    name = "config_go_proto",
+    srcs = [
+        "config.proto",
+    ],
+    deps = [
+        ":common_go_proto",
+    ],
+)
+
+# -----------------------------------------------
 # ecdsa
 # -----------------------------------------------
 proto_library(

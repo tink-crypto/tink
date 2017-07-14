@@ -41,8 +41,9 @@ import java.security.spec.ECPoint;
  * This key manager generates new {@code EciesAeadHkdfPrivateKey} keys and produces new instances
  * of {@code EciesAeadHkdfHybridDecrypt}.
  */
+
 public final class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt> {
-  EciesAeadHkdfPrivateKeyManager() {}
+  public EciesAeadHkdfPrivateKeyManager() {}
 
   private static final int VERSION = 0;
 
@@ -170,6 +171,11 @@ public final class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<H
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private void validate(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {

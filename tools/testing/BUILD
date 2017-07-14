@@ -13,6 +13,7 @@ java_binary(
     deps = [
         "//java",
         "//java:cleartext_keyset_handle",
+        "//java:config",
     ],
 )
 
@@ -27,5 +28,6 @@ java_binary(
     deps = [
         "//java",
         "//java:cleartext_keyset_handle",
+        "//java:config",
     ],
 )

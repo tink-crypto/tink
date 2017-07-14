@@ -34,7 +34,7 @@ import java.security.GeneralSecurityException;
  * of {@code AesGcmJce}.
  */
 public final class AesGcmKeyManager implements KeyManager<Aead> {
-  AesGcmKeyManager() {}
+  public AesGcmKeyManager() {}
 
   private static final int VERSION = 0;
 
@@ -121,6 +121,11 @@ public final class AesGcmKeyManager implements KeyManager<Aead> {
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private void validate(AesGcmKey key) throws GeneralSecurityException {

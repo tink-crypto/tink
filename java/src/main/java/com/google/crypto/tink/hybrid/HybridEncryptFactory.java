@@ -20,8 +20,6 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
@@ -47,30 +45,6 @@ import java.util.logging.Logger;
 public final class HybridEncryptFactory {
   private static final Logger logger = Logger.getLogger(HybridEncryptFactory.class.getName());
 
-  static {
-    try {
-      AeadConfig.registerStandardKeyTypes();
-      MacConfig.registerStandardKeyTypes();
-    } catch (GeneralSecurityException e) {
-      logger.severe("cannot register key managers: " + e);
-    }
-  }
-  /**
-   * Registers standard HybridEncrypt key types and their managers with the {@code Registry}.
-   * @throws GeneralSecurityException
-   */
-  public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    Registry.registerKeyManager(
-        EciesAeadHkdfPublicKeyManager.TYPE_URL,
-        new EciesAeadHkdfPublicKeyManager());
-  }
-  /**
-   * Registers legacy HybridEncrypt key types and their managers with the {@code Registry}.
-   * @throws GeneralSecurityException
-   */
-  public static void registerLegacyKeyTypes() throws GeneralSecurityException {
-    ;
-  }
   /**
    * @return a HybridEncrypt primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
@@ -79,6 +53,7 @@ public final class HybridEncryptFactory {
       throws GeneralSecurityException {
     return getPrimitive(keysetHandle, /* keyManager= */null);
   }
+
   /**
    * @return a HybridEncrypt primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException

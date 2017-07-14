@@ -31,7 +31,7 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -43,8 +43,8 @@ import org.junit.runners.JUnit4;
 public class MacFactoryTest {
   private static final int HMAC_KEY_SIZE = 20;
 
-  @Before
-  public void setUp() throws Exception {
+  @BeforeClass
+  public static void setUp() throws Exception {
     MacConfig.registerStandardKeyTypes();
   }
 

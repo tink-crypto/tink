@@ -34,7 +34,8 @@ import java.security.GeneralSecurityException;
  * produces new instances of {@code ChaCha20Poly1305}.
  */
 public final class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
-  ChaCha20Poly1305KeyManager() {}
+  public ChaCha20Poly1305KeyManager() {}
+
   /**
    * Type url that this manager supports
    */
@@ -95,6 +96,11 @@ public final class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private ChaCha20Poly1305Key newKey() throws GeneralSecurityException {

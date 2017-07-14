@@ -34,7 +34,7 @@ import java.security.GeneralSecurityException;
  * of {@code AesEaxJce}.
  */
 public final class AesEaxKeyManager implements KeyManager<Aead> {
-  AesEaxKeyManager() {}
+  public AesEaxKeyManager() {}
 
   private static final int VERSION = 0;
 
@@ -121,6 +121,11 @@ public final class AesEaxKeyManager implements KeyManager<Aead> {
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private void validate(AesEaxKey key) throws GeneralSecurityException {

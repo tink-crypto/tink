@@ -28,7 +28,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -38,8 +38,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class ChaCha20Poly1305KeyManagerTest {
-  @Before
-  public void setUp() throws GeneralSecurityException {
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
     AeadConfig.registerStandardKeyTypes();
   }
 

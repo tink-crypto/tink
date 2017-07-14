@@ -25,6 +25,7 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Logger;
 
 /**
  * Registry for KeyMangers. <p>
@@ -43,9 +44,22 @@ import java.util.concurrent.ConcurrentMap;
  * primitives and KeyManagers.
  */
 public final class Registry {
+  private static final Logger logger = Logger.getLogger(Registry.class.getName());
+
   @SuppressWarnings("rawtypes")
-  private static final ConcurrentMap<String, KeyManager> keyManager =
+  private static final ConcurrentMap<String, KeyManager> keyManagerMap =
       new ConcurrentHashMap<String, KeyManager>();         // typeUrl -> KeyManager mapping
+  private static final ConcurrentMap<String, Boolean> newKeyAllowedMap =
+      new ConcurrentHashMap<String, Boolean>();            // typeUrl -> newKeyAllowed mapping
+
+  /**
+   * Resets the registry.  After reset the registry is empty, i.e. it contains no key managers.
+   * This method is intended for testing.
+   */
+  public static synchronized void reset() {
+    keyManagerMap.clear();
+    newKeyAllowedMap.clear();
+  }
 
   /**
    * Registers {@code manager} for the given {@code typeUrl}, assuming that there is
@@ -56,17 +70,28 @@ public final class Registry {
    * @return true if the {@code manager} is registered as a manager for {@code typeUrl}; false if
    * there already exists a key manager for {@code typeUrl}.
    */
+  public static <P> void registerKeyManager(String typeUrl, final KeyManager<P> manager)
+      throws GeneralSecurityException {
+    registerKeyManager(typeUrl, manager, /* newKeyAllowed= */ true);
+  }
+
   @SuppressWarnings("unchecked")
-  public static <P> boolean registerKeyManager(String typeUrl, final KeyManager<P> manager)
+  public static synchronized <P> void registerKeyManager(
+      String typeUrl, final KeyManager<P> manager, boolean newKeyAllowed)
       throws GeneralSecurityException {
     if (manager == null) {
       throw new NullPointerException("key manager must be non-null.");
     }
-    KeyManager<P> existing = keyManager.putIfAbsent(typeUrl, manager);
-    if (existing == null) {
-      return true;
+    if (keyManagerMap.containsKey(typeUrl)) {
+      logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
+      throw new GeneralSecurityException("key manager for key type " + typeUrl
+          + " has been already registered");
+    } else {
+      keyManagerMap.put(typeUrl, manager);
+      newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
+      logger.info("Registered instance of " + manager.getClass().getName()
+          + " as key manager for key type " + typeUrl);
     }
-    return false;
   }
 
   /**
@@ -76,9 +101,10 @@ public final class Registry {
    */
   @SuppressWarnings("unchecked")
   public static <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
-    KeyManager<P> manager = keyManager.get(typeUrl);
+    KeyManager<P> manager = keyManagerMap.get(typeUrl);
     if (manager == null) {
-      throw new GeneralSecurityException("unsupported key type: " + typeUrl);
+      throw new GeneralSecurityException("No key manager found for key type: " + typeUrl
+          + ".  Check the configuration of the registry.");
     }
     return manager;
   }
@@ -91,9 +117,14 @@ public final class Registry {
    * This method should be used solely for key management.
    * @return a new key.
    */
-  public static <P> KeyData newKeyData(KeyTemplate template) throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManager(template.getTypeUrl());
-    return manager.newKeyData(template.getValue());
+  public static <P> KeyData newKeyData(KeyTemplate keyTemplate) throws GeneralSecurityException {
+    KeyManager<P> manager = getKeyManager(keyTemplate.getTypeUrl());
+    if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
+      return manager.newKeyData(keyTemplate.getValue());
+    } else {
+      throw new GeneralSecurityException("newKey-operation not permitted for key type "
+          + keyTemplate.getTypeUrl());
+    }
   }
 
   /**
@@ -105,7 +136,12 @@ public final class Registry {
    */
   public static <P> MessageLite newKey(KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(keyTemplate.getTypeUrl());
-    return manager.newKey(keyTemplate.getValue());
+    if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
+      return manager.newKey(keyTemplate.getValue());
+    } else {
+      throw new GeneralSecurityException("newKey-operation not permitted for key type "
+          + keyTemplate.getTypeUrl());
+    }
   }
 
   /**
@@ -118,7 +154,11 @@ public final class Registry {
   public static <P> MessageLite newKey(String typeUrl, MessageLite format)
       throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(typeUrl);
-    return manager.newKey(format);
+    if (newKeyAllowedMap.get(typeUrl).booleanValue()) {
+      return manager.newKey(format);
+    } else {
+      throw new GeneralSecurityException("newKey-operation not permitted for key type " + typeUrl);
+    }
   }
 
   /**
@@ -144,7 +184,8 @@ public final class Registry {
    * @return a new primitive.
    */
   @SuppressWarnings("TypeParameterUnusedInFormals")
-  public static <P> P getPrimitive(String typeUrl, MessageLite key) throws GeneralSecurityException {
+  public static <P> P getPrimitive(String typeUrl, MessageLite key)
+      throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(typeUrl);
     return manager.getPrimitive(key);
   }
@@ -171,7 +212,8 @@ public final class Registry {
    * @return a new primitive.
    */
   @SuppressWarnings("TypeParameterUnusedInFormals")
-  public static <P> P getPrimitive(String typeUrl, byte[] serialized) throws GeneralSecurityException {
+  public static <P> P getPrimitive(String typeUrl, byte[] serialized)
+      throws GeneralSecurityException {
     return getPrimitive(typeUrl, ByteString.copyFrom(serialized));
   }
 

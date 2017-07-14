@@ -48,6 +48,15 @@ java_library(
     ],
 )
 
+java_library(
+    name = "config",
+    visibility = ["//visibility:public"],
+    exports = [
+        "//java/src/main/java/com/google/crypto/tink/config",
+        "//java/src/main/java/com/google/crypto/tink/config:tink_catalogue",
+    ],
+)
+
 # RESTRICTED
 
 FULL_PROTOS = [
@@ -59,6 +68,7 @@ FULL_PROTOS = [
     "//proto:aes_gcm_java_proto",
     "//proto:chacha20_poly1305_java_proto",
     "//proto:common_java_proto",
+    "//proto:config_java_proto",
     "//proto:ecdsa_java_proto",
     "//proto:ecies_aead_hkdf_java_proto",
     "//proto:ed25519_java_proto",
@@ -77,6 +87,7 @@ LITE_PROTOS = [
     "//proto:aes_gcm_java_proto_lite",
     "//proto:chacha20_poly1305_java_proto_lite",
     "//proto:common_java_proto_lite",
+    "//proto:config_java_proto_lite",
     "//proto:ecdsa_java_proto_lite",
     "//proto:ecies_aead_hkdf_java_proto_lite",
     "//proto:ed25519_java_proto_lite",
@@ -131,6 +142,7 @@ java_library(
     ],
     exports = [
         ":cleartext_keyset_handle",
+        ":config",
         ":java",
         ":protos",
         ":subtle",

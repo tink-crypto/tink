@@ -125,6 +125,11 @@ public final class KmsAeadKeyManager implements KeyManager<Aead> {
     return TYPE_URL;
   }
 
+  @Override
+  public int getVersion() {
+    return VERSION;
+  }
+
   private static void validate(KmsAeadKey key) throws GeneralSecurityException {
     SubtleUtil.validateVersion(key.getVersion(), VERSION);
   }

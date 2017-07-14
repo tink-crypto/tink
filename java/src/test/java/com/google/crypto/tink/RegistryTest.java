@@ -18,17 +18,15 @@ package com.google.crypto.tink;
 
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil.DummyAead;
-import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.mac.HmacKeyManager;
-import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.HashType;
@@ -45,7 +43,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -85,7 +83,10 @@ public class RegistryTest {
     public String getKeyType() {
       return AesGcmKeyManager.TYPE_URL;
     }
-
+    @Override
+    public int getVersion() {
+      return 0;
+    }
   }
 
   private String aesCtrHmacAeadTypeUrl =
@@ -95,10 +96,9 @@ public class RegistryTest {
   private String hmacKeyTypeUrl =
       HmacKeyManager.TYPE_URL;
 
-  @Before
-  public void setUp() throws GeneralSecurityException {
-    AeadConfig.registerStandardKeyTypes();
-    MacConfig.registerStandardKeyTypes();
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
+    Config.register(Config.TINK_AEAD_1_0_0);
   }
 
   @Test
@@ -130,7 +130,7 @@ public class RegistryTest {
       KeyManager<Mac> unused = Registry.getKeyManager(badTypeUrl);
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "unsupported");
+      assertExceptionContains(e, "No key manager found");
       assertExceptionContains(e, badTypeUrl);
     }
   }
@@ -225,8 +225,12 @@ public class RegistryTest {
       assertTrue(e.toString().contains("must be non-null"));
     }
     // This should not overwrite the existing manager.
-    assertFalse(Registry.registerKeyManager(aesCtrHmacAeadTypeUrl,
-        new CustomAeadKeyManager()));
+    try {
+      Registry.registerKeyManager(aesCtrHmacAeadTypeUrl, new CustomAeadKeyManager());
+      fail("Expected GeneralSecurityException.");
+    } catch (GeneralSecurityException e) {
+      assertTrue(e.toString().contains("already registered"));
+    }
     KeyManager<Aead> manager = Registry.getKeyManager(aesCtrHmacAeadTypeUrl);
     assertNotEquals(CustomAeadKeyManager.class, manager.getClass());
     assertTrue(manager.getClass().toString().contains(

@@ -23,9 +23,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.KeyData;
@@ -34,16 +33,14 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.signature.EcdsaVerifyKeyManager;
-import com.google.crypto.tink.signature.PublicKeySignConfig;
 import com.google.crypto.tink.signature.PublicKeySignFactory;
-import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -53,12 +50,10 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class KeysetHandleTest {
-  @Before
-  public void setUp() throws GeneralSecurityException {
-    AeadConfig.registerStandardKeyTypes();
-    MacConfig.registerStandardKeyTypes();
-    PublicKeyVerifyConfig.registerStandardKeyTypes();
-    PublicKeySignConfig.registerStandardKeyTypes();
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
+    Config.register(Config.TINK_AEAD_1_0_0);
+    Config.register(Config.TINK_SIGNATURE_1_0_0);
   }
 
   /**

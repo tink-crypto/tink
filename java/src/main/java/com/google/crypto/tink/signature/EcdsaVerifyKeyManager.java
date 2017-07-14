@@ -34,7 +34,7 @@ import java.security.interfaces.ECPublicKey;
  * It doesn't support key generation.
  */
 public final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
-  EcdsaVerifyKeyManager() {}
+  public EcdsaVerifyKeyManager() {}
 
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
@@ -110,6 +110,11 @@ public final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> 
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private void validateKey(EcdsaPublicKey pubKey) throws GeneralSecurityException {

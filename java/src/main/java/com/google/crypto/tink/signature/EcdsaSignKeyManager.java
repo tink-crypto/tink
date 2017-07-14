@@ -40,7 +40,7 @@ import java.security.spec.ECPoint;
  * of {@code EcdsaSignJce}.
  */
 public final class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
-  EcdsaSignKeyManager() {}
+  public EcdsaSignKeyManager() {}
 
   /**
    * Type url that this manager supports
@@ -168,6 +168,11 @@ public final class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySig
   @Override
   public boolean doesSupport(String typeUrl) {
     return TYPE_URL.equals(typeUrl);
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {

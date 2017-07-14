@@ -36,7 +36,7 @@ import java.security.GeneralSecurityException;
  * {@code AesGcmHkdfStreaming}.
  */
 public final class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
-  AesGcmHkdfStreamingKeyManager() {}
+  public AesGcmHkdfStreamingKeyManager() {}
 
   private static final int VERSION = 0;
 
@@ -125,6 +125,11 @@ public final class AesGcmHkdfStreamingKeyManager implements KeyManager<Streaming
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
   }
 
   private void validate(AesGcmHkdfStreamingKey key) throws GeneralSecurityException {

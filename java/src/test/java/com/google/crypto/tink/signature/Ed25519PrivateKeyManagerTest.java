@@ -34,7 +34,7 @@ import com.google.crypto.tink.subtle.Ed25519Verify;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -44,8 +44,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class Ed25519PrivateKeyManagerTest {
-  @Before
-  public void setUp() throws GeneralSecurityException {
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
     PublicKeySignConfig.registerStandardKeyTypes();
     PublicKeyVerifyConfig.registerStandardKeyTypes();
   }

@@ -19,17 +19,14 @@ package com.google.crypto.tink;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.hybrid.HybridDecryptConfig;
-import com.google.crypto.tink.hybrid.HybridEncryptConfig;
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.mac.HmacKeyManager;
-import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import java.security.GeneralSecurityException;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -39,15 +36,11 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class KeysetManagerTest {
-  private String hmacKeyTypeUrl =
-      HmacKeyManager.TYPE_URL;
+  private String hmacKeyTypeUrl = HmacKeyManager.TYPE_URL;
 
-  @Before
-  public void setUp() throws GeneralSecurityException {
-    AeadConfig.registerStandardKeyTypes();
-    MacConfig.registerStandardKeyTypes();
-    HybridEncryptConfig.registerStandardKeyTypes();
-    HybridDecryptConfig.registerStandardKeyTypes();
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
+    Config.register(Config.TINK_HYBRID_1_0_0);  // includes TINK_AEAD_1_0_0
   }
 
   @Test

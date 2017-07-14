@@ -20,7 +20,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetReaders;
-import com.google.crypto.tink.hybrid.HybridDecryptConfig;
+import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -72,7 +72,7 @@ public class HybridDecryptCli {
 
     // Get the primitive.
     System.out.println("Getting the primitive...");
-    HybridDecryptConfig.registerStandardKeyTypes();
+    Config.register(Config.TINK_HYBRID_DECRYPT_1_0_0);
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandle);
 
     // Read the ciphertext.

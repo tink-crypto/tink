@@ -37,7 +37,7 @@ import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -212,8 +212,8 @@ public class AesEaxKeyManagerTest {
           "cfc46afc253b4652b1af3795b124ab6e"),
   };
 
-  @Before
-  public void setUp() throws GeneralSecurityException {
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
     AeadConfig.registerStandardKeyTypes();
   }
 
@@ -257,7 +257,6 @@ public class AesEaxKeyManagerTest {
 
   @Test
   public void testCiphertextSize() throws Exception {
-    AeadConfig.registerStandardKeyTypes();
     byte[] keyValue = Random.randBytes(AES_KEY_SIZE);
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
         TestUtil.createKeyset(
