@@ -12,13 +12,15 @@ TINK_SRCS = [
     "aead.go",
     "public_key_sign.go",
     "public_key_verify.go",
-    "keyset_handle.go",
     "key_manager.go",
+    "keyset_handle.go",
+    "primitive_set.go",
     "crypto_format.go",
 ]
 
 TINK_TEST_SRCS = [
     "crypto_format_test.go",
+    "primitive_set_test.go",
 ]
 
 TINK_INTERNAL_TEST_SRCS = [
@@ -33,6 +35,7 @@ TINK_DEPS = [
 
 TINK_TEST_DEPS = TINK_DEPS + [
     ":tink",
+    "//go/util:testutil",
 ]
 
 go_library(
