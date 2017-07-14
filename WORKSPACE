@@ -4,16 +4,20 @@ git_repository(
     remote = "https://github.com/bazelbuild/rules_go.git",
     tag = "0.4.4",
 )
+
 load("@io_bazel_rules_go//go:def.bzl", "go_repositories", "new_go_repository")
+
 go_repositories()
 
 git_repository(
     name = "org_pubref_rules_protobuf",
     remote = "https://github.com/pubref/rules_protobuf.git",
-    tag = "v0.7.1",
+    tag = "v0.7.2",
 )
+
 # TODO(thaidn): move this rule to third_party/rules_protobuf.
 load("@org_pubref_rules_protobuf//go:rules.bzl", "go_proto_repositories")
+
 go_proto_repositories()
 
 # cc
@@ -25,12 +29,13 @@ git_repository(
 
 new_git_repository(
     name = "gtest",
-    remote = "https://github.com/google/googletest.git",
-    commit = "ed9d1e1ff92ce199de5ca2667a667cd0a368482a",
     build_file = "//tools:gtest.BUILD",
+    commit = "ed9d1e1ff92ce199de5ca2667a667cd0a368482a",
+    remote = "https://github.com/google/googletest.git",
 )
 
 load("//third_party/rules_protobuf/javalite:rules.bzl", "javalite_proto_repositories")
+
 javalite_proto_repositories()
 
 # proto_library rules implicitly depend on @com_google_protobuf//:protoc,
@@ -38,42 +43,52 @@ javalite_proto_repositories()
 # This statement defines the @com_google_protobuf repo.
 http_archive(
     name = "com_google_protobuf",
-    urls = ["https://github.com/google/protobuf/archive/b4b0e304be5a68de3d0ee1af9b286f958750f5e4.zip"],
-    strip_prefix = "protobuf-b4b0e304be5a68de3d0ee1af9b286f958750f5e4",
     sha256 = "ff771a662fb6bd4d3cc209bcccedef3e93980a49f71df1e987f6afa3bcdcba3a",
+    strip_prefix = "protobuf-b4b0e304be5a68de3d0ee1af9b286f958750f5e4",
+    urls = ["https://github.com/google/protobuf/archive/b4b0e304be5a68de3d0ee1af9b286f958750f5e4.zip"],
 )
 
 # cc_proto_library rules implicitly depend on @com_google_protobuf_cc//:cc_toolchain,
 # which is the C++ proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_cc",
-    urls = ["https://github.com/google/protobuf/archive/b4b0e304be5a68de3d0ee1af9b286f958750f5e4.zip"],
-    strip_prefix = "protobuf-b4b0e304be5a68de3d0ee1af9b286f958750f5e4",
     sha256 = "ff771a662fb6bd4d3cc209bcccedef3e93980a49f71df1e987f6afa3bcdcba3a",
+    strip_prefix = "protobuf-b4b0e304be5a68de3d0ee1af9b286f958750f5e4",
+    urls = ["https://github.com/google/protobuf/archive/b4b0e304be5a68de3d0ee1af9b286f958750f5e4.zip"],
 )
 
 # java_proto_library rules implicitly depend on @com_google_protobuf_java//:java_toolchain,
 # which is the Java proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_java",
-    urls = ["https://github.com/google/protobuf/archive/b4b0e304be5a68de3d0ee1af9b286f958750f5e4.zip"],
-    strip_prefix = "protobuf-b4b0e304be5a68de3d0ee1af9b286f958750f5e4",
     sha256 = "ff771a662fb6bd4d3cc209bcccedef3e93980a49f71df1e987f6afa3bcdcba3a",
+    strip_prefix = "protobuf-b4b0e304be5a68de3d0ee1af9b286f958750f5e4",
+    urls = ["https://github.com/google/protobuf/archive/b4b0e304be5a68de3d0ee1af9b286f958750f5e4.zip"],
 )
 
 # java_lite_proto_library rules implicitly depend on @com_google_protobuf_javalite//:javalite_toolchain,
 # which is the JavaLite proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_javalite",
-    urls = ["https://github.com/google/protobuf/archive/82809aaebf24fca3c2d5611149c78a3625bd3b70.zip"],
-    strip_prefix = "protobuf-82809aaebf24fca3c2d5611149c78a3625bd3b70",
     sha256 = "75105f312cefd8aa5e0bdf29279dc8ef0a6f862362b321d35b1ed5c08ce2ecfb",
+    strip_prefix = "protobuf-82809aaebf24fca3c2d5611149c78a3625bd3b70",
+    urls = ["https://github.com/google/protobuf/archive/82809aaebf24fca3c2d5611149c78a3625bd3b70.zip"],
+)
+
+# objc_proto_library rules from @org_pubref_rules_protobuf require the objective
+# runtime files to build correctly. Therefore, we add a newer version of
+# google/protobuf that has the @com_google_protobuf_objc//:objectivec target.
+http_archive(
+    name = "com_google_protobuf_objc",
+    sha256 = "6025a4bd2a1bce5414a6521f44c247a31a0bd19cb1271c8ef46880cc450a7b10",
+    strip_prefix = "protobuf-286f0598422a70639e587b5329bd3037f5ee76b0",
+    urls = ["https://github.com/google/protobuf/archive/286f0598422a70639e587b5329bd3037f5ee76b0.zip"],
 )
 
 maven_jar(
     name = "args4j",
     artifact = "args4j:args4j:2.33",
-    sha1 = "bd87a75374a6d6523de82fef51fc3cfe9baf9fc9"
+    sha1 = "bd87a75374a6d6523de82fef51fc3cfe9baf9fc9",
 )
 
 maven_jar(
@@ -141,3 +156,7 @@ maven_jar(
     artifact = "com.google.errorprone:error_prone_annotations:2.0.19",
     sha1 = "c3754a0bdd545b00ddc26884f9e7624f8b6a14de",
 )
+
+load("@org_pubref_rules_protobuf//objc:rules.bzl", "objc_proto_repositories")
+
+objc_proto_repositories()
