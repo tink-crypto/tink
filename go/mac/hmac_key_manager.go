@@ -71,12 +71,12 @@ func NewHmacKeyManager() *HmacKeyManager {
  */
 func (keyManager *HmacKeyManager) GetPrimitiveFromSerializedKey(
     serializedKey []byte) (interface{}, error) {
-  if serializedKey == nil {
-    return nil, fmt.Errorf("hmac_key_manager: serialized key cannot be nil")
+  if len(serializedKey) == 0 {
+    return nil, fmt.Errorf("hmac_key_manager: invalid serialized key")
   }
   key := new(hmacpb.HmacKey)
   if err := proto.Unmarshal(serializedKey, key); err != nil {
-    return nil, fmt.Errorf("hmac_key_manager: unable to unmarshal serialized key: %s", err)
+    return nil, fmt.Errorf("hmac_key_manager: invalid serialized key: %s", err)
   }
   return keyManager.GetPrimitiveFromKey(key)
 }
@@ -110,12 +110,12 @@ func (keyManager *HmacKeyManager) GetPrimitiveFromKey(m proto.Message) (interfac
  */
 func (keyManager *HmacKeyManager) NewKeyFromSerializedKeyFormat(
     serializedKeyFormat []byte) (proto.Message, error) {
-  if serializedKeyFormat == nil {
-    return nil, fmt.Errorf("hmac_key_manager: serialized key format cannot be nil")
+  if len(serializedKeyFormat) == 0 {
+    return nil, fmt.Errorf("hmac_key_manager: invalid serialized key format")
   }
   keyFormat := new(hmacpb.HmacKeyFormat)
   if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
-    return nil, fmt.Errorf("hmac_key_manager: cannot unmarshal serialized key format: %s", err)
+    return nil, fmt.Errorf("hmac_key_manager: invalid serialized key format: %s", err)
   }
   return keyManager.NewKeyFromKeyFormat(keyFormat)
 }

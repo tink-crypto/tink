@@ -44,20 +44,19 @@ func TestGetPrimitiveFromSerializedKeyBasic(t *testing.T) {
 func TestGetPrimitiveFromInvalidSerializedKey(t *testing.T) {
   var h mac.HmacKeyManager
   // nil input
-  _, err := h.GetPrimitiveFromSerializedKey(nil)
-  if err == nil {
+  if _, err := h.GetPrimitiveFromSerializedKey(nil); err == nil {
     t.Errorf("expect an error when input is nil")
   }
-  // all-zero input
-  serializedKey := make([]byte, 10)
-  _, err = h.GetPrimitiveFromSerializedKey(serializedKey)
-  if err == nil {
+  // void input
+  if _, err := h.GetPrimitiveFromSerializedKey([]byte{}); err == nil {
+    t.Errorf("expect an error when input is not a serialized HmacKey")
+  }
+  if _, err := h.GetPrimitiveFromSerializedKey([]byte{0}); err == nil {
     t.Errorf("expect an error when input is not a serialized HmacKey")
   }
   // input is serialization of another proto
-  serializedKey, _ = proto.Marshal(newHmacParams(commonpb.HashType_SHA256, 32))
-  _, err = h.GetPrimitiveFromSerializedKey(serializedKey)
-  if err == nil {
+  serializedKey, _ := proto.Marshal(newHmacParams(commonpb.HashType_SHA256, 32))
+  if _, err := h.GetPrimitiveFromSerializedKey(serializedKey); err == nil {
     t.Errorf("expect an error when input is not a serialized HmacKey")
   }
 }
@@ -161,21 +160,20 @@ func TestNewKeyFromKeyFormatBasic(t *testing.T) {
 func TestNewKeyFromInvalidSerializedKeyFormat(t *testing.T) {
   var h mac.HmacKeyManager
   // nil input
-  _, err := h.NewKeyFromSerializedKeyFormat(nil)
-  if err == nil {
+  if _, err := h.NewKeyFromSerializedKeyFormat(nil); err == nil {
     t.Errorf("expect an error when input is nil")
   }
-  // all-zero input
-  serializedFormat := make([]byte, 10)
-  _, err = h.NewKeyFromSerializedKeyFormat(serializedFormat)
-  if err == nil {
+  // void input
+  if _, err := h.NewKeyFromSerializedKeyFormat([]byte{}); err == nil {
+    t.Errorf("expect an error when input is not a serialized HmacKeyFormat")
+  }
+  if _, err := h.NewKeyFromSerializedKeyFormat([]byte{0}); err == nil {
     t.Errorf("expect an error when input is not a serialized HmacKeyFormat")
   }
   // input is serialization of another proto
   hmacKey := newHmacKey(commonpb.HashType_SHA256, 32, mac.HMAC_KEY_VERSION, testKey)
-  serializedFormat, _ = proto.Marshal(hmacKey)
-  _, err = h.NewKeyFromSerializedKeyFormat(serializedFormat)
-  if err == nil {
+  serializedFormat, _ := proto.Marshal(hmacKey)
+  if _, err := h.NewKeyFromSerializedKeyFormat(serializedFormat); err == nil {
     t.Errorf("expect an error when input is not a serialized HmacKeyFormat")
   }
 }
