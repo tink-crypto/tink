@@ -317,7 +317,7 @@ public class DjbCipherTest {
           0x00, 0x4a, 0x00, 0x00, 0x00, 0x00};
       DjbCipher cipher = createInstance(key);
       ByteBuffer out = ByteBuffer.allocate(in.length);
-      cipher.process(out, in, 0, nonce, 1);
+      cipher.process(out, ByteBuffer.wrap(in), nonce, 1);
       Truth.assertThat(out.array()).isEqualTo(twosCompByte(new int[]{
           0x6e, 0x2e, 0x35, 0x9a, 0x25, 0x68, 0xf9, 0x80,
           0x41, 0xba, 0x07, 0x28, 0xdd, 0x0d, 0x69, 0x81,
@@ -472,7 +472,7 @@ public class DjbCipherTest {
       byte[] nonce = new byte[12];
       DjbCipher cipher = createInstance(key);
       ByteBuffer out = ByteBuffer.allocate(in.length);
-      cipher.process(out, in, 0, nonce, 0);
+      cipher.process(out, ByteBuffer.wrap(in), nonce, 0);
       Truth.assertThat(out.array()).isEqualTo(twosCompByte(new int[]{
           0x76, 0xb8, 0xe0, 0xad, 0xa0, 0xf1, 0x3d, 0x90,
           0x40, 0x5d, 0x6a, 0xe5, 0x53, 0x86, 0xbd, 0x28,
@@ -503,7 +503,7 @@ public class DjbCipherTest {
       nonce[11] = 2;
       DjbCipher cipher = createInstance(key);
       ByteBuffer out = ByteBuffer.allocate(in.length);
-      cipher.process(out, in, 0, nonce, 1);
+      cipher.process(out, ByteBuffer.wrap(in), nonce, 1);
       Truth.assertThat(out.array()).isEqualTo(twosCompByte(new int[]{
           0xa3, 0xfb, 0xf0, 0x7d, 0xf3, 0xfa, 0x2f, 0xde,
           0x4f, 0x37, 0x6c, 0xa2, 0x3e, 0x82, 0x73, 0x70,
@@ -587,7 +587,7 @@ public class DjbCipherTest {
       nonce[11] = 2;
       DjbCipher cipher = createInstance(key);
       ByteBuffer out = ByteBuffer.allocate(in.length);
-      cipher.process(out, in, 0, nonce, 42);
+      cipher.process(out, ByteBuffer.wrap(in), nonce, 42);
       Truth.assertThat(out.array()).isEqualTo(twosCompByte(new int[]{
           0x62, 0xe6, 0x34, 0x7f, 0x95, 0xed, 0x87, 0xa4,
           0x5f, 0xfa, 0xe7, 0x42, 0x6f, 0x27, 0xa1, 0xdf,
@@ -1089,7 +1089,7 @@ public class DjbCipherTest {
         ByteBuffer output = ByteBuffer.allocate(tv[2].length() / 2);
         byte[] inputZero = new byte[tv[2].length() / 2];
         DjbCipher cipher = createInstance(TestUtil.hexDecode(tv[0]));
-        cipher.process(output, inputZero, 0, TestUtil.hexDecode(tv[1]), 0);
+        cipher.process(output, ByteBuffer.wrap(inputZero), TestUtil.hexDecode(tv[1]), 0);
         assertThat(TestUtil.hexEncode(output.array())).isEqualTo(tv[2]);
       }
     }

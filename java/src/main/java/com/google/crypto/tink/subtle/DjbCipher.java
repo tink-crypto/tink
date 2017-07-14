@@ -180,25 +180,22 @@ public abstract class DjbCipher implements IndCpaCipher {
     }
   }
 
-  private void process(ByteBuffer output, final byte[] input, int inPos, KeyStream keyStream) {
+  private void process(ByteBuffer output, ByteBuffer input, KeyStream keyStream) {
     // xor the underlying cipher stream with the input.
     ByteBuffer buf = ByteBuffer.allocate(BLOCK_SIZE_IN_BYTES).order(ByteOrder.LITTLE_ENDIAN);
-    int pos = inPos;
-    int inLen = input.length - inPos;
     int todo;
-    while (inLen > 0) {
-      todo = inLen < BLOCK_SIZE_IN_BYTES ? inLen : BLOCK_SIZE_IN_BYTES;
+    while (input.hasRemaining()) {
+      todo = input.remaining() < BLOCK_SIZE_IN_BYTES ? input.remaining() : BLOCK_SIZE_IN_BYTES;
       buf.asIntBuffer().put(keyStream.next());
-      for (int j = 0; j < todo; j++, pos++) {
-        output.put((byte) (input[pos] ^ buf.get(j)));
+      for (int j = 0; j < todo; j++) {
+        output.put((byte) (input.get() ^ buf.get(j)));
       }
-      inLen -= todo;
     }
   }
 
   // TestOnly
-  void process(ByteBuffer output, final byte[] input, int inPos, byte[] nonce, int counter) {
-    process(output, input, inPos, new KeyStream(this, nonce, counter));
+  void process(ByteBuffer output, ByteBuffer input, byte[] nonce, int counter) {
+    process(output, input, new KeyStream(this, nonce, counter));
   }
 
   @Override
@@ -209,24 +206,24 @@ public abstract class DjbCipher implements IndCpaCipher {
     byte[] nonce = Random.randBytes(nonceSizeInBytes());
     ByteBuffer ciphertext = ByteBuffer.allocate(plaintext.length + nonceSizeInBytes());
     ciphertext.put(nonce);
-    process(ciphertext, plaintext, 0, getKeyStream(nonce));
+    process(ciphertext, ByteBuffer.wrap(plaintext), getKeyStream(nonce));
     return ciphertext.array();
   }
 
-  byte[] decrypt(final byte[] ciphertext, int startPos) throws GeneralSecurityException {
-    if (ciphertext.length < nonceSizeInBytes() + startPos) {
+  byte[] decrypt(ByteBuffer ciphertext) throws GeneralSecurityException {
+    if (ciphertext.remaining() < nonceSizeInBytes()) {
       throw new GeneralSecurityException("ciphertext too short");
     }
     byte[] nonce = new byte[nonceSizeInBytes()];
-    System.arraycopy(ciphertext, startPos, nonce, 0, nonceSizeInBytes());
-    ByteBuffer plaintext = ByteBuffer.allocate(ciphertext.length - nonceSizeInBytes() - startPos);
-    process(plaintext, ciphertext, startPos + nonceSizeInBytes(), getKeyStream(nonce));
+    ciphertext.get(nonce);
+    ByteBuffer plaintext = ByteBuffer.allocate(ciphertext.remaining());
+    process(plaintext, ciphertext, getKeyStream(nonce));
     return plaintext.array();
   }
 
   @Override
   public byte[] decrypt(final byte[] ciphertext) throws GeneralSecurityException {
-    return decrypt(ciphertext, 0);
+    return decrypt(ByteBuffer.wrap(ciphertext));
   }
 
   abstract static class ChaCha20Base extends DjbCipher {

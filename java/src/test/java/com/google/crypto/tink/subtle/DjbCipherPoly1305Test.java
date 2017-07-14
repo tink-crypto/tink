@@ -387,7 +387,6 @@ public class DjbCipherPoly1305Test {
           + "808182838485868788898a8b8c8d8e8f"
           + "909192939495969798999a9b9c9d9e9f");
       byte[] ciphertext = TestUtil.hexDecode(""
-          + "1ae10b594f09e26a7e902ecbd0600691"  // tag
           + "070000004041424344454647"          // nonce
           + "d31a8d34648e60db7b86afbc53ef7ec2"  // ciphertext
           + "a4aded51296e08fea9e2b5a736ee62d6"
@@ -396,7 +395,9 @@ public class DjbCipherPoly1305Test {
           + "92ddbd7f2d778b8c9803aee328091b58"
           + "fab324e4fad675945585808b4831d7bc"
           + "3ff4def08e4b7a9de576d26586cec64b"
-          + "6116");
+          + "6116"
+          + "1ae10b594f09e26a7e902ecbd0600691"  // tag
+      );
       byte[] aad = TestUtil.hexDecode("50515253c0c1c2c3c4c5c6c7");
       DjbCipherPoly1305 aead = createInstance(key);
       Truth.assertThat(aead.decrypt(ciphertext, aad)).isEqualTo(
@@ -488,7 +489,6 @@ public class DjbCipherPoly1305Test {
           + "1c9240a5eb55d38af333888604f6b5f0"
           + "473917c1402b80099dca5cbc207075c0");
       byte[] ciphertext = TestUtil.hexDecode(""
-          + "eead9d67890cbb22392336fea1851f38"  // tag
           + "000000000102030405060708"          // nonce
           + "64a0861575861af460f062c79be643bd"  // ciphertext
           + "5e805cfd345cf389f108670ac76c8cb2"
@@ -506,7 +506,9 @@ public class DjbCipherPoly1305Test {
           + "cebb4e466dae5a1073a6727627097a10"
           + "49e617d91d361094fa68f0ff77987130"
           + "305beaba2eda04df997b714d6c6f2c29"
-          + "a6ad5cb4022b02709b");
+          + "a6ad5cb4022b02709b"
+          + "eead9d67890cbb22392336fea1851f38"  // tag
+      );
       byte[] aad = TestUtil.hexDecode(""
           + "f33388860000000000004e91");
       DjbCipherPoly1305 aead = createInstance(key);
@@ -563,8 +565,6 @@ public class DjbCipherPoly1305Test {
               0xad, 0xfc, 0x7e, 0x14, 0x6f, 0x88, 0x2b, 0x4f}));
       DjbCipherPoly1305 cipher = createInstance(XSalsa20.hSalsa20(sharedKey));
       byte[] plaintext = cipher.decrypt(twosCompByte(new int[]{
-          0xf3, 0xff, 0xc7, 0x70, 0x3f, 0x94, 0x00, 0xe5,
-          0x2a, 0x7d, 0xfb, 0x4b, 0x3d, 0x33, 0x05, 0xd9,
           0x69, 0x69, 0x6e, 0xe9, 0x55, 0xb6, 0x2b, 0x73,
           0xcd, 0x62, 0xbd, 0xa8, 0x75, 0xfc, 0x73, 0xd6,
           0x82, 0x19, 0xe0, 0x03, 0x6b, 0x7a, 0x0b, 0x37,
@@ -584,7 +584,9 @@ public class DjbCipherPoly1305Test {
           0x56, 0x24, 0x4a, 0x9e, 0x88, 0xd5, 0xf9, 0xb3,
           0x79, 0x73, 0xf6, 0x22, 0xa4, 0x3d, 0x14, 0xa6,
           0x59, 0x9b, 0x1f, 0x65, 0x4c, 0xb4, 0x5a, 0x74,
-          0xe3, 0x55, 0xa5}), null);
+          0xe3, 0x55, 0xa5,
+          0xf3, 0xff, 0xc7, 0x70, 0x3f, 0x94, 0x00, 0xe5,
+          0x2a, 0x7d, 0xfb, 0x4b, 0x3d, 0x33, 0x05, 0xd9}), null);
       Truth.assertThat(plaintext).isEqualTo(twosCompByte(new int[]{
           0xbe, 0x07, 0x5f, 0xc5, 0x3c, 0x81, 0xf2, 0xd5,
           0xcf, 0x14, 0x13, 0x16, 0xeb, 0xeb, 0x0c, 0x7b,
@@ -682,12 +684,12 @@ public class DjbCipherPoly1305Test {
     }
 
     @Test
-    public void testHChaCha20Tvs() {
+    public void testXChaCha20Poly1305Tvs() {
       for (String[] tv : xChaCha20Poly1305Tvs) {
         DjbCipherPoly1305 cipher = DjbCipherPoly1305.constructXChaCha20Poly1305Nacl(
             TestUtil.hexDecode(tv[0]));
-        String ciphertext = tv[3].substring(0, 2 * MAC_TAG_SIZE_IN_BYTES)
-            + tv[1] + tv[3].substring(2 * MAC_TAG_SIZE_IN_BYTES);
+        String ciphertext = tv[1] + tv[3].substring(2 * MAC_TAG_SIZE_IN_BYTES)
+            + tv[3].substring(0, 2 * MAC_TAG_SIZE_IN_BYTES);
         try {
           Truth.assertThat(TestUtil.hexEncode(cipher.decrypt(TestUtil.hexDecode(ciphertext), null)))
               .isEqualTo(tv[2]);

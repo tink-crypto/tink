@@ -27,6 +27,20 @@ import java.util.Arrays;
 /**
  * an {@code Aead} construction with a {@link DjbCipher} and Poly1305.
  *
+ * Supported DjbCiphers are documented in the static construct methods. Although the algorithms
+ * are the same with their counterparts when stated explicitly (wrt. NaCl, libsodium, or RFC 7539),
+ * this implementation of Poly1305 produces ciphertext with the following format:
+ *   <br>{@code nonce || actual_ciphertext || tag}
+ * and only decrypts the same format.
+ * In NaCl and libsodium, messages to be encrypted are required to be padded with 0 for tag byte
+ * length and also decryption produces messages that are 0 padded in XSalsa20Poly1305.(though please
+ * note that libsodium does not require it for XChaCha20Poly1305 but still uses this trick under the
+ * hood to reuse ChaCha20 library)  Subkey for Poly1305 is populated to these 0 values during the
+ * encryption and it is overwritten with the tag value when Poly1305 is computed. Although this is a
+ * convenience (and also efficient in C) wrt implementation, it makes the API harder to use. Thus,
+ * this implementation chooses not to support the NaCl and libsodium's ciphertext format, instead
+ * put the tag at the end to be consistent with other AEAD's in this library.
+ *
  * The implementation is based on poly1305 implementation by Andrew Moon
  * (https://github.com/floodyberry/poly1305-donna) and released as public domain.
  */
@@ -257,6 +271,21 @@ public abstract class DjbCipherPoly1305 implements Aead {
     return djbCipher.nonceSizeInBytes();
   }
 
+  /**
+   * Encrypts the {@code plaintext} with Poly1305 authentication based on {@code additionalData}.
+   *
+   * Please note that nonce is randomly generated hence keys need to be rotated after encrypting
+   * a certain number of messages depending on the nonce size of the underlying {@link DjbCipher}.
+   * Reference:
+   * Using 96-bit random nonces, it is possible to encrypt, with a single key, up to 2^32 messages
+   * with probability of collision <= 2^-32
+   * whereas using 192-bit random nonces, the number of messages that can be encrypted with the same
+   * key is up to 2^80 with the same probability of collusion.
+   *
+   * @param plaintext data to encrypt
+   * @param additionalData additional data
+   * @return ciphertext with the following format {@code nonce || actual_ciphertext || tag}
+   */
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] additionalData)
       throws GeneralSecurityException {
@@ -267,20 +296,33 @@ public abstract class DjbCipherPoly1305 implements Aead {
     byte[] aeadSubKey = djbCipher.getAuthenticatorKey(nonce);
     byte[] tag = computeTag(ciphertextBuf, additionalData, aeadSubKey);
     ByteBuffer ciphertextWithTag = ByteBuffer.allocate(ciphertext.length + tag.length);
-    ciphertextWithTag.put(tag);
     ciphertextWithTag.put(ciphertext);
+    ciphertextWithTag.put(tag);
     return ciphertextWithTag.array();
   }
 
+  /**
+   * Decryptes {@code ciphertext} with the following format:
+   * {@code nonce || actual_ciphertext || tag}
+   *
+   * @param ciphertext with format {@code nonce || actual_ciphertext || tag}
+   * @param additionalData additional data
+   * @return plaintext if authentication is successful.
+   * @throws GeneralSecurityException when ciphertext is shorter than nonce size + tag size
+   *  or when computed tag based on {@code ciphertext} and {@code additionalData} does not match
+   *  the tag given in {@code ciphertext}.
+   */
   @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] additionalData)
       throws GeneralSecurityException {
-    if (ciphertext.length < MAC_TAG_SIZE_IN_BYTES + djbCipher.nonceSizeInBytes()) {
+    if (ciphertext.length < djbCipher.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("ciphertext too short");
     }
     byte[] tag = new byte[MAC_TAG_SIZE_IN_BYTES];
-    ByteBuffer ciphertextBuf = ByteBuffer.wrap(ciphertext);
-    ciphertextBuf.get(tag);
+    System.arraycopy(
+        ciphertext, ciphertext.length - MAC_TAG_SIZE_IN_BYTES, tag, 0, MAC_TAG_SIZE_IN_BYTES);
+    ByteBuffer ciphertextBuf = ByteBuffer.wrap(
+        ciphertext, 0, ciphertext.length - MAC_TAG_SIZE_IN_BYTES);
     byte[] nonce = new byte[djbCipher.nonceSizeInBytes()];
     ciphertextBuf.get(nonce);
     byte[] expectedTag =
@@ -288,6 +330,7 @@ public abstract class DjbCipherPoly1305 implements Aead {
     if (!SubtleUtil.arrayEquals(tag, expectedTag)) {
       throw new GeneralSecurityException("Tags do not match.");
     }
-    return djbCipher.decrypt(ciphertext, MAC_TAG_SIZE_IN_BYTES);
+    ciphertextBuf.rewind();
+    return djbCipher.decrypt(ciphertextBuf);
   }
 }
