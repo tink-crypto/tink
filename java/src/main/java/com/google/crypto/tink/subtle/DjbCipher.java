@@ -200,14 +200,21 @@ public abstract class DjbCipher implements IndCpaCipher {
 
   @Override
   public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
+    ByteBuffer ciphertext = ByteBuffer.allocate(nonceSizeInBytes() + plaintext.length);
+    encrypt(ciphertext, plaintext);
+    return ciphertext.array();
+  }
+
+  void encrypt(ByteBuffer output, final byte[] plaintext) throws GeneralSecurityException {
     if (plaintext.length > Integer.MAX_VALUE - nonceSizeInBytes()) {
       throw new GeneralSecurityException("plaintext too long");
     }
+    if (output.remaining() < plaintext.length + nonceSizeInBytes()) {
+      throw new IllegalArgumentException("Given ByteBuffer output is too small");
+    }
     byte[] nonce = Random.randBytes(nonceSizeInBytes());
-    ByteBuffer ciphertext = ByteBuffer.allocate(plaintext.length + nonceSizeInBytes());
-    ciphertext.put(nonce);
-    process(ciphertext, ByteBuffer.wrap(plaintext), getKeyStream(nonce));
-    return ciphertext.array();
+    output.put(nonce);
+    process(output, ByteBuffer.wrap(plaintext), getKeyStream(nonce));
   }
 
   byte[] decrypt(ByteBuffer ciphertext) throws GeneralSecurityException {
@@ -269,6 +276,30 @@ public abstract class DjbCipher implements IndCpaCipher {
       int[] keyInt = toIntArray(ByteBuffer.wrap(key));
       System.arraycopy(keyInt, 0, state, 4, keyInt.length);
     }
+
+    static byte[] hChaCha20(final byte[] key) {
+      return hChaCha20(key, ZERO_16_BYTES);
+    }
+
+    static byte[] hChaCha20(final byte[] key, final byte[] nonce) {
+      int[] state = new int[BLOCK_SIZE_IN_INTS];
+      setSigma(state);
+      setKey(state, key);
+      int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
+      state[12] = nonceInt[0];
+      state[13] = nonceInt[1];
+      state[14] = nonceInt[2];
+      state[15] = nonceInt[3];
+      shuffleInternal(state);
+      // state[0] = state[0], state[1] = state[1], state[2] = state[2], state[3] = state[3]
+      state[4] = state[12];
+      state[5] = state[13];
+      state[6] = state[14];
+      state[7] = state[15];
+      ByteBuffer buf = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN);
+      buf.asIntBuffer().put(state, 0, 8);
+      return buf.array();
+    }
   }
 
   /**
@@ -326,30 +357,6 @@ public abstract class DjbCipher implements IndCpaCipher {
      */
     private XChaCha20(byte[] key) {
       super(key);
-    }
-
-    static byte[] hChaCha20(final byte[] key) {
-      return hChaCha20(key, ZERO_16_BYTES);
-    }
-
-    static byte[] hChaCha20(final byte[] key, final byte[] nonce) {
-      int[] state = new int[BLOCK_SIZE_IN_INTS];
-      ChaCha20Base.setSigma(state);
-      ChaCha20Base.setKey(state, key);
-      int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
-      state[12] = nonceInt[0];
-      state[13] = nonceInt[1];
-      state[14] = nonceInt[2];
-      state[15] = nonceInt[3];
-      shuffleInternal(state);
-      // state[0] = state[0], state[1] = state[1], state[2] = state[2], state[3] = state[3]
-      state[4] = state[12];
-      state[5] = state[13];
-      state[6] = state[14];
-      state[7] = state[15];
-      ByteBuffer buf = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN);
-      buf.asIntBuffer().put(state, 0, 8);
-      return buf.array();
     }
 
     @Override

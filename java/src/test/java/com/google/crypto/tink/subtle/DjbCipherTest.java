@@ -174,6 +174,20 @@ public class DjbCipherTest {
             "first can only be called once and before next().");
       }
     }
+
+    @Test
+    public void testEncryptWithOutputArgThrowsWhenOutputIsTooShort()
+        throws GeneralSecurityException {
+      DjbCipher cipher = new MockDjbCipher(new byte[32]);
+      ByteBuffer buf = ByteBuffer.allocate(10);
+      try {
+        cipher.encrypt(buf, new byte[11]);
+        fail("Expected IllegalArgumentException.");
+      } catch (IllegalArgumentException e) {
+        assertThat(e).hasMessageThat().containsMatch(
+            "Given ByteBuffer output is too small");
+      }
+    }
   }
 
   private abstract static class DjbCipherTestBase {

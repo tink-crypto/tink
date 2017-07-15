@@ -289,16 +289,27 @@ public abstract class DjbCipherPoly1305 implements Aead {
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] additionalData)
       throws GeneralSecurityException {
-    byte[] ciphertext = djbCipher.encrypt(plaintext);
-    ByteBuffer ciphertextBuf = ByteBuffer.wrap(ciphertext);
+    ByteBuffer ciphertext = ByteBuffer.allocate(
+        nonceSizeInBytes() + plaintext.length + MAC_TAG_SIZE_IN_BYTES);
+    encrypt(ciphertext, plaintext, additionalData);
+    return ciphertext.array();
+  }
+
+  void encrypt(ByteBuffer output, final byte[] plaintext, final byte[] additionalData)
+      throws GeneralSecurityException {
+    if (output.remaining() < plaintext.length + nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
+      throw new IllegalArgumentException("Given ByteBuffer output is too small");
+    }
+    int firstPosition = output.position();
+    djbCipher.encrypt(output, plaintext);
+    output.position(firstPosition);
     byte[] nonce = new byte[djbCipher.nonceSizeInBytes()];
-    ciphertextBuf.get(nonce);
+    output.get(nonce);
     byte[] aeadSubKey = djbCipher.getAuthenticatorKey(nonce);
-    byte[] tag = computeTag(ciphertextBuf, additionalData, aeadSubKey);
-    ByteBuffer ciphertextWithTag = ByteBuffer.allocate(ciphertext.length + tag.length);
-    ciphertextWithTag.put(ciphertext);
-    ciphertextWithTag.put(tag);
-    return ciphertextWithTag.array();
+    output.limit(output.limit() - MAC_TAG_SIZE_IN_BYTES);
+    byte[] tag = computeTag(output, additionalData, aeadSubKey);
+    output.limit(output.limit() + MAC_TAG_SIZE_IN_BYTES);
+    output.put(tag);
   }
 
   /**
@@ -315,22 +326,41 @@ public abstract class DjbCipherPoly1305 implements Aead {
   @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] additionalData)
       throws GeneralSecurityException {
-    if (ciphertext.length < djbCipher.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
+    return decrypt(ByteBuffer.wrap(ciphertext), additionalData);
+  }
+
+  /**
+   * Decryptes {@code ciphertext} with the following format:
+   * {@code nonce || actual_ciphertext || tag}
+   *
+   * @param ciphertext with format {@code nonce || actual_ciphertext || tag}
+   * @param additionalData additional data
+   * @return plaintext if authentication is successful.
+   * @throws GeneralSecurityException when ciphertext is shorter than nonce size + tag size
+   *  or when computed tag based on {@code ciphertext} and {@code additionalData} does not match
+   *  the tag given in {@code ciphertext}.
+   */
+  byte[] decrypt(ByteBuffer ciphertext, final byte[] additionalData)
+      throws GeneralSecurityException {
+    if (ciphertext.remaining() < djbCipher.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("ciphertext too short");
     }
+    int firstPosition = ciphertext.position();
     byte[] tag = new byte[MAC_TAG_SIZE_IN_BYTES];
-    System.arraycopy(
-        ciphertext, ciphertext.length - MAC_TAG_SIZE_IN_BYTES, tag, 0, MAC_TAG_SIZE_IN_BYTES);
-    ByteBuffer ciphertextBuf = ByteBuffer.wrap(
-        ciphertext, 0, ciphertext.length - MAC_TAG_SIZE_IN_BYTES);
+    ciphertext.position(ciphertext.limit() - MAC_TAG_SIZE_IN_BYTES);
+    ciphertext.get(tag);
+    // rewind to read ciphertext and compute tag.
+    ciphertext.position(firstPosition);
+    ciphertext.limit(ciphertext.limit() - MAC_TAG_SIZE_IN_BYTES);
     byte[] nonce = new byte[djbCipher.nonceSizeInBytes()];
-    ciphertextBuf.get(nonce);
+    ciphertext.get(nonce);
     byte[] expectedTag =
-        computeTag(ciphertextBuf, additionalData, djbCipher.getAuthenticatorKey(nonce));
+        computeTag(ciphertext, additionalData, djbCipher.getAuthenticatorKey(nonce));
     if (!SubtleUtil.arrayEquals(tag, expectedTag)) {
       throw new GeneralSecurityException("Tags do not match.");
     }
-    ciphertextBuf.rewind();
-    return djbCipher.decrypt(ciphertextBuf);
+    // rewind to decrypt the ciphertext.
+    ciphertext.position(firstPosition);
+    return djbCipher.decrypt(ciphertext);
   }
 }

@@ -26,6 +26,7 @@ import com.google.common.truth.Truth;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.subtle.DjbCipher.XSalsa20;
 import com.google.crypto.tink.subtle.DjbCipherPoly1305Test.Poly1305Test;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -305,7 +306,7 @@ public class DjbCipherPoly1305Test {
               TestUtil.hexEncode(nonce),
               TestUtil.hexEncode(output),
               actualInput == null ? "null" : TestUtil.hexEncode(actualInput));
-          fail(error);
+          fail(error + e.getMessage());
         }
       }
     }
@@ -347,6 +348,19 @@ public class DjbCipherPoly1305Test {
         fail("Expected GeneralSecurityException.");
       } catch (GeneralSecurityException e) {
         Truth.assertThat(e).hasMessageThat().containsMatch("ciphertext too short");
+      }
+    }
+
+    @Test
+    public void testEncryptWithOutputArgThrowsWhenOutputIsTooSmall()
+        throws GeneralSecurityException {
+      DjbCipherPoly1305 cipher = createInstance(new byte[KEY_SIZE_IN_BYTES]);
+      ByteBuffer buf = ByteBuffer.allocate(10);
+      try {
+        cipher.encrypt(buf, new byte[0], new byte[5]);
+        fail("Expected IllegalArgumentException.");
+      } catch (IllegalArgumentException e) {
+        Truth.assertThat(e).hasMessageThat().containsMatch("Given ByteBuffer output is too small");
       }
     }
   }
