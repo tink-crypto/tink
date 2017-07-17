@@ -81,14 +81,14 @@ tinkey list-keys --in private-keyset.cfg
 tinkey create-public-keyset --in private-keyset.cfg --out public-keyset.cfg
 ```
 
-## Work with KMS
+## Work with Key Management System (KMS)
 
-Tinkey can encrypt or decrypt keysets with master keys residing in a remote KMS.
-Out of the box it supports AWS KMS and Google Cloud KMS. In this mode, users
-first create a master key in the KMS and tell Tinkey where the master key is via
-the `--master-key-uri` option. To create a master key in Google Cloud KMS, see
-https://cloud.google.com/kms/docs/quickstart. To create a master key in AWS KMS,
-see http://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html.
+Tinkey can encrypt or decrypt keysets with master keys residing in remote KMSes.
+In this mode, users first create a master key in the KMS and tell Tinkey where
+the master key is via the `--master-key-uri` option. To create a master key in
+Google Cloud KMS, see https://cloud.google.com/kms/docs/quickstart. To create a
+master key in AWS KMS, see
+http://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html.
 
 ### Master key URI
 
@@ -113,6 +113,7 @@ credentials:
 
 *   AWS KMS:
     http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html#credentials-default
+
 *   Google Clous KMS:
     https://developers.google.com/identity/protocols/application-default-credentials.
 
