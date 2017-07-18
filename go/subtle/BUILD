@@ -8,6 +8,46 @@ package(
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
+# ecdsa subtles
+ECDSA_SRCS = [
+    "ecdsa/ecdsa.go",
+    "ecdsa/ecdsa_sign.go",
+    "ecdsa/ecdsa_verify.go",
+    "ecdsa/encoding.go",
+]
+
+ECDSA_TEST_SRCS = [
+    "ecdsa/ecdsa_test.go",
+    "ecdsa/ecdsa_sign_verify_test.go",
+]
+
+ECDSA_DEPS = [
+    ":random",
+    ":util",
+    "//go/tink",
+    "//go/util",
+    "//proto:common_go_proto",
+    "//proto:ecdsa_go_proto",
+]
+
+go_library(
+    name = "ecdsa",
+    srcs = ECDSA_SRCS,
+    deps = ECDSA_DEPS,
+)
+
+go_test(
+    name = "ecdsa_test",
+    srcs = ECDSA_TEST_SRCS,
+    data = [
+        "//testdata:ecdsa",
+    ],
+    deps = ECDSA_DEPS + [
+        ":ecdsa",
+        "//go/util:testutil",
+    ],
+)
+
 # hmac subtle
 HMAC_SRCS = [
     "hmac/hmac.go",

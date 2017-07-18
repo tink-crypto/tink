@@ -22,6 +22,11 @@ import (
   "github.com/google/tink/go/util/testutil"
 )
 
+func TestDummyAead(t *testing.T) {
+  // Assert that DummyAead implements the Aead interface.
+  var _ tink.Aead = (*testutil.DummyAead)(nil)
+}
+
 func TestDummyMac(t *testing.T) {
   // Assert that DummyMac implements the Aead interface.
   var _ tink.Mac = (*testutil.DummyMac)(nil)

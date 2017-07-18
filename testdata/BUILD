@@ -19,6 +19,14 @@ filegroup(
 )
 
 filegroup(
+    name = "ecdsa",
+    testonly = 1,
+    srcs = [
+        "ecdsa_test.json",
+    ],
+)
+
+filegroup(
     name = "ecies_keysets",
     testonly = 1,
     srcs = [

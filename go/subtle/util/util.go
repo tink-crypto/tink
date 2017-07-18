@@ -16,12 +16,14 @@
 package util
 
 import (
-  "errors"
   "fmt"
   "hash"
+  "math/big"
+  "encoding/hex"
   "crypto/sha1"
   "crypto/sha256"
   "crypto/sha512"
+  "crypto/elliptic"
   commonpb "github.com/google/tink/proto/common_go_proto"
 )
 
@@ -34,9 +36,75 @@ func ValidateVersion(version uint32, maxExpected uint32) error {
     msg := fmt.Sprintf("key has version %v; " +
         "only keys with version in range [0..%v] are supported",
         version, maxExpected)
-    return errors.New("subtle/util: " + msg)
+    return fmt.Errorf("subtle/util: " + msg)
   }
   return nil
+}
+
+/**
+ * Checks if {@code sizeInBytes} is a valid AES key size.
+ */
+func ValidateAesKeySize(sizeInBytes uint32) error {
+  switch sizeInBytes {
+    case 16, 24, 32:
+      return nil
+    default:
+      return fmt.Errorf("invalid AES key size %d", sizeInBytes)
+  }
+}
+
+/**
+ * Checks if {@code curveType} is valid.
+ */
+func ValidateCurveType(curveType commonpb.EllipticCurveType) error {
+  switch curveType {
+    case commonpb.EllipticCurveType_NIST_P256,
+        commonpb.EllipticCurveType_NIST_P384,
+        commonpb.EllipticCurveType_NIST_P521:
+      return nil
+    default:
+      return fmt.Errorf("unsupported curve type: %v", curveType)
+  }
+}
+
+/**
+ * Checks if {@code hashType} is supported.
+ */
+func ValidateHashType(hashType commonpb.HashType) error {
+  switch hashType {
+    case commonpb.HashType_SHA1,
+        commonpb.HashType_SHA256,
+        commonpb.HashType_SHA512:
+      return nil
+    default:
+      return fmt.Errorf("unsupported hash type: %v", hashType)
+  }
+}
+
+func HashNameToHashType(name string) commonpb.HashType {
+  switch name {
+    case "SHA-256":
+      return commonpb.HashType_SHA256
+    case "SHA-512":
+      return commonpb.HashType_SHA512
+    case "SHA-1":
+      return commonpb.HashType_SHA1
+    default:
+      return commonpb.HashType_UNKNOWN_HASH
+  }
+}
+
+func CurveNameToCurveType(name string) commonpb.EllipticCurveType {
+  switch name {
+    case "secp256r1":
+      return commonpb.EllipticCurveType_NIST_P256
+    case "secp384r1":
+      return commonpb.EllipticCurveType_NIST_P384
+    case "secp521r1":
+      return commonpb.EllipticCurveType_NIST_P521
+    default:
+      return commonpb.EllipticCurveType_UNKNOWN_CURVE
+  }
 }
 
 /**
@@ -55,14 +123,43 @@ func GetHashFunc(hashType commonpb.HashType) func() hash.Hash {
   }
 }
 
-/**
- * Checks if {@code sizeInBytes} is a valid AES key size.
- */
-func ValidateAesKeySize(sizeInBytes uint32) error {
-  switch sizeInBytes {
-    case 16, 24, 32:
-      return nil
+// GetCurve returns the curve object that corresponds to the given curve type.
+// It returns null if the curve type is not supported.
+func GetCurve(curveType commonpb.EllipticCurveType) elliptic.Curve {
+  switch curveType {
+    case commonpb.EllipticCurveType_NIST_P224:
+      return elliptic.P224()
+    case commonpb.EllipticCurveType_NIST_P256:
+      return elliptic.P256()
+    case commonpb.EllipticCurveType_NIST_P384:
+      return elliptic.P384()
+    case commonpb.EllipticCurveType_NIST_P521:
+      return elliptic.P521()
     default:
-      return fmt.Errorf("invalid AES key size %d", sizeInBytes)
+      return nil
   }
+}
+
+// GetHash calculates a hash of the given data using the given hash function.
+func GetHash(hashType commonpb.HashType, data []byte) []byte {
+  hashFunc := GetHashFunc(hashType)
+  if hashFunc == nil {
+    return nil
+  }
+  h := hashFunc()
+  h.Write(data)
+  ret := h.Sum(nil)
+  return ret
+}
+
+func NewBigIntFromHex(s string) (*big.Int, error) {
+  if len(s)%2 == 1 {
+    s = "0" + s
+  }
+  b, err := hex.DecodeString(s)
+  if err != nil {
+    return nil, err
+  }
+  ret := new(big.Int).SetBytes(b)
+  return ret, nil
 }
