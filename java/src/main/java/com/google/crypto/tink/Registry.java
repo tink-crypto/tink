@@ -130,6 +130,21 @@ public final class Registry {
   }
 
   /**
+   * Convenience method for extracting the public key data from the private key given
+   * in {@code serializedPrivateKey}.
+   * It looks up a {@code PrivateKeyManager} identified by {@code typeUrl}, and calls
+   * the manager's {@code getPublicKeyData(serializedPrivateKey)}-method.
+   *
+   * @return a new key.
+   */
+  @SuppressWarnings("unchecked")
+  public <P> KeyData getPublicKeyData(String typeUrl, ByteString serializedPrivateKey)
+      throws GeneralSecurityException {
+    PrivateKeyManager<P> manager = (PrivateKeyManager) getKeyManager(typeUrl);
+    return manager.getPublicKeyData(serializedPrivateKey);
+  }
+
+  /**
    * Convenience method for creating a new primitive for the key given in {@code proto}.
    * It looks up a KeyManager identified by {@code type_url}, and calls
    * managers {@code getPrimitive(proto)}-method.

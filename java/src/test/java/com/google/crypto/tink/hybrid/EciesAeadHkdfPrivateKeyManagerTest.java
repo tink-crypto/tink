@@ -19,6 +19,7 @@ package com.google.crypto.tink.hybrid;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
@@ -94,5 +95,31 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     byte[] contextInfo = Random.randBytes(20);
     byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
     assertArrayEquals(plaintext, hybridDecrypt.decrypt(ciphertext, contextInfo));
+  }
+
+ /**
+   * Tests that a public key is extracted properly from a private key.
+   */
+  @Test
+  public void testGetPublicKeyData() throws Exception {
+    KeysetHandle privateHandle = CleartextKeysetHandle.generateNew(
+        HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM);
+    KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
+    EciesAeadHkdfPrivateKeyManager privateManager = new EciesAeadHkdfPrivateKeyManager();
+    KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
+    assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
+    assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
+    EciesAeadHkdfPrivateKey privateKey = EciesAeadHkdfPrivateKey.parseFrom(
+        privateKeyData.getValue());
+    assertArrayEquals(privateKey.getPublicKey().toByteArray(),
+        publicKeyData.getValue().toByteArray());
+
+    EciesAeadHkdfPublicKeyManager publicManager = new EciesAeadHkdfPublicKeyManager();
+    HybridEncrypt hybridEncrypt = publicManager.getPrimitive(publicKeyData.getValue());
+    HybridDecrypt hybridDecrypt = privateManager.getPrimitive(privateKeyData.getValue());
+    byte[] message = Random.randBytes(20);
+    byte[] contextInfo = Random.randBytes(20);
+    assertArrayEquals(message, hybridDecrypt.decrypt(
+        hybridEncrypt.encrypt(message, contextInfo), contextInfo));
   }
 }

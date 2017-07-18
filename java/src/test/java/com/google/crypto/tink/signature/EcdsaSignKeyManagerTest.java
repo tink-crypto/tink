@@ -19,7 +19,10 @@ package com.google.crypto.tink.signature;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertArrayEquals;
 
+import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
@@ -30,6 +33,7 @@ import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.Random;
@@ -43,6 +47,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -53,6 +58,12 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class EcdsaSignKeyManagerTest {
+  @Before
+  public void setUp() throws Exception {
+    PublicKeySignConfig.registerStandardKeyTypes();
+    PublicKeyVerifyConfig.registerStandardKeyTypes();
+  }
+
   private static class HashAndCurveType {
     public HashType hashType;
     public EllipticCurveType curveType;
@@ -280,4 +291,30 @@ public class EcdsaSignKeyManagerTest {
     }
   }
 
+ /**
+   * Tests that a public key is extracted properly from a private key.
+   */
+  @Test
+  public void testGetPublicKeyData() throws Exception {
+    KeysetHandle privateHandle = CleartextKeysetHandle.generateNew(
+        SignatureKeyTemplates.ECDSA_P256);
+    KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
+    EcdsaSignKeyManager privateManager = new EcdsaSignKeyManager();
+    KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
+    assertEquals(EcdsaVerifyKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
+    assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
+    EcdsaPrivateKey privateKey = EcdsaPrivateKey.parseFrom(privateKeyData.getValue());
+    assertArrayEquals(privateKey.getPublicKey().toByteArray(),
+        publicKeyData.getValue().toByteArray());
+
+    EcdsaVerifyKeyManager publicManager = new EcdsaVerifyKeyManager();
+    PublicKeySign signer = privateManager.getPrimitive(privateKeyData.getValue());
+    PublicKeyVerify verifier = publicManager.getPrimitive(publicKeyData.getValue());
+    byte[] message = Random.randBytes(20);
+    try {
+      verifier.verify(signer.sign(message), message);
+    } catch (GeneralSecurityException e) {
+      fail("Should not fail: " + e);
+    }
+  }
 }

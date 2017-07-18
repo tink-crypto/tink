@@ -16,19 +16,32 @@
 
 package com.google.crypto.tink;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.proto.EcdsaPrivateKey;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.signature.EcdsaVerifyKeyManager;
+import com.google.crypto.tink.signature.PublicKeySignConfig;
+import com.google.crypto.tink.signature.PublicKeySignFactory;
+import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
+import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
+import com.google.crypto.tink.signature.SignatureKeyTemplates;
+import com.google.crypto.tink.subtle.Random;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.security.GeneralSecurityException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -38,6 +51,12 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class KeysetHandleTest {
+  @Before
+  public void setUp() throws GeneralSecurityException {
+    PublicKeyVerifyConfig.registerStandardKeyTypes();
+    PublicKeySignConfig.registerStandardKeyTypes();
+  }
+
   /**
    * Tests that toString doesn't contain key material.
    */
@@ -82,5 +101,34 @@ public class KeysetHandleTest {
     KeysetHandle handle2 = EncryptedKeysetHandle.parseFrom(inputStream, masterKey);
     assertEquals(handle.getKeyset(), handle2.getKeyset());
     assertEquals(handle.getEncryptedKeyset(), handle2.getEncryptedKeyset());
+  }
+
+ /**
+   * Tests a public keyset is extracted properly from a private keyset.
+   */
+  @Test
+  public void testGetPublicKeysetHandle() throws Exception {
+    KeysetHandle privateHandle = CleartextKeysetHandle.generateNew(
+        SignatureKeyTemplates.ECDSA_P256);
+    KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
+    EcdsaPrivateKey privateKey = EcdsaPrivateKey.parseFrom(privateKeyData.getValue());
+    KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
+    assertEquals(1, publicHandle.getKeyset().getKeyCount());
+    assertEquals(privateHandle.getKeyset().getPrimaryKeyId(),
+        publicHandle.getKeyset().getPrimaryKeyId());
+    KeyData publicKeyData = publicHandle.getKeyset().getKey(0).getKeyData();
+    assertEquals(EcdsaVerifyKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
+    assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
+    assertArrayEquals(privateKey.getPublicKey().toByteArray(),
+        publicKeyData.getValue().toByteArray());
+
+    PublicKeySign signer = PublicKeySignFactory.getPrimitive(privateHandle);
+    PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(publicHandle);
+    byte[] message = Random.randBytes(20);
+    try {
+      verifier.verify(signer.sign(message), message);
+    } catch (GeneralSecurityException e) {
+      fail("Should not fail: " + e);
+    }
   }
 }

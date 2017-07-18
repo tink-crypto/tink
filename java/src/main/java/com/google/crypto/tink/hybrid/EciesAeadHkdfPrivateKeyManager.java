@@ -17,7 +17,7 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
@@ -41,7 +41,7 @@ import java.security.spec.ECPoint;
  * This key manager generates new {@code EciesAeadHkdfPrivateKey} keys and produces new instances
  * of {@code EciesAeadHkdfHybridDecrypt}.
  */
-public final class EciesAeadHkdfPrivateKeyManager implements KeyManager<HybridDecrypt> {
+public final class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt> {
   EciesAeadHkdfPrivateKeyManager() {}
 
   private static final int VERSION = 0;
@@ -145,6 +145,20 @@ public final class EciesAeadHkdfPrivateKeyManager implements KeyManager<HybridDe
         .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE)
         .build();
+  }
+
+  @Override
+  public KeyData getPublicKeyData(ByteString serializedKey) throws GeneralSecurityException {
+    try {
+      EciesAeadHkdfPrivateKey privKeyProto = EciesAeadHkdfPrivateKey.parseFrom(serializedKey);
+      return KeyData.newBuilder()
+          .setTypeUrl(EciesAeadHkdfPublicKeyManager.TYPE_URL)
+          .setValue(privKeyProto.getPublicKey().toByteString())
+          .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
+          .build();
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized EciesAeadHkdfPrivateKey proto", e);
+    }
   }
 
   @Override

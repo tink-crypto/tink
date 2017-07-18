@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
@@ -32,7 +32,7 @@ import java.security.GeneralSecurityException;
  * This instance of {@code KeyManager} generates new {@code Ed25519PrivateKey} keys and
  * produces new instances of {@code Ed25519Sign}.
  */
-public final class Ed25519PrivateKeyManager implements KeyManager<PublicKeySign> {
+public final class Ed25519PrivateKeyManager implements PrivateKeyManager<PublicKeySign> {
   Ed25519PrivateKeyManager() {}
   /**
    * Type url that this manager supports
@@ -84,6 +84,20 @@ public final class Ed25519PrivateKeyManager implements KeyManager<PublicKeySign>
         .setValue(key.toByteString())
         .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE)
         .build();
+  }
+
+  @Override
+  public KeyData getPublicKeyData(ByteString serializedKey) throws GeneralSecurityException {
+    try {
+      Ed25519PrivateKey privKeyProto = Ed25519PrivateKey.parseFrom(serializedKey);
+      return KeyData.newBuilder()
+          .setTypeUrl(Ed25519PublicKeyManager.TYPE_URL)
+          .setValue(privKeyProto.getPublicKey().toByteString())
+          .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
+          .build();
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized Ed25519PrivateKey proto", e);
+    }
   }
 
   @Override

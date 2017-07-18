@@ -19,10 +19,14 @@ package com.google.crypto.tink.signature;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertArrayEquals;
 
+import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.subtle.Ed25519Verify;
@@ -68,6 +72,33 @@ public class Ed25519PrivateKeyManagerTest {
       verifier.verify(signature, message);
     } catch (GeneralSecurityException e) {
       fail("Do not expect GeneralSecurityException: " + e);
+    }
+  }
+
+ /**
+   * Tests that a public key is extracted properly from a private key.
+   */
+  @Test
+  public void testGetPublicKeyData() throws Exception {
+    KeysetHandle privateHandle = CleartextKeysetHandle.generateNew(
+        SignatureKeyTemplates.ED25519);
+    KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
+    Ed25519PrivateKeyManager privateManager = new Ed25519PrivateKeyManager();
+    KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
+    assertEquals(Ed25519PublicKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
+    assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
+    Ed25519PrivateKey privateKey = Ed25519PrivateKey.parseFrom(privateKeyData.getValue());
+    assertArrayEquals(privateKey.getPublicKey().toByteArray(),
+        publicKeyData.getValue().toByteArray());
+
+    Ed25519PublicKeyManager publicManager = new Ed25519PublicKeyManager();
+    PublicKeySign signer = privateManager.getPrimitive(privateKeyData.getValue());
+    PublicKeyVerify verifier = publicManager.getPrimitive(publicKeyData.getValue());
+    byte[] message = Random.randBytes(20);
+    try {
+      verifier.verify(signer.sign(message), message);
+    } catch (GeneralSecurityException e) {
+      fail("Should not fail: " + e);
     }
   }
 }

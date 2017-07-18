@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
@@ -39,7 +39,7 @@ import java.security.spec.ECPoint;
  * This key manager generates new {@code EcdsaPrivateKey} keys and produces new instances
  * of {@code EcdsaSignJce}.
  */
-public final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
+public final class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
   EcdsaSignKeyManager() {}
 
   /**
@@ -146,13 +146,27 @@ public final class EcdsaSignKeyManager implements KeyManager<PublicKeySign> {
   }
 
   @Override
-  public boolean doesSupport(String typeUrl) {
-    return TYPE_URL.equals(typeUrl);
+  public KeyData getPublicKeyData(ByteString serializedKey) throws GeneralSecurityException {
+    try {
+      EcdsaPrivateKey privKeyProto = EcdsaPrivateKey.parseFrom(serializedKey);
+      return KeyData.newBuilder()
+          .setTypeUrl(EcdsaVerifyKeyManager.TYPE_URL)
+          .setValue(privKeyProto.getPublicKey().toByteString())
+          .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
+          .build();
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized EcdsaPrivateKey proto", e);
+    }
   }
 
   @Override
   public String getKeyType() {
     return TYPE_URL;
+  }
+
+  @Override
+  public boolean doesSupport(String typeUrl) {
+    return TYPE_URL.equals(typeUrl);
   }
 
   private void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {

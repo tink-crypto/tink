@@ -38,7 +38,6 @@ import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
-import com.google.protobuf.MessageLite;
 import com.google.protobuf.TextFormat;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -248,68 +247,5 @@ public class TinkeyUtil {
         && !format.equals("BINARY")) {
       throw new IllegalArgumentException("invalid format: " + format);
     }
-  }
-
-  /**
-   * Creates a public keyset from a private keyset.
-   * @throws GeneralSecurityException if cannot convert one of the keys or cannot find
-   * the corresponding public key protobuf.
-   */
-  public static Keyset createPublicKeyset(Keyset keyset) throws GeneralSecurityException {
-    Keyset.Builder keysetBuilder = Keyset.newBuilder();
-    for (Keyset.Key key : keyset.getKeyList()) {
-      KeyData keyData = createPublicKeyData(key.getKeyData());
-      keysetBuilder.addKey(Keyset.Key.newBuilder()
-          .mergeFrom(key)
-          .setKeyData(keyData)
-          .build());
-    }
-    keysetBuilder.setPrimaryKeyId(keyset.getPrimaryKeyId());
-    return keysetBuilder.build();
-  }
-
-  private static KeyData createPublicKeyData(KeyData privateKeyData)
-      throws GeneralSecurityException {
-    if (privateKeyData.getKeyMaterialType() != KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
-      throw new GeneralSecurityException("The keyset contains non-private key");
-    }
-    KeyData publicKeyData = getPublicKeyData(privateKeyData);
-    validate(publicKeyData);
-    return publicKeyData;
-  }
-
-  private static void validate(KeyData keyData) throws GeneralSecurityException {
-    // This will throw GeneralSecurityException if the keyData is invalid.
-    Registry.INSTANCE.getPrimitive(keyData);
-  }
-
-  private static KeyData getPublicKeyData(KeyData privateKeyData)
-      throws GeneralSecurityException {
-    String className = getClassNameFromTypeUrl(privateKeyData.getTypeUrl());
-    try {
-      Class<?> privateKeyProtoClass = loadClass(className);
-      Object privateKeyInstance = privateKeyProtoClass
-          .getDeclaredMethod("parseFrom", ByteString.class)
-          .invoke(null /* Object, ignored */, privateKeyData.getValue());
-      MessageLite publicKey = (MessageLite) privateKeyProtoClass
-          .getDeclaredMethod("getPublicKey")
-          .invoke(privateKeyInstance);
-      return KeyData.newBuilder()
-          .setTypeUrl(getPublicKeyTypeUrl(privateKeyData.getTypeUrl()))
-          .setValue(publicKey.toByteString())
-          .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
-          .build();
-    } catch (Exception e) {
-      throw new GeneralSecurityException("Cannot extract public key", e);
-    }
-  }
-
-  private static String getClassNameFromTypeUrl(String typeUrl) {
-    int dot = typeUrl.lastIndexOf(".");
-    return typeUrl.substring(dot + 1);
-  }
-
-  private static String getPublicKeyTypeUrl(String privateKeyTypeUrl) {
-    return privateKeyTypeUrl.replace("PrivateKey", "PublicKey");
   }
 }

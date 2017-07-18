@@ -16,35 +16,22 @@
 
 package com.google.crypto.tink.tinkey;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
-import com.google.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.crypto.tink.hybrid.HybridDecryptConfig;
-import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.crypto.tink.hybrid.HybridEncryptConfig;
-import com.google.crypto.tink.hybrid.HybridEncryptFactory;
-import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesGcmKey;
-import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.signature.PublicKeySignConfig;
 import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
-import com.google.crypto.tink.subtle.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -103,36 +90,5 @@ public class TinkeyUtilTest {
     } catch (IllegalArgumentException e) {
       assertTrue(e.toString().contains("invalid type URL or key format"));
     }
-  }
-
-  /**
-   * Tests a public keyset is extracted properly from a private keyset.
-   * TODO(thaidn): move this to integration test?
-   */
-  @Test
-  public void testExtractPublicKey() throws Exception {
-    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(
-        HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256);
-    KeyData privateKeyData = keysetHandle.getKeyset().getKey(0).getKeyData();
-    EciesAeadHkdfPrivateKey privateKey = EciesAeadHkdfPrivateKey.parseFrom(
-        privateKeyData.getValue());
-    HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
-        keysetHandle);
-
-    Keyset publicKeyset = TinkeyUtil.createPublicKeyset(keysetHandle.getKeyset());
-    assertEquals(1, publicKeyset.getKeyCount());
-    KeyData publicKeyData = publicKeyset.getKey(0).getKeyData();
-    assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL,
-        publicKeyData.getTypeUrl());
-    assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
-    assertArrayEquals(privateKey.getPublicKey().toByteArray(),
-        publicKeyData.getValue().toByteArray());
-
-    HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(
-        CleartextKeysetHandle.parseFrom(publicKeyset));
-    byte[] plaintext = Random.randBytes(20);
-    byte[] contextInfo = Random.randBytes(20);
-    byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
-    assertArrayEquals(plaintext, hybridDecrypt.decrypt(ciphertext, contextInfo));
   }
 }

@@ -17,6 +17,7 @@
 package com.google.crypto.tink;
 
 import com.google.crypto.tink.proto.EncryptedKeyset;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import java.io.IOException;
@@ -78,6 +79,39 @@ public final class KeysetHandle {
   }
 
   /**
+   * If the managed keyset contains private keys, returns a {@code KeysetHandle}
+   * of the public keys.
+   */
+  public KeysetHandle getPublicKeysetHandle() throws GeneralSecurityException {
+    Keyset.Builder keysetBuilder = Keyset.newBuilder();
+    for (Keyset.Key key : keyset.getKeyList()) {
+      KeyData keyData = createPublicKeyData(key.getKeyData());
+      keysetBuilder.addKey(Keyset.Key.newBuilder()
+          .mergeFrom(key)
+          .setKeyData(keyData)
+          .build());
+    }
+    keysetBuilder.setPrimaryKeyId(keyset.getPrimaryKeyId());
+    return new KeysetHandle(keysetBuilder.build());
+  }
+
+  private static KeyData createPublicKeyData(KeyData privateKeyData)
+      throws GeneralSecurityException {
+    if (privateKeyData.getKeyMaterialType() != KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
+      throw new GeneralSecurityException("The keyset contains a non-private key");
+    }
+    KeyData publicKeyData = Registry.INSTANCE.getPublicKeyData(
+        privateKeyData.getTypeUrl(), privateKeyData.getValue());
+    validate(publicKeyData);
+    return publicKeyData;
+  }
+
+  private static void validate(KeyData keyData) throws GeneralSecurityException {
+    // This will throw GeneralSecurityException if the keyData is invalid.
+    Registry.INSTANCE.getPrimitive(keyData);
+  }
+
+  /**
    * Serializes and writes the keyset to {@code outputStream}.
    */
   public void write(OutputStream outputStream) throws IOException {
@@ -107,5 +141,4 @@ public final class KeysetHandle {
       throw new GeneralSecurityException("empty keyset");
     }
   }
-
 }
