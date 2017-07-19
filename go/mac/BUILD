@@ -8,10 +8,12 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 SRCS = [
     "hmac_key_manager.go",
+    "mac_key_templates.go",
 ]
 
 TEST_SRCS = [
     "hmac_key_manager_test.go",
+    "mac_key_templates_test.go",
 ]
 
 DEPS = [
