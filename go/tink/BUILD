@@ -14,7 +14,10 @@ TINK_SRCS = [
     "public_key_verify.go",
     "key_manager.go",
     "keyset_handle.go",
+    "cleartext_keyset_handle.go",
     "primitive_set.go",
+    "registry.go",
+    "keyset_manager.go",
     "crypto_format.go",
 ]
 
@@ -29,6 +32,7 @@ TINK_INTERNAL_TEST_SRCS = [
 
 TINK_DEPS = [
     "//go/util",
+    "//go/subtle:random",
     "//proto:tink_go_proto",
     "@com_github_golang_protobuf//proto:go_default_library",
 ]

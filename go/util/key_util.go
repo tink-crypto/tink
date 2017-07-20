@@ -42,7 +42,6 @@ func GetKeysetInfo(keyset *tinkpb.Keyset) (*tinkpb.KeysetInfo, error) {
   }, nil
 }
 
-
 /**
  * @return a KeyInfo-proto from a {@code key} protobuf.
  */
@@ -56,4 +55,62 @@ func GetKeyInfo(key *tinkpb.Keyset_Key) (*tinkpb.KeysetInfo_KeyInfo, error) {
     KeyId: key.KeyId,
     OutputPrefixType: key.OutputPrefixType,
   }, nil
+}
+
+/**
+ * Validates the given key set.
+ * Returns nil if it is valid; an error otherwise.
+ */
+// TODO(thaidn): use TypeLiteral to ensure that all keys are of the same primitive.
+func ValidateKeyset(keyset *tinkpb.Keyset) error {
+  if keyset == nil {
+    return fmt.Errorf("keyutil: ValidateKeyset() called with nil")
+  }
+  if len(keyset.Key) == 0 {
+    return fmt.Errorf("keyutil: empty keyset")
+  }
+  primaryKeyId := keyset.PrimaryKeyId
+  hasPrimaryKey := false
+  for _, key := range keyset.Key {
+    if err := ValidateKey(key); err != nil {
+      return err
+    }
+    if key.Status == tinkpb.KeyStatusType_ENABLED && key.KeyId == primaryKeyId {
+      if hasPrimaryKey {
+        return fmt.Errorf("keyutil: keyset contains multiple primary keys")
+      }
+      hasPrimaryKey = true
+    }
+  }
+  if !hasPrimaryKey {
+    return fmt.Errorf("keyutil: keyset does not contain a valid primary key")
+  }
+  return nil
+}
+
+/**
+ * Validates the given key.
+ * Returns nil if it is valid; an error otherwise
+ */
+func ValidateKey(key *tinkpb.Keyset_Key) error {
+  if key == nil {
+    return fmt.Errorf("keyutil: ValidateKey() called with nil")
+  }
+  if key.KeyId <= 0 {
+    return fmt.Errorf("keyutil: key has non-positive key id: %d", key.KeyId)
+  }
+  if key.KeyData == nil {
+    return fmt.Errorf("keyutil: key %d has no key data", key.KeyId)
+  }
+  if key.OutputPrefixType != tinkpb.OutputPrefixType_TINK &&
+      key.OutputPrefixType != tinkpb.OutputPrefixType_LEGACY &&
+      key.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
+    return fmt.Errorf("keyutil: key %d has unknown prefix", key.KeyId)
+  }
+  if key.Status != tinkpb.KeyStatusType_ENABLED &&
+      key.Status != tinkpb.KeyStatusType_DISABLED &&
+      key.Status != tinkpb.KeyStatusType_DESTROYED {
+    return fmt.Errorf("keyutil: key %d has unknown status", key.KeyId)
+  }
+  return nil
 }

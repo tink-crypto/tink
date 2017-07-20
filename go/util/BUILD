@@ -26,6 +26,7 @@ DEPS = [
 
 TEST_DEPS = DEPS + [
     ":util",
+    ":testutil",
     "//go/tink",
     "//go/subtle:random",
 ]
