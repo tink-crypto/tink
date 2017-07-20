@@ -20,13 +20,16 @@ import (
   "crypto/ecdsa"
   "crypto/elliptic"
   "crypto/rand"
+  "github.com/google/tink/go/subtle/random"
   "github.com/google/tink/go/util/util"
   // "github.com/google/tink/go/tink/tink"
   // "github.com/google/tink/go/mac/mac"
+  "github.com/google/tink/go/aead/aead"
+  "github.com/golang/protobuf/proto"
   . "github.com/google/tink/proto/tink_go_proto"
   // . "github.com/google/tink/proto/hmac_go_proto"
   . "github.com/google/tink/proto/common_go_proto"
-  // . "github.com/google/tink/proto/aes_gcm_go_proto"
+  . "github.com/google/tink/proto/aes_gcm_go_proto"
   . "github.com/google/tink/proto/ecdsa_go_proto"
 )
 
@@ -85,4 +88,25 @@ func NewP256EcdsaPrivateKey() *EcdsaPrivateKey {
                                 EcdsaSignatureEncoding_DER,
                                 priv.X.Bytes(), priv.Y.Bytes())
   return util.NewEcdsaPrivateKey(0, publicKey, priv.D.Bytes())
+}
+
+func NewAesGcmKey(keySize uint32) *AesGcmKey {
+  keyValue := random.GetRandomBytes(keySize)
+  return util.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, keyValue)
+}
+
+func NewAesGcmKeyData(keySize uint32) *KeyData{
+  keyValue := random.GetRandomBytes(keySize)
+  key := util.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, keyValue)
+  serializedKey, _ := proto.Marshal(key)
+  return util.NewKeyData(aead.AES_GCM_TYPE_URL, serializedKey, KeyData_SYMMETRIC)
+}
+
+func NewSerializedAesGcmKey(keySize uint32) []byte {
+  key := NewAesGcmKey(keySize)
+  serializedKey, err := proto.Marshal(key)
+  if err != nil {
+    panic(fmt.Sprintf("cannot marshal AesGcmKey: %s", err))
+  }
+  return serializedKey
 }
