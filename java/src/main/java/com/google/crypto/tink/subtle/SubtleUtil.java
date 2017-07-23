@@ -126,11 +126,11 @@ public final class SubtleUtil {
 
   private static final String TYPE_URL_PREFIX = "type.googleapis.com/";
   /**
-   * @throws IllegalArgumentException if {@code typeUrl} is in invalid format.
+   * @throws GeneralSecurityException if {@code typeUrl} is in invalid format.
    */
-  public static void validate(String typeUrl) throws IllegalArgumentException {
+  public static void validateTypeUrl(String typeUrl) throws GeneralSecurityException {
     if (!typeUrl.startsWith(TYPE_URL_PREFIX)) {
-      throw new IllegalArgumentException(
+      throw new GeneralSecurityException(
           String.format(
               "Error: type URL %s is invalid; it must start with %s\n",
               typeUrl,
@@ -144,16 +144,5 @@ public final class SubtleUtil {
   public static void die(String error) {
     System.err.print(String.format("Error: %s\n", error));
     System.exit(1);
-  }
-
-  /**
-   * @return the class name of a proto from its type url. For example, return AesGcmKey
-   * if the type url is type.googleapis.com/google.crypto.tink.AesGcmKey.
-   * @throws IllegalArgumentException if {@code typeUrl} is in invalid format.
-   */
-  public static String getProtoClassName(String typeUrl) throws IllegalArgumentException {
-    validate(typeUrl);
-    int dot = typeUrl.lastIndexOf(".");
-    return typeUrl.substring(dot + 1);
   }
 }

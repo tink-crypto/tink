@@ -50,7 +50,7 @@ class CreateKeyTemplateOptions {
       outputStream = System.out;
     }
     try {
-      SubtleUtil.validate(typeUrlValue);
+      SubtleUtil.validateTypeUrl(typeUrlValue);
     } catch (Exception e) {
       SubtleUtil.die(e.toString());
     }

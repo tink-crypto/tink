@@ -23,8 +23,6 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.proto.GcpKmsAeadKey;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.SubtleUtil;
@@ -70,7 +68,7 @@ public class TinkeyUtil {
       throws IllegalArgumentException {
     try {
       // To parse {@code keyFormat}, we need to find the corresponding proto class.
-      String keyFormatName = SubtleUtil.getProtoClassName(typeUrl) + KEY_FORMAT_SUFFIX;
+      String keyFormatName = getProtoClassName(typeUrl) + KEY_FORMAT_SUFFIX;
       keyFormatName = keyFormatName.replace(PRIVATE, "");
       Class<?> keyFormatClass = loadClass(keyFormatName);
       Builder builder = getBuilder(keyFormatClass);
@@ -120,29 +118,14 @@ public class TinkeyUtil {
   }
 
   /**
-   * @return a {@code KeyData} from a specified key.
+   * @return the class name of a proto from its type url. For example, return AesGcmKey
+   * if the type url is type.googleapis.com/google.crypto.tink.AesGcmKey.
+   * @throws GeneralSecurityException if {@code typeUrl} is in invalid format.
    */
-  public static KeyData createKeyData(Message key, String typeUrl, KeyData.KeyMaterialType type)
-      throws Exception {
-    return KeyData.newBuilder()
-        .setValue(key.toByteString())
-        .setTypeUrl(typeUrl)
-        .setKeyMaterialType(type)
-        .build();
-  }
-
-  /**
-   * @return a {@code KeyData} containing a {@code GcpKmsAeadKey}.
-   */
-  public static KeyData createGcpKmsAeadKeyData(String kmsKeyUri)
-      throws Exception {
-    GcpKmsAeadKey keyProto = GcpKmsAeadKey.newBuilder()
-        .setKmsKeyUri(kmsKeyUri)
-        .build();
-    return createKeyData(
-        keyProto,
-        "type.googleapis.com/google.crypto.tink.GcpKmsAeadKey",
-        KeyData.KeyMaterialType.REMOTE);
+  private static String getProtoClassName(String typeUrl) throws GeneralSecurityException {
+    SubtleUtil.validateTypeUrl(typeUrl);
+    int dot = typeUrl.lastIndexOf(".");
+    return typeUrl.substring(dot + 1);
   }
 
   /**
