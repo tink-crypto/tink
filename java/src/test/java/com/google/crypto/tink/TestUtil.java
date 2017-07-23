@@ -20,7 +20,6 @@ import static com.google.common.io.BaseEncoding.base16;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.base.Optional;
 import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
@@ -65,7 +64,6 @@ import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -87,9 +85,7 @@ public class TestUtil {
 
   // This is a credential of a service account that is granted access to
   // {@code RESTRICTED_CRYPTO_KEY_URI}.
-  public static final Optional<File> SERVICE_ACCOUNT_FILE = Optional.of(Paths.get(
-      "testdata/credential.json")
-      .toFile());
+  public static final File SERVICE_ACCOUNT_FILE = new File("testdata/credential.json");
 
   /**
    * A dummy Aead-implementation that just throws exception.

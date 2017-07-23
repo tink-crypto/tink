@@ -16,29 +16,22 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.proto.GcpKmsAeadKey;
 import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.subtle.GcpCredentialFactory;
 import com.google.crypto.tink.subtle.GcpKmsAead;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
  * This key manager produces new instances of {@code GcpKmsAead}.
  * Currently it doesn't support key generation. To use it one must
- * provide an implementation of {@code GcpCredentialFactory}.
+ * provide a KMS client.
  */
 public final class GcpKmsAeadKeyManager implements KeyManager<Aead> {
   private static final int VERSION = 0;
@@ -46,10 +39,10 @@ public final class GcpKmsAeadKeyManager implements KeyManager<Aead> {
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.GcpKmsAeadKey";
 
-  private final GcpCredentialFactory credFactory;
+  private final CloudKMS cloudKmsClient;
 
-  public GcpKmsAeadKeyManager(GcpCredentialFactory credFactory) {
-    this.credFactory = credFactory;
+  public GcpKmsAeadKeyManager(CloudKMS cloudKmsClient) {
+    this.cloudKmsClient = cloudKmsClient;
   }
 
   /**
@@ -74,12 +67,8 @@ public final class GcpKmsAeadKeyManager implements KeyManager<Aead> {
       throw new GeneralSecurityException("expected GcpKmsAeadKey proto");
     }
     GcpKmsAeadKey keyProto = (GcpKmsAeadKey) key;
-    try {
-      validate(keyProto);
-      return new GcpKmsAead(createCloudKmsClient(keyProto), keyProto.getKmsKeyUri());
-    } catch (IOException e) {
-      throw new GeneralSecurityException("expected GcpKmsAeadKey proto", e);
-    }
+    validate(keyProto);
+    return new GcpKmsAead(cloudKmsClient, keyProto.getKmsKeyUri());
   }
 
   /**
@@ -118,15 +107,6 @@ public final class GcpKmsAeadKeyManager implements KeyManager<Aead> {
   @Override
   public String getKeyType() {
     return TYPE_URL;
-  }
-
-  private CloudKMS createCloudKmsClient(GcpKmsAeadKey key) throws IOException {
-    HttpTransport transport = new NetHttpTransport();
-    JsonFactory jsonFactory = new JacksonFactory();
-    GoogleCredential cred = this.credFactory.createCredential(key.getKmsKeyUri());
-    return new CloudKMS.Builder(transport, jsonFactory, cred)
-        .setApplicationName("Tink")
-        .build();
   }
 
   private static void validate(GcpKmsAeadKey key) throws GeneralSecurityException {

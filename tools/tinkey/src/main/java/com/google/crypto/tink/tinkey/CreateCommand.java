@@ -16,11 +16,13 @@
 
 package com.google.crypto.tink.tinkey;
 
+import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.GcpKmsAead;
+import com.google.crypto.tink.subtle.GcpKmsClient;
 import com.google.protobuf.Message;
 import java.io.File;
 import java.io.OutputStream;
@@ -81,8 +83,10 @@ public class CreateCommand extends CreateOptions implements Command {
   public static final EncryptedKeyset createEncryptedKeysetWithGcp(
       File credentialFile, KeyTemplate keyTemplate,
       String gcpKmsMasterKeyUriValue) throws Exception {
-    GcpKmsAead masterKey = new GcpKmsAead(
-        TinkeyUtil.createCloudKmsClient(credentialFile), gcpKmsMasterKeyUriValue);
+    Aead masterKey = new GcpKmsAead(
+        GcpKmsClient.fromNullableServiceAccount(credentialFile),
+        gcpKmsMasterKeyUriValue);
+
     return new KeysetManager.Builder()
         .setKeyTemplate(keyTemplate)
         .setMasterKey(masterKey)

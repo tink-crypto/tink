@@ -51,6 +51,8 @@ java_library(
     name = "aead_envelope",
     srcs = [
         "GcpKmsAead.java",
+        "GcpKmsClient.java",
+        "GcpScopes.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
@@ -58,23 +60,7 @@ java_library(
         "@com_google_api_client//jar",
         "@com_google_cloudkms//jar",
         "@com_google_http_client//jar",
-    ],
-)
-
-# Google credential subtle
-
-java_library(
-    name = "gcp_credential",
-    srcs = [
-        "GcpCredentialFactory.java",
-        "GcpScopes.java",
-        "ServiceAccountGcpCredentialFactory.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        "@com_google_api_client//jar",
-        "@com_google_guava//jar",
-        "@com_google_http_client//jar",
+        "@com_google_http_client_jackson2//jar",
         "@com_google_oauth_client//jar",
     ],
 )

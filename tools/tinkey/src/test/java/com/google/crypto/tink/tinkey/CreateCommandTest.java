@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.EncryptedKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
@@ -42,7 +43,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.signature.PublicKeySignConfig;
 import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
 import com.google.crypto.tink.subtle.GcpKmsAead;
-import com.google.crypto.tink.subtle.ServiceAccountGcpCredentialFactory;
+import com.google.crypto.tink.subtle.GcpKmsClient;
 import com.google.protobuf.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -68,7 +69,7 @@ public class CreateCommandTest {
     Registry.INSTANCE.registerKeyManager(
         GcpKmsAeadKeyManager.TYPE_URL,
         new GcpKmsAeadKeyManager(
-            new ServiceAccountGcpCredentialFactory(TestUtil.SERVICE_ACCOUNT_FILE)));
+            GcpKmsClient.fromServiceAccount(TestUtil.SERVICE_ACCOUNT_FILE)));
   }
 
   @Test
@@ -121,7 +122,7 @@ public class CreateCommandTest {
     String awsKmsMasterKeyValue = null;
     String gcpKmsMasterKeyValue = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
     // This is the service account allowed to access the Google Cloud master key above.
-    File credentialFile = TestUtil.SERVICE_ACCOUNT_FILE.get();
+    File credentialFile = TestUtil.SERVICE_ACCOUNT_FILE;
 
     String outFormat = "TEXT";
     CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
@@ -140,8 +141,9 @@ public class CreateCommandTest {
     outFormat = "BINARY";
     CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
         gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-    GcpKmsAead masterKey = new GcpKmsAead(
-        TinkeyUtil.createCloudKmsClient(credentialFile), gcpKmsMasterKeyValue);
+    Aead masterKey = new GcpKmsAead(
+        GcpKmsClient.fromServiceAccount(credentialFile),
+        gcpKmsMasterKeyValue);
     KeysetHandle handle = EncryptedKeysetHandle.parseFrom(
         outputStream.toByteArray(), masterKey);
     assertNotNull(handle.getEncryptedKeyset());

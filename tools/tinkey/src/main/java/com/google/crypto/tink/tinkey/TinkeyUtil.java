@@ -16,13 +16,6 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.cloudkms.v1.CloudKMS;
-import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteStreams;
 import com.google.common.reflect.ClassPath;
@@ -39,7 +32,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,29 +146,6 @@ public class TinkeyUtil {
   }
 
   /**
-   * @return a {@code GoogleCredential}, using the service account in {@code credentialFile}.
-   * If {@code credentialFile} is null, returns an
-   * <a href="https://g.co/dv/identity/protocols/application-default-credentials">application
-   * default credential</a>.
-   */
-  public static GoogleCredential readGoogleCredential(File credentialFile) throws IOException {
-    GoogleCredential cred;
-    if (credentialFile != null) {
-      byte[] credBytes = Files.readAllBytes(credentialFile.toPath());
-      cred = GoogleCredential.fromStream(new ByteArrayInputStream(credBytes));
-    } else {
-      cred = GoogleCredential.getApplicationDefault();
-    }
-    // Depending on the environment that provides the default credentials (e.g. Compute Engine, App
-    // Engine), the credentials may require us to specify the scopes we need explicitly.
-    // Check for this case, and inject the scope if required.
-    if (cred.createScopedRequired()) {
-      cred = cred.createScoped(CloudKMSScopes.all());
-    }
-    return cred;
-  }
-
-  /**
    * @return a {@code KeyTemplate} in {@code keyTemplatePath}.
    */
   public static KeyTemplate readKeyTemplateFromTextFile(Path keyTemplatePath) throws IOException {
@@ -220,21 +189,6 @@ public class TinkeyUtil {
       return CleartextKeysetHandle.parseFrom(builder.build());
     }
     return CleartextKeysetHandle.parseFrom(inBytes);
-  }
-
-  /**
-   * @return a {@code CloudKMS}, using the service account in {@code credentialFile}.
-   * If {@code credentialFile} is null, doesn't exist or doesn't contain a valid service
-   * account, uses an
-   * <a href="https://g.co/dv/identity/protocols/application-default-credentials">application
-   * default credential</a>.
-   */
-  public static CloudKMS createCloudKmsClient(File credentialFile) throws IOException {
-    HttpTransport transport = new NetHttpTransport();
-    JsonFactory jsonFactory = new JacksonFactory();
-    return new CloudKMS.Builder(transport, jsonFactory, readGoogleCredential(credentialFile))
-        .setApplicationName("Tinkey")
-        .build();
   }
 
   /**

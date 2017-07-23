@@ -17,6 +17,7 @@
 package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.subtle.GcpKmsClient;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import org.kohsuke.args4j.Option;
 
@@ -54,7 +55,7 @@ class CreateOptions extends OutOptions {
         SubtleUtil.die("Cannot set both --gcp-kms-key-uri and --aws-kms-key-arn");
       }
       if (gcpKmsMasterKeyUriValue != null) {
-        SubtleUtil.validateCloudKmsCryptoKeyUri(gcpKmsMasterKeyUriValue);
+        GcpKmsClient.validateCryptoKeyUri(gcpKmsMasterKeyUriValue);
       }
     } catch (Exception e) {
       SubtleUtil.die(e.toString());

@@ -29,8 +29,8 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.GcpKmsClient;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.ServiceAccountGcpCredentialFactory;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
@@ -45,11 +45,11 @@ import org.junit.runners.JUnit4;
 public class KmsEnvelopeAeadKeyManagerTest {
 
   @Before
-  public void setUp() throws GeneralSecurityException {
+  public void setUp() throws Exception {
     AeadConfig.registerStandardKeyTypes();
     Registry.INSTANCE.registerKeyManager(
         GcpKmsAeadKeyManager.TYPE_URL,
-        new GcpKmsAeadKeyManager(new ServiceAccountGcpCredentialFactory(
+        new GcpKmsAeadKeyManager(GcpKmsClient.fromServiceAccount(
             TestUtil.SERVICE_ACCOUNT_FILE)));
   }
 
@@ -70,7 +70,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
     // Now with {@code GcpKmsAeadKeyManager} as a custom key manager.
     GcpKmsAeadKeyManager customKeyManager =
-        new GcpKmsAeadKeyManager(new ServiceAccountGcpCredentialFactory(
+        new GcpKmsAeadKeyManager(GcpKmsClient.fromServiceAccount(
             TestUtil.SERVICE_ACCOUNT_FILE));
     TestUtil.runBasicAeadFactoryTests(keysetHandle, customKeyManager);
   }

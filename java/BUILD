@@ -39,7 +39,6 @@ java_library(
     exports = [
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:aead",
-        "//java/src/main/java/com/google/crypto/tink/subtle:gcp_credential",
         "//java/src/main/java/com/google/crypto/tink/subtle:hybrid",
         "//java/src/main/java/com/google/crypto/tink/subtle:mac",
         "//java/src/main/java/com/google/crypto/tink/subtle:signature",
@@ -54,7 +53,6 @@ java_library(
     exports = [
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:aead",
-        "//java/src/main/java/com/google/crypto/tink/subtle:gcp_credential",
         "//java/src/main/java/com/google/crypto/tink/subtle:hybrid_android",
         "//java/src/main/java/com/google/crypto/tink/subtle:mac",
         "//java/src/main/java/com/google/crypto/tink/subtle:signature_android",

@@ -22,8 +22,7 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.ServiceAccountGcpCredentialFactory;
-import java.security.GeneralSecurityException;
+import com.google.crypto.tink.subtle.GcpKmsClient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,10 +35,10 @@ import org.junit.runners.JUnit4;
 public class GcpKmsAeadKeyManagerTest {
 
   @Before
-  public void setUp() throws GeneralSecurityException {
+  public void setUp() throws Exception {
     Registry.INSTANCE.registerKeyManager(
         GcpKmsAeadKeyManager.TYPE_URL,
-        new GcpKmsAeadKeyManager(new ServiceAccountGcpCredentialFactory(
+        new GcpKmsAeadKeyManager(GcpKmsClient.fromServiceAccount(
             TestUtil.SERVICE_ACCOUNT_FILE)));
   }
 
@@ -57,7 +56,7 @@ public class GcpKmsAeadKeyManagerTest {
 
     // Now with {@code GcpKmsAeadKeyManager} as a custom key manager.
     GcpKmsAeadKeyManager customKeyManager =
-        new GcpKmsAeadKeyManager(new ServiceAccountGcpCredentialFactory(
+        new GcpKmsAeadKeyManager(GcpKmsClient.fromServiceAccount(
             TestUtil.SERVICE_ACCOUNT_FILE));
     TestUtil.runBasicAeadFactoryTests(keysetHandle, customKeyManager);
   }

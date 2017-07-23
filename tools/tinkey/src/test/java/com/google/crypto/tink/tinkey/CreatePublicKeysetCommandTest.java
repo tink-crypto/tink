@@ -37,7 +37,7 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.signature.PublicKeySignConfig;
 import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
-import com.google.crypto.tink.subtle.ServiceAccountGcpCredentialFactory;
+import com.google.crypto.tink.subtle.GcpKmsClient;
 import com.google.protobuf.TextFormat;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -64,7 +64,7 @@ public class CreatePublicKeysetCommandTest {
     Registry.INSTANCE.registerKeyManager(
         GcpKmsAeadKeyManager.TYPE_URL,
         new GcpKmsAeadKeyManager(
-            new ServiceAccountGcpCredentialFactory(TestUtil.SERVICE_ACCOUNT_FILE)));
+            GcpKmsClient.fromServiceAccount(TestUtil.SERVICE_ACCOUNT_FILE)));
   }
 
   @Test

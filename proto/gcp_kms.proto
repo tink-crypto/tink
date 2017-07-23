@@ -21,22 +21,14 @@ package google.crypto.tink;
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 
-message GcpKmsAeadParams {
-}
-
 // key_type: type.googleapis.com/google.crypto.tink.GcpKmsAeadKey
 message GcpKmsAeadKey {
   uint32 version = 1;
-  GcpKmsAeadParams params = 2;
   // Required.
   // The location of a CryptoKey in Google Cloud KMS.
   // Valid values have this format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
   // See https://cloud.google.com/kms/docs/object-hierarchy.
   // Note that to enable key rotation, this value should point to a CryptoKey,
   // not a CryptoKeyVersion.
-  string kms_key_uri = 3;
-}
-
-message GcpKmsAeadKeyFormat {
-  GcpKmsAeadParams params = 1;
+  string kms_key_uri = 2;
 }

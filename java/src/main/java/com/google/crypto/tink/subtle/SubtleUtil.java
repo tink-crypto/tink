@@ -19,7 +19,6 @@ package com.google.crypto.tink.subtle;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.regex.Pattern;
 
 /**
  * Helper methods.
@@ -145,33 +144,6 @@ public final class SubtleUtil {
   public static void die(String error) {
     System.err.print(String.format("Error: %s\n", error));
     System.exit(1);
-  }
-
-  private static final Pattern GCP_CLOUD_KMS_CRYPTO_KEY_PATTERN = Pattern.compile(
-        "^projects/([0-9a-zA-Z\\-]+)/locations/([0-9a-zA-Z\\-]+)"
-        + "/keyRings/([0-9a-zA-Z\\-]+)/cryptoKeys/([0-9a-zA-Z\\-]+)$", Pattern.CASE_INSENSITIVE);
-
-  private static final Pattern GCP_CLOUD_KMS_CRYPTO_KEY_VERSION_PATTERN = Pattern.compile(
-        "^projects/([0-9a-zA-Z\\-]+)/locations/([0-9a-zA-Z\\-]+)"
-        + "/keyRings/([0-9a-zA-Z\\-]+)/cryptoKeys/([0-9a-zA-Z\\-]+)"
-        + "/cryptoKeyVersions/([0-9a-zA-Z\\-]+)$", Pattern.CASE_INSENSITIVE);
-  /**
-   * @throws IllegalArgumentException if {@code kmsKeyUri} is not a valid URI of a CryptoKey
-   * in Google Cloud KMS.
-   */
-  public static void validateCloudKmsCryptoKeyUri(String kmsKeyUri)
-      throws IllegalArgumentException {
-    if (!GCP_CLOUD_KMS_CRYPTO_KEY_PATTERN.matcher(kmsKeyUri).matches()) {
-      if (GCP_CLOUD_KMS_CRYPTO_KEY_VERSION_PATTERN.matcher(kmsKeyUri).matches()) {
-        throw new IllegalArgumentException("Invalid Google Cloud KMS Key URI. "
-          + "The URI must point to a CryptoKey, not a CryptoKeyVersion");
-      }
-      throw new IllegalArgumentException("Invalid Google Cloud KMS Key URI. "
-          + "The URI must point to a CryptoKey in the format "
-          + "projects/*/locations/*/keyRings/*/cryptoKeys/*. "
-          + "See https://cloud.google.com/kms/docs/reference/rest/v1beta1"
-          + "/projects.locations.keyRings.cryptoKeys#CryptoKey");
-    }
   }
 
   /**
