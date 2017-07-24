@@ -92,6 +92,18 @@ maven_jar(
 )
 
 maven_jar(
+    name = "com_amazonaws_sdk_core",
+    artifact = "com.amazonaws:aws-java-sdk-core:1.11.166",
+    sha1 = "5f28def6d43d805cc1d795ad08187d5b463d6c9d",
+)
+
+maven_jar(
+    name = "com_amazonaws_sdk_kms",
+    artifact = "com.amazonaws:aws-java-sdk-kms:1.11.166",
+    sha1 = "33a4c0d5c26c4ab6bb14c1d80cdec435f837d887",
+)
+
+maven_jar(
     name = "com_google_api_client",
     artifact = "com.google.api-client:google-api-client:1.22.0",
     sha1 = "0244350c0c845c583717ade13f5666a452fd0cfa",
@@ -143,6 +155,30 @@ maven_jar(
     name = "junit_junit_4",
     artifact = "junit:junit:jar:4.12",
     sha1 = "2973d150c0dc1fefe998f834810d68f278ea58ec",
+)
+
+maven_jar(
+    name = "org_mockito",
+    artifact = "org.mockito:mockito-core:2.8.47",
+    sha1 = "48840cfced22ec0c07203a0201c5ae7bc12557b5",
+)
+
+maven_jar(
+    name = "net_bytebuddy",
+    artifact = "net.bytebuddy:byte-buddy:1.6.14",
+    sha1 = "871c3e49dc6183d0d361601c2f1d11abb1a6b48c",
+)
+
+maven_jar(
+    name = "net_bytebuddy_agent",
+    artifact = "net.bytebuddy:byte-buddy-agent:1.6.14",
+    sha1 = "ba1e5ba3a84fb2fbf2f4de9138df19665eec4d59",
+)
+
+maven_jar(
+    name = "org_objenesis",
+    artifact = "org.objenesis:objenesis:2.5",
+    sha1 = "612ecb799912ccf77cba9b3ed8c813da086076e9",
 )
 
 maven_jar(

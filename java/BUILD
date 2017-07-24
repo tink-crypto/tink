@@ -168,14 +168,21 @@ java_library(
     visibility = [
         "//visibility:private",
     ],
+    runtime_deps = [
+        "@net_bytebuddy//jar",
+        "@net_bytebuddy_agent//jar",
+        "@org_objenesis//jar",
+    ],
     deps = [
         ":testonly",
+        "@com_amazonaws_sdk_kms//jar",
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
         "@com_google_guava//jar",
         "@com_google_protobuf_java//:protobuf_java",
         "@com_google_truth//jar",
         "@junit_junit_4//jar",
+        "@org_mockito//jar",
     ],
 )
 

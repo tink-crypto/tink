@@ -44,31 +44,8 @@
     <defaultGoal>install</defaultGoal>
 
     <sourceDirectory>${tink.source.dir}</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>${tink.source.dir}</directory>
-        <excludes>
-          <exclude>**/GcpKmsAeadKeyManager.java</exclude>
-          <exclude>**/GcpKmsAead.java</exclude>
-          <exclude>**/GcpCredentialFactory.java</exclude>
-          <exclude>**/GcpScopes.java</exclude>
-          <exclude>**/ServiceAccountGcpCredentialFactory.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
 
     <testSourceDirectory>${tink.test.dir}</testSourceDirectory>
-    <testResources>
-      <testResource>
-        <filtering>false</filtering>
-        <directory>${tink.test.dir}</directory>
-        <excludes>
-          <exclude>**/EnvelopeTestUtil.java</exclude>
-          <exclude>**/GcpKmsAeadKeyManagerTest.java</exclude>
-          <exclude>**/KmsEnvelopeAeadKeyManagerTest.java</exclude>
-        </excludes>
-      </testResource>
-    </testResources>
 
     <extensions>
       <extension>
@@ -139,15 +116,17 @@
           <compilerArgument>-Werror</compilerArgument>
           <compilerArgument>-Xlint:deprecation</compilerArgument>
           <excludes>
-            <exclude>**/GcpKmsAeadKeyManager.java</exclude>
+            <exclude>**/AwsKmsAead.java</exclude>
             <exclude>**/GcpKmsAead.java</exclude>
-            <exclude>**/GcpCredentialFactory.java</exclude>
+            <exclude>**/GcpKmsAeadKeyManager.java</exclude>
+            <exclude>**/GcpKmsClient.java</exclude>
             <exclude>**/GcpScopes.java</exclude>
-            <exclude>**/ServiceAccountGcpCredentialFactory.java</exclude>
           </excludes>
           <testExcludes>
+            <exclude>**/AwsKmsAeadTest.java</exclude>
             <exclude>**/EnvelopeTestUtil.java</exclude>
             <exclude>**/GcpKmsAeadKeyManagerTest.java</exclude>
+            <exclude>**/GcpKmsClientTest.java</exclude>
             <exclude>**/KmsEnvelopeAeadKeyManagerTest.java</exclude>
           </testExcludes>
         </configuration>
