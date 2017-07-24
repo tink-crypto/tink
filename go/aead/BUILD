@@ -7,10 +7,16 @@ package(
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 SRCS = [
+    "aead_config.go",
+    "aead_factory.go",
+    "aead_key_templates.go",
     "aes_gcm_key_manager.go",
 ]
 
 TEST_SRCS = [
+    "aead_config_test.go",
+    "aead_factory_test.go",
+    "aead_key_templates_test.go",
     "aes_gcm_key_manager_test.go",
 ]
 

@@ -60,14 +60,19 @@ func (h *DummyMac) VerifyMac(mac []byte, data []byte) (bool, error) {
   return true, nil
 }
 
-// Return a key set with 4 keys.
+func NewTestAesGcmKeyset(primaryOutputPrefixType OutputPrefixType) *Keyset {
+  keyData := NewAesGcmKeyData(16)
+  return NewTestKeyset(keyData, primaryOutputPrefixType)
+}
+
 func NewTestKeyset(keyData *KeyData,
                   primaryOutputPrefixType OutputPrefixType) *Keyset {
   primaryKey := util.NewKey(keyData, KeyStatusType_ENABLED, 42, primaryOutputPrefixType)
   rawKey := util.NewKey(keyData, KeyStatusType_ENABLED, 43, OutputPrefixType_RAW)
   legacyKey := util.NewKey(keyData, KeyStatusType_ENABLED, 44, OutputPrefixType_LEGACY)
   tinkKey := util.NewKey(keyData, KeyStatusType_ENABLED, 45, OutputPrefixType_TINK)
-  keys := []*Keyset_Key{primaryKey, rawKey, legacyKey, tinkKey}
+  crunchyKey := util.NewKey(keyData, KeyStatusType_ENABLED, 46, OutputPrefixType_CRUNCHY)
+  keys := []*Keyset_Key{primaryKey, rawKey, legacyKey, tinkKey, crunchyKey}
   return util.NewKeyset(primaryKey.KeyId, keys)
 }
 
