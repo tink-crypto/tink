@@ -23,11 +23,11 @@ import (
   "github.com/google/tink/go/subtle/random"
   "github.com/google/tink/go/util/util"
   // "github.com/google/tink/go/tink/tink"
-  // "github.com/google/tink/go/mac/mac"
+  "github.com/google/tink/go/mac/mac"
   "github.com/google/tink/go/aead/aead"
   "github.com/golang/protobuf/proto"
   . "github.com/google/tink/proto/tink_go_proto"
-  // . "github.com/google/tink/proto/hmac_go_proto"
+  . "github.com/google/tink/proto/hmac_go_proto"
   . "github.com/google/tink/proto/common_go_proto"
   . "github.com/google/tink/proto/aes_gcm_go_proto"
   . "github.com/google/tink/proto/ecdsa_go_proto"
@@ -62,6 +62,12 @@ func (h *DummyMac) VerifyMac(mac []byte, data []byte) (bool, error) {
 
 func NewTestAesGcmKeyset(primaryOutputPrefixType OutputPrefixType) *Keyset {
   keyData := NewAesGcmKeyData(16)
+  return NewTestKeyset(keyData, primaryOutputPrefixType)
+}
+
+func NewTestHmacKeyset(tagSize uint32,
+                      primaryOutputPrefixType OutputPrefixType) *Keyset {
+  keyData := NewHmacKeyData(HashType_SHA256, tagSize)
   return NewTestKeyset(keyData, primaryOutputPrefixType)
 }
 
@@ -114,4 +120,20 @@ func NewSerializedAesGcmKey(keySize uint32) []byte {
     panic(fmt.Sprintf("cannot marshal AesGcmKey: %s", err))
   }
   return serializedKey
+}
+
+func NewHmacKey(hashType HashType, tagSize uint32) *HmacKey {
+  params := util.NewHmacParams(hashType, tagSize)
+  keyValue := random.GetRandomBytes(20)
+  return util.NewHmacKey(params, mac.HMAC_KEY_VERSION, keyValue)
+}
+
+func NewHmacKeyData(hashType HashType, tagSize uint32) *KeyData {
+  key := NewHmacKey(hashType, tagSize)
+  serializedKey, _ := proto.Marshal(key)
+  return &KeyData{
+    TypeUrl: mac.HMAC_TYPE_URL,
+    Value: serializedKey,
+    KeyMaterialType: KeyData_SYMMETRIC,
+  }
 }

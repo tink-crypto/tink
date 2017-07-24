@@ -31,11 +31,7 @@ func NewHmacParams(hashType HashType, tagSize uint32) *HmacParams {
   }
 }
 
-func NewHmacKey(hashType HashType,
-                tagSize uint32,
-                version uint32,
-                keyValue []byte) *HmacKey {
-  params := NewHmacParams(hashType, tagSize)
+func NewHmacKey(params *HmacParams, version uint32, keyValue []byte) *HmacKey {
   return &HmacKey{
     Version: version,
     Params: params,
@@ -43,10 +39,7 @@ func NewHmacKey(hashType HashType,
   }
 }
 
-func NewHmacKeyFormat(hashType HashType,
-                      tagSize uint32,
-                      keySize uint32) *HmacKeyFormat {
-  params := NewHmacParams(hashType, tagSize)
+func NewHmacKeyFormat(params *HmacParams, keySize uint32) *HmacKeyFormat {
   return &HmacKeyFormat{
     Params: params,
     KeySize: keySize,
