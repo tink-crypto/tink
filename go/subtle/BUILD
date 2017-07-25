@@ -1,12 +1,16 @@
 licenses(["notice"])  # Apache 2.0
 
 package(
-    default_visibility = [
-        "//go:__subpackages__",
-    ],
+    default_visibility = ["//visibility:public"],
 )
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+COMMON_DEPS = [
+    "//go/tink:primitives",
+    ":random",
+    ":util",
+]
 
 # ecdsa subtles
 ECDSA_SRCS = [
@@ -17,18 +21,11 @@ ECDSA_SRCS = [
 ]
 
 ECDSA_TEST_SRCS = [
-    "ecdsa/ecdsa_test.go",
     "ecdsa/ecdsa_sign_verify_test.go",
+    "ecdsa/ecdsa_test.go",
 ]
 
-ECDSA_DEPS = [
-    ":random",
-    ":util",
-    "//go/tink",
-    "//go/util",
-    "//proto:common_go_proto",
-    "//proto:ecdsa_go_proto",
-]
+ECDSA_DEPS = COMMON_DEPS
 
 go_library(
     name = "ecdsa",
@@ -44,7 +41,34 @@ go_test(
     ],
     deps = ECDSA_DEPS + [
         ":ecdsa",
-        "//go/util:testutil",
+    ],
+)
+
+# aes subtles
+AES_SRCS = [
+    "aes/aes_gcm.go",
+]
+
+AES_TEST_SRCS = [
+    "aes/aes_gcm_test.go",
+]
+
+AES_DEPS = COMMON_DEPS
+
+go_library(
+    name = "aes",
+    srcs = AES_SRCS,
+    deps = AES_DEPS,
+)
+
+go_test(
+    name = "aes_test",
+    srcs = AES_TEST_SRCS,
+    data = [
+        "//testdata:aes_gcm",
+    ],
+    deps = AES_DEPS + [
+        ":aes",
     ],
 )
 
@@ -57,49 +81,19 @@ HMAC_TEST_SRCS = [
     "hmac/hmac_test.go",
 ]
 
+HMAC_DEPS = COMMON_DEPS
+
 go_library(
     name = "hmac",
     srcs = HMAC_SRCS,
+    deps = HMAC_DEPS,
 )
 
 go_test(
     name = "hmac_test",
     srcs = HMAC_TEST_SRCS,
-    deps = [
+    deps = HMAC_DEPS + [
         ":hmac",
-        "//go/tink",
-    ],
-)
-
-# aead subtles
-AEAD_SRCS = [
-    "aead/aes_gcm.go",
-]
-
-AEAD_TEST_SRCS = [
-    "aead/aes_gcm_test.go",
-]
-
-AEAD_DEPS = [
-    ":random",
-    ":util",
-    "//go/tink",
-]
-
-go_library(
-    name = "aead",
-    srcs = AEAD_SRCS,
-    deps = AEAD_DEPS,
-)
-
-go_test(
-    name = "aead_test",
-    srcs = AEAD_TEST_SRCS,
-    data = [
-        "//testdata:aes_gcm",
-    ],
-    deps = AEAD_DEPS + [
-        ":aead",
     ],
 )
 
@@ -134,21 +128,15 @@ UTIL_TEST_SRCS = [
     "util/util_test.go",
 ]
 
-UTIL_DEPS = [
-    "//proto:common_go_proto",
-    "//proto:tink_go_proto",
-]
-
 go_library(
     name = "util",
     srcs = UTIL_SRCS,
-    deps = UTIL_DEPS,
 )
 
 go_test(
     name = "util_test",
     srcs = UTIL_TEST_SRCS,
-    deps = UTIL_DEPS + [
+    deps = [
         ":util",
     ],
 )

@@ -16,251 +16,213 @@
 package mac_test
 
 import (
+  "bytes"
+  "fmt"
   "testing"
   "reflect"
   "github.com/google/tink/go/tink/tink"
   "github.com/google/tink/go/mac/mac"
   "github.com/google/tink/go/subtle/hmac"
-  "github.com/google/tink/go/subtle/util"
+  "github.com/google/tink/go/subtle/random"
+  subtleUtil "github.com/google/tink/go/subtle/util"
+  "github.com/google/tink/go/util/testutil"
+  "github.com/google/tink/go/util/util"
   "github.com/golang/protobuf/proto"
   hmacpb "github.com/google/tink/proto/hmac_go_proto"
   commonpb "github.com/google/tink/proto/common_go_proto"
   tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-var testKey = []byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
+func TestGetPrimitiveBasic(t *testing.T) {
+  km := mac.NewHmacKeyManager()
+  testKeys := genValidHmacKeys()
+  for i := 0; i < len(testKeys); i++ {
+    key := testKeys[i]
+    p, err := km.GetPrimitiveFromKey(key)
+    if err != nil {
+      t.Errorf("unexpected error in test case %d: %s", i, err)
+    }
+    if err := validateHmacPrimitive(p.(*hmac.Hmac), key); err != nil {
+      t.Errorf("%s", err)
+    }
 
-func TestGetPrimitiveFromSerializedKeyBasic(t *testing.T) {
-  var h mac.HmacKeyManager
-  hmacKey := newHmacKey(commonpb.HashType_SHA256, 32, mac.HMAC_KEY_VERSION, testKey)
-  serializedKey, err := proto.Marshal(hmacKey)
-  p, err := h.GetPrimitiveFromSerializedKey(serializedKey)
-  if err != nil {
-    t.Errorf("unexpected error: %s", err)
+    serializedKey, _ := proto.Marshal(testKeys[i])
+    p, err = km.GetPrimitiveFromSerializedKey(serializedKey)
+    if err != nil {
+      t.Errorf("unexpected error in test case %d: %s", i, err)
+    }
+    if err := validateHmacPrimitive(p.(*hmac.Hmac), key); err != nil {
+      t.Errorf("%s", err)
+    }
   }
-  checkPrimitive(p, hmacKey, t)
 }
 
-func TestGetPrimitiveFromInvalidSerializedKey(t *testing.T) {
-  var h mac.HmacKeyManager
-  // nil input
-  if _, err := h.GetPrimitiveFromSerializedKey(nil); err == nil {
+func TestGetPrimitiveWithInvalidInput(t *testing.T) {
+  km := mac.NewHmacKeyManager()
+  // invalid key
+  testKeys := genInvalidHmacKeys()
+  for i := 0; i < len(testKeys); i++ {
+    if _, err := km.GetPrimitiveFromKey(testKeys[i]); err == nil {
+      t.Errorf("expect an error in test case %d", i)
+    }
+    serializedKey, _ := proto.Marshal(testKeys[i])
+    if _, err := km.GetPrimitiveFromSerializedKey(serializedKey); err == nil {
+      t.Errorf("expect an error in test case %d", i)
+    }
+  }
+  // nil
+  if _, err := km.GetPrimitiveFromKey(nil); err == nil {
     t.Errorf("expect an error when input is nil")
   }
-  // void input
-  if _, err := h.GetPrimitiveFromSerializedKey([]byte{}); err == nil {
-    t.Errorf("expect an error when input is not a serialized HmacKey")
-  }
-  if _, err := h.GetPrimitiveFromSerializedKey([]byte{0}); err == nil {
-    t.Errorf("expect an error when input is not a serialized HmacKey")
-  }
-  // input is serialization of another proto
-  serializedKey, _ := proto.Marshal(newHmacParams(commonpb.HashType_SHA256, 32))
-  if _, err := h.GetPrimitiveFromSerializedKey(serializedKey); err == nil {
-    t.Errorf("expect an error when input is not a serialized HmacKey")
-  }
-}
-
-func TestGetPrimitiveFromKeyBasic(t *testing.T) {
-  var h mac.HmacKeyManager
-  hmacKey := newHmacKey(commonpb.HashType_SHA256, 32, mac.HMAC_KEY_VERSION, testKey)
-  p, err := h.GetPrimitiveFromKey(hmacKey)
-  if err != nil {
-    t.Errorf("unexpected error: %s", err)
-  }
-  checkPrimitive(p, hmacKey, t)
-}
-
-func TestGetPrimitiveFromInvalidKey(t *testing.T) {
-  var h mac.HmacKeyManager
-  var err error
-  var key *hmacpb.HmacKey
-  // nil input
-  if _, err = h.GetPrimitiveFromKey(nil); err == nil {
+  if _, err := km.GetPrimitiveFromSerializedKey(nil); err == nil {
     t.Errorf("expect an error when input is nil")
   }
-  // input is not a HmacKey
-  hmacParams := newHmacParams(commonpb.HashType_SHA256, 32)
-  if _, err = h.GetPrimitiveFromKey(hmacParams); err == nil {
-    t.Errorf("expect an error when input is not a HmacKey")
-  }
-  // bad version
-  key = newHmacKey(commonpb.HashType_SHA256, 32, mac.HMAC_KEY_VERSION+1, testKey)
-  if _, err = h.GetPrimitiveFromKey(key); err == nil {
-    t.Errorf("expect an error when version is not valid")
-  }
-  // tag size too big
-  key = newHmacKey(commonpb.HashType_SHA256, 33, mac.HMAC_KEY_VERSION, testKey)
-  if _, err = h.GetPrimitiveFromKey(key); err == nil {
-    t.Errorf("expect an error when tag size is too big")
-  }
-  // tag size too small
-  key = newHmacKey(commonpb.HashType_SHA256, 1, mac.HMAC_KEY_VERSION, testKey)
-  if _, err = h.GetPrimitiveFromKey(key); err == nil {
-    t.Errorf("expect an error when tag size is too small")
-  }
-  // key too short
-  key = newHmacKey(commonpb.HashType_SHA256, 32, mac.HMAC_KEY_VERSION, []byte{1, 1})
-  if _, err = h.GetPrimitiveFromKey(key); err == nil {
-    t.Errorf("expect an error when key is too short")
-  }
-  // unknown hash type
-  key = newHmacKey(commonpb.HashType_UNKNOWN_HASH, 32, mac.HMAC_KEY_VERSION, testKey)
-  if _, err = h.GetPrimitiveFromKey(key); err == nil {
-    t.Errorf("expect an error when hash type is unknown")
+  // empty input
+  if _, err := km.GetPrimitiveFromSerializedKey([]byte{}); err == nil {
+    t.Errorf("expect an error when input is empty")
   }
 }
 
 func TestNewKeyMultipleTimes(t *testing.T) {
-  var h mac.HmacKeyManager
-  format := newHmacKeyFormat(commonpb.HashType_SHA256, 16, 32)
+  km := mac.NewHmacKeyManager()
+  format := testutil.NewHmacKeyFormat(commonpb.HashType_SHA256, 32)
   serializedFormat, _ := proto.Marshal(format)
   keys := make(map[string]bool)
   nTest := 26
-  for i := 0; i < nTest/2; i++ {
-    key, _ := h.NewKeyFromSerializedKeyFormat(serializedFormat)
+  for i := 0; i < nTest; i++ {
+    key, err := km.NewKeyFromSerializedKeyFormat(serializedFormat)
+    if err != nil {
+      t.Errorf("unexpected error: %s", err)
+    }
     serializedKey, _ := proto.Marshal(key)
-    _, existed := keys[string(serializedKey)]
-    if existed {
-      t.Errorf("key is repeated after %d times", i*2+1)
-    }
     keys[string(serializedKey)] = true
 
-    key, _ = h.NewKeyFromKeyFormat(format)
+    key, err = km.NewKeyFromKeyFormat(format)
+    if err != nil {
+      t.Errorf("unexpected error: %s", err)
+    }
     serializedKey, _ = proto.Marshal(key)
-    _, existed = keys[string(serializedKey)]
-    if existed {
-      t.Errorf("key is repeated after %d times", i*2+2)
-    }
     keys[string(serializedKey)] = true
+
+    keyData, err := km.NewKeyData(serializedFormat)
+    if err != nil {
+      t.Errorf("unexpected error: %s", err)
+    }
+    keys[string(keyData.Value)] = true
+  }
+  if len(keys) != nTest*3 {
+    t.Errorf("key is repeated")
   }
 }
 
-func TestNewKeyFromSerializedKeyFormatBasic(t *testing.T) {
-  var h mac.HmacKeyManager
-  format := newHmacKeyFormat(commonpb.HashType_SHA256, 32, 16)
-  serializedFormat, err := proto.Marshal(format)
-  m, err := h.NewKeyFromSerializedKeyFormat(serializedFormat)
-  if err != nil {
-    t.Errorf("unexpected error: %s", err)
+func TestNewKeyBasic(t *testing.T) {
+  km := mac.NewHmacKeyManager()
+  testFormats := genValidHmacKeyFormats()
+  for i := 0; i < len(testFormats); i++ {
+    format := testFormats[i]
+    key, err := km.NewKeyFromKeyFormat(format)
+    if err != nil {
+      t.Errorf("unexpected error in test case %d: %s", i, err)
+    }
+    if err := validateHmacKey(format, key.(*hmacpb.HmacKey)); err != nil {
+      t.Errorf("%s", err)
+    }
+
+    serializedFormat, _ := proto.Marshal(format)
+    key, err = km.NewKeyFromSerializedKeyFormat(serializedFormat)
+    if err != nil {
+      t.Errorf("unexpected error in test case %d: %s", i, err)
+    }
+    if err := validateHmacKey(format, key.(*hmacpb.HmacKey)); err != nil {
+      t.Errorf("%s", err)
+    }
   }
-  checkKeyFormat(format, m, t)
 }
 
-func TestNewKeyFromKeyFormatBasic(t *testing.T) {
-  var h mac.HmacKeyManager
-  format := newHmacKeyFormat(commonpb.HashType_SHA256, 32, 16)
-  m, err := h.NewKeyFromKeyFormat(format)
-  if err != nil {
-    t.Errorf("unexpected error: %s", err)
-  }
-  checkKeyFormat(format, m, t)
-}
+func TestNewKeyWithInvalidInput(t *testing.T) {
+  km := mac.NewHmacKeyManager()
+  // invalid key formats
+  testFormats := genInvalidHmacKeyFormats()
+  for i := 0; i < len(testFormats); i++ {
+    format := testFormats[i]
+    if _, err := km.NewKeyFromKeyFormat(format); err == nil {
+      t.Errorf("expect an error in test case %d: %s", i, err)
+    }
 
-func TestNewKeyFromInvalidSerializedKeyFormat(t *testing.T) {
-  var h mac.HmacKeyManager
-  // nil input
-  if _, err := h.NewKeyFromSerializedKeyFormat(nil); err == nil {
+    serializedFormat, _ := proto.Marshal(format)
+    if _, err := km.NewKeyFromSerializedKeyFormat(serializedFormat); err == nil {
+      t.Errorf("expect an error in test case %d: %s", i, err)
+    }
+  }
+  // nil
+  if _, err := km.NewKeyFromKeyFormat(nil); err == nil {
     t.Errorf("expect an error when input is nil")
   }
-  // void input
-  if _, err := h.NewKeyFromSerializedKeyFormat([]byte{}); err == nil {
-    t.Errorf("expect an error when input is not a serialized HmacKeyFormat")
-  }
-  if _, err := h.NewKeyFromSerializedKeyFormat([]byte{0}); err == nil {
-    t.Errorf("expect an error when input is not a serialized HmacKeyFormat")
-  }
-  // input is serialization of another proto
-  hmacKey := newHmacKey(commonpb.HashType_SHA256, 32, mac.HMAC_KEY_VERSION, testKey)
-  serializedFormat, _ := proto.Marshal(hmacKey)
-  if _, err := h.NewKeyFromSerializedKeyFormat(serializedFormat); err == nil {
-    t.Errorf("expect an error when input is not a serialized HmacKeyFormat")
-  }
-}
-
-func TestNewKeyFromInvalidKeyFormat(t *testing.T) {
-  var h mac.HmacKeyManager
-  var err error
-  var format *hmacpb.HmacKeyFormat
-  // nil input
-  if _, err := h.NewKeyFromKeyFormat(nil); err == nil {
+  if _, err := km.NewKeyFromSerializedKeyFormat(nil); err == nil {
     t.Errorf("expect an error when input is nil")
   }
-  // input is not a HmacKeyFormat
-  hmacKey := newHmacKey(commonpb.HashType_SHA256, 32, mac.HMAC_KEY_VERSION, testKey)
-  if _, err = h.NewKeyFromKeyFormat(hmacKey); err == nil {
-    t.Errorf("expect an error when input is not a HmacKeyFormat")
-  }
-  // key too short
-  format = newHmacKeyFormat(commonpb.HashType_SHA256, 32, 1)
-  if _, err := h.NewKeyFromKeyFormat(format); err == nil {
-    t.Errorf("expect an error when key is too short")
-  }
-  // tag size too small
-  format = newHmacKeyFormat(commonpb.HashType_SHA256, 1, 16)
-  if _, err := h.NewKeyFromKeyFormat(format); err == nil {
-    t.Errorf("expect an error when tag size is too small")
-  }
-  // tag size too big
-  format = newHmacKeyFormat(commonpb.HashType_SHA256, 33, 16)
-  if _, err := h.NewKeyFromKeyFormat(format); err == nil {
-    t.Errorf("expect an error when tag size is too big")
-  }
-  // unknown hash type
-  format = newHmacKeyFormat(commonpb.HashType_UNKNOWN_HASH, 32, 16)
-  if _, err := h.NewKeyFromKeyFormat(format); err == nil {
-    t.Errorf("expect an error when hash type is unknown")
+  // empty input
+  if _, err := km.NewKeyFromSerializedKeyFormat([]byte{}); err == nil {
+    t.Errorf("expect an error when input is empty")
   }
 }
 
 func TestNewKeyDataBasic(t *testing.T) {
-  var h mac.HmacKeyManager
-  format := newHmacKeyFormat(commonpb.HashType_SHA256, 32, 16)
-  serializedFormat, _ := proto.Marshal(format)
-  keyData, err := h.NewKeyData(serializedFormat)
-  if err != nil {
-    t.Errorf("unexpected error: %s", err)
-  }
-  if keyData.TypeUrl != mac.HMAC_TYPE_URL {
-    t.Errorf("incorrect type url")
-  }
-  if keyData.KeyMaterialType != tinkpb.KeyData_SYMMETRIC {
-    t.Errorf("incorrect key material type")
-  }
-  var key hmacpb.HmacKey
-  if err := proto.Unmarshal(keyData.Value, &key); err != nil {
-    t.Errorf("incorrect key value")
+  km := mac.NewHmacKeyManager()
+  testFormats := genValidHmacKeyFormats()
+  for i := 0; i < len(testFormats); i++ {
+    format := testFormats[i]
+    serializedFormat, _ := proto.Marshal(format)
+    keyData, err := km.NewKeyData(serializedFormat)
+    if err != nil {
+      t.Errorf("unexpected error in test case %d: %s", i, err)
+    }
+    if keyData.TypeUrl != mac.HMAC_TYPE_URL {
+      t.Errorf("incorrect type url in test case %d", i)
+    }
+    if keyData.KeyMaterialType != tinkpb.KeyData_SYMMETRIC {
+      t.Errorf("incorrect key material type in test case %d", i)
+    }
+    key := new(hmacpb.HmacKey)
+    if err := proto.Unmarshal(keyData.Value, key); err != nil {
+      t.Errorf("invalid key value")
+    }
+    if err := validateHmacKey(format, key); err != nil {
+      t.Errorf("invalid key")
+    }
   }
 }
 
-func TestInvalidNewKeyData(t *testing.T) {
-  var h mac.HmacKeyManager
-  // nil input
-  if _, err := h.NewKeyData(nil); err == nil {
-    t.Errorf("expect an error when input is nil")
+func TestNewKeyDataWithInvalidInput(t *testing.T) {
+  km := mac.NewHmacKeyManager()
+  // invalid key formats
+  testFormats := genInvalidHmacKeyFormats()
+  for i := 0; i < len(testFormats); i++ {
+    format := testFormats[i]
+    serializedFormat, _ := proto.Marshal(format)
+    if _, err := km.NewKeyData(serializedFormat); err == nil {
+      t.Errorf("expect an error in test case %d", i)
+    }
   }
-  // input is not HmacKeyFormat
-  key := newHmacKey(commonpb.HashType_SHA256, 32, mac.HMAC_KEY_VERSION, testKey)
-  serializedKey, _ := proto.Marshal(key)
-  if _, err := h.NewKeyData(serializedKey); err == nil {
-    t.Errorf("expect an error when input is not serialized HmacKeyFormat")
+  // nil input
+  if _, err := km.NewKeyData(nil); err == nil {
+    t.Errorf("expect an error when input is nil")
   }
 }
 
 func TestDoesSupport(t *testing.T) {
-  var h mac.HmacKeyManager
-  if h.DoesSupport(mac.HMAC_TYPE_URL) == false {
+  km := mac.NewHmacKeyManager()
+  if !km.DoesSupport(mac.HMAC_TYPE_URL){
     t.Errorf("HmacKeyManager must support %s", mac.HMAC_TYPE_URL)
   }
-  badType := "some bad type"
-  if h.DoesSupport(badType) {
+  if km.DoesSupport("some bad type") {
     t.Errorf("HmacKeyManager must support only %s", mac.HMAC_TYPE_URL)
   }
 }
 
 func TestGetKeyType(t *testing.T) {
-  var h mac.HmacKeyManager
-  if h.GetKeyType() != mac.HMAC_TYPE_URL {
+  km := mac.NewHmacKeyManager()
+  if km.GetKeyType() != mac.HMAC_TYPE_URL {
     t.Errorf("incorrect GetKeyType()")
   }
 }
@@ -270,53 +232,93 @@ func TestKeyManagerInterface(t *testing.T) {
   var _ tink.KeyManager = (*mac.HmacKeyManager)(nil)
 }
 
-func newHmacParams(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacParams {
-  return &hmacpb.HmacParams{
-    Hash: hashType,
-    TagSize: tagSize,
+func genInvalidHmacKeys() []proto.Message {
+  badVersionKey := testutil.NewHmacKey(commonpb.HashType_SHA256, 32)
+  badVersionKey.Version += 1
+  shortKey := testutil.NewHmacKey(commonpb.HashType_SHA256, 32)
+  shortKey.KeyValue = []byte{1, 1}
+  return []proto.Message{
+    // not a HmacKey
+    util.NewHmacParams(commonpb.HashType_SHA256, 32),
+    // bad version
+    badVersionKey,
+    // tag size too big
+    testutil.NewHmacKey(commonpb.HashType_SHA1, 21),
+    testutil.NewHmacKey(commonpb.HashType_SHA256, 33),
+    testutil.NewHmacKey(commonpb.HashType_SHA512, 65),
+    // tag size too small
+    testutil.NewHmacKey(commonpb.HashType_SHA256, 1),
+    // key too short
+    shortKey,
+    // unknown hash type
+    testutil.NewHmacKey(commonpb.HashType_UNKNOWN_HASH, 32),
   }
 }
 
-func newHmacKey(hashType commonpb.HashType, tagSize uint32,
-                version uint32, keyValue []byte) *hmacpb.HmacKey {
-  params := newHmacParams(hashType, tagSize)
-  return &hmacpb.HmacKey{
-    Version: version,
-    Params: params,
-    KeyValue: keyValue,
+func genInvalidHmacKeyFormats() []proto.Message {
+  shortKeyFormat := testutil.NewHmacKeyFormat(commonpb.HashType_SHA256, 32)
+  shortKeyFormat.KeySize = 1
+  return []proto.Message{
+    // not a HmacKeyFormat
+    util.NewHmacParams(commonpb.HashType_SHA256, 32),
+    // tag size too big
+    testutil.NewHmacKeyFormat(commonpb.HashType_SHA1, 21),
+    testutil.NewHmacKeyFormat(commonpb.HashType_SHA256, 33),
+    testutil.NewHmacKeyFormat(commonpb.HashType_SHA512, 65),
+    // tag size too small
+    testutil.NewHmacKeyFormat(commonpb.HashType_SHA256, 1),
+    // key too short
+    shortKeyFormat,
+    // unknown hash type
+    testutil.NewHmacKeyFormat(commonpb.HashType_UNKNOWN_HASH, 32),
   }
 }
 
-func newHmacKeyFormat(hashType commonpb.HashType, tagSize uint32,
-                      keySize uint32) *hmacpb.HmacKeyFormat {
-  params := newHmacParams(hashType, tagSize)
-  return &hmacpb.HmacKeyFormat{
-    Params: params,
-    KeySize: keySize,
+func genValidHmacKeyFormats() []*hmacpb.HmacKeyFormat {
+  return []*hmacpb.HmacKeyFormat{
+    testutil.NewHmacKeyFormat(commonpb.HashType_SHA1, 20),
+    testutil.NewHmacKeyFormat(commonpb.HashType_SHA256, 32),
+    testutil.NewHmacKeyFormat(commonpb.HashType_SHA512, 64),
+  }
+}
+
+func genValidHmacKeys() []*hmacpb.HmacKey {
+  return []*hmacpb.HmacKey{
+    testutil.NewHmacKey(commonpb.HashType_SHA1, 20),
+    testutil.NewHmacKey(commonpb.HashType_SHA256, 32),
+    testutil.NewHmacKey(commonpb.HashType_SHA512, 64),
   }
 }
 
 // Checks whether the given HmacKey matches the given key HmacKeyFormat
-func checkKeyFormat(format *hmacpb.HmacKeyFormat, m proto.Message, t *testing.T) {
-  key := m.(*hmacpb.HmacKey)
+func validateHmacKey(format *hmacpb.HmacKeyFormat, key *hmacpb.HmacKey) error {
   if format.KeySize != uint32(len(key.KeyValue)) ||
       key.Params.TagSize != format.Params.TagSize ||
       key.Params.Hash != format.Params.Hash {
-    t.Errorf("key format and generated key do not match")
+    return fmt.Errorf("key format and generated key do not match")
   }
+  p, err := hmac.New(util.GetHashName(key.Params.Hash), key.KeyValue, key.Params.TagSize)
+  if err != nil {
+    return fmt.Errorf("cannot create primitive from key: %s", err)
+  }
+  return validateHmacPrimitive(p, key)
 }
 
-// Checks whether the given primitive matches the given HmacKey
-func checkPrimitive(p interface{}, key *hmacpb.HmacKey, t *testing.T) {
-  hm := p.(*hmac.Hmac)
-  if !reflect.DeepEqual(hm.Key, key.KeyValue) ||
-      hm.TagSize != key.Params.TagSize ||
-      reflect.ValueOf(hm.HashFunc).Pointer() !=
-        reflect.ValueOf(util.GetHashFunc(key.Params.Hash)).Pointer() {
-    t.Errorf("primitive and key do not matched")
+// validateHmacPrimitive checks whether the given primitive matches the given HmacKey
+func validateHmacPrimitive(p *hmac.Hmac, key *hmacpb.HmacKey) error {
+  if !bytes.Equal(p.Key, key.KeyValue) ||
+      p.TagSize != key.Params.TagSize ||
+      reflect.ValueOf(p.HashFunc).Pointer() !=
+        reflect.ValueOf(subtleUtil.GetHashFunc(util.GetHashName(key.Params.Hash))).Pointer() {
+    return fmt.Errorf("primitive and key do not matched")
   }
-  var m tink.Mac = hm
-  if _, err := m.ComputeMac([]byte{1, 2, 3, 4, 5}); err != nil {
-    t.Errorf("unable to use the generated primitive")
+  data := random.GetRandomBytes(20)
+  mac, err := p.ComputeMac(data)
+  if err != nil {
+    return fmt.Errorf("mac computation failed: %s", err)
   }
+  if valid, err := p.VerifyMac(mac, data); !valid || err != nil {
+    return fmt.Errorf("mac verification failed: %s", err)
+  }
+  return nil
 }

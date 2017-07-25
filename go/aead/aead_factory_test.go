@@ -22,7 +22,7 @@ import (
   "strings"
   "github.com/google/tink/go/aead/aead"
   "github.com/google/tink/go/subtle/random"
-  subtleAead "github.com/google/tink/go/subtle/aead"
+  "github.com/google/tink/go/subtle/aes"
   "github.com/google/tink/go/util/util"
   "github.com/google/tink/go/util/testutil"
   "github.com/google/tink/go/tink/tink"
@@ -124,7 +124,7 @@ func validateAeadFactoryCipher(encryptCipher tink.Aead,
   if string(ct[:prefixSize]) != expectedPrefix {
     return fmt.Errorf("incorrect prefix with regular plaintext")
   }
-  if prefixSize+len(pt)+subtleAead.AES_GCM_IV_SIZE+subtleAead.AES_GCM_TAG_SIZE != len(ct) {
+  if prefixSize+len(pt)+aes.AES_GCM_IV_SIZE+aes.AES_GCM_TAG_SIZE != len(ct) {
     return fmt.Errorf("lengths of plaintext and ciphertext don't match with regular plaintext")
   }
 
@@ -142,7 +142,7 @@ func validateAeadFactoryCipher(encryptCipher tink.Aead,
   if string(ct[:prefixSize]) != expectedPrefix {
     return fmt.Errorf("incorrect prefix with short plaintext")
   }
-  if prefixSize+len(pt)+subtleAead.AES_GCM_IV_SIZE+subtleAead.AES_GCM_TAG_SIZE != len(ct) {
+  if prefixSize+len(pt)+aes.AES_GCM_IV_SIZE+aes.AES_GCM_TAG_SIZE != len(ct) {
     return fmt.Errorf("lengths of plaintext and ciphertext don't match with short plaintext")
   }
   return nil

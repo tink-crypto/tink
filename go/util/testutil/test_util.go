@@ -128,6 +128,12 @@ func NewHmacKey(hashType HashType, tagSize uint32) *HmacKey {
   return util.NewHmacKey(params, mac.HMAC_KEY_VERSION, keyValue)
 }
 
+func NewHmacKeyFormat(hashType HashType, tagSize uint32) *HmacKeyFormat {
+  params := util.NewHmacParams(hashType, tagSize)
+  keySize := uint32(20)
+  return util.NewHmacKeyFormat(params, keySize)
+}
+
 func NewHmacKeyData(hashType HashType, tagSize uint32) *KeyData {
   key := NewHmacKey(hashType, tagSize)
   serializedKey, _ := proto.Marshal(key)

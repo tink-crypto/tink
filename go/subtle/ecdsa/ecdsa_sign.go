@@ -16,44 +16,61 @@ package ecdsa
 
 import (
   "fmt"
+  "hash"
   "math/big"
   "crypto/ecdsa"
   "crypto/rand"
-  "github.com/google/tink/go/tink/tink"
+  "github.com/google/tink/go/tink/primitives"
   "github.com/google/tink/go/subtle/util"
-  ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
-  commonpb "github.com/google/tink/proto/common_go_proto"
 )
 
 // ecdsaSign is an implementation of PublicKeySign for ECDSA.
 // At the moment, the implementation only accepts DER encoding.
-type ecdsaSign struct {
+type EcdsaSign struct {
   privateKey *ecdsa.PrivateKey
-  hashType commonpb.HashType
-  encoding ecdsapb.EcdsaSignatureEncoding
+  hashFunc func() hash.Hash
+  encoding string
 }
 
 // Assert that ecdsaSign implements the PublicKeySign interface.
-var _ tink.PublicKeySign = (*ecdsaSign)(nil)
+var _ tink.PublicKeySign = (*EcdsaSign)(nil)
 
 // NewEcdsaSign creates a new instance of EcdsaSign.
-func NewEcdsaSign(privateKey *ecdsapb.EcdsaPrivateKey) (*ecdsaSign, error) {
-  if err := ValidatePrivateKey(privateKey); err != nil {
+func NewEcdsaSign(hashAlg string, curve string, encoding string, keyValue []byte) (*EcdsaSign, error) {
+  if err := ValidateParams(hashAlg, curve, encoding); err != nil {
     return nil, fmt.Errorf("ecdsa_sign: %s", err)
   }
-  params := privateKey.PublicKey.Params
-  publicKey := ecdsa.PublicKey{Curve: util.GetCurve(params.Curve), X: nil, Y: nil}
-  d := new(big.Int).SetBytes(privateKey.KeyValue)
-  return &ecdsaSign{
+  if len(keyValue) == 0 {
+    return nil, fmt.Errorf("ecdsa_sign: invalid key value")
+  }
+  hashFunc := util.GetHashFunc(hashAlg)
+  publicKey := ecdsa.PublicKey{Curve: util.GetCurve(curve), X: nil, Y: nil}
+  d := new(big.Int).SetBytes(keyValue)
+  return &EcdsaSign{
     privateKey: &ecdsa.PrivateKey{PublicKey: publicKey, D: d},
-    hashType: params.HashType,
-    encoding: params.Encoding,
+    hashFunc: hashFunc,
+    encoding: encoding,
+  }, nil
+}
+
+// NewEcdsaSignFromPrivateKey creates a new instance of EcdsaSign
+func NewEcdsaSignFromPrivateKey(hashAlg string, encoding string,
+                              privateKey *ecdsa.PrivateKey) (*EcdsaSign, error) {
+  curve := util.ConvertCurveName(privateKey.Curve.Params().Name)
+  if err := ValidateParams(hashAlg, curve, encoding); err != nil {
+    return nil, fmt.Errorf("ecdsa_sign: %s", err)
+  }
+  hashFunc := util.GetHashFunc(hashAlg)
+  return &EcdsaSign{
+    privateKey: privateKey,
+    hashFunc: hashFunc,
+    encoding: encoding,
   }, nil
 }
 
 // Sign computes a signature for the given data.
-func (e *ecdsaSign) Sign(data []byte) ([]byte, error) {
-  hashed := util.GetHash(e.hashType, data)
+func (e *EcdsaSign) Sign(data []byte) ([]byte, error) {
+  hashed := util.ComputeHash(e.hashFunc, data)
   r, s, err := ecdsa.Sign(rand.Reader, e.privateKey, hashed)
   if err != nil {
     return nil, fmt.Errorf("ecdsa_sign: signing failed: %s", err)

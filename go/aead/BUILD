@@ -21,14 +21,14 @@ TEST_SRCS = [
 ]
 
 DEPS = [
-    "//proto:tink_go_proto",
-    "//proto:common_go_proto",
-    "//proto:aes_gcm_go_proto",
-    "//go/tink",
-    "//go/subtle:aead",
-    "//go/subtle:util",
+    "//go/subtle:aes",
     "//go/subtle:random",
+    "//go/subtle:util",
+    "//go/tink",
     "//go/util",
+    "//proto:aes_gcm_go_proto",
+    "//proto:common_go_proto",
+    "//proto:tink_go_proto",
     "@com_github_golang_protobuf//proto:go_default_library",
 ]
 

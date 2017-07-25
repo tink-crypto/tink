@@ -21,10 +21,13 @@ import (
   "encoding/asn1"
   . "github.com/google/tink/go/subtle/ecdsa"
   "github.com/google/tink/go/subtle/random"
-  "github.com/google/tink/go/util/util"
-  commonpb "github.com/google/tink/proto/common_go_proto"
-  ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 )
+
+type paramsTest struct {
+  hash string
+  curve string
+  encoding string
+}
 
 var _ = fmt.Println
 
@@ -32,7 +35,7 @@ func TestEncodeDecode(t *testing.T) {
   nTest := 1000
   for i := 0; i < nTest; i++ {
     sig := newRandomSignature()
-    encoding := ecdsapb.EcdsaSignatureEncoding_DER
+    encoding := "DER"
     encoded, err := sig.Encode(encoding)
     if err != nil {
       t.Errorf("unexpected error during encoding: %s", err)
@@ -61,7 +64,7 @@ func TestEncodeDecode(t *testing.T) {
 
 func TestEncodeWithInvalidInput(t *testing.T) {
   sig := newRandomSignature()
-  _, err := sig.Encode(ecdsapb.EcdsaSignatureEncoding_UNKNOWN_ENCODING)
+  _, err := sig.Encode("UNKNOWN_ENCODING")
   if err == nil {
     t.Errorf("expect an error when encoding is invalid")
   }
@@ -70,7 +73,7 @@ func TestEncodeWithInvalidInput(t *testing.T) {
 func TestDecodeWithInvalidInput(t *testing.T) {
   var sig *EcdsaSignature
   var encoded []byte
-  encoding := ecdsapb.EcdsaSignatureEncoding_DER
+  encoding := "DER"
 
   // modified first byte
   sig = newRandomSignature()
@@ -113,115 +116,41 @@ func TestDecodeWithInvalidInput(t *testing.T) {
   }
 }
 
-func TestValidatePrivateKey(t *testing.T) {
-  // valid
-  params := genValidParams()
-  for i := 0; i < len(params); i++ {
-    pub := new(ecdsapb.EcdsaPublicKey)
-    pub.Params = params[i]
-    priv := new(ecdsapb.EcdsaPrivateKey)
-    priv.PublicKey = pub
-    if err := ValidatePrivateKey(priv); err != nil {
-      t.Errorf("unexpected error for valid private key: %s, i = %d", err, i)
-    }
-  }
-  // nil private key
-  if err := ValidatePrivateKey(nil); err == nil {
-    t.Errorf("expected an error when private key is nil")
-  }
-  // nil public key
-  if err := ValidatePrivateKey(util.NewEcdsaPrivateKey(0, nil, nil)); err == nil {
-    t.Errorf("expected an error when public key is nil")
-  }
-  // invalid params
-  params = genInvalidParams()
-  for i := 0; i < len(params); i++ {
-    pub := new(ecdsapb.EcdsaPublicKey)
-    pub.Params = params[i]
-    priv := new(ecdsapb.EcdsaPrivateKey)
-    priv.PublicKey = pub
-    if err := ValidatePrivateKey(priv); err == nil {
-      t.Errorf("expected an error when private key is invalid, i = %d", i)
-    }
-  }
-}
-
-func TestValidatePublicKey(t *testing.T) {
-  // valid
-  params := genValidParams()
-  for i := 0; i < len(params); i++ {
-    pub := new(ecdsapb.EcdsaPublicKey)
-    pub.Params = params[i]
-    if err := ValidatePublicKey(pub); err != nil {
-      t.Errorf("unexpected error for valid public key: %s, i = %d", err, i)
-    }
-  }
-  // nil public key
-  if err := ValidatePublicKey(nil); err == nil {
-    t.Errorf("expected an error when public key is nil")
-  }
-  // invalid params
-  params = genInvalidParams()
-  for i := 0; i < len(params); i++ {
-    pub := new(ecdsapb.EcdsaPublicKey)
-    pub.Params = params[i]
-    if err := ValidatePublicKey(pub); err == nil {
-      t.Errorf("expected an error when public key is invalid, i = %d", i)
-    }
-  }
-}
-
 func TestValidateParams(t *testing.T) {
   params := genValidParams()
   for i := 0; i < len(params); i++ {
-    if err := ValidateParams(params[i]); err != nil {
+    if err := ValidateParams(params[i].hash, params[i].curve, params[i].encoding); err != nil {
       t.Errorf("unexpected error for valid params: %s, i = %d", err, i)
     }
   }
   params = genInvalidParams()
   for i := 0; i < len(params); i++ {
-    if err := ValidateParams(params[i]); err == nil {
+    if err := ValidateParams(params[i].hash, params[i].curve, params[i].encoding); err == nil {
       t.Errorf("expect an error when params are invalid, i = %d", i)
     }
   }
 }
 
-func genInvalidParams() []*ecdsapb.EcdsaParams {
-  return []*ecdsapb.EcdsaParams{
+func genInvalidParams() []paramsTest {
+  return []paramsTest{
     // invalid encoding
-    util.NewEcdsaParams(commonpb.HashType_SHA256,
-                        commonpb.EllipticCurveType_NIST_P256,
-                        ecdsapb.EcdsaSignatureEncoding_UNKNOWN_ENCODING),
+    paramsTest{hash: "SHA256", curve: "NIST_P256", encoding: "UNKNOWN_ENCODING"},
     // invalid curve
-    util.NewEcdsaParams(commonpb.HashType_SHA256,
-                        commonpb.EllipticCurveType_UNKNOWN_CURVE,
-                        ecdsapb.EcdsaSignatureEncoding_DER),
+    paramsTest{hash: "SHA256", curve: "UNKNOWN_CURVE", encoding: "DER"},
     // invalid hash: P256 and SHA-512
-    util.NewEcdsaParams(commonpb.HashType_SHA512,
-                        commonpb.EllipticCurveType_NIST_P256,
-                        ecdsapb.EcdsaSignatureEncoding_DER),
+    paramsTest{hash: "SHA512", curve: "NIST_P256", encoding: "DER"},
     // invalid hash: P521 and SHA-256
-    util.NewEcdsaParams(commonpb.HashType_SHA256,
-                        commonpb.EllipticCurveType_NIST_P521,
-                        ecdsapb.EcdsaSignatureEncoding_DER),
+    paramsTest{hash: "SHA256", curve: "NIST_P521", encoding: "DER"},
     // invalid hash: P384 and SHA-256
-    util.NewEcdsaParams(commonpb.HashType_SHA256,
-                        commonpb.EllipticCurveType_NIST_P384,
-                        ecdsapb.EcdsaSignatureEncoding_DER),
+    paramsTest{hash: "SHA256", curve: "NIST_P384", encoding: "DER"},
   }
 }
 
-func genValidParams() []*ecdsapb.EcdsaParams {
-  return []*ecdsapb.EcdsaParams{
-    util.NewEcdsaParams(commonpb.HashType_SHA256,
-                        commonpb.EllipticCurveType_NIST_P256,
-                        ecdsapb.EcdsaSignatureEncoding_DER),
-    util.NewEcdsaParams(commonpb.HashType_SHA512,
-                        commonpb.EllipticCurveType_NIST_P384,
-                        ecdsapb.EcdsaSignatureEncoding_DER),
-    util.NewEcdsaParams(commonpb.HashType_SHA512,
-                        commonpb.EllipticCurveType_NIST_P521,
-                        ecdsapb.EcdsaSignatureEncoding_DER),
+func genValidParams() []paramsTest {
+  return []paramsTest{
+    paramsTest{hash: "SHA256", curve: "NIST_P256", encoding: "DER"},
+    paramsTest{hash: "SHA512", curve: "NIST_P384", encoding: "DER"},
+    paramsTest{hash: "SHA512", curve: "NIST_P521", encoding: "DER"},
   }
 }
 

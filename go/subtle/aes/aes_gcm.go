@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
-package aead
+package aes
 
 import (
   "fmt"
   "crypto/aes"
   "crypto/cipher"
-  "github.com/google/tink/go/tink/tink"
+  "github.com/google/tink/go/tink/primitives"
   "github.com/google/tink/go/subtle/random"
-  "github.com/google/tink/go/subtle/util"
 )
 
 const (
@@ -29,7 +28,7 @@ const (
   AES_GCM_TAG_SIZE = 16
 )
 
-// AesGcm implements AES-GCM.
+// AesGcm is an implementation of Aead interface.
 type AesGcm struct {
   Key []byte
 }
@@ -37,15 +36,25 @@ type AesGcm struct {
 // Assert that AesGcm implements the Aead interface.
 var _ tink.Aead = (*AesGcm)(nil)
 
-// NewAesGcm returns an AES-GCM cipher.
+// NewAesGcm returns an AesGcm instance.
 // The key argument should be the AES key, either 16, 24, or 32 bytes to select
 // AES-128, AES-192, or AES-256.
 func NewAesGcm(key []byte) (*AesGcm, error) {
   keySize := uint32(len(key))
-  if err := util.ValidateAesKeySize(keySize); err != nil {
+  if err := ValidateAesKeySize(keySize); err != nil {
     return nil, fmt.Errorf("aes_gcm: %s", err)
   }
   return &AesGcm{Key: key}, nil
+}
+
+// ValidateAesKeySize checks if the given key size is a valid AES key size.
+func ValidateAesKeySize(sizeInBytes uint32) error {
+  switch sizeInBytes {
+    case 16, 24, 32:
+      return nil
+    default:
+      return fmt.Errorf("invalid AES key size %d", sizeInBytes)
+  }
 }
 
 // Encrypt encrypts {@code pt} with {@code aad} as additional

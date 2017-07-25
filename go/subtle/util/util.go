@@ -24,13 +24,10 @@ import (
   "crypto/sha256"
   "crypto/sha512"
   "crypto/elliptic"
-  commonpb "github.com/google/tink/proto/common_go_proto"
 )
 
-/**
- * Checks whether the given version is valid. The version is valid only if
- * it is the range [0..{@code maxExpected}]
- */
+// ValidateVersion checks whether the given version is valid. The version is valid
+// only if it is the range [0..maxExpected]
 func ValidateVersion(version uint32, maxExpected uint32) error {
   if version > maxExpected {
     msg := fmt.Sprintf("key has version %v; " +
@@ -41,82 +38,44 @@ func ValidateVersion(version uint32, maxExpected uint32) error {
   return nil
 }
 
-/**
- * Checks if {@code sizeInBytes} is a valid AES key size.
- */
-func ValidateAesKeySize(sizeInBytes uint32) error {
-  switch sizeInBytes {
-    case 16, 24, 32:
-      return nil
-    default:
-      return fmt.Errorf("invalid AES key size %d", sizeInBytes)
-  }
-}
-
-/**
- * Checks if {@code curveType} is valid.
- */
-func ValidateCurveType(curveType commonpb.EllipticCurveType) error {
-  switch curveType {
-    case commonpb.EllipticCurveType_NIST_P256,
-        commonpb.EllipticCurveType_NIST_P384,
-        commonpb.EllipticCurveType_NIST_P521:
-      return nil
-    default:
-      return fmt.Errorf("unsupported curve type: %v", curveType)
-  }
-}
-
-/**
- * Checks if {@code hashType} is supported.
- */
-func ValidateHashType(hashType commonpb.HashType) error {
-  switch hashType {
-    case commonpb.HashType_SHA1,
-        commonpb.HashType_SHA256,
-        commonpb.HashType_SHA512:
-      return nil
-    default:
-      return fmt.Errorf("unsupported hash type: %v", hashType)
-  }
-}
-
-func HashNameToHashType(name string) commonpb.HashType {
+// ConvertTestVectorHashName converts different forms of a hash name to the
+// hash name that tink recognizes
+func ConvertHashName(name string) string {
   switch name {
     case "SHA-256":
-      return commonpb.HashType_SHA256
+      return "SHA256"
     case "SHA-512":
-      return commonpb.HashType_SHA512
+      return "SHA512"
     case "SHA-1":
-      return commonpb.HashType_SHA1
+      return "SHA1"
     default:
-      return commonpb.HashType_UNKNOWN_HASH
+      return ""
   }
 }
 
-func CurveNameToCurveType(name string) commonpb.EllipticCurveType {
+// ConvertCurveName converts different forms of a curve name to the
+// name that tink recognizes
+func ConvertCurveName(name string) string {
   switch name {
-    case "secp256r1":
-      return commonpb.EllipticCurveType_NIST_P256
-    case "secp384r1":
-      return commonpb.EllipticCurveType_NIST_P384
-    case "secp521r1":
-      return commonpb.EllipticCurveType_NIST_P521
+    case "secp256r1", "P-256":
+      return "NIST_P256"
+    case "secp384r1", "P-384":
+      return "NIST_P384"
+    case "secp521r1", "P-521":
+      return "NIST_P521"
     default:
-      return commonpb.EllipticCurveType_UNKNOWN_CURVE
+      return ""
   }
 }
 
-/**
- * @return the corresponding hash function of {@code hashType}
- */
-func GetHashFunc(hashType commonpb.HashType) func() hash.Hash {
-  switch hashType {
-    case commonpb.HashType_SHA1:
+// GetHashFunc returns the corresponding hash function of the given hash name.
+func GetHashFunc(hash string) func() hash.Hash {
+  switch hash {
+    case "SHA1":
       return sha1.New
-    case commonpb.HashType_SHA256:
+    case "SHA256":
       return sha256.New
-    case commonpb.HashType_SHA512:
+    case "SHA512":
       return sha512.New
     default:
       return nil
@@ -125,33 +84,30 @@ func GetHashFunc(hashType commonpb.HashType) func() hash.Hash {
 
 // GetCurve returns the curve object that corresponds to the given curve type.
 // It returns null if the curve type is not supported.
-func GetCurve(curveType commonpb.EllipticCurveType) elliptic.Curve {
-  switch curveType {
-    case commonpb.EllipticCurveType_NIST_P224:
+func GetCurve(curve string) elliptic.Curve {
+  switch curve {
+    case "NIST_P224":
       return elliptic.P224()
-    case commonpb.EllipticCurveType_NIST_P256:
+    case "NIST_P256":
       return elliptic.P256()
-    case commonpb.EllipticCurveType_NIST_P384:
+    case "NIST_P384":
       return elliptic.P384()
-    case commonpb.EllipticCurveType_NIST_P521:
+    case "NIST_P521":
       return elliptic.P521()
     default:
       return nil
   }
 }
 
-// GetHash calculates a hash of the given data using the given hash function.
-func GetHash(hashType commonpb.HashType, data []byte) []byte {
-  hashFunc := GetHashFunc(hashType)
-  if hashFunc == nil {
-    return nil
-  }
+// ComputeHash calculates a hash of the given data using the given hash function.
+func ComputeHash(hashFunc func() hash.Hash, data []byte) []byte {
   h := hashFunc()
   h.Write(data)
   ret := h.Sum(nil)
   return ret
 }
 
+// NewBigIntFromHex returns a big integer from a hex string.
 func NewBigIntFromHex(s string) (*big.Int, error) {
   if len(s)%2 == 1 {
     s = "0" + s

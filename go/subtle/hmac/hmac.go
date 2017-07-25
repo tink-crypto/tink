@@ -12,57 +12,96 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
-
-/**
- * HMAC implementation using crypto package
- */
-
-//TODO(thaidn): enforce some minimal value for key size and tag size.
-
 package hmac
 
 import (
-  "crypto/hmac"
   "fmt"
   "hash"
+  "crypto/hmac"
+  "github.com/google/tink/go/subtle/util"
+  "github.com/google/tink/go/tink/primitives"
 )
 
-// Context used for logging error
-var context = "subtle/hmac"
+const (
+  // Minimum key size in bytes.
+  minKeySizeInBytes = uint32(16)
 
+  // Minimum tag size in bytes. This provides minimum 80-bit security strength.
+  minTagSizeInBytes = uint32(10)
+)
+
+// Maximum tag size in bytes for each hash type
+var maxTagSizeInBytes = map[string]uint32{
+  "SHA1": uint32(20),
+  "SHA256": uint32(32),
+  "SHA512": uint32(64),
+}
+
+var errHmacInvalidInput = fmt.Errorf("hmac: invalid input")
+
+// Hmac implementation of interface tink.Mac
 type Hmac struct {
   HashFunc func() hash.Hash
   Key []byte
   TagSize uint32
 }
 
-/**
- * Computes message authentication code (MAC) for {@code data}.
- *
- * @return MAC value.
- */
+// This makes sure that Hmac implements the tink.Mac interface
+var _ tink.Mac = (*Hmac)(nil)
+
+// New creates a new instance of Hmac
+func New(hashAlg string, key []byte, tagSize uint32) (*Hmac, error) {
+  keySize := uint32(len(key))
+  if err := ValidateParams(hashAlg, keySize, tagSize); err != nil {
+    return nil, fmt.Errorf("hmac: %s", err)
+  }
+  hashFunc := util.GetHashFunc(hashAlg)
+  if hashFunc == nil {
+    return nil, fmt.Errorf("hmac: invalid hash algorithm")
+  }
+  return &Hmac{
+    HashFunc: hashFunc,
+    Key: key,
+    TagSize: tagSize,
+  }, nil
+}
+
+// ValidateParams validates parameters of Hmac constructor.
+func ValidateParams(hash string, keySize uint32, tagSize uint32) error {
+  // validate tag size
+  maxTagSize, found := maxTagSizeInBytes[hash]
+  if !found {
+    return fmt.Errorf("invalid hash algorithm")
+  }
+  if tagSize > maxTagSize {
+    return fmt.Errorf("tag size too big")
+  }
+  if tagSize < minTagSizeInBytes {
+    return fmt.Errorf("tag size too small")
+  }
+  // validate key size
+  if keySize < minKeySizeInBytes {
+    return fmt.Errorf("key too short")
+  }
+  return nil
+}
+
+// ComputeMac computes message authentication code (MAC) for the given data.
 func (h *Hmac) ComputeMac(data []byte) ([]byte, error) {
   if data == nil {
-    return []byte{}, fmt.Errorf("%s: %s", context, "ComputeMac() called with nil")
+    return nil, errHmacInvalidInput
   }
   mac := hmac.New(h.HashFunc, h.Key)
   mac.Write(data)
   tag := mac.Sum(nil)
-  if uint32(len(tag)) < h.TagSize {
-    return []byte{}, fmt.Errorf("%s: %s", context, "tag size is too large")
-  }
   return tag[:h.TagSize], nil
 }
 
-
-/**
- * Verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
- *
- * @return true if {@code mac} is correct; false otherwise.
- */
+// VerifyMac verifies whether the given MAC is a correct authentication code (MAC)
+// the given data.
 func (h *Hmac) VerifyMac(mac []byte, data []byte) (bool, error) {
   if mac == nil || data == nil {
-    return false, fmt.Errorf("%s: %s", context, "VerifyMac() called with nil")
+    return false, errHmacInvalidInput
   }
   expectedMAC, err := h.ComputeMac(data)
   if err != nil {

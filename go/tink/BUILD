@@ -7,11 +7,14 @@ package(
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 # tink
-TINK_SRCS = [
+PRIMITIVES_SRCS = [
     "mac.go",
     "aead.go",
     "public_key_sign.go",
     "public_key_verify.go",
+]
+
+TINK_SRCS = PRIMITIVES_SRCS + [
     "key_manager.go",
     "keyset_handle.go",
     "cleartext_keyset_handle.go",
@@ -59,4 +62,10 @@ go_test(
     name = "tink_internal_test",
     srcs = TINK_INTERNAL_TEST_SRCS,
     library = ":tink",
+)
+
+# primitives only
+go_library(
+    name = "primitives",
+    srcs = PRIMITIVES_SRCS,
 )

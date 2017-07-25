@@ -134,3 +134,28 @@ func NewEcdsaParams(hashType HashType,
     Encoding: encoding,
   }
 }
+
+// utilities for converting proto types to strings
+func GetHashName(hashType HashType) string {
+  ret, _ := HashType_name[int32(hashType)]
+  return ret
+}
+
+func GetCurveName(curve EllipticCurveType) string {
+  ret, _ := EllipticCurveType_name[int32(curve)]
+  return ret
+}
+
+func GetEncodingName(encoding EcdsaSignatureEncoding) string {
+  ret, _ := EcdsaSignatureEncoding_name[int32(encoding)]
+  return ret
+}
+
+// GetEcdsaParamNames returns the string representations of each parameter in
+// the given EcdsaParams
+func GetEcdsaParamNames(params *EcdsaParams) (string, string, string) {
+  hashName := GetHashName(params.HashType)
+  curveName := GetCurveName(params.Curve)
+  encodingName := GetEncodingName(params.Encoding)
+  return hashName, curveName, encodingName
+}
