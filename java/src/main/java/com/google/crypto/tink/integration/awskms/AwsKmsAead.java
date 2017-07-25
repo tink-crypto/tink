@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.integration;
+package com.google.crypto.tink.integration.awskms;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.kms.AWSKMS;
@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
 /**
- * This primitive forwards encryption/decryption requests to a key in AWS KMS.
+ * A {@link Aead} that forwards encryption/decryption requests to a key in AWS KMS.
  */
 public final class AwsKmsAead implements Aead {
 
@@ -55,8 +55,10 @@ public final class AwsKmsAead implements Aead {
     try {
       EncryptRequest req = new EncryptRequest()
           .withKeyId(keyArn)
-          .withPlaintext(ByteBuffer.wrap(plaintext))
-          .addEncryptionContextEntry("aad", BinaryUtils.toHex(associatedData));
+          .withPlaintext(ByteBuffer.wrap(plaintext));
+      if (associatedData != null && associatedData.length != 0) {
+        req = req.addEncryptionContextEntry("associatedData", BinaryUtils.toHex(associatedData));
+      }
       return kmsClient.encrypt(req).getCiphertextBlob().array();
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("encryption failed", e);
@@ -68,8 +70,10 @@ public final class AwsKmsAead implements Aead {
       throws GeneralSecurityException {
     try {
       DecryptRequest req = new DecryptRequest()
-          .withCiphertextBlob(ByteBuffer.wrap(ciphertext))
-          .addEncryptionContextEntry("aad", BinaryUtils.toHex(associatedData));
+          .withCiphertextBlob(ByteBuffer.wrap(ciphertext));
+      if (associatedData != null && associatedData.length != 0) {
+        req = req.addEncryptionContextEntry("associatedData", BinaryUtils.toHex(associatedData));
+      }
       return kmsClient.decrypt(req).getPlaintext().array();
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("decryption failed", e);

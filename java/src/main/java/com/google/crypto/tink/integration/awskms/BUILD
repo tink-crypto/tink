@@ -11,13 +11,9 @@ load("//java/build_defs:javac.bzl", "JAVACOPTS")
 # public interfaces
 
 java_library(
-    name = "integration",
+    name = "awskms",
     srcs = glob([
-        "AwsKmsAead.java",
-        "AwsKmsClient.java",
-        "GcpKmsAead.java",
-        "GcpKmsClient.java",
-        "IntegrationUtil.java",
+        "*.java",
     ]),
     javacopts = JAVACOPTS,
     plugins = [
@@ -34,14 +30,10 @@ java_library(
     ],
     deps = [
         "//java/src/main/java/com/google/crypto/tink",
+        "//java/src/main/java/com/google/crypto/tink/subtle",
         "@com_amazonaws_sdk_core//jar",
         "@com_amazonaws_sdk_kms//jar",
-        "@com_google_api_client//jar",
         "@com_google_auto_service//jar",
-        "@com_google_cloudkms//jar",
-        "@com_google_http_client//jar",
-        "@com_google_http_client_jackson2//jar",
-        "@com_google_oauth_client//jar",
     ],
 )
 

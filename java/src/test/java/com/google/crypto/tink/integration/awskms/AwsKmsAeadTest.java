@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.integration;
+package com.google.crypto.tink.integration.awskms;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;

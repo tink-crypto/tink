@@ -14,7 +14,8 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/aead",
         "//java/src/main/java/com/google/crypto/tink/config",
         "//java/src/main/java/com/google/crypto/tink/hybrid",
-        "//java/src/main/java/com/google/crypto/tink/integration",
+        "//java/src/main/java/com/google/crypto/tink/integration/awskms",
+        "//java/src/main/java/com/google/crypto/tink/integration/gcpkms",
         "//java/src/main/java/com/google/crypto/tink/mac",
         "//java/src/main/java/com/google/crypto/tink/signature",
         "//java/src/main/java/com/google/crypto/tink/streamingaead",
@@ -22,7 +23,7 @@ java_library(
 )
 
 # like :java, but for Android
-java_library(
+android_library(
     name = "android",
     visibility = ["//visibility:public"],
     exports = [
@@ -30,6 +31,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/aead:android",
         "//java/src/main/java/com/google/crypto/tink/config:android",
         "//java/src/main/java/com/google/crypto/tink/hybrid:android",
+        "//java/src/main/java/com/google/crypto/tink/integration/android",
         "//java/src/main/java/com/google/crypto/tink/mac:android",
         "//java/src/main/java/com/google/crypto/tink/signature:android",
         "//java/src/main/java/com/google/crypto/tink/streamingaead:android",
@@ -136,7 +138,7 @@ java_library(
     ],
 )
 
-java_library(
+android_library(
     name = "testonly_android",
     testonly = 1,
     visibility = ["//visibility:public"],

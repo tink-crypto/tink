@@ -80,6 +80,7 @@
     <os-maven-plugin.version>1.2.0.Final</os-maven-plugin.version>
 
     <!-- library versions -->
+    <android-sdk.version>23</android-sdk.version>
     <aws-java-sdk-core.version>1.11.166</aws-java-sdk-core.version>
     <aws-java-sdk-kms.version>1.11.166</aws-java-sdk-kms.version>
     <error-prone-annotations.version>2.0.19</error-prone-annotations.version>
@@ -119,6 +120,16 @@
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-java-sdk-kms</artifactId>
         <version>${aws-java-sdk-kms.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.android</groupId>
+        <artifactId>android</artifactId>
+        <version>${android-sdk.version}</version>
+        <scope>system</scope>
+        <systemPath>
+          ${env.ANDROID_HOME}/platforms/android-${android-sdk.version}/android.jar
+        </systemPath>
       </dependency>
 
       <dependency>

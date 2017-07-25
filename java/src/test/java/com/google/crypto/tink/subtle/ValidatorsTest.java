@@ -149,4 +149,58 @@ public class ValidatorsTest {
       // Expected.
     }
   }
+
+  @Test
+  public void testValidateCryptoKeyUri() throws Exception {
+    try {
+      Validators.validateCryptoKeyUri("a");
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      TestUtil.assertExceptionContains(e, "Invalid Google Cloud KMS Key URI");
+    }
+
+    String cryptoKey = TestUtil.createGcpKmsKeyUri(
+        "projectId", "locationId", "ringId", "cryptoKeyId");
+    try {
+      Validators.validateCryptoKeyUri(cryptoKey);
+    } catch (GeneralSecurityException e) {
+      fail("Valid CryptoKey URI should work: " + cryptoKey);
+    }
+
+    cryptoKey = TestUtil.createGcpKmsKeyUri(
+        "projectId.", "locationId-", "ringId_", "cryptoKeyId~");
+    try {
+      Validators.validateCryptoKeyUri(cryptoKey);
+    } catch (GeneralSecurityException e) {
+      fail("Valid CryptoKey URI should work: " + cryptoKey);
+    }
+
+    cryptoKey = TestUtil.createGcpKmsKeyUri(
+        "projectId%", "locationId", "ringId", "cryptoKeyId");
+    try {
+      Validators.validateCryptoKeyUri(cryptoKey);
+      fail("CryptoKey URI cannot contain %");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
+
+    cryptoKey = TestUtil.createGcpKmsKeyUri(
+        "projectId/", "locationId", "ringId", "cryptoKeyId");
+    try {
+      Validators.validateCryptoKeyUri(cryptoKey);
+      fail("CryptoKey URI cannot contain /");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
+
+    String cryptoVersion = TestUtil.createGcpKmsKeyUri(
+        "projectId", "locationId", "ringId", "cryptoKeyId") + "/cryptoKeyVersions/versionId";
+    try {
+      Validators.validateCryptoKeyUri(cryptoVersion);
+      fail("CryptoKeyVersion is not a valid CryptoKey");
+    } catch (GeneralSecurityException e) {
+      TestUtil.assertExceptionContains(e,
+          "The URI must point to a CryptoKey, not a CryptoKeyVersion");
+    }
+  }
 }

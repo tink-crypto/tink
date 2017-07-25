@@ -17,6 +17,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.google.android</groupId>
+      <artifactId>android</artifactId>
+      <version>${android-sdk.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
     </dependency>
@@ -61,11 +67,11 @@
             <exclude>**/AwsKmsClient.java</exclude>
             <exclude>**/GcpKmsAead.java</exclude>
             <exclude>**/GcpKmsClient.java</exclude>
-            <exclude>**/IntegrationUtil.java</exclude>
+            <exclude>**/TextFormatKeysetReaders.java</exclude>
+            <exclude>**/TextFormatKeysetWriters.java</exclude>
           </excludes>
           <testExcludes>
             <exclude>**/AwsKmsAeadTest.java</exclude>
-            <exclude>**/IntegrationUtilTest.java</exclude>
             <exclude>**/KmsAeadKeyManagerTest.java</exclude>
             <exclude>**/KmsEnvelopeAeadKeyManagerTest.java</exclude>
             <!-- these tests depend on JsonFormat which does not work with protobuf lite -->

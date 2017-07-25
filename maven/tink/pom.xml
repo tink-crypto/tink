@@ -129,6 +129,22 @@
 
   <build>
     <plugins>
+      <!-- exclude Android code which require Android SDK -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.5.1</version>
+        <configuration>
+          <excludes>
+            <exclude>**/AndroidKeysetHandle.java</exclude>
+            <exclude>**/AndroidKeystoreAesGcm.java</exclude>
+            <exclude>**/AndroidKeystoreKmsClient.java</exclude>
+            <exclude>**/SharedPrefKeysetReader.java</exclude>
+            <exclude>**/SharedPrefKeysetWriter.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+
       <!-- generate and build full protos -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>

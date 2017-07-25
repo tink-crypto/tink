@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.integration;
+package com.google.crypto.tink.integration.awskms;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -25,6 +25,7 @@ import com.amazonaws.services.kms.AWSKMSClient;
 import com.google.auto.service.AutoService;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.subtle.Validators;
 import java.security.GeneralSecurityException;
 
 /**
@@ -32,7 +33,11 @@ import java.security.GeneralSecurityException;
  */
 @AutoService(KmsClient.class)
 public final class AwsKmsClient implements KmsClient {
+  /**
+   * The prefix of all keys stored in AWS KMS.
+   */
   public static final String PREFIX = "aws-kms://";
+
   private AWSKMS client;
   private String keyUri;
 
@@ -68,11 +73,11 @@ public final class AwsKmsClient implements KmsClient {
   /**
    * Loads AWS credentials from a properties file.
    *
-   * <p>
-   * The AWS access key ID is expected to be in the <code>accessKey</code>
+   * <p>The AWS access key ID is expected to be in the <code>accessKey</code>
    * property and the AWS secret key is expected to be in the
    * <code>secretKey</code> property.
-   * @throws AmazonServiceException if the client initialization fails.
+   *
+   * @throws GeneralSecurityException if the client initialization fails
    */
   @Override
   public KmsClient withCredentials(String credentialPath) throws GeneralSecurityException {
@@ -90,14 +95,15 @@ public final class AwsKmsClient implements KmsClient {
   /**
    * Loads default AWS credentials.
    *
-   * AWS credentials provider chain that looks for credentials in this order:
+   * <p>AWS credentials provider chain that looks for credentials in this order:
    * <ul>
    *   <li>Environment Variables - AWS_ACCESS_KEY_ID and AWS_SECRET_KEY</li>
    *   <li>Java System Properties - aws.accessKeyId and aws.secretKey</li>
    *   <li>Credential profiles file at the default location (~/.aws/credentials)</li>
    *   <li>Instance profile credentials delivered through the Amazon EC2 metadata service</li>
    * </ul>
-   * @throws AmazonServiceException if the client initialization fails.
+   *
+   * @throws GeneralSecurityException if the client initialization fails
    */
   @Override
   public KmsClient withDefaultCredentials() throws GeneralSecurityException {
@@ -126,6 +132,6 @@ public final class AwsKmsClient implements KmsClient {
 
   @Override
   public Aead getAead(String uri) throws GeneralSecurityException {
-    return new AwsKmsAead(client, IntegrationUtil.validateAndRemovePrefix(PREFIX, uri));
+    return new AwsKmsAead(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
   }
 }

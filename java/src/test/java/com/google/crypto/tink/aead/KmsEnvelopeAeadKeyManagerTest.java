@@ -26,7 +26,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.integration.GcpKmsClient;
+import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Random;
 import java.nio.ByteBuffer;

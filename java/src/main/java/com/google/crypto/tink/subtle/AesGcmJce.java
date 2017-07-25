@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import com.google.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -31,10 +32,14 @@ public final class AesGcmJce implements Aead {
   private static final int IV_SIZE_IN_BYTES = 12;
   private static final int TAG_SIZE_IN_BYTES = 16;
 
-  private final SecretKeySpec keySpec;
+  private final SecretKey keySpec;
 
   public AesGcmJce(final byte[] key) {
     keySpec = new SecretKeySpec(key, "AES");
+  }
+
+  public AesGcmJce(SecretKey secretKey) {
+    keySpec = secretKey;
   }
 
   private static Cipher instance() throws GeneralSecurityException {

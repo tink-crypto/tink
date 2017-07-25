@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.integration;
+package com.google.crypto.tink.integration.gcpkms;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -24,6 +24,7 @@ import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.auto.service.AutoService;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.subtle.Validators;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,7 +36,11 @@ import java.security.GeneralSecurityException;
  */
 @AutoService(KmsClient.class)
 public final class GcpKmsClient implements KmsClient {
+  /**
+   * The prefix of all keys stored in Google Cloud KMS.
+   */
   public static final String PREFIX = "gcp-kms://";
+
   private static final String APPLICATION_NAME = "Tink";
   private CloudKMS client;
   private String keyUri;
@@ -59,7 +64,7 @@ public final class GcpKmsClient implements KmsClient {
   /**
    * @return @return true either if this client is a generic one and uri starts with
    * {@link GcpKmsClient#PREFIX}, or the client is a specific one that is bound to the
-   * key identified by {@code uri}.
+   * key identified by {@code uri}
    */
   @Override
   public boolean doesSupport(String uri) {
@@ -71,7 +76,10 @@ public final class GcpKmsClient implements KmsClient {
 
   /**
    * Loads credentials from a service account JSON file {@code credentialPath}.
-   * If {@code credentialPath} is null, loads default credentials.
+   *
+   * <p>If {@code credentialPath} is null, loads
+   * <a href="https://developers.google.com/accounts/docs/application-default-credentials"
+   * default Google Cloud credentials</a>.
    */
   @Override
   public KmsClient withCredentials(String credentialPath) throws GeneralSecurityException {
@@ -88,8 +96,8 @@ public final class GcpKmsClient implements KmsClient {
   }
 
   /**
-   * Loads default Google Cloud credentials.
-   * see https://developers.google.com/accounts/docs/application-default-credentials.
+   * Loads <a href="https://developers.google.com/accounts/docs/application-default-credentials"
+   * default Google Cloud credentials</a>.
    */
   @Override
   public KmsClient withDefaultCredentials() throws GeneralSecurityException {
@@ -105,7 +113,6 @@ public final class GcpKmsClient implements KmsClient {
 
   /**
    * Loads the provided credential.
-   *
    */
   private KmsClient withCredentials(GoogleCredential credential) {
     if (credential.createScopedRequired()) {
@@ -120,6 +127,6 @@ public final class GcpKmsClient implements KmsClient {
 
   @Override
   public Aead getAead(String keyUri) throws GeneralSecurityException {
-    return new GcpKmsAead(client, IntegrationUtil.validateAndRemovePrefix(PREFIX, keyUri));
+    return new GcpKmsAead(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri));
   }
 }

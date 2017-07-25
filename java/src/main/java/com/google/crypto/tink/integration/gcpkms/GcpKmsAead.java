@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.integration;
+package com.google.crypto.tink.integration.gcpkms;
 
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.api.services.cloudkms.v1.model.DecryptRequest;
@@ -26,8 +26,9 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * This primitive forwards encryption/decryption requests to a key in Google Cloud KMS.
- * As of March 2017, Google Cloud KMS supports only AES-256-GCM keys.
+ * A {@link Aead} that forwards encryption/decryption requests to a key in Google Cloud KMS.
+ *
+ * <p>As of August 2017, Google Cloud KMS supports only AES-256-GCM keys.
  */
 public final class GcpKmsAead implements Aead {
 
