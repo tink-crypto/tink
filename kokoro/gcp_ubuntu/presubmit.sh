@@ -21,6 +21,10 @@ set -e
 # Display commands to stderr.
 set -x
 
+# Workaround for some unknown issue in Kokoro.
+rm -f ~/.bazelrc
+
+# Build
 cd github/tink/
 
 # bazel sandbox doesn't work with Kokoro's MacOS image, see b/38040081.
