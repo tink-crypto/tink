@@ -15,18 +15,11 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "//java",
-        "//java:aead_envelope",
         "//java:keyset_handle",
         "//java:protos",
         "//java:subtle",
         "@args4j//jar",
-        "@com_google_api_client//jar",
-        "@com_google_cloudkms//jar",
-        "@com_google_code_gson_gson//jar",
         "@com_google_guava//jar",
-        "@com_google_http_client//jar",
-        "@com_google_http_client_jackson2//jar",
-        "@com_google_oauth_client//jar",
         "@com_google_protobuf_java//:protobuf_java",
     ],
 )

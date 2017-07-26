@@ -42,7 +42,6 @@ public final class AeadConfig {
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     registerKeyManager(new AesCtrHmacAeadKeyManager());
-    registerKeyManager(new KmsEnvelopeAeadKeyManager());
     registerKeyManager(new AesGcmKeyManager());
     registerKeyManager(new AesEaxKeyManager());
     registerKeyManager(new ChaCha20Poly1305KeyManager());

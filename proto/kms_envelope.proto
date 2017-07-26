@@ -23,21 +23,22 @@ import "proto/tink.proto";
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 
-message KmsEnvelopeAeadParams {
-  // This field specifies which KMS to call and how, e.g., GoogleCloudKmsAeadKey.
+message KmsEnvelopeAeadKeyFormat {
   // Required.
-  KeyData kms_key = 1;
+  // The location of the KEK in a remote KMS.
+  // With Google Cloud KMS, valid values have this format:
+  // gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*.
+  // With AWS KMS, valid values have this format:
+  // aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>
+  string kek_uri = 1;
   // Key template of the Data Encryption Key, e.g., AesCtrHmacAeadKeyFormat.
   // Required.
   KeyTemplate dek_template = 2;
 }
 
-message KmsEnvelopeAeadKeyFormat {
-  KmsEnvelopeAeadParams params = 1;
-}
-
 // There is no actual key material in the key.
 message KmsEnvelopeAeadKey {
   uint32 version = 1;
-  KmsEnvelopeAeadParams params = 2;
+  // The key format also contains the params.
+  KmsEnvelopeAeadKeyFormat params = 2;
 }

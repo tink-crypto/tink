@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.integration;
 
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.api.services.cloudkms.v1.model.DecryptRequest;
@@ -36,14 +36,16 @@ public final class GcpKmsAead implements Aead {
    */
   private final CloudKMS kmsClient;
 
+  private static final String PREFIX = "gcp-kms://";
+
   // The location of a CryptoKey in Google Cloud KMS.
   // Valid values have this format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
   // See https://cloud.google.com/kms/docs/object-hierarchy.
   private final String kmsKeyUri;
 
-  public GcpKmsAead(CloudKMS kmsClient, String kmsKeyUri) {
+  public GcpKmsAead(CloudKMS kmsClient, String keyUri) throws GeneralSecurityException {
     this.kmsClient = kmsClient;
-    this.kmsKeyUri = kmsKeyUri;
+    this.kmsKeyUri = IntegrationUtil.validateAndRemovePrefix(PREFIX, keyUri);
   }
 
   @Override

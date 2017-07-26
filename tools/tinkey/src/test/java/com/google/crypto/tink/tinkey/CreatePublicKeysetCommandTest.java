@@ -20,10 +20,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.GcpKmsAeadKeyManager;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.crypto.tink.hybrid.HybridDecryptConfig;
 import com.google.crypto.tink.hybrid.HybridEncryptConfig;
@@ -37,7 +34,6 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.signature.PublicKeySignConfig;
 import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
-import com.google.crypto.tink.subtle.GcpKmsClient;
 import com.google.protobuf.TextFormat;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -60,11 +56,6 @@ public class CreatePublicKeysetCommandTest {
     HybridEncryptConfig.registerStandardKeyTypes();
     PublicKeySignConfig.registerStandardKeyTypes();
     PublicKeyVerifyConfig.registerStandardKeyTypes();
-
-    Registry.INSTANCE.registerKeyManager(
-        GcpKmsAeadKeyManager.TYPE_URL,
-        new GcpKmsAeadKeyManager(
-            GcpKmsClient.fromServiceAccount(TestUtil.SERVICE_ACCOUNT_FILE)));
   }
 
   @Test

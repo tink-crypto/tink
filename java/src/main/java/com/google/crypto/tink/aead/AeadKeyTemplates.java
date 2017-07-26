@@ -26,6 +26,8 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
+import com.google.crypto.tink.proto.KmsAeadKeyFormat;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code Aead} keys. One can use these templates
@@ -152,6 +154,36 @@ public final class AeadKeyTemplates {
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl(AesCtrHmacAeadKeyManager.TYPE_URL)
+        .build();
+  }
+
+  /**
+   * @return a new {@code KeyTemplate} that can generate a {@code KmsAeadKey} pointing to
+   * {@code keyUri}.
+   */
+  public static KeyTemplate createKmsAeadKeyTemplate(String keyUri) {
+    KmsAeadKeyFormat format = KmsAeadKeyFormat.newBuilder()
+        .setKeyUri(keyUri)
+        .build();
+    return KeyTemplate.newBuilder()
+        .setValue(format.toByteString())
+        .setTypeUrl(KmsAeadKeyManager.TYPE_URL)
+        .build();
+  }
+
+  /**
+   * @return a new {@code KeyTemplate} that can generate a {@code KmsEnvelopeAeadKey} whose
+   * KEK is pointing to {@code kekUri} and DEK template is {@code dekTemplate}.
+   */
+  public static KeyTemplate createKmsEnvelopeAeadKeyTemplate(
+    String kekUri, KeyTemplate dekTemplate) {
+    KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.newBuilder()
+        .setDekTemplate(dekTemplate)
+        .setKekUri(kekUri)
+        .build();
+    return KeyTemplate.newBuilder()
+        .setValue(format.toByteString())
+        .setTypeUrl(KmsEnvelopeAeadKeyManager.TYPE_URL)
         .build();
   }
 }

@@ -16,48 +16,52 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.EnvelopeTestUtil;
+import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.integration.CloudKmsClient;
+import com.google.crypto.tink.integration.GcpKmsClient;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.KmsAeadKey;
+import com.google.crypto.tink.proto.KmsAeadKeyFormat;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.GcpKmsClient;
+import com.google.crypto.tink.subtle.KmsClient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for GcpKmsAead and its key manager.
+ * Tests for KmsAeadKeyManager.
  */
 @RunWith(JUnit4.class)
-public class GcpKmsAeadKeyManagerTest {
+public class KmsAeadKeyManagerTest {
+  private KmsClient kmsClient;
 
   @Before
   public void setUp() throws Exception {
-    Registry.INSTANCE.registerKeyManager(
-        GcpKmsAeadKeyManager.TYPE_URL,
-        new GcpKmsAeadKeyManager(GcpKmsClient.fromServiceAccount(
-            TestUtil.SERVICE_ACCOUNT_FILE)));
+    kmsClient = new CloudKmsClient()
+        .withGcpKmsClient(GcpKmsClient.fromServiceAccount(
+            TestUtil.SERVICE_ACCOUNT_FILE));
   }
 
   @Test
-  public void testGcpKmsKeyRestricted() throws Exception {
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(
-            TestUtil.createKey(
-                // This key is restricted to {@code TestUtil.SERVICE_ACCOUNT_FILE}.
-                EnvelopeTestUtil.createGcpKmsAeadKeyData(TestUtil.RESTRICTED_CRYPTO_KEY_URI),
-                42,
-                KeyStatusType.ENABLED,
-                OutputPrefixType.TINK)));
+  public void testGcpKmsKeyRestricted_WithRegistry() throws Exception {
+    Registry.INSTANCE.registerKeyManager(
+        KmsAeadKeyManager.TYPE_URL,
+        new KmsAeadKeyManager(kmsClient));
+    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(
+        AeadKeyTemplates.createKmsAeadKeyTemplate(TestUtil.RESTRICTED_CRYPTO_KEY_URI));
     TestUtil.runBasicAeadFactoryTests(keysetHandle);
+  }
 
-    // Now with {@code GcpKmsAeadKeyManager} as a custom key manager.
-    GcpKmsAeadKeyManager customKeyManager =
-        new GcpKmsAeadKeyManager(GcpKmsClient.fromServiceAccount(
-            TestUtil.SERVICE_ACCOUNT_FILE));
+  @Test
+  public void testGcpKmsKeyRestricted_WithCustomKeyManager() throws Exception {
+    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(
+        AeadKeyTemplates.createKmsAeadKeyTemplate(TestUtil.RESTRICTED_CRYPTO_KEY_URI));
+    KmsAeadKeyManager customKeyManager = new KmsAeadKeyManager(kmsClient);
     TestUtil.runBasicAeadFactoryTests(keysetHandle, customKeyManager);
   }
 }

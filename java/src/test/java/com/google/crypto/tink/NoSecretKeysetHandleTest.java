@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import java.io.ByteArrayInputStream;
@@ -59,20 +58,6 @@ public class NoSecretKeysetHandleTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset contains secret key material");
-    }
-
-    // This is a REMOTE key.
-    KeyTemplate template2 = TestUtil.createKmsEnvelopeAeadKeyTemplate(
-        KeyData.newBuilder().build(), KeyTemplate.newBuilder().build());
-    KeysetManager manager2 = new KeysetManager.Builder()
-        .setKeyTemplate(template2)
-        .build()
-        .rotate();
-    Keyset keyset2 = manager2.getKeysetHandle().getKeyset();
-    try {
-      KeysetHandle unused = NoSecretKeysetHandle.parseFrom(keyset2.toByteArray());
-    } catch (GeneralSecurityException e) {
-      fail("Should be allowed to load non secret keyset");
     }
   }
 

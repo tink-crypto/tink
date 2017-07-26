@@ -11,9 +11,7 @@ java_binary(
     main_class = "com.example.envelopeme.EnvelopeMe",
     deps = [
         "//java",
-        "//java:aead_envelope",
         "//java:subtle",
         "@args4j//jar",
-        "@com_google_guava//jar",
     ],
 )

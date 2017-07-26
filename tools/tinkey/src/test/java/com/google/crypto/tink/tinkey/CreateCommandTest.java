@@ -25,13 +25,13 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.EncryptedKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
-import com.google.crypto.tink.aead.GcpKmsAeadKeyManager;
 import com.google.crypto.tink.hybrid.HybridDecryptConfig;
 import com.google.crypto.tink.hybrid.HybridEncryptConfig;
+import com.google.crypto.tink.integration.GcpKmsAead;
+import com.google.crypto.tink.integration.GcpKmsClient;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.EncryptedKeyset;
@@ -42,8 +42,6 @@ import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.signature.PublicKeySignConfig;
 import com.google.crypto.tink.signature.PublicKeyVerifyConfig;
-import com.google.crypto.tink.subtle.GcpKmsAead;
-import com.google.crypto.tink.subtle.GcpKmsClient;
 import com.google.protobuf.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -65,11 +63,6 @@ public class CreateCommandTest {
     HybridEncryptConfig.registerStandardKeyTypes();
     PublicKeySignConfig.registerStandardKeyTypes();
     PublicKeyVerifyConfig.registerStandardKeyTypes();
-
-    Registry.INSTANCE.registerKeyManager(
-        GcpKmsAeadKeyManager.TYPE_URL,
-        new GcpKmsAeadKeyManager(
-            GcpKmsClient.fromServiceAccount(TestUtil.SERVICE_ACCOUNT_FILE)));
   }
 
   @Test

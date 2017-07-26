@@ -14,21 +14,28 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-syntax = "proto3";
+package com.google.crypto.tink.integration;
 
-package google.crypto.tink;
+/**
+ * Available OAuth 2.0 scopes for use with the Google Cloud API.
+ *
+ */
+public class GcpScopes {
 
-option java_package = "com.google.crypto.tink.proto";
-option java_multiple_files = true;
+  /** View and manage your data across Google Cloud Platform services. */
+  public static final String CLOUD_PLATFORM = "https://www.googleapis.com/auth/cloud-platform";
 
-// key_type: type.googleapis.com/google.crypto.tink.GcpKmsAeadKey
-message GcpKmsAeadKey {
-  uint32 version = 1;
-  // Required.
-  // The location of a CryptoKey in Google Cloud KMS.
-  // Valid values have this format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
-  // See https://cloud.google.com/kms/docs/object-hierarchy.
-  // Note that to enable key rotation, this value should point to a CryptoKey,
-  // not a CryptoKeyVersion.
-  string kms_key_uri = 2;
+  /**
+   * Returns an unmodifiable set that contains all scopes declared by this class.
+   *
+   * @since 1.16
+   */
+  public static java.util.Set<String> all() {
+    java.util.Set<String> set = new java.util.HashSet<String>();
+    set.add(CLOUD_PLATFORM);
+    return java.util.Collections.unmodifiableSet(set);
+  }
+
+  private GcpScopes() {
+  }
 }

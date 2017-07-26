@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.integration;
 
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
@@ -26,14 +26,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for GcpKmsClient.
+ * Tests for IntegrationUtil.
  */
 @RunWith(JUnit4.class)
-public class GcpKmsClientTest {
+public class IntegrationUtilTest {
   @Test
   public void testValidateCryptoKeyUri() throws Exception {
     try {
-      GcpKmsClient.validateCryptoKeyUri("a");
+      IntegrationUtil.validateCryptoKeyUri("a");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "Invalid Google Cloud KMS Key URI");
@@ -42,7 +42,7 @@ public class GcpKmsClientTest {
     String cryptoKey = TestUtil.createGcpKmsKeyUri(
         "projectId", "locationId", "ringId", "cryptoKeyId");
     try {
-      GcpKmsClient.validateCryptoKeyUri(cryptoKey);
+      IntegrationUtil.validateCryptoKeyUri(cryptoKey);
     } catch (GeneralSecurityException e) {
       fail("Valid CryptoKey URI should work: " + cryptoKey);
     }
@@ -50,7 +50,7 @@ public class GcpKmsClientTest {
     cryptoKey = TestUtil.createGcpKmsKeyUri(
         "projectId.", "locationId-", "ringId_", "cryptoKeyId~");
     try {
-      GcpKmsClient.validateCryptoKeyUri(cryptoKey);
+      IntegrationUtil.validateCryptoKeyUri(cryptoKey);
     } catch (GeneralSecurityException e) {
       fail("Valid CryptoKey URI should work: " + cryptoKey);
     }
@@ -58,7 +58,7 @@ public class GcpKmsClientTest {
     cryptoKey = TestUtil.createGcpKmsKeyUri(
         "projectId%", "locationId", "ringId", "cryptoKeyId");
     try {
-      GcpKmsClient.validateCryptoKeyUri(cryptoKey);
+      IntegrationUtil.validateCryptoKeyUri(cryptoKey);
       fail("CryptoKey URI cannot contain %");
     } catch (GeneralSecurityException e) {
       // Expected.
@@ -67,7 +67,7 @@ public class GcpKmsClientTest {
     cryptoKey = TestUtil.createGcpKmsKeyUri(
         "projectId/", "locationId", "ringId", "cryptoKeyId");
     try {
-      GcpKmsClient.validateCryptoKeyUri(cryptoKey);
+      IntegrationUtil.validateCryptoKeyUri(cryptoKey);
       fail("CryptoKey URI cannot contain /");
     } catch (GeneralSecurityException e) {
       // Expected.
@@ -76,7 +76,7 @@ public class GcpKmsClientTest {
     String cryptoVersion = TestUtil.createGcpKmsKeyUri(
         "projectId", "locationId", "ringId", "cryptoKeyId") + "/cryptoKeyVersions/versionId";
     try {
-      GcpKmsClient.validateCryptoKeyUri(cryptoVersion);
+      IntegrationUtil.validateCryptoKeyUri(cryptoVersion);
       fail("CryptoKeyVersion is not a valid CryptoKey");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "The URI must point to a CryptoKey, not a CryptoKeyVersion");

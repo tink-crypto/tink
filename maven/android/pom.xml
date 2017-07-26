@@ -117,16 +117,16 @@
           <compilerArgument>-Xlint:deprecation</compilerArgument>
           <excludes>
             <exclude>**/AwsKmsAead.java</exclude>
+            <exclude>**/CloudKmsClient.java</exclude>
+            <exclude>**/EnvelopeUtil.java</exclude>
             <exclude>**/GcpKmsAead.java</exclude>
-            <exclude>**/GcpKmsAeadKeyManager.java</exclude>
             <exclude>**/GcpKmsClient.java</exclude>
             <exclude>**/GcpScopes.java</exclude>
           </excludes>
           <testExcludes>
             <exclude>**/AwsKmsAeadTest.java</exclude>
-            <exclude>**/EnvelopeTestUtil.java</exclude>
-            <exclude>**/GcpKmsAeadKeyManagerTest.java</exclude>
             <exclude>**/GcpKmsClientTest.java</exclude>
+            <exclude>**/KmsAeadKeyManagerTest.java</exclude>
             <exclude>**/KmsEnvelopeAeadKeyManagerTest.java</exclude>
           </testExcludes>
         </configuration>

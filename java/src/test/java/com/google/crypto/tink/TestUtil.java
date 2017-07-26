@@ -48,9 +48,6 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
-import com.google.crypto.tink.proto.KmsEnvelopeAeadKey;
-import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
-import com.google.crypto.tink.proto.KmsEnvelopeAeadParams;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.Random;
@@ -80,7 +77,7 @@ import java.security.spec.ECPoint;
 public class TestUtil {
   // This GCP KMS CryptoKey is restricted to the service account in {@code SERVICE_ACCOUNT_FILE}.
   public static final String RESTRICTED_CRYPTO_KEY_URI = String.format(
-        "projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+        "gcp-kms://projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
         "tink-test-infrastructure", "global", "unit-and-integration-testing", "aead-key");
 
   // This is a credential of a service account that is granted access to
@@ -345,40 +342,6 @@ public class TestUtil {
         keyProto,
         AesEaxKeyManager.TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
-  }
-
-  /**
-   * @return a {@code KeyData} containing a {@code KmsEnvelopeAeadKey}.
-   */
-  public static KeyData createKmsEnvelopeAeadKeyData(KeyData kmsKey,
-      KeyTemplate dekTemplate) throws Exception {
-    KmsEnvelopeAeadParams params = KmsEnvelopeAeadParams.newBuilder()
-        .setDekTemplate(dekTemplate)
-        .setKmsKey(kmsKey)
-        .build();
-    KmsEnvelopeAeadKey keyProto = KmsEnvelopeAeadKey.newBuilder().setParams(params).build();
-    return createKeyData(
-        keyProto,
-        "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey",
-        KeyData.KeyMaterialType.REMOTE);
-  }
-
-  /**
-   * @return a {@code KeyTemplate} containing {@code KmsEnvelopeAeadKey}.
-   */
-  public static KeyTemplate createKmsEnvelopeAeadKeyTemplate(KeyData kmsKey,
-      KeyTemplate dekTemplate) throws Exception {
-    KmsEnvelopeAeadParams params = KmsEnvelopeAeadParams.newBuilder()
-        .setDekTemplate(dekTemplate)
-        .setKmsKey(kmsKey)
-        .build();
-    KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.newBuilder()
-        .setParams(params)
-        .build();
-    return KeyTemplate.newBuilder()
-        .setValue(format.toByteString())
-        .setTypeUrl("type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey")
-        .build();
   }
 
   /**

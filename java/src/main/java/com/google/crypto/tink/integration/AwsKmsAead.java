@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.integration;
 
 import static com.google.common.io.BaseEncoding.base16;
 
@@ -36,20 +36,20 @@ public final class AwsKmsAead implements Aead {
    */
   private final AWSKMS kmsClient;
 
+  private static final String PREFIX = "aws-kms://";
+
   // The location of a crypto key in AWS KMS.
-  private final String kmsKeyArn;
+  private final String keyArn;
 
-  private AwsKmsAead(AWSKMS kmsClient, String kmsKeyArn) {
+  public AwsKmsAead(AWSKMS kmsClient, String keyUri) throws GeneralSecurityException {
     this.kmsClient = kmsClient;
-    this.kmsKeyArn = kmsKeyArn;
+    this.keyArn = IntegrationUtil.validateAndRemovePrefix(PREFIX, keyUri);
   }
 
-  public static AwsKmsAead forEncryption(AWSKMS kmsClient, String kmsKeyArn) {
-    return new AwsKmsAead(kmsClient, kmsKeyArn);
-  }
-
-  public static AwsKmsAead forDecryption(AWSKMS kmsClient) {
-    return new AwsKmsAead(kmsClient, null /* kmsKeyArn, not needed for decryption */);
+  // Decryption does't need a keyArn.
+  public AwsKmsAead(AWSKMS kmsClient) {
+    this.kmsClient = kmsClient;
+    this.keyArn = null;
   }
 
   @Override
@@ -57,7 +57,7 @@ public final class AwsKmsAead implements Aead {
       throws GeneralSecurityException {
     try {
       EncryptRequest req = new EncryptRequest()
-          .withKeyId(kmsKeyArn)
+          .withKeyId(keyArn)
           .withPlaintext(ByteBuffer.wrap(plaintext))
           .addEncryptionContextEntry("aad", base16().lowerCase().encode(aad));
       return kmsClient.encrypt(req).getCiphertextBlob().array();

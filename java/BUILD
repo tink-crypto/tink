@@ -13,6 +13,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink/aead",
         "//java/src/main/java/com/google/crypto/tink/hybrid",
+        "//java/src/main/java/com/google/crypto/tink/integration",
         "//java/src/main/java/com/google/crypto/tink/mac",
         "//java/src/main/java/com/google/crypto/tink/signature",
         "//java/src/main/java/com/google/crypto/tink/streamingaead",
@@ -80,22 +81,10 @@ java_library(
         "//proto:ecdsa_java_proto",
         "//proto:ecies_aead_hkdf_java_proto",
         "//proto:ed25519_java_proto",
-        "//proto:gcp_kms_java_proto",
         "//proto:hmac_java_proto",
+        "//proto:kms_aead_java_proto",
         "//proto:kms_envelope_java_proto",
         "//proto:tink_java_proto",
-    ],
-)
-
-java_library(
-    name = "aead_envelope",
-    visibility = [
-        "//examples/java/envelopeme:__pkg__",
-        "//tools/tinkey:__pkg__",
-    ],
-    exports = [
-        "//java/src/main/java/com/google/crypto/tink/aead:envelope",
-        "//java/src/main/java/com/google/crypto/tink/subtle:aead_envelope",
     ],
 )
 
@@ -119,7 +108,6 @@ java_library(
         "//visibility:public",
     ],
     exports = [
-        ":aead_envelope",
         ":java",
         ":keyset_handle",
         ":protos",

@@ -8,17 +8,12 @@ package(
 
 load("//java/build_defs:javac.bzl", "JAVACOPTS")
 
-AEAD_ENVELOPE_SRCS = [
-    "GcpKmsAeadKeyManager.java",
-]
-
 filegroup(
     name = "aead_srcs",
     srcs = glob(
         [
             "*.java",
         ],
-        exclude = AEAD_ENVELOPE_SRCS,
     ),
 )
 
@@ -38,6 +33,7 @@ java_library(
         "//proto:chacha20_poly1305_java_proto",
         "//proto:common_java_proto",
         "//proto:hmac_java_proto",
+        "//proto:kms_aead_java_proto",
         "//proto:kms_envelope_java_proto",
         "//proto:tink_java_proto",
         "@com_google_protobuf_java//:protobuf_java",
@@ -60,25 +56,9 @@ java_library(
         "//proto:chacha20_poly1305_java_proto_lite",
         "//proto:common_java_proto_lite",
         "//proto:hmac_java_proto_lite",
+        "//proto:kms_aead_java_proto_lite",
         "//proto:kms_envelope_java_proto_lite",
         "//proto:tink_java_proto_lite",
-        "@com_google_protobuf_java//:protobuf_java",
-    ],
-)
-
-java_library(
-    name = "envelope",
-    srcs = AEAD_ENVELOPE_SRCS,
-    javacopts = JAVACOPTS,
-    deps = [
-        "//java/src/main/java/com/google/crypto/tink",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle:aead_envelope",
-        "//proto:common_java_proto",
-        "//proto:gcp_kms_java_proto",
-        "//proto:tink_java_proto",
-        "@com_google_api_client//jar",
-        "@com_google_cloudkms//jar",
         "@com_google_protobuf_java//:protobuf_java",
     ],
 )

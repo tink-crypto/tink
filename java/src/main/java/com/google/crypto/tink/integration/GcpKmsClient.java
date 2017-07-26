@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink.integration;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -25,46 +25,12 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.security.GeneralSecurityException;
-import java.util.regex.Pattern;
 
 /**
  * Helper methods for envelope encryption.
  */
 public final class GcpKmsClient {
   private static final String APPLICATION_NAME = "Tink";
-
-  // See https://tools.ietf.org/html/rfc3986#section-2.3.
-  private static final String URI_UNRESERVED_CHARS = "([0-9a-zA-Z\\-\\.\\_~])+";
-
-  private static final Pattern GCP_KMS_CRYPTO_KEY_PATTERN = Pattern.compile(
-        String.format("^projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s$",
-            URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS),
-        Pattern.CASE_INSENSITIVE);
-
-  private static final Pattern GCP_KMS_CRYPTO_KEY_VERSION_PATTERN = Pattern.compile(
-        String.format("^projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s/cryptoKeyVersions/%s$",
-            URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS,
-            URI_UNRESERVED_CHARS),
-        Pattern.CASE_INSENSITIVE);
-  /**
-   * @throws GeneralSecurityException if {@code kmsKeyUri} is not a valid URI of a CryptoKey
-   * in Google Cloud KMS.
-   */
-  public static void validateCryptoKeyUri(String kmsKeyUri)
-      throws GeneralSecurityException {
-    if (!GCP_KMS_CRYPTO_KEY_PATTERN.matcher(kmsKeyUri).matches()) {
-      if (GCP_KMS_CRYPTO_KEY_VERSION_PATTERN.matcher(kmsKeyUri).matches()) {
-        throw new GeneralSecurityException("Invalid Google Cloud KMS Key URI. "
-          + "The URI must point to a CryptoKey, not a CryptoKeyVersion");
-      }
-      throw new GeneralSecurityException("Invalid Google Cloud KMS Key URI. "
-          + "The URI must point to a CryptoKey in the format "
-          + "projects/*/locations/*/keyRings/*/cryptoKeys/*. "
-          + "See https://cloud.google.com/kms/docs/reference/rest/v1"
-          + "/projects.locations.keyRings.cryptoKeys#CryptoKey");
-    }
-  }
 
   /**
    * Initializes a cloud kms client based on default credential (provided by GCE/GCloud CLI).

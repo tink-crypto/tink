@@ -428,34 +428,34 @@ go_proto_library(
 )
 
 # -----------------------------------------------
-# gcp_kms
+# kms_aead
 # -----------------------------------------------
 proto_library(
-    name = "gcp_kms",
+    name = "kms_aead",
     srcs = [
-        "gcp_kms.proto",
+        "kms_aead.proto",
     ],
 )
 
 cc_proto_library(
-    name = "gcp_kms_cc_proto",
-    deps = [":gcp_kms"],
+    name = "kms_aead_cc_proto",
+    deps = [":kms_aead"],
 )
 
 java_proto_library(
-    name = "gcp_kms_java_proto",
-    deps = [":gcp_kms"],
+    name = "kms_aead_java_proto",
+    deps = [":kms_aead"],
 )
 
 java_lite_proto_library(
-    name = "gcp_kms_java_proto_lite",
-    deps = [":gcp_kms"],
+    name = "kms_aead_java_proto_lite",
+    deps = [":kms_aead"],
 )
 
 go_proto_library(
-    name = "gcp_kms_go_proto",
+    name = "kms_aead_go_proto",
     srcs = [
-        "gcp_kms.proto",
+        "kms_aead.proto",
     ],
 )
 
