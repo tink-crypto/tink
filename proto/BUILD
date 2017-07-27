@@ -9,7 +9,7 @@ package(
 
 licenses(["notice"])  # Apache 2.0
 
-load("@org_pubref_rules_protobuf//go:rules.bzl", "go_proto_library")
+load("@io_bazel_rules_go//proto:go_proto_library.bzl", "go_proto_library")
 
 # -----------------------------------------------
 # common
@@ -38,7 +38,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "common_go_proto",
-    protos = [
+    srcs = [
         "common.proto",
     ],
 )
@@ -73,11 +73,11 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "tink_go_proto",
-    proto_deps = [
-        ":common_go_proto",
-    ],
-    protos = [
+    srcs = [
         "tink.proto",
+    ],
+    deps = [
+        ":common_go_proto",
     ],
 )
 
@@ -111,11 +111,11 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "ecdsa_go_proto",
-    proto_deps = [
-        ":common_go_proto",
-    ],
-    protos = [
+    srcs = [
         "ecdsa.proto",
+    ],
+    deps = [
+        ":common_go_proto",
     ],
 )
 
@@ -146,7 +146,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "ed25519_go_proto",
-    protos = [
+    srcs = [
         "ed25519.proto",
     ],
 )
@@ -179,11 +179,11 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "hmac_go_proto",
-    proto_deps = [
-        ":common_go_proto",
-    ],
-    protos = [
+    srcs = [
         "hmac.proto",
+    ],
+    deps = [
+        ":common_go_proto",
     ],
 )
 
@@ -214,7 +214,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "aes_ctr_go_proto",
-    protos = [
+    srcs = [
         "aes_ctr.proto",
     ],
 )
@@ -250,12 +250,12 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "aes_ctr_hmac_aead_go_proto",
-    proto_deps = [
+    srcs = [
+        "aes_ctr_hmac_aead.proto",
+    ],
+    deps = [
         ":aes_ctr_go_proto",
         ":hmac_go_proto",
-    ],
-    protos = [
-        "aes_ctr_hmac_aead.proto",
     ],
 )
 
@@ -286,7 +286,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "aes_gcm_go_proto",
-    protos = [
+    srcs = [
         "aes_gcm.proto",
     ],
 )
@@ -320,12 +320,12 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "aes_ctr_hmac_streaming_go_proto",
-    proto_deps = [
+    srcs = [
+        "aes_ctr_hmac_streaming.proto",
+    ],
+    deps = [
         ":common_go_proto",
         ":hmac_go_proto",
-    ],
-    protos = [
-        "aes_ctr_hmac_streaming.proto",
     ],
 )
 
@@ -355,11 +355,11 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "aes_gcm_hkdf_streaming_go_proto",
-    proto_deps = [
-        ":common_go_proto",
-    ],
-    protos = [
+    srcs = [
         "aes_gcm_hkdf_streaming.proto",
+    ],
+    deps = [
+        ":common_go_proto",
     ],
 )
 
@@ -390,7 +390,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "aes_eax_go_proto",
-    protos = [
+    srcs = [
         "aes_eax.proto",
     ],
 )
@@ -422,7 +422,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "chacha20_poly1305_go_proto",
-    protos = [
+    srcs = [
         "chacha20_poly1305.proto",
     ],
 )
@@ -454,7 +454,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "gcp_kms_go_proto",
-    protos = [
+    srcs = [
         "gcp_kms.proto",
     ],
 )
@@ -487,11 +487,11 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "kms_envelope_go_proto",
-    proto_deps = [
-        ":tink_go_proto",
-    ],
-    protos = [
+    srcs = [
         "kms_envelope.proto",
+    ],
+    deps = [
+        ":tink_go_proto",
     ],
 )
 
@@ -526,11 +526,11 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "ecies_aead_hkdf_go_proto",
-    proto_deps = [
+    srcs = [
+        "ecies_aead_hkdf.proto",
+    ],
+    deps = [
         ":common_go_proto",
         ":tink_go_proto",
-    ],
-    protos = [
-        "ecies_aead_hkdf.proto",
     ],
 )

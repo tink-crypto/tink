@@ -1,23 +1,21 @@
-# go packages
-git_repository(
-    name = "io_bazel_rules_go",
-    remote = "https://github.com/bazelbuild/rules_go.git",
-    tag = "0.4.4",
-)
-
-load("@io_bazel_rules_go//go:def.bzl", "go_repositories", "new_go_repository")
-
-go_repositories()
-
+# TODO(thaidn): remove this dependency by porting what needed to
+# third_party/rules_protobuf.
 git_repository(
     name = "org_pubref_rules_protobuf",
     remote = "https://github.com/pubref/rules_protobuf.git",
     tag = "v0.7.2",
 )
 
-# TODO(thaidn): move this rule to third_party/rules_protobuf.
-load("@org_pubref_rules_protobuf//go:rules.bzl", "go_proto_repositories")
+# go packages
+git_repository(
+    name = "io_bazel_rules_go",
+    remote = "https://github.com/bazelbuild/rules_go.git",
+    tag = "0.4.4",
+)
+load("@io_bazel_rules_go//go:def.bzl", "go_repositories", "new_go_repository")
+load("@io_bazel_rules_go//proto:go_proto_library.bzl", "go_proto_repositories")
 
+go_repositories()
 go_proto_repositories()
 
 # cc
