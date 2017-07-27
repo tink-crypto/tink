@@ -55,8 +55,10 @@ TEST_UTIL_TEST_SRCS = [
 TEST_UTIL_DEPS = [
     ":util",
     "//go/subtle:random",
+    "//go/subtle:util",
     "//go/mac",
     "//go/aead",
+    "//go/signature",
     "//go/tink",
     "//proto:tink_go_proto",
     "//proto:hmac_go_proto",

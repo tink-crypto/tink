@@ -112,11 +112,8 @@ func NewEcdsaPrivateKey(version uint32,
 }
 
 func NewEcdsaPublicKey(version uint32,
-                        hashType HashType,
-                        curve EllipticCurveType,
-                        encoding EcdsaSignatureEncoding,
+                        params *EcdsaParams,
                         x []byte, y []byte) *EcdsaPublicKey {
-  params := NewEcdsaParams(hashType, curve, encoding)
   return &EcdsaPublicKey{
     Version: version,
     Params: params,
@@ -133,6 +130,10 @@ func NewEcdsaParams(hashType HashType,
     Curve: curve,
     Encoding: encoding,
   }
+}
+
+func NewEcdsaKeyFormat(params *EcdsaParams) *EcdsaKeyFormat {
+  return &EcdsaKeyFormat{Params: params}
 }
 
 // utilities for converting proto types to strings

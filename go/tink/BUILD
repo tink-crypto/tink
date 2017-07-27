@@ -16,6 +16,7 @@ PRIMITIVES_SRCS = [
 
 TINK_SRCS = PRIMITIVES_SRCS + [
     "key_manager.go",
+    "private_key_manager.go",
     "keyset_handle.go",
     "cleartext_keyset_handle.go",
     "primitive_set.go",

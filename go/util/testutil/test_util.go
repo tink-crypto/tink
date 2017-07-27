@@ -18,13 +18,14 @@ package testutil
 import (
   "fmt"
   "crypto/ecdsa"
-  "crypto/elliptic"
   "crypto/rand"
   "github.com/google/tink/go/subtle/random"
   "github.com/google/tink/go/util/util"
+  subtleUtil "github.com/google/tink/go/subtle/util"
   // "github.com/google/tink/go/tink/tink"
   "github.com/google/tink/go/mac/mac"
   "github.com/google/tink/go/aead/aead"
+  "github.com/google/tink/go/signature/signature"
   "github.com/golang/protobuf/proto"
   . "github.com/google/tink/proto/tink_go_proto"
   . "github.com/google/tink/proto/hmac_go_proto"
@@ -91,14 +92,30 @@ func NewDummyKey(keyId int, status KeyStatusType, outputPrefixType OutputPrefixT
   }
 }
 
-func NewP256EcdsaPrivateKey() *EcdsaPrivateKey {
-  priv, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-  publicKey := util.NewEcdsaPublicKey(0,
-                                HashType_SHA256,
-                                EllipticCurveType_NIST_P256,
-                                EcdsaSignatureEncoding_DER,
-                                priv.X.Bytes(), priv.Y.Bytes())
-  return util.NewEcdsaPrivateKey(0, publicKey, priv.D.Bytes())
+func NewEcdsaPrivateKey(hashType HashType, curve EllipticCurveType) *EcdsaPrivateKey {
+  curveName, _ := EllipticCurveType_name[int32(curve)]
+  priv, _ := ecdsa.GenerateKey(subtleUtil.GetCurve(curveName), rand.Reader)
+  params := util.NewEcdsaParams(hashType,
+                                curve,
+                                EcdsaSignatureEncoding_DER)
+  publicKey := util.NewEcdsaPublicKey(signature.ECDSA_VERIFY_KEY_VERSION,
+                                      params, priv.X.Bytes(), priv.Y.Bytes())
+  return util.NewEcdsaPrivateKey(signature.ECDSA_SIGN_KEY_VERSION,
+                                publicKey, priv.D.Bytes())
+}
+
+func NewEcdsaPrivateKeyData(hashType HashType, curve EllipticCurveType) *KeyData {
+  key := NewEcdsaPrivateKey(hashType, curve)
+  serializedKey, _ := proto.Marshal(key)
+  return &KeyData{
+    TypeUrl: signature.ECDSA_SIGN_TYPE_URL,
+    Value: serializedKey,
+    KeyMaterialType: KeyData_ASYMMETRIC_PRIVATE,
+  }
+}
+
+func NewEcdsaPublicKey(hashType HashType, curve EllipticCurveType) *EcdsaPublicKey {
+  return NewEcdsaPrivateKey(hashType, curve).PublicKey
 }
 
 func NewAesGcmKey(keySize uint32) *AesGcmKey {
