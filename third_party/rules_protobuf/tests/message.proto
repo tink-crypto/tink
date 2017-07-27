@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-option java_package = "tests";
-option java_outer_classname = "MessageProto";
-
-message Message {
-  bool bar = 1;
-}
