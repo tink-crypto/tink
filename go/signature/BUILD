@@ -7,15 +7,19 @@ package(
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 SRCS = [
-    "signature_key_templates.go",
     "ecdsa_sign_key_manager.go",
     "ecdsa_verify_key_manager.go",
+    "public_key_sign_config.go",
+    "public_key_verify_config.go",
+    "signature_key_templates.go",
 ]
 
 TEST_SRCS = [
-    "signature_key_templates_test.go",
     "ecdsa_sign_key_manager_test.go",
     "ecdsa_verify_key_manager_test.go",
+    "public_key_sign_config_test.go",
+    "public_key_verify_config_test.go",
+    "signature_key_templates_test.go",
 ]
 
 DEPS = [
