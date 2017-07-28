@@ -111,5 +111,6 @@ func (_ *EcdsaVerifyKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) error {
   if err := util.ValidateVersion(key.Version, ECDSA_VERIFY_KEY_VERSION); err != nil {
     return fmt.Errorf("ecdsa_verify_key_manager: %s", err)
   }
-  return nil
+  hash, curve, encoding := util.GetEcdsaParamNames(key.Params)
+  return subtleEcdsa.ValidateParams(hash, curve, encoding)
 }
