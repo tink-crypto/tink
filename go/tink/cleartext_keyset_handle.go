@@ -17,18 +17,30 @@ package tink
 
 import (
   "fmt"
+  "sync"
   "github.com/golang/protobuf/proto"
   tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// Utilities to creates keyset handles from cleartext keysets. This API allows loading
-// cleartext keysets, thus its usage should be restricted.
+// cleartextKeysetHandle provides utilities to creates keyset handles from
+// cleartext keysets. This API allows loading cleartext keysets, thus its usage
+// should be restricted.
+var ckhInstance *cleartextKeysetHandle
+var cleartextKeysetHandleOnce sync.Once
+type cleartextKeysetHandle struct {}
+
+// CleartextKeysetHandle returns the single instance of cleartextKeysetHandle.
+func CleartextKeysetHandle() *cleartextKeysetHandle {
+  cleartextKeysetHandleOnce.Do(func() {
+    ckhInstance = new(cleartextKeysetHandle)
+  })
+  return ckhInstance
+}
 
 var errInvalidKeyset = fmt.Errorf("cleartext_keyset_handle: invalid keyset")
 
-// NewHandleFromSerializedKeyset creates a new keyset handle from the given
-// serialized keyset.
-func NewHandleFromSerializedKeyset(serialized []byte) (*KeysetHandle, error) {
+// ParseSerializedKeyset creates a new keyset handle from the given serialized keyset.
+func (_ *cleartextKeysetHandle) ParseSerializedKeyset(serialized []byte) (*KeysetHandle, error) {
   if len(serialized) == 0 {
     return nil, errInvalidKeyset
   }
@@ -39,14 +51,14 @@ func NewHandleFromSerializedKeyset(serialized []byte) (*KeysetHandle, error) {
   return newKeysetHandle(keyset, nil)
 }
 
-// NewHandleFromKeyset creates a new keyset handle from the given keyset.
-func NewHandleFromKeyset(keyset *tinkpb.Keyset) (*KeysetHandle, error) {
+// ParseKeyset creates a new keyset handle from the given keyset.
+func (_ *cleartextKeysetHandle) ParseKeyset(keyset *tinkpb.Keyset) (*KeysetHandle, error) {
   return newKeysetHandle(keyset, nil)
 }
 
-// NewHandleFromKeyTemplate creates a keyset handle that contains a single
-// fresh key generated according to the given key template.
-func NewHandleFromKeyTemplate(template *tinkpb.KeyTemplate) (*KeysetHandle, error) {
+// GenerateNew creates a keyset handle that contains a single fresh key generated
+// according to the given key template.
+func (_ *cleartextKeysetHandle) GenerateNew(template *tinkpb.KeyTemplate) (*KeysetHandle, error) {
   manager := NewKeysetManager(template, tinkpb.OutputPrefixType_TINK, nil, nil)
   err := manager.Rotate()
   if err != nil {

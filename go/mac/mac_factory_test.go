@@ -33,7 +33,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
   if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_TINK {
     t.Errorf("expect a tink key")
   }
-  keysetHandle, _ := tink.NewHandleFromKeyset(keyset)
+  keysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset)
 
   p, err := mac.Factory().GetPrimitive(keysetHandle)
   if err != nil {
@@ -50,7 +50,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
     t.Errorf("expect a raw key")
   }
   keyset2 := util.NewKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
-  keysetHandle2, _ := tink.NewHandleFromKeyset(keyset2)
+  keysetHandle2, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset2)
   p2, err := mac.Factory().GetPrimitive(keysetHandle2)
   if err != nil {
     t.Errorf("GetPrimitive failed: %s", err)
@@ -63,7 +63,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
   keyset2 = testutil.NewTestHmacKeyset(tagSize, tinkpb.OutputPrefixType_TINK)
   primaryKey = keyset2.Key[0]
   expectedPrefix, _ = tink.GetOutputPrefix(primaryKey)
-  keysetHandle2, _ = tink.NewHandleFromKeyset(keyset2)
+  keysetHandle2, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset2)
   p2, err = mac.Factory().GetPrimitive(keysetHandle2)
   if err != nil {
     t.Errorf("cannot get primitive from keyset handle")
@@ -81,7 +81,7 @@ func TestFactoryRawKey(t *testing.T) {
   if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
     t.Errorf("expect a raw key")
   }
-  keysetHandle, _ := tink.NewHandleFromKeyset(keyset)
+  keysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset)
   p, err := mac.Factory().GetPrimitive(keysetHandle)
   if err != nil {
     t.Errorf("GetPrimitive failed: %s", err)
