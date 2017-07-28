@@ -18,6 +18,14 @@ load("@io_bazel_rules_go//proto:go_proto_library.bzl", "go_proto_repositories")
 go_repositories()
 go_proto_repositories()
 
+# wycheproof
+http_archive(
+    name = "wycheproof",
+    strip_prefix = "wycheproof-f755ff0279ddd5fa26640d959d5872764b45feb7",
+    sha256 = "8b32637abcf0c775dac424894a6586a75df821a7ffeedc467ccffa29209683e5",
+    url = "https://github.com/google/wycheproof/archive/f755ff0279ddd5fa26640d959d5872764b45feb7.zip",
+)
+
 # cc
 git_repository(
     name = "boringssl",

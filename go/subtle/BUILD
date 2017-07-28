@@ -37,7 +37,7 @@ go_test(
     name = "ecdsa_test",
     srcs = ECDSA_TEST_SRCS,
     data = [
-        "//testdata:ecdsa",
+        "@wycheproof//testvectors:ecdsa",
     ],
     deps = ECDSA_DEPS + [
         ":ecdsa",
@@ -65,7 +65,7 @@ go_test(
     name = "aes_test",
     srcs = AES_TEST_SRCS,
     data = [
-        "//testdata:aes_gcm",
+        "@wycheproof//testvectors:aes_gcm",
     ],
     deps = AES_DEPS + [
         ":aes",
