@@ -21,7 +21,7 @@ import (
   "crypto/ecdsa"
   "crypto/rand"
   "github.com/google/tink/go/tink/primitives"
-  "github.com/google/tink/go/subtle/util"
+  "github.com/google/tink/go/subtle/subtleutil"
 )
 
 // ecdsaSign is an implementation of PublicKeySign for ECDSA.
@@ -40,7 +40,7 @@ func NewEcdsaSign(hashAlg string,
                 curve string,
                 encoding string,
                 keyValue []byte) (*EcdsaSign, error) {
-  publicKey := ecdsa.PublicKey{Curve: util.GetCurve(curve), X: nil, Y: nil}
+  publicKey := ecdsa.PublicKey{Curve: subtleutil.GetCurve(curve), X: nil, Y: nil}
   d := new(big.Int).SetBytes(keyValue)
   privateKey := &ecdsa.PrivateKey{PublicKey: publicKey, D: d}
   return NewEcdsaSignFromPrivateKey(hashAlg, encoding, privateKey)
@@ -53,11 +53,11 @@ func NewEcdsaSignFromPrivateKey(hashAlg string,
   if privateKey.Curve == nil {
     return nil, fmt.Errorf("ecdsa_sign: invalid curve")
   }
-  curve := util.ConvertCurveName(privateKey.Curve.Params().Name)
+  curve := subtleutil.ConvertCurveName(privateKey.Curve.Params().Name)
   if err := ValidateParams(hashAlg, curve, encoding); err != nil {
     return nil, fmt.Errorf("ecdsa_sign: %s", err)
   }
-  hashFunc := util.GetHashFunc(hashAlg)
+  hashFunc := subtleutil.GetHashFunc(hashAlg)
   return &EcdsaSign{
     privateKey: privateKey,
     hashFunc: hashFunc,
@@ -67,7 +67,7 @@ func NewEcdsaSignFromPrivateKey(hashAlg string,
 
 // Sign computes a signature for the given data.
 func (e *EcdsaSign) Sign(data []byte) ([]byte, error) {
-  hashed := util.ComputeHash(e.hashFunc, data)
+  hashed := subtleutil.ComputeHash(e.hashFunc, data)
   r, s, err := ecdsa.Sign(rand.Reader, e.privateKey, hashed)
   if err != nil {
     return nil, fmt.Errorf("ecdsa_sign: signing failed: %s", err)

@@ -22,6 +22,14 @@ import (
   tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
+func TestValidateVersion(t *testing.T) {
+  if util.ValidateVersion(2, 1) == nil ||
+      util.ValidateVersion(1, 1) != nil ||
+      util.ValidateVersion(1, 2) != nil {
+    t.Errorf("incorrect version validation")
+  }
+}
+
 func TestGetKeyInfo(t *testing.T) {
   _ ,err := util.GetKeyInfo(nil)
   if err == nil {

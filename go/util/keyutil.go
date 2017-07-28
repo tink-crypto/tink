@@ -20,6 +20,18 @@ import (
   tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
+// ValidateVersion checks whether the given version is valid. The version is valid
+// only if it is the range [0..maxExpected]
+func ValidateVersion(version uint32, maxExpected uint32) error {
+  if version > maxExpected {
+    msg := fmt.Sprintf("key has version %v; " +
+        "only keys with version in range [0..%v] are supported",
+        version, maxExpected)
+    return fmt.Errorf("subtle/util: " + msg)
+  }
+  return nil
+}
+
 /**
  * @return a tinkpb.KeysetInfo-proto from a {@code keyset} protobuf.
  */

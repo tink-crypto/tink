@@ -24,7 +24,7 @@ import (
   "crypto/rand"
   "github.com/google/tink/go/subtle/random"
   subtleEcdsa "github.com/google/tink/go/subtle/ecdsa"
-  subtleUtil "github.com/google/tink/go/subtle/util"
+  "github.com/google/tink/go/subtle/subtleutil"
 )
 
 func TestSignVerify(t *testing.T) {
@@ -32,7 +32,7 @@ func TestSignVerify(t *testing.T) {
   hash := "SHA256"
   curve := "NIST_P256"
   encoding := "DER"
-  priv, _ := ecdsa.GenerateKey(subtleUtil.GetCurve(curve), rand.Reader)
+  priv, _ := ecdsa.GenerateKey(subtleutil.GetCurve(curve), rand.Reader)
   // Use the private key and public key directly to create new instances
   signer, err := subtleEcdsa.NewEcdsaSignFromPrivateKey(hash, encoding, priv)
   if err != nil {
@@ -112,17 +112,17 @@ func TestVectors(t *testing.T) {
     t.Errorf("cannot decode content of file: %s", err)
   }
   for _, g := range content.TestGroups {
-    hash := subtleUtil.ConvertHashName(g.Sha)
-    curve := subtleUtil.ConvertCurveName(g.Key.Curve)
+    hash := subtleutil.ConvertHashName(g.Sha)
+    curve := subtleutil.ConvertCurveName(g.Key.Curve)
     if hash == "" || curve == "" {
       continue
     }
     encoding := "DER"
-    x, err := subtleUtil.NewBigIntFromHex(g.Key.Wx)
+    x, err := subtleutil.NewBigIntFromHex(g.Key.Wx)
     if err != nil {
       t.Errorf("cannot decode wx: %s", err)
     }
-    y, err := subtleUtil.NewBigIntFromHex(g.Key.Wy)
+    y, err := subtleutil.NewBigIntFromHex(g.Key.Wy)
     if err != nil {
       t.Errorf("cannot decode wy: %s", err)
     }

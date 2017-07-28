@@ -13,10 +13,9 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-package util
+package subtleutil
 
 import (
-  "fmt"
   "hash"
   "math/big"
   "encoding/hex"
@@ -25,18 +24,6 @@ import (
   "crypto/sha512"
   "crypto/elliptic"
 )
-
-// ValidateVersion checks whether the given version is valid. The version is valid
-// only if it is the range [0..maxExpected]
-func ValidateVersion(version uint32, maxExpected uint32) error {
-  if version > maxExpected {
-    msg := fmt.Sprintf("key has version %v; " +
-        "only keys with version in range [0..%v] are supported",
-        version, maxExpected)
-    return fmt.Errorf("subtle/util: " + msg)
-  }
-  return nil
-}
 
 // ConvertTestVectorHashName converts different forms of a hash name to the
 // hash name that tink recognizes

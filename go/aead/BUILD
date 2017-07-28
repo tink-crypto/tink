@@ -23,7 +23,6 @@ TEST_SRCS = [
 DEPS = [
     "//go/subtle:aes",
     "//go/subtle:random",
-    "//go/subtle:util",
     "//go/tink",
     "//go/util",
     "//proto:aes_gcm_go_proto",

@@ -20,7 +20,7 @@ import (
   "math/big"
   "crypto/ecdsa"
   "github.com/google/tink/go/tink/primitives"
-  "github.com/google/tink/go/subtle/util"
+  "github.com/google/tink/go/subtle/subtleutil"
 )
 
 var errInvalidSignature = fmt.Errorf("ecdsa_verify: invalid signature")
@@ -43,7 +43,7 @@ func NewEcdsaVerify(hashAlg string,
                   x []byte,
                   y []byte) (*EcdsaVerify, error) {
   publicKey := &ecdsa.PublicKey{
-    Curve: util.GetCurve(curve),
+    Curve: subtleutil.GetCurve(curve),
     X: new(big.Int).SetBytes(x),
     Y: new(big.Int).SetBytes(y),
   }
@@ -56,11 +56,11 @@ func NewEcdsaVerifyFromPublicKey(hashAlg string, encoding string,
   if publicKey.Curve == nil {
     return nil, fmt.Errorf("ecdsa_verify: invalid curve")
   }
-  curve := util.ConvertCurveName(publicKey.Curve.Params().Name)
+  curve := subtleutil.ConvertCurveName(publicKey.Curve.Params().Name)
   if err := ValidateParams(hashAlg, curve, encoding); err != nil {
     return nil, fmt.Errorf("ecdsa_verify: %s", err)
   }
-  hashFunc := util.GetHashFunc(hashAlg)
+  hashFunc := subtleutil.GetHashFunc(hashAlg)
   return &EcdsaVerify{
     publicKey: publicKey,
     hashFunc: hashFunc,
@@ -75,7 +75,7 @@ func (e *EcdsaVerify) Verify(signatureBytes []byte, data []byte) error {
   if err != nil {
     return errInvalidSignature
   }
-  hashed := util.ComputeHash(e.hashFunc, data)
+  hashed := subtleutil.ComputeHash(e.hashFunc, data)
   valid := ecdsa.Verify(e.publicKey, hashed, signature.R, signature.S)
   if valid {
     return nil

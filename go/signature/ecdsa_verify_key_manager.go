@@ -20,7 +20,6 @@ import (
   "github.com/google/tink/go/tink/tink"
   "github.com/google/tink/go/util/util"
   subtleEcdsa "github.com/google/tink/go/subtle/ecdsa"
-  subtleutil "github.com/google/tink/go/subtle/util"
   "github.com/golang/protobuf/proto"
   ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
   tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -109,7 +108,7 @@ func (_ *EcdsaVerifyKeyManager) GetKeyType() string {
 
 // validateKey validates the given EcdsaPublicKey.
 func (_ *EcdsaVerifyKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) error {
-  if err := subtleutil.ValidateVersion(key.Version, ECDSA_VERIFY_KEY_VERSION); err != nil {
+  if err := util.ValidateVersion(key.Version, ECDSA_VERIFY_KEY_VERSION); err != nil {
     return fmt.Errorf("ecdsa_verify_key_manager: %s", err)
   }
   return nil

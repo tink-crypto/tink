@@ -21,7 +21,6 @@ import (
   "github.com/google/tink/go/util/util"
   "github.com/google/tink/go/subtle/hmac"
   "github.com/google/tink/go/subtle/random"
-  subtleUtil "github.com/google/tink/go/subtle/util"
   "github.com/golang/protobuf/proto"
   hmacpb "github.com/google/tink/proto/hmac_go_proto"
   tinkpb "github.com/google/tink/proto/tink_go_proto"
@@ -134,7 +133,7 @@ func (_ *HmacKeyManager) GetKeyType() string {
 // validateKey validates the given HmacKey. It only validates the version of the
 // key because other parameters will be validated in primitive construction.
 func (_ *HmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
-  err := subtleUtil.ValidateVersion(key.Version, HMAC_KEY_VERSION)
+  err := util.ValidateVersion(key.Version, HMAC_KEY_VERSION)
   if err != nil {
     return fmt.Errorf("hmac_key_manager: %s", err)
   }

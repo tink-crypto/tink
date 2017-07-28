@@ -28,7 +28,7 @@ TEST_SRCS = [
 DEPS = [
     "//go/subtle:ecdsa",
     "//go/subtle:random",
-    "//go/subtle:util",
+    "//go/subtle:subtleutil",
     "//go/tink",
     "//go/util",
     "//proto:common_go_proto",

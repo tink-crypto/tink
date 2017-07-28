@@ -18,7 +18,7 @@ import (
   "fmt"
   "hash"
   "crypto/hmac"
-  "github.com/google/tink/go/subtle/util"
+  "github.com/google/tink/go/subtle/subtleutil"
   "github.com/google/tink/go/tink/primitives"
 )
 
@@ -55,7 +55,7 @@ func New(hashAlg string, key []byte, tagSize uint32) (*Hmac, error) {
   if err := ValidateParams(hashAlg, keySize, tagSize); err != nil {
     return nil, fmt.Errorf("hmac: %s", err)
   }
-  hashFunc := util.GetHashFunc(hashAlg)
+  hashFunc := subtleutil.GetHashFunc(hashAlg)
   if hashFunc == nil {
     return nil, fmt.Errorf("hmac: invalid hash algorithm")
   }

@@ -7,12 +7,12 @@ package(
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 SRCS = [
-    "key_util.go",
-    "proto_util.go",
+    "keyutil.go",
+    "protoutil.go",
 ]
 
 TEST_SRCS = [
-    "key_util_test.go",
+    "keyutil_test.go",
 ]
 
 DEPS = [
@@ -44,18 +44,18 @@ go_test(
 )
 
 # test util
-TEST_UTIL_SRCS = [
-    "testutil/test_util.go",
+testutil_SRCS = [
+    "testutil/testutil.go",
 ]
 
-TEST_UTIL_TEST_SRCS = [
-    "testutil/test_util_test.go",
+testutil_TEST_SRCS = [
+    "testutil/testutil_test.go",
 ]
 
-TEST_UTIL_DEPS = [
+testutil_DEPS = [
     ":util",
     "//go/subtle:random",
-    "//go/subtle:util",
+    "//go/subtle:subtleutil",
     "//go/mac",
     "//go/aead",
     "//go/signature",
@@ -68,18 +68,18 @@ TEST_UTIL_DEPS = [
     "@com_github_golang_protobuf//proto:go_default_library",
 ]
 
-TEST_UTIL_TEST_DEPS = TEST_UTIL_DEPS + [
+testutil_TEST_DEPS = testutil_DEPS + [
     ":testutil",
 ]
 
 go_library(
     name = "testutil",
-    srcs = TEST_UTIL_SRCS,
-    deps = TEST_UTIL_DEPS,
+    srcs = testutil_SRCS,
+    deps = testutil_DEPS,
 )
 
 go_test(
     name = "testutil_test",
-    srcs = TEST_UTIL_TEST_SRCS,
-    deps = TEST_UTIL_TEST_DEPS,
+    srcs = testutil_TEST_SRCS,
+    deps = testutil_TEST_DEPS,
 )

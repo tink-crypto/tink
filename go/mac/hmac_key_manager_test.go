@@ -24,7 +24,7 @@ import (
   "github.com/google/tink/go/mac/mac"
   "github.com/google/tink/go/subtle/hmac"
   "github.com/google/tink/go/subtle/random"
-  subtleUtil "github.com/google/tink/go/subtle/util"
+  "github.com/google/tink/go/subtle/subtleutil"
   "github.com/google/tink/go/util/testutil"
   "github.com/google/tink/go/util/util"
   "github.com/golang/protobuf/proto"
@@ -309,7 +309,7 @@ func validateHmacPrimitive(p *hmac.Hmac, key *hmacpb.HmacKey) error {
   if !bytes.Equal(p.Key, key.KeyValue) ||
       p.TagSize != key.Params.TagSize ||
       reflect.ValueOf(p.HashFunc).Pointer() !=
-        reflect.ValueOf(subtleUtil.GetHashFunc(util.GetHashName(key.Params.Hash))).Pointer() {
+        reflect.ValueOf(subtleutil.GetHashFunc(util.GetHashName(key.Params.Hash))).Pointer() {
     return fmt.Errorf("primitive and key do not matched")
   }
   data := random.GetRandomBytes(20)

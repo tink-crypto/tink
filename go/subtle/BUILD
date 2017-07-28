@@ -9,7 +9,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 COMMON_DEPS = [
     "//go/tink:primitives",
     ":random",
-    ":util",
+    ":subtleutil",
 ]
 
 # ecdsa subtles
@@ -121,22 +121,22 @@ go_test(
 
 # util
 UTIL_SRCS = [
-    "util/util.go",
+    "subtleutil/subtleutil.go",
 ]
 
 UTIL_TEST_SRCS = [
-    "util/util_test.go",
+    "subtleutil/subtleutil_test.go",
 ]
 
 go_library(
-    name = "util",
+    name = "subtleutil",
     srcs = UTIL_SRCS,
 )
 
 go_test(
-    name = "util_test",
+    name = "subtleutil_test",
     srcs = UTIL_TEST_SRCS,
     deps = [
-        ":util",
+        ":subtleutil",
     ],
 )
