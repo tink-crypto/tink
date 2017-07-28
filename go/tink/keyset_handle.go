@@ -44,6 +44,41 @@ func newKeysetHandle(keyset *tinkpb.Keyset,
   }, nil
 }
 
+// GetPublicKeysetHandle returns a KeysetHandle of the public keys if the managed
+// keyset contains private keys.
+func (h *KeysetHandle) GetPublicKeysetHandle() (*KeysetHandle, error) {
+  privKeys := h.keyset.Key
+  pubKeys := make([]*tinkpb.Keyset_Key, len(privKeys))
+
+  for i := 0; i < len(privKeys); i++ {
+    if privKeys[i] == nil || privKeys[i].KeyData == nil {
+      return nil, errKeysetHandleInvalidKeyset
+    }
+    privKeyData := privKeys[i].KeyData
+    if privKeyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PRIVATE {
+      return nil, fmt.Errorf("keyset_handle: keyset contains a non-private key")
+    }
+    pubKeyData, err := Registry().GetPublicKeyData(privKeyData.TypeUrl, privKeyData.Value)
+    if err != nil {
+      return nil, fmt.Errorf("keyset_handle: %s", err)
+    }
+    if err := h.validateKeyData(pubKeyData); err != nil {
+      return nil, fmt.Errorf("keyset_handle: %s", err)
+    }
+    pubKeys[i] = &tinkpb.Keyset_Key{
+      KeyData: pubKeyData,
+      Status: privKeys[i].Status,
+      KeyId: privKeys[i].KeyId,
+      OutputPrefixType: privKeys[i].OutputPrefixType,
+    }
+  }
+  pubKeyset := &tinkpb.Keyset{
+    PrimaryKeyId: h.keyset.PrimaryKeyId,
+    Key: pubKeys,
+  }
+  return newKeysetHandle(pubKeyset, nil)
+}
+
 // Ketset returns the keyset component of the keyset handle.
 func (h *KeysetHandle) Keyset() *tinkpb.Keyset {
   return h.keyset
@@ -66,4 +101,11 @@ func (h *KeysetHandle) String() string {
     return ""
   }
   return info.String()
+}
+
+func (h *KeysetHandle) validateKeyData(keyData *tinkpb.KeyData) error {
+  if _, err := Registry().GetPrimitiveFromKeyData(keyData); err != nil {
+    return err
+  }
+  return nil
 }

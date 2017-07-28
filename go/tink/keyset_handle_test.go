@@ -17,6 +17,7 @@ package tink
 
 import (
   "testing"
+  "github.com/google/tink/go/signature/signature"
   "github.com/google/tink/go/util/util"
   tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
@@ -56,5 +57,50 @@ func TestNewKeysetHandleWithInvalidInput(t *testing.T) {
   }
   if _, err := newKeysetHandle(new(tinkpb.Keyset), nil); err == nil {
     t.Errorf("unexpected error: %s", err)
+  }
+}
+
+
+func TestGetPublicKeysetHandleBasic(t *testing.T) {
+  Registry().RegisterKeyManager(signature.NewEcdsaSignKeyManager())
+  Registry().RegisterKeyManager(signature.NewEcdsaVerifyKeyManager())
+
+  template := signature.EcdsaP256KeyTemplate()
+  privHandle, err := CleartextKeysetHandle().GenerateNew(template)
+  if err != nil {
+    t.Errorf("unexpected error: %s", err)
+  }
+  privKeyset := privHandle.keyset
+  pubHandle, err := privHandle.GetPublicKeysetHandle()
+  if err != nil {
+    t.Errorf("getting public keyset handle failed: %s", err)
+  }
+  pubKeyset := pubHandle.keyset
+  // check Keyset's params
+  if len(pubKeyset.Key) != 1 {
+    t.Errorf("incorrect number of keys in the keyset handle: %s", len(pubHandle.keyset.Key))
+  }
+  if pubKeyset.PrimaryKeyId != privKeyset.PrimaryKeyId {
+    t.Errorf("incorrect primary key id")
+  }
+  // check Keyset_Key's params
+  pubKey := pubKeyset.Key[0]
+  privKey := privKeyset.Key[0]
+  if pubKey.OutputPrefixType != privKey.OutputPrefixType {
+    t.Errorf("incorrect output prefix type")
+  }
+  if pubKey.Status != privKey.Status {
+    t.Errorf("incorrect key status")
+  }
+  if pubKey.KeyId != privKey.KeyId {
+    t.Errorf("incorrect key id")
+  }
+  // check KeyData's params
+  pubKeyData := pubKey.KeyData
+  if pubKeyData.TypeUrl != signature.ECDSA_VERIFY_TYPE_URL {
+    t.Errorf("incorrect typeurl")
+  }
+  if pubKeyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PUBLIC {
+    t.Errorf("incorrect key material type")
   }
 }

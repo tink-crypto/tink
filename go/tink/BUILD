@@ -44,10 +44,11 @@ TINK_DEPS = [
 ]
 
 TINK_TEST_DEPS = TINK_DEPS + [
-    ":tink",
     "//go/aead",
     "//go/mac",
+    "//go/signature",
     "//go/util:testutil",
+    ":tink",
 ]
 
 go_library(
@@ -67,6 +68,9 @@ go_test(
     name = "tink_internal_test",
     srcs = TINK_INTERNAL_TEST_SRCS,
     library = ":tink",
+    deps = [
+        "//go/signature",
+    ],
 )
 
 # primitives only

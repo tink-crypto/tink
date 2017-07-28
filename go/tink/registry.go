@@ -245,3 +245,19 @@ func (reg *registry) GetPrimitivesWithCustomManager(
   }
   return primitiveSet, nil
 }
+
+// GetPublicKeyData is Convenience method for extracting the public key data
+// from the given serialized private key. It looks up a PrivateKeyManager
+// identified by the given typeUrl, and calls the manager's GetPublicKeyData() method.
+func (reg *registry) GetPublicKeyData(typeUrl string,
+                                    serializedPrivKey []byte) (*tinkpb.KeyData, error) {
+  keyManager, err := reg.GetKeyManager(typeUrl)
+  if err != nil {
+    return nil, err
+  }
+  privateKeyManager, ok := keyManager.(PrivateKeyManager)
+  if !ok {
+    return nil, fmt.Errorf("registry: %s is not belong to a PrivateKeyManager", typeUrl)
+  }
+  return privateKeyManager.GetPublicKeyData(serializedPrivKey)
+}
