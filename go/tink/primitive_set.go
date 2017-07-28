@@ -26,14 +26,17 @@ type Entry struct {
   primitive interface{}
   identifier string
   status tinkpb.KeyStatusType
+  outputPrefixType tinkpb.OutputPrefixType
 }
 
 // NewEntry creates a new instance of Entry using the given information.
-func NewEntry(p interface{}, id string, stt tinkpb.KeyStatusType) *Entry {
+func NewEntry(p interface{}, id string, stt tinkpb.KeyStatusType,
+              outputPrefixType tinkpb.OutputPrefixType) *Entry {
   return &Entry{
     primitive: p,
     identifier: id,
     status: stt,
+    outputPrefixType: outputPrefixType,
   }
 }
 
@@ -47,6 +50,10 @@ func (e *Entry) Status() tinkpb.KeyStatusType {
 
 func (e *Entry) Identifier() string {
   return e.identifier
+}
+
+func (e *Entry) OutputPrefixType() tinkpb.OutputPrefixType {
+  return e.outputPrefixType
 }
 
 /**
@@ -144,7 +151,7 @@ func (ps *PrimitiveSet) AddPrimitive(primitive interface{},
   if err != nil {
     return nil, fmt.Errorf("primitive_set: %s", err)
   }
-  e := NewEntry(primitive, id, key.Status)
+  e := NewEntry(primitive, id, key.Status, key.OutputPrefixType)
   ps.primitives[id] = append(ps.primitives[id], e)
   return e, nil
 }
