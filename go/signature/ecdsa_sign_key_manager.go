@@ -21,7 +21,7 @@ import (
   "crypto/rand"
   "github.com/google/tink/go/tink/tink"
   "github.com/google/tink/go/util/util"
-  subtleUtil "github.com/google/tink/go/subtle/util"
+  subtleutil "github.com/google/tink/go/subtle/util"
   subtleEcdsa "github.com/google/tink/go/subtle/ecdsa"
   "github.com/golang/protobuf/proto"
   ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
@@ -108,7 +108,7 @@ func (km *EcdsaSignKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Messa
   // generate key
   params := format.Params
   curve := util.GetCurveName(params.Curve)
-  tmpKey, _ := ecdsa.GenerateKey(subtleUtil.GetCurve(curve), rand.Reader)
+  tmpKey, _ := ecdsa.GenerateKey(subtleutil.GetCurve(curve), rand.Reader)
   keyValue := tmpKey.D.Bytes()
   pub := util.NewEcdsaPublicKey(ECDSA_SIGN_KEY_VERSION, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
   priv := util.NewEcdsaPrivateKey(ECDSA_SIGN_KEY_VERSION, pub, keyValue)
@@ -162,7 +162,7 @@ func (_ *EcdsaSignKeyManager) GetKeyType() string {
 
 // validateKey validates the given EcdsaPrivateKey.
 func (_ *EcdsaSignKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
-  if err := subtleUtil.ValidateVersion(key.Version, ECDSA_SIGN_KEY_VERSION); err != nil {
+  if err := subtleutil.ValidateVersion(key.Version, ECDSA_SIGN_KEY_VERSION); err != nil {
     return fmt.Errorf("ecdsa_sign_key_manager: %s", err)
   }
   hash, curve, encoding := util.GetEcdsaParamNames(key.PublicKey.Params)

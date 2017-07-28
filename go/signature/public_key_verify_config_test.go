@@ -29,8 +29,8 @@ func TestPublicKeyVerifyConfigInstance(t *testing.T) {
 }
 
 func TestPublicKeyVerifyConfigRegistration(t *testing.T) {
-  success, err := signature.PublicKeyVerifyConfig().RegisterStandardKeyTypes()
-  if !success || err != nil {
+  _, err := signature.PublicKeyVerifyConfig().RegisterStandardKeyTypes()
+  if err != nil {
     t.Errorf("cannot register standard key types")
   }
   // check for EcdsaVerifyKeyManager
