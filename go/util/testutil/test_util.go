@@ -22,7 +22,7 @@ import (
   "github.com/google/tink/go/subtle/random"
   "github.com/google/tink/go/util/util"
   subtleUtil "github.com/google/tink/go/subtle/util"
-  // "github.com/google/tink/go/tink/tink"
+  "github.com/google/tink/go/tink/tink"
   "github.com/google/tink/go/mac/mac"
   "github.com/google/tink/go/aead/aead"
   "github.com/google/tink/go/signature/signature"
@@ -33,6 +33,34 @@ import (
   . "github.com/google/tink/proto/aes_gcm_go_proto"
   . "github.com/google/tink/proto/ecdsa_go_proto"
 )
+
+// DummyAeadKeyManager is a dummy implementation of the KeyManager interface.
+// It returns DummyAead when GetPrimitive() functions are called.
+type DummyAeadKeyManager struct {}
+var _ tink.KeyManager = (*DummyAeadKeyManager)(nil)
+
+func (_ *DummyAeadKeyManager) GetPrimitiveFromSerializedKey(serializedKey []byte) (interface{}, error) {
+  return new(DummyAead), nil
+}
+func (_ *DummyAeadKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, error) {
+  return new(DummyAead), nil
+}
+func (_ *DummyAeadKeyManager) NewKeyFromSerializedKeyFormat(serializedKeyFormat []byte) (proto.Message, error) {
+  return nil, fmt.Errorf("not implemented")
+}
+func (_ *DummyAeadKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message, error) {
+  return nil, fmt.Errorf("not implemented")
+}
+func (_ *DummyAeadKeyManager) NewKeyData(serializedKeyFormat []byte) (*KeyData, error) {
+  return nil, fmt.Errorf("not implemented")
+}
+func (_ *DummyAeadKeyManager) DoesSupport(typeUrl string) bool {
+  return typeUrl == aead.AES_GCM_TYPE_URL
+}
+func (_ *DummyAeadKeyManager) GetKeyType() string {
+  return aead.AES_GCM_TYPE_URL
+}
+
 
 // DummyAead is a dummy implementation of Aead interface.
 type DummyAead struct {}
@@ -149,6 +177,16 @@ func NewHmacKeyFormat(hashType HashType, tagSize uint32) *HmacKeyFormat {
   params := util.NewHmacParams(hashType, tagSize)
   keySize := uint32(20)
   return util.NewHmacKeyFormat(params, keySize)
+}
+
+func NewHmacKeysetManager() *tink.KeysetManager {
+  macTemplate := mac.HmacSha256Tag128KeyTemplate()
+  manager := tink.NewKeysetManager(macTemplate, OutputPrefixType_TINK, nil, nil)
+  err := manager.Rotate()
+  if err != nil {
+    panic(fmt.Sprintf("cannot rotate keyset manager: %s", err))
+  }
+  return manager
 }
 
 func NewHmacKeyData(hashType HashType, tagSize uint32) *KeyData {

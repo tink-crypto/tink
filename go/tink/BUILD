@@ -27,9 +27,12 @@ TINK_SRCS = PRIMITIVES_SRCS + [
 ]
 
 TINK_TEST_SRCS = [
+    "cleartext_keyset_handle_test.go",
     "crypto_format_test.go",
     "encrypted_keyset_handle_test.go",
+    "keyset_manager_test.go",
     "primitive_set_test.go",
+    "registry_test.go",
 ]
 
 TINK_INTERNAL_TEST_SRCS = [
@@ -47,7 +50,12 @@ TINK_TEST_DEPS = TINK_DEPS + [
     "//go/aead",
     "//go/mac",
     "//go/signature",
+    "//go/subtle:aes",
+    "//go/subtle:hmac",
     "//go/util:testutil",
+    "//proto:aes_gcm_go_proto",
+    "//proto:common_go_proto",
+    "//proto:hmac_go_proto",
     ":tink",
 ]
 
