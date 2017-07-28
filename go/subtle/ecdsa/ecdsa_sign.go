@@ -36,26 +36,23 @@ type EcdsaSign struct {
 var _ tink.PublicKeySign = (*EcdsaSign)(nil)
 
 // NewEcdsaSign creates a new instance of EcdsaSign.
-func NewEcdsaSign(hashAlg string, curve string, encoding string, keyValue []byte) (*EcdsaSign, error) {
-  if err := ValidateParams(hashAlg, curve, encoding); err != nil {
-    return nil, fmt.Errorf("ecdsa_sign: %s", err)
-  }
-  if len(keyValue) == 0 {
-    return nil, fmt.Errorf("ecdsa_sign: invalid key value")
-  }
-  hashFunc := util.GetHashFunc(hashAlg)
+func NewEcdsaSign(hashAlg string,
+                curve string,
+                encoding string,
+                keyValue []byte) (*EcdsaSign, error) {
   publicKey := ecdsa.PublicKey{Curve: util.GetCurve(curve), X: nil, Y: nil}
   d := new(big.Int).SetBytes(keyValue)
-  return &EcdsaSign{
-    privateKey: &ecdsa.PrivateKey{PublicKey: publicKey, D: d},
-    hashFunc: hashFunc,
-    encoding: encoding,
-  }, nil
+  privateKey := &ecdsa.PrivateKey{PublicKey: publicKey, D: d}
+  return NewEcdsaSignFromPrivateKey(hashAlg, encoding, privateKey)
 }
 
 // NewEcdsaSignFromPrivateKey creates a new instance of EcdsaSign
-func NewEcdsaSignFromPrivateKey(hashAlg string, encoding string,
+func NewEcdsaSignFromPrivateKey(hashAlg string,
+                              encoding string,
                               privateKey *ecdsa.PrivateKey) (*EcdsaSign, error) {
+  if privateKey.Curve == nil {
+    return nil, fmt.Errorf("ecdsa_sign: invalid curve")
+  }
   curve := util.ConvertCurveName(privateKey.Curve.Params().Name)
   if err := ValidateParams(hashAlg, curve, encoding); err != nil {
     return nil, fmt.Errorf("ecdsa_sign: %s", err)
