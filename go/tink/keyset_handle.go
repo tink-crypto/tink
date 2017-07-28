@@ -21,6 +21,8 @@ import (
   tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
+var errKeysetHandleInvalidKeyset = fmt.Errorf("keyset_handle: invalid keyset")
+
 // KeysetHandle provides abstracted access to Keysets, to limit the exposure
 // of actual protocol buffers that hold sensitive key material.
 type KeysetHandle struct {
@@ -33,8 +35,8 @@ type KeysetHandle struct {
 // be returned.
 func newKeysetHandle(keyset *tinkpb.Keyset,
                     encryptedKeyset *tinkpb.EncryptedKeyset) (*KeysetHandle, error) {
-  if keyset == nil {
-    return nil, fmt.Errorf("key_set_handle: keyset must not be nil")
+  if keyset == nil || len(keyset.Key) == 0 {
+    return nil, errKeysetHandleInvalidKeyset
   }
   return &KeysetHandle{
     keyset: keyset,
@@ -42,7 +44,7 @@ func newKeysetHandle(keyset *tinkpb.Keyset,
   }, nil
 }
 
-// Keyset returns the keyset component of the keyset handle.
+// Ketset returns the keyset component of the keyset handle.
 func (h *KeysetHandle) Keyset() *tinkpb.Keyset {
   return h.keyset
 }

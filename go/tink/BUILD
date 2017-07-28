@@ -8,25 +8,27 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 # tink
 PRIMITIVES_SRCS = [
-    "mac.go",
     "aead.go",
+    "mac.go",
     "public_key_sign.go",
     "public_key_verify.go",
 ]
 
 TINK_SRCS = PRIMITIVES_SRCS + [
-    "key_manager.go",
-    "private_key_manager.go",
-    "keyset_handle.go",
     "cleartext_keyset_handle.go",
-    "primitive_set.go",
-    "registry.go",
-    "keyset_manager.go",
     "crypto_format.go",
+    "encrypted_keyset_handle.go",
+    "key_manager.go",
+    "keyset_handle.go",
+    "keyset_manager.go",
+    "primitive_set.go",
+    "private_key_manager.go",
+    "registry.go",
 ]
 
 TINK_TEST_SRCS = [
     "crypto_format_test.go",
+    "encrypted_keyset_handle_test.go",
     "primitive_set_test.go",
 ]
 
@@ -43,6 +45,8 @@ TINK_DEPS = [
 
 TINK_TEST_DEPS = TINK_DEPS + [
     ":tink",
+    "//go/aead",
+    "//go/mac",
     "//go/util:testutil",
 ]
 

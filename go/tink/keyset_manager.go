@@ -24,6 +24,10 @@ import (
   tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
+// emptyAad is the additional authenticated data that is used in the encryption
+// and decryption of keysets
+var emptyAad = []byte{}
+
 // KeysetManager manages a Keyset-proto, with convenience methods that rotate,
 // disable, enable or destroy keys.
 // Note: It is not thread-safe.
@@ -46,7 +50,6 @@ func NewKeysetManager(keyTemplate *tinkpb.KeyTemplate,
   ret.SetKeyset(keyset)
   return ret
 }
-
 
 // Rotate generates a fresh key using the key template of the current keyset manager
 // and sets the new key as the primary key.
@@ -77,22 +80,10 @@ func (km *KeysetManager) GetKeysetHandle() (*KeysetHandle, error) {
   if km.masterKey == nil {
     return newKeysetHandle(km.keyset, nil)
   }
-  serializedKeyset, err := proto.Marshal(km.keyset)
+  encryptedKeyset, err := EncryptKeyset(km.keyset, km.masterKey)
   if err != nil {
-    return nil, fmt.Errorf("keyset_manager: cannot serialize keyset: %s", err)
+    return nil, err
   }
-  ad := []byte{}
-  serializedEncryptedKeyset, err := km.masterKey.Encrypt(serializedKeyset, ad)
-  // check if we can decrypt, to detect errors
-  decrypted, err := km.masterKey.Decrypt(serializedEncryptedKeyset, ad)
-  if err != nil || !bytes.Equal(decrypted, serializedKeyset) {
-    return nil, fmt.Errorf("keyset_manager: cannot encrypt keyset: %s", err)
-  }
-  info, err := util.GetKeysetInfo(km.keyset)
-  if err != nil {
-    return nil, fmt.Errorf("keyset_manager: cannot get keyset info: %s", err)
-  }
-  encryptedKeyset := util.NewEncryptedKeyset(serializedEncryptedKeyset, info)
   return newKeysetHandle(km.keyset, encryptedKeyset)
 }
 
@@ -157,4 +148,43 @@ func (km *KeysetManager) newKeyID() uint32 {
       return ret
     }
   }
+}
+
+// EncryptKeyset encrypts the given keyset using the given master key.
+func EncryptKeyset(keyset *tinkpb.Keyset,
+                  masterKey Aead) (*tinkpb.EncryptedKeyset, error) {
+  serializedKeyset, err := proto.Marshal(keyset)
+  if err != nil {
+    return nil, fmt.Errorf("keyset_manager: invalid keyset")
+  }
+  encrypted, err := masterKey.Encrypt(serializedKeyset, emptyAad)
+  if err != nil {
+    return nil, fmt.Errorf("keyset_manager: encrypted failed: %s", err)
+  }
+  // check if we can decrypt, to detect errors
+  decrypted, err := masterKey.Decrypt(encrypted, emptyAad)
+  if err != nil || !bytes.Equal(decrypted, serializedKeyset) {
+    return nil, fmt.Errorf("keyset_manager: encryption failed: %s", err)
+  }
+  // get keyset info
+  info, err := util.GetKeysetInfo(keyset)
+  if err != nil {
+    return nil, fmt.Errorf("keyset_manager: cannot get keyset info: %s", err)
+  }
+  encryptedKeyset := util.NewEncryptedKeyset(encrypted, info)
+  return encryptedKeyset, nil
+}
+
+// DecryptKeyset decrypts the given keyset using the given master key
+func DecryptKeyset(encryptedKeyset *tinkpb.EncryptedKeyset,
+                  masterKey Aead) (*tinkpb.Keyset, error) {
+  decrypted, err := masterKey.Decrypt(encryptedKeyset.EncryptedKeyset, []byte{})
+  if err != nil {
+    return nil, fmt.Errorf("keyset_manager: decryption failed: %s", err)
+  }
+  keyset := new(tinkpb.Keyset)
+  if err := proto.Unmarshal(decrypted, keyset); err != nil {
+    return nil, fmt.Errorf("keyset_manager: invalid encrypted keyset")
+  }
+  return keyset, nil
 }

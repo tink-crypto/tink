@@ -21,7 +21,7 @@ import (
   tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func TestKeysetHandleBasic(t *testing.T) {
+func TestNewKeysetHandleBasic(t *testing.T) {
   keyData := util.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
   key := util.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
   keyset := util.NewKeyset(1, []*tinkpb.Keyset_Key{key})
@@ -50,11 +50,11 @@ func TestKeysetHandleBasic(t *testing.T) {
   }
 }
 
-func TestNewKeysetHandle(t *testing.T) {
+func TestNewKeysetHandleWithInvalidInput(t *testing.T) {
   if _, err := newKeysetHandle(nil, nil); err == nil {
     t.Errorf("NewKeysetHandle should not accept nil as Keyset")
   }
-  if _, err := newKeysetHandle(new(tinkpb.Keyset), nil); err != nil {
+  if _, err := newKeysetHandle(new(tinkpb.Keyset), nil); err == nil {
     t.Errorf("unexpected error: %s", err)
   }
 }
