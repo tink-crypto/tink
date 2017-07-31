@@ -12,7 +12,7 @@ java_binary(
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
         "//java",
-        "//java:keyset_handle",
+        "//java:cleartext_keyset_handle",
     ],
 )
 
@@ -26,6 +26,6 @@ java_binary(
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
         "//java",
-        "//java:keyset_handle",
+        "//java:cleartext_keyset_handle",
     ],
 )

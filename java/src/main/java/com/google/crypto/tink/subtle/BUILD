@@ -74,6 +74,7 @@ java_library(
 java_library(
     name = "signature",
     srcs = [
+        "Curve25519.java",
         "EcUtil.java",
         "EcdsaSignJce.java",
         "EcdsaVerifyJce.java",
@@ -84,7 +85,6 @@ java_library(
     deps = [
         ":ed25519_internal",
         ":subtle",
-        ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "@com_google_errorprone_error_prone_annotations//jar",
     ] + select({
@@ -98,6 +98,7 @@ java_library(
 java_library(
     name = "hybrid",
     srcs = [
+        "Curve25519.java",
         "EcUtil.java",
         "EciesAeadHkdfDemHelper.java",
         "EciesAeadHkdfHybridDecrypt.java",
@@ -112,7 +113,6 @@ java_library(
     deps = [
         ":aead",
         ":subtle",
-        ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "@com_google_errorprone_error_prone_annotations//jar",
     ] + select({

@@ -15,7 +15,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "//java",
-        "//java:keyset_handle",
+        "//java:cleartext_keyset_handle",
         "//java:protos",
         "//java:subtle",
         "@args4j//jar",

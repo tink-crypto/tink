@@ -38,13 +38,13 @@ java_library(
     name = "subtle",
     visibility = ["//visibility:public"],
     exports = [
+        "//java/src/main/java/com/google/crypto/tink:primitives",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:aead",
         "//java/src/main/java/com/google/crypto/tink/subtle:hybrid",
         "//java/src/main/java/com/google/crypto/tink/subtle:mac",
         "//java/src/main/java/com/google/crypto/tink/subtle:signature",
         "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
-        "//java/src/main/java/com/google/crypto/tink/subtle:x25519",
     ],
 )
 
@@ -99,13 +99,13 @@ java_library(
 )
 
 java_library(
-    name = "keyset_handle",
+    name = "cleartext_keyset_handle",
     visibility = [
         "//tools/testing:__subpackages__",
         "//tools/tinkey:__pkg__",
     ],
     exports = [
-        "//java/src/main/java/com/google/crypto/tink:keyset_handle",
+        "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
     ],
 )
 
@@ -118,8 +118,8 @@ java_library(
         "//visibility:public",
     ],
     exports = [
+        ":cleartext_keyset_handle",
         ":java",
-        ":keyset_handle",
         ":protos",
         ":subtle",
     ],
@@ -131,7 +131,7 @@ java_library(
     visibility = ["//visibility:public"],
     exports = [
         ":android",
-        ":keyset_handle",
+        ":cleartext_keyset_handle",
         ":protos",
         ":subtle",
     ],

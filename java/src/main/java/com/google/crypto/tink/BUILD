@@ -36,7 +36,7 @@ java_library(
 
 # restricted APIs
 
-KEYSET_HANDLE_SRCS = [
+CLEARTEXT_KEYSET_HANDLE_SRCS = [
     # Storing keyset in cleartext usually leads to security incidents.
     # To discourage users from doing that, the visibility of
     # CleartextKeysetHandle, which allows loading cleartext keyset,
@@ -45,8 +45,8 @@ KEYSET_HANDLE_SRCS = [
 ]
 
 filegroup(
-    name = "keyset_handle_srcs",
-    srcs = KEYSET_HANDLE_SRCS,
+    name = "cleartext_keyset_handle_srcs",
+    srcs = CLEARTEXT_KEYSET_HANDLE_SRCS,
 )
 
 # core, without restricted APIs
@@ -57,7 +57,7 @@ filegroup(
         [
             "*.java",
         ],
-        exclude = KEYSET_HANDLE_SRCS,
+        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS,
     ),
 )
 
@@ -76,9 +76,9 @@ java_library(
 )
 
 java_library(
-    name = "keyset_handle",
+    name = "cleartext_keyset_handle",
     srcs = [
-        ":keyset_handle_srcs",
+        ":cleartext_keyset_handle_srcs",
     ],
     javacopts = JAVACOPTS,
     deps = [
