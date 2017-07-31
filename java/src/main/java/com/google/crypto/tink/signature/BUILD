@@ -17,6 +17,20 @@ filegroup(
     ),
 )
 
+FULL_PROTOS = [
+    "//proto:common_java_proto",
+    "//proto:ecdsa_java_proto",
+    "//proto:ed25519_java_proto",
+    "//proto:tink_java_proto",
+]
+
+LITE_PROTOS = [
+    "//proto:common_java_proto_lite",
+    "//proto:ecdsa_java_proto_lite",
+    "//proto:ed25519_java_proto_lite",
+    "//proto:tink_java_proto_lite",
+]
+
 java_library(
     name = "signature",
     srcs = [":signature_srcs"],
@@ -25,26 +39,9 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:signature",
-        "//proto:common_java_proto",
-        "//proto:ecdsa_java_proto",
-        "//proto:ed25519_java_proto",
-        "//proto:tink_java_proto",
-        "@com_google_protobuf_java//:protobuf_java",
-    ],
-)
-
-java_library(
-    name = "android",
-    srcs = [":signature_srcs"],
-    javacopts = JAVACOPTS,
-    deps = [
-        "//java/src/main/java/com/google/crypto/tink:android",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle:signature_android",
-        "//proto:common_java_proto_lite",
-        "//proto:ecdsa_java_proto_lite",
-        "//proto:ed25519_java_proto_lite",
-        "//proto:tink_java_proto_lite",
-        "@com_google_protobuf_java//:protobuf_java",
-    ],
+        "@com_google_protobuf_javalite//:protobuf_java_lite",
+    ] + select({
+        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
+        "//conditions:default": LITE_PROTOS,
+    }),
 )

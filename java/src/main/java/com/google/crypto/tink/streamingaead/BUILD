@@ -17,6 +17,20 @@ filegroup(
     ),
 )
 
+FULL_PROTOS = [
+    "//proto:aes_ctr_hmac_streaming_java_proto",
+    "//proto:aes_gcm_hkdf_streaming_java_proto",
+    "//proto:common_java_proto",
+    "//proto:tink_java_proto",
+]
+
+LITE_PROTOS = [
+    "//proto:aes_ctr_hmac_streaming_java_proto_lite",
+    "//proto:aes_gcm_hkdf_streaming_java_proto_lite",
+    "//proto:common_java_proto_lite",
+    "//proto:tink_java_proto_lite",
+]
+
 java_library(
     name = "streamingaead",
     srcs = [":streamingaead_srcs"],
@@ -25,26 +39,9 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
-        "//proto:aes_ctr_hmac_streaming_java_proto",
-        "//proto:aes_gcm_hkdf_streaming_java_proto",
-        "//proto:common_java_proto",
-        "//proto:tink_java_proto",
-        "@com_google_protobuf_java//:protobuf_java",
-    ],
-)
-
-java_library(
-    name = "android",
-    srcs = [":streamingaead_srcs"],
-    javacopts = JAVACOPTS,
-    deps = [
-        "//java/src/main/java/com/google/crypto/tink:android",
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
-        "//proto:aes_ctr_hmac_streaming_java_proto_lite",
-        "//proto:aes_gcm_hkdf_streaming_java_proto_lite",
-        "//proto:common_java_proto_lite",
-        "//proto:tink_java_proto_lite",
-        "@com_google_protobuf_java//:protobuf_java",
-    ],
+        "@com_google_protobuf_javalite//:protobuf_java_lite",
+    ] + select({
+        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
+        "//conditions:default": LITE_PROTOS,
+    }),
 )

@@ -8,6 +8,14 @@ package(
 
 load("//java/build_defs:javac.bzl", "JAVACOPTS")
 
+FULL_PROTOS = [
+    "//proto:common_java_proto",
+]
+
+LITE_PROTOS = [
+    "//proto:common_java_proto_lite",
+]
+
 # common subtle
 
 java_library(
@@ -78,29 +86,11 @@ java_library(
         ":subtle",
         ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//proto:common_java_proto",
         "@com_google_errorprone_error_prone_annotations//jar",
-    ],
-)
-
-java_library(
-    name = "signature_android",
-    srcs = [
-        "EcUtil.java",
-        "EcdsaSignJce.java",
-        "EcdsaVerifyJce.java",
-        "Ed25519Sign.java",
-        "Ed25519Verify.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        ":ed25519_internal",
-        ":subtle",
-        ":x25519",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//proto:common_java_proto_lite",
-        "@com_google_errorprone_error_prone_annotations//jar",
-    ],
+    ] + select({
+        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
+        "//conditions:default": LITE_PROTOS,
+    }),
 )
 
 # hybrid subtle
@@ -124,30 +114,11 @@ java_library(
         ":subtle",
         ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//proto:common_java_proto",
         "@com_google_errorprone_error_prone_annotations//jar",
-    ],
-)
-
-java_library(
-    name = "hybrid_android",
-    srcs = [
-        "EcUtil.java",
-        "EciesAeadHkdfDemHelper.java",
-        "EciesAeadHkdfHybridDecrypt.java",
-        "EciesAeadHkdfHybridEncrypt.java",
-        "EciesHkdfRecipientKem.java",
-        "EciesHkdfSenderKem.java",
-        "Hkdf.java",
-        "ProtoUtil.java",
-    ],
-    javacopts = JAVACOPTS,
-    deps = [
-        ":subtle",
-        "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//proto:common_java_proto_lite",
-        "@com_google_errorprone_error_prone_annotations//jar",
-    ],
+    ] + select({
+        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
+        "//conditions:default": LITE_PROTOS,
+    }),
 )
 
 # Streaming

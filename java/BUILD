@@ -25,12 +25,12 @@ java_library(
     name = "android",
     visibility = ["//visibility:public"],
     exports = [
-        "//java/src/main/java/com/google/crypto/tink:android",
-        "//java/src/main/java/com/google/crypto/tink/aead:android",
-        "//java/src/main/java/com/google/crypto/tink/hybrid:android",
-        "//java/src/main/java/com/google/crypto/tink/mac:android",
-        "//java/src/main/java/com/google/crypto/tink/signature:android",
-        "//java/src/main/java/com/google/crypto/tink/streamingaead:android",
+        "//java/src/main/java/com/google/crypto/tink",
+        "//java/src/main/java/com/google/crypto/tink/aead",
+        "//java/src/main/java/com/google/crypto/tink/hybrid",
+        "//java/src/main/java/com/google/crypto/tink/mac",
+        "//java/src/main/java/com/google/crypto/tink/signature",
+        "//java/src/main/java/com/google/crypto/tink/streamingaead",
     ],
 )
 
@@ -48,20 +48,43 @@ java_library(
     ],
 )
 
-java_library(
-    name = "subtle_android",
-    visibility = ["//visibility:public"],
-    exports = [
-        "//java/src/main/java/com/google/crypto/tink/subtle",
-        "//java/src/main/java/com/google/crypto/tink/subtle:aead",
-        "//java/src/main/java/com/google/crypto/tink/subtle:hybrid_android",
-        "//java/src/main/java/com/google/crypto/tink/subtle:mac",
-        "//java/src/main/java/com/google/crypto/tink/subtle:signature_android",
-        "//java/src/main/java/com/google/crypto/tink/subtle:x25519",
-    ],
-)
-
 # RESTRICTED
+
+FULL_PROTOS = [
+    "//proto:aes_ctr_hmac_aead_java_proto",
+    "//proto:aes_ctr_hmac_streaming_java_proto",
+    "//proto:aes_ctr_java_proto",
+    "//proto:aes_eax_java_proto",
+    "//proto:aes_gcm_hkdf_streaming_java_proto",
+    "//proto:aes_gcm_java_proto",
+    "//proto:chacha20_poly1305_java_proto",
+    "//proto:common_java_proto",
+    "//proto:ecdsa_java_proto",
+    "//proto:ecies_aead_hkdf_java_proto",
+    "//proto:ed25519_java_proto",
+    "//proto:hmac_java_proto",
+    "//proto:kms_aead_java_proto",
+    "//proto:kms_envelope_java_proto",
+    "//proto:tink_java_proto",
+]
+
+LITE_PROTOS = [
+    "//proto:aes_ctr_hmac_aead_java_proto_lite",
+    "//proto:aes_ctr_hmac_streaming_java_proto_lite",
+    "//proto:aes_ctr_java_proto_lite",
+    "//proto:aes_eax_java_proto_lite",
+    "//proto:aes_gcm_hkdf_streaming_java_proto_lite",
+    "//proto:aes_gcm_java_proto_lite",
+    "//proto:chacha20_poly1305_java_proto_lite",
+    "//proto:common_java_proto_lite",
+    "//proto:ecdsa_java_proto_lite",
+    "//proto:ecies_aead_hkdf_java_proto_lite",
+    "//proto:ed25519_java_proto_lite",
+    "//proto:hmac_java_proto_lite",
+    "//proto:kms_aead_java_proto_lite",
+    "//proto:kms_envelope_java_proto_lite",
+    "//proto:tink_java_proto_lite",
+]
 
 java_library(
     name = "protos",
@@ -69,23 +92,10 @@ java_library(
         "//examples/java/envelopeme:__pkg__",
         "//tools/tinkey:__pkg__",
     ],
-    exports = [
-        "//proto:aes_ctr_hmac_aead_java_proto",
-        "//proto:aes_ctr_hmac_streaming_java_proto",
-        "//proto:aes_ctr_java_proto",
-        "//proto:aes_eax_java_proto",
-        "//proto:aes_gcm_hkdf_streaming_java_proto",
-        "//proto:aes_gcm_java_proto",
-        "//proto:chacha20_poly1305_java_proto",
-        "//proto:common_java_proto",
-        "//proto:ecdsa_java_proto",
-        "//proto:ecies_aead_hkdf_java_proto",
-        "//proto:ed25519_java_proto",
-        "//proto:hmac_java_proto",
-        "//proto:kms_aead_java_proto",
-        "//proto:kms_envelope_java_proto",
-        "//proto:tink_java_proto",
-    ],
+    exports = select({
+        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
+        "//conditions:default": LITE_PROTOS,
+    }),
 )
 
 java_library(
@@ -121,8 +131,9 @@ java_library(
     visibility = ["//visibility:public"],
     exports = [
         ":android",
-        ":subtle_android",
-        "//java/src/main/java/com/google/crypto/tink:keyset_handle_android",
+        ":keyset_handle",
+        ":protos",
+        ":subtle",
     ],
 )
 
@@ -138,7 +149,7 @@ java_library(
     deps = [
         ":testonly",
         "@com_google_guava//jar",
-        "@com_google_protobuf_java//:protobuf_java",
+        "@com_google_protobuf_javalite//:protobuf_java_lite",
         "@junit_junit_4//jar",
     ],
 )
@@ -167,7 +178,7 @@ java_library(
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
         "@com_google_guava//jar",
-        "@com_google_protobuf_java//:protobuf_java",
+        "@com_google_protobuf_javalite//:protobuf_java_lite",
         "@com_google_truth//jar",
         "@junit_junit_4//jar",
         "@org_mockito//jar",
