@@ -42,10 +42,11 @@ import org.junit.runners.Suite.SuiteClasses;
 })
 public class NaClCryptoBoxTest {
 
-  public static abstract class BaseTest {
-
+  /**
+   * Base class for all NaClCryptoBox tests.
+   */
+  public abstract static class BaseTest {
     public abstract HybridEncrypt getHybridEncrypt(final byte[] peersPublicKey);
-
     public abstract HybridDecrypt getHybridDecrypt(final byte[] privateKey);
 
     /**
@@ -148,8 +149,10 @@ public class NaClCryptoBoxTest {
     }
   }
 
+  /**
+   * Tests for NaClCryptoBox with XSalsa20Poly1305.
+   */
   public static class XSalsa20Poly1305Test extends BaseTest {
-
     @Override
     public HybridEncrypt getHybridEncrypt(byte[] peersPublicKey) {
       return NaClCryptoBox.hybridEncryptWithXSalsa20Poly1305(peersPublicKey);
@@ -237,8 +240,10 @@ public class NaClCryptoBoxTest {
     }
   }
 
+  /**
+   * Tests for NaClCryptoBox with ChaCha20Poly1305.
+   */
   public static class ChaCha20Poly1305Test extends BaseTest {
-
     @Override
     public HybridEncrypt getHybridEncrypt(byte[] peersPublicKey) {
       return NaClCryptoBox.hybridEncryptWithChaCha20Poly1305(peersPublicKey);
@@ -250,8 +255,10 @@ public class NaClCryptoBoxTest {
     }
   }
 
+  /**
+   * Tests for NaClCryptoBox with XChaCha20Poly1305.
+   */
   public static class XChaCha20Poly1305Test extends BaseTest {
-
     @Override
     public HybridEncrypt getHybridEncrypt(byte[] peersPublicKey) {
       return NaClCryptoBox.hybridEncryptWithXChaCha20Poly1305(peersPublicKey);

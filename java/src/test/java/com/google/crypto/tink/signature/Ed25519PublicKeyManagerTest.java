@@ -17,7 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;

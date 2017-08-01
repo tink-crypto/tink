@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.signature;
 
-import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;

@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.integration;
 
-import java.util.regex.Pattern;
 import java.security.GeneralSecurityException;
+import java.util.regex.Pattern;
 
 /**
  * Integration helper methods.

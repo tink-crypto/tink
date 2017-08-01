@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;

@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
-import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.EcPointFormat;

@@ -31,11 +31,11 @@ import java.security.GeneralSecurityException;
  *   byte[] plaintext = hybridDecrypt.decrypt(ciphertextFromAlice, contextInfo \/* can be null *\/);
  * </code>
  */
-public class NaClCryptoBox {
+public final class NaClCryptoBox {
 
   private static final byte[] EMPTY_AAD = new byte[0];
 
-  private static abstract class Curve25519DjbCipherPoly1305Factory {
+  private abstract static class Curve25519DjbCipherPoly1305Factory {
     abstract DjbCipherPoly1305 constructFromSymmetricKey(final byte[] sharedSecret);
 
     DjbCipherPoly1305 constructWithKem(final byte[] privateKey, final byte[] peerPublicKey) {

@@ -16,10 +16,10 @@
 
 package com.google.crypto.tink.integration;
 
-import com.google.crypto.tink.subtle.KmsClient;
 import com.amazonaws.services.kms.AWSKMS;
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.subtle.KmsClient;
 import java.security.GeneralSecurityException;
 
 /**

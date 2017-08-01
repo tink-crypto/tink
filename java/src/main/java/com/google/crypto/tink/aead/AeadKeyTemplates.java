@@ -26,8 +26,8 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
 import com.google.crypto.tink.proto.KmsAeadKeyFormat;
+import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code Aead} keys. One can use these templates
