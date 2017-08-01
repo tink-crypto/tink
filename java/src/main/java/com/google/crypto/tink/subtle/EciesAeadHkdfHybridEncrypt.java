@@ -18,8 +18,6 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.proto.EcPointFormat;
-import com.google.crypto.tink.proto.HashType;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
@@ -33,17 +31,17 @@ public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
   private final EciesHkdfSenderKem senderKem;
   private final String hkdfHmacAlgo;
   private final byte[] hkdfSalt;
-  private final EcPointFormat ecPointFormat;
+  private final EcUtil.PointFormatEnum ecPointFormat;
   private final EciesAeadHkdfDemHelper demHelper;
 
   public EciesAeadHkdfHybridEncrypt(final ECPublicKey recipientPublicKey,
-      final byte[] hkdfSalt, HashType hkdfHashType, EcPointFormat ecPointFormat,
+      final byte[] hkdfSalt, String hkdfHmacAlgo, EcUtil.PointFormatEnum ecPointFormat,
       EciesAeadHkdfDemHelper demHelper)
       throws GeneralSecurityException {
     EcUtil.checkPublicKey(recipientPublicKey);
     this.senderKem = new EciesHkdfSenderKem(recipientPublicKey);
     this.hkdfSalt = hkdfSalt;
-    this.hkdfHmacAlgo = ProtoUtil.hashToHmacAlgorithmName(hkdfHashType);
+    this.hkdfHmacAlgo = hkdfHmacAlgo;
     this.ecPointFormat = ecPointFormat;
     this.demHelper = demHelper;
   }

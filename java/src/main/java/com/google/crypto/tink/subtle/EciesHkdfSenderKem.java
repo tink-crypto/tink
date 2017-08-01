@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -65,7 +64,7 @@ public final class EciesHkdfSenderKem {
   }
 
   public KemKey generateKey(String hmacAlgo, final byte[] hkdfSalt, final byte[] hkdfInfo,
-      int keySizeInBytes, EcPointFormat pointFormat) throws GeneralSecurityException {
+      int keySizeInBytes, EcUtil.PointFormatEnum pointFormat) throws GeneralSecurityException {
     KeyPair ephemeralKeyPair = generateEphemeralKey();
     ECPublicKey ephemeralPublicKey = (ECPublicKey) ephemeralKeyPair.getPublic();
     ECPrivateKey ephemeralPrivateKey = (ECPrivateKey) ephemeralKeyPair.getPrivate();

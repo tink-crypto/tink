@@ -16,11 +16,11 @@
 
 package com.google.crypto.tink.hybrid;
 
+import com.google.crypto.tink.ProtoUtil;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.subtle.EcUtil;
-import com.google.crypto.tink.subtle.ProtoUtil;
 import java.security.GeneralSecurityException;
 
 class HybridUtil {
@@ -31,8 +31,8 @@ class HybridUtil {
    * @throws GeneralSecurityException iff it's invalid.
    */
   public static void validate(EciesAeadHkdfParams params) throws GeneralSecurityException {
-    EcUtil.getCurveSpec(params.getKemParams().getCurveType());
-    ProtoUtil.hashToHmacAlgorithmName(params.getKemParams().getHkdfHashType());
+    EcUtil.getCurveSpec(ProtoUtil.toCurveTypeEnum(params.getKemParams().getCurveType()));
+    ProtoUtil.toHmacAlgo(params.getKemParams().getHkdfHashType());
     if (params.getEcPointFormat() == EcPointFormat.UNKNOWN_FORMAT) {
       throw new GeneralSecurityException("unknown EC point format");
     }

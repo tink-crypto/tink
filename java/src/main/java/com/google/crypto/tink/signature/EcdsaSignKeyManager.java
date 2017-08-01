@@ -17,6 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.ProtoUtil;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
@@ -78,10 +79,10 @@ public final class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySig
     EcdsaPrivateKey keyProto = (EcdsaPrivateKey) key;
     validateKey(keyProto);
     ECPrivateKey privateKey = EcUtil.getEcPrivateKey(
-        keyProto.getPublicKey().getParams().getCurve(),
+        ProtoUtil.toCurveTypeEnum(keyProto.getPublicKey().getParams().getCurve()),
         keyProto.getKeyValue().toByteArray());
     return new EcdsaSignJce(privateKey,
-        SigUtil.hashToEcdsaAlgorithmName(keyProto.getPublicKey().getParams().getHashType()));
+        SigUtil.toEcdsaAlgo(keyProto.getPublicKey().getParams().getHashType()));
   }
 
   /**
@@ -110,7 +111,8 @@ public final class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySig
     EcdsaKeyFormat format = (EcdsaKeyFormat) keyFormat;
     EcdsaParams ecdsaParams = format.getParams();
     SigUtil.validateEcdsaParams(ecdsaParams);
-    KeyPair keyPair = EcUtil.generateKeyPair(ecdsaParams.getCurve());
+    KeyPair keyPair = EcUtil.generateKeyPair(
+        ProtoUtil.toCurveTypeEnum(ecdsaParams.getCurve()));
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
     ECPoint w = pubKey.getW();

@@ -14,9 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink;
 
+import com.google.crypto.tink.proto.EcPointFormat;
+import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.subtle.EcUtil;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 
 /**
@@ -29,7 +33,7 @@ public final class ProtoUtil {
    * @param hash the hash type
    * @return the JCE's HMAC algorithm name for the hash.
    */
-  public static String hashToHmacAlgorithmName(HashType hash) throws NoSuchAlgorithmException {
+  public static String toHmacAlgo(HashType hash) throws NoSuchAlgorithmException {
     switch (hash) {
       case SHA1:
         return "HmacSha1";
@@ -39,6 +43,32 @@ public final class ProtoUtil {
         return "HmacSha512";
       default:
         throw new NoSuchAlgorithmException("hash unsupported for HMAC: " + hash);
+    }
+  }
+
+  public static EcUtil.CurveTypeEnum toCurveTypeEnum(EllipticCurveType type)
+      throws GeneralSecurityException {
+    switch (type) {
+      case NIST_P256:
+        return EcUtil.CurveTypeEnum.NIST_P256;
+      case NIST_P384:
+        return EcUtil.CurveTypeEnum.NIST_P384;
+      case NIST_P521:
+        return EcUtil.CurveTypeEnum.NIST_P521;
+      default:
+        throw new GeneralSecurityException("unknown curve type: " + type);
+    }
+  }
+
+  public static EcUtil.PointFormatEnum toPointFormatEnum(EcPointFormat format)
+      throws GeneralSecurityException {
+    switch (format) {
+      case UNCOMPRESSED:
+        return EcUtil.PointFormatEnum.UNCOMPRESSED;
+      case COMPRESSED:
+        return EcUtil.PointFormatEnum.COMPRESSED;
+      default:
+        throw new GeneralSecurityException("unknown point format: " + format);
     }
   }
 }

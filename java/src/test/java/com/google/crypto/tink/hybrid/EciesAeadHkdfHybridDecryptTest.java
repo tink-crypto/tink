@@ -21,9 +21,9 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.ProtoUtil;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -53,7 +53,8 @@ public class EciesAeadHkdfHybridDecryptTest {
 
   @Test
   public void testModifyDecrypt() throws Exception {
-    ECParameterSpec spec = EcUtil.getCurveSpec(EllipticCurveType.NIST_P256);
+    ECParameterSpec spec = EcUtil.getCurveSpec(
+        ProtoUtil.toCurveTypeEnum(EllipticCurveType.NIST_P256));
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(spec);
     KeyPair recipientKey = keyGen.generateKeyPair();
@@ -62,7 +63,7 @@ public class EciesAeadHkdfHybridDecryptTest {
     byte[] salt = Random.randBytes(123);
     byte[] plaintext = Random.randBytes(111);
     byte[] context = "context info".getBytes("UTF-8");
-    HashType hkdfHashType = HashType.SHA256;
+    String hmacAlgo = ProtoUtil.toHmacAlgo(HashType.SHA256);
 
     KeyTemplate[] keyTemplates = new KeyTemplate[] {
       AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
@@ -70,10 +71,10 @@ public class EciesAeadHkdfHybridDecryptTest {
     };
     for (int i = 0; i < keyTemplates.length; i++) {
       HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey,
-          salt, hkdfHashType, EcPointFormat.UNCOMPRESSED,
+          salt, hmacAlgo, EcUtil.PointFormatEnum.UNCOMPRESSED,
           new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
       HybridDecrypt hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
-          salt, hkdfHashType, EcPointFormat.UNCOMPRESSED,
+          salt, hmacAlgo, EcUtil.PointFormatEnum.UNCOMPRESSED,
           new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
 
       byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
@@ -103,7 +104,7 @@ public class EciesAeadHkdfHybridDecryptTest {
       }
       // Modify salt.
       hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
-          Arrays.copyOf(salt, salt.length - 1), hkdfHashType, EcPointFormat.UNCOMPRESSED,
+          Arrays.copyOf(salt, salt.length - 1), hmacAlgo, EcUtil.PointFormatEnum.UNCOMPRESSED,
           new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
       try {
         hybridDecrypt.decrypt(ciphertext, context);

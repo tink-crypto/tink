@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.ProtoUtil;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
@@ -142,7 +143,7 @@ public class EcdsaVerifyKeyManagerTest {
     for (int i = 0; i < hashAndCurves.length; i++) {
       HashType hashType = hashAndCurves[i].hashType;
       EllipticCurveType curveType = hashAndCurves[i].curveType;
-      ECParameterSpec ecParams = EcUtil.getCurveSpec(curveType);
+      ECParameterSpec ecParams = EcUtil.getCurveSpec(ProtoUtil.toCurveTypeEnum(curveType));
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();
@@ -150,7 +151,7 @@ public class EcdsaVerifyKeyManagerTest {
       ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
 
       // Sign with JCE's Signature.
-      Signature signer = Signature.getInstance(SigUtil.hashToEcdsaAlgorithmName(hashType));
+      Signature signer = Signature.getInstance(SigUtil.toEcdsaAlgo(hashType));
       signer.initSign(privKey);
       byte[] msg = Random.randBytes(1231);
       signer.update(msg);
@@ -181,7 +182,7 @@ public class EcdsaVerifyKeyManagerTest {
     for (int i = 0; i < hashAndCurves.length; i++) {
       HashType hashType = hashAndCurves[i].hashType;
       EllipticCurveType curveType = hashAndCurves[i].curveType;
-      ECParameterSpec ecParams = EcUtil.getCurveSpec(curveType);
+      ECParameterSpec ecParams = EcUtil.getCurveSpec(ProtoUtil.toCurveTypeEnum(curveType));
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();
@@ -203,7 +204,8 @@ public class EcdsaVerifyKeyManagerTest {
 
   @Test
   public void testGetPrimitiveWithUnsupportedEncoding() throws Exception {
-    ECParameterSpec ecParams = EcUtil.getCurveSpec(EllipticCurveType.NIST_P256);
+    ECParameterSpec ecParams = EcUtil.getCurveSpec(
+        ProtoUtil.toCurveTypeEnum(EllipticCurveType.NIST_P256));
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
     KeyPair keyPair = keyGen.generateKeyPair();

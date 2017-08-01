@@ -8,19 +8,12 @@ package(
 
 load("//java/build_defs:javac.bzl", "JAVACOPTS")
 
-FULL_PROTOS = [
-    "//proto:common_java_proto",
-]
-
-LITE_PROTOS = [
-    "//proto:common_java_proto_lite",
-]
-
 # common subtle
 
 java_library(
     name = "subtle",
     srcs = [
+        "EcUtil.java",
         "EngineFactory.java",
         "EngineWrapper.java",
         "ImmutableByteArray.java",
@@ -75,7 +68,6 @@ java_library(
     name = "signature",
     srcs = [
         "Curve25519.java",
-        "EcUtil.java",
         "EcdsaSignJce.java",
         "EcdsaVerifyJce.java",
         "Ed25519Sign.java",
@@ -87,10 +79,7 @@ java_library(
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "@com_google_errorprone_error_prone_annotations//jar",
-    ] + select({
-        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
-        "//conditions:default": LITE_PROTOS,
-    }),
+    ],
 )
 
 # hybrid subtle
@@ -99,7 +88,6 @@ java_library(
     name = "hybrid",
     srcs = [
         "Curve25519.java",
-        "EcUtil.java",
         "EciesAeadHkdfDemHelper.java",
         "EciesAeadHkdfHybridDecrypt.java",
         "EciesAeadHkdfHybridEncrypt.java",
@@ -107,7 +95,6 @@ java_library(
         "EciesHkdfSenderKem.java",
         "Hkdf.java",
         "NaClCryptoBox.java",
-        "ProtoUtil.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
@@ -115,10 +102,7 @@ java_library(
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "@com_google_errorprone_error_prone_annotations//jar",
-    ] + select({
-        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
-        "//conditions:default": LITE_PROTOS,
-    }),
+    ],
 )
 
 # Streaming

@@ -31,7 +31,7 @@ final class SigUtil {
    * @param hash the hash type
    * @return the JCE's Ecdsa algorithm name for the hash.
    */
-  public static String hashToEcdsaAlgorithmName(HashType hash) throws NoSuchAlgorithmException {
+  public static String toEcdsaAlgo(HashType hash) throws NoSuchAlgorithmException {
     switch(hash) {
       case SHA256:
         return "SHA256WithECDSA";

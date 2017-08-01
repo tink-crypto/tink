@@ -18,6 +18,7 @@ package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.ProtoUtil;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
@@ -75,14 +76,15 @@ public final class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<H
     EciesAeadHkdfParams eciesParams = recipientKeyProto.getPublicKey().getParams();
     EciesHkdfKemParams kemParams = eciesParams.getKemParams();
 
-    ECPrivateKey recipientPrivateKey = EcUtil.getEcPrivateKey(kemParams.getCurveType(),
+    ECPrivateKey recipientPrivateKey = EcUtil.getEcPrivateKey(
+        ProtoUtil.toCurveTypeEnum(kemParams.getCurveType()),
         recipientKeyProto.getKeyValue().toByteArray());
     EciesAeadHkdfDemHelper demHelper = new RegistryEciesAeadHkdfDemHelper(
         eciesParams.getDemParams().getAeadDem());
     return new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
         kemParams.getHkdfSalt().toByteArray(),
-        kemParams.getHkdfHashType(),
-        eciesParams.getEcPointFormat(),
+        ProtoUtil.toHmacAlgo(kemParams.getHkdfHashType()),
+        ProtoUtil.toPointFormatEnum(eciesParams.getEcPointFormat()),
         demHelper);
   }
 
@@ -112,7 +114,7 @@ public final class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<H
     EciesAeadHkdfKeyFormat eciesKeyFormat = (EciesAeadHkdfKeyFormat) keyFormat;
     HybridUtil.validate(eciesKeyFormat.getParams());
     EciesHkdfKemParams kemParams = eciesKeyFormat.getParams().getKemParams();
-    KeyPair keyPair = EcUtil.generateKeyPair(kemParams.getCurveType());
+    KeyPair keyPair = EcUtil.generateKeyPair(ProtoUtil.toCurveTypeEnum(kemParams.getCurveType()));
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
     ECPoint w = pubKey.getW();
