@@ -751,11 +751,14 @@ public class AesGcmHkdfStreamingTest {
     PipedOutputStream output = new PipedOutputStream();
     PipedInputStream result = new PipedInputStream(output);
     final WritableByteChannel ciphertext = Channels.newChannel(output);
-    new Thread(new Runnable() {
-      public void run() {
-        encryptChannel(ags, plaintext, ciphertext, aad, chunkSize);
-      }
-    }).start();
+    new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                encryptChannel(ags, plaintext, ciphertext, aad, chunkSize);
+              }
+            })
+      .start();
     return Channels.newChannel(result);
   }
 
@@ -782,7 +785,7 @@ public class AesGcmHkdfStreamingTest {
       read = decrypted.read(ByteBuffer.wrap(chunk));
       if (read > 0) {
         ByteBuffer expected = ByteBuffer.allocate(read);
-        int cnt = copy.read(expected);
+        int unused = copy.read(expected);
         decryptedBytes += read;
         assertByteArrayEquals(expected.array(), Arrays.copyOf(chunk, read));
       }

@@ -80,7 +80,6 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
   private int segmentNr;
 
   private final StreamSegmentDecrypter decrypter;
-  private final int plaintextSegmentSize;
   private final int ciphertextSegmentSize;
   private final int ciphertextOffset;
 
@@ -104,7 +103,6 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
     this.ciphertextSegmentSize = ciphertextSegmentSize;
     ciphertextSegment = ByteBuffer.allocate(ciphertextSegmentSize + 1);
     ciphertextSegment.limit(0);
-    this.plaintextSegmentSize = plaintextSegmentSize;
     plaintextSegment = ByteBuffer.allocate(plaintextSegmentSize);
     plaintextSegment.limit(0);
     this.ciphertextOffset = ciphertextOffset;
@@ -133,7 +131,7 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
 
   /**
    * Tries to read the header of the ciphertext.
-   * @returns true if the header has been fully read and false if not enogh bytes were available
+   * @return true if the header has been fully read and false if not enogh bytes were available
    *          from the ciphertext stream.
    * @throws IOException when an exception occurs while reading the ciphertextStream or when
    *         the header is too short.

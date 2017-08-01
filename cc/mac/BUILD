@@ -23,6 +23,7 @@ cc_library(
     deps = [
         ":hmac_key_manager",
         "//cc:key_manager",
+        "//cc:mac",
         "//cc:registry",
         "//cc/util:status",
     ],
@@ -129,6 +130,7 @@ cc_test(
         "//cc:mac",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//proto:aes_ctr_cc_proto",
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:common_cc_proto",
         "//proto:hmac_cc_proto",

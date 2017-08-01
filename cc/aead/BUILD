@@ -23,6 +23,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":aes_gcm_key_manager",
+        "//cc:aead",
         "//cc:key_manager",
         "//cc:registry",
         "//cc/util:status",

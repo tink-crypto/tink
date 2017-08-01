@@ -56,7 +56,7 @@ class MacConfig {
   // Takes ownership of 'key_manager', which must be non-nullptr.
   static util::Status RegisterKeyManager(KeyManager<Mac>* key_manager);
 
-private:
+ private:
   MacConfig() {}
 };
 

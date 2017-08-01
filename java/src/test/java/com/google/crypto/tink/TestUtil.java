@@ -77,12 +77,13 @@ import java.security.spec.ECPoint;
 public class TestUtil {
   // This GCP KMS CryptoKey is restricted to the service account in {@code SERVICE_ACCOUNT_FILE}.
   public static final String RESTRICTED_CRYPTO_KEY_URI = String.format(
-        "gcp-kms://projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-        "tink-test-infrastructure", "global", "unit-and-integration-testing", "aead-key");
+      "gcp-kms://projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+      "tink-test-infrastructure", "global", "unit-and-integration-testing", "aead-key");
 
   // This is a credential of a service account that is granted access to
   // {@code RESTRICTED_CRYPTO_KEY_URI}.
-  public static final File SERVICE_ACCOUNT_FILE = new File("testdata/credential.json");
+  public static final File SERVICE_ACCOUNT_FILE =
+      new File("testdata/credential.json");
 
   /**
    * A dummy Aead-implementation that just throws exception.

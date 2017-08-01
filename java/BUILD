@@ -186,6 +186,7 @@ java_library(
     ],
     deps = [
         ":testonly",
+        "@com_amazonaws_sdk_core//jar",
         "@com_amazonaws_sdk_kms//jar",
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",

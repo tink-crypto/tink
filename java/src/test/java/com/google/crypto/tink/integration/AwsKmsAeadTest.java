@@ -22,8 +22,8 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.model.AWSKMSException;
 import com.amazonaws.services.kms.model.DecryptRequest;
 import com.amazonaws.services.kms.model.DecryptResult;
 import com.amazonaws.services.kms.model.EncryptRequest;
@@ -69,7 +69,7 @@ public class AwsKmsAeadTest {
 
   @Test
   public void testEncrypt_shouldThrowExceptionIfRequestFailed() throws Exception {
-    AWSKMSException exception = mock(AWSKMSException.class);
+    AmazonServiceException exception = mock(AmazonServiceException.class);
     when(mockKms.encrypt(isA(EncryptRequest.class)))
         .thenThrow(exception);
 
@@ -89,7 +89,7 @@ public class AwsKmsAeadTest {
     EncryptResult mockEncryptResult = mock(EncryptResult.class);
     when(mockKms.encrypt(isA(EncryptRequest.class)))
         .thenReturn(mockEncryptResult);
-    AWSKMSException exception = mock(AWSKMSException.class);
+    AmazonServiceException exception = mock(AmazonServiceException.class);
     when(mockKms.decrypt(isA(DecryptRequest.class)))
         .thenThrow(exception);
 

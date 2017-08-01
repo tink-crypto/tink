@@ -170,7 +170,7 @@ public class AesCtrHmacStreamingTest {
    * @param ags the streaming primitive
    * @param plaintext the plaintext to encrypt
    * @param aad the additional data to authenticate
-   * @returns the ciphertext including a prefix of size ags.firstSegmentOffset
+   * @return the ciphertext including a prefix of size ags.firstSegmentOffset
    */
   private byte[] encrypt(
       AesCtrHmacStreaming ags,
@@ -786,7 +786,7 @@ public class AesCtrHmacStreamingTest {
    * @param plaintext the channel containing the plaintext
    * @param ciphertext the channel to which the ciphertext is written
    * @param aad the additional data to authenticate
-   * @param chuckSize the size of blocks that are read and written. This size determines the
+   * @param chunkSize the size of blocks that are read and written. This size determines the
    *        temporary memory used in this method but is independent of the streaming encryption.
    * @throws RuntimeException if something goes wrong.
    */
@@ -828,11 +828,14 @@ public class AesCtrHmacStreamingTest {
     PipedOutputStream output = new PipedOutputStream();
     PipedInputStream result = new PipedInputStream(output);
     final WritableByteChannel ciphertext = Channels.newChannel(output);
-    new Thread(new Runnable() {
-      public void run() {
-        encryptChannel(ags, plaintext, ciphertext, aad, chunkSize);
-      }
-    }).start();
+    new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                encryptChannel(ags, plaintext, ciphertext, aad, chunkSize);
+              }
+            })
+        .start();
     return Channels.newChannel(result);
   }
 
@@ -863,7 +866,7 @@ public class AesCtrHmacStreamingTest {
       read = decrypted.read(ByteBuffer.wrap(chunk));
       if (read > 0) {
         ByteBuffer expected = ByteBuffer.allocate(read);
-        int cnt = copy.read(expected);
+        int unused = copy.read(expected);
         decryptedBytes += read;
         assertByteArrayEquals(expected.array(), Arrays.copyOf(chunk, read));
       }

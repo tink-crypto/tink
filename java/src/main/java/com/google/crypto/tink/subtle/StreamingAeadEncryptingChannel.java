@@ -31,7 +31,6 @@ class StreamingAeadEncryptingChannel implements WritableByteChannel {
   ByteBuffer ptBuffer;  // contains plaintext that has not yet been encrypted.
   ByteBuffer ctBuffer;  // contains ciphertext that has not been written to ciphertextChannel.
   private int plaintextSegmentSize;
-  private int ciphertextSegmentSize;
   boolean open = true;
 
   public StreamingAeadEncryptingChannel(
@@ -46,7 +45,6 @@ class StreamingAeadEncryptingChannel implements WritableByteChannel {
     this.plaintextSegmentSize = plaintextSegmentSize;
     ptBuffer.limit(plaintextSegmentSize - ciphertextOffset);
     ctBuffer = ByteBuffer.allocate(ciphertextSegmentSize);
-    this.ciphertextSegmentSize = ciphertextSegmentSize;
     // At this point, ciphertextChannel might not yet be ready to receive bytes.
     // Buffering the header in ctBuffer ensures that the header will be written when writing to
     // ciphertextChannel is possible.

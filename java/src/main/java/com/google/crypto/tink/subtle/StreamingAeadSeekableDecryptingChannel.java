@@ -157,7 +157,7 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
    * Tries to read the header of the ciphertext and derive the key used for the
    * ciphertext from the information in the header.
    *
-   * @returns true if the header was fully read and has a correct format.
+   * @return true if the header was fully read and has a correct format.
    *               Returns false if the header could not be read.
    * @throws IOException if the header was incorrectly formatted or if there
    *         was an exception during the key derivation.
@@ -187,7 +187,7 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
   /**
    * Tries to read and decrypt a ciphertext segment.
    * @param segmentNr the number of the segment
-   * @returns true if the segment was read and correctly decrypted.
+   * @return true if the segment was read and correctly decrypted.
    *          Returns false if the segment could not be fully read.
    * @throws IOException if there was an exception reading the ciphertext,
    *         if the segment number was incorrect, or

@@ -18,8 +18,8 @@ package com.google.crypto.tink.integration;
 
 import static com.google.common.io.BaseEncoding.base16;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.model.AWSKMSException;
 import com.amazonaws.services.kms.model.DecryptRequest;
 import com.amazonaws.services.kms.model.EncryptRequest;
 import com.google.crypto.tink.Aead;
@@ -61,7 +61,7 @@ public final class AwsKmsAead implements Aead {
           .withPlaintext(ByteBuffer.wrap(plaintext))
           .addEncryptionContextEntry("aad", base16().lowerCase().encode(aad));
       return kmsClient.encrypt(req).getCiphertextBlob().array();
-    } catch (AWSKMSException e) {
+    } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("encryption failed", e);
     }
   }
@@ -74,7 +74,7 @@ public final class AwsKmsAead implements Aead {
           .withCiphertextBlob(ByteBuffer.wrap(ciphertext))
           .addEncryptionContextEntry("aad", base16().lowerCase().encode(aad));
       return kmsClient.decrypt(req).getPlaintext().array();
-    } catch (AWSKMSException e) {
+    } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("decryption failed", e);
     }
   }
