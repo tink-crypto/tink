@@ -69,10 +69,18 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "@com_google_errorprone_error_prone_annotations//jar",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
-    ] + select({
-        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
-        "//conditions:default": LITE_PROTOS,
-    }),
+    ] + FULL_PROTOS,
+)
+
+java_library(
+    name = "android",
+    srcs = [":tink_srcs"],
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "@com_google_errorprone_error_prone_annotations//jar",
+        "@com_google_protobuf_javalite//:protobuf_java_lite",
+    ] + LITE_PROTOS,
 )
 
 java_library(
@@ -83,9 +91,18 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         ":tink",
-        "@com_google_protobuf_java//:protobuf_java",
-    ] + select({
-        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
-        "//conditions:default": LITE_PROTOS,
-    }),
+        "@com_google_protobuf_javalite//:protobuf_java_lite",
+    ] + FULL_PROTOS,
+)
+
+java_library(
+    name = "cleartext_keyset_handle_android",
+    srcs = [
+        ":cleartext_keyset_handle_srcs",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":android",
+        "@com_google_protobuf_javalite//:protobuf_java_lite",
+    ] + LITE_PROTOS,
 )

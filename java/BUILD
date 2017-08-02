@@ -1,4 +1,4 @@
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//visibility:private"])
 
 licenses(["notice"])  # Apache 2.0
 
@@ -25,12 +25,12 @@ java_library(
     name = "android",
     visibility = ["//visibility:public"],
     exports = [
-        "//java/src/main/java/com/google/crypto/tink",
-        "//java/src/main/java/com/google/crypto/tink/aead",
-        "//java/src/main/java/com/google/crypto/tink/hybrid",
-        "//java/src/main/java/com/google/crypto/tink/mac",
-        "//java/src/main/java/com/google/crypto/tink/signature",
-        "//java/src/main/java/com/google/crypto/tink/streamingaead",
+        "//java/src/main/java/com/google/crypto/tink:android",
+        "//java/src/main/java/com/google/crypto/tink/aead:android",
+        "//java/src/main/java/com/google/crypto/tink/hybrid:android",
+        "//java/src/main/java/com/google/crypto/tink/mac:android",
+        "//java/src/main/java/com/google/crypto/tink/signature:android",
+        "//java/src/main/java/com/google/crypto/tink/streamingaead:android",
     ],
 )
 
@@ -89,13 +89,14 @@ LITE_PROTOS = [
 java_library(
     name = "protos",
     visibility = [
-        "//examples/java/envelopeme:__pkg__",
         "//tools/tinkey:__pkg__",
     ],
-    exports = select({
-        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
-        "//conditions:default": LITE_PROTOS,
-    }),
+    exports = FULL_PROTOS,
+)
+
+java_library(
+    name = "protos_android",
+    exports = LITE_PROTOS,
 )
 
 java_library(
@@ -106,6 +107,17 @@ java_library(
     ],
     exports = [
         "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+    ],
+)
+
+java_library(
+    name = "cleartext_keyset_handle_android",
+    visibility = [
+        "//tools/testing:__subpackages__",
+        "//tools/tinkey:__pkg__",
+    ],
+    exports = [
+        "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
     ],
 )
 
@@ -131,8 +143,8 @@ java_library(
     visibility = ["//visibility:public"],
     exports = [
         ":android",
-        ":cleartext_keyset_handle",
-        ":protos",
+        ":cleartext_keyset_handle_android",
+        ":protos_android",
         ":subtle",
     ],
 )

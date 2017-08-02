@@ -298,62 +298,6 @@
         </executions>
       </plugin>
 
-      <!-- generate and build lite protos -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>${maven-antrun-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>generate-sources</id>
-            <phase>generate-sources</phase>
-            <configuration>
-              <target>
-                <property
-                    name="protoc.filename"
-                    value="protoc-${protobuf.version}-${os.detected.classifier}.exe"/>
-                <property
-                    name="protoc.filepath"
-                    value="${project.build.directory}/${protoc.filename}"/>
-
-                <chmod file="${protoc.filepath}" perm="ugo+rx"/>
-
-                <property
-                    name="protoc-plugin.filename"
-                    value="protoc-gen-javalite-${protoc-gen-javalite.version}-${os.detected.classifier}.exe"/>
-                <property
-                    name="protoc-plugin.filepath"
-                    value="${project.build.directory}/${protoc-plugin.filename}"/>
-                <chmod file="${protoc-plugin.filepath}" perm="ugo+rx"/>
-
-                <mkdir dir="${protobuf.output.dir}" />
-
-                <path id="protobuf.input.filepaths.path">
-                  <fileset dir="${tink.basedir}/proto">
-                    <include name="**/*.proto"/>
-                  </fileset>
-                </path>
-
-                <pathconvert
-                    pathsep=" "
-                    property="protobuf.input.filepaths"
-                    refid="protobuf.input.filepaths.path"/>
-
-                <exec executable="${protoc.filepath}" failonerror="true">
-                  <arg value="--proto_path=${tink.basedir}"/>
-                  <arg value="--plugin=protoc-gen-javalite=${protoc-plugin.filepath}" />
-                  <arg value="--javalite_out=${protobuf.output.dir}" />
-                  <arg line="${protobuf.input.filepaths}"/>
-                </exec>
-              </target>
-              <sourceRoot>${protobuf.output.dir}</sourceRoot>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- Create javadoc.jar. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

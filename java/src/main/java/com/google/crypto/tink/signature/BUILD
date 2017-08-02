@@ -40,8 +40,17 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:signature",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
-    ] + select({
-        "//java/build_defs:use_java_proto_full": FULL_PROTOS,
-        "//conditions:default": LITE_PROTOS,
-    }),
+    ] + FULL_PROTOS,
+)
+
+java_library(
+    name = "android",
+    srcs = [":signature_srcs"],
+    javacopts = JAVACOPTS,
+    deps = [
+        "//java/src/main/java/com/google/crypto/tink:android",
+        "//java/src/main/java/com/google/crypto/tink/subtle",
+        "//java/src/main/java/com/google/crypto/tink/subtle:signature",
+        "@com_google_protobuf_javalite//:protobuf_java_lite",
+    ] + LITE_PROTOS,
 )

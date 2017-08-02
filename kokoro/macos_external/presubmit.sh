@@ -71,12 +71,9 @@ ${BAZEL_BIN} test \
 
 echo "bazel obj-c passed"
 
-# Test all targets except Tinkey and iOS.
+# Test all targets except iOS.
 # bazel sandbox doesn't work with Kokoro's MacOS image, see b/38040081.
-${BAZEL_BIN} test --sandbox_tmpfs_path=$TMP $DISABLE_SANDBOX -- //... -//objc/... -//tools/... || ( ls -l ; df -h / ; exit 1 )
-
-# Run all Tinkey tests, with full protos.
-${BAZEL_BIN} test --sandbox_tmpfs_path=$TMP --strategy=TestRunner=standalone --test_output=all \
---define use_java_proto_full=true -- //tools/... -//objc/...
+${BAZEL_BIN} test --sandbox_tmpfs_path=$TMP $DISABLE_SANDBOX -- //... \
+-//objc/... || ( ls -l ; df -h / ; exit 1 )
 
 echo "bazel non objc-c passed"
