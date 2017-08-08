@@ -17,7 +17,6 @@
 package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.ProtoUtil;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData;
@@ -69,7 +68,7 @@ public final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> 
     EcdsaPublicKey keyProto = (EcdsaPublicKey) key;
     validateKey(keyProto);
     ECPublicKey publicKey = EcUtil.getEcPublicKey(
-        ProtoUtil.toCurveTypeEnum(keyProto.getParams().getCurve()),
+        SigUtil.toCurveTypeEnum(keyProto.getParams().getCurve()),
         keyProto.getX().toByteArray(), keyProto.getY().toByteArray());
     return new EcdsaVerifyJce(publicKey,
         SigUtil.toEcdsaAlgo(keyProto.getParams().getHashType()));

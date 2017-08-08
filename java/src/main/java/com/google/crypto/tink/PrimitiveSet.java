@@ -19,11 +19,11 @@ package com.google.crypto.tink;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.ImmutableByteArray;
 import com.google.errorprone.annotations.Immutable;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,7 +57,8 @@ public final class PrimitiveSet<P> {
     private final P primitive;
     // Identifies the primitive within the set.
     // It is the ciphertext prefix of the correponding key.
-    private final ImmutableByteArray identifier;
+    @SuppressWarnings("Immutable")
+    private final byte[] identifier;
     // The status of the key represented by the primitive.
     private final KeyStatusType status;
     // The output prefix type of the key represented by the primitive.
@@ -66,7 +67,7 @@ public final class PrimitiveSet<P> {
     public Entry(P primitive, final byte[] identifier, KeyStatusType status,
       OutputPrefixType outputPrefixType) {
       this.primitive = primitive;
-      this.identifier = ImmutableByteArray.of(identifier);
+      this.identifier = Arrays.copyOf(identifier, identifier.length);
       this.status = status;
       this.outputPrefixType = outputPrefixType;
     }
@@ -83,7 +84,7 @@ public final class PrimitiveSet<P> {
       if (identifier == null) {
         return null;
       } else {
-        return identifier.getBytes();
+        return Arrays.copyOf(identifier, identifier.length);
       }
     }
   }

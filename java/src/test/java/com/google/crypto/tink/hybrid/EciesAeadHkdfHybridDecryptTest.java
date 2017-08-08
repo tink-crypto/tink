@@ -21,7 +21,6 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.ProtoUtil;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.EllipticCurveType;
@@ -54,7 +53,7 @@ public class EciesAeadHkdfHybridDecryptTest {
   @Test
   public void testModifyDecrypt() throws Exception {
     ECParameterSpec spec = EcUtil.getCurveSpec(
-        ProtoUtil.toCurveTypeEnum(EllipticCurveType.NIST_P256));
+        HybridUtil.toCurveTypeEnum(EllipticCurveType.NIST_P256));
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(spec);
     KeyPair recipientKey = keyGen.generateKeyPair();
@@ -63,7 +62,7 @@ public class EciesAeadHkdfHybridDecryptTest {
     byte[] salt = Random.randBytes(123);
     byte[] plaintext = Random.randBytes(111);
     byte[] context = "context info".getBytes("UTF-8");
-    String hmacAlgo = ProtoUtil.toHmacAlgo(HashType.SHA256);
+    String hmacAlgo = HybridUtil.toHmacAlgo(HashType.SHA256);
 
     KeyTemplate[] keyTemplates = new KeyTemplate[] {
       AeadKeyTemplates.AES128_CTR_HMAC_SHA256,

@@ -22,10 +22,10 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
 
 /**
  * Manages a Keyset-proto, with convenience methods that rotate, disable, enable or
@@ -106,10 +106,7 @@ public class KeysetManager {
    */
   public KeysetManager rotate(KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyData keyData = Registry.INSTANCE.newKeyData(keyTemplate);
-    int keyId = Random.randPositiveInt();
-    while (hasKeyWithKeyId(keyId)) {
-      keyId = Random.randPositiveInt();
-    }
+    int keyId = newKeyId();
     Keyset.Key key = Keyset.Key.newBuilder()
         .setKeyData(keyData)
         .setKeyId(keyId)
@@ -147,12 +144,34 @@ public class KeysetManager {
     return new KeysetHandle(keyset, proto);
   }
 
-  private boolean hasKeyWithKeyId(int keyId) {
-    for (Keyset.Key key : keysetBuilder.getKeyList()) {
-      if (key.getKeyId() == keyId) {
-        return true;
+  private int newKeyId() {
+    int keyId = randPositiveInt();
+    while (true) {
+      for (Keyset.Key key : keysetBuilder.getKeyList()) {
+        if (key.getKeyId() == keyId) {
+          keyId = randPositiveInt();
+          continue;
+        }
       }
+      break;
     }
-    return false;
+    return keyId;
+  }
+
+  /**
+   * @return positive random int.
+   */
+  private static int randPositiveInt() {
+    SecureRandom secureRandom = new SecureRandom();
+    byte[] rand = new byte[4];
+    int result = 0;
+    while (result == 0) {
+      secureRandom.nextBytes(rand);
+      result = ((rand[0] & 0x7f) << 24)
+          | ((rand[1] & 0xff) << 16)
+          | ((rand[2] & 0xff) << 8)
+          | (rand[3] & 0xff);
+    }
+    return result;
   }
 }

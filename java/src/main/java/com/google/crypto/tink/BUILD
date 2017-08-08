@@ -66,7 +66,6 @@ java_library(
     srcs = [":tink_srcs"],
     javacopts = JAVACOPTS,
     deps = [
-        "//java/src/main/java/com/google/crypto/tink/subtle",
         "@com_google_errorprone_error_prone_annotations//jar",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
     ] + FULL_PROTOS,
@@ -77,7 +76,6 @@ java_library(
     srcs = [":tink_srcs"],
     javacopts = JAVACOPTS,
     deps = [
-        "//java/src/main/java/com/google/crypto/tink/subtle",
         "@com_google_errorprone_error_prone_annotations//jar",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
     ] + LITE_PROTOS,

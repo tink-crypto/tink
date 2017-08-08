@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.ProtoUtil;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
@@ -232,7 +231,7 @@ public class EcdsaSignKeyManagerTest {
     for (int i = 0; i < hashAndCurves.length; i++) {
       HashType hashType = hashAndCurves[i].hashType;
       EllipticCurveType curveType = hashAndCurves[i].curveType;
-      ECParameterSpec ecParams = EcUtil.getCurveSpec(ProtoUtil.toCurveTypeEnum(curveType));
+      ECParameterSpec ecParams = EcUtil.getCurveSpec(SigUtil.toCurveTypeEnum(curveType));
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();
@@ -268,7 +267,7 @@ public class EcdsaSignKeyManagerTest {
     for (int i = 0; i < hashAndCurves.length; i++) {
       HashType hashType = hashAndCurves[i].hashType;
       EllipticCurveType curveType = hashAndCurves[i].curveType;
-      ECParameterSpec ecParams = EcUtil.getCurveSpec(ProtoUtil.toCurveTypeEnum(curveType));
+      ECParameterSpec ecParams = EcUtil.getCurveSpec(SigUtil.toCurveTypeEnum(curveType));
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();

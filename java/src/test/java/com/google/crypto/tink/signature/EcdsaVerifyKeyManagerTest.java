@@ -18,7 +18,6 @@ package com.google.crypto.tink.signature;
 
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.ProtoUtil;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
@@ -143,7 +142,7 @@ public class EcdsaVerifyKeyManagerTest {
     for (int i = 0; i < hashAndCurves.length; i++) {
       HashType hashType = hashAndCurves[i].hashType;
       EllipticCurveType curveType = hashAndCurves[i].curveType;
-      ECParameterSpec ecParams = EcUtil.getCurveSpec(ProtoUtil.toCurveTypeEnum(curveType));
+      ECParameterSpec ecParams = EcUtil.getCurveSpec(SigUtil.toCurveTypeEnum(curveType));
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();
@@ -182,7 +181,7 @@ public class EcdsaVerifyKeyManagerTest {
     for (int i = 0; i < hashAndCurves.length; i++) {
       HashType hashType = hashAndCurves[i].hashType;
       EllipticCurveType curveType = hashAndCurves[i].curveType;
-      ECParameterSpec ecParams = EcUtil.getCurveSpec(ProtoUtil.toCurveTypeEnum(curveType));
+      ECParameterSpec ecParams = EcUtil.getCurveSpec(SigUtil.toCurveTypeEnum(curveType));
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
       KeyPair keyPair = keyGen.generateKeyPair();
@@ -205,7 +204,7 @@ public class EcdsaVerifyKeyManagerTest {
   @Test
   public void testGetPrimitiveWithUnsupportedEncoding() throws Exception {
     ECParameterSpec ecParams = EcUtil.getCurveSpec(
-        ProtoUtil.toCurveTypeEnum(EllipticCurveType.NIST_P256));
+        SigUtil.toCurveTypeEnum(EllipticCurveType.NIST_P256));
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
     KeyPair keyPair = keyGen.generateKeyPair();
