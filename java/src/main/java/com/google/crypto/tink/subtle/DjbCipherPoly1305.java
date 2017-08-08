@@ -121,12 +121,13 @@ public abstract class DjbCipherPoly1305 implements Aead {
 
   /**
    * Constructs a new libsodium compatible XChaCha20Poly1305 cipher with the supplied {@code key}.
+   * Compatible with libsodium/crypto_aead/xchacha20poly1305/sodium/aead_xchacha20poly1305.c
    *
    * @throws IllegalArgumentException when {@code key} length is not
    * {@link DjbCipher#KEY_SIZE_IN_BYTES}.
    */
-  public static DjbCipherPoly1305 constructXChaCha20Poly1305Nacl(final byte[] key) {
-    return new DjbCipherPoly1305Nacl(DjbCipher.xChaCha20(key));
+  public static DjbCipherPoly1305 constructXChaCha20Poly1305Ietf(final byte[] key) {
+    return new DjbCipherPoly1305Ietf(DjbCipher.xChaCha20(key));
   }
 
   private static long load32(byte[] in, int idx) {

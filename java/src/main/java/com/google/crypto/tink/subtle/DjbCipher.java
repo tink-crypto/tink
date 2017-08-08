@@ -388,9 +388,7 @@ public abstract class DjbCipher implements IndCpaCipher {
 
     @Override
     KeyStream getKeyStream(byte[] nonce) {
-      KeyStream keyStream = new KeyStream(this, nonce, 0);
-      keyStream.first(MAC_KEY_SIZE_IN_BYTES);  // skip the aead sub key.
-      return keyStream;
+      return new KeyStream(this, nonce, 1);
     }
   }
 

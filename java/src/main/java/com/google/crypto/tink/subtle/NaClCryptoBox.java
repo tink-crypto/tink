@@ -73,10 +73,10 @@ public final class NaClCryptoBox {
     }
   }
 
-  private static class XChaCha20Poly1305NaclFactory extends Curve25519DjbCipherPoly1305Factory {
+  private static class XChaCha20Poly1305IetfFactory extends Curve25519DjbCipherPoly1305Factory {
     @Override
     public DjbCipherPoly1305 constructFromSymmetricKey(byte[] sharedSecret) {
-      return DjbCipherPoly1305.constructXChaCha20Poly1305Nacl(ChaCha20Base.hChaCha20(sharedSecret));
+      return DjbCipherPoly1305.constructXChaCha20Poly1305Ietf(ChaCha20Base.hChaCha20(sharedSecret));
     }
   }
 
@@ -112,7 +112,7 @@ public final class NaClCryptoBox {
    */
   public static HybridEncrypt hybridEncryptWithXChaCha20Poly1305(final byte[] peerPublicKey) {
     return new Curve25519DjbCipherPoly1305HybridEncrypt(
-        peerPublicKey, new XChaCha20Poly1305NaclFactory());
+        peerPublicKey, new XChaCha20Poly1305IetfFactory());
   }
 
   /**
@@ -147,7 +147,7 @@ public final class NaClCryptoBox {
    */
   public static HybridDecrypt hybridDecryptWithXChaCha20Poly1305(final byte[] privateKey) {
     return new Curve25519DjbCipherPoly1305HybridDecrypt(
-        privateKey, new XChaCha20Poly1305NaclFactory());
+        privateKey, new XChaCha20Poly1305IetfFactory());
   }
 
   /**
