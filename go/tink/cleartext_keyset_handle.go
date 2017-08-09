@@ -59,7 +59,7 @@ func (_ *cleartextKeysetHandle) ParseKeyset(keyset *tinkpb.Keyset) (*KeysetHandl
 // GenerateNew creates a keyset handle that contains a single fresh key generated
 // according to the given key template.
 func (_ *cleartextKeysetHandle) GenerateNew(template *tinkpb.KeyTemplate) (*KeysetHandle, error) {
-  manager := NewKeysetManager(template, tinkpb.OutputPrefixType_TINK, nil, nil)
+  manager := NewKeysetManager(template, nil, nil)
   err := manager.Rotate()
   if err != nil {
     return nil, fmt.Errorf("cleartext_keyset_handle: cannot rotate keyset manager: %s", err)

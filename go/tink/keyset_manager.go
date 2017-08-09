@@ -33,19 +33,16 @@ var emptyAad = []byte{}
 // Note: It is not thread-safe.
 type KeysetManager struct {
   keyTemplate *tinkpb.KeyTemplate
-  outputPrefixType tinkpb.OutputPrefixType
   masterKey Aead
   keyset *tinkpb.Keyset
 }
 
 // NewKeysetManager creates a new instance of keyset manager.
 func NewKeysetManager(keyTemplate *tinkpb.KeyTemplate,
-                      outputPrefixType tinkpb.OutputPrefixType,
                       masterKey Aead,
                       keyset *tinkpb.Keyset) *KeysetManager {
   ret := new(KeysetManager)
   ret.SetKeyTemplate(keyTemplate)
-  ret.SetOutputPrefixType(outputPrefixType)
   ret.SetMasterKey(masterKey)
   ret.SetKeyset(keyset)
   return ret
@@ -68,7 +65,11 @@ func (km *KeysetManager) RotateWithTemplate(keyTemplate *tinkpb.KeyTemplate) err
     return fmt.Errorf("keyset_manager: cannot create KeyData: %s", err)
   }
   keyID := km.newKeyID()
-  key := util.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, km.outputPrefixType)
+  outputPrefixType := keyTemplate.OutputPrefixType
+  if outputPrefixType == tinkpb.OutputPrefixType_UNKNOWN_PREFIX {
+    outputPrefixType = tinkpb.OutputPrefixType_TINK
+  }
+  key := util.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
   // Set the new key as the primary key
   km.keyset.Key = append(km.keyset.Key, key)
   km.keyset.PrimaryKeyId = keyID
@@ -92,12 +93,6 @@ func (km *KeysetManager) SetKeyTemplate(template *tinkpb.KeyTemplate) {
   km.keyTemplate = template
 }
 
-
-// SetOutputPrefixType sets the output prefix type of the manager.
-func (km *KeysetManager) SetOutputPrefixType(outputPrefixType tinkpb.OutputPrefixType) {
-  km.outputPrefixType = outputPrefixType
-}
-
 // SetMasterKey sets the master key of the manager.
 func (km *KeysetManager) SetMasterKey(masterKey Aead) {
   km.masterKey = masterKey
@@ -116,11 +111,6 @@ func (km *KeysetManager) SetKeyset(keyset *tinkpb.Keyset) {
 // KeyTemplate returns the key template of the manager.
 func (km *KeysetManager) KeyTemplate() *tinkpb.KeyTemplate {
   return km.keyTemplate
-}
-
-// OutputPrefixType returns the output prefix type of the manager.
-func (km *KeysetManager) OutputPrefixType() tinkpb.OutputPrefixType {
-  return km.outputPrefixType
 }
 
 // MasterKey returns the master key of the manager.

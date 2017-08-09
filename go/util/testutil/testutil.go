@@ -181,7 +181,7 @@ func NewHmacKeyFormat(hashType HashType, tagSize uint32) *HmacKeyFormat {
 
 func NewHmacKeysetManager() *tink.KeysetManager {
   macTemplate := mac.HmacSha256Tag128KeyTemplate()
-  manager := tink.NewKeysetManager(macTemplate, OutputPrefixType_TINK, nil, nil)
+  manager := tink.NewKeysetManager(macTemplate, nil, nil)
   err := manager.Rotate()
   if err != nil {
     panic(fmt.Sprintf("cannot rotate keyset manager: %s", err))

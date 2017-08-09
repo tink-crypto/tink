@@ -53,6 +53,9 @@ message KeyTemplate {
   // Optional.
   // If missing, it means the key type doesn't require a *KeyFormat proto.
   bytes value = 2;      // contains specific serialized *KeyFormat proto
+  // Optional.
+  // If missing, uses OutputPrefixType.TINK.
+  OutputPrefixType output_prefix_type = 3;
 }
 
 enum KeyStatusType {
@@ -132,6 +135,8 @@ message Keyset {
     // of a ciphertext/signature.
     uint32 key_id = 3;
 
+    // Determines the prefix of the ciphertexts/signatures produced by this key.
+    // This value is copied verbatim from the key template.
     OutputPrefixType output_prefix_type = 4;
   }
 

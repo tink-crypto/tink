@@ -35,12 +35,10 @@ import java.security.SecureRandom;
 public class KeysetManager {
   private final Keyset.Builder keysetBuilder;
   private final KeyTemplate keyTemplate;
-  private final OutputPrefixType outputPrefixType;
   private final Aead masterKey;
 
   private KeysetManager(Builder builder) {
     keyTemplate = builder.keyTemplate;
-    outputPrefixType = builder.outputPrefixType;
     masterKey = builder.masterKey;
 
     if (builder.keysetHandle != null) {
@@ -54,18 +52,11 @@ public class KeysetManager {
    * Builder for KeysetManager.
    */
   public static class Builder {
-    private OutputPrefixType outputPrefixType = OutputPrefixType.TINK;
     private KeyTemplate keyTemplate = null;
     private KeysetHandle keysetHandle = null;
     private Aead masterKey = null;
 
     public Builder() {
-    }
-
-
-    public Builder setOutputPrefixType(OutputPrefixType val) {
-      outputPrefixType = val;
-      return this;
     }
 
     public Builder setKeysetHandle(KeysetHandle val) {
@@ -107,6 +98,10 @@ public class KeysetManager {
   public KeysetManager rotate(KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyData keyData = Registry.INSTANCE.newKeyData(keyTemplate);
     int keyId = newKeyId();
+    OutputPrefixType outputPrefixType = keyTemplate.getOutputPrefixType();
+    if (outputPrefixType == OutputPrefixType.UNKNOWN_PREFIX) {
+      outputPrefixType = OutputPrefixType.TINK;
+    }
     Keyset.Key key = Keyset.Key.newBuilder()
         .setKeyData(keyData)
         .setKeyId(keyId)

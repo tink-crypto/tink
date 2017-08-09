@@ -79,7 +79,7 @@ func (_ *encryptedKeysetHandle) GenerateNew(
   if masterKey == nil {
     return nil, errInvalidMasterKey
   }
-  keysetManager := NewKeysetManager(template, tinkpb.OutputPrefixType_TINK, masterKey, nil)
+  keysetManager := NewKeysetManager(template, masterKey, nil)
   if err := keysetManager.Rotate(); err != nil {
     return nil, fmt.Errorf("encrypted_keyset_handle: %s", err)
   }

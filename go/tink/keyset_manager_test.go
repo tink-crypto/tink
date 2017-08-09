@@ -40,14 +40,14 @@ func setupKeysetManagerTest() {
 func TestKeysetManagerBasic(t *testing.T) {
   setupKeysetManagerTest()
 
-  manager := tink.NewKeysetManager(nil, tinkpb.OutputPrefixType_TINK, nil, nil)
+  manager := tink.NewKeysetManager(nil, nil, nil)
   err := manager.Rotate()
   if err == nil || !strings.Contains(err.Error(), "need key template"){
     t.Errorf("expect an error when key template is nil")
   }
   // Create a keyset that contains a single HmacKey.
   template := mac.HmacSha256Tag128KeyTemplate()
-  manager = tink.NewKeysetManager(template, tinkpb.OutputPrefixType_TINK, nil, nil)
+  manager = tink.NewKeysetManager(template, nil, nil)
   err = manager.Rotate()
   if err != nil {
     t.Errorf("cannot rotate when key template is available: %s", err)
@@ -77,7 +77,7 @@ func TestEncryptedKeyset(t *testing.T) {
     t.Errorf("cannot get primitive from key data: %s", err)
   }
   masterKey := p.(tink.Aead)
-  manager := tink.NewKeysetManager(macTemplate, tinkpb.OutputPrefixType_TINK, masterKey, nil)
+  manager := tink.NewKeysetManager(macTemplate, masterKey, nil)
   err = manager.Rotate()
   if err != nil {
     t.Errorf("cannot rotate when key template is available: %s", err)
@@ -106,7 +106,7 @@ func TestEncryptedKeyset(t *testing.T) {
 func TestExistingKeyset(t *testing.T) {
   // Create a keyset that contains a single HmacKey.
   macTemplate := mac.HmacSha256Tag128KeyTemplate()
-  manager1 := tink.NewKeysetManager(macTemplate, tinkpb.OutputPrefixType_TINK, nil, nil)
+  manager1 := tink.NewKeysetManager(macTemplate, nil, nil)
   err := manager1.Rotate()
   if err != nil {
     t.Errorf("cannot rotate when key template is available: %s", err)
@@ -117,7 +117,7 @@ func TestExistingKeyset(t *testing.T) {
   }
   keyset1 := handle1.Keyset()
 
-  manager2 := tink.NewKeysetManager(nil, tinkpb.OutputPrefixType_TINK, nil, keyset1)
+  manager2 := tink.NewKeysetManager(nil, nil, keyset1)
   manager2.RotateWithTemplate(macTemplate)
   handle2, err := manager2.GetKeysetHandle()
   if err != nil {
@@ -141,7 +141,7 @@ func TestExistingKeyset(t *testing.T) {
 func TestFaultyKms(t *testing.T) {
   var masterKey tink.Aead = new(testutil.DummyAead)
   template := mac.HmacSha256Tag128KeyTemplate()
-  manager := tink.NewKeysetManager(template, tinkpb.OutputPrefixType_TINK, masterKey, nil)
+  manager := tink.NewKeysetManager(template, masterKey, nil)
   err := manager.Rotate()
   if err != nil {
     t.Errorf("cannot rotate when key template is available: %s", err)
