@@ -17,14 +17,13 @@
 package com.google.crypto.tink.tinkey;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.EncryptedKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KeysetReaders;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
@@ -94,7 +93,8 @@ public class CreateCommandTest {
     outFormat = "BINARY";
     CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
         gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-    KeysetHandle handle = CleartextKeysetHandle.parseFrom(outputStream.toByteArray());
+    KeysetHandle handle = CleartextKeysetHandle.fromKeysetReader(
+        KeysetReaders.withBytes(outputStream.toByteArray()));
     keyset = handle.getKeyset();
     assertEquals(1, keyset.getKeyCount());
     assertEquals(keyset.getPrimaryKeyId(), keyset.getKey(0).getKeyId());
@@ -137,9 +137,8 @@ public class CreateCommandTest {
     Aead masterKey = new GcpKmsAead(
         GcpKmsClient.fromServiceAccount(credentialFile),
         gcpKmsMasterKeyValue);
-    KeysetHandle handle = EncryptedKeysetHandle.parseFrom(
-        outputStream.toByteArray(), masterKey);
-    assertNotNull(handle.getEncryptedKeyset());
+    KeysetHandle handle = KeysetHandle
+        .fromKeysetReader(KeysetReaders.withBytes(outputStream.toByteArray()), masterKey);
 
     Keyset keyset = handle.getKeyset();
     assertEquals(1, keyset.getKeyCount());

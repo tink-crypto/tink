@@ -19,7 +19,6 @@ package com.google.crypto.tink.aead;
 import static org.junit.Assert.assertEquals;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
@@ -46,14 +45,14 @@ public class ChaCha20Poly1305KeyManagerTest {
 
   @Test
   public void testBasic() throws Exception {
-    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(
         AeadKeyTemplates.CHACHA20_POLY1305);
     TestUtil.runBasicAeadFactoryTests(keysetHandle);
   }
 
   @Test
   public void testCiphertextSize() throws Exception {
-    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(
         AeadKeyTemplates.CHACHA20_POLY1305);
     Aead aead = AeadFactory.getPrimitive(keysetHandle);
     byte[] plaintext = "plaintext".getBytes("UTF-8");

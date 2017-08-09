@@ -18,10 +18,12 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 
 /**
@@ -32,29 +34,46 @@ public final class KeysetHandle {
   /**
    * The {@code Keyset}.
    */
-  private final Keyset keyset;
+  private Keyset keyset;
 
-  /**
-   * The {@code EncryptedKeyset}.
-   */
-  private final EncryptedKeyset encryptedKeyset;
-
-  /**
-   * This constructor is package-private. To get a new instance, users have to use one of
-   * the public factories, e.g., {@code CleartextKeysetHandle}.
-   */
-  KeysetHandle(Keyset keyset) {
+  private KeysetHandle(Keyset keyset) {
     this.keyset = keyset;
-    this.encryptedKeyset = null;
   }
 
   /**
-   * This constructor is package-private. To get a new instance, users have to use one of
-   * the public factories, e.g., {@code EncryptedKeysetHandle}).
+   * @return a new {@code KeysetHandle} from a {@code keyset}.
+   * @throws GeneralSecurityException
    */
-  KeysetHandle(Keyset keyset, EncryptedKeyset encryptedKeyset) {
-    this.keyset = keyset;
-    this.encryptedKeyset = encryptedKeyset;
+  static final KeysetHandle fromKeyset(Keyset keyset)
+      throws GeneralSecurityException {
+    assertEnoughKeyMaterial(keyset);
+    return new KeysetHandle(keyset);
+  }
+
+  /**
+   * Creates keyset handles from an encrypted keyset obtained via {@code reader}.
+   * Users that need to load cleartext keysets can use {@code CleartextKeysetHandle}.
+   * @return a new {@code KeysetHandle} from {@code encryptedKeysetProto} that was encrypted
+   * with {@code masterKey}.
+   * @throws GeneralSecurityException
+   */
+  public static final KeysetHandle fromKeysetReader(KeysetReader reader,
+      Aead masterKey) throws GeneralSecurityException, IOException {
+    EncryptedKeyset encryptedKeyset = reader.readEncrypted();
+    assertEnoughEncryptedKeyMaterial(encryptedKeyset);
+    return new KeysetHandle(decrypt(encryptedKeyset, masterKey));
+  }
+
+  /**
+   * @return a new keyset handle that contains a single fresh key generated
+   * according to the {@code keyTemplate}.
+   * @throws GeneralSecurityException
+   */
+  public static final KeysetHandle generateNew(KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
+    return KeysetManager.withEmptyKeyset()
+        .rotate(keyTemplate)
+        .getKeysetHandle();
   }
 
   /**
@@ -72,10 +91,60 @@ public final class KeysetHandle {
   }
 
   /**
-   * @return the encrypted keyset data.
+   * Serializes and writes the keyset to {@code keysetWriter}.
    */
-  public EncryptedKeyset getEncryptedKeyset() {
-    return encryptedKeyset;
+  public void write(KeysetWriter keysetWriter) throws IOException {
+    keysetWriter.write(keyset);
+    return;
+  }
+
+  /**
+   * Serializes, encrypts with {@code masterKey} and writes the keyset to {@code outputStream}.
+   */
+  public void writeEncrypted(KeysetWriter keysetWriter, Aead masterKey)
+      throws GeneralSecurityException, IOException {
+    EncryptedKeyset encryptedKeyset = encrypt(keyset, masterKey);
+    keysetWriter.write(encryptedKeyset);
+    return;
+  }
+
+  /**
+   * Encrypts the keyset with the {@code Aead} master key.
+   */
+  private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey)
+      throws GeneralSecurityException {
+    byte[] encryptedKeyset = masterKey.encrypt(keyset.toByteArray(),
+        /* additionalData= */new byte[0]);
+    // Check if we can decrypt, to detect errors
+    try {
+      final Keyset keyset2 = Keyset.parseFrom(masterKey.decrypt(
+          encryptedKeyset, /* additionalData= */new byte[0]));
+      if (!keyset2.equals(keyset)) {
+        throw new GeneralSecurityException("cannot encrypt keyset");
+      }
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("invalid keyset, corrupted key material");
+    }
+    return EncryptedKeyset.newBuilder()
+        .setEncryptedKeyset(ByteString.copyFrom(encryptedKeyset))
+        .setKeysetInfo(Util.getKeysetInfo(keyset))
+        .build();
+  }
+
+  /**
+   * Decrypts the encrypted keyset with the {@code Aead} master key.
+   */
+  private static Keyset decrypt(EncryptedKeyset encryptedKeyset, Aead masterKey)
+      throws GeneralSecurityException {
+    try {
+      Keyset keyset = Keyset.parseFrom(masterKey.decrypt(
+          encryptedKeyset.getEncryptedKeyset().toByteArray(), /* additionalData= */new byte[0]));
+      // check emptiness here too, in case the encrypted keys unwrapped to nothing?
+      assertEnoughKeyMaterial(keyset);
+      return keyset;
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("invalid keyset, corrupted key material");
+    }
   }
 
   /**
@@ -83,6 +152,9 @@ public final class KeysetHandle {
    * of the public keys.
    */
   public KeysetHandle getPublicKeysetHandle() throws GeneralSecurityException {
+    if (keyset == null) {
+      throw new GeneralSecurityException("cleartext keyset is not available");
+    }
     Keyset.Builder keysetBuilder = Keyset.newBuilder();
     for (Keyset.Key key : keyset.getKeyList()) {
       KeyData keyData = createPublicKeyData(key.getKeyData());
@@ -112,18 +184,6 @@ public final class KeysetHandle {
   }
 
   /**
-   * Serializes and writes the keyset to {@code outputStream}.
-   */
-  public void write(OutputStream outputStream) throws IOException {
-    if (encryptedKeyset != null) {
-      outputStream.write(encryptedKeyset.toByteArray());
-      return;
-    }
-    outputStream.write(keyset.toByteArray());
-    return;
-  }
-
-  /**
    * Prints out the {@code KeysetInfo}.
    */
   @Override
@@ -138,6 +198,18 @@ public final class KeysetHandle {
    */
   public static void assertEnoughKeyMaterial(Keyset keyset) throws GeneralSecurityException {
     if (keyset == null || keyset.getKeyCount() <= 0) {
+      throw new GeneralSecurityException("empty keyset");
+    }
+  }
+
+  /**
+   * Validates that an encrypted keyset contains enough key material to build a keyset on,
+   * and throws otherwise.
+   * @throws GeneralSecurityException
+   */
+  public static void assertEnoughEncryptedKeyMaterial(EncryptedKeyset keyset)
+      throws GeneralSecurityException {
+    if (keyset == null || keyset.getEncryptedKeyset().size() == 0) {
       throw new GeneralSecurityException("empty keyset");
     }
   }

@@ -25,12 +25,11 @@ import com.google.crypto.tink.proto.KeyTemplate;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code PublicKeySign} and {@code PublicKeyVerify}.
- * One can use these templates to generate new {@code Keyset}, using either
- * {@code CleartextKeysetHandle} or {@code EncryptedKeysetHandle}. To generate a new keyset
- * that contains a single {@code EcdsaPrivateKey}, one can do:
+ * One can use these templates to generate new {@code Keyset} with {@code KeysetHandle}.
+ * To generate a new keyset that contains a single {@code EcdsaPrivateKey}, one can do:
  * <pre>
  *   PublicKeySign.registerStandardKeyTypes();
- *   KeysetHandle handle = CleartextKeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+ *   KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
  *   PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
  * </pre>
  */

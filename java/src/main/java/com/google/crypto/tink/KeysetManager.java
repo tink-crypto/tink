@@ -16,14 +16,11 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 
@@ -34,61 +31,23 @@ import java.security.SecureRandom;
  */
 public class KeysetManager {
   private final Keyset.Builder keysetBuilder;
-  private final KeyTemplate keyTemplate;
-  private final Aead masterKey;
 
-  private KeysetManager(Builder builder) {
-    keyTemplate = builder.keyTemplate;
-    masterKey = builder.masterKey;
-
-    if (builder.keysetHandle != null) {
-      keysetBuilder = builder.keysetHandle.getKeyset().toBuilder();
-    } else {
-      keysetBuilder = Keyset.newBuilder();
-    }
+  private KeysetManager(Keyset.Builder val) {
+    keysetBuilder = val;
   }
 
   /**
-   * Builder for KeysetManager.
+   * Gets a keyset manager from an existing keyset handle.
    */
-  public static class Builder {
-    private KeyTemplate keyTemplate = null;
-    private KeysetHandle keysetHandle = null;
-    private Aead masterKey = null;
-
-    public Builder() {
-    }
-
-    public Builder setKeysetHandle(KeysetHandle val) {
-      keysetHandle = val;
-      return this;
-    }
-
-    public Builder setMasterKey(Aead val) {
-      masterKey = val;
-      return this;
-    }
-
-    public Builder setKeyTemplate(KeyTemplate val) {
-      keyTemplate = val;
-      return this;
-    }
-
-    public KeysetManager build() {
-      return new KeysetManager(this);
-    }
+  public static KeysetManager fromKeysetHandle(KeysetHandle val) {
+    return new KeysetManager(val.getKeyset().toBuilder());
   }
 
   /**
-   * Rotates a keyset by generating a fresh key using a key template.
-   * Setting the new key as the primary key.
+   * Gets a keyset manager with an empty keyset.
    */
-  public KeysetManager rotate() throws GeneralSecurityException {
-    if (keyTemplate != null) {
-      return rotate(keyTemplate);
-    } else {
-      throw new GeneralSecurityException("cannot rotate, needs key template");
-    }
+  public static KeysetManager withEmptyKeyset() {
+    return new KeysetManager(Keyset.newBuilder());
   }
 
   /**
@@ -116,27 +75,7 @@ public class KeysetManager {
    * @return return {@code KeysetHandle} of the managed keyset.
    */
   public KeysetHandle getKeysetHandle() throws GeneralSecurityException {
-    if (masterKey == null) {
-      return new KeysetHandle(keysetBuilder.build());
-    }
-    Keyset keyset = keysetBuilder.build();
-    byte[] encryptedKeyset = masterKey.encrypt(keyset.toByteArray(),
-        /* additionalData= */new byte[0]);
-    // Check if we can decrypt, to detect errors
-    try {
-      final Keyset keyset2 = Keyset.parseFrom(masterKey.decrypt(
-          encryptedKeyset, /* additionalData= */new byte[0]));
-      if (!keyset2.equals(keyset)) {
-        throw new GeneralSecurityException("cannot encrypt keyset");
-      }
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid keyset, corrupted key material");
-    }
-    EncryptedKeyset proto = EncryptedKeyset.newBuilder()
-        .setEncryptedKeyset(ByteString.copyFrom(encryptedKeyset))
-        .setKeysetInfo(Util.getKeysetInfo(keyset))
-        .build();
-    return new KeysetHandle(keyset, proto);
+    return KeysetHandle.fromKeyset(keysetBuilder.build());
   }
 
   private int newKeyId() {

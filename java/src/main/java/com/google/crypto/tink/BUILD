@@ -67,13 +67,27 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "@com_google_errorprone_error_prone_annotations//jar",
-        "@com_google_protobuf_javalite//:protobuf_java_lite",
+        "@com_google_protobuf_java//:protobuf_java",
     ] + FULL_PROTOS,
+)
+
+filegroup(
+    name = "android_srcs",
+    srcs = glob(
+        [
+            "*.java",
+        ],
+        exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + [
+            # TextFormat doesn't work with lite protos
+            "TextFormatKeysetReaders.java",
+            "TextFormatKeysetWriters.java",
+        ],
+    ),
 )
 
 java_library(
     name = "android",
-    srcs = [":tink_srcs"],
+    srcs = [":android_srcs"],
     javacopts = JAVACOPTS,
     deps = [
         "@com_google_errorprone_error_prone_annotations//jar",

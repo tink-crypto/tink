@@ -23,12 +23,11 @@ import com.google.crypto.tink.proto.KeyTemplate;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code Mac}. One can use these templates
- * to generate new {@code Keyset}, using either {@code CleartextKeysetHandle} or
- * {@code EncryptedKeysetHandle}. To generate a new keyset that contains a single
- * {@code HmacKey}, one can do:
+ * to generate new {@code Keyset} with {@code KeysetHandle}. To generate a new keyset
+ * that contains a single {@code HmacKey}, one can do:
  * <pre>
  *   MacConfig.registerStandardKeyTypes();
- *   KeysetHandle handle = CleartextKeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+ *   KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
  *   Mac mac = MacFactory.getPrimitive(handle);
  * </pre>
  */

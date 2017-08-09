@@ -17,7 +17,6 @@
 package com.google.crypto.tink;
 
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
@@ -25,7 +24,6 @@ import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
-import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,11 +45,9 @@ public class NoSecretKeysetHandleTest {
   public void testBasic() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetManager manager = new KeysetManager.Builder()
-        .setKeyTemplate(template)
-        .build()
-        .rotate();
-    assertNull(manager.getKeysetHandle().getEncryptedKeyset());
+    KeysetManager manager = KeysetManager
+        .withEmptyKeyset()
+        .rotate(template);
     Keyset keyset = manager.getKeysetHandle().getKeyset();
     try {
       KeysetHandle unused = NoSecretKeysetHandle.parseFrom(keyset.toByteArray());
@@ -66,21 +62,14 @@ public class NoSecretKeysetHandleTest {
     KeysetHandle unused;
 
     try {
-      unused = NoSecretKeysetHandle.parseFrom(new ByteArrayInputStream(new byte[0]));
+      unused = NoSecretKeysetHandle.fromKeysetReader(KeysetReaders.withBytes(new byte[0]));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");
     }
 
     try {
-      unused = NoSecretKeysetHandle.parseFrom(new byte[0]);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "empty keyset");
-    }
-
-    try {
-      unused = NoSecretKeysetHandle.parseFrom((ByteArrayInputStream) null);
+      unused = NoSecretKeysetHandle.fromKeysetReader(KeysetReaders.withBytes(new byte[0]));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");

@@ -16,25 +16,17 @@
 
 package com.google.crypto.tink;
 
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.hybrid.HybridDecryptConfig;
 import com.google.crypto.tink.hybrid.HybridEncryptConfig;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
-import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
-import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
@@ -60,20 +52,9 @@ public class KeysetManagerTest {
 
   @Test
   public void testBasic() throws Exception {
-    KeysetManager manager = new KeysetManager.Builder().build();
-    try {
-      manager.rotate();
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "cannot rotate, needs key template");
-    }
-
     // Create a keyset that contains a single HmacKey.
-    manager = new KeysetManager.Builder()
-        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
-        .build()
-        .rotate();
-    assertNull(manager.getKeysetHandle().getEncryptedKeyset());
+    KeysetManager manager = KeysetManager.withEmptyKeyset()
+        .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     Keyset keyset = manager.getKeysetHandle().getKeyset();
     assertEquals(1, keyset.getKeyCount());
     assertEquals(keyset.getPrimaryKeyId(), keyset.getKey(0).getKeyId());
@@ -84,40 +65,15 @@ public class KeysetManagerTest {
   }
 
   @Test
-  public void testEncryptedKeyset() throws Exception {
-    // Create an encrypted keyset that contains a single HmacKey.
-    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
-    KeyData aeadKeyData = Registry.INSTANCE.newKeyData(masterKeyTemplate);
-    Aead masterKey = Registry.INSTANCE.getPrimitive(aeadKeyData);
-    KeysetManager manager = new KeysetManager.Builder()
-        .setKeyTemplate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
-        .setMasterKey(masterKey)
-        .build()
-        .rotate();
-    KeysetHandle keysetHandle = manager.getKeysetHandle();
-    assertNotNull(keysetHandle.getEncryptedKeyset());
-    KeysetInfo keysetInfo = keysetHandle.getKeysetInfo();
-    assertEquals(1, keysetInfo.getKeyInfoCount());
-    assertEquals(keysetInfo.getPrimaryKeyId(), keysetInfo.getKeyInfo(0).getKeyId());
-    assertEquals(hmacKeyTypeUrl, keysetInfo.getKeyInfo(0).getTypeUrl());
-    assertEquals(KeyStatusType.ENABLED, keysetInfo.getKeyInfo(0).getStatus());
-    assertEquals(OutputPrefixType.TINK, keysetInfo.getKeyInfo(0).getOutputPrefixType());
-  }
-
-  @Test
   public void testExistingKeyset() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetManager manager1 = new KeysetManager.Builder()
-        .setKeyTemplate(template)
-        .build()
-        .rotate();
+    KeysetManager manager1 = KeysetManager.withEmptyKeyset()
+        .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     Keyset keyset1 = manager1.getKeysetHandle().getKeyset();
 
-    KeysetManager manager2 = new KeysetManager.Builder()
-        .setKeysetHandle(manager1.getKeysetHandle())
-        .build()
-        .rotate(template);
+    KeysetManager manager2 = KeysetManager
+        .fromKeysetHandle(manager1.getKeysetHandle())
+        .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     Keyset keyset2 = manager2.getKeysetHandle().getKeyset();
 
     assertEquals(2, keyset2.getKeyCount());
@@ -125,25 +81,5 @@ public class KeysetManagerTest {
     assertEquals(keyset1.getKey(0), keyset2.getKey(0));
     // The new key is the primary key.
     assertEquals(keyset2.getPrimaryKeyId(), keyset2.getKey(1).getKeyId());
-  }
-
-  /**
-   * Tests that when encryption with KMS failed, an exception is thrown.
-   */
-  @Test
-  public void testFaultyKms() throws Exception {
-    // Encrypt with dummy Aead.
-    TestUtil.DummyAead masterKey = new TestUtil.DummyAead();
-    try {
-      KeysetHandle unused = new KeysetManager.Builder()
-          .setKeyTemplate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
-          .setMasterKey(masterKey)
-          .build()
-          .rotate()
-          .getKeysetHandle();
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "dummy");
-    }
   }
 }

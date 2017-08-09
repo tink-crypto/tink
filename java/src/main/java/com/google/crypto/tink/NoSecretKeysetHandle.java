@@ -20,7 +20,6 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
 /**
@@ -32,42 +31,29 @@ public final class NoSecretKeysetHandle {
   /**
    * @return a new keyset handle from {@code serialized} which is a serialized {@code Keyset}.
    * @throws GeneralSecurityException
+   * @deprecated use fromKeysetReader instead
    */
+  @Deprecated
   public static final KeysetHandle parseFrom(final byte[] serialized)
       throws GeneralSecurityException {
     try {
       Keyset keyset = Keyset.parseFrom(serialized);
-      KeysetHandle.assertEnoughKeyMaterial(keyset);
-      return parseFrom(keyset);
+      validate(keyset);
+      return KeysetHandle.fromKeyset(keyset);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("invalid keyset");
     }
   }
 
   /**
-   * @return a new keyset handle from {@code inputStream}, which reads a serialized {@code Keyset}.
-   * @throws GeneralSecurityException, IOException
-   */
-  public static final KeysetHandle parseFrom(final InputStream inputStream)
-      throws GeneralSecurityException, IOException {
-    try {
-      Keyset keyset = Keyset.parseFrom(inputStream);
-      KeysetHandle.assertEnoughKeyMaterial(keyset);
-      return parseFrom(keyset);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid keyset");
-    }
-  }
-
-  /**
-   * @return a new keyset handle from {@code encryptedKeySet}.
+   * @return a new keyset handle from a keyset obtained from {@code reader}.
    * @throws GeneralSecurityException
    */
-  public static final KeysetHandle parseFrom(Keyset keyset)
-      throws GeneralSecurityException {
+  public static final KeysetHandle fromKeysetReader(KeysetReader reader)
+      throws GeneralSecurityException, IOException {
+    Keyset keyset = reader.read();
     validate(keyset);
-    KeysetHandle.assertEnoughKeyMaterial(keyset);
-    return new KeysetHandle(keyset);
+    return KeysetHandle.fromKeyset(keyset);
   }
 
   /**

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
@@ -296,7 +295,7 @@ public class EcdsaSignKeyManagerTest {
    */
   @Test
   public void testGetPublicKeyData() throws Exception {
-    KeysetHandle privateHandle = CleartextKeysetHandle.generateNew(
+    KeysetHandle privateHandle = KeysetHandle.generateNew(
         SignatureKeyTemplates.ECDSA_P256);
     KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
     EcdsaSignKeyManager privateManager = new EcdsaSignKeyManager();

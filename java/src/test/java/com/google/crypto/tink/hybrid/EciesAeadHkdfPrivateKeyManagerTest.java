@@ -19,7 +19,6 @@ package com.google.crypto.tink.hybrid;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
@@ -102,7 +101,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
    */
   @Test
   public void testGetPublicKeyData() throws Exception {
-    KeysetHandle privateHandle = CleartextKeysetHandle.generateNew(
+    KeysetHandle privateHandle = KeysetHandle.generateNew(
         HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM);
     KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
     EciesAeadHkdfPrivateKeyManager privateManager = new EciesAeadHkdfPrivateKeyManager();

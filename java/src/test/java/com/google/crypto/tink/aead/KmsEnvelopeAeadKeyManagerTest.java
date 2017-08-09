@@ -21,7 +21,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
@@ -57,7 +56,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
   @Test
   public void testGcpKmsKeyRestricted() throws Exception {
     KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(
         AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(
             TestUtil.RESTRICTED_CRYPTO_KEY_URI, dekTemplate));
     TestUtil.runBasicAeadFactoryTests(keysetHandle);
@@ -66,7 +65,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
   @Test
   public void testParsingInvalidCiphertexts() throws Exception {
     KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(
         AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(
             TestUtil.RESTRICTED_CRYPTO_KEY_URI, dekTemplate));
 

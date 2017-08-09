@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
@@ -47,14 +46,14 @@ public class KmsAeadKeyManagerTest {
     Registry.INSTANCE.registerKeyManager(
         KmsAeadKeyManager.TYPE_URL,
         new KmsAeadKeyManager(kmsClient));
-    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(
         AeadKeyTemplates.createKmsAeadKeyTemplate(TestUtil.RESTRICTED_CRYPTO_KEY_URI));
     TestUtil.runBasicAeadFactoryTests(keysetHandle);
   }
 
   @Test
   public void testGcpKmsKeyRestricted_WithCustomKeyManager() throws Exception {
-    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(
         AeadKeyTemplates.createKmsAeadKeyTemplate(TestUtil.RESTRICTED_CRYPTO_KEY_URI));
     KmsAeadKeyManager customKeyManager = new KmsAeadKeyManager(kmsClient);
     TestUtil.runBasicAeadFactoryTests(keysetHandle, customKeyManager);

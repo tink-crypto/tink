@@ -31,12 +31,11 @@ import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code Aead} keys. One can use these templates
- * to generate new {@code Keyset}, using either {@code CleartextKeysetHandle} or
- * {@code EncryptedKeysetHandle}. To generate a new keyset that contains a single
- * {@code AesGcmKey}, one can do:
+ * to generate new {@code Keyset} with {@code KeysetHandle}. To generate a new keyset
+ * that contains a single {@code AesGcmKey}, one can do:
  * <pre>
  *   AeadConfig.registerStandardKeyTypes();
- *   KeysetHandle handle = CleartextKeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
+ *   KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
  *   Aead aead = AeadFactory.getPrimitive(handle);
  * </pre>
  */

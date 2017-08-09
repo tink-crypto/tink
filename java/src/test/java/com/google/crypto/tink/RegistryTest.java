@@ -164,7 +164,7 @@ public class RegistryTest {
     KeyData key1 = Registry.INSTANCE.newKeyData(template1);
     KeyData key2 = Registry.INSTANCE.newKeyData(template1);
     KeyData key3 = Registry.INSTANCE.newKeyData(template2);
-    KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
+    KeysetHandle keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
             .setKeyId(1)
@@ -189,7 +189,7 @@ public class RegistryTest {
     assertEquals(AesGcmJce.class, aeadSet.getPrimary().getPrimitive().getClass());
 
     // Try a keyset with some keys non-ENABLED.
-    keysetHandle = new KeysetHandle(Keyset.newBuilder()
+    keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
             .setKeyId(1)
@@ -237,7 +237,7 @@ public class RegistryTest {
   public void testInvalidKeyset() throws Exception {
     // Empty keyset.
     try {
-      Registry.INSTANCE.getPrimitives(new KeysetHandle(Keyset.newBuilder().build()));
+      Registry.INSTANCE.getPrimitives(KeysetHandle.fromKeyset(Keyset.newBuilder().build()));
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");
@@ -247,7 +247,7 @@ public class RegistryTest {
     KeyTemplate template1 = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeyData key1 = Registry.INSTANCE.newKeyData(template1);
     // No primary key.
-    KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
+    KeysetHandle keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
             .setKeyId(1)
@@ -264,7 +264,7 @@ public class RegistryTest {
     }
 
     // Primary key is disabled.
-    keysetHandle = new KeysetHandle(Keyset.newBuilder()
+    keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
             .setKeyId(1)
@@ -281,7 +281,7 @@ public class RegistryTest {
     }
 
     // Multiple primary keys.
-    keysetHandle = new KeysetHandle(Keyset.newBuilder()
+    keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
             .setKeyId(1)
@@ -311,7 +311,7 @@ public class RegistryTest {
     KeyTemplate template2 =  AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.INSTANCE.newKeyData(template1);
     KeyData key2 = Registry.INSTANCE.newKeyData(template2);
-    KeysetHandle keysetHandle = new KeysetHandle(Keyset.newBuilder()
+    KeysetHandle keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
         .addKey(Keyset.Key.newBuilder()
             .setKeyData(key1)
             .setKeyId(1)

@@ -18,12 +18,11 @@ package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetManager;
+import com.google.crypto.tink.KeysetWriter;
 import com.google.crypto.tink.integration.GcpKmsAead;
 import com.google.crypto.tink.integration.GcpKmsClient;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.Keyset;
-import com.google.protobuf.Message;
 import java.io.File;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
@@ -37,6 +36,7 @@ public class CreateCommand extends CreateOptions implements Command {
     validate();
     create(outputStream, outFormat, credentialFile, keyTemplate,
         gcpKmsMasterKeyUriValue, awsKmsMasterKeyUriValue);
+    outputStream.close();
   }
 
   /**
@@ -47,53 +47,45 @@ public class CreateCommand extends CreateOptions implements Command {
   public static void create(OutputStream outputStream, String outFormat, File credentialFile,
       KeyTemplate keyTemplate, String gcpKmsMasterKeyUriValue, String awsKmsMasterKeyUriValue)
       throws Exception {
-    Message keyset;
+    KeysetWriter writer = TinkeyUtil.createKeysetWriter(outputStream, outFormat);
     if (gcpKmsMasterKeyUriValue != null) {
-      keyset = createEncryptedKeysetWithGcp(credentialFile, keyTemplate,
-          gcpKmsMasterKeyUriValue);
+      createEncryptedKeysetWithGcp(credentialFile, keyTemplate, gcpKmsMasterKeyUriValue, writer);
     } else if (awsKmsMasterKeyUriValue != null) {
-      keyset = createEncryptedKeysetWithAws(credentialFile, keyTemplate,
-          awsKmsMasterKeyUriValue);
+      createEncryptedKeysetWithAws(credentialFile, keyTemplate, awsKmsMasterKeyUriValue, writer);
     } else {
       // cleartext, empty, keyset.
-      keyset = createCleartextKeyset(keyTemplate);
+      createCleartextKeyset(keyTemplate, writer);
     }
-    TinkeyUtil.writeProto(keyset, outputStream, outFormat);
   }
 
   /**
    * Creates a keyset that contains a single key of template {@code keyTemplateFile}.
-   * @return the resulting keyset.
    */
-  public static final Keyset createCleartextKeyset(KeyTemplate keyTemplate) throws Exception {
-    return new KeysetManager.Builder()
-        .setKeyTemplate(keyTemplate)
-        .build()
-        .rotate()
+  public static final void createCleartextKeyset(KeyTemplate keyTemplate, KeysetWriter writer)
+      throws Exception {
+    KeysetManager
+        .withEmptyKeyset()
+        .rotate(keyTemplate)
         .getKeysetHandle()
-        .getKeyset();
+        .write(writer);
   }
 
   /**
    * Creates a keyset that contains a single key of template {@code keyTemplateFile}.
    * Encrypts the keyset using {@code credentialFile} and {@code gcpKmsMasterKeyUriValue}.
-   * @return the resulting encrypted keyset.
    * @throws GeneralSecurityException if failed to encrypt keyset.
    */
-  public static final EncryptedKeyset createEncryptedKeysetWithGcp(
+  public static final void createEncryptedKeysetWithGcp(
       File credentialFile, KeyTemplate keyTemplate,
-      String gcpKmsMasterKeyUriValue) throws Exception {
+      String gcpKmsMasterKeyUriValue, KeysetWriter writer) throws Exception {
     Aead masterKey = new GcpKmsAead(
         GcpKmsClient.fromNullableServiceAccount(credentialFile),
         gcpKmsMasterKeyUriValue);
-
-    return new KeysetManager.Builder()
-        .setKeyTemplate(keyTemplate)
-        .setMasterKey(masterKey)
-        .build()
-        .rotate()
+    KeysetManager
+        .withEmptyKeyset()
+        .rotate(keyTemplate)
         .getKeysetHandle()
-        .getEncryptedKeyset();
+        .writeEncrypted(writer, masterKey);
   }
 
   /**
@@ -104,7 +96,7 @@ public class CreateCommand extends CreateOptions implements Command {
    */
   public static final EncryptedKeyset createEncryptedKeysetWithAws(
       File credentialFile, KeyTemplate keyTemplate,
-      String awsKmsMasterKeyUriValue) throws Exception {
+      String awsKmsMasterKeyUriValue, KeysetWriter writer) throws Exception {
     throw new Exception("Not Implemented Yet");
   }
 }

@@ -16,6 +16,7 @@ package com.example.envelopeme;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KeysetReaders;
 import com.google.crypto.tink.NoSecretKeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadFactory;
@@ -33,7 +34,8 @@ public class EnvelopeMe {
    */
   public static byte[] encrypt(byte[] config, byte[] plaintext)
       throws Exception {
-    KeysetHandle handle = NoSecretKeysetHandle.parseFrom(config);
+    KeysetHandle handle = NoSecretKeysetHandle.fromKeysetReader(
+        KeysetReaders.withBytes(config));
     Aead aead = AeadFactory.getPrimitive(handle);
     return aead.encrypt(plaintext, /* additionalData= */null);
   }
@@ -43,7 +45,8 @@ public class EnvelopeMe {
    */
   public static byte[] decrypt(byte[] config, byte[] ciphertext)
       throws Exception {
-    KeysetHandle handle = NoSecretKeysetHandle.parseFrom(config);
+    KeysetHandle handle = NoSecretKeysetHandle.fromKeysetReader(
+        KeysetReaders.withBytes(config));
     Aead aead = AeadFactory.getPrimitive(handle);
     return aead.decrypt(ciphertext, /* additionalData= */null);
   }

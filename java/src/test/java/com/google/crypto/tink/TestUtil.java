@@ -221,7 +221,7 @@ public class TestUtil {
    * @return a keyset handle from a {@code keyset}.
    */
   public static KeysetHandle createKeysetHandle(final Keyset keyset) throws Exception {
-    return new KeysetHandle(keyset);
+    return KeysetHandle.fromKeyset(keyset);
   }
 
   /**

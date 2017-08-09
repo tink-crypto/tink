@@ -29,12 +29,12 @@ import com.google.protobuf.ByteString;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code HybridDecrypt} and {@code HybridEncrypt}
- * primitives. One can use these templates to generate new {@code Keyset}, using either
- * {@code CleartextKeysetHandle} or {@code EncryptedKeysetHandle}. To generate a new keyset
- * that contains a single {@code EciesAeadHkdfPrivateKey}, one can do:
+ * primitives. One can use these templates to generate new {@code Keyset} with
+ * {@code KeysetHandle}. To generate a new keyset that contains a single
+ * {@code EciesAeadHkdfPrivateKey}, one can do:
  * <pre>
  *   PublicKeySign.registerStandardKeyTypes();
- *   KeysetHandle handle = CleartextKeysetHandle.generateNew(
+ *   KeysetHandle handle = KeysetHandle.generateNew(
  *       HybridKeyTemplates.ECIES_P256_HKDF_AES128_GCM);
  *   PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
  * </pre>

@@ -16,21 +16,25 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.proto.EncryptedKeyset;
+import com.google.crypto.tink.proto.Keyset;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 /**
- * Creates keyset handles from cleartext keysets. This API allows loading cleartext keysets, thus
- * its usage should be restricted. Users that need to load keysets that don't contain any secret
- * key material can use {@code NoSecretKeysetHandle}.
+ * KeysetWriter knows how to write a cleartext or encrypted keyset to some storage system.
  */
-public final class CleartextKeysetHandle {
+public interface KeysetWriter {
   /**
-   * @return a new keyset handle from a keyset obtained from {@code reader}.
-   * @throws GeneralSecurityException
+   * Writes the cleartext {@code keyset} to some storage system.
+   *
+   * @throws IOException.
    */
-  public static final KeysetHandle fromKeysetReader(KeysetReader reader)
-      throws GeneralSecurityException, IOException {
-    return KeysetHandle.fromKeyset(reader.read());
-  }
+  void write(Keyset keyset) throws IOException;
+
+  /**
+   * Writes the encrypted {@code keyset} to some storage system.
+   *
+   * @throws IOException.
+   */
+  void write(EncryptedKeyset keyset) throws IOException;
 }

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
@@ -80,7 +79,7 @@ public class Ed25519PrivateKeyManagerTest {
    */
   @Test
   public void testGetPublicKeyData() throws Exception {
-    KeysetHandle privateHandle = CleartextKeysetHandle.generateNew(
+    KeysetHandle privateHandle = KeysetHandle.generateNew(
         SignatureKeyTemplates.ED25519);
     KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
     Ed25519PrivateKeyManager privateManager = new Ed25519PrivateKeyManager();

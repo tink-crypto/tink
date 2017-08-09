@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,6 +25,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.KeyData;
@@ -53,6 +55,8 @@ import org.junit.runners.JUnit4;
 public class KeysetHandleTest {
   @Before
   public void setUp() throws GeneralSecurityException {
+    AeadConfig.registerStandardKeyTypes();
+    MacConfig.registerStandardKeyTypes();
     PublicKeyVerifyConfig.registerStandardKeyTypes();
     PublicKeySignConfig.registerStandardKeyTypes();
   }
@@ -68,7 +72,7 @@ public class KeysetHandleTest {
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.TINK));
-    KeysetHandle handle = CleartextKeysetHandle.parseFrom(keyset.toByteArray());
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
     assertEquals(keyset, handle.getKeyset());
 
     String keysetInfo = handle.toString();
@@ -78,29 +82,31 @@ public class KeysetHandleTest {
 
   @Test
   public void testWrite() throws Exception {
-    KeysetHandle handle = CleartextKeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+    KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    handle.write(outputStream);
+    KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
+    handle.write(writer);
     ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-    KeysetHandle handle2 = CleartextKeysetHandle.parseFrom(inputStream);
+    KeysetReader reader = KeysetReaders.withInputStream(inputStream);
+    KeysetHandle handle2 = CleartextKeysetHandle.fromKeysetReader(reader);
     assertEquals(handle.getKeyset(), handle2.getKeyset());
   }
 
   @Test
-  public void testWriteEncryptedKeyset() throws Exception {
-    AeadConfig.registerStandardKeyTypes();
+  public void testWriteEncrypted() throws Exception {
+    KeysetHandle handle = KeysetHandle
+        .generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     // Encrypt the keyset with an AeadKey.
     KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
     Aead masterKey = Registry.INSTANCE.getPrimitive(
         Registry.INSTANCE.newKeyData(masterKeyTemplate));
-    KeysetHandle handle = EncryptedKeysetHandle.generateNew(
-        MacKeyTemplates.HMAC_SHA256_128BITTAG, masterKey);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    handle.write(outputStream);
+    KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
+    handle.writeEncrypted(writer, masterKey);
     ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-    KeysetHandle handle2 = EncryptedKeysetHandle.parseFrom(inputStream, masterKey);
+    KeysetReader reader = KeysetReaders.withInputStream(inputStream);
+    KeysetHandle handle2 = KeysetHandle.fromKeysetReader(reader, masterKey);
     assertEquals(handle.getKeyset(), handle2.getKeyset());
-    assertEquals(handle.getEncryptedKeyset(), handle2.getEncryptedKeyset());
   }
 
  /**
@@ -108,7 +114,7 @@ public class KeysetHandleTest {
    */
   @Test
   public void testGetPublicKeysetHandle() throws Exception {
-    KeysetHandle privateHandle = CleartextKeysetHandle.generateNew(
+    KeysetHandle privateHandle = KeysetHandle.generateNew(
         SignatureKeyTemplates.ECDSA_P256);
     KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
     EcdsaPrivateKey privateKey = EcdsaPrivateKey.parseFrom(privateKeyData.getValue());
@@ -129,6 +135,38 @@ public class KeysetHandleTest {
       verifier.verify(signer.sign(message), message);
     } catch (GeneralSecurityException e) {
       fail("Should not fail: " + e);
+    }
+  }
+
+  /**
+   * Tests that when encryption failed an exception is thrown.
+   */
+  @Test
+  public void testEncryptFailed() throws Exception {
+    KeysetHandle handle = KeysetManager.withEmptyKeyset()
+        .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
+        .getKeysetHandle();
+    // Encrypt with dummy Aead.
+    TestUtil.DummyAead faultyAead = new TestUtil.DummyAead();
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
+    try {
+      handle.writeEncrypted(writer, faultyAead);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "dummy");
+    }
+  }
+
+  @Test
+  public void testVoidInputs() throws Exception {
+    KeysetHandle unused;
+    try {
+      KeysetReader reader = KeysetReaders.withBytes(new byte[0]);
+      unused = KeysetHandle.fromKeysetReader(reader, null /* masterKey */);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "empty keyset");
     }
   }
 }

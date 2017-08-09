@@ -17,14 +17,17 @@
 package com.google.crypto.tink.tinkey;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.ByteStreams;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KeysetReaders;
+import com.google.crypto.tink.KeysetWriter;
+import com.google.crypto.tink.KeysetWriters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.TextFormatKeysetReaders;
+import com.google.crypto.tink.TextFormatKeysetWriters;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -139,8 +142,18 @@ public class TinkeyUtil {
   }
 
   /**
-   * Writes {@code proto} in {@code outFormat} to {@code outputStream}. Closes
-   * {@code outputStream} afterward.
+   * Creates a {@code KeysetWriter} that can write the keyset in the right {@code outFormat}.
+   */
+  public static KeysetWriter createKeysetWriter(OutputStream outputStream, String outFormat)
+      throws IOException {
+    if (outFormat == null || outFormat.equals("TEXT")) {
+      return TextFormatKeysetWriters.withOutputStream(outputStream);
+    }
+    return KeysetWriters.withOutputStream(outputStream);
+  }
+
+  /**
+   * Writes {@code proto} in {@code outFormat} to {@code outputStream}.
    */
   public static void writeProto(Message proto, OutputStream outputStream, String outFormat)
       throws IOException {
@@ -150,28 +163,22 @@ public class TinkeyUtil {
     } else {
       output = proto.toByteArray();
     }
-    try {
-      outputStream.write(output);
-    } finally {
-      outputStream.close();
-    }
+    outputStream.write(output);
   }
 
   /**
    * Returns a {@code KeysetHandle} from either a cleartext {@code Keyset} or a
    * {@code EncryptedKeyset}, read from {@code inputStream}.
-   * Closes {code inputStream} afterward.
    */
   public static KeysetHandle getKeysetHandle(InputStream inputStream, String inFormat,
       File credentialFile) throws IOException, GeneralSecurityException {
-    byte[] inBytes = ByteStreams.toByteArray(inputStream);
-    inputStream.close();
     if (inFormat == null || inFormat.equals("TEXT")) {
-      Keyset.Builder builder = Keyset.newBuilder();
-      TextFormat.merge(new String(inBytes, "UTF-8"), builder);
-      return CleartextKeysetHandle.parseFrom(builder.build());
+      return CleartextKeysetHandle.fromKeysetReader(
+          TextFormatKeysetReaders.withInputStream(inputStream));
     }
-    return CleartextKeysetHandle.parseFrom(inBytes);
+    return CleartextKeysetHandle.fromKeysetReader(
+        KeysetReaders.withInputStream(inputStream));
+    // TODO(thaidn): handle encrypted keysets.
   }
 
   /**
