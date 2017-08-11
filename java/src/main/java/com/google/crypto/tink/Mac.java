@@ -19,9 +19,10 @@ package com.google.crypto.tink;
 import java.security.GeneralSecurityException;
 
 /**
- * Interface for MACs (Message Authentication Codes).
- * This interface should be used for authentication only, and not for other purposes
- * (for example, it should not be used to generate pseudorandom bytes).
+ * Interface for multi-time MACs (Message Authentication Codes).
+ * This interface should be used for multi-time authentication only, and not for other purposes
+ * (for example, it should not be used to generate pseudorandom bytes or one-time MACs like
+ * Poly1305).
  */
 public interface Mac {
   /**
