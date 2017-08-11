@@ -29,7 +29,6 @@ import java.io.InputStream;
  * keysets in proto binary format from common storage systems.
  */
 public final class KeysetReaders {
-
   public static KeysetReader withInputStream(InputStream stream) {
     return new InputStreamKeysetReader(stream);
   }

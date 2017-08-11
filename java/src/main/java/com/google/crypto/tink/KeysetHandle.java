@@ -51,6 +51,13 @@ public final class KeysetHandle {
   }
 
   /**
+   * @return the actual keyset data.
+   */
+  Keyset getKeyset() {
+    return keyset;
+  }
+
+  /**
    * Creates keyset handles from an encrypted keyset obtained via {@code reader}.
    * Users that need to load cleartext keysets can use {@code CleartextKeysetHandle}.
    * @return a new {@code KeysetHandle} from {@code encryptedKeysetProto} that was encrypted
@@ -74,13 +81,6 @@ public final class KeysetHandle {
     return KeysetManager.withEmptyKeyset()
         .rotate(keyTemplate)
         .getKeysetHandle();
-  }
-
-  /**
-   * @return the actual keyset data.
-   */
-  public Keyset getKeyset() {
-    return keyset;
   }
 
   /**

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetReaders;
 import com.google.crypto.tink.TestUtil;
@@ -93,9 +92,7 @@ public class CreateCommandTest {
     outFormat = "BINARY";
     CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
         gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-    KeysetHandle handle = CleartextKeysetHandle.fromKeysetReader(
-        KeysetReaders.withBytes(outputStream.toByteArray()));
-    keyset = handle.getKeyset();
+    keyset = KeysetReaders.withBytes(outputStream.toByteArray()).read();
     assertEquals(1, keyset.getKeyCount());
     assertEquals(keyset.getPrimaryKeyId(), keyset.getKey(0).getKeyId());
     assertTrue(keyset.getKey(0).hasKeyData());
@@ -137,19 +134,8 @@ public class CreateCommandTest {
     Aead masterKey = new GcpKmsAead(
         GcpKmsClient.fromServiceAccount(credentialFile),
         gcpKmsMasterKeyValue);
-    KeysetHandle handle = KeysetHandle
-        .fromKeysetReader(KeysetReaders.withBytes(outputStream.toByteArray()), masterKey);
-
-    Keyset keyset = handle.getKeyset();
-    assertEquals(1, keyset.getKeyCount());
-    assertEquals(keyset.getPrimaryKeyId(), keyset.getKey(0).getKeyId());
-    assertTrue(keyset.getKey(0).hasKeyData());
-    assertEquals(typeUrl, keyset.getKey(0).getKeyData().getTypeUrl());
-    assertEquals(KeyStatusType.ENABLED, keyset.getKey(0).getStatus());
-    assertEquals(OutputPrefixType.TINK, keyset.getKey(0).getOutputPrefixType());
-    AesGcmKey aesGcmKey = AesGcmKey.parseFrom(keyset.getKey(0).getKeyData().getValue());
-    assertEquals(16, aesGcmKey.getKeyValue().size());
-
+    KeysetHandle handle = KeysetHandle.fromKeysetReader(
+        KeysetReaders.withBytes(outputStream.toByteArray()), masterKey);
     keysetInfo = handle.getKeysetInfo();
     assertEquals(1, keysetInfo.getKeyInfoCount());
     assertEquals(keysetInfo.getPrimaryKeyId(), keysetInfo.getKeyInfo(0).getKeyId());

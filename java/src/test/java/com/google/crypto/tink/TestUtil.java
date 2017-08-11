@@ -40,6 +40,7 @@ import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EllipticCurveType;
+import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacParams;
@@ -218,9 +219,26 @@ public class TestUtil {
   }
 
   /**
+   * @return a {@code KeysetReader} from a {@code handle}.
+   */
+  public static KeysetReader createKeysetReader(KeysetHandle handle) throws Exception {
+    return new KeysetReader() {
+      @Override
+      public Keyset read() throws IOException {
+        return handle.getKeyset();
+      }
+
+      @Override
+      public EncryptedKeyset readEncrypted() throws IOException {
+        throw new IOException("Not Implemented");
+      }
+    };
+  }
+
+  /**
    * @return a keyset handle from a {@code keyset}.
    */
-  public static KeysetHandle createKeysetHandle(final Keyset keyset) throws Exception {
+  public static KeysetHandle createKeysetHandle(Keyset keyset) throws Exception {
     return KeysetHandle.fromKeyset(keyset);
   }
 
