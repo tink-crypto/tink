@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import static com.google.crypto.tink.subtle.DjbCipherPoly1305.MAC_TAG_SIZE_IN_BYTES;
+import static com.google.crypto.tink.subtle.Poly1305.MAC_TAG_SIZE_IN_BYTES;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;

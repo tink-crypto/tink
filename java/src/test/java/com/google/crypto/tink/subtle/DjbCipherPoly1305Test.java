@@ -17,15 +17,14 @@
 package com.google.crypto.tink.subtle;
 
 import static com.google.crypto.tink.subtle.DjbCipher.KEY_SIZE_IN_BYTES;
-import static com.google.crypto.tink.subtle.DjbCipherPoly1305.MAC_TAG_SIZE_IN_BYTES;
 import static com.google.crypto.tink.subtle.DjbCipherTest.twosCompByte;
+import static com.google.crypto.tink.subtle.Poly1305.MAC_TAG_SIZE_IN_BYTES;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.truth.Truth;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.subtle.DjbCipher.XSalsa20;
-import com.google.crypto.tink.subtle.DjbCipherPoly1305Test.Poly1305Test;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -40,238 +39,11 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    Poly1305Test.class,
     DjbCipherPoly1305Test.ChaCha20Poly1305IetfTest.class,
     DjbCipherPoly1305Test.XSalsa20Poly1305NaclTest.class,
     DjbCipherPoly1305Test.XChaCha20Poly1305IetfTest.class
 })
 public class DjbCipherPoly1305Test {
-
-  /**
-   * Unit tests for {@link DjbCipherPoly1305} static methods.
-   */
-  public static class Poly1305Test {
-
-    /**
-     * Tests against the test vectors in Section 2.5.2 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#section-2.5.2
-     */
-    @Test
-    public void testPoly1305() {
-      byte[] key = TestUtil.hexDecode(""
-          + "85d6be7857556d337f4452fe42d506a8"
-          + "0103808afb0db2fd4abff6af4149f51b");
-      byte[] in = ("Cryptographic Forum Research Group").getBytes(StandardCharsets.US_ASCII);
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "a8061dc1305136c6c22b8baf0c0127a9"));
-    }
-
-    /**
-     * Tests against the test vector 1 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector1() {
-      byte[] key = TestUtil.hexDecode(""
-          + "00000000000000000000000000000000"
-          + "00000000000000000000000000000000");
-      byte[] in = TestUtil.hexDecode(""
-          + "00000000000000000000000000000000"
-          + "00000000000000000000000000000000"
-          + "00000000000000000000000000000000"
-          + "00000000000000000000000000000000");
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "00000000000000000000000000000000"));
-    }
-
-    /**
-     * Tests against the test vector 2 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector2() {
-      byte[] key = TestUtil.hexDecode(""
-          + "00000000000000000000000000000000"
-          + "36e5f6b5c5e06070f0efca96227a863e");
-      byte[] in = (
-          "Any submission to the IETF intended by the Contributor for publication as all or "
-              + "part of an IETF Internet-Draft or RFC and any statement made within the context "
-              + "of an IETF activity is considered an \"IETF Contribution\". Such statements "
-              + "include oral statements in IETF sessions, as well as written and electronic "
-              + "communications made at any time or place, which are addressed to")
-          .getBytes(StandardCharsets.US_ASCII);
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "36e5f6b5c5e06070f0efca96227a863e"));
-    }
-
-    /**
-     * Tests against the test vector 3 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector3() {
-      byte[] key = TestUtil.hexDecode(""
-          + "36e5f6b5c5e06070f0efca96227a863e"
-          + "00000000000000000000000000000000");
-      byte[] in = (
-          "Any submission to the IETF intended by the Contributor for publication as all or "
-              + "part of an IETF Internet-Draft or RFC and any statement made within the context "
-              + "of an IETF activity is considered an \"IETF Contribution\". Such statements "
-              + "include oral statements in IETF sessions, as well as written and electronic "
-              + "communications made at any time or place, which are addressed to")
-          .getBytes(StandardCharsets.US_ASCII);
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "f3477e7cd95417af89a6b8794c310cf0"));
-    }
-
-    /**
-     * Tests against the test vector 4 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector4() {
-      byte[] key = TestUtil.hexDecode(""
-          + "1c9240a5eb55d38af333888604f6b5f0"
-          + "473917c1402b80099dca5cbc207075c0");
-      byte[] in = TestUtil.hexDecode(""
-          + "2754776173206272696c6c69672c2061"
-          + "6e642074686520736c6974687920746f"
-          + "7665730a446964206779726520616e64"
-          + "2067696d626c6520696e207468652077"
-          + "6162653a0a416c6c206d696d73792077"
-          + "6572652074686520626f726f676f7665"
-          + "732c0a416e6420746865206d6f6d6520"
-          + "7261746873206f757467726162652e");
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "4541669a7eaaee61e708dc7cbcc5eb62"));
-    }
-
-    /**
-     * Tests against the test vector 5 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector5() {
-      byte[] key = TestUtil.hexDecode(""
-          + "02000000000000000000000000000000"
-          + "00000000000000000000000000000000");
-      byte[] in = TestUtil.hexDecode(""
-          + "ffffffffffffffffffffffffffffffff");
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "03000000000000000000000000000000"));
-    }
-
-    /**
-     * Tests against the test vector 6 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector6() {
-      byte[] key = TestUtil.hexDecode(""
-          + "02000000000000000000000000000000"
-          + "ffffffffffffffffffffffffffffffff");
-      byte[] in = TestUtil.hexDecode(""
-          + "02000000000000000000000000000000");
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "03000000000000000000000000000000"));
-    }
-
-    /**
-     * Tests against the test vector 7 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector7() {
-      byte[] key = TestUtil.hexDecode(""
-          + "01000000000000000000000000000000"
-          + "00000000000000000000000000000000");
-      byte[] in = TestUtil.hexDecode(""
-          + "ffffffffffffffffffffffffffffffff"
-          + "f0ffffffffffffffffffffffffffffff"
-          + "11000000000000000000000000000000");
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "05000000000000000000000000000000"));
-    }
-
-    /**
-     * Tests against the test vector 8 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector8() {
-      byte[] key = TestUtil.hexDecode(""
-          + "01000000000000000000000000000000"
-          + "00000000000000000000000000000000");
-      byte[] in = TestUtil.hexDecode(""
-          + "ffffffffffffffffffffffffffffffff"
-          + "fbfefefefefefefefefefefefefefefe"
-          + "01010101010101010101010101010101");
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "00000000000000000000000000000000"));
-    }
-
-    /**
-     * Tests against the test vector 9 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector9() {
-      byte[] key = TestUtil.hexDecode(""
-          + "02000000000000000000000000000000"
-          + "00000000000000000000000000000000");
-      byte[] in = TestUtil.hexDecode(""
-          + "fdffffffffffffffffffffffffffffff");
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "faffffffffffffffffffffffffffffff"));
-    }
-
-    /**
-     * Tests against the test vector 10 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector10() {
-      byte[] key = TestUtil.hexDecode(""
-          + "01000000000000000400000000000000"
-          + "00000000000000000000000000000000");
-      byte[] in = TestUtil.hexDecode(""
-          + "e33594d7505e43b90000000000000000"
-          + "3394d7505e4379cd0100000000000000"
-          + "00000000000000000000000000000000"
-          + "01000000000000000000000000000000");
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "14000000000000005500000000000000"));
-    }
-
-    /**
-     * Tests against the test vector 11 in Appendix A.3 of RFC 7539.
-     * https://tools.ietf.org/html/rfc7539#appendix-A.3
-     */
-    @Test
-    public void testPoly1305TestVector11() {
-      byte[] key = TestUtil.hexDecode(""
-          + "01000000000000000400000000000000"
-          + "00000000000000000000000000000000");
-      byte[] in = TestUtil.hexDecode(""
-          + "e33594d7505e43b90000000000000000"
-          + "3394d7505e4379cd0100000000000000"
-          + "00000000000000000000000000000000");
-      byte[] mac = DjbCipherPoly1305.poly1305Mac(in, key);
-      Truth.assertThat(mac).isEqualTo(TestUtil.hexDecode(""
-          + "13000000000000000000000000000000"));
-    }
-  }
 
   /**
    * Unit test base class for DjbCipherPoly1305.
@@ -321,7 +93,7 @@ public class DjbCipherPoly1305Test {
     }
 
     @Test
-    public void testPoly1305ThrowsIllegalArgExpWhenKeyLenIsGreaterThan32() {
+    public void testDjbCipherPoly1305ThrowsIllegalArgExpWhenKeyLenIsGreaterThan32() {
       try {
         createInstance(new byte[KEY_SIZE_IN_BYTES + 1]);
         fail("Expected IllegalArgumentException.");
@@ -331,7 +103,7 @@ public class DjbCipherPoly1305Test {
     }
 
     @Test
-    public void testPoly1305ThrowsIllegalArgExpWhenKeyLenIsLessThan32() {
+    public void testDjbCipherPoly1305ThrowsIllegalArgExpWhenKeyLenIsLessThan32() {
       try {
         createInstance(new byte[KEY_SIZE_IN_BYTES - 1]);
         fail("Expected IllegalArgumentException.");
@@ -440,7 +212,7 @@ public class DjbCipherPoly1305Test {
         createInstance(key).decrypt(ciphertext, aad);
         fail("Expected GeneralSecurityException.");
       } catch (GeneralSecurityException e) {
-        Truth.assertThat(e).hasMessageThat().containsMatch("Tags do not match.");
+        Truth.assertThat(e).hasMessageThat().containsMatch("invalid MAC");
       }
 
     }

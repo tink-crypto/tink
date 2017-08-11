@@ -40,6 +40,7 @@ java_library(
         "DjbCipherPoly1305.java",
         "EncryptThenAuthenticate.java",
         "IndCpaCipher.java",
+        "Poly1305.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
