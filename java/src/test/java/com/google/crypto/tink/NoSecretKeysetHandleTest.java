@@ -62,14 +62,14 @@ public class NoSecretKeysetHandleTest {
     KeysetHandle unused;
 
     try {
-      unused = NoSecretKeysetHandle.fromKeysetReader(KeysetReaders.withBytes(new byte[0]));
+      unused = NoSecretKeysetHandle.read(KeysetReaders.withBytes(new byte[0]));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");
     }
 
     try {
-      unused = NoSecretKeysetHandle.fromKeysetReader(KeysetReaders.withBytes(new byte[0]));
+      unused = NoSecretKeysetHandle.read(KeysetReaders.withBytes(new byte[0]));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");

@@ -48,11 +48,11 @@ public class IntegrationTest {
   @Test
   public void testWithTinkeyEciesAesGcmHkdf() throws Exception {
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
-        CleartextKeysetHandle.fromKeysetReader(KeysetReaders.withFile(
+        CleartextKeysetHandle.read(KeysetReaders.withFile(
             new File("testdata/ecies_private_keyset2.bin"))));
 
     HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(
-        CleartextKeysetHandle.fromKeysetReader(KeysetReaders.withFile(
+        CleartextKeysetHandle.read(KeysetReaders.withFile(
             new File("testdata/ecies_public_keyset2.bin"))));
 
     byte[] plaintext = Random.randBytes(20);
@@ -74,11 +74,11 @@ public class IntegrationTest {
   @Test
   public void testWithTinkeyEciesAesCtrHmacAead() throws Exception {
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
-        CleartextKeysetHandle.fromKeysetReader(KeysetReaders.withFile(
+        CleartextKeysetHandle.read(KeysetReaders.withFile(
             new File("testdata/ecies_private_keyset.bin"))));
 
     HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(
-        CleartextKeysetHandle.fromKeysetReader(KeysetReaders.withFile(
+        CleartextKeysetHandle.read(KeysetReaders.withFile(
             new File("testdata/ecies_public_keyset.bin"))));
 
     byte[] plaintext = Random.randBytes(20);

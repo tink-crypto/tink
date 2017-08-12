@@ -34,7 +34,7 @@ public class EnvelopeMe {
    */
   public static byte[] encrypt(byte[] config, byte[] plaintext)
       throws Exception {
-    KeysetHandle handle = NoSecretKeysetHandle.fromKeysetReader(
+    KeysetHandle handle = NoSecretKeysetHandle.read(
         KeysetReaders.withBytes(config));
     Aead aead = AeadFactory.getPrimitive(handle);
     return aead.encrypt(plaintext, /* additionalData= */null);
@@ -45,7 +45,7 @@ public class EnvelopeMe {
    */
   public static byte[] decrypt(byte[] config, byte[] ciphertext)
       throws Exception {
-    KeysetHandle handle = NoSecretKeysetHandle.fromKeysetReader(
+    KeysetHandle handle = NoSecretKeysetHandle.read(
         KeysetReaders.withBytes(config));
     Aead aead = AeadFactory.getPrimitive(handle);
     return aead.decrypt(ciphertext, /* additionalData= */null);

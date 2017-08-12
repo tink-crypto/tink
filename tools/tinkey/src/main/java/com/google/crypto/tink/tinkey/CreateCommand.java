@@ -17,6 +17,7 @@
 package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetWriter;
 import com.google.crypto.tink.integration.GcpKmsAead;
@@ -63,11 +64,12 @@ public class CreateCommand extends CreateOptions implements Command {
    */
   public static final void createCleartextKeyset(KeyTemplate keyTemplate, KeysetWriter writer)
       throws Exception {
-    KeysetManager
-        .withEmptyKeyset()
-        .rotate(keyTemplate)
-        .getKeysetHandle()
-        .write(writer);
+    CleartextKeysetHandle.write(
+        KeysetManager
+            .withEmptyKeyset()
+            .rotate(keyTemplate)
+            .getKeysetHandle(),
+        writer);
   }
 
   /**
@@ -85,7 +87,7 @@ public class CreateCommand extends CreateOptions implements Command {
         .withEmptyKeyset()
         .rotate(keyTemplate)
         .getKeysetHandle()
-        .writeEncrypted(writer, masterKey);
+        .write(writer, masterKey);
   }
 
   /**

@@ -81,18 +81,6 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void testWrite() throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
-    handle.write(writer);
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-    KeysetReader reader = KeysetReaders.withInputStream(inputStream);
-    KeysetHandle handle2 = CleartextKeysetHandle.fromKeysetReader(reader);
-    assertEquals(handle.getKeyset(), handle2.getKeyset());
-  }
-
-  @Test
   public void testWriteEncrypted() throws Exception {
     KeysetHandle handle = KeysetHandle
         .generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
@@ -102,10 +90,10 @@ public class KeysetHandleTest {
         Registry.INSTANCE.newKeyData(masterKeyTemplate));
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
-    handle.writeEncrypted(writer, masterKey);
+    handle.write(writer, masterKey);
     ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
     KeysetReader reader = KeysetReaders.withInputStream(inputStream);
-    KeysetHandle handle2 = KeysetHandle.fromKeysetReader(reader, masterKey);
+    KeysetHandle handle2 = KeysetHandle.read(reader, masterKey);
     assertEquals(handle.getKeyset(), handle2.getKeyset());
   }
 
@@ -151,7 +139,7 @@ public class KeysetHandleTest {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
     try {
-      handle.writeEncrypted(writer, faultyAead);
+      handle.write(writer, faultyAead);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "dummy");
@@ -163,7 +151,7 @@ public class KeysetHandleTest {
     KeysetHandle unused;
     try {
       KeysetReader reader = KeysetReaders.withBytes(new byte[0]);
-      unused = KeysetHandle.fromKeysetReader(reader, null /* masterKey */);
+      unused = KeysetHandle.read(reader, null /* masterKey */);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");

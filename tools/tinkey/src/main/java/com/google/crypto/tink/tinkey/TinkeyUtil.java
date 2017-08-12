@@ -173,10 +173,10 @@ public class TinkeyUtil {
   public static KeysetHandle getKeysetHandle(InputStream inputStream, String inFormat,
       File credentialFile) throws IOException, GeneralSecurityException {
     if (inFormat == null || inFormat.equals("TEXT")) {
-      return CleartextKeysetHandle.fromKeysetReader(
+      return CleartextKeysetHandle.read(
           TextFormatKeysetReaders.withInputStream(inputStream));
     }
-    return CleartextKeysetHandle.fromKeysetReader(
+    return CleartextKeysetHandle.read(
         KeysetReaders.withInputStream(inputStream));
     // TODO(thaidn): handle encrypted keysets.
   }

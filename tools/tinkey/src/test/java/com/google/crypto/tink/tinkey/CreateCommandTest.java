@@ -134,7 +134,7 @@ public class CreateCommandTest {
     Aead masterKey = new GcpKmsAead(
         GcpKmsClient.fromServiceAccount(credentialFile),
         gcpKmsMasterKeyValue);
-    KeysetHandle handle = KeysetHandle.fromKeysetReader(
+    KeysetHandle handle = KeysetHandle.read(
         KeysetReaders.withBytes(outputStream.toByteArray()), masterKey);
     keysetInfo = handle.getKeysetInfo();
     assertEquals(1, keysetInfo.getKeyInfoCount());

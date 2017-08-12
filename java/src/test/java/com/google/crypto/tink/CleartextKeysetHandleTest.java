@@ -25,6 +25,8 @@ import com.google.crypto.tink.mac.MacFactory;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
@@ -51,7 +53,7 @@ public class CleartextKeysetHandleTest {
         .rotate(template);
     Keyset keyset1 = manager.getKeysetHandle().getKeyset();
 
-    KeysetHandle handle1 = CleartextKeysetHandle.fromKeysetReader(
+    KeysetHandle handle1 = CleartextKeysetHandle.read(
         KeysetReaders.withBytes(keyset1.toByteArray()));
     assertEquals(keyset1, handle1.getKeyset());
 
@@ -62,6 +64,23 @@ public class CleartextKeysetHandleTest {
     assertEquals(keyset2.getPrimaryKeyId(), key2.getKeyId());
     assertEquals(template.getTypeUrl(), key2.getKeyData().getTypeUrl());
     Mac unused = MacFactory.getPrimitive(handle2);  // instantiation should succeed
+  }
+
+  @Test
+  public void testWrite() throws Exception {
+    // Create a keyset that contains a single HmacKey.
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    KeysetHandle handle = KeysetManager
+        .withEmptyKeyset()
+        .rotate(template)
+        .getKeysetHandle();
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
+    CleartextKeysetHandle.write(handle, writer);
+    ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+    KeysetReader reader = KeysetReaders.withInputStream(inputStream);
+    KeysetHandle handle2 = CleartextKeysetHandle.read(reader);
+    assertEquals(handle.getKeyset(), handle2.getKeyset());
   }
 
   @Test
@@ -76,7 +95,7 @@ public class CleartextKeysetHandleTest {
     byte[] proto = keyset.toByteArray();
     proto[0] = (byte) ~proto[0];
     try {
-      KeysetHandle unused = CleartextKeysetHandle.fromKeysetReader(
+      KeysetHandle unused = CleartextKeysetHandle.read(
           KeysetReaders.withBytes(proto));
       fail("Expected IOException");
     } catch (IOException e) {
@@ -89,14 +108,14 @@ public class CleartextKeysetHandleTest {
     KeysetHandle unused;
 
     try {
-      unused = CleartextKeysetHandle.fromKeysetReader(KeysetReaders.withBytes(new byte[0]));
+      unused = CleartextKeysetHandle.read(KeysetReaders.withBytes(new byte[0]));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");
     }
 
     try {
-      unused = CleartextKeysetHandle.fromKeysetReader(KeysetReaders.withBytes(new byte[0]));
+      unused = CleartextKeysetHandle.read(KeysetReaders.withBytes(new byte[0]));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");

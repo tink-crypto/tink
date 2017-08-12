@@ -20,17 +20,26 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * Creates keyset handles from cleartext keysets. This API allows loading cleartext keysets, thus
- * its usage should be restricted. Users that need to load keysets that don't contain any secret
- * key material can use {@code NoSecretKeysetHandle}.
+ * Reads and writes cleartext keyset handles.
+ *
+ * <p> Reading or writing cleartext keysets is a bad practice, thus usage of this API should be
+ * restricted. Users can read or write encrypted keysets with {@code KeysetHandle}.
  */
 public final class CleartextKeysetHandle {
   /**
    * @return a new keyset handle from a keyset obtained from {@code reader}.
    * @throws GeneralSecurityException
    */
-  public static final KeysetHandle fromKeysetReader(KeysetReader reader)
+  public static KeysetHandle read(KeysetReader reader)
       throws GeneralSecurityException, IOException {
     return KeysetHandle.fromKeyset(reader.read());
+  }
+
+  /**
+   * Serializes and writes the keyset to {@code keysetWriter}.
+   */
+  public static void write(KeysetHandle handle, KeysetWriter keysetWriter) throws IOException {
+    keysetWriter.write(handle.getKeyset());
+    return;
   }
 }

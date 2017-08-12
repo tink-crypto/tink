@@ -67,7 +67,7 @@ public class HybridEncryptCli {
 
     // Read the keyset.
     System.out.println("Reading the keyset...");
-    KeysetHandle keysetHandle = CleartextKeysetHandle.fromKeysetReader(
+    KeysetHandle keysetHandle = CleartextKeysetHandle.read(
         KeysetReaders.withFile(new File(keysetFilename)));
 
     // Get the primitive.

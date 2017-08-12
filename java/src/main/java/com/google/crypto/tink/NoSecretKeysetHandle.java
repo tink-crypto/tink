@@ -49,7 +49,7 @@ public final class NoSecretKeysetHandle {
    * @return a new keyset handle from a keyset obtained from {@code reader}.
    * @throws GeneralSecurityException
    */
-  public static final KeysetHandle fromKeysetReader(KeysetReader reader)
+  public static final KeysetHandle read(KeysetReader reader)
       throws GeneralSecurityException, IOException {
     Keyset keyset = reader.read();
     validate(keyset);

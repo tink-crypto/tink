@@ -29,6 +29,11 @@ import java.security.GeneralSecurityException;
 /**
  * KeysetHandle provides abstracted access to Keysets, to limit the exposure
  * of actual protocol buffers that hold sensitive key material.
+ *
+ * <p> This class allows reading and writing encrypted keysets. Users that want
+ * to read or write can use the restricted API {@code CleartextKeysetHandle}.
+ * Users can also load keysets that don't contain any secret key material with
+ * {@code NoSecretKeysetHandle}.
  */
 public final class KeysetHandle {
   /**
@@ -58,17 +63,10 @@ public final class KeysetHandle {
   }
 
   /**
-   * Creates keyset handles from an encrypted keyset obtained via {@code reader}.
-   * Users that need to load cleartext keysets can use {@code CleartextKeysetHandle}.
-   * @return a new {@code KeysetHandle} from {@code encryptedKeysetProto} that was encrypted
-   * with {@code masterKey}.
-   * @throws GeneralSecurityException
+   * @return the {@code KeysetInfo} that doesn't contain actual key material.
    */
-  public static final KeysetHandle fromKeysetReader(KeysetReader reader,
-      Aead masterKey) throws GeneralSecurityException, IOException {
-    EncryptedKeyset encryptedKeyset = reader.readEncrypted();
-    assertEnoughEncryptedKeyMaterial(encryptedKeyset);
-    return new KeysetHandle(decrypt(encryptedKeyset, masterKey));
+  public KeysetInfo getKeysetInfo() {
+    return Util.getKeysetInfo(keyset);
   }
 
   /**
@@ -84,24 +82,23 @@ public final class KeysetHandle {
   }
 
   /**
-   * @return the {@code KeysetInfo} that doesn't contain actual key material.
+   * Creates keyset handles from an encrypted keyset obtained via {@code reader}.
+   * Users that need to load cleartext keysets can use {@code CleartextKeysetHandle}.
+   * @return a new {@code KeysetHandle} from {@code encryptedKeysetProto} that was encrypted
+   * with {@code masterKey}.
+   * @throws GeneralSecurityException
    */
-  public KeysetInfo getKeysetInfo() {
-    return Util.getKeysetInfo(keyset);
-  }
-
-  /**
-   * Serializes and writes the keyset to {@code keysetWriter}.
-   */
-  public void write(KeysetWriter keysetWriter) throws IOException {
-    keysetWriter.write(keyset);
-    return;
+  public static final KeysetHandle read(KeysetReader reader,
+      Aead masterKey) throws GeneralSecurityException, IOException {
+    EncryptedKeyset encryptedKeyset = reader.readEncrypted();
+    assertEnoughEncryptedKeyMaterial(encryptedKeyset);
+    return new KeysetHandle(decrypt(encryptedKeyset, masterKey));
   }
 
   /**
    * Serializes, encrypts with {@code masterKey} and writes the keyset to {@code outputStream}.
    */
-  public void writeEncrypted(KeysetWriter keysetWriter, Aead masterKey)
+  public void write(KeysetWriter keysetWriter, Aead masterKey)
       throws GeneralSecurityException, IOException {
     EncryptedKeyset encryptedKeyset = encrypt(keyset, masterKey);
     keysetWriter.write(encryptedKeyset);
