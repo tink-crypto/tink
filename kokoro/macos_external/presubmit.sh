@@ -54,8 +54,8 @@ ${BAZEL_BIN} version
 echo "using java binary: " `which java`
 java -version
 
-# Test the iOS targets.
-${BAZEL_BIN} test \
+# Build all the iOS targets.
+${BAZEL_BIN} build \
   $DISABLE_SANDBOX \
   --compilation_mode=dbg \
   --dynamic_mode=off \

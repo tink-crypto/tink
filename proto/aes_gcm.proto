@@ -20,6 +20,7 @@ package google.crypto.tink;
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
+option objc_class_prefix = "TINKPB";
 
 // only allowing IV size in bytes = 12 and tag size in bytes = 16
 // Thus, accept no params.

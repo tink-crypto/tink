@@ -10,6 +10,8 @@ package(
 licenses(["notice"])  # Apache 2.0
 
 load("@io_bazel_rules_go//proto:go_proto_library.bzl", "go_proto_library")
+load("@org_pubref_rules_protobuf//objc:rules.bzl", "objc_proto_compile")
+load("//proto:objc.bzl", "tink_objc_proto_library")
 
 # -----------------------------------------------
 # common
@@ -41,6 +43,14 @@ go_proto_library(
     srcs = [
         "common.proto",
     ],
+)
+
+objc_proto_compile(
+    name = "common_objc_pb",
+    protos = ["common.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -81,6 +91,14 @@ go_proto_library(
     ],
 )
 
+objc_proto_compile(
+    name = "tink_objc_pb",
+    protos = ["tink.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
+)
+
 # -----------------------------------------------
 # ecdsa
 # -----------------------------------------------
@@ -119,6 +137,15 @@ go_proto_library(
     ],
 )
 
+objc_proto_compile(
+    name = "ecdsa_objc_pb",
+    protos = ["ecdsa.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
+    deps = [":common_objc_pb"],
+)
+
 # -----------------------------------------------
 # ed25519
 # -----------------------------------------------
@@ -149,6 +176,14 @@ go_proto_library(
     srcs = [
         "ed25519.proto",
     ],
+)
+
+objc_proto_compile(
+    name = "ed25519_objc_pb",
+    protos = ["ed25519.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -187,6 +222,15 @@ go_proto_library(
     ],
 )
 
+objc_proto_compile(
+    name = "hmac_objc_pb",
+    protos = ["hmac.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
+    deps = [":common_objc_pb"],
+)
+
 # -----------------------------------------------
 # aes_ctr
 # -----------------------------------------------
@@ -217,6 +261,14 @@ go_proto_library(
     srcs = [
         "aes_ctr.proto",
     ],
+)
+
+objc_proto_compile(
+    name = "aes_ctr_objc_pb",
+    protos = ["aes_ctr.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -259,6 +311,18 @@ go_proto_library(
     ],
 )
 
+objc_proto_compile(
+    name = "aes_ctr_hmac_aead_objc_pb",
+    protos = ["aes_ctr_hmac_aead.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
+    deps = [
+        ":aes_ctr_objc_pb",
+        ":hmac_objc_pb",
+    ],
+)
+
 # -----------------------------------------------
 # aes_gcm
 # -----------------------------------------------
@@ -289,6 +353,14 @@ go_proto_library(
     srcs = [
         "aes_gcm.proto",
     ],
+)
+
+objc_proto_compile(
+    name = "aes_gcm_objc_pb",
+    protos = ["aes_gcm.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -329,6 +401,18 @@ go_proto_library(
     ],
 )
 
+objc_proto_compile(
+    name = "aes_ctr_hmac_streaming_objc_pb",
+    protos = ["aes_ctr_hmac_streaming.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
+    deps = [
+        ":common_objc_pb",
+        ":hmac_objc_pb",
+    ],
+)
+
 # -----------------------------------------------
 # aes_gcm_hkdf_streaming
 # -----------------------------------------------
@@ -360,6 +444,17 @@ go_proto_library(
     ],
     deps = [
         ":common_go_proto",
+    ],
+)
+
+objc_proto_compile(
+    name = "aes_gcm_hkdf_streaming_objc_pb",
+    protos = ["aes_gcm_hkdf_streaming.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
+    deps = [
+        ":common_objc_pb",
     ],
 )
 
@@ -395,6 +490,14 @@ go_proto_library(
     ],
 )
 
+objc_proto_compile(
+    name = "aes_eax_objc_pb",
+    protos = ["aes_eax.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
+)
+
 # -----------------------------------------------
 # chacha20_poly1305
 # -----------------------------------------------
@@ -427,6 +530,14 @@ go_proto_library(
     ],
 )
 
+objc_proto_compile(
+    name = "chacha20_poly1305_objc_pb",
+    protos = ["chacha20_poly1305.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
+)
+
 # -----------------------------------------------
 # kms_aead
 # -----------------------------------------------
@@ -457,6 +568,14 @@ go_proto_library(
     srcs = [
         "kms_aead.proto",
     ],
+)
+
+objc_proto_compile(
+    name = "kms_aead_objc_pb",
+    protos = ["kms_aead.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -492,6 +611,17 @@ go_proto_library(
     ],
     deps = [
         ":tink_go_proto",
+    ],
+)
+
+objc_proto_compile(
+    name = "kms_envelope_objc_pb",
+    protos = ["kms_envelope.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
+    deps = [
+        ":tink_objc_pb",
     ],
 )
 
@@ -533,4 +663,41 @@ go_proto_library(
         ":common_go_proto",
         ":tink_go_proto",
     ],
+)
+
+objc_proto_compile(
+    name = "ecies_aead_hkdf_objc_pb",
+    protos = ["ecies_aead_hkdf.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+    with_grpc = False,
+    deps = [
+        ":common_objc_pb",
+        ":tink_objc_pb",
+    ],
+)
+
+# -----------------------------------------------
+# objc library
+# -----------------------------------------------
+tink_objc_proto_library(
+    name = "all_objc_proto",
+    srcs = [
+        ":aes_ctr_hmac_aead_objc_pb",
+        ":aes_ctr_hmac_streaming_objc_pb",
+        ":aes_ctr_objc_pb",
+        ":aes_eax_objc_pb",
+        ":aes_gcm_hkdf_streaming_objc_pb",
+        ":aes_gcm_objc_pb",
+        ":chacha20_poly1305_objc_pb",
+        ":common_objc_pb",
+        ":ecdsa_objc_pb",
+        ":ecies_aead_hkdf_objc_pb",
+        ":ed25519_objc_pb",
+        ":hmac_objc_pb",
+        ":kms_aead_objc_pb",
+        ":kms_envelope_objc_pb",
+        ":tink_objc_pb",
+    ],
+    tags = ["manual"],
 )

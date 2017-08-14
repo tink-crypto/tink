@@ -23,6 +23,7 @@ import "proto/hmac.proto";
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
+option objc_class_prefix = "TINKPB";
 
 message AesCtrHmacAeadParams {
   AesCtrParams aes_ctr_params = 1;

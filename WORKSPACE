@@ -2,8 +2,8 @@
 # third_party/rules_protobuf.
 git_repository(
     name = "org_pubref_rules_protobuf",
+    commit = "61efe7c69a6bafffd9f1231f9d6ea97c2014aa64",
     remote = "https://github.com/pubref/rules_protobuf.git",
-    tag = "v0.7.2",
 )
 
 # go packages
@@ -12,17 +12,19 @@ git_repository(
     remote = "https://github.com/bazelbuild/rules_go.git",
     tag = "0.4.4",
 )
+
 load("@io_bazel_rules_go//go:def.bzl", "go_repositories", "new_go_repository")
 load("@io_bazel_rules_go//proto:go_proto_library.bzl", "go_proto_repositories")
 
 go_repositories()
+
 go_proto_repositories()
 
 # wycheproof
 http_archive(
     name = "wycheproof",
-    strip_prefix = "wycheproof-f755ff0279ddd5fa26640d959d5872764b45feb7",
     sha256 = "8b32637abcf0c775dac424894a6586a75df821a7ffeedc467ccffa29209683e5",
+    strip_prefix = "wycheproof-f755ff0279ddd5fa26640d959d5872764b45feb7",
     url = "https://github.com/google/wycheproof/archive/f755ff0279ddd5fa26640d959d5872764b45feb7.zip",
 )
 
@@ -45,36 +47,36 @@ new_git_repository(
 # This statement defines the @com_google_protobuf repo.
 http_archive(
     name = "com_google_protobuf",
+    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
     strip_prefix = "protobuf-3.3.0",
     urls = ["https://github.com/google/protobuf/archive/v3.3.0.tar.gz"],
-    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
 )
 
 # cc_proto_library rules implicitly depend on @com_google_protobuf_cc//:cc_toolchain,
 # which is the C++ proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_cc",
+    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
     strip_prefix = "protobuf-3.3.0",
     urls = ["https://github.com/google/protobuf/archive/v3.3.0.tar.gz"],
-    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
 )
 
 # java_proto_library rules implicitly depend on @com_google_protobuf_java//:java_toolchain,
 # which is the Java proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_java",
+    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
     strip_prefix = "protobuf-3.3.0",
     urls = ["https://github.com/google/protobuf/archive/v3.3.0.tar.gz"],
-    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
 )
 
 # java_lite_proto_library rules implicitly depend on @com_google_protobuf_javalite//:javalite_toolchain,
 # which is the JavaLite proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_javalite",
+    sha256 = "b9ca3f706c6a6a6a744a7ba85321abce9e7d49825a19aaba6f29278871d41926",
     strip_prefix = "protobuf-javalite",
     urls = ["https://github.com/google/protobuf/archive/javalite.zip"],
-    sha256 = "b9ca3f706c6a6a6a744a7ba85321abce9e7d49825a19aaba6f29278871d41926",
 )
 
 # objc_proto_library rules from @org_pubref_rules_protobuf require the objective
