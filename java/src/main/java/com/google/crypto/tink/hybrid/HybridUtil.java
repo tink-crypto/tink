@@ -39,7 +39,7 @@ class HybridUtil {
       throw new GeneralSecurityException("unknown EC point format");
     }
     // Check that we can generate new keys from the DEM AEAD key format.
-    Registry.INSTANCE.newKeyData(params.getDemParams().getAeadDem());
+    Registry.newKeyData(params.getDemParams().getAeadDem());
   }
 
   /**

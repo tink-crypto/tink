@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 /**
  * HybridEncryptFactory allows obtaining a HybridEncrypt primitive from a {@code KeysetHandle}.
  *
- * HybridEncryptFactory gets primitives from the {@code Registry.INSTANCE}, which can be initialized
+ * HybridEncryptFactory gets primitives from the {@code Registry}, which can be initialized
  * via convenience methods from {@code HybridEncryptConfig}. Here is an example how one can obtain
  * and use a HybridEncrypt primitive:
  * <pre>   {@code
@@ -60,7 +60,7 @@ public final class HybridEncryptFactory {
    * @throws GeneralSecurityException
    */
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    Registry.INSTANCE.registerKeyManager(
+    Registry.registerKeyManager(
         EciesAeadHkdfPublicKeyManager.TYPE_URL,
         new EciesAeadHkdfPublicKeyManager());
   }
@@ -87,7 +87,7 @@ public final class HybridEncryptFactory {
       KeysetHandle keysetHandle, final KeyManager<HybridEncrypt> keyManager)
       throws GeneralSecurityException {
     final PrimitiveSet<HybridEncrypt> primitives =
-        Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
+        Registry.getPrimitives(keysetHandle, keyManager);
     return new HybridEncrypt() {
       @Override
       public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)

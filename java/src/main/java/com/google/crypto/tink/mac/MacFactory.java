@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 /**
  * MacFactory allows obtaining a Mac primitive from a {@code KeysetHandle}.
  *
- * MacFactory gets primitives from the {@code Registry.INSTANCE}, which can be initialized
+ * MacFactory gets primitives from the {@code Registry}, which can be initialized
  * via convenience methods from {@code MacConfig}. Here is an example how one can obtain
  * and use a Mac primitive:
  * <pre>   {@code
@@ -68,7 +68,7 @@ public final class MacFactory {
       KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)
       throws GeneralSecurityException {
     final PrimitiveSet<Mac> primitives =
-        Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
+        Registry.getPrimitives(keysetHandle, keyManager);
     final byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
     return new Mac() {
       @Override

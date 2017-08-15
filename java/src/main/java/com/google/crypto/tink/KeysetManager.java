@@ -55,7 +55,7 @@ public class KeysetManager {
    * Setting the new key as the primary key.
    */
   public KeysetManager rotate(KeyTemplate keyTemplate) throws GeneralSecurityException {
-    KeyData keyData = Registry.INSTANCE.newKeyData(keyTemplate);
+    KeyData keyData = Registry.newKeyData(keyTemplate);
     int keyId = newKeyId();
     OutputPrefixType outputPrefixType = keyTemplate.getOutputPrefixType();
     if (outputPrefixType == OutputPrefixType.UNKNOWN_PREFIX) {

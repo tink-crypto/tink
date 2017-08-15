@@ -169,7 +169,7 @@ public final class KeysetHandle {
     if (privateKeyData.getKeyMaterialType() != KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
       throw new GeneralSecurityException("The keyset contains a non-private key");
     }
-    KeyData publicKeyData = Registry.INSTANCE.getPublicKeyData(
+    KeyData publicKeyData = Registry.getPublicKeyData(
         privateKeyData.getTypeUrl(), privateKeyData.getValue());
     validate(publicKeyData);
     return publicKeyData;
@@ -177,7 +177,7 @@ public final class KeysetHandle {
 
   private static void validate(KeyData keyData) throws GeneralSecurityException {
     // This will throw GeneralSecurityException if the keyData is invalid.
-    Registry.INSTANCE.getPrimitive(keyData);
+    Registry.getPrimitive(keyData);
   }
 
   /**

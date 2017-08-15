@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 /**
  * HybridDecryptFactory allows obtaining a HybridDecrypt primitive from a {@code KeysetHandle}.
  *
- * HybridDecryptFactory gets primitives from the {@code Registry.INSTANCE}, which can be initialized
+ * HybridDecryptFactory gets primitives from the {@code Registry}, which can be initialized
  * via convenience methods from {@code HybridDecryptConfig}. Here is an example how one can obtain
  * and use a HybridDecrypt primitive:
  * <pre>   {@code
@@ -64,7 +64,7 @@ public final class HybridDecryptFactory {
       KeysetHandle keysetHandle, final KeyManager<HybridDecrypt> keyManager)
       throws GeneralSecurityException {
     final PrimitiveSet<HybridDecrypt> primitives =
-        Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
+        Registry.getPrimitives(keysetHandle, keyManager);
     return new HybridDecrypt() {
       @Override
       public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)

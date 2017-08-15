@@ -43,7 +43,7 @@ public class KmsAeadKeyManagerTest {
 
   @Test
   public void testGcpKmsKeyRestricted_WithRegistry() throws Exception {
-    Registry.INSTANCE.registerKeyManager(
+    Registry.registerKeyManager(
         KmsAeadKeyManager.TYPE_URL,
         new KmsAeadKeyManager(kmsClient));
     KeysetHandle keysetHandle = KeysetHandle.generateNew(

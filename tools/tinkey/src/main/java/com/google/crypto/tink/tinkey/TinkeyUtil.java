@@ -93,7 +93,7 @@ public class TinkeyUtil {
         .setValue(format)
         .build();
     // Tests whether the key template works.
-    Registry.INSTANCE.newKey(template);
+    Registry.newKey(template);
     return template;
   }
 

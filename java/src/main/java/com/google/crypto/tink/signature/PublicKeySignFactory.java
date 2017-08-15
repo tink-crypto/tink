@@ -30,7 +30,7 @@ import java.security.GeneralSecurityException;
  * PublicKeySignFactory allows obtaining a {@code PublicKeySign} primitive from a
  * {@code KeysetHandle}.
  *
- * PublicKeySignFactory gets primitives from the {@code Registry.INSTANCE}, which can be initialized
+ * PublicKeySignFactory gets primitives from the {@code Registry}, which can be initialized
  * via convenience methods from {@code PublicKeySignConfig}. Here is an example how one can obtain
  * and use a PublicKeySign primitive:
  * <pre>   {@code
@@ -63,7 +63,7 @@ public final class PublicKeySignFactory {
       KeysetHandle keysetHandle, final KeyManager<PublicKeySign> keyManager)
       throws GeneralSecurityException {
         final PrimitiveSet<PublicKeySign> primitives =
-            Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
+            Registry.getPrimitives(keysetHandle, keyManager);
         return new PublicKeySign() {
           @Override
           public byte[] sign(final byte[] data) throws GeneralSecurityException {

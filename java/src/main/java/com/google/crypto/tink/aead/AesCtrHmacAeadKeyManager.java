@@ -54,7 +54,7 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
   static {
     try {
       // TODO(thaidn): this could be IndCpaCipherFactory.registerStandardKeyTypes();
-      Registry.INSTANCE.registerKeyManager(AesCtrKeyManager.TYPE_URL, new AesCtrKeyManager());
+      Registry.registerKeyManager(AesCtrKeyManager.TYPE_URL, new AesCtrKeyManager());
       MacConfig.registerStandardKeyTypes();
     } catch (GeneralSecurityException e) {
       logger.severe("cannot register key managers: " + e);
@@ -85,9 +85,9 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
     AesCtrHmacAeadKey keyProto = (AesCtrHmacAeadKey) key;
     validate(keyProto);
     return new EncryptThenAuthenticate(
-        (IndCpaCipher) Registry.INSTANCE.getPrimitive(
+        (IndCpaCipher) Registry.getPrimitive(
             AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey()),
-        (Mac) Registry.INSTANCE.getPrimitive(HmacKeyManager.TYPE_URL, keyProto.getHmacKey()),
+        (Mac) Registry.getPrimitive(HmacKeyManager.TYPE_URL, keyProto.getHmacKey()),
         keyProto.getHmacKey().getParams().getTagSize());
   }
 
@@ -115,9 +115,9 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
       throw new GeneralSecurityException("expected AesCtrHmacAeadKeyFormat proto");
     }
     AesCtrHmacAeadKeyFormat format = (AesCtrHmacAeadKeyFormat) keyFormat;
-    AesCtrKey aesCtrKey = (AesCtrKey) Registry.INSTANCE.newKey(
+    AesCtrKey aesCtrKey = (AesCtrKey) Registry.newKey(
         AesCtrKeyManager.TYPE_URL, format.getAesCtrKeyFormat());
-    HmacKey hmacKey = (HmacKey) Registry.INSTANCE.newKey(
+    HmacKey hmacKey = (HmacKey) Registry.newKey(
         HmacKeyManager.TYPE_URL, format.getHmacKeyFormat());
     return AesCtrHmacAeadKey.newBuilder()
         .setAesCtrKey(aesCtrKey)

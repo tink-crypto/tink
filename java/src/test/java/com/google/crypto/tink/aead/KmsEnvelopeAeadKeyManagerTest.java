@@ -47,7 +47,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
     KmsClient kmsClient = new CloudKmsClient()
         .withGcpKmsClient(GcpKmsClient.fromServiceAccount(
             TestUtil.SERVICE_ACCOUNT_FILE));
-    Registry.INSTANCE.registerKeyManager(
+    Registry.registerKeyManager(
         KmsEnvelopeAeadKeyManager.TYPE_URL,
         new KmsEnvelopeAeadKeyManager(kmsClient));
     AeadConfig.registerStandardKeyTypes();

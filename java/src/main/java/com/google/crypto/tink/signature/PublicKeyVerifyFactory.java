@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  * PublicKeyVerifyFactory allows obtaining a {@code PublicKeyVerify} primitive from a
  * {@code KeysetHandle}.
  *
- * PublicKeyVerifyFactory gets primitives from the {@code Registry.INSTANCE}, which can be
+ * PublicKeyVerifyFactory gets primitives from the {@code Registry}, which can be
  * initialized via convenience methods from {@code PublicKeyVerifyConfig}. Here is an example
  * how one can obtain and use a PublicKeyVerify primitive:
  * <pre>   {@code
@@ -68,7 +68,7 @@ public final class PublicKeyVerifyFactory {
       KeysetHandle keysetHandle, final KeyManager<PublicKeyVerify> keyManager)
       throws GeneralSecurityException {
     final PrimitiveSet<PublicKeyVerify> primitives =
-        Registry.INSTANCE.getPrimitives(keysetHandle, keyManager);
+        Registry.getPrimitives(keysetHandle, keyManager);
     return new PublicKeyVerify() {
       @Override
       public void verify(final byte[] signature, final byte[] data)

@@ -43,17 +43,9 @@ import java.util.concurrent.ConcurrentMap;
  * primitives and KeyManagers.
  */
 public final class Registry {
-  public static final Registry INSTANCE = new Registry();  // Default registry used by factories.
-
   @SuppressWarnings("rawtypes")
-  private final ConcurrentMap<String, KeyManager> keyManager =
+  private static final ConcurrentMap<String, KeyManager> keyManager =
       new ConcurrentHashMap<String, KeyManager>();         // typeUrl -> KeyManager mapping
-
-
-  /**
-   * Creates an empty registry.
-   */
-  protected Registry() {}
 
   /**
    * Registers {@code manager} for the given {@code typeUrl}, assuming that there is
@@ -65,7 +57,7 @@ public final class Registry {
    * there already exists a key manager for {@code typeUrl}.
    */
   @SuppressWarnings("unchecked")
-  public <P> boolean registerKeyManager(String typeUrl, final KeyManager<P> manager)
+  public static <P> boolean registerKeyManager(String typeUrl, final KeyManager<P> manager)
       throws GeneralSecurityException {
     if (manager == null) {
       throw new NullPointerException("key manager must be non-null.");
@@ -83,7 +75,7 @@ public final class Registry {
    * TODO(przydatek): find a way for verifying the primitive type.
    */
   @SuppressWarnings("unchecked")
-  public <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
+  public static <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
     KeyManager<P> manager = keyManager.get(typeUrl);
     if (manager == null) {
       throw new GeneralSecurityException("unsupported key type: " + typeUrl);
@@ -99,7 +91,7 @@ public final class Registry {
    * This method should be used solely for key management.
    * @return a new key.
    */
-  public <P> KeyData newKeyData(KeyTemplate template) throws GeneralSecurityException {
+  public static <P> KeyData newKeyData(KeyTemplate template) throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(template.getTypeUrl());
     return manager.newKeyData(template.getValue());
   }
@@ -111,7 +103,7 @@ public final class Registry {
    *
    * @return a new key.
    */
-  public <P> MessageLite newKey(KeyTemplate keyTemplate) throws GeneralSecurityException {
+  public static <P> MessageLite newKey(KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(keyTemplate.getTypeUrl());
     return manager.newKey(keyTemplate.getValue());
   }
@@ -123,7 +115,7 @@ public final class Registry {
    *
    * @return a new key.
    */
-  public <P> MessageLite newKey(String typeUrl, MessageLite format)
+  public static <P> MessageLite newKey(String typeUrl, MessageLite format)
       throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(typeUrl);
     return manager.newKey(format);
@@ -138,7 +130,7 @@ public final class Registry {
    * @return a new key.
    */
   @SuppressWarnings("unchecked")
-  public <P> KeyData getPublicKeyData(String typeUrl, ByteString serializedPrivateKey)
+  public static <P> KeyData getPublicKeyData(String typeUrl, ByteString serializedPrivateKey)
       throws GeneralSecurityException {
     PrivateKeyManager<P> manager = (PrivateKeyManager) getKeyManager(typeUrl);
     return manager.getPublicKeyData(serializedPrivateKey);
@@ -152,7 +144,7 @@ public final class Registry {
    * @return a new primitive.
    */
   @SuppressWarnings("TypeParameterUnusedInFormals")
-  public <P> P getPrimitive(String typeUrl, MessageLite key) throws GeneralSecurityException {
+  public static <P> P getPrimitive(String typeUrl, MessageLite key) throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(typeUrl);
     return manager.getPrimitive(key);
   }
@@ -165,7 +157,7 @@ public final class Registry {
    * @return a new primitive.
    */
   @SuppressWarnings("TypeParameterUnusedInFormals")
-  public <P> P getPrimitive(String typeUrl, ByteString serialized)
+  public static <P> P getPrimitive(String typeUrl, ByteString serialized)
       throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(typeUrl);
     return manager.getPrimitive(serialized);
@@ -179,7 +171,7 @@ public final class Registry {
    * @return a new primitive.
    */
   @SuppressWarnings("TypeParameterUnusedInFormals")
-  public <P> P getPrimitive(String typeUrl, byte[] serialized) throws GeneralSecurityException {
+  public static <P> P getPrimitive(String typeUrl, byte[] serialized) throws GeneralSecurityException {
     return getPrimitive(typeUrl, ByteString.copyFrom(serialized));
   }
 
@@ -191,7 +183,7 @@ public final class Registry {
    * @return a new primitive.
    */
   @SuppressWarnings("TypeParameterUnusedInFormals")
-  public <P> P getPrimitive(KeyData keyData) throws GeneralSecurityException {
+  public static <P> P getPrimitive(KeyData keyData) throws GeneralSecurityException {
     return getPrimitive(keyData.getTypeUrl(), keyData.getValue());
   }
 
@@ -205,10 +197,11 @@ public final class Registry {
    *
    * @return a PrimitiveSet with all instantiated primitives.
    */
-  public <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle)
+  public static <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
     return getPrimitives(keysetHandle, /* customManager= */null);
   }
+
   /**
    * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset
    * given in {@code keysetHandle}, using {@code customManager} (instead of registered
@@ -224,26 +217,26 @@ public final class Registry {
    *
    * @return a PrimitiveSet with all instantiated primitives.
    */
-    public <P> PrimitiveSet<P> getPrimitives(
-        KeysetHandle keysetHandle, final KeyManager<P> customManager)
-        throws GeneralSecurityException {
-      Util.validateKeyset(keysetHandle.getKeyset());
-      PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
-      for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
-        if (key.getStatus() == KeyStatusType.ENABLED) {
-          P primitive;
-          if (customManager != null && customManager.doesSupport(key.getKeyData().getTypeUrl())) {
-            primitive = customManager.getPrimitive(key.getKeyData().getValue());
-          } else {
-            primitive = getPrimitive(key.getKeyData().getTypeUrl(),
-                key.getKeyData().getValue());
-          }
-          PrimitiveSet.Entry<P> entry = primitives.addPrimitive(primitive, key);
-          if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {
-            primitives.setPrimary(entry);
-          }
+  public static <P> PrimitiveSet<P> getPrimitives(
+      KeysetHandle keysetHandle, final KeyManager<P> customManager)
+      throws GeneralSecurityException {
+    Util.validateKeyset(keysetHandle.getKeyset());
+    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet();
+    for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
+      if (key.getStatus() == KeyStatusType.ENABLED) {
+        P primitive;
+        if (customManager != null && customManager.doesSupport(key.getKeyData().getTypeUrl())) {
+          primitive = customManager.getPrimitive(key.getKeyData().getValue());
+        } else {
+          primitive = getPrimitive(key.getKeyData().getTypeUrl(),
+              key.getKeyData().getValue());
+        }
+        PrimitiveSet.Entry<P> entry = primitives.addPrimitive(primitive, key);
+        if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {
+          primitives.setPrimary(entry);
         }
       }
-      return primitives;
+    }
+    return primitives;
   }
 }

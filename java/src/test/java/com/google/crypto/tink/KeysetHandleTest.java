@@ -86,8 +86,8 @@ public class KeysetHandleTest {
         .generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     // Encrypt the keyset with an AeadKey.
     KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
-    Aead masterKey = Registry.INSTANCE.getPrimitive(
-        Registry.INSTANCE.newKeyData(masterKeyTemplate));
+    Aead masterKey = Registry.getPrimitive(
+        Registry.newKeyData(masterKeyTemplate));
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
     handle.write(writer, masterKey);

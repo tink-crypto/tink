@@ -60,7 +60,7 @@ public final class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHel
       try {
         AesGcmKeyFormat gcmKeyFormat = AesGcmKeyFormat.parseFrom(demTemplate.getValue());
         this.demKeyType = DemKeyType.AES_GCM_KEY;
-        this.aesGcmKey = (AesGcmKey) Registry.INSTANCE.newKey(demTemplate);
+        this.aesGcmKey = (AesGcmKey) Registry.newKey(demTemplate);
         this.symmetricKeySize = gcmKeyFormat.getKeySize();
       } catch (InvalidProtocolBufferException e) {
         throw new GeneralSecurityException(
@@ -71,7 +71,7 @@ public final class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHel
         AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(
             demTemplate.getValue());
         this.demKeyType = DemKeyType.AES_CTR_HMAC_AEAD_KEY;
-        this.aesCtrHmacAeadKey = (AesCtrHmacAeadKey) Registry.INSTANCE.newKey(demTemplate);
+        this.aesCtrHmacAeadKey = (AesCtrHmacAeadKey) Registry.newKey(demTemplate);
         this.aesCtrKeySize = aesCtrHmacAeadKeyFormat.getAesCtrKeyFormat().getKeySize();
         int hmacKeySize = aesCtrHmacAeadKeyFormat.getHmacKeyFormat().getKeySize();
         this.symmetricKeySize = aesCtrKeySize + hmacKeySize;
@@ -96,7 +96,7 @@ public final class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHel
           .mergeFrom(aesGcmKey)
           .setKeyValue(ByteString.copyFrom(symmetricKeyValue))
           .build();
-      return Registry.INSTANCE.getPrimitive(AesGcmKeyManager.TYPE_URL, aeadKey);
+      return Registry.getPrimitive(AesGcmKeyManager.TYPE_URL, aeadKey);
     } else if (demKeyType == DemKeyType.AES_CTR_HMAC_AEAD_KEY) {
       byte[] aesCtrKeyValue = Arrays.copyOfRange(symmetricKeyValue, 0, aesCtrKeySize);
       byte[] hmacKeyValue = Arrays.copyOfRange(symmetricKeyValue, aesCtrKeySize, symmetricKeySize);
@@ -111,7 +111,7 @@ public final class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHel
           .setAesCtrKey(aesCtrKey)
           .setHmacKey(hmacKey)
           .build();
-      return Registry.INSTANCE.getPrimitive(AesCtrHmacAeadKeyManager.TYPE_URL, aeadKey);
+      return Registry.getPrimitive(AesCtrHmacAeadKeyManager.TYPE_URL, aeadKey);
     } else {
       throw new GeneralSecurityException("unknown DEM key type");
     }

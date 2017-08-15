@@ -24,7 +24,7 @@ import java.security.GeneralSecurityException;
 
 /**
  * HybridEncryptConfig offers convenience methods for initializing {@code HybridEncryptFactory}
- * and the underlying {@code Registry.INSTANCE}.  In particular, it  allows for initalizing the
+ * and the underlying {@code Registry}.  In particular, it  allows for initalizing the
  * {@code Registry} with native key types and their managers that Tink supports out of the box.
  * These key types are divided in two groups:
  *   - standard: secure and safe to use in new code. Over time, with new developments in
@@ -63,6 +63,6 @@ public final class HybridEncryptConfig {
    */
   public static boolean registerKeyManager(final KeyManager<HybridEncrypt> keyManager)
       throws GeneralSecurityException {
-    return Registry.INSTANCE.registerKeyManager(keyManager.getKeyType(), keyManager);
+    return Registry.registerKeyManager(keyManager.getKeyType(), keyManager);
   }
 }
