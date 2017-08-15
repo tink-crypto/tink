@@ -28,6 +28,8 @@ import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.aead.ChaCha20Poly1305KeyManager;
+import com.google.crypto.tink.aead.KmsAeadKeyManager;
+import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPublicKeyManager;
 import com.google.crypto.tink.mac.HmacKeyManager;
@@ -96,6 +98,10 @@ public class TinkCatalogue implements Catalogue {
         return new AesGcmKeyManager();
       case ChaCha20Poly1305KeyManager.TYPE_URL:
         return new ChaCha20Poly1305KeyManager();
+      case KmsAeadKeyManager.TYPE_URL:
+        return new KmsAeadKeyManager();
+      case KmsEnvelopeAeadKeyManager.TYPE_URL:
+        return new KmsEnvelopeAeadKeyManager();
       default:
         throw new GeneralSecurityException(String.format(
             "No support for primitive 'Aead' with key type '%s'.", typeUrl));

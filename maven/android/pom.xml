@@ -48,17 +48,16 @@
         <configuration>
           <excludes>
             <exclude>**/AwsKmsAead.java</exclude>
-            <exclude>**/CloudKmsClient.java</exclude>
-            <exclude>**/EnvelopeUtil.java</exclude>
+            <exclude>**/AwsKmsClient.java</exclude>
             <exclude>**/GcpKmsAead.java</exclude>
             <exclude>**/GcpKmsClient.java</exclude>
-            <exclude>**/GcpScopes.java</exclude>
+            <exclude>**/IntegrationUtil.java</exclude>
             <exclude>**/TextFormatKeysetReaders.java</exclude>
             <exclude>**/TextFormatKeysetWriters.java</exclude>
           </excludes>
           <testExcludes>
             <exclude>**/AwsKmsAeadTest.java</exclude>
-            <exclude>**/GcpKmsClientTest.java</exclude>
+            <exclude>**/IntegrationUtilTest.java</exclude>
             <exclude>**/KmsAeadKeyManagerTest.java</exclude>
             <exclude>**/KmsEnvelopeAeadKeyManagerTest.java</exclude>
           </testExcludes>

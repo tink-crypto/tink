@@ -18,10 +18,11 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KmsAeadKey;
 import com.google.crypto.tink.proto.KmsAeadKeyFormat;
-import com.google.crypto.tink.subtle.KmsClient;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -29,8 +30,8 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * This key manager produces new instances of {@code GcpKmsAead} or {@code AwsKmsAead}.
- * To use it one must provide a {@code KmsClient}.
+ * This key manager produces new instances of {@code Aead} that forwards encrypt/decrypt
+ * requests to a key residing in a remote KMS.
  */
 public final class KmsAeadKeyManager implements KeyManager<Aead> {
   private static final int VERSION = 0;
@@ -38,10 +39,7 @@ public final class KmsAeadKeyManager implements KeyManager<Aead> {
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.KmsAeadKey";
 
-  private final KmsClient kmsClient;
-
-  public KmsAeadKeyManager(KmsClient kmsClient) {
-    this.kmsClient = kmsClient;
+  public KmsAeadKeyManager() {
   }
 
   /**
@@ -67,7 +65,9 @@ public final class KmsAeadKeyManager implements KeyManager<Aead> {
     }
     KmsAeadKey keyProto = (KmsAeadKey) key;
     validate(keyProto);
-    return kmsClient.getAead(keyProto.getParams().getKeyUri());
+    String keyUri = keyProto.getParams().getKeyUri();
+    KmsClient kmsClient = KmsClients.get(keyUri);
+    return kmsClient.getAead(keyUri);
   }
 
   /**

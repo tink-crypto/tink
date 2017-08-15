@@ -105,6 +105,8 @@ public final class Config {
         .addEntry(getTinkKeyTypeEntry("Aead", "AesEaxKey", 0, true))
         .addEntry(getTinkKeyTypeEntry("Aead", "AesGcmKey", 0, true))
         .addEntry(getTinkKeyTypeEntry("Aead", "ChaCha20Poly1305Key", 0, true))
+        .addEntry(getTinkKeyTypeEntry("Aead", "KmsAeadKey", 0, true))
+        .addEntry(getTinkKeyTypeEntry("Aead", "KmsEnvelopeAeadKey", 0, true))
         .build();
     TINK_HYBRID_1_0_0 = TinkConfig.newBuilder()
         .mergeFrom(TINK_AEAD_1_0_0)

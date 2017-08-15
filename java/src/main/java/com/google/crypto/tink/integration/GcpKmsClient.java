@@ -21,68 +21,105 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.api.services.cloudkms.v1.CloudKMSScopes;
+import com.google.auto.service.AutoService;
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KmsClient;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 
 /**
- * Helper methods for envelope encryption.
+ * An implementation of {@code KmsClient} for Google Cloud KMS.
  */
-public final class GcpKmsClient {
+@AutoService(KmsClient.class)
+public final class GcpKmsClient implements KmsClient {
+  public static final String PREFIX = "gcp-kms://";
   private static final String APPLICATION_NAME = "Tink";
+  private CloudKMS client;
+  private String keyUri;
 
   /**
-   * Initializes a cloud kms client based on default credential (provided by GCE/GCloud CLI).
-   *
-   * @throws IOException if the client initialization fails.
+   * Constructs a generic GcpKmsClient that is not bound to any specific key.
    */
-  public static CloudKMS fromDefaultCredential() throws IOException {
-    GoogleCredential credential =
-        GoogleCredential.getApplicationDefault(
-            new NetHttpTransport(), new JacksonFactory());
-    return fromProvidedCredential(credential);
+  public GcpKmsClient() {
   }
 
   /**
-   * Initializes a cloud kms client based on a credential from a service
-   * account JSON file that can be downloaded from Google Cloud Console.
-   *
-   * @throws IOException if the client initialization fails.
+   * Constructs a specific GcpKmsClient that is bound to a single key identified by {@code uri}.
    */
-  public static CloudKMS fromServiceAccount(File serviceAccount)
-      throws IOException {
-    GoogleCredential credential = GoogleCredential.fromStream(
-        new ByteArrayInputStream(Files.readAllBytes(serviceAccount.toPath())));
-    return fromProvidedCredential(credential);
-  }
-
-  /**
-   * Initializes a cloud kms client based on a credential from a nullable
-   * service account. If the service account is null, use the default credential
-   * (provided by GCE/GCloud CLI)
-   * @throws IOException if the client initialization fails.
-   */
-  public static CloudKMS fromNullableServiceAccount(File serviceAccount)
-      throws IOException {
-    if (serviceAccount == null) {
-      return fromDefaultCredential();
+  public GcpKmsClient(String uri) {
+    if (!uri.toLowerCase().startsWith(PREFIX)) {
+      throw new IllegalArgumentException("key URI must starts with " + PREFIX);
     }
-    return fromServiceAccount(serviceAccount);
+    this.keyUri = uri;
   }
 
   /**
-   * Initializes a cloud kms client based on a provided credential.
-   *
-   * @throws IOException if the client initialization fails.
+   * @return @return true either if this client is a generic one and uri starts with
+   * {@link GcpKmsClient#PREFIX}, or the client is a specific one that is bound to the
+   * key identified by {@code uri}.
    */
-  public static CloudKMS fromProvidedCredential(GoogleCredential credential)
-      throws IOException {
+  @Override
+  public boolean doesSupport(String uri) {
+    if (this.keyUri != null && this.keyUri.equals(uri)) {
+      return true;
+    }
+    return this.keyUri == null && uri.toLowerCase().startsWith(PREFIX);
+  }
+
+  /**
+   * Loads credentials from a service account JSON file {@code credentialPath}.
+   * If {@code credentialPath} is null, loads default credentials.
+   */
+  @Override
+  public KmsClient withCredentials(String credentialPath) throws GeneralSecurityException {
+    if (credentialPath == null) {
+      return withDefaultCredentials();
+    }
+    try {
+      GoogleCredential credentials = GoogleCredential.fromStream(
+          new ByteArrayInputStream(Files.readAllBytes(Paths.get(credentialPath))));
+      return withCredentials(credentials);
+    } catch (IOException e) {
+      throw new GeneralSecurityException("cannot load credentials", e);
+    }
+  }
+
+  /**
+   * Loads default Google Cloud credentials.
+   * see https://developers.google.com/accounts/docs/application-default-credentials.
+   */
+  @Override
+  public KmsClient withDefaultCredentials() throws GeneralSecurityException {
+    try {
+      GoogleCredential credentials =
+          GoogleCredential.getApplicationDefault(
+              new NetHttpTransport(), new JacksonFactory());
+      return withCredentials(credentials);
+    } catch (IOException e) {
+      throw new GeneralSecurityException("cannot load default credentials", e);
+    }
+  }
+
+  /**
+   * Loads the provided credential.
+   *
+   */
+  private KmsClient withCredentials(GoogleCredential credential) {
     if (credential.createScopedRequired()) {
       credential = credential.createScoped(CloudKMSScopes.all());
     }
-    return new CloudKMS.Builder(new NetHttpTransport(), new JacksonFactory(), credential)
+    this.client = new CloudKMS.Builder(
+        new NetHttpTransport(), new JacksonFactory(), credential)
             .setApplicationName(APPLICATION_NAME)
             .build();
+    return this;
+  }
+
+  @Override
+  public Aead getAead(String keyUri) throws GeneralSecurityException {
+    return new GcpKmsAead(client, IntegrationUtil.validateAndRemovePrefix(PREFIX, keyUri));
   }
 }

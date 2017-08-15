@@ -20,8 +20,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetWriter;
-import com.google.crypto.tink.integration.GcpKmsAead;
-import com.google.crypto.tink.integration.GcpKmsClient;
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyTemplate;
 import java.io.File;
@@ -80,9 +79,9 @@ public class CreateCommand extends CreateOptions implements Command {
   public static final void createEncryptedKeysetWithGcp(
       File credentialFile, KeyTemplate keyTemplate,
       String gcpKmsMasterKeyUriValue, KeysetWriter writer) throws Exception {
-    Aead masterKey = new GcpKmsAead(
-        GcpKmsClient.fromNullableServiceAccount(credentialFile),
-        gcpKmsMasterKeyUriValue);
+    Aead masterKey = KmsClients.getAutoLoaded(gcpKmsMasterKeyUriValue)
+        .withCredentials(credentialFile.getPath())
+        .getAead(gcpKmsMasterKeyUriValue);
     KeysetManager
         .withEmptyKeyset()
         .rotate(keyTemplate)

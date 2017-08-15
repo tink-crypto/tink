@@ -14,9 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink;
 
-import com.google.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 
 /**
@@ -24,10 +23,26 @@ import java.security.GeneralSecurityException;
  */
 public interface KmsClient {
   /**
+   * @return true iff this client does support {@code keyUri}.
+   */
+  public boolean doesSupport(String keyUri);
+
+  /**
+   * Loads the credentials in {@code credentialPath}. If {@code credentialPath}
+   * is null, loads the default credentials.
+   */
+  public KmsClient withCredentials(String credentialPath) throws GeneralSecurityException;
+
+  /**
+   * Loads the default credentials.
+   */
+  public KmsClient withDefaultCredentials() throws GeneralSecurityException;
+
+  /**
    * Gets an {@code Aead} backed by {@code keyUri}.
    *
    * @return the Aead
    * @throws GeneralSecurityException if the URI is not supported or invalid.
    */
-  Aead getAead(String keyUri) throws GeneralSecurityException;
+  public Aead getAead(String keyUri) throws GeneralSecurityException;
 }

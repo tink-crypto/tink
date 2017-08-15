@@ -12,19 +12,17 @@ git_repository(
     remote = "https://github.com/bazelbuild/rules_go.git",
     tag = "0.4.4",
 )
-
 load("@io_bazel_rules_go//go:def.bzl", "go_repositories", "new_go_repository")
 load("@io_bazel_rules_go//proto:go_proto_library.bzl", "go_proto_repositories")
 
 go_repositories()
-
 go_proto_repositories()
 
 # wycheproof
 http_archive(
     name = "wycheproof",
-    sha256 = "8b32637abcf0c775dac424894a6586a75df821a7ffeedc467ccffa29209683e5",
     strip_prefix = "wycheproof-f755ff0279ddd5fa26640d959d5872764b45feb7",
+    sha256 = "8b32637abcf0c775dac424894a6586a75df821a7ffeedc467ccffa29209683e5",
     url = "https://github.com/google/wycheproof/archive/f755ff0279ddd5fa26640d959d5872764b45feb7.zip",
 )
 
@@ -47,36 +45,36 @@ new_git_repository(
 # This statement defines the @com_google_protobuf repo.
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
     strip_prefix = "protobuf-3.3.0",
     urls = ["https://github.com/google/protobuf/archive/v3.3.0.tar.gz"],
+    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
 )
 
 # cc_proto_library rules implicitly depend on @com_google_protobuf_cc//:cc_toolchain,
 # which is the C++ proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_cc",
-    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
     strip_prefix = "protobuf-3.3.0",
     urls = ["https://github.com/google/protobuf/archive/v3.3.0.tar.gz"],
+    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
 )
 
 # java_proto_library rules implicitly depend on @com_google_protobuf_java//:java_toolchain,
 # which is the Java proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_java",
-    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
     strip_prefix = "protobuf-3.3.0",
     urls = ["https://github.com/google/protobuf/archive/v3.3.0.tar.gz"],
+    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
 )
 
 # java_lite_proto_library rules implicitly depend on @com_google_protobuf_javalite//:javalite_toolchain,
 # which is the JavaLite proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_javalite",
-    sha256 = "b9ca3f706c6a6a6a744a7ba85321abce9e7d49825a19aaba6f29278871d41926",
     strip_prefix = "protobuf-javalite",
     urls = ["https://github.com/google/protobuf/archive/javalite.zip"],
+    sha256 = "b9ca3f706c6a6a6a744a7ba85321abce9e7d49825a19aaba6f29278871d41926",
 )
 
 # objc_proto_library rules from @org_pubref_rules_protobuf require the objective
@@ -105,6 +103,18 @@ maven_jar(
     name = "com_amazonaws_sdk_kms",
     artifact = "com.amazonaws:aws-java-sdk-kms:1.11.166",
     sha1 = "33a4c0d5c26c4ab6bb14c1d80cdec435f837d887",
+)
+
+maven_jar(
+    name = "com_google_auto_common",
+    artifact = "com.google.auto:auto-common:0.8",
+    sha1 = "c6f7af0e57b9d69d81b05434ef9f3c5610d498c4",
+)
+
+maven_jar(
+    name = "com_google_auto_service",
+    artifact = "com.google.auto.service:auto-service:1.0-rc3",
+    sha1 = "35c5d43b0332b8f94d473f9fee5fb1d74b5e0056",
 )
 
 maven_jar(
@@ -151,8 +161,20 @@ maven_jar(
 
 maven_jar(
     name = "com_fasterxml_jackson_core",
-    artifact = "com.fasterxml.jackson.core:jackson-core:2.8.8",
-    sha1 = "d478fb6de45a7c3d2cad07c8ad70c7f0a797a020",
+    artifact = "com.fasterxml.jackson.core:jackson-core:2.9.0",
+    sha1 = "88e7c6220be3b3497b3074d3fc7754213289b987",
+)
+
+maven_jar(
+    name = "com_fasterxml_jackson_databind",
+    artifact = "com.fasterxml.jackson.core:jackson-databind:2.9.0",
+    sha1 = "14fb5f088cc0b0dc90a73ba745bcade4961a3ee3",
+)
+
+maven_jar(
+    name = "com_fasterxml_jackson_annotations",
+    artifact = "com.fasterxml.jackson.core:jackson-annotations:2.9.0",
+    sha1 = "07c10d545325e3a6e72e06381afe469fd40eb701",
 )
 
 maven_jar(
@@ -195,6 +217,24 @@ maven_jar(
     name = "com_google_errorprone_error_prone_annotations",
     artifact = "com.google.errorprone:error_prone_annotations:2.0.19",
     sha1 = "c3754a0bdd545b00ddc26884f9e7624f8b6a14de",
+)
+
+maven_jar(
+    name = "org_apache_commons_logging",
+    artifact = "commons-logging:commons-logging:1.2",
+    sha1 = "4bfc12adfe4842bf07b657f0369c4cb522955686",
+)
+
+maven_jar(
+    name = "org_apache_httpcomponents_httpclient",
+    artifact = "org.apache.httpcomponents:httpclient:4.5.3",
+    sha1 = "d1577ae15f01ef5438c5afc62162457c00a34713",
+)
+
+maven_jar(
+    name = "org_apache_httpcomponents_httpcore",
+    artifact = "org.apache.httpcomponents:httpcore:4.4.6",
+    sha1 = "e3fd8ced1f52c7574af952e2e6da0df8df08eb82",
 )
 
 load("@org_pubref_rules_protobuf//objc:rules.bzl", "objc_proto_repositories")

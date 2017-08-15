@@ -18,10 +18,11 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKey;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
-import com.google.crypto.tink.subtle.KmsClient;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -39,10 +40,7 @@ public final class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
 
-  private final KmsClient kmsClient;
-
-  public KmsEnvelopeAeadKeyManager(KmsClient kmsClient) {
-    this.kmsClient = kmsClient;
+  public KmsEnvelopeAeadKeyManager() {
   }
 
   /**
@@ -68,7 +66,9 @@ public final class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
     }
     KmsEnvelopeAeadKey keyProto = (KmsEnvelopeAeadKey) key;
     validate(keyProto);
-    Aead remote = kmsClient.getAead(keyProto.getParams().getKekUri());
+    String keyUri = keyProto.getParams().getKekUri();
+    KmsClient kmsClient = KmsClients.get(keyUri);
+    Aead remote = kmsClient.getAead(keyUri);
     return new KmsEnvelopeAead(keyProto.getParams().getDekTemplate(), remote);
   }
 

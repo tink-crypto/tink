@@ -54,7 +54,6 @@ import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -83,8 +82,7 @@ public class TestUtil {
 
   // This is a credential of a service account that is granted access to
   // {@code RESTRICTED_CRYPTO_KEY_URI}.
-  public static final File SERVICE_ACCOUNT_FILE =
-      new File("testdata/credential.json");
+  public static final String SERVICE_ACCOUNT_FILE = "testdata/credential.json";
 
   /**
    * A dummy Aead-implementation that just throws exception.
@@ -221,7 +219,7 @@ public class TestUtil {
   /**
    * @return a {@code KeysetReader} from a {@code handle}.
    */
-  public static KeysetReader createKeysetReader(KeysetHandle handle) throws Exception {
+  public static KeysetReader createKeysetReader(final KeysetHandle handle) throws Exception {
     return new KeysetReader() {
       @Override
       public Keyset read() throws IOException {

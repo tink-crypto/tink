@@ -17,7 +17,6 @@ java_library(
         "EngineFactory.java",
         "EngineWrapper.java",
         "ImmutableByteArray.java",
-        "KmsClient.java",
         "Random.java",
         "SubtleUtil.java",
     ],

@@ -23,11 +23,10 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetReaders;
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.Config;
-import com.google.crypto.tink.integration.GcpKmsAead;
-import com.google.crypto.tink.integration.GcpKmsClient;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyStatusType;
@@ -102,7 +101,7 @@ public class CreateCommandTest {
     String awsKmsMasterKeyValue = null;
     String gcpKmsMasterKeyValue = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
     // This is the service account allowed to access the Google Cloud master key above.
-    File credentialFile = TestUtil.SERVICE_ACCOUNT_FILE;
+    File credentialFile = new File(TestUtil.SERVICE_ACCOUNT_FILE);
 
     String outFormat = "TEXT";
     CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
@@ -121,9 +120,9 @@ public class CreateCommandTest {
     outFormat = "BINARY";
     CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
         gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-    Aead masterKey = new GcpKmsAead(
-        GcpKmsClient.fromServiceAccount(credentialFile),
-        gcpKmsMasterKeyValue);
+    Aead masterKey = KmsClients.getAutoLoaded(gcpKmsMasterKeyValue)
+        .withCredentials(credentialFile.getPath())
+        .getAead(gcpKmsMasterKeyValue);
     KeysetHandle handle = KeysetHandle.read(
         KeysetReaders.withBytes(outputStream.toByteArray()), masterKey);
     keysetInfo = handle.getKeysetInfo();
