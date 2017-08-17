@@ -31,7 +31,7 @@ public final class NoSecretKeysetHandle {
   /**
    * @return a new keyset handle from {@code serialized} which is a serialized {@code Keyset}.
    * @throws GeneralSecurityException
-   * @deprecated use fromKeysetReader instead
+   * @deprecated use {@link NoSecretKeysetHandle#read} instead
    */
   @Deprecated
   public static final KeysetHandle parseFrom(final byte[] serialized)

@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.proto.Keyset;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -26,6 +28,22 @@ import java.security.GeneralSecurityException;
  * restricted. Users can read or write encrypted keysets with {@code KeysetHandle}.
  */
 public final class CleartextKeysetHandle {
+  /**
+   * @return a new keyset handle from {@code serialized} which is a serialized {@code Keyset}.
+   * @throws GeneralSecurityException
+   * @deprecated use {@link CleartextKeysetHandle#read} instead
+   */
+  @Deprecated
+  public static final KeysetHandle parseFrom(final byte[] serialized)
+      throws GeneralSecurityException {
+    try {
+      Keyset keyset = Keyset.parseFrom(serialized);
+      return KeysetHandle.fromKeyset(keyset);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("invalid keyset");
+    }
+  }
+
   /**
    * @return a new keyset handle from a keyset obtained from {@code reader}.
    * @throws GeneralSecurityException

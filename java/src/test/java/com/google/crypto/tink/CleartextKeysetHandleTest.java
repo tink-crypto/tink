@@ -45,7 +45,22 @@ public class CleartextKeysetHandleTest {
   }
 
   @Test
-  public void testBasic() throws Exception {
+  public void testParse() throws Exception {
+    // Create a keyset that contains a single HmacKey.
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    Keyset keyset = handle.getKeyset();
+    handle = CleartextKeysetHandle.parseFrom(keyset.toByteArray());
+    assertEquals(keyset, handle.getKeyset());
+    try {
+      Mac unused = MacFactory.getPrimitive(handle);
+    } catch (GeneralSecurityException e) {
+      fail("instantiation should succeed: " + e.toString());
+    }
+  }
+
+  @Test
+  public void testRead() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetManager manager = KeysetManager
@@ -63,7 +78,11 @@ public class CleartextKeysetHandleTest {
     Keyset.Key key2 = keyset2.getKey(0);
     assertEquals(keyset2.getPrimaryKeyId(), key2.getKeyId());
     assertEquals(template.getTypeUrl(), key2.getKeyData().getTypeUrl());
-    Mac unused = MacFactory.getPrimitive(handle2);  // instantiation should succeed
+    try {
+      Mac unused = MacFactory.getPrimitive(handle2);
+    } catch (GeneralSecurityException e) {
+      fail("instantiation should succeed: " + e.toString());
+    }
   }
 
   @Test
@@ -84,7 +103,7 @@ public class CleartextKeysetHandleTest {
   }
 
   @Test
-  public void testInvalidKeyset() throws Exception {
+  public void testReadInvalidKeyset() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetManager manager = KeysetManager
@@ -116,6 +135,13 @@ public class CleartextKeysetHandleTest {
 
     try {
       unused = CleartextKeysetHandle.read(KeysetReaders.withBytes(new byte[0]));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "empty keyset");
+    }
+
+    try {
+      unused = CleartextKeysetHandle.parseFrom(new byte[0]);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");
