@@ -16,15 +16,13 @@
 
 package com.google.crypto.tink;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.config.Config;
-import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.mac.MacKeyTemplates;
-import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,43 +34,98 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class KeysetManagerTest {
-  private String hmacKeyTypeUrl = HmacKeyManager.TYPE_URL;
-
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
     Config.register(Config.TINK_HYBRID_1_0_0);  // includes TINK_AEAD_1_0_0
   }
 
   @Test
-  public void testBasic() throws Exception {
+  public void testRotate_shouldAddNewKeyAndSetPrimaryKeyId() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeysetManager manager = KeysetManager.withEmptyKeyset()
-        .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG);
-    Keyset keyset = manager.getKeysetHandle().getKeyset();
-    assertEquals(1, keyset.getKeyCount());
-    assertEquals(keyset.getPrimaryKeyId(), keyset.getKey(0).getKeyId());
-    assertTrue(keyset.getKey(0).hasKeyData());
-    assertEquals(hmacKeyTypeUrl, keyset.getKey(0).getKeyData().getTypeUrl());
-    assertEquals(KeyStatusType.ENABLED, keyset.getKey(0).getStatus());
-    assertEquals(OutputPrefixType.TINK, keyset.getKey(0).getOutputPrefixType());
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    Keyset keyset = KeysetManager.withEmptyKeyset()
+        .rotate(template)
+        .getKeysetHandle()
+        .getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(keyset.getKey(0).getKeyId());
+    TestUtil.assertHmacKey(template, keyset.getKey(0));
   }
 
   @Test
-  public void testExistingKeyset() throws Exception {
+  public void testRotate_bogusKeyTemplate_shouldThrowException() throws Exception {
+    KeyTemplate bogus = TestUtil.createKeyTemplateWithNonExistingTypeUrl();
+
+    try {
+      KeysetManager
+          .withEmptyKeyset()
+          .rotate(bogus);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      TestUtil.assertExceptionContains(e, "No key manager found for key type");
+    }
+  }
+
+  @Test
+  public void testRotate_existingKeyset_shouldAddNewKeyAndSetPrimaryKeyId() throws Exception {
+    KeysetHandle existing = KeysetManager.withEmptyKeyset()
+        .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
+        .getKeysetHandle();
+    Keyset keyset = KeysetManager.withKeysetHandle(existing)
+        .rotate(MacKeyTemplates.HMAC_SHA256_256BITTAG)
+        .getKeysetHandle()
+        .getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(keyset.getKey(1).getKeyId());
+    TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, keyset.getKey(0));
+    TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_256BITTAG, keyset.getKey(1));
+  }
+
+  @Test
+  public void testAdd_shouldAddNewKey() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    KeysetManager manager1 = KeysetManager.withEmptyKeyset()
-        .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG);
-    Keyset keyset1 = manager1.getKeysetHandle().getKeyset();
+    KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    Keyset keyset = KeysetManager
+        .withEmptyKeyset()
+        .add(template)
+        .getKeysetHandle()
+        .getKeyset();
 
-    KeysetManager manager2 = KeysetManager
-        .fromKeysetHandle(manager1.getKeysetHandle())
-        .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG);
-    Keyset keyset2 = manager2.getKeysetHandle().getKeyset();
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(0);
+    TestUtil.assertHmacKey(template, keyset.getKey(0));
+  }
 
-    assertEquals(2, keyset2.getKeyCount());
-    // The first key in two keysets should be the same.
-    assertEquals(keyset1.getKey(0), keyset2.getKey(0));
-    // The new key is the primary key.
-    assertEquals(keyset2.getPrimaryKeyId(), keyset2.getKey(1).getKeyId());
+  @Test
+  public void testAdd_bogusKeyTemplate_shouldThrowException() throws Exception {
+    KeyTemplate bogus = TestUtil.createKeyTemplateWithNonExistingTypeUrl();
+
+    try {
+      KeysetManager
+          .withEmptyKeyset()
+          .add(bogus);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      TestUtil.assertExceptionContains(e, "No key manager found for key type");
+    }
+  }
+
+  @Test
+  public void testAdd_existingKeySet_shouldAddNewKey() throws Exception {
+    KeysetHandle existing = KeysetManager.withEmptyKeyset()
+        .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
+        .getKeysetHandle();
+    int existingPrimaryKeyId = existing.getKeyset().getPrimaryKeyId();
+    Keyset keyset = KeysetManager.withKeysetHandle(existing)
+        .add(MacKeyTemplates.HMAC_SHA256_256BITTAG)
+        .getKeysetHandle()
+        .getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(existingPrimaryKeyId);
+    TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, keyset.getKey(0));
+    TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_256BITTAG, keyset.getKey(1));
   }
 }

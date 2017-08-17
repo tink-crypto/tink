@@ -23,24 +23,48 @@ import org.kohsuke.args4j.Option;
 /**
  * Common args for commands that read from file.
  */
-class InOptions extends OutOptions {
+class InOptions {
   @Option(
       name = "--in",
       handler = InputStreamHandler.class,
-      required = true,
+      required = false,
       usage = "The input filename to read the keyset from or standard input if not specified")
   InputStream inputStream;
 
   @Option(
-      name = "--inFormat",
+      name = "--in-format",
       required = false,
       metaVar = "TEXT | BINARY",
-      usage = "The input format: TEXT or BINARY. TEXT is default")
+      usage = "The input format: TEXT or BINARY (case-insensitive). TEXT is default")
   String inFormat;
 
-  @Override
+  @Option(
+      name = "--master-key-uri",
+      required = false,
+      usage = "The keyset might be encrypted with a master key in Google Cloud KMS or AWS KMS. "
+          + "This option specifies the URI of the master key. "
+          + "If missing, read or write cleartext keysets. "
+          + "Google Cloud KMS keys have this format: "
+          + "gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*. "
+          + "AWS KMS keys have this format: "
+          + "aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>."
+  )
+  String masterKeyUri;
+
+  @Option(
+      name = "--credential",
+      required = false,
+      usage =
+          "If --masterKeyUri is specifies, this option specifies the credentials file path. "
+          + "If missing, use default credentials. "
+          + "Google Cloud credentials are service account JSON files. "
+          + "AWS credentials are properties files with the AWS access key ID is expected "
+          + "to be in the accessKey property and the AWS secret key is expected to be in "
+          + "the secretKey property."
+      )
+  String credentialPath;
+
   void validate() {
-    super.validate();
     if (inputStream == null) {
       inputStream = System.in;
     }

@@ -24,21 +24,21 @@ import org.kohsuke.args4j.Option;
 /**
  * Options for change-master-key command.
  */
-class ChangeMasterKeyOptions extends InOptions {
+class ChangeMasterKeyOptions extends OutOptions {
   @Option(name = "--new-master-key", required = true,
       usage = "The new master key to encrypt the keyset with")
   String newMasterKeyValue;
 
   @Option(name = "--new-credential", required = false,
       usage = "The filename containing a credential of the master key")
-  File newCredentialFile;
+  File newcredentialPath;
 
   @Override
   void validate() {
     super.validate();
-    if (newCredentialFile != null) {
+    if (newcredentialPath != null) {
       try {
-        SubtleUtil.validateExists(newCredentialFile);
+        SubtleUtil.validateExists(newcredentialPath);
       } catch (IOException e) {
         SubtleUtil.die(e.toString());
       }

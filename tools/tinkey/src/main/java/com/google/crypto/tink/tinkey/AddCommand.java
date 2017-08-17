@@ -16,8 +16,12 @@
 
 package com.google.crypto.tink.tinkey;
 
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KeysetManager;
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.proto.KeyTemplate;
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -28,17 +32,35 @@ public class AddCommand extends AddRotateOptions implements Command {
   @Override
   public void run() throws Exception {
     validate();
-    add(outputStream, outFormat, inputStream, inFormat, credentialFile, keyTemplate);
+    add(outputStream, outFormat, inputStream, inFormat, masterKeyUri, credentialPath,
+        keyTemplate);
   }
 
   /**
    * Generates and adds a key of template {@code keyTemplate} to the keyset in
-   * {@code inputStream} (using {@code credentialFile} to decrypt if it is encrypted).
+   * {@code inputStream} (using {@code credentialPath} to decrypt if it is encrypted).
    * Writes the resulting keyset to {@code outputStream}.
    */
   public static void add(OutputStream outputStream, String outFormat,
       InputStream inputStream, String inFormat,
-      File credentialFile, KeyTemplate keyTemplate) throws Exception {
-    throw new Exception("Not Implemented Yet");
+      String masterKeyUri, String credentialPath,
+      KeyTemplate keyTemplate) throws Exception {
+    KeysetHandle handle = TinkeyUtil.getKeysetHandle(inputStream, inFormat, masterKeyUri,
+        credentialPath);
+    if (masterKeyUri != null) {
+      Aead masterKey = KmsClients.getAutoLoaded(masterKeyUri)
+          .withCredentials(credentialPath)
+          .getAead(masterKeyUri);
+      KeysetManager.withKeysetHandle(handle)
+          .add(keyTemplate)
+          .getKeysetHandle()
+          .write(TinkeyUtil.createKeysetWriter(outputStream, outFormat), masterKey);
+    } else {
+      CleartextKeysetHandle.write(
+          KeysetManager.withKeysetHandle(handle)
+              .add(keyTemplate)
+              .getKeysetHandle(),
+          TinkeyUtil.createKeysetWriter(outputStream, outFormat));
+    }
   }
 }

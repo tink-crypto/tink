@@ -27,8 +27,8 @@ public class ChangeMasterKeyCommand extends ChangeMasterKeyOptions implements Co
   @Override
   public void run() throws Exception {
     validate();
-    changeMasterKey(outputStream, inputStream, credentialFile, newMasterKeyValue,
-        newCredentialFile);
+    changeMasterKey(outputStream, inputStream, credentialPath, newMasterKeyValue,
+        newcredentialPath);
   }
 
   /**
@@ -36,7 +36,7 @@ public class ChangeMasterKeyCommand extends ChangeMasterKeyOptions implements Co
    * resulting keyset to {@code outputStream}.
    */
   public static void changeMasterKey(OutputStream outputStream, InputStream inputStream,
-      File credentialFile, String newMasterKeyValue, File newCredentialFile)
+      String credentialPath, String newMasterKeyValue, File newcredentialPath)
       throws Exception {
     throw new Exception("Not Implemented Yet");
   }

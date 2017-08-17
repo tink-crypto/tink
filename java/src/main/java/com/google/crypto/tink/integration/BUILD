@@ -32,6 +32,7 @@ java_library(
     ],
     deps = [
         "//java/src/main/java/com/google/crypto/tink",
+        "//java/src/main/java/com/google/crypto/tink/subtle:aead",
         "@com_amazonaws_sdk_core//jar",
         "@com_amazonaws_sdk_kms//jar",
         "@com_google_api_client//jar",

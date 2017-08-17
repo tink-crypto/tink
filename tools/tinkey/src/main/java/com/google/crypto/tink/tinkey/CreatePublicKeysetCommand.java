@@ -19,31 +19,33 @@ package com.google.crypto.tink.tinkey;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetWriter;
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
  * Creates a public keyset from an existing private keyset.
  */
-public class CreatePublicKeysetCommand extends InOptions implements Command {
+public class CreatePublicKeysetCommand extends OutOptions implements Command {
   @Override
   public void run() throws Exception {
-    create(outputStream, outFormat, inputStream, inFormat, credentialFile);
+    create(outputStream, outFormat, inputStream, inFormat, masterKeyUri, credentialPath);
     outputStream.close();
     inputStream.close();
   }
 
   /**
-   * Extracts public keys from {@code inputStream} (using {@code credentialFile} to decrypt
-   * if it is encrypted) and writes public keys to {@code outputStream}.
+   * Extracts public keys from {@code inputStream} (using {@code credentialPath} and
+   * {@code masterKeyUri} to decrypt if it is encrypted) and writes public keys to
+   * {@code outputStream}.
    */
   public static void create(OutputStream outputStream, String outFormat,
-      InputStream inputStream, String inFormat, File credentialFile) throws Exception {
-    KeysetHandle privateHandle = TinkeyUtil.getKeysetHandle(inputStream, inFormat, credentialFile);
+      InputStream inputStream, String inFormat, String masterKeyUri, String credentialPath)
+      throws Exception {
+    KeysetHandle handle = TinkeyUtil.getKeysetHandle(inputStream, inFormat, masterKeyUri,
+        credentialPath);
     KeysetWriter writer = TinkeyUtil.createKeysetWriter(outputStream, outFormat);
     CleartextKeysetHandle.write(
-        privateHandle.getPublicKeysetHandle(),
+        handle.getPublicKeysetHandle(),
         writer);
   }
 }

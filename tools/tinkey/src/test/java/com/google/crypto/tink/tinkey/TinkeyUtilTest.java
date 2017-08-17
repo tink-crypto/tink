@@ -43,18 +43,23 @@ public class TinkeyUtilTest {
   }
 
   @Test
-  public void testCreateKeyTemplate() throws Exception {
+  public void testCreateKeyTemplate_AesGcm_shouldWork() throws Exception {
     String keyType = AesGcmKeyManager.TYPE_URL;
     String keyFormat = "key_size: 16";
     KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
     AesGcmKey keyProto1 = (AesGcmKey) Registry.newKey(keyTemplate);
-    assertEquals(16, keyProto1.getKeyValue().size());
 
-    keyType = AesCtrHmacAeadKeyManager.TYPE_URL;
-    keyFormat = "aes_ctr_key_format {params { iv_size: 12}, key_size: 16}, "
+    assertEquals(16, keyProto1.getKeyValue().size());
+  }
+
+  @Test
+  public void testCreateKeyTemplate_AesCtrHmacAead_shouldWork() throws Exception {
+    String keyType = AesCtrHmacAeadKeyManager.TYPE_URL;
+    String keyFormat = "aes_ctr_key_format {params { iv_size: 12}, key_size: 16}, "
         + "hmac_key_format {params {hash: SHA256, tag_size: 10}, key_size: 32}";
-    keyTemplate = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
+    KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
     AesCtrHmacAeadKey keyProto2 = (AesCtrHmacAeadKey) Registry.newKey(keyTemplate);
+
     assertEquals(16, keyProto2.getAesCtrKey().getKeyValue().size());
     assertEquals(12, keyProto2.getAesCtrKey().getParams().getIvSize());
     assertEquals(32, keyProto2.getHmacKey().getKeyValue().size());
@@ -62,20 +67,25 @@ public class TinkeyUtilTest {
   }
 
   @Test
-  public void testCreateKeyTemplateInvalid() throws Exception {
+  public void testCreateKeyTemplate_invalidKeySize_shouldThrowException() throws Exception {
     String keyType = AesGcmKeyManager.TYPE_URL;
     String keyFormat = "key_size: 17";
+
     try {
-      KeyTemplate unused = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
+      TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException e) {
-      System.out.println(e);
       assertTrue(e.toString().contains("invalid type URL or key format"));
     }
+  }
 
-    keyType = "AesGcm1";
+  @Test
+  public void testCreateKeyTemplate_invalidTypeUrl_shouldThrowException() throws Exception {
+    String keyType = "AesGcm1";
+    String keyFormat = "key_size: 16";
+
     try {
-      KeyTemplate unused = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
+      TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException e) {
       assertTrue(e.toString().contains("invalid type URL or key format"));

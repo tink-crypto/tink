@@ -16,9 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
-import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * List keys in a keyset.
@@ -27,15 +25,15 @@ public class ListCommand extends InOptions implements Command {
   @Override
   public void run() throws Exception {
     validate();
-    list(outputStream, outFormat, inputStream, inFormat, credentialFile);
+    list(inputStream, inFormat, masterKeyUri, credentialPath);
   }
 
   /**
-   * Lists all keys in the keyset in {@code inputStream} (using {@code credentialFile} to
+   * Lists all keys in the keyset in {@code inputStream} (using {@code credentialPath} to
    * decrypt if it is encrypted). This command doesn't output actual key material.
    */
-  public static void list(OutputStream outputStream, String outFormat, InputStream inputStream,
-      String inFormat, File credentialFile) throws Exception {
+  public static void list(InputStream inputStream,
+      String inFormat, String masterKeyUri, String credentialPath) throws Exception {
     throw new Exception("Not Implemented Yet");
   }
 }

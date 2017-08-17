@@ -16,8 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AesGcmKeyManager;
@@ -42,42 +41,38 @@ public class CreateKeyTemplateCommandTest {
   }
 
   @Test
-  public void testCreate() throws Exception {
+  public void testCreate_shouldWork() throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String typeUrl = AesGcmKeyManager.TYPE_URL;
-    String keyFormat = "key_size: 16";
-    CreateKeyTemplateCommand.create(outputStream, typeUrl, keyFormat);
-
+    CreateKeyTemplateCommand.create(outputStream,
+        AesGcmKeyManager.TYPE_URL, "key_size: 16");
     KeyTemplate.Builder builder = KeyTemplate.newBuilder();
     TextFormat.merge(outputStream.toString(), builder);
     KeyTemplate keyTemplate = builder.build();
-    assertEquals(typeUrl, keyTemplate.getTypeUrl());
     AesGcmKeyFormat aesKeyFormat = AesGcmKeyFormat.parseFrom(keyTemplate.getValue());
-    assertEquals(16, aesKeyFormat.getKeySize());
+
+    assertThat(keyTemplate.getTypeUrl()).isEqualTo(AesGcmKeyManager.TYPE_URL);
+    assertThat(aesKeyFormat.getKeySize()).isEqualTo(16);
   }
 
   @Test
-  public void testCreateInvalid() throws Exception {
+  public void testCreate_invalidKeySize_shouldThrowException() throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String typeUrl = AesGcmKeyManager.TYPE_URL;
-    String keyFormat = "key_size: 17";
     try {
-      CreateKeyTemplateCommand.create(outputStream, typeUrl, keyFormat);
+      CreateKeyTemplateCommand.create(outputStream, AesGcmKeyManager.TYPE_URL, "key_size: 17");
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException e) {
-      System.out.println(e);
-      assertTrue(e.toString().contains("invalid type URL or key format"));
+      assertThat(e.toString()).contains("invalid type URL or key format");
     }
+  }
 
-    outputStream.reset();
-    typeUrl = "AesGcmKey1";
-    keyFormat = "key_size: 16";
+  @Test
+  public void testCreate_invalidTypeUrl_shouldThrowException() throws Exception {
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     try {
-      CreateKeyTemplateCommand.create(outputStream, typeUrl, keyFormat);
+      CreateKeyTemplateCommand.create(outputStream, "bogus", "key_size: 16");
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException e) {
-      System.out.println(e);
-      assertTrue(e.toString().contains("invalid type URL or key format"));
+      assertThat(e.toString()).contains("invalid type URL or key format");
     }
   }
 }

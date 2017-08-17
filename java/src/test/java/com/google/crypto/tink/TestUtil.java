@@ -17,6 +17,7 @@
 package com.google.crypto.tink;
 
 import static com.google.common.io.BaseEncoding.base16;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -40,15 +41,16 @@ import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EllipticCurveType;
-import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
+import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
+import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.Random;
@@ -217,20 +219,10 @@ public class TestUtil {
   }
 
   /**
-   * @return a {@code KeysetReader} from a {@code handle}.
+   * @return a {@code Keyset} from a {@code handle}.
    */
-  public static KeysetReader createKeysetReader(final KeysetHandle handle) throws Exception {
-    return new KeysetReader() {
-      @Override
-      public Keyset read() throws IOException {
-        return handle.getKeyset();
-      }
-
-      @Override
-      public EncryptedKeyset readEncrypted() throws IOException {
-        throw new IOException("Not Implemented");
-      }
-    };
+  public static Keyset getKeyset(final KeysetHandle handle) {
+    return handle.getKeyset();
   }
 
   /**
@@ -251,6 +243,15 @@ public class TestUtil {
       builder.addKey(key);
     }
     return builder.build();
+  }
+
+  /**
+   * @return a KeyTemplate with an non-existing type url.
+   */
+  public static KeyTemplate createKeyTemplateWithNonExistingTypeUrl() throws Exception {
+    return KeyTemplate.newBuilder()
+        .setTypeUrl("does-not-exist")
+        .build();
   }
 
   /**
@@ -556,6 +557,33 @@ public class TestUtil {
         e.getMessage(),
         contains);
     assertTrue(message, e.getMessage().contains(contains));
+  }
+
+  /**
+   * Asserts that {@code key} is generated from {@code keyTemplate}.
+   */
+  public static void assertHmacKey(KeyTemplate keyTemplate, Keyset.Key key) throws Exception {
+    assertThat(key.getKeyId()).isGreaterThan(0);
+    assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key.hasKeyData()).isTrue();
+    assertThat(key.getKeyData().getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
+
+    HmacKeyFormat hmacKeyFormat = HmacKeyFormat.parseFrom(keyTemplate.getValue());
+    HmacKey hmacKey = HmacKey.parseFrom(key.getKeyData().getValue());
+    assertThat(hmacKey.getParams()).isEqualTo(hmacKeyFormat.getParams());
+    assertThat(hmacKey.getKeyValue().size()).isEqualTo(hmacKeyFormat.getKeySize());
+  }
+
+  /**
+   * Asserts that {@code KeyInfo} is corresponding to a key from {@code keyTemplate}.
+   */
+  public static void assertKeyInfo(KeyTemplate keyTemplate, KeysetInfo.KeyInfo keyInfo)
+      throws Exception {
+    assertThat(keyInfo.getKeyId()).isGreaterThan(0);
+    assertThat(keyInfo.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(keyInfo.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(keyInfo.getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
   }
 
   /**

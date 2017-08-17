@@ -34,7 +34,6 @@ import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
@@ -298,8 +297,7 @@ public class EcdsaSignKeyManagerTest {
   public void testGetPublicKeyData() throws Exception {
     KeysetHandle privateHandle = KeysetHandle.generateNew(
         SignatureKeyTemplates.ECDSA_P256);
-    Keyset keyset = TestUtil.createKeysetReader(privateHandle).read();
-    KeyData privateKeyData = keyset.getKey(0).getKeyData();
+    KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
     EcdsaSignKeyManager privateManager = new EcdsaSignKeyManager();
     KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
     assertEquals(EcdsaVerifyKeyManager.TYPE_URL, publicKeyData.getTypeUrl());

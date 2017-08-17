@@ -34,7 +34,6 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
@@ -104,8 +103,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   public void testGetPublicKeyData() throws Exception {
     KeysetHandle privateHandle = KeysetHandle.generateNew(
         HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM);
-    Keyset keyset = TestUtil.createKeysetReader(privateHandle).read();
-    KeyData privateKeyData = keyset.getKey(0).getKeyData();
+    KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
     EciesAeadHkdfPrivateKeyManager privateManager = new EciesAeadHkdfPrivateKeyManager();
     KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
     assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL, publicKeyData.getTypeUrl());

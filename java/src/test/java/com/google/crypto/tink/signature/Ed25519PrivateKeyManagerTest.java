@@ -28,7 +28,6 @@ import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.subtle.Ed25519Verify;
 import com.google.crypto.tink.subtle.Random;
@@ -83,8 +82,7 @@ public class Ed25519PrivateKeyManagerTest {
   public void testGetPublicKeyData() throws Exception {
     KeysetHandle privateHandle = KeysetHandle.generateNew(
         SignatureKeyTemplates.ED25519);
-    Keyset keyset = TestUtil.createKeysetReader(privateHandle).read();
-    KeyData privateKeyData = keyset.getKey(0).getKeyData();
+    KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
     Ed25519PrivateKeyManager privateManager = new Ed25519PrivateKeyManager();
     KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
     assertEquals(Ed25519PublicKeyManager.TYPE_URL, publicKeyData.getTypeUrl());

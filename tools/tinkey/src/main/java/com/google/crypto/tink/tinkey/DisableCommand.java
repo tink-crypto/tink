@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.tinkey;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -27,16 +26,16 @@ public class DisableCommand extends KeyIdOptions implements Command {
   @Override
   public void run() throws Exception {
     validate();
-    disable(outputStream, outFormat, inputStream, inFormat, credentialFile, keyIdValue);
+    disable(outputStream, outFormat, inputStream, inFormat, credentialPath, keyIdValue);
   }
 
   /**
    * Disables the key with {@code keyIdValue} in the keyset in {@code inputStream} (using
-   * {@code credentialFile} to decrypt if it is encrypted).
+   * {@code credentialPath} to decrypt if it is encrypted).
    * @throws GeneralSecurityException if the key is the primary key, or not found.
    */
   public static void disable(OutputStream outputStream, String outFormat, InputStream inputStream,
-      String inFormat, File credentialFile, int keyIdValue) throws Exception {
+      String inFormat, String credentialPath, int keyIdValue) throws Exception {
     throw new Exception("Not Implemented Yet");
   }
 }

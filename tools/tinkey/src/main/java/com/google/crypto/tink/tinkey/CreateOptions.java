@@ -16,9 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.integration.IntegrationUtil;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.subtle.SubtleUtil;
 import org.kohsuke.args4j.Option;
 
 /**
@@ -28,7 +26,7 @@ class CreateOptions extends OutOptions {
   @Option(
       name = "--key-template",
       handler = KeyTemplateHandler.class,
-      metaVar = "aes-128-gcm.proto",
+      metaVar = "AES128_GCM.ascii",
       required = true,
       usage =
           "The input filename to read the key template from. "
@@ -37,28 +35,8 @@ class CreateOptions extends OutOptions {
   )
   KeyTemplate keyTemplate;
 
-  @Option(name = "--gcp-kms-key-uri",
-      required = false,
-      usage = "The Google Cloud KMS master key to encrypt the keyset with.")
-  String gcpKmsMasterKeyUriValue;
-
-  @Option(name = "--aws-kms-key-arn",
-      required = false,
-      usage = "The AWS KMS master key to encrypt the keyset with.")
-  String awsKmsMasterKeyUriValue;
-
   @Override
   void validate() {
     super.validate();
-    try {
-      if (gcpKmsMasterKeyUriValue != null && awsKmsMasterKeyUriValue != null) {
-        SubtleUtil.die("Cannot set both --gcp-kms-key-uri and --aws-kms-key-arn");
-      }
-      if (gcpKmsMasterKeyUriValue != null) {
-        IntegrationUtil.validateCryptoKeyUri(gcpKmsMasterKeyUriValue);
-      }
-    } catch (Exception e) {
-      SubtleUtil.die(e.toString());
-    }
   }
 }

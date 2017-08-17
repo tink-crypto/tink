@@ -16,27 +16,17 @@
 
 package com.google.crypto.tink.tinkey;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static com.google.common.truth.Truth.assertThat;
 
-import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KeysetReaders;
-import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.Config;
-import com.google.crypto.tink.proto.AesGcmKey;
+import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.EncryptedKeyset;
-import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.protobuf.TextFormat;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,109 +37,56 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class CreateCommandTest {
+  private static final KeyTemplate KEY_TEMPLATE = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+
   @BeforeClass
   public static void setUp() throws Exception {
     Config.register(Config.TINK_1_0_0);
   }
 
   @Test
-  public void testCreateCleartextKeyset() throws Exception {
+  public void testCreateCleartext_shouldCreateNewKeyset() throws Exception {
+    testCreateCleartext_shouldCreateNewKeyset("text");
+    testCreateCleartext_shouldCreateNewKeyset("binary");
+  }
+
+  private void testCreateCleartext_shouldCreateNewKeyset(String outFormat)
+      throws Exception {
+    // Create a cleartext keyset.
+    String masterKeyUri = null; // This ensures that the keyset won't be encrypted.
+    String credentialPath = null;
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String typeUrl = AesGcmKeyManager.TYPE_URL;
-    String keyFormat = "key_size: 16";
-    KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(typeUrl, keyFormat);
-    String awsKmsMasterKeyValue = null;
-    String gcpKmsMasterKeyValue = null;
-    File credentialFile = null;
+    CreateCommand.create(
+        outputStream, outFormat, KEY_TEMPLATE,
+        masterKeyUri, credentialPath);
+    Keyset keyset = TinkeyUtil.createKeysetReader(
+        new ByteArrayInputStream(outputStream.toByteArray()), outFormat).read();
 
-    String outFormat = "TEXT";
-    CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
-        gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-    Keyset.Builder builder = Keyset.newBuilder();
-    TextFormat.merge(outputStream.toString(), builder);
-    Keyset keyset = builder.build();
-    assertEquals(1, keyset.getKeyCount());
-    assertEquals(keyset.getPrimaryKeyId(), keyset.getKey(0).getKeyId());
-    assertTrue(keyset.getKey(0).hasKeyData());
-    assertEquals(typeUrl, keyset.getKey(0).getKeyData().getTypeUrl());
-    assertEquals(KeyStatusType.ENABLED, keyset.getKey(0).getStatus());
-    assertEquals(OutputPrefixType.TINK, keyset.getKey(0).getOutputPrefixType());
-    AesGcmKey aesGcmKey = AesGcmKey.parseFrom(keyset.getKey(0).getKeyData().getValue());
-    assertEquals(16, aesGcmKey.getKeyValue().size());
-
-    outputStream.reset();
-    outFormat = "BINARY";
-    CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
-        gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-    keyset = KeysetReaders.withBytes(outputStream.toByteArray()).read();
-    assertEquals(1, keyset.getKeyCount());
-    assertEquals(keyset.getPrimaryKeyId(), keyset.getKey(0).getKeyId());
-    assertTrue(keyset.getKey(0).hasKeyData());
-    assertEquals(typeUrl, keyset.getKey(0).getKeyData().getTypeUrl());
-    assertEquals(KeyStatusType.ENABLED, keyset.getKey(0).getStatus());
-    assertEquals(OutputPrefixType.TINK, keyset.getKey(0).getOutputPrefixType());
-    aesGcmKey = AesGcmKey.parseFrom(keyset.getKey(0).getKeyData().getValue());
-    assertEquals(16, aesGcmKey.getKeyValue().size());
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    TestUtil.assertHmacKey(KEY_TEMPLATE, keyset.getKey(0));
   }
 
   @Test
-  public void testCreateEncryptedKeysetWithGcp() throws Exception {
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String typeUrl = AesGcmKeyManager.TYPE_URL;
-    String keyFormat = "key_size: 16";
-    KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(typeUrl, keyFormat);
-    String awsKmsMasterKeyValue = null;
-    String gcpKmsMasterKeyValue = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
-    // This is the service account allowed to access the Google Cloud master key above.
-    File credentialFile = new File(TestUtil.SERVICE_ACCOUNT_FILE);
+  public void testCreateEncrypted_shouldCreateNewKeyset() throws Exception {
+    testCreateEncrypted_shouldCreateNewKeyset("text");
+    testCreateEncrypted_shouldCreateNewKeyset("binary");
+  }
 
-    String outFormat = "TEXT";
-    CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
-        gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-    EncryptedKeyset.Builder builder = EncryptedKeyset.newBuilder();
-    TextFormat.merge(outputStream.toString(), builder);
-    EncryptedKeyset encryptedKeyset = builder.build();
+  private void testCreateEncrypted_shouldCreateNewKeyset(
+      String outFormat) throws Exception {
+    // Create an encrypted keyset.
+    String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
+    String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    CreateCommand.create(
+        outputStream, outFormat, KEY_TEMPLATE,
+        masterKeyUri, credentialPath);
+    EncryptedKeyset encryptedKeyset = TinkeyUtil
+        .createKeysetReader(new ByteArrayInputStream(outputStream.toByteArray()), outFormat)
+        .readEncrypted();
     KeysetInfo keysetInfo = encryptedKeyset.getKeysetInfo();
-    assertEquals(1, keysetInfo.getKeyInfoCount());
-    assertEquals(keysetInfo.getPrimaryKeyId(), keysetInfo.getKeyInfo(0).getKeyId());
-    assertEquals(typeUrl, keysetInfo.getKeyInfo(0).getTypeUrl());
-    assertEquals(KeyStatusType.ENABLED, keysetInfo.getKeyInfo(0).getStatus());
-    assertEquals(OutputPrefixType.TINK, keysetInfo.getKeyInfo(0).getOutputPrefixType());
 
-    outputStream.reset();
-    outFormat = "BINARY";
-    CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
-        gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-    Aead masterKey = KmsClients.getAutoLoaded(gcpKmsMasterKeyValue)
-        .withCredentials(credentialFile.getPath())
-        .getAead(gcpKmsMasterKeyValue);
-    KeysetHandle handle = KeysetHandle.read(
-        KeysetReaders.withBytes(outputStream.toByteArray()), masterKey);
-    keysetInfo = handle.getKeysetInfo();
-    assertEquals(1, keysetInfo.getKeyInfoCount());
-    assertEquals(keysetInfo.getPrimaryKeyId(), keysetInfo.getKeyInfo(0).getKeyId());
-    assertEquals(typeUrl, keysetInfo.getKeyInfo(0).getTypeUrl());
-    assertEquals(KeyStatusType.ENABLED, keysetInfo.getKeyInfo(0).getStatus());
-    assertEquals(OutputPrefixType.TINK, keysetInfo.getKeyInfo(0).getOutputPrefixType());
-  }
-
-  @Test
-  public void testCreateEncryptedKeysetWithAws() throws Exception {
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String typeUrl = AesGcmKeyManager.TYPE_URL;
-    String keyFormat = "key_size: 16";
-    KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(typeUrl, keyFormat);
-    String awsKmsMasterKeyValue = "blah";
-    String gcpKmsMasterKeyValue = null;
-    File credentialFile = null;
-    String outFormat = "TEXT";
-
-    try {
-      CreateCommand.create(outputStream, outFormat, credentialFile, keyTemplate,
-          gcpKmsMasterKeyValue, awsKmsMasterKeyValue);
-      fail("Expected Exception");
-    } catch (Exception e) {
-      assertTrue(e.toString().contains("Not Implemented Yet"));
-    }
+    assertThat(keysetInfo.getKeyInfoCount()).isEqualTo(1);
+    TestUtil.assertKeyInfo(KEY_TEMPLATE, keysetInfo.getKeyInfo(0));
   }
 }

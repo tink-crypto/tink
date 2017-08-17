@@ -39,7 +39,7 @@ public class KeysetManager {
   /**
    * Gets a keyset manager from an existing keyset handle.
    */
-  public static KeysetManager fromKeysetHandle(KeysetHandle val) {
+  public static KeysetManager withKeysetHandle(KeysetHandle val) {
     return new KeysetManager(val.getKeyset().toBuilder());
   }
 
@@ -51,31 +51,45 @@ public class KeysetManager {
   }
 
   /**
-   * Rotates a keyset by generating a fresh key using {@code keyTemplate}.
-   * Setting the new key as the primary key.
+   * @return return {@code KeysetHandle} of the managed keyset.
+   */
+  public KeysetHandle getKeysetHandle() throws GeneralSecurityException {
+    return KeysetHandle.fromKeyset(keysetBuilder.build());
+  }
+
+  /**
+   * Generates and adds a fresh key using {@code keyTemplate}, and sets the new key as
+   * the primary key.
    */
   public KeysetManager rotate(KeyTemplate keyTemplate) throws GeneralSecurityException {
+    Keyset.Key key = newKey(keyTemplate);
+    keysetBuilder
+        .addKey(key)
+        .setPrimaryKeyId(key.getKeyId());
+    return this;
+  }
+
+  /**
+   * Generates and adds to keyset a fresh key using {@code keyTemplate}.
+   */
+  public KeysetManager add(KeyTemplate keyTemplate) throws GeneralSecurityException {
+    keysetBuilder.addKey(newKey(keyTemplate));
+    return this;
+  }
+
+  private Keyset.Key newKey(KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyData keyData = Registry.newKeyData(keyTemplate);
     int keyId = newKeyId();
     OutputPrefixType outputPrefixType = keyTemplate.getOutputPrefixType();
     if (outputPrefixType == OutputPrefixType.UNKNOWN_PREFIX) {
       outputPrefixType = OutputPrefixType.TINK;
     }
-    Keyset.Key key = Keyset.Key.newBuilder()
+    return Keyset.Key.newBuilder()
         .setKeyData(keyData)
         .setKeyId(keyId)
         .setStatus(KeyStatusType.ENABLED)
         .setOutputPrefixType(outputPrefixType)
         .build();
-    keysetBuilder.addKey(key).setPrimaryKeyId(key.getKeyId());
-    return this;
-  }
-
-  /**
-   * @return return {@code KeysetHandle} of the managed keyset.
-   */
-  public KeysetHandle getKeysetHandle() throws GeneralSecurityException {
-    return KeysetHandle.fromKeyset(keysetBuilder.build());
   }
 
   private int newKeyId() {

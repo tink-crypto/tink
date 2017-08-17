@@ -33,6 +33,9 @@ java_binary(
     javacopts = JAVACOPTS,
     main_class = "com.google.crypto.tink.tinkey.Tinkey",
     visibility = ["//tools/testing:__subpackages__"],
+    runtime_deps = [
+        "@com_fasterxml_jackson_core//jar",
+    ],
     deps = [
         ":libtinkey",
         "//java",
@@ -57,6 +60,7 @@ java_library(
         "//java:testonly",
         "@com_fasterxml_jackson_core//jar",
         "@com_google_protobuf_java//:protobuf_java",
+        "@com_google_truth//jar",
         "@junit_junit_4//jar",
     ],
 )

@@ -19,11 +19,15 @@ package com.google.crypto.tink.tinkey;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
+import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KeysetManager;
+import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.KeysetReaders;
 import com.google.crypto.tink.KeysetWriter;
 import com.google.crypto.tink.KeysetWriters;
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TextFormatKeysetReaders;
 import com.google.crypto.tink.TextFormatKeysetWriters;
@@ -33,7 +37,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -142,14 +147,66 @@ public class TinkeyUtil {
   }
 
   /**
+   * Creates a {@code KeysetReader} that can read the keyset in the right {@code inFormat}.
+   */
+  public static KeysetReader createKeysetReader(InputStream inputStream, String inFormat)
+      throws IOException {
+    if (inFormat == null || inFormat.toLowerCase().equals("text")) {
+      return TextFormatKeysetReaders.withInputStream(inputStream);
+    }
+    return KeysetReaders.withInputStream(inputStream);
+  }
+
+  /**
    * Creates a {@code KeysetWriter} that can write the keyset in the right {@code outFormat}.
    */
   public static KeysetWriter createKeysetWriter(OutputStream outputStream, String outFormat)
       throws IOException {
-    if (outFormat == null || outFormat.equals("TEXT")) {
+    if (outFormat == null || outFormat.toLowerCase().equals("text")) {
       return TextFormatKeysetWriters.withOutputStream(outputStream);
     }
     return KeysetWriters.withOutputStream(outputStream);
+  }
+
+  /**
+   * Creates a keyset that contains a single key of template {@code keyTemplate}, encrypts it
+   * using {@code credentialPath} and {@code masterKeyUri}, then encodes it in {@code outFormat}.
+   * @return an input stream containing the resulting encrypted keyset.
+   * @throws GeneralSecurityException if failed to encrypt keyset.
+   */
+  public static final InputStream generateKeyset(KeyTemplate keyTemplate,
+      String outFormat, String masterKeyUri, String credentialPath)
+      throws GeneralSecurityException, IOException {
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    KeysetWriter writer = createKeysetWriter(outputStream, outFormat);
+    generateKeyset(keyTemplate, writer, masterKeyUri, credentialPath);
+    return new ByteArrayInputStream(outputStream.toByteArray());
+  }
+
+  /**
+   * Creates a keyset that contains a single key of template {@code keyTemplate}, encrypts it
+   * using {@code credentialPath} and {@code masterKeyUri}, then writes it to {@code writer}.
+   */
+  public static final void generateKeyset(
+      KeyTemplate keyTemplate, KeysetWriter writer,
+      String masterKeyUri, String credentialPath) throws GeneralSecurityException, IOException {
+    if (masterKeyUri != null) {
+      Aead masterKey = KmsClients.getAutoLoaded(masterKeyUri)
+          .withCredentials(credentialPath)
+          .getAead(masterKeyUri);
+      KeysetManager
+          .withEmptyKeyset()
+          .rotate(keyTemplate)
+          .getKeysetHandle()
+          .write(writer, masterKey);
+    } else {
+      CleartextKeysetHandle.write(
+          KeysetManager
+              .withEmptyKeyset()
+              .rotate(keyTemplate)
+              .getKeysetHandle(),
+          writer);
+    }
   }
 
   /**
@@ -158,7 +215,7 @@ public class TinkeyUtil {
   public static void writeProto(Message proto, OutputStream outputStream, String outFormat)
       throws IOException {
     byte[] output;
-    if (outFormat == null || outFormat.equals("TEXT")) {
+    if (outFormat == null || outFormat.toLowerCase().equals("text")) {
       output = TextFormat.printToUnicodeString(proto).getBytes("UTF-8");
     } else {
       output = proto.toByteArray();
@@ -171,24 +228,27 @@ public class TinkeyUtil {
    * {@code EncryptedKeyset}, read from {@code inputStream}.
    */
   public static KeysetHandle getKeysetHandle(InputStream inputStream, String inFormat,
-      File credentialFile) throws IOException, GeneralSecurityException {
-    if (inFormat == null || inFormat.equals("TEXT")) {
-      return CleartextKeysetHandle.read(
-          TextFormatKeysetReaders.withInputStream(inputStream));
+      String masterKeyUri, String credentialPath) throws IOException, GeneralSecurityException {
+    KeysetReader reader = createKeysetReader(inputStream, inFormat);
+    KeysetHandle handle;
+    if (masterKeyUri != null) {
+      Aead masterKey = KmsClients.getAutoLoaded(masterKeyUri)
+          .withCredentials(credentialPath)
+          .getAead(masterKeyUri);
+      return KeysetHandle.read(reader, masterKey);
     }
-    return CleartextKeysetHandle.read(
-        KeysetReaders.withInputStream(inputStream));
-    // TODO(thaidn): handle encrypted keysets.
+    return CleartextKeysetHandle.read(reader);
   }
 
   /**
-   * Checks that input or output format is valid. Only supported formats are TEXT and BINARY.
+   * Checks that input or output format is valid. Only supported formats are TEXT and BINARY
+   * (case-insensitive).
    * @throws IllegalArgumentException iff format is invalid.
    */
   public static void validateInputOutputFormat(String format) throws IllegalArgumentException {
     if (format != null
-        && !format.equals("TEXT")
-        && !format.equals("BINARY")) {
+        && !format.toLowerCase().equals("text")
+        && !format.toLowerCase().equals("binary")) {
       throw new IllegalArgumentException("invalid format: " + format);
     }
   }

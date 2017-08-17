@@ -23,10 +23,10 @@ generate_keys() {
   echo "--- Using template $key_template to generate keysets" \
       "to files $priv_key_file and $pub_key_file ..."
 
-  $TINKEY_CLI create --key-template $key_template --outFormat BINARY \
+  $TINKEY_CLI create --key-template $key_template --out-format BINARY \
       --out $priv_key_file  || exit 1
-  $TINKEY_CLI create-public-keyset --inFormat BINARY --in $priv_key_file \
-      --outFormat BINARY --out $pub_key_file  || exit 1
+  $TINKEY_CLI create-public-keyset --in-format BINARY --in $priv_key_file \
+      --out-format BINARY --out $pub_key_file  || exit 1
   echo "Done generating keysets."
 }
 

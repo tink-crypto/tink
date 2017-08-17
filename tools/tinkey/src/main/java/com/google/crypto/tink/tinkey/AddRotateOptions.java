@@ -22,10 +22,10 @@ import org.kohsuke.args4j.Option;
 /**
  * Options for add or rotate command.
  */
-class AddRotateOptions extends InOptions {
+class AddRotateOptions extends OutOptions {
   @Option(
       name = "--key-template",
-      metaVar = "AES128GCM.ascii",
+      metaVar = "AES128_GCM.ascii",
       required = true,
       handler = KeyTemplateHandler.class,
       usage =

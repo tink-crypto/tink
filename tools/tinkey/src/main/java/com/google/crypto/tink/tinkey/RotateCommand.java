@@ -16,29 +16,53 @@
 
 package com.google.crypto.tink.tinkey;
 
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KeysetManager;
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.proto.KeyTemplate;
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Rotates an existing keyset.
+ * Generates, adds a new key to an existing keyset and sets the new key as the primary
+ * key.
  */
 public class RotateCommand extends AddRotateOptions implements Command {
   @Override
   public void run() throws Exception {
-    rotate(outputStream, outFormat, inputStream, inFormat, credentialFile, keyTemplate);
+    validate();
+    rotate(outputStream, outFormat, inputStream, inFormat, masterKeyUri, credentialPath,
+        keyTemplate);
   }
 
   /**
    * Generates and adds a key of template {@code keyTemplate} to the keyset in
-   * {@code inputStream} (using {@code credentialFile} to decrypt if it is encrypted).
-   * The new key becomes the primary key.
-   * Writes the resulting keyset to {@code outputStream}.
+   * {@code inputStream} (using {@code credentialPath} to decrypt if it is encrypted).
+   * Sets the new key as the primary key and writes the resulting keyset to
+   * {@code outputStream}.
    */
   public static void rotate(OutputStream outputStream, String outFormat,
       InputStream inputStream, String inFormat,
-      File credentialFile, KeyTemplate keyTemplate) throws Exception {
-    throw new Exception("Not Implemented Yet");
+      String masterKeyUri, String credentialPath,
+      KeyTemplate keyTemplate) throws Exception {
+    KeysetHandle handle = TinkeyUtil.getKeysetHandle(inputStream, inFormat, masterKeyUri,
+        credentialPath);
+    if (masterKeyUri != null) {
+      Aead masterKey = KmsClients.getAutoLoaded(masterKeyUri)
+          .withCredentials(credentialPath)
+          .getAead(masterKeyUri);
+      KeysetManager.withKeysetHandle(handle)
+          .rotate(keyTemplate)
+          .getKeysetHandle()
+          .write(TinkeyUtil.createKeysetWriter(outputStream, outFormat), masterKey);
+    } else {
+      CleartextKeysetHandle.write(
+          KeysetManager.withKeysetHandle(handle)
+              .rotate(keyTemplate)
+              .getKeysetHandle(),
+          TinkeyUtil.createKeysetWriter(outputStream, outFormat));
+    }
   }
 }

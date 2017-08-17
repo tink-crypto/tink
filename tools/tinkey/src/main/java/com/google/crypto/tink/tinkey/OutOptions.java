@@ -17,14 +17,13 @@
 package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.subtle.SubtleUtil;
-import java.io.File;
 import java.io.OutputStream;
 import org.kohsuke.args4j.Option;
 
 /**
  * Common args for commands that write to file and need credential.
  */
-class OutOptions {
+class OutOptions extends InOptions {
   @Option(
       name = "--out",
       handler = OutputStreamHandler.class,
@@ -33,28 +32,19 @@ class OutOptions {
   OutputStream outputStream;
 
   @Option(
-      name = "--outFormat",
+      name = "--out-format",
       metaVar = "TEXT | BINARY",
       required = false,
-      usage = "The output format: TEXT or BINARY. TEXT is default")
+      usage = "The output format: TEXT or BINARY (case-insensitive). TEXT is default")
   String outFormat;
 
-  @Option(
-      name = "--credential",
-      required = false,
-      usage =
-          "The output keyset can be encrypted with a master key. "
-          + "This specifies the filename containing a credential to obtain that master key")
-  File credentialFile;
-
+  @Override
   void validate() {
+    super.validate();
     if (outputStream == null) {
       outputStream = System.out;
     }
     try {
-      if (credentialFile != null) {
-        SubtleUtil.validateExists(credentialFile);
-      }
       TinkeyUtil.validateInputOutputFormat(outFormat);
     } catch (Exception e) {
       SubtleUtil.die(e.toString());
