@@ -17,6 +17,7 @@
 package com.google.crypto.tink.tinkey;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.TestUtil;
@@ -92,6 +93,7 @@ public class RotateCommandTest {
           outputStream, OUTPUT_FORMAT,
           emptyStream, INPUT_FORMAT,
           masterKeyUri, credentialPath, NEW_TEMPLATE);
+      fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       TestUtil.assertExceptionContains(e, "empty keyset");
     }

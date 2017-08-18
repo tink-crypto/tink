@@ -22,7 +22,6 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
-        "//java/src/main/java/com/google/crypto/tink:primitives",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )

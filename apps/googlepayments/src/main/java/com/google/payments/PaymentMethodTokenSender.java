@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -184,12 +185,16 @@ public final class PaymentMethodTokenSender {
         PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1,
         signedMessage);
     byte[] signature = signer.sign(toSignBytes);
-    return new JSONObject()
-        .put(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY, signedMessage)
-        .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY,
-            PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
-        .put(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY,
-            PaymentMethodTokenUtil.BASE64.encode(signature))
-        .toString();
+    try {
+      return new JSONObject()
+          .put(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY, signedMessage)
+          .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY,
+              PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
+          .put(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY,
+              PaymentMethodTokenUtil.BASE64.encode(signature))
+          .toString();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException("cannot seal; JSON error");
+    }
   }
 }

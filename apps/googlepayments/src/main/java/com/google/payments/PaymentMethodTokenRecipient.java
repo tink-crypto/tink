@@ -213,7 +213,7 @@ public final class PaymentMethodTokenRecipient {
       }
       throw new IllegalArgumentException("unsupported version: " + protocolVersion);
     } catch (JSONException e) {
-      throw new GeneralSecurityException("cannot unseal; invalid JSON message", e);
+      throw new GeneralSecurityException("cannot unseal; invalid JSON message");
     }
   }
 
@@ -266,7 +266,8 @@ public final class PaymentMethodTokenRecipient {
     throw new GeneralSecurityException("cannot decrypt");
   }
 
-  private void validateV1(final JSONObject jsonMsg) throws GeneralSecurityException {
+  private void validateV1(final JSONObject jsonMsg)
+      throws GeneralSecurityException, JSONException {
     if (!jsonMsg.has(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY)

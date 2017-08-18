@@ -44,7 +44,8 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
     try {
       JSONObject json = new JSONObject(new String(ciphertext, StandardCharsets.UTF_8));
       validate(json);
-      byte[] kem = PaymentMethodTokenUtil.BASE64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
+      byte[] kem = PaymentMethodTokenUtil.BASE64.decode(json.getString(
+          PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
       int symmetricKeySize = PaymentMethodTokenConstants.AES_CTR_KEY_SIZE
           + PaymentMethodTokenConstants.HMAC_SHA256_KEY_SIZE;
       byte[] demKey = recipientKem.generateKey(
@@ -60,7 +61,8 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
           json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
       byte[] computedTag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key,
           encryptedMessage);
-      byte[] expectedTag = PaymentMethodTokenUtil.BASE64.decode(json.getString(PaymentMethodTokenConstants.JSON_TAG_KEY));
+      byte[] expectedTag = PaymentMethodTokenUtil.BASE64.decode(json.getString(
+          PaymentMethodTokenConstants.JSON_TAG_KEY));
       if (!SubtleUtil.arrayEquals(expectedTag, computedTag)) {
         throw new GeneralSecurityException("cannot decrypt; invalid MAC");
       }
@@ -68,7 +70,7 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
           PaymentMethodTokenConstants.AES_CTR_KEY_SIZE);
       return PaymentMethodTokenUtil.aesCtr(aesCtrKey, encryptedMessage);
     } catch (JSONException e) {
-      throw new GeneralSecurityException("cannot decrypt; failed to parse JSON", e);
+      throw new GeneralSecurityException("cannot decrypt; failed to parse JSON");
     }
   }
 

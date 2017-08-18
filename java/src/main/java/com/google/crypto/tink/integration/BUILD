@@ -26,13 +26,14 @@ java_library(
     runtime_deps = [
         "@com_fasterxml_jackson_annotations//jar",
         "@com_fasterxml_jackson_databind//jar",
+        "@com_google_code_gson_gson//jar",
+        "@joda_time//jar",
         "@org_apache_commons_logging//jar",
         "@org_apache_httpcomponents_httpclient//jar",
         "@org_apache_httpcomponents_httpcore//jar",
     ],
     deps = [
         "//java/src/main/java/com/google/crypto/tink",
-        "//java/src/main/java/com/google/crypto/tink/subtle:aead",
         "@com_amazonaws_sdk_core//jar",
         "@com_amazonaws_sdk_kms//jar",
         "@com_google_api_client//jar",

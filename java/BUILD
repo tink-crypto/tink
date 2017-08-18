@@ -57,6 +57,15 @@ java_library(
     ],
 )
 
+java_library(
+    name = "config_android",
+    visibility = ["//visibility:public"],
+    exports = [
+        "//java/src/main/java/com/google/crypto/tink/config:android",
+        "//java/src/main/java/com/google/crypto/tink/config:tink_catalogue_android",
+    ],
+)
+
 # RESTRICTED
 
 FULL_PROTOS = [
@@ -113,7 +122,6 @@ java_library(
 java_library(
     name = "cleartext_keyset_handle",
     visibility = [
-        "//tools/testing:__subpackages__",
         "//tools/tinkey:__pkg__",
     ],
     exports = [
@@ -123,10 +131,6 @@ java_library(
 
 java_library(
     name = "cleartext_keyset_handle_android",
-    visibility = [
-        "//tools/testing:__subpackages__",
-        "//tools/tinkey:__pkg__",
-    ],
     exports = [
         "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
     ],

@@ -29,7 +29,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "tink_catalogue_android",
-        "//java/src/main/java/com/google/crypto/tink",
+        "//java/src/main/java/com/google/crypto/tink:android",
         "//proto:config_java_proto_lite",
     ],
 )

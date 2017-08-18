@@ -211,7 +211,7 @@ public class PaymentMethodTokenRecipientTest {
     trustedKeysJson.put("keys", new JSONArray().put(key1).put(key2));
 
     try {
-      PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
+      PaymentMethodTokenRecipient unused = new PaymentMethodTokenRecipient.Builder()
           .senderVerifyingKeys(trustedKeysJson.toString())
           .recipientId(RECIPIENT_ID)
           .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
@@ -287,7 +287,7 @@ public class PaymentMethodTokenRecipientTest {
       recipient.unseal(payload.toString());
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertEquals("cannot unseal; invalid JSON message", e.getMessage());
+      // expected
     }
   }
 
@@ -305,7 +305,7 @@ public class PaymentMethodTokenRecipientTest {
       recipient.unseal(payload.toString());
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertEquals("cannot unseal; invalid JSON message", e.getMessage());
+      // expected
     }
   }
 }

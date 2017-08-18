@@ -42,7 +42,7 @@ For custom initialization the registration can proceed directly via `Registry`-c
 ```
 
 For more complex use cases, with multiple primitives and custom implementations,
-one can use Tink configuration tools from [`com.google.crypto.tink.config`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config)-package, 
+one can use Tink configuration tools from [`com.google.crypto.tink.config`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config)-package,
 which provides a configuration language for specifying key types and their key
 managers to be used by Tink at runtime, and utilities for handling the
 configurations.  This allows for customizable configuration without need of
@@ -208,7 +208,7 @@ To create a custom implementation of a primitive proceed as follows:
 2. Define protocol buffers that hold key material and parameters for the custom
    cryptographic scheme; the name of the key protocol buffer (a.k.a. type URL)
    determines the _key type_ for the custom implementation.
-3. Implement [`KeyManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeyManager.java) 
+3. Implement [`KeyManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeyManager.java)
    interface for the _primitive_ from step #1 and the _key type_ from step #2.
 
 To use a custom implementation of a primitive in an application, register with

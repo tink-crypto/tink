@@ -47,14 +47,14 @@ public class ConfigTest {
         .setNewKeyAllowed(true)
         .build();
     try {
-      KeyManager<Aead> keyManager = Registry.getKeyManager(typeUrl);
+      KeyManager<Aead> unused = Registry.getKeyManager(typeUrl);
       fail();
     } catch (GeneralSecurityException e) {
       // expected
     }
 
     Config.registerKeyType(entry);
-    KeyManager<Aead> keyManager = Registry.getKeyManager(typeUrl);
+    KeyManager<Aead> unused = Registry.getKeyManager(typeUrl);
   }
 
   @Test
@@ -74,7 +74,7 @@ public class ConfigTest {
       // Initially, there should be no key manager in the registry.
       for (KeyTypeEntry entry : tinkConfig.getEntryList()) {
         try {
-          KeyManager<?> keyManager = Registry.getKeyManager(entry.getTypeUrl());
+          KeyManager<?> unused = Registry.getKeyManager(entry.getTypeUrl());
           fail("Registry should contain no manager for " + entry.getTypeUrl());
         } catch (GeneralSecurityException e) {
           // expected
@@ -83,7 +83,7 @@ public class ConfigTest {
       // After registering the config the registry should contain the key managers.
       Config.register(tinkConfig);
       for (KeyTypeEntry entry : tinkConfig.getEntryList()) {
-        KeyManager<?> keyManager = Registry.getKeyManager(entry.getTypeUrl());
+        KeyManager<?> unused = Registry.getKeyManager(entry.getTypeUrl());
       }
       // Another register-attmpt should fail, as key managers already exist.
       try {
