@@ -25,16 +25,18 @@ import org.kohsuke.args4j.Option;
 class OutOptions extends InOptions {
   @Option(
       name = "--out",
+      metaVar = "path/to/keyset.cfg",
       handler = OutputStreamHandler.class,
       required = false,
-      usage = "The output filename to write the keyset to or standard output if not specified")
+      usage = "The output filename, must not exist, to write the keyset to or "
+          + "standard output if not specified")
   OutputStream outputStream;
 
   @Option(
       name = "--out-format",
-      metaVar = "TEXT | BINARY",
+      metaVar = "text | binary",
       required = false,
-      usage = "The output format: TEXT or BINARY (case-insensitive). TEXT is default")
+      usage = "The output format: text or binary (case-insensitive). text is default")
   String outFormat;
 
   @Override
@@ -44,7 +46,7 @@ class OutOptions extends InOptions {
       outputStream = System.out;
     }
     try {
-      TinkeyUtil.validateInputOutputFormat(outFormat);
+      TinkeyUtil.validateFormat(outFormat);
     } catch (Exception e) {
       TinkeyUtil.die(e.toString());
     }

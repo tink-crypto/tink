@@ -16,11 +16,6 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KeysetManager;
-import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.proto.KeyTemplate;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,7 +24,7 @@ import java.io.OutputStream;
  * Generates, adds a new key to an existing keyset and sets the new key as the primary
  * key.
  */
-public class RotateCommand extends AddRotateOptions implements Command {
+public class RotateKeysetCommand extends AddRotateOptions implements Command {
   @Override
   public void run() throws Exception {
     validate();
@@ -47,22 +42,7 @@ public class RotateCommand extends AddRotateOptions implements Command {
       InputStream inputStream, String inFormat,
       String masterKeyUri, String credentialPath,
       KeyTemplate keyTemplate) throws Exception {
-    KeysetHandle handle = TinkeyUtil.getKeysetHandle(inputStream, inFormat, masterKeyUri,
-        credentialPath);
-    if (masterKeyUri != null) {
-      Aead masterKey = KmsClients.getAutoLoaded(masterKeyUri)
-          .withCredentials(credentialPath)
-          .getAead(masterKeyUri);
-      KeysetManager.withKeysetHandle(handle)
-          .rotate(keyTemplate)
-          .getKeysetHandle()
-          .write(TinkeyUtil.createKeysetWriter(outputStream, outFormat), masterKey);
-    } else {
-      CleartextKeysetHandle.write(
-          KeysetManager.withKeysetHandle(handle)
-              .rotate(keyTemplate)
-              .getKeysetHandle(),
-          TinkeyUtil.createKeysetWriter(outputStream, outFormat));
-    }
+    TinkeyUtil.createKey(TinkeyUtil.CommandType.ROTATE_KEYSET, outputStream, outFormat,
+        inputStream, inFormat, masterKeyUri, credentialPath, keyTemplate);
   }
 }

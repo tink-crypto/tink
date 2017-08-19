@@ -20,22 +20,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Disables a key with some key id in a keyset.
+ * Destroys a key with some key id in a keyset.
  */
-public class DisableCommand extends KeyIdOptions implements Command {
+public class DestroyKeyCommand extends KeyIdOptions implements Command {
   @Override
   public void run() throws Exception {
     validate();
-    disable(outputStream, outFormat, inputStream, inFormat, credentialPath, keyIdValue);
+    destroy(outputStream, outFormat, inputStream, inFormat,
+        masterKeyUri, credentialPath, keyId);
   }
 
   /**
-   * Disables the key with {@code keyIdValue} in the keyset in {@code inputStream} (using
+   * Destroys the key with {@code keyId} in the keyset (using {@code masterKeyUri}
    * {@code credentialPath} to decrypt if it is encrypted).
-   * @throws GeneralSecurityException if the key is the primary key, or not found.
+   * @throws GeneralSecurityException if the key is not found or it is already disabled.
    */
-  public static void disable(OutputStream outputStream, String outFormat, InputStream inputStream,
-      String inFormat, String credentialPath, int keyIdValue) throws Exception {
-    throw new Exception("Not Implemented Yet");
+  public static void destroy(OutputStream outputStream, String outFormat,
+      InputStream inputStream, String inFormat, String masterKeyUri,
+      String credentialPath, int keyId) throws Exception {
+    TinkeyUtil.manipulateKey(TinkeyUtil.CommandType.DESTROY_KEY, outputStream, outFormat,
+        inputStream, inFormat, masterKeyUri, credentialPath, keyId);
   }
 }

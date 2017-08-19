@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.tinkey;
 
+import com.google.crypto.tink.subtle.Validators;
+import java.io.File;
 import java.io.InputStream;
 import org.kohsuke.args4j.Option;
 
@@ -25,20 +27,23 @@ import org.kohsuke.args4j.Option;
 class InOptions {
   @Option(
       name = "--in",
+      metaVar = "path/to/keyset.cfg",
       handler = InputStreamHandler.class,
       required = false,
-      usage = "The input filename to read the keyset from or standard input if not specified")
+      usage = "The input filename, must exist, to read the keyset from or "
+          + "standard input if not specified")
   InputStream inputStream;
 
   @Option(
       name = "--in-format",
       required = false,
-      metaVar = "TEXT | BINARY",
-      usage = "The input format: TEXT or BINARY (case-insensitive). TEXT is default")
+      metaVar = "text | binary",
+      usage = "The input format: text or binary (case-insensitive). text is default")
   String inFormat;
 
   @Option(
       name = "--master-key-uri",
+      metaVar = "gcp-kms://projects/foo1/locations/global/keyRings/foo2/cryptoKeys/foo3",
       required = false,
       usage = "The keyset might be encrypted with a master key in Google Cloud KMS or AWS KMS. "
           + "This option specifies the URI of the master key. "
@@ -52,10 +57,11 @@ class InOptions {
 
   @Option(
       name = "--credential",
+      metaVar = "path/to/credential.json",
       required = false,
       usage =
-          "If --masterKeyUri is specifies, this option specifies the credentials file path. "
-          + "If missing, use default credentials. "
+          "If --master-key-uri is specified, this option specifies the credentials file path. "
+          + "Must exist if specified. If missing, use default credentials. "
           + "Google Cloud credentials are service account JSON files. "
           + "AWS credentials are properties files with the AWS access key ID is expected "
           + "to be in the accessKey property and the AWS secret key is expected to be in "
@@ -68,7 +74,10 @@ class InOptions {
       inputStream = System.in;
     }
     try {
-      TinkeyUtil.validateInputOutputFormat(inFormat);
+      TinkeyUtil.validateFormat(inFormat);
+      if (credentialPath != null) {
+        Validators.validateExists(new File(credentialPath));
+      }
     } catch (Exception e) {
       TinkeyUtil.die(e.toString());
     }

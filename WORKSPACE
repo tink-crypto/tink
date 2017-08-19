@@ -130,6 +130,12 @@ maven_jar(
 )
 
 maven_jar(
+    name = "com_google_code_findbugs_jsr305",
+    artifact = "com.google.code.findbugs:jsr305:3.0.1",
+    sha1 = "f7be08ec23c21485b9b5a1cf1654c2ec8c58168d",
+)
+
+maven_jar(
     name = "com_google_code_gson_gson",
     artifact = "com.google.code.gson:gson:2.8.0",
     sha1 = "c4ba5371a29ac9b2ad6129b1d39ea38750043eff",

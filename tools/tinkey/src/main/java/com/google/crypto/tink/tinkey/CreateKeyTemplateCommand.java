@@ -20,7 +20,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import java.io.OutputStream;
 
 /**
- * Creates a new {@code KeyTemplate}.
+ * Creates a new {@link KeyTemplate}.
  */
 public class CreateKeyTemplateCommand extends CreateKeyTemplateOptions implements Command {
   @Override
@@ -30,7 +30,9 @@ public class CreateKeyTemplateCommand extends CreateKeyTemplateOptions implement
   }
 
   /**
-   * Creates a {@code KeyTemplate} containing a key of type {@code typeUrlValue} and
+   * Creates a new {@link KeyTemplate}.
+   *
+   * <p>The new key template contains a key of type {@code typeUrlValue} and a value of
    * {@code keyFormatValue}.
    */
   public static void create(OutputStream outputStream, String typeUrlValue,

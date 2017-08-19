@@ -20,22 +20,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Enables a key with some key id in a keyset.
+ * Deletes a key with some key id in a keyset.
  */
-public class EnableCommand extends KeyIdOptions implements Command {
+public class DeleteKeyCommand extends KeyIdOptions implements Command {
   @Override
   public void run() throws Exception {
     validate();
-    enable(outputStream, outFormat, inputStream, inFormat, credentialPath, keyIdValue);
+    delete(outputStream, outFormat, inputStream, inFormat,
+        masterKeyUri, credentialPath, keyId);
   }
 
   /**
-   * Enables the key with {@code keyIdValue} in the keyset in {@code inFile} (using
+   * Deletes the key with {@code keyId} in the keyset (using {@code masterKeyUri}
    * {@code credentialPath} to decrypt if it is encrypted).
    * @throws GeneralSecurityException if the key is not found.
    */
-  public static void enable(OutputStream outputStream, String outFormat, InputStream inputStream,
-      String inFormat, String credentialPath, int keyIdValue) throws Exception {
-    throw new Exception("Not Implemented Yet");
+  public static void delete(OutputStream outputStream, String outFormat,
+      InputStream inputStream, String inFormat, String masterKeyUri,
+      String credentialPath, int keyId) throws Exception {
+    TinkeyUtil.manipulateKey(TinkeyUtil.CommandType.DELETE_KEY, outputStream, outFormat,
+        inputStream, inFormat, masterKeyUri, credentialPath, keyId);
   }
 }

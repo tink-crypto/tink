@@ -22,23 +22,23 @@ import java.io.IOException;
 import org.kohsuke.args4j.Option;
 
 /**
- * Options for change-master-key command.
+ * Options for convert-keyset command.
  */
-class ChangeMasterKeyOptions extends OutOptions {
-  @Option(name = "--new-master-key", required = true,
-      usage = "The new master key to encrypt the keyset with")
-  String newMasterKeyValue;
+class ConvertKeysetOptions extends OutOptions {
+  @Option(name = "--new-master-key-uri", required = false,
+      usage = "The new master key URI")
+  String newMasterKeyUri;
 
   @Option(name = "--new-credential", required = false,
-      usage = "The filename containing a credential of the master key")
-  File newcredentialPath;
+      usage = "The new master key credential, must exist if specified")
+  String newCredentialPath;
 
   @Override
   void validate() {
     super.validate();
-    if (newcredentialPath != null) {
+    if (newCredentialPath != null) {
       try {
-        Validators.validateExists(newcredentialPath);
+        Validators.validateExists(new File(newCredentialPath));
       } catch (IOException e) {
         TinkeyUtil.die(e.toString());
       }

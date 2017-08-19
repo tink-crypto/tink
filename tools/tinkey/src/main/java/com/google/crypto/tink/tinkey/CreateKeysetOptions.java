@@ -22,7 +22,7 @@ import org.kohsuke.args4j.Option;
 /**
  * Args for command to create a keyset.
  */
-class CreateOptions extends OutOptions {
+class CreateKeysetOptions extends OutOptions {
   @Option(
       name = "--key-template",
       handler = KeyTemplateHandler.class,

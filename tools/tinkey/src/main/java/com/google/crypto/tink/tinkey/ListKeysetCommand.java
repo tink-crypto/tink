@@ -16,12 +16,14 @@
 
 package com.google.crypto.tink.tinkey;
 
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.proto.KeysetInfo;
 import java.io.InputStream;
 
 /**
  * List keys in a keyset.
  */
-public class ListCommand extends InOptions implements Command {
+public class ListKeysetCommand extends InOptions implements Command {
   @Override
   public void run() throws Exception {
     validate();
@@ -34,6 +36,9 @@ public class ListCommand extends InOptions implements Command {
    */
   public static void list(InputStream inputStream,
       String inFormat, String masterKeyUri, String credentialPath) throws Exception {
-    throw new Exception("Not Implemented Yet");
+    KeysetHandle handle = TinkeyUtil.getKeysetHandle(inputStream, inFormat, masterKeyUri,
+        credentialPath);
+    KeysetInfo keysetInfo = handle.getKeysetInfo();
+    System.out.println(keysetInfo.toString());
   }
 }

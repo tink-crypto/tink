@@ -21,12 +21,12 @@ import static org.junit.Assert.fail;
 
 import java.security.GeneralSecurityException;
 import org.joda.time.Days;
+import org.joda.time.Instant;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.joda.time.Instant;
 
 /**
  * Unit tests for {@code PaymentMethodTokenRecipient}.

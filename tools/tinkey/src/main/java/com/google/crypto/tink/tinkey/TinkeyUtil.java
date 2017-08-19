@@ -50,6 +50,21 @@ import java.security.GeneralSecurityException;
  * Various helpers.
  */
 class TinkeyUtil {
+  public enum CommandType {
+    ADD_KEY,
+    CONVERT_KEYSET,
+    CREATE_KEYSET,
+    CREATE_PUBLIC_KEYSET,
+    CREATE_KEY_TEMPLATE,
+    DELETE_KEY,
+    DESTROY_KEY,
+    DISABLE_KEY,
+    ENABLE_KEY,
+    LIST_KEYSET,
+    ROTATE_KEYSET,
+    PROMOTE_KEY
+  };
+
   /**
    * By convention, the key format proto of XyzKey would be XyzKeyFormat.
    * For example, the key format proto of AesGcmKey is AesGcmKeyFormat.
@@ -174,12 +189,11 @@ class TinkeyUtil {
    * @return an input stream containing the resulting encrypted keyset.
    * @throws GeneralSecurityException if failed to encrypt keyset.
    */
-  public static final InputStream generateKeyset(KeyTemplate keyTemplate,
+  public static final InputStream createKeyset(KeyTemplate keyTemplate,
       String outFormat, String masterKeyUri, String credentialPath)
       throws GeneralSecurityException, IOException {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    KeysetWriter writer = createKeysetWriter(outputStream, outFormat);
-    generateKeyset(keyTemplate, writer, masterKeyUri, credentialPath);
+    createKeyset(outputStream, outFormat, masterKeyUri, credentialPath, keyTemplate);
     return new ByteArrayInputStream(outputStream.toByteArray());
   }
 
@@ -187,26 +201,100 @@ class TinkeyUtil {
    * Creates a keyset that contains a single key of template {@code keyTemplate}, encrypts it
    * using {@code credentialPath} and {@code masterKeyUri}, then writes it to {@code writer}.
    */
-  public static final void generateKeyset(
-      KeyTemplate keyTemplate, KeysetWriter writer,
-      String masterKeyUri, String credentialPath) throws GeneralSecurityException, IOException {
+  public static void createKeyset(
+      OutputStream outputStream, String outFormat,
+      String masterKeyUri, String credentialPath, KeyTemplate keyTemplate)
+        throws GeneralSecurityException, IOException {
+    KeysetHandle handle = KeysetManager
+        .withEmptyKeyset()
+        .rotate(keyTemplate)
+        .getKeysetHandle();
+
+    writeKeyset(handle, outputStream, outFormat, masterKeyUri, credentialPath);
+  }
+
+  /**
+   * Manipulates a key within a keyset.
+   */
+  public static void manipulateKey(
+      CommandType type, OutputStream outputStream,
+      String outFormat, InputStream inputStream, String inFormat, String masterKeyUri,
+      String credentialPath, int keyId) throws GeneralSecurityException, IOException {
+    KeysetManager manager = KeysetManager.withKeysetHandle(
+        getKeysetHandle(inputStream, inFormat, masterKeyUri, credentialPath));
+    switch (type) {
+        case DELETE_KEY:
+            manager = manager.delete(keyId);
+            break;
+        case DESTROY_KEY:
+            manager = manager.destroy(keyId);
+            break;
+        case DISABLE_KEY:
+            manager = manager.enable(keyId);
+            break;
+        case ENABLE_KEY:
+            manager = manager.enable(keyId);
+            break;
+        case PROMOTE_KEY:
+            manager = manager.promote(keyId);
+            break;
+        default:
+            throw new GeneralSecurityException("invalid command");
+    }
+
+    writeKeyset(manager.getKeysetHandle(), outputStream, outFormat, masterKeyUri, credentialPath);
+  }
+
+  /**
+   * Creates and adds a new key to an existing keyset.
+   * The new key becomes the primary key if {@code type} is {@link CommandType#ROTATE}.
+   */
+  public static void createKey(
+      CommandType type, OutputStream outputStream, String outFormat, InputStream inputStream,
+      String inFormat, String masterKeyUri, String credentialPath,
+      KeyTemplate keyTemplate) throws GeneralSecurityException, IOException {
+    KeysetManager manager = KeysetManager.withKeysetHandle(
+        getKeysetHandle(inputStream, inFormat, masterKeyUri, credentialPath));
+    switch (type) {
+        case ADD_KEY:
+            manager = manager.add(keyTemplate);
+            break;
+        case ROTATE_KEYSET:
+            manager = manager.rotate(keyTemplate);
+            break;
+        default:
+            throw new GeneralSecurityException("invalid command");
+    }
+
+    writeKeyset(manager.getKeysetHandle(), outputStream, outFormat, masterKeyUri, credentialPath);
+  }
+
+  /**
+   * Writes the keyset managed by {@code handle} to {@code outputStream} with format
+   * {@code outFormat}. Maybe encrypt it with {@code masterKeyUri} and {@code credentialPath}.
+   */
+  public static void writeKeyset(KeysetHandle handle, OutputStream outputStream,
+      String outFormat, String masterKeyUri, String credentialPath)
+      throws GeneralSecurityException, IOException {
+    KeysetWriter writer = createKeysetWriter(outputStream, outFormat);
     if (masterKeyUri != null) {
       Aead masterKey = KmsClients.getAutoLoaded(masterKeyUri)
           .withCredentials(credentialPath)
           .getAead(masterKeyUri);
-      KeysetManager
-          .withEmptyKeyset()
-          .rotate(keyTemplate)
-          .getKeysetHandle()
-          .write(writer, masterKey);
+      handle.write(writer, masterKey);
     } else {
-      CleartextKeysetHandle.write(
-          KeysetManager
-              .withEmptyKeyset()
-              .rotate(keyTemplate)
-              .getKeysetHandle(),
-          writer);
+      CleartextKeysetHandle.write(handle, writer);
     }
+  }
+
+  /**
+   * Manipulates a keyset
+   */
+  public static void manipulateEncryptedKeyset(
+      CommandType type, OutputStream outputStream,
+      String outFormat, InputStream inputStream, String inFormat, String masterKeyUri,
+      String credentialPath, String keyId) throws GeneralSecurityException, IOException {
+
   }
 
   /**
@@ -245,7 +333,7 @@ class TinkeyUtil {
    * (case-insensitive).
    * @throws IllegalArgumentException iff format is invalid.
    */
-  public static void validateInputOutputFormat(String format) throws IllegalArgumentException {
+  public static void validateFormat(String format) throws IllegalArgumentException {
     if (format != null
         && !format.toLowerCase().equals("text")
         && !format.toLowerCase().equals("binary")) {

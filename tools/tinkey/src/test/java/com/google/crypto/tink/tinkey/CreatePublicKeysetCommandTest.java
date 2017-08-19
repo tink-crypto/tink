@@ -101,7 +101,7 @@ public class CreatePublicKeysetCommandTest {
     // Create a cleartext private keyset.
     String masterKeyUri = null;
     String credentialPath = null;
-    InputStream inputStream1 = TinkeyUtil.generateKeyset(
+    InputStream inputStream1 = TinkeyUtil.createKeyset(
         template, INPUT_FORMAT, masterKeyUri, credentialPath);
     KeysetReader privateReader = TinkeyUtil
         .createKeysetReader(inputStream1, INPUT_FORMAT);
@@ -125,7 +125,7 @@ public class CreatePublicKeysetCommandTest {
     // Create an input stream containing a cleartext private keyset.
     String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
     String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
-    InputStream inputStream1 = TinkeyUtil.generateKeyset(
+    InputStream inputStream1 = TinkeyUtil.createKeyset(
         template, INPUT_FORMAT, masterKeyUri, credentialPath);
     inputStream1.mark(inputStream1.available());
     final KeysetHandle privateHandle = TinkeyUtil.getKeysetHandle(

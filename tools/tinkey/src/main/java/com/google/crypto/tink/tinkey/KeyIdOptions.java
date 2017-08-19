@@ -22,6 +22,10 @@ import org.kohsuke.args4j.Option;
  * Options for commands that take a key id option, e.g., enable, disable or destroy.
  */
 class KeyIdOptions extends OutOptions {
-  @Option(name = "--key-id", required = true, usage = "The target key id")
-  int keyIdValue;
+  @Option(
+      name = "--key-id",
+      metaVar = "number",
+      required = true,
+      usage = "The target key id")
+  int keyId;
 }

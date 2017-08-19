@@ -16,30 +16,36 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.KeysetWriter;
 import com.google.crypto.tink.proto.KeyTemplate;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.security.GeneralSecurityException;
 
 /**
  * Creates a new keyset.
  */
-public class CreateCommand extends CreateOptions implements Command {
+public class CreateKeysetCommand extends CreateKeysetOptions implements Command {
   @Override
   public void run() throws Exception {
     validate();
-    create(outputStream, outFormat, keyTemplate, masterKeyUri, credentialPath);
+    create(outputStream, outFormat, masterKeyUri, credentialPath, keyTemplate);
     outputStream.close();
   }
 
   /**
-   * Creates a keyset that contains a single key of template {@code keyTemplate}, and writes it
-   * to {@code outputStream}. Attempts to encrypt the keyset using {@code credentialPath} and
-   * {@code masterKeyUri}.
+   * Create a new keyset.
+   *
+   * <p>Creates a keyset that contains a single key of template {@code keyTemplate}, and writes it
+   * to {@code outputStream}. If {@code masterKeyUri} is not null, encrypt the output keyset with
+   * {@code masterKeyUri} and {@code credentialPath}.
+   *
+   * @throws GeneralSecurityException if cannot generate or encrypt the output keyset
+   * @throws IOException if cannot write the output keyset
    */
   public static void create(OutputStream outputStream, String outFormat,
-      KeyTemplate keyTemplate, String masterKeyUri, String credentialPath)
-      throws Exception {
-    KeysetWriter writer = TinkeyUtil.createKeysetWriter(outputStream, outFormat);
-    TinkeyUtil.generateKeyset(keyTemplate, writer, masterKeyUri, credentialPath);
+      String masterKeyUri, String credentialPath, KeyTemplate keyTemplate)
+      throws GeneralSecurityException, IOException {
+    TinkeyUtil.createKeyset(outputStream, outFormat, masterKeyUri, credentialPath,
+        keyTemplate);
   }
 }

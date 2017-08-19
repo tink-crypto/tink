@@ -20,7 +20,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import org.kohsuke.args4j.Option;
 
 /**
- * Options for add or rotate command.
+ * Options for add-key or rotate-keyset command.
  */
 class AddRotateOptions extends OutOptions {
   @Option(

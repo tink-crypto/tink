@@ -21,8 +21,10 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.proto.Keyset.Key;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,6 +39,304 @@ public class KeysetManagerTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
     Config.register(Config.TINK_HYBRID_1_0_0);  // includes TINK_AEAD_1_0_0
+  }
+
+  private Key createDisabledKey(int keyId) {
+    return Key.newBuilder()
+        .setKeyId(keyId)
+        .setStatus(KeyStatusType.DISABLED)
+        .build();
+  }
+
+  private Key createEnabledKey(int keyId) {
+    return Key.newBuilder()
+        .setKeyId(keyId)
+        .setStatus(KeyStatusType.ENABLED)
+        .build();
+  }
+
+  private Key createUnknownStatusKey(int keyId) {
+    return Key.newBuilder()
+        .setKeyId(keyId)
+        .setStatus(KeyStatusType.UNKNOWN_STATUS)
+        .build();
+  }
+
+  @Test
+  public void testEnable_shouldEnableKey() throws Exception {
+    int keyId = 42;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(createDisabledKey(keyId)));
+    Keyset keyset = KeysetManager
+        .withKeysetHandle(handle)
+        .enable(keyId)
+        .getKeysetHandle()
+        .getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    assertThat(keyset.getKey(0).getKeyId()).isEqualTo(keyId);
+    assertThat(keyset.getKey(0).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+  }
+
+  @Test
+  public void testEnable_keyNotFound_shouldThrowException() throws Exception {
+    int keyId = 42;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(createDisabledKey(keyId)));
+
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .enable(keyId + 1);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("key not found");
+    }
+  }
+
+  @Test
+  public void testPromote_shouldPromoteKey() throws Exception {
+    int primaryKeyId = 42;
+    int newPrimaryKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(newPrimaryKeyId)));
+    Keyset keyset = KeysetManager
+        .withKeysetHandle(handle)
+        .promote(newPrimaryKeyId)
+        .getKeysetHandle()
+        .getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(newPrimaryKeyId);
+  }
+
+  @Test
+  public void testPromote_keyNotFound_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int newPrimaryKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(newPrimaryKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .promote(44);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("key not found");
+    }
+  }
+
+  @Test
+  public void testPromote_keyDisabled_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int newPrimaryKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createDisabledKey(newPrimaryKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .promote(newPrimaryKeyId);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot promote key because it's not enabled");
+    }
+  }
+
+  @Test
+  public void testPromote_keyUnknownStatus_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int newPrimaryKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createUnknownStatusKey(newPrimaryKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .promote(newPrimaryKeyId);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot promote key because it's not enabled");
+    }
+  }
+
+  @Test
+  public void testDisable_shouldDisableKey() throws Exception {
+    int primaryKeyId = 42;
+    int otherKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(otherKeyId)));
+    Keyset keyset = KeysetManager
+        .withKeysetHandle(handle)
+        .disable(otherKeyId)
+        .getKeysetHandle()
+        .getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    assertThat(keyset.getKey(0).getKeyId()).isEqualTo(primaryKeyId);
+    assertThat(keyset.getKey(0).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(keyset.getKey(1).getKeyId()).isEqualTo(otherKeyId);
+    assertThat(keyset.getKey(1).getStatus()).isEqualTo(KeyStatusType.DISABLED);
+  }
+
+  @Test
+  public void testDisable_keyIsPrimary_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int otherKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(otherKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .disable(primaryKeyId)
+          .getKeysetHandle()
+          .getKeyset();
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot disable the primary key");
+    }
+  }
+
+  @Test
+  public void testDisable_keyNotFound_shouldThrowException() throws Exception {
+    int keyId = 42;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(createDisabledKey(keyId)));
+
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .disable(keyId + 1);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("key not found");
+    }
+  }
+
+  @Test
+  public void testDestroy_shouldDestroyKey() throws Exception {
+    int primaryKeyId = 42;
+    int otherKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(otherKeyId)));
+    Keyset keyset = KeysetManager
+        .withKeysetHandle(handle)
+        .destroy(otherKeyId)
+        .getKeysetHandle()
+        .getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    assertThat(keyset.getKey(0).getKeyId()).isEqualTo(primaryKeyId);
+    assertThat(keyset.getKey(0).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(keyset.getKey(1).getKeyId()).isEqualTo(otherKeyId);
+    assertThat(keyset.getKey(1).getStatus()).isEqualTo(KeyStatusType.DESTROYED);
+    assertThat(keyset.getKey(1).hasKeyData()).isFalse();
+  }
+
+  @Test
+  public void testDestroy_keyIsPrimary_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int otherKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(otherKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .destroy(primaryKeyId)
+          .getKeysetHandle()
+          .getKeyset();
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot destroy the primary key");
+    }
+  }
+
+  @Test
+  public void testDestroy_keyNotFound_shouldThrowException() throws Exception {
+    int keyId = 42;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(createDisabledKey(keyId)));
+
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .destroy(keyId + 1);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("key not found");
+    }
+  }
+
+  @Test
+  public void testDelete_shouldDeleteKey() throws Exception {
+    int primaryKeyId = 42;
+    int otherKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(otherKeyId)));
+    Keyset keyset = KeysetManager
+        .withKeysetHandle(handle)
+        .delete(otherKeyId)
+        .getKeysetHandle()
+        .getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    assertThat(keyset.getKey(0).getKeyId()).isEqualTo(primaryKeyId);
+    assertThat(keyset.getKey(0).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+  }
+
+  @Test
+  public void testDelete_keyIsPrimary_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int otherKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(otherKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .delete(primaryKeyId)
+          .getKeysetHandle()
+          .getKeyset();
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot delete the primary key");
+    }
+  }
+
+  @Test
+  public void testDelete_keyNotFound_shouldThrowException() throws Exception {
+    int keyId1 = 42;
+    int keyId2 = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(keyId1),
+            createEnabledKey(keyId2)));
+
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .delete(44);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("key not found");
+    }
   }
 
   @Test
@@ -127,5 +427,215 @@ public class KeysetManagerTest {
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(existingPrimaryKeyId);
     TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, keyset.getKey(0));
     TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_256BITTAG, keyset.getKey(1));
+  }
+
+  private void manipulateKeyset(KeysetManager manager) {
+    try {
+      KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+      manager
+          .rotate(template)
+          .add(template)
+          .rotate(template)
+          .add(template);
+    } catch (GeneralSecurityException e) {
+      fail("should not throw exception: " + e);
+    }
+  }
+
+  @Test
+  public void testThreadSafety_manipulateKeyset_shouldWork() throws Exception {
+    KeysetManager manager = KeysetManager.withEmptyKeyset();
+    Thread thread1 = new Thread(
+        new Runnable() {
+          @Override
+          public void run() {
+            manipulateKeyset(manager);
+          }
+        });
+    Thread thread2 = new Thread(
+        new Runnable() {
+          @Override
+          public void run() {
+            manipulateKeyset(manager);
+          }
+        });
+    Thread thread3 = new Thread(
+        new Runnable() {
+          @Override
+          public void run() {
+            manipulateKeyset(manager);
+          }
+        });
+    thread1.start();
+    thread2.start();
+    thread3.start();
+
+    // Wait until all threads finished.
+    thread1.join();
+    thread2.join();
+    thread3.join();
+    Keyset keyset = manager.getKeysetHandle().getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(12);
+  }
+
+  private void enablePromoteKey(KeysetManager manager, int keyId) {
+    try {
+      manager
+          .enable(keyId)
+          .promote(keyId);
+    } catch (GeneralSecurityException e) {
+      fail("should not throw exception: " + e);
+    }
+  }
+
+  @Test
+  public void testThreadSafety_enablePromoteKey_shouldWork() throws Exception {
+    int primaryKeyId = 42;
+    int keyId2 = 43;
+    int keyId3 = 44;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(keyId2),
+            createDisabledKey(keyId3)));
+    KeysetManager manager = KeysetManager.withKeysetHandle(handle);
+
+    Thread thread1 = new Thread(
+        new Runnable() {
+          @Override
+          public void run() {
+            enablePromoteKey(manager, primaryKeyId);
+          }
+        });
+    Thread thread2 = new Thread(
+        new Runnable() {
+          @Override
+          public void run() {
+            enablePromoteKey(manager, keyId2);
+          }
+        });
+    Thread thread3 = new Thread(
+        new Runnable() {
+          @Override
+          public void run() {
+            enablePromoteKey(manager, keyId3);
+          }
+        });
+    thread1.start();
+    thread2.start();
+    thread3.start();
+
+    // Wait until all threads finished.
+    thread1.join();
+    thread2.join();
+    thread3.join();
+    Keyset keyset = manager.getKeysetHandle().getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(3);
+    assertThat(keyset.getKey(0).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(keyset.getKey(1).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(keyset.getKey(2).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+  }
+
+  private void disableEnablePromoteKey(KeysetManager manager, int keyId) {
+    try {
+      manager
+          .disable(keyId)
+          .enable(keyId)
+          .promote(keyId);
+    } catch (GeneralSecurityException e) {
+      fail("should not throw exception: " + e);
+    }
+  }
+
+  @Test
+  public void testThreadSafety_disableEnablePromoteKey_shouldWork() throws Exception {
+    int primaryKeyId = 42;
+    int keyId2 = 43;
+    int keyId3 = 44;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(keyId2),
+            createDisabledKey(keyId3)));
+    KeysetManager manager = KeysetManager.withKeysetHandle(handle);
+
+    Thread thread2 = new Thread(
+        new Runnable() {
+          @Override
+          public void run() {
+            disableEnablePromoteKey(manager, keyId2);
+          }
+        });
+    Thread thread3 = new Thread(
+        new Runnable() {
+          @Override
+          public void run() {
+            disableEnablePromoteKey(manager, keyId3);
+          }
+        });
+    thread2.start();
+    thread3.start();
+
+    // Wait until all threads finished.
+    thread2.join();
+    thread3.join();
+    Keyset keyset = manager.getKeysetHandle().getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(3);
+    assertThat(keyset.getKey(0).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(keyset.getKey(1).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(keyset.getKey(2).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+  }
+
+  private void enableDisableDeleteKey(KeysetManager manager, int keyId) {
+    try {
+      manager
+          .enable(keyId)
+          .disable(keyId)
+          .delete(keyId);
+    } catch (GeneralSecurityException e) {
+      fail("should not throw exception: " + e);
+    }
+  }
+
+  @Test
+  public void testThreadSafety_enableDisableDeleteKey_shouldWork() throws Exception {
+    int primaryKeyId = 42;
+    int keyId2 = 43;
+    int keyId3 = 44;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(keyId2),
+            createDisabledKey(keyId3)));
+    KeysetManager manager = KeysetManager.withKeysetHandle(handle);
+
+    Thread thread2 = new Thread(
+        new Runnable() {
+          @Override
+          public void run() {
+            enableDisableDeleteKey(manager, keyId2);
+          }
+        });
+    Thread thread3 = new Thread(
+        new Runnable() {
+          @Override
+          public void run() {
+            enableDisableDeleteKey(manager, keyId3);
+          }
+        });
+    thread2.start();
+    thread3.start();
+
+    // Wait until all threads finished.
+    thread2.join();
+    thread3.join();
+    Keyset keyset = manager.getKeysetHandle().getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    assertThat(keyset.getKey(0).getKeyId()).isEqualTo(keyset.getPrimaryKeyId());
+    assertThat(keyset.getKey(0).getStatus()).isEqualTo(KeyStatusType.ENABLED);
   }
 }

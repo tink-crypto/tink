@@ -66,6 +66,7 @@ java_library(
     srcs = [":tink_srcs"],
     javacopts = JAVACOPTS,
     deps = [
+        "@com_google_code_findbugs_jsr305//jar",
         "@com_google_errorprone_error_prone_annotations//jar",
         "@com_google_protobuf_java//:protobuf_java",
     ] + FULL_PROTOS,
@@ -90,6 +91,7 @@ java_library(
     srcs = [":android_srcs"],
     javacopts = JAVACOPTS,
     deps = [
+        "@com_google_code_findbugs_jsr305//jar",
         "@com_google_errorprone_error_prone_annotations//jar",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
     ] + LITE_PROTOS,

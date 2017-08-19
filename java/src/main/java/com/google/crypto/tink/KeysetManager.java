@@ -23,13 +23,14 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
+import javax.annotation.concurrent.GuardedBy;
 
 /**
  * Manages a Keyset-proto, with convenience methods that rotate, disable, enable or
  * destroy keys.
- * Not thread-safe.
  */
 public final class KeysetManager {
+  @GuardedBy("this")
   private final Keyset.Builder keysetBuilder;
 
   private KeysetManager(Keyset.Builder val) {
@@ -53,7 +54,8 @@ public final class KeysetManager {
   /**
    * @return return {@code KeysetHandle} of the managed keyset.
    */
-  public KeysetHandle getKeysetHandle() throws GeneralSecurityException {
+  @GuardedBy("this")
+  public synchronized KeysetHandle getKeysetHandle() throws GeneralSecurityException {
     return KeysetHandle.fromKeyset(keysetBuilder.build());
   }
 
@@ -61,7 +63,9 @@ public final class KeysetManager {
    * Generates and adds a fresh key using {@code keyTemplate}, and sets the new key as
    * the primary key.
    */
-  public KeysetManager rotate(KeyTemplate keyTemplate) throws GeneralSecurityException {
+  @GuardedBy("this")
+  public synchronized KeysetManager rotate(KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
     Keyset.Key key = newKey(keyTemplate);
     keysetBuilder
         .addKey(key)
@@ -72,12 +76,115 @@ public final class KeysetManager {
   /**
    * Generates and adds to keyset a fresh key using {@code keyTemplate}.
    */
-  public KeysetManager add(KeyTemplate keyTemplate) throws GeneralSecurityException {
+  @GuardedBy("this")
+  public synchronized KeysetManager add(KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
     keysetBuilder.addKey(newKey(keyTemplate));
     return this;
   }
 
-  private Keyset.Key newKey(KeyTemplate keyTemplate) throws GeneralSecurityException {
+  /**
+   * Promotes to primary the key with {@code keyId}.
+   * @throws GeneralSecurityException if the key is not found or not enabled.
+   */
+  @GuardedBy("this")
+  public synchronized KeysetManager promote(int keyId) throws GeneralSecurityException {
+    for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
+      Keyset.Key key = keysetBuilder.getKey(i);
+      if (key.getKeyId() == keyId) {
+        if (!key.getStatus().equals(KeyStatusType.ENABLED)) {
+          throw new GeneralSecurityException(
+              "cannot promote key because it's not enabled: " + keyId);
+        }
+        keysetBuilder.setPrimaryKeyId(keyId);
+        return this;
+      }
+    }
+    throw new GeneralSecurityException("key not found: " + keyId);
+  }
+
+  /**
+   * Enables the key with {@code keyId}.
+   * @throws GeneralSecurityException if the key is not found.
+   */
+  @GuardedBy("this")
+  public synchronized KeysetManager enable(int keyId) throws GeneralSecurityException {
+    for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
+      Keyset.Key key = keysetBuilder.getKey(i);
+      if (key.getKeyId() == keyId) {
+        keysetBuilder.setKey(i, key.toBuilder().setStatus(KeyStatusType.ENABLED).build());
+        return this;
+      }
+    }
+    throw new GeneralSecurityException("key not found: " + keyId);
+  }
+
+  /**
+   * Disables the key with {@code keyId}.
+   * @throws GeneralSecurityException if the key is not found or it is the primary key.
+   */
+  @GuardedBy("this")
+  public synchronized KeysetManager disable(int keyId) throws GeneralSecurityException {
+    if (keyId == keysetBuilder.getPrimaryKeyId()) {
+      throw new GeneralSecurityException("cannot disable the primary key");
+    }
+
+    for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
+      Keyset.Key key = keysetBuilder.getKey(i);
+      if (key.getKeyId() == keyId) {
+        keysetBuilder.setKey(i, key.toBuilder().setStatus(KeyStatusType.DISABLED).build());
+        return this;
+      }
+    }
+    throw new GeneralSecurityException("key not found: " + keyId);
+  }
+
+  /**
+   * Deletes the key with {@code keyId}.
+   * @throws GeneralSecurityException if the key is not found or it is the primary key.
+   */
+  @GuardedBy("this")
+  public synchronized KeysetManager delete(int keyId) throws GeneralSecurityException {
+    if (keyId == keysetBuilder.getPrimaryKeyId()) {
+      throw new GeneralSecurityException("cannot delete the primary key");
+    }
+
+    for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
+      Keyset.Key key = keysetBuilder.getKey(i);
+      if (key.getKeyId() == keyId) {
+        keysetBuilder.removeKey(i);
+        return this;
+      }
+    }
+    throw new GeneralSecurityException("key not found: " + keyId);
+  }
+
+  /**
+   * Destroys the key material associated with the {@code keyId}.
+   * @throws GeneralSecurityException if the key is not found or it is the primary key.
+   */
+  @GuardedBy("this")
+  public synchronized KeysetManager destroy(int keyId) throws GeneralSecurityException {
+    if (keyId == keysetBuilder.getPrimaryKeyId()) {
+      throw new GeneralSecurityException("cannot destroy the primary key");
+    }
+
+    for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
+      Keyset.Key key = keysetBuilder.getKey(i);
+      if (key.getKeyId() == keyId) {
+        keysetBuilder.setKey(i, key.toBuilder()
+            .setStatus(KeyStatusType.DESTROYED)
+            .clearKeyData()
+            .build());
+        return this;
+      }
+    }
+    throw new GeneralSecurityException("key not found: " + keyId);
+  }
+
+  @GuardedBy("this")
+  private synchronized Keyset.Key newKey(KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
     KeyData keyData = Registry.newKeyData(keyTemplate);
     int keyId = newKeyId();
     OutputPrefixType outputPrefixType = keyTemplate.getOutputPrefixType();
@@ -92,7 +199,8 @@ public final class KeysetManager {
         .build();
   }
 
-  private int newKeyId() {
+  @GuardedBy("this")
+  private synchronized int newKeyId() {
     int keyId = randPositiveInt();
     while (true) {
       for (Keyset.Key key : keysetBuilder.getKeyList()) {

@@ -16,28 +16,29 @@
 
 package com.google.crypto.tink.tinkey;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Changes the master key of a keyset. The keyset will be encrypted with the new master key.
+ * Promotes a specified key to primary.
  */
-public class ChangeMasterKeyCommand extends ChangeMasterKeyOptions implements Command {
+public class PromoteKeyCommand extends KeyIdOptions implements Command {
   @Override
   public void run() throws Exception {
     validate();
-    changeMasterKey(outputStream, inputStream, credentialPath, newMasterKeyValue,
-        newcredentialPath);
+    promote(outputStream, outFormat, inputStream, inFormat,
+        masterKeyUri, credentialPath, keyId);
   }
 
   /**
-   * Reencrypts the keyset in {@code inputStream} using {@code newMasterKeyValue}, writes the
-   * resulting keyset to {@code outputStream}.
+   * Promotes the key with {@code keyId} to become the primary (using {@code masterKeyUri}
+   * {@code credentialPath} to decrypt if it is encrypted).
+   * @throws GeneralSecurityException if the key is not found or disabled.
    */
-  public static void changeMasterKey(OutputStream outputStream, InputStream inputStream,
-      String credentialPath, String newMasterKeyValue, File newcredentialPath)
-      throws Exception {
-    throw new Exception("Not Implemented Yet");
+  public static void promote(OutputStream outputStream, String outFormat,
+      InputStream inputStream, String inFormat, String masterKeyUri,
+      String credentialPath, int keyId) throws Exception {
+    TinkeyUtil.manipulateKey(TinkeyUtil.CommandType.PROMOTE_KEY, outputStream, outFormat,
+      inputStream, inFormat, masterKeyUri, credentialPath, keyId);
   }
 }

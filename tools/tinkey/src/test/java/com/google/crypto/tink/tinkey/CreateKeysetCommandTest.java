@@ -33,10 +33,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for {@code CreateCommand}.
+ * Tests for {@code CreateKeysetCommand}.
  */
 @RunWith(JUnit4.class)
-public class CreateCommandTest {
+public class CreateKeysetCommandTest {
   private static final KeyTemplate KEY_TEMPLATE = MacKeyTemplates.HMAC_SHA256_128BITTAG;
 
   @BeforeClass
@@ -56,9 +56,9 @@ public class CreateCommandTest {
     String masterKeyUri = null; // This ensures that the keyset won't be encrypted.
     String credentialPath = null;
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    CreateCommand.create(
-        outputStream, outFormat, KEY_TEMPLATE,
-        masterKeyUri, credentialPath);
+    CreateKeysetCommand.create(
+        outputStream, outFormat,
+        masterKeyUri, credentialPath, KEY_TEMPLATE);
     Keyset keyset = TinkeyUtil.createKeysetReader(
         new ByteArrayInputStream(outputStream.toByteArray()), outFormat).read();
 
@@ -78,9 +78,9 @@ public class CreateCommandTest {
     String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
     String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    CreateCommand.create(
-        outputStream, outFormat, KEY_TEMPLATE,
-        masterKeyUri, credentialPath);
+    CreateKeysetCommand.create(
+        outputStream, outFormat,
+        masterKeyUri, credentialPath, KEY_TEMPLATE);
     EncryptedKeyset encryptedKeyset = TinkeyUtil
         .createKeysetReader(new ByteArrayInputStream(outputStream.toByteArray()), outFormat)
         .readEncrypted();

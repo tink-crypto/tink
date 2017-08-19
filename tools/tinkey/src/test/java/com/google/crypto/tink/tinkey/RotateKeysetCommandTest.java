@@ -37,10 +37,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests for {@code RotateCommand}.
+ * Tests for {@code RotateKeysetCommand}.
 */
 @RunWith(JUnit4.class)
-public class RotateCommandTest {
+public class RotateKeysetCommandTest {
   private static final KeyTemplate EXISTING_TEMPLATE = MacKeyTemplates.HMAC_SHA256_128BITTAG;
   private static final KeyTemplate NEW_TEMPLATE = MacKeyTemplates.HMAC_SHA256_256BITTAG;
   private static final String OUTPUT_FORMAT = "text";
@@ -55,7 +55,7 @@ public class RotateCommandTest {
       String inFormat, String masterKeyUri, String credentialPath, KeyTemplate template)
       throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    RotateCommand.rotate(
+    RotateKeysetCommand.rotate(
         outputStream, outFormat,
         inputStream, inFormat,
         masterKeyUri, credentialPath,
@@ -69,7 +69,7 @@ public class RotateCommandTest {
     // Create an input stream containing a cleartext keyset.
     String masterKeyUri = null;
     String credentialPath = null;
-    InputStream inputStream = TinkeyUtil.generateKeyset(
+    InputStream inputStream = TinkeyUtil.createKeyset(
         EXISTING_TEMPLATE, INPUT_FORMAT, masterKeyUri, credentialPath);
     // Add a new key to the existing keyset.
     Keyset keyset = addNewKeyToKeyset(OUTPUT_FORMAT, inputStream, INPUT_FORMAT,
@@ -89,7 +89,7 @@ public class RotateCommandTest {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     try {
-      RotateCommand.rotate(
+      RotateKeysetCommand.rotate(
           outputStream, OUTPUT_FORMAT,
           emptyStream, INPUT_FORMAT,
           masterKeyUri, credentialPath, NEW_TEMPLATE);
@@ -104,7 +104,7 @@ public class RotateCommandTest {
     // Create an input stream containing an encrypted keyset.
     String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
     String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
-    InputStream inputStream = TinkeyUtil.generateKeyset(
+    InputStream inputStream = TinkeyUtil.createKeyset(
         EXISTING_TEMPLATE, INPUT_FORMAT, masterKeyUri, credentialPath);
     EncryptedKeyset encryptedKeyset = addNewKeyToKeyset(OUTPUT_FORMAT, inputStream,
         INPUT_FORMAT, masterKeyUri, credentialPath, NEW_TEMPLATE).readEncrypted();
