@@ -28,7 +28,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
  * One can use these templates to generate new {@code Keyset} with {@code KeysetHandle}.
  * To generate a new keyset that contains a single {@code EcdsaPrivateKey}, one can do:
  * <pre>
- *   PublicKeySign.registerStandardKeyTypes();
+ *   Config.register(SignatureConfig.TINK_1_0_0);
  *   KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
  *   PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
  * </pre>

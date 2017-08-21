@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
@@ -47,6 +48,11 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class AesEaxKeyManagerTest {
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
+    Config.register(AeadConfig.TINK_1_0_0);
+  }
+
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
     AesEaxKeyFormat eaxKeyFormat = AesEaxKeyFormat.newBuilder()
@@ -211,11 +217,6 @@ public class AesEaxKeyManagerTest {
           "cb8920f87a6c75cff39627b56e3ed197c552d295a7",
           "cfc46afc253b4652b1af3795b124ab6e"),
   };
-
-  @BeforeClass
-  public static void setUp() throws GeneralSecurityException {
-    AeadConfig.registerStandardKeyTypes();
-  }
 
   @Test
   public void testPublicTestVectors() throws Exception {

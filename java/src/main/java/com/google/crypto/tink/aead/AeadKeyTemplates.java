@@ -34,7 +34,7 @@ import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
  * to generate new {@code Keyset} with {@code KeysetHandle}. To generate a new keyset
  * that contains a single {@code AesGcmKey}, one can do:
  * <pre>
- *   AeadConfig.registerStandardKeyTypes();
+ *   Config.register(AeadConfig.TINK_1_0_0);
  *   KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
  *   Aead aead = AeadFactory.getPrimitive(handle);
  * </pre>

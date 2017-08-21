@@ -19,7 +19,7 @@ package com.google.crypto.tink;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.google.crypto.tink.config.Config;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.crypto.tink.subtle.Random;
@@ -37,7 +37,7 @@ import org.junit.runners.JUnit4;
 public class IntegrationTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
-    Config.register(Config.TINK_HYBRID_1_0_0);
+    Config.register(TinkConfig.TINK_1_0_0);
   }
 
   /**

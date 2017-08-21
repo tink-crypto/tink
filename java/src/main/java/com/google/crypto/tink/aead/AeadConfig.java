@@ -16,19 +16,64 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * AeadConfig offers convenience methods for initializing
- * {@code AeadFactory} and the underlying {@code Registry}.
+ * This class offers convenience methods and constants for initializing
+ * {@link AeadFactory} and the underlying {@link Registry}.
  *
- * For more information on how to obtain and use Aead primitives, see {@code AeadFactory}.
+ * <p>To register all {@link Aead} key types provided in Tink release 1.0.0 one would use:
+ *
+ * <pre><code>
+ * Config.register(AeadConfig.TINK_1_0_0);
+ * </code></pre>
+ *
+ * <p>For more information on how to obtain and use {@link Aead} primitives,
+ * see {@link AeadFactory}.
  */
 public final class AeadConfig {
+  private static final String CATALOGUE_NAME = "TinkAead";
+  private static final String PRIMITIVE_NAME = "Aead";
+
+  public static final RegistryConfig TINK_1_0_0 = RegistryConfig.newBuilder()
+      .mergeFrom(MacConfig.TINK_1_0_0)
+      .addEntry(Config.getTinkKeyTypeEntry(
+          CATALOGUE_NAME, PRIMITIVE_NAME, "AesCtrHmacAeadKey", 0, true))
+      .addEntry(Config.getTinkKeyTypeEntry(
+          CATALOGUE_NAME, PRIMITIVE_NAME, "AesEaxKey", 0, true))
+      .addEntry(Config.getTinkKeyTypeEntry(
+          CATALOGUE_NAME, PRIMITIVE_NAME, "AesGcmKey", 0, true))
+      .addEntry(Config.getTinkKeyTypeEntry(
+          CATALOGUE_NAME, PRIMITIVE_NAME, "ChaCha20Poly1305Key", 0, true))
+      .addEntry(Config.getTinkKeyTypeEntry(
+          CATALOGUE_NAME, PRIMITIVE_NAME, "KmsAeadKey", 0, true))
+      .addEntry(Config.getTinkKeyTypeEntry(
+          CATALOGUE_NAME, PRIMITIVE_NAME, "KmsEnvelopeAeadKey", 0, true))
+      .setConfigName("TINK_AEAD_1_0_0")
+      .build();
+
+  static {
+    try {
+      init();
+    } catch (GeneralSecurityException e) {
+      throw new ExceptionInInitializerError(e);
+    }
+  }
+
+  /**
+   * Registers {@link Aead} catalogues with the {@link Registry}.
+   *
+   * <p>Because Aead key types depend on {@link Mac} key types, this method also
+   * registers all {@link Mac} catalogues.
+   */
+  public static void init() throws GeneralSecurityException {
+    Registry.addCatalogue(CATALOGUE_NAME, new AeadCatalogue());
+    MacConfig.init();
+  }
 
   /**
    * Registers standard (for the current release) Aead key types
@@ -38,28 +83,11 @@ public final class AeadConfig {
    * so-called "no new key"-mode, which allows for usage of existing
    * keys forbids generation of new key material.
    *
-   * NOTE: as some Aead key types use Mac-primitives, this method registers
-   *       also standard Mac key types via {@code MacConfig.registerStandardKeyTypes()}.
-   *
    * @throws GeneralSecurityException
+   * @deprecated
    */
+  @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    MacConfig.registerStandardKeyTypes();
-    registerKeyManager(new AesCtrHmacAeadKeyManager());
-    registerKeyManager(new AesGcmKeyManager());
-    registerKeyManager(new AesEaxKeyManager());
-    registerKeyManager(new ChaCha20Poly1305KeyManager());
-    registerKeyManager(new KmsAeadKeyManager());
-    registerKeyManager(new KmsEnvelopeAeadKeyManager());
-  }
-
-  /**
-   * Registers the given {@code keyManager} for the key type {@code keyManager.getKeyType()}.
-   *
-   * @throws GeneralSecurityException
-   */
-  public static void registerKeyManager(final KeyManager<Aead> keyManager)
-      throws GeneralSecurityException {
-    Registry.registerKeyManager(keyManager.getKeyType(), keyManager);
+    Config.register(TINK_1_0_0);
   }
 }

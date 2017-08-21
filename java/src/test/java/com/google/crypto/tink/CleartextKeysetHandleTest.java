@@ -20,7 +20,7 @@ import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacFactory;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -41,7 +41,7 @@ import org.junit.runners.JUnit4;
 public class CleartextKeysetHandleTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
-    MacConfig.registerStandardKeyTypes();
+    Config.register(TinkConfig.TINK_1_0_0);
   }
 
   @Test

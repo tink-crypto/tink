@@ -33,11 +33,11 @@ import java.util.logging.Logger;
  * MacFactory allows obtaining a Mac primitive from a {@code KeysetHandle}.
  *
  * MacFactory gets primitives from the {@code Registry}, which can be initialized
- * via convenience methods from {@code MacConfig}. Here is an example how one can obtain
- * and use a Mac primitive:
+ * via convenience methods from {@code Config} and {@code MacConfig}. Here is an example
+ * how one can obtain and use a Mac primitive:
  * <pre>   {@code
  *   KeysetHandle keysetHandle = ...;
- *   MacConfig.registerStandardKeyTypes();
+ *   Config.register(Mac.TINK_1_0_0);
  *   Mac mac = MacFactory.getPrimitive(keysetHandle);
  *   byte[] data = ...;
  *   byte[] tag = mac.computeMac(data);

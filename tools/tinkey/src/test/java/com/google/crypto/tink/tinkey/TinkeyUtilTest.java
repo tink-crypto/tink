@@ -20,10 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
-import com.google.crypto.tink.config.Config;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -39,7 +40,7 @@ import org.junit.runners.JUnit4;
 public class TinkeyUtilTest {
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(Config.TINK_1_0_0);
+    Config.register(TinkConfig.TINK_1_0_0);
   }
 
   @Test

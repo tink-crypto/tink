@@ -16,18 +16,55 @@
 
 package com.google.crypto.tink.mac;
 
-import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * MacConfig offers convenience methods for initializing
- * {@code MacFactory} and the underlying {@code Registry}.
+ * This class offers convenience methods and constants for initializing
+ * {@link MacFactory} and the underlying {@link Registry}.
  *
- * For more information on how to obtain and use Mac primitives, see {@code MacFactory}.
+ * <p>To register all {@link Mac} key types provided in Tink release 1.0.0 one would use:
+ *
+ * <pre><code>
+ * Config.register(MacConfig.TINK_1_0_0);
+ * </code></pre>
+ *
+ * <p>For more information on how to obtain and use Mac primitives, see {@link MacFactory}.
  */
 public final class MacConfig {
+  private static final String CATALOGUE_NAME = "TinkMac";
+  private static final String PRIMITIVE_NAME = "Mac";
+
+  public static final RegistryConfig TINK_1_0_0 = RegistryConfig.newBuilder()
+        .setConfigName("TINK_MAC_1_0_0")
+        .addEntry(Config.getTinkKeyTypeEntry(
+            CATALOGUE_NAME, PRIMITIVE_NAME, "HmacKey", 0, true))
+        .build();
+
+  static {
+    try {
+      init();
+    } catch (GeneralSecurityException e) {
+      throw new ExceptionInInitializerError(e);
+    }
+  }
+
+  /**
+   * Registers all {@link Mac} catalogues with the {@link Registry}.
+   */
+  public static void init() throws GeneralSecurityException {
+    Registry.addCatalogue(CATALOGUE_NAME, new MacCatalogue());
+  }
+
+  /**
+   * Registers key managers according to the specification in {@code config}.
+   */
+  public static void register(RegistryConfig config) throws GeneralSecurityException {
+    Config.register(config);
+  }
+
   /**
    * Registers standard (for the current release) Mac key types
    * and their managers with the {@code Registry}.
@@ -37,18 +74,10 @@ public final class MacConfig {
    * keys forbids generation of new key material.
    *
    * @throws GeneralSecurityException
+   * @deprecated
    */
+  @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-      registerKeyManager(new HmacKeyManager());
-  }
-
-  /**
-   * Registers the given {@code keyManager} for the key type {@code keyManager.getKeyType()}.
-   *
-   * @throws GeneralSecurityException
-   */
-  public static void registerKeyManager(final KeyManager<Mac> keyManager)
-      throws GeneralSecurityException {
-    Registry.registerKeyManager(keyManager.getKeyType(), keyManager);
+    Config.register(TINK_1_0_0);
   }
 }

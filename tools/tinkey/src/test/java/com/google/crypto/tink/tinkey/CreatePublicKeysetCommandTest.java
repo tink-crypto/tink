@@ -19,6 +19,7 @@ package com.google.crypto.tink.tinkey;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
@@ -26,7 +27,7 @@ import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.config.Config;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
@@ -61,7 +62,7 @@ public class CreatePublicKeysetCommandTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(Config.TINK_1_0_0);
+    Config.register(TinkConfig.TINK_1_0_0);
   }
 
   @Test

@@ -16,18 +16,18 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.Config;
 import java.security.GeneralSecurityException;
 
 /**
- * PublicKeySignConfig offers convenience methods for initializing
- * {@code PublicKeySignFactory} and the underlying {@code Registry}.
+ * This class offers convenience methods and constants for initializing
+ * {@link PublicKeySignFactory} and the underlying {@link Registry}.
  *
  * For more information on how to obtain and use PublicKeySign primitives,
- * see {@code PublicKeySignFactory}.
+ * see {@link PublicKeySignFactory}.
+ * @deprecated
  */
+@Deprecated
 public final class PublicKeySignConfig {
   /**
    * Registers standard (for the current release) PublicKeySign key types
@@ -38,19 +38,10 @@ public final class PublicKeySignConfig {
    * keys forbids generation of new key material.
    *
    * @throws GeneralSecurityException
+   * @deprecated
    */
+  @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    registerKeyManager(new EcdsaSignKeyManager());
-    registerKeyManager(new Ed25519PrivateKeyManager());
-  }
-
-  /**
-   * Registers the given {@code keyManager} for the key type {@code keyManager.getKeyType()}.
-   *
-   * @throws GeneralSecurityException
-   */
-  public static void registerKeyManager(final KeyManager<PublicKeySign> keyManager)
-      throws GeneralSecurityException {
-    Registry.registerKeyManager(keyManager.getKeyType(), keyManager);
+    Config.register(SignatureConfig.TINK_1_0_0);
   }
 }

@@ -16,7 +16,6 @@ java_library(
     deps = [
         "//java",
         "//java:cleartext_keyset_handle",
-        "//java:config",
         "//java:protos",
         "//java:subtle",
         "@args4j//jar",
@@ -39,7 +38,6 @@ java_binary(
     deps = [
         ":libtinkey",
         "//java",
-        "//java:config",
         "@args4j//jar",
     ],
 )

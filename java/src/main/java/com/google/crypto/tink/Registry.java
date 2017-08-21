@@ -43,6 +43,8 @@ import java.util.logging.Logger;
  * KeyManagers.  Registry is public though, to enable configurations with custom
  * primitives and KeyManagers.
  */
+// TODO(przydatek): make the read only methods, e.g., getKeyManager, getCatalogue, etc.
+// thread-safe.
 public final class Registry {
   private static final Logger logger = Logger.getLogger(Registry.class.getName());
 
@@ -51,7 +53,8 @@ public final class Registry {
       new ConcurrentHashMap<String, KeyManager>();         // typeUrl -> KeyManager mapping
   private static final ConcurrentMap<String, Boolean> newKeyAllowedMap =
       new ConcurrentHashMap<String, Boolean>();            // typeUrl -> newKeyAllowed mapping
-
+  private static final ConcurrentMap<String, Catalogue> catalogueMap =
+      new ConcurrentHashMap<String, Catalogue>();   //  name -> catalogue mapping
   /**
    * Resets the registry.  After reset the registry is empty, i.e. it contains no key managers.
    * This method is intended for testing.
@@ -59,16 +62,76 @@ public final class Registry {
   public static synchronized void reset() {
     keyManagerMap.clear();
     newKeyAllowedMap.clear();
+    catalogueMap.clear();
   }
 
   /**
-   * Registers {@code manager} for the given {@code typeUrl}.
+   * Adds a catalogue, to enable custom configuration of key types and key managers.
    *
-   * If there is an existing key manager, throw exception if {@code manager} and the existing
-   * key manager don't share the same class, and do nothing if they do.
+   * <p>Adding a custom catalogue should be a one-time operaton. There is an existing
+   * catalogue, throw exception if {@code catalogue} and the existing catalogue aren't
+   * instances of the same class, and do nothing if they are.
+   *
+   * @throws GeneralSecurityException if there's an existing catalogue is not an instance
+   * of the same class as {@code catalogue}.
+   * @throws IllegalArgumentException if either parameter is null.
+   */
+  public static synchronized void addCatalogue(String catalogueName, Catalogue catalogue)
+      throws GeneralSecurityException {
+    if (catalogueName == null) {
+      throw new IllegalArgumentException("catalogueName must be non-null.");
+    }
+    if (catalogue == null) {
+      throw new IllegalArgumentException("catalogue must be non-null.");
+    }
+    if (catalogueMap.containsKey(catalogueName.toLowerCase())) {
+      Catalogue existing = catalogueMap.get(catalogueName.toLowerCase());
+      if (!catalogue.getClass().equals(existing.getClass())) {
+        logger.warning("Attempted overwrite of a catalogueName catalogue for name "
+            + catalogueName);
+        throw new GeneralSecurityException("catalogue for name " + catalogueName
+            + " has been already registered");
+      }
+    }
+    catalogueMap.put(catalogueName.toLowerCase(), catalogue);
+  }
+
+  /**
+   * Gets a catalogue associated with {@code catalogueName}.
+   */
+  public static Catalogue getCatalogue(String catalogueName)
+      throws GeneralSecurityException {
+    if (catalogueName == null) {
+      throw new IllegalArgumentException("catalogueName must be non-null.");
+    }
+    Catalogue catalogue = catalogueMap.get(catalogueName.toLowerCase());
+    if (catalogue == null) {
+      String error = String.format("no catalogue found for %s. ", catalogueName);
+      if (catalogueName.toLowerCase().startsWith("tinkaead")) {
+        error += "Maybe call AeadConfig.init().";
+      } else if (catalogueName.toLowerCase().startsWith("tinkhybrid")) {
+        error += "Maybe call HybridConfig.init().";
+      } else if (catalogueName.toLowerCase().startsWith("tinkmac")) {
+        error += "Maybe call MacConfig.init().";
+      } else if (catalogueName.toLowerCase().startsWith("tinksignature")) {
+        error += "Maybe call SignatureConfig.init().";
+      } else if (catalogueName.toLowerCase().startsWith("tink")) {
+        error += "Maybe call TinkConfig.init().";
+      }
+      throw new GeneralSecurityException(error);
+    }
+    return catalogue;
+  }
+
+  /**
+   * Registers {@code manager} for the given {@code typeUrl}. Users can generate new keys with
+   * this manager using the {@link Registry#newKey} methods.
+   *
+   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing
+   * key manager aren't instances of the same class, and do nothing if they are.
    *
    * @throws IllegalArgumentException if {@code manager} is null.
-   * @throws GeneralSecurityException if there's an existing key manager that doesn't come from
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of
    * the same class as {@code manager}.
    */
   public static <P> void registerKeyManager(String typeUrl, final KeyManager<P> manager)
@@ -76,6 +139,17 @@ public final class Registry {
     registerKeyManager(typeUrl, manager, /* newKeyAllowed= */ true);
   }
 
+  /**
+   * Registers {@code manager} for the given {@code typeUrl}. If {@code newKeyAllowed} is true,
+   * users can generate new keys with this manager using the {@link Registry#newKey} methods.
+   *
+   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing
+   * key manager aren't instances of the same class, and do nothing if they are.
+   *
+   * @throws IllegalArgumentException if {@code manager} is null.
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of
+   * the same class as {@code manager}.
+   */
   @SuppressWarnings("unchecked")
   public static synchronized <P> void registerKeyManager(
       String typeUrl, final KeyManager<P> manager, boolean newKeyAllowed)
@@ -84,19 +158,22 @@ public final class Registry {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
     if (keyManagerMap.containsKey(typeUrl)) {
-      KeyManager<P> existing = getKeyManager(typeUrl);
-      if (!manager.getClass().equals(existing.getClass())) {
+      KeyManager<P> existingManager = getKeyManager(typeUrl);
+      boolean existingNewKeyAllowed =
+          newKeyAllowedMap.get(typeUrl).booleanValue();
+      if (!manager.getClass().equals(existingManager.getClass())
+          // Disallow changing newKeyAllow from false to true.
+          || (!existingNewKeyAllowed && newKeyAllowed)) {
         logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
         throw new GeneralSecurityException(String.format(
             "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
-            typeUrl, existing.getClass().getName(), manager.getClass().getName()));
+            typeUrl, existingManager.getClass().getName(), manager.getClass().getName()));
       }
-    } else {
-      keyManagerMap.put(typeUrl, manager);
-      newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
-      logger.info("Registered instance of " + manager.getClass().getName()
-          + " as key manager for key type " + typeUrl);
     }
+    keyManagerMap.put(typeUrl, manager);
+    newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
+    logger.info("Registered instance of " + manager.getClass().getName()
+          + " as key manager for key type " + typeUrl);
   }
 
   /**

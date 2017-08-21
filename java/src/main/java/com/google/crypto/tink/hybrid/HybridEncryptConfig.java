@@ -15,9 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.hybrid;
 
-import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.aead.AeadConfig;
 import java.security.GeneralSecurityException;
 
@@ -27,33 +25,27 @@ import java.security.GeneralSecurityException;
  *
  * For more information on how to obtain and use HybridEncrypt primitives,
  * see {@code HybridEncryptFactory}.
+ * @deprecated
  */
+@Deprecated
 public final class HybridEncryptConfig {
   /**
-   * Registers standard (for the current release) HybridEncrypt key types
+   * Registers standard (for the current release) HybridDecrypt key types
    * and their managers with the {@code Registry}.
    *
    * Deprecated-yet-still-supported key types are registered in
    * so-called "no new key"-mode, which allows for usage of existing
    * keys forbids generation of new key material.
    *
-   * NOTE: as some HybridEncrypt key types use Aead-primitives, this method registers
-   *       also standard Aead key types via {@code AeadConfig.registerStandardKeyTypes()}.
+   * NOTE: as some HybridDecrypt key types use Aead-primitives, this method registers
+   *       also standard Aead key types.
    *
    * @throws GeneralSecurityException
+   * @deprecated
    */
+  @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    AeadConfig.registerStandardKeyTypes(); // calls also MacConfig.registerStandardKeyTypes()
-    registerKeyManager(new EciesAeadHkdfPublicKeyManager());
-  }
-
-  /**
-   * Registers the given {@code keyManager} for the key type {@code keyManager.getKeyType()}.
-   *
-   * @throws GeneralSecurityException
-   */
-  public static void registerKeyManager(final KeyManager<HybridEncrypt> keyManager)
-      throws GeneralSecurityException {
-    Registry.registerKeyManager(keyManager.getKeyType(), keyManager);
+    Config.register(HybridConfig.TINK_1_0_0);
+    Config.register(AeadConfig.TINK_1_0_0);
   }
 }

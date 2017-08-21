@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.config.Config;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.KeyData;
@@ -52,8 +52,7 @@ import org.junit.runners.JUnit4;
 public class KeysetHandleTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
-    Config.register(Config.TINK_AEAD_1_0_0);
-    Config.register(Config.TINK_SIGNATURE_1_0_0);
+    Config.register(TinkConfig.TINK_1_0_0);
   }
 
   /**

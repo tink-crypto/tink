@@ -12,7 +12,6 @@ java_binary(
     main_class = "com.google.crypto.tink.testing.HybridEncryptCli",
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
-        "//java:config",
         "//java:testonly",
     ],
 )
@@ -27,7 +26,6 @@ java_binary(
     main_class = "com.google.crypto.tink.testing.HybridDecryptCli",
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
-        "//java:config",
         "//java:testonly",
     ],
 )

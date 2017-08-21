@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.aead;
 
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
@@ -36,7 +37,7 @@ public class KmsAeadKeyManagerTest {
     KmsClient kmsClient = new GcpKmsClient()
         .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE);
     KmsClients.add(kmsClient);
-    AeadConfig.registerStandardKeyTypes();
+    Config.register(AeadConfig.TINK_1_0_0);
   }
 
   @Test

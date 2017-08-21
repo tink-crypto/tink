@@ -14,9 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.config;
+package com.google.crypto.tink;
 
-import com.google.crypto.tink.KeyManager;
 import java.security.GeneralSecurityException;
 
 /**
@@ -24,9 +23,10 @@ import java.security.GeneralSecurityException;
  * primitive name)-tuple to {@code KeyManager}-objects, that determine
  * the implementation that handles the keys of the given key type.
  *
- * Tink comes with a default catalogue ({@code TinkCatalogue}), but
- * supports custom catalogues to enable user-defined configuration
- * of run-time environment via {@code Config}.
+ * <p>Tink comes with per-primitive default catalogues ({@link AeadCatalogue},
+ * {@link MacCatalogue}, {@link HybridCatalogue}, and {@link SignatureCatalogue}),
+ * but supports custom catalogues to enable user-defined configuration
+ * of run-time environment via {@link Registry}.
  */
 public interface Catalogue {
   /**

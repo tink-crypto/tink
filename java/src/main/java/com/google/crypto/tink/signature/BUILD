@@ -19,6 +19,7 @@ filegroup(
 
 FULL_PROTOS = [
     "//proto:common_java_proto",
+    "//proto:config_java_proto",
     "//proto:ecdsa_java_proto",
     "//proto:ed25519_java_proto",
     "//proto:tink_java_proto",
@@ -26,6 +27,7 @@ FULL_PROTOS = [
 
 LITE_PROTOS = [
     "//proto:common_java_proto_lite",
+    "//proto:config_java_proto_lite",
     "//proto:ecdsa_java_proto_lite",
     "//proto:ed25519_java_proto_lite",
     "//proto:tink_java_proto_lite",

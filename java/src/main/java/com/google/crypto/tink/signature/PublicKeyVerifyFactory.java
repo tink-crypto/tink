@@ -34,11 +34,11 @@ import java.util.logging.Logger;
  * {@code KeysetHandle}.
  *
  * PublicKeyVerifyFactory gets primitives from the {@code Registry}, which can be
- * initialized via convenience methods from {@code PublicKeyVerifyConfig}. Here is an example
- * how one can obtain and use a PublicKeyVerify primitive:
+ * initialized via convenience methods from {@code Config} and {@code PublicKeyVerifyConfig}.
+ * Here is an example how one can obtain and use a PublicKeyVerify primitive:
  * <pre>   {@code
  *   KeysetHandle keysetHandle = ...;
- *   PublicKeyVerifyConfig.registerStandardKeyTypes();
+ *   Config.register(SignatureConfig.TINK_1_0_0);
  *   PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle);
  *   verifier.verify(signature, data);
  *  }</pre>

@@ -18,8 +18,9 @@ package com.google.crypto.tink.tinkey;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.config.Config;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -41,7 +42,7 @@ public class CreateKeysetCommandTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(Config.TINK_1_0_0);
+    Config.register(TinkConfig.TINK_1_0_0);
   }
 
   @Test

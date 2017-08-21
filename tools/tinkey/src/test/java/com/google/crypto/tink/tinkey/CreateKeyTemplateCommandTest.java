@@ -19,8 +19,9 @@ package com.google.crypto.tink.tinkey;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
-import com.google.crypto.tink.config.Config;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.protobuf.TextFormat;
@@ -37,7 +38,7 @@ import org.junit.runners.JUnit4;
 public class CreateKeyTemplateCommandTest {
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(Config.TINK_1_0_0);
+    Config.register(TinkConfig.TINK_1_0_0);
   }
 
   @Test

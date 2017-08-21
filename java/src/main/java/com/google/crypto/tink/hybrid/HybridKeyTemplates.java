@@ -33,7 +33,7 @@ import com.google.protobuf.ByteString;
  * {@code KeysetHandle}. To generate a new keyset that contains a single
  * {@code EciesAeadHkdfPrivateKey}, one can do:
  * <pre>
- *   PublicKeySign.registerStandardKeyTypes();
+ *   Config.register(HybridConfig.TINK_1_0_0);
  *   KeysetHandle handle = KeysetHandle.generateNew(
  *       HybridKeyTemplates.ECIES_P256_HKDF_AES128_GCM);
  *   PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);

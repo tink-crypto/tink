@@ -19,6 +19,7 @@ package com.google.crypto.tink.signature;
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
@@ -39,8 +40,7 @@ import org.junit.runners.JUnit4;
 public class Ed25519PublicKeyManagerTest {
   @Before
   public void setUp() throws GeneralSecurityException {
-    PublicKeySignConfig.registerStandardKeyTypes();
-    PublicKeyVerifyConfig.registerStandardKeyTypes();
+    Config.register(SignatureConfig.TINK_1_0_0);;
   }
 
   @Test

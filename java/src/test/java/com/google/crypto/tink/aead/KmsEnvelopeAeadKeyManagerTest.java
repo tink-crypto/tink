@@ -21,11 +21,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.integration.GcpKmsClient;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Random;
@@ -43,9 +43,9 @@ import org.junit.runners.JUnit4;
 public class KmsEnvelopeAeadKeyManagerTest {
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(Config.TINK_AEAD_1_0_0);
     KmsClients.add(new GcpKmsClient()
         .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE));
+    Config.register(AeadConfig.TINK_1_0_0);
   }
 
   @Test

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
@@ -45,7 +46,7 @@ public class MacFactoryTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    MacConfig.registerStandardKeyTypes();
+    Config.register(MacConfig.TINK_1_0_0);
   }
 
   @Test

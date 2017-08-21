@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
@@ -44,8 +45,7 @@ public class PublicKeyVerifyFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    PublicKeyVerifyConfig.registerStandardKeyTypes();
-    PublicKeySignConfig.registerStandardKeyTypes();
+    Config.register(SignatureConfig.TINK_1_0_0);;
   }
 
   @Test

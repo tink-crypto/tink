@@ -16,7 +16,8 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.config.Config;
+import com.google.crypto.tink.Config;
+import com.google.crypto.tink.config.TinkConfig;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -25,7 +26,7 @@ import org.kohsuke.args4j.CmdLineParser;
  */
 public final class Tinkey {
   public static void main(String[] args) throws Exception {
-    Config.register(Config.TINK_1_0_0);
+    Config.register(TinkConfig.TINK_1_0_0);
     TinkeyCommands commands = new TinkeyCommands();
     CmdLineParser parser = new CmdLineParser(commands);
 

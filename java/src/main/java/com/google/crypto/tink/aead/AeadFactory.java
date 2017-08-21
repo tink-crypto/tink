@@ -32,11 +32,11 @@ import java.util.logging.Logger;
  * AeadFactory allows obtaining a primitive from a {@code KeysetHandle}.
  *
  * AeadFactory gets primitives from the {@code Registry}, which can be initialized
- * via convenience methods from {@code AeadConfig}. Here is an example how one can obtain
- * and use a Aead primitive:
+ * via convenience methods from {@code Config} and {@code AeadConfig}. Here is an example
+ * how one can obtain and use a Aead primitive:
  * <pre>   {@code
  *   KeysetHandle keysetHandle = ...;
- *   AeadConfig.registerStandardKeyTypes();
+ *   Config.register(AeadConfig.TINK_1_0_0);
  *   Aead aead = AeadFactory.getPrimitive(keysetHandle);
  *   byte[] plaintext = ...;
  *   byte[] aad = ...;

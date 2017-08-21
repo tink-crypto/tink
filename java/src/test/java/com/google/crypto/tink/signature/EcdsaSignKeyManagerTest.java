@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
@@ -59,8 +60,7 @@ import org.junit.runners.JUnit4;
 public class EcdsaSignKeyManagerTest {
   @BeforeClass
   public static void setUp() throws Exception {
-    PublicKeySignConfig.registerStandardKeyTypes();
-    PublicKeyVerifyConfig.registerStandardKeyTypes();
+    Config.register(SignatureConfig.TINK_1_0_0);;
   }
 
   private static class HashAndCurveType {

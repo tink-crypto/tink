@@ -22,10 +22,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -47,7 +47,7 @@ public class AeadFactoryTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(Config.TINK_AEAD_1_0_0);
+    Config.register(AeadConfig.TINK_1_0_0);
   }
 
   @Test

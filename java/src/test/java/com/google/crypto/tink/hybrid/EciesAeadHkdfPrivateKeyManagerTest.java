@@ -19,12 +19,12 @@ package com.google.crypto.tink.hybrid;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
@@ -49,7 +49,7 @@ import org.junit.runners.JUnit4;
 public class EciesAeadHkdfPrivateKeyManagerTest {
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(Config.TINK_HYBRID_1_0_0);
+    Config.register(HybridConfig.TINK_1_0_0);
   }
 
   @Test

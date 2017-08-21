@@ -28,11 +28,11 @@ import java.util.logging.Logger;
  * HybridEncryptFactory allows obtaining a HybridEncrypt primitive from a {@code KeysetHandle}.
  *
  * HybridEncryptFactory gets primitives from the {@code Registry}, which can be initialized
- * via convenience methods from {@code HybridEncryptConfig}. Here is an example how one can obtain
- * and use a HybridEncrypt primitive:
+ * via convenience methods from {@code Config} and {@code HybridConfig}. Here is an
+ * example how one can obtain and use a HybridEncrypt primitive:
  * <pre>   {@code
  *   KeysetHandle keysetHandle = ...;
- *   HybridEncryptConfig.registerStandardKeyTypes();
+ *   Config.register(HybridConfig.TINK_1_0_0);
  *   HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(keysetHandle);
  *   byte[] plaintext = ...;
  *   byte[] contextInfo = ...;

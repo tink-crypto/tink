@@ -10,11 +10,13 @@ load("//java/build_defs:javac.bzl", "JAVACOPTS")
 
 FULL_PROTOS = [
     "//proto:common_java_proto",
+    "//proto:config_java_proto",
     "//proto:tink_java_proto",
 ]
 
 LITE_PROTOS = [
     "//proto:common_java_proto_lite",
+    "//proto:config_java_proto_lite",
     "//proto:tink_java_proto_lite",
 ]
 

@@ -26,7 +26,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
  * to generate new {@code Keyset} with {@code KeysetHandle}. To generate a new keyset
  * that contains a single {@code HmacKey}, one can do:
  * <pre>
- *   MacConfig.registerStandardKeyTypes();
+ *   Config.register(Mac.TINK_1_0_0);
  *   KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
  *   Mac mac = MacFactory.getPrimitive(handle);
  * </pre>

@@ -19,7 +19,7 @@ package com.google.crypto.tink;
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.config.Config;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
@@ -36,7 +36,7 @@ import org.junit.runners.JUnit4;
 public class NoSecretKeysetHandleTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
-    Config.register(Config.TINK_AEAD_1_0_0);
+    Config.register(TinkConfig.TINK_1_0_0);
   }
 
   @Test

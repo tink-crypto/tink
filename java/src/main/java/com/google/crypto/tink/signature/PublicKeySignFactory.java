@@ -31,11 +31,11 @@ import java.security.GeneralSecurityException;
  * {@code KeysetHandle}.
  *
  * PublicKeySignFactory gets primitives from the {@code Registry}, which can be initialized
- * via convenience methods from {@code PublicKeySignConfig}. Here is an example how one can obtain
- * and use a PublicKeySign primitive:
+ * via convenience methods from {@code Config} and {@code SignatureConfig}. Here is an example
+ * how one can obtain and use a PublicKeySign primitive:
  * <pre>   {@code
  *   KeysetHandle keysetHandle = ...;
- *   PublicKeySignConfig.registerStandardKeyTypes();
+ *   Config.register(SignatureConfig.TINK_1_0_0);
  *   PublicKeySign signer = PublicKeySignFactory.getPrimitive(keysetHandle);
  *   byte[] data = ...;
  *   byte[] signature = signer.sign(data);

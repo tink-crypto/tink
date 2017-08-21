@@ -1,0 +1,62 @@
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+package com.google.crypto.tink.hybrid;
+
+import com.google.crypto.tink.Config;
+import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.proto.RegistryConfig;
+import java.security.GeneralSecurityException;
+
+/**
+ * This class offers convenience methods and constants for initializing
+ * {@link HybridDecryptFactory} and the underlying {@link Registry}.
+ *
+ * For more information on how to obtain and use HybridDecrypt primitives,
+ * see {@link HybridDecryptFactory}.
+ */
+public final class HybridConfig {
+  private static final String CATALOGUE_NAME = "TinkHybrid";
+
+  public static final RegistryConfig TINK_1_0_0 = RegistryConfig.newBuilder()
+        .mergeFrom(AeadConfig.TINK_1_0_0)
+        .addEntry(Config.getTinkKeyTypeEntry(
+            CATALOGUE_NAME, "HybridDecrypt", "EciesAeadHkdfPrivateKey", 0, true))
+        .addEntry(Config.getTinkKeyTypeEntry(
+            CATALOGUE_NAME, "HybridEncrypt", "EciesAeadHkdfPublicKey", 0, true))
+        .setConfigName("TINK_HYBRID_1_0_0")
+        .build();
+
+  static {
+    try {
+      init();
+    } catch (GeneralSecurityException e) {
+      throw new ExceptionInInitializerError(e);
+    }
+  }
+
+  /**
+   * Registers all {@link HybridEncrypt} and {@link HybridDecrypt} catalogues with the
+   * {@link Registry}.
+   *
+   * <p>Because hybrid key types depend on {@link Aead} and {@link Mac} key types, this method
+   * also registers all {@link Aead} and {@link Mac} catalogues.
+   */
+  public static void init() throws GeneralSecurityException {
+    Registry.addCatalogue(CATALOGUE_NAME, new HybridCatalogue());
+    AeadConfig.init(); // includes Mac
+  }
+}

@@ -15,19 +15,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.hybrid;
 
-import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.Config;
 import com.google.crypto.tink.aead.AeadConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * HybridDecryptConfig offers convenience methods for initializing
- * {@code HybridDecryptFactory} and the underlying {@code Registry}.
+ * This class offers convenience methods and constants for initializing
+ * {@link HybridDecryptFactory} and the underlying {@link Registry}.
  *
  * For more information on how to obtain and use HybridDecrypt primitives,
- * see {@code HybridDecryptFactory}.
+ * see {@link HybridDecryptFactory}.
+ * @deprecated
  */
+@Deprecated
 public final class HybridDecryptConfig {
   /**
    * Registers standard (for the current release) HybridDecrypt key types
@@ -38,22 +38,14 @@ public final class HybridDecryptConfig {
    * keys forbids generation of new key material.
    *
    * NOTE: as some HybridDecrypt key types use Aead-primitives, this method registers
-   *       also standard Aead key types via {@code AeadConfig.registerStandardKeyTypes()}.
+   *       also standard Aead key types.
    *
    * @throws GeneralSecurityException
+   * @deprecated
    */
+  @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    AeadConfig.registerStandardKeyTypes();  // calls also MacConfig.registerStandardKeyTypes()
-    registerKeyManager(new EciesAeadHkdfPrivateKeyManager());
-  }
-
-  /**
-   * Registers the given {@code keyManager} for the key type {@code keyManager.getKeyType()}.
-   *
-   * @throws GeneralSecurityException
-   */
-  public static void registerKeyManager(final KeyManager<HybridDecrypt> keyManager)
-      throws GeneralSecurityException {
-    Registry.registerKeyManager(keyManager.getKeyType(), keyManager);
+    Config.register(HybridConfig.TINK_1_0_0);
+    Config.register(AeadConfig.TINK_1_0_0);
   }
 }

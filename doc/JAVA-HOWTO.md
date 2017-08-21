@@ -6,28 +6,44 @@ common tasks in [Tink](https://github.com/google/tink).
 ## Initializing Tink
 
 Tink provides customizable initialization, which allows for choosing specific
-implementations (identified by _key types_) of desired primitives.  This
-initialization happens via _registration_ of the implementations: for each
-_key type_ to be used one has to register a corresponding `KeyManager`-object,
-that "understands" the given _key type_.
+implementations (identified by _key types_) of desired primitives. This
+initialization happens via _registration_ of the implementations: for each _key
+type_ to be used one has to register a corresponding `KeyManager`-object, that
+"understands" the given _key type_.
 
-In a simple case when only Tink implementations of a single primitive are needed
-one can use `registerStandardKeyTypes()`-method from the corresponding
-convenience`Config`-class, which registers standard key types for the given
-release of Tink library.  For example if one wants to use the standard
-implementations of AEAD primitive, the initialization would look as follows:
+The
+[`Config`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Config.java)
+class provides a configuration language for specifying key types and their key
+managers to be used by Tink at runtime, and utilities for handling the
+configurations. This allows for customizable configuration without need of
+recompilation, and for cross-platform and cross-language synchronization wrt.
+supported implementations of primitives. Tink also offers ready-to-use
+configurations that should work for most users. For example to register standard
+implementations of AEAD primitive from Tink 1.0.0 one can write:
 
-``` java
+```java
+    import com.google.crypto.tink.Config;
     import com.google.crypto.tink.aead.AeadConfig;
-    // (...)
 
-    // Register standard implementations of AEAD primitive.
-    AeadConfig.registerStandardKeyTypes();
+    // Register standard implementations of AEAD primitive from release 1.0.0.
+    Config.register(AeadConfig.Tink_1_0_0);
 ```
 
-For custom initialization the registration can proceed directly via `Registry`-class:
+To register all standard key types of **all primitives** offered by Tink 1.0.0
+one would just use different pre-defined configuration:
 
-``` java
+```java
+    import com.google.crypto.tink.Config;
+    import com.google.crypto.tink.config.TinkConfig;
+
+    // Register standard implementations of AEAD primitive from release 1.
+    Config.register(TinkConfig.TINK_1_0_0);
+```
+
+For custom initialization the registration can proceed directly via
+`Registry`-class:
+
+```java
     import com.google.crypto.tink.Registry;
     import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
     import my.custom.package.aead.MyAeadKeyManager;
@@ -41,77 +57,35 @@ For custom initialization the registration can proceed directly via `Registry`-c
 
 ```
 
-For more complex use cases, with multiple primitives and custom implementations,
-one can use Tink configuration tools from [`com.google.crypto.tink.config`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config)-package,
-which provides a configuration language for specifying key types and their key
-managers to be used by Tink at runtime, and utilities for handling the
-configurations.  This allows for customizable configuration without need of
-recompilation, and for cross-platform and cross-language synchronization
-wrt. supported implementations of primitives.  [`Config`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config/Config.java)-class
-contains pre-defined configurations for specific primitives offered by a Tink
-release. For example to register standard implementations of AEAD primitive from
-Tink release 1 one can write:
-
-``` java
-    import com.google.crypto.tink.config.Config;
-    // (...)
-
-    // Register standard implementations of AEAD primitive from release 1.
-    Config.register(Config.TINK_JAVA_AEAD_REL_1);
-```
-
-To register all standard key types of **all primitives** offered by Tink release
-1 one would just use different pre-defined configuration:
-
-``` java
-    import com.google.crypto.tink.config.Config;
-    // (...)
-
-    // Register standard implementations of AEAD primitive from release 1.
-    Config.register(Config.TINK_JAVA_REL_1);
-```
-
 The registration mechanism and Tink configurations provide also support for
 deprecation of _key types_: the corresponding key manager can be registered in a
 "no new key"-mode, which allows for usage of existing keys forbids generation of
-new key material for the given _key type_ (see [`Registry`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Registry.java)-class
-and `KeyTypeEntry`in [`config.proto`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/proto/config.proto)).
+new key material for the given _key type_ (see
+[`Registry`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Registry.java)-class
+and `KeyTypeEntry`in
+[`config.proto`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/proto/config.proto)).
 
 **NOTE**: Registration of a _key type_ is a one-time operation, and replacing a
-key manager registered for a _key type_ is forbidden (it will result in an
-exception).  Since some primitives are used as building blocks for more complex
-primitives (e.g. an AEAD primitive can use a MAC primitive as a sub-primitive),
-the order of standard registrations is important, as standard registration for a
-primitive covers also the required sub-primitives . For example if one first
-registers AEAD implementations using `AeadConfig.registerStandardKeyTypes();`
-then a subsequent attempt to register MAC implementations via
-`MacConfig.registerStandardKeyTypes();` (or via
-`Config.register(Config.TINK_JAVA_MAC_REL_1);` will fail, as the
-AEAD-registration already includes MAC-registration.  Please refer for details
-to the documentation of the corresponding primitives and their configs.
-
-
-
+key manager registered for a _key type_ is forbidden, if the new key manager is
+not an instance of the same class as the existing one (it will result in an
+exception).
 
 ## Generating New Key(set)s
 
 Each `KeyManager`-implementation provides `newKey(..)`-methods that generate new
-keys of the corresponding key type.  However to avoid accidental leakage of
+keys of the corresponding key type. However to avoid accidental leakage of
 sensitive key material one should be careful with mixing key(set) generation
-with key(set) usage in code.  To support the separation between these
-activities Tink package provides a command-line tool
-called [Tinkey](https://github.com/google/tink/tree/master/tools/tinkey), which
-can be used for common key management tasks.  Moreover, there is also
-[`KmsEncryptedKeysetHandle`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KmsEncryptedKeysetHandle.java)-class,
-which enables working with keysets in which the sensitive key material is
-encrypted with a KMS-managed key.
+with key(set) usage in code. To support the separation between these activities
+Tink package provides a command-line tool called
+[Tinkey](https://github.com/google/tink/tree/master/tools/tinkey), which can be
+used for common key management tasks.
 
 Still, if there is a need to generate a KeysetHandle with fresh key material
 directly in Java code, one can use
-[`CleartextKeysetHandle`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/CleartextKeysetHandle.java)-class:
+[`KeysetHandle`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeysetHandle.java)-class:
 
-``` java
-    KeysetHandle keysetHandle = CleartextKeysetHandle.generateNew(keyTemplate);
+```java
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(keyTemplate);
 ```
 
 where `keyTemplate` can be initialized with one of pre-generated templates from
@@ -120,18 +94,21 @@ Alternatively, one can use also
 [`KeysetManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeysetManager.java)-class.
 
 ## Loading Existing Keysets
-Via [`KmsEncryptedKeysetHandle`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KmsEncryptedKeysetHandle.java) or
+
+Via
+[`KmsEncryptedKeysetHandle`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KmsEncryptedKeysetHandle.java)
+or
 [`CleartextKeysetHandle`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/CleartextKeysetHandle.java),
 
 TODO: write more in this section
 
 ## Creating and Using a Primitive
 
-After all needed KeyManagers have been registered, one creates a primitive
-via the corresponding factory.  For example, here is how to create and use
+After all needed KeyManagers have been registered, one creates a primitive via
+the corresponding factory. For example, here is how to create and use
 AEAD-primitive:
 
-``` java
+```java
     import com.google.crypto.tink.Aead;
     import com.google.crypto.tink.aead.AeadFactory;
     import com.google.crypto.tink.KeysetHandle;
@@ -145,7 +122,6 @@ AEAD-primitive:
     byte[] ciphertext = aead.encrypt(plaintext, aad);
 ```
 
-
 ## Key Rotation
 
 The support for key rotation in Tink is provided via
@@ -154,7 +130,7 @@ One has to provide a `KeysetHandle`-object that contains the keyset that should
 be rotated, and a specification of the new key via a
 [`KeyTemplate`](https://github.com/google/tink/blob/master/proto/tink.proto#L50)-message.
 
-``` java
+```java
     import com.google.crypto.tink.KeysetHandle;
     import com.google.crypto.tink.KeysetManager;
     import com.google.crypto.tink.proto.KeyTemplate;
@@ -169,54 +145,56 @@ be rotated, and a specification of the new key via a
         .getKeysetHandle();
 ```
 
-Some common specifications are available as pre-generated templates
-in [examples/keytemplates](https://github.com/google/tink/tree/master/examples/keytemplates)-folder,
+Some common specifications are available as pre-generated templates in
+[examples/keytemplates](https://github.com/google/tink/tree/master/examples/keytemplates)-folder,
 and can be accessed via `...KeyTemplates.java` classes of the respective
-primitives.  After a successful rotation the resulting keyset contains a new key
+primitives. After a successful rotation the resulting keyset contains a new key
 generated according to the specification in `keyTemplate`, and the new key
-becomes the _primary key_ of the keyset.  For the rotation to succeed the
+becomes the _primary key_ of the keyset. For the rotation to succeed the
 `Registry` must contain a key manager for the key type specified in
 `keyTemplate`.
 
-Alternatively, one can
-use [Tinkey](https://github.com/google/tink/tree/master/tools/tinkey) to rotate
-a key.
+Alternatively, one can use
+[Tinkey](https://github.com/google/tink/tree/master/tools/tinkey) to rotate a
+key.
 
 TODO: write more about Tinkey
 
 ## Custom Implementation of a Primitive
 
-**NOTE**: The usage of **custom key managers should be enjoyed
-responsibly**: we (i.e. Tink developers) have no way checking or enforcing that
-a custom implementation satisfies security properties of the corresponding
-primitive interface, so it is up to the implementer and the user of the custom
+**NOTE**: The usage of **custom key managers should be enjoyed responsibly**: we
+(i.e. Tink developers) have no way checking or enforcing that a custom
+implementation satisfies security properties of the corresponding primitive
+interface, so it is up to the implementer and the user of the custom
 implementation ensure the required properties.
 
 As described in [Tink overview](../README.md#tink-overview), the main
 cryptographic operations offered by Tink are accessible via so-called
 _primitives_, which essentially are interfaces that represent corresponding
-cryptographic functionalities.  While Tink comes with several standard
+cryptographic functionalities. While Tink comes with several standard
 implementations of common primitives, it allows also for adding custom
-implementations of primitives.  Such implementations allow for seamless
+implementations of primitives. Such implementations allow for seamless
 integration of Tink with custom third-party cryptographic schemes or hardware
 modules, and in combination with [key rotation](#key-rotation)-features enable
 painless migration between cryptographic schemes.
 
 To create a custom implementation of a primitive proceed as follows:
 
-1. Determine for which _primitive_ a custom implementation is needed.
-2. Define protocol buffers that hold key material and parameters for the custom
-   cryptographic scheme; the name of the key protocol buffer (a.k.a. type URL)
-   determines the _key type_ for the custom implementation.
-3. Implement [`KeyManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeyManager.java)
-   interface for the _primitive_ from step #1 and the _key type_ from step #2.
+1.  Determine for which _primitive_ a custom implementation is needed.
+2.  Define protocol buffers that hold key material and parameters for the custom
+    cryptographic scheme; the name of the key protocol buffer (a.k.a. type URL)
+    determines the _key type_ for the custom implementation.
+3.  Implement
+    [`KeyManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeyManager.java)
+    interface for the _primitive_ from step #1 and the _key type_ from step #2.
 
 To use a custom implementation of a primitive in an application, register with
-the [`Registry`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Registry.java)
+the
+[`Registry`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Registry.java)
 the custom `KeyManager`-implementation (from step #3 above) for the custom key
 type (from step #2 above):
 
-``` java
+```java
     Registry.registerKeyManager(keyType, keyManager);
 ```
 
@@ -227,23 +205,25 @@ or can be retrieved directly via `Registry.getKeyManager(keyType)`.
 When defining the protocol buffers for the key material and parameters (step #2
 above), one should provide definitions of three messages:
 
- * `...Params`: parameters of an instantiation of the primitive,
-   needed when a key is being used.
- * `...Key`: the actual key proto, contains the key material and the
-   corresponding `...Params`-proto.
- * `...KeyFormat`: parameters needed to generate a new key.
+*   `...Params`: parameters of an instantiation of the primitive, needed when a
+    key is being used.
+*   `...Key`: the actual key proto, contains the key material and the
+    corresponding `...Params`-proto.
+*   `...KeyFormat`: parameters needed to generate a new key.
 
-Here are a few conventions/recommendations wrt. defining these messages
-(see [tink.proto](https://github.com/google/tink/blob/master/proto/tink.proto)
-and defintions of [existing key types](https://github.com/google/tink/blob/master/proto/)
-for details):
+Here are a few conventions/recommendations wrt. defining these messages (see
+[tink.proto](https://github.com/google/tink/blob/master/proto/tink.proto) and
+defintions of [existing key
+types](https://github.com/google/tink/blob/master/proto/) for details):
 
- * `...Key` should contain a version field (a monotonic counter, `uint32 version;`),
-   which identifies the version of implementation that can work with this key.
- * `...Params` should be a field of `...Key`, as by definition `...Params`
-   contains parameters needed when the key is being used.
- * `...Params` should be also a field of `...KeyFormat`, so that given `...KeyFormat`
-   one has all information it needs to generate a new `...Key` message.
+*   `...Key` should contain a version field (a monotonic counter, `uint32
+    version;`), which identifies the version of implementation that can work
+    with this key.
+*   `...Params` should be a field of `...Key`, as by definition `...Params`
+    contains parameters needed when the key is being used.
+*   `...Params` should be also a field of `...KeyFormat`, so that given
+    `...KeyFormat` one has all information it needs to generate a new `...Key`
+    message.
 
 Alternatively, depending on the use case requirements, one can skip step #2
 entirely and re-use for the key material an existing protocol buffer messages.
@@ -253,13 +233,16 @@ register the needed `KeyManager`-instances manually.
 
 For a concrete example, let's assume that we'd like a custom implementation of
 [`Aead`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/Aead.java)-primitive
-(step #1).  We define then three protocol buffer messages (step #2):
+(step #1). We define then three protocol buffer messages (step #2):
 
- * `MyCustomAeadParams`: holds parameters needed for the use of the key material.
- * `MyCustomAeadKey`: holds the actual key material and parameters needed for its use.
- * `MyCustomAeadKeyFormat`: holds parameters needed for generation of a new `MyCustomAeadKey`-key.
+*   `MyCustomAeadParams`: holds parameters needed for the use of the key
+    material.
+*   `MyCustomAeadKey`: holds the actual key material and parameters needed for
+    its use.
+*   `MyCustomAeadKeyFormat`: holds parameters needed for generation of a new
+    `MyCustomAeadKey`-key.
 
-``` protocol-buffer
+```protocol-buffer
     syntax = "proto3";
     package mycompany.mypackage;
 
@@ -282,22 +265,22 @@ For a concrete example, let's assume that we'd like a custom implementation of
 
 The corresponding _key type_ in Java is defined as
 
-``` java
+```java
     String keyType = "type.googleapis.com/mycompany.mypackage.MyCustomAeadKey";`
 ```
 
 and the corresponding _key manager_ implements (step #3) the interface
 [`KeyManager<Aead>`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeyManager.java)
 
-``` java
+```java
     class MyCustomAeadKeyManager implements KeyManager<Aead> {
       // ...
     }
 ```
 
-After registering `MyCustomAeadKeyManager` with the Registry we can use it
-via [`AeadFactory`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/aead/AeadFactory.java).
-
+After registering `MyCustomAeadKeyManager` with the Registry we can use it via
+[`AeadFactory`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/aead/AeadFactory.java).
 
 ## Adding a Custom Primitive
+
 TODO: write this section

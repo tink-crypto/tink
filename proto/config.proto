@@ -37,7 +37,7 @@ message KeyTypeEntry {
 // A complete configuration of Tink library: a list of key types
 // to be available via the Registry after initialization.
 // All fields are required.
-message TinkConfig {
+message RegistryConfig {
   string config_name = 1;
   repeated KeyTypeEntry entry = 2;
 }
