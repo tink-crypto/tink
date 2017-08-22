@@ -159,7 +159,7 @@ cc_library(
     name = "ecies_aead_hkdf_private_key_manager",
     srcs = ["ecies_aead_hkdf_private_key_manager.cc"],
     hdrs = ["ecies_aead_hkdf_private_key_manager.h"],
-    visibility = ["//visibility:private"],
+    visibility = ["//objc/hybrid:__pkg__"],
     deps = [
         ":ecies_aead_hkdf_hybrid_decrypt",
         "//cc:hybrid_decrypt",
@@ -177,7 +177,7 @@ cc_library(
     name = "ecies_aead_hkdf_public_key_manager",
     srcs = ["ecies_aead_hkdf_public_key_manager.cc"],
     hdrs = ["ecies_aead_hkdf_public_key_manager.h"],
-    visibility = ["//visibility:private"],
+    visibility = ["//objc/hybrid:__pkg__"],
     deps = [
         ":ecies_aead_hkdf_hybrid_encrypt",
         "//cc:hybrid_encrypt",
