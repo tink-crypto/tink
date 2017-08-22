@@ -25,6 +25,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.util.ArrayList;
 import java.util.List;
+import org.joda.time.Instant;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -231,7 +232,29 @@ public final class PaymentMethodTokenRecipient {
         PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1,
         signedMessage);
     verify(signature, signedBytes);
-    return decrypt(signedMessage);
+    String decryptedMessage = decrypt(signedMessage);
+    validateDecryptedMessage(decryptedMessage);
+    return decryptedMessage;
+  }
+
+  private void validateDecryptedMessage(String decryptedMessage) throws GeneralSecurityException {
+    JSONObject decodedMessage;
+    try {
+      decodedMessage = new JSONObject(decryptedMessage);
+    } catch (JSONException e) {
+      // Message wasn't a valid JSON, so nothing to validate.
+      return;
+    }
+
+    // If message expiration is present, checking it.
+    if (decodedMessage.has(PaymentMethodTokenConstants.JSON_MESSAGE_EXPIRATION_KEY)) {
+      Long expirationInMillis =
+          Long.parseLong(decodedMessage.getString(
+              PaymentMethodTokenConstants.JSON_MESSAGE_EXPIRATION_KEY));
+      if (expirationInMillis <= Instant.now().getMillis()) {
+        throw new GeneralSecurityException("expired payload");
+      }
+    }
   }
 
   private void verify(final byte[] signature,

@@ -43,4 +43,5 @@ public final class PaymentMethodTokenConstants {
   public static final String JSON_SIGNATURE_KEY = "signature";
   public static final String JSON_SIGNED_MESSAGE_KEY = "signedMessage";
   public static final String JSON_PROTOCOL_VERSION_KEY = "protocolVersion";
+  public static final String JSON_MESSAGE_EXPIRATION_KEY = "messageExpiration";
 }

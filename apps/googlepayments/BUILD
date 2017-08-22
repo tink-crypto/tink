@@ -11,6 +11,7 @@ java_library(
         "//java",
         "//java:subtle",
         "@com_google_guava//jar",
+        "@joda_time//jar",
         "@json//jar",
     ],
 )
@@ -28,6 +29,7 @@ java_library(
     deps = [
         ":payment_token_method",
         "//java:testonly",
+        "@joda_time//jar",
         "@json//jar",
         "@junit_junit_4//jar",
     ],

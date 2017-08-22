@@ -20,19 +20,39 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.security.GeneralSecurityException;
+import org.joda.time.Days;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.joda.time.Instant;
 
 /**
  * Unit tests for {@code PaymentMethodTokenRecipient}.
  */
 @RunWith(JUnit4.class)
 public class PaymentMethodTokenRecipientTest {
+
   /**
-   * Created with:
+   * Sample merchant public key.
+   *
+   * <p>Corresponds to public key of {@link #MERCHANT_PRIVATE_KEY_PKCS8_BASE64}
+   *
+   * <p>Created with:
+   *
+   * <pre>
+   * openssl ec -in merchant-key.pem -pubout -text -noout 2> /dev/null | grep "pub:" -A5 \
+   *     | xxd -r -p | base64
+   * </pre>
+   */
+  private static final String MERCHANT_PUBLIC_KEY_BASE64 =
+      "BOdoXP+9Aq473SnGwg3JU1aiNpsd9vH2ognq4PtDtlLGa3Kj8TPf+jaQNPyDSkh3JUhiS0KyrrlWhAgNZKHYF2Y=";
+
+  /**
+   * Sample merchant private key.
+   *
+   * <p>Corresponds to the private key of {@link #MERCHANT_PUBLIC_KEY_BASE64}
    *
    * <pre>
    * openssl pkcs8 -topk8 -inform PEM -outform PEM -in merchant-key.pem -nocrypt
@@ -43,17 +63,14 @@ public class PaymentMethodTokenRecipientTest {
           + "chHPyDu2NXFe0vDBoTpPkYaK9dehRANCAATnaFz/vQKuO90pxsINyVNWojabHfbx"
           + "9qIJ6uD7Q7ZSxmtyo/Ez3/o2kDT8g0pIdyVIYktCsq65VoQIDWSh2Bdm";
 
+  /** An alternative merchant private key used during the tests. */
   private static final String ALTERNATE_MERCHANT_PRIVATE_KEY_PKCS8_BASE64 =
       "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgOUIzccyJ3rTx6SVm"
           + "XrWdtwUP0NU26nvc8KIYw2GmYZKhRANCAAR5AjmTNAE93hQEQE+PryLlgr6Q7FXyN"
           + "XoZRk+1Fikhq61mFhQ9s14MOwGBxd5O6Jwn/sdUrWxkYk3idtNEN1Rz";
 
   /**
-   * Public key value created with:
-   *
-   * <pre>
-   * openssl ec -in google-key.pem -inform PEM -outform PEM -pubout
-   * </pre>
+   * Sample Google provided JSON with its public signing keys.
    */
   private static final String GOOGLE_VERIFYING_PUBLIC_KEYS_JSON =
       "{\n"
@@ -65,6 +82,16 @@ public class PaymentMethodTokenRecipientTest {
           + "    },\n"
           + "  ],\n"
           + "}";
+
+  /**
+   * Sample Google private signing key.
+   *
+   * <p>Corresponds to private key of the key in {@link #GOOGLE_VERIFYING_PUBLIC_KEYS_JSON}.
+   */
+  private static final String GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64 =
+      "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgZj/Dldxz8fvKVF5O"
+          + "TeAtK6tY3G1McmvhMppe6ayW6GahRANCAAQ9icfBLy56BYB7BC2XGLOYsXKfAdzF"
+          + "FPU8rTtwMDr8LixetUjVLNkJTHxTxLQuMytPqKt39Vbtt7czPq3+yu1F";
 
   private static final String RECIPIENT_ID = "someRecipient";
 
@@ -306,6 +333,59 @@ public class PaymentMethodTokenRecipientTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
+    }
+  }
+
+  @Test
+  public void testShouldSucceedIfMessageIsNotExpired() throws Exception {
+    PaymentMethodTokenSender sender = new PaymentMethodTokenSender.Builder()
+        .senderSigningKey(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)
+        .recipientId(RECIPIENT_ID)
+        .rawUncompressedRecipientPublicKey(MERCHANT_PUBLIC_KEY_BASE64)
+        .build();
+    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
+        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+        .recipientId(RECIPIENT_ID)
+        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+        .build();
+
+    String ciphertext = sender.seal(
+        new JSONObject()
+            .put(
+                "messageExpiration",
+                // One day in the future
+                String.valueOf(Instant.now().plus(Days.ONE.toStandardDuration()).getMillis()))
+            .put("someKey", "someValue")
+            .toString());
+    assertEquals(
+        "someValue", new JSONObject(recipient.unseal(ciphertext)).getString("someKey"));
+  }
+
+  @Test
+  public void testShouldFailIfMessageIsExpired() throws Exception {
+    PaymentMethodTokenSender sender = new PaymentMethodTokenSender.Builder()
+        .senderSigningKey(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)
+        .recipientId(RECIPIENT_ID)
+        .rawUncompressedRecipientPublicKey(MERCHANT_PUBLIC_KEY_BASE64)
+        .build();
+    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
+        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+        .recipientId(RECIPIENT_ID)
+        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+        .build();
+
+    String ciphertext = sender.seal(
+        new JSONObject()
+            .put(
+                "messageExpiration",
+                // One day in the past
+                String.valueOf(Instant.now().minus(Days.ONE.toStandardDuration()).getMillis()))
+            .toString());
+    try {
+      recipient.unseal(ciphertext);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertEquals("expired payload", e.getMessage());
     }
   }
 }
