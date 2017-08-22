@@ -69,7 +69,7 @@ public class CleartextKeysetHandleTest {
     Keyset keyset1 = manager.getKeysetHandle().getKeyset();
 
     KeysetHandle handle1 = CleartextKeysetHandle.read(
-        KeysetReaders.withBytes(keyset1.toByteArray()));
+        BinaryKeysetReader.withBytes(keyset1.toByteArray()));
     assertEquals(keyset1, handle1.getKeyset());
 
     KeysetHandle handle2 = KeysetHandle.generateNew(template);
@@ -94,10 +94,10 @@ public class CleartextKeysetHandleTest {
         .rotate(template)
         .getKeysetHandle();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
+    KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
     CleartextKeysetHandle.write(handle, writer);
     ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-    KeysetReader reader = KeysetReaders.withInputStream(inputStream);
+    KeysetReader reader = BinaryKeysetReader.withInputStream(inputStream);
     KeysetHandle handle2 = CleartextKeysetHandle.read(reader);
     assertEquals(handle.getKeyset(), handle2.getKeyset());
   }
@@ -115,7 +115,7 @@ public class CleartextKeysetHandleTest {
     proto[0] = (byte) ~proto[0];
     try {
       KeysetHandle unused = CleartextKeysetHandle.read(
-          KeysetReaders.withBytes(proto));
+          BinaryKeysetReader.withBytes(proto));
       fail("Expected IOException");
     } catch (IOException e) {
       // expected
@@ -127,14 +127,14 @@ public class CleartextKeysetHandleTest {
     KeysetHandle unused;
 
     try {
-      unused = CleartextKeysetHandle.read(KeysetReaders.withBytes(new byte[0]));
+      unused = CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0]));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");
     }
 
     try {
-      unused = CleartextKeysetHandle.read(KeysetReaders.withBytes(new byte[0]));
+      unused = CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0]));
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");

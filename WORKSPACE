@@ -166,6 +166,12 @@ maven_jar(
 )
 
 maven_jar(
+    name = "com_google_protobuf_java_util",
+    artifact = "com.google.protobuf:protobuf-java-util:3.3.0",
+    sha1 = "f78f5d3c05053470023b12cbe4a94419d3792274",
+)
+
+maven_jar(
     name = "com_fasterxml_jackson_core",
     artifact = "com.fasterxml.jackson.core:jackson-core:2.9.0",
     sha1 = "88e7c6220be3b3497b3074d3fc7754213289b987",
@@ -184,7 +190,7 @@ maven_jar(
 )
 
 maven_jar(
-    name = "json",
+    name = "org_json_json",
     artifact = "org.json:json:20170516",
     sha1 = "949abe1460757b8dc9902c562f83e49675444572",
 )

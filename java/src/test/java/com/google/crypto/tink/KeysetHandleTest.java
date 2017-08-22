@@ -83,10 +83,10 @@ public class KeysetHandleTest {
     Aead masterKey = Registry.getPrimitive(
         Registry.newKeyData(masterKeyTemplate));
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
+    KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
     handle.write(writer, masterKey);
     ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-    KeysetReader reader = KeysetReaders.withInputStream(inputStream);
+    KeysetReader reader = BinaryKeysetReader.withInputStream(inputStream);
     KeysetHandle handle2 = KeysetHandle.read(reader, masterKey);
     assertEquals(handle.getKeyset(), handle2.getKeyset());
   }
@@ -131,7 +131,7 @@ public class KeysetHandleTest {
     // Encrypt with dummy Aead.
     TestUtil.DummyAead faultyAead = new TestUtil.DummyAead();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    KeysetWriter writer = KeysetWriters.withOutputStream(outputStream);
+    KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
     try {
       handle.write(writer, faultyAead);
       fail("Expected GeneralSecurityException");
@@ -144,7 +144,7 @@ public class KeysetHandleTest {
   public void testVoidInputs() throws Exception {
     KeysetHandle unused;
     try {
-      KeysetReader reader = KeysetReaders.withBytes(new byte[0]);
+      KeysetReader reader = BinaryKeysetReader.withBytes(new byte[0]);
       unused = KeysetHandle.read(reader, null /* masterKey */);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {

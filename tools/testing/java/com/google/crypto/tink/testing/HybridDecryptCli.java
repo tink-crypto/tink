@@ -16,11 +16,11 @@
 
 package com.google.crypto.tink.testing;
 
+import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KeysetReaders;
 import com.google.crypto.tink.hybrid.HybridConfig;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 import java.io.ByteArrayOutputStream;
@@ -69,7 +69,7 @@ public class HybridDecryptCli {
     // Read the keyset.
     System.out.println("Reading the keyset...");
     KeysetHandle keysetHandle = CleartextKeysetHandle.read(
-        KeysetReaders.withFile(new File(keysetFilename)));
+        BinaryKeysetReader.withFile(new File(keysetFilename)));
 
     // Get the primitive.
     System.out.println("Getting the primitive...");

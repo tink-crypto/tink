@@ -20,13 +20,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.BinaryKeysetReader;
+import com.google.crypto.tink.BinaryKeysetWriter;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetReader;
-import com.google.crypto.tink.KeysetReaders;
 import com.google.crypto.tink.KeysetWriter;
-import com.google.crypto.tink.KeysetWriters;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TextFormatKeysetReaders;
@@ -169,7 +169,7 @@ class TinkeyUtil {
     if (inFormat == null || inFormat.toLowerCase().equals("text")) {
       return TextFormatKeysetReaders.withInputStream(inputStream);
     }
-    return KeysetReaders.withInputStream(inputStream);
+    return BinaryKeysetReader.withInputStream(inputStream);
   }
 
   /**
@@ -180,7 +180,7 @@ class TinkeyUtil {
     if (outFormat == null || outFormat.toLowerCase().equals("text")) {
       return TextFormatKeysetWriters.withOutputStream(outputStream);
     }
-    return KeysetWriters.withOutputStream(outputStream);
+    return BinaryKeysetWriter.withOutputStream(outputStream);
   }
 
   /**

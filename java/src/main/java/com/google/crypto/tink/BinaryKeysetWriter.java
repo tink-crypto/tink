@@ -24,34 +24,31 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * This class consists exclusively of static methods that create new writers that can write
- * keysets in proto binary format to common storage systems.
+ * A {@link KeysetWriter} that can write keysets in binary wire format,
+ * see {@link https://developers.google.com/protocol-buffers/docs/encoding}.
  */
-public final class KeysetWriters {
+public final class BinaryKeysetWriter implements KeysetWriter {
+  private final OutputStream outputStream;
+
+  private BinaryKeysetWriter(OutputStream stream) {
+    outputStream = stream;
+  }
 
   public static KeysetWriter withOutputStream(OutputStream stream) {
-    return new OutputStreamKeysetWriter(stream);
+    return new BinaryKeysetWriter(stream);
   }
 
   public static KeysetWriter withFile(File file) throws IOException {
-    return new OutputStreamKeysetWriter(new FileOutputStream(file));
+    return new BinaryKeysetWriter(new FileOutputStream(file));
   }
 
-  private static class OutputStreamKeysetWriter implements KeysetWriter {
-    private final OutputStream outputStream;
+  @Override
+  public void write(Keyset keyset) throws IOException {
+    outputStream.write(keyset.toByteArray());
+  }
 
-    public OutputStreamKeysetWriter(OutputStream stream) {
-      outputStream = stream;
-    }
-
-    @Override
-    public void write(Keyset keyset) throws IOException {
-      outputStream.write(keyset.toByteArray());
-    }
-
-    @Override
-    public void write(EncryptedKeyset keyset) throws IOException {
-      outputStream.write(keyset.toByteArray());
-    }
+  @Override
+  public void write(EncryptedKeyset keyset) throws IOException {
+    outputStream.write(keyset.toByteArray());
   }
 }

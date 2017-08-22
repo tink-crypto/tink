@@ -238,7 +238,8 @@ public final class PaymentMethodTokenRecipient {
     return decryptedMessage;
   }
 
-  private void validateDecryptedMessage(String decryptedMessage) throws GeneralSecurityException {
+  private void validateDecryptedMessage(String decryptedMessage)
+      throws GeneralSecurityException, JSONException {
     JSONObject decodedMessage;
     try {
       decodedMessage = new JSONObject(decryptedMessage);

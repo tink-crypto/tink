@@ -191,9 +191,11 @@ java_library(
         "@com_fasterxml_jackson_core//jar",
         "@com_google_api_client//jar",
         "@com_google_guava//jar",
+        "@com_google_protobuf_java_util//jar",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
         "@com_google_truth//jar",
         "@junit_junit_4//jar",
+        "@org_json_json//jar",
         "@org_mockito//jar",
     ],
 )

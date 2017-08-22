@@ -25,38 +25,35 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * This class consists exclusively of static methods that create new readers that can reader
- * keysets in proto binary format from common storage systems.
+ * A {@link KeysetReader} that can read cleartext or encrypted keysets in binary wire format,
+ * see {@link https://developers.google.com/protocol-buffers/docs/encoding}.
  */
-public final class KeysetReaders {
+public final class BinaryKeysetReader implements KeysetReader {
+  private final InputStream inputStream;
 
   public static KeysetReader withInputStream(InputStream stream) {
-    return new InputStreamKeysetReader(stream);
+    return new BinaryKeysetReader(stream);
   }
 
   public static KeysetReader withBytes(final byte[] bytes) {
-    return new InputStreamKeysetReader(new ByteArrayInputStream(bytes));
+    return new BinaryKeysetReader(new ByteArrayInputStream(bytes));
   }
 
   public static KeysetReader withFile(File file) throws IOException {
-    return new InputStreamKeysetReader(new FileInputStream(file));
+    return new BinaryKeysetReader(new FileInputStream(file));
   }
 
-  private static class InputStreamKeysetReader implements KeysetReader {
-    private final InputStream inputStream;
+  private BinaryKeysetReader(InputStream stream) {
+    inputStream = stream;
+  }
 
-    public InputStreamKeysetReader(InputStream stream) {
-      inputStream = stream;
-    }
+  @Override
+  public Keyset read() throws IOException {
+    return Keyset.parseFrom(inputStream);
+  }
 
-    @Override
-    public Keyset read() throws IOException {
-      return Keyset.parseFrom(inputStream);
-    }
-
-    @Override
-    public EncryptedKeyset readEncrypted() throws IOException {
-      return EncryptedKeyset.parseFrom(inputStream);
-    }
+  @Override
+  public EncryptedKeyset readEncrypted() throws IOException {
+    return EncryptedKeyset.parseFrom(inputStream);
   }
 }

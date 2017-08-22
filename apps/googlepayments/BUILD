@@ -11,7 +11,7 @@ java_library(
         "//java",
         "//java:subtle",
         "@joda_time//jar",
-        "@json//jar",
+        "@org_json_json//jar",
     ],
 )
 
@@ -29,8 +29,8 @@ java_library(
         ":payment_token_method",
         "//java:testonly",
         "@joda_time//jar",
-        "@json//jar",
         "@junit_junit_4//jar",
+        "@org_json_json//jar",
     ],
 )
 
