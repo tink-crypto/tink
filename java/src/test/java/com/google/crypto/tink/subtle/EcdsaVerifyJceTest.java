@@ -569,7 +569,7 @@ public class EcdsaVerifyJceTest {
   }
 
   public ECPublicKeySpec publicKey1() throws Exception {
-    ECParameterSpec params = EcUtil.getNistP256Params();
+    ECParameterSpec params = EllipticCurves.getNistP256Params();
     ECPoint w = new ECPoint(PubX, PubY);
     return new ECPublicKeySpec(w, params);
   }
@@ -607,7 +607,7 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testBasic() throws Exception {
-    ECParameterSpec ecParams = EcUtil.getNistP256Params();
+    ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
     KeyPair keyPair = keyGen.generateKeyPair();
@@ -632,7 +632,7 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testBitFlip() throws Exception {
-    ECParameterSpec ecParams = EcUtil.getNistP256Params();
+    ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
     KeyPair keyPair = keyGen.generateKeyPair();

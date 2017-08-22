@@ -33,11 +33,11 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   private final EciesHkdfRecipientKem recipientKem;
   private final String hkdfHmacAlgo;
   private final byte[] hkdfSalt;
-  private final EcUtil.PointFormatEnum ecPointFormat;
+  private final EllipticCurves.PointFormatType ecPointFormat;
   private final EciesAeadHkdfDemHelper demHelper;
 
   public EciesAeadHkdfHybridDecrypt(final ECPrivateKey recipientPrivateKey,
-      final byte[] hkdfSalt, String hkdfHmacAlgo, EcUtil.PointFormatEnum ecPointFormat,
+      final byte[] hkdfSalt, String hkdfHmacAlgo, EllipticCurves.PointFormatType ecPointFormat,
       EciesAeadHkdfDemHelper demHelper)
       throws GeneralSecurityException {
     this.recipientPrivateKey = recipientPrivateKey;
@@ -52,7 +52,7 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
       throws GeneralSecurityException {
     EllipticCurve curve = recipientPrivateKey.getParams().getCurve();
-    int headerSize = EcUtil.encodingSizeInBytes(curve, ecPointFormat);
+    int headerSize = EllipticCurves.encodingSizeInBytes(curve, ecPointFormat);
     if (ciphertext.length < headerSize) {
       throw new GeneralSecurityException("ciphertext too short");
     }

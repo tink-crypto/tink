@@ -24,9 +24,9 @@ import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EciesHkdfKemParams;
 import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -76,15 +76,15 @@ public final class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<H
     EciesAeadHkdfParams eciesParams = recipientKeyProto.getPublicKey().getParams();
     EciesHkdfKemParams kemParams = eciesParams.getKemParams();
 
-    ECPrivateKey recipientPrivateKey = EcUtil.getEcPrivateKey(
-        HybridUtil.toCurveTypeEnum(kemParams.getCurveType()),
+    ECPrivateKey recipientPrivateKey = EllipticCurves.getEcPrivateKey(
+        HybridUtil.toCurveType(kemParams.getCurveType()),
         recipientKeyProto.getKeyValue().toByteArray());
     EciesAeadHkdfDemHelper demHelper = new RegistryEciesAeadHkdfDemHelper(
         eciesParams.getDemParams().getAeadDem());
     return new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
         kemParams.getHkdfSalt().toByteArray(),
         HybridUtil.toHmacAlgo(kemParams.getHkdfHashType()),
-        HybridUtil.toPointFormatEnum(eciesParams.getEcPointFormat()),
+        HybridUtil.toPointFormatType(eciesParams.getEcPointFormat()),
         demHelper);
   }
 
@@ -114,7 +114,7 @@ public final class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<H
     EciesAeadHkdfKeyFormat eciesKeyFormat = (EciesAeadHkdfKeyFormat) keyFormat;
     HybridUtil.validate(eciesKeyFormat.getParams());
     EciesHkdfKemParams kemParams = eciesKeyFormat.getParams().getKemParams();
-    KeyPair keyPair = EcUtil.generateKeyPair(HybridUtil.toCurveTypeEnum(kemParams.getCurveType()));
+    KeyPair keyPair = EllipticCurves.generateKeyPair(HybridUtil.toCurveType(kemParams.getCurveType()));
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
     ECPoint w = pubKey.getW();

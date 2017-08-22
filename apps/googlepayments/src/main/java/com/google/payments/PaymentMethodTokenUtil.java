@@ -18,7 +18,7 @@ package com.google.payments;
 
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Bytes;
-import com.google.crypto.tink.subtle.EcUtil;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EngineFactory;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -41,9 +41,9 @@ public final class PaymentMethodTokenUtil {
 
   public static ECPublicKey rawUncompressedEcPublicKey(String rawUncompressedPublicKey)
       throws GeneralSecurityException {
-    ECPoint point = EcUtil.ecPointDecode(EcUtil.getNistP256Params().getCurve(),
-        EcUtil.PointFormatEnum.UNCOMPRESSED, Base64.decode(rawUncompressedPublicKey));
-    ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, EcUtil.getNistP256Params());
+    ECPoint point = EllipticCurves.ecPointDecode(EllipticCurves.getNistP256Params().getCurve(),
+        EllipticCurves.PointFormatType.UNCOMPRESSED, Base64.decode(rawUncompressedPublicKey));
+    ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, EllipticCurves.getNistP256Params());
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     return (ECPublicKey) kf.generatePublic(pubSpec);
   }

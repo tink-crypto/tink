@@ -38,7 +38,7 @@ import org.junit.runners.JUnit4;
 public class EcdsaSignJceTest {
   @Test
   public void testBasic() throws Exception {
-    ECParameterSpec ecParams = EcUtil.getNistP256Params();
+    ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
     KeyPair keyPair = keyGen.generateKeyPair();
@@ -59,7 +59,7 @@ public class EcdsaSignJceTest {
 
   @Test
   public void testBitFlip() throws Exception {
-    ECParameterSpec ecParams = EcUtil.getNistP256Params();
+    ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
     KeyPair keyPair = keyGen.generateKeyPair();

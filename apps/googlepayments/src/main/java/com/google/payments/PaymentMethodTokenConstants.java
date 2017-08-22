@@ -16,7 +16,7 @@
 
 package com.google.payments;
 
-import com.google.crypto.tink.subtle.EcUtil;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -32,8 +32,8 @@ public final class PaymentMethodTokenConstants {
   // Zero IV is fine here because each encryption uses a unique key.
   public static final byte[] AES_CTR_ZERO_IV = new byte[16];
   public static final int HMAC_SHA256_KEY_SIZE = 16;
-  public static final EcUtil.PointFormatEnum UNCOMPRESSED_POINT_FORMAT =
-      EcUtil.PointFormatEnum.UNCOMPRESSED;
+  public static final EllipticCurves.PointFormatType UNCOMPRESSED_POINT_FORMAT =
+      EllipticCurves.PointFormatType.UNCOMPRESSED;
   public static final String PROTOCOL_VERSION_EC_V1 = "ECv1";
   public static final String ECDSA_SHA256_SIGNING_ALGO = "SHA256WithECDSA";
 

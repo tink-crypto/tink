@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.subtle.Base64;
-import com.google.crypto.tink.subtle.EcUtil;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Random;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -44,7 +44,7 @@ import org.junit.runners.JUnit4;
 public class PaymentMethodTokenHybridDecryptTest {
   @Test
   public void testModifyDecrypt() throws Exception {
-    ECParameterSpec spec = EcUtil.getNistP256Params();
+    ECParameterSpec spec = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(spec);
     KeyPair recipientKey = keyGen.generateKeyPair();

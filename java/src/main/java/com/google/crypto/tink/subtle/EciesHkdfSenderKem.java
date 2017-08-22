@@ -63,14 +63,17 @@ public final class EciesHkdfSenderKem {
     this.recipientPublicKey = recipientPublicKey;
   }
 
-  public KemKey generateKey(String hmacAlgo, final byte[] hkdfSalt, final byte[] hkdfInfo,
-      int keySizeInBytes, EcUtil.PointFormatEnum pointFormat) throws GeneralSecurityException {
+  public KemKey generateKey(String hmacAlgo,
+      final byte[] hkdfSalt,
+      final byte[] hkdfInfo,
+      int keySizeInBytes,
+      EllipticCurves.PointFormatType pointFormat) throws GeneralSecurityException {
     KeyPair ephemeralKeyPair = generateEphemeralKey();
     ECPublicKey ephemeralPublicKey = (ECPublicKey) ephemeralKeyPair.getPublic();
     ECPrivateKey ephemeralPrivateKey = (ECPrivateKey) ephemeralKeyPair.getPrivate();
 
     byte[] sharedSecret = getSharedSecret(ephemeralPrivateKey);
-    byte[] kemBytes = EcUtil.ecPointEncode(
+    byte[] kemBytes = EllipticCurves.ecPointEncode(
         ephemeralPublicKey.getParams().getCurve(), pointFormat, ephemeralPublicKey.getW());
     byte[] symmetricKey = Hkdf.computeEciesHkdfSymmetricKey(kemBytes, sharedSecret,
          hmacAlgo, hkdfSalt, hkdfInfo, keySizeInBytes);
@@ -89,7 +92,7 @@ public final class EciesHkdfSenderKem {
       throws GeneralSecurityException {
     ECPoint publicPoint = recipientPublicKey.getW();
     ECParameterSpec spec = recipientPublicKey.getParams();
-    EcUtil.checkPointOnCurve(publicPoint, spec.getCurve());
+    EllipticCurves.checkPointOnCurve(publicPoint, spec.getCurve());
     KeyAgreement ka = EngineFactory.KEY_AGREEMENT.getInstance("ECDH");
     ka.init(senderPrivateKey);
     ka.doPhase(recipientPublicKey, true);

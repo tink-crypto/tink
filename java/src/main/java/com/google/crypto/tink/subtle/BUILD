@@ -15,7 +15,7 @@ java_library(
     srcs = [
         "Base64.java",
         "Bytes.java",
-        "EcUtil.java",
+        "EllipticCurves.java",
         "EngineFactory.java",
         "EngineWrapper.java",
         "Hex.java",

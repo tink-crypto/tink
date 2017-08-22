@@ -26,9 +26,9 @@ import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -52,8 +52,8 @@ public class EciesAeadHkdfHybridDecryptTest {
 
   @Test
   public void testModifyDecrypt() throws Exception {
-    ECParameterSpec spec = EcUtil.getCurveSpec(
-        HybridUtil.toCurveTypeEnum(EllipticCurveType.NIST_P256));
+    ECParameterSpec spec = EllipticCurves.getCurveSpec(
+        HybridUtil.toCurveType(EllipticCurveType.NIST_P256));
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(spec);
     KeyPair recipientKey = keyGen.generateKeyPair();
@@ -70,10 +70,10 @@ public class EciesAeadHkdfHybridDecryptTest {
     };
     for (int i = 0; i < keyTemplates.length; i++) {
       HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey,
-          salt, hmacAlgo, EcUtil.PointFormatEnum.UNCOMPRESSED,
+          salt, hmacAlgo, EllipticCurves.PointFormatType.UNCOMPRESSED,
           new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
       HybridDecrypt hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
-          salt, hmacAlgo, EcUtil.PointFormatEnum.UNCOMPRESSED,
+          salt, hmacAlgo, EllipticCurves.PointFormatType.UNCOMPRESSED,
           new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
 
       byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
@@ -103,7 +103,9 @@ public class EciesAeadHkdfHybridDecryptTest {
       }
       // Modify salt.
       hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
-          Arrays.copyOf(salt, salt.length - 1), hmacAlgo, EcUtil.PointFormatEnum.UNCOMPRESSED,
+          Arrays.copyOf(salt, salt.length - 1),
+          hmacAlgo,
+          EllipticCurves.PointFormatType.UNCOMPRESSED,
           new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
       try {
         hybridDecrypt.decrypt(ciphertext, context);

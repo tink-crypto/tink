@@ -30,7 +30,7 @@ public final class EcdsaVerifyJce implements PublicKeyVerify {
 
   public EcdsaVerifyJce(final ECPublicKey pubKey, String signatureAlgorithm)
       throws GeneralSecurityException {
-        EcUtil.checkPublicKey(pubKey);
+        EllipticCurves.checkPublicKey(pubKey);
         this.publicKey = pubKey;
         this.signatureAlgorithm = signatureAlgorithm;
       }

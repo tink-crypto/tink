@@ -18,7 +18,7 @@ package com.google.payments;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.crypto.tink.subtle.EcUtil;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
@@ -97,7 +97,7 @@ public class PaymentMethodTokenSenderTest {
 
   @Test
   public void testSendReceive() throws Exception {
-    ECParameterSpec spec = EcUtil.getNistP256Params();
+    ECParameterSpec spec = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(spec);
     String senderId = "foo";

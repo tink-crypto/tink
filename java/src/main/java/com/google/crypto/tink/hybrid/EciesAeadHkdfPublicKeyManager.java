@@ -22,9 +22,9 @@ import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EciesHkdfKemParams;
 import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -69,15 +69,15 @@ public final class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEnc
     validate(recipientKeyProto);
     EciesAeadHkdfParams eciesParams = recipientKeyProto.getParams();
     EciesHkdfKemParams kemParams = eciesParams.getKemParams();
-    ECPublicKey recipientPublicKey = EcUtil.getEcPublicKey(
-        HybridUtil.toCurveTypeEnum(kemParams.getCurveType()),
+    ECPublicKey recipientPublicKey = EllipticCurves.getEcPublicKey(
+        HybridUtil.toCurveType(kemParams.getCurveType()),
         recipientKeyProto.getX().toByteArray(), recipientKeyProto.getY().toByteArray());
     EciesAeadHkdfDemHelper demHelper = new RegistryEciesAeadHkdfDemHelper(
         eciesParams.getDemParams().getAeadDem());
     return new EciesAeadHkdfHybridEncrypt(recipientPublicKey,
         kemParams.getHkdfSalt().toByteArray(),
         HybridUtil.toHmacAlgo(kemParams.getHkdfHashType()),
-        HybridUtil.toPointFormatEnum(eciesParams.getEcPointFormat()),
+        HybridUtil.toPointFormatType(eciesParams.getEcPointFormat()),
         demHelper);
   }
 

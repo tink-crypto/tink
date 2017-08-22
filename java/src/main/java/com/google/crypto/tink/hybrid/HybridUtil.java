@@ -21,7 +21,7 @@ import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.subtle.EcUtil;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 
@@ -33,7 +33,7 @@ class HybridUtil {
    * @throws GeneralSecurityException iff it's invalid.
    */
   public static void validate(EciesAeadHkdfParams params) throws GeneralSecurityException {
-    EcUtil.getCurveSpec(HybridUtil.toCurveTypeEnum(params.getKemParams().getCurveType()));
+    EllipticCurves.getCurveSpec(HybridUtil.toCurveType(params.getKemParams().getCurveType()));
     HybridUtil.toHmacAlgo(params.getKemParams().getHkdfHashType());
     if (params.getEcPointFormat() == EcPointFormat.UNKNOWN_FORMAT) {
       throw new GeneralSecurityException("unknown EC point format");
@@ -62,32 +62,32 @@ class HybridUtil {
   }
 
   /**
-   * Converts protobuf enum {@code EllipticCurveType} to raw Java enum {code CurveTypeEnum}.
+   * Converts protobuf enum {@code EllipticCurveType} to raw Java enum {code CurveType}.
    */
-  public static EcUtil.CurveTypeEnum toCurveTypeEnum(EllipticCurveType type)
+  public static EllipticCurves.CurveType toCurveType(EllipticCurveType type)
       throws GeneralSecurityException {
     switch (type) {
       case NIST_P256:
-        return EcUtil.CurveTypeEnum.NIST_P256;
+        return EllipticCurves.CurveType.NIST_P256;
       case NIST_P384:
-        return EcUtil.CurveTypeEnum.NIST_P384;
+        return EllipticCurves.CurveType.NIST_P384;
       case NIST_P521:
-        return EcUtil.CurveTypeEnum.NIST_P521;
+        return EllipticCurves.CurveType.NIST_P521;
       default:
         throw new GeneralSecurityException("unknown curve type: " + type);
     }
   }
 
   /**
-   * Converts protobuf enum {@code EcPointFormat} to raw Java enum {code PointFormatEnum}.
+   * Converts protobuf enum {@code EcPointFormat} to raw Java enum {code PointFormatType}.
    */
-  public static EcUtil.PointFormatEnum toPointFormatEnum(EcPointFormat format)
+  public static EllipticCurves.PointFormatType toPointFormatType(EcPointFormat format)
       throws GeneralSecurityException {
     switch (format) {
       case UNCOMPRESSED:
-        return EcUtil.PointFormatEnum.UNCOMPRESSED;
+        return EllipticCurves.PointFormatType.UNCOMPRESSED;
       case COMPRESSED:
-        return EcUtil.PointFormatEnum.COMPRESSED;
+        return EllipticCurves.PointFormatType.COMPRESSED;
       default:
         throw new GeneralSecurityException("unknown point format: " + format);
     }

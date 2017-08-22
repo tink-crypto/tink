@@ -51,7 +51,7 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.EcUtil;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
@@ -406,13 +406,13 @@ public class TestUtil {
         ECParameterSpec ecParams;
         switch(curve) {
           case NIST_P256:
-            ecParams = EcUtil.getNistP256Params();
+            ecParams = EllipticCurves.getNistP256Params();
             break;
           case NIST_P384:
-            ecParams = EcUtil.getNistP384Params();
+            ecParams = EllipticCurves.getNistP384Params();
             break;
           case NIST_P521:
-            ecParams = EcUtil.getNistP521Params();
+            ecParams = EllipticCurves.getNistP521Params();
             break;
           default:
             throw new NoSuchAlgorithmException("Curve not implemented:" + curve);
@@ -459,13 +459,13 @@ public class TestUtil {
     ECParameterSpec ecParams;
     switch(curve) {
       case NIST_P256:
-        ecParams = EcUtil.getNistP256Params();
+        ecParams = EllipticCurves.getNistP256Params();
         break;
       case NIST_P384:
-        ecParams = EcUtil.getNistP384Params();
+        ecParams = EllipticCurves.getNistP384Params();
         break;
       case NIST_P521:
-        ecParams = EcUtil.getNistP521Params();
+        ecParams = EllipticCurves.getNistP521Params();
         break;
       default:
         throw new NoSuchAlgorithmException("Curve not implemented:" + curve);

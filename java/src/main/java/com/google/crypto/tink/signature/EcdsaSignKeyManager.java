@@ -23,8 +23,8 @@ import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -77,8 +77,8 @@ public final class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySig
     }
     EcdsaPrivateKey keyProto = (EcdsaPrivateKey) key;
     validateKey(keyProto);
-    ECPrivateKey privateKey = EcUtil.getEcPrivateKey(
-        SigUtil.toCurveTypeEnum(keyProto.getPublicKey().getParams().getCurve()),
+    ECPrivateKey privateKey = EllipticCurves.getEcPrivateKey(
+        SigUtil.toCurveType(keyProto.getPublicKey().getParams().getCurve()),
         keyProto.getKeyValue().toByteArray());
     return new EcdsaSignJce(privateKey,
         SigUtil.toEcdsaAlgo(keyProto.getPublicKey().getParams().getHashType()));
@@ -110,8 +110,8 @@ public final class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySig
     EcdsaKeyFormat format = (EcdsaKeyFormat) keyFormat;
     EcdsaParams ecdsaParams = format.getParams();
     SigUtil.validateEcdsaParams(ecdsaParams);
-    KeyPair keyPair = EcUtil.generateKeyPair(
-        SigUtil.toCurveTypeEnum(ecdsaParams.getCurve()));
+    KeyPair keyPair = EllipticCurves.generateKeyPair(
+        SigUtil.toCurveType(ecdsaParams.getCurve()));
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
     ECPoint w = pubKey.getW();

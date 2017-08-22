@@ -31,14 +31,14 @@ public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
   private final EciesHkdfSenderKem senderKem;
   private final String hkdfHmacAlgo;
   private final byte[] hkdfSalt;
-  private final EcUtil.PointFormatEnum ecPointFormat;
+  private final EllipticCurves.PointFormatType ecPointFormat;
   private final EciesAeadHkdfDemHelper demHelper;
 
   public EciesAeadHkdfHybridEncrypt(final ECPublicKey recipientPublicKey,
-      final byte[] hkdfSalt, String hkdfHmacAlgo, EcUtil.PointFormatEnum ecPointFormat,
+      final byte[] hkdfSalt, String hkdfHmacAlgo, EllipticCurves.PointFormatType ecPointFormat,
       EciesAeadHkdfDemHelper demHelper)
       throws GeneralSecurityException {
-    EcUtil.checkPublicKey(recipientPublicKey);
+    EllipticCurves.checkPublicKey(recipientPublicKey);
     this.senderKem = new EciesHkdfSenderKem(recipientPublicKey);
     this.hkdfSalt = hkdfSalt;
     this.hkdfHmacAlgo = hkdfHmacAlgo;
