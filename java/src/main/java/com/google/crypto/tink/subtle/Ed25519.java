@@ -1500,7 +1500,7 @@ public final class Ed25519 {
     byte[] hram = digest.digest();
     reduce(hram);
     mulAdd(hashedPrivateKey, hram, hashedPrivateKey, r);
-    return SubtleUtil.concat(rB, Arrays.copyOfRange(hashedPrivateKey, 0, FIELD_LEN));
+    return Bytes.concat(rB, Arrays.copyOfRange(hashedPrivateKey, 0, FIELD_LEN));
   }
 
   /**

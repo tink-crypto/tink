@@ -10,7 +10,6 @@ java_library(
     deps = [
         "//java",
         "//java:subtle",
-        "@com_google_guava//jar",
         "@joda_time//jar",
         "@json//jar",
     ],

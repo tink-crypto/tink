@@ -21,6 +21,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.Random;
 import java.nio.charset.StandardCharsets;
@@ -67,13 +68,13 @@ public class PaymentMethodTokenHybridDecryptTest {
     JSONObject json = new JSONObject(new String(ciphertext, StandardCharsets.UTF_8));
 
     // Modify public key.
-    byte[] kem = PaymentMethodTokenUtil.BASE64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
+    byte[] kem = Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
     for (int bytes = 0; bytes < kem.length; bytes++) {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modifiedPublicKey = Arrays.copyOf(kem, kem.length);
         modifiedPublicKey[bytes] ^= (byte) (1 << bit);
         json.put(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
-            PaymentMethodTokenUtil.BASE64.encode(modifiedPublicKey));
+            Base64.encode(modifiedPublicKey));
         try {
           hybridDecrypt.decrypt(json.toString().getBytes(StandardCharsets.UTF_8), context);
           fail("Invalid ciphertext, should have thrown exception");
@@ -84,14 +85,14 @@ public class PaymentMethodTokenHybridDecryptTest {
     }
 
     // Modify payload.
-    byte[] payload = PaymentMethodTokenUtil.BASE64.decode(json.getString(
+    byte[] payload = Base64.decode(json.getString(
         PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
     for (int bytes = 0; bytes < payload.length; bytes++) {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modifiedPayload = Arrays.copyOf(payload, payload.length);
         modifiedPayload[bytes] ^= (byte) (1 << bit);
         json.put(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY,
-            PaymentMethodTokenUtil.BASE64.encode(modifiedPayload));
+            Base64.encode(modifiedPayload));
         try {
           hybridDecrypt.decrypt(json.toString().getBytes(StandardCharsets.UTF_8), context);
           fail("Invalid ciphertext, should have thrown exception");

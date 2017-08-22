@@ -17,6 +17,7 @@
 package com.google.payments;
 
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EciesHkdfSenderKem;
 import java.nio.charset.StandardCharsets;
@@ -60,10 +61,10 @@ class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
     try {
       return new JSONObject()
           .put(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY,
-              PaymentMethodTokenUtil.BASE64.encode(ciphertext))
-          .put(PaymentMethodTokenConstants.JSON_TAG_KEY, PaymentMethodTokenUtil.BASE64.encode(tag))
+              Base64.encode(ciphertext))
+          .put(PaymentMethodTokenConstants.JSON_TAG_KEY, Base64.encode(tag))
           .put(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
-              PaymentMethodTokenUtil.BASE64.encode(ephemeralPublicKey))
+              Base64.encode(ephemeralPublicKey))
           .toString()
           .getBytes(StandardCharsets.UTF_8);
     } catch (JSONException e) {

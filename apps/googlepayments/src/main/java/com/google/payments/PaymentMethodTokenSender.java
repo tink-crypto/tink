@@ -18,6 +18,7 @@ package com.google.payments;
 
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -191,7 +192,7 @@ public final class PaymentMethodTokenSender {
           .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY,
               PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
           .put(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY,
-              PaymentMethodTokenUtil.BASE64.encode(signature))
+              Base64.encode(signature))
           .toString();
     } catch (JSONException e) {
       throw new GeneralSecurityException("cannot seal; JSON error");

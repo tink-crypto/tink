@@ -426,7 +426,7 @@ public final class AesCtrHmacStreaming implements StreamingAead {
       assert tagBuffer.remaining() == tagSizeInBytes;
       tagBuffer.get(expectedTag);
       assert expectedTag.length == tag.length;
-      if (!SubtleUtil.arrayEquals(expectedTag, tag)) {
+      if (!Bytes.equal(expectedTag, tag)) {
         throw new GeneralSecurityException("Tag mismatch");
       }
 

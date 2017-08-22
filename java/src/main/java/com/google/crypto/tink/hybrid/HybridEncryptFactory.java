@@ -20,7 +20,7 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
@@ -67,7 +67,7 @@ public final class HybridEncryptFactory {
       @Override
       public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
           throws GeneralSecurityException {
-        return SubtleUtil.concat(
+        return Bytes.concat(
             primitives.getPrimary().getIdentifier(),
             primitives.getPrimary().getPrimitive().encrypt(plaintext, contextInfo));
       }

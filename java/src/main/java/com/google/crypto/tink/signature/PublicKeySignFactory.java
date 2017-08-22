@@ -23,7 +23,7 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 
 /**
@@ -69,12 +69,12 @@ public final class PublicKeySignFactory {
           public byte[] sign(final byte[] data) throws GeneralSecurityException {
             if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
               byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
-              return SubtleUtil.concat(
+              return Bytes.concat(
                   primitives.getPrimary().getIdentifier(),
                   primitives.getPrimary().getPrimitive().sign(
-                      SubtleUtil.concat(data, formatVersion)));
+                      Bytes.concat(data, formatVersion)));
             }
-            return SubtleUtil.concat(
+            return Bytes.concat(
                 primitives.getPrimary().getIdentifier(),
                 primitives.getPrimary().getPrimitive().sign(data));
           }

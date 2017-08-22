@@ -16,10 +16,10 @@
 
 package com.google.payments;
 
-import com.google.common.io.BaseEncoding;
+import com.google.crypto.tink.subtle.Base64;
+import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.EcUtil;
 import com.google.crypto.tink.subtle.EngineFactory;
-import com.google.crypto.tink.subtle.SubtleUtil;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -42,7 +42,7 @@ public final class PaymentMethodTokenUtil {
   public static ECPublicKey rawUncompressedEcPublicKey(String rawUncompressedPublicKey)
       throws GeneralSecurityException {
     ECPoint point = EcUtil.ecPointDecode(EcUtil.getNistP256Params().getCurve(),
-        EcUtil.PointFormatEnum.UNCOMPRESSED, BASE64.decode(rawUncompressedPublicKey));
+        EcUtil.PointFormatEnum.UNCOMPRESSED, Base64.decode(rawUncompressedPublicKey));
     ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, EcUtil.getNistP256Params());
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     return (ECPublicKey) kf.generatePublic(pubSpec);
@@ -51,7 +51,7 @@ public final class PaymentMethodTokenUtil {
   public static ECPublicKey x509EcPublicKey(String x509PublicKey)
       throws GeneralSecurityException {
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
-    return (ECPublicKey) kf.generatePublic(new X509EncodedKeySpec(BASE64.decode(
+    return (ECPublicKey) kf.generatePublic(new X509EncodedKeySpec(Base64.decode(
         x509PublicKey)));
   }
 
@@ -59,15 +59,15 @@ public final class PaymentMethodTokenUtil {
       throws GeneralSecurityException {
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     return (ECPrivateKey) kf.generatePrivate(new PKCS8EncodedKeySpec(
-        BASE64.decode(pkcs8PrivateKey)));
+        Base64.decode(pkcs8PrivateKey)));
   }
 
   public static byte[] toLengthValue(String... chunks) throws GeneralSecurityException {
     byte[] out = new byte[0];
     for (String chunk : chunks) {
       byte[] bytes = chunk.getBytes(StandardCharsets.UTF_8);
-      out = SubtleUtil.concat(out, SubtleUtil.intToByteArray(4, bytes.length));
-      out = SubtleUtil.concat(out, bytes);
+      out = Bytes.concat(out, Bytes.intToByteArray(4, bytes.length));
+      out = Bytes.concat(out, bytes);
     }
     return out;
   }
@@ -91,6 +91,4 @@ public final class PaymentMethodTokenUtil {
     mac.init(key);
     return mac.doFinal(encryptedMessage);
   }
-
-  public static final BaseEncoding BASE64 = BaseEncoding.base64();
 }

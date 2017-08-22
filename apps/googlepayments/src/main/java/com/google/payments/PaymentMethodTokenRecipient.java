@@ -18,6 +18,7 @@ package com.google.payments;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -222,7 +223,7 @@ public final class PaymentMethodTokenRecipient {
       throws GeneralSecurityException, JSONException {
     JSONObject jsonMsg = new JSONObject(sealedMessage);
     validateV1(jsonMsg);
-    byte[] signature = PaymentMethodTokenUtil.BASE64.decode(
+    byte[] signature = Base64.decode(
         jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY));
     String signedMessage = jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY);
     byte[] signedBytes = PaymentMethodTokenUtil.toLengthValue(

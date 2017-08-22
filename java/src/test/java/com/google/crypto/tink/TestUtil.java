@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import static com.google.common.io.BaseEncoding.base16;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
@@ -53,6 +52,7 @@ import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.EcUtil;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
@@ -537,14 +537,14 @@ public class TestUtil {
    * Decodes hex string.
    */
   public static byte[] hexDecode(String hexData) {
-    return base16().lowerCase().decode(hexData);
+    return Hex.decode(hexData);
   }
 
   /**
    * Encodes bytes to hex string.
    */
   public static String hexEncode(byte[] data) {
-    return base16().lowerCase().encode(data);
+    return Hex.encode(data);
   }
 
   /**

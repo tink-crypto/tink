@@ -13,9 +13,12 @@ load("//java/build_defs:javac.bzl", "JAVACOPTS")
 java_library(
     name = "subtle",
     srcs = [
+        "Base64.java",
+        "Bytes.java",
         "EcUtil.java",
         "EngineFactory.java",
         "EngineWrapper.java",
+        "Hex.java",
         "ImmutableByteArray.java",
         "Random.java",
         "SubtleUtil.java",

@@ -23,7 +23,7 @@ import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -74,12 +74,12 @@ public final class MacFactory {
       @Override
       public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
         if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-          return SubtleUtil.concat(
+          return Bytes.concat(
               primitives.getPrimary().getIdentifier(),
               primitives.getPrimary().getPrimitive().computeMac(
-                  SubtleUtil.concat(data, formatVersion)));
+                  Bytes.concat(data, formatVersion)));
         }
-        return SubtleUtil.concat(
+        return Bytes.concat(
             primitives.getPrimary().getIdentifier(),
             primitives.getPrimary().getPrimitive().computeMac(data));
       }
@@ -99,7 +99,7 @@ public final class MacFactory {
             try {
               if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
                 entry.getPrimitive().verifyMac(macNoPrefix,
-                    SubtleUtil.concat(data, formatVersion));
+                    Bytes.concat(data, formatVersion));
               } else {
                 entry.getPrimitive().verifyMac(macNoPrefix, data);
               }

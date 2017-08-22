@@ -23,7 +23,7 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -87,7 +87,7 @@ public final class PublicKeyVerifyFactory {
           try {
             if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
               final byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
-              final byte[] dataWithFormatVersion = SubtleUtil.concat(data, formatVersion);
+              final byte[] dataWithFormatVersion = Bytes.concat(data, formatVersion);
               entry.getPrimitive().verify(sigNoPrefix, dataWithFormatVersion);
             } else {
               entry.getPrimitive().verify(sigNoPrefix, data);

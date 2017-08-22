@@ -57,8 +57,8 @@ public final class EncryptThenAuthenticate implements Aead {
     byte[] ciphertext = cipher.encrypt(plaintext);
     byte[] aadLengthInBits = Arrays.copyOf(ByteBuffer.allocate(8).putLong(8L * aad.length).array(),
         8);
-    byte[] macValue = mac.computeMac(SubtleUtil.concat(aad, ciphertext, aadLengthInBits));
-    return SubtleUtil.concat(ciphertext, macValue);
+    byte[] macValue = mac.computeMac(Bytes.concat(aad, ciphertext, aadLengthInBits));
+    return Bytes.concat(ciphertext, macValue);
   }
 
   /**
@@ -83,7 +83,7 @@ public final class EncryptThenAuthenticate implements Aead {
         ciphertext.length);
     byte[] aadLengthInBits = Arrays.copyOf(
         ByteBuffer.allocate(8).putLong(8L * aad.length).array(), 8);
-    mac.verifyMac(macValue, SubtleUtil.concat(aad, rawCiphertext, aadLengthInBits));
+    mac.verifyMac(macValue, Bytes.concat(aad, rawCiphertext, aadLengthInBits));
     return cipher.decrypt(rawCiphertext);
   }
 }

@@ -162,7 +162,7 @@ class Poly1305 {
   }
 
   static void verifyMac(final byte[] key, byte[] data, byte[] mac) throws GeneralSecurityException {
-    if (!SubtleUtil.arrayEquals(computeMac(key, data), mac)) {
+    if (!Bytes.equal(computeMac(key, data), mac)) {
       throw new GeneralSecurityException("invalid MAC");
     }
   }

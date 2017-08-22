@@ -27,8 +27,8 @@ import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import org.junit.BeforeClass;
@@ -94,7 +94,7 @@ public class MacFactoryTest {
       }
 
       // Modify plaintext or tag and make sure the verifyMac failed.
-      byte[] plaintextAndTag = SubtleUtil.concat(plaintext, tag);
+      byte[] plaintextAndTag = Bytes.concat(plaintext, tag);
       for (int b = 0; b < plaintextAndTag.length; b++) {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modified = Arrays.copyOf(plaintextAndTag, plaintextAndTag.length);

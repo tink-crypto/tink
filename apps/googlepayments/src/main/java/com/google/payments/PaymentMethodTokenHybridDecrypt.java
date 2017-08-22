@@ -17,8 +17,9 @@
 package com.google.payments;
 
 import com.google.crypto.tink.HybridDecrypt;
+import com.google.crypto.tink.subtle.Base64;
+import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.EciesHkdfRecipientKem;
-import com.google.crypto.tink.subtle.SubtleUtil;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
@@ -44,7 +45,7 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
     try {
       JSONObject json = new JSONObject(new String(ciphertext, StandardCharsets.UTF_8));
       validate(json);
-      byte[] kem = PaymentMethodTokenUtil.BASE64.decode(json.getString(
+      byte[] kem = Base64.decode(json.getString(
           PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
       int symmetricKeySize = PaymentMethodTokenConstants.AES_CTR_KEY_SIZE
           + PaymentMethodTokenConstants.HMAC_SHA256_KEY_SIZE;
@@ -57,13 +58,13 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
           PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
       byte[] hmacSha256Key = Arrays.copyOfRange(
           demKey, PaymentMethodTokenConstants.AES_CTR_KEY_SIZE, symmetricKeySize);
-      byte[] encryptedMessage = PaymentMethodTokenUtil.BASE64.decode(
+      byte[] encryptedMessage = Base64.decode(
           json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
       byte[] computedTag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key,
           encryptedMessage);
-      byte[] expectedTag = PaymentMethodTokenUtil.BASE64.decode(json.getString(
+      byte[] expectedTag = Base64.decode(json.getString(
           PaymentMethodTokenConstants.JSON_TAG_KEY));
-      if (!SubtleUtil.arrayEquals(expectedTag, computedTag)) {
+      if (!Bytes.equal(expectedTag, computedTag)) {
         throw new GeneralSecurityException("cannot decrypt; invalid MAC");
       }
       byte[] aesCtrKey = Arrays.copyOfRange(demKey, 0,

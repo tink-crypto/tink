@@ -100,7 +100,7 @@ public class Hkdf {
   public static byte[] computeEciesHkdfSymmetricKey(final byte[] ephemeralPublicKeyBytes,
        final byte[] sharedSecret, String hmacAlgo, final byte[] hkdfSalt, final byte[] hkdfInfo,
        int keySizeInBytes) throws GeneralSecurityException {
-    byte[] hkdfInput = SubtleUtil.concat(ephemeralPublicKeyBytes, sharedSecret);
+    byte[] hkdfInput = Bytes.concat(ephemeralPublicKeyBytes, sharedSecret);
     return Hkdf.computeHkdf(hmacAlgo, hkdfInput, hkdfSalt, hkdfInfo, keySizeInBytes);
   }
 }

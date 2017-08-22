@@ -31,8 +31,8 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -222,7 +222,7 @@ public class AesEaxKeyManagerTest {
     for (PublicTestVector t : publicTestVectors) {
       Aead aead = getRawAesEax(t.keyValue, t.iv.length);
       try {
-        byte[] ciphertext = SubtleUtil.concat(t.iv, t.ciphertext, t.tag);
+        byte[] ciphertext = Bytes.concat(t.iv, t.ciphertext, t.tag);
         byte[] plaintext = aead.decrypt(ciphertext, t.aad);
         assertArrayEquals(plaintext, t.plaintext);
       } catch (GeneralSecurityException e) {
