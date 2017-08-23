@@ -69,6 +69,7 @@ public class ConfigTest {
     configs[6] = Config.TINK_SIGNATURE_1_0_0;
     configs[7] = Config.TINK_SIGNATURE_SIGN_1_0_0;
     configs[8] = Config.TINK_SIGNATURE_VERIFY_1_0_0;
+
     for (TinkConfig tinkConfig : configs) {
       Registry.reset();
       // Initially, there should be no key manager in the registry.
@@ -85,12 +86,12 @@ public class ConfigTest {
       for (KeyTypeEntry entry : tinkConfig.getEntryList()) {
         KeyManager<?> unused = Registry.getKeyManager(entry.getTypeUrl());
       }
-      // Another register-attmpt should fail, as key managers already exist.
+
+      // Another register-attempt should still work, because the key managers are the same.
       try {
         Config.register(tinkConfig);
-        fail("Repeated registration of the same config should have thrown exception.");
       } catch (GeneralSecurityException e) {
-        // expected
+        fail("Repeated registration of the same config should work.");
       }
     }
   }

@@ -62,13 +62,14 @@ public final class Registry {
   }
 
   /**
-   * Registers {@code manager} for the given {@code typeUrl}, assuming that there is
-   * no key manager registered for {@code typeUrl} yet. Does nothing if there already exists
-   * a key manager for {@code typeUrl}.
+   * Registers {@code manager} for the given {@code typeUrl}.
    *
-   * @throws NullPointerException if {@code manager} is null.
-   * @return true if the {@code manager} is registered as a manager for {@code typeUrl}; false if
-   * there already exists a key manager for {@code typeUrl}.
+   * If there is an existing key manager, throw exception if {@code manager} and the existing
+   * key manager don't share the same class, and do nothing if they do.
+   *
+   * @throws IllegalArgumentException if {@code manager} is null.
+   * @throws GeneralSecurityException if there's an existing key manager that doesn't come from
+   * the same class as {@code manager}.
    */
   public static <P> void registerKeyManager(String typeUrl, final KeyManager<P> manager)
       throws GeneralSecurityException {
@@ -80,12 +81,16 @@ public final class Registry {
       String typeUrl, final KeyManager<P> manager, boolean newKeyAllowed)
       throws GeneralSecurityException {
     if (manager == null) {
-      throw new NullPointerException("key manager must be non-null.");
+      throw new IllegalArgumentException("key manager must be non-null.");
     }
     if (keyManagerMap.containsKey(typeUrl)) {
-      logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
-      throw new GeneralSecurityException("key manager for key type " + typeUrl
-          + " has been already registered");
+      KeyManager<P> existing = getKeyManager(typeUrl);
+      if (!manager.getClass().equals(existing.getClass())) {
+        logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
+        throw new GeneralSecurityException(String.format(
+            "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
+            typeUrl, existing.getClass().getName(), manager.getClass().getName()));
+      }
     } else {
       keyManagerMap.put(typeUrl, manager);
       newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));

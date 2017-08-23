@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil.DummyAead;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.Config;
 import com.google.crypto.tink.mac.HmacKeyManager;
@@ -220,10 +221,18 @@ public class RegistryTest {
   public void testRegistryCollisions() throws Exception {
     try {
       Registry.registerKeyManager(aesCtrHmacAeadTypeUrl, null);
-      fail("Expected NullPointerException.");
-    } catch (NullPointerException e) {
+      fail("Expected IllegalArgumentException.");
+    } catch (IllegalArgumentException e) {
       assertTrue(e.toString().contains("must be non-null"));
     }
+
+    // This should work because the key manager comes from the same class.
+    try {
+      Registry.registerKeyManager(aesCtrHmacAeadTypeUrl, new AesCtrHmacAeadKeyManager());
+    } catch (GeneralSecurityException e) {
+      fail("Repeated registration of the same key manager should work.");
+    }
+
     // This should not overwrite the existing manager.
     try {
       Registry.registerKeyManager(aesCtrHmacAeadTypeUrl, new CustomAeadKeyManager());
@@ -231,6 +240,7 @@ public class RegistryTest {
     } catch (GeneralSecurityException e) {
       assertTrue(e.toString().contains("already registered"));
     }
+
     KeyManager<Aead> manager = Registry.getKeyManager(aesCtrHmacAeadTypeUrl);
     assertNotEquals(CustomAeadKeyManager.class, manager.getClass());
     assertTrue(manager.getClass().toString().contains(

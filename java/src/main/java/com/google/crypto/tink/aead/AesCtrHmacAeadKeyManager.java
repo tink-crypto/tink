@@ -40,7 +40,9 @@ import java.util.logging.Logger;
  * of {@code EncryptThenAuthenticate}.
  */
 public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
-  public AesCtrHmacAeadKeyManager() {}
+  public AesCtrHmacAeadKeyManager() throws GeneralSecurityException {
+    Registry.registerKeyManager(AesCtrKeyManager.TYPE_URL, new AesCtrKeyManager());
+  }
 
   private static final Logger logger =
       Logger.getLogger(AesCtrHmacAeadKeyManager.class.getName());
@@ -49,15 +51,6 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
 
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-
-  static {
-    try {
-      // TODO(thaidn): this could be IndCpaCipherFactory.registerStandardKeyTypes();
-      Registry.registerKeyManager(AesCtrKeyManager.TYPE_URL, new AesCtrKeyManager());
-    } catch (GeneralSecurityException e) {
-      logger.severe("cannot register key managers: " + e);
-    }
-  }
 
   /**
    * @param serializedKey  serialized {@code AesCtrHmacAeadKey} proto
