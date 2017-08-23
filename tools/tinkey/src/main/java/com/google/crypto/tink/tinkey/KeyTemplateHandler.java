@@ -17,7 +17,7 @@
 package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,7 +44,7 @@ public class KeyTemplateHandler extends OptionHandler<KeyTemplate> {
     final String token = params.getParameter(0);
     Path keyTemplatePath = Paths.get(token);
     try {
-      SubtleUtil.validateExists(keyTemplatePath.toFile());
+      Validators.validateExists(keyTemplatePath.toFile());
       setter.addValue(TinkeyUtil.readKeyTemplateFromTextFile(keyTemplatePath));
     } catch (IOException e) {
       throw new CmdLineException(owner, e.getMessage(), e);

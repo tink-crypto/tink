@@ -23,7 +23,7 @@ import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KmsAeadKey;
 import com.google.crypto.tink.proto.KmsAeadKeyFormat;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -131,6 +131,6 @@ public final class KmsAeadKeyManager implements KeyManager<Aead> {
   }
 
   private static void validate(KmsAeadKey key) throws GeneralSecurityException {
-    SubtleUtil.validateVersion(key.getVersion(), VERSION);
+    Validators.validateVersion(key.getVersion(), VERSION);
   }
 }

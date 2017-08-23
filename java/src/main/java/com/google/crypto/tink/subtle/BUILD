@@ -22,6 +22,7 @@ java_library(
         "ImmutableByteArray.java",
         "Random.java",
         "SubtleUtil.java",
+        "Validators.java",
     ],
     javacopts = JAVACOPTS,
     deps = [

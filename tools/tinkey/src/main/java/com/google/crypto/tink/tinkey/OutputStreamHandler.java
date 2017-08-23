@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class OutputStreamHandler extends OptionHandler<OutputStream> {
     final String token = params.getParameter(0);
     try {
       File outFile = Paths.get(token).toFile();
-      SubtleUtil.validateNotExists(outFile);
+      Validators.validateNotExists(outFile);
       setter.addValue(new FileOutputStream(outFile));
     } catch (IOException e) {
       throw new CmdLineException(owner, e.getMessage(), e);

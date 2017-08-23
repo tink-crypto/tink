@@ -25,7 +25,7 @@ import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.MacJce;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -156,7 +156,7 @@ public final class HmacKeyManager implements KeyManager<Mac> {
   }
 
   private void validate(HmacKey key) throws GeneralSecurityException {
-    SubtleUtil.validateVersion(key.getVersion(), VERSION);
+    Validators.validateVersion(key.getVersion(), VERSION);
     if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("key too short");
     }

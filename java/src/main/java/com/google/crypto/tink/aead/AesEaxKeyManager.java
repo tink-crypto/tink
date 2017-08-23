@@ -23,7 +23,7 @@ import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -129,15 +129,15 @@ public final class AesEaxKeyManager implements KeyManager<Aead> {
   }
 
   private void validate(AesEaxKey key) throws GeneralSecurityException {
-    SubtleUtil.validateVersion(key.getVersion(), VERSION);
-    SubtleUtil.validateAesKeySize(key.getKeyValue().size());
+    Validators.validateVersion(key.getVersion(), VERSION);
+    Validators.validateAesKeySize(key.getKeyValue().size());
     if (key.getParams().getIvSize() != 12 && key.getParams().getIvSize() != 16) {
       throw new GeneralSecurityException("invalid IV size; acceptable values have 12 or 16 bytes");
     }
   }
 
   private void validate(AesEaxKeyFormat format) throws GeneralSecurityException {
-    SubtleUtil.validateAesKeySize(format.getKeySize());
+    Validators.validateAesKeySize(format.getKeySize());
     if (format.getParams().getIvSize() != 12 && format.getParams().getIvSize() != 16) {
       throw new GeneralSecurityException("invalid IV size; acceptable values have 12 or 16 bytes");
     }

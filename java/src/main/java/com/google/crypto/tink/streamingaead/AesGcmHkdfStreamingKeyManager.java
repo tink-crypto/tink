@@ -25,7 +25,7 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.AesGcmHkdfStreaming;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -133,7 +133,7 @@ public final class AesGcmHkdfStreamingKeyManager implements KeyManager<Streaming
   }
 
   private void validate(AesGcmHkdfStreamingKey key) throws GeneralSecurityException {
-    SubtleUtil.validateVersion(key.getVersion(), VERSION);
+    Validators.validateVersion(key.getVersion(), VERSION);
     validate(key.getParams());
   }
 
@@ -145,7 +145,7 @@ public final class AesGcmHkdfStreamingKeyManager implements KeyManager<Streaming
   }
 
   private void validate(AesGcmHkdfStreamingParams params) throws GeneralSecurityException {
-    SubtleUtil.validateAesKeySize(params.getDerivedKeySize());
+    Validators.validateAesKeySize(params.getDerivedKeySize());
     if (params.getHkdfHashType() != HashType.SHA256) {
       throw new GeneralSecurityException("Only hkdf_hash_type equal to SHA256 is supported");
     }

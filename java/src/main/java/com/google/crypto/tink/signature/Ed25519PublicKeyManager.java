@@ -21,7 +21,7 @@ import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.Ed25519Verify;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -97,7 +97,7 @@ public final class Ed25519PublicKeyManager implements KeyManager<PublicKeyVerify
   }
 
   private void validateKey(Ed25519PublicKey keyProto) throws GeneralSecurityException {
-    SubtleUtil.validateVersion(keyProto.getVersion(), VERSION);
+    Validators.validateVersion(keyProto.getVersion(), VERSION);
     if (keyProto.getKeyValue().size() != Ed25519Verify.PUBLIC_KEY_LEN) {
       throw new GeneralSecurityException("invalid Ed25519 public key: incorrect key length");
     }

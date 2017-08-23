@@ -25,7 +25,7 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.AesCtrHmacStreaming;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -134,7 +134,7 @@ public final class AesCtrHmacStreamingKeyManager implements KeyManager<Streaming
   }
 
   private void validate(AesCtrHmacStreamingKey key) throws GeneralSecurityException {
-    SubtleUtil.validateVersion(key.getVersion(), VERSION);
+    Validators.validateVersion(key.getVersion(), VERSION);
     if (key.getKeyValue().size() < 16) {
       throw new GeneralSecurityException("key_value must have at least 16 bytes");
     }
@@ -153,7 +153,7 @@ public final class AesCtrHmacStreamingKeyManager implements KeyManager<Streaming
   }
 
   private void validate(AesCtrHmacStreamingParams params) throws GeneralSecurityException {
-    SubtleUtil.validateAesKeySize(params.getDerivedKeySize());
+    Validators.validateAesKeySize(params.getDerivedKeySize());
     // TODO(przydatek): extend the implementation in subtle and remove the restrictions to SHA256
     if (params.getHkdfHashType() != HashType.SHA256) {
       throw new GeneralSecurityException("Only hkdf_hash_type equal to SHA256 is supported");

@@ -25,7 +25,7 @@ import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -176,7 +176,7 @@ public final class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySig
   }
 
   private void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {
-    SubtleUtil.validateVersion(privKey.getVersion(), VERSION);
+    Validators.validateVersion(privKey.getVersion(), VERSION);
     SigUtil.validateEcdsaParams(privKey.getPublicKey().getParams());
   }
 }

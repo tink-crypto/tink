@@ -28,7 +28,7 @@ import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.IndCpaCipher;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -154,6 +154,6 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
   }
 
   private void validate(AesCtrHmacAeadKey key) throws GeneralSecurityException {
-    SubtleUtil.validateVersion(key.getVersion(), VERSION);
+    Validators.validateVersion(key.getVersion(), VERSION);
   }
 }

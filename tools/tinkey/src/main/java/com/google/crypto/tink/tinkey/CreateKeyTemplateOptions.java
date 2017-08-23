@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import java.io.OutputStream;
 import org.kohsuke.args4j.Option;
 
@@ -50,9 +50,9 @@ class CreateKeyTemplateOptions {
       outputStream = System.out;
     }
     try {
-      SubtleUtil.validateTypeUrl(typeUrlValue);
+      Validators.validateTypeUrl(typeUrlValue);
     } catch (Exception e) {
-      SubtleUtil.die(e.toString());
+      TinkeyUtil.die(e.toString());
     }
   }
 }

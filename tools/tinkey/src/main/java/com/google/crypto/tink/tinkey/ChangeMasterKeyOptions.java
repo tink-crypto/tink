@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import java.io.File;
 import java.io.IOException;
 import org.kohsuke.args4j.Option;
@@ -38,9 +38,9 @@ class ChangeMasterKeyOptions extends OutOptions {
     super.validate();
     if (newcredentialPath != null) {
       try {
-        SubtleUtil.validateExists(newcredentialPath);
+        Validators.validateExists(newcredentialPath);
       } catch (IOException e) {
-        SubtleUtil.die(e.toString());
+        TinkeyUtil.die(e.toString());
       }
     }
   }

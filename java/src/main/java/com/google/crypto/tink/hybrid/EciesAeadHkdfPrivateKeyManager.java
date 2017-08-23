@@ -27,7 +27,7 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -180,7 +180,7 @@ public final class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<H
 
   private void validate(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {
     // TODO(przydatek): add more checks.
-    SubtleUtil.validateVersion(keyProto.getVersion(), VERSION);
+    Validators.validateVersion(keyProto.getVersion(), VERSION);
     HybridUtil.validate(keyProto.getPublicKey().getParams());
   }
 }

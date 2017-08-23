@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.subtle.SubtleUtil;
 import java.io.InputStream;
 import org.kohsuke.args4j.Option;
 
@@ -71,7 +70,7 @@ class InOptions {
     try {
       TinkeyUtil.validateInputOutputFormat(inFormat);
     } catch (Exception e) {
-      SubtleUtil.die(e.toString());
+      TinkeyUtil.die(e.toString());
     }
   }
 }

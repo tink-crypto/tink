@@ -24,7 +24,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import java.security.GeneralSecurityException;
 
 /** Various helpers. */
-public class Util {
+class Util {
   /** @return a KeysetInfo-proto from a {@code keyset} protobuf. */
   public static KeysetInfo getKeysetInfo(Keyset keyset) {
     KeysetInfo.Builder info = KeysetInfo.newBuilder().setPrimaryKeyId(keyset.getPrimaryKeyId());

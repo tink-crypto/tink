@@ -23,7 +23,7 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.DjbCipher;
 import com.google.crypto.tink.subtle.DjbCipherPoly1305;
 import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -111,7 +111,7 @@ public final class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
   }
 
   private void validateKey(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
-    SubtleUtil.validateVersion(keyProto.getVersion(), VERSION);
+    Validators.validateVersion(keyProto.getVersion(), VERSION);
     if (keyProto.getKeyValue().size() != DjbCipher.KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("invalid ChaCha20Poly1305Key: incorrect key length");
     }

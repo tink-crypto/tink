@@ -32,7 +32,7 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TextFormatKeysetReaders;
 import com.google.crypto.tink.TextFormatKeysetWriters;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.subtle.SubtleUtil;
+import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
@@ -131,7 +131,7 @@ public class TinkeyUtil {
    * @throws GeneralSecurityException if {@code typeUrl} is in invalid format.
    */
   private static String getProtoClassName(String typeUrl) throws GeneralSecurityException {
-    SubtleUtil.validateTypeUrl(typeUrl);
+    Validators.validateTypeUrl(typeUrl);
     int dot = typeUrl.lastIndexOf(".");
     return typeUrl.substring(dot + 1);
   }
@@ -251,5 +251,13 @@ public class TinkeyUtil {
         && !format.toLowerCase().equals("binary")) {
       throw new IllegalArgumentException("invalid format: " + format);
     }
+  }
+
+  /**
+   * Prints an error then exits.
+   */
+  public static void die(String error) {
+    System.err.print(String.format("Error: %s\n", error));
+    System.exit(1);
   }
 }

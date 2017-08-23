@@ -16,39 +16,11 @@
 
 package com.google.crypto.tink.subtle;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 /**
  * Helper methods.
  */
-// TODO(thaidn): tests these functions.
-public final class SubtleUtil {
-  /**
-   * @throws GeneralSecurityException if the {@code sizeInBytes} is not a valid AES key size.
-   */
-  public static void validateAesKeySize(int sizeInBytes) throws GeneralSecurityException {
-    if (sizeInBytes != 16 && sizeInBytes != 24 && sizeInBytes != 32) {
-      throw new GeneralSecurityException("invalid Aes key size");
-    }
-  }
-
-  /**
-   * @throws GeneralSecurityException if {@code candidate} is negative
-   * or larger than {@code maxExpected}.
-   */
-  public static void validateVersion(int candidate, int maxExpected)
-      throws GeneralSecurityException {
-    if (candidate < 0 || candidate > maxExpected) {
-      throw new GeneralSecurityException(
-          String.format(
-              "key has version %d; only keys with version in range [0..%d] are supported",
-              candidate,
-              maxExpected));
-    }
-  }
-
+class SubtleUtil {
   /**
    * Best-effort checks that this is Android.
    * @return true if running on Android.
@@ -61,47 +33,5 @@ public final class SubtleUtil {
       // If Application isn't loaded, it might as well not be Android.
       return false;
     }
-  }
-
-  /*
-   * @throws IOException if {@code f} exists.
-   */
-  public static void validateNotExists(File f) throws IOException {
-    if (f.exists()) {
-      throw new IOException(
-          String.format("%s exists, please choose another file\n", f.toString()));
-    }
-  }
-
-  /**
-   * @throws IOException if {@code f} does not exists.
-   */
-  public static void validateExists(File f) throws IOException {
-    if (!f.exists()) {
-      throw new IOException(
-          String.format("Error: %s doesn't exist, please choose another file\n", f.toString()));
-    }
-  }
-
-  private static final String TYPE_URL_PREFIX = "type.googleapis.com/";
-  /**
-   * @throws GeneralSecurityException if {@code typeUrl} is in invalid format.
-   */
-  public static void validateTypeUrl(String typeUrl) throws GeneralSecurityException {
-    if (!typeUrl.startsWith(TYPE_URL_PREFIX)) {
-      throw new GeneralSecurityException(
-          String.format(
-              "Error: type URL %s is invalid; it must start with %s\n",
-              typeUrl,
-              TYPE_URL_PREFIX));
-    }
-  }
-
-  /**
-   * Prints an error then exits.
-   */
-  public static void die(String error) {
-    System.err.print(String.format("Error: %s\n", error));
-    System.exit(1);
   }
 }
