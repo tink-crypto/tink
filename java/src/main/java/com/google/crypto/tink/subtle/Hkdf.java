@@ -24,7 +24,7 @@ import javax.crypto.spec.SecretKeySpec;
  * This class implements HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
  * https://tools.ietf.org/html/rfc5869.
  */
-public class Hkdf {
+public final class Hkdf {
 
   /**
    * Computes an HKDF.
@@ -43,7 +43,8 @@ public class Hkdf {
    *    {@code size} is too large or if {@code salt} is not a valid key for macAlgorithm (which
    *    should not happen since HMAC allows key sizes up to 2^64).
    */
-  public static byte[] computeHkdf(String macAlgorithm, byte[] ikm, byte[] salt, byte[] info,
+  public static byte[] computeHkdf(String macAlgorithm, final byte[] ikm,
+      final byte[] salt, final byte[] info,
       int size) throws GeneralSecurityException {
     Mac mac = EngineFactory.MAC.getInstance(macAlgorithm);
     if (size > 255 * mac.getMacLength()) {

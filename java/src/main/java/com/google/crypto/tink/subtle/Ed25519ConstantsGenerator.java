@@ -22,7 +22,7 @@ import java.util.Arrays;
 /**
  * Generates constants used in {@link Ed25519}.
  */
-public class Ed25519ConstantsGenerator {
+public final class Ed25519ConstantsGenerator {
 
   private static final BigInteger P = BigInteger.valueOf(2).pow(255).subtract(
       BigInteger.valueOf(19));

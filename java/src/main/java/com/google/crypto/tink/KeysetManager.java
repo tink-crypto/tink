@@ -29,7 +29,7 @@ import java.security.SecureRandom;
  * destroy keys.
  * Not thread-safe.
  */
-public class KeysetManager {
+public final class KeysetManager {
   private final Keyset.Builder keysetBuilder;
 
   private KeysetManager(Keyset.Builder val) {

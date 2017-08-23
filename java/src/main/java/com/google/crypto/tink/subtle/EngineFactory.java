@@ -37,7 +37,7 @@ import javax.crypto.Mac;
  * allow customization and hide the typing complexity in this class. To use this class, import it,
  * and replace your `Cipher.getInstance(...` with `EngineFactory.CIPHER.getInstance(...`.
  */
-public class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_ENGINE> {
+public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_ENGINE> {
   private static final Logger logger =
       Logger.getLogger(EngineFactory.class.getName());
   private static final List<Provider> defaultPolicy;

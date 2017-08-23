@@ -49,7 +49,7 @@ import java.security.GeneralSecurityException;
 /**
  * Various helpers.
  */
-public class TinkeyUtil {
+class TinkeyUtil {
   /**
    * By convention, the key format proto of XyzKey would be XyzKeyFormat.
    * For example, the key format proto of AesGcmKey is AesGcmKeyFormat.

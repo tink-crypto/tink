@@ -23,7 +23,7 @@ import org.kohsuke.args4j.CmdLineParser;
 /**
  * Tinkey is a command-line tool to manage keys for Tink.
  */
-public class Tinkey {
+public final class Tinkey {
   public static void main(String[] args) throws Exception {
     Config.register(Config.TINK_1_0_0);
     TinkeyCommands commands = new TinkeyCommands();

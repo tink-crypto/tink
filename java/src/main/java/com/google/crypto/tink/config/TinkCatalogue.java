@@ -43,7 +43,7 @@ import java.security.GeneralSecurityException;
 /**
  * A catalogue of key managers.
  */
-public class TinkCatalogue implements Catalogue {
+public final class TinkCatalogue implements Catalogue {
   public TinkCatalogue() {}
 
   /**
