@@ -32,9 +32,13 @@ public final class Validators {
     if (!typeUrl.startsWith(TYPE_URL_PREFIX)) {
       throw new GeneralSecurityException(
           String.format(
-              "Error: type URL %s is invalid; it must start with %s\n",
+              "Error: type URL %s is invalid; it must start with %s.\n",
               typeUrl,
               TYPE_URL_PREFIX));
+    }
+    if (typeUrl.length() == TYPE_URL_PREFIX.length()) {
+      throw new GeneralSecurityException(
+          String.format("Error: type URL %s is invalid; it has no message name.\n", typeUrl));
     }
   }
 
@@ -43,7 +47,7 @@ public final class Validators {
    */
   public static void validateAesKeySize(int sizeInBytes) throws GeneralSecurityException {
     if (sizeInBytes != 16 && sizeInBytes != 24 && sizeInBytes != 32) {
-      throw new GeneralSecurityException("invalid Aes key size");
+      throw new GeneralSecurityException("invalid AES key size");
     }
   }
 
