@@ -25,7 +25,7 @@ set -x
 : "${IOS_SDK_VERSION:=10.2}"
 : "${XCODE_VERSION:=8.2.1}"
 
-BAZEL_BIN="${KOKORO_GFILE_DIR}/bazel-0.5.1-darwin-x86_64"
+BAZEL_BIN="${KOKORO_GFILE_DIR}/bazel-0.5.3-darwin-x86_64"
 
 DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
 --strategy=CppCompile=standalone --strategy=ProtoCompile=standalone \

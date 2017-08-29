@@ -6,6 +6,12 @@ git_repository(
     remote = "https://github.com/pubref/rules_protobuf.git",
 )
 
+git_repository(
+    name = "build_bazel_rules_apple",
+    commit = "7ea05576182ba82ea9b951fa3d42ecdb3dc8dc59",
+    remote = "https://github.com/bazelbuild/rules_apple.git",
+)
+
 # go packages
 git_repository(
     name = "io_bazel_rules_go",
