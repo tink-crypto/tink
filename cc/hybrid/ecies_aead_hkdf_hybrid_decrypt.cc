@@ -26,14 +26,14 @@
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
-using util::Status;
-using util::StatusOr;
+using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 
 namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::unique_ptr<HybridDecrypt>>
+crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
 EciesAeadHkdfHybridDecrypt::New(const EciesAeadHkdfPrivateKey& recipient_key) {
   Status status = Validate(recipient_key);
   if (!status.ok()) return status;
@@ -53,7 +53,7 @@ EciesAeadHkdfHybridDecrypt::New(const EciesAeadHkdfPrivateKey& recipient_key) {
   return std::move(hybrid_decrypt);
 }
 
-util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
+crypto::tink::util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
     google::protobuf::StringPiece ciphertext,
     google::protobuf::StringPiece context_info) const {
   // Extract KEM-bytes from the ciphertext.
@@ -63,7 +63,7 @@ util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
   if (!header_size_result.ok()) return header_size_result.status();
   auto header_size = header_size_result.ValueOrDie();
   if (ciphertext.size() < header_size) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
                         "ciphertext too short");
   }
   std::string kem_bytes = std::string(ciphertext.substr(0, header_size));
@@ -98,7 +98,7 @@ Status EciesAeadHkdfHybridDecrypt::Validate(
   if (!key.has_public_key() || !key.public_key().has_params()
       || key.public_key().x().empty() || key.public_key().y().empty()
       || key.key_value().empty()) {
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(crypto::tink::util::error::INVALID_ARGUMENT,
           "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
   return Status::OK;

@@ -30,13 +30,13 @@ namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
+crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
     const KeysetHandle& keyset_handle) {
   return GetPrimitive(keyset_handle, nullptr);
 }
 
 // static
-util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
+crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
     const KeysetHandle& keyset_handle,
     const KeyManager<Aead>* custom_key_manager) {
   auto primitives_result = Registry::get_default_registry().GetPrimitives<Aead>(

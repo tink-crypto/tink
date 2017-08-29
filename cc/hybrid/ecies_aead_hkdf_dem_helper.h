@@ -31,7 +31,7 @@ namespace tink {
 class EciesAeadHkdfDemHelper {
  public:
   // Constructs a new helper for the specified DEM key template.
-  static util::StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>> New(
       const google::crypto::tink::KeyTemplate& dem_key_template);
 
   // Returns the size of the DEM-key in bytes.
@@ -42,7 +42,7 @@ class EciesAeadHkdfDemHelper {
   // Creates and returns a new Aead-primitive that uses
   // the key material given in 'symmetric_key', which must
   // be of length dem_key_size_in_bytes().
-  util::StatusOr<std::unique_ptr<Aead>> GetAead(
+  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetAead(
       const std::string& symmetric_key_value) const;
 
  private:

@@ -31,17 +31,17 @@ namespace tink {
 
 class HmacBoringSsl : public Mac {
  public:
-  static util::StatusOr<std::unique_ptr<Mac>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<Mac>> New(
       google::crypto::tink::HashType hash_type,
       uint32_t tag_size, const std::string& key_value);
 
   // Computes and returns the HMAC for 'data'.
-  util::StatusOr<std::string> ComputeMac(
+  crypto::tink::util::StatusOr<std::string> ComputeMac(
       google::protobuf::StringPiece data) const override;
 
   // Verifies if 'mac' is a correct HMAC for 'data'.
   // Returns Status::OK if 'mac' is correct, and a non-OK-Status otherwise.
-  util::Status VerifyMac(
+  crypto::tink::util::Status VerifyMac(
       google::protobuf::StringPiece mac,
       google::protobuf::StringPiece data) const override;
 

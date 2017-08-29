@@ -20,18 +20,20 @@
 
 using ::std::ostream;
 
+namespace crypto {
+namespace tink {
 namespace util {
 
 namespace {
 
 
 const Status& GetCancelled() {
-  static const Status status(::util::error::CANCELLED, "");
+  static const Status status(::crypto::tink::util::error::CANCELLED, "");
   return status;
 }
 
 const Status& GetUnknown() {
-  static const Status status(::util::error::UNKNOWN, "");
+  static const Status status(::crypto::tink::util::error::UNKNOWN, "");
   return status;
 }
 
@@ -39,12 +41,12 @@ const Status& GetUnknown() {
 }  // namespace
 
 
-Status::Status() : code_(::util::error::OK), message_("") {
+Status::Status() : code_(::crypto::tink::util::error::OK), message_("") {
 }
 
-Status::Status(::util::error::Code error, const std::string& error_message)
+Status::Status(::crypto::tink::util::error::Code error, const std::string& error_message)
     : code_(error), message_(error_message) {
-  if (code_ == ::util::error::OK) {
+  if (code_ == ::crypto::tink::util::error::OK) {
     message_.clear();
   }
 }
@@ -64,7 +66,7 @@ const Status& Status::UNKNOWN = GetUnknown();
 const Status& Status::OK = Status();
 
 std::string Status::ToString() const {
-  if (code_ == ::util::error::OK) {
+  if (code_ == ::crypto::tink::util::error::OK) {
     return "OK";
   }
 
@@ -73,39 +75,39 @@ std::string Status::ToString() const {
   return oss.str();
 }
 
-std::string ErrorCodeString(util::error::Code error) {
+std::string ErrorCodeString(crypto::tink::util::error::Code error) {
   switch (error) {
-    case util::error::OK:
+    case crypto::tink::util::error::OK:
       return "OK";
-    case util::error::CANCELLED:
+    case crypto::tink::util::error::CANCELLED:
       return "CANCELLED";
-    case util::error::UNKNOWN:
+    case crypto::tink::util::error::UNKNOWN:
       return "UNKNOWN";
-    case util::error::INVALID_ARGUMENT:
+    case crypto::tink::util::error::INVALID_ARGUMENT:
       return "INVALID_ARGUMENT";
-    case util::error::DEADLINE_EXCEEDED:
+    case crypto::tink::util::error::DEADLINE_EXCEEDED:
       return "DEADLINE_EXCEEDED";
-    case util::error::NOT_FOUND:
+    case crypto::tink::util::error::NOT_FOUND:
       return "NOT_FOUND";
-    case util::error::ALREADY_EXISTS:
+    case crypto::tink::util::error::ALREADY_EXISTS:
       return "ALREADY_EXISTS";
-    case util::error::PERMISSION_DENIED:
+    case crypto::tink::util::error::PERMISSION_DENIED:
       return "PERMISSION_DENIED";
-    case util::error::RESOURCE_EXHAUSTED:
+    case crypto::tink::util::error::RESOURCE_EXHAUSTED:
       return "RESOURCE_EXHAUSTED";
-    case util::error::FAILED_PRECONDITION:
+    case crypto::tink::util::error::FAILED_PRECONDITION:
       return "FAILED_PRECONDITION";
-    case util::error::ABORTED:
+    case crypto::tink::util::error::ABORTED:
       return "ABORTED";
-    case util::error::OUT_OF_RANGE:
+    case crypto::tink::util::error::OUT_OF_RANGE:
       return "OUT_OF_RANGE";
-    case util::error::UNIMPLEMENTED:
+    case crypto::tink::util::error::UNIMPLEMENTED:
       return "UNIMPLEMENTED";
-    case util::error::INTERNAL:
+    case crypto::tink::util::error::INTERNAL:
       return "INTERNAL";
-    case util::error::UNAVAILABLE:
+    case crypto::tink::util::error::UNAVAILABLE:
       return "UNAVAILABLE";
-    case util::error::DATA_LOSS:
+    case crypto::tink::util::error::DATA_LOSS:
       return "DATA_LOSS";
   }
   // Avoid using a "default" in the switch, so that the compiler can
@@ -113,7 +115,7 @@ std::string ErrorCodeString(util::error::Code error) {
   return std::to_string(error);
 }
 
-extern ostream& operator<<(ostream& os, util::error::Code code) {
+extern ostream& operator<<(ostream& os, crypto::tink::util::error::Code code) {
   os << ErrorCodeString(code);
   return os;
 }
@@ -125,3 +127,5 @@ extern ostream& operator<<(ostream& os, const Status& other) {
 
 
 }  // namespace util
+}  // namespace tink
+}  // namespace crypto

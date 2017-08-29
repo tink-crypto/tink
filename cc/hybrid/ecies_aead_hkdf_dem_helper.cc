@@ -28,8 +28,8 @@
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyTemplate;
-using util::Status;
-using util::StatusOr;
+using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 
 namespace crypto {
 namespace tink {
@@ -37,24 +37,24 @@ namespace tink {
 // static
 StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>>
 EciesAeadHkdfDemHelper::New(const KeyTemplate& dem_key_template) {
-  auto helper = util::wrap_unique(new EciesAeadHkdfDemHelper(dem_key_template));
+  auto helper = crypto::tink::util::wrap_unique(new EciesAeadHkdfDemHelper(dem_key_template));
   std::string dem_type_url = dem_key_template.type_url();
   if (dem_type_url == "type.googleapis.com/google.crypto.tink.AesGcmKey") {
     helper->dem_key_type_ = AES_GCM_KEY;
     AesGcmKeyFormat gcm_key_format;
     if (!gcm_key_format.ParseFromString(dem_key_template.value())) {
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(crypto::tink::util::error::INVALID_ARGUMENT,
                     "Invalid AesGcmKeyFormat in DEM key template");
     }
     helper->dem_key_size_in_bytes_ = gcm_key_format.key_size();
   } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Unsupported DEM key type '%s'.", dem_type_url.c_str());
   }
   auto key_manager_result =
       Registry::get_default_registry().get_key_manager<Aead>(dem_type_url);
   if (!key_manager_result.ok()) {
-    return ToStatusF(util::error::FAILED_PRECONDITION,
+    return ToStatusF(crypto::tink::util::error::FAILED_PRECONDITION,
                      "No manager for DEM key type '%s' found in the registry.",
                      dem_type_url.c_str());
   }
@@ -65,14 +65,14 @@ EciesAeadHkdfDemHelper::New(const KeyTemplate& dem_key_template) {
 StatusOr<std::unique_ptr<Aead>> EciesAeadHkdfDemHelper::GetAead(
     const std::string& symmetric_key_value) const {
   if (symmetric_key_value.size() != dem_key_size_in_bytes_) {
-    return Status(util::error::INTERNAL,
+    return Status(crypto::tink::util::error::INTERNAL,
                   "Wrong length of symmetric key.");
   }
   auto new_key_result = dem_key_manager_->NewKey(dem_key_template_);
   if (!new_key_result.ok()) return new_key_result.status();
   auto new_key = std::move(new_key_result.ValueOrDie());
   if (!ReplaceKeyBytes(symmetric_key_value, new_key.get())) {
-    return Status(util::error::INTERNAL, "Generation of DEM-key failed.");
+    return Status(crypto::tink::util::error::INTERNAL, "Generation of DEM-key failed.");
   }
   return dem_key_manager_->GetPrimitive(*new_key);
 }

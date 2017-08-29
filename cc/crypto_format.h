@@ -46,7 +46,7 @@ class CryptoFormat {
 
   // Generates the prefix for the outputs handled by the specified 'key'.
   // Returns an error if the prefix type of 'key' is invalid.
-  static util::StatusOr<std::string> get_output_prefix(
+  static crypto::tink::util::StatusOr<std::string> get_output_prefix(
       const google::crypto::tink::Keyset::Key& key);
 };
 

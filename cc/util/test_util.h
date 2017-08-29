@@ -40,7 +40,7 @@ namespace test {
 // Converts a hexadecimal string into a string of bytes.
 // Returns a status if the size of the input is odd or if the input contains
 // characters that are not hexadecimal.
-util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex);
+crypto::tink::util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex);
 
 // Converts a hexadecimal string into a string of bytes.
 // Dies if the input is not a valid hexadecimal string.
@@ -97,13 +97,13 @@ class DummyAead : public Aead {
 
   // Computes a dummy ciphertext, which is concatenation of provided 'plaintext'
   // with the name of this DummyAead.
-  util::StatusOr<std::string> Encrypt(
+  crypto::tink::util::StatusOr<std::string> Encrypt(
       google::protobuf::StringPiece plaintext,
       google::protobuf::StringPiece additional_data) const override {
     return plaintext.ToString().append(aead_name_);
   }
 
-  util::StatusOr<std::string> Decrypt(
+  crypto::tink::util::StatusOr<std::string> Decrypt(
       google::protobuf::StringPiece ciphertext,
       google::protobuf::StringPiece additional_data) const override {
     std::string c = ciphertext.ToString();
@@ -112,7 +112,7 @@ class DummyAead : public Aead {
         ciphertext.length() == (unsigned)(aead_name_.length() + pos)) {
       return c.substr(0, pos);
     }
-    return util::Status(util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
   }
 
  private:
@@ -129,7 +129,7 @@ class DummyHybridEncrypt : public HybridEncrypt {
 
   // Computes a dummy ciphertext, which is concatenation of provided 'plaintext'
   // with the name of this DummyHybridEncrypt.
-  util::StatusOr<std::string> Encrypt(
+  crypto::tink::util::StatusOr<std::string> Encrypt(
       google::protobuf::StringPiece plaintext,
       google::protobuf::StringPiece context_info) const override {
     return plaintext.ToString().append(hybrid_name_);
@@ -149,7 +149,7 @@ class DummyHybridDecrypt : public HybridDecrypt {
 
   // Decrypts a dummy ciphertext, which should be a concatenation
   // of a plaintext with the name of this DummyHybridDecrypt.
-  util::StatusOr<std::string> Decrypt(
+  crypto::tink::util::StatusOr<std::string> Decrypt(
       google::protobuf::StringPiece ciphertext,
       google::protobuf::StringPiece additional_data) const override {
     std::string c = ciphertext.ToString();
@@ -158,7 +158,7 @@ class DummyHybridDecrypt : public HybridDecrypt {
         ciphertext.length() == (unsigned)(hybrid_name_.length() + pos)) {
       return c.substr(0, pos);
     }
-    return util::Status(util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
   }
 
  private:
@@ -174,18 +174,18 @@ class DummyMac : public Mac {
 
   // Computes a dummy MAC, which is concatenation of provided 'data'
   // with the name of this DummyMac.
-  util::StatusOr<std::string> ComputeMac(
+  crypto::tink::util::StatusOr<std::string> ComputeMac(
       google::protobuf::StringPiece data) const override {
     return data.ToString().append(mac_name_);
   }
 
-  util::Status VerifyMac(
+  crypto::tink::util::Status VerifyMac(
       google::protobuf::StringPiece mac,
       google::protobuf::StringPiece data) const override {
     if (mac == (data.ToString().append(mac_name_))) {
-      return util::Status::OK;
+      return crypto::tink::util::Status::OK;
     } else {
-      return util::Status(util::error::INVALID_ARGUMENT, "Wrong MAC.");
+      return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "Wrong MAC.");
     }
   }
  private:

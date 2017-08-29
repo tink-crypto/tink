@@ -35,9 +35,9 @@ namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
+crypto::tink::util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
     HashType hash_type, uint32_t tag_size, const std::string& key_value) {
-  util::StatusOr<const EVP_MD*> res = SubtleUtilBoringSSL::EvpHash(hash_type);
+  crypto::tink::util::StatusOr<const EVP_MD*> res = SubtleUtilBoringSSL::EvpHash(hash_type);
   if (!res.ok()) {
     return res.status();
   }
@@ -46,7 +46,7 @@ util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
     // The key manager is responsible to security policies.
     // The checks here just ensure the preconditions of the primitive.
     // If this fails then something is wrong with the key manager.
-    return util::Status(util::error::INTERNAL, "invalid tag size");
+    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL, "invalid tag size");
   }
   std::unique_ptr<Mac> hmac(new HmacBoringSsl(md, tag_size, key_value));
   return std::move(hmac);
@@ -56,7 +56,7 @@ HmacBoringSsl::HmacBoringSsl(const EVP_MD* md, uint32_t tag_size,
                              const std::string& key_value)
     : md_(md), tag_size_(tag_size), key_value_(key_value) {}
 
-util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
+crypto::tink::util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     google::protobuf::StringPiece data) const {
   uint8_t buf[EVP_MAX_MD_SIZE];
   unsigned int out_len;
@@ -67,17 +67,17 @@ util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     // TODO(bleichen): We expect that BoringSSL supports the
     //   hashes that we use. Maybe we should have a status that indicates
     //   such mismatches between expected and actual behaviour.
-    return util::Status(util::error::INTERNAL,
+    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
                         "BoringSSL failed to compute HMAC");
   }
   return std::string(reinterpret_cast<char*>(buf), tag_size_);
 }
 
-util::Status HmacBoringSsl::VerifyMac(
+crypto::tink::util::Status HmacBoringSsl::VerifyMac(
     google::protobuf::StringPiece mac,
     google::protobuf::StringPiece data) const {
   if (mac.size() != tag_size_) {
-    return util::Status(util::error::INVALID_ARGUMENT, "incorrect tag size");
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "incorrect tag size");
   }
   uint8_t buf[EVP_MAX_MD_SIZE];
   unsigned int out_len;
@@ -85,7 +85,7 @@ util::Status HmacBoringSsl::VerifyMac(
                             reinterpret_cast<const uint8_t*>(data.data()),
                             data.size(), buf, &out_len);
   if (res == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
                         "BoringSSL failed to compute HMAC");
   }
   uint8_t diff = 0;
@@ -93,9 +93,9 @@ util::Status HmacBoringSsl::VerifyMac(
     diff |= buf[i] ^ static_cast<uint8_t>(mac[i]);
   }
   if (diff == 0) {
-    return util::Status::OK;
+    return crypto::tink::util::Status::OK;
   } else {
-    return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "verification failed");
   }
 }
 

@@ -26,13 +26,13 @@ namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
+crypto::tink::util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
     const KeysetHandle& keyset_handle) {
   return GetPrimitive(keyset_handle, nullptr);
 }
 
 // static
-util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
+crypto::tink::util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
     const KeysetHandle& keyset_handle,
     const KeyManager<Mac>* custom_key_manager) {
   auto primitives_result = Registry::get_default_registry().GetPrimitives<Mac>(

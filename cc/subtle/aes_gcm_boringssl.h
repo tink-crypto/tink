@@ -31,14 +31,14 @@ namespace tink {
 
 class AesGcmBoringSsl : public Aead {
  public:
-  static util::StatusOr<std::unique_ptr<Aead>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
       google::protobuf::StringPiece key_value);
 
-  util::StatusOr<std::string> Encrypt(
+  crypto::tink::util::StatusOr<std::string> Encrypt(
       google::protobuf::StringPiece plaintext,
       google::protobuf::StringPiece additional_data) const override;
 
-  util::StatusOr<std::string> Decrypt(
+  crypto::tink::util::StatusOr<std::string> Decrypt(
       google::protobuf::StringPiece ciphertext,
       google::protobuf::StringPiece additional_data) const override;
 

@@ -155,9 +155,9 @@ TEST_F(PrimitiveSetTest, testBasic) {
 
   PrimitiveSet<Mac> primitive_set;
   EXPECT_TRUE(primitive_set.get_primary() == nullptr);
-  EXPECT_EQ(util::error::NOT_FOUND,
+  EXPECT_EQ(crypto::tink::util::error::NOT_FOUND,
             primitive_set.get_raw_primitives().status().error_code());
-  EXPECT_EQ(util::error::NOT_FOUND,
+  EXPECT_EQ(crypto::tink::util::error::NOT_FOUND,
             primitive_set.get_primitives("prefix").status().error_code());
 
   // Add all the primitives.

@@ -31,14 +31,14 @@ class EciesHkdfRecipientKemBoringSsl {
  public:
   // Constructs a recipient KEM for the specified curve and recipient's
   // private key, which must be a big-endian byte array.
-  static util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>> New(
       google::crypto::tink::EllipticCurveType curve,
       const std::string& priv_key);
 
   // Computes the ecdh's shared secret from our private key and peer's encoded
   // public key, then uses hkdf to derive the symmetric key from the shared
   // secret, hkdf info and hkdf salt.
-  util::StatusOr<std::string> GenerateKey(
+  crypto::tink::util::StatusOr<std::string> GenerateKey(
       google::protobuf::StringPiece kem_bytes,
       google::crypto::tink::HashType hash,
       google::protobuf::StringPiece hkdf_salt,

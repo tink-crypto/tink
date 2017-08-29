@@ -38,17 +38,17 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
 
   // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
   // for the given 'key_data', which must contain EciesAeadHkdfPrivateKey-proto.
-  util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitive(
+  crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitive(
       const google::crypto::tink::KeyData& key_data) const override;
 
   // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
   // for the given 'key', which must be EciesAeadHkdfPrivateKey-proto.
-  util::StatusOr<std::unique_ptr<HybridDecrypt>>
+  crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
   GetPrimitive(const google::protobuf::Message& key) const override;
 
   // Generates a new random EciesAeadHkdfPrivateKey, based on
   // the given 'key_template', which must contain EciesAeadHkdfKeyFormat-proto.
-  util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
       const google::crypto::tink::KeyTemplate& key_template)
       const override;
 
@@ -69,14 +69,14 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
 
   // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
   // for the given 'key'.
-  util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitiveImpl(
+  crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitiveImpl(
       const google::crypto::tink::EciesAeadHkdfPrivateKey& key) const;
 
-  util::Status Validate(
+  crypto::tink::util::Status Validate(
       const google::crypto::tink::EciesAeadHkdfParams& params) const;
-  util::Status Validate(
+  crypto::tink::util::Status Validate(
       const google::crypto::tink::EciesAeadHkdfPrivateKey& key) const;
-  util::Status Validate(
+  crypto::tink::util::Status Validate(
       const google::crypto::tink::EciesAeadHkdfKeyFormat& format) const;
 };
 

@@ -33,10 +33,10 @@ class HybridDecryptSetWrapper : public HybridDecrypt {
  public:
   // Returns an HybridDecrypt-primitive that uses HybridDecrypt-instances
   // provided in 'hybrid_decrypt_set', which must be non-NULL.
-  static util::StatusOr<std::unique_ptr<HybridDecrypt>> NewHybridDecrypt(
+  static crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> NewHybridDecrypt(
       std::unique_ptr<PrimitiveSet<HybridDecrypt>> hybrid_decrypt_set);
 
-  util::StatusOr<std::string> Decrypt(
+  crypto::tink::util::StatusOr<std::string> Decrypt(
       google::protobuf::StringPiece ciphertext,
       google::protobuf::StringPiece context_info) const override;
 

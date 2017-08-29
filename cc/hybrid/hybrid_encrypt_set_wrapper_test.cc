@@ -42,7 +42,7 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
     auto hybrid_encrypt_result =
         HybridEncryptSetWrapper::NewHybridEncrypt(nullptr);
     EXPECT_FALSE(hybrid_encrypt_result.ok());
-    EXPECT_EQ(util::error::INTERNAL,
+    EXPECT_EQ(crypto::tink::util::error::INTERNAL,
         hybrid_encrypt_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
         hybrid_encrypt_result.status().error_message());
@@ -54,7 +54,7 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
     auto hybrid_encrypt_result = HybridEncryptSetWrapper::NewHybridEncrypt(
         std::move(hybrid_encrypt_set));
     EXPECT_FALSE(hybrid_encrypt_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT,
         hybrid_encrypt_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
         hybrid_encrypt_result.status().error_message());

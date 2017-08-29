@@ -36,8 +36,8 @@ using google::crypto::tink::AesGcmParams;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 using google::protobuf::Message;
-using util::Status;
-using util::StatusOr;
+using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 
 namespace crypto {
 namespace tink {
@@ -60,13 +60,13 @@ AesGcmKeyManager::GetPrimitive(const KeyData& key_data) const {
   if (DoesSupport(key_data.type_url())) {
     AesGcmKey aes_gcm_key;
     if (!aes_gcm_key.ParseFromString(key_data.value())) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                        "Could not parse key_data.value as key type '%s'.",
                        key_data.type_url().c_str());
     }
     return GetPrimitiveImpl(aes_gcm_key);
   } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Key type '%s' is not supported by this manager.",
                      key_data.type_url().c_str());
   }
@@ -80,7 +80,7 @@ AesGcmKeyManager::GetPrimitive(const Message& key) const {
     const AesGcmKey& aes_gcm_key = reinterpret_cast<const AesGcmKey&>(key);
     return GetPrimitiveImpl(aes_gcm_key);
   } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Key type '%s' is not supported by this manager.",
                      key_type.c_str());
   }
@@ -98,14 +98,14 @@ AesGcmKeyManager::GetPrimitiveImpl(const AesGcmKey& aes_gcm_key) const {
 StatusOr<std::unique_ptr<Message>> AesGcmKeyManager::NewKey(
     const KeyTemplate& key_template) const {
   if (!DoesSupport(key_template.type_url())) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Key type '%s' is not supported by this manager.",
                      key_template.type_url().c_str());
   }
 
   AesGcmKeyFormat key_format;
   if (!key_format.ParseFromString(key_template.value())) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
         "Could not parse key_template.value as key format '%sFormat'.",
         key_template.type_url().c_str());
   }
@@ -129,11 +129,11 @@ Status AesGcmKeyManager::Validate(const AesGcmKey& key) const {
   if (!status.ok()) return status;
   uint32_t key_size = key.key_value().size();
   if (key_size < kMinKeySizeInBytes) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                        "Invalid AesGcmKey: key_value is too short.");
   }
   if (key_size != 16 && key_size != 24 && key_size != 32) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                        "Invalid AesGcmKey: key_value has %d bytes; "
                        "supported sizes: 16, 24, or 32 bytes.", key_size);
   }
@@ -142,7 +142,7 @@ Status AesGcmKeyManager::Validate(const AesGcmKey& key) const {
 
 Status AesGcmKeyManager::Validate(const AesGcmKeyFormat& key_format) const {
   if (key_format.key_size() < kMinKeySizeInBytes) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                        "Invalid AesGcmKeyFormat: key_size is too small.");
   }
   return Validate(key_format.params());

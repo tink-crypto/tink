@@ -49,7 +49,7 @@ namespace tink {
 class HybridEncrypt {
  public:
   // Encrypts 'plaintext' binding 'context_info' to the resulting ciphertext.
-  virtual util::StatusOr<std::string> Encrypt(
+  virtual crypto::tink::util::StatusOr<std::string> Encrypt(
       google::protobuf::StringPiece plaintext,
       google::protobuf::StringPiece context_info) const = 0;
 

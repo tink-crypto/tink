@@ -41,7 +41,7 @@ TEST_F(MacSetWrapperTest, testBasic) {
   { // mac_set is nullptr.
     auto mac_result = MacSetWrapper::NewMac(nullptr);
     EXPECT_FALSE(mac_result.ok());
-    EXPECT_EQ(util::error::INTERNAL, mac_result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INTERNAL, mac_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
                         mac_result.status().error_message());
   }
@@ -50,7 +50,7 @@ TEST_F(MacSetWrapperTest, testBasic) {
     std::unique_ptr<PrimitiveSet<Mac>> mac_set(new PrimitiveSet<Mac>());
     auto mac_result = MacSetWrapper::NewMac(std::move(mac_set));
     EXPECT_FALSE(mac_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, mac_result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, mac_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
                         mac_result.status().error_message());
   }
@@ -101,12 +101,12 @@ TEST_F(MacSetWrapperTest, testBasic) {
     std::string mac_value = compute_mac_result.ValueOrDie();
     EXPECT_PRED_FORMAT2(testing::IsSubstring, mac_name_2, mac_value);
 
-    util::Status status = mac->VerifyMac(mac_value, data);
+    crypto::tink::util::Status status = mac->VerifyMac(mac_value, data);
     EXPECT_TRUE(status.ok()) << status;
 
     status = mac->VerifyMac("some bad mac", data);
     EXPECT_FALSE(status.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, status.error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "verification failed",
                         status.error_message());
   }

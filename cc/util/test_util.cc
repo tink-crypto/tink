@@ -36,16 +36,16 @@ using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::OutputPrefixType;
-using util::error::Code;
-using util::Status;
+using crypto::tink::util::error::Code;
+using crypto::tink::util::Status;
 
 namespace crypto {
 namespace tink {
 namespace test {
 
-util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex) {
+crypto::tink::util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex) {
   if (hex.size() % 2 != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Input has odd size.");
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "Input has odd size.");
   }
   std::string decoded(hex.size() / 2, static_cast<char>(0));
   for (int i = 0; i < hex.size(); ++i) {
@@ -58,7 +58,7 @@ util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex) {
     else if ('A' <= c && c <= 'F')
       val = c - 'A' + 10;
     else
-      return util::Status(util::error::INVALID_ARGUMENT, "Not hexadecimal");
+      return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "Not hexadecimal");
     decoded[i / 2] = (decoded[i / 2] << 4) | val;
   }
   return decoded;

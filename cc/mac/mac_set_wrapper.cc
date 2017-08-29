@@ -27,29 +27,29 @@ namespace tink {
 
 namespace {
 
-util::Status Validate(PrimitiveSet<Mac>* mac_set) {
+crypto::tink::util::Status Validate(PrimitiveSet<Mac>* mac_set) {
   if (mac_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "mac_set must be non-NULL");
+    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL, "mac_set must be non-NULL");
   }
   if (mac_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
                         "mac_set has no primary");
   }
-  return util::Status::OK;
+  return crypto::tink::util::Status::OK;
 }
 
 }  // anonymous namespace
 
 // static
-util::StatusOr<std::unique_ptr<Mac>> MacSetWrapper::NewMac(
+crypto::tink::util::StatusOr<std::unique_ptr<Mac>> MacSetWrapper::NewMac(
     std::unique_ptr<PrimitiveSet<Mac>> mac_set) {
-  util::Status status = Validate(mac_set.get());
+  crypto::tink::util::Status status = Validate(mac_set.get());
   if (!status.ok()) return status;
   std::unique_ptr<Mac> mac(new MacSetWrapper(std::move(mac_set)));
   return std::move(mac);
 }
 
-util::StatusOr<std::string> MacSetWrapper::ComputeMac(
+crypto::tink::util::StatusOr<std::string> MacSetWrapper::ComputeMac(
     google::protobuf::StringPiece data) const {
   auto compute_mac_result =
       mac_set_->get_primary()->get_primitive().ComputeMac(data);
@@ -58,7 +58,7 @@ util::StatusOr<std::string> MacSetWrapper::ComputeMac(
   return key_id + compute_mac_result.ValueOrDie();
 }
 
-util::Status MacSetWrapper::VerifyMac(
+crypto::tink::util::Status MacSetWrapper::VerifyMac(
     google::protobuf::StringPiece mac_value,
     google::protobuf::StringPiece data) const {
   if (mac_value.length() > CryptoFormat::kNonRawPrefixSize) {
@@ -70,7 +70,7 @@ util::Status MacSetWrapper::VerifyMac(
           mac_value.substr(CryptoFormat::kNonRawPrefixSize);
       for (auto& mac_entry : *(primitives_result.ValueOrDie())) {
         Mac& mac = mac_entry.get_primitive();
-        util::Status status = mac.VerifyMac(raw_mac_value, data);
+        crypto::tink::util::Status status = mac.VerifyMac(raw_mac_value, data);
         if (status.ok()) {
           return status;
         } else {
@@ -85,13 +85,13 @@ util::Status MacSetWrapper::VerifyMac(
   if (raw_primitives_result.ok()) {
     for (auto& mac_entry : *(raw_primitives_result.ValueOrDie())) {
         Mac& mac = mac_entry.get_primitive();
-        util::Status status = mac.VerifyMac(mac_value, data);
+        crypto::tink::util::Status status = mac.VerifyMac(mac_value, data);
       if (status.ok()) {
         return status;
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
+  return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "verification failed");
 }
 
 }  // namespace tink

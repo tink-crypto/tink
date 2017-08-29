@@ -48,7 +48,7 @@ const int CryptoFormat::kRawPrefixSize;
 const std::string CryptoFormat::kRawPrefix = "";
 
 // static
-util::StatusOr<std::string> CryptoFormat::get_output_prefix(
+crypto::tink::util::StatusOr<std::string> CryptoFormat::get_output_prefix(
     const Keyset::Key& key) {
   switch (key.output_prefix_type()) {
     case OutputPrefixType::TINK: {
@@ -70,7 +70,7 @@ util::StatusOr<std::string> CryptoFormat::get_output_prefix(
     case OutputPrefixType::RAW:
       return kRawPrefix;
     default:
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                        "The given key has invalid OutputPrefixType.");
   }
 }

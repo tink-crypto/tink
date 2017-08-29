@@ -30,29 +30,29 @@ namespace crypto {
 namespace tink {
 
 //  static
-util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::New(
+crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::New(
     const Keyset& keyset) {
-  auto handle = util::make_unique<KeysetHandle>(keyset);
+  auto handle = crypto::tink::util::make_unique<KeysetHandle>(keyset);
   return std::move(handle);
 }
 
 //  static
-util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::ParseFrom(
+crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::ParseFrom(
     const std::string& serialized_keyset) {
   Keyset keyset;
   if (!keyset.ParseFromString(serialized_keyset)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
                         "Could not parse the input string as a Keyset-proto.");
   }
   return New(keyset);
 }
 
 //  static
-util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::ParseFrom(
+crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::ParseFrom(
     std::istream* keyset_stream) {
   Keyset keyset;
   if (!keyset.ParseFromIstream(keyset_stream)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
                         "Could not parse the input stream as a Keyset-proto.");
   }
   return New(keyset);

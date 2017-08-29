@@ -38,17 +38,17 @@ class HmacKeyManager : public KeyManager<Mac> {
 
   // Constructs an instance of HMAC-Mac for the given 'key_data',
   // which must contain HmacKey-proto.
-  util::StatusOr<std::unique_ptr<Mac>> GetPrimitive(
+  crypto::tink::util::StatusOr<std::unique_ptr<Mac>> GetPrimitive(
       const google::crypto::tink::KeyData& key_data) const override;
 
   // Constructs an instance of HMAC-Mac for the given 'key',
   // which must be HmacKey-proto.
-  util::StatusOr<std::unique_ptr<Mac>>
+  crypto::tink::util::StatusOr<std::unique_ptr<Mac>>
   GetPrimitive(const google::protobuf::Message& key) const override;
 
   // Generates a new random HmacKey, based on the specified 'key_template',
   // which must contain HmacKeyFormat-proto.
-  util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
       const google::crypto::tink::KeyTemplate& key_template)
       const override;
 
@@ -68,14 +68,14 @@ class HmacKeyManager : public KeyManager<Mac> {
   std::string key_type_;
 
   // Constructs an instance of HMAC-Mac for the given 'key'.
-  util::StatusOr<std::unique_ptr<Mac>>
+  crypto::tink::util::StatusOr<std::unique_ptr<Mac>>
   GetPrimitiveImpl(const google::crypto::tink::HmacKey& key) const;
 
-  util::Status Validate(
+  crypto::tink::util::Status Validate(
       const google::crypto::tink::HmacParams& params) const;
-  util::Status Validate(
+  crypto::tink::util::Status Validate(
       const google::crypto::tink::HmacKey& key) const;
-  util::Status Validate(
+  crypto::tink::util::Status Validate(
       const google::crypto::tink::HmacKeyFormat& key_format) const;
 };
 

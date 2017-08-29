@@ -25,19 +25,19 @@ namespace crypto {
 namespace tink {
 
 // static
-util::Status AeadConfig::RegisterStandardKeyTypes() {
+crypto::tink::util::Status AeadConfig::RegisterStandardKeyTypes() {
   return RegisterKeyManager(new AesGcmKeyManager());
 }
 
 // static
-util::Status AeadConfig::RegisterLegacyKeyTypes() {
-  return util::Status::OK;
+crypto::tink::util::Status AeadConfig::RegisterLegacyKeyTypes() {
+  return crypto::tink::util::Status::OK;
 }
 
 // static
-util::Status AeadConfig::RegisterKeyManager(KeyManager<Aead>* key_manager) {
+crypto::tink::util::Status AeadConfig::RegisterKeyManager(KeyManager<Aead>* key_manager) {
   if (key_manager == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
                         "Parameter 'key_manager' must be non-null.");
   }
   return Registry::get_default_registry().RegisterKeyManager(

@@ -27,7 +27,7 @@ namespace crypto {
 namespace tink {
 
 // static
-util::Status HybridDecryptConfig::RegisterStandardKeyTypes() {
+crypto::tink::util::Status HybridDecryptConfig::RegisterStandardKeyTypes() {
   auto status = AeadConfig::RegisterKeyManager(new AesGcmKeyManager());
   // We intentionally ignore the status of registration of AesGcmKeyManager,
   // as the registration may fail if AeadFactory::RegisterStandardKeyTypes()
@@ -38,15 +38,15 @@ util::Status HybridDecryptConfig::RegisterStandardKeyTypes() {
 }
 
 // static
-util::Status HybridDecryptConfig::RegisterLegacyKeyTypes() {
-  return util::Status::OK;
+crypto::tink::util::Status HybridDecryptConfig::RegisterLegacyKeyTypes() {
+  return crypto::tink::util::Status::OK;
 }
 
 // static
-util::Status HybridDecryptConfig::RegisterKeyManager(
+crypto::tink::util::Status HybridDecryptConfig::RegisterKeyManager(
     KeyManager<HybridDecrypt>* key_manager) {
   if (key_manager == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
                         "Parameter 'key_manager' must be non-null.");
   }
   return Registry::get_default_registry().RegisterKeyManager(

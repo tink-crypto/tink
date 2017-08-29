@@ -83,7 +83,7 @@ class PrimitiveSet {
   PrimitiveSet<P>() : primary_(nullptr) {}
 
   // Adds 'primitive' to this set for the specified 'key'.
-  util::StatusOr<Entry<P>*> AddPrimitive(
+  crypto::tink::util::StatusOr<Entry<P>*> AddPrimitive(
       std::unique_ptr<P> primitive,
       google::crypto::tink::Keyset::Key key) {
     auto identifier_result = CryptoFormat::get_output_prefix(key);
@@ -96,13 +96,13 @@ class PrimitiveSet {
   }
 
   // Returns the entries with primitives identifed by 'identifier'.
-  util::StatusOr<const Primitives*> get_primitives(
+  crypto::tink::util::StatusOr<const Primitives*> get_primitives(
       google::protobuf::StringPiece identifier) {
     std::lock_guard<std::mutex> lock(primitives_mutex_);
     typename CiphertextPrefixToPrimitivesMap::iterator found =
         primitives_.find(identifier.ToString());
     if (found == primitives_.end()) {
-      return ToStatusF(util::error::NOT_FOUND,
+      return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                        "No primitives found for identifier '%s'.",
                        identifier.ToString().c_str());
     }
@@ -110,7 +110,7 @@ class PrimitiveSet {
   }
 
   // Returns all primitives that use RAW prefix.
-  util::StatusOr<const Primitives*> get_raw_primitives() {
+  crypto::tink::util::StatusOr<const Primitives*> get_raw_primitives() {
     return get_primitives(CryptoFormat::kRawPrefix);
   }
 

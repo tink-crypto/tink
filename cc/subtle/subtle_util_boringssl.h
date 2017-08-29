@@ -37,18 +37,18 @@ class SubtleUtilBoringSSL {
   };
 
   // Returns BoringSSL's EC_GROUP constructed from the curve type.
-  static util::StatusOr<EC_GROUP *> GetEcGroup(
+  static crypto::tink::util::StatusOr<EC_GROUP *> GetEcGroup(
       google::crypto::tink::EllipticCurveType curve_type);
 
   // Returns BoringSSL's EC_POINT constructed from the curve type, big-endian
   // representation of public key's x-coordinate and y-coordinate.
-  static util::StatusOr<EC_POINT *> GetEcPoint(
+  static crypto::tink::util::StatusOr<EC_POINT *> GetEcPoint(
       google::crypto::tink::EllipticCurveType curve,
       google::protobuf::StringPiece pubx,
       google::protobuf::StringPiece puby);
 
   // Returns a new EC key for the specified curve.
-  static util::StatusOr<EcKey> GetNewEcKey(
+  static crypto::tink::util::StatusOr<EcKey> GetNewEcKey(
       google::crypto::tink::EllipticCurveType curve_type);
 
   // Returns BoringSSL's EC_POINT constructed from curve type, point format and
@@ -57,7 +57,7 @@ class SubtleUtilBoringSSL {
   // The compressed point is encoded as 1-byte || x where x is
   // curve_size_in_bytes big-endian byte array and if the least significant bit
   // of y is 1, the 1st byte is 0x03, otherwise it's 0x02.
-  static util::StatusOr<EC_POINT *> EcPointDecode(
+  static crypto::tink::util::StatusOr<EC_POINT *> EcPointDecode(
       google::crypto::tink::EllipticCurveType curve,
       google::crypto::tink::EcPointFormat format,
       google::protobuf::StringPiece encoded);
@@ -68,20 +68,20 @@ class SubtleUtilBoringSSL {
   // The compressed point is encoded as 1-byte || x where x is
   // curve_size_in_bytes big-endian byte array and if the least significant bit
   // of y is 1, the 1st byte is 0x03, otherwise it's 0x02.
-  static util::StatusOr<std::string> EcPointEncode(
+  static crypto::tink::util::StatusOr<std::string> EcPointEncode(
       google::crypto::tink::EllipticCurveType curve,
       google::crypto::tink::EcPointFormat format,
       const EC_POINT *point);
 
   // Returns the ECDH's shared secret based on our private key and peer's public
   // key. Returns error if the public key is not on private key's curve.
-  static util::StatusOr<std::string> ComputeEcdhSharedSecret(
+  static crypto::tink::util::StatusOr<std::string> ComputeEcdhSharedSecret(
       google::crypto::tink::EllipticCurveType curve,
       const BIGNUM *priv_key, const EC_POINT *pub_key);
 
   // Returns an EVP structure for a hash function.
   // The EVP_MD instances are sigletons owned by BoringSSL.
-  static util::StatusOr<const EVP_MD *> EvpHash(
+  static crypto::tink::util::StatusOr<const EVP_MD *> EvpHash(
       google::crypto::tink::HashType hash_type);
 };
 

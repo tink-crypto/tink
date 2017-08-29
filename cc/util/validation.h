@@ -25,9 +25,9 @@ namespace tink {
 
 // Various validation helpers.
 
-util::Status ValidateKeyset(const google::crypto::tink::Keyset& keyset);
+crypto::tink::util::Status ValidateKeyset(const google::crypto::tink::Keyset& keyset);
 
-util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected);
+crypto::tink::util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected);
 
 }  // namespace tink
 }  // namespace crypto

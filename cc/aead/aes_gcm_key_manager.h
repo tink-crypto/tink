@@ -38,17 +38,17 @@ class AesGcmKeyManager : public KeyManager<Aead> {
 
   // Constructs an instance of AES-GCM Aead for the given 'key_data',
   // which must contain AesGcmKey-proto.
-  util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
+  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
       const google::crypto::tink::KeyData& key_data) const override;
 
   // Constructs an instance of AES-GCM Aead for the given 'key',
   // which must be AesGcmKey-proto.
-  util::StatusOr<std::unique_ptr<Aead>>
+  crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const google::protobuf::Message& key) const override;
 
   // Generates a new random AesGcmKey, based on the specified 'key_template',
   // which must contain AesGcmKeyFormat-proto.
-  util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
       const google::crypto::tink::KeyTemplate& key_template)
       const override;
 
@@ -68,14 +68,14 @@ class AesGcmKeyManager : public KeyManager<Aead> {
   std::string key_type_;
 
   // Constructs an instance of AES-GCM Aead for the given 'key'.
-  util::StatusOr<std::unique_ptr<Aead>>
+  crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitiveImpl(const google::crypto::tink::AesGcmKey& key) const;
 
-  util::Status Validate(
+  crypto::tink::util::Status Validate(
       const google::crypto::tink::AesGcmParams& params) const;
-  util::Status Validate(
+  crypto::tink::util::Status Validate(
       const google::crypto::tink::AesGcmKey& key) const;
-  util::Status Validate(
+  crypto::tink::util::Status Validate(
       const google::crypto::tink::AesGcmKeyFormat& key_format) const;
 };
 

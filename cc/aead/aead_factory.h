@@ -44,13 +44,13 @@ class AeadFactory {
  public:
   // Returns an Aead-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
-  static util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
+  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
       const KeysetHandle& keyset_handle);
 
   // Returns an Aead-primitive that uses key material from the keyset
   // specified via 'keyset_handle' and is instantiated by the given
   // 'custom_key_manager' (instead of the key manager from the Registry).
-  static util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
+  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
       const KeysetHandle& keyset_handle,
       const KeyManager<Aead>* custom_key_manager);
 

@@ -46,15 +46,15 @@ namespace tink {
 class MacConfig {
  public:
   // Registers standard Mac key types and their managers with the Registry.
-  static util::Status RegisterStandardKeyTypes();
+  static crypto::tink::util::Status RegisterStandardKeyTypes();
 
   // Registers legacy Mac key types and their managers with the Registry.
-  static util::Status RegisterLegacyKeyTypes();
+  static crypto::tink::util::Status RegisterLegacyKeyTypes();
 
   // Registers the given 'key_manager' for the key type
   // key_manager->get_key_type().
   // Takes ownership of 'key_manager', which must be non-nullptr.
-  static util::Status RegisterKeyManager(KeyManager<Mac>* key_manager);
+  static crypto::tink::util::Status RegisterKeyManager(KeyManager<Mac>* key_manager);
 
  private:
   MacConfig() {}

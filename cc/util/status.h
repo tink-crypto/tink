@@ -22,6 +22,8 @@
 
 #include <string>
 
+namespace crypto {
+namespace tink {
 namespace util {
 
 namespace error {
@@ -129,7 +131,7 @@ class Status {
   Status();
 
   // Make a Status from the specified error and message.
-  Status(::util::error::Code error, const std::string& error_message);
+  Status(::crypto::tink::util::error::Code error, const std::string& error_message);
 
   Status(const Status& other);
   Status& operator=(const Status& other);
@@ -141,12 +143,12 @@ class Status {
 
   // Accessors
   bool ok() const {
-    return code_ == ::util::error::OK;
+    return code_ == ::crypto::tink::util::error::OK;
   }
   int error_code() const {
     return code_;
   }
-  ::util::error::Code CanonicalCode() const {
+  ::crypto::tink::util::error::Code CanonicalCode() const {
     return code_;
   }
   const std::string& error_message() const {
@@ -163,7 +165,7 @@ class Status {
   std::string ToString() const;
 
  private:
-  ::util::error::Code code_;
+  ::crypto::tink::util::error::Code code_;
   std::string message_;
 };
 
@@ -175,15 +177,17 @@ inline bool Status::operator!=(const Status& other) const {
   return !(*this == other);
 }
 
-extern std::string ErrorCodeString(util::error::Code error);
+extern std::string ErrorCodeString(crypto::tink::util::error::Code error);
 
 extern ::std::ostream& operator<<(::std::ostream& os,
-                                  ::util::error::Code code);
+                                  ::crypto::tink::util::error::Code code);
 extern ::std::ostream& operator<<(::std::ostream& os, const Status& other);
 
 // Returns an OK status, equivalent to a default constructed instance.
 inline Status OkStatus() { return Status(); }
 
 }  // namespace util
+}  // namespace tink
+}  // namespace crypto
 
 #endif  // TINK_UTIL_STATUS_H_

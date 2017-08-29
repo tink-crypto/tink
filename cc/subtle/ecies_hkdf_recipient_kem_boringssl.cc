@@ -32,12 +32,12 @@ namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
+crypto::tink::util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
 EciesHkdfRecipientKemBoringSsl::New(
     EllipticCurveType curve, const std::string& priv_key) {
   auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
   if (!status_or_ec_group.ok()) return status_or_ec_group.status();
-  auto recipient_kem = util::wrap_unique(
+  auto recipient_kem = crypto::tink::util::wrap_unique(
       new EciesHkdfRecipientKemBoringSsl(curve, priv_key));
   // TODO(przydatek): consider refactoring SubtleUtilBoringSSL,
   //     so that the saved group can be used for KEM operations.
@@ -49,14 +49,14 @@ EciesHkdfRecipientKemBoringSsl::EciesHkdfRecipientKemBoringSsl(
     EllipticCurveType curve, const std::string& priv_key_value)
     : curve_(curve), priv_key_value_(priv_key_value) {}
 
-util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
+crypto::tink::util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
     StringPiece kem_bytes, HashType hash, StringPiece hkdf_salt,
     StringPiece hkdf_info, uint32_t key_size_in_bytes,
     EcPointFormat point_format) const {
   auto status_or_ec_point =
       SubtleUtilBoringSSL::EcPointDecode(curve_, point_format, kem_bytes);
   if (!status_or_ec_point.ok()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Invalid KEM bytes: %s",
                      status_or_ec_point.status().error_message().c_str());
   }

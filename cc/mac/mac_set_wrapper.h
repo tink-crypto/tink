@@ -36,13 +36,13 @@ class MacSetWrapper : public Mac {
  public:
   // Returns an Mac-primitive that uses Mac-instances provided in 'mac_set',
   // which must be non-NULL and must contain a primary instance.
-  static util::StatusOr<std::unique_ptr<Mac>> NewMac(
+  static crypto::tink::util::StatusOr<std::unique_ptr<Mac>> NewMac(
       std::unique_ptr<PrimitiveSet<Mac>> mac_set);
 
-  util::StatusOr<std::string> ComputeMac(
+  crypto::tink::util::StatusOr<std::string> ComputeMac(
       google::protobuf::StringPiece data) const override;
 
-  util::Status VerifyMac(
+  crypto::tink::util::Status VerifyMac(
       google::protobuf::StringPiece mac_value,
       google::protobuf::StringPiece data) const override;
 

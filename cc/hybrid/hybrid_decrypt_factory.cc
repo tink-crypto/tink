@@ -29,13 +29,13 @@ namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::unique_ptr<HybridDecrypt>>
+crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
 HybridDecryptFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
   return GetPrimitive(keyset_handle, nullptr);
 }
 
 // static
-util::StatusOr<std::unique_ptr<HybridDecrypt>>
+crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
 HybridDecryptFactory::GetPrimitive(const KeysetHandle& keyset_handle,
     const KeyManager<HybridDecrypt>* custom_key_manager) {
   auto primitives_result = Registry::get_default_registry()

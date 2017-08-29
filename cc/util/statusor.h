@@ -22,6 +22,8 @@
 
 #include "cc/util/status.h"
 
+namespace crypto {
+namespace tink {
 namespace util {
 
 // A StatusOr holds a Status (in the case of an error), or a value T.
@@ -32,7 +34,7 @@ class StatusOr {
   inline StatusOr();
 
   // Builds from a non-OK status. Crashes if an OK status is specified.
-  inline StatusOr(const ::util::Status& status);  // NOLINT
+  inline StatusOr(const ::crypto::tink::util::Status& status);  // NOLINT
 
   // Builds from the specified value.
   inline StatusOr(const T& value);  // NOLINT
@@ -56,7 +58,7 @@ class StatusOr {
   inline const StatusOr& operator=(const StatusOr<U>& other);
 
   // Accessors.
-  inline const ::util::Status& status() const {
+  inline const ::crypto::tink::util::Status& status() const {
     return status_;
   }
 
@@ -92,13 +94,13 @@ class StatusOr {
 // Implementation.
 
 template <typename T>
-inline StatusOr<T>::StatusOr() : status_(::util::error::UNKNOWN, "") {
+inline StatusOr<T>::StatusOr() : status_(::crypto::tink::util::error::UNKNOWN, "") {
 }
 
 template <typename T>
-inline StatusOr<T>::StatusOr(const ::util::Status& status) : status_(status) {
+inline StatusOr<T>::StatusOr(const ::crypto::tink::util::Status& status) : status_(status) {
   if (status.ok()) {
-    std::cerr << "::util::OkStatus() is not a valid argument to StatusOr\n";
+    std::cerr << "::crypto::tink::util::OkStatus() is not a valid argument to StatusOr\n";
     exit(1);
   }
 }
@@ -147,5 +149,7 @@ inline const StatusOr<T>& StatusOr<T>::operator=(const StatusOr<U>& other) {
 }
 
 }  // namespace util
+}  // namespace tink
+}  // namespace crypto
 
 #endif  // TINK_UTIL_STATUSOR_H_

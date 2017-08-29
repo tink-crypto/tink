@@ -46,15 +46,15 @@ namespace tink {
 class AeadConfig {
  public:
   // Registers standard Aead key types and their managers with the Registry.
-  static util::Status RegisterStandardKeyTypes();
+  static crypto::tink::util::Status RegisterStandardKeyTypes();
 
   // Registers legacy Aead key types and their managers with the Registry.
-  static util::Status RegisterLegacyKeyTypes();
+  static crypto::tink::util::Status RegisterLegacyKeyTypes();
 
   // Registers the given 'key_manager' for the key type
   // key_manager->get_key_type().
   // Takes ownership of 'key_manager', which must be non-nullptr.
-  static util::Status RegisterKeyManager(KeyManager<Aead>* key_manager);
+  static crypto::tink::util::Status RegisterKeyManager(KeyManager<Aead>* key_manager);
 
  private:
   AeadConfig() {}

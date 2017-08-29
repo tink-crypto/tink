@@ -49,7 +49,7 @@ namespace tink {
 class HybridDecrypt {
  public:
   // Decrypts 'ciphertext' verifying the integrity of 'context_info'.
-  virtual util::StatusOr<std::string> Decrypt(
+  virtual crypto::tink::util::StatusOr<std::string> Decrypt(
       google::protobuf::StringPiece ciphertext,
       google::protobuf::StringPiece context_info) const = 0;
 

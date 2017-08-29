@@ -27,8 +27,8 @@ namespace crypto {
 namespace tink {
 
 // Constructs a Status object given a printf-style va list.
-util::Status ToStatusF(
-    util::error::Code code, const char* format, ...)
+crypto::tink::util::Status ToStatusF(
+    crypto::tink::util::error::Code code, const char* format, ...)
     PRINTF_ATTRIBUTE(2, 3);
 
 }  // namespace tink

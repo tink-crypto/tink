@@ -35,8 +35,8 @@ using google::crypto::tink::EciesAeadHkdfParams;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 using google::protobuf::Message;
-using util::Status;
-using util::StatusOr;
+using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 
 namespace crypto {
 namespace tink {
@@ -57,13 +57,13 @@ EciesAeadHkdfPublicKeyManager::GetPrimitive(const KeyData& key_data) const {
   if (DoesSupport(key_data.type_url())) {
     EciesAeadHkdfPublicKey ecies_public_key;
     if (!ecies_public_key.ParseFromString(key_data.value())) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                        "Could not parse key_data.value as key type '%s'.",
                        key_data.type_url().c_str());
     }
     return GetPrimitiveImpl(ecies_public_key);
   } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Key type '%s' is not supported by this manager.",
                      key_data.type_url().c_str());
   }
@@ -78,7 +78,7 @@ EciesAeadHkdfPublicKeyManager::GetPrimitive(const Message& key) const {
         reinterpret_cast<const EciesAeadHkdfPublicKey&>(key);
     return GetPrimitiveImpl(ecies_public_key);
   } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Key type '%s' is not supported by this manager.",
                      key_type.c_str());
   }
@@ -96,7 +96,7 @@ EciesAeadHkdfPublicKeyManager::GetPrimitiveImpl(
 
 StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPublicKeyManager::NewKey(
     const KeyTemplate& key_template) const {
-  return util::Status(util::error::UNIMPLEMENTED,
+  return crypto::tink::util::Status(crypto::tink::util::error::UNIMPLEMENTED,
                       "Operation not supported for public keys, "
                       "please use a corresponding PrivateKeyManager.");
 }

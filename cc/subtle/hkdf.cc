@@ -29,7 +29,7 @@ namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
+crypto::tink::util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
                                               StringPiece ikm,
                                               StringPiece salt,
                                               StringPiece info,
@@ -43,13 +43,13 @@ util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
                 reinterpret_cast<const uint8_t *>(ikm.data()), ikm.size(),
                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size(),
                 reinterpret_cast<const uint8_t *>(info.data()), info.size())) {
-    return util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
+    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL, "BoringSSL's HKDF failed");
   }
   return std::string(reinterpret_cast<const char *>(out_key.get()), out_len);
 }
 
 // static
-util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
+crypto::tink::util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
     HashType hash,
     StringPiece kem_bytes,
     StringPiece shared_secret,

@@ -31,7 +31,7 @@ class EcUtil {
   // the shared point, from a private key and a public key.
   // Returns an error if the public key is not a valid point on the private
   // key's curve.
-  static util::StatusOr<std::string> ComputeEcdhSharedSecret(
+  static crypto::tink::util::StatusOr<std::string> ComputeEcdhSharedSecret(
       google::crypto::tink::EllipticCurveType curve_type,
       google::protobuf::StringPiece priv,
       google::protobuf::StringPiece pub_x,
@@ -39,7 +39,7 @@ class EcUtil {
 
   // Returns the encoding size of a point on the specified elliptic curve
   // when the given 'point_format' is used.
-  static util::StatusOr<uint32_t> EncodingSizeInBytes(
+  static crypto::tink::util::StatusOr<uint32_t> EncodingSizeInBytes(
       google::crypto::tink::EllipticCurveType curve_type,
       google::crypto::tink::EcPointFormat point_format);
 

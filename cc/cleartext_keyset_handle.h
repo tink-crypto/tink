@@ -31,11 +31,11 @@ namespace tink {
 // loading cleartext keysets, thus its usage should be restricted.
 class CleartextKeysetHandle {
  public:
-  static util::StatusOr<std::unique_ptr<KeysetHandle>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> New(
       const google::crypto::tink::Keyset& keyset);
-  static util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(
       const std::string& serialized_keyset);
-  static util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(
       std::istream* keyset_stream);
  private:
   CleartextKeysetHandle() {}

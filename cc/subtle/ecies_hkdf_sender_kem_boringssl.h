@@ -46,7 +46,7 @@ class EciesHkdfSenderKemBoringSsl {
 
   // Constructs a sender KEM for the specified curve and recipient's
   // public key point.  The public key's coordinates are big-endian byte array.
-  static util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>> New(
       google::crypto::tink::EllipticCurveType curve,
       const std::string& pubx,
       const std::string& puby);
@@ -55,7 +55,7 @@ class EciesHkdfSenderKemBoringSsl {
   // generated ephemeral key and recipient's public key, then uses HKDF
   // to derive the symmetric key from the shared secret, 'hkdf_info' and
   // hkdf_salt.
-  util::StatusOr<std::unique_ptr<KemKey>> GenerateKey(
+  crypto::tink::util::StatusOr<std::unique_ptr<KemKey>> GenerateKey(
       google::crypto::tink::HashType hash,
       google::protobuf::StringPiece hkdf_salt,
       google::protobuf::StringPiece hkdf_info,

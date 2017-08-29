@@ -31,12 +31,12 @@ namespace tink {
 class Mac {
  public:
   // Computes and returns the message authentication code (MAC) for 'data'.
-  virtual util::StatusOr<std::string> ComputeMac(
+  virtual crypto::tink::util::StatusOr<std::string> ComputeMac(
       google::protobuf::StringPiece data) const = 0;
 
   // Verifies if 'mac' is a correct authentication code (MAC) for 'data'.
   // Returns Status::OK if 'mac' is correct, and a non-OK-Status otherwise.
-  virtual util::Status VerifyMac(
+  virtual crypto::tink::util::Status VerifyMac(
       google::protobuf::StringPiece mac_value,
       google::protobuf::StringPiece data) const = 0;
 

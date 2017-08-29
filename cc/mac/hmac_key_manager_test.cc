@@ -62,7 +62,7 @@ TEST_F(HmacKeyManagerTest, testKeyDataErrors) {
     key_data.set_type_url(bad_key_type);
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
                         result.status().error_message());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
@@ -75,7 +75,7 @@ TEST_F(HmacKeyManagerTest, testKeyDataErrors) {
     key_data.set_value("some bad serialized proto");
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
                         result.status().error_message());
   }
@@ -88,7 +88,7 @@ TEST_F(HmacKeyManagerTest, testKeyDataErrors) {
     key_data.set_value(key.SerializeAsString());
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
                         result.status().error_message());
   }
@@ -101,7 +101,7 @@ TEST_F(HmacKeyManagerTest, testKeyMessageErrors) {
     AesCtrKey key_message;
     auto result = key_manager.GetPrimitive(key_message);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesCtrKey",
                         result.status().error_message());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -150,7 +150,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyErrors) {
     key_template.set_type_url(bad_key_type);
     auto result = key_manager.NewKey(key_template);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
                         result.status().error_message());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
@@ -163,7 +163,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyErrors) {
     key_template.set_value("some bad serialized proto");
     auto result = key_manager.NewKey(key_template);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
                         result.status().error_message());
   }
@@ -176,7 +176,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyErrors) {
     key_template.set_value(key_format.SerializeAsString());
     auto result = key_manager.NewKey(key_template);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "key_size",
                         result.status().error_message());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
@@ -192,7 +192,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyErrors) {
     key_template.set_value(key_format.SerializeAsString());
     auto result = key_manager.NewKey(key_template);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "HashType",
                         result.status().error_message());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -209,7 +209,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyErrors) {
     key_template.set_value(key_format.SerializeAsString());
     auto result = key_manager.NewKey(key_template);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "tag_size",
                         result.status().error_message());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
@@ -226,7 +226,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyErrors) {
     key_template.set_value(key_format.SerializeAsString());
     auto result = key_manager.NewKey(key_template);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "tag_size",
                         result.status().error_message());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "too big",

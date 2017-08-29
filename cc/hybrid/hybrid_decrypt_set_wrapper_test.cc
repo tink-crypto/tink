@@ -42,7 +42,7 @@ TEST_F(HybridDecryptSetWrapperTest, testBasic) {
     auto hybrid_decrypt_result =
         HybridDecryptSetWrapper::NewHybridDecrypt(nullptr);
     EXPECT_FALSE(hybrid_decrypt_result.ok());
-    EXPECT_EQ(util::error::INTERNAL,
+    EXPECT_EQ(crypto::tink::util::error::INTERNAL,
         hybrid_decrypt_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
         hybrid_decrypt_result.status().error_message());
@@ -54,7 +54,7 @@ TEST_F(HybridDecryptSetWrapperTest, testBasic) {
     auto hybrid_decrypt_result = HybridDecryptSetWrapper::NewHybridDecrypt(
         std::move(hybrid_decrypt_set));
     EXPECT_FALSE(hybrid_decrypt_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT,
         hybrid_decrypt_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
         hybrid_decrypt_result.status().error_message());
@@ -120,7 +120,7 @@ TEST_F(HybridDecryptSetWrapperTest, testBasic) {
       std::string ciphertext =  plaintext + hybrid_name_1;
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_FALSE(decrypt_result.ok());
-      EXPECT_EQ(util::error::INVALID_ARGUMENT,
+      EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT,
           decrypt_result.status().error_code());
       EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
           decrypt_result.status().error_message());
@@ -137,7 +137,7 @@ TEST_F(HybridDecryptSetWrapperTest, testBasic) {
       std::string ciphertext = "some bad ciphertext";
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_FALSE(decrypt_result.ok());
-      EXPECT_EQ(util::error::INVALID_ARGUMENT,
+      EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT,
           decrypt_result.status().error_code());
       EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
           decrypt_result.status().error_message());

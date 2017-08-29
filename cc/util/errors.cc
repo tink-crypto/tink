@@ -21,8 +21,8 @@
 
 #include "cc/util/status.h"
 
-using util::error::Code;
-using util::Status;
+using crypto::tink::util::error::Code;
+using crypto::tink::util::Status;
 
 namespace crypto {
 namespace tink {

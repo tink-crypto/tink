@@ -36,17 +36,17 @@ class EciesAeadHkdfHybridEncrypt : public HybridEncrypt {
  public:
   // Returns an HybridEncrypt-primitive that uses the key material
   // given in 'recipient_key'.
-  static util::StatusOr<std::unique_ptr<HybridEncrypt>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>> New(
       const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key);
 
-  util::StatusOr<std::string> Encrypt(
+  crypto::tink::util::StatusOr<std::string> Encrypt(
       google::protobuf::StringPiece plaintext,
       google::protobuf::StringPiece context_info) const override;
 
   virtual ~EciesAeadHkdfHybridEncrypt() {}
 
  private:
-  static util::Status Validate(
+  static crypto::tink::util::Status Validate(
       const google::crypto::tink::EciesAeadHkdfPublicKey& key);
 
   EciesAeadHkdfHybridEncrypt(

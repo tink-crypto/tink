@@ -62,7 +62,7 @@ class Registry {
   // Registers the given 'manager' for the key type identified by 'type_url'.
   // Takes ownership of 'manager', which must be non-nullptr.
   template <class P>
-  util::Status RegisterKeyManager(google::protobuf::StringPiece type_url,
+  crypto::tink::util::Status RegisterKeyManager(google::protobuf::StringPiece type_url,
                                   KeyManager<P>* manager);
 
   // Returns a key manager for the given type_url (if any found).
@@ -72,14 +72,14 @@ class Registry {
   // (cannot return reference directly, as StatusOr does not support it,
   // see https://goo.gl/x0ymDz)
   template <class P>
-  util::StatusOr<const KeyManager<P>*> get_key_manager(
+  crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
       google::protobuf::StringPiece type_url);
 
   // Convenience method for creating a new primitive for the key given
   // in 'key_data'.  It looks up a KeyManager identified by key_data.type_url,
   // and calls manager's GetPrimitive(key_data)-method.
   template <class P>
-  util::StatusOr<std::unique_ptr<P>> GetPrimitive(
+  crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const google::crypto::tink::KeyData& key_data);
 
   // Creates a set of primitives corresponding to the keys with
@@ -90,7 +90,7 @@ class Registry {
   // The returned set is usually later "wrapped" into a class that
   // implements the corresponding Primitive-interface.
   template <class P>
-  util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> GetPrimitives(
+  crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> GetPrimitives(
       const KeysetHandle& keyset_handle, const KeyManager<P>* custom_manager);
 
   Registry() {}
@@ -116,23 +116,23 @@ void delete_manager(void* t) {
 }
 
 template <class P>
-util::Status Registry::RegisterKeyManager(
+crypto::tink::util::Status Registry::RegisterKeyManager(
     google::protobuf::StringPiece type_url, KeyManager<P>* manager) {
   if (manager == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
                         "Parameter 'manager' must be non-null.");
   }
   std::unique_ptr<void, void(*)(void*)>
       entry(manager, delete_manager<P>);
   if (!manager->DoesSupport(type_url)) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "The manager does not support type '%s'.",
                      type_url.ToString().c_str());
   }
   std::lock_guard<std::mutex> lock(maps_mutex_);
   auto curr_manager = type_to_manager_map_.find(type_url.ToString());
   if (curr_manager != type_to_manager_map_.end()) {
-    return ToStatusF(util::error::ALREADY_EXISTS,
+    return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                      "A manager for type '%s' has been already registered.",
                      type_url.ToString().c_str());
   }
@@ -140,21 +140,21 @@ util::Status Registry::RegisterKeyManager(
       std::make_pair(type_url.ToString(), std::move(entry)));
   type_to_primitive_map_.insert(
       std::make_pair(type_url.ToString(), typeid(P).name()));
-  return util::Status::OK;
+  return crypto::tink::util::Status::OK;
 }
 
 template <class P>
-util::StatusOr<const KeyManager<P>*> Registry::get_key_manager(
+crypto::tink::util::StatusOr<const KeyManager<P>*> Registry::get_key_manager(
     google::protobuf::StringPiece type_url) {
   std::lock_guard<std::mutex> lock(maps_mutex_);
   auto manager_entry = type_to_manager_map_.find(type_url.ToString());
   if (manager_entry == type_to_manager_map_.end()) {
-    return ToStatusF(util::error::NOT_FOUND,
+    return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                      "No manager for type '%s' has been registered.",
                      type_url.ToString().c_str());
   }
   if (type_to_primitive_map_[type_url.ToString()] != typeid(P).name()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Wrong Primitive type for key type '%s': "
                      "got '%s', expected '%s'",
                      type_url.ToString().c_str(),
@@ -165,7 +165,7 @@ util::StatusOr<const KeyManager<P>*> Registry::get_key_manager(
 }
 
 template <class P>
-util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
+crypto::tink::util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
     const google::crypto::tink::KeyData& key_data) {
   auto key_manager_result = get_key_manager<P>(key_data.type_url());
   if (key_manager_result.ok()) {
@@ -175,9 +175,9 @@ util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
 }
 
 template <class P>
-util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> Registry::GetPrimitives(
+crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> Registry::GetPrimitives(
     const KeysetHandle& keyset_handle, const KeyManager<P>* custom_manager) {
-  util::Status status = ValidateKeyset(keyset_handle.get_keyset());
+  crypto::tink::util::Status status = ValidateKeyset(keyset_handle.get_keyset());
   if (!status.ok()) return status;
   std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());
   for (const google::crypto::tink::Keyset::Key& key

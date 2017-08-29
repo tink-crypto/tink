@@ -33,19 +33,19 @@ class ErrorsTest : public ::testing::Test {
 TEST_F(ErrorsTest, ToStatusFTest) {
   const char* const msg1 = "test message 1";
   const char* const msg2 = "test message %s 2 %d";
-  util::Status status;
+  crypto::tink::util::Status status;
 
-  status = ToStatusF(util::error::OK, msg1);
+  status = ToStatusF(crypto::tink::util::error::OK, msg1);
   EXPECT_TRUE(status.ok());
   // if status is OK, error message is ignored
   EXPECT_EQ("", status.error_message());
-  EXPECT_EQ(util::error::OK, status.error_code());
+  EXPECT_EQ(crypto::tink::util::error::OK, status.error_code());
 
   const char* expected_msg2 = "test message asdf 2 42";
-  status = ToStatusF(util::error::UNKNOWN, msg2, "asdf", 42);
+  status = ToStatusF(crypto::tink::util::error::UNKNOWN, msg2, "asdf", 42);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(expected_msg2, status.error_message());
-  EXPECT_EQ(util::error::UNKNOWN, status.error_code());
+  EXPECT_EQ(crypto::tink::util::error::UNKNOWN, status.error_code());
 }
 
 }  // namespace

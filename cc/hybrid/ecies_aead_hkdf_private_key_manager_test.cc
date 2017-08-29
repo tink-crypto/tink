@@ -73,7 +73,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyDataErrors) {
     key_data.set_type_url(bad_key_type);
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
                         result.status().error_message());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
@@ -86,7 +86,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyDataErrors) {
     key_data.set_value("some bad serialized proto");
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
                         result.status().error_message());
   }
@@ -99,7 +99,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyDataErrors) {
     key_data.set_value(key.SerializeAsString());
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "version",
                         result.status().error_message());
   }
@@ -112,7 +112,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyMessageErrors) {
     AesEaxKey key;
     auto result = key_manager.GetPrimitive(key);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKey",
                         result.status().error_message());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
@@ -159,7 +159,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyError) {
   KeyTemplate key_template;
   auto result = key_manager.NewKey(key_template);
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
+  EXPECT_EQ(crypto::tink::util::error::UNIMPLEMENTED, result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented yet",
                       result.status().error_message());
 }

@@ -47,25 +47,25 @@ EllipticCurveType curve, const std::string& pubx, const std::string& puby)
 }
 
 // static
-util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
+crypto::tink::util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
 EciesHkdfSenderKemBoringSsl::New(
     EllipticCurveType curve, const std::string& pubx, const std::string& puby) {
   auto status_or_ec_point =
       SubtleUtilBoringSSL::GetEcPoint(curve, pubx, puby);
   if (!status_or_ec_point.ok()) return status_or_ec_point.status();
-  auto sender_kem = util::wrap_unique(
+  auto sender_kem = crypto::tink::util::wrap_unique(
       new EciesHkdfSenderKemBoringSsl(curve, pubx, puby));
   sender_kem->peer_pub_key_.reset(status_or_ec_point.ValueOrDie());
   return std::move(sender_kem);
 }
 
-util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl::KemKey>>
+crypto::tink::util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl::KemKey>>
 EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, StringPiece hkdf_salt,
                                          StringPiece hkdf_info,
                                          uint32_t key_size_in_bytes,
                                          EcPointFormat point_format) const {
   if (peer_pub_key_.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
                         "peer_pub_key_ wasn't initialized");
   }
 
@@ -76,10 +76,10 @@ EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, StringPiece hkdf_salt,
   bssl::UniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
   bssl::UniquePtr<EC_KEY> ephemeral_key(EC_KEY_new());
   if (1 != EC_KEY_set_group(ephemeral_key.get(), group.get())) {
-    return util::Status(util::error::INTERNAL, "EC_KEY_set_group failed");
+    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL, "EC_KEY_set_group failed");
   }
   if (1 != EC_KEY_generate_key(ephemeral_key.get())) {
-    return util::Status(util::error::INTERNAL, "EC_KEY_generate_key failed");
+    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL, "EC_KEY_generate_key failed");
   }
   const BIGNUM* ephemeral_priv = EC_KEY_get0_private_key(ephemeral_key.get());
   const EC_POINT* ephemeral_pub = EC_KEY_get0_public_key(ephemeral_key.get());
@@ -102,7 +102,7 @@ EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, StringPiece hkdf_salt,
     return status_or_string_symmetric_key.status();
   }
   std::string symmetric_key(status_or_string_symmetric_key.ValueOrDie());
-  auto kem_key = util::make_unique<KemKey>(kem_bytes, symmetric_key);
+  auto kem_key = crypto::tink::util::make_unique<KemKey>(kem_bytes, symmetric_key);
   return std::move(kem_key);
 }
 

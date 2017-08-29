@@ -25,22 +25,22 @@ namespace tink {
 
 // TODO(przydatek): add more validation checks
 
-util::Status ValidateKeyset(const google::crypto::tink::Keyset& keyset) {
+crypto::tink::util::Status ValidateKeyset(const google::crypto::tink::Keyset& keyset) {
   if (keyset.key_size() < 1) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "A valid keyset must contain at least one key.");
   }
-  return util::Status::OK;
+  return crypto::tink::util::Status::OK;
 }
 
-util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected) {
+crypto::tink::util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected) {
   if (candidate > max_expected) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Key has version '%d'; "
                      "only keys with version in range [0..%d] are supported.",
                      candidate, max_expected);
   }
-  return util::Status::OK;
+  return crypto::tink::util::Status::OK;
 }
 
 

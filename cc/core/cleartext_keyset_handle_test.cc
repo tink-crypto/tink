@@ -47,7 +47,7 @@ TEST_F(CleartextKeysetHandleTest, testFromString) {
   {  // Bad serialization.
     auto result = CleartextKeysetHandle::ParseFrom("bad serialized keyset");
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
   }
   {  // Empty serialization.
     auto result = CleartextKeysetHandle::ParseFrom("");
@@ -76,7 +76,7 @@ TEST_F(CleartextKeysetHandleTest, testFromStream) {
     std::istringstream stream("some bad serialized keyset");
     auto result = CleartextKeysetHandle::ParseFrom(&stream);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, result.status().error_code());
   }
   {  // Empty serialization.
     std::istringstream stream("");

@@ -33,7 +33,7 @@ TEST_F(MacConfigTest, testBasic) {
   std::string key_type =  "type.googleapis.com/google.crypto.tink.HmacKey";
   auto manager_result = registry.get_key_manager<Mac>(key_type);
   EXPECT_FALSE(manager_result.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  EXPECT_EQ(crypto::tink::util::error::NOT_FOUND, manager_result.status().error_code());
   EXPECT_TRUE(MacConfig::RegisterStandardKeyTypes().ok());
   manager_result = registry.get_key_manager<Mac>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();

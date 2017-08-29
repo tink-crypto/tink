@@ -19,6 +19,8 @@
 
 #include <memory>
 
+namespace crypto {
+namespace tink {
 namespace util {
 
 // C++14 make_unique.
@@ -45,5 +47,7 @@ std::unique_ptr<T> wrap_unique(T* ptr) {
 }
 
 }  // namespace util
+}  // namespace tink
+}  // namespace crypto
 
 #endif  // TINK_UTIL_MAKE_UNIQUE_H_

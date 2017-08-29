@@ -46,15 +46,15 @@ namespace tink {
 class HybridDecryptConfig {
  public:
   // Registers standard HybridDecrypt key types and their managers.
-  static util::Status RegisterStandardKeyTypes();
+  static crypto::tink::util::Status RegisterStandardKeyTypes();
 
   // Registers legacy HybridDecrypt key types and their managers.
-  static util::Status RegisterLegacyKeyTypes();
+  static crypto::tink::util::Status RegisterLegacyKeyTypes();
 
   // Registers the given 'key_manager' for the key type
   // key_manager->get_key_type().
   // Takes ownership of 'key_manager', which must be non-nullptr.
-  static util::Status RegisterKeyManager(
+  static crypto::tink::util::Status RegisterKeyManager(
       KeyManager<HybridDecrypt>* key_manager);
 
  private:

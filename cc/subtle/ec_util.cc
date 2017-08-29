@@ -31,7 +31,7 @@ namespace crypto {
 namespace tink {
 
 // static
-util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
+crypto::tink::util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
     EllipticCurveType curve_type, StringPiece priv, StringPiece pub_x,
     StringPiece pub_y) {
   bssl::UniquePtr<BIGNUM> priv_key(
@@ -57,11 +57,11 @@ uint32_t EcUtil::FieldSizeInBytes(
 }
 
 // static
-util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
+crypto::tink::util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
     EllipticCurveType curve_type, EcPointFormat point_format) {
   int coordinate_size = FieldSizeInBytes(curve_type);
   if (coordinate_size == 0) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Unsupported elliptic curve type: %s",
                      EllipticCurveType_Name(curve_type).c_str());
   }
@@ -71,7 +71,7 @@ util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
   case EcPointFormat::COMPRESSED:
     return coordinate_size + 1;
   default:
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Unsupported elliptic curve point format: %s",
                      EcPointFormat_Name(point_format).c_str());
   }

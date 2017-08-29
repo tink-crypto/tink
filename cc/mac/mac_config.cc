@@ -25,19 +25,19 @@ namespace crypto {
 namespace tink {
 
 // static
-util::Status MacConfig::RegisterStandardKeyTypes() {
+crypto::tink::util::Status MacConfig::RegisterStandardKeyTypes() {
   return RegisterKeyManager(new HmacKeyManager());
 }
 
 // static
-util::Status MacConfig::RegisterLegacyKeyTypes() {
-  return util::Status::OK;
+crypto::tink::util::Status MacConfig::RegisterLegacyKeyTypes() {
+  return crypto::tink::util::Status::OK;
 }
 
 // static
-util::Status MacConfig::RegisterKeyManager(KeyManager<Mac>* key_manager) {
+crypto::tink::util::Status MacConfig::RegisterKeyManager(KeyManager<Mac>* key_manager) {
   if (key_manager == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
                         "Parameter 'key_manager' must be non-null.");
   }
   return Registry::get_default_registry().RegisterKeyManager(

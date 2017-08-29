@@ -29,8 +29,8 @@
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EciesAeadHkdfPublicKey;
-using util::Status;
-using util::StatusOr;
+using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 
 namespace crypto {
 namespace tink {
@@ -87,7 +87,7 @@ StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
 // static
 Status EciesAeadHkdfHybridEncrypt::Validate(const EciesAeadHkdfPublicKey& key) {
   if (key.x().empty() || key.y().empty() || !key.has_params()) {
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(crypto::tink::util::error::INVALID_ARGUMENT,
           "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
   return Status::OK;

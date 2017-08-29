@@ -34,7 +34,7 @@ TEST_F(HybridDecryptConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
   auto manager_result = registry.get_key_manager<HybridDecrypt>(key_type);
   EXPECT_FALSE(manager_result.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  EXPECT_EQ(crypto::tink::util::error::NOT_FOUND, manager_result.status().error_code());
   EXPECT_TRUE(HybridDecryptConfig::RegisterStandardKeyTypes().ok());
   manager_result = registry.get_key_manager<HybridDecrypt>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();

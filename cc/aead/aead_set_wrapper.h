@@ -35,14 +35,14 @@ class AeadSetWrapper : public Aead {
  public:
   // Returns an Aead-primitive that uses Aead-instances provided in 'aead_set',
   // which must be non-NULL and must contain a primary instance.
-  static util::StatusOr<std::unique_ptr<Aead>> NewAead(
+  static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> NewAead(
       std::unique_ptr<PrimitiveSet<Aead>> aead_set);
 
-  util::StatusOr<std::string> Encrypt(
+  crypto::tink::util::StatusOr<std::string> Encrypt(
       google::protobuf::StringPiece plaintext,
       google::protobuf::StringPiece additional_data) const override;
 
-  util::StatusOr<std::string> Decrypt(
+  crypto::tink::util::StatusOr<std::string> Decrypt(
       google::protobuf::StringPiece ciphertext,
       google::protobuf::StringPiece additional_data) const override;
 

@@ -43,15 +43,15 @@ template<class P>
 class KeyManager {
  public:
   // Constructs an instance of P for the given 'key_data'.
-  virtual util::StatusOr<std::unique_ptr<P>>
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<P>>
   GetPrimitive(const google::crypto::tink::KeyData& key_data) const = 0;
 
   // Constructs an instance of P for the given 'key'.
-  virtual util::StatusOr<std::unique_ptr<P>>
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<P>>
   GetPrimitive(const google::protobuf::Message& key) const = 0;
 
   // Generates a new random key, based on the specified 'key_template'.
-  virtual util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
       const google::crypto::tink::KeyTemplate& key_template) const = 0;
 
   // Returns the type_url identifying the key type handled by this manager.
