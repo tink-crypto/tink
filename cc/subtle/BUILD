@@ -1,4 +1,7 @@
-package(default_visibility = ["//cc:__subpackages__"])
+package(default_visibility = [
+    "//cc:__subpackages__",
+    "//objc:__subpackages__",
+])
 
 licenses(["notice"])  # Apache 2.0
 
