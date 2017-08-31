@@ -22,11 +22,18 @@ import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * This class offers convenience methods and constants for initializing
- * {@link HybridDecryptFactory} and the underlying {@link Registry}.
+ * Static methods and constants for registering with the {@link Registry} all instances of
+ * {@link com.google.crypto.tink.HybridEncrypt} and {@link com.google.crypto.tink.HybridDecrypt}
+ * key types supported in a particular release of Tink.
  *
- * For more information on how to obtain and use HybridDecrypt primitives,
- * see {@link HybridDecryptFactory}.
+ * <p>To register all HybridEncrypt and HybridDecrypt key types provided in Tink release
+ * 1.0.0 one can do:
+ * <pre>{@code
+ * Config.register(HybridConfig.TINK_1_0_0);
+ * }</pre>
+ *
+ * <p>For more information on how to obtain and use instances of HybridEncrypt or HybridDecrypt,
+ * see {@link HybridEncryptFactory} or {@link HybridDecryptFactory}.
  */
 public final class HybridConfig {
   private static final String CATALOGUE_NAME = "TinkHybrid";
@@ -49,11 +56,13 @@ public final class HybridConfig {
   }
 
   /**
-   * Registers all {@link HybridEncrypt} and {@link HybridDecrypt} catalogues with the
-   * {@link Registry}.
+   * Tries to register with the {@link Registry} all instances of
+   * {@link com.google.crypto.tink.Catalogue} needed to handle HybridDecrypt and HybridEncrypt
+   * key types supported in Tink.
    *
-   * <p>Because hybrid key types depend on {@link Aead} and {@link Mac} key types, this method
-   * also registers all {@link Aead} and {@link Mac} catalogues.
+   * <p>Because HybridDecrypt and HybridEncrypt key types depend on
+   * {@link com.google.crypto.tink.Aead} and {@link com.google.crypto.tink.Mac} key types, this
+   * method also registers all Aead and Mac catalogues.
    */
   public static void init() throws GeneralSecurityException {
     Registry.addCatalogue(CATALOGUE_NAME, new HybridCatalogue());

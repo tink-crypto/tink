@@ -22,14 +22,13 @@ import com.google.crypto.tink.signature.SignatureConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * This class contains constants with configuration examples that can be used
- * for initializing the {@link Registry}.
+ * Static methods and constants for registering with the {@link com.google.crypto.tink.Registry}
+ * all instances of all key types supported in a particular release of Tink.
  *
- * To register all key types provided in Tink release 1.0.0 one would use:
- *
- * <pre><code>
+ * <p>To register all key types provided in Tink release 1.0.0 one can do:
+ * <pre>{@code
  * Config.register(TinkConfig.TINK_1_0_0);
- * </code></pre>
+ * }</pre>
  */
 public final class TinkConfig {
   public static final RegistryConfig TINK_1_0_0 = RegistryConfig.newBuilder()
@@ -39,7 +38,8 @@ public final class TinkConfig {
       .build();
 
   /**
-   * Registers all catalogues with the {@link Registry}.
+   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of
+   * {@link com.google.crypto.tink.Catalogue} needed to handle all key types supported in Tink.
    */
   public static void init() throws GeneralSecurityException {
     HybridConfig.init(); // includes Aead and Mac

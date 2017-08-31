@@ -19,28 +19,27 @@ package com.google.crypto.tink;
 import com.google.crypto.tink.proto.KeyTypeEntry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
-import java.util.logging.Logger;
 
 /**
- * Helper for handling of Tink configurations, i.e. of key types and
- * their corresponding key managers supported by a specific run-time
- * environment.
+ * Static methods for handling of Tink configurations, i.e. of key types and their corresponding
+ * key managers supported by a specific run-time environment.
  *
- * <p>Configurations enable control of Tink setup via text-formatted
- * config files that determine which key types are supported, and
- * provide a mechanism for deprecation of obsolete/outdated
- * cryptographic schemes (see {@code config.proto} for more info).
+ * <p>Configurations enable control of Tink setup via config files that determine which key types
+ * are supported, and provide a mechanism for deprecation of obsolete/outdated cryptographic
+ * schemes (see
+ * <a href="https://github.com/google/tink/blob/master/proto/config.proto">config.proto</a>
+ * for more info).
  *
- * <p>Usage:
- *
- * <pre><code>
- * RegistryConfig registerConfig = ... // e.g. AeadConfig.TINK_1_0_0
+ * <p><b>Usage:</b>
+ * <pre>{@code
+ * RegistryConfig registerConfig = ...; // AeadConfig.TINK_1_0_0
  * Config.register(registerConfig);
- * </code></pre>
+ * }</pre>
  */
 public final class Config {
-  private static final Logger logger = Logger.getLogger(Config.class.getName());
-
+  /**
+   * Returns a {@link KeyTypeEntry} for Tink key types with the specified properties.
+   */
   public static KeyTypeEntry getTinkKeyTypeEntry(String catalogueName,
       String primitiveName, String keyProtoName, int keyManagerVersion,
       boolean newKeyAllowed) {
@@ -54,18 +53,27 @@ public final class Config {
   }
 
   /**
-   * Registers key managers according to the specification in {@code config}.
+   * Tries to register key managers according to the specification in {@code config}.
+   *
+   * @throws GeneralSecurityException if cannot register this config with the {@link Registry}.
+   * This usually happens when either {@code config} contains any {@link KeyTypeEntry} that is
+   * already registered or the Registry cannot find any {@link com.google.crypto.tink.KeyManager}
+   * or {@link com.google.crypto.tink.Catalogue} that can handle the entry. In both cases the
+   * error message should show how to resolve it.
    */
   public static void register(RegistryConfig config) throws GeneralSecurityException {
-    logger.info("Registering config " + config.getConfigName() + "...");
     for (KeyTypeEntry entry : config.getEntryList()) {
       registerKeyType(entry);
     }
-    logger.info("Done registering config " + config.getConfigName() + ".");
   }
 
   /**
-   * Registers a key manager according to the specification in {@code entry}.
+   * Tries to register a key manager according to the specification in {@code entry}.
+   *
+   * @throws GeneralSecurityException if cannot register this config with the {@link Registry}.
+   * This usually happens when {@code entry} is already registered or the Registry cannot find
+   * any {@link com.google.crypto.tink.KeyManager} or {@link com.google.crypto.tink.Catalogue}
+   * that can handle the entry. In both cases the error message should show how to resolve it.
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static void registerKeyType(KeyTypeEntry entry) throws GeneralSecurityException {

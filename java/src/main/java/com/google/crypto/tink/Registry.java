@@ -56,10 +56,14 @@ public final class Registry {
   private static final ConcurrentMap<String, Catalogue> catalogueMap =
       new ConcurrentHashMap<String, Catalogue>();   //  name -> catalogue mapping
   /**
-   * Resets the registry.  After reset the registry is empty, i.e. it contains no key managers.
-   * This method is intended for testing.
+   * Resets the registry.
+   *
+   * <p>After reset the registry is empty, i.e. it contains no key managers. Thus one might need
+   * to call {@code XyzConfig.init()} to re-install the catalogues.
+   *
+   * <p>This method is intended for testing.
    */
-  public static synchronized void reset() {
+  static synchronized void reset() {
     keyManagerMap.clear();
     newKeyAllowedMap.clear();
     catalogueMap.clear();
@@ -172,8 +176,6 @@ public final class Registry {
     }
     keyManagerMap.put(typeUrl, manager);
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
-    logger.info("Registered instance of " + manager.getClass().getName()
-          + " as key manager for key type " + typeUrl);
   }
 
   /**

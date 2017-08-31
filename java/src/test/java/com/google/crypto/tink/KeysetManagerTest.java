@@ -323,7 +323,7 @@ public class KeysetManagerTest {
   @Test
   public void testDelete_keyNotFound_shouldThrowException() throws Exception {
     int keyId1 = 42;
-    int keyId2 = 43;
+    final int keyId2 = 43;
     KeysetHandle handle = KeysetHandle.fromKeyset(
         TestUtil.createKeyset(
             createEnabledKey(keyId1),
@@ -444,7 +444,7 @@ public class KeysetManagerTest {
 
   @Test
   public void testThreadSafety_manipulateKeyset_shouldWork() throws Exception {
-    KeysetManager manager = KeysetManager.withEmptyKeyset();
+    final KeysetManager manager = KeysetManager.withEmptyKeyset();
     Thread thread1 = new Thread(
         new Runnable() {
           @Override
@@ -491,15 +491,15 @@ public class KeysetManagerTest {
 
   @Test
   public void testThreadSafety_enablePromoteKey_shouldWork() throws Exception {
-    int primaryKeyId = 42;
-    int keyId2 = 43;
-    int keyId3 = 44;
+    final int primaryKeyId = 42;
+    final int keyId2 = 43;
+    final int keyId3 = 44;
     KeysetHandle handle = KeysetHandle.fromKeyset(
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(keyId2),
             createDisabledKey(keyId3)));
-    KeysetManager manager = KeysetManager.withKeysetHandle(handle);
+    final KeysetManager manager = KeysetManager.withKeysetHandle(handle);
 
     Thread thread1 = new Thread(
         new Runnable() {
@@ -551,15 +551,15 @@ public class KeysetManagerTest {
 
   @Test
   public void testThreadSafety_disableEnablePromoteKey_shouldWork() throws Exception {
-    int primaryKeyId = 42;
-    int keyId2 = 43;
-    int keyId3 = 44;
+    final int primaryKeyId = 42;
+    final int keyId2 = 43;
+    final int keyId3 = 44;
     KeysetHandle handle = KeysetHandle.fromKeyset(
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(keyId2),
             createDisabledKey(keyId3)));
-    KeysetManager manager = KeysetManager.withKeysetHandle(handle);
+    final KeysetManager manager = KeysetManager.withKeysetHandle(handle);
 
     Thread thread2 = new Thread(
         new Runnable() {
@@ -602,15 +602,15 @@ public class KeysetManagerTest {
 
   @Test
   public void testThreadSafety_enableDisableDeleteKey_shouldWork() throws Exception {
-    int primaryKeyId = 42;
-    int keyId2 = 43;
-    int keyId3 = 44;
+    final int primaryKeyId = 42;
+    final int keyId2 = 43;
+    final int keyId3 = 44;
     KeysetHandle handle = KeysetHandle.fromKeyset(
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(keyId2),
             createDisabledKey(keyId3)));
-    KeysetManager manager = KeysetManager.withKeysetHandle(handle);
+    final KeysetManager manager = KeysetManager.withKeysetHandle(handle);
 
     Thread thread2 = new Thread(
         new Runnable() {

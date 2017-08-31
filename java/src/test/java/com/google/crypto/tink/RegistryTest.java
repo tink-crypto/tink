@@ -446,7 +446,7 @@ public class RegistryTest {
 
   @Test
   public void testAddCatalogue_MultiThreads_shouldWork() throws Exception {
-    boolean[] threwException = new boolean[3];
+    final boolean[] threwException = new boolean[3];
     Thread thread1 = new Thread(
         new Runnable() {
           @Override

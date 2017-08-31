@@ -23,17 +23,15 @@ import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * This class offers convenience methods and constants for initializing
- * {@link AeadFactory} and the underlying {@link Registry}.
+ * Static methods and constants for registering with the {@link Registry} all instances of
+ * {@link com.google.crypto.tink.Aead} key types supported in a particular release of Tink.
  *
- * <p>To register all {@link Aead} key types provided in Tink release 1.0.0 one would use:
- *
- * <pre><code>
+ * <p>To register all Aead key types provided in Tink release 1.0.0 one can do:
+ * <pre>{@code
  * Config.register(AeadConfig.TINK_1_0_0);
- * </code></pre>
+ * }</pre>
  *
- * <p>For more information on how to obtain and use {@link Aead} primitives,
- * see {@link AeadFactory}.
+ * <p>For more information on how to obtain and use instances of Aead, see {@link AeadFactory}.
  */
 public final class AeadConfig {
   private static final String CATALOGUE_NAME = "TinkAead";
@@ -65,10 +63,11 @@ public final class AeadConfig {
   }
 
   /**
-   * Registers {@link Aead} catalogues with the {@link Registry}.
+   * Tries to register with the {@link Registry} all instances of
+   * {@link com.google.crypto.tink.Catalogue} needed to handle Aead key types supported in Tink.
    *
-   * <p>Because Aead key types depend on {@link Mac} key types, this method also
-   * registers all {@link Mac} catalogues.
+   * <p>Because Aead key types depend on {@link com.google.crypto.tink.Mac} key types, this method
+   * also registers all Mac catalogues.
    */
   public static void init() throws GeneralSecurityException {
     Registry.addCatalogue(CATALOGUE_NAME, new AeadCatalogue());
@@ -76,14 +75,12 @@ public final class AeadConfig {
   }
 
   /**
-   * Registers standard (for the current release) Aead key types
-   * and their managers with the {@code Registry}.
+   * Registers with the {@code Registry} all Aead key types released with the latest version
+   * of Tink.
    *
-   * Deprecated-yet-still-supported key types are registered in
-   * so-called "no new key"-mode, which allows for usage of existing
-   * keys forbids generation of new key material.
+   * Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
+   * which allows for usage of existing keys forbids generation of new key material.
    *
-   * @throws GeneralSecurityException
    * @deprecated
    */
   @Deprecated

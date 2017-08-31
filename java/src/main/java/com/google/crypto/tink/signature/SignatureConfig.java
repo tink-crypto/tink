@@ -22,11 +22,18 @@ import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * This class offers convenience methods and constants for initializing
- * {@link PublicKeySignFactory} and the underlying {@link Registry}.
+ * Static methods and constants for registering with the {@link Registry} all instances of
+ * {@link com.google.crypto.tink.PublicKeySign} and {@link com.google.crypto.tink.PublicKeyVerify}
+ * key types supported in a particular release of Tink.
  *
- * For more information on how to obtain and use PublicKeySign primitives,
- * see {@link PublicKeySignFactory}.
+ * <p>To register all PublicKeySign and PublicKeyVerify key types provided in Tink release
+ * 1.0.0 one can do:
+ * <pre>{@code
+ * Config.register(HybridConfig.TINK_1_0_0);
+ * }</pre>
+ *
+ * <p>For more information on how to obtain and use instances of PublicKeySign or PublicKeyVerify,
+ * see {@link PublicKeySignFactory} or {@link PublicKeyVerifyFactory}.
  */
 public final class SignatureConfig {
   private static final String CATALOGUE_NAME = "TinkSignature";
@@ -52,8 +59,9 @@ public final class SignatureConfig {
   }
 
   /**
-   * Registers all {@link PublicKeyVerify} and {@link PublicKeySign} catalogues with the
-   * {@link Registry}.
+   * Tries to register with the {@link Registry} all instances of
+   * {@link com.google.crypto.tink.Catalogue} needed to handle PublicKeySign and PublicKeyVerify
+   * key types supported in Tink.
    */
   public static void init() throws GeneralSecurityException {
     Registry.addCatalogue(CATALOGUE_NAME, new SignatureCatalogue());

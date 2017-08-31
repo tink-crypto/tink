@@ -32,6 +32,11 @@
     </dependency>
 
     <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -65,6 +70,9 @@
             <exclude>**/IntegrationUtilTest.java</exclude>
             <exclude>**/KmsAeadKeyManagerTest.java</exclude>
             <exclude>**/KmsEnvelopeAeadKeyManagerTest.java</exclude>
+            <!-- these tests depend on JsonFormat which does not work with protobuf lite -->
+            <exclude>**/JsonKeysetReaderTest.java</exclude>
+            <exclude>**/JsonKeysetWriterTest.java</exclude>
           </testExcludes>
         </configuration>
       </plugin>

@@ -19,9 +19,7 @@ package com.google.crypto.tink;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.hybrid.HybridConfig;
-import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.KeyTypeEntry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import com.google.crypto.tink.signature.SignatureConfig;
@@ -72,14 +70,8 @@ public class ConfigTest {
 
   @Test
   public void testRegisterKeyType_NoCatalogue_shouldThrowException() throws Exception {
-    Registry.reset();
-    String typeUrl = AesEaxKeyManager.TYPE_URL;
     KeyTypeEntry entry = KeyTypeEntry.newBuilder()
-        .setTypeUrl(typeUrl)
-        .setPrimitiveName("Aead")
-        .setCatalogueName("TinkAead")
-        .setKeyManagerVersion(0)
-        .setNewKeyAllowed(true)
+        .setCatalogueName("DoesNotExist")
         .build();
 
     try {
@@ -101,55 +93,30 @@ public class ConfigTest {
   }
 
   @Test
-  public void testRegister_NoCatalogue_shouldThrowException() throws Exception {
-    Registry.reset();
-    testRegister_NoCatalogue_shouldThrowException(createAeadConfig());
-    testRegister_NoCatalogue_shouldThrowException(createMacConfig());
-    testRegister_NoCatalogue_shouldThrowException(createHybridConfig());
-    testRegister_NoCatalogue_shouldThrowException(createSignatureConfig());
-  }
-
-  @Test
-  public void testRegister_WithInit_shouldWork() throws Exception {
+  public void testRegister_initialization_shouldWork() throws Exception {
     Registry.reset();
     // The registry is empty, register should fail.
     testRegister_NoCatalogue_shouldThrowException(createAeadConfig());
     testRegister_NoCatalogue_shouldThrowException(createMacConfig());
     testRegister_NoCatalogue_shouldThrowException(createHybridConfig());
+    testRegister_NoCatalogue_shouldThrowException(createSignatureConfig());
 
     // Fill the registry with Aead key managers.
     AeadConfig.init();
     // Now register for Aead and Mac should succeed.
     Config.register(createAeadConfig());
     Config.register(createMacConfig());
-    // But hybrid still fail.
+
+    // But hybrid should be still failing.
     testRegister_NoCatalogue_shouldThrowException(createHybridConfig());
     HybridConfig.init();
     // Hybrid should work now.
     Config.register(createHybridConfig());
-  }
 
-  @Test
-  public void testRegister_Tink_1_0_0_shouldWork() throws Exception {
-    Registry.reset();
-    RegistryConfig[] configs = new RegistryConfig[4];
-    configs[0] = AeadConfig.TINK_1_0_0;
-    configs[1] = HybridConfig.TINK_1_0_0;
-    configs[2] = MacConfig.TINK_1_0_0;
-    configs[3] = SignatureConfig.TINK_1_0_0;
-    for (RegistryConfig tinkConfig : configs) {
-      // After registering the config the registry should contain the key managers.
-      Config.register(tinkConfig);
-      for (KeyTypeEntry entry : tinkConfig.getEntryList()) {
-        KeyManager<?> unused = Registry.getKeyManager(entry.getTypeUrl());
-      }
-
-      // Another register-attempt should still work, because the key managers are the same.
-      try {
-        Config.register(tinkConfig);
-      } catch (GeneralSecurityException e) {
-        fail("Repeated registration of the same config should work.");
-      }
-    }
+    // Signature is still failing.
+    testRegister_NoCatalogue_shouldThrowException(createSignatureConfig());
+    SignatureConfig.init();
+    // Signature should work now.
+    Config.register(createSignatureConfig());
   }
 }

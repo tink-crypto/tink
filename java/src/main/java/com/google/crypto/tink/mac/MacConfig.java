@@ -22,16 +22,15 @@ import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * This class offers convenience methods and constants for initializing
- * {@link MacFactory} and the underlying {@link Registry}.
+ * Static methods and constants for registering with the {@link Registry} all instances of
+ * {@link com.google.crypto.tink.Mac} key types supported in a particular release of Tink.
  *
- * <p>To register all {@link Mac} key types provided in Tink release 1.0.0 one would use:
- *
- * <pre><code>
+ * <p>To register all Mac key types provided in Tink release 1.0.0 one can do:
+ * <pre>{@code
  * Config.register(MacConfig.TINK_1_0_0);
- * </code></pre>
+ * }</pre>
  *
- * <p>For more information on how to obtain and use Mac primitives, see {@link MacFactory}.
+ * <p>For more information on how to obtain and use instances of Mac, see {@link MacFactory}.
  */
 public final class MacConfig {
   private static final String CATALOGUE_NAME = "TinkMac";
@@ -52,28 +51,20 @@ public final class MacConfig {
   }
 
   /**
-   * Registers all {@link Mac} catalogues with the {@link Registry}.
+   * Tries to register with the {@link Registry} all instances of
+   * {@link com.google.crypto.tink.Catalogue} needed to handle Mac key types supported in Tink.
    */
   public static void init() throws GeneralSecurityException {
     Registry.addCatalogue(CATALOGUE_NAME, new MacCatalogue());
   }
 
   /**
-   * Registers key managers according to the specification in {@code config}.
-   */
-  public static void register(RegistryConfig config) throws GeneralSecurityException {
-    Config.register(config);
-  }
-
-  /**
-   * Registers standard (for the current release) Mac key types
-   * and their managers with the {@code Registry}.
+   * Registers with the {@code Registry} all Mac key types released with the latest
+   * version of Tink.
    *
-   * Deprecated-yet-still-supported key types are registered in
-   * so-called "no new key"-mode, which allows for usage of existing
-   * keys forbids generation of new key material.
+   * Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
+   * which allows for usage of existing keys forbids generation of new key material.
    *
-   * @throws GeneralSecurityException
    * @deprecated
    */
   @Deprecated

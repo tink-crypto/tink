@@ -50,7 +50,11 @@ public final class JsonKeysetReader implements KeysetReader {
   }
 
   private JsonKeysetReader(String input) {
-    this(new JSONObject(input));
+    try {
+      json = new JSONObject(input);
+    } catch (JSONException e) {
+      throw new IllegalArgumentException(e);
+    }
   }
 
   public static KeysetReader withInputStream(InputStream input) throws IOException {
