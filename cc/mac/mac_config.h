@@ -54,7 +54,8 @@ class MacConfig {
   // Registers the given 'key_manager' for the key type
   // key_manager->get_key_type().
   // Takes ownership of 'key_manager', which must be non-nullptr.
-  static crypto::tink::util::Status RegisterKeyManager(KeyManager<Mac>* key_manager);
+  static crypto::tink::util::Status RegisterKeyManager(
+      KeyManager<Mac>* key_manager);
 
  private:
   MacConfig() {}

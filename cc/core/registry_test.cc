@@ -44,6 +44,8 @@ using google::protobuf::Message;
 using google::protobuf::StringPiece;
 using crypto::tink::util::Status;
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 namespace {
@@ -61,20 +63,20 @@ class TestAeadKeyManager : public KeyManager<Aead> {
   TestAeadKeyManager(const std::string& key_type) : key_type_(key_type) {
   }
 
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
+  util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const KeyData& key) const override {
     std::unique_ptr<Aead> aead(new DummyAead(key_type_));
     return std::move(aead);
   }
 
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
+  util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const Message& key) const override {
-    return crypto::tink::util::Status::UNKNOWN;
+    return util::Status::UNKNOWN;
   }
 
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+  util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
       const KeyTemplate& key_template) const override {
-    return crypto::tink::util::Status::UNKNOWN;
+    return util::Status::UNKNOWN;
   }
 
   uint32_t get_version() const override {
@@ -94,7 +96,7 @@ void register_test_managers(Registry* registry,
                             int manager_count) {
   for (int i = 0; i < manager_count; i++) {
     std::string key_type = key_type_prefix + std::to_string(i);
-    crypto::tink::util::Status status = registry->RegisterKeyManager(
+    util::Status status = registry->RegisterKeyManager(
         key_type, new TestAeadKeyManager(key_type));
     EXPECT_TRUE(status.ok()) << status;
   }
@@ -144,7 +146,7 @@ TEST_F(RegistryTest, testConcurrentRegistration) {
   key_type = key_type_prefix_a + std::to_string(count_a);
   manager_result = registry.get_key_manager<Aead>(key_type);
   EXPECT_FALSE(manager_result.ok());
-  EXPECT_EQ(crypto::tink::util::error::NOT_FOUND, manager_result.status().error_code());
+  EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
 }
 
 TEST_F(RegistryTest, testBasic) {
@@ -153,14 +155,14 @@ TEST_F(RegistryTest, testBasic) {
   std::string key_type_2 = AesGcmKey::descriptor()->full_name();
   auto manager_result = registry.get_key_manager<Aead>(key_type_1);
   EXPECT_FALSE(manager_result.ok());
-  EXPECT_EQ(crypto::tink::util::error::NOT_FOUND,
+  EXPECT_EQ(util::error::NOT_FOUND,
             manager_result.status().error_code());
 
   TestAeadKeyManager* null_key_manager = nullptr;
-  crypto::tink::util::Status status = registry.RegisterKeyManager(key_type_1,
+  util::Status status = registry.RegisterKeyManager(key_type_1,
                                                     null_key_manager);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, status.error_code()) << status;
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code()) << status;
 
   status = registry.RegisterKeyManager(key_type_1,
       new TestAeadKeyManager(key_type_1));
@@ -169,7 +171,7 @@ TEST_F(RegistryTest, testBasic) {
   status = registry.RegisterKeyManager(key_type_1,
       new TestAeadKeyManager(key_type_1));
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(crypto::tink::util::error::ALREADY_EXISTS, status.error_code()) << status;
+  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
 
   status = registry.RegisterKeyManager(key_type_2,
       new TestAeadKeyManager(key_type_2));
@@ -221,7 +223,7 @@ TEST_F(RegistryTest, testGettingPrimitives) {
   keyset.set_primary_key_id(key_id_3);
 
   // Register key managers.
-  crypto::tink::util::Status status;
+  util::Status status;
   status = registry.RegisterKeyManager(key_type_1,
                                        new TestAeadKeyManager(key_type_1));
   EXPECT_TRUE(status.ok()) << status;
@@ -281,7 +283,7 @@ TEST_F(RegistryTest, testGettingPrimitives) {
     auto disabled = aead_set->get_primitives(
         CryptoFormat::get_output_prefix(keyset.key(1)).ValueOrDie());
     EXPECT_FALSE(disabled.ok());
-    EXPECT_EQ(crypto::tink::util::error::NOT_FOUND, disabled.status().error_code());
+    EXPECT_EQ(util::error::NOT_FOUND, disabled.status().error_code());
   }
 
   // TODO(przydatek): add test: Keyset with custom key manager.

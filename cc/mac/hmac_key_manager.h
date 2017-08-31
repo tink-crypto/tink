@@ -48,8 +48,8 @@ class HmacKeyManager : public KeyManager<Mac> {
 
   // Generates a new random HmacKey, based on the specified 'key_template',
   // which must contain HmacKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
-      const google::crypto::tink::KeyTemplate& key_template)
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+      NewKey(const google::crypto::tink::KeyTemplate& key_template)
       const override;
 
   // Returns the type_url identifying the key type handled by this manager.

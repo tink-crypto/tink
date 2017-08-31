@@ -50,13 +50,13 @@ public final class AwsKmsAead implements Aead {
   }
 
   @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] aad)
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
     try {
       EncryptRequest req = new EncryptRequest()
           .withKeyId(keyArn)
           .withPlaintext(ByteBuffer.wrap(plaintext))
-          .addEncryptionContextEntry("aad", BinaryUtils.toHex(aad));
+          .addEncryptionContextEntry("aad", BinaryUtils.toHex(associatedData));
       return kmsClient.encrypt(req).getCiphertextBlob().array();
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("encryption failed", e);
@@ -64,12 +64,12 @@ public final class AwsKmsAead implements Aead {
   }
 
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
+  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
     try {
       DecryptRequest req = new DecryptRequest()
           .withCiphertextBlob(ByteBuffer.wrap(ciphertext))
-          .addEncryptionContextEntry("aad", BinaryUtils.toHex(aad));
+          .addEncryptionContextEntry("aad", BinaryUtils.toHex(associatedData));
       return kmsClient.decrypt(req).getPlaintext().array();
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("decryption failed", e);

@@ -46,20 +46,20 @@ public final class KmsEnvelopeAead implements Aead {
   }
 
   @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData) throws GeneralSecurityException {
     // Generate a new DEK.
     byte[] dek = Registry.newKey(dekTemplate).toByteArray();
     // Wrap it with remote.
     byte[] encryptedDek = remote.encrypt(dek, EMPTY_AAD);
     // Use DEK to encrypt plaintext.
     Aead aead = Registry.getPrimitive(dekTemplate.getTypeUrl(), dek);
-    byte[] payload = aead.encrypt(plaintext, aad);
+    byte[] payload = aead.encrypt(plaintext, associatedData);
     // Build ciphertext protobuf and return result.
     return buildCiphertext(encryptedDek, payload);
   }
 
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
+  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
     try {
       // TODO(thaidn): more efficient parsing?
@@ -76,7 +76,7 @@ public final class KmsEnvelopeAead implements Aead {
       byte[] dek = remote.decrypt(encryptedDek, EMPTY_AAD);
       // Use DEK to decrypt payload.
       Aead aead = Registry.getPrimitive(dekTemplate.getTypeUrl(), dek);
-      return aead.decrypt(payload, aad);
+      return aead.decrypt(payload, associatedData);
     } catch (IndexOutOfBoundsException
              | BufferUnderflowException
              | NegativeArraySizeException e) {

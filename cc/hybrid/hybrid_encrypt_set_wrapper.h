@@ -34,8 +34,9 @@ class HybridEncryptSetWrapper : public HybridEncrypt {
   // Returns an HybridEncrypt-primitive that uses the primary
   // HybridEncrypt-instance provided in 'hybrid_encrypt_set',
   // which must be non-NULL (and must contain a primary instance).
-  static crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>> NewHybridEncrypt(
-      std::unique_ptr<PrimitiveSet<HybridEncrypt>> hybrid_encrypt_set);
+  static crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>>
+      NewHybridEncrypt(
+          std::unique_ptr<PrimitiveSet<HybridEncrypt>> hybrid_encrypt_set);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       google::protobuf::StringPiece plaintext,

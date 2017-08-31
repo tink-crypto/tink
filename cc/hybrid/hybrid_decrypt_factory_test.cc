@@ -41,6 +41,8 @@ using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 namespace {
@@ -60,7 +62,7 @@ TEST_F(HybridDecryptFactoryTest, testBasic) {
   auto hybrid_decrypt_result =
       HybridDecryptFactory::GetPrimitive(keyset_handle);
   EXPECT_FALSE(hybrid_decrypt_result.ok());
-  EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT,
+  EXPECT_EQ(util::error::INVALID_ARGUMENT,
       hybrid_decrypt_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
       hybrid_decrypt_result.status().error_message());
@@ -93,7 +95,7 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   ASSERT_TRUE(HybridDecryptConfig::RegisterStandardKeyTypes().ok());;
 
   // Prepare HybridEncrypt-instances.
-  auto ecies_key_manager = crypto::tink::util::make_unique<EciesAeadHkdfPublicKeyManager>();
+  auto ecies_key_manager = util::make_unique<EciesAeadHkdfPublicKeyManager>();
   std::unique_ptr<HybridEncrypt> ecies_1 = std::move(
       ecies_key_manager->GetPrimitive(ecies_key_1.public_key()).ValueOrDie());
   std::unique_ptr<HybridEncrypt> ecies_2 = std::move(
@@ -131,7 +133,7 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   {  // Wrong context_info.
     auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext_1, "bad context");
     EXPECT_FALSE(decrypt_result.ok());
-    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT,
+    EXPECT_EQ(util::error::INVALID_ARGUMENT,
               decrypt_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
                         decrypt_result.status().error_message());

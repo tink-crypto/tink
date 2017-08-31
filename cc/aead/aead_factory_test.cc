@@ -34,6 +34,8 @@ using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 namespace {
@@ -46,7 +48,7 @@ TEST_F(AeadFactoryTest, testBasic) {
   KeysetHandle keyset_handle(keyset);
   auto aead_result = AeadFactory::GetPrimitive(keyset_handle);
   EXPECT_FALSE(aead_result.ok());
-  EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, aead_result.status().error_code());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, aead_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
                       aead_result.status().error_message());
 }
@@ -107,7 +109,7 @@ TEST_F(AeadFactoryTest, testPrimitive) {
 
   decrypt_result = aead->Decrypt("some bad ciphertext", aad);
   EXPECT_FALSE(decrypt_result.ok());
-  EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT,
+  EXPECT_EQ(util::error::INVALID_ARGUMENT,
             decrypt_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
                       decrypt_result.status().error_message());

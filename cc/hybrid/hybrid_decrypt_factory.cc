@@ -25,17 +25,19 @@
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 
 // static
-crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
+util::StatusOr<std::unique_ptr<HybridDecrypt>>
 HybridDecryptFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
   return GetPrimitive(keyset_handle, nullptr);
 }
 
 // static
-crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
+util::StatusOr<std::unique_ptr<HybridDecrypt>>
 HybridDecryptFactory::GetPrimitive(const KeysetHandle& keyset_handle,
     const KeyManager<HybridDecrypt>* custom_key_manager) {
   auto primitives_result = Registry::get_default_registry()

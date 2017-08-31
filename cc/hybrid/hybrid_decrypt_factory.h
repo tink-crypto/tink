@@ -47,15 +47,15 @@ class HybridDecryptFactory {
  public:
   // Returns a HybridDecrypt-primitive that uses key material from the keyset
   // specified via 'keyset_handle'.
-  static crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitive(
-      const KeysetHandle& keyset_handle);
+  static crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
+      GetPrimitive(const KeysetHandle& keyset_handle);
 
   // Returns a HybridDecrypt-primitive that uses key material from the keyset
   // specified via 'keyset_handle' and is instantiated by the given
   // 'custom_key_manager' (instead of the key manager from the Registry).
-  static crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitive(
-      const KeysetHandle& keyset_handle,
-      const KeyManager<HybridDecrypt>* custom_key_manager);
+  static crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
+      GetPrimitive(const KeysetHandle& keyset_handle,
+                   const KeyManager<HybridDecrypt>* custom_key_manager);
 
  private:
   HybridDecryptFactory() {}

@@ -22,37 +22,39 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 
 namespace {
 
-crypto::tink::util::Status Validate(PrimitiveSet<HybridEncrypt>* hybrid_encrypt_set) {
+util::Status Validate(PrimitiveSet<HybridEncrypt>* hybrid_encrypt_set) {
   if (hybrid_encrypt_set == nullptr) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+    return util::Status(util::error::INTERNAL,
                         "hybrid_encrypt_set must be non-NULL");
   }
   if (hybrid_encrypt_set->get_primary() == nullptr) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                         "hybrid_encrypt_set has no primary");
   }
-  return crypto::tink::util::Status::OK;
+  return util::Status::OK;
 }
 
 }  // anonymous namespace
 
 // static
-crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>>
+util::StatusOr<std::unique_ptr<HybridEncrypt>>
 HybridEncryptSetWrapper::NewHybridEncrypt(
     std::unique_ptr<PrimitiveSet<HybridEncrypt>> hybrid_encrypt_set) {
-  crypto::tink::util::Status status = Validate(hybrid_encrypt_set.get());
+  util::Status status = Validate(hybrid_encrypt_set.get());
   if (!status.ok()) return status;
   std::unique_ptr<HybridEncrypt> hybrid_encrypt(
       new HybridEncryptSetWrapper(std::move(hybrid_encrypt_set)));
   return std::move(hybrid_encrypt);
 }
 
-crypto::tink::util::StatusOr<std::string> HybridEncryptSetWrapper::Encrypt(
+util::StatusOr<std::string> HybridEncryptSetWrapper::Encrypt(
     google::protobuf::StringPiece plaintext,
     google::protobuf::StringPiece context_info) const {
   auto primary = hybrid_encrypt_set_->get_primary();

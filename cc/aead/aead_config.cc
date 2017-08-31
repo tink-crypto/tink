@@ -21,23 +21,25 @@
 #include "cc/aead/aes_gcm_key_manager.h"
 #include "cc/util/status.h"
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 
 // static
-crypto::tink::util::Status AeadConfig::RegisterStandardKeyTypes() {
+util::Status AeadConfig::RegisterStandardKeyTypes() {
   return RegisterKeyManager(new AesGcmKeyManager());
 }
 
 // static
-crypto::tink::util::Status AeadConfig::RegisterLegacyKeyTypes() {
-  return crypto::tink::util::Status::OK;
+util::Status AeadConfig::RegisterLegacyKeyTypes() {
+  return util::Status::OK;
 }
 
 // static
-crypto::tink::util::Status AeadConfig::RegisterKeyManager(KeyManager<Aead>* key_manager) {
+util::Status AeadConfig::RegisterKeyManager(KeyManager<Aead>* key_manager) {
   if (key_manager == nullptr) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                         "Parameter 'key_manager' must be non-null.");
   }
   return Registry::get_default_registry().RegisterKeyManager(

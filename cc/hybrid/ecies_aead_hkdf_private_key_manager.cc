@@ -38,6 +38,8 @@ using google::protobuf::Message;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 
@@ -57,13 +59,13 @@ EciesAeadHkdfPrivateKeyManager::GetPrimitive(const KeyData& key_data) const {
   if (DoesSupport(key_data.type_url())) {
     EciesAeadHkdfPrivateKey ecies_private_key;
     if (!ecies_private_key.ParseFromString(key_data.value())) {
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+      return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Could not parse key_data.value as key type '%s'.",
                        key_data.type_url().c_str());
     }
     return GetPrimitiveImpl(ecies_private_key);
   } else {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Key type '%s' is not supported by this manager.",
                      key_data.type_url().c_str());
   }
@@ -78,7 +80,7 @@ EciesAeadHkdfPrivateKeyManager::GetPrimitive(const Message& key) const {
         reinterpret_cast<const EciesAeadHkdfPrivateKey&>(key);
     return GetPrimitiveImpl(ecies_private_key);
   } else {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Key type '%s' is not supported by this manager.",
                      key_type.c_str());
   }
@@ -96,7 +98,7 @@ EciesAeadHkdfPrivateKeyManager::GetPrimitiveImpl(
 
 StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPrivateKeyManager::NewKey(
     const KeyTemplate& key_template) const {
-  return crypto::tink::util::Status(crypto::tink::util::error::UNIMPLEMENTED, "not implemented yet");
+  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
 }
 
 Status EciesAeadHkdfPrivateKeyManager::Validate(

@@ -94,13 +94,16 @@ class StatusOr {
 // Implementation.
 
 template <typename T>
-inline StatusOr<T>::StatusOr() : status_(::crypto::tink::util::error::UNKNOWN, "") {
+inline StatusOr<T>::StatusOr()
+    : status_(::crypto::tink::util::error::UNKNOWN, "") {
 }
 
 template <typename T>
-inline StatusOr<T>::StatusOr(const ::crypto::tink::util::Status& status) : status_(status) {
+inline StatusOr<T>::StatusOr(
+    const ::crypto::tink::util::Status& status) : status_(status) {
   if (status.ok()) {
-    std::cerr << "::crypto::tink::util::OkStatus() is not a valid argument to StatusOr\n";
+    std::cerr << "::crypto::tink::util::OkStatus() "
+              << "is not a valid argument to StatusOr\n";
     exit(1);
   }
 }

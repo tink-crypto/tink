@@ -70,15 +70,15 @@ public final class AeadFactory {
         Registry.getPrimitives(keysetHandle, keyManager);
     return new Aead() {
       @Override
-      public byte[] encrypt(final byte[] plaintext, final byte[] aad)
+      public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
           throws GeneralSecurityException {
         return Bytes.concat(
             primitives.getPrimary().getIdentifier(),
-            primitives.getPrimary().getPrimitive().encrypt(plaintext, aad));
+            primitives.getPrimary().getPrimitive().encrypt(plaintext, associatedData));
       }
 
       @Override
-      public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
+      public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
           throws GeneralSecurityException {
         if (ciphertext.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
           byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
@@ -89,7 +89,7 @@ public final class AeadFactory {
           List<PrimitiveSet.Entry<Aead>> entries = primitives.getPrimitive(prefix);
           for (PrimitiveSet.Entry<Aead> entry : entries) {
             try {
-              return entry.getPrimitive().decrypt(ciphertextNoPrefix, aad);
+              return entry.getPrimitive().decrypt(ciphertextNoPrefix, associatedData);
             } catch (GeneralSecurityException e) {
               logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e.toString());
               continue;
@@ -101,7 +101,7 @@ public final class AeadFactory {
         List<PrimitiveSet.Entry<Aead>> entries = primitives.getRawPrimitives();
         for (PrimitiveSet.Entry<Aead> entry : entries) {
           try {
-            return entry.getPrimitive().decrypt(ciphertext, aad);
+            return entry.getPrimitive().decrypt(ciphertext, associatedData);
           } catch (GeneralSecurityException e) {
             continue;
           }

@@ -41,6 +41,8 @@ using google::protobuf::Message;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 
@@ -63,13 +65,13 @@ HmacKeyManager::GetPrimitive(const KeyData& key_data) const {
   if (DoesSupport(key_data.type_url())) {
     HmacKey hmac_key;
     if (!hmac_key.ParseFromString(key_data.value())) {
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+      return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Could not parse key_data.value as key type '%s'.",
                        key_data.type_url().c_str());
     }
     return GetPrimitiveImpl(hmac_key);
   } else {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Key type '%s' is not supported by this manager.",
                      key_data.type_url().c_str());
   }
@@ -83,7 +85,7 @@ HmacKeyManager::GetPrimitive(const Message& key) const {
     const HmacKey& hmac_key = reinterpret_cast<const HmacKey&>(key);
     return GetPrimitiveImpl(hmac_key);
   } else {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Key type '%s' is not supported by this manager.",
                      key_type.c_str());
   }
@@ -103,14 +105,14 @@ HmacKeyManager::GetPrimitiveImpl(const HmacKey& hmac_key) const {
 StatusOr<std::unique_ptr<Message>> HmacKeyManager::NewKey(
     const KeyTemplate& key_template) const {
   if (!DoesSupport(key_template.type_url())) {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Key type '%s' is not supported by this manager.",
                      key_template.type_url().c_str());
   }
 
   HmacKeyFormat key_format;
   if (!key_format.ParseFromString(key_template.value())) {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(util::error::INVALID_ARGUMENT,
         "Could not parse key_template.value as key format '%sFormat'.",
         key_template.type_url().c_str());
   }
@@ -127,7 +129,7 @@ StatusOr<std::unique_ptr<Message>> HmacKeyManager::NewKey(
 
 Status HmacKeyManager::Validate(const HmacParams& params) const {
   if (params.tag_size() < kMinTagSizeInBytes) {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid HmacParams: tag_size %d is too small.",
                      params.tag_size());
   }
@@ -135,12 +137,12 @@ Status HmacKeyManager::Validate(const HmacParams& params) const {
                                                {HashType::SHA256, 32},
                                                {HashType::SHA512, 64}};
   if (max_tag_size.find(params.hash()) == max_tag_size.end()) {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid HmacParams: HashType '%s' not supported.",
                      HashType_Name(params.hash()).c_str());
   } else {
     if (params.tag_size() > max_tag_size[params.hash()]) {
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+      return ToStatusF(util::error::INVALID_ARGUMENT,
           "Invalid HmacParams: tag_size %d is too big for HashType '%s'.",
           params.tag_size(), HashType_Name(params.hash()).c_str());
     }
@@ -152,7 +154,7 @@ Status HmacKeyManager::Validate(const HmacKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (key.key_value().size() < kMinKeySizeInBytes) {
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+      return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid HmacKey: key_value is too short.");
   }
   return Validate(key.params());
@@ -160,7 +162,7 @@ Status HmacKeyManager::Validate(const HmacKey& key) const {
 
 Status HmacKeyManager::Validate(const HmacKeyFormat& key_format) const {
   if (key_format.key_size() < kMinKeySizeInBytes) {
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+      return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid HmacKeyFormat: key_size is too small.");
   }
   return Validate(key_format.params());

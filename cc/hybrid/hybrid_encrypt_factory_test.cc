@@ -38,6 +38,8 @@ using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 namespace {
@@ -58,7 +60,7 @@ TEST_F(HybridEncryptFactoryTest, testBasic) {
   auto hybrid_encrypt_result =
       HybridEncryptFactory::GetPrimitive(keyset_handle);
   EXPECT_FALSE(hybrid_encrypt_result.ok());
-  EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT,
+  EXPECT_EQ(util::error::INVALID_ARGUMENT,
       hybrid_encrypt_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
       hybrid_encrypt_result.status().error_message());

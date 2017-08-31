@@ -40,7 +40,8 @@ namespace test {
 // Converts a hexadecimal string into a string of bytes.
 // Returns a status if the size of the input is odd or if the input contains
 // characters that are not hexadecimal.
-crypto::tink::util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex);
+crypto::tink::util::StatusOr<std::string> HexDecode(
+    google::protobuf::StringPiece hex);
 
 // Converts a hexadecimal string into a string of bytes.
 // Dies if the input is not a valid hexadecimal string.
@@ -112,7 +113,8 @@ class DummyAead : public Aead {
         ciphertext.length() == (unsigned)(aead_name_.length() + pos)) {
       return c.substr(0, pos);
     }
-    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
   }
 
  private:
@@ -158,7 +160,8 @@ class DummyHybridDecrypt : public HybridDecrypt {
         ciphertext.length() == (unsigned)(hybrid_name_.length() + pos)) {
       return c.substr(0, pos);
     }
-    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
   }
 
  private:
@@ -185,7 +188,8 @@ class DummyMac : public Mac {
     if (mac == (data.ToString().append(mac_name_))) {
       return crypto::tink::util::Status::OK;
     } else {
-      return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "Wrong MAC.");
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "Wrong MAC.");
     }
   }
  private:

@@ -25,11 +25,13 @@
 using google::crypto::tink::HashType;
 using google::protobuf::StringPiece;
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 
 // static
-crypto::tink::util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
+util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
                                               StringPiece ikm,
                                               StringPiece salt,
                                               StringPiece info,
@@ -43,13 +45,13 @@ crypto::tink::util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
                 reinterpret_cast<const uint8_t *>(ikm.data()), ikm.size(),
                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size(),
                 reinterpret_cast<const uint8_t *>(info.data()), info.size())) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL, "BoringSSL's HKDF failed");
+    return util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
   }
   return std::string(reinterpret_cast<const char *>(out_key.get()), out_len);
 }
 
 // static
-crypto::tink::util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
+util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
     HashType hash,
     StringPiece kem_bytes,
     StringPiece shared_secret,

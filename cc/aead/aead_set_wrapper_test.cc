@@ -21,6 +21,8 @@
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 
+namespace util = crypto::tink::util;
+
 using crypto::tink::test::DummyAead;
 using google::crypto::tink::OutputPrefixType;
 using google::crypto::tink::Keyset;
@@ -41,7 +43,7 @@ TEST_F(AeadSetWrapperTest, testBasic) {
   { // aead_set is nullptr.
     auto aead_result = AeadSetWrapper::NewAead(nullptr);
     EXPECT_FALSE(aead_result.ok());
-    EXPECT_EQ(crypto::tink::util::error::INTERNAL, aead_result.status().error_code());
+    EXPECT_EQ(util::error::INTERNAL, aead_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
                         aead_result.status().error_message());
   }
@@ -50,7 +52,7 @@ TEST_F(AeadSetWrapperTest, testBasic) {
     std::unique_ptr<PrimitiveSet<Aead>> aead_set(new PrimitiveSet<Aead>());
     auto aead_result = AeadSetWrapper::NewAead(std::move(aead_set));
     EXPECT_FALSE(aead_result.ok());
-    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT, aead_result.status().error_code());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, aead_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
                         aead_result.status().error_message());
   }
@@ -108,7 +110,7 @@ TEST_F(AeadSetWrapperTest, testBasic) {
 
     decrypt_result = aead->Decrypt("some bad ciphertext", aad);
     EXPECT_FALSE(decrypt_result.ok());
-    EXPECT_EQ(crypto::tink::util::error::INVALID_ARGUMENT,
+    EXPECT_EQ(util::error::INVALID_ARGUMENT,
               decrypt_result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
                         decrypt_result.status().error_message());

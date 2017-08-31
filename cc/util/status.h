@@ -131,7 +131,8 @@ class Status {
   Status();
 
   // Make a Status from the specified error and message.
-  Status(::crypto::tink::util::error::Code error, const std::string& error_message);
+  Status(::crypto::tink::util::error::Code error,
+         const std::string& error_message);
 
   Status(const Status& other);
   Status& operator=(const Status& other);

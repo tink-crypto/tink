@@ -31,8 +31,8 @@ namespace tink {
 class EciesAeadHkdfDemHelper {
  public:
   // Constructs a new helper for the specified DEM key template.
-  static crypto::tink::util::StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>> New(
-      const google::crypto::tink::KeyTemplate& dem_key_template);
+  static crypto::tink::util::StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>>
+      New(const google::crypto::tink::KeyTemplate& dem_key_template);
 
   // Returns the size of the DEM-key in bytes.
   uint32_t dem_key_size_in_bytes() {

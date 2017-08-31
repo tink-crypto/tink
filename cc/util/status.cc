@@ -44,7 +44,8 @@ const Status& GetUnknown() {
 Status::Status() : code_(::crypto::tink::util::error::OK), message_("") {
 }
 
-Status::Status(::crypto::tink::util::error::Code error, const std::string& error_message)
+Status::Status(::crypto::tink::util::error::Code error,
+               const std::string& error_message)
     : code_(error), message_(error_message) {
   if (code_ == ::crypto::tink::util::error::OK) {
     message_.clear();

@@ -19,6 +19,7 @@
 #include "cc/util/status.h"
 #include "gtest/gtest.h"
 
+namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
@@ -33,7 +34,7 @@ TEST_F(AeadConfigTest, testBasic) {
   std::string key_type =  "type.googleapis.com/google.crypto.tink.AesGcmKey";
   auto manager_result = registry.get_key_manager<Aead>(key_type);
   EXPECT_FALSE(manager_result.ok());
-  EXPECT_EQ(crypto::tink::util::error::NOT_FOUND, manager_result.status().error_code());
+  EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
   EXPECT_TRUE(AeadConfig::RegisterStandardKeyTypes().ok());
   manager_result = registry.get_key_manager<Aead>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();

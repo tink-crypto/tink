@@ -156,7 +156,8 @@ public final class AesEaxJce implements Aead {
 
   @SuppressWarnings("InsecureCryptoUsage")
   @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
+      throws GeneralSecurityException {
     // Check that ciphertext is not longer than the max. size of a Java array.
     if (plaintext.length > Integer.MAX_VALUE - ivSizeInBytes - TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("plaintext too long");
@@ -168,7 +169,7 @@ public final class AesEaxJce implements Aead {
     Cipher ecb = Cipher.getInstance("AES/ECB/NOPADDING");
     ecb.init(Cipher.ENCRYPT_MODE, keySpec);
     byte[] n = omac(ecb, 0, iv, 0, iv.length);
-    byte[] h = omac(ecb, 1, aad, 0, aad.length);
+    byte[] h = omac(ecb, 1, associatedData, 0, associatedData.length);
     Cipher ctr = Cipher.getInstance("AES/CTR/NOPADDING");
     ctr.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(n));
     ctr.doFinal(plaintext, 0, plaintext.length, ciphertext, ivSizeInBytes);
@@ -182,7 +183,7 @@ public final class AesEaxJce implements Aead {
 
   @SuppressWarnings("InsecureCryptoUsage")
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
+  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
     int plaintextLength = ciphertext.length - ivSizeInBytes - TAG_SIZE_IN_BYTES;
     if (plaintextLength < 0) {
@@ -191,7 +192,7 @@ public final class AesEaxJce implements Aead {
     Cipher ecb = Cipher.getInstance("AES/ECB/NOPADDING");
     ecb.init(Cipher.ENCRYPT_MODE, keySpec);
     byte[] n = omac(ecb, 0, ciphertext, 0, ivSizeInBytes);
-    byte[] h = omac(ecb, 1, aad, 0, aad.length);
+    byte[] h = omac(ecb, 1, associatedData, 0, associatedData.length);
     byte[] t = omac(ecb, 2, ciphertext, ivSizeInBytes, plaintextLength);
     byte res = 0;
     int offset = ciphertext.length - TAG_SIZE_IN_BYTES;

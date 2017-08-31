@@ -23,11 +23,13 @@
 #include "cc/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "cc/util/status.h"
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 
 // static
-crypto::tink::util::Status HybridEncryptConfig::RegisterStandardKeyTypes() {
+util::Status HybridEncryptConfig::RegisterStandardKeyTypes() {
   auto status = AeadConfig::RegisterKeyManager(new AesGcmKeyManager());
   // We intentionally ignore the status of registration of AesGcmKeyManager,
   // as the registration may fail if AeadFactory::RegisterStandardKeyTypes()
@@ -38,15 +40,15 @@ crypto::tink::util::Status HybridEncryptConfig::RegisterStandardKeyTypes() {
 }
 
 // static
-crypto::tink::util::Status HybridEncryptConfig::RegisterLegacyKeyTypes() {
-  return crypto::tink::util::Status::OK;
+util::Status HybridEncryptConfig::RegisterLegacyKeyTypes() {
+  return util::Status::OK;
 }
 
 // static
-crypto::tink::util::Status HybridEncryptConfig::RegisterKeyManager(
+util::Status HybridEncryptConfig::RegisterKeyManager(
     KeyManager<HybridEncrypt>* key_manager) {
   if (key_manager == nullptr) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                         "Parameter 'key_manager' must be non-null.");
   }
   return Registry::get_default_registry().RegisterKeyManager(

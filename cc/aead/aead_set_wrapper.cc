@@ -22,34 +22,36 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 
+namespace util = crypto::tink::util;
+
 namespace crypto {
 namespace tink {
 
 namespace {
 
-crypto::tink::util::Status Validate(PrimitiveSet<Aead>* aead_set) {
+util::Status Validate(PrimitiveSet<Aead>* aead_set) {
   if (aead_set == nullptr) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL, "aead_set must be non-NULL");
+    return util::Status(util::error::INTERNAL, "aead_set must be non-NULL");
   }
   if (aead_set->get_primary() == nullptr) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                         "aead_set has no primary");
   }
-  return crypto::tink::util::Status::OK;
+  return util::Status::OK;
 }
 
 }  // anonymous namespace
 
 // static
-crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AeadSetWrapper::NewAead(
+util::StatusOr<std::unique_ptr<Aead>> AeadSetWrapper::NewAead(
     std::unique_ptr<PrimitiveSet<Aead>> aead_set) {
-  crypto::tink::util::Status status = Validate(aead_set.get());
+  util::Status status = Validate(aead_set.get());
   if (!status.ok()) return status;
   std::unique_ptr<Aead> aead(new AeadSetWrapper(std::move(aead_set)));
   return std::move(aead);
 }
 
-crypto::tink::util::StatusOr<std::string> AeadSetWrapper::Encrypt(
+util::StatusOr<std::string> AeadSetWrapper::Encrypt(
     google::protobuf::StringPiece plaintext,
     google::protobuf::StringPiece aad) const {
   auto encrypt_result =
@@ -59,7 +61,7 @@ crypto::tink::util::StatusOr<std::string> AeadSetWrapper::Encrypt(
   return key_id + encrypt_result.ValueOrDie();
 }
 
-crypto::tink::util::StatusOr<std::string> AeadSetWrapper::Decrypt(
+util::StatusOr<std::string> AeadSetWrapper::Decrypt(
     google::protobuf::StringPiece ciphertext,
     google::protobuf::StringPiece aad) const {
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
@@ -92,7 +94,7 @@ crypto::tink::util::StatusOr<std::string> AeadSetWrapper::Decrypt(
       }
     }
   }
-  return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT, "decryption failed");
+  return util::Status(util::error::INVALID_ARGUMENT, "decryption failed");
 }
 
 }  // namespace tink
