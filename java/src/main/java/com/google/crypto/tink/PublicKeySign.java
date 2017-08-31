@@ -20,14 +20,22 @@ import java.security.GeneralSecurityException;
 
 /**
  * Interface for public key signing.
- * Implementations of this interface are secure against adaptive chosen-message attacks.
- * Signing data ensures authenticity and integrity of that data, but not its secrecy.
+ *
+ * <p>Digital Signatures provide functionality of signing data and verification of
+ * the signatures.
+ *
+ * <p>The functionality of Digital Signatures is represented a pair of primitives (interfaces)
+ * {@link PublicKeySign} for signing of data, and {@link PublicKeyVerify} for
+ * verification of signatures.
+ *
+ * <p>Implementations of these interfaces are secure against adaptive chosen-message attacks.
+ * Signing data ensures the authenticity and the integrity of that data, but not its secrecy.
  */
 public interface PublicKeySign {
   /**
    * Computes the signature for {@code data}.
    *
-   * @return the signature of {$code data}.
+   * @return the signature of {$code data}
    */
   byte[] sign(final byte[] data) throws GeneralSecurityException;
 }

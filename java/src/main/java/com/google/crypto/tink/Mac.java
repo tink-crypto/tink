@@ -19,24 +19,25 @@ package com.google.crypto.tink;
 import java.security.GeneralSecurityException;
 
 /**
- * Interface for multi-time MACs (Message Authentication Codes).
- * This interface should be used for multi-time authentication only, and not for other purposes
- * (for example, it should not be used to generate pseudorandom bytes or one-time MACs like
- * Poly1305).
+ * Interface for Message Authentication Codes (MAC).
+ *
+ * <p>Message Authentication Codes provide symmetric message authentication.
+ * Instances implementing this interface are secure against existential forgery under chosen
+ * plaintext attack, and can be deterministic or randomized. This interface should be used
+ * for authentication only, and not for other purposes like generation of pseudorandom bytes.
  */
 public interface Mac {
   /**
    * Computes message authentication code (MAC) for {@code data}.
    *
-   * @return MAC value.
+   * @return MAC value
    */
   byte[] computeMac(final byte[] data) throws GeneralSecurityException;
 
   /**
    * Verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
    *
-   * @throws GeneralSecurityException If {@code mac} is not a correct MAC for {@code data} then a
-   * GeneralSecurityException is thrown.
+   * @throws GeneralSecurityException if {@code mac} is not a correct MAC for {@code data}
    */
   void verifyMac(final byte[] mac, final byte[] data) throws GeneralSecurityException;
 }

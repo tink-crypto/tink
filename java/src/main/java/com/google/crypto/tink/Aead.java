@@ -19,10 +19,12 @@ package com.google.crypto.tink;
 import java.security.GeneralSecurityException;
 
 /**
- * The interface for Authenticated Encryption with Associated Data.
- * Implementations of this interface are secure against adaptive chosen ciphertext attacks.
- * Encryption with associated data ensures authenticity and integrity of that data,
- * but not its secrecy. (see <a href="https://tools.ietf.org/html/rfc5116">RFC 5116</a>)
+ * Interface for Authenticated Encryption with Associated Data (AEAD).
+ *
+ * <p>Implementations of this interface are secure against adaptive chosen ciphertext attacks.
+ * Encryption with associated data ensures authenticity (who the sender is) and integrity
+ * (the data has not been tampered with) of that data, but not its secrecy.
+ * (see <a href="https://tools.ietf.org/html/rfc5116">RFC 5116</a>)
  */
 public interface Aead {
   /**
@@ -30,7 +32,7 @@ public interface Aead {
    * The resulting ciphertext allows for checking authenticity and integrity
    * of associated data ({@code associatedData}), but does not guarantee its secrecy.
    *
-   * @return resulting ciphertext.
+   * @return resulting ciphertext
    */
   byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException;
@@ -40,7 +42,7 @@ public interface Aead {
    * The decryption verifies the authenticity and integrity of the associated data,
    * but there are no guarantees wrt. secrecy of that data.
    *
-   * @return resulting plaintext.
+   * @return resulting plaintext
    */
   byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException;

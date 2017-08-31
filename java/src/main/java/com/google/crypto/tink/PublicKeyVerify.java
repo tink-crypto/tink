@@ -19,16 +19,23 @@ package com.google.crypto.tink;
 import java.security.GeneralSecurityException;
 
 /**
- * Interface for verification of public key signature.
- * Implementations of this interface are secure against adaptive chosen-message attacks.
- * Signing data ensures authenticity and integrity of that data, but not its secrecy.
+ * Interface for verification of public key signatures.
+ *
+ * <p>Digital Signatures provide functionality of signing data and verification of
+ * the signatures.
+ *
+ * <p>The functionality of Digital Signatures is represented a pair of primitives (interfaces)
+ * {@link PublicKeySign} for signing of data, and {@link PublicKeyVerify} for
+ * verification of signatures.
+ *
+ * <p>Implementations of these interfaces are secure against adaptive chosen-message attacks.
+ * Signing data ensures the authenticity and the integrity of that data, but not its secrecy.
  */
 public interface PublicKeyVerify {
   /**
    * Verifies whether {@code signature} is a valid signature for {@code data}.
    *
-   * @throws GeneralSecurityException If {@code signature} is not a valid signature for
-   * {@code data} then GeneralSecurityException is thrown.
+   * @throws GeneralSecurityException if {@code signature} is not a valid signature for {@code data}
    */
   void verify(final byte[] signature, final byte[] data) throws GeneralSecurityException;
 }
