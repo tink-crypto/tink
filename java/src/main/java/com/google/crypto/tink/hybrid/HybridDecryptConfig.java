@@ -16,36 +16,36 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.Config;
-import com.google.crypto.tink.aead.AeadConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * This class offers convenience methods and constants for initializing
- * {@link HybridDecryptFactory} and the underlying {@link Registry}.
+ * Static methods for registering with the {@link Registry} all instances of
+ * {@link com.google.crypto.tink.HybridDecrypt} key types supported in a particular release of
+ * Tink.
  *
- * For more information on how to obtain and use HybridDecrypt primitives,
- * see {@link HybridDecryptFactory}.
- * @deprecated
+ * <p>To register all HybridDecrypt key types provided in Tink release 1.0.0 one can do:
+ * <pre>{@code
+ * Config.register(HybridDecryptConfig.TINK_1_0_0);
+ * }</pre>
+ *
+ * <p>For more information on how to obtain and use instances of HybridDecrypt, see
+ * {@link HybridDecryptFactory}.
+ *
+ * @deprecated use {@link Config} and {@link HybridConfig}
  */
 @Deprecated
 public final class HybridDecryptConfig {
   /**
-   * Registers standard (for the current release) HybridDecrypt key types
-   * and their managers with the {@code Registry}.
+   * Registers standard with the {@code Registry} all HybridDecrypt key types released with the
+   * latest version of Tink.
    *
-   * Deprecated-yet-still-supported key types are registered in
-   * so-called "no new key"-mode, which allows for usage of existing
-   * keys forbids generation of new key material.
+   * Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
+   * which allows for usage of existing keys forbids generation of new key material.
    *
-   * NOTE: as some HybridDecrypt key types use Aead-primitives, this method registers
-   *       also standard Aead key types.
-   *
-   * @throws GeneralSecurityException
-   * @deprecated
+   * @deprecated use {@link Config#register}
    */
   @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     Config.register(HybridConfig.TINK_1_0_0);
-    Config.register(AeadConfig.TINK_1_0_0);
   }
 }

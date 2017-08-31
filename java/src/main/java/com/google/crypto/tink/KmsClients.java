@@ -25,10 +25,11 @@ import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * A container for KmsClient-objects that are needed by KeyManager-objects for primitives that use
- * KMS-managed keys.
+ * A container for {@link KmsClient}-objects that are needed by {@link KeyManager}-objects for
+ * primitives that use KMS-managed keys.
  *
- * <p>This class consists exclusively of static methods that register and load KmsClient-objects.
+ * <p>This class consists exclusively of static methods that register and load
+ * {@link KmsClient}-objects.
  */
 public final class KmsClients {
   // The list of KmsClients loaded automatically using ServiceLoader.
@@ -38,15 +39,17 @@ public final class KmsClients {
       new CopyOnWriteArrayList<KmsClient>();
 
   /**
-   * Adds a client to the list of known KmsClients.
+   * Adds a client to the list of known {@link KmsClient}-objects.
    */
   public static void add(KmsClient client) {
     clients.add(client);
   }
 
   /**
-   * Returns the first {@code KmsClient} registered with {@link KmsClients#registerKmsClient}
-   * that supports {@code keyUri}.
+   * Returns the first {@link KmsClient} registered with {@link KmsClients#add} that supports
+   * {@code keyUri}.
+   *
+   * @throws GeneralSecurityException if cannot found any KMS clients that support {@code keyUri}
    */
   public static KmsClient get(String keyUri) throws GeneralSecurityException {
     for (KmsClient client : clients) {
@@ -58,13 +61,18 @@ public final class KmsClients {
   }
 
   /**
-   * Returns the first {@code KmsClient} automatically loaded with {@link java.util.ServiceLoader}
+   * Returns the first {@link KmsClient} automatically loaded with {@link java.util.ServiceLoader}
    * that supports {@code keyUri}.
-   * <p> Warning: This method searches over the classpath for all implementations of
-   * {@code KmsClient}. An attacker that can insert a class in your classpath (e.g., somone
-   * controlling a library that you're using) could provide a fake KmsClient that steal your keys.
-   * For this reason Tink does not use this method. It is used by Tinkey because it needs talk to
-   * custom, in-house KMS.
+   *
+   * <p><b>Warning</b>
+   * This method searches over the classpath for all implementations of {@link KmsClient}. An
+   * attacker that can insert a class in your classpath (e.g., someone controlling a library that
+   * you're using) could provide a fake {@link KmsClient} that steal your keys. For this reason
+   * Tink does not use this method. It is used by
+   * <a href="https://github.com/google/tink/tree/master/tools/tinkey">Tinkey</a> which needs to
+   * talk to custom, in-house key management systems.
+   *
+   * @throws GeneralSecurityException if cannot found any KMS clients that support {@code keyUri}
    */
   public static synchronized KmsClient getAutoLoaded(String keyUri)
       throws GeneralSecurityException {

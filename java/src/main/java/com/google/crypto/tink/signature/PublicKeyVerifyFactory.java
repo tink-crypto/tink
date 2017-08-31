@@ -30,22 +30,20 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * PublicKeyVerifyFactory allows obtaining a {@code PublicKeyVerify} primitive from a
- * {@code KeysetHandle}.
+ * Static methods for obtaining {@link PublicKeyVerify} instances.
  *
- * PublicKeyVerifyFactory gets primitives from the {@code Registry}, which can be
- * initialized via convenience methods from {@code Config} and {@code PublicKeyVerifyConfig}.
- * Here is an example how one can obtain and use a PublicKeyVerify primitive:
- * <pre>   {@code
+ * <p>Usage:
+ * <pre>{@code
  *   KeysetHandle keysetHandle = ...;
- *   Config.register(SignatureConfig.TINK_1_0_0);
  *   PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle);
  *   verifier.verify(signature, data);
- *  }</pre>
- * The returned primitive works with a keyset (rather than a single key). To verify a signature,
+ * }</pre>
+ *
+ * <p>The returned primitive works with a keyset (rather than a single key). To verify a signature,
  * the primitive uses the prefix of the signature to efficiently select the right key in the set.
  * If there is no key associated with the prefix or if the keys associated with the prefix do not
- * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
+ * work, the primitive tries all keys with
+ * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public final class PublicKeyVerifyFactory {
   private static final Logger logger = Logger.getLogger(PublicKeyVerifyFactory.class.getName());

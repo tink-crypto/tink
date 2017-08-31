@@ -30,20 +30,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * A container class for a set of primitives (i.e. implementations of cryptographic
- * primitives offered by Tink).  It provides also additional properties for the primitives
- * it holds.  In particular, one of the primitives in the set can be distinguished as
- * "the primary" one. <p>
+ * A container class for a set of primitives -- implementations of cryptographic
+ * primitives offered by Tink.
  *
- * PrimitiveSet is an auxiliary class used for supporting key rotation: primitives in a set
- * correspond to keys in a keyset.  Users will usually work with primitive instances,
- * which essentially wrap primitive sets.  For example an instance of an Aead-primitive
- * for a given keyset holds a set of Aead-primitives corresponding to the keys in the keyset,
- * and uses the set members to do the actual crypto operations: to encrypt data the primary
- * Aead-primitive from the set is used, and upon decryption the ciphertext's prefix
- * determines the id of the primitive from the set. <p>
+ * <p>It provides also additional properties for the primitives it holds. In particular,
+ * one of the primitives in the set can be distinguished as "the primary" one.
  *
- * PrimitiveSet is a public class to allow its use in implementations of custom primitives.
+ * <p>PrimitiveSet is an auxiliary class used for supporting key rotation: primitives in a set
+ * correspond to keys in a keyset. Users will usually work with primitive instances, which
+ * essentially wrap primitive sets. For example an instance of an Aead-primitive for a given
+ * keyset holds a set of Aead-primitives corresponding to the keys in the keyset, and uses the
+ * set members to do the actual crypto operations: to encrypt data the primary Aead-primitive
+ * from the set is used, and upon decryption the ciphertext's prefix determines the id of the
+ * primitive from the set.
+ *
+ * <p>PrimitiveSet is a public class to allow its use in implementations of custom primitives.
  */
 public final class PrimitiveSet<P> {
   private static final Charset UTF_8 = Charset.forName("UTF-8");

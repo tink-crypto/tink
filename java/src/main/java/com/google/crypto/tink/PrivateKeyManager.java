@@ -21,14 +21,14 @@ import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 
 /**
- * A special type of {@code KeyManager} that understands private key types.
+ * A {@link KeyManager} that understands asymmetric private key types.
  */
 public interface PrivateKeyManager<P> extends KeyManager<P> {
   /**
-   * Extracts the public key data from the private key.
+   * Extracts the public key data from the private key data.
    *
-   * @return the public key.
-   * @throws GeneralSecurityException if the specified format is wrong or not supported.
+   * @return the {@link KeyData} containing the public keys
+   * @throws GeneralSecurityException if the specified format is wrong or not supported
    */
   KeyData getPublicKeyData(ByteString serializedKey) throws GeneralSecurityException;
 }

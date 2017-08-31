@@ -16,36 +16,36 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.Config;
-import com.google.crypto.tink.aead.AeadConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * HybridEncryptConfig offers convenience methods for initializing
- * {@code HybridEncryptFactory} and the underlying {@code Registry}.
+ * Static methods for registering with the {@link Registry} all instances of
+ * {@link com.google.crypto.tink.HybridEncrypt} key types supported in a particular release of
+ * Tink.
  *
- * For more information on how to obtain and use HybridEncrypt primitives,
- * see {@code HybridEncryptFactory}.
- * @deprecated
+ * <p>To register all HybridEncrypt key types provided in Tink release 1.0.0 one can do:
+ * <pre>{@code
+ * Config.register(HybridEncryptConfig.TINK_1_0_0);
+ * }</pre>
+ *
+ * <p>For more information on how to obtain and use instances of HybridEncrypt, see
+ * {@link HybridEncryptFactory}.
+ *
+ * @deprecated use {@link Config} and {@link HybridConfig}
  */
 @Deprecated
 public final class HybridEncryptConfig {
   /**
-   * Registers standard (for the current release) HybridDecrypt key types
-   * and their managers with the {@code Registry}.
+   * Registers standard with the {@code Registry} all HybridEncrypt key types released with the
+   * latest version of Tink.
    *
-   * Deprecated-yet-still-supported key types are registered in
-   * so-called "no new key"-mode, which allows for usage of existing
-   * keys forbids generation of new key material.
+   * <p>Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
+   * which allows for usage of existing keys forbids generation of new key material.
    *
-   * NOTE: as some HybridDecrypt key types use Aead-primitives, this method registers
-   *       also standard Aead key types.
-   *
-   * @throws GeneralSecurityException
-   * @deprecated
+   * @deprecated use {@link Config#register}
    */
   @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     Config.register(HybridConfig.TINK_1_0_0);
-    Config.register(AeadConfig.TINK_1_0_0);
   }
 }

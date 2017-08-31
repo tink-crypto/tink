@@ -27,23 +27,21 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * HybridDecryptFactory allows obtaining a HybridDecrypt primitive from a {@code KeysetHandle}.
+ * Static methods for obtaining {@link HybridDecrypt} instances.
  *
- * HybridDecryptFactory gets primitives from the {@code Registry}, which can be initialized
- * via convenience methods from {@code Config} and {@code HybridConfig}. Here is an example how
- * one can obtain and use a HybridDecrypt primitive:
- * <pre>   {@code
+ * <p>Usage:
+ * <pre>{@code
  *   KeysetHandle keysetHandle = ...;
- *   Config.register(HybridConfig.TINK_1_0_0);
  *   HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandle);
  *   byte[] ciphertext = ...;
  *   byte[] contextInfo = ...;
- *   byte[] plaintext = hybridEncypt.decrypt(ciphertext, contextInfo);
- *  }</pre>
- * The returned primitive works with a keyset (rather than a single key). To decrypt a message,
- * the primitive uses the prefix of the ciphertext to efficiently select the right key in the set.
- * If there is no key associated with the prefix or if the keys associated with the prefix do not
- * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
+ *   byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
+ * }</pre>
+ *
+ * <p>The returned primitive works with a keyset (rather than a single key). To decrypt, the
+ * primitive uses the prefix of the ciphertext to efficiently select the right key in the set.
+ * If the keys associated with the prefix do not work, the primitive tries all keys with
+ * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public final class HybridDecryptFactory {
   private static final Logger logger = Logger.getLogger(HybridDecryptFactory.class.getName());

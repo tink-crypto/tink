@@ -34,7 +34,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A {@link KeysetWriter} that can write keysets in proto JSON format.
+ * A {@link KeysetWriter} that can write to some source cleartext or encrypted keysets in proto
+ * JSON format.
  */
 public final class JsonKeysetWriter implements KeysetWriter {
   private final OutputStream outputStream;

@@ -29,24 +29,23 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * AeadFactory allows obtaining a primitive from a {@code KeysetHandle}.
+ * Static methods for obtaining {@link Aead} instances.
  *
- * AeadFactory gets primitives from the {@code Registry}, which can be initialized
- * via convenience methods from {@code Config} and {@code AeadConfig}. Here is an example
- * how one can obtain and use a Aead primitive:
- * <pre>   {@code
+ * <p>Usage:
+ * <pre>{@code
  *   KeysetHandle keysetHandle = ...;
- *   Config.register(AeadConfig.TINK_1_0_0);
  *   Aead aead = AeadFactory.getPrimitive(keysetHandle);
  *   byte[] plaintext = ...;
  *   byte[] aad = ...;
  *   byte[] ciphertext = aead.encrypt(plaintext, aad);
- *  }</pre>
- * The returned primitive works with a keyset (rather than a single key). To encrypt a plaintext,
- * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix
- * associated with the primary key. To decrypt, the primitive uses the prefix of the ciphertext
- * to efficiently select the right key in the set. If the keys associated with the prefix do not
- * work, the primitive tries all keys with {@code OutputPrefixType.RAW}.
+ * }</pre>
+ *
+ * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a
+ * plaintext, it uses the primary key in the keyset, and prepends to the ciphertext a certain
+ * prefix associated with the primary key. To decrypt, the primitive uses the prefix of the
+ * ciphertext to efficiently select the right key in the set. If the keys associated with the
+ * prefix do not work, the primitive tries all keys with
+ * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public final class AeadFactory {
   private static final Logger logger = Logger.getLogger(AeadFactory.class.getName());

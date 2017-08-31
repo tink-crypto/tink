@@ -26,8 +26,8 @@ import java.security.SecureRandom;
 import javax.annotation.concurrent.GuardedBy;
 
 /**
- * Manages a Keyset-proto, with convenience methods that rotate, disable, enable or
- * destroy keys.
+ * Manages a {@link com.google.crypto.tink.proto.Keyset} proto, with convenience methods that
+ * rotate, disable, enable or destroy keys.
  */
 public final class KeysetManager {
   @GuardedBy("this")
@@ -38,21 +38,21 @@ public final class KeysetManager {
   }
 
   /**
-   * Gets a keyset manager from an existing keyset handle.
+   * @return a {@link KeysetManager} for the keyset manged by {@code val}
    */
   public static KeysetManager withKeysetHandle(KeysetHandle val) {
     return new KeysetManager(val.getKeyset().toBuilder());
   }
 
   /**
-   * Gets a keyset manager with an empty keyset.
+   * @return a {@link KeysetManager} for an empty keyset.
    */
   public static KeysetManager withEmptyKeyset() {
     return new KeysetManager(Keyset.newBuilder());
   }
 
   /**
-   * @return return {@code KeysetHandle} of the managed keyset.
+   * @return a {@link KeysetHandle} of the managed keyset
    */
   @GuardedBy("this")
   public synchronized KeysetHandle getKeysetHandle() throws GeneralSecurityException {
@@ -60,8 +60,11 @@ public final class KeysetManager {
   }
 
   /**
-   * Generates and adds a fresh key using {@code keyTemplate}, and sets the new key as
+   * Generates and adds a fresh key generated using {@code keyTemplate}, and sets the new key as
    * the primary key.
+   *
+   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle
+   * {@code keyTemplate}
    */
   @GuardedBy("this")
   public synchronized KeysetManager rotate(KeyTemplate keyTemplate)
@@ -74,7 +77,10 @@ public final class KeysetManager {
   }
 
   /**
-   * Generates and adds to keyset a fresh key using {@code keyTemplate}.
+   * Generates and adds a fresh key generated using {@code keyTemplate}.
+   *
+   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle
+   * {@code keyTemplate}
    */
   @GuardedBy("this")
   public synchronized KeysetManager add(KeyTemplate keyTemplate)
@@ -85,7 +91,8 @@ public final class KeysetManager {
 
   /**
    * Promotes to primary the key with {@code keyId}.
-   * @throws GeneralSecurityException if the key is not found or not enabled.
+   *
+   * @throws GeneralSecurityException if the key is not found or not enabled
    */
   @GuardedBy("this")
   public synchronized KeysetManager promote(int keyId) throws GeneralSecurityException {
@@ -105,7 +112,8 @@ public final class KeysetManager {
 
   /**
    * Enables the key with {@code keyId}.
-   * @throws GeneralSecurityException if the key is not found.
+   *
+   * @throws GeneralSecurityException if the key is not found
    */
   @GuardedBy("this")
   public synchronized KeysetManager enable(int keyId) throws GeneralSecurityException {
@@ -121,7 +129,8 @@ public final class KeysetManager {
 
   /**
    * Disables the key with {@code keyId}.
-   * @throws GeneralSecurityException if the key is not found or it is the primary key.
+   *
+   * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
   @GuardedBy("this")
   public synchronized KeysetManager disable(int keyId) throws GeneralSecurityException {
@@ -141,7 +150,8 @@ public final class KeysetManager {
 
   /**
    * Deletes the key with {@code keyId}.
-   * @throws GeneralSecurityException if the key is not found or it is the primary key.
+   *
+   * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
   @GuardedBy("this")
   public synchronized KeysetManager delete(int keyId) throws GeneralSecurityException {
@@ -161,7 +171,8 @@ public final class KeysetManager {
 
   /**
    * Destroys the key material associated with the {@code keyId}.
-   * @throws GeneralSecurityException if the key is not found or it is the primary key.
+   *
+   * @throws GeneralSecurityException if the key is not found or it is the primary key
    */
   @GuardedBy("this")
   public synchronized KeysetManager destroy(int keyId) throws GeneralSecurityException {
@@ -215,7 +226,7 @@ public final class KeysetManager {
   }
 
   /**
-   * @return positive random int.
+   * @return positive random int
    */
   private static int randPositiveInt() {
     SecureRandom secureRandom = new SecureRandom();

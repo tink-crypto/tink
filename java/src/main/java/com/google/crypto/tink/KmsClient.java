@@ -19,11 +19,11 @@ package com.google.crypto.tink;
 import java.security.GeneralSecurityException;
 
 /**
- * KmsClient knows how to produce primitives backed by keys stored in remote KMS services.
+ * A KmsClient knows how to produce primitives backed by keys stored in remote KMS services.
  */
 public interface KmsClient {
   /**
-   * @return true iff this client does support {@code keyUri}.
+   * @return true if this client does support {@code keyUri}
    */
   public boolean doesSupport(String keyUri);
 
@@ -41,8 +41,7 @@ public interface KmsClient {
   /**
    * Gets an {@code Aead} backed by {@code keyUri}.
    *
-   * @return the Aead
-   * @throws GeneralSecurityException if the URI is not supported or invalid.
+   * @throws GeneralSecurityException if the URI is not supported or invalid
    */
   public Aead getAead(String keyUri) throws GeneralSecurityException;
 }

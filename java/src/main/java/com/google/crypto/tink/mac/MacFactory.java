@@ -30,23 +30,21 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * MacFactory allows obtaining a Mac primitive from a {@code KeysetHandle}.
+ * Static methods for obtaining {@link Mac} instances.
  *
- * MacFactory gets primitives from the {@code Registry}, which can be initialized
- * via convenience methods from {@code Config} and {@code MacConfig}. Here is an example
- * how one can obtain and use a Mac primitive:
- * <pre>   {@code
+ * <p>Usage:
+ * <pre>{@code
  *   KeysetHandle keysetHandle = ...;
- *   Config.register(Mac.TINK_1_0_0);
  *   Mac mac = MacFactory.getPrimitive(keysetHandle);
  *   byte[] data = ...;
  *   byte[] tag = mac.computeMac(data);
  *  }</pre>
- * The returned primitive works with a keyset (rather than a single key). To compute a MAC tag, it
- * uses the primary key in the keyset, and prepends to the tag a certain prefix associated with the
- * primary key. To verify a tag, the primitive uses the prefix of the tag to efficiently select the
- * right key in the set. If the keys associated with the prefix do not validate the tag, the
- * primitive tries all keys with {@code OutputPrefixType.RAW}.
+ *
+ * <p>The returned primitive works with a keyset (rather than a single key). To compute a MAC tag,
+ * it uses the primary key in the keyset, and prepends to the tag a certain prefix associated with
+ * the primary key. To verify a tag, the primitive uses the prefix of the tag to efficiently select
+ * the right key in the set. If the keys associated with the prefix do not validate the tag, the
+ * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public final class MacFactory {
   private static final Logger logger = Logger.getLogger(MacFactory.class.getName());

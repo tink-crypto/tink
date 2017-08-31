@@ -21,20 +21,17 @@ import com.google.crypto.tink.proto.Keyset;
 import java.io.IOException;
 
 /**
- * KeysetWriter knows how to write a cleartext or encrypted keyset to some storage system.
+ * A KeysetWriter knows how to write a {@link Keyset} or an {@link EncryptedKeyset} to some storage
+ * system.
  */
 public interface KeysetWriter {
   /**
-   * Writes the cleartext {@code keyset} to some storage system.
-   *
-   * @throws IOException.
+   * Tries to write a {@link Keyset} to some storage system.
    */
   void write(Keyset keyset) throws IOException;
 
   /**
-   * Writes the encrypted {@code keyset} to some storage system.
-   *
-   * @throws IOException.
+   * Tries to write an {@link EncryptedKeyset} to some storage system.
    */
   void write(EncryptedKeyset keyset) throws IOException;
 }

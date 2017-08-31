@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * Creates keyset handles from keysets that don't contain secret key material. This keyset handle
- * therefore is not restricted, and can be used to load keysets containing only public or remote
- * keys.
+ * Static methods for reading cleartext keysets that don't contain any secret key material.
  */
 public final class NoSecretKeysetHandle {
   /**

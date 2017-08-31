@@ -27,24 +27,20 @@ import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 
 /**
- * PublicKeySignFactory allows obtaining a {@code PublicKeySign} primitive from a
- * {@code KeysetHandle}.
+ * Static methods for obtaining {@link PublicKeySign} instances.
  *
- * PublicKeySignFactory gets primitives from the {@code Registry}, which can be initialized
- * via convenience methods from {@code Config} and {@code SignatureConfig}. Here is an example
- * how one can obtain and use a PublicKeySign primitive:
- * <pre>   {@code
+ * <p>Usage:
+ * <pre>{@code
  *   KeysetHandle keysetHandle = ...;
- *   Config.register(SignatureConfig.TINK_1_0_0);
  *   PublicKeySign signer = PublicKeySignFactory.getPrimitive(keysetHandle);
  *   byte[] data = ...;
  *   byte[] signature = signer.sign(data);
- *  }</pre>
- * The returned primitive works with a keyset (rather than a single key). To sign a message,
+ * }</pre>
+ *
+ * <p>The returned primitive works with a keyset (rather than a single key). To sign a message,
  * it uses the primary key in the keyset, and prepends to the signature a certain prefix
  * associated with the primary key.
  */
-
 public final class PublicKeySignFactory {
   /**
    * @return a PublicKeySign primitive from a {@code keysetHandle}.

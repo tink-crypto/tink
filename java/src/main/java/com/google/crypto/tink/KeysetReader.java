@@ -21,22 +21,21 @@ import com.google.crypto.tink.proto.Keyset;
 import java.io.IOException;
 
 /**
- * KeysetReader knows how to read a cleartext or encrypted keyset from some source.
+ * A KeysetReader knows how to read a {@link Keyset} or an {@link EncryptedKeyset} from some
+ * source.
  */
 public interface KeysetReader {
   /**
-   * Reads and returns a cleartext keyset.
+   * Tries to read and return a cleartext {@link Keyset}.
    *
    * @return the Keyset
-   * @throws IOException.
    */
   Keyset read() throws IOException;
 
   /**
-   * Reads and returns an EncryptedKeyset keyset.
+   * Tries to read and return an {@link EncryptedKeyset}.
    *
    * @return the EncryptedKeyset
-   * @throws IOException.
    */
   EncryptedKeyset readEncrypted() throws IOException;
 }

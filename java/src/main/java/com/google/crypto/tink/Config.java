@@ -21,19 +21,19 @@ import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods for handling of Tink configurations, i.e. of key types and their corresponding
- * key managers supported by a specific run-time environment.
+ * Static methods for handling of Tink configurations.
  *
- * <p>Configurations enable control of Tink setup via config files that determine which key types
- * are supported, and provide a mechanism for deprecation of obsolete/outdated cryptographic
- * schemes (see
+ * <p>Configurations, i.e., of key types and their corresponding key managers supported by a
+ * specific run-time environment enable control of Tink setup via JSON-formatted config files that
+ * determine which key types are supported, and provide a mechanism for deprecation of
+ * obsolete/outdated cryptographic schemes (see
  * <a href="https://github.com/google/tink/blob/master/proto/config.proto">config.proto</a>
  * for more info).
  *
  * <p><b>Usage:</b>
  * <pre>{@code
- * RegistryConfig registerConfig = ...; // AeadConfig.TINK_1_0_0
- * Config.register(registerConfig);
+ * RegistryConfig registryConfig = ...; // AeadConfig.TINK_1_0_0
+ * Config.register(registryConfig);
  * }</pre>
  */
 public final class Config {

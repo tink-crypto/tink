@@ -25,22 +25,20 @@ import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
 /**
- * HybridEncryptFactory allows obtaining a HybridEncrypt primitive from a {@code KeysetHandle}.
+ * Static methods for obtaining {@link HybridEncrypt} instances.
  *
- * HybridEncryptFactory gets primitives from the {@code Registry}, which can be initialized
- * via convenience methods from {@code Config} and {@code HybridConfig}. Here is an
- * example how one can obtain and use a HybridEncrypt primitive:
- * <pre>   {@code
+ * <p>Usage:
+ * <pre>{@code
  *   KeysetHandle keysetHandle = ...;
- *   Config.register(HybridConfig.TINK_1_0_0);
  *   HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(keysetHandle);
  *   byte[] plaintext = ...;
  *   byte[] contextInfo = ...;
- *   byte[] ciphertext = hybridEncypt.encrypt(plaintext, contextInfo);
- *  }</pre>
- * The returned primitive works with a keyset (rather than a single key). To encrypt a message,
- * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix
- * associated with the primary key.
+ *   byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
+ * }</pre>
+ *
+ * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a
+ * plaintext, it uses the primary key in the keyset, and prepends to the ciphertext a certain
+ * prefix associated with the primary key.
  */
 public final class HybridEncryptFactory {
   private static final Logger logger = Logger.getLogger(HybridEncryptFactory.class.getName());

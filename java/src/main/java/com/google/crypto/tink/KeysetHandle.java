@@ -27,18 +27,15 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * KeysetHandle provides abstracted access to Keysets, to limit the exposure
- * of actual protocol buffers that hold sensitive key material.
+ * A KeysetHandle provides abstracted access to {@link com.google.crypto.tink.proto.Keyset},
+ * to limit the exposure of actual protocol buffers that hold sensitive key material.
  *
- * <p> This class allows reading and writing encrypted keysets. Users that want
- * to read or write can use the restricted API {@code CleartextKeysetHandle}.
+ * <p>This class allows reading and writing encrypted keysets. Users that want
+ * to read or write can use the restricted API {@link CleartextKeysetHandle}.
  * Users can also load keysets that don't contain any secret key material with
- * {@code NoSecretKeysetHandle}.
+ * {@link NoSecretKeysetHandle}.
  */
 public final class KeysetHandle {
-  /**
-   * The {@code Keyset}.
-   */
   private Keyset keyset;
 
   private KeysetHandle(Keyset keyset) {
@@ -46,7 +43,7 @@ public final class KeysetHandle {
   }
 
   /**
-   * @return a new {@code KeysetHandle} from a {@code keyset}.
+   * @return a new {@link KeysetHandle} from a {@code keyset}.
    * @throws GeneralSecurityException
    */
   static final KeysetHandle fromKeyset(Keyset keyset)
@@ -63,15 +60,16 @@ public final class KeysetHandle {
   }
 
   /**
-   * @return the {@code KeysetInfo} that doesn't contain actual key material.
+   * @return the {@link com.google.crypto.tink.proto.KeysetInfo} that doesn't contain actual key
+   * material.
    */
   public KeysetInfo getKeysetInfo() {
     return Util.getKeysetInfo(keyset);
   }
 
   /**
-   * @return a new keyset handle that contains a single fresh key generated
-   * according to the {@code keyTemplate}.
+   * @return a new {@link KeysetHandle} that contains a single fresh key generated according to
+   * {@code keyTemplate}.
    * @throws GeneralSecurityException
    */
   public static final KeysetHandle generateNew(KeyTemplate keyTemplate)
@@ -82,11 +80,14 @@ public final class KeysetHandle {
   }
 
   /**
-   * Creates keyset handles from an encrypted keyset obtained via {@code reader}.
-   * Users that need to load cleartext keysets can use {@code CleartextKeysetHandle}.
-   * @return a new {@code KeysetHandle} from {@code encryptedKeysetProto} that was encrypted
-   * with {@code masterKey}.
-   * @throws GeneralSecurityException
+   * Tries to create a {@link KeysetHandle} from an encrypted keyset obtained via {@code reader}.
+   *
+   * <p>Users that need to load cleartext keysets can use {@link CleartextKeysetHandle}.
+   *
+   * @return a new {@link KeysetHandle} from {@code encryptedKeysetProto} that was encrypted
+   * with {@code masterKey}
+   * @throws GeneralSecurityException if cannot decrypt the keyset or it doesn't contain
+   * encrypted key material
    */
   public static final KeysetHandle read(KeysetReader reader,
       Aead masterKey) throws GeneralSecurityException, IOException {
@@ -106,7 +107,7 @@ public final class KeysetHandle {
   }
 
   /**
-   * Encrypts the keyset with the {@code Aead} master key.
+   * Encrypts the keyset with the {@link Aead} master key.
    */
   private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey)
       throws GeneralSecurityException {
@@ -129,7 +130,7 @@ public final class KeysetHandle {
   }
 
   /**
-   * Decrypts the encrypted keyset with the {@code Aead} master key.
+   * Decrypts the encrypted keyset with the {@link Aead} master key.
    */
   private static Keyset decrypt(EncryptedKeyset encryptedKeyset, Aead masterKey)
       throws GeneralSecurityException {
@@ -145,8 +146,11 @@ public final class KeysetHandle {
   }
 
   /**
-   * If the managed keyset contains private keys, returns a {@code KeysetHandle}
+   * If the managed keyset contains private keys, returns a {@link KeysetHandle}
    * of the public keys.
+   *
+   * @throws GenernalSecurityException if the managed keyset is null or if it contains any
+   * non-private keys.
    */
   public KeysetHandle getPublicKeysetHandle() throws GeneralSecurityException {
     if (keyset == null) {
@@ -181,7 +185,8 @@ public final class KeysetHandle {
   }
 
   /**
-   * Prints out the {@code KeysetInfo}.
+   * Extracts and returns the string representation of the
+   * {@link com.google.crypto.tink.proto.KeysetInfo} of the managed keyset.
    */
   @Override
   public String toString() {
@@ -189,8 +194,8 @@ public final class KeysetHandle {
   }
 
   /**
-   * Validate that an keyset handle contains enough key material to build a keyset on, and throws
-   * otherwise.
+   * Validates that an keyset handle contains enough key material to build a keyset on.
+   *
    * @throws GeneralSecurityException
    */
   public static void assertEnoughKeyMaterial(Keyset keyset) throws GeneralSecurityException {
@@ -200,8 +205,8 @@ public final class KeysetHandle {
   }
 
   /**
-   * Validates that an encrypted keyset contains enough key material to build a keyset on,
-   * and throws otherwise.
+   * Validates that an encrypted keyset contains enough key material to build a keyset on.
+   *
    * @throws GeneralSecurityException
    */
   public static void assertEnoughEncryptedKeyMaterial(EncryptedKeyset keyset)

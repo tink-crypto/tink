@@ -62,7 +62,7 @@ public final class MacConfig {
    * Registers with the {@code Registry} all Mac key types released with the latest
    * version of Tink.
    *
-   * Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
+   * <p>Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
    * which allows for usage of existing keys forbids generation of new key material.
    *
    * @deprecated

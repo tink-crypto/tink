@@ -20,25 +20,30 @@ import com.google.crypto.tink.Config;
 import java.security.GeneralSecurityException;
 
 /**
- * This class offers convenience methods and constants for initializing
- * {@link PublicKeyVerifyFactory} and the underlying {@link Registry}.
+ * Static methods for registering with the {@link Registry} all instances of
+ * {@link com.google.crypto.tink.PublicKeyVerify} key types supported in a particular release of
+ * Tink.
  *
- * For more information on how to obtain and use PublicKeyVerify primitives,
- * see {@link PublicKeyVerifyFactory}.
- * @deprecated
+ * <p>To register all PublicKeyVerify key types provided in Tink release 1.0.0 one can do:
+ * <pre>{@code
+ * Config.register(PublicKeyVerifyConfig.TINK_1_0_0);
+ * }</pre>
+ *
+ * <p>For more information on how to obtain and use instances of PublicKeyVerify, see
+ * {@link PublicKeyVerifyFactory}.
+ *
+ * @deprecated use {@link Config} and {@link SignatureConfig}
  */
 @Deprecated
 public final class PublicKeyVerifyConfig {
   /**
-   * Registers standard (for the current release) PublicKeyVerify key types
-   * and their managers with the {@code Registry}.
+   * Registers standard with the {@code Registry} all PublicKeyVerify key types released with the
+   * latest version of Tink.
    *
-   * Deprecated-yet-still-supported key types are registered in
-   * so-called "no new key"-mode, which allows for usage of existing
-   * keys forbids generation of new key material.
+   * <p>Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
+   * which allows for usage of existing keys forbids generation of new key material.
    *
-   * @throws GeneralSecurityException
-   * @deprecated
+   * @deprecated use {@link Config#register}
    */
   @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {

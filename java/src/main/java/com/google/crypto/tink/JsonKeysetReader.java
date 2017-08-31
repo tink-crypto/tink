@@ -39,7 +39,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A {@link KeysetReader} that can read cleartext or encrypted keysets in proto JSON format.
+ * A {@link KeysetReader} that can read from source source cleartext or encrypted keysets in proto
+ * JSON format.
  */
 public final class JsonKeysetReader implements KeysetReader {
   private final JSONObject json;

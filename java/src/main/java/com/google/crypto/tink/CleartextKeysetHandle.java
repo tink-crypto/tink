@@ -22,14 +22,16 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * Reads and writes cleartext keyset handles.
+ * Static methods for reading or writing cleartext keysets.
  *
- * <p> Reading or writing cleartext keysets is a bad practice, thus usage of this API should be
- * restricted. Users can read or write encrypted keysets with {@code KeysetHandle}.
+ * <p><b>Warning</b>
+ * Reading or writing cleartext keysets is a bad practice, usage of this API should be
+ * restricted. Users can read (write) encrypted keysets using {@link KeysetHandle#read} (
+ * {@link KeysetHandle#write}.
  */
 public final class CleartextKeysetHandle {
   /**
-   * @return a new keyset handle from {@code serialized} which is a serialized {@code Keyset}.
+   * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
    * @throws GeneralSecurityException
    * @deprecated use {@link CleartextKeysetHandle#read} instead
    */
@@ -45,7 +47,7 @@ public final class CleartextKeysetHandle {
   }
 
   /**
-   * @return a new keyset handle from a keyset obtained from {@code reader}.
+   * @return a new {@link KeysetHandle} from a keyset obtained from {@code reader}.
    * @throws GeneralSecurityException
    */
   public static KeysetHandle read(KeysetReader reader)
@@ -54,10 +56,11 @@ public final class CleartextKeysetHandle {
   }
 
   /**
-   * Serializes and writes the keyset to {@code keysetWriter}.
+   * Serializes and writes the keyset managed by {@code handle} to {@code keysetWriter}.
+   *
+   * @throws IOException
    */
   public static void write(KeysetHandle handle, KeysetWriter keysetWriter) throws IOException {
     keysetWriter.write(handle.getKeyset());
-    return;
   }
 }

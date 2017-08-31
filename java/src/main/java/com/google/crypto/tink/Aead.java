@@ -22,7 +22,7 @@ import java.security.GeneralSecurityException;
  * The interface for Authenticated Encryption with Associated Data.
  * Implementations of this interface are secure against adaptive chosen ciphertext attacks.
  * Encryption with associated data ensures authenticity and integrity of that data,
- * but not its secrecy. (see RFC 5116, https://tools.ietf.org/html/rfc5116)
+ * but not its secrecy. (see <a href="https://tools.ietf.org/html/rfc5116">RFC 5116</a>)
  */
 public interface Aead {
   /**

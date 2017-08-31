@@ -19,18 +19,17 @@ package com.google.crypto.tink;
 import java.security.GeneralSecurityException;
 
 /**
- * A catalogue of key managers.  It is basically a map from a (key type,
- * primitive name)-tuple to {@code KeyManager}-objects, that determine
- * the implementation that handles the keys of the given key type.
+ * A catalogue of {@link KeyManager} objects.
  *
- * <p>Tink comes with per-primitive default catalogues ({@link AeadCatalogue},
- * {@link MacCatalogue}, {@link HybridCatalogue}, and {@link SignatureCatalogue}),
- * but supports custom catalogues to enable user-defined configuration
- * of run-time environment via {@link Registry}.
+ * <p>It is basically a map from a (key type, primitive name)-tuple to {@link KeyManager}-objects,
+ * that determine the implementation that handles the keys of the given key type.
+ *
+ * <p>Tink includes default per-primitive catalogues, but it also supports custom catalogues to
+ * enable user-defined configuration of run-time environment via {@link Registry}.
  */
 public interface Catalogue {
   /**
-   * @return a KeyManager for the given {@code typeUrl}, {@code primitiveName},
+   * @return a {@link KeyManager} for the given {@code typeUrl}, {@code primitiveName},
    * and version at least {@code minVersion} (if it exists in the catalogue).
    */
   @SuppressWarnings("rawtypes")
