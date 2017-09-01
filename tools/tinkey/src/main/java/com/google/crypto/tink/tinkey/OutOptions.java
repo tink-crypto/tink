@@ -25,7 +25,7 @@ import org.kohsuke.args4j.Option;
 class OutOptions extends InOptions {
   @Option(
       name = "--out",
-      metaVar = "path/to/keyset.cfg",
+      metaVar = "path/to/keyset.json",
       handler = OutputStreamHandler.class,
       required = false,
       usage = "The output filename, must not exist, to write the keyset to or "
@@ -34,9 +34,9 @@ class OutOptions extends InOptions {
 
   @Option(
       name = "--out-format",
-      metaVar = "text | binary",
+      metaVar = "json | binary",
       required = false,
-      usage = "The output format: text or binary (case-insensitive). text is default")
+      usage = "The output format: json or binary (case-insensitive). json is default")
   String outFormat;
 
   @Override

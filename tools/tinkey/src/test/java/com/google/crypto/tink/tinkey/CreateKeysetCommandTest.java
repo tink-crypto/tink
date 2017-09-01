@@ -47,7 +47,7 @@ public class CreateKeysetCommandTest {
 
   @Test
   public void testCreateCleartext_shouldCreateNewKeyset() throws Exception {
-    testCreateCleartext_shouldCreateNewKeyset("text");
+    testCreateCleartext_shouldCreateNewKeyset("json");
     testCreateCleartext_shouldCreateNewKeyset("binary");
   }
 
@@ -69,7 +69,7 @@ public class CreateKeysetCommandTest {
 
   @Test
   public void testCreateEncrypted_shouldCreateNewKeyset() throws Exception {
-    testCreateEncrypted_shouldCreateNewKeyset("text");
+    testCreateEncrypted_shouldCreateNewKeyset("json");
     testCreateEncrypted_shouldCreateNewKeyset("binary");
   }
 

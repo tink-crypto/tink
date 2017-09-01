@@ -36,8 +36,8 @@ public class AddKeyCommand extends AddRotateOptions implements Command {
   /**
    * Generates and adds a new key to a keyset.
    *
-   * <p>The keyset is read from {@code inputStream}. Its format can be either "text"
-   * or "binary", and is specified by {@code inFormat}. The new key is generated
+   * <p>The keyset is read from {@code inputStream}. Its format can be either <code>json</code>
+   * or <code>binary</code>, and is specified by {@code inFormat}. The new key is generated
    * from template {@code keyTemplate}. If the input keyset is encrypted, use
    * {@code masterKeyUri} and {@code credentialPath} to decrypt. The output keyset
    * is written to {@code outputStream} in {@code outFormat}, and encrypted if the

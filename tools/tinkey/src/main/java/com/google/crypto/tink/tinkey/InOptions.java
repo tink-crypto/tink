@@ -27,7 +27,7 @@ import org.kohsuke.args4j.Option;
 class InOptions {
   @Option(
       name = "--in",
-      metaVar = "path/to/keyset.cfg",
+      metaVar = "path/to/keyset.json",
       handler = InputStreamHandler.class,
       required = false,
       usage = "The input filename, must exist, to read the keyset from or "
@@ -37,8 +37,8 @@ class InOptions {
   @Option(
       name = "--in-format",
       required = false,
-      metaVar = "text | binary",
-      usage = "The input format: text or binary (case-insensitive). text is default")
+      metaVar = "json | binary",
+      usage = "The input format: json or binary (case-insensitive). json is default")
   String inFormat;
 
   @Option(

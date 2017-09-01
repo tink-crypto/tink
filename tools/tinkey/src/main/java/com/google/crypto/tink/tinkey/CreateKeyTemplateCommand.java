@@ -16,7 +16,10 @@
 
 package com.google.crypto.tink.tinkey;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.protobuf.TextFormat;
 import java.io.OutputStream;
 
 /**
@@ -52,7 +55,8 @@ public class CreateKeyTemplateCommand extends CreateKeyTemplateOptions implement
       comment += String.format("#     --key-format \"%s\"\n", keyFormatValue);
     }
 
-    outputStream.write(comment.getBytes("UTF-8"));
-    TinkeyUtil.writeProto(keyTemplate, outputStream, /* outFormat= */"TEXT");
+    outputStream.write(comment.getBytes(UTF_8));
+    byte[] output = TextFormat.printToUnicodeString(keyTemplate).getBytes(UTF_8);
+    outputStream.write(output);
   }
 }

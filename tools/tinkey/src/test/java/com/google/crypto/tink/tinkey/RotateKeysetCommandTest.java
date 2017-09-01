@@ -31,7 +31,6 @@ import com.google.crypto.tink.proto.KeysetInfo;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,8 +43,8 @@ import org.junit.runners.JUnit4;
 public class RotateKeysetCommandTest {
   private static final KeyTemplate EXISTING_TEMPLATE = MacKeyTemplates.HMAC_SHA256_128BITTAG;
   private static final KeyTemplate NEW_TEMPLATE = MacKeyTemplates.HMAC_SHA256_256BITTAG;
-  private static final String OUTPUT_FORMAT = "text";
-  private static final String INPUT_FORMAT = "text";
+  private static final String OUTPUT_FORMAT = "json";
+  private static final String INPUT_FORMAT = "json";
 
   @BeforeClass
   public static void setUp() throws Exception {
@@ -94,9 +93,9 @@ public class RotateKeysetCommandTest {
           outputStream, OUTPUT_FORMAT,
           emptyStream, INPUT_FORMAT,
           masterKeyUri, credentialPath, NEW_TEMPLATE);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      TestUtil.assertExceptionContains(e, "empty keyset");
+      fail("Expected IllegalArgumentException");
+    } catch (IllegalArgumentException e) {
+      // expected
     }
   }
 

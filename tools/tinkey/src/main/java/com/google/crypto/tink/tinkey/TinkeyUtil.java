@@ -23,18 +23,17 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.BinaryKeysetWriter;
 import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.JsonKeysetWriter;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.KeysetWriter;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.TextFormatKeysetReaders;
-import com.google.crypto.tink.TextFormatKeysetWriters;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
 import com.google.protobuf.Message.Builder;
 import com.google.protobuf.TextFormat;
 import java.io.ByteArrayInputStream;
@@ -166,8 +165,8 @@ class TinkeyUtil {
    */
   public static KeysetReader createKeysetReader(InputStream inputStream, String inFormat)
       throws IOException {
-    if (inFormat == null || inFormat.toLowerCase().equals("text")) {
-      return TextFormatKeysetReaders.withInputStream(inputStream);
+    if (inFormat == null || inFormat.toLowerCase().equals("json")) {
+      return JsonKeysetReader.withInputStream(inputStream);
     }
     return BinaryKeysetReader.withInputStream(inputStream);
   }
@@ -177,8 +176,8 @@ class TinkeyUtil {
    */
   public static KeysetWriter createKeysetWriter(OutputStream outputStream, String outFormat)
       throws IOException {
-    if (outFormat == null || outFormat.toLowerCase().equals("text")) {
-      return TextFormatKeysetWriters.withOutputStream(outputStream);
+    if (outFormat == null || outFormat.toLowerCase().equals("json")) {
+      return JsonKeysetWriter.withOutputStream(outputStream);
     }
     return BinaryKeysetWriter.withOutputStream(outputStream);
   }
@@ -298,20 +297,6 @@ class TinkeyUtil {
   }
 
   /**
-   * Writes {@code proto} in {@code outFormat} to {@code outputStream}.
-   */
-  public static void writeProto(Message proto, OutputStream outputStream, String outFormat)
-      throws IOException {
-    byte[] output;
-    if (outFormat == null || outFormat.toLowerCase().equals("text")) {
-      output = TextFormat.printToUnicodeString(proto).getBytes("UTF-8");
-    } else {
-      output = proto.toByteArray();
-    }
-    outputStream.write(output);
-  }
-
-  /**
    * Returns a {@code KeysetHandle} from either a cleartext {@code Keyset} or a
    * {@code EncryptedKeyset}, read from {@code inputStream}.
    */
@@ -329,13 +314,14 @@ class TinkeyUtil {
   }
 
   /**
-   * Checks that input or output format is valid. Only supported formats are TEXT and BINARY
-   * (case-insensitive).
-   * @throws IllegalArgumentException iff format is invalid.
+   * Checks that input or output format is valid. Only supported formats are {@code json} and
+   * {@code binary} (case-insensitive).
+   *
+   * @throws IllegalArgumentException iff format is invalid
    */
   public static void validateFormat(String format) throws IllegalArgumentException {
     if (format != null
-        && !format.toLowerCase().equals("text")
+        && !format.toLowerCase().equals("json")
         && !format.toLowerCase().equals("binary")) {
       throw new IllegalArgumentException("invalid format: " + format);
     }
