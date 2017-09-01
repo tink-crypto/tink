@@ -24,29 +24,29 @@ namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// The interface for authenticated encryption with additional authenticated
-// data.  Implementations of this interface are secure against adaptive
-// chosen ciphertext attacks.  Encryption with additional data ensures
+// The interface for authenticated encryption with associated data.
+// Implementations of this interface are secure against adaptive
+// chosen ciphertext attacks.  Encryption with associated data ensures
 // authenticity and integrity of that data, but not its secrecy.
 // (see RFC 5116, https://tools.ietf.org/html/rfc5116)
 class Aead {
  public:
-  // Encrypts 'plaintext' with 'additional_data' as additional
-  // authenticated data, and returns the resulting ciphertext.
+  // Encrypts 'plaintext' with 'associated_data' as associated data,
+  // and returns the resulting ciphertext.
   // The ciphertext allows for checking authenticity and integrity
-  // of the additional data , but does not guarantee its secrecy.
+  // of the associated data , but does not guarantee its secrecy.
   virtual crypto::tink::util::StatusOr<std::string> Encrypt(
       google::protobuf::StringPiece plaintext,
-      google::protobuf::StringPiece additional_data) const = 0;
+      google::protobuf::StringPiece associated_data) const = 0;
 
-  // Decrypts 'ciphertext' with 'additional_data' as additional
-  // authenticated data, and returns the resulting plaintext.
+  // Decrypts 'ciphertext' with 'associated_data' as associated data,
+  // and returns the resulting plaintext.
   // The decryption verifies the authenticity and integrity
-  // of the additional data, but there are no guarantees wrt. secrecy
+  // of the associated data, but there are no guarantees wrt. secrecy
   // of that data.
   virtual crypto::tink::util::StatusOr<std::string> Decrypt(
       google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece additional_data) const = 0;
+      google::protobuf::StringPiece associated_data) const = 0;
 
   virtual ~Aead() {}
 

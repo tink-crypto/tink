@@ -62,8 +62,9 @@ class Registry {
   // Registers the given 'manager' for the key type identified by 'type_url'.
   // Takes ownership of 'manager', which must be non-nullptr.
   template <class P>
-  crypto::tink::util::Status RegisterKeyManager(google::protobuf::StringPiece type_url,
-                                  KeyManager<P>* manager);
+  crypto::tink::util::Status
+      RegisterKeyManager(google::protobuf::StringPiece type_url,
+                         KeyManager<P>* manager);
 
   // Returns a key manager for the given type_url (if any found).
   // Keeps the ownership of the manager.
@@ -119,8 +120,9 @@ template <class P>
 crypto::tink::util::Status Registry::RegisterKeyManager(
     google::protobuf::StringPiece type_url, KeyManager<P>* manager) {
   if (manager == nullptr) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
-                        "Parameter 'manager' must be non-null.");
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INVALID_ARGUMENT,
+        "Parameter 'manager' must be non-null.");
   }
   std::unique_ptr<void, void(*)(void*)>
       entry(manager, delete_manager<P>);
@@ -175,9 +177,12 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
 }
 
 template <class P>
-crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> Registry::GetPrimitives(
-    const KeysetHandle& keyset_handle, const KeyManager<P>* custom_manager) {
-  crypto::tink::util::Status status = ValidateKeyset(keyset_handle.get_keyset());
+crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
+    Registry::GetPrimitives(
+        const KeysetHandle& keyset_handle,
+        const KeyManager<P>* custom_manager) {
+  crypto::tink::util::Status status =
+      ValidateKeyset(keyset_handle.get_keyset());
   if (!status.ok()) return status;
   std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());
   for (const google::crypto::tink::Keyset::Key& key

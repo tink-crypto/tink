@@ -75,7 +75,7 @@ public class JsonKeysetWriterTest {
   }
 
   @Test
-  public void testWrite_mutipleKeys_shouldWork() throws Exception {
+  public void testWrite_multipleKeys_shouldWork() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetHandle handle1 = KeysetManager
         .withEmptyKeyset()

@@ -70,14 +70,14 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
   // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
   // for the given 'key'.
   crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitiveImpl(
-      const google::crypto::tink::EciesAeadHkdfPrivateKey& key) const;
+      const google::crypto::tink::EciesAeadHkdfPrivateKey& ecies_private_key) const;
 
   crypto::tink::util::Status Validate(
       const google::crypto::tink::EciesAeadHkdfParams& params) const;
   crypto::tink::util::Status Validate(
       const google::crypto::tink::EciesAeadHkdfPrivateKey& key) const;
   crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfKeyFormat& format) const;
+      const google::crypto::tink::EciesAeadHkdfKeyFormat& key_format) const;
 };
 
 }  // namespace tink

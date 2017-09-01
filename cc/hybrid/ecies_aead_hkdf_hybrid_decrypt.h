@@ -38,7 +38,7 @@ class EciesAeadHkdfHybridDecrypt : public HybridDecrypt {
       const google::crypto::tink::EciesAeadHkdfPrivateKey& recipient_key);
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece plaintext,
+      google::protobuf::StringPiece ciphertext,
       google::protobuf::StringPiece context_info) const override;
 
   virtual ~EciesAeadHkdfHybridDecrypt() {}

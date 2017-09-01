@@ -40,11 +40,11 @@ class AeadSetWrapper : public Aead {
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       google::protobuf::StringPiece plaintext,
-      google::protobuf::StringPiece additional_data) const override;
+      google::protobuf::StringPiece associated_data) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece additional_data) const override;
+      google::protobuf::StringPiece associated_data) const override;
 
   virtual ~AeadSetWrapper() {}
 

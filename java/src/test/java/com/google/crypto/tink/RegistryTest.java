@@ -422,6 +422,7 @@ public class RegistryTest {
 
   private static class Catalogue1 implements Catalogue {
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion) {
       return null;
     }
@@ -429,6 +430,7 @@ public class RegistryTest {
 
   private static class Catalogue2 implements Catalogue {
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion) {
       return null;
     }
@@ -436,6 +438,7 @@ public class RegistryTest {
 
   private static class Catalogue3 implements Catalogue {
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion) {
       return null;
     }

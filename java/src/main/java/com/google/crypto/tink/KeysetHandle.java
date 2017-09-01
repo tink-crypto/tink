@@ -111,11 +111,11 @@ public final class KeysetHandle {
   private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey)
       throws GeneralSecurityException {
     byte[] encryptedKeyset = masterKey.encrypt(keyset.toByteArray(),
-        /* additionalData= */new byte[0]);
+        /* associatedData= */new byte[0]);
     // Check if we can decrypt, to detect errors
     try {
       final Keyset keyset2 = Keyset.parseFrom(masterKey.decrypt(
-          encryptedKeyset, /* additionalData= */new byte[0]));
+          encryptedKeyset, /* associatedData= */new byte[0]));
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("cannot encrypt keyset");
       }
@@ -135,7 +135,7 @@ public final class KeysetHandle {
       throws GeneralSecurityException {
     try {
       Keyset keyset = Keyset.parseFrom(masterKey.decrypt(
-          encryptedKeyset.getEncryptedKeyset().toByteArray(), /* additionalData= */new byte[0]));
+          encryptedKeyset.getEncryptedKeyset().toByteArray(), /* associatedData= */new byte[0]));
       // check emptiness here too, in case the encrypted keys unwrapped to nothing?
       assertEnoughKeyMaterial(keyset);
       return keyset;

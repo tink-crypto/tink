@@ -96,7 +96,7 @@ public class JsonKeysetReaderTest {
   }
 
   @Test
-  public void testRead_mutipleKeys_shouldWork() throws Exception {
+  public void testRead_multipleKeys_shouldWork() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetHandle handle1 = KeysetManager
         .withEmptyKeyset()

@@ -46,7 +46,8 @@ public final class KmsEnvelopeAead implements Aead {
   }
 
   @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData) throws GeneralSecurityException {
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
+      throws GeneralSecurityException {
     // Generate a new DEK.
     byte[] dek = Registry.newKey(dekTemplate).toByteArray();
     // Wrap it with remote.

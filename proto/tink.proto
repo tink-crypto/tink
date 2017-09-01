@@ -84,7 +84,7 @@ enum OutputPrefixType {
   RAW = 3;
   // CRUNCHY is like LEGACY, but with two differences:
   //   - Its key id is generated randomly (like TINK)
-  //   - Its signature schemes don't append zero the the to sign messages
+  //   - Its signature schemes don't append zero to sign messages
   CRUNCHY = 4;
 }
 

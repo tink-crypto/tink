@@ -68,7 +68,7 @@ class EciesAeadHkdfPublicKeyManager : public KeyManager<HybridEncrypt> {
 
   // Constructs an instance of HybridEncrypt for the given 'key'.
   crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>> GetPrimitiveImpl(
-      const google::crypto::tink::EciesAeadHkdfPublicKey& key) const;
+      const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key) const;
 
   crypto::tink::util::Status Validate(
       const google::crypto::tink::EciesAeadHkdfParams& params) const;

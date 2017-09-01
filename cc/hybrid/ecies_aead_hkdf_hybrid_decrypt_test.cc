@@ -34,8 +34,6 @@ using google::crypto::tink::EciesAeadHkdfPrivateKey;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
 
 namespace util = crypto::tink::util;
 
