@@ -133,21 +133,6 @@ public class JsonKeysetReaderTest {
     }
   }
 
-  @Test
-  public void testRead_emptyKey_shouldThrowException() throws Exception {
-    JSONObject json = new JSONObject(JSON_KEYSET);
-    JSONArray keys = json.getJSONArray("key");
-    keys.remove(0); // remove the only element
-    json.put("key", keys);
-
-    try {
-      JsonKeysetReader.withJsonObject(json).read();
-      fail("Expected IOException");
-    } catch (IOException e) {
-      assertThat(e.toString()).contains("invalid keyset");
-    }
-  }
-
   private void testRead_invalidKey_shouldThrowException(String name)
       throws Exception {
     JSONObject json = new JSONObject(JSON_KEYSET);
