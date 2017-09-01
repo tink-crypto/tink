@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.payments;
+package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.subtle.Base64;
@@ -28,8 +28,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * An implementation of Google Payment Method Token.
- * See {@link https://developers.google.com/android-pay/integration/payment-token-cryptography}.
+ * A {@link HybridEncrypt} implementation for the hybrid encryption used in
+ * <a href="https://developers.google.com/android-pay/integration/payment-token-cryptography">
+ *Google Payment Method Token</a>.
  */
 class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
   private final EciesHkdfSenderKem senderKem;

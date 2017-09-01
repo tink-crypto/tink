@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.payments;
+package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.PublicKeyVerify;
@@ -32,9 +32,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * An implementation of the recipient side of Google Payment Method Token.
- * See {@link https://developers.google.com/android-pay/integration/payment-token-cryptography}.
- * This implementation supports only version ECv1.
+ * An implementation of the recipient side of
+ * <a href="https://developers.google.com/android-pay/integration/payment-token-cryptography">
+ * Google Payment Method Token</a>.
+ *
+ * <p><b>Warning</b>
+ * This implementation supports only version {@code ECv1}.
+ *
+ * <p>Usage:
+ * <pre>{@code
+ * PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
+ *     .senderId(senderId)
+ *     .addSenderVerifyingKey(senderPublicKey)
+ *     .recipientId(recipientId)
+ *     .addRecipientPrivateKey(recipientPrivateKey)
+ *     .build();
+ * String ciphertext = ...;
+ * String plaintext = recipient.unseal(ciphertext);
+ * }</pre>
  */
 public final class PaymentMethodTokenRecipient {
   private final String protocolVersion;

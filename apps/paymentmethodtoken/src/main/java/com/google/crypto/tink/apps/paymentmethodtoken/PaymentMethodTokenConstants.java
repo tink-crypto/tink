@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.payments;
+package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.crypto.tink.subtle.EllipticCurves;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Various constants.
  */
-public final class PaymentMethodTokenConstants {
+class PaymentMethodTokenConstants {
   public static final String GOOGLE_SENDER_ID = "Google";
   public static final String HMAC_SHA256_ALGO = "HmacSha256";
   public static final byte[] HKDF_EMPTY_SALT = new byte[0];

@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.payments;
+package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Bytes;
@@ -37,7 +37,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Various helpers.
  */
-public final class PaymentMethodTokenUtil {
+class PaymentMethodTokenUtil {
 
   public static ECPublicKey rawUncompressedEcPublicKey(String rawUncompressedPublicKey)
       throws GeneralSecurityException {

@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:private"])
 licenses(["notice"])  # Apache 2.0
 
 java_library(
-    name = "payment_token_method",
+    name = "payment_method_token",
     srcs = glob([
         "src/main/**/*.java",
     ]),
@@ -26,7 +26,7 @@ java_library(
         "src/test/**/*.java",
     ]),
     deps = [
-        ":payment_token_method",
+        ":payment_method_token",
         "//java:testonly",
         "@joda_time//jar",
         "@junit_junit_4//jar",
