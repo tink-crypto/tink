@@ -236,6 +236,10 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.5.1</version>
         <configuration>
+          <testExcludes>
+            <!-- TODO: add Maven support for Wycheproof which these tests depend on -->
+            <exclude>**/AesGcmJceTest.java</exclude>
+          </testExcludes>
           <source>${java.version}</source>
           <target>${java.version}</target>
           <compilerArgument>-Werror</compilerArgument>

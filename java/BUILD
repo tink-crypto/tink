@@ -165,6 +165,7 @@ java_library(
         "@com_google_protobuf_javalite//:protobuf_java_lite",
         "@com_google_truth//jar",
         "@junit_junit_4//jar",
+        "@org_json_json//jar",
     ],
 )
 
@@ -208,6 +209,7 @@ gen_java_test_rules(
     data = [
         "//testdata:credentials",
         "//testdata:ecies_keysets",
+        "@wycheproof//testvectors:aes_gcm",
     ],
     default_test_size = "small",
     large_tests = [

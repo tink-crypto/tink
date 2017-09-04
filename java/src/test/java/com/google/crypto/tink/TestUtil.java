@@ -17,6 +17,7 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -61,7 +62,9 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -71,52 +74,47 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
+import org.json.JSONObject;
 
-/**
- * Test helpers.
- */
+/** Test helpers. */
 public class TestUtil {
   // This GCP KMS CryptoKey is restricted to the service account in {@code SERVICE_ACCOUNT_FILE}.
-  public static final String RESTRICTED_CRYPTO_KEY_URI = String.format(
-      "gcp-kms://projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-      "tink-test-infrastructure", "global", "unit-and-integration-testing", "aead-key");
+  public static final String RESTRICTED_CRYPTO_KEY_URI =
+      String.format(
+          "gcp-kms://projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+          "tink-test-infrastructure", "global", "unit-and-integration-testing", "aead-key");
 
   // This is a credential of a service account that is granted access to
   // {@code RESTRICTED_CRYPTO_KEY_URI}.
   public static final String SERVICE_ACCOUNT_FILE = "testdata/credential.json";
 
-  /**
-   * A dummy Aead-implementation that just throws exception.
-   */
+  /** A dummy Aead-implementation that just throws exception. */
   public static class DummyAead implements Aead {
     public DummyAead() {}
+
     @Override
     public byte[] encrypt(byte[] plaintext, byte[] aad) throws GeneralSecurityException {
       throw new GeneralSecurityException("dummy");
     }
+
     @Override
     public byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException {
       throw new GeneralSecurityException("dummy");
     }
   }
 
-  /**
-   * Implements a SeekableByteChannel for testing.
-   * The implementation is backed by a ByteBuffer.
-   */
+  /** Implements a SeekableByteChannel for testing. The implementation is backed by a ByteBuffer. */
   public static class ByteBufferChannel implements SeekableByteChannel {
     private final ByteBuffer buffer;
 
     /**
-     * Defines the maximal size of a chunk that is transferred with a single write.
-     * This can be used to test the behavior of streaming encryption with channels
-     * where not always sufficiently many bytes are available during reads and writes.
+     * Defines the maximal size of a chunk that is transferred with a single write. This can be used
+     * to test the behavior of streaming encryption with channels where not always sufficiently many
+     * bytes are available during reads and writes.
      */
     private final int maxChunkSize;
 
-    /**
-     * keeps track whether the channel is still open.
-     */
+    /** keeps track whether the channel is still open. */
     private boolean isopen;
 
     public ByteBufferChannel(ByteBuffer buffer) {
@@ -150,8 +148,7 @@ public class TestUtil {
     }
 
     @Override
-    public synchronized ByteBufferChannel position(long newPosition)
-        throws ClosedChannelException {
+    public synchronized ByteBufferChannel position(long newPosition) throws ClosedChannelException {
       checkIsOpen();
       if (newPosition < 0) {
         throw new IllegalArgumentException("negative position");
@@ -217,47 +214,35 @@ public class TestUtil {
     }
   }
 
-  /**
-   * @return a {@code Keyset} from a {@code handle}.
-   */
+  /** @return a {@code Keyset} from a {@code handle}. */
   public static Keyset getKeyset(final KeysetHandle handle) {
     return handle.getKeyset();
   }
 
-  /**
-   * @return a keyset handle from a {@code keyset}.
-   */
+  /** @return a keyset handle from a {@code keyset}. */
   public static KeysetHandle createKeysetHandle(Keyset keyset) throws Exception {
     return KeysetHandle.fromKeyset(keyset);
   }
 
-  /**
-   * @return a keyset from a list of keys. The first key is primary.
-   */
+  /** @return a keyset from a list of keys. The first key is primary. */
   public static Keyset createKeyset(Key primary, Key... keys) throws Exception {
     Keyset.Builder builder = Keyset.newBuilder();
-    builder.addKey(primary)
-        .setPrimaryKeyId(primary.getKeyId());
+    builder.addKey(primary).setPrimaryKeyId(primary.getKeyId());
     for (Key key : keys) {
       builder.addKey(key);
     }
     return builder.build();
   }
 
-  /**
-   * @return a KeyTemplate with an non-existing type url.
-   */
+  /** @return a KeyTemplate with an non-existing type url. */
   public static KeyTemplate createKeyTemplateWithNonExistingTypeUrl() throws Exception {
-    return KeyTemplate.newBuilder()
-        .setTypeUrl("does-not-exist")
-        .build();
+    return KeyTemplate.newBuilder().setTypeUrl("does-not-exist").build();
   }
 
-  /**
-   * @return a key with some specified properties.
-   */
-  public static Key createKey(KeyData keyData, int keyId, KeyStatusType status,
-      OutputPrefixType prefixType) throws Exception {
+  /** @return a key with some specified properties. */
+  public static Key createKey(
+      KeyData keyData, int keyId, KeyStatusType status, OutputPrefixType prefixType)
+      throws Exception {
     return Key.newBuilder()
         .setKeyData(keyData)
         .setStatus(status)
@@ -266,14 +251,10 @@ public class TestUtil {
         .build();
   }
 
-  /**
-   * @return a {@code HmacKey}.
-   */
+  /** @return a {@code HmacKey}. */
   public static HmacKey createHmacKey(byte[] keyValue, int tagSize) throws Exception {
-    HmacParams params = HmacParams.newBuilder()
-        .setHash(HashType.SHA256)
-        .setTagSize(tagSize)
-        .build();
+    HmacParams params =
+        HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(tagSize).build();
 
     return HmacKey.newBuilder()
         .setParams(params)
@@ -281,9 +262,7 @@ public class TestUtil {
         .build();
   }
 
-  /**
-   * @return a {@code KeyData} from a specified key.
-   */
+  /** @return a {@code KeyData} from a specified key. */
   public static KeyData createKeyData(MessageLite key, String typeUrl, KeyData.KeyMaterialType type)
       throws Exception {
     return KeyData.newBuilder()
@@ -293,9 +272,7 @@ public class TestUtil {
         .build();
   }
 
-  /**
-   * @return a {@code KeyData} containing a {@code HmacKey}.
-   */
+  /** @return a {@code KeyData} containing a {@code HmacKey}. */
   public static KeyData createHmacKeyData(byte[] keyValue, int tagSize) throws Exception {
     return createKeyData(
         createHmacKey(keyValue, tagSize),
@@ -303,77 +280,53 @@ public class TestUtil {
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 
-  /**
-   * @return a {@code AesCtrKey}.
-   */
+  /** @return a {@code AesCtrKey}. */
   public static AesCtrKey createAesCtrKey(byte[] keyValue, int ivSize) throws Exception {
-    AesCtrParams aesCtrParams = AesCtrParams.newBuilder()
-        .setIvSize(ivSize)
-        .build();
+    AesCtrParams aesCtrParams = AesCtrParams.newBuilder().setIvSize(ivSize).build();
     return AesCtrKey.newBuilder()
         .setParams(aesCtrParams)
         .setKeyValue(ByteString.copyFrom(keyValue))
         .build();
   }
 
-  /**
-   * @return a {@code KeyData} containing a {@code AesCtrHmacAeadKey}.
-   */
-  public static KeyData createAesCtrHmacAeadKeyData(byte[] aesCtrKeyValue, int ivSize,
-      byte[] hmacKeyValue, int tagSize) throws Exception {
+  /** @return a {@code KeyData} containing a {@code AesCtrHmacAeadKey}. */
+  public static KeyData createAesCtrHmacAeadKeyData(
+      byte[] aesCtrKeyValue, int ivSize, byte[] hmacKeyValue, int tagSize) throws Exception {
     AesCtrKey aesCtrKey = createAesCtrKey(aesCtrKeyValue, ivSize);
     HmacKey hmacKey = createHmacKey(hmacKeyValue, tagSize);
 
-    AesCtrHmacAeadKey keyProto = AesCtrHmacAeadKey.newBuilder()
-        .setAesCtrKey(aesCtrKey)
-        .setHmacKey(hmacKey)
-        .build();
+    AesCtrHmacAeadKey keyProto =
+        AesCtrHmacAeadKey.newBuilder().setAesCtrKey(aesCtrKey).setHmacKey(hmacKey).build();
     return createKeyData(
-        keyProto,
-        AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL,
-        KeyData.KeyMaterialType.SYMMETRIC);
+        keyProto, AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, KeyData.KeyMaterialType.SYMMETRIC);
   }
 
-  /**
-   * @return a {@code KeyData} containing a {@code AesGcmKey}.
-   */
+  /** @return a {@code KeyData} containing a {@code AesGcmKey}. */
   public static KeyData createAesGcmKeyData(byte[] keyValue) throws Exception {
-    AesGcmKey keyProto = AesGcmKey.newBuilder()
-        .setKeyValue(ByteString.copyFrom(keyValue))
-        .build();
-    return createKeyData(
-        keyProto,
-        AeadConfig.AES_GCM_TYPE_URL,
-        KeyData.KeyMaterialType.SYMMETRIC);
+    AesGcmKey keyProto = AesGcmKey.newBuilder().setKeyValue(ByteString.copyFrom(keyValue)).build();
+    return createKeyData(keyProto, AeadConfig.AES_GCM_TYPE_URL, KeyData.KeyMaterialType.SYMMETRIC);
   }
 
-  /**
-   * @return a {@code KeyData} containing a {@code AesEaxKey}.
-   */
+  /** @return a {@code KeyData} containing a {@code AesEaxKey}. */
   public static KeyData createAesEaxKeyData(byte[] keyValue, int ivSizeInBytes) throws Exception {
-    AesEaxKey keyProto = AesEaxKey.newBuilder()
-        .setKeyValue(ByteString.copyFrom(keyValue))
-        .setParams(AesEaxParams.newBuilder().setIvSize(ivSizeInBytes).build())
-        .build();
-    return createKeyData(
-        keyProto,
-        AeadConfig.AES_EAX_TYPE_URL,
-        KeyData.KeyMaterialType.SYMMETRIC);
+    AesEaxKey keyProto =
+        AesEaxKey.newBuilder()
+            .setKeyValue(ByteString.copyFrom(keyValue))
+            .setParams(AesEaxParams.newBuilder().setIvSize(ivSizeInBytes).build())
+            .build();
+    return createKeyData(keyProto, AeadConfig.AES_EAX_TYPE_URL, KeyData.KeyMaterialType.SYMMETRIC);
   }
 
-  /**
-   * @return a KMS key URI in a format defined by Google Cloud KMS.
-   */
+  /** @return a KMS key URI in a format defined by Google Cloud KMS. */
   public static String createGcpKmsKeyUri(
-    String projectId, String location, String ringId, String keyId) {
+      String projectId, String location, String ringId, String keyId) {
     return String.format(
-        "projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-        projectId, location, ringId, keyId);
+        "projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", projectId, location, ringId, keyId);
   }
 
   /**
-   * @return a {@code EcdsaPrivateKey} constructed from {@code EcdsaPublicKey} and the byte array
-   * of private key.
+   * @return a {@code EcdsaPrivateKey} constructed from {@code EcdsaPublicKey} and the byte array of
+   *     private key.
    */
   public static EcdsaPrivateKey createEcdsaPrivKey(EcdsaPublicKey pubKey, byte[] privKey) {
     final int version = 0;
@@ -385,78 +338,25 @@ public class TestUtil {
   }
 
   /**
-   * @return a {@code EcdsaPublicKey} constructed from {@code EllipticCurveType} and
-   * {@code HashType}.
+   * @return a {@code EcdsaPublicKey} constructed from {@code EllipticCurveType} and {@code
+   *     HashType}.
    */
-  public static EcdsaPublicKey generateEcdsaPubKey(EllipticCurveType curve, HashType hashType,
-      EcdsaSignatureEncoding encoding)
-    throws Exception {
+  public static EcdsaPublicKey generateEcdsaPubKey(
+      EllipticCurveType curve, HashType hashType, EcdsaSignatureEncoding encoding)
+      throws Exception {
     EcdsaPrivateKey privKey = generateEcdsaPrivKey(curve, hashType, encoding);
     return privKey.getPublicKey();
   }
 
   /**
-   * @return a {@code EcdsaPrivateKey} constructed from {@code EllipticCurveType} and
-   * {@code HashType}.
+   * @return a {@code EcdsaPrivateKey} constructed from {@code EllipticCurveType} and {@code
+   *     HashType}.
    */
-  public static EcdsaPrivateKey generateEcdsaPrivKey(EllipticCurveType curve, HashType hashType,
-      EcdsaSignatureEncoding encoding)
-      throws Exception {
-        ECParameterSpec ecParams;
-        switch(curve) {
-          case NIST_P256:
-            ecParams = EllipticCurves.getNistP256Params();
-            break;
-          case NIST_P384:
-            ecParams = EllipticCurves.getNistP384Params();
-            break;
-          case NIST_P521:
-            ecParams = EllipticCurves.getNistP521Params();
-            break;
-          default:
-            throw new NoSuchAlgorithmException("Curve not implemented:" + curve);
-        }
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
-        keyGen.initialize(ecParams);
-        KeyPair keyPair = keyGen.generateKeyPair();
-        ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
-        ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
-        ECPoint w = pubKey.getW();
-        EcdsaPublicKey ecdsaPubKey = createEcdsaPubKey(hashType, curve, encoding,
-            w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
-
-        return createEcdsaPrivKey(ecdsaPubKey, privKey.getS().toByteArray());
-      }
-
-  /**
-   * @return a {@code EcdsaPublicKey} constructed from {@code HashType}, {@code EllipticCurveType}
-   * and affine coordinates of the public key.
-   */
-  public static EcdsaPublicKey createEcdsaPubKey(HashType hashType, EllipticCurveType curve,
-      EcdsaSignatureEncoding encoding, byte[] pubX, byte[] pubY) throws Exception {
-    final int version = 0;
-    EcdsaParams ecdsaParams = EcdsaParams.newBuilder()
-        .setHashType(hashType)
-        .setCurve(curve)
-        .setEncoding(encoding)
-        .build();
-    return EcdsaPublicKey.newBuilder()
-        .setVersion(version)
-        .setParams(ecdsaParams)
-        .setX(ByteString.copyFrom(pubX))
-        .setY(ByteString.copyFrom(pubY))
-        .build();
-  }
-
-  /**
-   * @return a freshly generated {@code EciesAeadHkdfPrivateKey} constructed with specified
-   * parameters.
-   */
-  public static EciesAeadHkdfPrivateKey generateEciesAeadHkdfPrivKey(EllipticCurveType curve,
-      HashType hashType, EcPointFormat pointFormat, KeyTemplate demKeyTemplate, byte[] salt)
+  public static EcdsaPrivateKey generateEcdsaPrivKey(
+      EllipticCurveType curve, HashType hashType, EcdsaSignatureEncoding encoding)
       throws Exception {
     ECParameterSpec ecParams;
-    switch(curve) {
+    switch (curve) {
       case NIST_P256:
         ecParams = EllipticCurves.getNistP256Params();
         break;
@@ -475,17 +375,88 @@ public class TestUtil {
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
     ECPoint w = pubKey.getW();
-    EciesAeadHkdfPublicKey eciesPubKey = createEciesAeadHkdfPubKey(curve, hashType, pointFormat,
-        demKeyTemplate, w.getAffineX().toByteArray(), w.getAffineY().toByteArray(), salt);
+    EcdsaPublicKey ecdsaPubKey =
+        createEcdsaPubKey(
+            hashType, curve, encoding, w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
+
+    return createEcdsaPrivKey(ecdsaPubKey, privKey.getS().toByteArray());
+  }
+
+  /**
+   * @return a {@code EcdsaPublicKey} constructed from {@code HashType}, {@code EllipticCurveType}
+   *     and affine coordinates of the public key.
+   */
+  public static EcdsaPublicKey createEcdsaPubKey(
+      HashType hashType,
+      EllipticCurveType curve,
+      EcdsaSignatureEncoding encoding,
+      byte[] pubX,
+      byte[] pubY)
+      throws Exception {
+    final int version = 0;
+    EcdsaParams ecdsaParams =
+        EcdsaParams.newBuilder()
+            .setHashType(hashType)
+            .setCurve(curve)
+            .setEncoding(encoding)
+            .build();
+    return EcdsaPublicKey.newBuilder()
+        .setVersion(version)
+        .setParams(ecdsaParams)
+        .setX(ByteString.copyFrom(pubX))
+        .setY(ByteString.copyFrom(pubY))
+        .build();
+  }
+
+  /**
+   * @return a freshly generated {@code EciesAeadHkdfPrivateKey} constructed with specified
+   *     parameters.
+   */
+  public static EciesAeadHkdfPrivateKey generateEciesAeadHkdfPrivKey(
+      EllipticCurveType curve,
+      HashType hashType,
+      EcPointFormat pointFormat,
+      KeyTemplate demKeyTemplate,
+      byte[] salt)
+      throws Exception {
+    ECParameterSpec ecParams;
+    switch (curve) {
+      case NIST_P256:
+        ecParams = EllipticCurves.getNistP256Params();
+        break;
+      case NIST_P384:
+        ecParams = EllipticCurves.getNistP384Params();
+        break;
+      case NIST_P521:
+        ecParams = EllipticCurves.getNistP521Params();
+        break;
+      default:
+        throw new NoSuchAlgorithmException("Curve not implemented:" + curve);
+    }
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+    keyGen.initialize(ecParams);
+    KeyPair keyPair = keyGen.generateKeyPair();
+    ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
+    ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
+    ECPoint w = pubKey.getW();
+    EciesAeadHkdfPublicKey eciesPubKey =
+        createEciesAeadHkdfPubKey(
+            curve,
+            hashType,
+            pointFormat,
+            demKeyTemplate,
+            w.getAffineX().toByteArray(),
+            w.getAffineY().toByteArray(),
+            salt);
     return createEciesAeadHkdfPrivKey(eciesPubKey, privKey.getS().toByteArray());
   }
 
   /**
-   *  @return a {@code KeyData} containing a {@code EciesAeadHkdfPrivateKey} with the specified key
-   *  material and parameters.
+   * @return a {@code KeyData} containing a {@code EciesAeadHkdfPrivateKey} with the specified key
+   *     material and parameters.
    */
-  public static EciesAeadHkdfPrivateKey createEciesAeadHkdfPrivKey(EciesAeadHkdfPublicKey pubKey,
-      byte[] privKeyValue) throws Exception {
+  public static EciesAeadHkdfPrivateKey createEciesAeadHkdfPrivKey(
+      EciesAeadHkdfPublicKey pubKey, byte[] privKeyValue) throws Exception {
     final int version = 0;
     return EciesAeadHkdfPrivateKey.newBuilder()
         .setVersion(version)
@@ -494,15 +465,20 @@ public class TestUtil {
         .build();
   }
 
-  /**
-   *  @return a {@code EciesAeadHkdfPublicKey} with the specified key material and parameters.
-   */
-  public static EciesAeadHkdfPublicKey createEciesAeadHkdfPubKey(EllipticCurveType curve,
-      HashType hashType, EcPointFormat ecPointFormat, KeyTemplate demKeyTemplate,
-      byte[] pubX, byte[] pubY, byte[] salt) throws Exception {
+  /** @return a {@code EciesAeadHkdfPublicKey} with the specified key material and parameters. */
+  public static EciesAeadHkdfPublicKey createEciesAeadHkdfPubKey(
+      EllipticCurveType curve,
+      HashType hashType,
+      EcPointFormat ecPointFormat,
+      KeyTemplate demKeyTemplate,
+      byte[] pubX,
+      byte[] pubY,
+      byte[] salt)
+      throws Exception {
     final int version = 0;
-    EciesAeadHkdfParams params = HybridKeyTemplates.createEciesAeadHkdfParams(
-        curve, hashType, ecPointFormat, demKeyTemplate, salt);
+    EciesAeadHkdfParams params =
+        HybridKeyTemplates.createEciesAeadHkdfParams(
+            curve, hashType, ecPointFormat, demKeyTemplate, salt);
     return EciesAeadHkdfPublicKey.newBuilder()
         .setVersion(version)
         .setParams(params)
@@ -512,15 +488,13 @@ public class TestUtil {
   }
 
   /**
-   * Runs basic tests against an Aead primitive. The given keysetHandle should
-   * be an Aead key type.
+   * Runs basic tests against an Aead primitive. The given keysetHandle should be an Aead key type.
    */
   public static void runBasicAeadFactoryTests(KeysetHandle keysetHandle) throws Exception {
     runBasicAeadFactoryTests(keysetHandle, /* keyManager*/ null);
   }
   /**
-   * Runs basic tests against an Aead primitive. The given keysetHandle should
-   * be an Aead key type.
+   * Runs basic tests against an Aead primitive. The given keysetHandle should be an Aead key type.
    */
   public static void runBasicAeadFactoryTests(
       KeysetHandle keysetHandle, KeyManager<Aead> keyManager) throws Exception {
@@ -532,18 +506,40 @@ public class TestUtil {
     assertArrayEquals(plaintext, decrypted);
   }
 
-  /**
-   * Decodes hex string.
-   */
+  /** Decodes hex string. */
   public static byte[] hexDecode(String hexData) {
     return Hex.decode(hexData);
   }
 
-  /**
-   * Encodes bytes to hex string.
-   */
+  /** Encodes bytes to hex string. */
   public static String hexEncode(byte[] data) {
     return Hex.encode(data);
+  }
+
+  /** @return true iff two arrays are equal. */
+  public static boolean arrayEquals(byte[] a, byte[] b) {
+    if (a.length != b.length) {
+      return false;
+    }
+    byte res = 0;
+    for (int i = 0; i < a.length; i++) {
+      res |= (byte) (a[i] ^ b[i]);
+    }
+    return res == 0;
+  }
+
+  /** Gets JSONObject from file. */
+  public static JSONObject getJsonObject(String filename) throws Exception {
+    return new JSONObject(new String(Files.readAllBytes(Paths.get(filename)), UTF_8));
+  }
+
+  /**
+   * Gets hex-decoded bytes value from JsonObject. Wycheproof represents byte arrays as hexadeciamal
+   * strings.
+   */
+  public static byte[] getBytes(JSONObject object, String name) throws Exception {
+    String hex = object.getString(name);
+    return hexDecode(hex);
   }
 
   /**
@@ -551,16 +547,14 @@ public class TestUtil {
    * exception's message and the expected value will be in the failure log.
    */
   public static void assertExceptionContains(Throwable e, String contains) {
-    String message = String.format(
-        "Got exception with message \"%s\", expected it to contain \"%s\".",
-        e.getMessage(),
-        contains);
+    String message =
+        String.format(
+            "Got exception with message \"%s\", expected it to contain \"%s\".",
+            e.getMessage(), contains);
     assertTrue(message, e.getMessage().contains(contains));
   }
 
-  /**
-   * Asserts that {@code key} is generated from {@code keyTemplate}.
-   */
+  /** Asserts that {@code key} is generated from {@code keyTemplate}. */
   public static void assertHmacKey(KeyTemplate keyTemplate, Keyset.Key key) throws Exception {
     assertThat(key.getKeyId()).isGreaterThan(0);
     assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
@@ -574,9 +568,7 @@ public class TestUtil {
     assertThat(hmacKey.getKeyValue().size()).isEqualTo(hmacKeyFormat.getKeySize());
   }
 
-  /**
-   * Asserts that {@code KeyInfo} is corresponding to a key from {@code keyTemplate}.
-   */
+  /** Asserts that {@code KeyInfo} is corresponding to a key from {@code keyTemplate}. */
   public static void assertKeyInfo(KeyTemplate keyTemplate, KeysetInfo.KeyInfo keyInfo)
       throws Exception {
     assertThat(keyInfo.getKeyId()).isGreaterThan(0);
@@ -585,9 +577,7 @@ public class TestUtil {
     assertThat(keyInfo.getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
   }
 
-  /**
-   * Generates and returns a random, temporary file path.
-   */
+  /** Generates and returns a random, temporary file path. */
   public static Path generateRandomPath(String prefix) {
     String tmpDir = java.lang.System.getenv("TEST_TMPDIR");
     String tmpFilename = String.format("%s.%s.tmp", prefix, new SecureRandom().nextLong());

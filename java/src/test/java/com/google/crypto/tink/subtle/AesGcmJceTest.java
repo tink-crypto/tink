@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
@@ -26,29 +27,28 @@ import java.util.Arrays;
 import java.util.HashSet;
 import javax.crypto.AEADBadTagException;
 import javax.crypto.Cipher;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for AesGcm
- * TODO(bleichen): Add more tests.
- *   - maybe add NIST style verification.
- */
+/** Unit tests for AesGcm. TODO(bleichen): Add more tests. - maybe add NIST style verification. */
 @RunWith(JUnit4.class)
 public class AesGcmJceTest {
 
-  private int[] keySizeInBytes;
+  private Integer[] keySizeInBytes;
 
   @Before
   public void setUp() throws Exception {
     if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-        System.out.println("Unlimited Strength Jurisdiction Policy Files are required"
-            + " but not installed. Skip tests with keys larger than 128 bits.");
-      keySizeInBytes = new int[] {16};
+      System.out.println(
+          "Unlimited Strength Jurisdiction Policy Files are required"
+              + " but not installed. Skip tests with keys larger than 128 bits.");
+      keySizeInBytes = new Integer[] {16};
     } else {
-      keySizeInBytes = new int[] {16, 24, 32};
+      keySizeInBytes = new Integer[] {16, 24, 32};
     }
   }
 
@@ -59,11 +59,7 @@ public class AesGcmJceTest {
     final byte[] aad;
     final byte[] ct;
 
-    public GcmTestVector(
-        String message,
-        String keyMaterial,
-        String aad,
-        String ciphertext) {
+    public GcmTestVector(String message, String keyMaterial, String aad, String ciphertext) {
       this.key = TestUtil.hexDecode(keyMaterial);
       this.pt = TestUtil.hexDecode(message);
       this.aad = TestUtil.hexDecode(aad);
@@ -77,8 +73,8 @@ public class AesGcmJceTest {
         "5b9604fe14eadba931b0ccf34843dab9",
         "",
         "028318abc1824029138141a2"
-           + "26073cc1d851beff176384dc9896d5ff"
-           + "0a3ea7a5487cb5f7d70fb6c58d038554"),
+            + "26073cc1d851beff176384dc9896d5ff"
+            + "0a3ea7a5487cb5f7d70fb6c58d038554"),
     new GcmTestVector(
         "2035af313d1346ab00154fea78322105",
         "aa023d0478dcb2b2312498293d9a9129",
@@ -91,15 +87,12 @@ public class AesGcmJceTest {
         "00010203040506070809",
         "92ace3e348cd821092cd921aa3546374299ab46209691bc28b8752d17f123c20",
         "00000000ffffffff",
-        "00112233445566778899aabb"
-            + "e27abdd2d2a53d2f136b"
-            + "9a4a2579529301bcfb71c78d4060f52c"),
+        "00112233445566778899aabb" + "e27abdd2d2a53d2f136b" + "9a4a2579529301bcfb71c78d4060f52c"),
     new GcmTestVector(
         "",
         "29d3a44f8723dc640239100c365423a312934ac80239212ac3df3421a2098123",
         "aabbccddeeff",
-        "00112233445566778899aabb"
-            + "2a7d77fa526b8250cb296078926b5020"),
+        "00112233445566778899aabb" + "2a7d77fa526b8250cb296078926b5020"),
 
     // special cases
     new GcmTestVector(
@@ -109,7 +102,7 @@ public class AesGcmJceTest {
         "00112233445566778899aabb"
             + "d8eba6a5a03403851abc27f6e15d84c0"
             + "00000000000000000000000000000000"),
-   new GcmTestVector(
+    new GcmTestVector(
         "ebd4a3e10cf6d41c50aeae007563b072",
         "00112233445566778899aabbccddeeff",
         "",
@@ -127,16 +120,16 @@ public class AesGcmJceTest {
 
   @Test
   /**
-   * A regression test with some test vectors.
-   * AesGcmJce randomizes the ciphertext. Therefore this test only
-   * checks that decryption still works.
+   * A regression test with some test vectors. AesGcmJce randomizes the ciphertext. Therefore this
+   * test only checks that decryption still works.
    */
   public void testRegression() throws Exception {
     for (GcmTestVector test : GCM_TEST_VECTORS) {
       if (Cipher.getMaxAllowedKeyLength("AES") < 256 && test.key.length > 16) {
-          System.out.println("Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip tests with keys larger than 128 bits.");
-          continue;
+        System.out.println(
+            "Unlimited Strength Jurisdiction Policy Files are required"
+                + " but not installed. Skip tests with keys larger than 128 bits.");
+        continue;
       }
       AesGcmJce gcm = new AesGcmJce(test.key);
       byte[] pt = gcm.decrypt(test.ct, test.aad);
@@ -160,9 +153,7 @@ public class AesGcmJceTest {
   }
 
   @Test
-  /**
-   * BC had a bug, where GCM failed for messages of size > 8192
-   */
+  /** BC had a bug, where GCM failed for messages of size > 8192 */
   public void testLongMessages() throws Exception {
     int dataSize = 16;
     while (dataSize <= (1 << 24)) {
@@ -231,23 +222,100 @@ public class AesGcmJceTest {
   }
 
   @Test
+  public void testWycheproofVectors() throws Exception {
+    JSONObject jsonObj = TestUtil.getJsonObject("../wycheproof/testvectors/aes_gcm_test.json");
+    final String expectedAlgorithm = "AES-GCM";
+    String algorithm = jsonObj.getString("algorithm");
+    if (!expectedAlgorithm.equals(algorithm)) {
+      System.out.println("expect algorithm " + expectedAlgorithm + ", got" + algorithm);
+    }
+    final String expectedVersion = "0.0a8";
+    String generatorVersion = jsonObj.getString("generatorVersion");
+    if (!generatorVersion.equals(expectedVersion)) {
+      System.out.println(
+          "expect test vectors with version "
+              + expectedVersion
+              + " ,got vectors with version "
+              + generatorVersion);
+    }
+    int numTests = jsonObj.getInt("numberOfTests");
+    int cntTests = 0;
+    int cntSkippedTests = 0;
+    int errors = 0;
+    JSONArray testGroups = jsonObj.getJSONArray("testGroups");
+    for (int i = 0; i < testGroups.length(); i++) {
+      JSONObject group = testGroups.getJSONObject(i);
+      int tagSize = group.getInt("tagSize");
+      int keySize = group.getInt("keySize");
+      JSONArray tests = group.getJSONArray("tests");
+      if (!Arrays.asList(keySizeInBytes).contains(keySize / 8)) {
+        cntSkippedTests += tests.length();
+        continue;
+      }
+      for (int j = 0; j < tests.length(); j++) {
+        cntTests++;
+        JSONObject testcase = tests.getJSONObject(j);
+        int tcid = testcase.getInt("tcId");
+        String tc = "tcId: " + tcid + " " + testcase.getString("comment");
+        byte[] iv = TestUtil.getBytes(testcase, "iv");
+        byte[] key = TestUtil.getBytes(testcase, "key");
+        byte[] msg = TestUtil.getBytes(testcase, "msg");
+        byte[] aad = TestUtil.getBytes(testcase, "aad");
+        byte[] ct = TestUtil.getBytes(testcase, "ct");
+        byte[] tag = TestUtil.getBytes(testcase, "tag");
+        byte[] ciphertext = Bytes.concat(iv, ct, tag);
+        // Result is one of "valid", "invalid", "acceptable".
+        // "valid" are test vectors with matching plaintext, ciphertext and tag.
+        // "invalid" are test vectors with invalid parameters or invalid ciphertext and tag.
+        // "acceptable" are test vectors with weak parameters or legacy formats.
+        String result = testcase.getString("result");
+        // Tink only supports 12-byte iv.
+        if (iv.length != 12) {
+          result = "invalid";
+        }
+
+        try {
+          AesGcmJce gcm = new AesGcmJce(key);
+          byte[] decrypted = gcm.decrypt(ciphertext, aad);
+          boolean eq = TestUtil.arrayEquals(decrypted, msg);
+          if (result.equals("invalid")) {
+            System.out.println("Decrypted invalid ciphertext " + tc + " eq:" + eq);
+            errors++;
+          } else {
+            if (!eq) {
+              System.out.println(
+                  "Incorrect decryption " + tc + " decrypted:" + TestUtil.hexEncode(decrypted));
+            }
+          }
+        } catch (GeneralSecurityException ex) {
+          if (result.equals("valid")) {
+            System.out.println("Failed to decrypt " + tc);
+            errors++;
+          }
+        }
+      }
+    }
+    assertEquals(0, errors);
+    assertEquals(numTests, cntTests + cntSkippedTests);
+  }
+
+  @Test
   /**
-   * This is a very simple test for the randomness of the nonce.
-   * The test simply checks that the multiple ciphertexts of the same
-   * message are distinct.
+   * This is a very simple test for the randomness of the nonce. The test simply checks that the
+   * multiple ciphertexts of the same message are distinct.
    */
   public void testRandomNonce() throws Exception {
-     final int samples = 1 << 17;
-     byte[] key = Random.randBytes(16);
-     byte[] message = new byte[0];
-     byte[] aad = new byte[0];
-     AesGcmJce gcm = new AesGcmJce(key);
-     HashSet<String> ciphertexts = new HashSet<String>();
-     for (int i = 0; i < samples; i++) {
-       byte[] ct = gcm.encrypt(message, aad);
-       String ctHex = TestUtil.hexEncode(ct);
-       assertFalse(ciphertexts.contains(ctHex));
-       ciphertexts.add(ctHex);
-     }
+    final int samples = 1 << 17;
+    byte[] key = Random.randBytes(16);
+    byte[] message = new byte[0];
+    byte[] aad = new byte[0];
+    AesGcmJce gcm = new AesGcmJce(key);
+    HashSet<String> ciphertexts = new HashSet<String>();
+    for (int i = 0; i < samples; i++) {
+      byte[] ct = gcm.encrypt(message, aad);
+      String ctHex = TestUtil.hexEncode(ct);
+      assertFalse(ciphertexts.contains(ctHex));
+      ciphertexts.add(ctHex);
+    }
   }
 }

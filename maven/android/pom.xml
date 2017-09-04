@@ -81,7 +81,10 @@
             <!-- these tests depend on JsonFormat which does not work with protobuf lite -->
             <exclude>**/JsonKeysetReaderTest.java</exclude>
             <exclude>**/JsonKeysetWriterTest.java</exclude>
+            <!-- TODO: add Maven support for Wycheproof which these tests depend on -->
+            <exclude>**/AesGcmJceTest.java</exclude>
           </testExcludes>
+
         </configuration>
       </plugin>
 
