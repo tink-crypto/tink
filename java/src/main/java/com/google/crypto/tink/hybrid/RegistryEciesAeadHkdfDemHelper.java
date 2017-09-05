@@ -18,8 +18,7 @@ package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKey;
@@ -38,13 +37,8 @@ import java.util.Arrays;
  * It uses selected {@code KeyManager}-instances from the {@code Registry} to obtain the
  * instances of {@code Aead}.
  */
-public final class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
-  private enum DemKeyType {
-    AES_GCM_KEY,
-    AES_CTR_HMAC_AEAD_KEY
-  }
-
-  private final DemKeyType demKeyType;
+class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
+  private final String demKeyTypeUrl;
   private final int symmetricKeySize;
 
   // used iff demKeyType == AES_GCM_KEY
@@ -55,22 +49,20 @@ public final class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHel
   private int aesCtrKeySize;
 
   RegistryEciesAeadHkdfDemHelper(KeyTemplate demTemplate) throws GeneralSecurityException {
-    String keyType = demTemplate.getTypeUrl();
-    if (keyType.equals(AesGcmKeyManager.TYPE_URL)) {
+    demKeyTypeUrl = demTemplate.getTypeUrl();
+    if (demKeyTypeUrl.equals(AeadConfig.AES_GCM_TYPE_URL)) {
       try {
         AesGcmKeyFormat gcmKeyFormat = AesGcmKeyFormat.parseFrom(demTemplate.getValue());
-        this.demKeyType = DemKeyType.AES_GCM_KEY;
         this.aesGcmKey = (AesGcmKey) Registry.newKey(demTemplate);
         this.symmetricKeySize = gcmKeyFormat.getKeySize();
       } catch (InvalidProtocolBufferException e) {
         throw new GeneralSecurityException(
             "invalid KeyFormat protobuf, expected AesGcmKeyFormat", e);
       }
-    } else if (keyType.equals(AesCtrHmacAeadKeyManager.TYPE_URL)) {
+    } else if (demKeyTypeUrl.equals(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)) {
       try {
         AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(
             demTemplate.getValue());
-        this.demKeyType = DemKeyType.AES_CTR_HMAC_AEAD_KEY;
         this.aesCtrHmacAeadKey = (AesCtrHmacAeadKey) Registry.newKey(demTemplate);
         this.aesCtrKeySize = aesCtrHmacAeadKeyFormat.getAesCtrKeyFormat().getKeySize();
         int hmacKeySize = aesCtrHmacAeadKeyFormat.getHmacKeyFormat().getKeySize();
@@ -80,7 +72,7 @@ public final class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHel
             "invalid KeyFormat protobuf, expected AesGcmKeyFormat", e);
       }
     } else {
-      throw new GeneralSecurityException("unsupported AEAD DEM key type: " + keyType);
+      throw new GeneralSecurityException("unsupported AEAD DEM key type: " + demKeyTypeUrl);
     }
   }
 
@@ -91,13 +83,13 @@ public final class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHel
 
   @Override
   public Aead getAead(final byte[] symmetricKeyValue) throws GeneralSecurityException {
-    if (demKeyType == DemKeyType.AES_GCM_KEY) {
+    if (demKeyTypeUrl.equals(AeadConfig.AES_GCM_TYPE_URL)) {
       AesGcmKey aeadKey = AesGcmKey.newBuilder()
           .mergeFrom(aesGcmKey)
           .setKeyValue(ByteString.copyFrom(symmetricKeyValue))
           .build();
-      return Registry.getPrimitive(AesGcmKeyManager.TYPE_URL, aeadKey);
-    } else if (demKeyType == DemKeyType.AES_CTR_HMAC_AEAD_KEY) {
+      return Registry.getPrimitive(demKeyTypeUrl, aeadKey);
+    } else if (demKeyTypeUrl.equals(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)) {
       byte[] aesCtrKeyValue = Arrays.copyOfRange(symmetricKeyValue, 0, aesCtrKeySize);
       byte[] hmacKeyValue = Arrays.copyOfRange(symmetricKeyValue, aesCtrKeySize, symmetricKeySize);
       AesCtrKey aesCtrKey = AesCtrKey.newBuilder()
@@ -111,7 +103,7 @@ public final class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHel
           .setAesCtrKey(aesCtrKey)
           .setHmacKey(hmacKey)
           .build();
-      return Registry.getPrimitive(AesCtrHmacAeadKeyManager.TYPE_URL, aeadKey);
+      return Registry.getPrimitive(demKeyTypeUrl, aeadKey);
     } else {
       throw new GeneralSecurityException("unknown DEM key type");
     }

@@ -35,9 +35,7 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesCtrHmacStreamingKey} keys and produces new instances of
  * {@code AesCtrHmacStreaming}.
  */
-public final class AesCtrHmacStreamingKeyManager implements KeyManager<StreamingAead> {
-  AesCtrHmacStreamingKeyManager() {}
-
+class AesCtrHmacStreamingKeyManager implements KeyManager<StreamingAead> {
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =

@@ -36,6 +36,11 @@ import java.security.GeneralSecurityException;
  * see {@link HybridEncryptFactory} or {@link HybridDecryptFactory}.
  */
 public final class HybridConfig {
+  public static final String ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE_URL =
+      EciesAeadHkdfPublicKeyManager.TYPE_URL;
+  public static final String ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE_URL =
+      EciesAeadHkdfPrivateKeyManager.TYPE_URL;
+
   private static final String CATALOGUE_NAME = "TinkHybrid";
 
   public static final RegistryConfig TINK_1_0_0 = RegistryConfig.newBuilder()

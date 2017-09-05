@@ -45,12 +45,8 @@ For custom initialization the registration can proceed directly via
 
 ```java
     import com.google.crypto.tink.Registry;
-    import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
     import my.custom.package.aead.MyAeadKeyManager;
     // (...)
-
-    // Register only one Tink-implementation of AEAD.
-    Registry.registerKeyManager(AesCtrHmacAeadKeyManager.TYPE_URL, new AesCtrHmacAeadKeyManager());
 
     // Register a custom implementation of AEAD.
     Registry.registerKeyManager(MyAeadKeyManager.TYPE_URL, new MyAeadKeyManager());

@@ -40,7 +40,7 @@ public final class KmsEnvelopeAead implements Aead {
   private final Aead remote;
   private static final int LENGTH_ENCRYPTED_DEK = 4;
 
-  KmsEnvelopeAead(KeyTemplate dekTemplate, Aead remote) {
+  public KmsEnvelopeAead(KeyTemplate dekTemplate, Aead remote) {
     this.dekTemplate = dekTemplate;
     this.remote = remote;
   }

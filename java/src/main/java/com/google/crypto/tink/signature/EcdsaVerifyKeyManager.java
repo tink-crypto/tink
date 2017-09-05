@@ -33,9 +33,7 @@ import java.security.interfaces.ECPublicKey;
  * This key manager produces new instances of {@code EcdsaVerifyJce}.
  * It doesn't support key generation.
  */
-public final class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
-  public EcdsaVerifyKeyManager() {}
-
+class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
   /**

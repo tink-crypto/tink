@@ -33,6 +33,8 @@ import java.security.GeneralSecurityException;
  * <p>For more information on how to obtain and use instances of Mac, see {@link MacFactory}.
  */
 public final class MacConfig {
+  public static final String HMAC_TYPE_URL = HmacKeyManager.TYPE_URL;
+
   private static final String CATALOGUE_NAME = "TinkMac";
   private static final String PRIMITIVE_NAME = "Mac";
 

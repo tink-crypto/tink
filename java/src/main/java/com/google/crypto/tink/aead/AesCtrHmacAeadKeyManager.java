@@ -20,7 +20,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.mac.HmacKeyManager;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKey;
@@ -36,11 +36,11 @@ import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
 /**
- * This key manager generates new {@code AesCtrHmacAeadKey} keys and produces new instances
- * of {@code EncryptThenAuthenticate}.
+ * This key manager generates new {@link AesCtrHmacAeadKey} keys and produces new instances
+ * of {@link EncryptThenAuthenticate}.
  */
-public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
-  public AesCtrHmacAeadKeyManager() throws GeneralSecurityException {
+class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
+  AesCtrHmacAeadKeyManager() throws GeneralSecurityException {
     Registry.registerKeyManager(AesCtrKeyManager.TYPE_URL, new AesCtrKeyManager());
   }
 
@@ -78,7 +78,7 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
     return new EncryptThenAuthenticate(
         (IndCpaCipher) Registry.getPrimitive(
             AesCtrKeyManager.TYPE_URL, keyProto.getAesCtrKey()),
-        (Mac) Registry.getPrimitive(HmacKeyManager.TYPE_URL, keyProto.getHmacKey()),
+        (Mac) Registry.getPrimitive(MacConfig.HMAC_TYPE_URL, keyProto.getHmacKey()),
         keyProto.getHmacKey().getParams().getTagSize());
   }
 
@@ -109,7 +109,7 @@ public final class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
     AesCtrKey aesCtrKey = (AesCtrKey) Registry.newKey(
         AesCtrKeyManager.TYPE_URL, format.getAesCtrKeyFormat());
     HmacKey hmacKey = (HmacKey) Registry.newKey(
-        HmacKeyManager.TYPE_URL, format.getHmacKeyFormat());
+        MacConfig.HMAC_TYPE_URL, format.getHmacKeyFormat());
     return AesCtrHmacAeadKey.newBuilder()
         .setAesCtrKey(aesCtrKey)
         .setHmacKey(hmacKey)

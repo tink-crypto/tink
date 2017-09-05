@@ -39,9 +39,7 @@ import java.security.spec.ECPoint;
  * This key manager generates new {@code EcdsaPrivateKey} keys and produces new instances
  * of {@code EcdsaSignJce}.
  */
-public final class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
-  public EcdsaSignKeyManager() {}
-
+class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
   /**
    * Type url that this manager supports
    */

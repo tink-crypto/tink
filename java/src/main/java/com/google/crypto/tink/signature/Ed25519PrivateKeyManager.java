@@ -32,8 +32,7 @@ import java.security.GeneralSecurityException;
  * This instance of {@code KeyManager} generates new {@code Ed25519PrivateKey} keys and
  * produces new instances of {@code Ed25519Sign}.
  */
-public final class Ed25519PrivateKeyManager implements PrivateKeyManager<PublicKeySign> {
-  public Ed25519PrivateKeyManager() {}
+class Ed25519PrivateKeyManager implements PrivateKeyManager<PublicKeySign> {
   /**
    * Type url that this manager supports
    */

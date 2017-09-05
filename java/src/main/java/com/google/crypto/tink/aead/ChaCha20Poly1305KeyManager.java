@@ -33,9 +33,7 @@ import java.security.GeneralSecurityException;
  * This instance of {@code KeyManager} generates new {@code ChaCha20Poly1305} keys and
  * produces new instances of {@code ChaCha20Poly1305}.
  */
-public final class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
-  public ChaCha20Poly1305KeyManager() {}
-
+class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
   /**
    * Type url that this manager supports
    */

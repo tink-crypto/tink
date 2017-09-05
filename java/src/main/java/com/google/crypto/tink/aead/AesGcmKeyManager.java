@@ -33,9 +33,7 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code AesGcmKey} keys and produces new instances
  * of {@code AesGcmJce}.
  */
-public final class AesGcmKeyManager implements KeyManager<Aead> {
-  public AesGcmKeyManager() {}
-
+class AesGcmKeyManager implements KeyManager<Aead> {
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =

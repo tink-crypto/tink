@@ -33,14 +33,11 @@ import java.security.GeneralSecurityException;
  * This key manager produces new instances of {@code Aead} that forwards encrypt/decrypt
  * requests to a key residing in a remote KMS.
  */
-public final class KmsAeadKeyManager implements KeyManager<Aead> {
+class KmsAeadKeyManager implements KeyManager<Aead> {
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.KmsAeadKey";
-
-  public KmsAeadKeyManager() {
-  }
 
   /**
    * @param serializedKey  serialized {@code KmsAeadKey} proto

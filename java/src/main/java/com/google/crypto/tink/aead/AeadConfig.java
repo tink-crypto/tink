@@ -34,6 +34,13 @@ import java.security.GeneralSecurityException;
  * <p>For more information on how to obtain and use instances of Aead, see {@link AeadFactory}.
  */
 public final class AeadConfig {
+  public static final String AES_CTR_HMAC_AEAD_TYPE_URL = AesCtrHmacAeadKeyManager.TYPE_URL;
+  public static final String AES_GCM_TYPE_URL = AesGcmKeyManager.TYPE_URL;
+  public static final String AES_EAX_TYPE_URL = AesEaxKeyManager.TYPE_URL;
+  public static final String CHACHA20_POLY1305_TYPE_URL = ChaCha20Poly1305KeyManager.TYPE_URL;
+  public static final String KMS_AEAD_TYPE_URL = KmsAeadKeyManager.TYPE_URL;
+  public static final String KMS_ENVELOPE_AEAD_TYPE_URL = KmsEnvelopeAeadKeyManager.TYPE_URL;
+
   private static final String CATALOGUE_NAME = "TinkAead";
   private static final String PRIMITIVE_NAME = "Aead";
 

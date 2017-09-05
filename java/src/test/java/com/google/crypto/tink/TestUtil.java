@@ -20,11 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadFactory;
-import com.google.crypto.tink.aead.AesEaxKeyManager;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
-import com.google.crypto.tink.mac.HmacKeyManager;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrKey;
 import com.google.crypto.tink.proto.AesCtrParams;
@@ -300,7 +299,7 @@ public class TestUtil {
   public static KeyData createHmacKeyData(byte[] keyValue, int tagSize) throws Exception {
     return createKeyData(
         createHmacKey(keyValue, tagSize),
-        HmacKeyManager.TYPE_URL,
+        MacConfig.HMAC_TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 
@@ -331,7 +330,7 @@ public class TestUtil {
         .build();
     return createKeyData(
         keyProto,
-        "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+        AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 
@@ -344,7 +343,7 @@ public class TestUtil {
         .build();
     return createKeyData(
         keyProto,
-        AesGcmKeyManager.TYPE_URL,
+        AeadConfig.AES_GCM_TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 
@@ -358,7 +357,7 @@ public class TestUtil {
         .build();
     return createKeyData(
         keyProto,
-        AesEaxKeyManager.TYPE_URL,
+        AeadConfig.AES_EAX_TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 

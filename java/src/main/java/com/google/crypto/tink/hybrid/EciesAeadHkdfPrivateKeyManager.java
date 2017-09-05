@@ -42,9 +42,7 @@ import java.security.spec.ECPoint;
  * of {@code EciesAeadHkdfHybridDecrypt}.
  */
 
-public final class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt> {
-  public EciesAeadHkdfPrivateKeyManager() {}
-
+class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt> {
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =

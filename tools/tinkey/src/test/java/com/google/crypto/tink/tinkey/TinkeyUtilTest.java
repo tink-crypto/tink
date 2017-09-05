@@ -22,8 +22,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesGcmKey;
@@ -45,7 +44,7 @@ public class TinkeyUtilTest {
 
   @Test
   public void testCreateKeyTemplate_AesGcm_shouldWork() throws Exception {
-    String keyType = AesGcmKeyManager.TYPE_URL;
+    String keyType = AeadConfig.AES_GCM_TYPE_URL;
     String keyFormat = "key_size: 16";
     KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
     AesGcmKey keyProto1 = (AesGcmKey) Registry.newKey(keyTemplate);
@@ -55,7 +54,7 @@ public class TinkeyUtilTest {
 
   @Test
   public void testCreateKeyTemplate_AesCtrHmacAead_shouldWork() throws Exception {
-    String keyType = AesCtrHmacAeadKeyManager.TYPE_URL;
+    String keyType = AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL;
     String keyFormat = "aes_ctr_key_format {params { iv_size: 12}, key_size: 16}, "
         + "hmac_key_format {params {hash: SHA256, tag_size: 10}, key_size: 32}";
     KeyTemplate keyTemplate = TinkeyUtil.createKeyTemplateFromText(keyType, keyFormat);
@@ -69,7 +68,7 @@ public class TinkeyUtilTest {
 
   @Test
   public void testCreateKeyTemplate_invalidKeySize_shouldThrowException() throws Exception {
-    String keyType = AesGcmKeyManager.TYPE_URL;
+    String keyType = AeadConfig.AES_GCM_TYPE_URL;
     String keyFormat = "key_size: 17";
 
     try {

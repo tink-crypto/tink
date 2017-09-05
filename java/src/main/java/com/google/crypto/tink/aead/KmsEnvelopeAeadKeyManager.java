@@ -33,15 +33,12 @@ import java.security.GeneralSecurityException;
  * This key manager generates new {@code KmsEnvelopeAeadKey} keys and produces new instances
  * of {@code KmsEnvelopeAead}.
  */
-public final class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
+class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
 
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
-
-  public KmsEnvelopeAeadKeyManager() {
-  }
 
   /**
    * @param serializedKey  serialized {@code KmsEnvelopeAeadKey} proto

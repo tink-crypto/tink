@@ -32,9 +32,9 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.signature.EcdsaVerifyKeyManager;
 import com.google.crypto.tink.signature.PublicKeySignFactory;
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
+import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
 import java.io.ByteArrayInputStream;
@@ -105,7 +105,7 @@ public class KeysetHandleTest {
     assertEquals(privateHandle.getKeyset().getPrimaryKeyId(),
         publicHandle.getKeyset().getPrimaryKeyId());
     KeyData publicKeyData = publicHandle.getKeyset().getKey(0).getKeyData();
-    assertEquals(EcdsaVerifyKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
+    assertEquals(SignatureConfig.ECDSA_PUBLIC_KEY_TYPE_URL, publicKeyData.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
     assertArrayEquals(privateKey.getPublicKey().toByteArray(),
         publicKeyData.getValue().toByteArray());

@@ -31,9 +31,7 @@ import java.security.GeneralSecurityException;
  * This key manager produces new instances of {@code Ed25519Verify}.
  * It doesn't support key generation.
  */
-public final class Ed25519PublicKeyManager implements KeyManager<PublicKeyVerify> {
-  public Ed25519PublicKeyManager() {}
-
+class Ed25519PublicKeyManager implements KeyManager<PublicKeyVerify> {
   /**
    * Type url that this manager supports
    */

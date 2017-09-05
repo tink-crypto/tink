@@ -36,6 +36,11 @@ import java.security.GeneralSecurityException;
  * see {@link PublicKeySignFactory} or {@link PublicKeyVerifyFactory}.
  */
 public final class SignatureConfig {
+  public static final String ECDSA_PUBLIC_KEY_TYPE_URL = EcdsaVerifyKeyManager.TYPE_URL;
+  public static final String ECDSA_PRIVATE_KEY_TYPE_URL = EcdsaSignKeyManager.TYPE_URL;
+  public static final String ED25519_PUBLIC_KEY_TYPE_URL = Ed25519PublicKeyManager.TYPE_URL;
+  public static final String ED25519_PRIVATE_KEY_TYPE_URL = Ed25519PrivateKeyManager.TYPE_URL;
+
   private static final String CATALOGUE_NAME = "TinkSignature";
 
   public static final RegistryConfig TINK_1_0_0 = RegistryConfig.newBuilder()

@@ -36,9 +36,7 @@ import javax.crypto.spec.SecretKeySpec;
  * This key manager generates new {@code HmacKey} keys and produces new instances
  * of {@code MacJce}.
  */
-public final class HmacKeyManager implements KeyManager<Mac> {
-  public HmacKeyManager() {}
-
+class HmacKeyManager implements KeyManager<Mac> {
   /**
    * Type url that this manager does support.
    */

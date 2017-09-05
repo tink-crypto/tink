@@ -36,9 +36,7 @@ import java.security.interfaces.ECPublicKey;
  * This key manager produces new instances of {@code EciesAeadHkdfHybridEncrypt}.
  * It doesn't support key generation.
  */
-public final class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
-  public EciesAeadHkdfPublicKeyManager() {}
-
+class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =

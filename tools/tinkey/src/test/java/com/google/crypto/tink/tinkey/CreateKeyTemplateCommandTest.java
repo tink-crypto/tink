@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Config;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -45,13 +45,13 @@ public class CreateKeyTemplateCommandTest {
   public void testCreate_shouldWork() throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     CreateKeyTemplateCommand.create(outputStream,
-        AesGcmKeyManager.TYPE_URL, "key_size: 16");
+        AeadConfig.AES_GCM_TYPE_URL, "key_size: 16");
     KeyTemplate.Builder builder = KeyTemplate.newBuilder();
     TextFormat.merge(outputStream.toString(), builder);
     KeyTemplate keyTemplate = builder.build();
     AesGcmKeyFormat aesKeyFormat = AesGcmKeyFormat.parseFrom(keyTemplate.getValue());
 
-    assertThat(keyTemplate.getTypeUrl()).isEqualTo(AesGcmKeyManager.TYPE_URL);
+    assertThat(keyTemplate.getTypeUrl()).isEqualTo(AeadConfig.AES_GCM_TYPE_URL);
     assertThat(aesKeyFormat.getKeySize()).isEqualTo(16);
   }
 
@@ -59,7 +59,7 @@ public class CreateKeyTemplateCommandTest {
   public void testCreate_invalidKeySize_shouldThrowException() throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     try {
-      CreateKeyTemplateCommand.create(outputStream, AesGcmKeyManager.TYPE_URL, "key_size: 17");
+      CreateKeyTemplateCommand.create(outputStream, AeadConfig.AES_GCM_TYPE_URL, "key_size: 17");
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException e) {
       assertThat(e.toString()).contains("invalid type URL or key format");

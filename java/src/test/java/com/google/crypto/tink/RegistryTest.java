@@ -21,11 +21,10 @@ import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil.DummyAead;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.mac.HmacKeyManager;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.HashType;
@@ -76,24 +75,17 @@ public class RegistryTest {
     }
     @Override
     public boolean doesSupport(String typeUrl) {  // supports same keys as AesGcmKey
-      return typeUrl.equals(AesGcmKeyManager.TYPE_URL);
+      return typeUrl.equals(AeadConfig.AES_GCM_TYPE_URL);
     }
     @Override
     public String getKeyType() {
-      return AesGcmKeyManager.TYPE_URL;
+      return AeadConfig.AES_GCM_TYPE_URL;
     }
     @Override
     public int getVersion() {
       return 0;
     }
   }
-
-  private String aesCtrHmacAeadTypeUrl =
-      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-  private String aesGcmTypeUrl =
-      AesGcmKeyManager.TYPE_URL;
-  private String hmacKeyTypeUrl =
-      HmacKeyManager.TYPE_URL;
 
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
@@ -107,15 +99,16 @@ public class RegistryTest {
 
   @Test
   public void testGetKeyManager_shouldWork() throws Exception {
-    testGetKeyManager_shouldWork(aesCtrHmacAeadTypeUrl, "AesCtrHmacAeadKeyManager");
-    testGetKeyManager_shouldWork(aesGcmTypeUrl, "AesGcmKeyManager");
-    testGetKeyManager_shouldWork(hmacKeyTypeUrl, "HmacKeyManager");
+    testGetKeyManager_shouldWork(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL,
+        "AesCtrHmacAeadKeyManager");
+    testGetKeyManager_shouldWork(AeadConfig.AES_GCM_TYPE_URL, "AesGcmKeyManager");
+    testGetKeyManager_shouldWork(MacConfig.HMAC_TYPE_URL, "HmacKeyManager");
   }
 
   @Test
   public void testGetKeyManager_wrongType_shouldThrowException() throws Exception {
     // TODO(thaidn): make this assignment throw some exception.
-    KeyManager<Aead> wrongType = Registry.getKeyManager(hmacKeyTypeUrl);
+    KeyManager<Aead> wrongType = Registry.getKeyManager(MacConfig.HMAC_TYPE_URL);
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     HmacKey hmacKey = (HmacKey) Registry.newKey(template);
 
@@ -143,20 +136,10 @@ public class RegistryTest {
   @Test
   public void testRegisterKeyManager_keyManagerIsNull_shouldThrowException() throws Exception {
     try {
-      Registry.registerKeyManager(aesCtrHmacAeadTypeUrl, null);
+      Registry.registerKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, null);
       fail("Expected IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
       assertThat(e.toString()).contains("must be non-null");
-    }
-  }
-
-  @Test
-  public void testRegisterKeyManager_keyManagerFromTheSameClass_shouldWork() throws Exception {
-    // This should work because the key manager comes from the same class.
-    try {
-      Registry.registerKeyManager(aesCtrHmacAeadTypeUrl, new AesCtrHmacAeadKeyManager());
-    } catch (GeneralSecurityException e) {
-      fail("Repeated registration of the same key manager should work.");
     }
   }
 
@@ -191,14 +174,14 @@ public class RegistryTest {
       throws Exception {
     // This should not overwrite the existing manager.
     try {
-      Registry.registerKeyManager(aesCtrHmacAeadTypeUrl, new CustomAeadKeyManager());
+      Registry.registerKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, new CustomAeadKeyManager());
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("already registered");
     }
 
-    KeyManager<Aead> manager = Registry.getKeyManager(aesCtrHmacAeadTypeUrl);
-    assertThat(manager.getClass()).isEqualTo(AesCtrHmacAeadKeyManager.class);
+    KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
+    assertThat(manager.getClass().toString()).contains("AesCtrHmacAeadKeyManager");
   }
 
   @Test
@@ -209,7 +192,7 @@ public class RegistryTest {
     Aead aead = Registry.getPrimitive(aesGcmKeyData);
 
     assertThat(aesGcmKey.getKeyValue().size()).isEqualTo(16);
-    assertThat(aesGcmKeyData.getTypeUrl()).isEqualTo(aesGcmTypeUrl);
+    assertThat(aesGcmKeyData.getTypeUrl()).isEqualTo(AeadConfig.AES_GCM_TYPE_URL);
     // This might break when we add native implementations.
     assertThat(aead.getClass()).isEqualTo(AesGcmJce.class);
   }
@@ -224,7 +207,7 @@ public class RegistryTest {
     assertThat(hmacKey.getKeyValue().size()).isEqualTo(32);
     assertThat(hmacKey.getParams().getTagSize()).isEqualTo(16);
     assertThat(hmacKey.getParams().getHash()).isEqualTo(HashType.SHA256);
-    assertThat(hmacKeyData.getTypeUrl()).isEqualTo(hmacKeyTypeUrl);
+    assertThat(hmacKeyData.getTypeUrl()).isEqualTo(MacConfig.HMAC_TYPE_URL);
     // This might break when we add native implementations.
     assertThat(mac.getClass()).isEqualTo(MacJce.class);
   }
