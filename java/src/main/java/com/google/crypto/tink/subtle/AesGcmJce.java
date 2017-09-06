@@ -36,10 +36,6 @@ public final class AesGcmJce implements Aead {
     keySpec = new SecretKeySpec(key, "AES");
   }
 
-  public AesGcmJce(SecretKey secretKey) {
-    keySpec = secretKey;
-  }
-
   private static Cipher instance() throws GeneralSecurityException {
     return EngineFactory.CIPHER.getInstance("AES/GCM/NoPadding");
   }

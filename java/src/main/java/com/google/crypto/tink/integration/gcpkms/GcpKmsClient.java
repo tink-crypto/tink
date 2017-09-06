@@ -115,7 +115,12 @@ public final class GcpKmsClient implements KmsClient {
   }
 
   @Override
-  public Aead getAead(String keyUri) throws GeneralSecurityException {
-    return new GcpKmsAead(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri));
+  public Aead getAead(String uri) throws GeneralSecurityException {
+    if (this.keyUri != null && !this.keyUri.equals(uri)) {
+      throw new GeneralSecurityException(
+          String.format("this client is bound to %s, cannot load keys bound to %s",
+              this.keyUri, uri));
+    }
+    return new GcpKmsAead(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
   }
 }

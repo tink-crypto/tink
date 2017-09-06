@@ -28,45 +28,38 @@ import java.io.IOException;
 /** A {@link KeysetWriter} that can write keysets to private shared preferences on Android. */
 public final class SharedPrefKeysetWriter implements KeysetWriter {
   private final SharedPreferences.Editor editor;
-  private final String prefName;
+  private final String keysetName;
 
   /**
-   * Creates a {@link KeysetReader} that hex-encodes and writes keysets to the preference name
-   * {@code prefName} in the private shared preferences file {@code fileName}.
+   * Creates a {@link KeysetReader} that hex-encodes and writes keysets to the preference
+   * name {@code keysetName} in the private shared preferences file {@code prefFileName}.
    *
-   * <p>If {@code fileName} is null, uses the default shared preferences file.
+   *<p>If {@code prefFileName} is null, uses the default shared preferences file.
    *
    * @throws IOException if cannot write the keyset
-   * @throws IllegalArgumentException if {@code prefName} is null
+   * @throws IllegalArgumentException if {@code keysetName} is null
    */
-  public static KeysetWriter withSharedPref(Context context, String fileName, String prefName) {
-    if (prefName == null) {
-      throw new IllegalArgumentException("prefName cannot be null");
+  public SharedPrefKeysetWriter(Context context, String keysetName, String prefFileName) {
+    if (keysetName == null) {
+      throw new IllegalArgumentException("keysetName cannot be null");
     }
+    this.keysetName = keysetName;
 
     Context appContext = context.getApplicationContext();
-    SharedPreferences sharedPreferences;
-    if (fileName == null) {
-      sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
+    if (prefFileName == null) {
+      editor = PreferenceManager.getDefaultSharedPreferences(appContext).edit();
     } else {
-      sharedPreferences = appContext.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+      editor = appContext.getSharedPreferences(prefFileName, Context.MODE_PRIVATE).edit();
     }
-
-    return new SharedPrefKeysetWriter(sharedPreferences.edit(), prefName);
-  }
-
-  private SharedPrefKeysetWriter(SharedPreferences.Editor editor, String prefName) {
-    this.editor = editor;
-    this.prefName = prefName;
   }
 
   @Override
   public void write(Keyset keyset) throws IOException {
-    editor.putString(prefName, Hex.encode(keyset.toByteArray())).apply();
+    editor.putString(keysetName, Hex.encode(keyset.toByteArray())).apply();
   }
 
   @Override
   public void write(EncryptedKeyset keyset) throws IOException {
-    editor.putString(prefName, Hex.encode(keyset.toByteArray())).apply();
+    editor.putString(keysetName, Hex.encode(keyset.toByteArray())).apply();
   }
 }

@@ -136,7 +136,7 @@
         <version>3.5.1</version>
         <configuration>
           <excludes>
-            <exclude>**/AndroidKeysetHandle.java</exclude>
+            <exclude>**/AndroidKeysetManager.java</exclude>
             <exclude>**/AndroidKeystoreAesGcm.java</exclude>
             <exclude>**/AndroidKeystoreKmsClient.java</exclude>
             <exclude>**/SharedPrefKeysetReader.java</exclude>

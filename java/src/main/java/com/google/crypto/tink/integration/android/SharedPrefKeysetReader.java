@@ -19,46 +19,65 @@ package com.google.crypto.tink.integration.android;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeysetReader;
+import com.google.crypto.tink.proto.EncryptedKeyset;
+import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Hex;
 import java.io.IOException;
 
-/** A {@link KeysetReader} that can read keysets from private shared preferences on Android. */
-public final class SharedPrefKeysetReader {
+/**
+ * A {@link KeysetReader} that can read keysets from private shared preferences on Android.
+ */
+public final class SharedPrefKeysetReader implements KeysetReader {
+  private final SharedPreferences sharedPreferences;
+  private final String keysetName;
+
   /**
-   * Creates a {@link KeysetReader} that reads and hex-decodes keysets from the preference name
-   * {@code prefName} in the private shared preferences file {@code fileName}.
+   * Creates a {@link KeysetReader} that reads and hex-decodes keysets from the preference
+   * name {@code keysetName} in the private shared preferences file {@code prefFilename}.
    *
-   * <p>If {@code fileName} is null, uses the default shared preferences file.
+   *<p>If {@code prefFilename} is null, uses the default shared preferences file.
    *
    * @throws IOException if cannot read the keyset
-   * @throws IllegalArgumentException if {@code prefName} is null
+   * @throws IllegalArgumentException if {@code keysetName} is null
    */
-  public static KeysetReader withSharedPref(Context context, String fileName, String prefName)
+  public SharedPrefKeysetReader(Context context, String keysetName, String prefFilename)
       throws IOException {
-    if (prefName == null) {
-      throw new IllegalArgumentException("prefName cannot be null");
+    if (keysetName == null) {
+      throw new IllegalArgumentException("keysetName cannot be null");
     }
+    this.keysetName = keysetName;
 
     Context appContext = context.getApplicationContext();
-    SharedPreferences sharedPreferences;
-    if (fileName == null) {
+    if (prefFilename == null) {
       sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
     } else {
-      sharedPreferences = appContext.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+      sharedPreferences = appContext.getSharedPreferences(
+        prefFilename, Context.MODE_PRIVATE);
     }
+  }
 
+  private byte[] readPref() throws IOException {
     try {
-      String keysetHex = sharedPreferences.getString(prefName, null /* default value */);
+      String keysetHex = sharedPreferences.getString(keysetName, null /* default value */);
       if (keysetHex == null) {
         throw new IOException(
-            String.format("can't read keyset; the pref value %s does not exist", prefName));
+            String.format("can't read keyset; the pref value %s does not exist", keysetName));
       }
-      return BinaryKeysetReader.withBytes(Hex.decode(keysetHex));
+      return Hex.decode(keysetHex);
     } catch (ClassCastException e) {
       throw new IOException(
-          String.format("can't read keyset; the pref value %s is not a string", prefName), e);
+        String.format("can't read keyset; the pref value %s is not a string", keysetName), e);
     }
+  }
+
+  @Override
+  public Keyset read() throws IOException {
+    return Keyset.parseFrom(readPref());
+  }
+
+  @Override
+  public EncryptedKeyset readEncrypted() throws IOException {
+    return EncryptedKeyset.parseFrom(readPref());
   }
 }

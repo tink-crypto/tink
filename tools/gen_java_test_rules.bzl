@@ -14,14 +14,13 @@
 #
 ################################################################################
 
-"""Generate java test rules from given test_files.
+"""Generate Java test rules from given test_files.
 
 Instead of having to create one test rule per test in the BUILD file, this rule
 provides a handy way to create a bunch of test rules for the specified test
 files.
 
 """
-
 
 def gen_java_test_rules(test_files,
                         deps,
@@ -94,7 +93,7 @@ def _package_from_path(package_path, src_impls=None):
 
 def _strip_right(s, suffix):
   if s.endswith(suffix):
-    return str[0: len(s) - len(suffix)]
+    return s[0: len(s) - len(suffix)]
   else:
     return s
 

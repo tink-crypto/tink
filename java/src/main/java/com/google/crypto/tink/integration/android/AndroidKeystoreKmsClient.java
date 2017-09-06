@@ -45,7 +45,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   public AndroidKeystoreKmsClient() throws GeneralSecurityException {
     if (!isAtLeastM()) {
       throw new GeneralSecurityException(
-          "Android Keystore is only available on Android M or newer");
+          "needs Android Keystore on Android M or newer");
     }
   }
 
@@ -98,51 +98,54 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   }
 
   @Override
-  public Aead getAead(String keyUri) throws GeneralSecurityException {
+  public Aead getAead(String uri) throws GeneralSecurityException {
+    if (this.keyUri != null && !this.keyUri.equals(uri)) {
+      throw new GeneralSecurityException(
+          String.format("this client is bound to %s, cannot load keys bound to %s",
+              this.keyUri, uri));
+    }
     try {
-      return new AndroidKeystoreAesGcm(Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri));
+      return new AndroidKeystoreAesGcm(
+          Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
     } catch (IOException e) {
       throw new GeneralSecurityException(e);
     }
   }
 
-  /** Generates a new key in Android Keystore, if it doesn't exist. Otherwise do nothing. */
-  public static void generateNewIfNotFound(String keyUri, KeyGenParameterSpec spec)
-      throws GeneralSecurityException {
+  /**
+   * Generates a new key in Android Keystore, if it doesn't exist.
+   *
+   * <p>At the moment it can generate only AES256-GCM keys.
+   */
+  public static Aead getOrGenerateNewAeadKey(String keyUri)
+      throws GeneralSecurityException, IOException {
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
     KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
-    if (keyStore.containsAlias(keyId)) {
-      return;
+    keyStore.load(null /* param */);
+    if (!keyStore.containsAlias(keyId)) {
+      generateNewAeadKey(keyUri);
     }
-    generateNew(keyUri, spec);
+    return new AndroidKeystoreKmsClient().getAead(keyUri);
   }
 
   /**
-   * Generates a new Android Keystore KMS key. At the moment it can generate only AES-GCM keys.
+   * Generates a new key in Android Keystore.
    *
-   * <p>By passing an optional {@link android.security.keystore.KeyGenParameterSpec} argument you
-   * can specify that the master key is only authorized to be used if the user has been
-   * authenticated. The user is authenticated using a subset of their secure lock screen credentials
-   * (pattern/PIN/password, fingerprint). See also:
-   * https://developer.android.com/training/articles/keystore.html#UserAuthentication.
+   * <p>At the moment it can generate only AES256-GCM keys.
    */
-  public static void generateNew(String keyUri, KeyGenParameterSpec spec)
+  public static void generateNewAeadKey(String keyUri)
       throws GeneralSecurityException {
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
-    KeyGenerator keyGenerator =
-        KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
-    KeyGenParameterSpec.Builder specBuilder =
-        new KeyGenParameterSpec.Builder(
-                keyId, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE);
-    if (spec != null) {
-      specBuilder
-          .setUserAuthenticationRequired(spec.isUserAuthenticationRequired())
-          .setUserAuthenticationValidityDurationSeconds(
-              spec.getUserAuthenticationValidityDurationSeconds());
-    }
-    keyGenerator.init(specBuilder.build());
+    KeyGenerator keyGenerator = KeyGenerator.getInstance(
+        KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+    KeyGenParameterSpec spec =
+        new KeyGenParameterSpec.Builder(keyId,
+            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                .setKeySize(256)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .build();
+    keyGenerator.init(spec);
     keyGenerator.generateKey();
   }
 }

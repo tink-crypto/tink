@@ -120,6 +120,11 @@ public final class AwsKmsClient implements KmsClient {
 
   @Override
   public Aead getAead(String uri) throws GeneralSecurityException {
+    if (this.keyUri != null && !this.keyUri.equals(uri)) {
+      throw new GeneralSecurityException(
+          String.format("this client is bound to %s, cannot load keys bound to %s",
+              this.keyUri, uri));
+    }
     return new AwsKmsAead(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
   }
 }

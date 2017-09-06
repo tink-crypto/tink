@@ -71,8 +71,6 @@
             <exclude>**/AwsKmsClient.java</exclude>
             <exclude>**/GcpKmsAead.java</exclude>
             <exclude>**/GcpKmsClient.java</exclude>
-            <exclude>**/TextFormatKeysetReaders.java</exclude>
-            <exclude>**/TextFormatKeysetWriters.java</exclude>
           </excludes>
           <testExcludes>
             <exclude>**/AwsKmsAeadTest.java</exclude>
