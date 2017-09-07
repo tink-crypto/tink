@@ -123,16 +123,6 @@
       </dependency>
 
       <dependency>
-        <groupId>com.google.android</groupId>
-        <artifactId>android</artifactId>
-        <version>${android-sdk.version}</version>
-        <scope>system</scope>
-        <systemPath>
-          ${env.ANDROID_HOME}/platforms/android-${android-sdk.version}/android.jar
-        </systemPath>
-      </dependency>
-
-      <dependency>
         <groupId>com.google.api-client</groupId>
         <artifactId>google-api-client</artifactId>
         <version>${google-api-client.version}</version>
