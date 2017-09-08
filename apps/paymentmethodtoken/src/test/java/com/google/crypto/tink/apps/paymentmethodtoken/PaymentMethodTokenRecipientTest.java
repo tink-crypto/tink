@@ -237,14 +237,17 @@ public class PaymentMethodTokenRecipientTest {
             .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, "ECv3");
     trustedKeysJson.put("keys", new JSONArray().put(key1).put(key2));
 
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(trustedKeysJson.toString())
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
+
     try {
-      PaymentMethodTokenRecipient unused = new PaymentMethodTokenRecipient.Builder()
-          .senderVerifyingKeys(trustedKeysJson.toString())
-          .recipientId(RECIPIENT_ID)
-          .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-          .build();
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException e) {
+      recipient.unseal(CIPHERTEXT);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
       assertEquals("no trusted keys are available for this protocol version", e.getMessage());
     }
   }

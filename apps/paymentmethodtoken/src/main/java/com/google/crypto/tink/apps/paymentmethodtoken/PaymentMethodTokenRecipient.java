@@ -17,14 +17,15 @@
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.joda.time.Instant;
 import org.json.JSONArray;
@@ -32,20 +33,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * An implementation of the recipient side of
- * <a href="https://developers.google.com/android-pay/integration/payment-token-cryptography">
- * Google Payment Method Token</a>.
+ * An implementation of the recipient side of <a
+ * href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
+ * Payment Method Token</a>.
  *
- * <p><b>Warning</b>
- * This implementation supports only version {@code ECv1}.
+ * <p><b>Warning</b> This implementation supports only version {@code ECv1}.
  *
- * <p>Usage:
+ * <p>Typical usage:
+ *
  * <pre>{@code
  * PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
- *     .senderId(senderId)
- *     .addSenderVerifyingKey(senderPublicKey)
+ *     .fetchSenderVerifyingKeysWith(
+ *         GooglePaymentsPublicKeysManager.INSTANCE_PRODUCTION)
  *     .recipientId(recipientId)
- *     .addRecipientPrivateKey(recipientPrivateKey)
+ *     // Multiple recipient private keys can be added to support graceful key rotations
+ *     .addRecipientPrivateKey(recipientPrivateKey1)
+ *     .addRecipientPrivateKey(recipientPrivateKey2)
  *     .build();
  * String ciphertext = ...;
  * String plaintext = recipient.unseal(ciphertext);
@@ -53,30 +56,28 @@ import org.json.JSONObject;
  */
 public final class PaymentMethodTokenRecipient {
   private final String protocolVersion;
-  private final List<PublicKeyVerify> verifiers = new ArrayList<PublicKeyVerify>();
+  private final List<SenderVerifyingKeysProvider> verifyingKeysProviders;
   private final List<HybridDecrypt> hybridDecrypters = new ArrayList<HybridDecrypt>();
   private final String senderId;
   private final String recipientId;
 
   PaymentMethodTokenRecipient(
       String protocolVersion,
-      final List<ECPublicKey> senderVerifyingKeys,
+      List<SenderVerifyingKeysProvider> verifyingKeysProviders,
       String senderId,
-      final List<ECPrivateKey> recipientPrivateKeys,
+      List<ECPrivateKey> recipientPrivateKeys,
       String recipientId)
       throws GeneralSecurityException {
     if (!protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
       throw new IllegalArgumentException("invalid version: " + protocolVersion);
     }
     this.protocolVersion = protocolVersion;
-    if (senderVerifyingKeys == null || senderVerifyingKeys.isEmpty()) {
+    if (verifyingKeysProviders == null || verifyingKeysProviders.isEmpty()) {
       throw new IllegalArgumentException(
-          "must set at least one sender's verifying key using Builder.senderVerifyingKeys");
+          "must set at least one way to get sender's verifying key using"
+              + " Builder.fetchSenderVerifyingKeysWith or Builder.senderVerifyingKeys");
     }
-    for (ECPublicKey publicKey : senderVerifyingKeys) {
-      verifiers.add(new EcdsaVerifyJce(publicKey,
-          PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO));
-    }
+    this.verifyingKeysProviders = verifyingKeysProviders;
     this.senderId = senderId;
 
     if (recipientPrivateKeys == null || recipientPrivateKeys.isEmpty()) {
@@ -94,8 +95,9 @@ public final class PaymentMethodTokenRecipient {
   }
 
   private PaymentMethodTokenRecipient(Builder builder) throws GeneralSecurityException {
-    this(builder.protocolVersion,
-        builder.senderVerifyingKeys,
+    this(
+        builder.protocolVersion,
+        builder.senderVerifyingKeysProviders,
         builder.senderId,
         builder.recipientPrivateKeys,
         builder.recipientId);
@@ -108,7 +110,8 @@ public final class PaymentMethodTokenRecipient {
     private String protocolVersion = PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1;
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
     private String recipientId = null;
-    private final List<ECPublicKey> senderVerifyingKeys = new ArrayList<ECPublicKey>();
+    private final List<SenderVerifyingKeysProvider> senderVerifyingKeysProviders =
+        new ArrayList<SenderVerifyingKeysProvider>();
     private final List<ECPrivateKey> recipientPrivateKeys = new ArrayList<ECPrivateKey>();
 
     public Builder() {
@@ -139,7 +142,36 @@ public final class PaymentMethodTokenRecipient {
     }
 
     /**
+     * Fetches verifying public keys of the sender using {@link GooglePaymentsPublicKeysManager}.
+     *
+     * <p>This is the preferred method of specifying the verifying public keys of the sender.
+     */
+    public Builder fetchSenderVerifyingKeysWith(
+        final GooglePaymentsPublicKeysManager googlePaymentsPublicKeysManager)
+        throws GeneralSecurityException {
+      this.senderVerifyingKeysProviders.add(
+          new SenderVerifyingKeysProvider() {
+            @Override
+            public List<ECPublicKey> get(String protocolVersion) throws GeneralSecurityException {
+              try {
+                return parseTrustedSigningKeysJson(
+                    protocolVersion, googlePaymentsPublicKeysManager.getTrustedSigningKeysJson());
+              } catch (IOException e) {
+                throw new GeneralSecurityException("Failed to fetch keys!", e);
+              }
+            }
+          });
+      return this;
+    }
+
+    /**
      * Sets the trusted verifying public keys of the sender.
+     *
+     * <p><b>IMPORTANT</b>: Instead of using this method to sent the verifying public keys of the
+     * sender, prefer calling {@link #fetchSenderVerifyingKeysWith} passing it an instance of {@link
+     * GooglePaymentsPublicKeysManager}. It will take care of fetching fresh keys and caching in
+     * memory. Only use this method if you can't use {@link #fetchSenderVerifyingKeysWith} and be
+     * aware you will need to Google key rotations yourself.
      *
      * <p>The given string is a JSON object formatted like the following:
      *
@@ -161,45 +193,62 @@ public final class PaymentMethodTokenRecipient {
      * <p>Each public key will be a base64 (no wrapping, padded) version of the key encoded in ASN.1
      * type SubjectPublicKeyInfo defined in the X.509 standard.
      */
-    public Builder senderVerifyingKeys(String trustedSigningKeysJson)
+    public Builder senderVerifyingKeys(final String trustedSigningKeysJson)
         throws GeneralSecurityException {
-      senderVerifyingKeys.clear();
-      try {
-        JSONArray keys = new JSONObject(trustedSigningKeysJson).getJSONArray("keys");
-        for (int i = 0; i < keys.length(); i++) {
-          JSONObject key = keys.getJSONObject(i);
-          if (protocolVersion.equals(key.getString(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY))) {
-            senderVerifyingKeys.add(
-                PaymentMethodTokenUtil.x509EcPublicKey(key.getString("keyValue")));
-          }
-        }
-      } catch (JSONException e) {
-        throw new RuntimeException("failed to extract trusted signing public keys", e);
-      }
-      if (senderVerifyingKeys.isEmpty()) {
-        throw new IllegalArgumentException(
-            "no trusted keys are available for this protocol version");
-      }
+      this.senderVerifyingKeysProviders.add(
+          new SenderVerifyingKeysProvider() {
+            @Override
+            public List<ECPublicKey> get(String protocolVersion) throws GeneralSecurityException {
+              return parseTrustedSigningKeysJson(protocolVersion, trustedSigningKeysJson);
+            }
+          });
       return this;
     }
 
     /**
      * Adds a verifying public key of the sender.
      *
-     * <p>The public key is a base64 (no wrapping, padded) version of the key encoded in ASN.1
-     * type SubjectPublicKeyInfo defined in the X.509 standard.
+     * <p><b>IMPORTANT</b>: Instead of using this method to sent the verifying public keys of the
+     * sender, prefer calling {@link #fetchSenderVerifyingKeysWith} passing it an instance of {@link
+     * GooglePaymentsPublicKeysManager}. It will take care of fetching fresh keys and caching in
+     * memory. Only use this method if you can't use {@link #fetchSenderVerifyingKeysWith} and be
+     * aware you will need to Google key rotations yourself.
+     *
+     * <p>The public key is a base64 (no wrapping, padded) version of the key encoded in ASN.1 type
+     * SubjectPublicKeyInfo defined in the X.509 standard.
      *
      * <p>Multiple keys may be added. This utility will then verify any message signed with any of
      * the private keys corresponding to the public keys added. Adding multiple keys is useful for
      * handling key rotation.
      */
-    public Builder addSenderVerifyingKey(String val) throws GeneralSecurityException {
-      senderVerifyingKeys.add(PaymentMethodTokenUtil.x509EcPublicKey(val));
+    public Builder addSenderVerifyingKey(final String val) throws GeneralSecurityException {
+      this.senderVerifyingKeysProviders.add(
+          new SenderVerifyingKeysProvider() {
+            @Override
+            public List<ECPublicKey> get(String protocolVersion) throws GeneralSecurityException {
+              return Arrays.asList(PaymentMethodTokenUtil.x509EcPublicKey(val));
+            }
+          });
       return this;
     }
 
-    public Builder addSenderVerifyingKey(ECPublicKey val) throws GeneralSecurityException {
-      senderVerifyingKeys.add(val);
+    /**
+     * Adds a verifying public key of the sender.
+     *
+     * <p><b>IMPORTANT</b>: Instead of using this method to sent the verifying public keys of the
+     * sender, prefer calling {@link #fetchSenderVerifyingKeysWith} passing it an instance of {@link
+     * GooglePaymentsPublicKeysManager}. It will take care of fetching fresh keys and caching in
+     * memory. Only use this method if you can't use {@link #fetchSenderVerifyingKeysWith} and be
+     * aware you will need to Google key rotations yourself.
+     */
+    public Builder addSenderVerifyingKey(final ECPublicKey val) throws GeneralSecurityException {
+      this.senderVerifyingKeysProviders.add(
+          new SenderVerifyingKeysProvider() {
+            @Override
+            public List<ECPublicKey> get(String protocolVersion) throws GeneralSecurityException {
+              return Arrays.asList(val);
+            }
+          });
       return this;
     }
 
@@ -277,13 +326,17 @@ public final class PaymentMethodTokenRecipient {
   private void verify(final byte[] signature,
       final byte[] message) throws GeneralSecurityException {
     boolean verified = false;
-    for (PublicKeyVerify verifier : verifiers) {
-      try {
-        verifier.verify(signature, message);
-        // No exception means the signature is valid.
-        verified = true;
-      } catch (GeneralSecurityException e) {
-        // ignored, try again
+    for (SenderVerifyingKeysProvider verifyingKeysProvider : verifyingKeysProviders) {
+      for (ECPublicKey publicKey : verifyingKeysProvider.get(protocolVersion)) {
+        EcdsaVerifyJce verifier =
+            new EcdsaVerifyJce(publicKey, PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO);
+        try {
+          verifier.verify(signature, message);
+          // No exception means the signature is valid.
+          verified = true;
+        } catch (GeneralSecurityException e) {
+          // ignored, try again
+        }
       }
     }
     if (!verified) {
@@ -319,5 +372,31 @@ public final class PaymentMethodTokenRecipient {
     if (!version.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
       throw new GeneralSecurityException("invalid version: " + version);
     }
+  }
+
+  private static List<ECPublicKey> parseTrustedSigningKeysJson(
+      String protocolVersion, String trustedSigningKeysJson) throws GeneralSecurityException {
+    List<ECPublicKey> senderVerifyingKeys = new ArrayList<>();
+    try {
+      JSONArray keys = new JSONObject(trustedSigningKeysJson).getJSONArray("keys");
+      for (int i = 0; i < keys.length(); i++) {
+        JSONObject key = keys.getJSONObject(i);
+        if (protocolVersion.equals(
+            key.getString(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY))) {
+          senderVerifyingKeys.add(
+              PaymentMethodTokenUtil.x509EcPublicKey(key.getString("keyValue")));
+        }
+      }
+    } catch (JSONException e) {
+      throw new GeneralSecurityException("failed to extract trusted signing public keys", e);
+    }
+    if (senderVerifyingKeys.isEmpty()) {
+      throw new GeneralSecurityException("no trusted keys are available for this protocol version");
+    }
+    return senderVerifyingKeys;
+  }
+
+  private interface SenderVerifyingKeysProvider {
+    List<ECPublicKey> get(String protocolVersion) throws GeneralSecurityException;
   }
 }

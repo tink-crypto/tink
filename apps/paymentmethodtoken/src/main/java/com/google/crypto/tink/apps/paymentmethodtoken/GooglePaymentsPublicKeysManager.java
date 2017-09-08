@@ -114,9 +114,9 @@ public class GooglePaymentsPublicKeysManager {
   /**
    * Returns a string containing a JSON with the Google public signing keys.
    *
-   * <p>You can pass this value to {@link PaymentMethodTokenRecipient.Builder#senderVerifyingKeys}.
+   * <p>Meant to be called by {@link PaymentMethodTokenRecipient}.
    */
-  public String getTrustedSigningKeysJson() throws IOException {
+  String getTrustedSigningKeysJson() throws IOException {
     synchronized (instanceStateLock) {
       // Checking and using the cache if required.
       if (hasNonExpiredKeyCached()) {
