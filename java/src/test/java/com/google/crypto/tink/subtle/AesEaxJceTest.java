@@ -28,24 +28,26 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Unit tests for AesEax
- * TODO(bleichen): Add more tests:
- *   - maybe add NIST style verification.
- *   - tests with long ciphertexts (e.g. BC had a bug with messages of size 8k or longer)
- *   - check that IVs are distinct.
+ * Unit tests for AesEax.
+ *
+ * <p>TODO(bleichen): Add more tests:
+ *
+ * <ul>
+ *   <li>- maybe add NIST style verification.
+ *   <li>- tests with long ciphertexts (e.g. BC had a bug with messages of size 8k or longer)
+ *   <li>- check that IVs are distinct.
+ * </ul>
  */
 @RunWith(JUnit4.class)
 public class AesEaxJceTest {
   private static final int KEY_SIZE = 16;
   private static final int IV_SIZE = 16;
 
-  /**
-   * EaxTestVector
-   */
+  /** EaxTestVector */
   public static class EaxTestVector {
     final byte[] pt;
     final byte[] aad;
-    final byte[] ct;  // nonce + ciphertext
+    final byte[] ct; // nonce + ciphertext
     final String ptHex;
     final String ctHex;
     final byte[] key;
@@ -65,7 +67,8 @@ public class AesEaxJceTest {
 
   /**
    * Test vectors from Wycheproof.
-   * TODO(bleichen): There are no 12 byte nonces here.
+   *
+   * <p>TODO(bleichen): There are no 12 byte nonces here.
    */
   private static final EaxTestVector[] EAX_TEST_VECTOR = {
     new EaxTestVector(

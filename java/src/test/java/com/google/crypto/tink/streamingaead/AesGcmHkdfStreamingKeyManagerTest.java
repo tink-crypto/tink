@@ -43,9 +43,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Test for AesGcmHkdfStreamingKeyManager.
- */
+/** Test for AesGcmHkdfStreamingKeyManager. */
 @RunWith(JUnit4.class)
 public class AesGcmHkdfStreamingKeyManagerTest {
   private static final int AES_KEY_SIZE = 16;
@@ -54,17 +52,16 @@ public class AesGcmHkdfStreamingKeyManagerTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {
-    keyParams = AesGcmHkdfStreamingParams.newBuilder()
-        .setCiphertextSegmentSize(128)
-        .setDerivedKeySize(AES_KEY_SIZE)
-        .setHkdfHashType(HashType.SHA256)
-        .build();
+    keyParams =
+        AesGcmHkdfStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(128)
+            .setDerivedKeySize(AES_KEY_SIZE)
+            .setHkdfHashType(HashType.SHA256)
+            .build();
     keyManager = new AesGcmHkdfStreamingKeyManager();
   }
 
-  /**
-   * Tests encryption and decryption functionalities of {@code streamingAead}.
-   */
+  /** Tests encryption and decryption functionalities of {@code streamingAead}. */
   private void testEncryptionAndDecryption(StreamingAead streamingAead) throws Exception {
     byte[] aad = Random.randBytes(15);
     // Short plaintext.
@@ -76,22 +73,22 @@ public class AesGcmHkdfStreamingKeyManagerTest {
   }
 
   /**
-   * Tests encryption and decryption functionalities of {@code streamingAead}
-   * using {@code plaintext} and {@code aad}.
+   * Tests encryption and decryption functionalities of {@code streamingAead} using {@code
+   * plaintext} and {@code aad}.
    */
-  private void testEncryptionAndDecryption(StreamingAead streamingAead,
-      byte[] plaintext, byte[] aad) throws Exception {
+  private void testEncryptionAndDecryption(
+      StreamingAead streamingAead, byte[] plaintext, byte[] aad) throws Exception {
     // Encrypt plaintext.
     ByteArrayOutputStream ciphertext = new ByteArrayOutputStream();
-    WritableByteChannel encChannel = streamingAead.newEncryptingChannel(
-        Channels.newChannel(ciphertext), aad);
+    WritableByteChannel encChannel =
+        streamingAead.newEncryptingChannel(Channels.newChannel(ciphertext), aad);
     encChannel.write(ByteBuffer.wrap(plaintext));
     encChannel.close();
 
     // Decrypt ciphertext.
     ByteBufferChannel ciphertextChannel = new ByteBufferChannel(ciphertext.toByteArray());
-    SeekableByteChannel decChannel = streamingAead.newSeekableDecryptingChannel(
-        ciphertextChannel, aad);
+    SeekableByteChannel decChannel =
+        streamingAead.newSeekableDecryptingChannel(ciphertextChannel, aad);
     ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
     int readCount = decChannel.read(decrypted);
 
@@ -103,19 +100,18 @@ public class AesGcmHkdfStreamingKeyManagerTest {
   @Test
   public void testBasic() throws Exception {
     // Create primitive from a given key.
-    AesGcmHkdfStreamingKey key = AesGcmHkdfStreamingKey.newBuilder()
-        .setVersion(0)
-        .setKeyValue(ByteString.copyFrom(Random.randBytes(20)))
-        .setParams(keyParams)
-        .build();
+    AesGcmHkdfStreamingKey key =
+        AesGcmHkdfStreamingKey.newBuilder()
+            .setVersion(0)
+            .setKeyValue(ByteString.copyFrom(Random.randBytes(20)))
+            .setParams(keyParams)
+            .build();
     StreamingAead streamingAead = keyManager.getPrimitive(key);
     testEncryptionAndDecryption(streamingAead);
 
     // Create a key from KeyFormat, and use the key.
-    AesGcmHkdfStreamingKeyFormat keyFormat = AesGcmHkdfStreamingKeyFormat.newBuilder()
-        .setParams(keyParams)
-        .setKeySize(16)
-        .build();
+    AesGcmHkdfStreamingKeyFormat keyFormat =
+        AesGcmHkdfStreamingKeyFormat.newBuilder().setParams(keyParams).setKeySize(16).build();
     ByteString serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     key = (AesGcmHkdfStreamingKey) keyManager.newKey(serializedKeyFormat);
     streamingAead = keyManager.getPrimitive(key);
@@ -124,10 +120,8 @@ public class AesGcmHkdfStreamingKeyManagerTest {
 
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
-    AesGcmHkdfStreamingKeyFormat keyFormat = AesGcmHkdfStreamingKeyFormat.newBuilder()
-        .setParams(keyParams)
-        .setKeySize(16)
-        .build();
+    AesGcmHkdfStreamingKeyFormat keyFormat =
+        AesGcmHkdfStreamingKeyFormat.newBuilder().setParams(keyParams).setKeySize(16).build();
     ByteString serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     Set<String> keys = new TreeSet<String>();
     // Calls newKey multiple times and make sure that they generate different keys.
@@ -152,10 +146,8 @@ public class AesGcmHkdfStreamingKeyManagerTest {
   @Test
   public void testNewKeyWithBadFormat() throws Exception {
     // key_size too small.
-    AesGcmHkdfStreamingKeyFormat keyFormat = AesGcmHkdfStreamingKeyFormat.newBuilder()
-        .setParams(keyParams)
-        .setKeySize(15)
-        .build();
+    AesGcmHkdfStreamingKeyFormat keyFormat =
+        AesGcmHkdfStreamingKeyFormat.newBuilder().setParams(keyParams).setKeySize(15).build();
     ByteString serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     try {
       keyManager.newKey(keyFormat);
@@ -171,15 +163,14 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     }
 
     // Unsupported HKDF HashType.
-    AesGcmHkdfStreamingParams badKeyParams = AesGcmHkdfStreamingParams.newBuilder()
-        .setCiphertextSegmentSize(128)
-        .setDerivedKeySize(AES_KEY_SIZE)
-        .setHkdfHashType(HashType.SHA512)
-        .build();
-    keyFormat = AesGcmHkdfStreamingKeyFormat.newBuilder()
-        .setParams(badKeyParams)
-        .setKeySize(16)
-        .build();
+    AesGcmHkdfStreamingParams badKeyParams =
+        AesGcmHkdfStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(128)
+            .setDerivedKeySize(AES_KEY_SIZE)
+            .setHkdfHashType(HashType.SHA512)
+            .build();
+    keyFormat =
+        AesGcmHkdfStreamingKeyFormat.newBuilder().setParams(badKeyParams).setKeySize(16).build();
     serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     try {
       keyManager.newKey(keyFormat);
@@ -195,15 +186,14 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     }
 
     // derived_key_size too small.
-    badKeyParams = AesGcmHkdfStreamingParams.newBuilder()
-        .setCiphertextSegmentSize(128)
-        .setDerivedKeySize(10)
-        .setHkdfHashType(HashType.SHA256)
-        .build();
-    keyFormat = AesGcmHkdfStreamingKeyFormat.newBuilder()
-        .setParams(badKeyParams)
-        .setKeySize(16)
-        .build();
+    badKeyParams =
+        AesGcmHkdfStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(128)
+            .setDerivedKeySize(10)
+            .setHkdfHashType(HashType.SHA256)
+            .build();
+    keyFormat =
+        AesGcmHkdfStreamingKeyFormat.newBuilder().setParams(badKeyParams).setKeySize(16).build();
     serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     try {
       keyManager.newKey(keyFormat);
@@ -219,15 +209,14 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     }
 
     // ciphertext_segment_size too small.
-    badKeyParams = AesGcmHkdfStreamingParams.newBuilder()
-        .setCiphertextSegmentSize(15)
-        .setDerivedKeySize(AES_KEY_SIZE)
-        .setHkdfHashType(HashType.SHA256)
-        .build();
-    keyFormat = AesGcmHkdfStreamingKeyFormat.newBuilder()
-        .setParams(badKeyParams)
-        .setKeySize(16)
-        .build();
+    badKeyParams =
+        AesGcmHkdfStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(15)
+            .setDerivedKeySize(AES_KEY_SIZE)
+            .setHkdfHashType(HashType.SHA256)
+            .build();
+    keyFormat =
+        AesGcmHkdfStreamingKeyFormat.newBuilder().setParams(badKeyParams).setKeySize(16).build();
     serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     try {
       keyManager.newKey(keyFormat);
@@ -243,15 +232,14 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     }
 
     // All params good.
-    AesGcmHkdfStreamingParams goodKeyParams = AesGcmHkdfStreamingParams.newBuilder()
-        .setCiphertextSegmentSize(130)
-        .setDerivedKeySize(AES_KEY_SIZE)
-        .setHkdfHashType(HashType.SHA256)
-        .build();
-    keyFormat = AesGcmHkdfStreamingKeyFormat.newBuilder()
-        .setParams(goodKeyParams)
-        .setKeySize(16)
-        .build();
+    AesGcmHkdfStreamingParams goodKeyParams =
+        AesGcmHkdfStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(130)
+            .setDerivedKeySize(AES_KEY_SIZE)
+            .setHkdfHashType(HashType.SHA256)
+            .build();
+    keyFormat =
+        AesGcmHkdfStreamingKeyFormat.newBuilder().setParams(goodKeyParams).setKeySize(16).build();
     serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     AesGcmHkdfStreamingKey unusedKey = (AesGcmHkdfStreamingKey) keyManager.newKey(keyFormat);
     unusedKey = (AesGcmHkdfStreamingKey) keyManager.newKey(serializedKeyFormat);

@@ -42,9 +42,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for EciesAeadHkdfPrivateKeyManager.
- */
+/** Tests for EciesAeadHkdfPrivateKeyManager. */
 @RunWith(JUnit4.class)
 public class EciesAeadHkdfPrivateKeyManagerTest {
   @BeforeClass
@@ -60,34 +58,36 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     KeyTemplate demKeyTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
 
     byte[] salt = "some salt".getBytes("UTF-8");
-    EciesAeadHkdfParams params = HybridKeyTemplates.createEciesAeadHkdfParams(
-        curve, hashType, pointFormat, demKeyTemplate, salt);
+    EciesAeadHkdfParams params =
+        HybridKeyTemplates.createEciesAeadHkdfParams(
+            curve, hashType, pointFormat, demKeyTemplate, salt);
 
     EciesAeadHkdfPrivateKeyManager manager = new EciesAeadHkdfPrivateKeyManager();
-    EciesAeadHkdfPrivateKey keyProto = (EciesAeadHkdfPrivateKey) manager.newKey(
-        EciesAeadHkdfKeyFormat.newBuilder().setParams(params).build());
+    EciesAeadHkdfPrivateKey keyProto =
+        (EciesAeadHkdfPrivateKey)
+            manager.newKey(EciesAeadHkdfKeyFormat.newBuilder().setParams(params).build());
     assertEquals(params, keyProto.getPublicKey().getParams());
 
-    Key primaryPriv = TestUtil.createKey(
-        TestUtil.createKeyData(
-            keyProto,
-            EciesAeadHkdfPrivateKeyManager.TYPE_URL,
-            KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
-        8,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.RAW);
-    Key primaryPub = TestUtil.createKey(
-        TestUtil.createKeyData(
-            keyProto.getPublicKey(),
-            EciesAeadHkdfPublicKeyManager.TYPE_URL,
-            KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
-        42,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.RAW);
-    KeysetHandle keysetHandlePub = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primaryPub));
-    KeysetHandle keysetHandlePriv = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primaryPriv));
+    Key primaryPriv =
+        TestUtil.createKey(
+            TestUtil.createKeyData(
+                keyProto,
+                EciesAeadHkdfPrivateKeyManager.TYPE_URL,
+                KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
+            8,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.RAW);
+    Key primaryPub =
+        TestUtil.createKey(
+            TestUtil.createKeyData(
+                keyProto.getPublicKey(),
+                EciesAeadHkdfPublicKeyManager.TYPE_URL,
+                KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.RAW);
+    KeysetHandle keysetHandlePub = TestUtil.createKeysetHandle(TestUtil.createKeyset(primaryPub));
+    KeysetHandle keysetHandlePriv = TestUtil.createKeysetHandle(TestUtil.createKeyset(primaryPriv));
     HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(keysetHandlePub);
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandlePriv);
     byte[] plaintext = Random.randBytes(20);
@@ -96,29 +96,27 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     assertArrayEquals(plaintext, hybridDecrypt.decrypt(ciphertext, contextInfo));
   }
 
- /**
-   * Tests that a public key is extracted properly from a private key.
-   */
+  /** Tests that a public key is extracted properly from a private key. */
   @Test
   public void testGetPublicKeyData() throws Exception {
-    KeysetHandle privateHandle = KeysetHandle.generateNew(
-        HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM);
+    KeysetHandle privateHandle =
+        KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM);
     KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
     EciesAeadHkdfPrivateKeyManager privateManager = new EciesAeadHkdfPrivateKeyManager();
     KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
     assertEquals(EciesAeadHkdfPublicKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
-    EciesAeadHkdfPrivateKey privateKey = EciesAeadHkdfPrivateKey.parseFrom(
-        privateKeyData.getValue());
-    assertArrayEquals(privateKey.getPublicKey().toByteArray(),
-        publicKeyData.getValue().toByteArray());
+    EciesAeadHkdfPrivateKey privateKey =
+        EciesAeadHkdfPrivateKey.parseFrom(privateKeyData.getValue());
+    assertArrayEquals(
+        privateKey.getPublicKey().toByteArray(), publicKeyData.getValue().toByteArray());
 
     EciesAeadHkdfPublicKeyManager publicManager = new EciesAeadHkdfPublicKeyManager();
     HybridEncrypt hybridEncrypt = publicManager.getPrimitive(publicKeyData.getValue());
     HybridDecrypt hybridDecrypt = privateManager.getPrimitive(privateKeyData.getValue());
     byte[] message = Random.randBytes(20);
     byte[] contextInfo = Random.randBytes(20);
-    assertArrayEquals(message, hybridDecrypt.decrypt(
-        hybridEncrypt.encrypt(message, contextInfo), contextInfo));
+    assertArrayEquals(
+        message, hybridDecrypt.decrypt(hybridEncrypt.encrypt(message, contextInfo), contextInfo));
   }
 }

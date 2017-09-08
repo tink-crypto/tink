@@ -28,51 +28,49 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for Config.
- */
+/** Tests for Config. */
 @RunWith(JUnit4.class)
 public class ConfigTest {
   private RegistryConfig createAeadConfig() {
     return RegistryConfig.newBuilder()
-        .addEntry(Config.getTinkKeyTypeEntry(
-            "TinkAead", "Aead", "AesEaxKey", 0, true))
+        .addEntry(Config.getTinkKeyTypeEntry("TinkAead", "Aead", "AesEaxKey", 0, true))
         .setConfigName("TINK_AEAD_1_0_0")
         .build();
   }
 
   private RegistryConfig createMacConfig() {
     return RegistryConfig.newBuilder()
-        .addEntry(Config.getTinkKeyTypeEntry(
-            "TinkMac", "Mac", "HmacKey", 0, true))
+        .addEntry(Config.getTinkKeyTypeEntry("TinkMac", "Mac", "HmacKey", 0, true))
         .setConfigName("TINK_MAC_1_0_0")
         .build();
   }
 
   private RegistryConfig createHybridConfig() {
     return RegistryConfig.newBuilder()
-        .addEntry(Config.getTinkKeyTypeEntry(
-            "TinkHybrid", "HybridDecrypt", "EciesAeadHkdfPrivateKey", 0, true))
-        .addEntry(Config.getTinkKeyTypeEntry(
-            "TinkHybrid", "HybridEncrypt", "EciesAeadHkdfPublicKey", 0, true))
+        .addEntry(
+            Config.getTinkKeyTypeEntry(
+                "TinkHybrid", "HybridDecrypt", "EciesAeadHkdfPrivateKey", 0, true))
+        .addEntry(
+            Config.getTinkKeyTypeEntry(
+                "TinkHybrid", "HybridEncrypt", "EciesAeadHkdfPublicKey", 0, true))
         .setConfigName("TINK_HYBRID_1_0_0")
         .build();
   }
 
   private RegistryConfig createSignatureConfig() {
     return RegistryConfig.newBuilder()
-        .addEntry(Config.getTinkKeyTypeEntry(
-            "TinkSignature", "PublicKeySign", "EcdsaPrivateKey", 0, true))
-        .addEntry(Config.getTinkKeyTypeEntry(
-            "TinkSignature", "PublicKeyVerify", "Ed25519PublicKey", 0, true))
+        .addEntry(
+            Config.getTinkKeyTypeEntry(
+                "TinkSignature", "PublicKeySign", "EcdsaPrivateKey", 0, true))
+        .addEntry(
+            Config.getTinkKeyTypeEntry(
+                "TinkSignature", "PublicKeyVerify", "Ed25519PublicKey", 0, true))
         .build();
   }
 
   @Test
   public void testRegisterKeyType_NoCatalogue_shouldThrowException() throws Exception {
-    KeyTypeEntry entry = KeyTypeEntry.newBuilder()
-        .setCatalogueName("DoesNotExist")
-        .build();
+    KeyTypeEntry entry = KeyTypeEntry.newBuilder().setCatalogueName("DoesNotExist").build();
 
     try {
       Config.registerKeyType(entry);

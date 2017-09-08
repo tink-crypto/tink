@@ -42,7 +42,8 @@ import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for EcdsaVerifyKeyManager.
- * TODO(quannguyen): Add more tests.
+ *
+ * <p>TODO(quannguyen): Add more tests.
  */
 @RunWith(JUnit4.class)
 public class EcdsaVerifyKeyManagerTest {
@@ -64,8 +65,14 @@ public class EcdsaVerifyKeyManagerTest {
     HashType hashType;
     EllipticCurveType curveType;
 
-    public RfcTestVector(String msg, String pubX, String pubY, String r, String s,
-        HashType hashType, EllipticCurveType curveType) {
+    public RfcTestVector(
+        String msg,
+        String pubX,
+        String pubY,
+        String r,
+        String s,
+        HashType hashType,
+        EllipticCurveType curveType) {
       try {
         this.msg = msg.getBytes("UTF-8");
       } catch (Exception ignored) {
@@ -73,8 +80,9 @@ public class EcdsaVerifyKeyManagerTest {
       }
       this.pubX = TestUtil.hexDecode(pubX.toLowerCase());
       this.pubY = TestUtil.hexDecode(pubY.toLowerCase());
-      this.sig = derEncodeSignature(TestUtil.hexDecode(r.toLowerCase()),
-          TestUtil.hexDecode(s.toLowerCase()));
+      this.sig =
+          derEncodeSignature(
+              TestUtil.hexDecode(r.toLowerCase()), TestUtil.hexDecode(s.toLowerCase()));
       this.hashType = hashType;
       this.curveType = curveType;
     }
@@ -93,29 +101,29 @@ public class EcdsaVerifyKeyManagerTest {
     new RfcTestVector(
         "sample",
         "EC3A4E415B4E19A4568618029F427FA5DA9A8BC4AE92E02E06AAE5286B300C64"
-        + "DEF8F0EA9055866064A254515480BC13",
+            + "DEF8F0EA9055866064A254515480BC13",
         "8015D9B72D7D57244EA8EF9AC0C621896708A59367F9DFB9F54CA84B3F1C9DB1"
-        + "288B231C3AE0D4FE7344FD2533264720",
+            + "288B231C3AE0D4FE7344FD2533264720",
         "ED0959D5880AB2D869AE7F6C2915C6D60F96507F9CB3E047C0046861DA4A799C"
-        + "FE30F35CC900056D7C99CD7882433709",
+            + "FE30F35CC900056D7C99CD7882433709",
         "512C8CCEEE3890A84058CE1E22DBC2198F42323CE8ACA9135329F03C068E5112"
-        + "DC7CC3EF3446DEFCEB01A45C2667FDD5",
+            + "DC7CC3EF3446DEFCEB01A45C2667FDD5",
         HashType.SHA512,
         EllipticCurveType.NIST_P384),
     new RfcTestVector(
         "test",
         "01894550D0785932E00EAA23B694F213F8C3121F86DC97A04E5A7167DB4E5BCD3"
-        + "71123D46E45DB6B5D5370A7F20FB633155D38FFA16D2BD761DCAC474B9A2F502"
-        + "3A4",
+            + "71123D46E45DB6B5D5370A7F20FB633155D38FFA16D2BD761DCAC474B9A2F502"
+            + "3A4",
         "00493101C962CD4D2FDDF782285E64584139C2F91B47F87FF82354D6630F746A2"
-        + "8A0DB25741B5B34A828008B22ACC23F924FAAFBD4D33F81EA66956DFEAA2BFDF"
-        + "CF5",
+            + "8A0DB25741B5B34A828008B22ACC23F924FAAFBD4D33F81EA66956DFEAA2BFDF"
+            + "CF5",
         "013E99020ABF5CEE7525D16B69B229652AB6BDF2AFFCAEF38773B4B7D08725F10"
-        + "CDB93482FDCC54EDCEE91ECA4166B2A7C6265EF0CE2BD7051B7CEF945BABD47E"
-        + "E6D",
+            + "CDB93482FDCC54EDCEE91ECA4166B2A7C6265EF0CE2BD7051B7CEF945BABD47E"
+            + "E6D",
         "01FBD0013C674AA79CB39849527916CE301C66EA7CE8B80682786AD60F98F7E78"
-        + "A19CA69EFF5C57400E3B3A0AD66CE0978214D13BAF4E9AC60752F7B155E2DE4D"
-        + "CE3",
+            + "A19CA69EFF5C57400E3B3A0AD66CE0978214D13BAF4E9AC60752F7B155E2DE4D"
+            + "CE3",
         HashType.SHA512,
         EllipticCurveType.NIST_P521),
   };
@@ -138,7 +146,8 @@ public class EcdsaVerifyKeyManagerTest {
     HashAndCurveType[] hashAndCurves = {
       new HashAndCurveType(HashType.SHA256, EllipticCurveType.NIST_P256),
       new HashAndCurveType(HashType.SHA512, EllipticCurveType.NIST_P384),
-      new HashAndCurveType(HashType.SHA512, EllipticCurveType.NIST_P521)};
+      new HashAndCurveType(HashType.SHA512, EllipticCurveType.NIST_P521)
+    };
     for (int i = 0; i < hashAndCurves.length; i++) {
       HashType hashType = hashAndCurves[i].hashType;
       EllipticCurveType curveType = hashAndCurves[i].curveType;
@@ -158,8 +167,13 @@ public class EcdsaVerifyKeyManagerTest {
 
       // Create PublicKeyVerify.
       ECPoint w = pubKey.getW();
-      PublicKeyVerify verifier = createVerifier(hashType, curveType, EcdsaSignatureEncoding.DER,
-          w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
+      PublicKeyVerify verifier =
+          createVerifier(
+              hashType,
+              curveType,
+              EcdsaSignatureEncoding.DER,
+              w.getAffineX().toByteArray(),
+              w.getAffineY().toByteArray());
       try {
         verifier.verify(signature, msg);
       } catch (GeneralSecurityException e) {
@@ -191,10 +205,14 @@ public class EcdsaVerifyKeyManagerTest {
       // Create PublicKeyVerify.
       ECPoint w = pubKey.getW();
       try {
-        PublicKeyVerify unusedVerifier = createVerifier(hashType, curveType,
-            EcdsaSignatureEncoding.DER, w.getAffineX().toByteArray(), w.getAffineY().toByteArray());
-        fail("Unsupported key, should have thrown exception: " + hashType + " "
-            + curveType);
+        PublicKeyVerify unusedVerifier =
+            createVerifier(
+                hashType,
+                curveType,
+                EcdsaSignatureEncoding.DER,
+                w.getAffineX().toByteArray(),
+                w.getAffineY().toByteArray());
+        fail("Unsupported key, should have thrown exception: " + hashType + " " + curveType);
       } catch (GeneralSecurityException expected) {
         // Expected
       }
@@ -203,8 +221,8 @@ public class EcdsaVerifyKeyManagerTest {
 
   @Test
   public void testGetPrimitiveWithUnsupportedEncoding() throws Exception {
-    ECParameterSpec ecParams = EllipticCurves.getCurveSpec(
-        SigUtil.toCurveType(EllipticCurveType.NIST_P256));
+    ECParameterSpec ecParams =
+        EllipticCurves.getCurveSpec(SigUtil.toCurveType(EllipticCurveType.NIST_P256));
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
     KeyPair keyPair = keyGen.generateKeyPair();
@@ -214,9 +232,13 @@ public class EcdsaVerifyKeyManagerTest {
     // Create PublicKeyVerify.
     ECPoint w = pubKey.getW();
     try {
-      PublicKeyVerify unusedVerifier = createVerifier(HashType.SHA256, EllipticCurveType.NIST_P256,
-          EcdsaSignatureEncoding.IEEE_P1363, w.getAffineX().toByteArray(),
-          w.getAffineY().toByteArray());
+      PublicKeyVerify unusedVerifier =
+          createVerifier(
+              HashType.SHA256,
+              EllipticCurveType.NIST_P256,
+              EcdsaSignatureEncoding.IEEE_P1363,
+              w.getAffineX().toByteArray(),
+              w.getAffineY().toByteArray());
       fail("Unsupported encoding, should have thrown exception.");
     } catch (GeneralSecurityException expected) {
       // Expected
@@ -227,8 +249,13 @@ public class EcdsaVerifyKeyManagerTest {
     return createVerifier(t.hashType, t.curveType, EcdsaSignatureEncoding.DER, t.pubX, t.pubY);
   }
 
-  private PublicKeyVerify createVerifier(HashType hashType, EllipticCurveType curve,
-      EcdsaSignatureEncoding encoding, byte[] pubX, byte[] pubY) throws Exception {
+  private PublicKeyVerify createVerifier(
+      HashType hashType,
+      EllipticCurveType curve,
+      EcdsaSignatureEncoding encoding,
+      byte[] pubX,
+      byte[] pubY)
+      throws Exception {
     EcdsaPublicKey ecdsaPubKey = TestUtil.createEcdsaPubKey(hashType, curve, encoding, pubX, pubY);
     EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
     return verifyManager.getPrimitive(ecdsaPubKey);

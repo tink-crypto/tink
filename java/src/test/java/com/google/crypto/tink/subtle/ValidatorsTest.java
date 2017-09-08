@@ -32,8 +32,7 @@ import org.junit.runners.JUnit4;
 /** Unit tests for {@link Validators}. */
 @RunWith(JUnit4.class)
 public class ValidatorsTest {
-  @Rule
-  public TemporaryFolder tmpFolder = new TemporaryFolder();
+  @Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
 
   @Test
   public void testValidateTypeUrl() throws Exception {
@@ -92,14 +91,14 @@ public class ValidatorsTest {
     for (int maxExpected = -maxVersion; maxExpected <= maxVersion; maxExpected++) {
       for (int candidate = -maxVersion; candidate <= maxVersion; candidate++) {
         if (candidate < 0 || maxExpected < 0) {
-            try {
-              Validators.validateVersion(candidate, maxExpected);
-              fail("Negative version parameters, should have thrown exception.");
-            } catch (GeneralSecurityException e) {
-              // Expected.
-              countNegative++;
-              TestUtil.assertExceptionContains(e, "version");
-            }
+          try {
+            Validators.validateVersion(candidate, maxExpected);
+            fail("Negative version parameters, should have thrown exception.");
+          } catch (GeneralSecurityException e) {
+            // Expected.
+            countNegative++;
+            TestUtil.assertExceptionContains(e, "version");
+          }
         } else {
           if (candidate <= maxExpected) {
             Validators.validateVersion(candidate, maxExpected);
@@ -159,24 +158,22 @@ public class ValidatorsTest {
       TestUtil.assertExceptionContains(e, "Invalid Google Cloud KMS Key URI");
     }
 
-    String cryptoKey = TestUtil.createGcpKmsKeyUri(
-        "projectId", "locationId", "ringId", "cryptoKeyId");
+    String cryptoKey =
+        TestUtil.createGcpKmsKeyUri("projectId", "locationId", "ringId", "cryptoKeyId");
     try {
       Validators.validateCryptoKeyUri(cryptoKey);
     } catch (GeneralSecurityException e) {
       fail("Valid CryptoKey URI should work: " + cryptoKey);
     }
 
-    cryptoKey = TestUtil.createGcpKmsKeyUri(
-        "projectId.", "locationId-", "ringId_", "cryptoKeyId~");
+    cryptoKey = TestUtil.createGcpKmsKeyUri("projectId.", "locationId-", "ringId_", "cryptoKeyId~");
     try {
       Validators.validateCryptoKeyUri(cryptoKey);
     } catch (GeneralSecurityException e) {
       fail("Valid CryptoKey URI should work: " + cryptoKey);
     }
 
-    cryptoKey = TestUtil.createGcpKmsKeyUri(
-        "projectId%", "locationId", "ringId", "cryptoKeyId");
+    cryptoKey = TestUtil.createGcpKmsKeyUri("projectId%", "locationId", "ringId", "cryptoKeyId");
     try {
       Validators.validateCryptoKeyUri(cryptoKey);
       fail("CryptoKey URI cannot contain %");
@@ -184,8 +181,7 @@ public class ValidatorsTest {
       // Expected.
     }
 
-    cryptoKey = TestUtil.createGcpKmsKeyUri(
-        "projectId/", "locationId", "ringId", "cryptoKeyId");
+    cryptoKey = TestUtil.createGcpKmsKeyUri("projectId/", "locationId", "ringId", "cryptoKeyId");
     try {
       Validators.validateCryptoKeyUri(cryptoKey);
       fail("CryptoKey URI cannot contain /");
@@ -193,14 +189,15 @@ public class ValidatorsTest {
       // Expected.
     }
 
-    String cryptoVersion = TestUtil.createGcpKmsKeyUri(
-        "projectId", "locationId", "ringId", "cryptoKeyId") + "/cryptoKeyVersions/versionId";
+    String cryptoVersion =
+        TestUtil.createGcpKmsKeyUri("projectId", "locationId", "ringId", "cryptoKeyId")
+            + "/cryptoKeyVersions/versionId";
     try {
       Validators.validateCryptoKeyUri(cryptoVersion);
       fail("CryptoKeyVersion is not a valid CryptoKey");
     } catch (GeneralSecurityException e) {
-      TestUtil.assertExceptionContains(e,
-          "The URI must point to a CryptoKey, not a CryptoKeyVersion");
+      TestUtil.assertExceptionContains(
+          e, "The URI must point to a CryptoKey, not a CryptoKeyVersion");
     }
   }
 }

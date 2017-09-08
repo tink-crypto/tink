@@ -29,9 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for NoSecretKeysetHandle.
- */
+/** Tests for NoSecretKeysetHandle. */
 @RunWith(JUnit4.class)
 public class NoSecretKeysetHandleTest {
   @BeforeClass
@@ -43,9 +41,7 @@ public class NoSecretKeysetHandleTest {
   public void testBasic() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetManager manager = KeysetManager
-        .withEmptyKeyset()
-        .rotate(template);
+    KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(template);
     Keyset keyset = manager.getKeysetHandle().getKeyset();
     try {
       KeysetHandle unused = NoSecretKeysetHandle.parseFrom(keyset.toByteArray());

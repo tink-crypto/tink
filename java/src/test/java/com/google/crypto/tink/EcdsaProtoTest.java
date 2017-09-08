@@ -25,7 +25,8 @@ import org.junit.runners.JUnit4;
 
 /**
  * A simple integration test to see whether Ecdsa protobuf is built correctly.
- * TODO(quannguyen): Add extensive tests.
+ *
+ * <p>TODO(quannguyen): Add extensive tests.
  */
 @RunWith(JUnit4.class)
 public class EcdsaProtoTest {

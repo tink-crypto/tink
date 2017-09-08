@@ -27,23 +27,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for KmsAeadKeyManager.
- */
+/** Tests for KmsAeadKeyManager. */
 @RunWith(JUnit4.class)
 public class KmsAeadKeyManagerTest {
   @Before
   public void setUp() throws Exception {
-    KmsClient kmsClient = new GcpKmsClient()
-        .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE);
+    KmsClient kmsClient = new GcpKmsClient().withCredentials(TestUtil.SERVICE_ACCOUNT_FILE);
     KmsClients.add(kmsClient);
     Config.register(AeadConfig.TINK_1_0_0);
   }
 
   @Test
   public void testGcpKmsKeyRestricted() throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AeadKeyTemplates.createKmsAeadKeyTemplate(TestUtil.RESTRICTED_CRYPTO_KEY_URI));
+    KeysetHandle keysetHandle =
+        KeysetHandle.generateNew(
+            AeadKeyTemplates.createKmsAeadKeyTemplate(TestUtil.RESTRICTED_CRYPTO_KEY_URI));
     TestUtil.runBasicAeadFactoryTests(keysetHandle);
   }
 }

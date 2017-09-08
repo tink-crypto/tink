@@ -31,19 +31,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for Util.
- */
+/** Tests for Util. */
 @RunWith(JUnit4.class)
 public class UtilTest {
   @Test
   public void testValidateKeyset() throws Exception {
     String keyValue = "01234567890123456";
-    Keyset keyset =  TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
-        -42,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.TINK));
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                -42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
     try {
       Util.validateKeyset(keyset);
     } catch (GeneralSecurityException e) {
@@ -59,18 +59,18 @@ public class UtilTest {
     }
 
     // Multiple primary keys.
-    Keyset invalidKeyset = TestUtil.createKeyset(
-        TestUtil.createKey(
-            TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
-            42,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.TINK),
-        TestUtil.createKey(
-            TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
-            42,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.TINK)
-    );
+    Keyset invalidKeyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK),
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
     try {
       Util.validateKeyset(invalidKeyset);
       fail("Invalid keyset. Expect GeneralSecurityException");
@@ -79,11 +79,13 @@ public class UtilTest {
     }
 
     // Primary key is disabled.
-    invalidKeyset = TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
-        42,
-        KeyStatusType.DISABLED,
-        OutputPrefixType.TINK));
+    invalidKeyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.DISABLED,
+                OutputPrefixType.TINK));
     try {
       Util.validateKeyset(invalidKeyset);
       fail("Invalid keyset. Expect GeneralSecurityException");
@@ -92,14 +94,16 @@ public class UtilTest {
     }
 
     // No primary key.
-    invalidKeyset = Keyset.newBuilder()
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16))
-            .setKeyId(1)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .build();
+    invalidKeyset =
+        Keyset.newBuilder()
+            .addKey(
+                Keyset.Key.newBuilder()
+                    .setKeyData(TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16))
+                    .setKeyId(1)
+                    .setStatus(KeyStatusType.ENABLED)
+                    .setOutputPrefixType(OutputPrefixType.TINK)
+                    .build())
+            .build();
     try {
       Util.validateKeyset(invalidKeyset);
       fail("Invalid keyset. Expect GeneralSecurityException");
@@ -108,17 +112,20 @@ public class UtilTest {
     }
 
     // No primary key, but contains only public key material.
-    Keyset validKeyset = Keyset.newBuilder()
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(TestUtil.createKeyData(
-                KeyData.newBuilder().build(),
-                "typeUrl",
-                KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC))
-            .setKeyId(1)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .build();
+    Keyset validKeyset =
+        Keyset.newBuilder()
+            .addKey(
+                Keyset.Key.newBuilder()
+                    .setKeyData(
+                        TestUtil.createKeyData(
+                            KeyData.newBuilder().build(),
+                            "typeUrl",
+                            KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC))
+                    .setKeyId(1)
+                    .setStatus(KeyStatusType.ENABLED)
+                    .setOutputPrefixType(OutputPrefixType.TINK)
+                    .build())
+            .build();
     try {
       Util.validateKeyset(validKeyset);
     } catch (GeneralSecurityException e) {
@@ -126,17 +133,17 @@ public class UtilTest {
     }
   }
 
-  /**
-   * Tests that getKeysetInfo doesn't contain key material.
-   */
+  /** Tests that getKeysetInfo doesn't contain key material. */
   @Test
   public void testGetKeysetInfo() throws Exception {
     String keyValue = "01234567890123456";
-    Keyset keyset =  TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
-        42,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.TINK));
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
     assertTrue(keyset.toString().contains(keyValue));
 
     KeysetInfo keysetInfo = Util.getKeysetInfo(keyset);
@@ -151,7 +158,7 @@ public class UtilTest {
       assertExceptionContains(new GeneralSecurityException("abc"), "def");
     } catch (AssertionError e) {
       assertExceptionContains(
-        e, "Got exception with message \"abc\", expected it to contain \"def\".");
+          e, "Got exception with message \"abc\", expected it to contain \"def\".");
     }
   }
 

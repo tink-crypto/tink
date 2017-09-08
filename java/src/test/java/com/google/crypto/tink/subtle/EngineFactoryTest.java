@@ -27,9 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for EngineFactory.
- */
+/** Tests for EngineFactory. */
 @RunWith(JUnit4.class)
 public class EngineFactoryTest {
 
@@ -39,7 +37,6 @@ public class EngineFactoryTest {
     // didn't throw
   }
 
-
   @Test // A bunch of default settings for a regular JVM.
   public void testCustomListOfProviders() throws Exception {
     if (SubtleUtil.isAndroid()) {
@@ -48,31 +45,28 @@ public class EngineFactoryTest {
     }
 
     Cipher c = EngineFactory.getCustomCipherProvider(true, "X", "Y").getInstance("AES");
-    KeyPairGenerator kpg = EngineFactory.getCustomKeyPairGeneratorProvider(
-        true, "X", "Y").getInstance("EC");
+    KeyPairGenerator kpg =
+        EngineFactory.getCustomKeyPairGeneratorProvider(true, "X", "Y").getInstance("EC");
     assertEquals("SUN", Security.getProviders()[0].getName()); // The first provider
     assertEquals("SunJCE", c.getProvider().getName()); // The first one to implement AES
     assertEquals("SunEC", kpg.getProvider().getName()); // The first one to implement EC stuff
 
-
     kpg = EngineFactory.getCustomKeyPairGeneratorProvider(false, "SunEC").getInstance("EC");
     c = EngineFactory.getCustomCipherProvider(false, "SunJCE").getInstance("AES");
-
 
     try {
       EngineFactory.getCustomCipherProvider(false, "SunEC").getInstance("AES");
       fail();
     } catch (GeneralSecurityException e) {
-      //expected
+      // expected
     }
     try {
       EngineFactory.getCustomKeyPairGeneratorProvider(false, "SunJCE").getInstance("AES");
       fail();
     } catch (GeneralSecurityException e) {
-      //expected
+      // expected
     }
   }
-
 
   @Test
   public void testNoProviders() throws Exception {
@@ -80,24 +74,23 @@ public class EngineFactoryTest {
       EngineFactory.getCustomCipherProvider(false).getInstance("AES");
       fail();
     } catch (GeneralSecurityException e) {
-      //expected
+      // expected
     }
 
     try {
       EngineFactory.getCustomCipherProvider(true).getInstance("I don't exist, no point trying");
       fail();
     } catch (GeneralSecurityException e) {
-      //expected
+      // expected
     }
 
     try {
       EngineFactory.getCustomKeyPairGeneratorProvider(false, "SunJCE").getInstance("EC");
       fail();
     } catch (GeneralSecurityException e) {
-      //expected
+      // expected
     }
   }
-
 
   @Test
   public void testIsReuseable() throws Exception {
@@ -106,5 +99,4 @@ public class EngineFactoryTest {
     EngineFactory.CIPHER.getInstance("AES");
     // didn't throw
   }
-
 }

@@ -39,9 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for HybridEncryptFactory.
- */
+/** Tests for HybridEncryptFactory. */
 @RunWith(JUnit4.class)
 public class HybridEncryptFactoryTest {
   @BeforeClass
@@ -61,49 +59,55 @@ public class HybridEncryptFactoryTest {
     byte[] primarySalt = "some salt".getBytes("UTF-8");
     byte[] rawSalt = "other salt".getBytes("UTF-8");
 
-    EciesAeadHkdfPrivateKey primaryPrivProto = TestUtil.generateEciesAeadHkdfPrivKey(curve,
-        hashType, primaryPointFormat, primaryDemKeyTemplate, primarySalt);
+    EciesAeadHkdfPrivateKey primaryPrivProto =
+        TestUtil.generateEciesAeadHkdfPrivKey(
+            curve, hashType, primaryPointFormat, primaryDemKeyTemplate, primarySalt);
 
-    Key primaryPriv = TestUtil.createKey(
-        TestUtil.createKeyData(
-            primaryPrivProto,
-            EciesAeadHkdfPrivateKeyManager.TYPE_URL,
-            KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
-        8,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.RAW);
-    Key primaryPub = TestUtil.createKey(
-        TestUtil.createKeyData(
-            primaryPrivProto.getPublicKey(),
-            EciesAeadHkdfPublicKeyManager.TYPE_URL,
-            KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
-        42,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.RAW);
+    Key primaryPriv =
+        TestUtil.createKey(
+            TestUtil.createKeyData(
+                primaryPrivProto,
+                EciesAeadHkdfPrivateKeyManager.TYPE_URL,
+                KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
+            8,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.RAW);
+    Key primaryPub =
+        TestUtil.createKey(
+            TestUtil.createKeyData(
+                primaryPrivProto.getPublicKey(),
+                EciesAeadHkdfPublicKeyManager.TYPE_URL,
+                KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.RAW);
 
-    EciesAeadHkdfPrivateKey rawPrivProto = TestUtil.generateEciesAeadHkdfPrivKey(curve,
-        hashType, rawPointFormat, rawDemKeyTemplate, rawSalt);
+    EciesAeadHkdfPrivateKey rawPrivProto =
+        TestUtil.generateEciesAeadHkdfPrivKey(
+            curve, hashType, rawPointFormat, rawDemKeyTemplate, rawSalt);
 
-    Key rawPriv = TestUtil.createKey(
-        TestUtil.createKeyData(
-            rawPrivProto,
-            EciesAeadHkdfPrivateKeyManager.TYPE_URL,
-            KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
-        11,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.RAW);
-    Key rawPub = TestUtil.createKey(
-        TestUtil.createKeyData(
-            rawPrivProto.getPublicKey(),
-            EciesAeadHkdfPublicKeyManager.TYPE_URL,
-            KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
-        43,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.RAW);
-    KeysetHandle keysetHandlePub = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primaryPub, rawPub));
-    KeysetHandle keysetHandlePriv = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(primaryPriv, rawPriv));
+    Key rawPriv =
+        TestUtil.createKey(
+            TestUtil.createKeyData(
+                rawPrivProto,
+                EciesAeadHkdfPrivateKeyManager.TYPE_URL,
+                KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE),
+            11,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.RAW);
+    Key rawPub =
+        TestUtil.createKey(
+            TestUtil.createKeyData(
+                rawPrivProto.getPublicKey(),
+                EciesAeadHkdfPublicKeyManager.TYPE_URL,
+                KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC),
+            43,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.RAW);
+    KeysetHandle keysetHandlePub =
+        TestUtil.createKeysetHandle(TestUtil.createKeyset(primaryPub, rawPub));
+    KeysetHandle keysetHandlePriv =
+        TestUtil.createKeysetHandle(TestUtil.createKeyset(primaryPriv, rawPriv));
     HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(keysetHandlePub);
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandlePriv);
     byte[] plaintext = Random.randBytes(20);

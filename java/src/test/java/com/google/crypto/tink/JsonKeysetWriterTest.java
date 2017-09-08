@@ -35,9 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for JsonKeysetWriter.
- */
+/** Tests for JsonKeysetWriter. */
 @RunWith(JUnit4.class)
 public class JsonKeysetWriterTest {
   @BeforeClass
@@ -45,8 +43,7 @@ public class JsonKeysetWriterTest {
     Config.register(TinkConfig.TINK_1_0_0);
   }
 
-  private void assertKeysetHandle(KeysetHandle handle1, KeysetHandle handle2)
-      throws Exception {
+  private void assertKeysetHandle(KeysetHandle handle1, KeysetHandle handle2) throws Exception {
     Mac mac1 = MacFactory.getPrimitive(handle1);
     Mac mac2 = MacFactory.getPrimitive(handle2);
     byte[] message = Random.randBytes(20);
@@ -63,7 +60,6 @@ public class JsonKeysetWriterTest {
     KeysetHandle handle2 = KeysetHandle.fromKeyset(builder.build());
 
     assertKeysetHandle(handle1, handle2);
-
   }
 
   @Test
@@ -77,12 +73,12 @@ public class JsonKeysetWriterTest {
   @Test
   public void testWrite_multipleKeys_shouldWork() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetHandle handle1 = KeysetManager
-        .withEmptyKeyset()
-        .rotate(template)
-        .add(template)
-        .add(template)
-        .getKeysetHandle();
+    KeysetHandle handle1 =
+        KeysetManager.withEmptyKeyset()
+            .rotate(template)
+            .add(template)
+            .add(template)
+            .getKeysetHandle();
 
     testWrite_shouldWork(handle1);
   }
@@ -90,14 +86,13 @@ public class JsonKeysetWriterTest {
   private void testWriteEncrypted_shouldWork(KeysetHandle handle1) throws Exception {
     // Encrypt the keyset with an AeadKey.
     KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
-    Aead masterKey = Registry.getPrimitive(
-        Registry.newKeyData(masterKeyTemplate));
+    Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate));
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     handle1.write(JsonKeysetWriter.withOutputStream(outputStream), masterKey);
     EncryptedKeyset.Builder builder = EncryptedKeyset.newBuilder();
     JsonFormat.parser().merge(new String(outputStream.toByteArray(), UTF_8), builder);
-    KeysetHandle handle2 = KeysetHandle.read(
-        BinaryKeysetReader.withBytes(builder.build().toByteArray()), masterKey);
+    KeysetHandle handle2 =
+        KeysetHandle.read(BinaryKeysetReader.withBytes(builder.build().toByteArray()), masterKey);
 
     assertKeysetHandle(handle1, handle2);
   }
@@ -105,8 +100,7 @@ public class JsonKeysetWriterTest {
   @Test
   public void testWriteEncrypted_singleKey_shouldWork() throws Exception {
     // Encrypt the keyset with an AeadKey.
-    KeysetHandle handle1 = KeysetHandle
-        .generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+    KeysetHandle handle1 = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
 
     testWriteEncrypted_shouldWork(handle1);
   }
@@ -115,12 +109,12 @@ public class JsonKeysetWriterTest {
   public void testWriteEncrypted_multipleKeys_shouldWork() throws Exception {
     // Encrypt the keyset with an AeadKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetHandle handle1 = KeysetManager
-        .withEmptyKeyset()
-        .rotate(template)
-        .add(template)
-        .add(template)
-        .getKeysetHandle();
+    KeysetHandle handle1 =
+        KeysetManager.withEmptyKeyset()
+            .rotate(template)
+            .add(template)
+            .add(template)
+            .getKeysetHandle();
 
     testWriteEncrypted_shouldWork(handle1);
   }

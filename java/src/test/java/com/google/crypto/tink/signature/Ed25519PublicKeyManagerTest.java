@@ -33,14 +33,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for Ed25519PublicKeyManager.
- */
+/** Unit tests for Ed25519PublicKeyManager. */
 @RunWith(JUnit4.class)
 public class Ed25519PublicKeyManagerTest {
   @Before
   public void setUp() throws GeneralSecurityException {
-    Config.register(SignatureConfig.TINK_1_0_0);;
+    Config.register(SignatureConfig.TINK_1_0_0);
   }
 
   @Test

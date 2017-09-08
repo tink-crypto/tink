@@ -48,22 +48,23 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Test for {@code AesCtrHmacStreaming}-implementation of {@code StreamingAead}-primitive.
- */
+/** Test for {@code AesCtrHmacStreaming}-implementation of {@code StreamingAead}-primitive. */
 @RunWith(JUnit4.class)
 public class AesCtrHmacStreamingTest {
   /**
    * TODO(bleichen): Some things that are not yet tested:
-   *   - Thread-safety (i.e. operations should be atomic but more importantly
-   *       the state must remain the same.
-   *   - Reading beyond the end of the file
-   *   - regression for c++ implementation
+   *
+   * <ul>
+   *   <li>- Thread-safety (i.e. operations should be atomic but more importantly the state must
+   *       remain the same.
+   *   <li>- Reading beyond the end of the file
+   *   <li>- regression for c++ implementation
+   * </ul>
    */
 
   /**
-   * Replacement for org.junit.Assert.assertEquals, since
-   * org.junit.Assert.assertEquals is quite slow.
+   * Replacement for org.junit.Assert.assertEquals, since org.junit.Assert.assertEquals is quite
+   * slow.
    */
   public void assertByteArrayEquals(String txt, byte[] expected, byte[] actual) throws Exception {
     assertEquals(txt + " arrays not of the same length", expected.length, actual.length);
@@ -79,13 +80,13 @@ public class AesCtrHmacStreamingTest {
   }
 
   /**
-   * Checks whether the bytes from buffer.position() to buffer.limit() are the
-   * same bytes as expected.
+   * Checks whether the bytes from buffer.position() to buffer.limit() are the same bytes as
+   * expected.
    */
   public void assertByteBufferContains(String txt, byte[] expected, ByteBuffer buffer)
       throws Exception {
-    assertEquals(txt + " unexpected number of bytes in buffer", expected.length,
-        buffer.remaining());
+    assertEquals(
+        txt + " unexpected number of bytes in buffer", expected.length, buffer.remaining());
     byte[] content = new byte[buffer.remaining()];
     buffer.duplicate().get(content);
     assertByteArrayEquals(txt, expected, content);
@@ -147,9 +148,7 @@ public class AesCtrHmacStreamingTest {
     }
   }
 
-  /**
-   * Returns a plaintext of a given size.
-   */
+  /** Returns a plaintext of a given size. */
   private byte[] generatePlaintext(int size) {
     byte[] plaintext = new byte[size];
     for (int i = 0; i < size; i++) {
@@ -167,15 +166,13 @@ public class AesCtrHmacStreamingTest {
 
   /**
    * Convenience method for encrypting some plaintext.
+   *
    * @param ags the streaming primitive
    * @param plaintext the plaintext to encrypt
    * @param aad the additional data to authenticate
    * @return the ciphertext including a prefix of size ags.firstSegmentOffset
    */
-  private byte[] encrypt(
-      AesCtrHmacStreaming ags,
-      byte[] plaintext,
-      byte[] aad) throws Exception {
+  private byte[] encrypt(AesCtrHmacStreaming ags, byte[] plaintext, byte[] aad) throws Exception {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     WritableByteChannel ctChannel = Channels.newChannel(bos);
     ctChannel.write(ByteBuffer.allocate(ags.getFirstSegmentOffset()));
@@ -189,10 +186,7 @@ public class AesCtrHmacStreamingTest {
   }
 
   private void isValidCiphertext(
-      AesCtrHmacStreaming ags,
-      byte[] plaintext,
-      byte[] aad,
-      byte[] ciphertext) throws Exception {
+      AesCtrHmacStreaming ags, byte[] plaintext, byte[] aad, byte[] ciphertext) throws Exception {
     ByteBufferChannel ctChannel = new ByteBufferChannel(ciphertext);
     ctChannel.position(ags.getFirstSegmentOffset());
     ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, aad);
@@ -202,9 +196,7 @@ public class AesCtrHmacStreamingTest {
     assertByteBufferContains(plaintext, decrypted);
   }
 
-  /**
-   * Returns whether we expect an AES key size to be supported by the provider.
-   */
+  /** Returns whether we expect an AES key size to be supported by the provider. */
   private boolean isAesKeySizeSupported(int bits) throws NoSuchAlgorithmException {
     int maxKeySize = Cipher.getMaxAllowedKeyLength("AES/CTR/NoPadding");
     if (bits > maxKeySize) {
@@ -217,9 +209,7 @@ public class AesCtrHmacStreamingTest {
   }
 
   @Test
-  /**
-   * Checks whether the provider limits key sizes or primitives.
-   */
+  /** Checks whether the provider limits key sizes or primitives. */
   public void testProvider() throws Exception {
     EngineFactory.CIPHER.getInstance("AES/CTR/NoPadding");
     EngineFactory.MAC.getInstance("HMACSHA256");
@@ -235,8 +225,9 @@ public class AesCtrHmacStreamingTest {
   }
 
   /**
-   * Encrypts and decrypts some plaintext in a stream and checks that the expected
-   * plaintext is returned.
+   * Encrypts and decrypts some plaintext in a stream and checks that the expected plaintext is
+   * returned.
+   *
    * @param keySizeInBytes the size of the AES key.
    * @param tagSizeInBytes the size of authentication tag.
    * @param segmentSize the size of the ciphertext segments.
@@ -259,15 +250,15 @@ public class AesCtrHmacStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(
-        ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
+    AesCtrHmacStreaming ags =
+        new AesCtrHmacStreaming(
+            ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
     // Construct an InputStream from the ciphertext where the first
     // firstSegmentOffset bytes have already been read.
-    ReadableByteChannel ctChannel =
-        new ByteBufferChannel(ciphertext).position(firstSegmentOffset);
+    ReadableByteChannel ctChannel = new ByteBufferChannel(ciphertext).position(firstSegmentOffset);
 
     // Construct an InputStream that returns the plaintext.
     ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, aad);
@@ -279,25 +270,28 @@ public class AesCtrHmacStreamingTest {
         break;
       }
       assertEquals(read, chunk.position());
-      byte[] expectedPlaintext =
-          Arrays.copyOfRange(plaintext, decryptedSize, decryptedSize + read);
+      byte[] expectedPlaintext = Arrays.copyOfRange(plaintext, decryptedSize, decryptedSize + read);
       assertByteArrayEquals(expectedPlaintext, Arrays.copyOf(chunk.array(), read));
       decryptedSize += read;
       // ptChannel should fill chunk, unless the end of the plaintext has been reached.
       if (decryptedSize < plaintextSize) {
-        assertEquals("Decrypted chunk is shorter than expected\n" + ptChannel.toString(),
-                     chunk.limit(), chunk.position());
+        assertEquals(
+            "Decrypted chunk is shorter than expected\n" + ptChannel.toString(),
+            chunk.limit(),
+            chunk.position());
       }
     }
     assertEquals(plaintext.length, decryptedSize);
   }
 
-  /**
-   * Encrypt and then decrypt partially, and check that the result is the same.
-   */
+  /** Encrypt and then decrypt partially, and check that the result is the same. */
   public void testEncryptDecryptRandomAccess(
-      int keySizeInBytes, int tagSizeInBytes, int segmentSize, int firstSegmentOffset,
-      int plaintextSize) throws Exception {
+      int keySizeInBytes,
+      int tagSizeInBytes,
+      int segmentSize,
+      int firstSegmentOffset,
+      int plaintextSize)
+      throws Exception {
     if (!isAesKeySizeSupported(8 * keySizeInBytes)) {
       System.out.println("Skipping a test with key size:" + (8 * keySizeInBytes) + " bits.");
       return;
@@ -305,8 +299,9 @@ public class AesCtrHmacStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(
-        ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
+    AesCtrHmacStreaming ags =
+        new AesCtrHmacStreaming(
+            ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     byte[] ciphertext = encrypt(ags, plaintext, aad);
 
@@ -320,8 +315,9 @@ public class AesCtrHmacStreamingTest {
         ptChannel.position(start);
         int read = ptChannel.read(pt);
         // Expect that pt is filled unless the end of the plaintext has been reached.
-        assertTrue("start:" + start + " read:" + read + " length:" + length,
-                    pt.remaining() == 0 || start + pt.position() == plaintext.length);
+        assertTrue(
+            "start:" + start + " read:" + read + " length:" + length,
+            pt.remaining() == 0 || start + pt.position() == plaintext.length);
         String expected =
             TestUtil.hexEncode(Arrays.copyOfRange(plaintext, start, start + pt.position()));
         String actual = TestUtil.hexEncode(Arrays.copyOf(pt.array(), pt.position()));
@@ -446,8 +442,7 @@ public class AesCtrHmacStreamingTest {
   }
 
   /**
-   * Encrypts and decrypts a with non-ASCII characters using CharsetEncoders
-   * and CharsetDecoders.
+   * Encrypts and decrypts a with non-ASCII characters using CharsetEncoders and CharsetDecoders.
    */
   @Test
   public void testEncryptDecryptString() throws Exception {
@@ -458,8 +453,9 @@ public class AesCtrHmacStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(
-        ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
+    AesCtrHmacStreaming ags =
+        new AesCtrHmacStreaming(
+            ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
 
     String stringWithNonAsciiChars = "αβγδ áéíóúý ∀∑∊∫≅⊕⊄";
     int repetitions = 1000;
@@ -483,7 +479,7 @@ public class AesCtrHmacStreamingTest {
       int position = 0;
       while (position < stringWithNonAsciiChars.length()) {
         int read = reader.read(chunk, position, stringWithNonAsciiChars.length() - position);
-        assertTrue("read:" + read,  read > 0);
+        assertTrue("read:" + read, read > 0);
         position += read;
       }
       assertEquals("i:" + i, stringWithNonAsciiChars, new String(chunk));
@@ -492,10 +488,7 @@ public class AesCtrHmacStreamingTest {
     assertEquals(-1, res);
   }
 
-  /**
-   * Test encryption with a simulated ciphertext channel, which has only
-   * a limited capacity.
-   */
+  /** Test encryption with a simulated ciphertext channel, which has only a limited capacity. */
   @Test
   public void testEncryptLimitedCiphertextChannel() throws Exception {
     int plaintextSize = 1 << 15;
@@ -507,8 +500,9 @@ public class AesCtrHmacStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(
-        ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
+    AesCtrHmacStreaming ags =
+        new AesCtrHmacStreaming(
+            ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
     byte[] plaintext = generatePlaintext(plaintextSize);
     int ciphertextLength = (int) ags.expectedCiphertextSize(plaintextSize);
     ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
@@ -530,17 +524,17 @@ public class AesCtrHmacStreamingTest {
   }
 
   /**
-   * Tries to decrypt a modified ciphertext.
-   * Each call to read must either return the original plaintext
-   * (e.g. when the modification in the ciphertext has not yet been read)
-   * or it must throw an IOException.
+   * Tries to decrypt a modified ciphertext. Each call to read must either return the original
+   * plaintext (e.g. when the modification in the ciphertext has not yet been read) or it must throw
+   * an IOException.
    */
   private void tryDecryptModifiedCiphertext(
       AesCtrHmacStreaming ags,
       byte[] modifiedCiphertext,
       byte[] aad,
       int chunkSize,
-      byte[] plaintext) throws Exception {
+      byte[] plaintext)
+      throws Exception {
     ByteBufferChannel ct = new ByteBufferChannel(modifiedCiphertext);
     ct.position(ags.getFirstSegmentOffset());
     ReadableByteChannel ptChannel = ags.newDecryptingChannel(ct, aad);
@@ -597,9 +591,9 @@ public class AesCtrHmacStreamingTest {
     }
 
     // Append stuff to ciphertext
-    int[] sizes = new int[]{1, (segmentSize - ciphertext.length % segmentSize), segmentSize};
+    int[] sizes = new int[] {1, (segmentSize - ciphertext.length % segmentSize), segmentSize};
     for (int appendedBytes : sizes) {
-      byte [] modifiedCiphertext = concatBytes(ciphertext, new byte[appendedBytes]);
+      byte[] modifiedCiphertext = concatBytes(ciphertext, new byte[appendedBytes]);
       tryDecryptModifiedCiphertext(ags, modifiedCiphertext, aad, 128, plaintext);
     }
 
@@ -622,8 +616,9 @@ public class AesCtrHmacStreamingTest {
     // duplicate segments
     for (int segment = 0; segment < (ciphertext.length / segmentSize); segment++) {
       byte[] modifiedCiphertext =
-          concatBytes(Arrays.copyOf(ciphertext, (segment + 1) * segmentSize),
-                      Arrays.copyOfRange(ciphertext, segment * segmentSize, ciphertext.length));
+          concatBytes(
+              Arrays.copyOf(ciphertext, (segment + 1) * segmentSize),
+              Arrays.copyOfRange(ciphertext, segment * segmentSize, ciphertext.length));
       tryDecryptModifiedCiphertext(ags, modifiedCiphertext, aad, 128, plaintext);
     }
 
@@ -637,16 +632,13 @@ public class AesCtrHmacStreamingTest {
   }
 
   /**
-   * Tries to decrypt a modified ciphertext using an SeekableByteChannel.
-   * Each call to read must either return the original plaintext
-   * (e.g. when the modification in the ciphertext does not affect the plaintext)
-   * or it must throw an IOException.
+   * Tries to decrypt a modified ciphertext using an SeekableByteChannel. Each call to read must
+   * either return the original plaintext (e.g. when the modification in the ciphertext does not
+   * affect the plaintext) or it must throw an IOException.
    */
   private void tryDecryptModifiedCiphertextWithSeekableByteChannel(
-      AesCtrHmacStreaming ags,
-      byte[] modifiedCiphertext,
-      byte[] aad,
-      byte[] plaintext) throws Exception {
+      AesCtrHmacStreaming ags, byte[] modifiedCiphertext, byte[] aad, byte[] plaintext)
+      throws Exception {
 
     ByteBufferChannel bbc = new ByteBufferChannel(modifiedCiphertext);
     SeekableByteChannel ptChannel;
@@ -676,8 +668,9 @@ public class AesCtrHmacStreamingTest {
           assertTrue("Incorrect truncation: ", start == plaintext.length);
         } else {
           // Expect the decrypted plaintext not to be longer than the expected plaintext.
-          assertTrue("start:" + start + " read:" + read + " length:" + length,
-                     start + read <= plaintext.length);
+          assertTrue(
+              "start:" + start + " read:" + read + " length:" + length,
+              start + read <= plaintext.length);
           // Check that the decrypted plaintext matches the original plaintext.
           String expected =
               TestUtil.hexEncode(Arrays.copyOfRange(plaintext, start, start + pt.position()));
@@ -708,9 +701,9 @@ public class AesCtrHmacStreamingTest {
     }
 
     // Append stuff to ciphertext
-    int[] sizes = new int[]{1, (segmentSize - ciphertext.length % segmentSize), segmentSize};
+    int[] sizes = new int[] {1, (segmentSize - ciphertext.length % segmentSize), segmentSize};
     for (int appendedBytes : sizes) {
-      byte [] modifiedCiphertext = concatBytes(ciphertext, new byte[appendedBytes]);
+      byte[] modifiedCiphertext = concatBytes(ciphertext, new byte[appendedBytes]);
       tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
     }
 
@@ -724,17 +717,18 @@ public class AesCtrHmacStreamingTest {
     // delete segments
     for (int segment = 0; segment < (ciphertext.length / segmentSize); segment++) {
       byte[] modifiedCiphertext =
-          concatBytes(Arrays.copyOf(ciphertext, segment * segmentSize),
-                      Arrays.copyOfRange(
-                          ciphertext, (segment + 1) * segmentSize, ciphertext.length));
+          concatBytes(
+              Arrays.copyOf(ciphertext, segment * segmentSize),
+              Arrays.copyOfRange(ciphertext, (segment + 1) * segmentSize, ciphertext.length));
       tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
     }
 
     // duplicate segments
     for (int segment = 0; segment < (ciphertext.length / segmentSize); segment++) {
       byte[] modifiedCiphertext =
-          concatBytes(Arrays.copyOf(ciphertext, (segment + 1) * segmentSize),
-                      Arrays.copyOfRange(ciphertext, segment * segmentSize, ciphertext.length));
+          concatBytes(
+              Arrays.copyOf(ciphertext, (segment + 1) * segmentSize),
+              Arrays.copyOfRange(ciphertext, segment * segmentSize, ciphertext.length));
       tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
     }
 
@@ -751,8 +745,8 @@ public class AesCtrHmacStreamingTest {
   @Test
   /**
    * Encrypts a plaintext consisting of 0's and checks that the ciphertext has no repeating blocks.
-   * This is a simple test to catch basic errors that violate semantic security.
-   * The probability of false positives is smaller than 2^{-100}.
+   * This is a simple test to catch basic errors that violate semantic security. The probability of
+   * false positives is smaller than 2^{-100}.
    */
   public void testKeyStream() throws Exception {
     HashSet<String> ciphertextBlocks = new HashSet<String>();
@@ -770,24 +764,24 @@ public class AesCtrHmacStreamingTest {
     for (int sample = 0; sample < samples; sample++) {
       byte[] ciphertext = encrypt(ags, plaintext, aad);
       for (int pos = ags.headerLength(); pos + blocksize <= ciphertext.length; pos++) {
-        String block = TestUtil.hexEncode(
-            Arrays.copyOfRange(ciphertext, pos, pos + blocksize));
+        String block = TestUtil.hexEncode(Arrays.copyOfRange(ciphertext, pos, pos + blocksize));
         if (!ciphertextBlocks.add(block)) {
-          fail("Ciphertext contains a repeating block " +  block + " at position " + pos);
+          fail("Ciphertext contains a repeating block " + block + " at position " + pos);
         }
       }
     }
   }
 
   /**
-   * Reads everything from plaintext, encrypt it and writes the result to ciphertext.
-   * This method is used to test aynchronous encryption.
+   * Reads everything from plaintext, encrypt it and writes the result to ciphertext. This method is
+   * used to test aynchronous encryption.
+   *
    * @param ags the streaming encryption
    * @param plaintext the channel containing the plaintext
    * @param ciphertext the channel to which the ciphertext is written
    * @param aad the additional data to authenticate
    * @param chunkSize the size of blocks that are read and written. This size determines the
-   *        temporary memory used in this method but is independent of the streaming encryption.
+   *     temporary memory used in this method but is independent of the streaming encryption.
    * @throws RuntimeException if something goes wrong.
    */
   private void encryptChannel(
@@ -816,15 +810,16 @@ public class AesCtrHmacStreamingTest {
   }
 
   /**
-   * Constructs a ReadableByteChannel with ciphertext from a ReadableByteChannel.
-   * The method constructs a new thread that is used to encrypt the plaintext.
-   * TODO(bleichen): Using PipedInputStream may have performance problems.
+   * Constructs a ReadableByteChannel with ciphertext from a ReadableByteChannel. The method
+   * constructs a new thread that is used to encrypt the plaintext. TODO(bleichen): Using
+   * PipedInputStream may have performance problems.
    */
   private ReadableByteChannel ciphertextChannel(
       final AesCtrHmacStreaming ags,
       final ReadableByteChannel plaintext,
       final byte[] aad,
-      final int chunkSize) throws Exception {
+      final int chunkSize)
+      throws Exception {
     PipedOutputStream output = new PipedOutputStream();
     PipedInputStream result = new PipedInputStream(output);
     final WritableByteChannel ciphertext = Channels.newChannel(output);
@@ -839,9 +834,7 @@ public class AesCtrHmacStreamingTest {
     return Channels.newChannel(result);
   }
 
-  /**
-   * Encrypt and decrypt a long ciphertext.
-   */
+  /** Encrypt and decrypt a long ciphertext. */
   @Test
   public void testEncryptDecryptLong() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
@@ -874,9 +867,7 @@ public class AesCtrHmacStreamingTest {
     assertEquals(plaintextSize, decryptedBytes);
   }
 
-  /**
-   * Encrypt some plaintext to a file, then decrypt from the file
-   */
+  /** Encrypt some plaintext to a file, then decrypt from the file */
   @Test
   public void testFileEncrytion() throws Exception {
     int plaintextSize = 1 << 18;
@@ -939,8 +930,13 @@ public class AesCtrHmacStreamingTest {
       // We expect that all read of ctChannel return the requested number of bytes.
       // Hence we also expect that ptChannel returns the maximal number of bytes.
       if (read < length && read + start < plaintextSize) {
-        fail("Plaintext size is smaller than expected; read:" + read + " position:" + start
-             + " length:" + length);
+        fail(
+            "Plaintext size is smaller than expected; read:"
+                + read
+                + " position:"
+                + start
+                + " length:"
+                + length);
       }
       byte[] expected = new byte[read];
       plaintext.position(start);

@@ -34,9 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for CleartextKeysetHandle.
- */
+/** Tests for CleartextKeysetHandle. */
 @RunWith(JUnit4.class)
 public class CleartextKeysetHandleTest {
   @BeforeClass
@@ -63,13 +61,11 @@ public class CleartextKeysetHandleTest {
   public void testRead() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetManager manager = KeysetManager
-        .withEmptyKeyset()
-        .rotate(template);
+    KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(template);
     Keyset keyset1 = manager.getKeysetHandle().getKeyset();
 
-    KeysetHandle handle1 = CleartextKeysetHandle.read(
-        BinaryKeysetReader.withBytes(keyset1.toByteArray()));
+    KeysetHandle handle1 =
+        CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(keyset1.toByteArray()));
     assertEquals(keyset1, handle1.getKeyset());
 
     KeysetHandle handle2 = KeysetHandle.generateNew(template);
@@ -89,10 +85,7 @@ public class CleartextKeysetHandleTest {
   public void testWrite() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetHandle handle = KeysetManager
-        .withEmptyKeyset()
-        .rotate(template)
-        .getKeysetHandle();
+    KeysetHandle handle = KeysetManager.withEmptyKeyset().rotate(template).getKeysetHandle();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
     CleartextKeysetHandle.write(handle, writer);
@@ -106,16 +99,13 @@ public class CleartextKeysetHandleTest {
   public void testReadInvalidKeyset() throws Exception {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    KeysetManager manager = KeysetManager
-        .withEmptyKeyset()
-        .rotate(template);
+    KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(template);
     Keyset keyset = manager.getKeysetHandle().getKeyset();
 
     byte[] proto = keyset.toByteArray();
     proto[0] = (byte) ~proto[0];
     try {
-      KeysetHandle unused = CleartextKeysetHandle.read(
-          BinaryKeysetReader.withBytes(proto));
+      KeysetHandle unused = CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(proto));
       fail("Expected IOException");
     } catch (IOException e) {
       // expected

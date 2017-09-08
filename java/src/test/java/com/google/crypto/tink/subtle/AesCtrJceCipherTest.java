@@ -29,27 +29,32 @@ import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for AesCtrJceCipher.
- * TODO(quangnguyen): Add more tests.
+ *
+ * <p>TODO(quangnguyen): Add more tests.
  */
 @RunWith(JUnit4.class)
 public class AesCtrJceCipherTest {
   // NIST SP 800-38A pp 55.
   private static final String NIST_KEY = "2b7e151628aed2a6abf7158809cf4f3c";
-  private static final String NIST_PLAINTEXT = "6bc1bee22e409f96e93d7e117393172a"
-      + "ae2d8a571e03ac9c9eb76fac45af8e51"
-      + "30c81c46a35ce411e5fbc1191a0a52ef"
-      + "f69f2445df4f9b17ad2b417be66c3710";
-  private static final String NIST_CIPHERTEXT = "874d6191b620e3261bef6864990db6ce"
-      + "9806f66b7970fdff8617187bb9fffdff"
-      + "5ae4df3edbd5d35e5b4f09020db03eab"
-      + "1e031dda2fbe03d1792170a0f3009cee";
+  private static final String NIST_PLAINTEXT =
+      "6bc1bee22e409f96e93d7e117393172a"
+          + "ae2d8a571e03ac9c9eb76fac45af8e51"
+          + "30c81c46a35ce411e5fbc1191a0a52ef"
+          + "f69f2445df4f9b17ad2b417be66c3710";
+  private static final String NIST_CIPHERTEXT =
+      "874d6191b620e3261bef6864990db6ce"
+          + "9806f66b7970fdff8617187bb9fffdff"
+          + "5ae4df3edbd5d35e5b4f09020db03eab"
+          + "1e031dda2fbe03d1792170a0f3009cee";
   private static final String NIST_IV = "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff";
 
-  private static final String PLAINTEXT = "I'm counter mode and I'm not vulnerable to padding"
-      + " oracle attack like CBC mode";
+  private static final String PLAINTEXT =
+      "I'm counter mode and I'm not vulnerable to padding oracle attack like CBC mode";
 
   private byte[] msg;
-  @Before public void setUp() {
+
+  @Before
+  public void setUp() {
     try {
       msg = PLAINTEXT.getBytes("UTF-8");
     } catch (Exception ignored) {
@@ -108,5 +113,4 @@ public class AesCtrJceCipherTest {
     byte[] ciphertext = c.encrypt(msg);
     assertArrayEquals(msg, c.decrypt(ciphertext));
   }
-
 }

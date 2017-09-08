@@ -45,9 +45,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for KeysetHandle.
- */
+/** Tests for KeysetHandle. */
 @RunWith(JUnit4.class)
 public class KeysetHandleTest {
   @BeforeClass
@@ -55,17 +53,17 @@ public class KeysetHandleTest {
     Config.register(TinkConfig.TINK_1_0_0);
   }
 
-  /**
-   * Tests that toString doesn't contain key material.
-   */
+  /** Tests that toString doesn't contain key material. */
   @Test
   public void testToString() throws Exception {
     String keyValue = "01234567890123456";
-    Keyset keyset = TestUtil.createKeyset(TestUtil.createKey(
-        TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
-        42,
-        KeyStatusType.ENABLED,
-        OutputPrefixType.TINK));
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.TINK));
     KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
     assertEquals(keyset, handle.getKeyset());
 
@@ -76,12 +74,10 @@ public class KeysetHandleTest {
 
   @Test
   public void testWriteEncrypted() throws Exception {
-    KeysetHandle handle = KeysetHandle
-        .generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+    KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     // Encrypt the keyset with an AeadKey.
     KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
-    Aead masterKey = Registry.getPrimitive(
-        Registry.newKeyData(masterKeyTemplate));
+    Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate));
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
     handle.write(writer, masterKey);
@@ -91,24 +87,21 @@ public class KeysetHandleTest {
     assertEquals(handle.getKeyset(), handle2.getKeyset());
   }
 
- /**
-   * Tests a public keyset is extracted properly from a private keyset.
-   */
+  /** Tests a public keyset is extracted properly from a private keyset. */
   @Test
   public void testGetPublicKeysetHandle() throws Exception {
-    KeysetHandle privateHandle = KeysetHandle.generateNew(
-        SignatureKeyTemplates.ECDSA_P256);
+    KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
     KeyData privateKeyData = privateHandle.getKeyset().getKey(0).getKeyData();
     EcdsaPrivateKey privateKey = EcdsaPrivateKey.parseFrom(privateKeyData.getValue());
     KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
     assertEquals(1, publicHandle.getKeyset().getKeyCount());
-    assertEquals(privateHandle.getKeyset().getPrimaryKeyId(),
-        publicHandle.getKeyset().getPrimaryKeyId());
+    assertEquals(
+        privateHandle.getKeyset().getPrimaryKeyId(), publicHandle.getKeyset().getPrimaryKeyId());
     KeyData publicKeyData = publicHandle.getKeyset().getKey(0).getKeyData();
     assertEquals(SignatureConfig.ECDSA_PUBLIC_KEY_TYPE_URL, publicKeyData.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
-    assertArrayEquals(privateKey.getPublicKey().toByteArray(),
-        publicKeyData.getValue().toByteArray());
+    assertArrayEquals(
+        privateKey.getPublicKey().toByteArray(), publicKeyData.getValue().toByteArray());
 
     PublicKeySign signer = PublicKeySignFactory.getPrimitive(privateHandle);
     PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(publicHandle);
@@ -120,14 +113,13 @@ public class KeysetHandleTest {
     }
   }
 
-  /**
-   * Tests that when encryption failed an exception is thrown.
-   */
+  /** Tests that when encryption failed an exception is thrown. */
   @Test
   public void testEncryptFailed() throws Exception {
-    KeysetHandle handle = KeysetManager.withEmptyKeyset()
-        .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
-        .getKeysetHandle();
+    KeysetHandle handle =
+        KeysetManager.withEmptyKeyset()
+            .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
+            .getKeysetHandle();
     // Encrypt with dummy Aead.
     TestUtil.DummyAead faultyAead = new TestUtil.DummyAead();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

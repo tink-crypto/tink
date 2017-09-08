@@ -27,9 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for Ed25519.
- */
+/** Unit tests for Ed25519. */
 @RunWith(JUnit4.class)
 public class Ed25519Test {
 
@@ -44,11 +42,13 @@ public class Ed25519Test {
       try {
         verifier.verify(s, rand);
       } catch (SignatureException e) {
-        fail(String.format(
-            "\n\nMessage: %s\nSignature: %s\nPrivateKey: %s\nPublicKey: %s\n",
-            TestUtil.hexEncode(rand), TestUtil.hexEncode(s),
-            TestUtil.hexEncode(keyPair.getPrivateKey()),
-            TestUtil.hexEncode(keyPair.getPublicKey())));
+        fail(
+            String.format(
+                "\n\nMessage: %s\nSignature: %s\nPrivateKey: %s\nPublicKey: %s\n",
+                TestUtil.hexEncode(rand),
+                TestUtil.hexEncode(s),
+                TestUtil.hexEncode(keyPair.getPrivateKey()),
+                TestUtil.hexEncode(keyPair.getPublicKey())));
       }
     }
   }
@@ -91,7 +91,7 @@ public class Ed25519Test {
       verifier.verify(sig, message);
     }
 
-    void testSignForIllegalArgExp(String errorMsg) throws GeneralSecurityException  {
+    void testSignForIllegalArgExp(String errorMsg) throws GeneralSecurityException {
       try {
         Ed25519Sign signer = new Ed25519Sign(TestUtil.hexDecode(hexPrivateKey));
         signer.sign(TestUtil.hexDecode(hexMessage));
@@ -101,7 +101,7 @@ public class Ed25519Test {
       }
     }
 
-    void testVerifyForIllegalArgExp(String errorMsg) throws GeneralSecurityException  {
+    void testVerifyForIllegalArgExp(String errorMsg) throws GeneralSecurityException {
       try {
         Ed25519Verify verifier = new Ed25519Verify(TestUtil.hexDecode(hexPublicKey));
         verifier.verify(TestUtil.hexDecode(hexSignature), TestUtil.hexDecode(hexMessage));

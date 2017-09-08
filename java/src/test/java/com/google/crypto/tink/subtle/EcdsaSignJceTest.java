@@ -32,7 +32,8 @@ import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for EcdsaSignJce.
- * TODO(quannguyen): Add more tests.
+ *
+ * <p>TODO(quannguyen): Add more tests.
  */
 @RunWith(JUnit4.class)
 public class EcdsaSignJceTest {

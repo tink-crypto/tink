@@ -25,22 +25,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for CryptoFormat.
- */
+/** Tests for CryptoFormat. */
 @RunWith(JUnit4.class)
 public class CryptoFormatTest {
-  /**
-   * Tests that prefix is generated correctly.
-   */
+  /** Tests that prefix is generated correctly. */
   public void testPrefix(OutputPrefixType type, int... keyIds) throws Exception {
     String keyValue = "01234567890123456";
     for (int keyId : keyIds) {
-      Key key = TestUtil.createKey(
-          TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
-          keyId,
-          KeyStatusType.ENABLED,
-          type);
+      Key key =
+          TestUtil.createKey(
+              TestUtil.createHmacKeyData(keyValue.getBytes("UTF-8"), 16),
+              keyId,
+              KeyStatusType.ENABLED,
+              type);
       if (type == OutputPrefixType.RAW) {
         assertEquals(CryptoFormat.RAW_PREFIX_SIZE, CryptoFormat.getOutputPrefix(key).length);
       } else {
@@ -49,9 +46,7 @@ public class CryptoFormatTest {
     }
   }
 
-  /**
-   * Tests that prefixes for keys with "extreme" key id are generated correctly.
-   */
+  /** Tests that prefixes for keys with "extreme" key id are generated correctly. */
   @Test
   public void testPrefixWithWeirdKeyIds() throws Exception {
     testPrefix(OutputPrefixType.RAW, 0, -1, 2147483647 /* INT_MAX */, -2147483648 /* INT_MIN */);

@@ -34,7 +34,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Unit tests for AesGcm. TODO(bleichen): Add more tests. - maybe add NIST style verification. */
+/**
+ * Unit tests for AesGcm.
+ *
+ * <p>TODO(bleichen): Add more tests. Maybe add NIST style verification.
+ */
 @RunWith(JUnit4.class)
 public class AesGcmJceTest {
 

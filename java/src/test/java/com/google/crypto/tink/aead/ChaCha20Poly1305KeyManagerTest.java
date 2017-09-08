@@ -34,9 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Test for ChaCha20Poly1305KeyManager.
- */
+/** Test for ChaCha20Poly1305KeyManager. */
 @RunWith(JUnit4.class)
 public class ChaCha20Poly1305KeyManagerTest {
   @BeforeClass
@@ -46,15 +44,13 @@ public class ChaCha20Poly1305KeyManagerTest {
 
   @Test
   public void testBasic() throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AeadKeyTemplates.CHACHA20_POLY1305);
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.CHACHA20_POLY1305);
     TestUtil.runBasicAeadFactoryTests(keysetHandle);
   }
 
   @Test
   public void testCiphertextSize() throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AeadKeyTemplates.CHACHA20_POLY1305);
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(AeadKeyTemplates.CHACHA20_POLY1305);
     Aead aead = AeadFactory.getPrimitive(keysetHandle);
     byte[] plaintext = "plaintext".getBytes("UTF-8");
     byte[] associatedData = "associatedData".getBytes("UTF-8");

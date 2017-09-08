@@ -23,18 +23,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * A simple integration test to see whether protobuf is built correctly.
- */
+/** A simple integration test to see whether protobuf is built correctly. */
 @RunWith(JUnit4.class)
 public class TinkProtoTest {
 
   @Test
   public void testKeysetBasic() throws Exception {
-    Keyset keyset = Keyset.newBuilder()
-        .setPrimaryKeyId(1)
-        .build();
+    Keyset keyset = Keyset.newBuilder().setPrimaryKeyId(1).build();
     assertEquals(1, keyset.getPrimaryKeyId());
   }
-
 }

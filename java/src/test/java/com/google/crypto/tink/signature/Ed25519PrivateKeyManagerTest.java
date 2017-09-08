@@ -39,14 +39,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for Ed25519PrivateKeyManager.
- */
+/** Unit tests for Ed25519PrivateKeyManager. */
 @RunWith(JUnit4.class)
 public class Ed25519PrivateKeyManagerTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
-    Config.register(SignatureConfig.TINK_1_0_0);;
+    Config.register(SignatureConfig.TINK_1_0_0);
+    ;
   }
 
   @Test
@@ -75,21 +74,18 @@ public class Ed25519PrivateKeyManagerTest {
     }
   }
 
- /**
-   * Tests that a public key is extracted properly from a private key.
-   */
+  /** Tests that a public key is extracted properly from a private key. */
   @Test
   public void testGetPublicKeyData() throws Exception {
-    KeysetHandle privateHandle = KeysetHandle.generateNew(
-        SignatureKeyTemplates.ED25519);
+    KeysetHandle privateHandle = KeysetHandle.generateNew(SignatureKeyTemplates.ED25519);
     KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
     Ed25519PrivateKeyManager privateManager = new Ed25519PrivateKeyManager();
     KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
     assertEquals(Ed25519PublicKeyManager.TYPE_URL, publicKeyData.getTypeUrl());
     assertEquals(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC, publicKeyData.getKeyMaterialType());
     Ed25519PrivateKey privateKey = Ed25519PrivateKey.parseFrom(privateKeyData.getValue());
-    assertArrayEquals(privateKey.getPublicKey().toByteArray(),
-        publicKeyData.getValue().toByteArray());
+    assertArrayEquals(
+        privateKey.getPublicKey().toByteArray(), publicKeyData.getValue().toByteArray());
 
     Ed25519PublicKeyManager publicManager = new Ed25519PublicKeyManager();
     PublicKeySign signer = privateManager.getPrimitive(privateKeyData.getValue());

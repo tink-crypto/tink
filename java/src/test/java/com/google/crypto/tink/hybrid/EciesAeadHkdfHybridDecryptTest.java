@@ -52,8 +52,8 @@ public class EciesAeadHkdfHybridDecryptTest {
 
   @Test
   public void testModifyDecrypt() throws Exception {
-    ECParameterSpec spec = EllipticCurves.getCurveSpec(
-        HybridUtil.toCurveType(EllipticCurveType.NIST_P256));
+    ECParameterSpec spec =
+        EllipticCurves.getCurveSpec(HybridUtil.toCurveType(EllipticCurveType.NIST_P256));
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(spec);
     KeyPair recipientKey = keyGen.generateKeyPair();
@@ -64,17 +64,23 @@ public class EciesAeadHkdfHybridDecryptTest {
     byte[] context = "context info".getBytes("UTF-8");
     String hmacAlgo = HybridUtil.toHmacAlgo(HashType.SHA256);
 
-    KeyTemplate[] keyTemplates = new KeyTemplate[] {
-      AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
-      AeadKeyTemplates.AES128_GCM
-    };
+    KeyTemplate[] keyTemplates =
+        new KeyTemplate[] {AeadKeyTemplates.AES128_CTR_HMAC_SHA256, AeadKeyTemplates.AES128_GCM};
     for (int i = 0; i < keyTemplates.length; i++) {
-      HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(recipientPublicKey,
-          salt, hmacAlgo, EllipticCurves.PointFormatType.UNCOMPRESSED,
-          new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
-      HybridDecrypt hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
-          salt, hmacAlgo, EllipticCurves.PointFormatType.UNCOMPRESSED,
-          new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
+      HybridEncrypt hybridEncrypt =
+          new EciesAeadHkdfHybridEncrypt(
+              recipientPublicKey,
+              salt,
+              hmacAlgo,
+              EllipticCurves.PointFormatType.UNCOMPRESSED,
+              new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
+      HybridDecrypt hybridDecrypt =
+          new EciesAeadHkdfHybridDecrypt(
+              recipientPrivateKey,
+              salt,
+              hmacAlgo,
+              EllipticCurves.PointFormatType.UNCOMPRESSED,
+              new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
 
       byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
       byte[] decrypted = hybridDecrypt.decrypt(ciphertext, context);
@@ -102,11 +108,13 @@ public class EciesAeadHkdfHybridDecryptTest {
         // Expected
       }
       // Modify salt.
-      hybridDecrypt = new EciesAeadHkdfHybridDecrypt(recipientPrivateKey,
-          Arrays.copyOf(salt, salt.length - 1),
-          hmacAlgo,
-          EllipticCurves.PointFormatType.UNCOMPRESSED,
-          new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
+      hybridDecrypt =
+          new EciesAeadHkdfHybridDecrypt(
+              recipientPrivateKey,
+              Arrays.copyOf(salt, salt.length - 1),
+              hmacAlgo,
+              EllipticCurves.PointFormatType.UNCOMPRESSED,
+              new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
       try {
         hybridDecrypt.decrypt(ciphertext, context);
         fail("Invalid salt, should have thrown exception");

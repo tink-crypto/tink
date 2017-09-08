@@ -33,9 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for AesCtrHmaAeadKeyManager.
- */
+/** Tests for AesCtrHmaAeadKeyManager. */
 @RunWith(JUnit4.class)
 public class AesCtrHmacAeadKeyManagerTest {
   @BeforeClass
@@ -46,8 +44,8 @@ public class AesCtrHmacAeadKeyManagerTest {
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
     KeyTemplate keyTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    AesCtrHmacAeadKeyFormat aeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(
-        keyTemplate.getValue().toByteArray());
+    AesCtrHmacAeadKeyFormat aeadKeyFormat =
+        AesCtrHmacAeadKeyFormat.parseFrom(keyTemplate.getValue().toByteArray());
     ByteString serialized = ByteString.copyFrom(aeadKeyFormat.toByteArray());
     AesCtrHmacAeadKeyManager keyManager = new AesCtrHmacAeadKeyManager();
     Set<String> keys = new TreeSet<String>();
@@ -79,10 +77,11 @@ public class AesCtrHmacAeadKeyManagerTest {
   @Test
   public void testNewKeyWithCorruptedFormat() throws Exception {
     ByteString serialized = ByteString.copyFrom(new byte[128]);
-    KeyTemplate keyTemplate = KeyTemplate.newBuilder()
-        .setTypeUrl(AesCtrHmacAeadKeyManager.TYPE_URL)
-        .setValue(serialized)
-        .build();
+    KeyTemplate keyTemplate =
+        KeyTemplate.newBuilder()
+            .setTypeUrl(AesCtrHmacAeadKeyManager.TYPE_URL)
+            .setValue(serialized)
+            .build();
     AesCtrHmacAeadKeyManager keyManager = new AesCtrHmacAeadKeyManager();
     try {
       keyManager.newKey(serialized);

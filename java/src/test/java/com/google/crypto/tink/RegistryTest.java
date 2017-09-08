@@ -46,41 +46,47 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for Registry.
- */
+/** Tests for Registry. */
 @RunWith(JUnit4.class)
 public class RegistryTest {
   private static class CustomAeadKeyManager implements KeyManager<Aead> {
     public CustomAeadKeyManager() {}
+
     @Override
     public Aead getPrimitive(ByteString proto) throws GeneralSecurityException {
       return new DummyAead();
     }
+
     @Override
     public Aead getPrimitive(MessageLite proto) throws GeneralSecurityException {
       return new DummyAead();
     }
+
     @Override
     public MessageLite newKey(ByteString template) throws GeneralSecurityException {
       throw new GeneralSecurityException("Not Implemented");
     }
+
     @Override
     public MessageLite newKey(MessageLite template) throws GeneralSecurityException {
       throw new GeneralSecurityException("Not Implemented");
     }
+
     @Override
     public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
       throw new GeneralSecurityException("Not Implemented");
     }
+
     @Override
-    public boolean doesSupport(String typeUrl) {  // supports same keys as AesGcmKey
+    public boolean doesSupport(String typeUrl) { // supports same keys as AesGcmKey
       return typeUrl.equals(AeadConfig.AES_GCM_TYPE_URL);
     }
+
     @Override
     public String getKeyType() {
       return AeadConfig.AES_GCM_TYPE_URL;
     }
+
     @Override
     public int getVersion() {
       return 0;
@@ -96,11 +102,9 @@ public class RegistryTest {
     assertThat(Registry.getKeyManager(typeUrl).getClass().toString()).contains(className);
   }
 
-
   @Test
   public void testGetKeyManager_shouldWork() throws Exception {
-    testGetKeyManager_shouldWork(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL,
-        "AesCtrHmacAeadKeyManager");
+    testGetKeyManager_shouldWork(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, "AesCtrHmacAeadKeyManager");
     testGetKeyManager_shouldWork(AeadConfig.AES_GCM_TYPE_URL, "AesGcmKeyManager");
     testGetKeyManager_shouldWork(MacConfig.HMAC_TYPE_URL, "HmacKeyManager");
   }
@@ -174,7 +178,8 @@ public class RegistryTest {
       throws Exception {
     // This should not overwrite the existing manager.
     try {
-      Registry.registerKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, new CustomAeadKeyManager());
+      Registry.registerKeyManager(
+          AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, new CustomAeadKeyManager());
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("already registered");
@@ -215,32 +220,37 @@ public class RegistryTest {
   @Test
   public void testGetPrimitives_shouldWork() throws Exception {
     // Create a keyset, and get a PrimitiveSet.
-    KeyTemplate template1 =  AeadKeyTemplates.AES128_GCM;
-    KeyTemplate template2 =  AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
+    KeyTemplate template1 = AeadKeyTemplates.AES128_GCM;
+    KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.newKeyData(template1);
     KeyData key2 = Registry.newKeyData(template1);
     KeyData key3 = Registry.newKeyData(template2);
-    KeysetHandle keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key1)
-            .setKeyId(1)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key2)
-            .setKeyId(2)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key3)
-            .setKeyId(3)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .setPrimaryKeyId(2)
-        .build());
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key2)
+                        .setKeyId(2)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key3)
+                        .setKeyId(3)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(2)
+                .build());
     PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle);
 
     assertThat(aeadSet.getPrimary().getPrimitive().getClass()).isEqualTo(AesGcmJce.class);
@@ -249,35 +259,41 @@ public class RegistryTest {
   @Test
   public void testGetPrimitives_WithSomeNonEnabledKeys_shouldWork() throws Exception {
     // Try a keyset with some keys non-ENABLED.
-    KeyTemplate template1 =  AeadKeyTemplates.AES128_GCM;
-    KeyTemplate template2 =  AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
+    KeyTemplate template1 = AeadKeyTemplates.AES128_GCM;
+    KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.newKeyData(template1);
     KeyData key2 = Registry.newKeyData(template1);
     KeyData key3 = Registry.newKeyData(template2);
-    KeysetHandle keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key1)
-            .setKeyId(1)
-            .setStatus(KeyStatusType.DESTROYED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key2)
-            .setKeyId(2)
-            .setStatus(KeyStatusType.DISABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key3)
-            .setKeyId(3)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .setPrimaryKeyId(3)
-        .build());
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.DESTROYED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key2)
+                        .setKeyId(2)
+                        .setStatus(KeyStatusType.DISABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key3)
+                        .setKeyId(3)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(3)
+                .build());
     PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle);
 
-    assertThat(aeadSet.getPrimary().getPrimitive().getClass()).isEqualTo(EncryptThenAuthenticate.class);
+    assertThat(aeadSet.getPrimary().getPrimitive().getClass())
+        .isEqualTo(EncryptThenAuthenticate.class);
   }
 
   @Test
@@ -287,35 +303,38 @@ public class RegistryTest {
     KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.newKeyData(template1);
     KeyData key2 = Registry.newKeyData(template2);
-    KeysetHandle keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key1)
-            .setKeyId(1)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key2)
-            .setKeyId(2)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .setPrimaryKeyId(2)
-        .build());
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key2)
+                        .setKeyId(2)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(2)
+                .build());
 
     // Get a PrimitiveSet using a custom key manager for key1.
     KeyManager<Aead> customManager = new CustomAeadKeyManager();
     PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, customManager);
-    List<PrimitiveSet.Entry<Aead>> aead1List = aeadSet.getPrimitive(
-        keysetHandle.getKeyset().getKey(0));
-    List<PrimitiveSet.Entry<Aead>> aead2List = aeadSet.getPrimitive(
-        keysetHandle.getKeyset().getKey(1));
+    List<PrimitiveSet.Entry<Aead>> aead1List =
+        aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(0));
+    List<PrimitiveSet.Entry<Aead>> aead2List =
+        aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(1));
 
     assertThat(aead1List.size()).isEqualTo(1);
     assertThat(aead1List.get(0).getPrimitive().getClass()).isEqualTo(DummyAead.class);
     assertThat(aead2List.size()).isEqualTo(1);
-    assertThat(aead2List.get(0).getPrimitive().getClass()).isEqualTo(
-        EncryptThenAuthenticate.class);
+    assertThat(aead2List.get(0).getPrimitive().getClass()).isEqualTo(EncryptThenAuthenticate.class);
   }
 
   @Test
@@ -333,14 +352,17 @@ public class RegistryTest {
   public void testGetPrimitives_KeysetWithNoPrimaryKey_shouldThrowException() throws Exception {
     // Create a keyset without a primary key.
     KeyData key1 = Registry.newKeyData(MacKeyTemplates.HMAC_SHA256_128BITTAG);
-    KeysetHandle keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key1)
-            .setKeyId(1)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .build());
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .build());
 
     // No primary key.
     try {
@@ -356,15 +378,18 @@ public class RegistryTest {
       throws Exception {
     // Create a keyset with a disabled primary key.
     KeyData key1 = Registry.newKeyData(MacKeyTemplates.HMAC_SHA256_128BITTAG);
-    KeysetHandle keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key1)
-            .setKeyId(1)
-            .setStatus(KeyStatusType.DISABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .setPrimaryKeyId(1)
-        .build());
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.DISABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(1)
+                .build());
 
     try {
       Registry.getPrimitives(keysetHandle);
@@ -379,21 +404,25 @@ public class RegistryTest {
       throws Exception {
     // Multiple primary keys.
     KeyData key1 = Registry.newKeyData(MacKeyTemplates.HMAC_SHA256_128BITTAG);
-    KeysetHandle keysetHandle = KeysetHandle.fromKeyset(Keyset.newBuilder()
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key1)
-            .setKeyId(1)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .addKey(Keyset.Key.newBuilder()
-            .setKeyData(key1)
-            .setKeyId(1)
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build())
-        .setPrimaryKeyId(1)
-        .build());
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key1)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(1)
+                .build());
 
     try {
       Registry.getPrimitives(keysetHandle);
@@ -430,42 +459,45 @@ public class RegistryTest {
   @Test
   public void testAddCatalogue_MultiThreads_shouldWork() throws Exception {
     final boolean[] threwException = new boolean[3];
-    Thread thread1 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            try {
-              Registry.addCatalogue("catalogue", new Catalogue1());
-              threwException[0] = false;
-            } catch (GeneralSecurityException e) {
-              threwException[0] = true;
-            }
-          }
-        });
-    Thread thread2 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            try {
-              Registry.addCatalogue("catalogue", new Catalogue2());
-              threwException[1] = false;
-            } catch (GeneralSecurityException e) {
-              threwException[1] = true;
-            }
-          }
-        });
-    Thread thread3 = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            try {
-              Registry.addCatalogue("catalogue", new Catalogue3());
-              threwException[2] = false;
-            } catch (GeneralSecurityException e) {
-              threwException[2] = true;
-            }
-          }
-        });
+    Thread thread1 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                try {
+                  Registry.addCatalogue("catalogue", new Catalogue1());
+                  threwException[0] = false;
+                } catch (GeneralSecurityException e) {
+                  threwException[0] = true;
+                }
+              }
+            });
+    Thread thread2 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                try {
+                  Registry.addCatalogue("catalogue", new Catalogue2());
+                  threwException[1] = false;
+                } catch (GeneralSecurityException e) {
+                  threwException[1] = true;
+                }
+              }
+            });
+    Thread thread3 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                try {
+                  Registry.addCatalogue("catalogue", new Catalogue3());
+                  threwException[2] = false;
+                } catch (GeneralSecurityException e) {
+                  threwException[2] = true;
+                }
+              }
+            });
 
     // Start the threads.
     thread1.start();

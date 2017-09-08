@@ -38,7 +38,8 @@ import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for EcdsaVerifyJce.
- * TODO(quannguyen): Add more tests.
+ *
+ * <p>TODO(quannguyen): Add more tests.
  */
 @RunWith(JUnit4.class)
 public class EcdsaVerifyJceTest {
@@ -62,10 +63,10 @@ public class EcdsaVerifyJceTest {
   };
 
   /**
-   * The following test vectors contain a valid signature that use alternative BER encoding.
-   * Whether such signatures are accepted as valid or rejected depends on the implementation.
-   * Allowing alternative BER encodings is in many cases benign. However, there are cases where this
-   * kind of signature malleability was a problem. See for example
+   * The following test vectors contain a valid signature that use alternative BER encoding. Whether
+   * such signatures are accepted as valid or rejected depends on the implementation. Allowing
+   * alternative BER encodings is in many cases benign. However, there are cases where this kind of
+   * signature malleability was a problem. See for example
    * https://en.bitcoin.it/wiki/Transaction_Malleability
    */
   static final String[] MODIFIED_SIGNATURES = {
@@ -111,28 +112,32 @@ public class EcdsaVerifyJceTest {
   };
 
   /**
-   * Test vectors with invalid signatures.
-   * The motivation for these test vectors are previously broken implementations. E.g.
+   * Test vectors with invalid signatures. The motivation for these test vectors are previously
+   * broken implementations. E.g.
+   *
    * <ul>
-   * <li> The implementation of DSA in gpg4browsers accepted signatures with r=1 and s=q as valid.
-   *     Similar bugs in ECDSA are thinkable, hence the test vectors contain a number of tests with
-   *     edge case integers.
-   * <li> CVE-2013-2944: strongSwan 5.0.4 accepts invalid ECDSA signatures when openssl is used.
-   *      (Not sure if the following interpretation is correct, because of missing details).
-   *      OpenSSLs error codes are easy to misinterpret. For many functions
-   *      the result can be 0 (verification failed), 1 (verification succeded)
-   *      or -1 (invalid format). A simple <code>if (result) { ... }</code> will be incorrect in
-   *      such situations. The test vectors below contain incorrectly encoded signatures.
+   *   <li>The implementation of DSA in gpg4browsers accepted signatures with r=1 and s=q as valid.
+   *       Similar bugs in ECDSA are thinkable, hence the test vectors contain a number of tests
+   *       with edge case integers.
+   *   <li>CVE-2013-2944: strongSwan 5.0.4 accepts invalid ECDSA signatures when openssl is used.
+   *       (Not sure if the following interpretation is correct, because of missing details).
+   *       OpenSSLs error codes are easy to misinterpret. For many functions the result can be 0
+   *       (verification failed), 1 (verification succeded) or -1 (invalid format). A simple <code>
+   *       if (result) { ... }</code> will be incorrect in such situations. The test vectors below
+   *       contain incorrectly encoded signatures.
    * </ul>
-   * <p> {@link java.security.Signature#verify(byte[])} should either return false or throw a
-   * SignatureException. Other behaviour such as throwing a RuntimeException might allow a denial
-   * of service attack:
+   *
+   * <p>{@link java.security.Signature#verify(byte[])} should either return false or throw a
+   * SignatureException. Other behaviour such as throwing a RuntimeException might allow a denial of
+   * service attack:
+   *
    * <ul>
-   * <li> CVE-2016-5546: OpenJDK8 throwed an OutOfmemoryError on some signatures.
+   *   <li>CVE-2016-5546: OpenJDK8 throwed an OutOfmemoryError on some signatures.
    * </ul>
-   * Some of the test vectors were derived from a valid signature by corrupting the DER encoding.
-   * If providers accepts such modified signatures for legacy purpose, then these signatures
-   * should be moved to MODIFIED_SIGNATURES.
+   *
+   * Some of the test vectors were derived from a valid signature by corrupting the DER encoding. If
+   * providers accepts such modified signatures for legacy purpose, then these signatures should be
+   * moved to MODIFIED_SIGNATURES.
    */
   static final String[] INVALID_SIGNATURES = {
     // wrong length
@@ -450,8 +455,7 @@ public class EcdsaVerifyJceTest {
     "3046022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9ca"
         + "c2fc632551022100ffffffff0000000100000000000000000000000100000000"
         + "0000000000000000",
-    "3028022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9ca"
-        + "c2fc632551090380fe01",
+    "3028022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9ca" + "c2fc632551090380fe01",
     "3026022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632550020100",
     "3026022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632550020101",
     "3026022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc6325500201ff",
@@ -470,8 +474,7 @@ public class EcdsaVerifyJceTest {
     "3046022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9ca"
         + "c2fc632550022100ffffffff0000000100000000000000000000000100000000"
         + "0000000000000000",
-    "3028022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9ca"
-        + "c2fc632550090380fe01",
+    "3028022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9ca" + "c2fc632550090380fe01",
     "3026022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632552020100",
     "3026022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632552020101",
     "3026022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc6325520201ff",
@@ -490,8 +493,7 @@ public class EcdsaVerifyJceTest {
     "3046022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9ca"
         + "c2fc632552022100ffffffff0000000100000000000000000000000100000000"
         + "0000000000000000",
-    "3028022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9ca"
-        + "c2fc632552090380fe01",
+    "3028022100ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9ca" + "c2fc632552090380fe01",
     "3026022100ffffffff00000001000000000000000000000000ffffffffffffffffffffffff020100",
     "3026022100ffffffff00000001000000000000000000000000ffffffffffffffffffffffff020101",
     "3026022100ffffffff00000001000000000000000000000000ffffffffffffffffffffffff0201ff",
@@ -510,8 +512,7 @@ public class EcdsaVerifyJceTest {
     "3046022100ffffffff00000001000000000000000000000000ffffffffffffff"
         + "ffffffffff022100ffffffff0000000100000000000000000000000100000000"
         + "0000000000000000",
-    "3028022100ffffffff00000001000000000000000000000000ffffffffffffff"
-        + "ffffffffff090380fe01",
+    "3028022100ffffffff00000001000000000000000000000000ffffffffffffff" + "ffffffffff090380fe01",
     "3026022100ffffffff00000001000000000000000000000001000000000000000000000000020100",
     "3026022100ffffffff00000001000000000000000000000001000000000000000000000000020101",
     "3026022100ffffffff000000010000000000000000000000010000000000000000000000000201ff",
@@ -530,8 +531,7 @@ public class EcdsaVerifyJceTest {
     "3046022100ffffffff0000000100000000000000000000000100000000000000"
         + "0000000000022100ffffffff0000000100000000000000000000000100000000"
         + "0000000000000000",
-    "3028022100ffffffff0000000100000000000000000000000100000000000000"
-        + "0000000000090380fe01",
+    "3028022100ffffffff0000000100000000000000000000000100000000000000" + "0000000000090380fe01",
   };
 
   public void testVectors(
@@ -541,7 +541,8 @@ public class EcdsaVerifyJceTest {
       String algorithm,
       String signatureType,
       boolean isValidDER,
-      boolean isValidBER) throws Exception {
+      boolean isValidBER)
+      throws Exception {
     byte[] messageBytes = message.getBytes("UTF-8");
     KeyFactory kf = KeyFactory.getInstance("EC");
     ECPublicKey pub = (ECPublicKey) kf.generatePublic(pubSpec);
@@ -577,8 +578,13 @@ public class EcdsaVerifyJceTest {
   @Test
   public void testValidSignatures() throws Exception {
     testVectors(
-        VALID_SIGNATURES, publicKey1(), "Hello", "SHA256WithECDSA", "Valid ECDSA signature",
-        true, true);
+        VALID_SIGNATURES,
+        publicKey1(),
+        "Hello",
+        "SHA256WithECDSA",
+        "Valid ECDSA signature",
+        true,
+        true);
   }
 
   @Test
@@ -621,7 +627,7 @@ public class EcdsaVerifyJceTest {
     signer.update(message.getBytes("UTF-8"));
     byte[] signature = signer.sign();
 
-    //Verify with EcdsaVerifyJce.
+    // Verify with EcdsaVerifyJce.
     EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, "SHA256WithECDSA");
     try {
       verifier.verify(signature, message.getBytes("UTF-8"));
@@ -646,7 +652,7 @@ public class EcdsaVerifyJceTest {
     signer.update(message.getBytes("UTF-8"));
     byte[] signature = signer.sign();
 
-    //Verify with EcdsaVerifyJce.
+    // Verify with EcdsaVerifyJce.
     EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, "SHA256WithECDSA");
     for (int i = 0; i < signature.length; i++) {
       for (int j = 0; j < 8; j++) {
