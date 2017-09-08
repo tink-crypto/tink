@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
@@ -24,6 +25,7 @@ import java.security.GeneralSecurityException;
  * of this interfaces are passed to ...DecryptingChannel. Each instance must be initialized with the
  * header of the ciphertext.
  */
+@Alpha
 public interface StreamSegmentDecrypter {
   void init(ByteBuffer header, byte[] aad) throws GeneralSecurityException;
 

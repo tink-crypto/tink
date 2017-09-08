@@ -51,6 +51,12 @@ android-21  android-23  android-24  android-26
 Snapshots of Tink built from the master branch are available through Maven using
 version `1.1.0-SNAPSHOT`, or `1.1.0-android-SNAPSHOT` for the Android flavor.
 
+## Important Warnings
+
+Do not use APIs including fields and methods marked with the `@Alpha` annotation.
+They can be modified in any way, or even removed, at any time. They are in the
+package, but not for official, production release, but only for testing.
+
 ## Initializing Tink
 
 Tink provides customizable initialization, which allows for choosing specific

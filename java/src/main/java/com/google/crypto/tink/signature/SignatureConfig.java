@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
@@ -39,7 +40,9 @@ import java.security.GeneralSecurityException;
 public final class SignatureConfig {
   public static final String ECDSA_PUBLIC_KEY_TYPE_URL = EcdsaVerifyKeyManager.TYPE_URL;
   public static final String ECDSA_PRIVATE_KEY_TYPE_URL = EcdsaSignKeyManager.TYPE_URL;
+  @Alpha
   public static final String ED25519_PUBLIC_KEY_TYPE_URL = Ed25519PublicKeyManager.TYPE_URL;
+  @Alpha
   public static final String ED25519_PRIVATE_KEY_TYPE_URL = Ed25519PrivateKeyManager.TYPE_URL;
 
   private static final String CATALOGUE_NAME = "TinkSignature";

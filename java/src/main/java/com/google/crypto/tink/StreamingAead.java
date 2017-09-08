@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.annotations.Alpha;
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
@@ -103,6 +104,7 @@ import java.security.GeneralSecurityException;
  * }
  * </pre>
  */
+@Alpha
 public interface StreamingAead {
 
   /**

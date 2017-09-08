@@ -117,6 +117,12 @@ AEAD primitive in Java:
 See the [Java HOWTO](doc/JAVA-HOWTO.md#obtaining-and-using-a-primitive) for how
 to obtain and use other primitives.
 
+## Important Warnings
+
+Do not use APIs including fields and methods marked with the `@Alpha` annotation.
+They can be modified in any way, or even removed, at any time. They are in the
+package, but not for official, production release, but only for testing.
+
 ## Learn More
 
 *   [Tink Primitives](doc/PRIMITIVES.md)

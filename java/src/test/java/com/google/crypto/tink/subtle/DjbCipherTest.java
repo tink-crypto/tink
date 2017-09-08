@@ -513,8 +513,8 @@ public class DjbCipherTest {
     @Test
     public void testChaCha202() {
       byte[] in =
-          ("Any submission to the IETF intended by the Contributor for publication as all or "
-                  + "part of an IETF Internet-Draft or RFC and any statement made within the context "
+          ("Any submission to the IETF intended by the Contributor for publication as all or part "
+                  + "of an IETF Internet-Draft or RFC and any statement made within the context "
                   + "of an IETF activity is considered an \"IETF Contribution\". Such statements "
                   + "include oral statements in IETF sessions, as well as written and electronic "
                   + "communications made at any time or place, which are addressed to")

@@ -20,6 +20,7 @@ import static com.google.crypto.tink.subtle.Poly1305.MAC_TAG_SIZE_IN_BYTES;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.subtle.DjbCipher.ChaCha20Base;
 import com.google.crypto.tink.subtle.DjbCipher.XSalsa20;
 import java.nio.ByteBuffer;
@@ -47,6 +48,7 @@ import java.security.GeneralSecurityException;
  *   byte[] plaintext = hybridDecrypt.decrypt(ciphertextFromAlice, contextInfo \/* can be null *\/);
  * </code>
  */
+@Alpha
 public final class NaClCryptoBox {
 
   private static final byte[] EMPTY_AAD = new byte[0];

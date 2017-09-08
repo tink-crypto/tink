@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import static com.google.crypto.tink.subtle.Poly1305.MAC_KEY_SIZE_IN_BYTES;
 
+import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -29,6 +30,7 @@ import java.util.Arrays;
  *
  * <p>Class of Djb's ciphers that are meant to be used to construct an AEAD with Poly1305.
  */
+@Alpha
 public abstract class DjbCipher implements IndCpaCipher {
 
   static final int BLOCK_SIZE_IN_INTS = 16;

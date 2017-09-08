@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.annotations.Alpha;
 import java.util.Arrays;
 
 /**
@@ -47,6 +48,7 @@ import java.util.Arrays;
  * byte[] sharedSecretB = Curve25519.x25519(privateKeyB, publicKeyA);
  * such that sharedSecretA == sharedSecretB.
  */
+@Alpha
 public final class Curve25519 {
 
   static final int FIELD_LEN = 32;

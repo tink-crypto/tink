@@ -48,6 +48,7 @@ java_library(
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
     ],
 )
 
@@ -81,6 +82,7 @@ java_library(
         ":ed25519_internal",
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
@@ -104,6 +106,7 @@ java_library(
         ":aead",
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
@@ -126,6 +129,7 @@ java_library(
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
@@ -140,6 +144,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         ":subtle",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
     ],
 )
 
@@ -156,6 +161,7 @@ java_library(
     deps = [
         ":subtle",
         ":x25519",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
     ],
 )
 

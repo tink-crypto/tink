@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import static com.google.crypto.tink.subtle.Poly1305.MAC_TAG_SIZE_IN_BYTES;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
@@ -42,6 +43,7 @@ import java.security.GeneralSecurityException;
  * <p>The implementation is based on poly1305 implementation by Andrew Moon
  * (https://github.com/floodyberry/poly1305-donna) and released as public domain.
  */
+@Alpha
 public abstract class DjbCipherPoly1305 implements Aead {
 
   private final DjbCipher djbCipher;

@@ -39,6 +39,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "//java/src/main/java/com/google/crypto/tink",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:signature",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
@@ -51,6 +52,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "//java/src/main/java/com/google/crypto/tink:android",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:signature",
         "@com_google_protobuf_javalite//:protobuf_java_lite",

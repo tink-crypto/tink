@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
@@ -32,6 +33,7 @@ import java.security.GeneralSecurityException;
  * This state is used to encrypt each segment with different parameters, so that segments
  * in the ciphertext cannot be switched.
  */
+@Alpha
 public interface StreamSegmentEncrypter {
 
   /**

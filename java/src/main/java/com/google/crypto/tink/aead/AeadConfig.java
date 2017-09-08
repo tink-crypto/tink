@@ -18,6 +18,7 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -37,9 +38,11 @@ public final class AeadConfig {
   public static final String AES_CTR_HMAC_AEAD_TYPE_URL = AesCtrHmacAeadKeyManager.TYPE_URL;
   public static final String AES_GCM_TYPE_URL = AesGcmKeyManager.TYPE_URL;
   public static final String AES_EAX_TYPE_URL = AesEaxKeyManager.TYPE_URL;
-  public static final String CHACHA20_POLY1305_TYPE_URL = ChaCha20Poly1305KeyManager.TYPE_URL;
   public static final String KMS_AEAD_TYPE_URL = KmsAeadKeyManager.TYPE_URL;
   public static final String KMS_ENVELOPE_AEAD_TYPE_URL = KmsEnvelopeAeadKeyManager.TYPE_URL;
+
+  @Alpha
+  public static final String CHACHA20_POLY1305_TYPE_URL = ChaCha20Poly1305KeyManager.TYPE_URL;
 
   private static final String CATALOGUE_NAME = "TinkAead";
   private static final String PRIMITIVE_NAME = "Aead";
