@@ -19,6 +19,8 @@ package com.google.crypto.tink.apps.paymentmethodtoken;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.api.client.testing.http.MockHttpTransport;
+import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import java.security.GeneralSecurityException;
 import org.joda.time.Days;
 import org.joda.time.Instant;
@@ -124,6 +126,26 @@ public class PaymentMethodTokenRecipientTest {
         .recipientId(RECIPIENT_ID)
         .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
         .build();
+
+    assertEquals(PLAINTEXT, recipient.unseal(CIPHERTEXT));
+  }
+
+  @Test
+  public void testShouldDecryptV1WhenFetchingSenderVerifyingKeys() throws Exception {
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .fetchSenderVerifyingKeysWith(
+                new GooglePaymentsPublicKeysManager.Builder()
+                    .setHttpTransport(
+                        new MockHttpTransport.Builder()
+                            .setLowLevelHttpResponse(
+                                new MockLowLevelHttpResponse()
+                                    .setContent(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON))
+                            .build())
+                    .build())
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
 
     assertEquals(PLAINTEXT, recipient.unseal(CIPHERTEXT));
   }
