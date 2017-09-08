@@ -249,7 +249,6 @@ public class AesGcmJceTest {
     JSONArray testGroups = jsonObj.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
-      int tagSize = group.getInt("tagSize");
       int keySize = group.getInt("keySize");
       JSONArray tests = group.getJSONArray("tests");
       if (!Arrays.asList(keySizeInBytes).contains(keySize / 8)) {

@@ -64,7 +64,7 @@ java_library(
     srcs = [":aead_srcs"],
     javacopts = JAVACOPTS,
     deps = [
-        "//java/src/main/java/com/google/crypto/tink",
+        "//java/src/main/java/com/google/crypto/tink:android",
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/mac:android",
         "//java/src/main/java/com/google/crypto/tink/subtle",

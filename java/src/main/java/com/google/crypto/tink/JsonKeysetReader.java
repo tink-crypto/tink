@@ -30,6 +30,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -72,6 +73,10 @@ public final class JsonKeysetReader implements KeysetReader {
 
   public static JsonKeysetReader withBytes(final byte[] bytes) {
     return new JsonKeysetReader(new String(bytes, UTF_8));
+  }
+
+  public static JsonKeysetReader withFile(File file) throws IOException {
+    return withPath(file.toPath());
   }
 
   public static JsonKeysetReader withPath(Path path) throws IOException {

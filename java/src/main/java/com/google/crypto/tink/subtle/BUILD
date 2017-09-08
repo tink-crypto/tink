@@ -79,7 +79,7 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
-        ":ed25519_internal",
+        ":ed25519",
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "//java/src/main/java/com/google/crypto/tink/annotations",
@@ -142,6 +142,7 @@ java_library(
         "Curve25519.java",
     ],
     javacopts = JAVACOPTS,
+    visibility = ["//visibility:private"],
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink/annotations",
@@ -151,7 +152,7 @@ java_library(
 # Ed25519 subtle
 
 java_library(
-    name = "ed25519_internal",
+    name = "ed25519",
     srcs = [
         "Ed25519.java",
         "Ed25519Constants.java",

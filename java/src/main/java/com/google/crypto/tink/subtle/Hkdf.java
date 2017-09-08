@@ -82,7 +82,7 @@ public final class Hkdf {
   /**
    * Computes symmetric key for ECIES with HKDF from the provided parameters.
    *
-   * @param ephemeralPublicKeyBytes the encoded ephemeral public key, i.e. the KEM part of the the
+   * @param ephemeralPublicKeyBytes the encoded ephemeral public key, i.e. the KEM part of the
    *     hybrid encryption. In some versions of ECIES (e.g. IEEE P1363a) this argument is optional.
    *     Shoup strongly prefers the inclusion of this argument in
    *     http://eprint.iacr.org/2001/112.pdf (see discussion of the value C0 in Section 15.6, and
