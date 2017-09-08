@@ -34,32 +34,31 @@ import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-/**
- * Various helpers.
- */
+/** Various helpers. */
 class PaymentMethodTokenUtil {
 
   public static ECPublicKey rawUncompressedEcPublicKey(String rawUncompressedPublicKey)
       throws GeneralSecurityException {
-    ECPoint point = EllipticCurves.ecPointDecode(EllipticCurves.getNistP256Params().getCurve(),
-        EllipticCurves.PointFormatType.UNCOMPRESSED, Base64.decode(rawUncompressedPublicKey));
+    ECPoint point =
+        EllipticCurves.ecPointDecode(
+            EllipticCurves.getNistP256Params().getCurve(),
+            EllipticCurves.PointFormatType.UNCOMPRESSED,
+            Base64.decode(rawUncompressedPublicKey));
     ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, EllipticCurves.getNistP256Params());
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     return (ECPublicKey) kf.generatePublic(pubSpec);
   }
 
-  public static ECPublicKey x509EcPublicKey(String x509PublicKey)
-      throws GeneralSecurityException {
+  public static ECPublicKey x509EcPublicKey(String x509PublicKey) throws GeneralSecurityException {
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
-    return (ECPublicKey) kf.generatePublic(new X509EncodedKeySpec(Base64.decode(
-        x509PublicKey)));
+    return (ECPublicKey) kf.generatePublic(new X509EncodedKeySpec(Base64.decode(x509PublicKey)));
   }
 
   public static ECPrivateKey pkcs8EcPrivateKey(String pkcs8PrivateKey)
       throws GeneralSecurityException {
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
-    return (ECPrivateKey) kf.generatePrivate(new PKCS8EncodedKeySpec(
-        Base64.decode(pkcs8PrivateKey)));
+    return (ECPrivateKey)
+        kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(pkcs8PrivateKey)));
   }
 
   public static byte[] toLengthValue(String... chunks) throws GeneralSecurityException {
@@ -84,10 +83,8 @@ class PaymentMethodTokenUtil {
 
   static byte[] hmacSha256(final byte[] macKey, final byte[] encryptedMessage)
       throws GeneralSecurityException {
-    SecretKeySpec key = new SecretKeySpec(macKey,
-          PaymentMethodTokenConstants.HMAC_SHA256_ALGO);
-    Mac mac = EngineFactory.MAC.getInstance(
-        PaymentMethodTokenConstants.HMAC_SHA256_ALGO);
+    SecretKeySpec key = new SecretKeySpec(macKey, PaymentMethodTokenConstants.HMAC_SHA256_ALGO);
+    Mac mac = EngineFactory.MAC.getInstance(PaymentMethodTokenConstants.HMAC_SHA256_ALGO);
     mac.init(key);
     return mac.doFinal(encryptedMessage);
   }

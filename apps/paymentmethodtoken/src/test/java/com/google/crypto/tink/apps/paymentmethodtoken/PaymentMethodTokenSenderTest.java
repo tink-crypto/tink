@@ -28,9 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@code PaymentMethodTokenSender}.
- */
+/** Unit tests for {@code PaymentMethodTokenSender}. */
 @RunWith(JUnit4.class)
 public class PaymentMethodTokenSenderTest {
   private static final String MERCHANT_PUBLIC_KEY_BASE64 =
@@ -79,17 +77,19 @@ public class PaymentMethodTokenSenderTest {
 
   @Test
   public void testWithPrecomputedKeys() throws Exception {
-    PaymentMethodTokenSender sender = new PaymentMethodTokenSender.Builder()
-        .senderSigningKey(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)
-        .recipientId(RECIPIENT_ID)
-        .rawUncompressedRecipientPublicKey(MERCHANT_PUBLIC_KEY_BASE64)
-        .build();
+    PaymentMethodTokenSender sender =
+        new PaymentMethodTokenSender.Builder()
+            .senderSigningKey(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)
+            .recipientId(RECIPIENT_ID)
+            .rawUncompressedRecipientPublicKey(MERCHANT_PUBLIC_KEY_BASE64)
+            .build();
 
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
 
     String plaintext = "blah";
     assertEquals(plaintext, recipient.unseal(sender.seal(plaintext)));
@@ -111,19 +111,21 @@ public class PaymentMethodTokenSenderTest {
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
 
-    PaymentMethodTokenSender sender = new PaymentMethodTokenSender.Builder()
-        .senderId(senderId)
-        .senderSigningKey(senderPrivateKey)
-        .recipientId(recipientId)
-        .recipientPublicKey(recipientPublicKey)
-        .build();
+    PaymentMethodTokenSender sender =
+        new PaymentMethodTokenSender.Builder()
+            .senderId(senderId)
+            .senderSigningKey(senderPrivateKey)
+            .recipientId(recipientId)
+            .recipientPublicKey(recipientPublicKey)
+            .build();
 
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderId(senderId)
-        .addSenderVerifyingKey(senderPublicKey)
-        .recipientId(recipientId)
-        .addRecipientPrivateKey(recipientPrivateKey)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderId(senderId)
+            .addSenderVerifyingKey(senderPublicKey)
+            .recipientId(recipientId)
+            .addRecipientPrivateKey(recipientPrivateKey)
+            .build();
 
     String plaintext = "blah";
     assertEquals(plaintext, recipient.unseal(sender.seal(plaintext)));

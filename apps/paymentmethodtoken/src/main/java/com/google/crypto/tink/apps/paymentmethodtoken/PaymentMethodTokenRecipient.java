@@ -88,8 +88,7 @@ public final class PaymentMethodTokenRecipient {
       hybridDecrypters.add(new PaymentMethodTokenHybridDecrypt(privateKey));
     }
     if (recipientId == null) {
-      throw new IllegalArgumentException(
-          "must set recipient Id using Builder.recipientId");
+      throw new IllegalArgumentException("must set recipient Id using Builder.recipientId");
     }
     this.recipientId = recipientId;
   }
@@ -103,9 +102,7 @@ public final class PaymentMethodTokenRecipient {
         builder.recipientId);
   }
 
-  /**
-   * Builder for PaymentMethodTokenRecipient.
-   */
+  /** Builder for PaymentMethodTokenRecipient. */
   public static class Builder {
     private String protocolVersion = PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1;
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
@@ -114,28 +111,21 @@ public final class PaymentMethodTokenRecipient {
         new ArrayList<SenderVerifyingKeysProvider>();
     private final List<ECPrivateKey> recipientPrivateKeys = new ArrayList<ECPrivateKey>();
 
-    public Builder() {
-    }
+    public Builder() {}
 
-    /**
-     * Sets the protocolVersion.
-     */
+    /** Sets the protocolVersion. */
     public Builder protocolVersion(String val) {
       protocolVersion = val;
       return this;
     }
 
-    /**
-     * Sets the sender Id.
-     */
+    /** Sets the sender Id. */
     public Builder senderId(String val) {
       senderId = val;
       return this;
     }
 
-    /**
-     * Sets the recipient Id.
-     */
+    /** Sets the recipient Id. */
     public Builder recipientId(String val) {
       recipientId = val;
       return this;
@@ -287,15 +277,16 @@ public final class PaymentMethodTokenRecipient {
       throws GeneralSecurityException, JSONException {
     JSONObject jsonMsg = new JSONObject(sealedMessage);
     validateV1(jsonMsg);
-    byte[] signature = Base64.decode(
-        jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY));
+    byte[] signature =
+        Base64.decode(jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY));
     String signedMessage = jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY);
-    byte[] signedBytes = PaymentMethodTokenUtil.toLengthValue(
-        // The order of the parameters matters.
-        senderId,
-        recipientId,
-        PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1,
-        signedMessage);
+    byte[] signedBytes =
+        PaymentMethodTokenUtil.toLengthValue(
+            // The order of the parameters matters.
+            senderId,
+            recipientId,
+            PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1,
+            signedMessage);
     verify(signature, signedBytes);
     String decryptedMessage = decrypt(signedMessage);
     validateDecryptedMessage(decryptedMessage);
@@ -315,16 +306,16 @@ public final class PaymentMethodTokenRecipient {
     // If message expiration is present, checking it.
     if (decodedMessage.has(PaymentMethodTokenConstants.JSON_MESSAGE_EXPIRATION_KEY)) {
       Long expirationInMillis =
-          Long.parseLong(decodedMessage.getString(
-              PaymentMethodTokenConstants.JSON_MESSAGE_EXPIRATION_KEY));
+          Long.parseLong(
+              decodedMessage.getString(PaymentMethodTokenConstants.JSON_MESSAGE_EXPIRATION_KEY));
       if (expirationInMillis <= Instant.now().getMillis()) {
         throw new GeneralSecurityException("expired payload");
       }
     }
   }
 
-  private void verify(final byte[] signature,
-      final byte[] message) throws GeneralSecurityException {
+  private void verify(final byte[] signature, final byte[] message)
+      throws GeneralSecurityException {
     boolean verified = false;
     for (SenderVerifyingKeysProvider verifyingKeysProvider : senderVerifyingKeysProviders) {
       for (ECPublicKey publicKey : verifyingKeysProvider.get(protocolVersion)) {
@@ -344,13 +335,13 @@ public final class PaymentMethodTokenRecipient {
     }
   }
 
-  private String decrypt(String ciphertext)
-      throws GeneralSecurityException {
+  private String decrypt(String ciphertext) throws GeneralSecurityException {
     for (HybridDecrypt hybridDecrypter : hybridDecrypters) {
       try {
-        byte[] cleartext = hybridDecrypter.decrypt(
-            ciphertext.getBytes(StandardCharsets.UTF_8),
-            PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1);
+        byte[] cleartext =
+            hybridDecrypter.decrypt(
+                ciphertext.getBytes(StandardCharsets.UTF_8),
+                PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1);
         return new String(cleartext, StandardCharsets.UTF_8);
       } catch (GeneralSecurityException e) {
         // ignored, try again
@@ -359,8 +350,7 @@ public final class PaymentMethodTokenRecipient {
     throw new GeneralSecurityException("cannot decrypt");
   }
 
-  private void validateV1(final JSONObject jsonMsg)
-      throws GeneralSecurityException, JSONException {
+  private void validateV1(final JSONObject jsonMsg) throws GeneralSecurityException, JSONException {
     if (!jsonMsg.has(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY)

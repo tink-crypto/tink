@@ -28,14 +28,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * An implementation of the sender side of
- * <a href="https://developers.google.com/android-pay/integration/payment-token-cryptography">
- * Google Payment Method Token</a>.
+ * An implementation of the sender side of <a
+ * href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
+ * Payment Method Token</a>.
  *
- * <p><b>Warning</b>
- * This implementation supports only version {@code ECv1}.
+ * <p><b>Warning</b> This implementation supports only version {@code ECv1}.
  *
  * <p>Usage:
+ *
  * <pre>{@code
  * PaymentMethodTokenSender sender = new PaymentMethodTokenSender.Builder()
  *    .senderId(senderId)
@@ -69,8 +69,8 @@ public final class PaymentMethodTokenSender {
       throw new IllegalArgumentException(
           "must set sender's signing key using Builder.senderSigningKey");
     }
-    this.signer = new EcdsaSignJce(senderSigningKey,
-        PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO);
+    this.signer =
+        new EcdsaSignJce(senderSigningKey, PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO);
     this.senderId = senderId;
     if (recipientPublicKey == null) {
       throw new IllegalArgumentException(
@@ -78,24 +78,21 @@ public final class PaymentMethodTokenSender {
     }
     this.hybridEncrypter = new PaymentMethodTokenHybridEncrypt(recipientPublicKey);
     if (recipientId == null) {
-      throw new IllegalArgumentException(
-          "must set recipient Id using Builder.recipientId");
+      throw new IllegalArgumentException("must set recipient Id using Builder.recipientId");
     }
     this.recipientId = recipientId;
   }
 
-  private PaymentMethodTokenSender(Builder builder)
-      throws GeneralSecurityException {
-    this(builder.protocolVersion,
+  private PaymentMethodTokenSender(Builder builder) throws GeneralSecurityException {
+    this(
+        builder.protocolVersion,
         builder.senderSigningKey,
         builder.senderId,
         builder.recipientPublicKey,
         builder.recipientId);
   }
 
-  /**
-   * Builder for PaymentMethodTokenSender.
-   */
+  /** Builder for PaymentMethodTokenSender. */
   public static class Builder {
     private String protocolVersion = PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1;
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
@@ -103,28 +100,21 @@ public final class PaymentMethodTokenSender {
     private ECPrivateKey senderSigningKey = null;
     private ECPublicKey recipientPublicKey = null;
 
-    public Builder() {
-    }
+    public Builder() {}
 
-    /**
-     * Sets the protocolVersion.
-     */
+    /** Sets the protocolVersion. */
     public Builder protocolVersion(String val) {
       protocolVersion = val;
       return this;
     }
 
-    /**
-     * Sets the sender Id.
-     */
+    /** Sets the sender Id. */
     public Builder senderId(String val) {
       senderId = val;
       return this;
     }
 
-    /**
-     * Sets the recipient Id.
-     */
+    /** Sets the recipient Id. */
     public Builder recipientId(String val) {
       recipientId = val;
       return this;
@@ -148,8 +138,8 @@ public final class PaymentMethodTokenSender {
     /**
      * Sets the encryption public key of the recipient.
      *
-     * <p>The public key is a base64 (no wrapping, padded) version of the key encoded in ASN.1
-     * type SubjectPublicKeyInfo defined in the X.509 standard.
+     * <p>The public key is a base64 (no wrapping, padded) version of the key encoded in ASN.1 type
+     * SubjectPublicKeyInfo defined in the X.509 standard.
      */
     public Builder recipientPublicKey(String val) throws GeneralSecurityException {
       recipientPublicKey = PaymentMethodTokenUtil.x509EcPublicKey(val);
@@ -178,9 +168,7 @@ public final class PaymentMethodTokenSender {
     }
   }
 
-  /**
-   * Seals the input message according to the Payment Method Token specification.
-   */
+  /** Seals the input message according to the Payment Method Token specification. */
   public String seal(final String message) throws GeneralSecurityException {
     if (protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
       return sealv1(message);
@@ -189,25 +177,27 @@ public final class PaymentMethodTokenSender {
   }
 
   private String sealv1(final String message) throws GeneralSecurityException {
-    String signedMessage = new String(
-        hybridEncrypter.encrypt(
-            message.getBytes(StandardCharsets.UTF_8),
-            PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1),
-        StandardCharsets.UTF_8);
-    byte[] toSignBytes = PaymentMethodTokenUtil.toLengthValue(
-        // The order of the parameters matters.
-        senderId,
-        recipientId,
-        PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1,
-        signedMessage);
+    String signedMessage =
+        new String(
+            hybridEncrypter.encrypt(
+                message.getBytes(StandardCharsets.UTF_8),
+                PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1),
+            StandardCharsets.UTF_8);
+    byte[] toSignBytes =
+        PaymentMethodTokenUtil.toLengthValue(
+            // The order of the parameters matters.
+            senderId,
+            recipientId,
+            PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1,
+            signedMessage);
     byte[] signature = signer.sign(toSignBytes);
     try {
       return new JSONObject()
           .put(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY, signedMessage)
-          .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY,
+          .put(
+              PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY,
               PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
-          .put(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY,
-              Base64.encode(signature))
+          .put(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY, Base64.encode(signature))
           .toString();
     } catch (JSONException e) {
       throw new GeneralSecurityException("cannot seal; JSON error");

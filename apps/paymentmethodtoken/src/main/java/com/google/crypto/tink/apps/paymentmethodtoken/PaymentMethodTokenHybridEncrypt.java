@@ -28,9 +28,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A {@link HybridEncrypt} implementation for the hybrid encryption used in
- * <a href="https://developers.google.com/android-pay/integration/payment-token-cryptography">
- *Google Payment Method Token</a>.
+ * A {@link HybridEncrypt} implementation for the hybrid encryption used in <a
+ * href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
+ * Payment Method Token</a>.
  */
 class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
   private final EciesHkdfSenderKem senderKem;
@@ -44,27 +44,33 @@ class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
       throws GeneralSecurityException {
-    int symmetricKeySize = PaymentMethodTokenConstants.AES_CTR_KEY_SIZE
-        + PaymentMethodTokenConstants.HMAC_SHA256_KEY_SIZE;
-    EciesHkdfSenderKem.KemKey kemKey = senderKem.generateKey(
-        PaymentMethodTokenConstants.HMAC_SHA256_ALGO,
-        PaymentMethodTokenConstants.HKDF_EMPTY_SALT,
-        contextInfo,
-        symmetricKeySize,
-        PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
-    byte[] aesCtrKey = Arrays.copyOfRange(kemKey.getSymmetricKey(), 0,
-        PaymentMethodTokenConstants.AES_CTR_KEY_SIZE);
+    int symmetricKeySize =
+        PaymentMethodTokenConstants.AES_CTR_KEY_SIZE
+            + PaymentMethodTokenConstants.HMAC_SHA256_KEY_SIZE;
+    EciesHkdfSenderKem.KemKey kemKey =
+        senderKem.generateKey(
+            PaymentMethodTokenConstants.HMAC_SHA256_ALGO,
+            PaymentMethodTokenConstants.HKDF_EMPTY_SALT,
+            contextInfo,
+            symmetricKeySize,
+            PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
+    byte[] aesCtrKey =
+        Arrays.copyOfRange(
+            kemKey.getSymmetricKey(), 0, PaymentMethodTokenConstants.AES_CTR_KEY_SIZE);
     byte[] ciphertext = PaymentMethodTokenUtil.aesCtr(aesCtrKey, plaintext);
-    byte[] hmacSha256Key = Arrays.copyOfRange(
-        kemKey.getSymmetricKey(), PaymentMethodTokenConstants.AES_CTR_KEY_SIZE, symmetricKeySize);
+    byte[] hmacSha256Key =
+        Arrays.copyOfRange(
+            kemKey.getSymmetricKey(),
+            PaymentMethodTokenConstants.AES_CTR_KEY_SIZE,
+            symmetricKeySize);
     byte[] tag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key, ciphertext);
     byte[] ephemeralPublicKey = kemKey.getKemBytes();
     try {
       return new JSONObject()
-          .put(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY,
-              Base64.encode(ciphertext))
+          .put(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY, Base64.encode(ciphertext))
           .put(PaymentMethodTokenConstants.JSON_TAG_KEY, Base64.encode(tag))
-          .put(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
+          .put(
+              PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
               Base64.encode(ephemeralPublicKey))
           .toString()
           .getBytes(StandardCharsets.UTF_8);

@@ -19,9 +19,7 @@ package com.google.crypto.tink.apps.paymentmethodtoken;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Various constants.
- */
+/** Various constants. */
 class PaymentMethodTokenConstants {
   public static final String GOOGLE_SENDER_ID = "Google";
   public static final String HMAC_SHA256_ALGO = "HmacSha256";

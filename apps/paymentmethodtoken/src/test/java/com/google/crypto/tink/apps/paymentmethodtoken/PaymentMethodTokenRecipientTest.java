@@ -30,9 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@code PaymentMethodTokenRecipient}.
- */
+/** Unit tests for {@code PaymentMethodTokenRecipient}. */
 @RunWith(JUnit4.class)
 public class PaymentMethodTokenRecipientTest {
 
@@ -71,9 +69,7 @@ public class PaymentMethodTokenRecipientTest {
           + "XrWdtwUP0NU26nvc8KIYw2GmYZKhRANCAAR5AjmTNAE93hQEQE+PryLlgr6Q7FXyN"
           + "XoZRk+1Fikhq61mFhQ9s14MOwGBxd5O6Jwn/sdUrWxkYk3idtNEN1Rz";
 
-  /**
-   * Sample Google provided JSON with its public signing keys.
-   */
+  /** Sample Google provided JSON with its public signing keys. */
   private static final String GOOGLE_VERIFYING_PUBLIC_KEYS_JSON =
       "{\n"
           + "  \"keys\": [\n"
@@ -100,8 +96,8 @@ public class PaymentMethodTokenRecipientTest {
   private static final String PLAINTEXT = "plaintext";
 
   /**
-   * The result of {@link #PLAINTEXT} encrypted with {@link #MERCHANT_PRIVATE_KEY_PKCS8_BASE64}
-   * and signed with the only key in {@link #GOOGLE_VERIFYING_PUBLIC_KEYS_JSON}.
+   * The result of {@link #PLAINTEXT} encrypted with {@link #MERCHANT_PRIVATE_KEY_PKCS8_BASE64} and
+   * signed with the only key in {@link #GOOGLE_VERIFYING_PUBLIC_KEYS_JSON}.
    */
   private static final String CIPHERTEXT =
       "{"
@@ -121,11 +117,12 @@ public class PaymentMethodTokenRecipientTest {
 
   @Test
   public void testShouldDecryptV1() throws Exception {
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
 
     assertEquals(PLAINTEXT, recipient.unseal(CIPHERTEXT));
   }
@@ -152,23 +149,25 @@ public class PaymentMethodTokenRecipientTest {
 
   @Test
   public void testShouldTryAllKeysToDecryptV1() throws Exception {
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(ALTERNATE_MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(ALTERNATE_MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
 
     assertEquals(PLAINTEXT, recipient.unseal(CIPHERTEXT));
   }
 
   @Test
   public void testShouldFailIfDecryptingWithDifferentKeyV1() throws Exception {
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(ALTERNATE_MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(ALTERNATE_MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
 
     try {
       recipient.unseal(CIPHERTEXT);
@@ -186,11 +185,12 @@ public class PaymentMethodTokenRecipientTest {
         .getJSONObject(0)
         .put("keyValue", ALTERNATE_PUBLIC_SIGNING_KEY);
 
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(trustedKeysJson.toString())
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(trustedKeysJson.toString())
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
 
     try {
       recipient.unseal(CIPHERTEXT);
@@ -210,11 +210,12 @@ public class PaymentMethodTokenRecipientTest {
             .put("keyValue", ALTERNATE_PUBLIC_SIGNING_KEY);
     trustedKeysJson.put("keys", new JSONArray().put(wrongKey).put(correctKey));
 
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(trustedKeysJson.toString())
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(trustedKeysJson.toString())
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
 
     assertEquals(PLAINTEXT, recipient.unseal(CIPHERTEXT));
   }
@@ -223,21 +224,24 @@ public class PaymentMethodTokenRecipientTest {
   public void testShouldFailIfSignedV1WithKeyForWrongProtocolVersion() throws Exception {
     JSONObject trustedKeysJson = new JSONObject(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON);
     JSONArray keys = trustedKeysJson.getJSONArray("keys");
-    JSONObject correctKeyButWrongProtocol = new JSONObject(keys.getJSONObject(0).toString())
-        .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, "ECv2");
+    JSONObject correctKeyButWrongProtocol =
+        new JSONObject(keys.getJSONObject(0).toString())
+            .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, "ECv2");
     JSONObject wrongKeyButRightProtocol =
         new JSONObject(keys.getJSONObject(0).toString())
             .put("keyValue", ALTERNATE_PUBLIC_SIGNING_KEY)
-            .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY,
+            .put(
+                PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY,
                 PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1);
     trustedKeysJson.put(
         "keys", new JSONArray().put(correctKeyButWrongProtocol).put(wrongKeyButRightProtocol));
 
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(trustedKeysJson.toString())
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(trustedKeysJson.toString())
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
 
     try {
       recipient.unseal(CIPHERTEXT);
@@ -251,8 +255,9 @@ public class PaymentMethodTokenRecipientTest {
   public void testShouldFailIfNoSigningKeysForProtocolVersion() throws Exception {
     JSONObject trustedKeysJson = new JSONObject(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON);
     JSONArray keys = trustedKeysJson.getJSONArray("keys");
-    JSONObject key1 = new JSONObject(keys.getJSONObject(0).toString())
-        .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, "ECv2");
+    JSONObject key1 =
+        new JSONObject(keys.getJSONObject(0).toString())
+            .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, "ECv2");
     JSONObject key2 =
         new JSONObject(keys.getJSONObject(0).toString())
             .put("keyValue", ALTERNATE_PUBLIC_SIGNING_KEY)
@@ -276,13 +281,15 @@ public class PaymentMethodTokenRecipientTest {
 
   @Test
   public void testShouldFailIfSignedMessageWasChangedInV1() throws Exception {
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
     JSONObject payload = new JSONObject(CIPHERTEXT);
-    payload.put(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY,
+    payload.put(
+        PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY,
         payload.getString(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY) + " ");
     try {
       recipient.unseal(payload.toString());
@@ -294,11 +301,12 @@ public class PaymentMethodTokenRecipientTest {
 
   @Test
   public void testShouldFailIfWrongRecipientInV1() throws Exception {
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId("not " + RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId("not " + RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
     try {
       recipient.unseal(CIPHERTEXT);
       fail("Expected GeneralSecurityException");
@@ -309,11 +317,12 @@ public class PaymentMethodTokenRecipientTest {
 
   @Test
   public void testShouldFailIfV1SetsWrongProtocolVersion() throws Exception {
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
     JSONObject payload = new JSONObject(CIPHERTEXT);
     String invalidVersion = "ECv2";
     payload.put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, invalidVersion);
@@ -327,11 +336,12 @@ public class PaymentMethodTokenRecipientTest {
 
   @Test
   public void testShouldFailIfProtocolSetToAnInt() throws Exception {
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
     JSONObject payload = new JSONObject(CIPHERTEXT);
     payload.put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, 1);
     System.out.println(payload);
@@ -345,11 +355,12 @@ public class PaymentMethodTokenRecipientTest {
 
   @Test
   public void testShouldFailIfProtocolSetToAnFloat() throws Exception {
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
     JSONObject payload = new JSONObject(CIPHERTEXT);
     payload.put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, 1.1);
     System.out.println(payload);
@@ -363,49 +374,54 @@ public class PaymentMethodTokenRecipientTest {
 
   @Test
   public void testShouldSucceedIfMessageIsNotExpired() throws Exception {
-    PaymentMethodTokenSender sender = new PaymentMethodTokenSender.Builder()
-        .senderSigningKey(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)
-        .recipientId(RECIPIENT_ID)
-        .rawUncompressedRecipientPublicKey(MERCHANT_PUBLIC_KEY_BASE64)
-        .build();
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenSender sender =
+        new PaymentMethodTokenSender.Builder()
+            .senderSigningKey(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)
+            .recipientId(RECIPIENT_ID)
+            .rawUncompressedRecipientPublicKey(MERCHANT_PUBLIC_KEY_BASE64)
+            .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
 
-    String ciphertext = sender.seal(
-        new JSONObject()
-            .put(
-                "messageExpiration",
-                // One day in the future
-                String.valueOf(Instant.now().plus(Days.ONE.toStandardDuration()).getMillis()))
-            .put("someKey", "someValue")
-            .toString());
-    assertEquals(
-        "someValue", new JSONObject(recipient.unseal(ciphertext)).getString("someKey"));
+    String ciphertext =
+        sender.seal(
+            new JSONObject()
+                .put(
+                    "messageExpiration",
+                    // One day in the future
+                    String.valueOf(Instant.now().plus(Days.ONE.toStandardDuration()).getMillis()))
+                .put("someKey", "someValue")
+                .toString());
+    assertEquals("someValue", new JSONObject(recipient.unseal(ciphertext)).getString("someKey"));
   }
 
   @Test
   public void testShouldFailIfMessageIsExpired() throws Exception {
-    PaymentMethodTokenSender sender = new PaymentMethodTokenSender.Builder()
-        .senderSigningKey(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)
-        .recipientId(RECIPIENT_ID)
-        .rawUncompressedRecipientPublicKey(MERCHANT_PUBLIC_KEY_BASE64)
-        .build();
-    PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
-        .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
-        .recipientId(RECIPIENT_ID)
-        .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
-        .build();
+    PaymentMethodTokenSender sender =
+        new PaymentMethodTokenSender.Builder()
+            .senderSigningKey(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)
+            .recipientId(RECIPIENT_ID)
+            .rawUncompressedRecipientPublicKey(MERCHANT_PUBLIC_KEY_BASE64)
+            .build();
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
 
-    String ciphertext = sender.seal(
-        new JSONObject()
-            .put(
-                "messageExpiration",
-                // One day in the past
-                String.valueOf(Instant.now().minus(Days.ONE.toStandardDuration()).getMillis()))
-            .toString());
+    String ciphertext =
+        sender.seal(
+            new JSONObject()
+                .put(
+                    "messageExpiration",
+                    // One day in the past
+                    String.valueOf(Instant.now().minus(Days.ONE.toStandardDuration()).getMillis()))
+                .toString());
     try {
       recipient.unseal(ciphertext);
       fail("Expected GeneralSecurityException");

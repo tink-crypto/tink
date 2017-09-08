@@ -37,9 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@code PaymentMethodTokenHybridDecrypt}.
- */
+/** Unit tests for {@code PaymentMethodTokenHybridDecrypt}. */
 @RunWith(JUnit4.class)
 public class PaymentMethodTokenHybridDecryptTest {
   @Test
@@ -68,12 +66,14 @@ public class PaymentMethodTokenHybridDecryptTest {
     JSONObject json = new JSONObject(new String(ciphertext, StandardCharsets.UTF_8));
 
     // Modify public key.
-    byte[] kem = Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
+    byte[] kem =
+        Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
     for (int bytes = 0; bytes < kem.length; bytes++) {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modifiedPublicKey = Arrays.copyOf(kem, kem.length);
         modifiedPublicKey[bytes] ^= (byte) (1 << bit);
-        json.put(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
+        json.put(
+            PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
             Base64.encode(modifiedPublicKey));
         try {
           hybridDecrypt.decrypt(json.toString().getBytes(StandardCharsets.UTF_8), context);
@@ -85,14 +85,14 @@ public class PaymentMethodTokenHybridDecryptTest {
     }
 
     // Modify payload.
-    byte[] payload = Base64.decode(json.getString(
-        PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
+    byte[] payload =
+        Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
     for (int bytes = 0; bytes < payload.length; bytes++) {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modifiedPayload = Arrays.copyOf(payload, payload.length);
         modifiedPayload[bytes] ^= (byte) (1 << bit);
-        json.put(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY,
-            Base64.encode(modifiedPayload));
+        json.put(
+            PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY, Base64.encode(modifiedPayload));
         try {
           hybridDecrypt.decrypt(json.toString().getBytes(StandardCharsets.UTF_8), context);
           fail("Invalid ciphertext, should have thrown exception");

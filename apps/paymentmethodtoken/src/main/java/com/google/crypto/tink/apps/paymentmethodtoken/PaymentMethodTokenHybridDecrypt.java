@@ -28,9 +28,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A {@link HybridDecrypt} implementation for the hybrid encryption used in
- * <a href="https://developers.google.com/android-pay/integration/payment-token-cryptography">
- *Google Payment Method Token</a>.
+ * A {@link HybridDecrypt} implementation for the hybrid encryption used in <a
+ * href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
+ * Payment Method Token</a>.
  */
 class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
   private final EciesHkdfRecipientKem recipientKem;
@@ -46,30 +46,31 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
     try {
       JSONObject json = new JSONObject(new String(ciphertext, StandardCharsets.UTF_8));
       validate(json);
-      byte[] kem = Base64.decode(json.getString(
-          PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
-      int symmetricKeySize = PaymentMethodTokenConstants.AES_CTR_KEY_SIZE
-          + PaymentMethodTokenConstants.HMAC_SHA256_KEY_SIZE;
-      byte[] demKey = recipientKem.generateKey(
-          kem,
-          PaymentMethodTokenConstants.HMAC_SHA256_ALGO,
-          PaymentMethodTokenConstants.HKDF_EMPTY_SALT,
-          contextInfo,
-          symmetricKeySize,
-          PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
-      byte[] hmacSha256Key = Arrays.copyOfRange(
-          demKey, PaymentMethodTokenConstants.AES_CTR_KEY_SIZE, symmetricKeySize);
-      byte[] encryptedMessage = Base64.decode(
-          json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
-      byte[] computedTag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key,
-          encryptedMessage);
-      byte[] expectedTag = Base64.decode(json.getString(
-          PaymentMethodTokenConstants.JSON_TAG_KEY));
+      byte[] kem =
+          Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
+      int symmetricKeySize =
+          PaymentMethodTokenConstants.AES_CTR_KEY_SIZE
+              + PaymentMethodTokenConstants.HMAC_SHA256_KEY_SIZE;
+      byte[] demKey =
+          recipientKem.generateKey(
+              kem,
+              PaymentMethodTokenConstants.HMAC_SHA256_ALGO,
+              PaymentMethodTokenConstants.HKDF_EMPTY_SALT,
+              contextInfo,
+              symmetricKeySize,
+              PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
+      byte[] hmacSha256Key =
+          Arrays.copyOfRange(
+              demKey, PaymentMethodTokenConstants.AES_CTR_KEY_SIZE, symmetricKeySize);
+      byte[] encryptedMessage =
+          Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
+      byte[] computedTag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key, encryptedMessage);
+      byte[] expectedTag = Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_TAG_KEY));
       if (!Bytes.equal(expectedTag, computedTag)) {
         throw new GeneralSecurityException("cannot decrypt; invalid MAC");
       }
-      byte[] aesCtrKey = Arrays.copyOfRange(demKey, 0,
-          PaymentMethodTokenConstants.AES_CTR_KEY_SIZE);
+      byte[] aesCtrKey =
+          Arrays.copyOfRange(demKey, 0, PaymentMethodTokenConstants.AES_CTR_KEY_SIZE);
       return PaymentMethodTokenUtil.aesCtr(aesCtrKey, encryptedMessage);
     } catch (JSONException e) {
       throw new GeneralSecurityException("cannot decrypt; failed to parse JSON");
