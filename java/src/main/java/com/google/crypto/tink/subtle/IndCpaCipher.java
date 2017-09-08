@@ -25,9 +25,8 @@ import java.security.GeneralSecurityException;
  */
 public interface IndCpaCipher {
   /**
-   * Encrypts {@code plaintext}.
-   * The resulting ciphertext is indistinguishable under chosen-plaintext attack. However, it does
-   * not have integrity protection.
+   * Encrypts {@code plaintext}. The resulting ciphertext is indistinguishable under
+   * chosen-plaintext attack. However, it does not have integrity protection.
    *
    * @return the resulting ciphertext.
    */

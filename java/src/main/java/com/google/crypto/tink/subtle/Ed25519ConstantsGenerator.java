@@ -19,18 +19,16 @@ package com.google.crypto.tink.subtle;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-/**
- * Generates constants used in {@link Ed25519}.
- */
+/** Generates constants used in {@link Ed25519}. */
 public final class Ed25519ConstantsGenerator {
 
-  private static final BigInteger P = BigInteger.valueOf(2).pow(255).subtract(
-      BigInteger.valueOf(19));
-  private static final BigInteger D = BigInteger.valueOf(-121665).multiply(
-      BigInteger.valueOf(121666).modInverse(P)).mod(P);
+  private static final BigInteger P =
+      BigInteger.valueOf(2).pow(255).subtract(BigInteger.valueOf(19));
+  private static final BigInteger D =
+      BigInteger.valueOf(-121665).multiply(BigInteger.valueOf(121666).modInverse(P)).mod(P);
   private static final BigInteger D2 = BigInteger.valueOf(2).multiply(D).mod(P);
-  private static final BigInteger SQRTM1 = BigInteger.valueOf(2).modPow(
-      P.subtract(BigInteger.ONE).divide(BigInteger.valueOf(4)), P);
+  private static final BigInteger SQRTM1 =
+      BigInteger.valueOf(2).modPow(P.subtract(BigInteger.ONE).divide(BigInteger.valueOf(4)), P);
 
   private static class Point {
     private BigInteger x;
@@ -39,8 +37,10 @@ public final class Ed25519ConstantsGenerator {
 
   private static BigInteger recoverX(BigInteger y) {
     // x^2 = (y^2 - 1) / (d * y^2 + 1) mod 2^255-19
-    BigInteger xx = y.pow(2).subtract(BigInteger.ONE)
-        .multiply(D.multiply(y.pow(2)).add(BigInteger.ONE).modInverse(P));
+    BigInteger xx =
+        y.pow(2)
+            .subtract(BigInteger.ONE)
+            .multiply(D.multiply(y.pow(2)).add(BigInteger.ONE).modInverse(P));
     BigInteger x = xx.modPow(P.add(BigInteger.valueOf(3)).divide(BigInteger.valueOf(8)), P);
     if (!x.pow(2).subtract(xx).mod(P).equals(BigInteger.ZERO)) {
       x = x.multiply(SQRTM1).mod(P);
@@ -53,12 +53,20 @@ public final class Ed25519ConstantsGenerator {
 
   private static Point edwards(Point a, Point b) {
     Point o = new Point();
-    o.x = (a.x.multiply(b.y).add(b.x.multiply(a.y))).multiply(
-        BigInteger.ONE.add(D.multiply(a.x.multiply(b.x).multiply(a.y).multiply(b.y)))
-            .modInverse(P)).mod(P);
-    o.y = (a.y.multiply(b.y).add(a.x.multiply(b.x))).multiply(
-        BigInteger.ONE.subtract(D.multiply(a.x.multiply(b.x).multiply(a.y).multiply(b.y)))
-            .modInverse(P)).mod(P);
+    o.x =
+        (a.x.multiply(b.y).add(b.x.multiply(a.y)))
+            .multiply(
+                BigInteger.ONE
+                    .add(D.multiply(a.x.multiply(b.x).multiply(a.y).multiply(b.y)))
+                    .modInverse(P))
+            .mod(P);
+    o.y =
+        (a.y.multiply(b.y).add(a.x.multiply(b.x)))
+            .multiply(
+                BigInteger.ONE
+                    .subtract(D.multiply(a.x.multiply(b.x).multiply(a.y).multiply(b.y)))
+                    .modInverse(P))
+            .mod(P);
     return o;
   }
 
@@ -80,16 +88,22 @@ public final class Ed25519ConstantsGenerator {
 
   private static String getCachedXYTStr(Point p) {
     String decl = "new CachedXYT(\n";
-    decl += "new long[]"
-        + replaceBrackets(
-            Arrays.toString(Curve25519.expand(toLittleEndian(p.y.add(p.x).mod(P))))) + ",\n";
-    decl += "new long[]"
-        + replaceBrackets(
-            Arrays.toString(Curve25519.expand(toLittleEndian(p.y.subtract(p.x).mod(P))))) + ",\n";
-    decl += "new long[]"
-        + replaceBrackets(
-            Arrays.toString(
-                Curve25519.expand(toLittleEndian(D2.multiply(p.x).multiply(p.y).mod(P))))) + ")";
+    decl +=
+        "new long[]"
+            + replaceBrackets(
+                Arrays.toString(Curve25519.expand(toLittleEndian(p.y.add(p.x).mod(P)))))
+            + ",\n";
+    decl +=
+        "new long[]"
+            + replaceBrackets(
+                Arrays.toString(Curve25519.expand(toLittleEndian(p.y.subtract(p.x).mod(P)))))
+            + ",\n";
+    decl +=
+        "new long[]"
+            + replaceBrackets(
+                Arrays.toString(
+                    Curve25519.expand(toLittleEndian(D2.multiply(p.x).multiply(p.y).mod(P)))))
+            + ")";
     return decl;
   }
 
@@ -100,15 +114,24 @@ public final class Ed25519ConstantsGenerator {
     String decl = "static final long[]";
 
     System.out.println("// d = -121665 / 121666 mod 2^255-19");
-    System.out.println(decl + " D = "
-        + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(D)))) + ";");
+    System.out.println(
+        decl
+            + " D = "
+            + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(D))))
+            + ";");
     System.out.println("// 2d");
-    System.out.println(decl + " D2 = "
-        + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(D2)))) + ";");
+    System.out.println(
+        decl
+            + " D2 = "
+            + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(D2))))
+            + ";");
     System.out.println("// 2^((p-1)/4) mod p where p = 2^255-19");
-    System.out.println(decl + " SQRTM1 = "
-        + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(SQRTM1)))) + ";");
-    //System.out.println("// (x, 4/5)");
+    System.out.println(
+        decl
+            + " SQRTM1 = "
+            + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(SQRTM1))))
+            + ";");
+    // System.out.println("// (x, 4/5)");
     Point bi = b;
     System.out.println("static final CachedXYT[][] B_TABLE = new CachedXYT[][]{");
     for (int i = 0; i < 32; i++) {

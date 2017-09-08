@@ -30,19 +30,16 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * This key manager generates new {@code KmsEnvelopeAeadKey} keys and produces new instances
- * of {@code KmsEnvelopeAead}.
+ * This key manager generates new {@code KmsEnvelopeAeadKey} keys and produces new instances of
+ * {@code KmsEnvelopeAead}.
  */
 class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
 
   private static final int VERSION = 0;
 
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
+  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
 
-  /**
-   * @param serializedKey  serialized {@code KmsEnvelopeAeadKey} proto
-   */
+  /** @param serializedKey serialized {@code KmsEnvelopeAeadKey} proto */
   @Override
   public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
@@ -53,9 +50,7 @@ class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
     }
   }
 
-  /**
-   * @param key  {@code KmsEnvelopeAeadKey} proto
-   */
+  /** @param key {@code KmsEnvelopeAeadKey} proto */
   @Override
   public Aead getPrimitive(MessageLite key) throws GeneralSecurityException {
     if (!(key instanceof KmsEnvelopeAeadKey)) {
@@ -70,7 +65,7 @@ class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code KmsEnvelopeAeadKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code KmsEnvelopeAeadKeyFormat} proto
    * @return new {@code KmsEnvelopeAeadKey} proto
    */
   @Override
@@ -84,24 +79,20 @@ class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param keyFormat  {@code KmsEnvelopeAeadKeyFormat} proto
+   * @param keyFormat {@code KmsEnvelopeAeadKeyFormat} proto
    * @return new {@code KmsEnvelopeAeadKey} proto
    */
   @Override
-  public MessageLite newKey(MessageLite keyFormat)
-      throws GeneralSecurityException {
+  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
     if (!(keyFormat instanceof KmsEnvelopeAeadKeyFormat)) {
       throw new GeneralSecurityException("expected KmsEnvelopeAeadKeyFormat proto");
     }
     KmsEnvelopeAeadKeyFormat format = (KmsEnvelopeAeadKeyFormat) keyFormat;
-    return KmsEnvelopeAeadKey.newBuilder()
-        .setParams(format)
-        .setVersion(VERSION)
-        .build();
+    return KmsEnvelopeAeadKey.newBuilder().setParams(format).setVersion(VERSION).build();
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code KmsEnvelopeAeadKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code KmsEnvelopeAeadKeyFormat} proto
    * @return {@code KeyData} with a new {@code KmsEnvelopeAeadKey} proto
    */
   @Override

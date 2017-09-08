@@ -31,29 +31,20 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 
-/**
- * An implementation of {@code KmsClient} for Google Cloud KMS.
- */
+/** An implementation of {@code KmsClient} for Google Cloud KMS. */
 @AutoService(KmsClient.class)
 public final class GcpKmsClient implements KmsClient {
-  /**
-   * The prefix of all keys stored in Google Cloud KMS.
-   */
+  /** The prefix of all keys stored in Google Cloud KMS. */
   public static final String PREFIX = "gcp-kms://";
 
   private static final String APPLICATION_NAME = "Tink";
   private CloudKMS client;
   private String keyUri;
 
-  /**
-   * Constructs a generic GcpKmsClient that is not bound to any specific key.
-   */
-  public GcpKmsClient() {
-  }
+  /** Constructs a generic GcpKmsClient that is not bound to any specific key. */
+  public GcpKmsClient() {}
 
-  /**
-   * Constructs a specific GcpKmsClient that is bound to a single key identified by {@code uri}.
-   */
+  /** Constructs a specific GcpKmsClient that is bound to a single key identified by {@code uri}. */
   public GcpKmsClient(String uri) {
     if (!uri.toLowerCase().startsWith(PREFIX)) {
       throw new IllegalArgumentException("key URI must starts with " + PREFIX);
@@ -62,9 +53,9 @@ public final class GcpKmsClient implements KmsClient {
   }
 
   /**
-   * @return @return true either if this client is a generic one and uri starts with
-   * {@link GcpKmsClient#PREFIX}, or the client is a specific one that is bound to the
-   * key identified by {@code uri}
+   * @return @return true either if this client is a generic one and uri starts with {@link
+   *     GcpKmsClient#PREFIX}, or the client is a specific one that is bound to the key identified
+   *     by {@code uri}
    */
   @Override
   public boolean doesSupport(String uri) {
@@ -77,9 +68,9 @@ public final class GcpKmsClient implements KmsClient {
   /**
    * Loads credentials from a service account JSON file {@code credentialPath}.
    *
-   * <p>If {@code credentialPath} is null, loads
-   * <a href="https://developers.google.com/accounts/docs/application-default-credentials"
-   * default Google Cloud credentials</a>.
+   * <p>If {@code credentialPath} is null, loads <a
+   * href="https://developers.google.com/accounts/docs/application-default-credentials" default
+   * Google Cloud credentials</a>.
    */
   @Override
   public KmsClient withCredentials(String credentialPath) throws GeneralSecurityException {
@@ -87,8 +78,9 @@ public final class GcpKmsClient implements KmsClient {
       return withDefaultCredentials();
     }
     try {
-      GoogleCredential credentials = GoogleCredential.fromStream(
-          new ByteArrayInputStream(Files.readAllBytes(Paths.get(credentialPath))));
+      GoogleCredential credentials =
+          GoogleCredential.fromStream(
+              new ByteArrayInputStream(Files.readAllBytes(Paths.get(credentialPath))));
       return withCredentials(credentials);
     } catch (IOException e) {
       throw new GeneralSecurityException("cannot load credentials", e);
@@ -103,23 +95,20 @@ public final class GcpKmsClient implements KmsClient {
   public KmsClient withDefaultCredentials() throws GeneralSecurityException {
     try {
       GoogleCredential credentials =
-          GoogleCredential.getApplicationDefault(
-              new NetHttpTransport(), new JacksonFactory());
+          GoogleCredential.getApplicationDefault(new NetHttpTransport(), new JacksonFactory());
       return withCredentials(credentials);
     } catch (IOException e) {
       throw new GeneralSecurityException("cannot load default credentials", e);
     }
   }
 
-  /**
-   * Loads the provided credential.
-   */
+  /** Loads the provided credential. */
   private KmsClient withCredentials(GoogleCredential credential) {
     if (credential.createScopedRequired()) {
       credential = credential.createScoped(CloudKMSScopes.all());
     }
-    this.client = new CloudKMS.Builder(
-        new NetHttpTransport(), new JacksonFactory(), credential)
+    this.client =
+        new CloudKMS.Builder(new NetHttpTransport(), new JacksonFactory(), credential)
             .setApplicationName(APPLICATION_NAME)
             .build();
     return this;

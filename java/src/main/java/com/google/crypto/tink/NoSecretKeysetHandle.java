@@ -22,9 +22,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-/**
- * Static methods for reading cleartext keysets that don't contain any secret key material.
- */
+/** Static methods for reading cleartext keysets that don't contain any secret key material. */
 public final class NoSecretKeysetHandle {
   /**
    * @return a new keyset handle from {@code serialized} which is a serialized {@code Keyset}.
@@ -56,6 +54,7 @@ public final class NoSecretKeysetHandle {
 
   /**
    * Validates that {@code keyset} doesn't contain any secret key material.
+   *
    * @throws GeneralSecurityException if {@code keyset} contains secret key material.
    */
   private static void validate(Keyset keyset) throws GeneralSecurityException {

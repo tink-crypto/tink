@@ -26,22 +26,24 @@ import java.security.GeneralSecurityException;
  * <p>Configurations, i.e., of key types and their corresponding key managers supported by a
  * specific run-time environment enable control of Tink setup via JSON-formatted config files that
  * determine which key types are supported, and provide a mechanism for deprecation of
- * obsolete/outdated cryptographic schemes (see
- * <a href="https://github.com/google/tink/blob/master/proto/config.proto">config.proto</a>
- * for more info).
+ * obsolete/outdated cryptographic schemes (see <a
+ * href="https://github.com/google/tink/blob/master/proto/config.proto">config.proto</a> for more
+ * info).
  *
  * <p><b>Usage:</b>
+ *
  * <pre>{@code
  * RegistryConfig registryConfig = ...; // AeadConfig.TINK_1_0_0
  * Config.register(registryConfig);
  * }</pre>
  */
 public final class Config {
-  /**
-   * Returns a {@link KeyTypeEntry} for Tink key types with the specified properties.
-   */
-  public static KeyTypeEntry getTinkKeyTypeEntry(String catalogueName,
-      String primitiveName, String keyProtoName, int keyManagerVersion,
+  /** Returns a {@link KeyTypeEntry} for Tink key types with the specified properties. */
+  public static KeyTypeEntry getTinkKeyTypeEntry(
+      String catalogueName,
+      String primitiveName,
+      String keyProtoName,
+      int keyManagerVersion,
       boolean newKeyAllowed) {
     return KeyTypeEntry.newBuilder()
         .setPrimitiveName(primitiveName)
@@ -55,11 +57,11 @@ public final class Config {
   /**
    * Tries to register key managers according to the specification in {@code config}.
    *
-   * @throws GeneralSecurityException if cannot register this config with the {@link Registry}.
-   * This usually happens when either {@code config} contains any {@link KeyTypeEntry} that is
-   * already registered or the Registry cannot find any {@link com.google.crypto.tink.KeyManager}
-   * or {@link com.google.crypto.tink.Catalogue} that can handle the entry. In both cases the
-   * error message should show how to resolve it.
+   * @throws GeneralSecurityException if cannot register this config with the {@link Registry}. This
+   *     usually happens when either {@code config} contains any {@link KeyTypeEntry} that is
+   *     already registered or the Registry cannot find any {@link
+   *     com.google.crypto.tink.KeyManager} or {@link com.google.crypto.tink.Catalogue} that can
+   *     handle the entry. In both cases the error message should show how to resolve it.
    */
   public static void register(RegistryConfig config) throws GeneralSecurityException {
     for (KeyTypeEntry entry : config.getEntryList()) {
@@ -70,17 +72,18 @@ public final class Config {
   /**
    * Tries to register a key manager according to the specification in {@code entry}.
    *
-   * @throws GeneralSecurityException if cannot register this config with the {@link Registry}.
-   * This usually happens when {@code entry} is already registered or the Registry cannot find
-   * any {@link com.google.crypto.tink.KeyManager} or {@link com.google.crypto.tink.Catalogue}
-   * that can handle the entry. In both cases the error message should show how to resolve it.
+   * @throws GeneralSecurityException if cannot register this config with the {@link Registry}. This
+   *     usually happens when {@code entry} is already registered or the Registry cannot find any
+   *     {@link com.google.crypto.tink.KeyManager} or {@link com.google.crypto.tink.Catalogue} that
+   *     can handle the entry. In both cases the error message should show how to resolve it.
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static void registerKeyType(KeyTypeEntry entry) throws GeneralSecurityException {
     validate(entry);
     Catalogue catalogue = Registry.getCatalogue(entry.getCatalogueName());
-    KeyManager keyManager = catalogue.getKeyManager(
-        entry.getTypeUrl(), entry.getPrimitiveName(), entry.getKeyManagerVersion());
+    KeyManager keyManager =
+        catalogue.getKeyManager(
+            entry.getTypeUrl(), entry.getPrimitiveName(), entry.getKeyManagerVersion());
     Registry.registerKeyManager(entry.getTypeUrl(), keyManager, entry.getNewKeyAllowed());
   }
 

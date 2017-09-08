@@ -27,13 +27,12 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * A KeysetHandle provides abstracted access to {@link com.google.crypto.tink.proto.Keyset},
- * to limit the exposure of actual protocol buffers that hold sensitive key material.
+ * A KeysetHandle provides abstracted access to {@link com.google.crypto.tink.proto.Keyset}, to
+ * limit the exposure of actual protocol buffers that hold sensitive key material.
  *
- * <p>This class allows reading and writing encrypted keysets. Users that want
- * to read or write can use the restricted API {@link CleartextKeysetHandle}.
- * Users can also load keysets that don't contain any secret key material with
- * {@link NoSecretKeysetHandle}.
+ * <p>This class allows reading and writing encrypted keysets. Users that want to read or write can
+ * use the restricted API {@link CleartextKeysetHandle}. Users can also load keysets that don't
+ * contain any secret key material with {@link NoSecretKeysetHandle}.
  */
 public final class KeysetHandle {
   private Keyset keyset;
@@ -46,22 +45,19 @@ public final class KeysetHandle {
    * @return a new {@link KeysetHandle} from a {@code keyset}.
    * @throws GeneralSecurityException
    */
-  static final KeysetHandle fromKeyset(Keyset keyset)
-      throws GeneralSecurityException {
+  static final KeysetHandle fromKeyset(Keyset keyset) throws GeneralSecurityException {
     assertEnoughKeyMaterial(keyset);
     return new KeysetHandle(keyset);
   }
 
-  /**
-   * @return the actual keyset data.
-   */
+  /** @return the actual keyset data. */
   Keyset getKeyset() {
     return keyset;
   }
 
   /**
    * @return the {@link com.google.crypto.tink.proto.KeysetInfo} that doesn't contain actual key
-   * material.
+   *     material.
    */
   public KeysetInfo getKeysetInfo() {
     return Util.getKeysetInfo(keyset);
@@ -69,14 +65,12 @@ public final class KeysetHandle {
 
   /**
    * @return a new {@link KeysetHandle} that contains a single fresh key generated according to
-   * {@code keyTemplate}.
+   *     {@code keyTemplate}.
    * @throws GeneralSecurityException
    */
   public static final KeysetHandle generateNew(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    return KeysetManager.withEmptyKeyset()
-        .rotate(keyTemplate)
-        .getKeysetHandle();
+    return KeysetManager.withEmptyKeyset().rotate(keyTemplate).getKeysetHandle();
   }
 
   /**
@@ -84,21 +78,19 @@ public final class KeysetHandle {
    *
    * <p>Users that need to load cleartext keysets can use {@link CleartextKeysetHandle}.
    *
-   * @return a new {@link KeysetHandle} from {@code encryptedKeysetProto} that was encrypted
-   * with {@code masterKey}
-   * @throws GeneralSecurityException if cannot decrypt the keyset or it doesn't contain
-   * encrypted key material
+   * @return a new {@link KeysetHandle} from {@code encryptedKeysetProto} that was encrypted with
+   *     {@code masterKey}
+   * @throws GeneralSecurityException if cannot decrypt the keyset or it doesn't contain encrypted
+   *     key material
    */
-  public static final KeysetHandle read(KeysetReader reader,
-      Aead masterKey) throws GeneralSecurityException, IOException {
+  public static final KeysetHandle read(KeysetReader reader, Aead masterKey)
+      throws GeneralSecurityException, IOException {
     EncryptedKeyset encryptedKeyset = reader.readEncrypted();
     assertEnoughEncryptedKeyMaterial(encryptedKeyset);
     return new KeysetHandle(decrypt(encryptedKeyset, masterKey));
   }
 
-  /**
-   * Serializes, encrypts with {@code masterKey} and writes the keyset to {@code outputStream}.
-   */
+  /** Serializes, encrypts with {@code masterKey} and writes the keyset to {@code outputStream}. */
   public void write(KeysetWriter keysetWriter, Aead masterKey)
       throws GeneralSecurityException, IOException {
     EncryptedKeyset encryptedKeyset = encrypt(keyset, masterKey);
@@ -106,17 +98,15 @@ public final class KeysetHandle {
     return;
   }
 
-  /**
-   * Encrypts the keyset with the {@link Aead} master key.
-   */
+  /** Encrypts the keyset with the {@link Aead} master key. */
   private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey)
       throws GeneralSecurityException {
-    byte[] encryptedKeyset = masterKey.encrypt(keyset.toByteArray(),
-        /* associatedData= */new byte[0]);
+    byte[] encryptedKeyset =
+        masterKey.encrypt(keyset.toByteArray(), /* associatedData= */ new byte[0]);
     // Check if we can decrypt, to detect errors
     try {
-      final Keyset keyset2 = Keyset.parseFrom(masterKey.decrypt(
-          encryptedKeyset, /* associatedData= */new byte[0]));
+      final Keyset keyset2 =
+          Keyset.parseFrom(masterKey.decrypt(encryptedKeyset, /* associatedData= */ new byte[0]));
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("cannot encrypt keyset");
       }
@@ -129,14 +119,15 @@ public final class KeysetHandle {
         .build();
   }
 
-  /**
-   * Decrypts the encrypted keyset with the {@link Aead} master key.
-   */
+  /** Decrypts the encrypted keyset with the {@link Aead} master key. */
   private static Keyset decrypt(EncryptedKeyset encryptedKeyset, Aead masterKey)
       throws GeneralSecurityException {
     try {
-      Keyset keyset = Keyset.parseFrom(masterKey.decrypt(
-          encryptedKeyset.getEncryptedKeyset().toByteArray(), /* associatedData= */new byte[0]));
+      Keyset keyset =
+          Keyset.parseFrom(
+              masterKey.decrypt(
+                  encryptedKeyset.getEncryptedKeyset().toByteArray(),
+                  /* associatedData= */ new byte[0]));
       // check emptiness here too, in case the encrypted keys unwrapped to nothing?
       assertEnoughKeyMaterial(keyset);
       return keyset;
@@ -146,11 +137,10 @@ public final class KeysetHandle {
   }
 
   /**
-   * If the managed keyset contains private keys, returns a {@link KeysetHandle}
-   * of the public keys.
+   * If the managed keyset contains private keys, returns a {@link KeysetHandle} of the public keys.
    *
    * @throws GenernalSecurityException if the managed keyset is null or if it contains any
-   * non-private keys.
+   *     non-private keys.
    */
   public KeysetHandle getPublicKeysetHandle() throws GeneralSecurityException {
     if (keyset == null) {
@@ -159,10 +149,7 @@ public final class KeysetHandle {
     Keyset.Builder keysetBuilder = Keyset.newBuilder();
     for (Keyset.Key key : keyset.getKeyList()) {
       KeyData keyData = createPublicKeyData(key.getKeyData());
-      keysetBuilder.addKey(Keyset.Key.newBuilder()
-          .mergeFrom(key)
-          .setKeyData(keyData)
-          .build());
+      keysetBuilder.addKey(Keyset.Key.newBuilder().mergeFrom(key).setKeyData(keyData).build());
     }
     keysetBuilder.setPrimaryKeyId(keyset.getPrimaryKeyId());
     return new KeysetHandle(keysetBuilder.build());
@@ -173,8 +160,8 @@ public final class KeysetHandle {
     if (privateKeyData.getKeyMaterialType() != KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
       throw new GeneralSecurityException("The keyset contains a non-private key");
     }
-    KeyData publicKeyData = Registry.getPublicKeyData(
-        privateKeyData.getTypeUrl(), privateKeyData.getValue());
+    KeyData publicKeyData =
+        Registry.getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
     validate(publicKeyData);
     return publicKeyData;
   }
@@ -185,8 +172,8 @@ public final class KeysetHandle {
   }
 
   /**
-   * Extracts and returns the string representation of the
-   * {@link com.google.crypto.tink.proto.KeysetInfo} of the managed keyset.
+   * Extracts and returns the string representation of the {@link
+   * com.google.crypto.tink.proto.KeysetInfo} of the managed keyset.
    */
   @Override
   public String toString() {

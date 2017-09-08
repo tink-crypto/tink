@@ -33,12 +33,14 @@ import java.util.logging.Logger;
  * Static methods for obtaining {@link Mac} instances.
  *
  * <p>Usage:
+ *
  * <pre>{@code
- *   KeysetHandle keysetHandle = ...;
- *   Mac mac = MacFactory.getPrimitive(keysetHandle);
- *   byte[] data = ...;
- *   byte[] tag = mac.computeMac(data);
- *  }</pre>
+ * KeysetHandle keysetHandle = ...;
+ * Mac mac = MacFactory.getPrimitive(keysetHandle);
+ * byte[] data = ...;
+ * byte[] tag = mac.computeMac(data);
+ *
+ * }</pre>
  *
  * <p>The returned primitive works with a keyset (rather than a single key). To compute a MAC tag,
  * it uses the primary key in the keyset, and prepends to the tag a certain prefix associated with
@@ -53,20 +55,17 @@ public final class MacFactory {
    * @return a Mac primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
    */
-  public static Mac getPrimitive(KeysetHandle keysetHandle)
-      throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, /* keyManager= */null);
+  public static Mac getPrimitive(KeysetHandle keysetHandle) throws GeneralSecurityException {
+    return getPrimitive(keysetHandle, /* keyManager= */ null);
   }
 
   /**
    * @return a Mac primitive from a {@code keysetHandle} and a custom {@code keyManager}.
    * @throws GeneralSecurityException
    */
-  public static Mac getPrimitive(
-      KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)
+  public static Mac getPrimitive(KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)
       throws GeneralSecurityException {
-    final PrimitiveSet<Mac> primitives =
-        Registry.getPrimitives(keysetHandle, keyManager);
+    final PrimitiveSet<Mac> primitives = Registry.getPrimitives(keysetHandle, keyManager);
     final byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
     return new Mac() {
       @Override
@@ -74,8 +73,7 @@ public final class MacFactory {
         if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
           return Bytes.concat(
               primitives.getPrimary().getIdentifier(),
-              primitives.getPrimary().getPrimitive().computeMac(
-                  Bytes.concat(data, formatVersion)));
+              primitives.getPrimary().getPrimitive().computeMac(Bytes.concat(data, formatVersion)));
         }
         return Bytes.concat(
             primitives.getPrimary().getIdentifier(),
@@ -90,23 +88,21 @@ public final class MacFactory {
           throw new GeneralSecurityException("tag too short");
         }
         byte[] prefix = Arrays.copyOfRange(mac, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-        byte[] macNoPrefix = Arrays.copyOfRange(mac, CryptoFormat.NON_RAW_PREFIX_SIZE,
-              mac.length);
+        byte[] macNoPrefix = Arrays.copyOfRange(mac, CryptoFormat.NON_RAW_PREFIX_SIZE, mac.length);
         List<PrimitiveSet.Entry<Mac>> entries = primitives.getPrimitive(prefix);
         for (PrimitiveSet.Entry<Mac> entry : entries) {
-            try {
-              if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-                entry.getPrimitive().verifyMac(macNoPrefix,
-                    Bytes.concat(data, formatVersion));
-              } else {
-                entry.getPrimitive().verifyMac(macNoPrefix, data);
-              }
-              // If there is no exception, the MAC is valid and we can return.
-              return;
-            } catch (GeneralSecurityException e) {
-              logger.info("tag prefix matches a key, but cannot verify: " + e.toString());
-              // Ignored as we want to continue verification with the remaining keys.
+          try {
+            if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
+              entry.getPrimitive().verifyMac(macNoPrefix, Bytes.concat(data, formatVersion));
+            } else {
+              entry.getPrimitive().verifyMac(macNoPrefix, data);
             }
+            // If there is no exception, the MAC is valid and we can return.
+            return;
+          } catch (GeneralSecurityException e) {
+            logger.info("tag prefix matches a key, but cannot verify: " + e.toString());
+            // Ignored as we want to continue verification with the remaining keys.
+          }
         }
 
         // None "non-raw" key matched, so let's try the raw keys (if any exist).

@@ -30,20 +30,15 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * This instance of {@code KeyManager} generates new {@code ChaCha20Poly1305} keys and
- * produces new instances of {@code ChaCha20Poly1305}.
+ * This instance of {@code KeyManager} generates new {@code ChaCha20Poly1305} keys and produces new
+ * instances of {@code ChaCha20Poly1305}.
  */
 class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
-  /**
-   * Type url that this manager supports
-   */
+  /** Type url that this manager supports */
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key";
 
-  /**
-   * Current version of this key manager.
-   * Keys with greater version are not supported.
-   */
+  /** Current version of this key manager. Keys with greater version are not supported. */
   private static final int VERSION = 0;
 
   @Override

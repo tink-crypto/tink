@@ -20,17 +20,17 @@ import com.google.crypto.tink.Config;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods for registering with the {@link Registry} all instances of
- * {@link com.google.crypto.tink.PublicKeyVerify} key types supported in a particular release of
- * Tink.
+ * Static methods for registering with the {@link Registry} all instances of {@link
+ * com.google.crypto.tink.PublicKeyVerify} key types supported in a particular release of Tink.
  *
  * <p>To register all PublicKeyVerify key types provided in Tink release 1.0.0 one can do:
+ *
  * <pre>{@code
  * Config.register(PublicKeyVerifyConfig.TINK_1_0_0);
  * }</pre>
  *
- * <p>For more information on how to obtain and use instances of PublicKeyVerify, see
- * {@link PublicKeyVerifyFactory}.
+ * <p>For more information on how to obtain and use instances of PublicKeyVerify, see {@link
+ * PublicKeyVerifyFactory}.
  *
  * @deprecated use {@link Config} and {@link SignatureConfig}
  */

@@ -26,8 +26,8 @@ import java.security.KeyStore;
 import javax.crypto.SecretKey;
 
 /**
- * An {@link Aead} that forwards encryption/decryption requests to an {@code AES-GCM} key in
- * <a href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
+ * An {@link Aead} that forwards encryption/decryption requests to an {@code AES-GCM} key in <a
+ * href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
  *
  * <p>This class requires Android M or newer.
  */
@@ -44,14 +44,12 @@ public final class AndroidKeystoreAesGcm implements Aead {
   }
 
   @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] aad)
-      throws GeneralSecurityException {
+  public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
     return aead.encrypt(plaintext, aad);
   }
 
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
-      throws GeneralSecurityException {
+  public byte[] decrypt(final byte[] ciphertext, final byte[] aad) throws GeneralSecurityException {
     return aead.decrypt(ciphertext, aad);
   }
 }

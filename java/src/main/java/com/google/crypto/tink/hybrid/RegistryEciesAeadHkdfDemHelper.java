@@ -33,9 +33,9 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 /**
- * Helper generating {@code Aead}-instances for specified {@code KeyTemplate} and key material.
- * It uses selected {@code KeyManager}-instances from the {@code Registry} to obtain the
- * instances of {@code Aead}.
+ * Helper generating {@code Aead}-instances for specified {@code KeyTemplate} and key material. It
+ * uses selected {@code KeyManager}-instances from the {@code Registry} to obtain the instances of
+ * {@code Aead}.
  */
 class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
   private final String demKeyTypeUrl;
@@ -61,8 +61,8 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
       }
     } else if (demKeyTypeUrl.equals(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)) {
       try {
-        AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat = AesCtrHmacAeadKeyFormat.parseFrom(
-            demTemplate.getValue());
+        AesCtrHmacAeadKeyFormat aesCtrHmacAeadKeyFormat =
+            AesCtrHmacAeadKeyFormat.parseFrom(demTemplate.getValue());
         this.aesCtrHmacAeadKey = (AesCtrHmacAeadKey) Registry.newKey(demTemplate);
         this.aesCtrKeySize = aesCtrHmacAeadKeyFormat.getAesCtrKeyFormat().getKeySize();
         int hmacKeySize = aesCtrHmacAeadKeyFormat.getHmacKeyFormat().getKeySize();
@@ -84,25 +84,31 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
   @Override
   public Aead getAead(final byte[] symmetricKeyValue) throws GeneralSecurityException {
     if (demKeyTypeUrl.equals(AeadConfig.AES_GCM_TYPE_URL)) {
-      AesGcmKey aeadKey = AesGcmKey.newBuilder()
-          .mergeFrom(aesGcmKey)
-          .setKeyValue(ByteString.copyFrom(symmetricKeyValue))
-          .build();
+      AesGcmKey aeadKey =
+          AesGcmKey.newBuilder()
+              .mergeFrom(aesGcmKey)
+              .setKeyValue(ByteString.copyFrom(symmetricKeyValue))
+              .build();
       return Registry.getPrimitive(demKeyTypeUrl, aeadKey);
     } else if (demKeyTypeUrl.equals(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)) {
       byte[] aesCtrKeyValue = Arrays.copyOfRange(symmetricKeyValue, 0, aesCtrKeySize);
       byte[] hmacKeyValue = Arrays.copyOfRange(symmetricKeyValue, aesCtrKeySize, symmetricKeySize);
-      AesCtrKey aesCtrKey = AesCtrKey.newBuilder()
-          .mergeFrom(aesCtrHmacAeadKey.getAesCtrKey())
-          .setKeyValue(ByteString.copyFrom(aesCtrKeyValue)).build();
-      HmacKey hmacKey = HmacKey.newBuilder()
-          .mergeFrom(aesCtrHmacAeadKey.getHmacKey())
-          .setKeyValue(ByteString.copyFrom(hmacKeyValue)).build();
-      AesCtrHmacAeadKey aeadKey = AesCtrHmacAeadKey.newBuilder()
-          .setVersion(aesCtrHmacAeadKey.getVersion())
-          .setAesCtrKey(aesCtrKey)
-          .setHmacKey(hmacKey)
-          .build();
+      AesCtrKey aesCtrKey =
+          AesCtrKey.newBuilder()
+              .mergeFrom(aesCtrHmacAeadKey.getAesCtrKey())
+              .setKeyValue(ByteString.copyFrom(aesCtrKeyValue))
+              .build();
+      HmacKey hmacKey =
+          HmacKey.newBuilder()
+              .mergeFrom(aesCtrHmacAeadKey.getHmacKey())
+              .setKeyValue(ByteString.copyFrom(hmacKeyValue))
+              .build();
+      AesCtrHmacAeadKey aeadKey =
+          AesCtrHmacAeadKey.newBuilder()
+              .setVersion(aesCtrHmacAeadKey.getVersion())
+              .setAesCtrKey(aesCtrKey)
+              .setHmacKey(hmacKey)
+              .build();
       return Registry.getPrimitive(demKeyTypeUrl, aeadKey);
     } else {
       throw new GeneralSecurityException("unknown DEM key type");

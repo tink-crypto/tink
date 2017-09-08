@@ -37,54 +37,45 @@ public final class KeysetManager {
     keysetBuilder = val;
   }
 
-  /**
-   * @return a {@link KeysetManager} for the keyset manged by {@code val}
-   */
+  /** @return a {@link KeysetManager} for the keyset manged by {@code val} */
   public static KeysetManager withKeysetHandle(KeysetHandle val) {
     return new KeysetManager(val.getKeyset().toBuilder());
   }
 
-  /**
-   * @return a {@link KeysetManager} for an empty keyset.
-   */
+  /** @return a {@link KeysetManager} for an empty keyset. */
   public static KeysetManager withEmptyKeyset() {
     return new KeysetManager(Keyset.newBuilder());
   }
 
-  /**
-   * @return a {@link KeysetHandle} of the managed keyset
-   */
+  /** @return a {@link KeysetHandle} of the managed keyset */
   @GuardedBy("this")
   public synchronized KeysetHandle getKeysetHandle() throws GeneralSecurityException {
     return KeysetHandle.fromKeyset(keysetBuilder.build());
   }
 
   /**
-   * Generates and adds a fresh key generated using {@code keyTemplate}, and sets the new key as
-   * the primary key.
+   * Generates and adds a fresh key generated using {@code keyTemplate}, and sets the new key as the
+   * primary key.
    *
-   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle
-   * {@code keyTemplate}
+   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
+   *     keyTemplate}
    */
   @GuardedBy("this")
   public synchronized KeysetManager rotate(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     Keyset.Key key = newKey(keyTemplate);
-    keysetBuilder
-        .addKey(key)
-        .setPrimaryKeyId(key.getKeyId());
+    keysetBuilder.addKey(key).setPrimaryKeyId(key.getKeyId());
     return this;
   }
 
   /**
    * Generates and adds a fresh key generated using {@code keyTemplate}.
    *
-   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle
-   * {@code keyTemplate}
+   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
+   *     keyTemplate}
    */
   @GuardedBy("this")
-  public synchronized KeysetManager add(KeyTemplate keyTemplate)
-      throws GeneralSecurityException {
+  public synchronized KeysetManager add(KeyTemplate keyTemplate) throws GeneralSecurityException {
     keysetBuilder.addKey(newKey(keyTemplate));
     return this;
   }
@@ -183,10 +174,8 @@ public final class KeysetManager {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
       if (key.getKeyId() == keyId) {
-        keysetBuilder.setKey(i, key.toBuilder()
-            .setStatus(KeyStatusType.DESTROYED)
-            .clearKeyData()
-            .build());
+        keysetBuilder.setKey(
+            i, key.toBuilder().setStatus(KeyStatusType.DESTROYED).clearKeyData().build());
         return this;
       }
     }
@@ -194,8 +183,7 @@ public final class KeysetManager {
   }
 
   @GuardedBy("this")
-  private synchronized Keyset.Key newKey(KeyTemplate keyTemplate)
-      throws GeneralSecurityException {
+  private synchronized Keyset.Key newKey(KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyData keyData = Registry.newKeyData(keyTemplate);
     int keyId = newKeyId();
     OutputPrefixType outputPrefixType = keyTemplate.getOutputPrefixType();
@@ -225,19 +213,18 @@ public final class KeysetManager {
     return keyId;
   }
 
-  /**
-   * @return positive random int
-   */
+  /** @return positive random int */
   private static int randPositiveInt() {
     SecureRandom secureRandom = new SecureRandom();
     byte[] rand = new byte[4];
     int result = 0;
     while (result == 0) {
       secureRandom.nextBytes(rand);
-      result = ((rand[0] & 0x7f) << 24)
-          | ((rand[1] & 0xff) << 16)
-          | ((rand[2] & 0xff) << 8)
-          | (rand[3] & 0xff);
+      result =
+          ((rand[0] & 0x7f) << 24)
+              | ((rand[1] & 0xff) << 16)
+              | ((rand[2] & 0xff) << 8)
+              | (rand[3] & 0xff);
     }
     return result;
   }

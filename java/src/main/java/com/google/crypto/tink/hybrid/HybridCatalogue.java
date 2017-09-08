@@ -21,15 +21,13 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyManager;
 import java.security.GeneralSecurityException;
 
-/**
- * A catalogue of {@link HybridDecrypt} and {@link HybridEncrypt} key managers.
- */
+/** A catalogue of {@link HybridDecrypt} and {@link HybridEncrypt} key managers. */
 class HybridCatalogue implements Catalogue {
   public HybridCatalogue() {}
 
   /**
-   * @return a KeyManager for the given {@code typeUrl}, {@code primitiveName} and version
-   * at least {@code minVersion} (if it exists in the catalogue).
+   * @return a KeyManager for the given {@code typeUrl}, {@code primitiveName} and version at least
+   *     {@code minVersion} (if it exists in the catalogue).
    */
   @Override
   @SuppressWarnings("rawtypes")
@@ -48,31 +46,32 @@ class HybridCatalogue implements Catalogue {
             String.format("No support for primitive '%s'.", primitiveName));
     }
     if (keyManager.getVersion() < minVersion) {
-      throw new GeneralSecurityException(String.format(
-          "No key manager for key type '%s' with version at least %d.", typeUrl, minVersion));
+      throw new GeneralSecurityException(
+          String.format(
+              "No key manager for key type '%s' with version at least %d.", typeUrl, minVersion));
     }
     return keyManager;
   }
 
   private KeyManager<HybridDecrypt> hybridDecryptKeyManager(String typeUrl)
-      throws GeneralSecurityException{
+      throws GeneralSecurityException {
     switch (typeUrl) {
       case EciesAeadHkdfPrivateKeyManager.TYPE_URL:
         return new EciesAeadHkdfPrivateKeyManager();
       default:
-        throw new GeneralSecurityException(String.format(
-            "No support for primitive 'HybridEncrypt' with key type '%s'.", typeUrl));
+        throw new GeneralSecurityException(
+            String.format("No support for primitive 'HybridEncrypt' with key type '%s'.", typeUrl));
     }
   }
 
   private KeyManager<HybridEncrypt> hybridEncryptKeyManager(String typeUrl)
-      throws GeneralSecurityException{
+      throws GeneralSecurityException {
     switch (typeUrl) {
       case EciesAeadHkdfPublicKeyManager.TYPE_URL:
         return new EciesAeadHkdfPublicKeyManager();
       default:
-        throw new GeneralSecurityException(String.format(
-            "No support for primitive 'HybridEncrypt' with key type '%s'.", typeUrl));
+        throw new GeneralSecurityException(
+            String.format("No support for primitive 'HybridEncrypt' with key type '%s'.", typeUrl));
     }
   }
 }

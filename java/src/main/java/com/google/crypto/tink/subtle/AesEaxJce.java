@@ -27,23 +27,21 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * This class implements the EAX mode using AES.
- * EAX is an encryption mode proposed by Bellare, Rogaway and Wagner
- * (http://web.cs.ucdavis.edu/~rogaway/papers/eax.pdf).
- * The encryption mode is an alternative to CCM and has been proposed as
- * a NIST standard:
+ * This class implements the EAX mode using AES. EAX is an encryption mode proposed by Bellare,
+ * Rogaway and Wagner (http://web.cs.ucdavis.edu/~rogaway/papers/eax.pdf). The encryption mode is an
+ * alternative to CCM and has been proposed as a NIST standard:
  * http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/eax/eax-spec.pdf
  *
  * <p>The parameter choices have been restricted to a small set of options:
+ *
  * <ul>
- *   <li> The tag size is always 16 bytes
- *   <li> Nonces are chosen by the implementation at random. Their size is
- *        12 or 16 bytes.
+ *   <li>The tag size is always 16 bytes
+ *   <li>Nonces are chosen by the implementation at random. Their size is 12 or 16 bytes.
  * </ul>
  *
- * <p>Plans: The current implementation is slow since it uses JCA and only assumes
- *   that the encryption modes "AES/ECB/NOPADDING" and "AES/CTR/NOPADDING" are
- *   implemented. Our plan is to implement a native version of EAX.
+ * <p>Plans: The current implementation is slow since it uses JCA and only assumes that the
+ * encryption modes "AES/ECB/NOPADDING" and "AES/CTR/NOPADDING" are implemented. Our plan is to
+ * implement a native version of EAX.
  */
 public final class AesEaxJce implements Aead {
   static final int BLOCK_SIZE_IN_BYTES = 16;
@@ -70,9 +68,7 @@ public final class AesEaxJce implements Aead {
     p = multiplyByX(b);
   }
 
-  /**
-   * Computes the xor of two byte arrays of equal size.
-   */
+  /** Computes the xor of two byte arrays of equal size. */
   private static byte[] xor(final byte[] x, final byte[] y) {
     assert x.length == y.length;
     int len = x.length;
@@ -85,6 +81,7 @@ public final class AesEaxJce implements Aead {
 
   /**
    * Multiplies an element of the field GF(2)[x]/(x^128+x^7+x^2+x+1) by x.
+   *
    * @param block a 16 byte block representing an element of the field using big endian order.
    */
   private static byte[] multiplyByX(final byte[] block) {
@@ -101,8 +98,8 @@ public final class AesEaxJce implements Aead {
 
   /**
    * Pads the last block for OMAC. If the last block is smaller than 16 bytes then a bitstring
-   * starting with 1 and followed by 0's is appended and the result is XORed with p.
-   * If the last block is 16 bytes long then the last block is XORed with b.
+   * starting with 1 and followed by 0's is appended and the result is XORed with p. If the last
+   * block is 16 bytes long then the last block is XORed with b.
    *
    * @param data A block or partial block of size 1 .. 16 bytes.
    * @return The padded block.
@@ -122,8 +119,9 @@ public final class AesEaxJce implements Aead {
 
   /**
    * Computes an OMAC.
+   *
    * @param ecb A cipher initialized with the key of this class using AES/ECB/NOPadding and
-   *            encryption mode.
+   *     encryption mode.
    * @param tag The OMAC tag (0 for nonce, 1 for aad, 2 for ciphertext)
    * @param data The array containing the data to MAC.
    * @param offset The start of the data to MAC.

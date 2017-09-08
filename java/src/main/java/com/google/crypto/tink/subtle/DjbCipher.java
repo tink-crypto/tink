@@ -27,7 +27,7 @@ import java.util.Arrays;
 /**
  * Abstract base class for class of Djb's ciphers.
  *
- * Class of Djb's ciphers that are meant to be used to construct an AEAD with Poly1305.
+ * <p>Class of Djb's ciphers that are meant to be used to construct an AEAD with Poly1305.
  */
 public abstract class DjbCipher implements IndCpaCipher {
 
@@ -38,8 +38,12 @@ public abstract class DjbCipher implements IndCpaCipher {
 
   private static final byte[] ZERO_16_BYTES = new byte[16];
 
-  static final int[] SIGMA = toIntArray(ByteBuffer.wrap(
-      new byte[]{'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k'}));
+  static final int[] SIGMA =
+      toIntArray(
+          ByteBuffer.wrap(
+              new byte[] {
+                'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k'
+              }));
 
   final ImmutableByteArray key;
 
@@ -54,7 +58,7 @@ public abstract class DjbCipher implements IndCpaCipher {
    * Constructs a new ChaCha20 cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link
-   * DjbCipher#KEY_SIZE_IN_BYTES}.
+   *     DjbCipher#KEY_SIZE_IN_BYTES}.
    */
   static DjbCipher chaCha20(final byte[] key) {
     return new ChaCha20(key);
@@ -64,7 +68,7 @@ public abstract class DjbCipher implements IndCpaCipher {
    * Constructs a new XChaCha20 cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link
-   * DjbCipher#KEY_SIZE_IN_BYTES}.
+   *     DjbCipher#KEY_SIZE_IN_BYTES}.
    */
   static DjbCipher xChaCha20(final byte[] key) {
     return new XChaCha20(key);
@@ -74,7 +78,7 @@ public abstract class DjbCipher implements IndCpaCipher {
    * Constructs a new XSalsa20 cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link
-   * DjbCipher#KEY_SIZE_IN_BYTES}.
+   *     DjbCipher#KEY_SIZE_IN_BYTES}.
    */
   static DjbCipher xSalsa20(final byte[] key) {
     return new XSalsa20(key);
@@ -100,9 +104,7 @@ public abstract class DjbCipher implements IndCpaCipher {
     return x;
   }
 
-  /**
-   * Returns a one-time authenticator key as part of an AEAD algorithm (e.g., Poly1305).
-   */
+  /** Returns a one-time authenticator key as part of an AEAD algorithm (e.g., Poly1305). */
   byte[] getAuthenticatorKey(byte[] nonce) {
     return new KeyStream(this, nonce, 0).first(MAC_KEY_SIZE_IN_BYTES);
   }
@@ -121,11 +123,10 @@ public abstract class DjbCipher implements IndCpaCipher {
   abstract KeyStream getKeyStream(final byte[] nonce);
 
   /**
-   * State generator for DjbCipher types.
-   * Stateful and <b>not</b> thread-safe.
-   * {@link KeyStream} is not stored as an instance variable in {@link DjbCipher} types to preserve
-   * their stateless guarantee. Instead, it is used in local scope to easily maintain the local
-   * state inside of a single call (i.e., encrypt or decrypt).
+   * State generator for DjbCipher types. Stateful and <b>not</b> thread-safe. {@link KeyStream} is
+   * not stored as an instance variable in {@link DjbCipher} types to preserve their stateless
+   * guarantee. Instead, it is used in local scope to easily maintain the local state inside of a
+   * single call (i.e., encrypt or decrypt).
    */
   static class KeyStream {
 
@@ -170,11 +171,17 @@ public abstract class DjbCipher implements IndCpaCipher {
       readCalled = true;
       System.arraycopy(
           keyStreamBlock,
-          currentPosInBlock, keyStreamBlockReturn, 0, BLOCK_SIZE_IN_INTS - currentPosInBlock);
+          currentPosInBlock,
+          keyStreamBlockReturn,
+          0,
+          BLOCK_SIZE_IN_INTS - currentPosInBlock);
       djbCipher.incrementCounter(state);
       keyStreamBlock = djbCipher.shuffleAdd(state);
       System.arraycopy(
-          keyStreamBlock, 0, keyStreamBlockReturn, BLOCK_SIZE_IN_INTS - currentPosInBlock,
+          keyStreamBlock,
+          0,
+          keyStreamBlockReturn,
+          BLOCK_SIZE_IN_INTS - currentPosInBlock,
           currentPosInBlock);
       return keyStreamBlockReturn;
     }
@@ -306,7 +313,7 @@ public abstract class DjbCipher implements IndCpaCipher {
    * Djb's {@link ChaCha20} stream cipher based on RFC7539 (i.e., uses 96-bit random nonces).
    * https://tools.ietf.org/html/rfc7539
    *
-   * This cipher is meant to be used to construct an AEAD with Poly1305.
+   * <p>This cipher is meant to be used to construct an AEAD with Poly1305.
    */
   static class ChaCha20 extends ChaCha20Base {
 
@@ -345,7 +352,7 @@ public abstract class DjbCipher implements IndCpaCipher {
    * Djb's {@link XChaCha20} stream cipher based on
    * https://download.libsodium.org/doc/advanced/xchacha20.html
    *
-   * This cipher is meant to be used to construct an AEAD with Poly1305.
+   * <p>This cipher is meant to be used to construct an AEAD with Poly1305.
    */
   static class XChaCha20 extends ChaCha20Base {
 
@@ -353,7 +360,7 @@ public abstract class DjbCipher implements IndCpaCipher {
      * Constructs a new XChaCha20 cipher with the supplied {@code key}.
      *
      * @throws IllegalArgumentException when {@code key} length is not {@link
-     * DjbCipher#KEY_SIZE_IN_BYTES}.
+     *     DjbCipher#KEY_SIZE_IN_BYTES}.
      */
     private XChaCha20(byte[] key) {
       super(key);
@@ -393,10 +400,9 @@ public abstract class DjbCipher implements IndCpaCipher {
   }
 
   /**
-   * Djb's XSalsa20 stream cipher.
-   * https://cr.yp.to/snuffle/xsalsa-20081128.pdf
+   * Djb's XSalsa20 stream cipher. https://cr.yp.to/snuffle/xsalsa-20081128.pdf
    *
-   * This cipher is meant to be used to construct an AEAD with Poly1305.
+   * <p>This cipher is meant to be used to construct an AEAD with Poly1305.
    */
   static class XSalsa20 extends DjbCipher {
 
@@ -404,7 +410,7 @@ public abstract class DjbCipher implements IndCpaCipher {
      * Constructs a new {@link XSalsa20} cipher with the supplied {@code key}.
      *
      * @throws IllegalArgumentException when {@code key} length is not {@link
-     * DjbCipher#KEY_SIZE_IN_BYTES}.
+     *     DjbCipher#KEY_SIZE_IN_BYTES}.
      */
     private XSalsa20(byte[] key) {
       super(key);
@@ -513,7 +519,7 @@ public abstract class DjbCipher implements IndCpaCipher {
     @Override
     KeyStream getKeyStream(byte[] nonce) {
       KeyStream keyStream = new KeyStream(this, nonce, 0);
-      keyStream.first(MAC_KEY_SIZE_IN_BYTES);  // skip the aead sub key.
+      keyStream.first(MAC_KEY_SIZE_IN_BYTES); // skip the aead sub key.
       return keyStream;
     }
   }

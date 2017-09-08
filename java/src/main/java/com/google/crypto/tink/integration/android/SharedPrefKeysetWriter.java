@@ -25,18 +25,16 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Hex;
 import java.io.IOException;
 
-/**
- * A {@link KeysetWriter} that can write keysets to private shared preferences on Android.
- */
+/** A {@link KeysetWriter} that can write keysets to private shared preferences on Android. */
 public final class SharedPrefKeysetWriter implements KeysetWriter {
   private final SharedPreferences.Editor editor;
   private final String prefName;
 
   /**
-   * Creates a {@link KeysetReader} that hex-encodes and writes keysets to the preference
-   * name {@code prefName} in the private shared preferences file {@code fileName}.
+   * Creates a {@link KeysetReader} that hex-encodes and writes keysets to the preference name
+   * {@code prefName} in the private shared preferences file {@code fileName}.
    *
-   *<p>If {@code fileName} is null, uses the default shared preferences file.
+   * <p>If {@code fileName} is null, uses the default shared preferences file.
    *
    * @throws IOException if cannot write the keyset
    * @throws IllegalArgumentException if {@code prefName} is null
@@ -51,8 +49,7 @@ public final class SharedPrefKeysetWriter implements KeysetWriter {
     if (fileName == null) {
       sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
     } else {
-      sharedPreferences = appContext.getSharedPreferences(
-        fileName, Context.MODE_PRIVATE);
+      sharedPreferences = appContext.getSharedPreferences(fileName, Context.MODE_PRIVATE);
     }
 
     return new SharedPrefKeysetWriter(sharedPreferences.edit(), prefName);
@@ -65,15 +62,11 @@ public final class SharedPrefKeysetWriter implements KeysetWriter {
 
   @Override
   public void write(Keyset keyset) throws IOException {
-    editor
-        .putString(prefName, Hex.encode(keyset.toByteArray()))
-        .apply();
+    editor.putString(prefName, Hex.encode(keyset.toByteArray())).apply();
   }
 
   @Override
   public void write(EncryptedKeyset keyset) throws IOException {
-    editor
-        .putString(prefName, Hex.encode(keyset.toByteArray()))
-        .apply();
+    editor.putString(prefName, Hex.encode(keyset.toByteArray())).apply();
   }
 }

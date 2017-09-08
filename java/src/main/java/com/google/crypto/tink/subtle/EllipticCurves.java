@@ -33,22 +33,16 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.util.Arrays;
 
-/**
- * Utility functions and enums for elliptic curve crypto, used in ECDSA and ECDH.
- */
+/** Utility functions and enums for elliptic curve crypto, used in ECDSA and ECDH. */
 public final class EllipticCurves {
 
-  /**
-   * Point formats.
-   */
+  /** Point formats. */
   public enum PointFormatType {
     UNCOMPRESSED,
     COMPRESSED,
   }
 
-  /**
-   * Elliptic curve types.
-   */
+  /** Elliptic curve types. */
   public enum CurveType {
     NIST_P256,
     NIST_P384,
@@ -67,31 +61,31 @@ public final class EllipticCurves {
   public static ECParameterSpec getNistP384Params() {
     return getNistCurveSpec(
         "3940200619639447921227904010014361380507973927046544666794829340"
-        + "4245721771496870329047266088258938001861606973112319",
+            + "4245721771496870329047266088258938001861606973112319",
         "3940200619639447921227904010014361380507973927046544666794690527"
-        + "9627659399113263569398956308152294913554433653942643",
+            + "9627659399113263569398956308152294913554433653942643",
         "b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875a"
-        + "c656398d8a2ed19d2a85c8edd3ec2aef",
+            + "c656398d8a2ed19d2a85c8edd3ec2aef",
         "aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a38"
-        + "5502f25dbf55296c3a545e3872760ab7",
+            + "5502f25dbf55296c3a545e3872760ab7",
         "3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c0"
-        + "0a60b1ce1d7e819d7a431d7c90ea0e5f");
+            + "0a60b1ce1d7e819d7a431d7c90ea0e5f");
   }
 
   public static ECParameterSpec getNistP521Params() {
     return getNistCurveSpec(
         "6864797660130609714981900799081393217269435300143305409394463459"
-        + "18554318339765605212255964066145455497729631139148085803712198"
-        + "7999716643812574028291115057151",
+            + "18554318339765605212255964066145455497729631139148085803712198"
+            + "7999716643812574028291115057151",
         "6864797660130609714981900799081393217269435300143305409394463459"
-        + "18554318339765539424505774633321719753296399637136332111386476"
-        + "8612440380340372808892707005449",
+            + "18554318339765539424505774633321719753296399637136332111386476"
+            + "8612440380340372808892707005449",
         "051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef10"
-        + "9e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00",
+            + "9e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00",
         "c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3d"
-        + "baa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66",
+            + "baa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66",
         "11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e6"
-        + "62c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650");
+            + "62c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650");
   }
 
   /**
@@ -109,26 +103,26 @@ public final class EllipticCurves {
    */
   public static void checkPointOnCurve(ECPoint point, EllipticCurve ec)
       throws GeneralSecurityException {
-        BigInteger p = getModulus(ec);
-        BigInteger x = point.getAffineX();
-        BigInteger y = point.getAffineY();
-        if (x == null || y == null) {
-          throw new GeneralSecurityException("point is at infinity");
-        }
-        // Check 0 <= x < p and 0 <= y < p.
-        if (x.signum() == -1 || x.compareTo(p) != -1) {
-          throw new GeneralSecurityException("x is out of range");
-        }
-        if (y.signum() == -1 || y.compareTo(p) != -1) {
-          throw new GeneralSecurityException("y is out of range");
-        }
-        // Check y^2 == x^3 + a x + b (mod p)
-        BigInteger lhs = y.multiply(y).mod(p);
-        BigInteger rhs = x.multiply(x).add(ec.getA()).multiply(x).add(ec.getB()).mod(p);
-        if (!lhs.equals(rhs)) {
-          throw new GeneralSecurityException("Point is not on curve");
-        }
-      }
+    BigInteger p = getModulus(ec);
+    BigInteger x = point.getAffineX();
+    BigInteger y = point.getAffineY();
+    if (x == null || y == null) {
+      throw new GeneralSecurityException("point is at infinity");
+    }
+    // Check 0 <= x < p and 0 <= y < p.
+    if (x.signum() == -1 || x.compareTo(p) != -1) {
+      throw new GeneralSecurityException("x is out of range");
+    }
+    if (y.signum() == -1 || y.compareTo(p) != -1) {
+      throw new GeneralSecurityException("y is out of range");
+    }
+    // Check y^2 == x^3 + a x + b (mod p)
+    BigInteger lhs = y.multiply(y).mod(p);
+    BigInteger rhs = x.multiply(x).add(ec.getA()).multiply(x).add(ec.getB()).mod(p);
+    if (!lhs.equals(rhs)) {
+      throw new GeneralSecurityException("Point is not on curve");
+    }
+  }
 
   /**
    * Checks a public key. I.e. this checks that the point defining the public key is on the curve.
@@ -193,9 +187,9 @@ public final class EllipticCurves {
   }
 
   /**
-   * Computes a square root modulo an odd prime.
-   * Timing and exceptions can leak information about the inputs. Therefore this method must only
-   * be used to decompress public keys.
+   * Computes a square root modulo an odd prime. Timing and exceptions can leak information about
+   * the inputs. Therefore this method must only be used to decompress public keys.
+   *
    * @param x the square
    * @param p the prime modulus (the behaviour of the method is undefined if p is not prime).
    * @return a value s such that s^2 mod p == x mod p
@@ -285,15 +279,16 @@ public final class EllipticCurves {
   }
 
   /**
-   * Computes the y coordinate of a point on an elliptic curve. This method can be used
-   * to decompress elliptic curve points.
+   * Computes the y coordinate of a point on an elliptic curve. This method can be used to
+   * decompress elliptic curve points.
+   *
    * @param x the x-coordinate of the point
    * @param lsb the least significant bit of the y-coordinate of the point.
    * @param curve this must be an elliptic curve over a prime field using Weierstrass
-   *        representation.
+   *     representation.
    * @return the y coordinate.
-   * @throws GeneralSecurityException if there is no point with coordinate x on the curve,
-   *   or if curve is not supported.
+   * @throws GeneralSecurityException if there is no point with coordinate x on the curve, or if
+   *     curve is not supported.
    */
   public static BigInteger getY(BigInteger x, boolean lsb, EllipticCurve curve)
       throws GeneralSecurityException {
@@ -310,11 +305,12 @@ public final class EllipticCurves {
 
   /**
    * Returns the encoding size of a point on an elliptic curve.
+   *
    * @param curve the elliptic curve
    * @param format the format used to encode the point
    * @return the size of an encoded point in bytes
-   * @throws GeneralSecurityException if the point format is unknown or
-   *   if the elliptic curve is not supported
+   * @throws GeneralSecurityException if the point format is unknown or if the elliptic curve is not
+   *     supported
    */
   public static int encodingSizeInBytes(EllipticCurve curve, PointFormatType format)
       throws GeneralSecurityException {
@@ -330,17 +326,17 @@ public final class EllipticCurves {
   }
 
   /**
-   * Decodes an encoded point on an elliptic curve. This method checks that the
-   * encoded point is on the curve.
+   * Decodes an encoded point on an elliptic curve. This method checks that the encoded point is on
+   * the curve.
+   *
    * @param curve the elliptic curve
    * @param format the format used to enocde the point
    * @param encoded the encoded point
    * @return the point
-   * @throws GeneralSecurityException if the encoded point
-   * is invalid or if the curve or format are not supported.
+   * @throws GeneralSecurityException if the encoded point is invalid or if the curve or format are
+   *     not supported.
    */
-  public static ECPoint ecPointDecode(
-      EllipticCurve curve, PointFormatType format, byte[] encoded)
+  public static ECPoint ecPointDecode(EllipticCurve curve, PointFormatType format, byte[] encoded)
       throws GeneralSecurityException {
     int coordinateSize = EllipticCurves.fieldSizeInBytes(curve);
     switch (format) {
@@ -392,8 +388,8 @@ public final class EllipticCurves {
    * @param format the format for the encoding
    * @param point the point to encode
    * @return the encoded key exchange
-   * @throws GeneralSecurityException if the point is not on the curve or
-   *     if the format is not supported.
+   * @throws GeneralSecurityException if the point is not on the curve or if the format is not
+   *     supported.
    */
   public static byte[] ecPointEncode(EllipticCurve curve, PointFormatType format, ECPoint point)
       throws GeneralSecurityException {
@@ -430,8 +426,7 @@ public final class EllipticCurves {
    * @param curve the curve type
    * @return the ECParameterSpec for the curve.
    */
-  public static ECParameterSpec getCurveSpec(CurveType curve)
-      throws NoSuchAlgorithmException {
+  public static ECParameterSpec getCurveSpec(CurveType curve) throws NoSuchAlgorithmException {
     switch (curve) {
       case NIST_P256:
         return getNistP256Params();

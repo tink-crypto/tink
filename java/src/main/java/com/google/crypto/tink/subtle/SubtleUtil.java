@@ -16,13 +16,11 @@
 
 package com.google.crypto.tink.subtle;
 
-
-/**
- * Helper methods.
- */
+/** Helper methods. */
 class SubtleUtil {
   /**
    * Best-effort checks that this is Android.
+   *
    * @return true if running on Android.
    */
   public static boolean isAndroid() {

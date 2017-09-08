@@ -19,17 +19,17 @@ import com.google.crypto.tink.Config;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods for registering with the {@link Registry} all instances of
- * {@link com.google.crypto.tink.HybridDecrypt} key types supported in a particular release of
- * Tink.
+ * Static methods for registering with the {@link Registry} all instances of {@link
+ * com.google.crypto.tink.HybridDecrypt} key types supported in a particular release of Tink.
  *
  * <p>To register all HybridDecrypt key types provided in Tink release 1.0.0 one can do:
+ *
  * <pre>{@code
  * Config.register(HybridDecryptConfig.TINK_1_0_0);
  * }</pre>
  *
- * <p>For more information on how to obtain and use instances of HybridDecrypt, see
- * {@link HybridDecryptFactory}.
+ * <p>For more information on how to obtain and use instances of HybridDecrypt, see {@link
+ * HybridDecryptFactory}.
  *
  * @deprecated use {@link Config} and {@link HybridConfig}
  */
@@ -39,7 +39,7 @@ public final class HybridDecryptConfig {
    * Registers standard with the {@code Registry} all HybridDecrypt key types released with the
    * latest version of Tink.
    *
-   * Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
+   * <p>Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
    * which allows for usage of existing keys forbids generation of new key material.
    *
    * @deprecated use {@link Config#register}

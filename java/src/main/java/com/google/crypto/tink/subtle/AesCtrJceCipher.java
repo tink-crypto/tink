@@ -23,8 +23,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * The primitive implements AES counter mode with random IVs, using JCE. It is safe against
- * chosen-plaintext attacks, but does not provide ciphertext integrity, thus is unsafe
- * against chosen-ciphertext attacks.
+ * chosen-plaintext attacks, but does not provide ciphertext integrity, thus is unsafe against
+ * chosen-ciphertext attacks.
  */
 public final class AesCtrJceCipher implements IndCpaCipher {
   private static final String KEY_ALGORITHM = "AES";
@@ -57,14 +57,13 @@ public final class AesCtrJceCipher implements IndCpaCipher {
    * format is iv || raw ciphertext.
    *
    * @param plaintext the plaintext to be encrypted.
-   *
    * @return the encryption of plaintext.
    */
   @Override
   public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
     if (plaintext.length > Integer.MAX_VALUE - ivSize) {
-      throw new GeneralSecurityException("plaintext length can not exceed "
-          + (Integer.MAX_VALUE - ivSize));
+      throw new GeneralSecurityException(
+          "plaintext length can not exceed " + (Integer.MAX_VALUE - ivSize));
     }
     byte[] ciphertext = new byte[ivSize + plaintext.length];
     byte[] iv = Random.randBytes(ivSize);
@@ -78,7 +77,6 @@ public final class AesCtrJceCipher implements IndCpaCipher {
    * ciphertext.
    *
    * @param ciphetext the ciphertext to be decrypted.
-   *
    * @return the decrypted plaintext.
    */
   @Override
@@ -93,8 +91,15 @@ public final class AesCtrJceCipher implements IndCpaCipher {
     return plaintext;
   }
 
-  private void doCtr(final byte[] input, int inputOffset, int inputLen, byte[] output,
-      int outputOffset, final byte[] iv, boolean encrypt) throws GeneralSecurityException {
+  private void doCtr(
+      final byte[] input,
+      int inputOffset,
+      int inputLen,
+      byte[] output,
+      int outputOffset,
+      final byte[] iv,
+      boolean encrypt)
+      throws GeneralSecurityException {
     Cipher cipher = EngineFactory.CIPHER.getInstance(CIPHER_ALGORITHM);
     // The counter is big-endian. The counter is composed of iv and (blockSize - ivSize) of zeros.
     byte[] counter = new byte[blockSize];

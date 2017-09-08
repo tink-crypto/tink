@@ -23,8 +23,8 @@ import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
 /**
- * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and
- * AEAD-DEM (data encapsulation mechanism).
+ * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and AEAD-DEM (data encapsulation
+ * mechanism).
  */
 public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
   private static final byte[] EMPTY_AAD = new byte[0];
@@ -34,8 +34,11 @@ public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
   private final EllipticCurves.PointFormatType ecPointFormat;
   private final EciesAeadHkdfDemHelper demHelper;
 
-  public EciesAeadHkdfHybridEncrypt(final ECPublicKey recipientPublicKey,
-      final byte[] hkdfSalt, String hkdfHmacAlgo, EllipticCurves.PointFormatType ecPointFormat,
+  public EciesAeadHkdfHybridEncrypt(
+      final ECPublicKey recipientPublicKey,
+      final byte[] hkdfSalt,
+      String hkdfHmacAlgo,
+      EllipticCurves.PointFormatType ecPointFormat,
       EciesAeadHkdfDemHelper demHelper)
       throws GeneralSecurityException {
     EllipticCurves.checkPublicKey(recipientPublicKey);
@@ -47,16 +50,21 @@ public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
   }
 
   /**
-   * Encrypts {@code plaintext} using {@code contextInfo} as <b>info</b>-parameter
-   * of the underlying HKDF.
+   * Encrypts {@code plaintext} using {@code contextInfo} as <b>info</b>-parameter of the underlying
+   * HKDF.
    *
    * @return resulting ciphertext.
    */
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
       throws GeneralSecurityException {
-    EciesHkdfSenderKem.KemKey kemKey =  senderKem.generateKey(hkdfHmacAlgo, hkdfSalt,
-        contextInfo, demHelper.getSymmetricKeySizeInBytes(), ecPointFormat);
+    EciesHkdfSenderKem.KemKey kemKey =
+        senderKem.generateKey(
+            hkdfHmacAlgo,
+            hkdfSalt,
+            contextInfo,
+            demHelper.getSymmetricKeySizeInBytes(),
+            ecPointFormat);
     Aead aead = demHelper.getAead(kemKey.getSymmetricKey());
     byte[] ciphertext = aead.encrypt(plaintext, EMPTY_AAD);
     byte[] header = kemKey.getKemBytes();

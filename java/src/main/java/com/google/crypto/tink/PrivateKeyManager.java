@@ -20,9 +20,7 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 
-/**
- * A {@link KeyManager} that understands asymmetric private key types.
- */
+/** A {@link KeyManager} that understands asymmetric private key types. */
 public interface PrivateKeyManager<P> extends KeyManager<P> {
   /**
    * Extracts the public key data from the private key data.

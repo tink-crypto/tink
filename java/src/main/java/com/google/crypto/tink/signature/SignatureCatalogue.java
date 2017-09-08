@@ -22,15 +22,13 @@ import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import java.security.GeneralSecurityException;
 
-/**
- * A catalogue of {@link PublicKeySign} and {@link PublicKeyVerify} key managers.
- */
+/** A catalogue of {@link PublicKeySign} and {@link PublicKeyVerify} key managers. */
 class SignatureCatalogue implements Catalogue {
   public SignatureCatalogue() {}
 
   /**
-   * @return a KeyManager for the given {@code typeUrl}, {@code primitiveName} and version
-   * at least {@code minVersion} (if it exists in the catalogue).
+   * @return a KeyManager for the given {@code typeUrl}, {@code primitiveName} and version at least
+   *     {@code minVersion} (if it exists in the catalogue).
    */
   @Override
   @SuppressWarnings("rawtypes")
@@ -49,8 +47,9 @@ class SignatureCatalogue implements Catalogue {
             String.format("No support for primitive '%s'.", primitiveName));
     }
     if (keyManager.getVersion() < minVersion) {
-      throw new GeneralSecurityException(String.format(
-          "No key manager for key type '%s' with version at least %d.", typeUrl, minVersion));
+      throw new GeneralSecurityException(
+          String.format(
+              "No key manager for key type '%s' with version at least %d.", typeUrl, minVersion));
     }
     return keyManager;
   }
@@ -63,8 +62,8 @@ class SignatureCatalogue implements Catalogue {
       case Ed25519PrivateKeyManager.TYPE_URL:
         return new Ed25519PrivateKeyManager();
       default:
-        throw new GeneralSecurityException(String.format(
-            "No support for primitive 'PublicKeySign' with key type '%s'.", typeUrl));
+        throw new GeneralSecurityException(
+            String.format("No support for primitive 'PublicKeySign' with key type '%s'.", typeUrl));
     }
   }
 
@@ -76,8 +75,9 @@ class SignatureCatalogue implements Catalogue {
       case Ed25519PublicKeyManager.TYPE_URL:
         return new Ed25519PublicKeyManager();
       default:
-        throw new GeneralSecurityException(String.format(
-            "No support for primitive 'PublicKeyVerify' with key type '%s'.", typeUrl));
+        throw new GeneralSecurityException(
+            String.format(
+                "No support for primitive 'PublicKeyVerify' with key type '%s'.", typeUrl));
     }
   }
 }

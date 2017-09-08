@@ -36,25 +36,17 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 
 /**
- * This key manager generates new {@code EcdsaPrivateKey} keys and produces new instances
- * of {@code EcdsaSignJce}.
+ * This key manager generates new {@code EcdsaPrivateKey} keys and produces new instances of {@code
+ * EcdsaSignJce}.
  */
 class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
-  /**
-   * Type url that this manager supports
-   */
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+  /** Type url that this manager supports */
+  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 
-  /**
-   * Current version of this key manager.
-   * Keys with greater version are not supported.
-   */
+  /** Current version of this key manager. Keys with greater version are not supported. */
   private static final int VERSION = 0;
 
-  /**
-   * @param serializedKey  serialized {@code EcdsaPrivateKey} proto
-   */
+  /** @param serializedKey serialized {@code EcdsaPrivateKey} proto */
   @Override
   public PublicKeySign getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
@@ -65,9 +57,7 @@ class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
     }
   }
 
-  /**
-   * @param key  {@code EcdsaPrivateKey} proto
-   */
+  /** @param key {@code EcdsaPrivateKey} proto */
   @Override
   public PublicKeySign getPrimitive(MessageLite key) throws GeneralSecurityException {
     if (!(key instanceof EcdsaPrivateKey)) {
@@ -75,15 +65,16 @@ class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
     }
     EcdsaPrivateKey keyProto = (EcdsaPrivateKey) key;
     validateKey(keyProto);
-    ECPrivateKey privateKey = EllipticCurves.getEcPrivateKey(
-        SigUtil.toCurveType(keyProto.getPublicKey().getParams().getCurve()),
-        keyProto.getKeyValue().toByteArray());
-    return new EcdsaSignJce(privateKey,
-        SigUtil.toEcdsaAlgo(keyProto.getPublicKey().getParams().getHashType()));
+    ECPrivateKey privateKey =
+        EllipticCurves.getEcPrivateKey(
+            SigUtil.toCurveType(keyProto.getPublicKey().getParams().getCurve()),
+            keyProto.getKeyValue().toByteArray());
+    return new EcdsaSignJce(
+        privateKey, SigUtil.toEcdsaAlgo(keyProto.getPublicKey().getParams().getHashType()));
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code EcdsaKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code EcdsaKeyFormat} proto
    * @return new {@code EcdsaPrivateKey} proto
    */
   @Override
@@ -97,7 +88,7 @@ class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
   }
 
   /**
-   * @param keyFormat  {@code EcdsaKeyFormat} proto
+   * @param keyFormat {@code EcdsaKeyFormat} proto
    * @return new {@code EcdsaPrivateKey} proto
    */
   @Override
@@ -108,21 +99,21 @@ class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
     EcdsaKeyFormat format = (EcdsaKeyFormat) keyFormat;
     EcdsaParams ecdsaParams = format.getParams();
     SigUtil.validateEcdsaParams(ecdsaParams);
-    KeyPair keyPair = EllipticCurves.generateKeyPair(
-        SigUtil.toCurveType(ecdsaParams.getCurve()));
+    KeyPair keyPair = EllipticCurves.generateKeyPair(SigUtil.toCurveType(ecdsaParams.getCurve()));
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
     ECPoint w = pubKey.getW();
 
     // Creates EcdsaPublicKey.
-    EcdsaPublicKey ecdsaPubKey = EcdsaPublicKey.newBuilder()
-        .setVersion(VERSION)
-        .setParams(ecdsaParams)
-        .setX(ByteString.copyFrom(w.getAffineX().toByteArray()))
-        .setY(ByteString.copyFrom(w.getAffineY().toByteArray()))
-        .build();
+    EcdsaPublicKey ecdsaPubKey =
+        EcdsaPublicKey.newBuilder()
+            .setVersion(VERSION)
+            .setParams(ecdsaParams)
+            .setX(ByteString.copyFrom(w.getAffineX().toByteArray()))
+            .setY(ByteString.copyFrom(w.getAffineY().toByteArray()))
+            .build();
 
-    //Creates EcdsaPrivateKey.
+    // Creates EcdsaPrivateKey.
     return EcdsaPrivateKey.newBuilder()
         .setVersion(VERSION)
         .setPublicKey(ecdsaPubKey)
@@ -131,7 +122,7 @@ class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code EcdsaKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code EcdsaKeyFormat} proto
    * @return {@code KeyData} with a new {@code EcdsaPrivateKey} proto
    */
   @Override

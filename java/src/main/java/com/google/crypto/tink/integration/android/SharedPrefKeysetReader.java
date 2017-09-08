@@ -24,15 +24,13 @@ import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.subtle.Hex;
 import java.io.IOException;
 
-/**
- * A {@link KeysetReader} that can read keysets from private shared preferences on Android.
- */
+/** A {@link KeysetReader} that can read keysets from private shared preferences on Android. */
 public final class SharedPrefKeysetReader {
   /**
-   * Creates a {@link KeysetReader} that reads and hex-decodes keysets from the preference
-   * name {@code prefName} in the private shared preferences file {@code fileName}.
+   * Creates a {@link KeysetReader} that reads and hex-decodes keysets from the preference name
+   * {@code prefName} in the private shared preferences file {@code fileName}.
    *
-   *<p>If {@code fileName} is null, uses the default shared preferences file.
+   * <p>If {@code fileName} is null, uses the default shared preferences file.
    *
    * @throws IOException if cannot read the keyset
    * @throws IllegalArgumentException if {@code prefName} is null
@@ -48,8 +46,7 @@ public final class SharedPrefKeysetReader {
     if (fileName == null) {
       sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext);
     } else {
-      sharedPreferences = appContext.getSharedPreferences(
-        fileName, Context.MODE_PRIVATE);
+      sharedPreferences = appContext.getSharedPreferences(fileName, Context.MODE_PRIVATE);
     }
 
     try {
@@ -61,9 +58,7 @@ public final class SharedPrefKeysetReader {
       return BinaryKeysetReader.withBytes(Hex.decode(keysetHex));
     } catch (ClassCastException e) {
       throw new IOException(
-          String.format(
-              "can't read keyset; the pref value %s is not a string", prefName),
-          e);
+          String.format("can't read keyset; the pref value %s is not a string", prefName), e);
     }
   }
 }

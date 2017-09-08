@@ -28,28 +28,19 @@ import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.subtle.Validators;
 import java.security.GeneralSecurityException;
 
-/**
- * An implementation of {@code KmsClient} for AWS KMS.
- */
+/** An implementation of {@code KmsClient} for AWS KMS. */
 @AutoService(KmsClient.class)
 public final class AwsKmsClient implements KmsClient {
-  /**
-   * The prefix of all keys stored in AWS KMS.
-   */
+  /** The prefix of all keys stored in AWS KMS. */
   public static final String PREFIX = "aws-kms://";
 
   private AWSKMS client;
   private String keyUri;
 
-  /**
-   * Constructs a generic AwsKmsClient that is not bound to any specific key.
-   */
-  public AwsKmsClient() {
-  }
+  /** Constructs a generic AwsKmsClient that is not bound to any specific key. */
+  public AwsKmsClient() {}
 
-  /**
-   * Constructs a specific AwsKmsClient that is bound to a single key identified by {@code uri}.
-   */
+  /** Constructs a specific AwsKmsClient that is bound to a single key identified by {@code uri}. */
   public AwsKmsClient(String uri) {
     if (!uri.toLowerCase().startsWith(PREFIX)) {
       throw new IllegalArgumentException("key URI must starts with " + PREFIX);
@@ -58,9 +49,9 @@ public final class AwsKmsClient implements KmsClient {
   }
 
   /**
-   * @return @return true either if this client is a generic one and uri starts with
-   * {@link AwsKmsClient#PREFIX}, or the client is a specific one that is bound to the
-   * key identified by {@code uri}.
+   * @return @return true either if this client is a generic one and uri starts with {@link
+   *     AwsKmsClient#PREFIX}, or the client is a specific one that is bound to the key identified
+   *     by {@code uri}.
    */
   @Override
   public boolean doesSupport(String uri) {
@@ -73,9 +64,8 @@ public final class AwsKmsClient implements KmsClient {
   /**
    * Loads AWS credentials from a properties file.
    *
-   * <p>The AWS access key ID is expected to be in the <code>accessKey</code>
-   * property and the AWS secret key is expected to be in the
-   * <code>secretKey</code> property.
+   * <p>The AWS access key ID is expected to be in the <code>accessKey</code> property and the AWS
+   * secret key is expected to be in the <code>secretKey</code> property.
    *
    * @throws GeneralSecurityException if the client initialization fails
    */
@@ -85,8 +75,7 @@ public final class AwsKmsClient implements KmsClient {
       if (credentialPath == null) {
         return withDefaultCredentials();
       }
-      return withCredentialsProvider(
-          new PropertiesFileCredentialsProvider(credentialPath));
+      return withCredentialsProvider(new PropertiesFileCredentialsProvider(credentialPath));
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("cannot load credentials", e);
     }
@@ -96,11 +85,12 @@ public final class AwsKmsClient implements KmsClient {
    * Loads default AWS credentials.
    *
    * <p>AWS credentials provider chain that looks for credentials in this order:
+   *
    * <ul>
-   *   <li>Environment Variables - AWS_ACCESS_KEY_ID and AWS_SECRET_KEY</li>
-   *   <li>Java System Properties - aws.accessKeyId and aws.secretKey</li>
-   *   <li>Credential profiles file at the default location (~/.aws/credentials)</li>
-   *   <li>Instance profile credentials delivered through the Amazon EC2 metadata service</li>
+   *   <li>Environment Variables - AWS_ACCESS_KEY_ID and AWS_SECRET_KEY
+   *   <li>Java System Properties - aws.accessKeyId and aws.secretKey
+   *   <li>Credential profiles file at the default location (~/.aws/credentials)
+   *   <li>Instance profile credentials delivered through the Amazon EC2 metadata service
    * </ul>
    *
    * @throws GeneralSecurityException if the client initialization fails
@@ -114,9 +104,7 @@ public final class AwsKmsClient implements KmsClient {
     }
   }
 
-  /**
-   * Loads AWS credentials from a provider.
-   */
+  /** Loads AWS credentials from a provider. */
   // new AWSKMSClient(provider) is deprecated, but some clients have not upgraded their AWS
   // libraries.
   @SuppressWarnings("deprecation")

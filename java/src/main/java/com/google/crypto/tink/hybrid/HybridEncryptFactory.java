@@ -28,17 +28,18 @@ import java.util.logging.Logger;
  * Static methods for obtaining {@link HybridEncrypt} instances.
  *
  * <p>Usage:
+ *
  * <pre>{@code
- *   KeysetHandle keysetHandle = ...;
- *   HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(keysetHandle);
- *   byte[] plaintext = ...;
- *   byte[] contextInfo = ...;
- *   byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
+ * KeysetHandle keysetHandle = ...;
+ * HybridEncrypt hybridEncrypt = HybridEncryptFactory.getPrimitive(keysetHandle);
+ * byte[] plaintext = ...;
+ * byte[] contextInfo = ...;
+ * byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
  * }</pre>
  *
- * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a
- * plaintext, it uses the primary key in the keyset, and prepends to the ciphertext a certain
- * prefix associated with the primary key.
+ * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a plaintext,
+ * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix associated
+ * with the primary key.
  */
 public final class HybridEncryptFactory {
   private static final Logger logger = Logger.getLogger(HybridEncryptFactory.class.getName());
@@ -49,7 +50,7 @@ public final class HybridEncryptFactory {
    */
   public static HybridEncrypt getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, /* keyManager= */null);
+    return getPrimitive(keysetHandle, /* keyManager= */ null);
   }
 
   /**
@@ -59,8 +60,7 @@ public final class HybridEncryptFactory {
   public static HybridEncrypt getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<HybridEncrypt> keyManager)
       throws GeneralSecurityException {
-    final PrimitiveSet<HybridEncrypt> primitives =
-        Registry.getPrimitives(keysetHandle, keyManager);
+    final PrimitiveSet<HybridEncrypt> primitives = Registry.getPrimitives(keysetHandle, keyManager);
     return new HybridEncrypt() {
       @Override
       public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)

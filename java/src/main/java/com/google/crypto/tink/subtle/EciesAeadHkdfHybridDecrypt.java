@@ -24,8 +24,8 @@ import java.security.spec.EllipticCurve;
 import java.util.Arrays;
 
 /**
- * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and
- * AEAD-DEM (data encapsulation mechanism).
+ * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and AEAD-DEM (data encapsulation
+ * mechanism).
  */
 public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   private static final byte[] EMPTY_AAD = new byte[0];
@@ -36,8 +36,11 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   private final EllipticCurves.PointFormatType ecPointFormat;
   private final EciesAeadHkdfDemHelper demHelper;
 
-  public EciesAeadHkdfHybridDecrypt(final ECPrivateKey recipientPrivateKey,
-      final byte[] hkdfSalt, String hkdfHmacAlgo, EllipticCurves.PointFormatType ecPointFormat,
+  public EciesAeadHkdfHybridDecrypt(
+      final ECPrivateKey recipientPrivateKey,
+      final byte[] hkdfSalt,
+      String hkdfHmacAlgo,
+      EllipticCurves.PointFormatType ecPointFormat,
       EciesAeadHkdfDemHelper demHelper)
       throws GeneralSecurityException {
     this.recipientPrivateKey = recipientPrivateKey;
@@ -57,8 +60,14 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
       throw new GeneralSecurityException("ciphertext too short");
     }
     byte[] kemBytes = Arrays.copyOfRange(ciphertext, 0, headerSize);
-    byte[] symmetricKey = recipientKem.generateKey(kemBytes, hkdfHmacAlgo, hkdfSalt,
-        contextInfo, demHelper.getSymmetricKeySizeInBytes(), ecPointFormat);
+    byte[] symmetricKey =
+        recipientKem.generateKey(
+            kemBytes,
+            hkdfHmacAlgo,
+            hkdfSalt,
+            contextInfo,
+            demHelper.getSymmetricKeySizeInBytes(),
+            ecPointFormat);
     Aead aead = demHelper.getAead(symmetricKey);
     return aead.decrypt(Arrays.copyOfRange(ciphertext, headerSize, ciphertext.length), EMPTY_AAD);
   }

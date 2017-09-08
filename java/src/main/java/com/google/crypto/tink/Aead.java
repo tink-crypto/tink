@@ -22,15 +22,15 @@ import java.security.GeneralSecurityException;
  * Interface for Authenticated Encryption with Associated Data (AEAD).
  *
  * <p>Implementations of this interface are secure against adaptive chosen ciphertext attacks.
- * Encryption with associated data ensures authenticity (who the sender is) and integrity
- * (the data has not been tampered with) of that data, but not its secrecy.
- * (see <a href="https://tools.ietf.org/html/rfc5116">RFC 5116</a>)
+ * Encryption with associated data ensures authenticity (who the sender is) and integrity (the data
+ * has not been tampered with) of that data, but not its secrecy. (see <a
+ * href="https://tools.ietf.org/html/rfc5116">RFC 5116</a>)
  */
 public interface Aead {
   /**
-   * Encrypts {@code plaintext} with {@code associatedData} as associated authenticated data.
-   * The resulting ciphertext allows for checking authenticity and integrity
-   * of associated data ({@code associatedData}), but does not guarantee its secrecy.
+   * Encrypts {@code plaintext} with {@code associatedData} as associated authenticated data. The
+   * resulting ciphertext allows for checking authenticity and integrity of associated data ({@code
+   * associatedData}), but does not guarantee its secrecy.
    *
    * @return resulting ciphertext
    */
@@ -38,9 +38,9 @@ public interface Aead {
       throws GeneralSecurityException;
 
   /**
-   * Decrypts {@code ciphertext} with {@code associatedData} as associated authenticated data.
-   * The decryption verifies the authenticity and integrity of the associated data,
-   * but there are no guarantees wrt. secrecy of that data.
+   * Decrypts {@code ciphertext} with {@code associatedData} as associated authenticated data. The
+   * decryption verifies the authenticity and integrity of the associated data, but there are no
+   * guarantees wrt. secrecy of that data.
    *
    * @return resulting plaintext
    */

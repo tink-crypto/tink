@@ -19,18 +19,14 @@ package com.google.crypto.tink.subtle;
 import com.google.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 
-/**
- * A helper for DEM (data encapsulation mechanism) of ECIES-AEAD-HKDF.
- */
+/** A helper for DEM (data encapsulation mechanism) of ECIES-AEAD-HKDF. */
 public interface EciesAeadHkdfDemHelper {
-  /**
-   * @return the size of the DEM-key in bytes.
-   */
+  /** @return the size of the DEM-key in bytes. */
   public int getSymmetricKeySizeInBytes();
 
   /**
-   * Creates a new {@code Aead}-primitive that uses the key material given in
-   * 'symmetric_key', which must be of length dem_key_size_in_bytes().
+   * Creates a new {@code Aead}-primitive that uses the key material given in 'symmetric_key', which
+   * must be of length dem_key_size_in_bytes().
    *
    * @return the newly created {@codee Aead}-primitive.
    */

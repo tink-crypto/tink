@@ -25,13 +25,9 @@ import java.io.IOException;
  * system.
  */
 public interface KeysetWriter {
-  /**
-   * Tries to write a {@link Keyset} to some storage system.
-   */
+  /** Tries to write a {@link Keyset} to some storage system. */
   void write(Keyset keyset) throws IOException;
 
-  /**
-   * Tries to write an {@link EncryptedKeyset} to some storage system.
-   */
+  /** Tries to write an {@link EncryptedKeyset} to some storage system. */
   void write(EncryptedKeyset keyset) throws IOException;
 }

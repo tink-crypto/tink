@@ -22,14 +22,14 @@ import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
 
 /**
- * An instance of {WritableByteChannel} that encrypts the input
- * using a nonce based online authentication scheme.
+ * An instance of {WritableByteChannel} that encrypts the input using a nonce based online
+ * authentication scheme.
  */
 class StreamingAeadEncryptingChannel implements WritableByteChannel {
   private WritableByteChannel ciphertextChannel;
   private StreamSegmentEncrypter encrypter;
-  ByteBuffer ptBuffer;  // contains plaintext that has not yet been encrypted.
-  ByteBuffer ctBuffer;  // contains ciphertext that has not been written to ciphertextChannel.
+  ByteBuffer ptBuffer; // contains plaintext that has not yet been encrypted.
+  ByteBuffer ctBuffer; // contains ciphertext that has not been written to ciphertextChannel.
   private int plaintextSegmentSize;
   boolean open = true;
 
@@ -38,7 +38,8 @@ class StreamingAeadEncryptingChannel implements WritableByteChannel {
       WritableByteChannel ciphertextChannel,
       int plaintextSegmentSize,
       int ciphertextSegmentSize,
-      int ciphertextOffset) throws GeneralSecurityException, IOException {
+      int ciphertextOffset)
+      throws GeneralSecurityException, IOException {
     this.ciphertextChannel = ciphertextChannel;
     this.encrypter = encrypter;
     ptBuffer = ByteBuffer.allocate(plaintextSegmentSize);

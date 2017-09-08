@@ -33,8 +33,8 @@ import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
 /**
- * This key manager produces new instances of {@code EciesAeadHkdfHybridEncrypt}.
- * It doesn't support key generation.
+ * This key manager produces new instances of {@code EciesAeadHkdfHybridEncrypt}. It doesn't support
+ * key generation.
  */
 class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   private static final int VERSION = 0;
@@ -42,9 +42,7 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
 
-  /**
-   * @param serializedKey  serialized {@code EciesAeadHkdfPublicKey} proto
-   */
+  /** @param serializedKey serialized {@code EciesAeadHkdfPublicKey} proto */
   @Override
   public HybridEncrypt getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
@@ -55,9 +53,7 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
     }
   }
 
-  /**
-   * @param recipientKey  {@code EciesAeadHkdfPublicKey} proto
-   */
+  /** @param recipientKey {@code EciesAeadHkdfPublicKey} proto */
   @Override
   public HybridEncrypt getPrimitive(MessageLite recipientKey) throws GeneralSecurityException {
     if (!(recipientKey instanceof EciesAeadHkdfPublicKey)) {
@@ -67,12 +63,15 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
     validate(recipientKeyProto);
     EciesAeadHkdfParams eciesParams = recipientKeyProto.getParams();
     EciesHkdfKemParams kemParams = eciesParams.getKemParams();
-    ECPublicKey recipientPublicKey = EllipticCurves.getEcPublicKey(
-        HybridUtil.toCurveType(kemParams.getCurveType()),
-        recipientKeyProto.getX().toByteArray(), recipientKeyProto.getY().toByteArray());
-    EciesAeadHkdfDemHelper demHelper = new RegistryEciesAeadHkdfDemHelper(
-        eciesParams.getDemParams().getAeadDem());
-    return new EciesAeadHkdfHybridEncrypt(recipientPublicKey,
+    ECPublicKey recipientPublicKey =
+        EllipticCurves.getEcPublicKey(
+            HybridUtil.toCurveType(kemParams.getCurveType()),
+            recipientKeyProto.getX().toByteArray(),
+            recipientKeyProto.getY().toByteArray());
+    EciesAeadHkdfDemHelper demHelper =
+        new RegistryEciesAeadHkdfDemHelper(eciesParams.getDemParams().getAeadDem());
+    return new EciesAeadHkdfHybridEncrypt(
+        recipientPublicKey,
         kemParams.getHkdfSalt().toByteArray(),
         HybridUtil.toHmacAlgo(kemParams.getHkdfHashType()),
         HybridUtil.toPointFormatType(eciesParams.getEcPointFormat()),
@@ -80,7 +79,7 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code EciesAeadHkdfKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code EciesAeadHkdfKeyFormat} proto
    * @return new {@code EciesAeadHkdfPublicKey} proto
    */
   @Override
@@ -89,7 +88,7 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   }
 
   /**
-   * @param keyFormat  {@code EciesAeadHkdfKeyFormat} proto
+   * @param keyFormat {@code EciesAeadHkdfKeyFormat} proto
    * @return new {@code EciesAeadHkdfPublicKey} proto
    */
   @Override
@@ -98,7 +97,7 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code EciesAeadHkdfKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code EciesAeadHkdfKeyFormat} proto
    * @return {@code KeyData} with a new {@code EciesAeadHkdfPrivateKey} proto
    */
   @Override
@@ -126,5 +125,4 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
     Validators.validateVersion(key.getVersion(), VERSION);
     HybridUtil.validate(key.getParams());
   }
-
 }

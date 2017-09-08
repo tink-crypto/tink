@@ -32,9 +32,7 @@ import java.security.GeneralSecurityException;
  */
 public final class GcpKmsAead implements Aead {
 
-  /**
-   * This client knows how to talk to Google Cloud KMS.
-   */
+  /** This client knows how to talk to Google Cloud KMS. */
   private final CloudKMS kmsClient;
 
   // The location of a CryptoKey in Google Cloud KMS.
@@ -50,12 +48,16 @@ public final class GcpKmsAead implements Aead {
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
     try {
-      EncryptRequest request = new EncryptRequest()
-          .encodePlaintext(plaintext)
-          .encodeAdditionalAuthenticatedData(aad);
-      EncryptResponse response = this.kmsClient.projects().locations().keyRings().cryptoKeys()
-          .encrypt(this.kmsKeyUri, request)
-          .execute();
+      EncryptRequest request =
+          new EncryptRequest().encodePlaintext(plaintext).encodeAdditionalAuthenticatedData(aad);
+      EncryptResponse response =
+          this.kmsClient
+              .projects()
+              .locations()
+              .keyRings()
+              .cryptoKeys()
+              .encrypt(this.kmsKeyUri, request)
+              .execute();
       return response.decodeCiphertext();
     } catch (IOException e) {
       throw new GeneralSecurityException("encryption failed", e);
@@ -63,19 +65,21 @@ public final class GcpKmsAead implements Aead {
   }
 
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
-      throws GeneralSecurityException {
+  public byte[] decrypt(final byte[] ciphertext, final byte[] aad) throws GeneralSecurityException {
     try {
-      DecryptRequest request = new DecryptRequest()
-          .encodeCiphertext(ciphertext)
-          .encodeAdditionalAuthenticatedData(aad);
-      DecryptResponse response = this.kmsClient.projects().locations().keyRings().cryptoKeys()
-          .decrypt(this.kmsKeyUri, request)
-          .execute();
+      DecryptRequest request =
+          new DecryptRequest().encodeCiphertext(ciphertext).encodeAdditionalAuthenticatedData(aad);
+      DecryptResponse response =
+          this.kmsClient
+              .projects()
+              .locations()
+              .keyRings()
+              .cryptoKeys()
+              .decrypt(this.kmsKeyUri, request)
+              .execute();
       return response.decodePlaintext();
     } catch (IOException e) {
       throw new GeneralSecurityException("decryption failed", e);
     }
-
   }
 }

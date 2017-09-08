@@ -61,9 +61,7 @@ class HybridUtil {
     }
   }
 
-  /**
-   * Converts protobuf enum {@code EllipticCurveType} to raw Java enum {code CurveType}.
-   */
+  /** Converts protobuf enum {@code EllipticCurveType} to raw Java enum {code CurveType}. */
   public static EllipticCurves.CurveType toCurveType(EllipticCurveType type)
       throws GeneralSecurityException {
     switch (type) {
@@ -78,9 +76,7 @@ class HybridUtil {
     }
   }
 
-  /**
-   * Converts protobuf enum {@code EcPointFormat} to raw Java enum {code PointFormatType}.
-   */
+  /** Converts protobuf enum {@code EcPointFormat} to raw Java enum {code PointFormatType}. */
   public static EllipticCurves.PointFormatType toPointFormatType(EcPointFormat format)
       throws GeneralSecurityException {
     switch (format) {

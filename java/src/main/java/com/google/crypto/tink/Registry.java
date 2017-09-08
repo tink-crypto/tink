@@ -30,34 +30,36 @@ import java.util.logging.Logger;
 /**
  * A global container of key managers and catalogues.
  *
- * <p>Registry maps catalogue names to instances of {@link Catalogue} and each supported key type
- * to a corresponding {@link KeyManager} object, which "understands" the key type (i.e., the
- * KeyManager can instantiate the primitive corresponding to given key, or can generate new keys of
- * the supported key type). Keeping KeyManagers for all primitives in a single Registry (rather
- * than having a separate KeyManager per primitive) enables modular construction of compound
- * primitives from "simple" ones, e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and
- * a MAC.
+ * <p>Registry maps catalogue names to instances of {@link Catalogue} and each supported key type to
+ * a corresponding {@link KeyManager} object, which "understands" the key type (i.e., the KeyManager
+ * can instantiate the primitive corresponding to given key, or can generate new keys of the
+ * supported key type). Keeping KeyManagers for all primitives in a single Registry (rather than
+ * having a separate KeyManager per primitive) enables modular construction of compound primitives
+ * from "simple" ones, e.g., AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC.
  *
- * <p>Registry is initialized at startup, and is later used to instantiate primitives for given
- * keys or keysets. Note that regular users will usually not work directly with Registry, but rather
- * via {@link Config} and primitive factories which in the background register and query the
- * Registry for specific KeyManagers. Registry is public though, to enable configurations with
- * custom catalogues, primitives or KeyManagers.
+ * <p>Registry is initialized at startup, and is later used to instantiate primitives for given keys
+ * or keysets. Note that regular users will usually not work directly with Registry, but rather via
+ * {@link Config} and primitive factories which in the background register and query the Registry
+ * for specific KeyManagers. Registry is public though, to enable configurations with custom
+ * catalogues, primitives or KeyManagers.
  *
  * <p>To initialize the Registery with all key managers in Tink 1.0.0, one can do as follows:
+ *
  * <pre>{@code
  * Config.register(TinkConfig.TINK_1_0_0);
  * }</pre>
  *
  * <p>Here's how to register only {@link Aead} key managers:
+ *
  * <pre>{@code
  * Config.register(AeadConfig.TINK_1_0_0);
  * }</pre>
  *
- * <p>After the Registry has been initialized, one can use
- * {@link com.google.crypto.tink.aead.AeadFactory}, {@link com.google.crypto.tink.mac.MacFactory},
- * etc., to obtain corresponding primitive instances. For example, here's how to obtain an
- * {@link Aead} primitive:
+ * <p>After the Registry has been initialized, one can use {@link
+ * com.google.crypto.tink.aead.AeadFactory}, {@link com.google.crypto.tink.mac.MacFactory}, etc., to
+ * obtain corresponding primitive instances. For example, here's how to obtain an {@link Aead}
+ * primitive:
+ *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
  * Aead aead = AeadFactory.getPrimitive(keysetHandle);
@@ -70,16 +72,17 @@ public final class Registry {
 
   @SuppressWarnings("rawtypes")
   private static final ConcurrentMap<String, KeyManager> keyManagerMap =
-      new ConcurrentHashMap<String, KeyManager>();         // typeUrl -> KeyManager mapping
+      new ConcurrentHashMap<String, KeyManager>(); // typeUrl -> KeyManager mapping
+
   private static final ConcurrentMap<String, Boolean> newKeyAllowedMap =
-      new ConcurrentHashMap<String, Boolean>();            // typeUrl -> newKeyAllowed mapping
+      new ConcurrentHashMap<String, Boolean>(); // typeUrl -> newKeyAllowed mapping
   private static final ConcurrentMap<String, Catalogue> catalogueMap =
-      new ConcurrentHashMap<String, Catalogue>();   //  name -> catalogue mapping
+      new ConcurrentHashMap<String, Catalogue>(); //  name -> catalogue mapping
   /**
    * Resets the registry.
    *
-   * <p>After reset the registry is empty, i.e. it contains no key managers. Thus one might need
-   * to call {@code XyzConfig.init()} to re-install the catalogues.
+   * <p>After reset the registry is empty, i.e. it contains no key managers. Thus one might need to
+   * call {@code XyzConfig.init()} to re-install the catalogues.
    *
    * <p>This method is intended for testing.
    */
@@ -92,12 +95,12 @@ public final class Registry {
   /**
    * Tries to add a catalogue, to enable custom configuration of key types and key managers.
    *
-   * <p>Adding a custom catalogue should be a one-time operaton. There is an existing
-   * catalogue, throw exception if {@code catalogue} and the existing catalogue aren't
-   * instances of the same class, and do nothing if they are.
+   * <p>Adding a custom catalogue should be a one-time operaton. There is an existing catalogue,
+   * throw exception if {@code catalogue} and the existing catalogue aren't instances of the same
+   * class, and do nothing if they are.
    *
-   * @throws GeneralSecurityException if there's an existing catalogue is not an instance
-   * of the same class as {@code catalogue}
+   * @throws GeneralSecurityException if there's an existing catalogue is not an instance of the
+   *     same class as {@code catalogue}
    */
   public static synchronized void addCatalogue(String catalogueName, Catalogue catalogue)
       throws GeneralSecurityException {
@@ -110,10 +113,10 @@ public final class Registry {
     if (catalogueMap.containsKey(catalogueName.toLowerCase())) {
       Catalogue existing = catalogueMap.get(catalogueName.toLowerCase());
       if (!catalogue.getClass().equals(existing.getClass())) {
-        logger.warning("Attempted overwrite of a catalogueName catalogue for name "
-            + catalogueName);
-        throw new GeneralSecurityException("catalogue for name " + catalogueName
-            + " has been already registered");
+        logger.warning(
+            "Attempted overwrite of a catalogueName catalogue for name " + catalogueName);
+        throw new GeneralSecurityException(
+            "catalogue for name " + catalogueName + " has been already registered");
       }
     }
     catalogueMap.put(catalogueName.toLowerCase(), catalogue);
@@ -151,11 +154,11 @@ public final class Registry {
    * Tries to registers {@code manager} for the given {@code typeUrl}. Users can generate new keys
    * with this manager using the {@link Registry#newKey} methods.
    *
-   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing
-   * key manager aren't instances of the same class, and do nothing if they are.
+   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing key
+   * manager aren't instances of the same class, and do nothing if they are.
    *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance of
-   * the class of {@code manager}
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
+   *     class of {@code manager}
    */
   public static <P> void registerKeyManager(String typeUrl, final KeyManager<P> manager)
       throws GeneralSecurityException {
@@ -166,11 +169,11 @@ public final class Registry {
    * Tries to registers {@code manager} for the given {@code typeUrl}. If {@code newKeyAllowed} is
    * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
    *
-   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing
-   * key manager aren't instances of the same class, and do nothing if they are.
+   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing key
+   * manager aren't instances of the same class, and do nothing if they are.
    *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance of
-   * the class of {@code manager}
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
+   *     class of {@code manager}
    */
   @SuppressWarnings("unchecked")
   public static synchronized <P> void registerKeyManager(
@@ -181,15 +184,15 @@ public final class Registry {
     }
     if (keyManagerMap.containsKey(typeUrl)) {
       KeyManager<P> existingManager = getKeyManager(typeUrl);
-      boolean existingNewKeyAllowed =
-          newKeyAllowedMap.get(typeUrl).booleanValue();
+      boolean existingNewKeyAllowed = newKeyAllowedMap.get(typeUrl).booleanValue();
       if (!manager.getClass().equals(existingManager.getClass())
           // Disallow changing newKeyAllow from false to true.
           || (!existingNewKeyAllowed && newKeyAllowed)) {
         logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
-        throw new GeneralSecurityException(String.format(
-            "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
-            typeUrl, existingManager.getClass().getName(), manager.getClass().getName()));
+        throw new GeneralSecurityException(
+            String.format(
+                "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
+                typeUrl, existingManager.getClass().getName(), manager.getClass().getName()));
       }
     }
     keyManagerMap.put(typeUrl, manager);
@@ -198,15 +201,16 @@ public final class Registry {
 
   /**
    * @return a {@link KeyManager} for the given {@code typeUrl} (if found).
-   *
-   * TODO(przydatek): find a way for verifying the primitive type.
+   *     <p>TODO(przydatek): find a way for verifying the primitive type.
    */
   @SuppressWarnings("unchecked")
   public static <P> KeyManager<P> getKeyManager(String typeUrl) throws GeneralSecurityException {
     KeyManager<P> manager = keyManagerMap.get(typeUrl);
     if (manager == null) {
-      throw new GeneralSecurityException("No key manager found for key type: " + typeUrl
-          + ".  Check the configuration of the registry.");
+      throw new GeneralSecurityException(
+          "No key manager found for key type: "
+              + typeUrl
+              + ".  Check the configuration of the registry.");
     }
     return manager;
   }
@@ -226,8 +230,8 @@ public final class Registry {
     if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
       return manager.newKeyData(keyTemplate.getValue());
     } else {
-      throw new GeneralSecurityException("newKey-operation not permitted for key type "
-          + keyTemplate.getTypeUrl());
+      throw new GeneralSecurityException(
+          "newKey-operation not permitted for key type " + keyTemplate.getTypeUrl());
     }
   }
 
@@ -244,8 +248,8 @@ public final class Registry {
     if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
       return manager.newKey(keyTemplate.getValue());
     } else {
-      throw new GeneralSecurityException("newKey-operation not permitted for key type "
-          + keyTemplate.getTypeUrl());
+      throw new GeneralSecurityException(
+          "newKey-operation not permitted for key type " + keyTemplate.getTypeUrl());
     }
   }
 
@@ -268,11 +272,11 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for extracting the public key data from the private key given
-   * in {@code serializedPrivateKey}.
+   * Convenience method for extracting the public key data from the private key given in {@code
+   * serializedPrivateKey}.
    *
-   * <p>It looks up a {@link PrivateKeyManager} identified by {@code typeUrl}, and calls
-   * {@link KeyManager#getPublicKeyData} with {@code serializedPrivateKey} as the parameter.
+   * <p>It looks up a {@link PrivateKeyManager} identified by {@code typeUrl}, and calls {@link
+   * KeyManager#getPublicKeyData} with {@code serializedPrivateKey} as the parameter.
    *
    * @return a new key
    */
@@ -286,8 +290,8 @@ public final class Registry {
   /**
    * Convenience method for creating a new primitive for the key given in {@code proto}.
    *
-   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls
-   * {@link KeyManager#getPrimitive} with {@code key} as the parameter.
+   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
+   * KeyManager#getPrimitive} with {@code key} as the parameter.
    *
    * @return a new primitive
    */
@@ -301,8 +305,8 @@ public final class Registry {
   /**
    * Convenience method for creating a new primitive for the key given in {@code proto}.
    *
-   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls
-   * {@link KeyManager#getPrimitive} with {@code serialized} as the parameter.
+   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
+   * KeyManager#getPrimitive} with {@code serialized} as the parameter.
    *
    * @return a new primitive
    */
@@ -316,8 +320,8 @@ public final class Registry {
   /**
    * Convenience method for creating a new primitive for the key given in {@code proto}.
    *
-   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls
-   * {@link KeyManager#getPrimitive} with {@code serialized} as the parameter.
+   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
+   * KeyManager#getPrimitive} with {@code serialized} as the parameter.
    *
    * @return a new primitive
    */
@@ -330,8 +334,8 @@ public final class Registry {
   /**
    * Convenience method for creating a new primitive for the key given in {@code proto}.
    *
-   * <p>It looks up a {@link KeyManager} identified by {@code keyData.type_url}, and calls
-   * {@link KeyManager#getPrimitive} with {@code keyData.value} as the parameter.
+   * <p>It looks up a {@link KeyManager} identified by {@code keyData.type_url}, and calls {@link
+   * KeyManager#getPrimitive} with {@code keyData.value} as the parameter.
    *
    * @return a new primitive
    */
@@ -341,9 +345,9 @@ public final class Registry {
   }
 
   /**
-   * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset
-   * given in {@code keysetHandle}, assuming all the corresponding key managers are present
-   * (keys with status!=ENABLED are skipped).
+   * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset given
+   * in {@code keysetHandle}, assuming all the corresponding key managers are present (keys with
+   * status!=ENABLED are skipped).
    *
    * <p>The returned set is usually later "wrapped" into a class that implements the corresponding
    * Primitive-interface.
@@ -352,21 +356,20 @@ public final class Registry {
    */
   public static <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitives(keysetHandle, /* customManager= */null);
+    return getPrimitives(keysetHandle, /* customManager= */ null);
   }
 
   /**
-   * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset
-   * given in {@code keysetHandle}, using {@code customManager} (instead of registered
-   * key managers) for keys supported by it.  Keys not supported by {@code customManager}
-   * are handled by matching registered key managers (if present), and keys with status!=ENABLED
-   * are skipped.
+   * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset given
+   * in {@code keysetHandle}, using {@code customManager} (instead of registered key managers) for
+   * keys supported by it. Keys not supported by {@code customManager} are handled by matching
+   * registered key managers (if present), and keys with status!=ENABLED are skipped.
    *
    * <p>This enables custom treatment of keys, for example providing extra context (e.g.,
    * credentials for accessing keys managed by a KMS), or gathering custom monitoring/profiling
    * information.
    *
-   * The returned set is usually later "wrapped" into a class that implements the corresponding
+   * <p>The returned set is usually later "wrapped" into a class that implements the corresponding
    * Primitive-interface.
    *
    * @return a PrimitiveSet with all instantiated primitives
@@ -382,8 +385,7 @@ public final class Registry {
         if (customManager != null && customManager.doesSupport(key.getKeyData().getTypeUrl())) {
           primitive = customManager.getPrimitive(key.getKeyData().getValue());
         } else {
-          primitive = getPrimitive(key.getKeyData().getTypeUrl(),
-              key.getKeyData().getValue());
+          primitive = getPrimitive(key.getKeyData().getTypeUrl(), key.getKeyData().getValue());
         }
         PrimitiveSet.Entry<P> entry = primitives.addPrimitive(primitive, key);
         if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {

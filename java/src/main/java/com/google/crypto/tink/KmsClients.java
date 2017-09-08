@@ -28,8 +28,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * A container for {@link KmsClient}-objects that are needed by {@link KeyManager}-objects for
  * primitives that use KMS-managed keys.
  *
- * <p>This class consists exclusively of static methods that register and load
- * {@link KmsClient}-objects.
+ * <p>This class consists exclusively of static methods that register and load {@link
+ * KmsClient}-objects.
  */
 public final class KmsClients {
   // The list of KmsClients loaded automatically using ServiceLoader.
@@ -38,16 +38,14 @@ public final class KmsClients {
   private static final CopyOnWriteArrayList<KmsClient> clients =
       new CopyOnWriteArrayList<KmsClient>();
 
-  /**
-   * Adds a client to the list of known {@link KmsClient}-objects.
-   */
+  /** Adds a client to the list of known {@link KmsClient}-objects. */
   public static void add(KmsClient client) {
     clients.add(client);
   }
 
   /**
-   * Returns the first {@link KmsClient} registered with {@link KmsClients#add} that supports
-   * {@code keyUri}.
+   * Returns the first {@link KmsClient} registered with {@link KmsClients#add} that supports {@code
+   * keyUri}.
    *
    * @throws GeneralSecurityException if cannot found any KMS clients that support {@code keyUri}
    */
@@ -64,13 +62,12 @@ public final class KmsClients {
    * Returns the first {@link KmsClient} automatically loaded with {@link java.util.ServiceLoader}
    * that supports {@code keyUri}.
    *
-   * <p><b>Warning</b>
-   * This method searches over the classpath for all implementations of {@link KmsClient}. An
-   * attacker that can insert a class in your classpath (e.g., someone controlling a library that
-   * you're using) could provide a fake {@link KmsClient} that steal your keys. For this reason
-   * Tink does not use this method. It is used by
-   * <a href="https://github.com/google/tink/tree/master/tools/tinkey">Tinkey</a> which needs to
-   * talk to custom, in-house key management systems.
+   * <p><b>Warning</b> This method searches over the classpath for all implementations of {@link
+   * KmsClient}. An attacker that can insert a class in your classpath (e.g., someone controlling a
+   * library that you're using) could provide a fake {@link KmsClient} that steal your keys. For
+   * this reason Tink does not use this method. It is used by <a
+   * href="https://github.com/google/tink/tree/master/tools/tinkey">Tinkey</a> which needs to talk
+   * to custom, in-house key management systems.
    *
    * @throws GeneralSecurityException if cannot found any KMS clients that support {@code keyUri}
    */
@@ -89,11 +86,10 @@ public final class KmsClients {
 
   private static List<KmsClient> loadAutoKmsClients() {
     List<KmsClient> clients = new ArrayList<KmsClient>();
-    ServiceLoader<KmsClient> clientLoader =
-        ServiceLoader.load(KmsClient.class);
+    ServiceLoader<KmsClient> clientLoader = ServiceLoader.load(KmsClient.class);
     Iterator<KmsClient> i = clientLoader.iterator();
     while (i.hasNext()) {
-        clients.add(i.next());
+      clients.add(i.next());
     }
     return Collections.unmodifiableList(clients);
   }

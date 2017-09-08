@@ -18,12 +18,11 @@ package com.google.crypto.tink.subtle;
 
 import java.security.GeneralSecurityException;
 
-/**
- * Helper methods that deal with byte arrays.
- */
+/** Helper methods that deal with byte arrays. */
 public final class Bytes {
   /**
    * Best effort fix-timing array comparison.
+   *
    * @return true if two arrays are equal.
    */
   public static final boolean equal(final byte[] x, final byte[] y) {
@@ -41,9 +40,8 @@ public final class Bytes {
   }
 
   /**
-   * Returns the concatenation of the input arrays in a single array. For example,
-   * {@code concat(new byte[] {a, b}, new byte[] {}, new byte[] {c}} returns the array
-   * {@code {a, b, c}}.
+   * Returns the concatenation of the input arrays in a single array. For example, {@code concat(new
+   * byte[] {a, b}, new byte[] {}, new byte[] {c}} returns the array {@code {a, b, c}}.
    *
    * @return a single array containing all the values from the source arrays, in order
    */
@@ -66,8 +64,7 @@ public final class Bytes {
 
   // TODO(thaidn): add checks for boundary conditions/overflows.
   /**
-   * Transforms a passed value to a LSB first byte array with the size of
-   * the specified capacity
+   * Transforms a passed value to a LSB first byte array with the size of the specified capacity
    *
    * @param capacity size of the resulting byte array
    * @param value that should be represented as a byte array

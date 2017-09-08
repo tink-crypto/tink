@@ -23,9 +23,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-/**
- * This primitive implements AesGcm using JCE.
- */
+/** This primitive implements AesGcm using JCE. */
 public final class AesGcmJce implements Aead {
 
   // All instances of this class use a 12 byte IV and a 16 byte tag.
@@ -47,8 +45,7 @@ public final class AesGcmJce implements Aead {
   }
 
   @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] aad)
-      throws GeneralSecurityException {
+  public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
     // Check that ciphertext is not longer than the max. size of a Java array.
     if (plaintext.length > Integer.MAX_VALUE - IV_SIZE_IN_BYTES - TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("plaintext too long");
@@ -61,14 +58,13 @@ public final class AesGcmJce implements Aead {
     GCMParameterSpec params = new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, iv);
     cipher.init(Cipher.ENCRYPT_MODE, keySpec, params);
     cipher.updateAAD(aad);
-    int unusedWritten = cipher.doFinal(plaintext, 0, plaintext.length, ciphertext,
-        IV_SIZE_IN_BYTES);
+    int unusedWritten =
+        cipher.doFinal(plaintext, 0, plaintext.length, ciphertext, IV_SIZE_IN_BYTES);
     return ciphertext;
   }
 
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] aad)
-      throws GeneralSecurityException {
+  public byte[] decrypt(final byte[] ciphertext, final byte[] aad) throws GeneralSecurityException {
     if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("ciphertext too short");
     }
@@ -77,7 +73,6 @@ public final class AesGcmJce implements Aead {
     Cipher cipher = instance();
     cipher.init(Cipher.DECRYPT_MODE, keySpec, params);
     cipher.updateAAD(aad);
-    return cipher.doFinal(
-        ciphertext, IV_SIZE_IN_BYTES, ciphertext.length - IV_SIZE_IN_BYTES);
+    return cipher.doFinal(ciphertext, IV_SIZE_IN_BYTES, ciphertext.length - IV_SIZE_IN_BYTES);
   }
 };

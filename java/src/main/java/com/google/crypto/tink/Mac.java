@@ -21,10 +21,10 @@ import java.security.GeneralSecurityException;
 /**
  * Interface for Message Authentication Codes (MAC).
  *
- * <p>Message Authentication Codes provide symmetric message authentication.
- * Instances implementing this interface are secure against existential forgery under chosen
- * plaintext attack, and can be deterministic or randomized. This interface should be used
- * for authentication only, and not for other purposes like generation of pseudorandom bytes.
+ * <p>Message Authentication Codes provide symmetric message authentication. Instances implementing
+ * this interface are secure against existential forgery under chosen plaintext attack, and can be
+ * deterministic or randomized. This interface should be used for authentication only, and not for
+ * other purposes like generation of pseudorandom bytes.
  */
 public interface Mac {
   /**

@@ -46,8 +46,8 @@ public final class ImmutableByteArray {
    * @param data the byte array to be wrapped.
    * @param start the starting index of the slice
    * @param len the length of the slice. start + len must be less than the length of the array.
-   * @return an immutable wrapper around the bytes in the slice from {@code start} to
-   *    {@code start + len}
+   * @return an immutable wrapper around the bytes in the slice from {@code start} to {@code start +
+   *     len}
    */
   public static ImmutableByteArray of(final byte[] data, final int start, final int len) {
     return new ImmutableByteArray(data, start, len);

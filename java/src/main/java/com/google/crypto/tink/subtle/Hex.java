@@ -16,13 +16,9 @@
 
 package com.google.crypto.tink.subtle;
 
-/**
- * Helper methods for encode/decode hex strings.
- */
+/** Helper methods for encode/decode hex strings. */
 public final class Hex {
-  /**
-   * Encodes a byte array to hex.
-   */
+  /** Encodes a byte array to hex. */
   public static String encode(final byte[] bytes) {
     String chars = "0123456789abcdef";
     StringBuilder result = new StringBuilder(2 * bytes.length);
@@ -35,9 +31,7 @@ public final class Hex {
     return result.toString();
   }
 
-  /**
-   * Decodes a hex string to a byte array.
-   */
+  /** Decodes a hex string to a byte array. */
   public static byte[] decode(String hex) throws IllegalArgumentException {
     if (hex.length() % 2 != 0) {
       throw new IllegalArgumentException("Expected a string of even length");

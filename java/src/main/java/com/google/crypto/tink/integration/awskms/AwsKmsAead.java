@@ -25,14 +25,10 @@ import com.google.crypto.tink.Aead;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
-/**
- * A {@link Aead} that forwards encryption/decryption requests to a key in AWS KMS.
- */
+/** A {@link Aead} that forwards encryption/decryption requests to a key in AWS KMS. */
 public final class AwsKmsAead implements Aead {
 
-  /**
-   * This client knows how to talk to AWS KMS.
-   */
+  /** This client knows how to talk to AWS KMS. */
   private final AWSKMS kmsClient;
 
   // The location of a crypto key in AWS KMS.
@@ -53,9 +49,8 @@ public final class AwsKmsAead implements Aead {
   public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
     try {
-      EncryptRequest req = new EncryptRequest()
-          .withKeyId(keyArn)
-          .withPlaintext(ByteBuffer.wrap(plaintext));
+      EncryptRequest req =
+          new EncryptRequest().withKeyId(keyArn).withPlaintext(ByteBuffer.wrap(plaintext));
       if (associatedData != null && associatedData.length != 0) {
         req = req.addEncryptionContextEntry("associatedData", BinaryUtils.toHex(associatedData));
       }
@@ -69,8 +64,7 @@ public final class AwsKmsAead implements Aead {
   public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
     try {
-      DecryptRequest req = new DecryptRequest()
-          .withCiphertextBlob(ByteBuffer.wrap(ciphertext));
+      DecryptRequest req = new DecryptRequest().withCiphertextBlob(ByteBuffer.wrap(ciphertext));
       if (associatedData != null && associatedData.length != 0) {
         req = req.addEncryptionContextEntry("associatedData", BinaryUtils.toHex(associatedData));
       }

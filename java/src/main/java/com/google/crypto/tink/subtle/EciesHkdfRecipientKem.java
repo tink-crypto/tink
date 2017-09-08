@@ -25,9 +25,7 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import javax.crypto.KeyAgreement;
 
-/**
- * HKDF-based KEM (key encapsulation mechanism) for ECIES recipient.
- */
+/** HKDF-based KEM (key encapsulation mechanism) for ECIES recipient. */
 public final class EciesHkdfRecipientKem {
   private ECPrivateKey recipientPrivateKey;
 
@@ -35,22 +33,26 @@ public final class EciesHkdfRecipientKem {
     this.recipientPrivateKey = recipientPrivateKey;
   }
 
-  public byte[] generateKey(byte[] kemBytes, String hmacAlgo, final byte[] hkdfSalt,
-     final byte[] hkdfInfo, int keySizeInBytes, EllipticCurves.PointFormatType pointFormat)
-       throws GeneralSecurityException {
+  public byte[] generateKey(
+      byte[] kemBytes,
+      String hmacAlgo,
+      final byte[] hkdfSalt,
+      final byte[] hkdfInfo,
+      int keySizeInBytes,
+      EllipticCurves.PointFormatType pointFormat)
+      throws GeneralSecurityException {
     ECParameterSpec spec = recipientPrivateKey.getParams();
-    ECPoint ephemeralPublicPoint = EllipticCurves.ecPointDecode(
-        spec.getCurve(), pointFormat, kemBytes);
+    ECPoint ephemeralPublicPoint =
+        EllipticCurves.ecPointDecode(spec.getCurve(), pointFormat, kemBytes);
     ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ephemeralPublicPoint, spec);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     ECPublicKey ephemeralPublicKey = (ECPublicKey) kf.generatePublic(publicKeySpec);
     byte[] sharedSecret = getSharedSecret(ephemeralPublicKey);
-    return Hkdf.computeEciesHkdfSymmetricKey(kemBytes,
-        sharedSecret, hmacAlgo, hkdfSalt, hkdfInfo, keySizeInBytes);
+    return Hkdf.computeEciesHkdfSymmetricKey(
+        kemBytes, sharedSecret, hmacAlgo, hkdfSalt, hkdfInfo, keySizeInBytes);
   }
 
-  private byte[] getSharedSecret(final ECPublicKey publicKey)
-      throws GeneralSecurityException {
+  private byte[] getSharedSecret(final ECPublicKey publicKey) throws GeneralSecurityException {
     ECParameterSpec spec = recipientPrivateKey.getParams();
     EllipticCurves.checkPointOnCurve(publicKey.getW(), spec.getCurve());
     KeyAgreement ka = EngineFactory.KEY_AGREEMENT.getInstance("ECDH");

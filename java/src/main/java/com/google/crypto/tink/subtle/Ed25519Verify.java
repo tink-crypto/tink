@@ -24,7 +24,9 @@ import java.security.SignatureException;
 /**
  * Ed25519 verifying.
  *
- * Usage:
+ * <p>Usage:
+ *
+ * <pre>
  * // get the publicKey from the other party.
  * Ed25519Verify verifier = new Ed25519Verify(publicKey);
  * try {
@@ -34,6 +36,7 @@ import java.security.SignatureException;
  * } catch (GeneralSecurityException e) {
  *   // all the rest of security exceptions.
  * }
+ * </pre>
  */
 @Immutable
 public final class Ed25519Verify implements PublicKeyVerify {
@@ -43,8 +46,7 @@ public final class Ed25519Verify implements PublicKeyVerify {
 
   private final ImmutableByteArray publicKey;
 
-  public Ed25519Verify(final byte[] publicKey)
-      throws GeneralSecurityException {
+  public Ed25519Verify(final byte[] publicKey) throws GeneralSecurityException {
     if (publicKey.length != PUBLIC_KEY_LEN) {
       throw new IllegalArgumentException(
           String.format("Given public key's length is not %s.", PUBLIC_KEY_LEN));

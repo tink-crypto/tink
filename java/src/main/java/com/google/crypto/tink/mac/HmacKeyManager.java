@@ -33,33 +33,21 @@ import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * This key manager generates new {@code HmacKey} keys and produces new instances
- * of {@code MacJce}.
+ * This key manager generates new {@code HmacKey} keys and produces new instances of {@code MacJce}.
  */
 class HmacKeyManager implements KeyManager<Mac> {
-  /**
-   * Type url that this manager does support.
-   */
+  /** Type url that this manager does support. */
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.HmacKey";
-  /**
-   * Current version of this key manager.
-   * Keys with version equal or smaller are supported.
-   */
+  /** Current version of this key manager. Keys with version equal or smaller are supported. */
   private static final int VERSION = 0;
 
-  /**
-   * Minimum key size in bytes.
-   */
+  /** Minimum key size in bytes. */
   private static final int MIN_KEY_SIZE_IN_BYTES = 16;
 
-  /**
-   * Minimum tag size in bytes. This provides minimum 80-bit security strength.
-   */
+  /** Minimum tag size in bytes. This provides minimum 80-bit security strength. */
   private static final int MIN_TAG_SIZE_IN_BYTES = 10;
 
-  /**
-   * @param serializedKey  serialized {@code HmacKey} proto
-   */
+  /** @param serializedKey serialized {@code HmacKey} proto */
   @Override
   public Mac getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
@@ -70,9 +58,7 @@ class HmacKeyManager implements KeyManager<Mac> {
     }
   }
 
-  /**
-   * @param key  {@code HmacKey} proto
-   */
+  /** @param key {@code HmacKey} proto */
   @Override
   public Mac getPrimitive(MessageLite key) throws GeneralSecurityException {
     if (!(key instanceof HmacKey)) {
@@ -85,15 +71,19 @@ class HmacKeyManager implements KeyManager<Mac> {
     SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
     int tagSize = keyProto.getParams().getTagSize();
     switch (hash) {
-      case SHA1 : return new MacJce("HMACSHA1", keySpec, tagSize);
-      case SHA256 : return new MacJce("HMACSHA256", keySpec, tagSize);
-      case SHA512 : return new MacJce("HMACSHA512", keySpec, tagSize);
-      default: throw new GeneralSecurityException("unknown hash");
+      case SHA1:
+        return new MacJce("HMACSHA1", keySpec, tagSize);
+      case SHA256:
+        return new MacJce("HMACSHA256", keySpec, tagSize);
+      case SHA512:
+        return new MacJce("HMACSHA512", keySpec, tagSize);
+      default:
+        throw new GeneralSecurityException("unknown hash");
     }
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code HmacKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code HmacKeyFormat} proto
    * @return new {@code HmacKey} proto
    */
   @Override
@@ -107,7 +97,7 @@ class HmacKeyManager implements KeyManager<Mac> {
   }
 
   /**
-   * @param keyFormat  {@code HmacKeyFormat} proto
+   * @param keyFormat {@code HmacKeyFormat} proto
    * @return new {@code HmacKey} proto
    */
   @Override
@@ -125,7 +115,7 @@ class HmacKeyManager implements KeyManager<Mac> {
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code HmacKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code HmacKeyFormat} proto
    * @return {@code KeyData} with a new {@code HmacKey} proto
    */
   @Override
@@ -166,7 +156,6 @@ class HmacKeyManager implements KeyManager<Mac> {
       throw new GeneralSecurityException("key too short");
     }
     validate(format.getParams());
-
   }
 
   private void validate(HmacParams params) throws GeneralSecurityException {

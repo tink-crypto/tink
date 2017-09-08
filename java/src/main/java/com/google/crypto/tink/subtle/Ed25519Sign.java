@@ -23,11 +23,14 @@ import java.util.Arrays;
 /**
  * Ed25519 signing.
  *
- * Usage:
+ * <p>Usage:
+ *
+ * <pre>
  * Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
  * // securely store keyPair and share keyPair.getPublicKey()
  * Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
  * byte[] signature = signer.sign(message);
+ * </pre>
  */
 public final class Ed25519Sign implements PublicKeySign {
 
@@ -42,8 +45,7 @@ public final class Ed25519Sign implements PublicKeySign {
    * @param privateKey 32-byte random sequence
    * @throws GeneralSecurityException if {@code privateKey} is not 32-bytes.
    */
-  public Ed25519Sign(final byte[] privateKey)
-      throws GeneralSecurityException {
+  public Ed25519Sign(final byte[] privateKey) throws GeneralSecurityException {
     if (privateKey.length != SECRET_KEY_LEN) {
       throw new IllegalArgumentException(
           String.format("Given private key's length is not %s", SECRET_KEY_LEN));
@@ -58,9 +60,7 @@ public final class Ed25519Sign implements PublicKeySign {
     return Ed25519.sign(data, publicKey, hashedPrivateKey);
   }
 
-  /**
-   * Defines the KeyPair consisting of a private key and its corresponding public key.
-   */
+  /** Defines the KeyPair consisting of a private key and its corresponding public key. */
   public static final class KeyPair {
 
     private final byte[] publicKey;
@@ -79,9 +79,7 @@ public final class Ed25519Sign implements PublicKeySign {
       return Arrays.copyOf(privateKey, privateKey.length);
     }
 
-    /**
-     * Returns a new <publicKey, privateKey> KeyPair.
-     */
+    /** Returns a new <publicKey, privateKey> KeyPair. */
     public static KeyPair newKeyPair() throws GeneralSecurityException {
       byte[] privateKey = Random.randBytes(Curve25519.FIELD_LEN);
       byte[] publicKey = Ed25519.scalarMultToBytes(Ed25519.getHashedScalar(privateKey));

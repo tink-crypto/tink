@@ -19,9 +19,7 @@ package com.google.crypto.tink.subtle;
 import com.google.crypto.tink.Mac;
 import java.security.GeneralSecurityException;
 
-/**
- * Mac implementations in JCE.
- */
+/** Mac implementations in JCE. */
 public final class MacJce implements Mac {
   private javax.crypto.Mac mac;
   private final int digestSize;

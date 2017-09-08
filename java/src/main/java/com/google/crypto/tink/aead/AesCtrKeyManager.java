@@ -31,14 +31,13 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * This key manager generates new {@code AesCtrKey} keys and produces new instances
- * of {@code AesCtrJceCipher}.
+ * This key manager generates new {@code AesCtrKey} keys and produces new instances of {@code
+ * AesCtrJceCipher}.
  */
 class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   private static final int VERSION = 0;
 
-  static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.AesCtrKey";
+  static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesCtrKey";
 
   // In counter mode each message is encrypted with an initialization vector (IV) that must be
   // unique. If one single IV is ever used to encrypt two or more messages, the confidentiality of
@@ -49,9 +48,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   // 2^-33 (i.e., less than one in eight billion).
   private static final int MIN_IV_SIZE_IN_BYTES = 12;
 
-  /**
-   * @param serializedKey  serialized {@code AesCtrKey} proto
-   */
+  /** @param serializedKey serialized {@code AesCtrKey} proto */
   @Override
   public AesCtrJceCipher getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
@@ -62,9 +59,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
     }
   }
 
-  /**
-   * @param key  {@code AesCtrKey} proto
-   */
+  /** @param key {@code AesCtrKey} proto */
   @Override
   public AesCtrJceCipher getPrimitive(MessageLite key) throws GeneralSecurityException {
     if (!(key instanceof AesCtrKey)) {
@@ -72,8 +67,8 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
     }
     AesCtrKey keyProto = (AesCtrKey) key;
     validate(keyProto);
-    return new AesCtrJceCipher(keyProto.getKeyValue().toByteArray(),
-        keyProto.getParams().getIvSize());
+    return new AesCtrJceCipher(
+        keyProto.getKeyValue().toByteArray(), keyProto.getParams().getIvSize());
   }
 
   /**
@@ -91,7 +86,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   }
 
   /**
-   * @param keyFormat  {@code AesCtrKeyFormat} proto
+   * @param keyFormat {@code AesCtrKeyFormat} proto
    * @return new {@code AesCtrKey} proto
    */
   @Override
@@ -109,7 +104,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code AesCtrKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code AesCtrKeyFormat} proto
    * @return {@code KeyData} proto with a new {@code AesCtrKey} proto
    */
   @Override

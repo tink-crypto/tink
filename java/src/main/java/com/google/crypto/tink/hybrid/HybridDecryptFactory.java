@@ -30,18 +30,19 @@ import java.util.logging.Logger;
  * Static methods for obtaining {@link HybridDecrypt} instances.
  *
  * <p>Usage:
+ *
  * <pre>{@code
- *   KeysetHandle keysetHandle = ...;
- *   HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandle);
- *   byte[] ciphertext = ...;
- *   byte[] contextInfo = ...;
- *   byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
+ * KeysetHandle keysetHandle = ...;
+ * HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandle);
+ * byte[] ciphertext = ...;
+ * byte[] contextInfo = ...;
+ * byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
  * }</pre>
  *
  * <p>The returned primitive works with a keyset (rather than a single key). To decrypt, the
- * primitive uses the prefix of the ciphertext to efficiently select the right key in the set.
- * If the keys associated with the prefix do not work, the primitive tries all keys with
- * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
+ * primitive uses the prefix of the ciphertext to efficiently select the right key in the set. If
+ * the keys associated with the prefix do not work, the primitive tries all keys with {@link
+ * com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public final class HybridDecryptFactory {
   private static final Logger logger = Logger.getLogger(HybridDecryptFactory.class.getName());
@@ -52,7 +53,7 @@ public final class HybridDecryptFactory {
    */
   public static HybridDecrypt getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, /* keyManager= */null);
+    return getPrimitive(keysetHandle, /* keyManager= */ null);
   }
   /**
    * @return a HybridDecrypt primitive from a {@code keysetHandle} and a custom {@code keyManager}.
@@ -61,20 +62,16 @@ public final class HybridDecryptFactory {
   public static HybridDecrypt getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<HybridDecrypt> keyManager)
       throws GeneralSecurityException {
-    final PrimitiveSet<HybridDecrypt> primitives =
-        Registry.getPrimitives(keysetHandle, keyManager);
+    final PrimitiveSet<HybridDecrypt> primitives = Registry.getPrimitives(keysetHandle, keyManager);
     return new HybridDecrypt() {
       @Override
       public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
           throws GeneralSecurityException {
         if (ciphertext.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
           byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-          byte[] ciphertextNoPrefix = Arrays.copyOfRange(
-              ciphertext,
-              CryptoFormat.NON_RAW_PREFIX_SIZE,
-              ciphertext.length);
-          List<PrimitiveSet.Entry<HybridDecrypt>> entries =
-              primitives.getPrimitive(prefix);
+          byte[] ciphertextNoPrefix =
+              Arrays.copyOfRange(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
+          List<PrimitiveSet.Entry<HybridDecrypt>> entries = primitives.getPrimitive(prefix);
           for (PrimitiveSet.Entry<HybridDecrypt> entry : entries) {
             try {
               return entry.getPrimitive().decrypt(ciphertextNoPrefix, contextInfo);
@@ -85,8 +82,7 @@ public final class HybridDecryptFactory {
           }
         }
         // Let's try all RAW keys.
-        List<PrimitiveSet.Entry<HybridDecrypt>> entries =
-            primitives.getRawPrimitives();
+        List<PrimitiveSet.Entry<HybridDecrypt>> entries = primitives.getRawPrimitives();
         for (PrimitiveSet.Entry<HybridDecrypt> entry : entries) {
           try {
             return entry.getPrimitive().decrypt(ciphertext, contextInfo);

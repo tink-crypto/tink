@@ -24,9 +24,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * A {@link KeysetWriter} that can write to some source cleartext or encrypted keysets in
- * <a href="https://developers.google.com/protocol-buffers/docs/encoding">
- * proto binary wire format</a>.
+ * A {@link KeysetWriter} that can write to some source cleartext or encrypted keysets in <a
+ * href="https://developers.google.com/protocol-buffers/docs/encoding">proto binary wire format</a>.
  */
 public final class BinaryKeysetWriter implements KeysetWriter {
   private final OutputStream outputStream;

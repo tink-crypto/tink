@@ -30,16 +30,14 @@ import java.security.KeyStore;
 import javax.crypto.KeyGenerator;
 
 /**
- * An implementation of {@link KmsClient} for
- * <a href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
+ * An implementation of {@link KmsClient} for <a
+ * href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
  *
  * <p>This class requires Android M or newer.
  */
 @TargetApi(VERSION_CODES.M)
 public final class AndroidKeystoreKmsClient implements KmsClient {
-  /**
-   * The prefix of all keys stored in Android Keystore.
-   */
+  /** The prefix of all keys stored in Android Keystore. */
   public static final String PREFIX = "android-keystore://";
 
   private String keyUri;
@@ -63,9 +61,9 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   }
 
   /**
-   * @return true either if {@link AndroidKeystoreKmsClient#keyUri} is not null and equal to
-   * {@code uri}, or {@link AndroidKeystoreKmsClient#keyUri} is null and {@code uri} starts with
-   * {@link AndroidKeystoreKmsClient#PREFIX}.
+   * @return true either if {@link AndroidKeystoreKmsClient#keyUri} is not null and equal to {@code
+   *     uri}, or {@link AndroidKeystoreKmsClient#keyUri} is null and {@code uri} starts with {@link
+   *     AndroidKeystoreKmsClient#PREFIX}.
    */
   @Override
   public boolean doesSupport(String uri) {
@@ -102,16 +100,13 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   @Override
   public Aead getAead(String keyUri) throws GeneralSecurityException {
     try {
-      return new AndroidKeystoreAesGcm(
-          Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri));
+      return new AndroidKeystoreAesGcm(Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri));
     } catch (IOException e) {
       throw new GeneralSecurityException(e);
     }
   }
 
-  /**
-   * Generates a new key in Android Keystore, if it doesn't exist. Otherwise do nothing.
-   */
+  /** Generates a new key in Android Keystore, if it doesn't exist. Otherwise do nothing. */
   public static void generateNewIfNotFound(String keyUri, KeyGenParameterSpec spec)
       throws GeneralSecurityException {
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
@@ -123,29 +118,27 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   }
 
   /**
-   * Generates a new Android Keystore KMS key. At the moment it can generate only AES-GCM
-   * keys.
+   * Generates a new Android Keystore KMS key. At the moment it can generate only AES-GCM keys.
    *
-   * <p>By passing an optional {@link android.security.keystore.KeyGenParameterSpec} argument
-   * you can specify that the master key is only authorized to be used if the user has been
-   * authenticated. The user is authenticated using a subset of their secure lock screen
-   * credentials (pattern/PIN/password, fingerprint).
-   * See also: https://developer.android.com/training/articles/keystore.html#UserAuthentication.
+   * <p>By passing an optional {@link android.security.keystore.KeyGenParameterSpec} argument you
+   * can specify that the master key is only authorized to be used if the user has been
+   * authenticated. The user is authenticated using a subset of their secure lock screen credentials
+   * (pattern/PIN/password, fingerprint). See also:
+   * https://developer.android.com/training/articles/keystore.html#UserAuthentication.
    */
   public static void generateNew(String keyUri, KeyGenParameterSpec spec)
       throws GeneralSecurityException {
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
-    KeyGenerator keyGenerator = KeyGenerator.getInstance(
-        KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+    KeyGenerator keyGenerator =
+        KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
     KeyGenParameterSpec.Builder specBuilder =
-        new KeyGenParameterSpec.Builder(keyId,
-            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE);
+        new KeyGenParameterSpec.Builder(
+                keyId, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE);
     if (spec != null) {
       specBuilder
-          .setUserAuthenticationRequired(
-              spec.isUserAuthenticationRequired())
+          .setUserAuthenticationRequired(spec.isUserAuthenticationRequired())
           .setUserAuthenticationValidityDurationSeconds(
               spec.getUserAuthenticationValidityDurationSeconds());
     }

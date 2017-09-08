@@ -18,15 +18,11 @@ package com.google.crypto.tink.subtle;
 
 import java.security.SecureRandom;
 
-/**
- * A simple wrapper of SecureRandom.
- */
+/** A simple wrapper of SecureRandom. */
 public final class Random {
   private static final SecureRandom secureRandom = new SecureRandom();
 
-  /**
-   * @return a random byte array of size {@code size}.
-   */
+  /** @return a random byte array of size {@code size}. */
   public static byte[] randBytes(int size) {
     byte[] rand = new byte[size];
     secureRandom.nextBytes(rand);

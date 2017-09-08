@@ -28,14 +28,12 @@ import javax.crypto.Mac;
 
 /**
  * Interface and its implentations to make JCE Engines have a common parent. There's no expected
- * reason to directly import this for users of Tink, but it might be needed to implement it
- * (say, if someone wants a new type of engine).
+ * reason to directly import this for users of Tink, but it might be needed to implement it (say, if
+ * someone wants a new type of engine).
  */
 public interface EngineWrapper<T> {
 
-  /**
-   * Cipher wrapper.
-   */
+  /** Cipher wrapper. */
   class TCipher implements EngineWrapper<Cipher> {
     @SuppressWarnings("InsecureCryptoUsage")
     @Override
@@ -48,9 +46,7 @@ public interface EngineWrapper<T> {
     }
   }
 
-  /**
-   * Mac wrapper.
-   */
+  /** Mac wrapper. */
   class TMac implements EngineWrapper<Mac> {
     @SuppressWarnings("InsecureCryptoUsage")
     @Override
@@ -63,9 +59,7 @@ public interface EngineWrapper<T> {
     }
   }
 
-  /**
-   * KeyPairGenerator wrapper.
-   */
+  /** KeyPairGenerator wrapper. */
   class TKeyPairGenerator implements EngineWrapper<KeyPairGenerator> {
     @SuppressWarnings("InsecureCryptoUsage")
     @Override
@@ -79,9 +73,7 @@ public interface EngineWrapper<T> {
     }
   }
 
-  /**
-   * MessageDigest wrapper.
-   */
+  /** MessageDigest wrapper. */
   class TMessageDigest implements EngineWrapper<MessageDigest> {
     @SuppressWarnings("InsecureCryptoUsage")
     @Override
@@ -95,9 +87,7 @@ public interface EngineWrapper<T> {
     }
   }
 
-  /**
-   * Signature wrapper.
-   */
+  /** Signature wrapper. */
   class TSignature implements EngineWrapper<Signature> {
     @SuppressWarnings("InsecureCryptoUsage")
     @Override
@@ -111,9 +101,7 @@ public interface EngineWrapper<T> {
     }
   }
 
-  /**
-   * KeyFactory wrapper.
-   */
+  /** KeyFactory wrapper. */
   class TKeyFactory implements EngineWrapper<KeyFactory> {
     @SuppressWarnings("InsecureCryptoUsage")
     @Override
@@ -127,9 +115,7 @@ public interface EngineWrapper<T> {
     }
   }
 
-  /**
-   * KeyAgreement wrapper.
-   */
+  /** KeyAgreement wrapper. */
   class TKeyAgreement implements EngineWrapper<KeyAgreement> {
     @SuppressWarnings("InsecureCryptoUsage")
     @Override
@@ -143,9 +129,6 @@ public interface EngineWrapper<T> {
     }
   }
 
-  /**
-   * Should call T.getInstance(...).
-   */
+  /** Should call T.getInstance(...). */
   public T getInstance(String algorithm, Provider provider) throws GeneralSecurityException;
-
 }

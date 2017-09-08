@@ -33,7 +33,7 @@ final class SigUtil {
    * @return the JCE's Ecdsa algorithm name for the hash.
    */
   public static String toEcdsaAlgo(HashType hash) throws NoSuchAlgorithmException {
-    switch(hash) {
+    switch (hash) {
       case SHA256:
         return "SHA256WithECDSA";
       case SHA512:
@@ -53,14 +53,14 @@ final class SigUtil {
     EcdsaSignatureEncoding encoding = params.getEncoding();
     HashType hash = params.getHashType();
     EllipticCurveType curve = params.getCurve();
-    switch(encoding) {
+    switch (encoding) {
       case DER:
         break;
-      // TODO(quannguyen): support other signature encodings.
+        // TODO(quannguyen): support other signature encodings.
       default:
         throw new GeneralSecurityException("unsupported signature encoding");
     }
-    switch(curve) {
+    switch (curve) {
       case NIST_P256:
         // Using SHA512 for curve P256 is fine. However, only the 256 leftmost bits of the hash is
         // used in signature computation. Therefore, we don't allow it here to prevent security's
@@ -77,13 +77,11 @@ final class SigUtil {
         }
         break;
       default:
-          throw new GeneralSecurityException(INVALID_PARAMS);
+        throw new GeneralSecurityException(INVALID_PARAMS);
     }
   }
 
-  /**
-   * Converts protobuf enum {@code EllipticCurveType} to raw Java enum {code CurveType}.
-   */
+  /** Converts protobuf enum {@code EllipticCurveType} to raw Java enum {code CurveType}. */
   public static EllipticCurves.CurveType toCurveType(EllipticCurveType type)
       throws GeneralSecurityException {
     switch (type) {

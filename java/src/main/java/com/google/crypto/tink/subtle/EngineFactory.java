@@ -33,13 +33,12 @@ import javax.crypto.Mac;
 /**
  * A factory that returns JCE engines, using pre-specified j.security.Providers.
  *
- * This class contains a lot of static factories and static functions returning factories: these
+ * <p>This class contains a lot of static factories and static functions returning factories: these
  * allow customization and hide the typing complexity in this class. To use this class, import it,
  * and replace your `Cipher.getInstance(...` with `EngineFactory.CIPHER.getInstance(...`.
  */
 public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_ENGINE> {
-  private static final Logger logger =
-      Logger.getLogger(EngineFactory.class.getName());
+  private static final Logger logger = Logger.getLogger(EngineFactory.class.getName());
   private static final List<Provider> defaultPolicy;
   private static final boolean DEFAULT_LET_FALLBACK = true;
 
@@ -48,9 +47,10 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_EN
   static {
     if (SubtleUtil.isAndroid()) {
       // TODO(thaidn): test this when Android building and testing are supported.
-      defaultPolicy = toProviderList(
-          "GmsCore_OpenSSL" /* Conscrypt in GmsCore, updatable thus preferrable */,
-          "AndroidOpenSSL"  /* Conscrypt in AOSP, not updatable but still better than BC */);
+      defaultPolicy =
+          toProviderList(
+              "GmsCore_OpenSSL" /* Conscrypt in GmsCore, updatable thus preferrable */,
+              "AndroidOpenSSL" /* Conscrypt in AOSP, not updatable but still better than BC */);
     } else {
       defaultPolicy = new ArrayList<Provider>();
     }
@@ -58,77 +58,68 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_EN
 
   public static final EngineFactory<EngineWrapper.TCipher, Cipher> CIPHER =
       new EngineFactory<>(new EngineWrapper.TCipher());
-  public static final EngineFactory<EngineWrapper.TCipher, Cipher>
-      getCustomCipherProvider(boolean letFallbackToDefault, String... providerNames) {
+
+  public static final EngineFactory<EngineWrapper.TCipher, Cipher> getCustomCipherProvider(
+      boolean letFallbackToDefault, String... providerNames) {
     return new EngineFactory<EngineWrapper.TCipher, Cipher>(
-        new EngineWrapper.TCipher(),
-        toProviderList(providerNames),
-        letFallbackToDefault);
+        new EngineWrapper.TCipher(), toProviderList(providerNames), letFallbackToDefault);
   }
 
   public static final EngineFactory<EngineWrapper.TMac, Mac> MAC =
       new EngineFactory<>(new EngineWrapper.TMac());
-  public static final EngineFactory<EngineWrapper.TMac, Mac>
-      getCustomMacProvider(boolean letFallbackToDefault, String... providerNames) {
+
+  public static final EngineFactory<EngineWrapper.TMac, Mac> getCustomMacProvider(
+      boolean letFallbackToDefault, String... providerNames) {
     return new EngineFactory<EngineWrapper.TMac, Mac>(
-        new EngineWrapper.TMac(),
-        toProviderList(providerNames),
-        letFallbackToDefault);
+        new EngineWrapper.TMac(), toProviderList(providerNames), letFallbackToDefault);
   }
 
   public static final EngineFactory<EngineWrapper.TSignature, Signature> SIGNATURE =
       new EngineFactory<>(new EngineWrapper.TSignature());
-  public static final EngineFactory<EngineWrapper.TSignature, Signature>
-      getCustomSignatureProvider(boolean letFallbackToDefault, String... providerNames) {
+
+  public static final EngineFactory<EngineWrapper.TSignature, Signature> getCustomSignatureProvider(
+      boolean letFallbackToDefault, String... providerNames) {
     return new EngineFactory<EngineWrapper.TSignature, Signature>(
-        new EngineWrapper.TSignature(),
-        toProviderList(providerNames),
-        letFallbackToDefault);
+        new EngineWrapper.TSignature(), toProviderList(providerNames), letFallbackToDefault);
   }
 
   public static final EngineFactory<EngineWrapper.TMessageDigest, MessageDigest> MESSAGE_DIGEST =
       new EngineFactory<>(new EngineWrapper.TMessageDigest());
+
   public static final EngineFactory<EngineWrapper.TMessageDigest, MessageDigest>
       getCustomMessageDigestProvider(boolean letFallbackToDefault, String... providerNames) {
     return new EngineFactory<EngineWrapper.TMessageDigest, MessageDigest>(
-        new EngineWrapper.TMessageDigest(),
-        toProviderList(providerNames),
-        letFallbackToDefault);
+        new EngineWrapper.TMessageDigest(), toProviderList(providerNames), letFallbackToDefault);
   }
 
-  public static final EngineFactory<EngineWrapper.TKeyAgreement, KeyAgreement>
-      KEY_AGREEMENT = new EngineFactory<>(new EngineWrapper.TKeyAgreement());
+  public static final EngineFactory<EngineWrapper.TKeyAgreement, KeyAgreement> KEY_AGREEMENT =
+      new EngineFactory<>(new EngineWrapper.TKeyAgreement());
+
   public static final EngineFactory<EngineWrapper.TKeyAgreement, KeyAgreement>
       getCustomKeyAgreementProvider(boolean letFallbackToDefault, String... providerNames) {
     return new EngineFactory<EngineWrapper.TKeyAgreement, KeyAgreement>(
-        new EngineWrapper.TKeyAgreement(),
-        toProviderList(providerNames),
-        letFallbackToDefault);
+        new EngineWrapper.TKeyAgreement(), toProviderList(providerNames), letFallbackToDefault);
   }
 
   public static final EngineFactory<EngineWrapper.TKeyPairGenerator, KeyPairGenerator>
       KEY_PAIR_GENERATOR = new EngineFactory<>(new EngineWrapper.TKeyPairGenerator());
+
   public static final EngineFactory<EngineWrapper.TKeyPairGenerator, KeyPairGenerator>
       getCustomKeyPairGeneratorProvider(boolean letFallbackToDefault, String... providerNames) {
     return new EngineFactory<EngineWrapper.TKeyPairGenerator, KeyPairGenerator>(
-        new EngineWrapper.TKeyPairGenerator(),
-        toProviderList(providerNames),
-        letFallbackToDefault);
+        new EngineWrapper.TKeyPairGenerator(), toProviderList(providerNames), letFallbackToDefault);
   }
 
-  public static final EngineFactory<EngineWrapper.TKeyFactory, KeyFactory>
-      KEY_FACTORY = new EngineFactory<>(new EngineWrapper.TKeyFactory());
+  public static final EngineFactory<EngineWrapper.TKeyFactory, KeyFactory> KEY_FACTORY =
+      new EngineFactory<>(new EngineWrapper.TKeyFactory());
+
   public static final EngineFactory<EngineWrapper.TKeyFactory, KeyFactory>
       getCustomKeyFactoryProvider(boolean letFallbackToDefault, String... providerNames) {
     return new EngineFactory<EngineWrapper.TKeyFactory, KeyFactory>(
-        new EngineWrapper.TKeyFactory(),
-        toProviderList(providerNames),
-        letFallbackToDefault);
+        new EngineWrapper.TKeyFactory(), toProviderList(providerNames), letFallbackToDefault);
   }
 
-  /**
-   * Helper function to get a list of Providers from names.
-   */
+  /** Helper function to get a list of Providers from names. */
   public static List<Provider> toProviderList(String... providerNames) {
     List<Provider> providers = new ArrayList<Provider>();
     for (String s : providerNames) {
@@ -154,8 +145,7 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_EN
     this.letFallback = DEFAULT_LET_FALLBACK;
   }
 
-  public EngineFactory(
-      T_WRAPPER instanceBuilder, List<Provider> policy, boolean letFallback) {
+  public EngineFactory(T_WRAPPER instanceBuilder, List<Provider> policy, boolean letFallback) {
     this.instanceBuilder = instanceBuilder;
     this.policy = policy;
     this.letFallback = letFallback;
@@ -179,7 +169,8 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_EN
 
   private boolean tryProvider(String algorithm, Provider provider) {
     try {
-      this.instanceBuilder.getInstance(algorithm, provider);;
+      this.instanceBuilder.getInstance(algorithm, provider);
+      ;
       return true;
     } catch (Exception e) { // Don't care which one specifically.
       return false;

@@ -21,15 +21,13 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Mac;
 import java.security.GeneralSecurityException;
 
-/**
- * A catalogue of {@link Mac} key managers.
- */
+/** A catalogue of {@link Mac} key managers. */
 class MacCatalogue implements Catalogue {
   public MacCatalogue() {}
 
   /**
-   * @return a KeyManager for the given {@code typeUrl}, {@code primitiveName} and version
-   * at least {@code minVersion} (if it exists in the catalogue).
+   * @return a KeyManager for the given {@code typeUrl}, {@code primitiveName} and version at least
+   *     {@code minVersion} (if it exists in the catalogue).
    */
   @Override
   @SuppressWarnings("rawtypes")
@@ -45,8 +43,9 @@ class MacCatalogue implements Catalogue {
             String.format("No support for primitive '%s'.", primitiveName));
     }
     if (keyManager.getVersion() < minVersion) {
-      throw new GeneralSecurityException(String.format(
-          "No key manager for key type '%s' with version at least %d.", typeUrl, minVersion));
+      throw new GeneralSecurityException(
+          String.format(
+              "No key manager for key type '%s' with version at least %d.", typeUrl, minVersion));
     }
     return keyManager;
   }
@@ -56,8 +55,8 @@ class MacCatalogue implements Catalogue {
       case HmacKeyManager.TYPE_URL:
         return new HmacKeyManager();
       default:
-        throw new GeneralSecurityException(String.format(
-            "No support for primitive 'Mac' with key type '%s'.", typeUrl));
+        throw new GeneralSecurityException(
+            String.format("No support for primitive 'Mac' with key type '%s'.", typeUrl));
     }
   }
 }

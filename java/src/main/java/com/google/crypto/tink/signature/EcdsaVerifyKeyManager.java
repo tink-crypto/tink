@@ -30,21 +30,15 @@ import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
 /**
- * This key manager produces new instances of {@code EcdsaVerifyJce}.
- * It doesn't support key generation.
+ * This key manager produces new instances of {@code EcdsaVerifyJce}. It doesn't support key
+ * generation.
  */
 class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
-  /**
-   * Current version of this key manager.
-   * Keys with greater version are not supported.
-   */
+  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
+  /** Current version of this key manager. Keys with greater version are not supported. */
   private static final int VERSION = 0;
 
-  /**
-   * @param serializedKey  serialized {@code EcdsaPublicKey} proto
-   */
+  /** @param serializedKey serialized {@code EcdsaPublicKey} proto */
   @Override
   public PublicKeyVerify getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
@@ -55,9 +49,7 @@ class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
     }
   }
 
-  /**
-   * @param key  {@code EcdsaPublicKey} proto
-   */
+  /** @param key {@code EcdsaPublicKey} proto */
   @Override
   public PublicKeyVerify getPrimitive(MessageLite key) throws GeneralSecurityException {
     if (!(key instanceof EcdsaPublicKey)) {
@@ -65,15 +57,16 @@ class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
     }
     EcdsaPublicKey keyProto = (EcdsaPublicKey) key;
     validateKey(keyProto);
-    ECPublicKey publicKey = EllipticCurves.getEcPublicKey(
-        SigUtil.toCurveType(keyProto.getParams().getCurve()),
-        keyProto.getX().toByteArray(), keyProto.getY().toByteArray());
-    return new EcdsaVerifyJce(publicKey,
-        SigUtil.toEcdsaAlgo(keyProto.getParams().getHashType()));
+    ECPublicKey publicKey =
+        EllipticCurves.getEcPublicKey(
+            SigUtil.toCurveType(keyProto.getParams().getCurve()),
+            keyProto.getX().toByteArray(),
+            keyProto.getY().toByteArray());
+    return new EcdsaVerifyJce(publicKey, SigUtil.toEcdsaAlgo(keyProto.getParams().getHashType()));
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code EcdsaKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code EcdsaKeyFormat} proto
    * @return new {@code EcdsaPublicKey} proto
    */
   @Override
@@ -81,9 +74,8 @@ class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
     throw new GeneralSecurityException("Not implemented");
   }
 
-
   /**
-   * @param keyFormat  {@code EcdsaKeyFormat} proto
+   * @param keyFormat {@code EcdsaKeyFormat} proto
    * @return new {@code EcdsaPublicKey} proto
    */
   @Override
@@ -92,7 +84,7 @@ class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code EcdsaKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code EcdsaKeyFormat} proto
    * @return {@code KeyData} with a new {@code EcdsaPublicKey} proto
    */
   @Override

@@ -25,12 +25,13 @@ import java.security.GeneralSecurityException;
 /**
  * An interface for streaming authenticated encryption with additional data.
  *
- * Streaming encryption is typically used for encrypting large plaintexts such as large files.
+ * <p>Streaming encryption is typically used for encrypting large plaintexts such as large files.
  * Tink may eventually contain multiple interfaces for streaming encryption depending on the
- * supported properties. This interface supports a streaming interface for symmetric encryption
- * with authentication. The underlying encryption modes are selected so that partial plaintext
- * can be obtained fast by decrypting and authenticating just part of the ciphertext.
+ * supported properties. This interface supports a streaming interface for symmetric encryption with
+ * authentication. The underlying encryption modes are selected so that partial plaintext can be
+ * obtained fast by decrypting and authenticating just part of the ciphertext.
  *
+ * <pre>
  * Security:
  * =========
  * Instances of StreamingAead must follow the OAE2 definition as proposed in the paper
@@ -100,65 +101,61 @@ import java.security.GeneralSecurityException;
  *     // No ciphertext is available at the moment.
  *   }
  * }
+ * </pre>
  */
-
 public interface StreamingAead {
 
   /**
    * Returns a WritableByteChannel for plaintext.
+   *
    * @param ciphertextDestination the channel to which the ciphertext is written.
-   * @param associatedData data associated with the plaintext. This data is authenticated
-   *        but not encrypted. It must be passed into the decryption.
+   * @param associatedData data associated with the plaintext. This data is authenticated but not
+   *     encrypted. It must be passed into the decryption.
    */
   WritableByteChannel newEncryptingChannel(
-      WritableByteChannel ciphertextDestination,
-      byte[] associatedData)
+      WritableByteChannel ciphertextDestination, byte[] associatedData)
       throws GeneralSecurityException, IOException;
 
   /**
    * Returns a SeekableByteChannel that allows to access the plaintext.
+   *
    * @param ciphertextSource the ciphertext
    * @param associatedData the data associated with the ciphertext.
-   * @return a SeekableByteChannel that allows random read access to the plaintext.
-   *    The following methods of SeekableByteChannel are implemented:
-   *    <ul>
-   *    <li> <code>long position()</code> Returns the channel's position in the plaintext.
-   *    <li> <code>SeekableByteChannel  position(long newPosition)</code>
-   *         Sets the channel's position. Setting the position to a value greater than
-   *         the plaintext size is legal. A later attempt to read byte will immediately
-   *         return an end-of-file indication.
-   *    <li> <code>int read(ByteBuffer dst)</code>
-   *         Bytes are read starting at the channel's position, and then the position is updated
-   *         with the number of bytes actually read.
-   *         All bytes returned have been authenticated. If the end of the stream has been
-   *         reached -1 is returned. A result of -1 is authenticated (e.g. by checking the MAC of
-   *         the last ciphertext chunk.) Throws java.io.IOException if a MAC verification failed.
-   *         read attempt to fill dst, but may return less bytes than requested if reads to
-   *         ciphertextSource do not return the requested number of bytes or if the plaintext
-   *         ended.
-   *         TODO(bleichen): Should we extend the interface with
-   *           read(ByteBuffer dst, long position) to avoid race conditions?
-   *    <li> <code>long size()</code> Returns the size of the plaintext.
-   *         (TODO: Decide whether the result should be authenticated)
-   *    <li> <code>SeekableByteChannel truncate(long size)</code>
-   *         throws NonWritableChannelException because the channel is read-only.
-   *    <li> <code>int write(ByteBuffer src)</code> throws NonWritableChannelException because
-   *         the channel is read-only.
-   *    <li> <code>close()</code> closes the channel
-   *    <li> <code>isOpen()</code>
-   *    </ul>
+   * @return a SeekableByteChannel that allows random read access to the plaintext. The following
+   *     methods of SeekableByteChannel are implemented:
+   *     <ul>
+   *       <li><code>long position()</code> Returns the channel's position in the plaintext.
+   *       <li><code>SeekableByteChannel  position(long newPosition)</code> Sets the channel's
+   *           position. Setting the position to a value greater than the plaintext size is legal. A
+   *           later attempt to read byte will immediately return an end-of-file indication.
+   *       <li><code>int read(ByteBuffer dst)</code> Bytes are read starting at the channel's
+   *           position, and then the position is updated with the number of bytes actually read.
+   *           All bytes returned have been authenticated. If the end of the stream has been reached
+   *           -1 is returned. A result of -1 is authenticated (e.g. by checking the MAC of the last
+   *           ciphertext chunk.) Throws java.io.IOException if a MAC verification failed. read
+   *           attempt to fill dst, but may return less bytes than requested if reads to
+   *           ciphertextSource do not return the requested number of bytes or if the plaintext
+   *           ended. TODO(bleichen): Should we extend the interface with read(ByteBuffer dst, long
+   *           position) to avoid race conditions?
+   *       <li><code>long size()</code> Returns the size of the plaintext. (TODO: Decide whether the
+   *           result should be authenticated)
+   *       <li><code>SeekableByteChannel truncate(long size)</code> throws
+   *           NonWritableChannelException because the channel is read-only.
+   *       <li><code>int write(ByteBuffer src)</code> throws NonWritableChannelException because the
+   *           channel is read-only.
+   *       <li><code>close()</code> closes the channel
+   *       <li><code>isOpen()</code>
+   *     </ul>
+   *
    * @throws GeneralSecurityException if the header of the ciphertext is corrupt or if the
-   *    associatedData is not correct.
+   *     associatedData is not correct.
    * @throws IOException if an IOException occurred while reading from ciphertextDestination.
    */
   SeekableByteChannel newSeekableDecryptingChannel(
-      SeekableByteChannel ciphertextSource,
-      byte[] associatedData)
+      SeekableByteChannel ciphertextSource, byte[] associatedData)
       throws GeneralSecurityException, IOException;
 
   ReadableByteChannel newDecryptingChannel(
-      ReadableByteChannel ciphertextChannel,
-      byte[] associatedData)
+      ReadableByteChannel ciphertextChannel, byte[] associatedData)
       throws GeneralSecurityException, IOException;
-
 }

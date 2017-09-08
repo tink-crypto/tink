@@ -21,8 +21,7 @@ import com.google.crypto.tink.proto.Keyset;
 import java.io.IOException;
 
 /**
- * A KeysetReader knows how to read a {@link Keyset} or an {@link EncryptedKeyset} from some
- * source.
+ * A KeysetReader knows how to read a {@link Keyset} or an {@link EncryptedKeyset} from some source.
  */
 public interface KeysetReader {
   /**

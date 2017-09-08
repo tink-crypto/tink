@@ -34,14 +34,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A {@link KeysetWriter} that can write to some source cleartext or encrypted keysets in proto
- * JSON format.
+ * A {@link KeysetWriter} that can write to some source cleartext or encrypted keysets in proto JSON
+ * format.
  */
 public final class JsonKeysetWriter implements KeysetWriter {
   private final OutputStream outputStream;
 
   private JsonKeysetWriter(OutputStream stream) {
-      outputStream = stream;
+    outputStream = stream;
   }
 
   public static KeysetWriter withOutputStream(OutputStream stream) {
@@ -98,9 +98,8 @@ public final class JsonKeysetWriter implements KeysetWriter {
 
   private JSONObject toJson(EncryptedKeyset keyset) throws JSONException {
     return new JSONObject()
-      .put("encryptedKeyset", Base64.encode(
-          keyset.getEncryptedKeyset().toByteArray()))
-      .put("keysetInfo", toJson(keyset.getKeysetInfo()));
+        .put("encryptedKeyset", Base64.encode(keyset.getEncryptedKeyset().toByteArray()))
+        .put("keysetInfo", toJson(keyset.getKeysetInfo()));
   }
 
   private JSONObject toJson(KeysetInfo keysetInfo) throws JSONException {

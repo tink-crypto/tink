@@ -18,24 +18,18 @@ package com.google.crypto.tink;
 
 import java.security.GeneralSecurityException;
 
-/**
- * A KmsClient knows how to produce primitives backed by keys stored in remote KMS services.
- */
+/** A KmsClient knows how to produce primitives backed by keys stored in remote KMS services. */
 public interface KmsClient {
-  /**
-   * @return true if this client does support {@code keyUri}
-   */
+  /** @return true if this client does support {@code keyUri} */
   public boolean doesSupport(String keyUri);
 
   /**
-   * Loads the credentials in {@code credentialPath}. If {@code credentialPath}
-   * is null, loads the default credentials.
+   * Loads the credentials in {@code credentialPath}. If {@code credentialPath} is null, loads the
+   * default credentials.
    */
   public KmsClient withCredentials(String credentialPath) throws GeneralSecurityException;
 
-  /**
-   * Loads the default credentials.
-   */
+  /** Loads the default credentials. */
   public KmsClient withDefaultCredentials() throws GeneralSecurityException;
 
   /**

@@ -33,17 +33,17 @@ import java.util.logging.Logger;
  * Static methods for obtaining {@link PublicKeyVerify} instances.
  *
  * <p>Usage:
+ *
  * <pre>{@code
- *   KeysetHandle keysetHandle = ...;
- *   PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle);
- *   verifier.verify(signature, data);
+ * KeysetHandle keysetHandle = ...;
+ * PublicKeyVerify verifier = PublicKeyVerifyFactory.getPrimitive(keysetHandle);
+ * verifier.verify(signature, data);
  * }</pre>
  *
  * <p>The returned primitive works with a keyset (rather than a single key). To verify a signature,
- * the primitive uses the prefix of the signature to efficiently select the right key in the set.
- * If there is no key associated with the prefix or if the keys associated with the prefix do not
- * work, the primitive tries all keys with
- * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
+ * the primitive uses the prefix of the signature to efficiently select the right key in the set. If
+ * there is no key associated with the prefix or if the keys associated with the prefix do not work,
+ * the primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public final class PublicKeyVerifyFactory {
   private static final Logger logger = Logger.getLogger(PublicKeyVerifyFactory.class.getName());
@@ -54,12 +54,12 @@ public final class PublicKeyVerifyFactory {
    */
   public static PublicKeyVerify getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-        return getPrimitive(keysetHandle, /* keyManager= */null);
-      }
+    return getPrimitive(keysetHandle, /* keyManager= */ null);
+  }
 
   /**
-   * @return a PublicKeyVerify primitive from a {@code keysetHandle} and a custom
-   * {@code keyManager}.
+   * @return a PublicKeyVerify primitive from a {@code keysetHandle} and a custom {@code
+   *     keyManager}.
    * @throws GeneralSecurityException
    */
   public static PublicKeyVerify getPrimitive(
@@ -70,17 +70,16 @@ public final class PublicKeyVerifyFactory {
     return new PublicKeyVerify() {
       @Override
       public void verify(final byte[] signature, final byte[] data)
-      throws GeneralSecurityException {
+          throws GeneralSecurityException {
         if (signature.length <= CryptoFormat.NON_RAW_PREFIX_SIZE) {
           // This also rejects raw signatures with size of 4 bytes or fewer. We're not aware of any
           // schemes that output signatures that small.
           throw new GeneralSecurityException("signature too short");
         }
         byte[] prefix = Arrays.copyOfRange(signature, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-        byte[] sigNoPrefix = Arrays.copyOfRange(signature, CryptoFormat.NON_RAW_PREFIX_SIZE,
-            signature.length);
-        List<PrimitiveSet.Entry<PublicKeyVerify>> entries =
-            primitives.getPrimitive(prefix);
+        byte[] sigNoPrefix =
+            Arrays.copyOfRange(signature, CryptoFormat.NON_RAW_PREFIX_SIZE, signature.length);
+        List<PrimitiveSet.Entry<PublicKeyVerify>> entries = primitives.getPrimitive(prefix);
         for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
           try {
             if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {

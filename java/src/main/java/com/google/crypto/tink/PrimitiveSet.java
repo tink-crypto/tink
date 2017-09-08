@@ -30,27 +30,27 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * A container class for a set of primitives -- implementations of cryptographic
- * primitives offered by Tink.
+ * A container class for a set of primitives -- implementations of cryptographic primitives offered
+ * by Tink.
  *
- * <p>It provides also additional properties for the primitives it holds. In particular,
- * one of the primitives in the set can be distinguished as "the primary" one.
+ * <p>It provides also additional properties for the primitives it holds. In particular, one of the
+ * primitives in the set can be distinguished as "the primary" one.
  *
  * <p>PrimitiveSet is an auxiliary class used for supporting key rotation: primitives in a set
  * correspond to keys in a keyset. Users will usually work with primitive instances, which
- * essentially wrap primitive sets. For example an instance of an Aead-primitive for a given
- * keyset holds a set of Aead-primitives corresponding to the keys in the keyset, and uses the
- * set members to do the actual crypto operations: to encrypt data the primary Aead-primitive
- * from the set is used, and upon decryption the ciphertext's prefix determines the id of the
- * primitive from the set.
+ * essentially wrap primitive sets. For example an instance of an Aead-primitive for a given keyset
+ * holds a set of Aead-primitives corresponding to the keys in the keyset, and uses the set members
+ * to do the actual crypto operations: to encrypt data the primary Aead-primitive from the set is
+ * used, and upon decryption the ciphertext's prefix determines the id of the primitive from the
+ * set.
  *
  * <p>PrimitiveSet is a public class to allow its use in implementations of custom primitives.
  */
 public final class PrimitiveSet<P> {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
   /**
-   * A single entry in the set. In addition to the actual primitive it holds also
-   * some extra information about the primitive.
+   * A single entry in the set. In addition to the actual primitive it holds also some extra
+   * information about the primitive.
    */
   @Immutable(containerOf = {"P"})
   public static final class Entry<P> {
@@ -65,22 +65,29 @@ public final class PrimitiveSet<P> {
     // The output prefix type of the key represented by the primitive.
     private final OutputPrefixType outputPrefixType;
 
-    public Entry(P primitive, final byte[] identifier, KeyStatusType status,
-      OutputPrefixType outputPrefixType) {
+    public Entry(
+        P primitive,
+        final byte[] identifier,
+        KeyStatusType status,
+        OutputPrefixType outputPrefixType) {
       this.primitive = primitive;
       this.identifier = Arrays.copyOf(identifier, identifier.length);
       this.status = status;
       this.outputPrefixType = outputPrefixType;
     }
+
     public P getPrimitive() {
       return this.primitive;
     }
+
     public KeyStatusType getStatus() {
       return status;
     }
+
     public OutputPrefixType getOutputPrefixType() {
       return outputPrefixType;
     }
+
     public final byte[] getIdentifier() {
       if (identifier == null) {
         return null;
@@ -90,37 +97,29 @@ public final class PrimitiveSet<P> {
     }
   }
 
-  /**
-   * @return the entry with the primary primitive.
-   */
+  /** @return the entry with the primary primitive. */
   public Entry<P> getPrimary() {
     return primary;
   }
 
-  /**
-   * @return all primitives using RAW prefix.
-   */
+  /** @return all primitives using RAW prefix. */
   public List<Entry<P>> getRawPrimitives() throws GeneralSecurityException {
     return getPrimitive(CryptoFormat.RAW_PREFIX);
   }
 
-  /**
-   * @return the entries with primitive identifed by {@code identifier}.
-   */
-  public List<Entry<P>> getPrimitive(final byte[] identifier)
-      throws GeneralSecurityException {
+  /** @return the entries with primitive identifed by {@code identifier}. */
+  public List<Entry<P>> getPrimitive(final byte[] identifier) throws GeneralSecurityException {
     List<Entry<P>> found = primitives.get(new String(identifier, UTF_8));
     return found != null ? found : Collections.<Entry<P>>emptyList();
   }
 
   /**
-   * The primitives are stored in a hash map of (ciphertext prefix, list of primivies sharing
-   * the prefix).
-   * This allows quickly retrieving the list of primitives sharing some particular prefix.
+   * The primitives are stored in a hash map of (ciphertext prefix, list of primivies sharing the
+   * prefix). This allows quickly retrieving the list of primitives sharing some particular prefix.
    * Because all RAW keys are using an empty prefix, this also quickly allows retrieving them.
    */
   private ConcurrentMap<java.lang.String, List<Entry<P>>> primitives =
-    new ConcurrentHashMap<java.lang.String, List<Entry<P>>>();
+      new ConcurrentHashMap<java.lang.String, List<Entry<P>>>();
 
   private Entry<P> primary;
 
@@ -128,29 +127,29 @@ public final class PrimitiveSet<P> {
     return new PrimitiveSet<P>();
   }
 
-  /**
-   * @return the entries with primitives identified by the ciphertext prefix of {@code key}.
-   */
-  protected List<Entry<P>> getPrimitive(Keyset.Key key)
-      throws GeneralSecurityException {
+  /** @return the entries with primitives identified by the ciphertext prefix of {@code key}. */
+  protected List<Entry<P>> getPrimitive(Keyset.Key key) throws GeneralSecurityException {
     return getPrimitive(CryptoFormat.getOutputPrefix(key));
   }
 
-  /**
-   * Sets given Entry {@code primary} as the primary one.
-   */
+  /** Sets given Entry {@code primary} as the primary one. */
   protected void setPrimary(final Entry<P> primary) {
     this.primary = primary;
   }
 
   /**
-    * Creates an entry in the primitive table.
-    * @return the added entry
-    */
+   * Creates an entry in the primitive table.
+   *
+   * @return the added entry
+   */
   protected Entry<P> addPrimitive(final P primitive, Keyset.Key key)
       throws GeneralSecurityException {
-    Entry<P> entry = new Entry<P>(primitive, CryptoFormat.getOutputPrefix(key), key.getStatus(),
-        key.getOutputPrefixType());
+    Entry<P> entry =
+        new Entry<P>(
+            primitive,
+            CryptoFormat.getOutputPrefix(key),
+            key.getStatus(),
+            key.getOutputPrefixType());
     List<Entry<P>> list = new ArrayList<Entry<P>>();
     list.add(entry);
     // Cannot use [] as keys in hash map, convert to string.

@@ -20,31 +20,24 @@ import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
 /**
- * StreamSegmentDecrypter is a helper class that decrypts individual segments of a stream.
- * Instances of this interfaces are passed to ...DecryptingChannel.
- * Each instance must be initialized with the header of the ciphertext.
+ * StreamSegmentDecrypter is a helper class that decrypts individual segments of a stream. Instances
+ * of this interfaces are passed to ...DecryptingChannel. Each instance must be initialized with the
+ * header of the ciphertext.
  */
 public interface StreamSegmentDecrypter {
-  void init(
-      ByteBuffer header,
-      byte[] aad)
-      throws GeneralSecurityException;
-  
+  void init(ByteBuffer header, byte[] aad) throws GeneralSecurityException;
+
   /**
    * Decrypts a ciphetext segment.
+   *
    * @param segmentNr the number of the segment
-   * @param isLastSegment true if this segment is the last segment of the ciphertext stream.
-   *        The last segment is encrypted (or authenticated) differently to detect truncated
-   *        ciphertext.
+   * @param isLastSegment true if this segment is the last segment of the ciphertext stream. The
+   *     last segment is encrypted (or authenticated) differently to detect truncated ciphertext.
    * @param plaintext the decrypted plaintext.
    * @throws GeneralSecurityException if ciphertext was not a valid ciphertext for the given
-   *         segment.
+   *     segment.
    */
   void decryptSegment(
-      ByteBuffer ciphertext,
-      int segmentNr,
-      boolean isLastSegment,
-      ByteBuffer plaintext)
+      ByteBuffer ciphertext, int segmentNr, boolean isLastSegment, ByteBuffer plaintext)
       throws GeneralSecurityException;
 }
-

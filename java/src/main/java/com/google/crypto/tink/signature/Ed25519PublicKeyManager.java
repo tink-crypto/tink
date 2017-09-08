@@ -28,20 +28,14 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * This key manager produces new instances of {@code Ed25519Verify}.
- * It doesn't support key generation.
+ * This key manager produces new instances of {@code Ed25519Verify}. It doesn't support key
+ * generation.
  */
 class Ed25519PublicKeyManager implements KeyManager<PublicKeyVerify> {
-  /**
-   * Type url that this manager supports
-   */
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.Ed25519PublicKey";
+  /** Type url that this manager supports */
+  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.Ed25519PublicKey";
 
-  /**
-   * Current version of this key manager.
-   * Keys with greater version are not supported.
-   */
+  /** Current version of this key manager. Keys with greater version are not supported. */
   private static final int VERSION = 0;
 
   @Override

@@ -21,21 +21,15 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.regex.Pattern;
 
-/**
- * Validation helper methods.
- */
+/** Validation helper methods. */
 public final class Validators {
   private static final String TYPE_URL_PREFIX = "type.googleapis.com/";
-  /**
-   * @throws GeneralSecurityException if {@code typeUrl} is in invalid format.
-   */
+  /** @throws GeneralSecurityException if {@code typeUrl} is in invalid format. */
   public static void validateTypeUrl(String typeUrl) throws GeneralSecurityException {
     if (!typeUrl.startsWith(TYPE_URL_PREFIX)) {
       throw new GeneralSecurityException(
           String.format(
-              "Error: type URL %s is invalid; it must start with %s.\n",
-              typeUrl,
-              TYPE_URL_PREFIX));
+              "Error: type URL %s is invalid; it must start with %s.\n", typeUrl, TYPE_URL_PREFIX));
     }
     if (typeUrl.length() == TYPE_URL_PREFIX.length()) {
       throw new GeneralSecurityException(
@@ -43,9 +37,7 @@ public final class Validators {
     }
   }
 
-  /**
-   * @throws GeneralSecurityException if the {@code sizeInBytes} is not a valid AES key size.
-   */
+  /** @throws GeneralSecurityException if the {@code sizeInBytes} is not a valid AES key size. */
   public static void validateAesKeySize(int sizeInBytes) throws GeneralSecurityException {
     if (sizeInBytes != 16 && sizeInBytes != 24 && sizeInBytes != 32) {
       throw new GeneralSecurityException("invalid AES key size");
@@ -53,8 +45,8 @@ public final class Validators {
   }
 
   /**
-   * @throws GeneralSecurityException if {@code candidate} is negative
-   * or larger than {@code maxExpected}.
+   * @throws GeneralSecurityException if {@code candidate} is negative or larger than {@code
+   *     maxExpected}.
    */
   public static void validateVersion(int candidate, int maxExpected)
       throws GeneralSecurityException {
@@ -62,8 +54,7 @@ public final class Validators {
       throw new GeneralSecurityException(
           String.format(
               "key has version %d; only keys with version in range [0..%d] are supported",
-              candidate,
-              maxExpected));
+              candidate, maxExpected));
     }
   }
 
@@ -72,14 +63,11 @@ public final class Validators {
    */
   public static void validateNotExists(File f) throws IOException {
     if (f.exists()) {
-      throw new IOException(
-          String.format("%s exists, please choose another file\n", f.toString()));
+      throw new IOException(String.format("%s exists, please choose another file\n", f.toString()));
     }
   }
 
-  /**
-   * @throws IOException if {@code f} does not exists.
-   */
+  /** @throws IOException if {@code f} does not exists. */
   public static void validateExists(File f) throws IOException {
     if (!f.exists()) {
       throw new IOException(
@@ -88,15 +76,15 @@ public final class Validators {
   }
 
   /**
-   * Validates that {@code kmsKeyUri} starts with {@code expectedPrefix},
-   * and removes the prefix.
+   * Validates that {@code kmsKeyUri} starts with {@code expectedPrefix}, and removes the prefix.
+   *
    * @throws IllegalArgumentException
    */
   public static String validateKmsKeyUriAndRemovePrefix(String expectedPrefix, String kmsKeyUri)
       throws IllegalArgumentException {
     if (!kmsKeyUri.toLowerCase().startsWith(expectedPrefix)) {
-      throw new IllegalArgumentException(String.format(
-          "key URI must start with %s", expectedPrefix));
+      throw new IllegalArgumentException(
+          String.format("key URI must start with %s", expectedPrefix));
     }
     return kmsKeyUri.substring(expectedPrefix.length());
   }
@@ -104,33 +92,43 @@ public final class Validators {
   // See https://tools.ietf.org/html/rfc3986#section-2.3.
   private static final String URI_UNRESERVED_CHARS = "([0-9a-zA-Z\\-\\.\\_~])+";
 
-  private static final Pattern GCP_KMS_CRYPTO_KEY_PATTERN = Pattern.compile(
-        String.format("^projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s$",
-            URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS,
-            URI_UNRESERVED_CHARS),
-        Pattern.CASE_INSENSITIVE);
+  private static final Pattern GCP_KMS_CRYPTO_KEY_PATTERN =
+      Pattern.compile(
+          String.format(
+              "^projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s$",
+              URI_UNRESERVED_CHARS,
+              URI_UNRESERVED_CHARS,
+              URI_UNRESERVED_CHARS,
+              URI_UNRESERVED_CHARS),
+          Pattern.CASE_INSENSITIVE);
 
-  private static final Pattern GCP_KMS_CRYPTO_KEY_VERSION_PATTERN = Pattern.compile(
-        String.format("^projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s/cryptoKeyVersions/%s$",
-            URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS, URI_UNRESERVED_CHARS,
-            URI_UNRESERVED_CHARS),
-        Pattern.CASE_INSENSITIVE);
+  private static final Pattern GCP_KMS_CRYPTO_KEY_VERSION_PATTERN =
+      Pattern.compile(
+          String.format(
+              "^projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s/cryptoKeyVersions/%s$",
+              URI_UNRESERVED_CHARS,
+              URI_UNRESERVED_CHARS,
+              URI_UNRESERVED_CHARS,
+              URI_UNRESERVED_CHARS,
+              URI_UNRESERVED_CHARS),
+          Pattern.CASE_INSENSITIVE);
   /**
-   * @throws GeneralSecurityException if {@code kmsKeyUri} is not a valid URI of a CryptoKey
-   * in Google Cloud KMS.
+   * @throws GeneralSecurityException if {@code kmsKeyUri} is not a valid URI of a CryptoKey in
+   *     Google Cloud KMS.
    */
-  public static void validateCryptoKeyUri(String kmsKeyUri)
-      throws GeneralSecurityException {
+  public static void validateCryptoKeyUri(String kmsKeyUri) throws GeneralSecurityException {
     if (!GCP_KMS_CRYPTO_KEY_PATTERN.matcher(kmsKeyUri).matches()) {
       if (GCP_KMS_CRYPTO_KEY_VERSION_PATTERN.matcher(kmsKeyUri).matches()) {
-        throw new GeneralSecurityException("Invalid Google Cloud KMS Key URI. "
-          + "The URI must point to a CryptoKey, not a CryptoKeyVersion");
+        throw new GeneralSecurityException(
+            "Invalid Google Cloud KMS Key URI. "
+                + "The URI must point to a CryptoKey, not a CryptoKeyVersion");
       }
-      throw new GeneralSecurityException("Invalid Google Cloud KMS Key URI. "
-          + "The URI must point to a CryptoKey in the format "
-          + "projects/*/locations/*/keyRings/*/cryptoKeys/*. "
-          + "See https://cloud.google.com/kms/docs/reference/rest/v1"
-          + "/projects.locations.keyRings.cryptoKeys#CryptoKey");
+      throw new GeneralSecurityException(
+          "Invalid Google Cloud KMS Key URI. "
+              + "The URI must point to a CryptoKey in the format "
+              + "projects/*/locations/*/keyRings/*/cryptoKeys/*. "
+              + "See https://cloud.google.com/kms/docs/reference/rest/v1"
+              + "/projects.locations.keyRings.cryptoKeys#CryptoKey");
     }
   }
 }

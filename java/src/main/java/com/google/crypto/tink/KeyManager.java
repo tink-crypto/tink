@@ -22,26 +22,26 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * A KeyManager "understands" keys of a specific key type: it can generate keys
- * of the supported type and create primitives for supported keys.
+ * A KeyManager "understands" keys of a specific key type: it can generate keys of the supported
+ * type and create primitives for supported keys.
  *
- * <p>A key type is identified by the global name of the protocol buffer that holds
- * the corresponding key material, and is given by {@code typeUrl}-field of
- * {@link KeyData}-protocol buffer.
+ * <p>A key type is identified by the global name of the protocol buffer that holds the
+ * corresponding key material, and is given by {@code typeUrl}-field of {@link KeyData}-protocol
+ * buffer.
  *
- * <p>The template parameter {@code P} denotes the primitive corresponding to the keys
- * handled by this manager.
+ * <p>The template parameter {@code P} denotes the primitive corresponding to the keys handled by
+ * this manager.
  */
 public interface KeyManager<P> {
   // APIs for primitive development
 
   /**
-   * Constructs an instance of P for the key given in {@code serializedKey},
-   * which must be a serialized key protocol buffer handled by this manager.
+   * Constructs an instance of P for the key given in {@code serializedKey}, which must be a
+   * serialized key protocol buffer handled by this manager.
    *
    * @return the new constructed P
-   * @throws GeneralSecurityException if the key given in {@code serializedKey} is corrupted
-   *         or not supported
+   * @throws GeneralSecurityException if the key given in {@code serializedKey} is corrupted or not
+   *     supported
    */
   P getPrimitive(ByteString serializedKey) throws GeneralSecurityException;
 
@@ -49,14 +49,13 @@ public interface KeyManager<P> {
    * Constructs an instance of P for the key given in {@code key}.
    *
    * @return the new constructed P
-   * @throws GeneralSecurityException if the key given in {@code key} is corrupted
-   *         or not supported
+   * @throws GeneralSecurityException if the key given in {@code key} is corrupted or not supported
    */
   P getPrimitive(MessageLite key) throws GeneralSecurityException;
 
   /**
-   * Generates a new key according to specification in {@code serializedKeyFormat},
-   * which must be a serialized key format protocol buffer handled by this manager.
+   * Generates a new key according to specification in {@code serializedKeyFormat}, which must be a
+   * serialized key format protocol buffer handled by this manager.
    *
    * @return the new generated key
    * @throws GeneralSecurityException if the specified format is wrong or not supported
@@ -71,19 +70,13 @@ public interface KeyManager<P> {
    */
   MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException;
 
-  /**
-   * @return true iff this KeyManager supports key type identified by {@code typeUrl}.
-   */
+  /** @return true iff this KeyManager supports key type identified by {@code typeUrl}. */
   boolean doesSupport(String typeUrl);
 
-  /**
-   * @return the type URL that identifies the key type of keys managed by this KeyManager.
-   */
+  /** @return the type URL that identifies the key type of keys managed by this KeyManager. */
   String getKeyType();
 
-  /**
-   * @return the version number of this KeyManager.
-   */
+  /** @return the version number of this KeyManager. */
   int getVersion();
 
   // APIs for Key Management

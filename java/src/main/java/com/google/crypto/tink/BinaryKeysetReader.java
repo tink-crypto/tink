@@ -25,9 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * A {@link KeysetReader} that can read from some source cleartext or encrypted keysets in
- * <a href="https://developers.google.com/protocol-buffers/docs/encoding">
- * proto binary wire format</a>.
+ * A {@link KeysetReader} that can read from some source cleartext or encrypted keysets in <a
+ * href="https://developers.google.com/protocol-buffers/docs/encoding">proto binary wire format</a>.
  */
 public final class BinaryKeysetReader implements KeysetReader {
   private final InputStream inputStream;

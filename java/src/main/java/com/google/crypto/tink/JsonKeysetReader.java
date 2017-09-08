@@ -88,7 +88,7 @@ public final class JsonKeysetReader implements KeysetReader {
     byte[] buf = new byte[1024];
     int count;
     while ((count = input.read(buf)) != -1) {
-        result.write(buf, 0, count);
+      result.write(buf, 0, count);
     }
     return result.toString(UTF_8.name());
   }
@@ -243,9 +243,7 @@ public final class JsonKeysetReader implements KeysetReader {
   }
 
   private void validateKeyData(JSONObject json) throws JSONException {
-    if (!json.has("typeUrl")
-        || !json.has("value")
-        || !json.has("keyMaterialType")) {
+    if (!json.has("typeUrl") || !json.has("value") || !json.has("keyMaterialType")) {
       throw new JSONException("invalid keyData");
     }
   }

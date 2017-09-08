@@ -29,21 +29,14 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * This instance of {@code KeyManager} generates new {@code Ed25519PrivateKey} keys and
- * produces new instances of {@code Ed25519Sign}.
+ * This instance of {@code KeyManager} generates new {@code Ed25519PrivateKey} keys and produces new
+ * instances of {@code Ed25519Sign}.
  */
 class Ed25519PrivateKeyManager implements PrivateKeyManager<PublicKeySign> {
-  /**
-   * Type url that this manager supports
-   */
+  /** Type url that this manager supports */
+  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
 
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey";
-
-  /**
-   * Current version of this key manager.
-   * Keys with greater version are not supported.
-   */
+  /** Current version of this key manager. Keys with greater version are not supported. */
   private static final int VERSION = 0;
 
   @Override
@@ -117,10 +110,11 @@ class Ed25519PrivateKeyManager implements PrivateKeyManager<PublicKeySign> {
 
   private Ed25519PrivateKey newKey() throws GeneralSecurityException {
     Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
-    Ed25519PublicKey publicKey = Ed25519PublicKey.newBuilder()
-        .setVersion(VERSION)
-        .setKeyValue(ByteString.copyFrom(keyPair.getPublicKey()))
-        .build();
+    Ed25519PublicKey publicKey =
+        Ed25519PublicKey.newBuilder()
+            .setVersion(VERSION)
+            .setKeyValue(ByteString.copyFrom(keyPair.getPublicKey()))
+            .build();
     return Ed25519PrivateKey.newBuilder()
         .setVersion(VERSION)
         .setKeyValue(ByteString.copyFrom(keyPair.getPrivateKey()))

@@ -32,20 +32,20 @@ import java.util.logging.Logger;
  * Static methods for obtaining {@link Aead} instances.
  *
  * <p>Usage:
+ *
  * <pre>{@code
- *   KeysetHandle keysetHandle = ...;
- *   Aead aead = AeadFactory.getPrimitive(keysetHandle);
- *   byte[] plaintext = ...;
- *   byte[] aad = ...;
- *   byte[] ciphertext = aead.encrypt(plaintext, aad);
+ * KeysetHandle keysetHandle = ...;
+ * Aead aead = AeadFactory.getPrimitive(keysetHandle);
+ * byte[] plaintext = ...;
+ * byte[] aad = ...;
+ * byte[] ciphertext = aead.encrypt(plaintext, aad);
  * }</pre>
  *
- * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a
- * plaintext, it uses the primary key in the keyset, and prepends to the ciphertext a certain
- * prefix associated with the primary key. To decrypt, the primitive uses the prefix of the
- * ciphertext to efficiently select the right key in the set. If the keys associated with the
- * prefix do not work, the primitive tries all keys with
- * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
+ * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a plaintext,
+ * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix associated
+ * with the primary key. To decrypt, the primitive uses the prefix of the ciphertext to efficiently
+ * select the right key in the set. If the keys associated with the prefix do not work, the
+ * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public final class AeadFactory {
   private static final Logger logger = Logger.getLogger(AeadFactory.class.getName());
@@ -54,9 +54,8 @@ public final class AeadFactory {
    * @return a Aead primitive from a {@code keysetHandle}.
    * @throws GeneralSecurityException
    */
-  public static Aead getPrimitive(KeysetHandle keysetHandle)
-      throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, /* keyManager= */null);
+  public static Aead getPrimitive(KeysetHandle keysetHandle) throws GeneralSecurityException {
+    return getPrimitive(keysetHandle, /* keyManager= */ null);
   }
 
   /**
@@ -65,8 +64,7 @@ public final class AeadFactory {
    */
   public static Aead getPrimitive(KeysetHandle keysetHandle, final KeyManager<Aead> keyManager)
       throws GeneralSecurityException {
-    final PrimitiveSet<Aead> primitives =
-        Registry.getPrimitives(keysetHandle, keyManager);
+    final PrimitiveSet<Aead> primitives = Registry.getPrimitives(keysetHandle, keyManager);
     return new Aead() {
       @Override
       public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
@@ -81,10 +79,8 @@ public final class AeadFactory {
           throws GeneralSecurityException {
         if (ciphertext.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
           byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
-          byte[] ciphertextNoPrefix = Arrays.copyOfRange(
-              ciphertext,
-              CryptoFormat.NON_RAW_PREFIX_SIZE,
-              ciphertext.length);
+          byte[] ciphertextNoPrefix =
+              Arrays.copyOfRange(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
           List<PrimitiveSet.Entry<Aead>> entries = primitives.getPrimitive(prefix);
           for (PrimitiveSet.Entry<Aead> entry : entries) {
             try {

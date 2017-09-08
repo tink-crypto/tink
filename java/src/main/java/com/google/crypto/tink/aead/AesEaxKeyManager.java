@@ -30,18 +30,15 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * This key manager generates new {@code AesEaxKey} keys and produces new instances
- * of {@code AesEaxJce}.
+ * This key manager generates new {@code AesEaxKey} keys and produces new instances of {@code
+ * AesEaxJce}.
  */
 class AesEaxKeyManager implements KeyManager<Aead> {
   private static final int VERSION = 0;
 
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.AesEaxKey";
+  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesEaxKey";
 
-  /**
-   * @param serializedKey  serialized {@code AesEaxKey} proto
-   */
+  /** @param serializedKey serialized {@code AesEaxKey} proto */
   @Override
   public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
@@ -52,9 +49,7 @@ class AesEaxKeyManager implements KeyManager<Aead> {
     }
   }
 
-  /**
-   * @param key  {@code AesEaxKey} proto
-   */
+  /** @param key {@code AesEaxKey} proto */
   @Override
   public Aead getPrimitive(MessageLite key) throws GeneralSecurityException {
     if (!(key instanceof AesEaxKey)) {
@@ -80,7 +75,7 @@ class AesEaxKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param keyFormat  {@code AesEaxKeyFormat} proto
+   * @param keyFormat {@code AesEaxKeyFormat} proto
    * @return new {@code AesEaxKey} proto
    */
   @Override
@@ -98,7 +93,7 @@ class AesEaxKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code AesEaxKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code AesEaxKeyFormat} proto
    * @return {@code KeyData} proto with a new {@code AesEaxKey} proto
    */
   @Override

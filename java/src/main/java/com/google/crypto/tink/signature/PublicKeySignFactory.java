@@ -30,16 +30,17 @@ import java.security.GeneralSecurityException;
  * Static methods for obtaining {@link PublicKeySign} instances.
  *
  * <p>Usage:
+ *
  * <pre>{@code
- *   KeysetHandle keysetHandle = ...;
- *   PublicKeySign signer = PublicKeySignFactory.getPrimitive(keysetHandle);
- *   byte[] data = ...;
- *   byte[] signature = signer.sign(data);
+ * KeysetHandle keysetHandle = ...;
+ * PublicKeySign signer = PublicKeySignFactory.getPrimitive(keysetHandle);
+ * byte[] data = ...;
+ * byte[] signature = signer.sign(data);
  * }</pre>
  *
- * <p>The returned primitive works with a keyset (rather than a single key). To sign a message,
- * it uses the primary key in the keyset, and prepends to the signature a certain prefix
- * associated with the primary key.
+ * <p>The returned primitive works with a keyset (rather than a single key). To sign a message, it
+ * uses the primary key in the keyset, and prepends to the signature a certain prefix associated
+ * with the primary key.
  */
 public final class PublicKeySignFactory {
   /**
@@ -48,8 +49,8 @@ public final class PublicKeySignFactory {
    */
   public static PublicKeySign getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-        return getPrimitive(keysetHandle, /* keyManager= */null);
-      }
+    return getPrimitive(keysetHandle, /* keyManager= */ null);
+  }
 
   /**
    * @return a PublicKeySign primitive from a {@code keysetHandle} and a custom {@code keyManager}.
@@ -58,22 +59,20 @@ public final class PublicKeySignFactory {
   public static PublicKeySign getPrimitive(
       KeysetHandle keysetHandle, final KeyManager<PublicKeySign> keyManager)
       throws GeneralSecurityException {
-        final PrimitiveSet<PublicKeySign> primitives =
-            Registry.getPrimitives(keysetHandle, keyManager);
-        return new PublicKeySign() {
-          @Override
-          public byte[] sign(final byte[] data) throws GeneralSecurityException {
-            if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-              byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
-              return Bytes.concat(
-                  primitives.getPrimary().getIdentifier(),
-                  primitives.getPrimary().getPrimitive().sign(
-                      Bytes.concat(data, formatVersion)));
-            }
-            return Bytes.concat(
-                primitives.getPrimary().getIdentifier(),
-                primitives.getPrimary().getPrimitive().sign(data));
-          }
-        };
+    final PrimitiveSet<PublicKeySign> primitives = Registry.getPrimitives(keysetHandle, keyManager);
+    return new PublicKeySign() {
+      @Override
+      public byte[] sign(final byte[] data) throws GeneralSecurityException {
+        if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
+          byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
+          return Bytes.concat(
+              primitives.getPrimary().getIdentifier(),
+              primitives.getPrimary().getPrimitive().sign(Bytes.concat(data, formatVersion)));
+        }
+        return Bytes.concat(
+            primitives.getPrimary().getIdentifier(),
+            primitives.getPrimary().getPrimitive().sign(data));
       }
+    };
+  }
 }

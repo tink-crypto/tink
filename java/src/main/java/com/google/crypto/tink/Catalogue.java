@@ -29,8 +29,8 @@ import java.security.GeneralSecurityException;
  */
 public interface Catalogue {
   /**
-   * @return a {@link KeyManager} for the given {@code typeUrl}, {@code primitiveName},
-   * and version at least {@code minVersion} (if it exists in the catalogue).
+   * @return a {@link KeyManager} for the given {@code typeUrl}, {@code primitiveName}, and version
+   *     at least {@code minVersion} (if it exists in the catalogue).
    */
   @SuppressWarnings("rawtypes")
   public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion)

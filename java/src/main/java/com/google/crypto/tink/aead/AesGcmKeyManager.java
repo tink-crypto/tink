@@ -30,18 +30,15 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
- * This key manager generates new {@code AesGcmKey} keys and produces new instances
- * of {@code AesGcmJce}.
+ * This key manager generates new {@code AesGcmKey} keys and produces new instances of {@code
+ * AesGcmJce}.
  */
 class AesGcmKeyManager implements KeyManager<Aead> {
   private static final int VERSION = 0;
 
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesGcmKey";
 
-  /**
-   * @param serializedKey  serialized {@code AesGcmKey} proto
-   */
+  /** @param serializedKey serialized {@code AesGcmKey} proto */
   @Override
   public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
@@ -52,9 +49,7 @@ class AesGcmKeyManager implements KeyManager<Aead> {
     }
   }
 
-  /**
-   * @param key  {@code AesGcmKey} proto
-   */
+  /** @param key {@code AesGcmKey} proto */
   @Override
   public Aead getPrimitive(MessageLite key) throws GeneralSecurityException {
     if (!(key instanceof AesGcmKey)) {
@@ -66,7 +61,7 @@ class AesGcmKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param serializedKeyFormat  serialized {@code AesGcmKeyFormat} proto
+   * @param serializedKeyFormat serialized {@code AesGcmKeyFormat} proto
    * @return new {@code AesGcmKey} proto
    */
   @Override

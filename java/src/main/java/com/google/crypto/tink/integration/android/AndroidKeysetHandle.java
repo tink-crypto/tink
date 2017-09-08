@@ -30,18 +30,18 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * A builder of {@link KeysetHandle} that supports reading/writing
- * {@link com.google.crypto.tink.proto.Keyset} to/from private shared preferences on Android.
+ * A builder of {@link KeysetHandle} that supports reading/writing {@link
+ * com.google.crypto.tink.proto.Keyset} to/from private shared preferences on Android.
  *
- * <p><b>Warning</b>:
- * This class reads and writes to shared preferences, thus is best not to run on the UI thread.
+ * <p><b>Warning</b>: This class reads and writes to shared preferences, thus is best not to run on
+ * the UI thread.
  *
- * <p>On Android M or newer, the keysets are encrypted with master keys generated and stored in
- * <a href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
+ * <p>On Android M or newer, the keysets are encrypted with master keys generated and stored in <a
+ * href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
  *
  * <p>Sample usage:
- * <pre>{@code
  *
+ * <pre>{@code
  * KeyTemplate keyTemplate = AeadKeyTemplates.AES128_GCM;
  * String masterKeyUri = "android-keystore://my_master_key_id";
  * // Generate the master key if it does not exist.
@@ -55,9 +55,9 @@ import java.security.GeneralSecurityException;
  * }</pre>
  *
  * <p>This will return a {@link KeysetHandle} from a keyset stored in the {@code my_pref_name}
- * preference name of the default shared preferences file. If the keyset is encrypted, it
- * will be decrypted using the {@code my_master_key_id} stored in Android Keystore. If the keyset
- * is not found a fresh one containing a single {@code AES128_GCM} key is generated.
+ * preference name of the default shared preferences file. If the keyset is encrypted, it will be
+ * decrypted using the {@code my_master_key_id} stored in Android Keystore. If the keyset is not
+ * found a fresh one containing a single {@code AES128_GCM} key is generated.
  */
 public final class AndroidKeysetHandle {
   private static final String TAG = AndroidKeysetHandle.class.getName();
@@ -103,8 +103,8 @@ public final class AndroidKeysetHandle {
   }
 
   /**
-   * A builder for {@link KeysetHandle} that supports reading/writing
-   * {@link com.google.crypto.tink.proto.Keyset} to/from private shared preferences on Android.
+   * A builder for {@link KeysetHandle} that supports reading/writing {@link
+   * com.google.crypto.tink.proto.Keyset} to/from private shared preferences on Android.
    */
   public static final class Builder {
     public static final String DEFAULT_PREF_NAME = "TINK-KEYSET";
@@ -116,12 +116,9 @@ public final class AndroidKeysetHandle {
     private boolean generateNewIfNotFound = false;
     private KeyTemplate keyTemplate = null;
 
-    public Builder() {
-    }
+    public Builder() {}
 
-    /**
-     * Sets the application context.
-     */
+    /** Sets the application context. */
     public Builder context(Context val) {
       context = val;
       return this;
@@ -150,8 +147,8 @@ public final class AndroidKeysetHandle {
     /**
      * Sets the master key URI.
      *
-     * <p>Only master keys stored in Android Keystore is supported. The URI
-     * must start with {@code android-keystore://}.
+     * <p>Only master keys stored in Android Keystore is supported. The URI must start with {@code
+     * android-keystore://}.
      */
     public Builder masterKeyUri(String val) {
       masterKeyUri = val;
@@ -161,28 +158,22 @@ public final class AndroidKeysetHandle {
     /**
      * Does not use Android Keystore, which might not work well in some phones.
      *
-     * <p><b>Warning:</b>
-     * When Android Keystore is disabled, keys are stored in cleartext. This should be safe
-     * because they are stored in private preferences.
+     * <p><b>Warning:</b> When Android Keystore is disabled, keys are stored in cleartext. This
+     * should be safe because they are stored in private preferences.
      */
     public Builder doNotUseKeystore() {
       useKeystore = false;
       return this;
     }
 
-    /**
-     * Whether should generate new keys with {@code val} if it is not found.
-     *
-     */
+    /** Whether should generate new keys with {@code val} if it is not found. */
     public Builder generateNewIfNotFound(KeyTemplate val) {
       generateNewIfNotFound = true;
       keyTemplate = val;
       return this;
     }
 
-    /**
-     * @return a {@link KeysetHandle} with the specified options.
-     */
+    /** @return a {@link KeysetHandle} with the specified options. */
     public KeysetHandle build() throws GeneralSecurityException, IOException {
       return new AndroidKeysetHandle(this).getKeysetHandle();
     }
@@ -220,8 +211,7 @@ public final class AndroidKeysetHandle {
     return CleartextKeysetHandle.read(reader);
   }
 
-  private KeysetHandle generateNewAndWriteToPref()
-      throws GeneralSecurityException, IOException {
+  private KeysetHandle generateNewAndWriteToPref() throws GeneralSecurityException, IOException {
     KeysetHandle keysetHandle = KeysetHandle.generateNew(keyTemplate);
     KeysetWriter writer = SharedPrefKeysetWriter.withSharedPref(context, prefFileName, prefName);
     if (shouldUseKeystore()) {
