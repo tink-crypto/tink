@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>parentpom</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
   <artifactId>tink</artifactId>
   <packaging>jar</packaging>
