@@ -7,9 +7,9 @@ Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png)
 
 Tink is a cryptographic library. The design goals are:
 
-*   **Easy** Tink provides APIs that are simple and easy to use correctly. Most
-    cryptographic operations such as data encryption, digital signatures, etc.
-    can be done with only a few lines of code.
+*   **Simplicity** Tink provides APIs that are simple and easy to use
+    correctly.  Most cryptographic operations such as data encryption, digital
+    signatures, etc.  can be done with only a few lines of code.
 
 *   **Security** Tink reduces common cryptographic pitfalls with user-centered
     design, careful implementation and code reviews, and extensive testing.
@@ -17,25 +17,25 @@ Tink is a cryptographic library. The design goals are:
 *   **Misuse-proof** Tink assumes that the attacker has complete freedom in
     calling methods of a high level interface; under this assumption the
     security is not compromised. For example, if the underlying encryption mode
-    requires nonces and is insecure if nonces are reused then the interface do
+    requires nonces and is insecure if nonces are reused then the interface does
     not allow to pass nonces.
 
-*   **Extensibility** Tink makes it easy to support new algorithms, new
-    ciphertext formats, or new key management systems, etc.
+*   **Extensibility** Tink makes it easy to support new primitives, new algorithms, new
+    ciphertext formats, new key management systems, etc.
 
 *   **Agility** Tink provides built-in cryptographic agility. It supports key
-    rotation, deprecation of obsolete schemes and adaptation of new ones. Once a
-    cryptographic primitive is found broken, you can switch to a new primitive
-    by rotating keys without changing or recompiling code.
+    rotation, deprecation of obsolete schemes and adaptation of new ones. For example, if an
+    implementation of a cryptographic primitive is found broken, you can switch
+    to a different implementation by rotating keys, without changing or recompiling code.
 
 *   **Interoperability** Tink produces and consumes ciphertexts that are
     compatible with existing cryptographic libraries. Tink supports encrypting
-    or storing keys in Amazon KMS, Google Cloud KMS, Android Keystore, and it's
+    or storing keys in Amazon KMS, Google Cloud KMS, Android Keystore, and it is
     easy to support other key management systems.
 
 *   **Versatility** No part of Tink is hard to replace or remove. All components
     are recombinant, and can be selected and assembled in various combinations.
-    For example, if you need only digital signature, you can exclude symmetric
+    For example, if you need only digital signatures, you can exclude symmetric
     key encryption components.
 
 *   **Readability** Tink shows cryptographic properties (i.e., whether safe
@@ -76,7 +76,7 @@ supports two operations:
     `ciphertext` (using `associated_data` as additional AEAD-input) and returns
     the resulting plaintext
 
-Before implementations of primitives can be used, it must be registered at
+Before implementations of primitives can be used, they must be registered at
 runtime with Tink, so that Tink "knows" the desired implementations. Here's how
 you can register all implementations of all primitives in Tink for Java 1.0.0:
 
@@ -87,8 +87,8 @@ you can register all implementations of all primitives in Tink for Java 1.0.0:
     Config.register(TinkConfig.TINK_1_0_0);
 ```
 
-After primitives have been registered, the basic use of Tink proceeds in three
-steps:
+After implementations of primitives have been registered, the basic use of Tink
+proceeds in three steps:
 
 1.  Load or generate the cryptographic key material (a `Keyset` in Tink terms).
 2.  Use the key material to get an instance of the chosen primitive.
@@ -119,9 +119,10 @@ to obtain and use other primitives.
 
 ## Important Warnings
 
-Do not use APIs including fields and methods marked with the `@Alpha` annotation.
-They can be modified in any way, or even removed, at any time. They are in the
-package, but not for official, production release, but only for testing.
+Do not use APIs including fields and methods marked with the `@Alpha`
+annotation.  They can be modified in any way, or even removed, at any time. They
+are in the package, but not for official, production release, but only for
+testing.
 
 ## Learn More
 
