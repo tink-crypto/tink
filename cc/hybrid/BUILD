@@ -205,7 +205,7 @@ cc_test(
         "//cc/util:status",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -221,7 +221,7 @@ cc_test(
         "//cc/util:status",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -234,7 +234,7 @@ cc_test(
         ":hybrid_decrypt_config",
         "//cc:registry",
         "//cc/util:status",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -255,7 +255,7 @@ cc_test(
         "//cc/util:test_util",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -268,7 +268,7 @@ cc_test(
         ":hybrid_encrypt_config",
         "//cc:registry",
         "//cc/util:status",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -286,7 +286,7 @@ cc_test(
         "//cc/util:test_util",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -308,7 +308,7 @@ cc_test(
         "//cc/util:test_util",
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -330,7 +330,7 @@ cc_test(
         "//cc/util:test_util",
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -351,7 +351,7 @@ cc_test(
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -372,6 +372,6 @@ cc_test(
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )

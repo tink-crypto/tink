@@ -135,7 +135,7 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:common_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -152,7 +152,7 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:common_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -167,7 +167,7 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:common_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -182,7 +182,7 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:common_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -198,7 +198,7 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:common_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -214,7 +214,7 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_util",
         "//proto:common_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -226,7 +226,7 @@ cc_test(
     linkopts = ["-pthread"],
     deps = [
         ":random",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -242,6 +242,6 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_util",
         "@boringssl//:crypto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )

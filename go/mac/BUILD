@@ -40,6 +40,7 @@ TEST_DEPS = DEPS + [
 go_library(
     name = "mac",
     srcs = SRCS,
+    importpath = "github.com/google/tink/go/mac/mac",
     deps = DEPS,
 )
 

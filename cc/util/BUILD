@@ -80,6 +80,6 @@ cc_test(
     deps = [
         ":errors",
         ":status",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )

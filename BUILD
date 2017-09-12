@@ -9,6 +9,6 @@ licenses(["notice"])  # Apache 2.0
 
 exports_files(["LICENSE"])
 
-# prefix for all go packages
+# All go packages use github.com/google/tink prefix
 load("@io_bazel_rules_go//go:def.bzl", "go_prefix")
 go_prefix("github.com/google/tink")

@@ -15,13 +15,8 @@ http_archive(
 git_repository(
     name = "io_bazel_rules_go",
     remote = "https://github.com/bazelbuild/rules_go.git",
-    tag = "0.4.4",
+    commit = "551e1f46cbeb470fe9d085e873c3bb83f075e18c",
 )
-load("@io_bazel_rules_go//go:def.bzl", "go_repositories", "new_go_repository")
-go_repositories()
-
-load("@io_bazel_rules_go//proto:go_proto_library.bzl", "go_proto_repositories")
-go_proto_repositories()
 
 #-----------------------------------------------------------------------------
 # cc
@@ -32,10 +27,10 @@ git_repository(
     remote = "https://boringssl.googlesource.com/boringssl",
 )
 
-new_git_repository(
-    name = "gtest",
-    build_file = "//tools:gtest.BUILD",
-    commit = "ed9d1e1ff92ce199de5ca2667a667cd0a368482a",
+# GoogleTest/GoogleMock framework. Used by most C++ unit-tests.
+git_repository(
+    name = "com_google_googletest",
+    commit = "61330388862cf011fa956f7f59082b9923e6be0e",
     remote = "https://github.com/google/googletest.git",
 )
 
@@ -47,27 +42,27 @@ new_git_repository(
 # This statement defines the @com_google_protobuf repo.
 http_archive(
     name = "com_google_protobuf",
-    strip_prefix = "protobuf-3.3.0",
-    urls = ["https://github.com/google/protobuf/archive/v3.3.0.tar.gz"],
-    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
+    strip_prefix = "protobuf-3.4.0",
+    urls = ["https://github.com/google/protobuf/releases/download/v3.4.0/protobuf-cpp-3.4.0.tar.gz"],
+    sha256 = "71434f6f836a1e479c44008bb033b2a8b2560ff539374dcdefb126be739e1635",
 )
 
 # cc_proto_library rules implicitly depend on @com_google_protobuf_cc//:cc_toolchain,
 # which is the C++ proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_cc",
-    strip_prefix = "protobuf-3.3.0",
-    urls = ["https://github.com/google/protobuf/archive/v3.3.0.tar.gz"],
-    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
+    strip_prefix = "protobuf-3.4.0",
+    urls = ["https://github.com/google/protobuf/releases/download/v3.4.0/protobuf-cpp-3.4.0.tar.gz"],
+    sha256 = "71434f6f836a1e479c44008bb033b2a8b2560ff539374dcdefb126be739e1635",
 )
 
 # java_proto_library rules implicitly depend on @com_google_protobuf_java//:java_toolchain,
 # which is the Java proto runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_java",
-    strip_prefix = "protobuf-3.3.0",
-    urls = ["https://github.com/google/protobuf/archive/v3.3.0.tar.gz"],
-    sha256 = "94c414775f275d876e5e0e4a276527d155ab2d0da45eed6b7734301c330be36e",
+    strip_prefix = "protobuf-3.4.0",
+    urls = ["https://github.com/google/protobuf/releases/download/v3.4.0/protobuf-java-3.4.0.tar.gz"],
+    sha256 = "7c61081cc2346542070cd35db7d15c7f24aeeefcd3afac08ec88fec03c45d698",
 )
 
 # java_lite_proto_library rules implicitly depend on @com_google_protobuf_javalite//:javalite_toolchain,
@@ -297,3 +292,7 @@ git_repository(
 
 load("@org_pubref_rules_protobuf//objc:rules.bzl", "objc_proto_repositories")
 objc_proto_repositories()
+
+load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
+go_rules_dependencies()
+go_register_toolchains()

@@ -15,8 +15,8 @@ PRIMITIVES_SRCS = [
 ]
 
 TINK_SRCS = PRIMITIVES_SRCS + [
-    "cleartext_keyset_handle.go",
     "crypto_format.go",
+    "cleartext_keyset_handle.go",
     "encrypted_keyset_handle.go",
     "key_manager.go",
     "keyset_handle.go",
@@ -40,7 +40,7 @@ TINK_INTERNAL_TEST_SRCS = [
 ]
 
 TINK_DEPS = [
-    "//go/util",
+    "//go/util:util",
     "//go/subtle:random",
     "//proto:tink_go_proto",
     "@com_github_golang_protobuf//proto:go_default_library",
@@ -62,6 +62,7 @@ TINK_TEST_DEPS = TINK_DEPS + [
 go_library(
     name = "tink",
     srcs = TINK_SRCS,
+    importpath = "github.com/google/tink/go/tink/tink",
     deps = TINK_DEPS,
 )
 
@@ -75,6 +76,7 @@ go_test(
 go_test(
     name = "tink_internal_test",
     srcs = TINK_INTERNAL_TEST_SRCS,
+    importpath = "github.com/google/tink/go/tink/tink_test",
     library = ":tink",
     deps = [
         "//go/signature",

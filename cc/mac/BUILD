@@ -81,7 +81,7 @@ cc_test(
         "//cc/util:status",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -94,7 +94,7 @@ cc_test(
         ":mac_config",
         "//cc:registry",
         "//cc/util:status",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -116,7 +116,7 @@ cc_test(
         "//proto:common_cc_proto",
         "//proto:hmac_cc_proto",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -135,6 +135,6 @@ cc_test(
         "//proto:common_cc_proto",
         "//proto:hmac_cc_proto",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )

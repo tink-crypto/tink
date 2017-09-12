@@ -34,6 +34,7 @@ TEST_DEPS = DEPS + [
 go_library(
     name = "util",
     srcs = SRCS,
+    importpath = "github.com/google/tink/go/util/util",
     deps = DEPS,
 )
 

@@ -177,7 +177,7 @@ cc_test(
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:aes_gcm_cc_proto",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -189,7 +189,7 @@ cc_test(
     deps = [
         ":crypto_format",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -203,7 +203,7 @@ cc_test(
         ":keyset_handle",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -218,7 +218,7 @@ cc_test(
         ":primitive_set",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
         "@com_google_protobuf//:protobuf_lite",
-        "@gtest//:gtest",
     ],
 )

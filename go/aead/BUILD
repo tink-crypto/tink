@@ -39,6 +39,7 @@ TEST_DEPS = DEPS + [
 go_library(
     name = "aead",
     srcs = SRCS,
+    importpath = "github.com/google/tink/go/aead/aead",
     deps = DEPS,
 )
 

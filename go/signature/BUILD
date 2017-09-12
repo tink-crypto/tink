@@ -45,6 +45,7 @@ TEST_DEPS = DEPS + [
 go_library(
     name = "signature",
     srcs = SRCS,
+    importpath = "github.com/google/tink/go/signature/signature",
     deps = DEPS,
 )
 

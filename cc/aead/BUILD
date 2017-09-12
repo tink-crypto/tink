@@ -83,7 +83,7 @@ cc_test(
         "//cc/util:status",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -96,7 +96,7 @@ cc_test(
         ":aead_config",
         "//cc:registry",
         "//cc/util:status",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -116,7 +116,7 @@ cc_test(
         "//cc/util:test_util",
         "//proto:aes_gcm_cc_proto",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -134,6 +134,6 @@ cc_test(
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
-        "@gtest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
