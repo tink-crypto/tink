@@ -11,6 +11,6 @@ tulsigen-*
 *.iml
 .gradle
 **/local.properties
-**/build
+**/build/**
 .externalNativeBuild
 

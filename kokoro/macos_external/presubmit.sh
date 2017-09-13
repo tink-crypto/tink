@@ -25,7 +25,7 @@ set -x
 : "${IOS_SDK_VERSION:=10.2}"
 : "${XCODE_VERSION:=8.2.1}"
 
-BAZEL_BIN="${KOKORO_GFILE_DIR}/bazel-0.5.3-darwin-x86_64"
+BAZEL_BIN="${KOKORO_GFILE_DIR}/bazel-c6122b6ad35ebbed61036b0a2bcfea92b10adb8f-darwin-x86_64"
 
 DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
 --strategy=CppCompile=standalone --strategy=ProtoCompile=standalone \
@@ -39,6 +39,7 @@ mkdir jdk; cd jdk;
 cp "${KOKORO_GFILE_DIR}/jdk-8u131-macosx-x64.tgz" ./
 tar xf jdk-8u131-macosx-x64.tgz
 
+export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
 export JAVA_HOME="${PWD}/Home"
 export PATH="${JAVA_HOME}/bin:$PATH"
 chmod -R a+rx "${JAVA_HOME}"

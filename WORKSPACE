@@ -276,22 +276,12 @@ maven_jar(
 #-----------------------------------------------------------------------------
 # objc
 #-----------------------------------------------------------------------------
-# TODO(thaidn): remove this dependency by porting what needed to
-# third_party/rules_protobuf.
-git_repository(
-    name = "org_pubref_rules_protobuf",
-    commit = "61efe7c69a6bafffd9f1231f9d6ea97c2014aa64",
-    remote = "https://github.com/pubref/rules_protobuf.git",
-)
 
 git_repository(
     name = "build_bazel_rules_apple",
     commit = "7ea05576182ba82ea9b951fa3d42ecdb3dc8dc59",
     remote = "https://github.com/bazelbuild/rules_apple.git",
 )
-
-load("@org_pubref_rules_protobuf//objc:rules.bzl", "objc_proto_repositories")
-objc_proto_repositories()
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
 go_rules_dependencies()

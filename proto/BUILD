@@ -10,7 +10,7 @@ package(
 licenses(["notice"])  # Apache 2.0
 
 load("@io_bazel_rules_go//proto:go_proto_library.bzl", "go_proto_library")
-load("@org_pubref_rules_protobuf//objc:rules.bzl", "objc_proto_compile")
+load("//third_party/rules_protobuf/objc:rules.bzl", "objc_proto_compile")
 load("//proto:objc.bzl", "tink_objc_proto_library")
 
 # -----------------------------------------------
@@ -50,7 +50,6 @@ objc_proto_compile(
     protos = ["common.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -96,7 +95,6 @@ objc_proto_compile(
     protos = ["tink.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -177,7 +175,6 @@ objc_proto_compile(
     protos = ["ecdsa.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
     deps = [":common_objc_pb"],
 )
 
@@ -218,7 +215,6 @@ objc_proto_compile(
     protos = ["ed25519.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -262,7 +258,6 @@ objc_proto_compile(
     protos = ["hmac.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
     deps = [":common_objc_pb"],
 )
 
@@ -303,7 +298,6 @@ objc_proto_compile(
     protos = ["aes_ctr.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -351,7 +345,6 @@ objc_proto_compile(
     protos = ["aes_ctr_hmac_aead.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
     deps = [
         ":aes_ctr_objc_pb",
         ":hmac_objc_pb",
@@ -395,7 +388,6 @@ objc_proto_compile(
     protos = ["aes_gcm.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -441,7 +433,6 @@ objc_proto_compile(
     protos = ["aes_ctr_hmac_streaming.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
     deps = [
         ":common_objc_pb",
         ":hmac_objc_pb",
@@ -487,7 +478,6 @@ objc_proto_compile(
     protos = ["aes_gcm_hkdf_streaming.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
     deps = [
         ":common_objc_pb",
     ],
@@ -530,7 +520,6 @@ objc_proto_compile(
     protos = ["aes_eax.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -570,7 +559,6 @@ objc_proto_compile(
     protos = ["chacha20_poly1305.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -610,7 +598,6 @@ objc_proto_compile(
     protos = ["kms_aead.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
 )
 
 # -----------------------------------------------
@@ -654,7 +641,6 @@ objc_proto_compile(
     protos = ["kms_envelope.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
     deps = [
         ":tink_objc_pb",
     ],
@@ -705,7 +691,6 @@ objc_proto_compile(
     protos = ["ecies_aead_hkdf.proto"],
     tags = ["manual"],
     visibility = ["//visibility:private"],
-    with_grpc = False,
     deps = [
         ":common_objc_pb",
         ":tink_objc_pb",

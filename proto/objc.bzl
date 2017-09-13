@@ -1,7 +1,7 @@
 # The actual rule which does the filtering.
 def _do_filter_impl(ctx):
   return struct(
-      files = set([f for f in ctx.files.srcs if f.path.endswith(ctx.attr.suffix)]),
+      files = depset([f for f in ctx.files.srcs if f.path.endswith(ctx.attr.suffix)]),
   )
 
 _do_filter = rule(
