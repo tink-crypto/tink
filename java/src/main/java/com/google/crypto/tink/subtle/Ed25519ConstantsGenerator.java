@@ -91,18 +91,18 @@ public final class Ed25519ConstantsGenerator {
     decl +=
         "new long[]"
             + replaceBrackets(
-                Arrays.toString(Curve25519.expand(toLittleEndian(p.y.add(p.x).mod(P)))))
+                Arrays.toString(Field25519.expand(toLittleEndian(p.y.add(p.x).mod(P)))))
             + ",\n";
     decl +=
         "new long[]"
             + replaceBrackets(
-                Arrays.toString(Curve25519.expand(toLittleEndian(p.y.subtract(p.x).mod(P)))))
+                Arrays.toString(Field25519.expand(toLittleEndian(p.y.subtract(p.x).mod(P)))))
             + ",\n";
     decl +=
         "new long[]"
             + replaceBrackets(
                 Arrays.toString(
-                    Curve25519.expand(toLittleEndian(D2.multiply(p.x).multiply(p.y).mod(P)))))
+                    Field25519.expand(toLittleEndian(D2.multiply(p.x).multiply(p.y).mod(P)))))
             + ")";
     return decl;
   }
@@ -117,19 +117,19 @@ public final class Ed25519ConstantsGenerator {
     System.out.println(
         decl
             + " D = "
-            + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(D))))
+            + replaceBrackets(Arrays.toString(Field25519.expand(toLittleEndian(D))))
             + ";");
     System.out.println("// 2d");
     System.out.println(
         decl
             + " D2 = "
-            + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(D2))))
+            + replaceBrackets(Arrays.toString(Field25519.expand(toLittleEndian(D2))))
             + ";");
     System.out.println("// 2^((p-1)/4) mod p where p = 2^255-19");
     System.out.println(
         decl
             + " SQRTM1 = "
-            + replaceBrackets(Arrays.toString(Curve25519.expand(toLittleEndian(SQRTM1))))
+            + replaceBrackets(Arrays.toString(Field25519.expand(toLittleEndian(SQRTM1))))
             + ";");
     // System.out.println("// (x, 4/5)");
     Point bi = b;

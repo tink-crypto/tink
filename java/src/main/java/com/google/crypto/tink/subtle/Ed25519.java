@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
-import static com.google.crypto.tink.subtle.Curve25519.FIELD_LEN;
-import static com.google.crypto.tink.subtle.Curve25519.LIMB_CNT;
+import static com.google.crypto.tink.subtle.Field25519.FIELD_LEN;
+import static com.google.crypto.tink.subtle.Field25519.LIMB_CNT;
 import static com.google.crypto.tink.subtle.Ed25519Constants.B2;
 import static com.google.crypto.tink.subtle.Ed25519Constants.B_TABLE;
 import static com.google.crypto.tink.subtle.Ed25519Constants.D;
@@ -100,9 +100,9 @@ public final class Ed25519 {
      * ge_p1p1_to_p2.c
      */
     static XYZ fromPartialXYZT(XYZ out, PartialXYZT in) {
-      Curve25519.mult(out.x, in.xyz.x, in.t);
-      Curve25519.mult(out.y, in.xyz.y, in.xyz.z);
-      Curve25519.mult(out.z, in.xyz.z, in.t);
+      Field25519.mult(out.x, in.xyz.x, in.t);
+      Field25519.mult(out.y, in.xyz.y, in.xyz.z);
+      Field25519.mult(out.z, in.xyz.z, in.t);
       return out;
     }
 
@@ -113,10 +113,10 @@ public final class Ed25519 {
       long[] recip = new long[LIMB_CNT];
       long[] x = new long[LIMB_CNT];
       long[] y = new long[LIMB_CNT];
-      Curve25519.curveRecip(recip, z);
-      Curve25519.mult(x, this.x, recip);
-      Curve25519.mult(y, this.y, recip);
-      byte[] s = Curve25519.contract(y);
+      Field25519.inverse(recip, z);
+      Field25519.mult(x, this.x, recip);
+      Field25519.mult(y, this.y, recip);
+      byte[] s = Field25519.contract(y);
       s[31] = (byte) (s[31] ^ (getLsb(x) << 7));
       return s;
     }
@@ -157,10 +157,10 @@ public final class Ed25519 {
      * ge_p1p1_to_p2.c
      */
     private static XYZT fromPartialXYZT(XYZT out, PartialXYZT in) {
-      Curve25519.mult(out.xyz.x, in.xyz.x, in.t);
-      Curve25519.mult(out.xyz.y, in.xyz.y, in.xyz.z);
-      Curve25519.mult(out.xyz.z, in.xyz.z, in.t);
-      Curve25519.mult(out.t, in.xyz.x, in.xyz.y);
+      Field25519.mult(out.xyz.x, in.xyz.x, in.t);
+      Field25519.mult(out.xyz.y, in.xyz.y, in.xyz.z);
+      Field25519.mult(out.xyz.z, in.xyz.z, in.t);
+      Field25519.mult(out.t, in.xyz.x, in.xyz.y);
       return out;
     }
 
@@ -170,39 +170,39 @@ public final class Ed25519 {
      */
     private static XYZT fromBytesNegateVarTime(byte[] s) {
       long[] x = new long[LIMB_CNT];
-      long[] y = Curve25519.expand(s);
+      long[] y = Field25519.expand(s);
       long[] z = new long[LIMB_CNT]; z[0] = 1;
       long[] t = new long[LIMB_CNT];
       long[] u = new long[LIMB_CNT];
       long[] v = new long[LIMB_CNT];
       long[] vxx = new long[LIMB_CNT];
       long[] check = new long[LIMB_CNT];
-      Curve25519.square(u, y);
-      Curve25519.mult(v, u, D);
-      Curve25519.sub(u, u, z);  // u = y^2 - 1
-      Curve25519.sum(v, v, z);  // v = dy^2 + 1
+      Field25519.square(u, y);
+      Field25519.mult(v, u, D);
+      Field25519.sub(u, u, z);  // u = y^2 - 1
+      Field25519.sum(v, v, z);  // v = dy^2 + 1
 
       long[] v3 = new long[LIMB_CNT];
-      Curve25519.square(v3, v);
-      Curve25519.mult(v3, v3, v);  // v3 = v^3
-      Curve25519.square(x, v3);
-      Curve25519.mult(x, x, v);
-      Curve25519.mult(x, x, u);  // x = uv^7
+      Field25519.square(v3, v);
+      Field25519.mult(v3, v3, v);  // v3 = v^3
+      Field25519.square(x, v3);
+      Field25519.mult(x, x, v);
+      Field25519.mult(x, x, u);  // x = uv^7
 
       pow2252m3(x, x);  // x = (uv^7)^((q-5)/8)
-      Curve25519.mult(x, x, v3);
-      Curve25519.mult(x, x, u);  // x = uv^3(uv^7)^((q-5)/8)
+      Field25519.mult(x, x, v3);
+      Field25519.mult(x, x, u);  // x = uv^3(uv^7)^((q-5)/8)
 
-      Curve25519.square(vxx, x);
-      Curve25519.mult(vxx, vxx, v);
-      Curve25519.sub(check, vxx, u);  // vx^2-u
+      Field25519.square(vxx, x);
+      Field25519.mult(vxx, vxx, v);
+      Field25519.sub(check, vxx, u);  // vx^2-u
       if (isNonZeroVarTime(check)) {
-        Curve25519.sum(check, vxx, u);  // vx^2+u
+        Field25519.sum(check, vxx, u);  // vx^2+u
         if (!isNonZeroVarTime(check)) {
           throw new IllegalArgumentException("Cannot convert given bytes to extended projective "
               + "coordinates. No square root exists for modulo 2^255-19");
         }
-        Curve25519.mult(x, x, SQRTM1);
+        Field25519.mult(x, x, SQRTM1);
       }
 
       if (!isNonZeroVarTime(x) && (s[31] & 0xff) >> 7 != 0) {
@@ -213,7 +213,7 @@ public final class Ed25519 {
         neg(x, x);
       }
 
-      Curve25519.mult(t, x, y);
+      Field25519.mult(t, x, y);
       return new XYZT(new XYZ(x, y, z), t);
     }
   }
@@ -315,10 +315,10 @@ public final class Ed25519 {
      */
     CachedXYZT(XYZT xyzt) {
       this();
-      Curve25519.sum(yPlusX, xyzt.xyz.y, xyzt.xyz.x);
-      Curve25519.sub(yMinusX, xyzt.xyz.y, xyzt.xyz.x);
+      Field25519.sum(yPlusX, xyzt.xyz.y, xyzt.xyz.x);
+      Field25519.sub(yMinusX, xyzt.xyz.y, xyzt.xyz.x);
       System.arraycopy(xyzt.xyz.z, 0, z, 0, LIMB_CNT);
-      Curve25519.mult(t2d, xyzt.t, D2);
+      Field25519.mult(t2d, xyzt.t, D2);
     }
 
     /**
@@ -336,7 +336,7 @@ public final class Ed25519 {
 
     @Override
     public void multByZ(long[] output, long[] in) {
-      Curve25519.mult(output, in, z);
+      Field25519.mult(output, in, z);
     }
   }
 
@@ -354,37 +354,37 @@ public final class Ed25519 {
     long[] t = new long[LIMB_CNT];
 
     // Y1 + X1
-    Curve25519.sum(partialXYZT.xyz.x, extended.xyz.y, extended.xyz.x);
+    Field25519.sum(partialXYZT.xyz.x, extended.xyz.y, extended.xyz.x);
 
     // Y1 - X1
-    Curve25519.sub(partialXYZT.xyz.y, extended.xyz.y, extended.xyz.x);
+    Field25519.sub(partialXYZT.xyz.y, extended.xyz.y, extended.xyz.x);
 
     // A = (Y1 - X1) * (Y2 - X2)
-    Curve25519.mult(partialXYZT.xyz.y, partialXYZT.xyz.y, cached.yMinusX);
+    Field25519.mult(partialXYZT.xyz.y, partialXYZT.xyz.y, cached.yMinusX);
 
     // B = (Y1 + X1) * (Y2 + X2)
-    Curve25519.mult(partialXYZT.xyz.z, partialXYZT.xyz.x, cached.yPlusX);
+    Field25519.mult(partialXYZT.xyz.z, partialXYZT.xyz.x, cached.yPlusX);
 
     // C = T1 * 2d * T2 = 2d * T1 * T2 (2d is written as k in the paper)
-    Curve25519.mult(partialXYZT.t, extended.t, cached.t2d);
+    Field25519.mult(partialXYZT.t, extended.t, cached.t2d);
 
     // Z1 * Z2
     cached.multByZ(partialXYZT.xyz.x, extended.xyz.z);
 
     // D = 2 * Z1 * Z2
-    Curve25519.sum(t, partialXYZT.xyz.x, partialXYZT.xyz.x);
+    Field25519.sum(t, partialXYZT.xyz.x, partialXYZT.xyz.x);
 
     // X3 = B - A
-    Curve25519.sub(partialXYZT.xyz.x, partialXYZT.xyz.z, partialXYZT.xyz.y);
+    Field25519.sub(partialXYZT.xyz.x, partialXYZT.xyz.z, partialXYZT.xyz.y);
 
     // Y3 = B + A
-    Curve25519.sum(partialXYZT.xyz.y, partialXYZT.xyz.z, partialXYZT.xyz.y);
+    Field25519.sum(partialXYZT.xyz.y, partialXYZT.xyz.z, partialXYZT.xyz.y);
 
     // Z3 = D + C
-    Curve25519.sum(partialXYZT.xyz.z, t, partialXYZT.t);
+    Field25519.sum(partialXYZT.xyz.z, t, partialXYZT.t);
 
     // T3 = D - C
-    Curve25519.sub(partialXYZT.t, t, partialXYZT.t);
+    Field25519.sub(partialXYZT.t, t, partialXYZT.t);
   }
 
   /**
@@ -401,37 +401,37 @@ public final class Ed25519 {
     long[] t = new long[LIMB_CNT];
 
     // Y1 + X1
-    Curve25519.sum(partialXYZT.xyz.x, extended.xyz.y, extended.xyz.x);
+    Field25519.sum(partialXYZT.xyz.x, extended.xyz.y, extended.xyz.x);
 
     // Y1 - X1
-    Curve25519.sub(partialXYZT.xyz.y, extended.xyz.y, extended.xyz.x);
+    Field25519.sub(partialXYZT.xyz.y, extended.xyz.y, extended.xyz.x);
 
     // A = (Y1 - X1) * (Y2 + X2)
-    Curve25519.mult(partialXYZT.xyz.y, partialXYZT.xyz.y, cached.yPlusX);
+    Field25519.mult(partialXYZT.xyz.y, partialXYZT.xyz.y, cached.yPlusX);
 
     // B = (Y1 + X1) * (Y2 - X2)
-    Curve25519.mult(partialXYZT.xyz.z, partialXYZT.xyz.x, cached.yMinusX);
+    Field25519.mult(partialXYZT.xyz.z, partialXYZT.xyz.x, cached.yMinusX);
 
     // C = T1 * 2d * T2 = 2d * T1 * T2 (2d is written as k in the paper)
-    Curve25519.mult(partialXYZT.t, extended.t, cached.t2d);
+    Field25519.mult(partialXYZT.t, extended.t, cached.t2d);
 
     // Z1 * Z2
     cached.multByZ(partialXYZT.xyz.x, extended.xyz.z);
 
     // D = 2 * Z1 * Z2
-    Curve25519.sum(t, partialXYZT.xyz.x, partialXYZT.xyz.x);
+    Field25519.sum(t, partialXYZT.xyz.x, partialXYZT.xyz.x);
 
     // X3 = B - A
-    Curve25519.sub(partialXYZT.xyz.x, partialXYZT.xyz.z, partialXYZT.xyz.y);
+    Field25519.sub(partialXYZT.xyz.x, partialXYZT.xyz.z, partialXYZT.xyz.y);
 
     // Y3 = B + A
-    Curve25519.sum(partialXYZT.xyz.y, partialXYZT.xyz.z, partialXYZT.xyz.y);
+    Field25519.sum(partialXYZT.xyz.y, partialXYZT.xyz.z, partialXYZT.xyz.y);
 
     // Z3 = D - C
-    Curve25519.sub(partialXYZT.xyz.z, t, partialXYZT.t);
+    Field25519.sub(partialXYZT.xyz.z, t, partialXYZT.t);
 
     // T3 = D + C
-    Curve25519.sum(partialXYZT.t, t, partialXYZT.t);
+    Field25519.sum(partialXYZT.t, t, partialXYZT.t);
   }
 
   /**
@@ -448,34 +448,34 @@ public final class Ed25519 {
     long[] t0 = new long[LIMB_CNT];
 
     // XX = X1^2
-    Curve25519.square(partialXYZT.xyz.x, p.x);
+    Field25519.square(partialXYZT.xyz.x, p.x);
 
     // YY = Y1^2
-    Curve25519.square(partialXYZT.xyz.z, p.y);
+    Field25519.square(partialXYZT.xyz.z, p.y);
 
     // B' = Z1^2
-    Curve25519.square(partialXYZT.t, p.z);
+    Field25519.square(partialXYZT.t, p.z);
 
     // B = 2 * B'
-    Curve25519.sum(partialXYZT.t, partialXYZT.t, partialXYZT.t);
+    Field25519.sum(partialXYZT.t, partialXYZT.t, partialXYZT.t);
 
     // A = X1 + Y1
-    Curve25519.sum(partialXYZT.xyz.y, p.x, p.y);
+    Field25519.sum(partialXYZT.xyz.y, p.x, p.y);
 
     // AA = A^2
-    Curve25519.square(t0, partialXYZT.xyz.y);
+    Field25519.square(t0, partialXYZT.xyz.y);
 
     // Y3 = YY + XX
-    Curve25519.sum(partialXYZT.xyz.y, partialXYZT.xyz.z, partialXYZT.xyz.x);
+    Field25519.sum(partialXYZT.xyz.y, partialXYZT.xyz.z, partialXYZT.xyz.x);
 
     // Z3 = YY - XX
-    Curve25519.sub(partialXYZT.xyz.z, partialXYZT.xyz.z, partialXYZT.xyz.x);
+    Field25519.sub(partialXYZT.xyz.z, partialXYZT.xyz.z, partialXYZT.xyz.x);
 
     // X3 = AA - Y3
-    Curve25519.sub(partialXYZT.xyz.x, t0, partialXYZT.xyz.y);
+    Field25519.sub(partialXYZT.xyz.x, t0, partialXYZT.xyz.y);
 
     // T3 = B - Z3
-    Curve25519.sub(partialXYZT.t, partialXYZT.t, partialXYZT.xyz.z);
+    Field25519.sub(partialXYZT.t, partialXYZT.t, partialXYZT.xyz.z);
   }
 
   /**
@@ -708,7 +708,7 @@ public final class Ed25519 {
    * Returns the least significant bit of {@code in}.
    */
   private static int getLsb(long[] in) {
-    return Curve25519.contract(in)[0] & 1;
+    return Field25519.contract(in)[0] & 1;
   }
 
   /**
@@ -729,97 +729,97 @@ public final class Ed25519 {
     long[] t2 = new long[LIMB_CNT];
 
     // z2 = z1^2^1
-    Curve25519.square(t0, in);
+    Field25519.square(t0, in);
 
     // z8 = z2^2^2
-    Curve25519.square(t1, t0);
+    Field25519.square(t1, t0);
     for (int i = 1; i < 2; i++) {
-      Curve25519.square(t1, t1);
+      Field25519.square(t1, t1);
     }
 
     // z9 = z1*z8
-    Curve25519.mult(t1, in, t1);
+    Field25519.mult(t1, in, t1);
 
     // z11 = z2*z9
-    Curve25519.mult(t0, t0, t1);
+    Field25519.mult(t0, t0, t1);
 
     // z22 = z11^2^1
-    Curve25519.square(t0, t0);
+    Field25519.square(t0, t0);
 
     // z_5_0 = z9*z22
-    Curve25519.mult(t0, t1, t0);
+    Field25519.mult(t0, t1, t0);
 
     // z_10_5 = z_5_0^2^5
-    Curve25519.square(t1, t0);
+    Field25519.square(t1, t0);
     for (int i = 1; i < 5; i++) {
-      Curve25519.square(t1, t1);
+      Field25519.square(t1, t1);
     }
 
     // z_10_0 = z_10_5*z_5_0
-    Curve25519.mult(t0, t1, t0);
+    Field25519.mult(t0, t1, t0);
 
     // z_20_10 = z_10_0^2^10
-    Curve25519.square(t1, t0);
+    Field25519.square(t1, t0);
     for (int i = 1; i < 10; i++) {
-      Curve25519.square(t1, t1);
+      Field25519.square(t1, t1);
     }
 
     // z_20_0 = z_20_10*z_10_0
-    Curve25519.mult(t1, t1, t0);
+    Field25519.mult(t1, t1, t0);
 
     // z_40_20 = z_20_0^2^20
-    Curve25519.square(t2, t1);
+    Field25519.square(t2, t1);
     for (int i = 1; i < 20; i++) {
-      Curve25519.square(t2, t2);
+      Field25519.square(t2, t2);
     }
 
     // z_40_0 = z_40_20*z_20_0
-    Curve25519.mult(t1, t2, t1);
+    Field25519.mult(t1, t2, t1);
 
     // z_50_10 = z_40_0^2^10
-    Curve25519.square(t1, t1);
+    Field25519.square(t1, t1);
     for (int i = 1; i < 10; i++) {
-      Curve25519.square(t1, t1);
+      Field25519.square(t1, t1);
     }
 
     // z_50_0 = z_50_10*z_10_0
-    Curve25519.mult(t0, t1, t0);
+    Field25519.mult(t0, t1, t0);
 
     // z_100_50 = z_50_0^2^50
-    Curve25519.square(t1, t0);
+    Field25519.square(t1, t0);
     for (int i = 1; i < 50; i++) {
-      Curve25519.square(t1, t1);
+      Field25519.square(t1, t1);
     }
 
     // z_100_0 = z_100_50*z_50_0
-    Curve25519.mult(t1, t1, t0);
+    Field25519.mult(t1, t1, t0);
 
     // z_200_100 = z_100_0^2^100
-    Curve25519.square(t2, t1);
+    Field25519.square(t2, t1);
     for (int i = 1; i < 100; i++) {
-      Curve25519.square(t2, t2);
+      Field25519.square(t2, t2);
     }
 
     // z_200_0 = z_200_100*z_100_0
-    Curve25519.mult(t1, t2, t1);
+    Field25519.mult(t1, t2, t1);
 
     // z_250_50 = z_200_0^2^50
-    Curve25519.square(t1, t1);
+    Field25519.square(t1, t1);
     for (int i = 1; i < 50; i++) {
-      Curve25519.square(t1, t1);
+      Field25519.square(t1, t1);
     }
 
     // z_250_0 = z_250_50*z_50_0
-    Curve25519.mult(t0, t1, t0);
+    Field25519.mult(t0, t1, t0);
 
     // z_252_2 = z_250_0^2^2
-    Curve25519.square(t0, t0);
+    Field25519.square(t0, t0);
     for (int i = 1; i < 2; i++) {
-      Curve25519.square(t0, t0);
+      Field25519.square(t0, t0);
     }
 
     // z_252_3 = z_252_2*z1
-    Curve25519.mult(out, t0, in);
+    Field25519.mult(out, t0, in);
   }
 
   /**

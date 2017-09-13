@@ -76,6 +76,7 @@ java_library(
         "EcdsaVerifyJce.java",
         "Ed25519Sign.java",
         "Ed25519Verify.java",
+        "Field25519.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
@@ -98,6 +99,7 @@ java_library(
         "EciesAeadHkdfHybridEncrypt.java",
         "EciesHkdfRecipientKem.java",
         "EciesHkdfSenderKem.java",
+        "Field25519.java",
         "Hkdf.java",
         "NaClCryptoBox.java",
     ],
@@ -140,6 +142,7 @@ java_library(
     name = "x25519",
     srcs = [
         "Curve25519.java",
+        "Field25519.java",
     ],
     javacopts = JAVACOPTS,
     visibility = ["//visibility:private"],

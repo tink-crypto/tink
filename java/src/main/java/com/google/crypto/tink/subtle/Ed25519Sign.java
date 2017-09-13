@@ -36,7 +36,7 @@ import java.util.Arrays;
 @Alpha
 public final class Ed25519Sign implements PublicKeySign {
 
-  public static final int SECRET_KEY_LEN = Curve25519.FIELD_LEN;
+  public static final int SECRET_KEY_LEN = Field25519.FIELD_LEN;
 
   private final byte[] hashedPrivateKey;
   private final byte[] publicKey;
@@ -83,7 +83,7 @@ public final class Ed25519Sign implements PublicKeySign {
 
     /** Returns a new <publicKey, privateKey> KeyPair. */
     public static KeyPair newKeyPair() throws GeneralSecurityException {
-      byte[] privateKey = Random.randBytes(Curve25519.FIELD_LEN);
+      byte[] privateKey = Random.randBytes(Field25519.FIELD_LEN);
       byte[] publicKey = Ed25519.scalarMultToBytes(Ed25519.getHashedScalar(privateKey));
       return new KeyPair(publicKey, privateKey);
     }

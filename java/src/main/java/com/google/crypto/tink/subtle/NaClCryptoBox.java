@@ -189,7 +189,7 @@ public final class NaClCryptoBox {
     @Override
     public byte[] encrypt(byte[] plaintext, byte[] contextInfo) throws GeneralSecurityException {
       ByteBuffer output = ByteBuffer.allocate(
-          Curve25519.FIELD_LEN + djbCipherPoly1305.nonceSizeInBytes() + plaintext.length
+          Field25519.FIELD_LEN + djbCipherPoly1305.nonceSizeInBytes() + plaintext.length
               + MAC_TAG_SIZE_IN_BYTES);
       output.put(ephemeralPublicKey.getBytes());
       djbCipherPoly1305.encrypt(output, plaintext, EMPTY_AAD);
@@ -219,7 +219,7 @@ public final class NaClCryptoBox {
     @Override
     public byte[] decrypt(byte[] ciphertext, byte[] contextInfo) throws GeneralSecurityException {
       ByteBuffer ciphertextBuf = ByteBuffer.wrap(ciphertext);
-      final byte[] peerPublicKey = new byte[Curve25519.FIELD_LEN];
+      final byte[] peerPublicKey = new byte[Field25519.FIELD_LEN];
       ciphertextBuf.get(peerPublicKey);
       return factory.constructWithKem(privateKey.getBytes(), peerPublicKey).decrypt(
           ciphertextBuf, EMPTY_AAD);
