@@ -21,6 +21,9 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
 /** Various helpers. */
@@ -94,5 +97,18 @@ class Util {
     if (!hasPrimaryKey && !containsOnlyPublicKeyMaterial) {
       throw new GeneralSecurityException("keyset doesn't contain a valid primary key");
     }
+  }
+
+  /**
+   * Reads all bytes from {@code inputStream}.
+   */
+  public static byte[] readAll(InputStream inputStream) throws IOException {
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    byte[] buf = new byte[1024];
+    int count;
+    while ((count = inputStream.read(buf)) != -1) {
+      result.write(buf, 0, count);
+    }
+    return result.toByteArray();
   }
 }

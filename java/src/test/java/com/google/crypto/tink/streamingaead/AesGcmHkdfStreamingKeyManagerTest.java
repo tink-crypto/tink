@@ -21,8 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.TestUtil.ByteBufferChannel;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;

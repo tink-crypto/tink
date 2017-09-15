@@ -21,8 +21,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.StreamingTestUtil;
+import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.TestUtil.ByteBufferChannel;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -793,7 +794,7 @@ public class AesGcmHkdfStreamingTest {
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
 
     // Encrypt to file
-    Path path = TestUtil.generateRandomPath("testFileEncryption");
+    Path path = StreamingTestUtil.generateRandomPath("testFileEncryption");
     FileChannel ctChannel =
         FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
     WritableByteChannel bc = ags.newEncryptingChannel(ctChannel, aad);

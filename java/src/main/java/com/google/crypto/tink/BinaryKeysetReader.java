@@ -31,6 +31,10 @@ import java.io.InputStream;
 public final class BinaryKeysetReader implements KeysetReader {
   private final InputStream inputStream;
 
+  /**
+   * Note: the input stream won't be read until {@link BinaryKeysetReader#read} or
+   * {@link BinaryKeysetReader#readEncrypted} is called.
+   */
   public static KeysetReader withInputStream(InputStream stream) {
     return new BinaryKeysetReader(stream);
   }
@@ -39,6 +43,10 @@ public final class BinaryKeysetReader implements KeysetReader {
     return new BinaryKeysetReader(new ByteArrayInputStream(bytes));
   }
 
+  /**
+   * Note: the input file won't be read until {@link BinaryKeysetReader#read} or
+   * {@link BinaryKeysetReader#readEncrypted} is called.
+   */
   public static KeysetReader withFile(File file) throws IOException {
     return new BinaryKeysetReader(new FileInputStream(file));
   }

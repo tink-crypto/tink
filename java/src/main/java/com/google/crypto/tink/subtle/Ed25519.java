@@ -16,13 +16,13 @@
 
 package com.google.crypto.tink.subtle;
 
-import static com.google.crypto.tink.subtle.Field25519.FIELD_LEN;
-import static com.google.crypto.tink.subtle.Field25519.LIMB_CNT;
 import static com.google.crypto.tink.subtle.Ed25519Constants.B2;
 import static com.google.crypto.tink.subtle.Ed25519Constants.B_TABLE;
 import static com.google.crypto.tink.subtle.Ed25519Constants.D;
 import static com.google.crypto.tink.subtle.Ed25519Constants.D2;
 import static com.google.crypto.tink.subtle.Ed25519Constants.SQRTM1;
+import static com.google.crypto.tink.subtle.Field25519.FIELD_LEN;
+import static com.google.crypto.tink.subtle.Field25519.LIMB_CNT;
 
 import com.google.crypto.tink.annotations.Alpha;
 import java.security.GeneralSecurityException;

@@ -21,7 +21,8 @@ To add a dependency on Tink using Maven, use the following:
   <artifactId>tink</artifactId>
   <version>1.0.0</version>
   <!-- or, for Android: -->
-  <version>1.0.0-android</version>
+  <artifactId>tink-android</artifactId>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -31,7 +32,7 @@ To add a dependency using Gradle:
 dependencies {
   compile 'com.google.crypto.tink:tink:1.0.0'
   // or, for Android:
-  compile 'com.google.crypto.tink:tink:1.0.0-android'
+  compile 'com.google.crypto.tink:tink-android:1.0.0'
 }
 ```
 

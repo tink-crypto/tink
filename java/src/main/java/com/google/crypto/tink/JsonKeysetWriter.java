@@ -53,6 +53,10 @@ public final class JsonKeysetWriter implements KeysetWriter {
     return new JsonKeysetWriter(new FileOutputStream(file));
   }
 
+  public static KeysetWriter withPath(String path) throws IOException {
+    return withFile(new File(path));
+  }
+
   public static KeysetWriter withPath(Path path) throws IOException {
     return withFile(path.toFile());
   }

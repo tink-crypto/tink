@@ -30,6 +30,7 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -93,8 +94,8 @@ public class RotateKeysetCommandTest {
           outputStream, OUTPUT_FORMAT,
           emptyStream, INPUT_FORMAT,
           masterKeyUri, credentialPath, NEW_TEMPLATE);
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException e) {
+      fail("Expected IOException");
+    } catch (IOException e) {
       // expected
     }
   }

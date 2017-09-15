@@ -56,20 +56,12 @@ import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.NonWritableChannelException;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileInputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
@@ -100,117 +92,6 @@ public class TestUtil {
     @Override
     public byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException {
       throw new GeneralSecurityException("dummy");
-    }
-  }
-
-  /** Implements a SeekableByteChannel for testing. The implementation is backed by a ByteBuffer. */
-  public static class ByteBufferChannel implements SeekableByteChannel {
-    private final ByteBuffer buffer;
-
-    /**
-     * Defines the maximal size of a chunk that is transferred with a single write. This can be used
-     * to test the behavior of streaming encryption with channels where not always sufficiently many
-     * bytes are available during reads and writes.
-     */
-    private final int maxChunkSize;
-
-    /** keeps track whether the channel is still open. */
-    private boolean isopen;
-
-    public ByteBufferChannel(ByteBuffer buffer) {
-      this.buffer = buffer.duplicate();
-      maxChunkSize = java.lang.Integer.MAX_VALUE;
-      isopen = true;
-    }
-
-    public ByteBufferChannel(ByteBuffer buffer, int maxChunkSize) {
-      this.buffer = buffer.duplicate();
-      this.maxChunkSize = maxChunkSize;
-      isopen = true;
-    }
-
-    public ByteBufferChannel(byte[] bytes) {
-      this.buffer = ByteBuffer.wrap(bytes);
-      maxChunkSize = java.lang.Integer.MAX_VALUE;
-      isopen = true;
-    }
-
-    private void checkIsOpen() throws ClosedChannelException {
-      if (!isopen) {
-        throw new ClosedChannelException();
-      }
-    }
-
-    @Override
-    public long position() throws ClosedChannelException {
-      checkIsOpen();
-      return buffer.position();
-    }
-
-    @Override
-    public synchronized ByteBufferChannel position(long newPosition) throws ClosedChannelException {
-      checkIsOpen();
-      if (newPosition < 0) {
-        throw new IllegalArgumentException("negative position");
-      }
-      if (newPosition > buffer.limit()) {
-        newPosition = buffer.limit();
-      }
-      buffer.position((int) newPosition);
-      return this;
-    }
-
-    @Override
-    public synchronized int read(ByteBuffer dst) throws IOException {
-      checkIsOpen();
-      if (buffer.remaining() == 0) {
-        return -1;
-      }
-      // Not the most efficient way.
-      int size = Math.min(buffer.remaining(), dst.remaining());
-      size = Math.min(size, maxChunkSize);
-      byte[] bytes = new byte[size];
-      buffer.get(bytes);
-      dst.put(bytes);
-      return size;
-    }
-
-    @Override
-    public int write(ByteBuffer src) throws IOException {
-      checkIsOpen();
-      // not the most efficient way
-      int size = Math.min(buffer.remaining(), src.remaining());
-      size = Math.min(size, maxChunkSize);
-      byte[] bytes = new byte[size];
-      src.get(bytes);
-      buffer.put(bytes);
-      return size;
-    }
-
-    @Override
-    public long size() throws ClosedChannelException {
-      checkIsOpen();
-      return buffer.limit();
-    }
-
-    @Override
-    public SeekableByteChannel truncate(long size) throws NonWritableChannelException {
-      throw new NonWritableChannelException();
-    }
-
-    @Override
-    public void close() throws IOException {
-      isopen = false;
-    }
-
-    @Override
-    public boolean isOpen() {
-      return isopen;
-    }
-
-    public void rewind() {
-      isopen = true;
-      buffer.rewind();
     }
   }
 
@@ -529,13 +410,14 @@ public class TestUtil {
   }
 
   /** Gets JSONObject from file. */
-  public static JSONObject getJsonObject(String filename) throws Exception {
-    return new JSONObject(new String(Files.readAllBytes(Paths.get(filename)), UTF_8));
+  public static JSONObject getJsonObject(String path) throws Exception {
+    return new JSONObject(
+        new String(Util.readAll(new FileInputStream(new File(path))), UTF_8));
   }
 
   /**
-   * Gets hex-decoded bytes value from JsonObject. Wycheproof represents byte arrays as hexadeciamal
-   * strings.
+   * Gets hex-decoded bytes value from JsonObject. Wycheproof represents byte arrays as
+   * hexadeciamal strings.
    */
   public static byte[] getBytes(JSONObject object, String name) throws Exception {
     String hex = object.getString(name);
@@ -575,12 +457,5 @@ public class TestUtil {
     assertThat(keyInfo.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(keyInfo.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
     assertThat(keyInfo.getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
-  }
-
-  /** Generates and returns a random, temporary file path. */
-  public static Path generateRandomPath(String prefix) {
-    String tmpDir = java.lang.System.getenv("TEST_TMPDIR");
-    String tmpFilename = String.format("%s.%s.tmp", prefix, new SecureRandom().nextLong());
-    return FileSystems.getDefault().getPath(tmpDir, tmpFilename);
   }
 }

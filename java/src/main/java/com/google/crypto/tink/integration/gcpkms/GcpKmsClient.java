@@ -25,10 +25,9 @@ import com.google.auto.service.AutoService;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.subtle.Validators;
-import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 
 /** An implementation of {@code KmsClient} for Google Cloud KMS. */
@@ -80,7 +79,7 @@ public final class GcpKmsClient implements KmsClient {
     try {
       GoogleCredential credentials =
           GoogleCredential.fromStream(
-              new ByteArrayInputStream(Files.readAllBytes(Paths.get(credentialPath))));
+              new FileInputStream(new File(credentialPath)));
       return withCredentials(credentials);
     } catch (IOException e) {
       throw new GeneralSecurityException("cannot load credentials", e);

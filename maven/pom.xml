@@ -95,6 +95,7 @@
     <junit.version>4.12</junit.version>
     <mockito-core.version>2.8.47</mockito-core.version>
     <protobuf.version>3.3.0</protobuf.version>
+    <protobuf-lite.version>3.0.1</protobuf-lite.version>
     <protoc-gen-javalite.version>3.0.0</protoc-gen-javalite.version>
     <truth.version>0.32</truth.version>
 
@@ -168,6 +169,12 @@
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-java-util</artifactId>
         <version>${protobuf.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-lite</artifactId>
+        <version>${protobuf-lite.version}</version>
       </dependency>
 
       <dependency>

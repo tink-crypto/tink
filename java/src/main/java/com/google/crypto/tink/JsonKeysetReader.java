@@ -29,11 +29,11 @@ import com.google.crypto.tink.proto.KeysetInfo.KeyInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.protobuf.ByteString;
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,43 +44,62 @@ import org.json.JSONObject;
  * JSON format.
  */
 public final class JsonKeysetReader implements KeysetReader {
+  private final InputStream inputStream;
   private final JSONObject json;
   private boolean urlSafeBase64 = false;
 
-  private JsonKeysetReader(JSONObject input) {
-    json = input;
+  private JsonKeysetReader(InputStream inputStream) {
+    this.inputStream = inputStream;
+    json = null;
   }
 
-  private JsonKeysetReader(String input) {
-    try {
-      json = new JSONObject(input);
-    } catch (JSONException e) {
-      throw new IllegalArgumentException(e);
-    }
+  private JsonKeysetReader(JSONObject json) {
+    this.json = json;
+    this.inputStream = null;
   }
 
+  /**
+   * Note: the input stream won't be read until {@link JsonKeysetReader#read} or
+   * {@link JsonKeysetReader#readEncrypted} is called.
+   */
   public static KeysetReader withInputStream(InputStream input) throws IOException {
-    return new JsonKeysetReader(readAll(input));
-  }
-
-  public static JsonKeysetReader withJsonObject(JSONObject json) {
-    return new JsonKeysetReader(json);
-  }
-
-  public static JsonKeysetReader withString(String input) {
     return new JsonKeysetReader(input);
   }
 
+  public static JsonKeysetReader withJsonObject(JSONObject input) {
+    return new JsonKeysetReader(input);
+  }
+
+  public static JsonKeysetReader withString(String input) {
+    return new JsonKeysetReader(new ByteArrayInputStream(input.getBytes(UTF_8)));
+  }
+
   public static JsonKeysetReader withBytes(final byte[] bytes) {
-    return new JsonKeysetReader(new String(bytes, UTF_8));
+    return new JsonKeysetReader(new ByteArrayInputStream(bytes));
   }
 
+  /**
+   * Note: the file won't be read until {@link JsonKeysetReader#read} or
+   * {@link JsonKeysetReader#readEncrypted} is called.
+   */
   public static JsonKeysetReader withFile(File file) throws IOException {
-    return withPath(file.toPath());
+    return new JsonKeysetReader(new FileInputStream(file));
   }
 
+  /**
+   * Note: the file path won't be read until {@link JsonKeysetReader#read} or
+   * {@link JsonKeysetReader#readEncrypted} is called.
+   */
+  public static JsonKeysetReader withPath(String path) throws IOException {
+    return withFile(new File(path));
+  }
+
+  /**
+   * Note: the file path won't be read until {@link JsonKeysetReader#read} or
+   * {@link JsonKeysetReader#readEncrypted} is called.
+   */
   public static JsonKeysetReader withPath(Path path) throws IOException {
-    return new JsonKeysetReader(new String(Files.readAllBytes(path), UTF_8));
+    return withFile(path.toFile());
   }
 
   public JsonKeysetReader withUrlSafeBase64() {
@@ -88,20 +107,15 @@ public final class JsonKeysetReader implements KeysetReader {
     return this;
   }
 
-  private static String readAll(InputStream input) throws IOException {
-    ByteArrayOutputStream result = new ByteArrayOutputStream();
-    byte[] buf = new byte[1024];
-    int count;
-    while ((count = input.read(buf)) != -1) {
-      result.write(buf, 0, count);
-    }
-    return result.toString(UTF_8.name());
-  }
-
   @Override
   public Keyset read() throws IOException {
     try {
-      return keysetFromJson(json);
+      if (json != null) {
+        return keysetFromJson(json);
+      } else {
+        return keysetFromJson(new JSONObject(
+            new String(Util.readAll(inputStream), UTF_8)));
+      }
     } catch (JSONException e) {
       throw new IOException(e);
     }
@@ -110,7 +124,12 @@ public final class JsonKeysetReader implements KeysetReader {
   @Override
   public EncryptedKeyset readEncrypted() throws IOException {
     try {
-      return encryptedKeysetFromJson(json);
+      if (json != null) {
+        return encryptedKeysetFromJson(json);
+      } else {
+        return encryptedKeysetFromJson(new JSONObject(
+            new String(Util.readAll(inputStream), UTF_8)));
+      }
     } catch (JSONException e) {
       throw new IOException(e);
     }

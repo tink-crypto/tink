@@ -104,16 +104,16 @@ public class CreatePublicKeysetCommandTest {
     String credentialPath = null;
     InputStream inputStream1 = TinkeyUtil.createKeyset(
         template, INPUT_FORMAT, masterKeyUri, credentialPath);
-    inputStream1.mark(inputStream1.available());
     KeysetReader privateReader = TinkeyUtil
         .createKeysetReader(inputStream1, INPUT_FORMAT);
-    inputStream1.reset();
     // Create the public keyset.
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    inputStream1.mark(inputStream1.available());
     CreatePublicKeysetCommand.create(
         outputStream, OUTPUT_FORMAT,
         inputStream1, INPUT_FORMAT,
         masterKeyUri, credentialPath);
+    inputStream1.reset();
     InputStream inputStream2 = new ByteArrayInputStream(outputStream.toByteArray());
     KeysetReader publicReader = TinkeyUtil
         .createKeysetReader(inputStream2, OUTPUT_FORMAT);
