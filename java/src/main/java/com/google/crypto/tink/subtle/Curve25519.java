@@ -20,32 +20,22 @@ import com.google.crypto.tink.annotations.Alpha;
 import java.util.Arrays;
 
 /**
- * Defines X25519 function based on curve25519-donna C implementation (mostly identical).
- * See https://github.com/agl/curve25519-donna/blob/master/curve25519-donna.c
+ * This class implements point arithmetic on the elliptic curve <a
+ * href="https://cr.yp.to/ecdh/curve25519-20060209.pdf">Curve25519</a>.
  *
- * Example Usage:
+ * <p>This class only implements point arithmetic, if you want to use the ECDH Curve25519 function,
+ * please checkout {@link com.google.crypto.tink.subtle.X25519}.
  *
- * Alice:
- * byte[] privateKeyA = Curve25519.GeneratePrivateKey();
- * byte[] publicKeyA = Curve25519.x25519PublicFromPrivate(privateKeyA);
- * Bob:
- * byte[] privateKeyB = Curve25519.GeneratePrivateKey();
- * byte[] publicKeyB = Curve25519.x25519PublicFromPrivate(privateKeyB);
- *
- * Alice sends publicKeyA to Bob and Bob sends publicKeyB to Alice.
- * Alice:
- * byte[] sharedSecretA = Curve25519.x25519(privateKeyA, publicKeyB);
- * Bob:
- * byte[] sharedSecretB = Curve25519.x25519(privateKeyB, publicKeyA);
- * such that sharedSecretA == sharedSecretB.
+ * <p>This implementation is based on <a
+ * href="https://github.com/agl/curve25519-donna/blob/master/curve25519-donna.c">curve255-donna C
+ * implementation</a>.
  */
 @Alpha
-public final class Curve25519 {
+final class Curve25519 {
   /**
    * Computes Montgomery's double-and-add formulas.
    *
-   * On entry and exit, the absolute value of the limbs of all inputs and outputs
-   * are < 2^26.
+   * <p>On entry and exit, the absolute value of the limbs of all inputs and outputs are < 2^26.
    *
    * @param x2 x projective coordinate of output 2Q, long form
    * @param z2 z projective coordinate of output 2Q, long form
@@ -58,7 +48,14 @@ public final class Curve25519 {
    * @param qmqp input Q - Q', short form, preserved
    */
   private static void monty(
-      long[] x2, long[] z2, long[] x3, long[] z3, long[] x, long[] z, long[] xprime, long[] zprime,
+      long[] x2,
+      long[] z2,
+      long[] x3,
+      long[] z3,
+      long[] x,
+      long[] z,
+      long[] xprime,
+      long[] zprime,
       long[] qmqp) {
     long[] origx = Arrays.copyOf(x, Field25519.LIMB_CNT);
     long[] zzz = new long[19];
@@ -71,7 +68,7 @@ public final class Curve25519 {
 
     Field25519.sum(x, z);
     // |x[i]| < 2^27
-    Field25519.sub(z, origx);  // does x - z
+    Field25519.sub(z, origx); // does x - z
     // |z[i]| < 2^27
 
     long[] origxprime = Arrays.copyOf(xprime, Field25519.LIMB_CNT);
@@ -117,7 +114,7 @@ public final class Curve25519 {
     Field25519.reduceSizeByModularReduction(x2);
     Field25519.reduceCoefficients(x2);
     // |x2[i]| < 2^26
-    Field25519.sub(zz, xx);  // does zz = xx - zz
+    Field25519.sub(zz, xx); // does zz = xx - zz
     // |zz[i]| < 2^27
     Arrays.fill(zzz, Field25519.LIMB_CNT, zzz.length - 1, 0);
     Field25519.scalarProduct(zzz, zz, 121665);
@@ -137,12 +134,12 @@ public final class Curve25519 {
 
   /**
    * Conditionally swap two reduced-form limb arrays if {@code iswap} is 1, but leave them unchanged
-   * if {@code iswap} is 0.  Runs in data-invariant time to avoid side-channel attacks.
+   * if {@code iswap} is 0. Runs in data-invariant time to avoid side-channel attacks.
    *
-   * NOTE that this function requires that {@code iswap} be 1 or 0; other values give wrong results.
-   * Also, the two limb arrays must be in reduced-coefficient, reduced-degree form: the values in
-   * a[10..19] or b[10..19] aren't swapped, and all all values in a[0..9],b[0..9] must have
-   * magnitude less than Integer.MAX_VALUE.
+   * <p>NOTE that this function requires that {@code iswap} be 1 or 0; other values give wrong
+   * results. Also, the two limb arrays must be in reduced-coefficient, reduced-degree form: the
+   * values in a[10..19] or b[10..19] aren't swapped, and all all values in a[0..9],b[0..9] must
+   * have magnitude less than Integer.MAX_VALUE.
    */
   static void swapConditional(long[] a, long[] b, int iswap) {
     int swap = -iswap;
@@ -155,13 +152,13 @@ public final class Curve25519 {
 
   /**
    * Conditionally copies a reduced-form limb arrays {@code b} into {@code a} if {@code icopy} is 1,
-   * but leave {@code a} unchanged if 'iswap' is 0.  Runs in data-invariant time to avoid
+   * but leave {@code a} unchanged if 'iswap' is 0. Runs in data-invariant time to avoid
    * side-channel attacks.
    *
-   * NOTE that this function requires that {@code icopy} be 1 or 0; other values give wrong results.
-   * Also, the two limb arrays must be in reduced-coefficient, reduced-degree form: the values in
-   * a[10..19] or b[10..19] aren't swapped, and all all values in a[0..9],b[0..9] must have
-   * magnitude less than Integer.MAX_VALUE.
+   * <p>NOTE that this function requires that {@code icopy} be 1 or 0; other values give wrong
+   * results. Also, the two limb arrays must be in reduced-coefficient, reduced-degree form: the
+   * values in a[10..19] or b[10..19] aren't swapped, and all all values in a[0..9],b[0..9] must
+   * have magnitude less than Integer.MAX_VALUE.
    */
   static void copyConditional(long[] a, long[] b, int icopy) {
     int copy = -icopy;
@@ -179,15 +176,19 @@ public final class Curve25519 {
    * @param n a little endian, 32-byte number
    * @param q a point of the curve (short form)
    */
-  private static void curveMult(long[] resultx, long[] resultz, byte[] n, long[] q) {
+  static void curveMult(long[] resultx, long[] resultz, byte[] n, long[] q) {
     long[] nqpqx = new long[19];
-    long[] nqpqz = new long[19]; nqpqz[0] = 1;
-    long[] nqx = new long[19]; nqx[0] = 1;
+    long[] nqpqz = new long[19];
+    nqpqz[0] = 1;
+    long[] nqx = new long[19];
+    nqx[0] = 1;
     long[] nqz = new long[19];
     long[] nqpqx2 = new long[19];
-    long[] nqpqz2 = new long[19]; nqpqz2[0] = 1;
+    long[] nqpqz2 = new long[19];
+    nqpqz2[0] = 1;
     long[] nqx2 = new long[19];
-    long[] nqz2 = new long[19]; nqz2[0] = 1;
+    long[] nqz2 = new long[19];
+    nqz2[0] = 1;
     long[] t = null;
 
     System.arraycopy(q, 0, nqpqx, 0, Field25519.LIMB_CNT);
@@ -220,79 +221,5 @@ public final class Curve25519 {
 
     System.arraycopy(nqx, 0, resultx, 0, Field25519.LIMB_CNT);
     System.arraycopy(nqz, 0, resultz, 0, Field25519.LIMB_CNT);
-  }
-
-  /**
-   * Returns a 32-byte private key for Curve25519.
-   *
-   * Note from BoringSSL: All X25519 implementations should decode scalars correctly (see
-   * https://tools.ietf.org/html/rfc7748#section-5). However, if an implementation doesn't then it
-   * might interoperate with random keys a fraction of the time because they'll, randomly, happen to
-   * be correctly formed.
-   *
-   * Thus we do the opposite of the masking here to make sure that our private keys are never
-   * correctly masked and so, hopefully, any incorrect implementations are deterministically broken.
-   *
-   * This does not affect security because, although we're throwing away entropy, a valid
-   * implementation of x25519 should throw away the exact same bits anyway.
-   */
-  @SuppressWarnings("NarrowingCompoundAssignment")
-  public static byte[] generatePrivateKey() {
-    byte[] privateKey = Random.randBytes(Field25519.FIELD_LEN);
-
-    privateKey[0] |= 7;
-    privateKey[31] &= 63;
-    privateKey[31] |= 128;
-
-    return privateKey;
-  }
-
-  /**
-   * Returns the 32-byte shared key (i.e., privateKey·peersPublicValue on the curve).
-   *
-   * @param privateKey 32-byte private key
-   * @param peersPublicValue 32-byte public value
-   * @return the 32-byte shared key
-   * @throws IllegalArgumentException when either {@code privateKey} or {@code peersPublicValue} is
-   * not 32 bytes.
-   */
-  @SuppressWarnings("NarrowingCompoundAssignment")
-  public static byte[] x25519(byte[] privateKey, byte[] peersPublicValue) {
-    if (privateKey.length != Field25519.FIELD_LEN) {
-      throw new IllegalArgumentException("Private key must have 32 bytes.");
-    }
-    if (peersPublicValue.length != Field25519.FIELD_LEN) {
-      throw new IllegalArgumentException("Peer's public key must have 32 bytes.");
-    }
-    long[] x = new long[Field25519.LIMB_CNT];
-    long[] z = new long[Field25519.LIMB_CNT + 1];
-    long[] zmone = new long[Field25519.LIMB_CNT];
-
-    byte[] e = Arrays.copyOf(privateKey, Field25519.FIELD_LEN);
-    e[0] &= 248;
-    e[31] &= 127;
-    e[31] |= 64;
-
-    long[] bp = Field25519.expand(peersPublicValue);
-    curveMult(x, z, e, bp);
-    Field25519.inverse(zmone, z);
-    Field25519.mult(z, x, zmone);
-    return Field25519.contract(z);
-  }
-
-  /**
-   * Returns the 32-byte Diffie-Hellman public value based on the given  {@code privateKey} (i.e.,
-   * {@code privateKey}·[9] on the curve).
-   *
-   * @param privateKey 32-byte private key
-   * @return 32-byte Diffie-Hellman public value
-   * @throws IllegalArgumentException when the {@code privateKey} is not 32 bytes.
-   */
-  public static byte[] x25519PublicFromPrivate(byte[] privateKey) {
-    if (privateKey.length != Field25519.FIELD_LEN) {
-      throw new IllegalArgumentException("Private key must have 32 bytes.");
-    }
-    byte[] base = new byte[Field25519.FIELD_LEN]; base[0] = 9;
-    return x25519(privateKey, base);
   }
 }

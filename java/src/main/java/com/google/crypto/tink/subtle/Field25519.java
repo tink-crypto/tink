@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.annotations.Alpha;
 import java.util.Arrays;
-
 
 /**
  * Defines field 25519 function based on curve25519-donna C implementation (mostly identical).
@@ -31,7 +31,7 @@ import java.util.Arrays;
  *
  * <p>i.e. the limbs are 26, 25, 26, 25, ... bits wide.
  */
-
+@Alpha
 final class Field25519 {
   /**
    * During Field25519 computation, the mixed radix representation may be in different forms:
@@ -216,7 +216,7 @@ final class Field25519 {
    * On exit: |output[0..8]| < 280*2^54
    */
   static void reduceSizeByModularReduction(long[] output) {
-    // The coefficients x[10], x[11],..., x[18] are eliminated by reduction modulo 2^255 - 9.
+    // The coefficients x[10], x[11],..., x[18] are eliminated by reduction modulo 2^255 - 19.
     // For example, the coefficient x[18] is multiplied by 19 and added to the coefficient x[8].
     //
     // Each of these shifts and adds ends up multiplying the value by 19.

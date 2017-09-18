@@ -330,7 +330,7 @@ public class DjbCipherPoly1305Test {
     }
 
     private static byte[] sharedKey(byte[] privateKey, byte[] publicKey) {
-      return Curve25519.x25519(privateKey, publicKey);
+      return X25519.computeSharedSecret(privateKey, publicKey);
     }
 
     /**

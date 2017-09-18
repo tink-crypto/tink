@@ -25,17 +25,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Unit tests for Curve25519. */
+/** Unit tests for {@link X25519}. */
 @RunWith(JUnit4.class)
-public class Curve25519Test {
-
+public final class X25519Test {
   /**
    * Tests against the test vectors in Section 5.2 of RFC 7748. https://tools.ietf.org/html/rfc7748
    */
   @Test
   public void testRfcTestVectors() {
     byte[] out =
-        Curve25519.x25519(
+        X25519.computeSharedSecret(
             TestUtil.hexDecode("a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4"),
             TestUtil.hexDecode("e6db6867583030db3594c1a424b15f7c726624ec26b3353b10a903a6d0ab1c4c"));
     assertEquals(
@@ -43,7 +42,7 @@ public class Curve25519Test {
         TestUtil.hexEncode(out));
 
     out =
-        Curve25519.x25519(
+        X25519.computeSharedSecret(
             TestUtil.hexDecode("4b66e9d4d1b4673c5ad22691957d6af5c11b6421e0ea01d42ca4169e7918ba0d"),
             TestUtil.hexDecode("e5210f12786811d3f4b7959d0538ae2c31dbe7106fc03c3efc4cd549c715a493"));
     assertEquals(
@@ -57,12 +56,12 @@ public class Curve25519Test {
     byte[] k = new byte[32];
     k[0] = 9;
     byte[] prevK = k;
-    k = Curve25519.x25519(k, prevK);
+    k = X25519.computeSharedSecret(k, prevK);
     assertEquals(
         "422c8e7a6227d7bca1350b3e2bb7279f7897b87bb6854b783c60e80311ae3079", TestUtil.hexEncode(k));
     for (int i = 0; i < 999; i++) {
       byte[] tmp = k;
-      k = Curve25519.x25519(k, prevK);
+      k = X25519.computeSharedSecret(k, prevK);
       prevK = tmp;
     }
     assertEquals(
@@ -76,21 +75,21 @@ public class Curve25519Test {
   @Test
   public void testDHTestVectors() {
     byte[] out =
-        Curve25519.x25519PublicFromPrivate(
+        X25519.publicFromPrivate(
             TestUtil.hexDecode("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"));
     assertEquals(
         "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a",
         TestUtil.hexEncode(out));
 
     out =
-        Curve25519.x25519PublicFromPrivate(
+        X25519.publicFromPrivate(
             TestUtil.hexDecode("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb"));
     assertEquals(
         "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f",
         TestUtil.hexEncode(out));
 
     out =
-        Curve25519.x25519(
+        X25519.computeSharedSecret(
             TestUtil.hexDecode("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"),
             TestUtil.hexDecode("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f"));
     assertEquals(
@@ -98,7 +97,7 @@ public class Curve25519Test {
         TestUtil.hexEncode(out));
 
     out =
-        Curve25519.x25519(
+        X25519.computeSharedSecret(
             TestUtil.hexDecode("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb"),
             TestUtil.hexDecode("8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a"));
     assertEquals(
@@ -108,7 +107,7 @@ public class Curve25519Test {
 
   @Test
   public void testGeneratePrivateKeyReturnsIntentionallyMalformedKeys() {
-    byte[] privateKey = Curve25519.generatePrivateKey();
+    byte[] privateKey = X25519.generatePrivateKey();
     assertEquals(7, privateKey[0] & 7);
     assertEquals(128, privateKey[31] & 192);
   }
@@ -118,7 +117,7 @@ public class Curve25519Test {
     byte[] base = new byte[peersPublicValueLen];
     base[0] = 9;
     try {
-      Curve25519.x25519(privateKey, base);
+      X25519.computeSharedSecret(privateKey, base);
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException expected) {
       assertThat(expected).hasMessageThat().containsMatch(errorMsg);
@@ -145,10 +144,10 @@ public class Curve25519Test {
     x25519Helper(32, 33, "Peer's public key must have 32 bytes.");
   }
 
-  private static void x25519PublicFromPrivateHelper(int privateKeyLen, String errorMsg) {
+  private static void publicFromPrivateHelper(int privateKeyLen, String errorMsg) {
     byte[] privateKey = new byte[privateKeyLen];
     try {
-      Curve25519.x25519PublicFromPrivate(privateKey);
+      X25519.publicFromPrivate(privateKey);
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException expected) {
       assertThat(expected).hasMessageThat().containsMatch(errorMsg);
@@ -157,11 +156,11 @@ public class Curve25519Test {
 
   @Test
   public void testX25519PublicFromPrivateThrowsIllegalArgExWhenPrivateKeyIsLessThan32Bytes() {
-    x25519PublicFromPrivateHelper(31, "Private key must have 32 bytes.");
+    publicFromPrivateHelper(31, "Private key must have 32 bytes.");
   }
 
   @Test
   public void testX25519PublicFromPrivateThrowsIllegalArgExWhenPrivateKeyIsGreaterThan32Bytes() {
-    x25519PublicFromPrivateHelper(33, "Private key must have 32 bytes.");
+    publicFromPrivateHelper(33, "Private key must have 32 bytes.");
   }
 }

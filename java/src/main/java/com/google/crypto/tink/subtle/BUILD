@@ -77,6 +77,7 @@ java_library(
         "Ed25519Sign.java",
         "Ed25519Verify.java",
         "Field25519.java",
+        "X25519.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
@@ -102,6 +103,7 @@ java_library(
         "Field25519.java",
         "Hkdf.java",
         "NaClCryptoBox.java",
+        "X25519.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
@@ -143,6 +145,7 @@ java_library(
     srcs = [
         "Curve25519.java",
         "Field25519.java",
+        "X25519.java",
     ],
     javacopts = JAVACOPTS,
     visibility = ["//visibility:private"],
