@@ -108,6 +108,7 @@ java_library(
 java_library(
     name = "cleartext_keyset_handle",
     visibility = [
+        "//examples:__subpackages__",
         "//tools/tinkey:__pkg__",
     ],
     exports = [

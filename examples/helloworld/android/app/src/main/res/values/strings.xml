@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Tink Hello World</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_plaintext">Plaintext</string>
+    <string name="prompt_ciphertext">Ciphertext</string>
+    <string name="action_encrypt">Encrypt</string>
+    <string name="action_decrypt">Decrypt</string>
+    <string name="error_cannot_encrypt">Cannot encrypt</string>
+    <string name="error_cannot_decrypt">Cannot decrypt</string>
+    <string name="error_field_required">This field is required</string>
+</resources>
