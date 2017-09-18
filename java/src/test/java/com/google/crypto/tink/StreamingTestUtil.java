@@ -16,11 +16,20 @@
 
 package com.google.crypto.tink;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
+import com.google.crypto.tink.subtle.Random;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.NonWritableChannelException;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.security.SecureRandom;
@@ -145,6 +154,139 @@ public class StreamingTestUtil {
     public void rewind() {
       isopen = true;
       buffer.rewind();
+    }
+  }
+
+  /**
+   * Implements a ReadableByteChannel for testing.
+   *
+   * The implementation is backed by an array of bytes of size {@code BLOCK_SIZE},
+   * which upon read()-operation is repeated until the specified size of the channel.
+   */
+  public static class PseudorandomReadableByteChannel implements ReadableByteChannel {
+    private long size;
+    private long position;
+    private boolean open;
+    private byte[] repeatedBlock;
+    public static final int BLOCK_SIZE = 1024;
+
+    /** Returns a plaintext of a given size. */
+    private byte[] generatePlaintext(int size) {
+      byte[] plaintext = new byte[size];
+      for (int i = 0; i < size; i++) {
+        plaintext[i] = (byte) (i % 253);
+      }
+      return plaintext;
+    }
+
+    public PseudorandomReadableByteChannel(long size) {
+      this.size = size;
+      this.position = 0;
+      this.open = true;
+      this.repeatedBlock = generatePlaintext(BLOCK_SIZE);
+    }
+
+    @Override
+    public int read(ByteBuffer dst) throws IOException {
+      if (!open) {
+        throw new ClosedChannelException();
+      }
+      if (position == size) {
+        return -1;
+      }
+      long start = position;
+      long end = java.lang.Math.min(size, start + dst.remaining());
+      long firstBlock = start / BLOCK_SIZE;
+      long lastBlock = end / BLOCK_SIZE;
+      int startOffset = (int) (start % BLOCK_SIZE);
+      int endOffset = (int) (end % BLOCK_SIZE);
+      if (firstBlock == lastBlock) {
+        dst.put(repeatedBlock, startOffset, endOffset - startOffset);
+      } else {
+        dst.put(repeatedBlock, startOffset, BLOCK_SIZE - startOffset);
+        for (long block = firstBlock + 1; block < lastBlock; block++) {
+          dst.put(repeatedBlock);
+        }
+        dst.put(repeatedBlock, 0, endOffset);
+      }
+      position = end;
+      return (int) (position - start);
+    }
+
+    @Override
+    public void close() {
+      this.open = false;
+    }
+
+    @Override
+    public boolean isOpen() {
+      return this.open;
+    }
+  }
+
+  /**
+   * Tests encryption and decryption functionalities using {@code encryptionStreamingAead}
+   * for encryption and  {@code decryptionStreamingAead} for decryption.
+   */
+  public static void testEncryptionAndDecryption(
+      StreamingAead encryptionStreamingAead, StreamingAead decryptionStreamingAead)
+      throws Exception {
+    byte[] aad = Random.randBytes(15);
+    // Short plaintext.
+    byte[] shortPlaintext = Random.randBytes(10);
+    testEncryptionAndDecryption(
+        encryptionStreamingAead, decryptionStreamingAead, shortPlaintext, aad);
+    // Long plaintext.
+    byte[] longPlaintext = Random.randBytes(1100);
+    testEncryptionAndDecryption(
+        encryptionStreamingAead, decryptionStreamingAead, longPlaintext, aad);
+  }
+
+  /** Tests encryption and decryption functionalities of {@code streamingAead}. */
+  public static void testEncryptionAndDecryption(StreamingAead streamingAead) throws Exception {
+    testEncryptionAndDecryption(streamingAead, streamingAead);
+  }
+
+  /**
+   * Tests encryption and decryption functionalities using {@code encryptionStreamingAead}
+   * for encryption and  {@code decryptionStreamingAead} for decryption on inputs
+   * {@code plaintext} and {@code aad}.
+   */
+  public static void testEncryptionAndDecryption(
+      StreamingAead encryptionStreamingAead, StreamingAead decryptionStreamingAead,
+      byte[] plaintext, byte[] aad) throws Exception {
+
+    // Encrypt plaintext.
+    ByteArrayOutputStream ciphertext = new ByteArrayOutputStream();
+    WritableByteChannel encChannel =
+        encryptionStreamingAead.newEncryptingChannel(Channels.newChannel(ciphertext), aad);
+    encChannel.write(ByteBuffer.wrap(plaintext));
+    encChannel.close();
+
+    // Decrypt ciphertext via ReadableByteChannel.
+    {
+      ByteBufferChannel ciphertextChannel = new ByteBufferChannel(ciphertext.toByteArray());
+      ReadableByteChannel decChannel =
+          decryptionStreamingAead.newDecryptingChannel(ciphertextChannel, aad);
+      ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
+      int readCount = decChannel.read(decrypted);
+
+      // Compare results;
+      assertEquals(plaintext.length, readCount);
+      assertArrayEquals(plaintext, decrypted.array());
+    }
+
+    // Decrypt ciphertext via SeekableByteChannel.
+    {
+      ByteBufferChannel ciphertextChannel = new ByteBufferChannel(ciphertext.toByteArray());
+      SeekableByteChannel decChannel =
+          decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, aad);
+      ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
+      int readCount = decChannel.read(decrypted);
+
+      // Compare results;
+      assertEquals(plaintext.length, readCount);
+      assertArrayEquals(plaintext, decrypted.array());
     }
   }
 

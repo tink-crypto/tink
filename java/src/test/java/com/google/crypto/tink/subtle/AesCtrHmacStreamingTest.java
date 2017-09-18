@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.StreamingTestUtil;
 import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
+import com.google.crypto.tink.StreamingTestUtil.PseudorandomReadableByteChannel;
 import com.google.crypto.tink.TestUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,7 +33,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
@@ -95,58 +95,6 @@ public class AesCtrHmacStreamingTest {
 
   public void assertByteBufferContains(byte[] expected, ByteBuffer buffer) throws Exception {
     assertByteBufferContains("", expected, buffer);
-  }
-
-  class PseudorandomReadableByteChannel implements ReadableByteChannel {
-    private long size;
-    private long position;
-    private boolean open;
-    private byte[] repeatedBlock;
-    private static final int BLOCK_SIZE = 1024;
-
-    public PseudorandomReadableByteChannel(long size) {
-      this.size = size;
-      this.position = 0;
-      this.open = true;
-      this.repeatedBlock = generatePlaintext(BLOCK_SIZE);
-    }
-
-    @Override
-    public int read(ByteBuffer dst) throws IOException {
-      if (!open) {
-        throw new ClosedChannelException();
-      }
-      if (position == size) {
-        return -1;
-      }
-      long start = position;
-      long end = java.lang.Math.min(size, start + dst.remaining());
-      long firstBlock = start / BLOCK_SIZE;
-      long lastBlock = end / BLOCK_SIZE;
-      int startOffset = (int) (start % BLOCK_SIZE);
-      int endOffset = (int) (end % BLOCK_SIZE);
-      if (firstBlock == lastBlock) {
-        dst.put(repeatedBlock, startOffset, endOffset - startOffset);
-      } else {
-        dst.put(repeatedBlock, startOffset, BLOCK_SIZE - startOffset);
-        for (long block = firstBlock + 1; block < lastBlock; block++) {
-          dst.put(repeatedBlock);
-        }
-        dst.put(repeatedBlock, 0, endOffset);
-      }
-      position = end;
-      return (int) (position - start);
-    }
-
-    @Override
-    public void close() {
-      this.open = false;
-    }
-
-    @Override
-    public boolean isOpen() {
-      return this.open;
-    }
   }
 
   /** Returns a plaintext of a given size. */

@@ -16,12 +16,11 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.StreamingAead;
-import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
+import com.google.crypto.tink.StreamingTestUtil;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
@@ -31,11 +30,6 @@ import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -65,42 +59,6 @@ public class AesCtrHmacStreamingKeyManagerTest {
     keyManager = new AesCtrHmacStreamingKeyManager();
   }
 
-  /** Tests encryption and decryption functionalities of {@code streamingAead}. */
-  private void testEncryptionAndDecryption(StreamingAead streamingAead) throws Exception {
-    byte[] aad = Random.randBytes(15);
-    // Short plaintext.
-    byte[] shortPlaintext = Random.randBytes(10);
-    testEncryptionAndDecryption(streamingAead, shortPlaintext, aad);
-    // Long plaintext.
-    byte[] longPlaintext = Random.randBytes(1100);
-    testEncryptionAndDecryption(streamingAead, longPlaintext, aad);
-  }
-
-  /**
-   * Tests encryption and decryption functionalities of {@code streamingAead} using {@code
-   * plaintext} and {@code aad}.
-   */
-  private void testEncryptionAndDecryption(
-      StreamingAead streamingAead, byte[] plaintext, byte[] aad) throws Exception {
-    // Encrypt plaintext.
-    ByteArrayOutputStream ciphertext = new ByteArrayOutputStream();
-    WritableByteChannel encChannel =
-        streamingAead.newEncryptingChannel(Channels.newChannel(ciphertext), aad);
-    encChannel.write(ByteBuffer.wrap(plaintext));
-    encChannel.close();
-
-    // Decrypt ciphertext.
-    ByteBufferChannel ciphertextChannel = new ByteBufferChannel(ciphertext.toByteArray());
-    SeekableByteChannel decChannel =
-        streamingAead.newSeekableDecryptingChannel(ciphertextChannel, aad);
-    ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
-    int readCount = decChannel.read(decrypted);
-
-    // Compare results;
-    assertEquals(plaintext.length, readCount);
-    assertArrayEquals(plaintext, decrypted.array());
-  }
-
   @Test
   public void testBasic() throws Exception {
     // Create primitive from a given key.
@@ -111,7 +69,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
             .setParams(keyParams)
             .build();
     StreamingAead streamingAead = keyManager.getPrimitive(key);
-    testEncryptionAndDecryption(streamingAead);
+    StreamingTestUtil.testEncryptionAndDecryption(streamingAead);
 
     // Create a key from KeyFormat, and use the key.
     AesCtrHmacStreamingKeyFormat keyFormat =
@@ -119,7 +77,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
     ByteString serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     key = (AesCtrHmacStreamingKey) keyManager.newKey(serializedKeyFormat);
     streamingAead = keyManager.getPrimitive(key);
-    testEncryptionAndDecryption(streamingAead);
+    StreamingTestUtil.testEncryptionAndDecryption(streamingAead);
   }
 
   @Test

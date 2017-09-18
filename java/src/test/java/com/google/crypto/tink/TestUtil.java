@@ -26,10 +26,14 @@ import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
+import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
+import com.google.crypto.tink.proto.AesCtrHmacStreamingParams;
 import com.google.crypto.tink.proto.AesCtrKey;
 import com.google.crypto.tink.proto.AesCtrParams;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxParams;
+import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
+import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
@@ -51,11 +55,13 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.GeneralSecurityException;
@@ -168,6 +174,45 @@ public class TestUtil {
         .setParams(aesCtrParams)
         .setKeyValue(ByteString.copyFrom(keyValue))
         .build();
+  }
+
+  /** @return a {@code KeyData} containing a {@code AesCtrHmacStreamingKey}. */
+  public static KeyData createAesCtrHmacStreamingKeyData(
+      byte[] keyValue, int derivedKeySize, int ciphertextSegmentSize) throws Exception {
+    HmacParams hmacParams = HmacParams.newBuilder()
+        .setHash(HashType.SHA256)
+        .setTagSize(16)
+        .build();
+    AesCtrHmacStreamingParams keyParams = AesCtrHmacStreamingParams.newBuilder()
+        .setCiphertextSegmentSize(ciphertextSegmentSize)
+        .setDerivedKeySize(derivedKeySize)
+        .setHkdfHashType(HashType.SHA256)
+        .setHmacParams(hmacParams)
+        .build();
+    AesCtrHmacStreamingKey keyProto = AesCtrHmacStreamingKey.newBuilder()
+        .setVersion(0)
+        .setKeyValue(ByteString.copyFrom(keyValue))
+        .setParams(keyParams)
+        .build();
+    return createKeyData(keyProto, StreamingAeadConfig.AES_CTR_HMAC_STREAMINGAEAD_TYPE_URL,
+        KeyData.KeyMaterialType.SYMMETRIC);
+  }
+
+  /** @return a {@code KeyData} containing a {@code AesGcmHkdfStreamingKey}. */
+  public static KeyData createAesGcmHkdfStreamingKeyData(
+      byte[] keyValue, int derivedKeySize, int ciphertextSegmentSize) throws Exception {
+    AesGcmHkdfStreamingParams keyParams = AesGcmHkdfStreamingParams.newBuilder()
+        .setCiphertextSegmentSize(ciphertextSegmentSize)
+        .setDerivedKeySize(derivedKeySize)
+        .setHkdfHashType(HashType.SHA256)
+        .build();
+    AesGcmHkdfStreamingKey keyProto = AesGcmHkdfStreamingKey.newBuilder()
+        .setVersion(0)
+        .setKeyValue(ByteString.copyFrom(keyValue))
+        .setParams(keyParams)
+        .build();
+    return createKeyData(keyProto, StreamingAeadConfig.AES_GCM_HKDF_STREAMINGAEAD_TYPE_URL,
+        KeyData.KeyMaterialType.SYMMETRIC);
   }
 
   /** @return a {@code KeyData} containing a {@code AesCtrHmacAeadKey}. */

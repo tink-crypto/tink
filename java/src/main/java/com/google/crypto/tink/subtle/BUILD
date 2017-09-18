@@ -21,11 +21,13 @@ java_library(
         "Hex.java",
         "ImmutableByteArray.java",
         "Random.java",
+        "RewindableReadableByteChannel.java",
         "SubtleUtil.java",
         "Validators.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
+        "@com_google_code_findbugs_jsr305//jar",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
