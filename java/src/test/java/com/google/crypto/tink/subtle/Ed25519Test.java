@@ -32,6 +32,28 @@ import org.junit.runners.JUnit4;
 public class Ed25519Test {
 
   @Test
+  public void testSignMultipleTimes() throws GeneralSecurityException {
+    Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
+    Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
+    Ed25519Verify verifier = new Ed25519Verify(keyPair.getPublicKey());
+    for (int i = 0; i < 1000; i++) {
+      byte[] rand = Random.randBytes(new java.util.Random().nextInt(300));
+      byte[] s = signer.sign(rand);
+      try {
+        verifier.verify(s, rand);
+      } catch (SignatureException e) {
+        fail(
+            String.format(
+                "\n\nMessage: %s\nSignature: %s\nPrivateKey: %s\nPublicKey: %s\n",
+                TestUtil.hexEncode(rand),
+                TestUtil.hexEncode(s),
+                TestUtil.hexEncode(keyPair.getPrivateKey()),
+                TestUtil.hexEncode(keyPair.getPublicKey())));
+      }
+    }
+  }
+
+  @Test
   public void testSignVerifyRandomKeys() throws GeneralSecurityException {
     for (int i = 0; i < 1000; i++) {
       byte[] rand = Random.randBytes(new java.util.Random().nextInt(300));

@@ -1501,8 +1501,9 @@ public final class Ed25519 {
     digest.update(message);
     byte[] hram = digest.digest();
     reduce(hram);
-    mulAdd(hashedPrivateKey, hram, hashedPrivateKey, r);
-    return Bytes.concat(rB, Arrays.copyOfRange(hashedPrivateKey, 0, FIELD_LEN));
+    byte[] s = new byte[FIELD_LEN];
+    mulAdd(s, hram, hashedPrivateKey, r);
+    return Bytes.concat(rB, s);
   }
 
   /**
