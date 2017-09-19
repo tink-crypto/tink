@@ -211,6 +211,7 @@ gen_java_test_rules(
     data = [
         "//testdata:credentials",
         "//testdata:ecies_keysets",
+        "//testdata:eddsa_test",
         "@wycheproof//testvectors:aes_gcm",
     ],
     default_test_size = "small",

@@ -168,7 +168,7 @@ public final class Ed25519 {
      * Decodes {@code s} into an extented projective point.
      * See Section 5.1.3 Decoding in https://tools.ietf.org/html/rfc8032#section-5.1.3
      */
-    private static XYZT fromBytesNegateVarTime(byte[] s) {
+    private static XYZT fromBytesNegateVarTime(byte[] s) throws GeneralSecurityException {
       long[] x = new long[LIMB_CNT];
       long[] y = Field25519.expand(s);
       long[] z = new long[LIMB_CNT]; z[0] = 1;
@@ -179,35 +179,35 @@ public final class Ed25519 {
       long[] check = new long[LIMB_CNT];
       Field25519.square(u, y);
       Field25519.mult(v, u, D);
-      Field25519.sub(u, u, z);  // u = y^2 - 1
-      Field25519.sum(v, v, z);  // v = dy^2 + 1
+      Field25519.sub(u, u, z); // u = y^2 - 1
+      Field25519.sum(v, v, z); // v = dy^2 + 1
 
       long[] v3 = new long[LIMB_CNT];
       Field25519.square(v3, v);
-      Field25519.mult(v3, v3, v);  // v3 = v^3
+      Field25519.mult(v3, v3, v); // v3 = v^3
       Field25519.square(x, v3);
       Field25519.mult(x, x, v);
-      Field25519.mult(x, x, u);  // x = uv^7
+      Field25519.mult(x, x, u); // x = uv^7
 
-      pow2252m3(x, x);  // x = (uv^7)^((q-5)/8)
+      pow2252m3(x, x); // x = (uv^7)^((q-5)/8)
       Field25519.mult(x, x, v3);
-      Field25519.mult(x, x, u);  // x = uv^3(uv^7)^((q-5)/8)
+      Field25519.mult(x, x, u); // x = uv^3(uv^7)^((q-5)/8)
 
       Field25519.square(vxx, x);
       Field25519.mult(vxx, vxx, v);
-      Field25519.sub(check, vxx, u);  // vx^2-u
+      Field25519.sub(check, vxx, u); // vx^2-u
       if (isNonZeroVarTime(check)) {
-        Field25519.sum(check, vxx, u);  // vx^2+u
-        if (!isNonZeroVarTime(check)) {
-          throw new IllegalArgumentException("Cannot convert given bytes to extended projective "
+        Field25519.sum(check, vxx, u); // vx^2+u
+        if (isNonZeroVarTime(check)) {
+          throw new GeneralSecurityException("Cannot convert given bytes to extended projective "
               + "coordinates. No square root exists for modulo 2^255-19");
         }
         Field25519.mult(x, x, SQRTM1);
       }
 
       if (!isNonZeroVarTime(x) && (s[31] & 0xff) >> 7 != 0) {
-        throw new IllegalArgumentException("Cannot convert given bytes to extended projective "
-            + "coordinates. Computed x is zero and encoded x's least significant bit is zero");
+        throw new GeneralSecurityException("Cannot convert given bytes to extended projective "
+            + "coordinates. Computed x is zero and encoded x's least significant bit is not zero");
       }
       if (getLsb(x) == ((s[31] & 0xff) >> 7)) {
         neg(x, x);
@@ -542,7 +542,7 @@ public final class Ed25519 {
    * a[31] <= 127
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
-  private static XYZ scalarMult(byte[] a) {
+  private static XYZ scalarMultWithBase(byte[] a) {
     byte[] e = new byte[2 * FIELD_LEN];
     for (int i = 0; i < FIELD_LEN; i++) {
       e[2 * i + 0] = (byte) (((a[i] & 0xff) >> 0) & 0xf);
@@ -601,8 +601,8 @@ public final class Ed25519 {
    * Preconditions:
    * a[31] <= 127
    */
-  static byte[] scalarMultToBytes(byte[] a) {
-    return scalarMult(a).toBytes();
+  static byte[] scalarMultWithBaseToBytes(byte[] a) {
+    return scalarMultWithBase(a).toBytes();
   }
 
   @SuppressWarnings("NarrowingCompoundAssignment")
@@ -696,8 +696,12 @@ public final class Ed25519 {
    * Note that execution time might depend on the input {@code in}.
    */
   private static boolean isNonZeroVarTime(long[] in) {
-    for (long i : in) {
-      if (i != 0) {
+    long[] inCopy = new long[in.length + 1];
+    System.arraycopy(in, 0, inCopy, 0, in.length);
+    Field25519.reduceCoefficients(inCopy);
+    byte[] bytes = Field25519.contract(inCopy);
+    for (byte b: bytes) {
+      if (b != 0) {
         return true;
       }
     }
@@ -1488,17 +1492,20 @@ public final class Ed25519 {
    */
   static byte[] sign(final byte[] message, final byte[] publicKey, final byte[] hashedPrivateKey)
       throws GeneralSecurityException {
+    // Copying the message to make it thread-safe. Otherwise, if the caller modifies the message
+    // between the first and the second hash then it might leak the private key.
+    byte[] messageCopy = Arrays.copyOfRange(message, 0, message.length);
     MessageDigest digest = EngineFactory.MESSAGE_DIGEST.getInstance("SHA-512");
     digest.update(hashedPrivateKey, FIELD_LEN, FIELD_LEN);
-    digest.update(message);
+    digest.update(messageCopy);
     byte[] r = digest.digest();
     reduce(r);
 
-    byte[] rB = Arrays.copyOfRange(scalarMult(r).toBytes(), 0, FIELD_LEN);
+    byte[] rB = Arrays.copyOfRange(scalarMultWithBase(r).toBytes(), 0, FIELD_LEN);
     digest.reset();
     digest.update(rB);
     digest.update(publicKey);
-    digest.update(message);
+    digest.update(messageCopy);
     byte[] hram = digest.digest();
     reduce(hram);
     byte[] s = new byte[FIELD_LEN];
@@ -1515,6 +1522,9 @@ public final class Ed25519 {
    */
   static boolean verify(final byte[] message, final byte[] signature,
       final byte[] publicKey) throws GeneralSecurityException {
+    if (signature.length != SIGNATURE_LEN) {
+      return false;
+    }
     MessageDigest digest = EngineFactory.MESSAGE_DIGEST.getInstance("SHA-512");
     digest.update(signature, 0, FIELD_LEN);
     digest.update(publicKey);

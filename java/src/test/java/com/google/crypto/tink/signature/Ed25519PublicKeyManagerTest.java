@@ -77,8 +77,8 @@ public class Ed25519PublicKeyManagerTest {
     copySig[copySig.length - 1] = (byte) (copySig[copySig.length - 1] ^ 0xff);
     try {
       verifier.verify(copySig, message);
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException e) {
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "Given signature's 3 most significant bits must be 0.");
     }
     // Flip other bytes.

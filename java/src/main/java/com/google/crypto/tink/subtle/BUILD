@@ -73,6 +73,7 @@ java_library(
     srcs = [
         "EcdsaSignJce.java",
         "EcdsaVerifyJce.java",
+        "Ed25519.java",
         "Ed25519Sign.java",
         "Ed25519Verify.java",
     ],

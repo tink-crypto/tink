@@ -32,3 +32,11 @@ filegroup(
         "ecies_public_keyset2.bin",
     ],
 )
+
+filegroup(
+    name = "eddsa_test",
+    testonly = 1,
+    srcs = [
+        "eddsa_test.json",
+    ],
+)

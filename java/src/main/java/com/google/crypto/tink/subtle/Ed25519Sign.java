@@ -44,8 +44,9 @@ public final class Ed25519Sign implements PublicKeySign {
   /**
    * Constructs a Ed25519Sign with the {@code privateKey}.
    *
-   * @param privateKey 32-byte random sequence
-   * @throws GeneralSecurityException if {@code privateKey} is not 32-bytes.
+   * @param privateKey 32-byte random sequence.
+   * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in {@link
+   *     EngineFactory}.MESSAGE_DIGEST.
    */
   public Ed25519Sign(final byte[] privateKey) throws GeneralSecurityException {
     if (privateKey.length != SECRET_KEY_LEN) {
@@ -54,7 +55,7 @@ public final class Ed25519Sign implements PublicKeySign {
     }
 
     this.hashedPrivateKey = Ed25519.getHashedScalar(privateKey);
-    this.publicKey = Ed25519.scalarMultToBytes(this.hashedPrivateKey);
+    this.publicKey = Ed25519.scalarMultWithBaseToBytes(this.hashedPrivateKey);
   }
 
   @Override
@@ -84,7 +85,7 @@ public final class Ed25519Sign implements PublicKeySign {
     /** Returns a new <publicKey, privateKey> KeyPair. */
     public static KeyPair newKeyPair() throws GeneralSecurityException {
       byte[] privateKey = Random.randBytes(Field25519.FIELD_LEN);
-      byte[] publicKey = Ed25519.scalarMultToBytes(Ed25519.getHashedScalar(privateKey));
+      byte[] publicKey = Ed25519.scalarMultWithBaseToBytes(Ed25519.getHashedScalar(privateKey));
       return new KeyPair(publicKey, privateKey);
     }
   }

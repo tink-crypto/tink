@@ -20,7 +20,6 @@ import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
-import java.security.SignatureException;
 
 /**
  * Ed25519 verifying.
@@ -48,7 +47,7 @@ public final class Ed25519Verify implements PublicKeyVerify {
 
   private final ImmutableByteArray publicKey;
 
-  public Ed25519Verify(final byte[] publicKey) throws GeneralSecurityException {
+  public Ed25519Verify(final byte[] publicKey) {
     if (publicKey.length != PUBLIC_KEY_LEN) {
       throw new IllegalArgumentException(
           String.format("Given public key's length is not %s.", PUBLIC_KEY_LEN));
@@ -59,14 +58,14 @@ public final class Ed25519Verify implements PublicKeyVerify {
   @Override
   public void verify(byte[] signature, byte[] data) throws GeneralSecurityException {
     if (signature.length != SIGNATURE_LEN) {
-      throw new IllegalArgumentException(
+      throw new GeneralSecurityException(
           String.format("The length of the signature is not %s.", SIGNATURE_LEN));
     }
     if (((signature[SIGNATURE_LEN - 1] & 0xff) & 224) != 0) {
-      throw new IllegalArgumentException("Given signature's 3 most significant bits must be 0.");
+      throw new GeneralSecurityException("Given signature's 3 most significant bits must be 0.");
     }
     if (!Ed25519.verify(data, signature, publicKey.getBytes())) {
-      throw new SignatureException("Signature check failed.");
+      throw new GeneralSecurityException("Signature check failed.");
     }
   }
 }

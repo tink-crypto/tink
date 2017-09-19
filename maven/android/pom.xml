@@ -76,6 +76,8 @@
             <exclude>**/JsonKeysetWriterTest.java</exclude>
             <!-- TODO: add Maven support for Wycheproof which these tests depend on -->
             <exclude>**/AesGcmJceTest.java</exclude>
+            <exclude>**/Ed25519SignTest.java</exclude>
+            <exclude>**/Ed25519VerifyTest.java</exclude>
           </testExcludes>
 
         </configuration>
