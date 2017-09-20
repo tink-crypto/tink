@@ -34,6 +34,9 @@ namespace tink {
 
 class AesGcmKeyManager : public KeyManager<Aead> {
  public:
+  static constexpr char kKeyType[] =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
+
   AesGcmKeyManager() : key_type_(kKeyType) {}
 
   // Constructs an instance of AES-GCM Aead for the given 'key_data',
@@ -62,8 +65,6 @@ class AesGcmKeyManager : public KeyManager<Aead> {
 
  private:
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
-  static constexpr char kKeyType[] =
-      "type.googleapis.com/google.crypto.tink.AesGcmKey";
 
   std::string key_type_;
 

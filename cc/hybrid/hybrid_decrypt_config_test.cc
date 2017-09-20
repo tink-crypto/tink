@@ -14,8 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/registry.h"
 #include "cc/hybrid/hybrid_decrypt_config.h"
+
+#include "cc/hybrid_decrypt.h"
+#include "cc/catalogue.h"
+#include "cc/config.h"
+#include "cc/registry.h"
 #include "cc/util/status.h"
 #include "gtest/gtest.h"
 
@@ -25,30 +29,109 @@ namespace crypto {
 namespace tink {
 namespace {
 
+class DummyHybridDecryptCatalogue : public Catalogue<HybridDecrypt> {
+ public:
+  DummyHybridDecryptCatalogue() {}
+
+  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<HybridDecrypt>>>
+  GetKeyManager(google::protobuf::StringPiece type_url,
+                google::protobuf::StringPiece primitive_name,
+                uint32_t min_version) const override {
+    return util::Status::UNKNOWN;
+  }
+};
+
+
 class HybridDecryptConfigTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    Registry::get_default_registry().reset();
+  }
 };
 
 TEST_F(HybridDecryptConfigTest, testBasic) {
-  // Registration of standard key types works.
-  auto& registry = Registry::get_default_registry();
   std::string key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  std::string aead_key_type =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  std::string mac_key_type =
+      "type.googleapis.com/google.crypto.tink.HmacKey";
+  auto& registry = Registry::get_default_registry();
+  auto& config = HybridDecryptConfig::Tink_1_1_0();
+
+  EXPECT_EQ(3, HybridDecryptConfig::Tink_1_1_0().entry_size());
+
+  EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
+  EXPECT_EQ("Mac", config.entry(0).primitive_name());
+  EXPECT_EQ(mac_key_type, config.entry(0).type_url());
+  EXPECT_EQ(true, config.entry(0).new_key_allowed());
+  EXPECT_EQ(0, config.entry(0).key_manager_version());
+
+  EXPECT_EQ("TinkAead", config.entry(1).catalogue_name());
+  EXPECT_EQ("Aead", config.entry(1).primitive_name());
+  EXPECT_EQ(aead_key_type, config.entry(1).type_url());
+  EXPECT_EQ(true, config.entry(1).new_key_allowed());
+  EXPECT_EQ(0, config.entry(1).key_manager_version());
+
+  EXPECT_EQ("TinkHybridDecrypt", config.entry(2).catalogue_name());
+  EXPECT_EQ("HybridDecrypt", config.entry(2).primitive_name());
+  EXPECT_EQ(key_type, config.entry(2).type_url());
+  EXPECT_EQ(true, config.entry(2).new_key_allowed());
+  EXPECT_EQ(0, config.entry(2).key_manager_version());
+
+  // No key manager before registration.
   auto manager_result = registry.get_key_manager<HybridDecrypt>(key_type);
   EXPECT_FALSE(manager_result.ok());
   EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
-  EXPECT_TRUE(HybridDecryptConfig::RegisterStandardKeyTypes().ok());
+
+  // Registration of standard key types works.
+  auto status = HybridDecryptConfig::Init();
+  EXPECT_TRUE(status.ok()) << status;
+  status = Config::Register(HybridDecryptConfig::Tink_1_1_0());
+  EXPECT_TRUE(status.ok()) << status;
   manager_result = registry.get_key_manager<HybridDecrypt>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
-
-  // Registration of legacy key types works.
-  EXPECT_TRUE(HybridDecryptConfig::RegisterLegacyKeyTypes().ok());
-
-  // Registration of individual key managers checks the passed pointer.
-  auto status = HybridDecryptConfig::RegisterKeyManager(nullptr);
-  EXPECT_FALSE(status.ok());
 }
 
+TEST_F(HybridDecryptConfigTest, testInit) {
+  // Try on empty registry.
+  auto status = Config::Register(HybridDecryptConfig::Tink_1_1_0());
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
+
+  // Initialize with a catalogue.
+  status = HybridDecryptConfig::Init();
+  EXPECT_TRUE(status.ok()) << status;
+  status = Config::Register(HybridDecryptConfig::Tink_1_1_0());
+  EXPECT_TRUE(status.ok()) << status;
+
+  // Try Init() again, should succeed (idempotence).
+  status = HybridDecryptConfig::Init();
+  EXPECT_TRUE(status.ok()) << status;
+
+  // Reset the registry, and try overriding a catalogue with a different one.
+  Registry::get_default_registry().reset();
+  status = Registry::get_default_registry()
+      .AddCatalogue("TinkHybridDecrypt", new DummyHybridDecryptCatalogue());
+  EXPECT_TRUE(status.ok()) << status;
+  status = HybridDecryptConfig::Init();
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
+}
+
+TEST_F(HybridDecryptConfigTest, testDeprecated) {
+  std::string key_type =
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  auto& registry = Registry::get_default_registry();
+
+  // Registration of standard key types works.
+  auto status = HybridDecryptConfig::RegisterStandardKeyTypes();
+  EXPECT_TRUE(status.ok()) << status;
+  auto manager_result = registry.get_key_manager<HybridDecrypt>(key_type);
+  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+  EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
+}
 
 }  // namespace
 }  // namespace tink

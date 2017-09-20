@@ -21,11 +21,26 @@ cc_library(
     hdrs = ["mac_config.h"],
     visibility = ["//visibility:public"],
     deps = [
-        ":hmac_key_manager",
+        ":mac_catalogue",
+        "//cc:config",
         "//cc:key_manager",
         "//cc:mac",
         "//cc:registry",
         "//cc/util:status",
+        "//proto:config_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "mac_catalogue",
+    srcs = ["mac_catalogue.cc"],
+    hdrs = ["mac_catalogue.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":hmac_key_manager",
+        "//cc:catalogue",
+        "//cc/util:status",
+        "//cc/util:strings",
     ],
 )
 
@@ -86,12 +101,30 @@ cc_test(
 )
 
 cc_test(
+    name = "mac_catalogue_test",
+    size = "small",
+    srcs = ["mac_catalogue_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":mac_catalogue",
+        ":mac_config",
+        "//cc:catalogue",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "mac_config_test",
     size = "small",
     srcs = ["mac_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":mac_config",
+        "//cc:catalogue",
+        "//cc:config",
+        "//cc:mac",
         "//cc:registry",
         "//cc/util:status",
         "@com_google_googletest//:gtest_main",

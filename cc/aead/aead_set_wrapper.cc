@@ -54,8 +54,8 @@ util::StatusOr<std::unique_ptr<Aead>> AeadSetWrapper::NewAead(
 util::StatusOr<std::string> AeadSetWrapper::Encrypt(
     google::protobuf::StringPiece plaintext,
     google::protobuf::StringPiece associated_data) const {
-  auto encrypt_result =
-      aead_set_->get_primary()->get_primitive().Encrypt(plaintext, associated_data);
+  auto encrypt_result = aead_set_->get_primary()->get_primitive()
+      .Encrypt(plaintext, associated_data);
   if (!encrypt_result.ok()) return encrypt_result.status();
   const std::string& key_id = aead_set_->get_primary()->get_identifier();
   return key_id + encrypt_result.ValueOrDie();

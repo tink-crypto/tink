@@ -17,16 +17,35 @@ cc_library(
 )
 
 cc_library(
+    name = "aead_catalogue",
+    srcs = ["aead_catalogue.cc"],
+    hdrs = ["aead_catalogue.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":aes_gcm_key_manager",
+        "//cc:aead",
+        "//cc:catalogue",
+        "//cc:key_manager",
+        "//cc/util:status",
+        "//cc/util:strings",
+    ],
+)
+
+cc_library(
     name = "aead_config",
     srcs = ["aead_config.cc"],
     hdrs = ["aead_config.h"],
     visibility = ["//visibility:public"],
     deps = [
+        ":aead_catalogue",
         ":aes_gcm_key_manager",
         "//cc:aead",
+        "//cc:config",
         "//cc:key_manager",
         "//cc:registry",
+        "//cc/mac:mac_config",
         "//cc/util:status",
+        "//proto:config_cc_proto",
     ],
 )
 
@@ -88,12 +107,31 @@ cc_test(
 )
 
 cc_test(
+    name = "aead_catalogue_test",
+    size = "small",
+    srcs = ["aead_catalogue_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aead_catalogue",
+        ":aead_config",
+        "//cc:aead",
+        "//cc:catalogue",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "aead_config_test",
     size = "small",
     srcs = ["aead_config_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aead_config",
+        "//cc:aead",
+        "//cc:catalogue",
+        "//cc:config",
         "//cc:registry",
         "//cc/util:status",
         "@com_google_googletest//:gtest_main",

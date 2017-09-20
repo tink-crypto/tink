@@ -51,8 +51,9 @@ class KeyManager {
   GetPrimitive(const google::protobuf::Message& key) const = 0;
 
   // Generates a new random key, based on the specified 'key_template'.
-  virtual crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
-      const google::crypto::tink::KeyTemplate& key_template) const = 0;
+  virtual
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+      NewKey(const google::crypto::tink::KeyTemplate& key_template) const = 0;
 
   // Returns the type_url identifying the key type handled by this manager.
   virtual const std::string& get_key_type() const = 0;

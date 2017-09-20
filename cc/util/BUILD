@@ -15,6 +15,12 @@ cc_library(
 )
 
 cc_library(
+    name = "strings",
+    srcs = ["strings.cc"],
+    hdrs = ["strings.h"],
+)
+
+cc_library(
     name = "ptr_util",
     srcs = ["ptr_util.h"],
     hdrs = ["ptr_util.h"],
@@ -80,6 +86,18 @@ cc_test(
     deps = [
         ":errors",
         ":status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "strings_test",
+    size = "small",
+    srcs = ["strings_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

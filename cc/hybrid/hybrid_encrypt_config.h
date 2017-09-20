@@ -20,42 +20,38 @@
 #include "cc/hybrid_encrypt.h"
 #include "cc/key_manager.h"
 #include "cc/util/status.h"
+#include "proto/config.pb.h"
 
 namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// HybridEncryptConfig offers convenience methods for initializing
-// HybridEncryptFactory and the underlying Registry.INSTANCE.
-// In particular, it  allows for initalizing the Registry with native
-// key types and their managers that Tink supports out of the box.
-// These key types are divided in two groups:
+// Static methods and constants for registering with the Registry
+// all instances of HybridEncrypt key types supported in a particular
+// release of Tink.
 //
-//  - standard: secure and safe to use in new code. Over time, with
-//    new developments in cryptanalysis and computing power, some
-//    standard key types might become legacy.
+// To register all HybridEncrypt key types provided in Tink release 1.1.0
+// one can do:
 //
-//  - legacy: deprecated and insecure or obsolete, should not be used
-//    in new code. Existing users should upgrade to one of the standard
-//    key types.
+//   Config::Register(HybridEncryptConfig::Tink_1_1_0());
 //
-// This divison allows for gradual retiring insecure or obsolete key types.
-//
-// For more information on how to obtain and use HybridEncrypt primitives
+// For more information on creation and usage of HybridEncrypt instances
 // see HybridEncryptFactory.
 class HybridEncryptConfig {
  public:
+  static constexpr char kCatalogueName[] = "TinkHybridEncrypt";
+  static constexpr char kPrimitiveName[] = "HybridEncrypt";
+
+  // Returns config of HybridEncrypt implementations supported in Tink 1.1.0.
+  static const google::crypto::tink::RegistryConfig& Tink_1_1_0();
+
+  // Initialization:
+  // registers the catalogue of Tink HybridEncrypt-implementations.
+  static crypto::tink::util::Status Init();
+
   // Registers standard HybridEncrypt key types and their managers.
+  // DEPRECATED.
   static crypto::tink::util::Status RegisterStandardKeyTypes();
-
-  // Registers legacy HybridEncrypt key types and their managers.
-  static crypto::tink::util::Status RegisterLegacyKeyTypes();
-
-  // Registers the given 'key_manager' for the key type
-  // key_manager->get_key_type().
-  // Takes ownership of 'key_manager', which must be non-nullptr.
-  static crypto::tink::util::Status RegisterKeyManager(
-      KeyManager<HybridEncrypt>* key_manager);
 
  private:
   HybridEncryptConfig() {}

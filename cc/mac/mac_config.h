@@ -20,42 +20,34 @@
 #include "cc/key_manager.h"
 #include "cc/mac.h"
 #include "cc/util/status.h"
+#include "proto/config.pb.h"
 
 namespace crypto {
 namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
-// MacConfig offers  convenience methods for initializing MacFactory
-// and the underlying Registry.INSTANCE.  In particular, it  allows for
-// initalizing the Registry with native key types and their managers
-// that Tink supports out of the box.  These key types are divided in
-// two groups:
+// Static methods and constants for registering with the Registry
+// all instances of Mac key types supported in a particular release of Tink.
 //
-//  - standard: secure and safe to use in new code. Over time, with
-//    new developments in cryptanalysis and computing power, some
-//    standard key types might become legacy.
+// To register all Mac key types provided in Tink release 1.1.0 one can do:
 //
-//  - legacy: deprecated and insecure or obsolete, should not be used
-//    in new code. Existing users should upgrade to one of the standard
-//    key types.
+//   Config::Register(MacConfig::Tink_1_1_0());
 //
-// This divison allows for gradual retiring insecure or obsolete key types.
-//
-// For more information on how to obtain and use Mac primitives
-// see MacFactory.
+// For more information on creation and usage of Mac instances see MacFactory.
 class MacConfig {
  public:
+  static constexpr char kCatalogueName[] = "TinkMac";
+  static constexpr char kPrimitiveName[] = "Mac";
+
+  // Returns config of Mac implementations supported in Tink 1.1.0.
+  static const google::crypto::tink::RegistryConfig& Tink_1_1_0();
+
+  // Initialization: registers the catalogue of Tink Mac-implementations.
+  static crypto::tink::util::Status Init();
+
   // Registers standard Mac key types and their managers with the Registry.
+  // DEPRECATED.
   static crypto::tink::util::Status RegisterStandardKeyTypes();
-
-  // Registers legacy Mac key types and their managers with the Registry.
-  static crypto::tink::util::Status RegisterLegacyKeyTypes();
-
-  // Registers the given 'key_manager' for the key type
-  // key_manager->get_key_type().
-  // Takes ownership of 'key_manager', which must be non-nullptr.
-  static crypto::tink::util::Status RegisterKeyManager(
-      KeyManager<Mac>* key_manager);
 
  private:
   MacConfig() {}

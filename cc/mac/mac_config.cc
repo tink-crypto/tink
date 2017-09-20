@@ -16,9 +16,10 @@
 
 #include "cc/mac/mac_config.h"
 
+#include "cc/config.h"
 #include "cc/key_manager.h"
 #include "cc/registry.h"
-#include "cc/mac/hmac_key_manager.h"
+#include "cc/mac/mac_catalogue.h"
 #include "cc/util/status.h"
 
 namespace util = crypto::tink::util;
@@ -26,24 +27,40 @@ namespace util = crypto::tink::util;
 namespace crypto {
 namespace tink {
 
+namespace {
+
+google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
+  google::crypto::tink::RegistryConfig* config =
+      new google::crypto::tink::RegistryConfig();
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      MacConfig::kCatalogueName, MacConfig::kPrimitiveName,
+      "HmacKey", 0, true));
+  config->set_config_name("TINK_MAC_1_1_0");
+  return config;
+}
+
+}  // anonymous namespace
+
+constexpr char MacConfig::kCatalogueName[];
+constexpr char MacConfig::kPrimitiveName[];
+
+// static
+const google::crypto::tink::RegistryConfig& MacConfig::Tink_1_1_0() {
+  static auto config = GenerateRegistryConfig();
+  return *config;
+}
+
+// static
+util::Status MacConfig::Init() {
+  return Registry::get_default_registry().AddCatalogue(kCatalogueName,
+                                                       new MacCatalogue());
+}
+
 // static
 util::Status MacConfig::RegisterStandardKeyTypes() {
-  return RegisterKeyManager(new HmacKeyManager());
-}
-
-// static
-util::Status MacConfig::RegisterLegacyKeyTypes() {
-  return util::Status::OK;
-}
-
-// static
-util::Status MacConfig::RegisterKeyManager(KeyManager<Mac>* key_manager) {
-  if (key_manager == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "Parameter 'key_manager' must be non-null.");
-  }
-  return Registry::get_default_registry().RegisterKeyManager(
-      key_manager->get_key_type(), key_manager);
+  auto status = Init();
+  if (!status.ok()) return status;
+  return Config::Register(Tink_1_1_0());
 }
 
 }  // namespace tink

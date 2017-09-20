@@ -23,12 +23,12 @@ import java.security.GeneralSecurityException;
 /**
  * Static methods for handling of Tink configurations.
  *
- * <p>Configurations, i.e., of key types and their corresponding key managers supported by a
- * specific run-time environment enable control of Tink setup via JSON-formatted config files that
- * determine which key types are supported, and provide a mechanism for deprecation of
- * obsolete/outdated cryptographic schemes (see <a
- * href="https://github.com/google/tink/blob/master/proto/config.proto">config.proto</a> for more
- * info).
+ * <p>Configurations, i.e., a collection of key types and their corresponding key managers
+ * supported by a specific run-time environment enable control of Tink setup via
+ * JSON-formatted config files that determine which key types are supported, and provide
+ * a mechanism for deprecation of obsolete/outdated cryptographic schemes (see
+ * <a href="https://github.com/google/tink/blob/master/proto/config.proto">config.proto</a>
+ * for more info).
  *
  * <p><b>Usage:</b>
  *

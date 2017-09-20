@@ -11,6 +11,8 @@ cc_library(
     name = "cc",
     hdrs = [
         "aead.h",
+        "catalogue.h",
+        "config.h",
         "hybrid_decrypt.h",
         "hybrid_encrypt.h",
         "key_manager.h",
@@ -79,6 +81,37 @@ cc_library(
 )
 
 cc_library(
+    name = "catalogue",
+    hdrs = ["catalogue.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":key_manager",
+        "//cc/util:statusor",
+    ],
+)
+
+cc_library(
+    name = "config",
+    srcs = ["core/config.cc"],
+    hdrs = ["config.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":aead",
+        ":catalogue",
+        ":hybrid_decrypt",
+        ":hybrid_encrypt",
+        ":key_manager",
+        ":mac",
+        ":registry",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:strings",
+        "//proto:config_cc_proto",
+    ],
+)
+
+cc_library(
     name = "crypto_format",
     srcs = ["core/crypto_format.cc"],
     hdrs = ["crypto_format.h"],
@@ -106,10 +139,11 @@ cc_library(
 
 cc_library(
     name = "registry",
-    srcs = ["registry.h"],
+    srcs = ["core/registry.cc"],
     hdrs = ["registry.h"],
     visibility = ["//visibility:public"],
     deps = [
+        ":catalogue",
         ":key_manager",
         ":keyset_handle",
         ":primitive_set",
@@ -177,6 +211,19 @@ cc_test(
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:aes_gcm_cc_proto",
         "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_test",
+    size = "small",
+    srcs = ["core/config_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":config",
+        ":mac",
+        "//proto:config_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )

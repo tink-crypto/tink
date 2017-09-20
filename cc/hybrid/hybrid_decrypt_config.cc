@@ -16,43 +16,56 @@
 
 #include "cc/hybrid/hybrid_decrypt_config.h"
 
+#include "cc/config.h"
 #include "cc/key_manager.h"
 #include "cc/registry.h"
 #include "cc/aead/aead_config.h"
-#include "cc/aead/aes_gcm_key_manager.h"
 #include "cc/hybrid/ecies_aead_hkdf_private_key_manager.h"
+#include "cc/hybrid/hybrid_decrypt_catalogue.h"
 #include "cc/util/status.h"
+#include "proto/config.pb.h"
 
 namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
 
+namespace {
+
+google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
+  google::crypto::tink::RegistryConfig* config =
+      new google::crypto::tink::RegistryConfig();
+  config->MergeFrom(AeadConfig::Tink_1_1_0());
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      HybridDecryptConfig::kCatalogueName, HybridDecryptConfig::kPrimitiveName,
+      "EciesAeadHkdfPrivateKey", 0, true));
+  config->set_config_name("TINK_HYBRID_DECRYPT_1_1_0");
+  return config;
+}
+
+}  // anonymous namespace
+
+constexpr char HybridDecryptConfig::kCatalogueName[];
+constexpr char HybridDecryptConfig::kPrimitiveName[];
+
+// static
+const google::crypto::tink::RegistryConfig& HybridDecryptConfig::Tink_1_1_0() {
+  static const auto config = GenerateRegistryConfig();
+  return *config;
+}
+
 // static
 util::Status HybridDecryptConfig::RegisterStandardKeyTypes() {
-  auto status = AeadConfig::RegisterKeyManager(new AesGcmKeyManager());
-  // We intentionally ignore the status of registration of AesGcmKeyManager,
-  // as the registration may fail if AeadFactory::RegisterStandardKeyTypes()
-  // was called before.
-  // TODO(przydatek): this is not really a good solution,
-  //     find a better way of dealing with such situations.
-  return RegisterKeyManager(new EciesAeadHkdfPrivateKeyManager());
+  auto status = Init();
+  if (!status.ok()) return status;
+  return Config::Register(Tink_1_1_0());
 }
 
 // static
-util::Status HybridDecryptConfig::RegisterLegacyKeyTypes() {
-  return util::Status::OK;
-}
-
-// static
-util::Status HybridDecryptConfig::RegisterKeyManager(
-    KeyManager<HybridDecrypt>* key_manager) {
-  if (key_manager == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "Parameter 'key_manager' must be non-null.");
-  }
-  return Registry::get_default_registry().RegisterKeyManager(
-      key_manager->get_key_type(), key_manager);
+util::Status HybridDecryptConfig::Init() {
+  AeadConfig::Init();
+  return Registry::get_default_registry().AddCatalogue(
+      kCatalogueName, new HybridDecryptCatalogue());
 }
 
 }  // namespace tink

@@ -34,6 +34,9 @@ namespace tink {
 
 class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
  public:
+  static constexpr char kKeyType[] =
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+
   EciesAeadHkdfPrivateKeyManager() : key_type_(kKeyType) {}
 
   // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
@@ -62,8 +65,6 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
 
  private:
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
-  static constexpr char kKeyType[] =
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
 
   std::string key_type_;
 

@@ -34,6 +34,9 @@ namespace tink {
 
 class HmacKeyManager : public KeyManager<Mac> {
  public:
+  static constexpr char kKeyType[] =
+      "type.googleapis.com/google.crypto.tink.HmacKey";
+
   HmacKeyManager() : key_type_(kKeyType) {}
 
   // Constructs an instance of HMAC-Mac for the given 'key_data',
@@ -62,9 +65,6 @@ class HmacKeyManager : public KeyManager<Mac> {
 
  private:
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
-  static constexpr char kKeyType[] =
-      "type.googleapis.com/google.crypto.tink.HmacKey";
-
   std::string key_type_;
 
   // Constructs an instance of HMAC-Mac for the given 'key'.

@@ -16,34 +16,60 @@
 
 #include "cc/aead/aead_config.h"
 
+#include "cc/aead.h"
+#include "cc/config.h"
 #include "cc/key_manager.h"
 #include "cc/registry.h"
+#include "cc/aead/aead_catalogue.h"
 #include "cc/aead/aes_gcm_key_manager.h"
+#include "cc/mac/mac_config.h"
 #include "cc/util/status.h"
+#include "proto/config.pb.h"
 
 namespace util = crypto::tink::util;
+
+using google::crypto::tink::RegistryConfig;
 
 namespace crypto {
 namespace tink {
 
+namespace {
+
+google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
+  google::crypto::tink::RegistryConfig* config =
+      new google::crypto::tink::RegistryConfig();
+  config->MergeFrom(MacConfig::Tink_1_1_0());
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
+      "AesGcmKey", 0, true));
+  config->set_config_name("TINK_AEAD_1_1_0");
+  return config;
+}
+
+}  // anonymous namespace
+
+constexpr char AeadConfig::kCatalogueName[];
+constexpr char AeadConfig::kPrimitiveName[];
+
+// static
+const google::crypto::tink::RegistryConfig& AeadConfig::Tink_1_1_0() {
+  static const auto config = GenerateRegistryConfig();
+  return *config;
+}
+
 // static
 util::Status AeadConfig::RegisterStandardKeyTypes() {
-  return RegisterKeyManager(new AesGcmKeyManager());
+  auto status = Init();
+  if (!status.ok()) return status;
+  return Config::Register(Tink_1_1_0());
 }
 
 // static
-util::Status AeadConfig::RegisterLegacyKeyTypes() {
-  return util::Status::OK;
-}
-
-// static
-util::Status AeadConfig::RegisterKeyManager(KeyManager<Aead>* key_manager) {
-  if (key_manager == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "Parameter 'key_manager' must be non-null.");
-  }
-  return Registry::get_default_registry().RegisterKeyManager(
-      key_manager->get_key_type(), key_manager);
+util::Status AeadConfig::Init() {
+  auto status = MacConfig::Init();
+  if (!status.ok()) return status;
+  return Registry::get_default_registry().AddCatalogue(kCatalogueName,
+                                                       new AeadCatalogue());
 }
 
 }  // namespace tink
