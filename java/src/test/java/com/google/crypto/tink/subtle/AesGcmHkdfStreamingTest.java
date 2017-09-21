@@ -45,12 +45,17 @@ import java.util.Arrays;
 import javax.crypto.Cipher;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /** Test for {@code AesGcmHkdfStreaming}-implementation of {@code StreamingAead}-primitive. */
 @RunWith(JUnit4.class)
 public class AesGcmHkdfStreamingTest {
+  @Rule
+  public TemporaryFolder tmpFolder = new TemporaryFolder();
+
   /**
    * TODO(bleichen): Some things that are not yet tested:
    *
@@ -794,9 +799,10 @@ public class AesGcmHkdfStreamingTest {
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
 
     // Encrypt to file
-    Path path = StreamingTestUtil.generateRandomPath("testFileEncryption");
+    Path path = tmpFolder.newFile(String.format("%s.%s.tmp", "testFileEncryption",
+        new SecureRandom().nextLong())).toPath();
     FileChannel ctChannel =
-        FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+        FileChannel.open(path, StandardOpenOption.WRITE);
     WritableByteChannel bc = ags.newEncryptingChannel(ctChannel, aad);
     int chunkSize = 1000;
     ByteBuffer chunk = ByteBuffer.allocate(chunkSize);

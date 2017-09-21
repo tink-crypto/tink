@@ -30,9 +30,6 @@ import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.security.SecureRandom;
 
 /**
  * Helpers for streaming tests.
@@ -288,12 +285,5 @@ public class StreamingTestUtil {
       assertEquals(plaintext.length, readCount);
       assertArrayEquals(plaintext, decrypted.array());
     }
-  }
-
-  /** Generates and returns a random, temporary file path. */
-  public static Path generateRandomPath(String prefix) {
-    String tmpDir = java.lang.System.getenv("TEST_TMPDIR");
-    String tmpFilename = String.format("%s.%s.tmp", prefix, new SecureRandom().nextLong());
-    return FileSystems.getDefault().getPath(tmpDir, tmpFilename);
   }
 }
