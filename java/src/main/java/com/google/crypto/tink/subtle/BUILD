@@ -21,13 +21,11 @@ java_library(
         "Hex.java",
         "ImmutableByteArray.java",
         "Random.java",
-        "RewindableReadableByteChannel.java",
         "SubtleUtil.java",
         "Validators.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
-        "@com_google_code_findbugs_jsr305//jar",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
@@ -73,18 +71,16 @@ java_library(
 java_library(
     name = "signature",
     srcs = [
-        "Curve25519.java",
         "EcdsaSignJce.java",
         "EcdsaVerifyJce.java",
         "Ed25519Sign.java",
         "Ed25519Verify.java",
-        "Field25519.java",
-        "X25519.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
         ":ed25519",
         ":subtle",
+        ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "@com_google_errorprone_error_prone_annotations//jar",
@@ -96,21 +92,19 @@ java_library(
 java_library(
     name = "hybrid",
     srcs = [
-        "Curve25519.java",
         "EciesAeadHkdfDemHelper.java",
         "EciesAeadHkdfHybridDecrypt.java",
         "EciesAeadHkdfHybridEncrypt.java",
         "EciesHkdfRecipientKem.java",
         "EciesHkdfSenderKem.java",
-        "Field25519.java",
         "Hkdf.java",
         "NaClCryptoBox.java",
-        "X25519.java",
     ],
     javacopts = JAVACOPTS,
     deps = [
         ":aead",
         ":subtle",
+        ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "@com_google_errorprone_error_prone_annotations//jar",
@@ -125,6 +119,7 @@ java_library(
         "AesCtrHmacStreaming.java",
         "AesGcmHkdfStreaming.java",
         "Hkdf.java",
+        "RewindableReadableByteChannel.java",
         "StreamSegmentDecrypter.java",
         "StreamSegmentEncrypter.java",
         "StreamingAeadDecryptingChannel.java",
@@ -136,6 +131,7 @@ java_library(
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "//java/src/main/java/com/google/crypto/tink/annotations",
+        "@com_google_code_findbugs_jsr305//jar",
         "@com_google_errorprone_error_prone_annotations//jar",
     ],
 )
@@ -150,7 +146,6 @@ java_library(
         "X25519.java",
     ],
     javacopts = JAVACOPTS,
-    visibility = ["//visibility:private"],
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink/annotations",

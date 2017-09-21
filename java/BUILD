@@ -10,6 +10,7 @@ java_library(
         "//visibility:public",
     ],
     exports = [
+        ":subtle",
         "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink/aead",
         "//java/src/main/java/com/google/crypto/tink/config",
@@ -27,6 +28,7 @@ android_library(
     name = "android",
     visibility = ["//visibility:public"],
     exports = [
+        ":subtle",
         "//java/src/main/java/com/google/crypto/tink:android",
         "//java/src/main/java/com/google/crypto/tink/aead:android",
         "//java/src/main/java/com/google/crypto/tink/config:android",
@@ -49,6 +51,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle:mac",
         "//java/src/main/java/com/google/crypto/tink/subtle:signature",
         "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
+        "//java/src/main/java/com/google/crypto/tink/subtle:x25519",
     ],
 )
 
@@ -135,7 +138,6 @@ java_library(
         ":cleartext_keyset_handle",
         ":java",
         ":protos",
-        ":subtle",
     ],
 )
 
@@ -147,7 +149,6 @@ android_library(
         ":android",
         ":cleartext_keyset_handle_android",
         ":protos_android",
-        ":subtle",
     ],
 )
 
