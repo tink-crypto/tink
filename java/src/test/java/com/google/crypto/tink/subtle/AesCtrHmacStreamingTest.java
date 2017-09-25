@@ -21,12 +21,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.StreamingTestUtil;
 import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
 import com.google.crypto.tink.StreamingTestUtil.PseudorandomReadableByteChannel;
 import com.google.crypto.tink.TestUtil;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.Reader;
@@ -45,8 +48,8 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashSet;
 import javax.crypto.Cipher;
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -54,8 +57,7 @@ import org.junit.runners.JUnit4;
 /** Test for {@code AesCtrHmacStreaming}-implementation of {@code StreamingAead}-primitive. */
 @RunWith(JUnit4.class)
 public class AesCtrHmacStreamingTest {
-  @Rule
-  public TemporaryFolder tmpFolder = new TemporaryFolder();
+  @Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
 
   /**
    * TODO(bleichen): Some things that are not yet tested:
@@ -238,6 +240,37 @@ public class AesCtrHmacStreamingTest {
     assertEquals(plaintext.length, decryptedSize);
   }
 
+  /**
+   * One case that is sometimes problematic is writing single bytes to a stream. This test
+   * constructs an OutputStream from a WritableByteChannel and tests whether encryption works on
+   * this stream.
+   */
+  public void testEncryptSingleBytes(int keySizeInBytes, int plaintextSize) throws Exception {
+    int firstSegmentOffset = 0;
+    int segmentSize = 512;
+    int tagSizeInBytes = 12;
+    byte[] ikm =
+        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
+    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    AesCtrHmacStreaming ags =
+        new AesCtrHmacStreaming(
+            ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
+    byte[] plaintext = generatePlaintext(plaintextSize);
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    WritableByteChannel ctChannel = Channels.newChannel(bos);
+    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, aad);
+    OutputStream encStream = Channels.newOutputStream(encChannel);
+    for (int i = 0; i < ags.getFirstSegmentOffset(); i++) {
+      encStream.write(0);
+    }
+    for (int i = 0; i < plaintext.length; i++) {
+      encStream.write(plaintext[i]);
+    }
+    encStream.close();
+    isValidCiphertext(ags, plaintext, aad, bos.toByteArray());
+  }
+
   /** Encrypt and then decrypt partially, and check that the result is the same. */
   public void testEncryptDecryptRandomAccess(
       int keySizeInBytes,
@@ -341,6 +374,13 @@ public class AesCtrHmacStreamingTest {
     testEncryptDecrypt(16, 12, 256, 16, 440, 1024);
   }
 
+  /* During decryption single bytes are requested */
+  @Test
+  public void testEncryptDecryptSingleBytes() throws Exception {
+    testEncryptDecrypt(16, 12, 256, 0, 1024, 1);
+    testEncryptDecrypt(32, 12, 512, 0, 5086, 1);
+  }
+
   /* The ciphertext is smaller than 1 segment. */
   @Test
   public void testEncryptDecryptRandomAccessSmall() throws Exception {
@@ -393,6 +433,14 @@ public class AesCtrHmacStreamingTest {
     testEncryptDecryptRandomAccess(16, 12, 256, 0, 216);
     testEncryptDecryptRandomAccess(16, 12, 256, 16, 200);
     testEncryptDecryptRandomAccess(16, 12, 256, 16, 440);
+  }
+
+  /* Encryption is done byte by byte. */
+  @Test
+  public void testEncryptWithStream() throws Exception {
+    testEncryptSingleBytes(16, 1024);
+    testEncryptSingleBytes(16, 12345);
+    testEncryptSingleBytes(16, 111111);
   }
 
   /**
@@ -835,10 +883,12 @@ public class AesCtrHmacStreamingTest {
     AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
 
     // Encrypt to file
-    Path path = tmpFolder.newFile(String.format("%s.%s.tmp", "testFileEncryption",
-        new SecureRandom().nextLong())).toPath();
-    FileChannel ctChannel =
-        FileChannel.open(path, StandardOpenOption.WRITE);
+    Path path =
+        tmpFolder
+            .newFile(
+                String.format("%s.%s.tmp", "testFileEncryption", new SecureRandom().nextLong()))
+            .toPath();
+    FileChannel ctChannel = FileChannel.open(path, StandardOpenOption.WRITE);
     WritableByteChannel bc = ags.newEncryptingChannel(ctChannel, aad);
     int chunkSize = 1000;
     ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
@@ -899,5 +949,65 @@ public class AesCtrHmacStreamingTest {
       decrypted.flip();
       assertByteBufferContains(expected, decrypted);
     }
+  }
+
+  /**
+   * Encrypts some plaintext to a file using FileOutputStream, then decrypt with a FileInputStream.
+   * Reading and writing is done byte by byte.
+   */
+  @Test
+  public void testFileEncryptionWithStream() throws Exception {
+    byte[] ikm =
+        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f");
+    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    int keySize = 16;
+    int tagSize = 12;
+    int segmentSize = 4096;
+    int offset = 0;
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
+    int plaintextSize = 1 << 15;
+    byte[] pt = generatePlaintext(plaintextSize);
+
+    // Encrypt to file
+    Path path =
+        tmpFolder
+            .newFile(
+                String.format(
+                    "%s.%s.tmp", "testFileEncryptionWithStream", new SecureRandom().nextLong()))
+            .toPath();
+    FileOutputStream ctStream = new FileOutputStream(path.toFile());
+    WritableByteChannel channel = Channels.newChannel(ctStream);
+    WritableByteChannel encChannel = ags.newEncryptingChannel(channel, aad);
+    OutputStream encStream = Channels.newOutputStream(encChannel);
+
+    // Writing single bytes appears to be the most troubling case.
+    for (int i = 0; i < pt.length; i++) {
+      encStream.write(pt[i]);
+    }
+    encStream.close();
+
+    FileInputStream inpStream = new FileInputStream(path.toFile());
+    ReadableByteChannel inpChannel = Channels.newChannel(inpStream);
+    ReadableByteChannel decryptedChannel = ags.newDecryptingChannel(inpChannel, aad);
+    InputStream decrypted = Channels.newInputStream(decryptedChannel);
+    int decryptedSize = 0;
+    int read;
+    while (true) {
+      read = decrypted.read();
+      if (read == -1) {
+        break;
+      }
+      if (read != (pt[decryptedSize] & 0xff)) {
+        fail(
+            "Incorrect decryption at postion "
+                + decryptedSize
+                + " expected: "
+                + pt[decryptedSize]
+                + " read:"
+                + read);
+      }
+      decryptedSize += 1;
+    }
+    assertEquals(plaintextSize, decryptedSize);
   }
 }
