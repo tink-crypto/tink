@@ -16,204 +16,36 @@
 
 package com.google.crypto.tink.subtle;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.StreamingTestUtil;
 import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
 import com.google.crypto.tink.TestUtil;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.File;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import javax.crypto.Cipher;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Test for {@code AesGcmHkdfStreaming}-implementation of {@code StreamingAead}-primitive. */
+/**
+ * Test for {@code AesGcmHkdfStreaming}-implementation of {@code StreamingAead}-primitive.
+ *
+ * <p>TODO(b/66921440): adding more tests.
+ */
 @RunWith(JUnit4.class)
 public class AesGcmHkdfStreamingTest {
   @Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
 
-  /**
-   * TODO(bleichen): Some things that are not yet tested:
-   *
-   * <ul>
-   *   <li>- Thread-safety (i.e. operations should be atomic but more importantly the state must
-   *       remain the same.
-   *   <li>- Reading beyond the end of the file
-   *   <li>- regression for c++ implementation
-   * </ul>
-   */
-  private boolean skipTestsWithLargerKeys;
-
-  @Before
-  public void setUp() throws Exception {
-    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
-      System.out.println(
-          "WARNING: Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skipping tests with keys larger than 128 bits.");
-      skipTestsWithLargerKeys = true;
-    } else {
-      skipTestsWithLargerKeys = false;
-    }
-  }
-
-  /**
-   * Replacement for org.junit.Assert.assertEquals, since org.junit.Assert.assertEquals is quite
-   * slow.
-   */
-  public void assertByteArrayEquals(String txt, byte[] expected, byte[] actual) throws Exception {
-    assertEquals(txt + " arrays not of the same length", expected.length, actual.length);
-    for (int i = 0; i < expected.length; i++) {
-      if (expected[i] != actual[i]) {
-        assertEquals(txt + " difference at position:" + i, expected[i], actual[i]);
-      }
-    }
-  }
-
-  public void assertByteArrayEquals(byte[] expected, byte[] actual) throws Exception {
-    assertByteArrayEquals("", expected, actual);
-  }
-
-  /**
-   * Checks whether the bytes from buffer.position() to buffer.limit() are the same bytes as
-   * expected.
-   */
-  public void assertByteBufferContains(String txt, byte[] expected, ByteBuffer buffer)
-      throws Exception {
-    assertEquals(
-        txt + " unexpected number of bytes in buffer", expected.length, buffer.remaining());
-    byte[] content = new byte[buffer.remaining()];
-    buffer.duplicate().get(content);
-    assertByteArrayEquals(txt, expected, content);
-  }
-
-  public void assertByteBufferContains(byte[] expected, ByteBuffer buffer) throws Exception {
-    assertByteBufferContains("", expected, buffer);
-  }
-
-  class PseudorandomReadableByteChannel implements ReadableByteChannel {
-    private long size;
-    private long position;
-    private boolean open;
-    private byte[] repeatedBlock;
-    private static final int BLOCK_SIZE = 1024;
-
-    public PseudorandomReadableByteChannel(long size) {
-      this.size = size;
-      this.position = 0;
-      this.open = true;
-      this.repeatedBlock = generatePlaintext(BLOCK_SIZE);
-    }
-
-    @Override
-    public int read(ByteBuffer dst) throws IOException {
-      if (!open) {
-        throw new ClosedChannelException();
-      }
-      if (position == size) {
-        return -1;
-      }
-      long start = position;
-      long end = java.lang.Math.min(size, start + dst.remaining());
-      long firstBlock = start / BLOCK_SIZE;
-      long lastBlock = end / BLOCK_SIZE;
-      int startOffset = (int) (start % BLOCK_SIZE);
-      int endOffset = (int) (end % BLOCK_SIZE);
-      if (firstBlock == lastBlock) {
-        dst.put(repeatedBlock, startOffset, endOffset - startOffset);
-      } else {
-        dst.put(repeatedBlock, startOffset, BLOCK_SIZE - startOffset);
-        for (long block = firstBlock + 1; block < lastBlock; block++) {
-          dst.put(repeatedBlock);
-        }
-        dst.put(repeatedBlock, 0, endOffset);
-      }
-      position = end;
-      return (int) (position - start);
-    }
-
-    @Override
-    public void close() {
-      this.open = false;
-    }
-
-    @Override
-    public boolean isOpen() {
-      return this.open;
-    }
-  }
-
-  /** Returns a plaintext of a given size. */
-  private byte[] generatePlaintext(int size) {
-    byte[] plaintext = new byte[size];
-    for (int i = 0; i < size; i++) {
-      plaintext[i] = (byte) (i % 253);
-    }
-    return plaintext;
-  }
-
-  private byte[] concatBytes(byte[] first, byte[] last) {
-    byte[] res = new byte[first.length + last.length];
-    java.lang.System.arraycopy(first, 0, res, 0, first.length);
-    java.lang.System.arraycopy(last, 0, res, first.length, last.length);
-    return res;
-  }
-
-  /**
-   * Convenience method for encrypting some plaintext.
-   *
-   * @param ags the streaming primitive
-   * @param plaintext the plaintext to encrypt
-   * @param aad the additional data to authenticate
-   * @returns the ciphertext including a prefix of size ags.firstSegmentOffset
-   */
-  private byte[] encrypt(AesGcmHkdfStreaming ags, byte[] plaintext, byte[] aad) throws Exception {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    WritableByteChannel ctChannel = Channels.newChannel(bos);
-    ctChannel.write(ByteBuffer.allocate(ags.getFirstSegmentOffset()));
-    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, aad);
-    encChannel.write(ByteBuffer.wrap(plaintext));
-    encChannel.close();
-    byte[] ciphertext = bos.toByteArray();
-    long expectedSize = ags.expectedCiphertextSize(plaintext.length);
-    assertEquals(expectedSize, ciphertext.length);
-    return ciphertext;
-  }
-
-  private void isValidCiphertext(
-      AesGcmHkdfStreaming ags, byte[] plaintext, byte[] aad, byte[] ciphertext) throws Exception {
-    ByteBufferChannel ctChannel = new ByteBufferChannel(ciphertext);
-    ctChannel.position(ags.getFirstSegmentOffset());
-    ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, aad);
-    ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length + 1);
-    ptChannel.read(decrypted);
-    decrypted.flip();
-    assertByteBufferContains(plaintext, decrypted);
+  private AesGcmHkdfStreaming createAesGcmStreaming() throws Exception {
+    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    int keySize = 16;
+    int segmentSize = 4096;
+    int offset = 0;
+    return new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
   }
 
   /**
@@ -229,109 +61,15 @@ public class AesGcmHkdfStreamingTest {
   public void testEncryptDecrypt(
       int keySizeInBytes, int segmentSize, int firstSegmentOffset, int plaintextSize, int chunkSize)
       throws Exception {
-    if (keySizeInBytes > 16 && skipTestsWithLargerKeys) {
-      System.out.println("WARNING: skipping a test with key size over 128 bits.");
+    if (!TestUtil.isAesKeySizeSupported(keySizeInBytes)) {
+      System.out.println("Skipping a test with key size:" + (keySizeInBytes) + " bytes.");
       return;
     }
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
     AesGcmHkdfStreaming ags =
         new AesGcmHkdfStreaming(ikm, keySizeInBytes, segmentSize, firstSegmentOffset);
-    byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encrypt(ags, plaintext, aad);
-
-    // Construct an InputStream from the ciphertext where the first
-    // firstSegmentOffset bytes have already been read.
-    ReadableByteChannel ctChannel = new ByteBufferChannel(ciphertext).position(firstSegmentOffset);
-
-    // Construct an InputStream that returns the plaintext.
-    ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, aad);
-    int decryptedSize = 0;
-    while (true) {
-      ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
-      int read = ptChannel.read(chunk);
-      if (read == -1) {
-        break;
-      }
-      assertEquals(read, chunk.position());
-      byte[] expectedPlaintext = Arrays.copyOfRange(plaintext, decryptedSize, decryptedSize + read);
-      assertByteArrayEquals(expectedPlaintext, Arrays.copyOf(chunk.array(), read));
-      decryptedSize += read;
-      // ptChannel should fill chunk, unless the end of the plaintext has been reached.
-      if (decryptedSize < plaintextSize) {
-        assertEquals(
-            "Decrypted chunk is shorter than expected\n" + ptChannel.toString(),
-            chunk.limit(),
-            chunk.position());
-      }
-    }
-    assertEquals(plaintext.length, decryptedSize);
-  }
-
-  public void testEncryptSingleBytes(int keySizeInBytes, int plaintextSize) throws Exception {
-    int firstSegmentOffset = 0;
-    int segmentSize = 512;
-    if (keySizeInBytes > 16 && skipTestsWithLargerKeys) {
-      System.out.println("WARNING: skipping a test with key size over 128 bits.");
-      return;
-    }
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmHkdfStreaming ags =
-        new AesGcmHkdfStreaming(ikm, keySizeInBytes, segmentSize, firstSegmentOffset);
-    byte[] plaintext = generatePlaintext(plaintextSize);
-
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    WritableByteChannel ctChannel = Channels.newChannel(bos);
-    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, aad);
-    OutputStream encStream = Channels.newOutputStream(encChannel);
-    for (int i = 0; i < ags.getFirstSegmentOffset(); i++) {
-      encStream.write(0);
-    }
-    for (int i = 0; i < plaintext.length; i++) {
-      encStream.write(plaintext[i]);
-    }
-    encStream.close();
-    isValidCiphertext(ags, plaintext, aad, bos.toByteArray());
-  }
-
-  /** Encrypt and then decrypt partially, and check that the result is the same. */
-  public void testEncryptDecryptRandomAccess(
-      int keySizeInBytes, int segmentSize, int firstSegmentOffset, int plaintextSize)
-      throws Exception {
-    if (keySizeInBytes > 16 && skipTestsWithLargerKeys) {
-      System.out.println("WARNING: skipping a test with key size over 128 bits.");
-      return;
-    }
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmHkdfStreaming ags =
-        new AesGcmHkdfStreaming(ikm, keySizeInBytes, segmentSize, firstSegmentOffset);
-    byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encrypt(ags, plaintext, aad);
-
-    // Construct a channel with random access for the ciphertext.
-    ByteBufferChannel bbc = new ByteBufferChannel(ciphertext);
-    SeekableByteChannel ptChannel = ags.newSeekableDecryptingChannel(bbc, aad);
-
-    for (int start = 0; start < plaintextSize; start += 1 + start / 2) {
-      for (int length = 1; length < plaintextSize; length += 1 + length / 2) {
-        ByteBuffer pt = ByteBuffer.allocate(length);
-        ptChannel.position(start);
-        int read = ptChannel.read(pt);
-        // Expect that pt is filled unless the end of the plaintext has been reached.
-        assertTrue(
-            "start:" + start + " read:" + read + " length:" + length,
-            pt.remaining() == 0 || start + pt.position() == plaintext.length);
-        String expected =
-            TestUtil.hexEncode(Arrays.copyOfRange(plaintext, start, start + pt.position()));
-        String actual = TestUtil.hexEncode(Arrays.copyOf(pt.array(), pt.position()));
-        assertEquals("start: " + start, expected, actual);
-      }
-    }
+    StreamingTestUtil.testEncryptDecrypt(ags, firstSegmentOffset, plaintextSize, chunkSize);
   }
 
   /* The ciphertext is smaller than 1 segment */
@@ -393,6 +131,21 @@ public class AesGcmHkdfStreamingTest {
     testEncryptDecrypt(32, 512, 0, 5086, 1);
   }
 
+  /** Encrypt and then decrypt partially, and check that the result is the same. */
+  public void testEncryptDecryptRandomAccess(
+      int keySizeInBytes, int segmentSize, int firstSegmentOffset, int plaintextSize)
+      throws Exception {
+    if (!TestUtil.isAesKeySizeSupported(keySizeInBytes)) {
+      System.out.println("Skipping a test with key size:" + (keySizeInBytes) + " bytes.");
+      return;
+    }
+    byte[] ikm =
+        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
+    AesGcmHkdfStreaming ags =
+        new AesGcmHkdfStreaming(ikm, keySizeInBytes, segmentSize, firstSegmentOffset);
+    StreamingTestUtil.testEncryptDecryptRandomAccess(ags, firstSegmentOffset, plaintextSize);
+  }
+
   /* The ciphertext is smaller than 1 segment. */
   @Test
   public void testEncryptDecryptRandomAccessSmall() throws Exception {
@@ -437,6 +190,20 @@ public class AesGcmHkdfStreamingTest {
     testEncryptDecryptRandomAccess(16, 256, 16, 440);
   }
 
+  public void testEncryptSingleBytes(int keySizeInBytes, int plaintextSize) throws Exception {
+    if (!TestUtil.isAesKeySizeSupported(keySizeInBytes)) {
+      System.out.println("Skipping a test with key size:" + (keySizeInBytes) + " bytes.");
+      return;
+    }
+    int firstSegmentOffset = 0;
+    int segmentSize = 512;
+    byte[] ikm =
+        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
+    AesGcmHkdfStreaming ags =
+        new AesGcmHkdfStreaming(ikm, keySizeInBytes, segmentSize, firstSegmentOffset);
+    StreamingTestUtil.testEncryptSingleBytes(ags, plaintextSize);
+  }
+
   /* Encrypt with a stream writing single bytes. */
   @Test
   public void testEncryptWithStream() throws Exception {
@@ -451,60 +218,23 @@ public class AesGcmHkdfStreamingTest {
    */
   @Test
   public void testEncryptDecryptString() throws Exception {
-    int segmentSize = 512;
-    int firstSegmentOffset = 0;
-    int keySizeInBytes = 16;
-    byte[] ikm =
-        TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    AesGcmHkdfStreaming ags =
-        new AesGcmHkdfStreaming(ikm, keySizeInBytes, segmentSize, firstSegmentOffset);
-
-    String stringWithNonAsciiChars = "αβγδ áéíóúý ∀∑∊∫≅⊕⊄";
-    int repetitions = 1000;
-
-    // Encrypts a sequence of strings.
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    WritableByteChannel ctChannel = Channels.newChannel(bos);
-    Writer writer = Channels.newWriter(ags.newEncryptingChannel(ctChannel, aad), "UTF-8");
-    for (int i = 0; i < repetitions; i++) {
-      writer.write(stringWithNonAsciiChars);
-    }
-    writer.close();
-    byte[] ciphertext = bos.toByteArray();
-
-    // Decrypts a sequence of strings.
-    // channels.newReader does not always return the requested number of characters.
-    ByteBufferChannel ctBuffer = new ByteBufferChannel(ByteBuffer.wrap(ciphertext));
-    Reader reader = Channels.newReader(ags.newSeekableDecryptingChannel(ctBuffer, aad), "UTF-8");
-    for (int i = 0; i < repetitions; i++) {
-      char[] chunk = new char[stringWithNonAsciiChars.length()];
-      int position = 0;
-      while (position < stringWithNonAsciiChars.length()) {
-        int read = reader.read(chunk, position, stringWithNonAsciiChars.length() - position);
-        assertTrue("read:" + read, read > 0);
-        position += read;
-      }
-      assertEquals("i:" + i, stringWithNonAsciiChars, new String(chunk));
-    }
-    int res = reader.read();
-    assertEquals(-1, res);
+    StreamingTestUtil.testEncryptDecryptString(createAesGcmStreaming());
   }
 
   /** Test encryption with a simulated ciphertext channel, which has only a limited capacity. */
   @Test
   public void testEncryptLimitedCiphertextChannel() throws Exception {
-    int plaintextSize = 1 << 15;
-    int maxChunkSize = 100;
     int segmentSize = 512;
     int firstSegmentOffset = 0;
     int keySizeInBytes = 16;
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f112233445566778899aabbccddeeff");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
     AesGcmHkdfStreaming ags =
         new AesGcmHkdfStreaming(ikm, keySizeInBytes, segmentSize, firstSegmentOffset);
-    byte[] plaintext = generatePlaintext(plaintextSize);
+    int plaintextSize = 1 << 15;
+    int maxChunkSize = 100;
+    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
+    byte[] plaintext = StreamingTestUtil.generatePlaintext(plaintextSize);
     int ciphertextLength = (int) ags.expectedCiphertextSize(plaintextSize);
     ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
     WritableByteChannel ctChannel = new ByteBufferChannel(ciphertext, maxChunkSize);
@@ -521,46 +251,7 @@ public class AesGcmHkdfStreamingTest {
     }
     encChannel.close();
     assertFalse(encChannel.isOpen());
-    isValidCiphertext(ags, plaintext, aad, ciphertext.array());
-  }
-
-  /**
-   * Tries to decrypt a modified ciphertext. Each call to read must either return the original
-   * plaintext (e.g. when the modification in the ciphertext has not yet been read) or it must throw
-   * an IOException.
-   */
-  private void tryDecryptModifiedCiphertext(
-      AesGcmHkdfStreaming ags,
-      byte[] modifiedCiphertext,
-      byte[] aad,
-      int chunkSize,
-      byte[] plaintext)
-      throws Exception {
-    ByteBufferChannel ct = new ByteBufferChannel(modifiedCiphertext);
-    ct.position(ags.getFirstSegmentOffset());
-    ReadableByteChannel ptChannel = ags.newDecryptingChannel(ct, aad);
-    int position = 0;
-    int read;
-    do {
-      ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
-      try {
-        read = ptChannel.read(chunk);
-      } catch (IOException ex) {
-        // Detected that the ciphertext was modified.
-        // TODO(bleichen): Maybe check that the stream cannot longer be accessed.
-        return;
-      }
-      if (read > 0) {
-        assertTrue("Read more plaintext than expected", position + read <= plaintext.length);
-        // Everything decrypted must be equal to the original plaintext.
-        assertByteArrayEquals(
-            "Returned modified plaintext position:" + position + " size:" + read,
-            Arrays.copyOf(chunk.array(), read),
-            Arrays.copyOfRange(plaintext, position, position + read));
-        position += read;
-      }
-    } while (read >= 0);
-    fail("Reached end of plaintext.");
+    StreamingTestUtil.isValidCiphertext(ags, plaintext, aad, ciphertext.array());
   }
 
   // Modifies the ciphertext. Checks that decryption either results in correct plaintext
@@ -575,397 +266,40 @@ public class AesGcmHkdfStreamingTest {
   @Test
   public void testModifiedCiphertext() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 256;
     int offset = 8;
-    int plaintextSize = 512;
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
-    byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encrypt(ags, plaintext, aad);
-
-    // truncate the ciphertext
-    for (int i = 0; i < ciphertext.length; i += 8) {
-      byte[] truncatedCiphertext = Arrays.copyOf(ciphertext, i);
-      tryDecryptModifiedCiphertext(ags, truncatedCiphertext, aad, 128, plaintext);
-    }
-
-    // Append stuff to ciphertext
-    int[] sizes = new int[] {1, (segmentSize - ciphertext.length % segmentSize), segmentSize};
-    for (int appendedBytes : sizes) {
-      byte[] modifiedCiphertext = concatBytes(ciphertext, new byte[appendedBytes]);
-      tryDecryptModifiedCiphertext(ags, modifiedCiphertext, aad, 128, plaintext);
-    }
-
-    // flip bits
-    for (int pos = offset; pos < ciphertext.length; pos++) {
-      byte[] modifiedCiphertext = Arrays.copyOf(ciphertext, ciphertext.length);
-      modifiedCiphertext[pos] ^= (byte) 1;
-      tryDecryptModifiedCiphertext(ags, modifiedCiphertext, aad, 128, plaintext);
-    }
-
-    // delete segments
-    for (int segment = 0; segment < (ciphertext.length / segmentSize); segment++) {
-      byte[] modifiedCiphertext =
-          concatBytes(
-              Arrays.copyOf(ciphertext, segment * segmentSize),
-              Arrays.copyOfRange(ciphertext, (segment + 1) * segmentSize, ciphertext.length));
-      tryDecryptModifiedCiphertext(ags, modifiedCiphertext, aad, 128, plaintext);
-    }
-
-    // duplicate segments
-    for (int segment = 0; segment < (ciphertext.length / segmentSize); segment++) {
-      byte[] modifiedCiphertext =
-          concatBytes(
-              Arrays.copyOf(ciphertext, (segment + 1) * segmentSize),
-              Arrays.copyOfRange(ciphertext, segment * segmentSize, ciphertext.length));
-      tryDecryptModifiedCiphertext(ags, modifiedCiphertext, aad, 128, plaintext);
-    }
-
-    // Modify aad
-    // When the additional data is modified then any attempt to read plaintext must fail.
-    for (int pos = 0; pos < aad.length; pos++) {
-      byte[] modifiedAad = Arrays.copyOf(aad, aad.length);
-      modifiedAad[pos] ^= (byte) 1;
-      tryDecryptModifiedCiphertext(ags, ciphertext, modifiedAad, 128, new byte[0]);
-    }
-  }
-
-  /**
-   * Tries to decrypt a modified ciphertext using an SeekableByteChannel. Each call to read must
-   * either return the original plaintext (e.g. when the modification in the ciphertext does not
-   * affect the plaintext) or it must throw an IOException.
-   */
-  private void tryDecryptModifiedCiphertextWithSeekableByteChannel(
-      AesGcmHkdfStreaming ags, byte[] modifiedCiphertext, byte[] aad, byte[] plaintext)
-      throws Exception {
-
-    ByteBufferChannel bbc = new ByteBufferChannel(modifiedCiphertext);
-    SeekableByteChannel ptChannel;
-    // Failing in the constructor is valid in principle, but does not happen
-    // with the current implementation. Hence we don't catch these exceptions at the moment.
-    try {
-      ptChannel = ags.newSeekableDecryptingChannel(bbc, aad);
-    } catch (IOException | GeneralSecurityException ex) {
-      return;
-    }
-    for (int start = 0; start <= plaintext.length; start += 1 + start / 2) {
-      for (int length = 1; length <= plaintext.length; length += 1 + length / 2) {
-        ByteBuffer pt = ByteBuffer.allocate(length);
-        ptChannel.position(start);
-        int read;
-        try {
-          read = ptChannel.read(pt);
-        } catch (IOException ex) {
-          // Modified ciphertext was found.
-          // TODO(bleichen): Currently it is undefined whether we should be able to read
-          //   more plaintext from the stream (i.e. unmodified segments).
-          //   However, if later calls return plaintext this has to be valid plaintext.
-          continue;
-        }
-        if (read == -1) {
-          // ptChannel claims that we reached the end of the plaintext.
-          assertTrue("Incorrect truncation: ", start == plaintext.length);
-        } else {
-          // Expect the decrypted plaintext not to be longer than the expected plaintext.
-          assertTrue(
-              "start:" + start + " read:" + read + " length:" + length,
-              start + read <= plaintext.length);
-          // Check that the decrypted plaintext matches the original plaintext.
-          String expected =
-              TestUtil.hexEncode(Arrays.copyOfRange(plaintext, start, start + pt.position()));
-          String actual = TestUtil.hexEncode(Arrays.copyOf(pt.array(), pt.position()));
-          assertEquals("start: " + start, expected, actual);
-        }
-      }
-    }
+    StreamingTestUtil.testModifiedCiphertext(ags, segmentSize, offset);
   }
 
   @Test
   public void testModifiedCiphertextWithSeekableByteChannel() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 256;
     int offset = 8;
-    int plaintextSize = 2000;
     AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
-    byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encrypt(ags, plaintext, aad);
-
-    // truncate the ciphertext
-    for (int i = 0; i < ciphertext.length; i += 64) {
-      byte[] truncatedCiphertext = Arrays.copyOf(ciphertext, i);
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, truncatedCiphertext, aad, plaintext);
-    }
-
-    // Append stuff to ciphertext
-    int[] sizes = new int[] {1, (segmentSize - ciphertext.length % segmentSize), segmentSize};
-    for (int appendedBytes : sizes) {
-      byte[] modifiedCiphertext = concatBytes(ciphertext, new byte[appendedBytes]);
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
-    }
-
-    // flip bits
-    for (int pos = offset; pos < ciphertext.length; pos++) {
-      byte[] modifiedCiphertext = Arrays.copyOf(ciphertext, ciphertext.length);
-      modifiedCiphertext[pos] ^= (byte) 1;
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
-    }
-
-    // delete segments
-    for (int segment = 0; segment < (ciphertext.length / segmentSize); segment++) {
-      byte[] modifiedCiphertext =
-          concatBytes(
-              Arrays.copyOf(ciphertext, segment * segmentSize),
-              Arrays.copyOfRange(ciphertext, (segment + 1) * segmentSize, ciphertext.length));
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
-    }
-
-    // duplicate segments
-    for (int segment = 0; segment < (ciphertext.length / segmentSize); segment++) {
-      byte[] modifiedCiphertext =
-          concatBytes(
-              Arrays.copyOf(ciphertext, (segment + 1) * segmentSize),
-              Arrays.copyOfRange(ciphertext, segment * segmentSize, ciphertext.length));
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(ags, modifiedCiphertext, aad, plaintext);
-    }
-
-    // Modify aad
-    // When the additional data is modified then any attempt to read plaintext must fail.
-    for (int pos = 0; pos < aad.length; pos++) {
-      byte[] modifiedAad = Arrays.copyOf(aad, aad.length);
-      modifiedAad[pos] ^= (byte) 1;
-      tryDecryptModifiedCiphertextWithSeekableByteChannel(
-          ags, ciphertext, modifiedAad, new byte[0]);
-    }
-  }
-
-  /**
-   * Reads everything from plaintext, encrypt it and writes the result to ciphertext. This method is
-   * used to test aynchronous encryption.
-   *
-   * @param ags the streaming encryption
-   * @param plaintext the channel containing the plaintext
-   * @param ciphertext the channel to which the ciphertext is written
-   * @param aad the additional data to authenticate
-   * @param chuckSize the size of blocks that are read and written. This size determines the
-   *     temporary memory used in this method but is independent of the streaming encryption.
-   * @throws RuntimeException if something goes wrong.
-   */
-  private void encryptChannel(
-      AesGcmHkdfStreaming ags,
-      ReadableByteChannel plaintext,
-      WritableByteChannel ciphertext,
-      byte[] aad,
-      int chunkSize) {
-    try {
-      WritableByteChannel encChannel = ags.newEncryptingChannel(ciphertext, aad);
-      ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
-      int read;
-      do {
-        chunk.clear();
-        read = plaintext.read(chunk);
-        if (read > 0) {
-          chunk.flip();
-          encChannel.write(chunk);
-        }
-      } while (read != -1);
-      encChannel.close();
-    } catch (Exception ex) {
-      // TODO(bleichen): What is the best way to chatch exceptions in threads?
-      throw new java.lang.RuntimeException(ex);
-    }
-  }
-
-  /**
-   * Constructs a ReadableByteChannel with ciphertext from a ReadableByteChannel. The method
-   * constructs a new thread that is used to encrypt the plaintext. TODO(bleichen): Using
-   * PipedInputStream may have performance problems.
-   */
-  private ReadableByteChannel ciphertextChannel(
-      final AesGcmHkdfStreaming ags,
-      final ReadableByteChannel plaintext,
-      final byte[] aad,
-      final int chunkSize)
-      throws Exception {
-    PipedOutputStream output = new PipedOutputStream();
-    PipedInputStream result = new PipedInputStream(output);
-    final WritableByteChannel ciphertext = Channels.newChannel(output);
-    new Thread(
-            new Runnable() {
-              @Override
-              public void run() {
-                encryptChannel(ags, plaintext, ciphertext, aad, chunkSize);
-              }
-            })
-        .start();
-    return Channels.newChannel(result);
+    StreamingTestUtil.testModifiedCiphertextWithSeekableByteChannel(ags, segmentSize, offset);
   }
 
   /** Encrypt and decrypt a long ciphertext. */
   @Test
   public void testEncryptDecryptLong() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    int keySize = 16;
-    int segmentSize = 1 << 20;
     long plaintextSize = (1L << 32) + 1234567;
-    int offset = 0;
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
-    ReadableByteChannel plaintext = new PseudorandomReadableByteChannel(plaintextSize);
-    ReadableByteChannel copy = new PseudorandomReadableByteChannel(plaintextSize);
-    ReadableByteChannel ciphertext = ciphertextChannel(ags, plaintext, aad, 1 << 20);
-    ReadableByteChannel decrypted = ags.newDecryptingChannel(ciphertext, aad);
-    byte[] chunk = new byte[1 << 15];
-    int read;
-    long decryptedBytes = 0;
-    do {
-      read = decrypted.read(ByteBuffer.wrap(chunk));
-      if (read > 0) {
-        ByteBuffer expected = ByteBuffer.allocate(read);
-        int unused = copy.read(expected);
-        decryptedBytes += read;
-        assertByteArrayEquals(expected.array(), Arrays.copyOf(chunk, read));
-      }
-    } while (read != -1);
-    assertEquals(plaintextSize, decryptedBytes);
+    StreamingTestUtil.testEncryptDecryptLong(createAesGcmStreaming(), plaintextSize);
   }
 
   /** Encrypt some plaintext to a file, then decrypt from the file */
   @Test
   public void testFileEncrytion() throws Exception {
-    int plaintextSize = 1 << 18;
-    ByteBufferChannel plaintext = new ByteBufferChannel(generatePlaintext(plaintextSize));
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    int keySize = 16;
-    int segmentSize = 4096;
-    int offset = 0;
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
-
-    // Encrypt to file
-    Path path =
-        tmpFolder
-            .newFile(
-                String.format("%s.%s.tmp", "testFileEncryption", new SecureRandom().nextLong()))
-            .toPath();
-    FileChannel ctChannel = FileChannel.open(path, StandardOpenOption.WRITE);
-    WritableByteChannel bc = ags.newEncryptingChannel(ctChannel, aad);
-    int chunkSize = 1000;
-    ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
-    int read;
-    do {
-      chunk.clear();
-      read = plaintext.read(chunk);
-      if (read > 0) {
-        chunk.flip();
-        bc.write(chunk);
-      }
-    } while (read != -1);
-    bc.close();
-
-    // Decrypt the whole file and compare to plaintext
-    plaintext.rewind();
-    ctChannel = FileChannel.open(path, java.nio.file.StandardOpenOption.READ);
-    ReadableByteChannel ptStream = ags.newDecryptingChannel(ctChannel, aad);
-    int decryptedSize = 0;
-    do {
-      ByteBuffer decrypted = ByteBuffer.allocate(512);
-      read = ptStream.read(decrypted);
-      if (read > 0) {
-        ByteBuffer expected = ByteBuffer.allocate(read);
-        plaintext.read(expected);
-        decrypted.flip();
-        assertByteBufferContains(expected.array(), decrypted);
-        decryptedSize += read;
-      }
-    } while (read != -1);
-    assertEquals(plaintextSize, decryptedSize);
-
-    // Decrypt file partially using FileChannel and compare to plaintext
-    plaintext.rewind();
-    ctChannel = FileChannel.open(path, java.nio.file.StandardOpenOption.READ);
-    SeekableByteChannel ptChannel = ags.newSeekableDecryptingChannel(ctChannel, aad);
-    SecureRandom random = new SecureRandom();
-    for (int samples = 0; samples < 100; samples++) {
-      int start = random.nextInt(plaintextSize);
-      int length = random.nextInt(plaintextSize / 100);
-      ByteBuffer decrypted = ByteBuffer.allocate(length);
-      ptChannel.position(start);
-      read = ptChannel.read(decrypted);
-      // We expect that all read of ctChannel return the requested number of bytes.
-      // Hence we also expect that ptChannel returns the maximal number of bytes.
-      if (read < length && read + start < plaintextSize) {
-        fail(
-            "Plaintext size is smaller than expected; read:"
-                + read
-                + " position:"
-                + start
-                + " length:"
-                + length);
-      }
-      byte[] expected = new byte[read];
-      plaintext.position(start);
-      plaintext.read(ByteBuffer.wrap(expected));
-      decrypted.flip();
-      assertByteBufferContains(expected, decrypted);
-    }
+    StreamingTestUtil.testFileEncrytion(createAesGcmStreaming(), tmpFolder.newFile());
   }
 
   /** Encrypt some plaintext to a file using FileOutputStream, then decrypt from the file */
   @Test
   public void testFileEncrytionWithStream() throws Exception {
-    byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
-    byte[] aad = TestUtil.hexDecode("aabbccddeeff");
-    int keySize = 16;
-    int segmentSize = 4096;
-    int offset = 0;
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, offset);
-    int plaintextSize = 1 << 15;
-    byte[] pt = generatePlaintext(plaintextSize);
-
-    // Encrypt to file
-    Path path =
-        tmpFolder
-            .newFile(
-                String.format(
-                    "%s.%s.tmp", "testFileEncryptionWithStream", new SecureRandom().nextLong()))
-            .toPath();
-
-    FileOutputStream ctStream = new FileOutputStream(path.toFile());
-    WritableByteChannel channel = Channels.newChannel(ctStream);
-    WritableByteChannel encChannel = ags.newEncryptingChannel(channel, aad);
-    OutputStream encStream = Channels.newOutputStream(encChannel);
-
-    // Writing single bytes appears to be the most troubling case.
-    for (int i = 0; i < pt.length; i++) {
-      encStream.write(pt[i]);
-    }
-    encStream.close();
-
-    FileInputStream inpStream = new FileInputStream(path.toFile());
-    ReadableByteChannel inpChannel = Channels.newChannel(inpStream);
-    ReadableByteChannel decryptedChannel = ags.newDecryptingChannel(inpChannel, aad);
-    InputStream decrypted = Channels.newInputStream(decryptedChannel);
-    int decryptedSize = 0;
-    int read;
-    while (true) {
-      read = decrypted.read();
-      if (read == -1) {
-        break;
-      }
-      if (read != (pt[decryptedSize] & 0xff)) {
-        fail(
-            "Incorrect decryption at postion "
-                + decryptedSize
-                + " expected: "
-                + pt[decryptedSize]
-                + " read:"
-                + read);
-      }
-      decryptedSize += 1;
-    }
-    assertEquals(plaintextSize, decryptedSize);
+    StreamingTestUtil.testFileEncrytionWithStream(createAesGcmStreaming(),
+        tmpFolder.newFile());
   }
 }

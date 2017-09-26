@@ -19,6 +19,7 @@ package com.google.crypto.tink;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.aead.AeadConfig;
@@ -63,6 +64,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -71,6 +73,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
+import javax.crypto.Cipher;
 import org.json.JSONObject;
 
 /** Test helpers. */
@@ -178,39 +181,44 @@ public class TestUtil {
   /** @return a {@code KeyData} containing a {@code AesCtrHmacStreamingKey}. */
   public static KeyData createAesCtrHmacStreamingKeyData(
       byte[] keyValue, int derivedKeySize, int ciphertextSegmentSize) throws Exception {
-    HmacParams hmacParams = HmacParams.newBuilder()
-        .setHash(HashType.SHA256)
-        .setTagSize(16)
-        .build();
-    AesCtrHmacStreamingParams keyParams = AesCtrHmacStreamingParams.newBuilder()
-        .setCiphertextSegmentSize(ciphertextSegmentSize)
-        .setDerivedKeySize(derivedKeySize)
-        .setHkdfHashType(HashType.SHA256)
-        .setHmacParams(hmacParams)
-        .build();
-    AesCtrHmacStreamingKey keyProto = AesCtrHmacStreamingKey.newBuilder()
-        .setVersion(0)
-        .setKeyValue(ByteString.copyFrom(keyValue))
-        .setParams(keyParams)
-        .build();
-    return createKeyData(keyProto, StreamingAeadConfig.AES_CTR_HMAC_STREAMINGAEAD_TYPE_URL,
+    HmacParams hmacParams = HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(16).build();
+    AesCtrHmacStreamingParams keyParams =
+        AesCtrHmacStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(ciphertextSegmentSize)
+            .setDerivedKeySize(derivedKeySize)
+            .setHkdfHashType(HashType.SHA256)
+            .setHmacParams(hmacParams)
+            .build();
+    AesCtrHmacStreamingKey keyProto =
+        AesCtrHmacStreamingKey.newBuilder()
+            .setVersion(0)
+            .setKeyValue(ByteString.copyFrom(keyValue))
+            .setParams(keyParams)
+            .build();
+    return createKeyData(
+        keyProto,
+        StreamingAeadConfig.AES_CTR_HMAC_STREAMINGAEAD_TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 
   /** @return a {@code KeyData} containing a {@code AesGcmHkdfStreamingKey}. */
   public static KeyData createAesGcmHkdfStreamingKeyData(
       byte[] keyValue, int derivedKeySize, int ciphertextSegmentSize) throws Exception {
-    AesGcmHkdfStreamingParams keyParams = AesGcmHkdfStreamingParams.newBuilder()
-        .setCiphertextSegmentSize(ciphertextSegmentSize)
-        .setDerivedKeySize(derivedKeySize)
-        .setHkdfHashType(HashType.SHA256)
-        .build();
-    AesGcmHkdfStreamingKey keyProto = AesGcmHkdfStreamingKey.newBuilder()
-        .setVersion(0)
-        .setKeyValue(ByteString.copyFrom(keyValue))
-        .setParams(keyParams)
-        .build();
-    return createKeyData(keyProto, StreamingAeadConfig.AES_GCM_HKDF_STREAMINGAEAD_TYPE_URL,
+    AesGcmHkdfStreamingParams keyParams =
+        AesGcmHkdfStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(ciphertextSegmentSize)
+            .setDerivedKeySize(derivedKeySize)
+            .setHkdfHashType(HashType.SHA256)
+            .build();
+    AesGcmHkdfStreamingKey keyProto =
+        AesGcmHkdfStreamingKey.newBuilder()
+            .setVersion(0)
+            .setKeyValue(ByteString.copyFrom(keyValue))
+            .setParams(keyParams)
+            .build();
+    return createKeyData(
+        keyProto,
+        StreamingAeadConfig.AES_GCM_HKDF_STREAMINGAEAD_TYPE_URL,
         KeyData.KeyMaterialType.SYMMETRIC);
   }
 
@@ -459,6 +467,18 @@ public class TestUtil {
         new String(Util.readAll(new FileInputStream(new File(path))), UTF_8));
   }
 
+  /** Returns whether we expect an AES key size to be supported by the provider. */
+  public static boolean isAesKeySizeSupported(int bytes) throws NoSuchAlgorithmException {
+    int maxKeySize = Cipher.getMaxAllowedKeyLength("AES/CTR/NoPadding");
+    if ((bytes * 8) > maxKeySize) {
+      return false;
+    }
+    if (bytes == 16 || bytes == 24 || bytes == 32) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Assertion that an exception's message contains the right message. When this fails, the
    * exception's message and the expected value will be in the failure log.
@@ -492,5 +512,40 @@ public class TestUtil {
     assertThat(keyInfo.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(keyInfo.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
     assertThat(keyInfo.getTypeUrl()).isEqualTo(keyTemplate.getTypeUrl());
+  }
+
+  /**
+   * Replacement for org.junit.Assert.assertEquals, since org.junit.Assert.assertEquals is quite
+   * slow.
+   */
+  public static void assertByteArrayEquals(String txt, byte[] expected, byte[] actual)
+      throws Exception {
+    assertEquals(txt + " arrays not of the same length", expected.length, actual.length);
+    for (int i = 0; i < expected.length; i++) {
+      if (expected[i] != actual[i]) {
+        assertEquals(txt + " difference at position:" + i, expected[i], actual[i]);
+      }
+    }
+  }
+
+  public static void assertByteArrayEquals(byte[] expected, byte[] actual) throws Exception {
+    assertByteArrayEquals("", expected, actual);
+  }
+
+  /**
+   * Checks whether the bytes from buffer.position() to buffer.limit() are the same bytes as
+   * expected.
+   */
+  public static void assertByteBufferContains(String txt, byte[] expected, ByteBuffer buffer)
+      throws Exception {
+    assertEquals(
+        txt + " unexpected number of bytes in buffer", expected.length, buffer.remaining());
+    byte[] content = new byte[buffer.remaining()];
+    buffer.duplicate().get(content);
+    assertByteArrayEquals(txt, expected, content);
+  }
+
+  public static void assertByteBufferContains(byte[] expected, ByteBuffer buffer) throws Exception {
+    assertByteBufferContains("", expected, buffer);
   }
 }
