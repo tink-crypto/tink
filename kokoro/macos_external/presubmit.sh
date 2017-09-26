@@ -45,6 +45,9 @@ export PATH="${JAVA_HOME}/bin:$PATH"
 chmod -R a+rx "${JAVA_HOME}"
 popd
 
+# fixing https://stackoverflow.com/questions/36908041/git-could-not-expand-include-path-gitcinclude-fatal-bad-config-file-line
+sudo sed -i.bak s#~#/Users/kbuilder#g /usr/local/git/etc/gitconfig
+
 chmod +x "${BAZEL_BIN}"
 
 cd github/tink/
