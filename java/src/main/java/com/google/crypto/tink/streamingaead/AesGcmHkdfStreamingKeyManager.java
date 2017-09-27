@@ -62,7 +62,7 @@ class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
     validate(keyProto);
     return new AesGcmHkdfStreaming(
         keyProto.getKeyValue().toByteArray(),
-        keyProto.getParams().getDerivedKeySize() * 8,
+        keyProto.getParams().getDerivedKeySize(),
         keyProto.getParams().getCiphertextSegmentSize(),
         /* firstSegmentOffset= */ 0);
   }

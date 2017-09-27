@@ -34,21 +34,18 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Streaming encryption using AES-GCM with HKDF as key derivation function.
  *
- * Each ciphertext uses a new AES-GCM key that is derived from the key derivation key,
- * a randomly chosen salt of the same size as the key and a nonce prefix.
+ * <p>Each ciphertext uses a new AES-GCM key that is derived from the key derivation key, a randomly
+ * chosen salt of the same size as the key and a nonce prefix.
  *
- * The the format of a ciphertext is
- *   header || segment_0 || segment_1 || ... || segment_k.
- * The header has size this.headerLength(). Its format is
- *   headerLength || salt || prefix.
- * where headerLength is 1 byte determining the size of the header, salt is a salt used in the
- * key derivation and prefix is the prefix of the nonce.
- * In principle headerLength is redundant information, since the length of the header can be
- * determined from the key size.
+ * <p>The the format of a ciphertext is header || segment_0 || segment_1 || ... || segment_k. The
+ * header has size this.headerLength(). Its format is headerLength || salt || prefix. where
+ * headerLength is 1 byte determining the size of the header, salt is a salt used in the key
+ * derivation and prefix is the prefix of the nonce. In principle headerLength is redundant
+ * information, since the length of the header can be determined from the key size.
  *
- * segment_i is the i-th segment of the ciphertext. The size of segment_1 .. segment_{k-1}
- * is ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header
- * and other information of size firstSegmentOffset align with ciphertextSegmentSize.
+ * <p>segment_i is the i-th segment of the ciphertext. The size of segment_1 .. segment_{k-1} is
+ * ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header and other information
+ * of size firstSegmentOffset align with ciphertextSegmentSize.
  */
 @Alpha
 public final class AesGcmHkdfStreaming implements StreamingAead {
@@ -81,7 +78,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
   // The MAC algorithm used for the key derivation
   private static final String MAC_ALGORITHM = "HMACSHA256";
 
-  private int keySizeInBits;
+  private int keySizeInBytes;
   private int ciphertextSegmentSize;
   private int plaintextSegmentSize;
   private int firstSegmentOffset;
@@ -89,24 +86,23 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
 
   /**
    * Initializes a streaming primitive with a key derivation key and encryption parameters.
+   *
    * @param ikm input keying material used to derive sub keys.
-   * @param keySizeInBits the key size of the sub keys
+   * @param keySizeInBytes the key size of the sub keys
    * @param ciphertextSegmentSize the size of ciphertext segments.
    * @param firstSegmentOffset the offset of the first ciphertext segment. That means the first
-   *    segment has size ciphertextSegmentSize - headerLength() - firstSegmentOffset
+   *     segment has size ciphertextSegmentSize - headerLength() - firstSegmentOffset
    * @throws InvalidAlgorithmParameterException if ikm is too short, the key size not supported or
-   *    ciphertextSegmentSize is to short.
+   *     ciphertextSegmentSize is to short.
    */
   public AesGcmHkdfStreaming(
-      byte[] ikm,
-      int keySizeInBits,
-      int ciphertextSegmentSize,
-      int firstSegmentOffset) throws InvalidAlgorithmParameterException {
+      byte[] ikm, int keySizeInBytes, int ciphertextSegmentSize, int firstSegmentOffset)
+      throws InvalidAlgorithmParameterException {
     // Checks
     if (ikm.length < 16) {
       throw new InvalidAlgorithmParameterException("ikm to short");
     }
-    boolean isValidKeySize = keySizeInBits == 128 || keySizeInBits == 192 || keySizeInBits == 256;
+    boolean isValidKeySize = keySizeInBytes == 16 || keySizeInBytes == 24 || keySizeInBytes == 32;
     if (!isValidKeySize) {
       throw new InvalidAlgorithmParameterException("Invalid key size");
     }
@@ -114,7 +110,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
       throw new InvalidAlgorithmParameterException("ciphertextSegmentSize too small");
     }
     this.ikm = Arrays.copyOf(ikm, ikm.length);
-    this.keySizeInBits = keySizeInBits;
+    this.keySizeInBytes = keySizeInBytes;
     this.ciphertextSegmentSize = ciphertextSegmentSize;
     this.firstSegmentOffset = firstSegmentOffset;
     this.plaintextSegmentSize = ciphertextSegmentSize - TAG_SIZE_IN_BYTES;
@@ -125,7 +121,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
   }
 
   private int headerLength() {
-    return 1 + keySizeInBits / 8 + NONCE_PREFIX_IN_BYTES;
+    return 1 + keySizeInBytes + NONCE_PREFIX_IN_BYTES;
   }
 
   private int ciphertextOffset() {
@@ -133,17 +129,16 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
   }
 
   /**
-   * Returns the number of bytes that a ciphertext segment
-   * is longer than the corresponding plaintext segment.
-   * Typically this is the size of the tag.
+   * Returns the number of bytes that a ciphertext segment is longer than the corresponding
+   * plaintext segment. Typically this is the size of the tag.
    */
   private int ciphertextOverhead() {
     return TAG_SIZE_IN_BYTES;
   }
 
   /**
-   * Returns the expected size of the ciphertext for a given plaintext
-   * The returned value includes the header and offset.
+   * Returns the expected size of the ciphertext for a given plaintext The returned value includes
+   * the header and offset.
    */
   public long expectedCiphertextSize(long plaintextSize) {
     long offset = ciphertextOffset();
@@ -161,7 +156,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
   }
 
   private byte[] randomSalt() {
-    return Random.randBytes(keySizeInBits / 8);
+    return Random.randBytes(keySizeInBytes);
   }
 
   public int getCiphertextSegmentSize() {
@@ -181,18 +176,17 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
     return Random.randBytes(NONCE_PREFIX_IN_BYTES);
   }
 
-  private SecretKeySpec deriveKeySpec(
-      byte[] salt,
-      byte[] aad) throws GeneralSecurityException {
-    byte[] key = Hkdf.computeHkdf(MAC_ALGORITHM, ikm, salt, aad, keySizeInBits / 8);
+  private SecretKeySpec deriveKeySpec(byte[] salt, byte[] aad) throws GeneralSecurityException {
+    byte[] key = Hkdf.computeHkdf(MAC_ALGORITHM, ikm, salt, aad, keySizeInBytes);
     return new SecretKeySpec(key, "AES");
   }
 
   /**
    * Returns a WritableByteChannel for plaintext.
+   *
    * @param ciphertextChannel the channel to which the ciphertext is written.
-   * @param associatedData data associated with the plaintext. This data is authenticated
-   *        but not encrypted. It must be passed into the decryption.
+   * @param associatedData data associated with the plaintext. This data is authenticated but not
+   *     encrypted. It must be passed into the decryption.
    */
   @Override
   public WritableByteChannel newEncryptingChannel(
@@ -209,8 +203,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
 
   @Override
   public ReadableByteChannel newDecryptingChannel(
-      ReadableByteChannel ciphertextChannel,
-      byte[] associatedData)
+      ReadableByteChannel ciphertextChannel, byte[] associatedData)
       throws GeneralSecurityException, IOException {
     return new StreamingAeadDecryptingChannel(
         new AesGcmHkdfStreamDecrypter(),
@@ -224,8 +217,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
 
   @Override
   public SeekableByteChannel newSeekableDecryptingChannel(
-      SeekableByteChannel ciphertextSource,
-      byte[] associatedData)
+      SeekableByteChannel ciphertextSource, byte[] associatedData)
       throws GeneralSecurityException, IOException {
     return new StreamingAeadSeekableDecryptingChannel(
         new AesGcmHkdfStreamDecrypter(),
@@ -239,10 +231,9 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
   }
 
   /**
-   * An instance of a crypter used to encrypt a plaintext stream.
-   * The instances have state: encryptedSegments counts the number of encrypted
-   * segments. This state is used to generate the IV for each segment.
-   * By enforcing that only the method encryptSegment can increment this state,
+   * An instance of a crypter used to encrypt a plaintext stream. The instances have state:
+   * encryptedSegments counts the number of encrypted segments. This state is used to generate the
+   * IV for each segment. By enforcing that only the method encryptSegment can increment this state,
    * we can guarantee that the IV does not repeat.
    */
   class AesGcmHkdfStreamEncrypter implements StreamSegmentEncrypter {
@@ -271,29 +262,32 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
     }
 
     /**
-     * Encrypts the next plaintext segment.
-     * This uses encryptedSegments as the segment number for the encryption.
+     * Encrypts the next plaintext segment. This uses encryptedSegments as the segment number for
+     * the encryption.
      */
     @Override
     public synchronized void encryptSegment(
         ByteBuffer plaintext, boolean isLastSegment, ByteBuffer ciphertext)
         throws GeneralSecurityException {
-      cipher.init(Cipher.ENCRYPT_MODE, keySpec,
+      cipher.init(
+          Cipher.ENCRYPT_MODE,
+          keySpec,
           paramsForSegment(noncePrefix, encryptedSegments, isLastSegment));
       encryptedSegments++;
       cipher.doFinal(plaintext, ciphertext);
     }
 
     /**
-     * Encrypt a segment consisting of two parts.
-     * This method simplifies the case where one part of the plaintext is buffered
-     * and the other part is passed in by the caller.
+     * Encrypt a segment consisting of two parts. This method simplifies the case where one part of
+     * the plaintext is buffered and the other part is passed in by the caller.
      */
     @Override
     public synchronized void encryptSegment(
         ByteBuffer part1, ByteBuffer part2, boolean isLastSegment, ByteBuffer ciphertext)
         throws GeneralSecurityException {
-      cipher.init(Cipher.ENCRYPT_MODE, keySpec,
+      cipher.init(
+          Cipher.ENCRYPT_MODE,
+          keySpec,
           paramsForSegment(noncePrefix, encryptedSegments, isLastSegment));
       encryptedSegments++;
       cipher.update(part1, ciphertext);
@@ -306,9 +300,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
     }
   }
 
-  /**
-   * An instance of a crypter used to decrypt a ciphertext stream.
-   */
+  /** An instance of a crypter used to decrypt a ciphertext stream. */
   class AesGcmHkdfStreamDecrypter implements StreamSegmentDecrypter {
     private SecretKeySpec keySpec;
     private Cipher cipher;
@@ -317,8 +309,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
     AesGcmHkdfStreamDecrypter() {};
 
     @Override
-    public synchronized void init(ByteBuffer header, byte[] aad)
-        throws GeneralSecurityException {
+    public synchronized void init(ByteBuffer header, byte[] aad) throws GeneralSecurityException {
       if (header.remaining() != headerLength()) {
         throw new InvalidAlgorithmParameterException("Invalid header length");
       }
@@ -330,15 +321,15 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
         throw new GeneralSecurityException("Invalid ciphertext");
       }
       noncePrefix = new byte[NONCE_PREFIX_IN_BYTES];
-      byte[] salt = new byte[keySizeInBits / 8];
+      byte[] salt = new byte[keySizeInBytes];
       header.get(salt);
       header.get(noncePrefix);
       keySpec = deriveKeySpec(salt, aad);
       cipher = cipherInstance();
     }
 
-   @Override
-   public synchronized void decryptSegment(
+    @Override
+    public synchronized void decryptSegment(
         ByteBuffer ciphertext, int segmentNr, boolean isLastSegment, ByteBuffer plaintext)
         throws GeneralSecurityException {
       GCMParameterSpec params = paramsForSegment(noncePrefix, segmentNr, isLastSegment);
