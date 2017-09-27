@@ -40,6 +40,7 @@ java_library(
     deps = [
         "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink/aead",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
@@ -54,6 +55,7 @@ java_library(
     deps = [
         "//java/src/main/java/com/google/crypto/tink:android",
         "//java/src/main/java/com/google/crypto/tink/aead:android",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
         "@com_google_protobuf_javalite//:protobuf_java_lite",

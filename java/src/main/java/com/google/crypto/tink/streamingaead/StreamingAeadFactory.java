@@ -21,6 +21,7 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.annotations.Alpha;
 import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
 
@@ -53,6 +54,7 @@ import java.util.logging.Logger;
  * the right key for decryption.  All keys in a keyset of StreamingAead have type
  * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
+@Alpha
 public final class StreamingAeadFactory {
   private static final Logger logger = Logger.getLogger(StreamingAeadFactory.class.getName());
 
