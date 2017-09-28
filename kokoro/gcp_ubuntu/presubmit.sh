@@ -36,9 +36,3 @@ bazel build --strategy=CppCompile=standalone --strategy=Turbine=standalone \
 # Run all tests, except iOS.
 bazel test --strategy=TestRunner=standalone --test_output=all -- //... \
 -//objc/...
-
-# Build Maven
-# Some tests depend on TEST_TMPDIR.
-export TEST_TMPDIR=$TMP
-cd maven
-mvn package
