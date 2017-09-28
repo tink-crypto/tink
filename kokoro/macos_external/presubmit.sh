@@ -58,8 +58,10 @@ ${BAZEL_BIN} version
 echo "using java binary: " `which java`
 java -version
 
+time ${BAZEL_BIN} fetch ...
+
 # Build all the iOS targets.
-${BAZEL_BIN} build \
+time ${BAZEL_BIN} build \
   $DISABLE_SANDBOX \
   --compilation_mode=dbg \
   --dynamic_mode=off \
@@ -70,14 +72,16 @@ ${BAZEL_BIN} build \
   --ios_sdk_version="${IOS_SDK_VERSION}" \
   --xcode_version="${XCODE_VERSION}" \
   --verbose_failures \
-  //objc/... || \
-  ( ls -l ; df -h / ; exit 1 )
+  //objc/...
 
 echo "bazel obj-c passed"
 
 # Test all targets except iOS.
 # bazel sandbox doesn't work with Kokoro's MacOS image, see b/38040081.
-${BAZEL_BIN} test --sandbox_tmpfs_path=$TMP $DISABLE_SANDBOX -- //... \
--//objc/... || ( ls -l ; df -h / ; exit 1 )
+time ${BAZEL_BIN} build --sandbox_tmpfs_path=$TMP $DISABLE_SANDBOX -- //... \
+-//objc/...
+
+time ${BAZEL_BIN} test --sandbox_tmpfs_path=$TMP $DISABLE_SANDBOX -- //... \
+-//objc/...
 
 echo "bazel non objc-c passed"
