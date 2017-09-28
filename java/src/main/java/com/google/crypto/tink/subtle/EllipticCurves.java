@@ -392,6 +392,22 @@ public final class EllipticCurves {
    * @throws GeneralSecurityException if the encoded point is invalid or if the curve or format are
    *     not supported.
    */
+  public static ECPoint pointDecode(CurveType curveType, PointFormatType format, byte[] encoded)
+      throws GeneralSecurityException {
+    return pointDecode(getCurveSpec(curveType).getCurve(), format, encoded);
+  }
+
+  /**
+   * Decodes an encoded point on an elliptic curve. This method checks that the encoded point is on
+   * the curve.
+   *
+   * @param curve the elliptic curve
+   * @param format the format used to enocde the point
+   * @param encoded the encoded point
+   * @return the point
+   * @throws GeneralSecurityException if the encoded point is invalid or if the curve or format are
+   *     not supported.
+   */
   public static ECPoint pointDecode(EllipticCurve curve, PointFormatType format, byte[] encoded)
       throws GeneralSecurityException {
     int coordinateSize = fieldSizeInBytes(curve);
@@ -435,6 +451,21 @@ public final class EllipticCurves {
       default:
         throw new GeneralSecurityException("invalid format:" + format);
     }
+  }
+
+  /**
+   * Encodes a point on an elliptic curve.
+   *
+   * @param curve the elliptic curve
+   * @param format the format for the encoding
+   * @param point the point to encode
+   * @return the encoded key exchange
+   * @throws GeneralSecurityException if the point is not on the curve or if the format is not
+   *     supported.
+   */
+  public static byte[] pointEncode(CurveType curveType, PointFormatType format, ECPoint point)
+      throws GeneralSecurityException {
+    return pointEncode(getCurveSpec(curveType).getCurve(), format, point);
   }
 
   /**
