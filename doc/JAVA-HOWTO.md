@@ -223,7 +223,7 @@ Tink user accesses implementations of a primitive via a factory that corresponds
 to the primitive: AEAD via `AeadFactory`, MAC via `MacFactory`, etc. where each
 factory offers corresponding `getPrimitive(...)` methods.
 
-**Symmetric Key Encryption**
+### Symmetric Key Encryption
 
 Here is how you can obtain and use an [AEAD (Authenticated Encryption with
 Associated
@@ -247,7 +247,7 @@ to encrypt or decrypt data:
     byte[] ciphertext = aead.encrypt(plaintext, aad);
 ```
 
-**Message Authentication Code**
+### Message Authentication Code
 
 Or to compute or verify a [MAC (Message Authentication
 Code)](doc/PRIMITIVES.md#message-authentication-code):
@@ -272,7 +272,7 @@ Code)](doc/PRIMITIVES.md#message-authentication-code):
     mac.verifyMac(tag, data);
 ```
 
-**Digitial Signatures**
+### Digitial Signatures
 
 Or to sign or verify a [digital
 signature](doc/PRIMITIVES.md#digital-signatures):
@@ -312,7 +312,7 @@ signature](doc/PRIMITIVES.md#digital-signatures):
     verifier.verify(signature, data);
 ```
 
-**Hybrid Encryption**
+### Hybrid Encryption
 
 Or to encrypt or decrypt using [a combination of public key encryption and
 symmetric key encryption](doc/PRIMITIVES.md#hybrid-encryption):
@@ -352,7 +352,7 @@ symmetric key encryption](doc/PRIMITIVES.md#hybrid-encryption):
     byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
 ```
 
-**Envelope Encryption**
+### Envelope Encryption
 
 Via the AEAD interface, Tink supports
 [envelope](http://docs.aws.amazon.com/kms/latest/developerguide/workflow.html)

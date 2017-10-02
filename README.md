@@ -59,8 +59,7 @@ development.
 
 **TIP** The easiest way to get started with Tink is to install
 [Bazel](https://docs.bazel.build/versions/master/install.html), then build, run
-and study the [`hello world samples`]
-(https://github.com/google/tink/tree/master/examples/helloworld).
+and study the [`hello world samples`](https://github.com/google/tink/tree/master/examples/helloworld).
 
 Tink performs cryptographic tasks via so-called [primitives](doc/PRIMITIVES.md),
 each of which is defined via a corresponding interface that specifies the
