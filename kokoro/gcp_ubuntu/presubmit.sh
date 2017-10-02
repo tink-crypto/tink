@@ -27,16 +27,12 @@ rm -f ~/.bazelrc
 # Build
 cd github/tink/
 
-time bazel fetch ...
-
 # bazel sandbox doesn't work with Kokoro's MacOS image, see b/38040081.
-time bazel build --strategy=CppCompile=standalone --strategy=Turbine=standalone \
+bazel build --strategy=CppCompile=standalone --strategy=Turbine=standalone \
   --strategy=ProtoCompile=standalone --strategy=GenProto=standalone \
   --strategy=GenRule=standalone --strategy=GenProtoDescriptorSet=standalone \
-  --proto_toolchain_for_cc=@com_google_protobuf//:cc_toolchain \
-  --proto_toolchain_for_java=@com_google_protobuf//:java_toolchain \
-  --sandbox_tmpfs_path=$TMP -- //... -//objc/...
+  --sandbox_tmpfs_path=$TMP -- //... -//objc/... -//tools/...
 
 # Run all tests, except iOS.
-time bazel test --strategy=TestRunner=standalone --test_output=all -- //... \
+bazel test --strategy=TestRunner=standalone --test_output=all -- //... \
 -//objc/...

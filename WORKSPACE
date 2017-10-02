@@ -39,6 +39,7 @@ git_repository(
 #-----------------------------------------------------------------------------
 # proto_library rules implicitly depend on @com_google_protobuf//:protoc,
 # which is the proto-compiler.
+# This statement defines the @com_google_protobuf repo.
 http_archive(
     name = "com_google_protobuf",
     strip_prefix = "protobuf-3.4.0",
