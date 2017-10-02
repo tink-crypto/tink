@@ -64,12 +64,6 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
   private boolean definedState;
 
   /**
-   * The position in the plaintext. This is the same as the number of bytes
-   * alread read this.
-   */
-  private long plaintextPosition;
-
-  /**
    * The additional data that is authenticated with the ciphertext.
    */
   private byte[] aad;
@@ -106,7 +100,6 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
     plaintextSegment = ByteBuffer.allocate(plaintextSegmentSize);
     plaintextSegment.limit(0);
     this.ciphertextOffset = ciphertextOffset;
-    plaintextPosition = 0;
     headerRead = false;
     endOfCiphertext = false;
     endOfPlaintext = false;
@@ -213,7 +206,6 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
       int firstSegmentLength = ciphertextSegmentSize - ciphertextOffset;
       ciphertextSegment.clear();
       ciphertextSegment.limit(firstSegmentLength + 1);
-      plaintextPosition = 0;
     }
     if (endOfPlaintext) {
       return -1;
@@ -232,37 +224,39 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
       if (plaintextSegment.remaining() <= dst.remaining()) {
         int sliceSize = plaintextSegment.remaining();
         dst.put(plaintextSegment);
-        plaintextPosition += sliceSize;
       } else {
         int sliceSize = dst.remaining();
         ByteBuffer slice = plaintextSegment.duplicate();
         slice.limit(slice.position() + sliceSize);
         dst.put(slice);
         plaintextSegment.position(plaintextSegment.position() + sliceSize);
-        plaintextPosition += sliceSize;
       }
     }
-    return dst.position() - startPosition;
+    int bytesRead = dst.position() - startPosition;
+    if (bytesRead == 0 && endOfPlaintext) {
+      return -1;
+    } else {
+      return bytesRead;
+    }
   }
 
   @Override
-  public void close() throws IOException {
+  public synchronized void close() throws IOException {
     ciphertextChannel.close();
   }
 
   @Override
-  public boolean isOpen() {
+  public synchronized boolean isOpen() {
     return ciphertextChannel.isOpen();
   }
 
 
   /* Returns the state of the channel. */
   @Override
-  public String toString() {
+  public synchronized String toString() {
     StringBuilder res =
       new StringBuilder();
     res.append("StreamingAeadDecryptingChannel")
-       .append("\nplaintextPosition:").append(plaintextPosition)
        .append("\nsegmentNr:").append(segmentNr)
        .append("\nciphertextSegmentSize:").append(ciphertextSegmentSize)
        .append("\nheaderRead:").append(headerRead)

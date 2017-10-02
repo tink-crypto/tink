@@ -138,7 +138,7 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
    * The position is relative to the plaintext.
    */
   @Override
-  public long position() {
+  public synchronized long position() {
     return plaintextPosition;
   }
 
@@ -148,7 +148,7 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
    * A later attempt to read byte will throw an IOException.
    */
   @Override
-  public SeekableByteChannel position(long newPosition) {
+  public synchronized SeekableByteChannel position(long newPosition) {
     plaintextPosition = newPosition;
     return this;
   }
@@ -308,7 +308,7 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
     return plaintextSize;
   }
 
-  public long verifiedSize() throws IOException {
+  public synchronized long verifiedSize() throws IOException {
     if (tryLoadSegment(numberOfSegments - 1)) {
       return plaintextSize;
     } else {

@@ -115,7 +115,7 @@ class StreamingAeadEncryptingChannel implements WritableByteChannel {
   }
 
   @Override
-  public boolean isOpen() {
+  public synchronized boolean isOpen() {
     return open;
   }
 }
