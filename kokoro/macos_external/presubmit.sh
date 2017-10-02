@@ -50,16 +50,18 @@ sudo sed -i.bak s#~#/Users/kbuilder#g /usr/local/git/etc/gitconfig
 
 chmod +x "${BAZEL_BIN}"
 
-cd github/tink/
-
 echo "using bazel binary: ${BAZEL_BIN}"
 ${BAZEL_BIN} version
 
 echo "using java binary: " `which java`
 java -version
 
+cd github/tink/
+
+time bazel fetch ...
+
 # Build all the iOS targets.
-${BAZEL_BIN} build \
+time ${BAZEL_BIN} build \
   $DISABLE_SANDBOX \
   --compilation_mode=dbg \
   --dynamic_mode=off \
@@ -77,7 +79,7 @@ echo "bazel obj-c passed"
 
 # Test all targets except iOS.
 # bazel sandbox doesn't work with Kokoro's MacOS image, see b/38040081.
-${BAZEL_BIN} test --sandbox_tmpfs_path=$TMP $DISABLE_SANDBOX -- //... \
+time ${BAZEL_BIN} test --sandbox_tmpfs_path=$TMP $DISABLE_SANDBOX -- //... \
 -//objc/... || ( ls -l ; df -h / ; exit 1 )
 
 echo "bazel non objc-c passed"
