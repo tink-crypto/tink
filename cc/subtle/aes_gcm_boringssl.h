@@ -24,7 +24,6 @@
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/evp.h"
-#include "proto/common.pb.h"
 
 namespace crypto {
 namespace tink {

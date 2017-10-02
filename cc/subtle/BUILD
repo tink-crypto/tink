@@ -94,7 +94,6 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:common_cc_proto",
         "@boringssl//:crypto",
         "@com_google_protobuf//:protobuf_lite",
     ],
@@ -213,7 +212,6 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
-        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -22,8 +22,6 @@
 #include "cc/util/statusor.h"
 #include "gtest/gtest.h"
 
-namespace util = crypto::tink::util;
-
 namespace crypto {
 namespace tink {
 namespace {

@@ -42,10 +42,10 @@ Config::GetTinkKeyTypeEntry(StringPiece catalogue_name,
   std::unique_ptr<KeyTypeEntry> entry(new KeyTypeEntry());
   entry->set_catalogue_name(catalogue_name);
   entry->set_primitive_name(primitive_name);
-  entry->set_type_url(prefix.append(key_proto_name));
+  entry->set_type_url(prefix.append(key_proto_name.ToString()));
   entry->set_key_manager_version(key_manager_version);
   entry->set_new_key_allowed(new_key_allowed);
-  return std::move(entry);
+  return entry;
 }
 
 // static

@@ -23,7 +23,6 @@
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
-#include "proto/common.pb.h"
 
 namespace crypto {
 namespace tink {

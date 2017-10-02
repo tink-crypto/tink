@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -227,14 +228,14 @@ public class AesGcmJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    JSONObject jsonObj = TestUtil.getJsonObject("../wycheproof/testvectors/aes_gcm_test.json");
+    JSONObject json = TestUtil.readJson("../wycheproof/testvectors/aes_gcm_test.json");
     final String expectedAlgorithm = "AES-GCM";
-    String algorithm = jsonObj.getString("algorithm");
+    String algorithm = json.getString("algorithm");
     if (!expectedAlgorithm.equals(algorithm)) {
       System.out.println("expect algorithm " + expectedAlgorithm + ", got" + algorithm);
     }
     final String expectedVersion = "0.0a8";
-    String generatorVersion = jsonObj.getString("generatorVersion");
+    String generatorVersion = json.getString("generatorVersion");
     if (!generatorVersion.equals(expectedVersion)) {
       System.out.println(
           "expect test vectors with version "
@@ -242,11 +243,11 @@ public class AesGcmJceTest {
               + " ,got vectors with version "
               + generatorVersion);
     }
-    int numTests = jsonObj.getInt("numberOfTests");
+    int numTests = json.getInt("numberOfTests");
     int cntTests = 0;
     int cntSkippedTests = 0;
     int errors = 0;
-    JSONArray testGroups = jsonObj.getJSONArray("testGroups");
+    JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
       int keySize = group.getInt("keySize");
@@ -260,12 +261,12 @@ public class AesGcmJceTest {
         JSONObject testcase = tests.getJSONObject(j);
         int tcid = testcase.getInt("tcId");
         String tc = "tcId: " + tcid + " " + testcase.getString("comment");
-        byte[] iv = TestUtil.getBytes(testcase, "iv");
-        byte[] key = TestUtil.getBytes(testcase, "key");
-        byte[] msg = TestUtil.getBytes(testcase, "msg");
-        byte[] aad = TestUtil.getBytes(testcase, "aad");
-        byte[] ct = TestUtil.getBytes(testcase, "ct");
-        byte[] tag = TestUtil.getBytes(testcase, "tag");
+        byte[] iv = Hex.decode(testcase.getString("iv"));
+        byte[] key = Hex.decode(testcase.getString("key"));
+        byte[] msg = Hex.decode(testcase.getString("msg"));
+        byte[] aad = Hex.decode(testcase.getString("aad"));
+        byte[] ct = Hex.decode(testcase.getString("ct"));
+        byte[] tag = Hex.decode(testcase.getString("tag"));
         byte[] ciphertext = Bytes.concat(iv, ct, tag);
         // Result is one of "valid", "invalid", "acceptable".
         // "valid" are test vectors with matching plaintext, ciphertext and tag.

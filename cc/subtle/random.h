@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_RANDOM_H_
 #define TINK_SUBTLE_RANDOM_H_
 
+#include <string>
 #include <memory>
 
 namespace crypto {

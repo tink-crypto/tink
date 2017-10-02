@@ -48,7 +48,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<HybridDecrypt>>>
 HybridDecryptCatalogue::GetKeyManager(google::protobuf::StringPiece type_url,
                 google::protobuf::StringPiece primitive_name,
                 uint32_t min_version) const {
-  if (!(to_lowercase(primitive_name) == "hybriddecrypt")) {
+  if (!(to_lowercase(primitive_name.ToString()) == "hybriddecrypt")) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                      "This catalogue does not support primitive %s.",
                      primitive_name.ToString().c_str());

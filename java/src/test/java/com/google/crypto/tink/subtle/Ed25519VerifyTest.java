@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import java.security.GeneralSecurityException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,12 +22,12 @@ public final class Ed25519VerifyTest {
   @Test
   public void testVerificationWithPublicKeyLengthDifferentFrom32Byte() throws Exception {
     try {
-      Ed25519Verify verifier = new Ed25519Verify(new byte[31]);
+      Ed25519Verify unused = new Ed25519Verify(new byte[31]);
       fail("Public key length should be 32-byte");
     } catch (IllegalArgumentException expected) {
     }
     try {
-      Ed25519Verify verifier = new Ed25519Verify(new byte[33]);
+      Ed25519Verify unused = new Ed25519Verify(new byte[33]);
       fail("Public key length should be 32-byte");
     } catch (IllegalArgumentException expected) {
     }
@@ -34,23 +35,23 @@ public final class Ed25519VerifyTest {
 
   @Test
   public void testVerificationWithWycheproofVectors() throws Exception {
-    JSONObject jsonObj = TestUtil.getJsonObject("testdata/eddsa_test.json");
-    checkAlgAndVersion(jsonObj);
-    int numTests = jsonObj.getInt("numberOfTests");
+    JSONObject json = TestUtil.readJson("testdata/wycheproof/eddsa_test.json");
+    checkAlgAndVersion(json);
+    int numTests = json.getInt("numberOfTests");
     int cntTests = 0;
     int errors = 0;
-    JSONArray testGroups = jsonObj.getJSONArray("testGroups");
+    JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
       JSONObject key = group.getJSONObject("key");
-      byte[] publicKey = TestUtil.getBytes(key, "pk");
+      byte[] publicKey = Hex.decode(key.getString("pk"));
       JSONArray tests = group.getJSONArray("tests");
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
         int tcId = testcase.getInt("tcId");
         String tc = "tcId: " + tcId + " " + testcase.getString("comment");
-        byte[] msg = TestUtil.getBytes(testcase, "message");
-        byte[] sig = TestUtil.getBytes(testcase, "sig");
+        byte[] msg = Hex.decode(testcase.getString("message"));
+        byte[] sig = Hex.decode(testcase.getString("sig"));
         String result = testcase.getString("result");
         boolean verified = false;
         Ed25519Verify verifier = new Ed25519Verify(publicKey);

@@ -18,7 +18,6 @@ package com.google.crypto.tink.streamingaead;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -47,7 +46,6 @@ public final class StreamingAeadConfig {
   private static final String PRIMITIVE_NAME = "StreamingAead";
 
   public static final RegistryConfig TINK_1_1_0 = RegistryConfig.newBuilder()
-      .mergeFrom(AeadConfig.TINK_1_0_0)
       .addEntry(Config.getTinkKeyTypeEntry(
           CATALOGUE_NAME, PRIMITIVE_NAME, "AesCtrHmacStreamingKey", 0, true))
       .addEntry(Config.getTinkKeyTypeEntry(
@@ -67,13 +65,8 @@ public final class StreamingAeadConfig {
    * Tries to register with the {@link Registry} all instances of
    * {@link com.google.crypto.tink.Catalogue} needed to handle StreamingAead key types
    * supported in Tink.
-   *
-   * <p>Because StreamingAead key types depend on {@link com.google.crypto.tink.Aead} and
-   * {@link com.google.crypto.tink.Mac} key types, this method also
-   * registers all Aead and Mac catalogues.
    */
   public static void init() throws GeneralSecurityException {
     Registry.addCatalogue(CATALOGUE_NAME, new StreamingAeadCatalogue());
-    AeadConfig.init();  // includes Mac
   }
 }

@@ -34,9 +34,9 @@ filegroup(
 )
 
 filegroup(
-    name = "eddsa_test",
+    name = "wycheproof",
     testonly = 1,
-    srcs = [
-        "eddsa_test.json",
-    ],
+    srcs = glob([
+        "wycheproof/*.*",
+    ]),
 )

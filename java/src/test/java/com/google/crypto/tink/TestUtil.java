@@ -61,7 +61,6 @@ import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.GeneralSecurityException;
@@ -455,18 +454,9 @@ public class TestUtil {
   }
 
   /** Gets JSONObject from file. */
-  public static JSONObject getJsonObject(String path) throws Exception {
+  public static JSONObject readJson(String path) throws Exception {
     return new JSONObject(
         new String(Util.readAll(new FileInputStream(new File(path))), UTF_8));
-  }
-
-  /**
-   * Gets hex-decoded bytes value from JsonObject. Wycheproof represents byte arrays as
-   * hexadeciamal strings.
-   */
-  public static byte[] getBytes(JSONObject object, String name) throws Exception {
-    String hex = object.getString(name);
-    return hexDecode(hex);
   }
 
   /**

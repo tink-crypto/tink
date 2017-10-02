@@ -19,8 +19,6 @@
 #include "gtest/gtest.h"
 #include "proto/config.pb.h"
 
-namespace util = crypto::tink::util;
-
 using google::crypto::tink::KeyTypeEntry;
 using google::protobuf::StringPiece;
 

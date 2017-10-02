@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.subtle.Hex;
 import java.security.GeneralSecurityException;
 import java.util.TreeSet;
 import org.json.JSONArray;
@@ -71,12 +72,12 @@ public final class Ed25519SignTest {
   @Test
   public void testSignWithPrivateKeyLengthDifferentFrom32Byte() throws Exception {
     try {
-      Ed25519Sign signer = new Ed25519Sign(new byte[31]);
+      Ed25519Sign unused = new Ed25519Sign(new byte[31]);
       fail("Private key length should be 32-byte");
     } catch (IllegalArgumentException expected) {
     }
     try {
-      Ed25519Sign signer = new Ed25519Sign(new byte[33]);
+      Ed25519Sign unused = new Ed25519Sign(new byte[33]);
       fail("Private key length should be 32-byte");
     } catch (IllegalArgumentException expected) {
     }
@@ -106,24 +107,24 @@ public final class Ed25519SignTest {
 
   @Test
   public void testSigningWithWycheproofVectors() throws Exception {
-    JSONObject jsonObj = TestUtil.getJsonObject("testdata/eddsa_test.json");
-    checkAlgAndVersion(jsonObj);
-    int numTests = jsonObj.getInt("numberOfTests");
+    JSONObject json = TestUtil.readJson("testdata/wycheproof/eddsa_test.json");
+    checkAlgAndVersion(json);
+    int numTests = json.getInt("numberOfTests");
     int cntTests = 0;
     int cntSkippedTests = 0;
     int errors = 0;
-    JSONArray testGroups = jsonObj.getJSONArray("testGroups");
+    JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
       JSONObject key = group.getJSONObject("key");
-      byte[] privateKey = TestUtil.getBytes(key, "sk");
+      byte[] privateKey = Hex.decode(key.getString("sk"));
       JSONArray tests = group.getJSONArray("tests");
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
         int tcId = testcase.getInt("tcId");
         String tc = "tcId: " + tcId + " " + testcase.getString("comment");
-        byte[] msg = TestUtil.getBytes(testcase, "message");
-        byte[] sig = TestUtil.getBytes(testcase, "sig");
+        byte[] msg = Hex.decode(testcase.getString("message"));
+        byte[] sig = Hex.decode(testcase.getString("sig"));
         String result = testcase.getString("result");
         if (result.equals("invalid")) {
           cntSkippedTests++;
@@ -139,7 +140,7 @@ public final class Ed25519SignTest {
     assertEquals(numTests, cntTests + cntSkippedTests);
   }
 
-  private void checkAlgAndVersion(JSONObject jsonObj) {
+  private void checkAlgAndVersion(JSONObject jsonObj) throws Exception {
     final String expectedAlgorithm = "EDDSA";
     String algorithm = jsonObj.getString("algorithm");
     if (!expectedAlgorithm.equals(algorithm)) {

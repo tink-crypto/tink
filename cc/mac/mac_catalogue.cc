@@ -47,7 +47,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Mac>>>
 MacCatalogue::GetKeyManager(google::protobuf::StringPiece type_url,
                             google::protobuf::StringPiece primitive_name,
                             uint32_t min_version) const {
-  if (!(to_lowercase(primitive_name) == "mac")) {
+  if (!(to_lowercase(primitive_name.ToString()) == "mac")) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                      "This catalogue does not support primitive %s.",
                      primitive_name.ToString().c_str());
