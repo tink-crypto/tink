@@ -22,6 +22,7 @@
 #include "cc/aead.h"
 #include "cc/hybrid_decrypt.h"
 #include "cc/hybrid_encrypt.h"
+#include "cc/keyset_handle.h"
 #include "cc/mac.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
@@ -49,6 +50,10 @@ std::string HexDecodeOrDie(google::protobuf::StringPiece hex);
 
 // Converts a string of bytes into a hexadecimal string.
 std::string HexEncode(google::protobuf::StringPiece bytes);
+
+// Creates a KeysetHandle object for the given 'keyset'.
+std::unique_ptr<KeysetHandle> GetKeysetHandle(
+    const google::crypto::tink::Keyset& keyset);
 
 // Adds the given 'key' with specified parameters and output_prefix_type=TINK
 // to the specified 'keyset'.

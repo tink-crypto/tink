@@ -17,6 +17,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "cc/binary_keyset_reader.h"
 #include "cc/cleartext_keyset_handle.h"
 #include "cc/hybrid_decrypt.h"
 #include "cc/keyset_handle.h"
@@ -24,9 +25,10 @@
 #include "cc/hybrid/hybrid_decrypt_factory.h"
 #include "cc/util/status.h"
 
+using crypto::tink::BinaryKeysetReader;
+using crypto::tink::CleartextKeysetHandle;
 using crypto::tink::HybridDecryptConfig;
 using crypto::tink::HybridDecryptFactory;
-using crypto::tink::CleartextKeysetHandle;
 using crypto::tink::KeysetHandle;
 
 // A command-line utility for testing HybridDecrypt-primitives.
@@ -54,9 +56,16 @@ int main(int argc, char** argv) {
 
   // Read the keyset.
   std::clog << "Reading the keyset...\n";
-  std::ifstream keyset_stream;
-  keyset_stream.open(keyset_filename, std::ifstream::in);
-  auto keyset_handle_result = CleartextKeysetHandle::ParseFrom(&keyset_stream);
+  std::unique_ptr<std::ifstream> keyset_stream(new std::ifstream());
+  keyset_stream->open(keyset_filename, std::ifstream::in);
+  auto keyset_reader_result = BinaryKeysetReader::New(std::move(keyset_stream));
+  if (!keyset_reader_result.ok()) {
+    std::clog << "Reading the keyset failed: "
+              << keyset_reader_result.status().error_message() << std::endl;
+    exit(1);
+  }
+  auto keyset_handle_result = CleartextKeysetHandle::Read(
+      std::move(keyset_reader_result.ValueOrDie()));
   if (!keyset_handle_result.ok()) {
     std::clog << "Reading the keyset failed: "
               << keyset_handle_result.status().error_message() << std::endl;
@@ -64,7 +73,6 @@ int main(int argc, char** argv) {
   }
   std::unique_ptr<KeysetHandle> keyset_handle =
       std::move(keyset_handle_result.ValueOrDie());
-  keyset_stream.close();
 
   // Get the primitive.
   std::clog << "Initializing the factory...\n";

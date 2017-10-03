@@ -11,12 +11,14 @@ cc_library(
     name = "cc",
     hdrs = [
         "aead.h",
+        "binary_keyset_reader.h",
         "catalogue.h",
         "config.h",
         "hybrid_decrypt.h",
         "hybrid_encrypt.h",
         "key_manager.h",
         "keyset_handle.h",
+        "keyset_reader.h",
         "mac.h",
         "registry.h",
     ],
@@ -77,6 +79,30 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "@com_google_protobuf//:protobuf_lite",
+    ],
+)
+
+cc_library(
+    name = "keyset_reader",
+    hdrs = ["keyset_reader.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "binary_keyset_reader",
+    srcs = ["core/binary_keyset_reader.cc"],
+    hdrs = ["binary_keyset_reader.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":keyset_reader",
+        "//cc/util:errors",
+        "//cc/util:ptr_util",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
     ],
 )
 
@@ -162,6 +188,10 @@ cc_library(
     hdrs = ["keyset_handle.h"],
     visibility = ["//visibility:public"],
     deps = [
+        ":aead",
+        ":keyset_reader",
+        "//cc/util:errors",
+        "//cc/util:ptr_util",
         "//proto:tink_cc_proto",
     ],
 )
@@ -173,6 +203,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":keyset_handle",
+        "//cc/util:errors",
         "//cc/util:ptr_util",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -219,6 +250,19 @@ cc_test(
 )
 
 cc_test(
+    name = "binary_keyset_reader_test",
+    size = "small",
+    srcs = ["core/binary_keyset_reader_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":binary_keyset_reader",
+        "//cc/util:test_util",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "config_test",
     size = "small",
     srcs = ["core/config_test.cc"],
@@ -244,13 +288,29 @@ cc_test(
 )
 
 cc_test(
+    name = "keyset_handle_test",
+    size = "small",
+    srcs = ["core/keyset_handle_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":binary_keyset_reader",
+        ":keyset_handle",
+        "//cc/util:test_util",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "cleartext_keyset_handle_test",
     size = "small",
     srcs = ["core/cleartext_keyset_handle_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":binary_keyset_reader",
         ":cleartext_keyset_handle",
         ":keyset_handle",
+        ":keyset_reader",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",

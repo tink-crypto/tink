@@ -6,6 +6,7 @@ cc_binary(
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
         "//cc",
+        "//cc:binary_keyset_reader",
         "//cc:cleartext_keyset_handle",
         "//cc/hybrid:hybrid_encrypt_config",
         "//cc/hybrid:hybrid_encrypt_factory",
@@ -19,6 +20,7 @@ cc_binary(
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
         "//cc",
+        "//cc:binary_keyset_reader",
         "//cc:cleartext_keyset_handle",
         "//cc/hybrid:hybrid_decrypt_config",
         "//cc/hybrid:hybrid_decrypt_factory",

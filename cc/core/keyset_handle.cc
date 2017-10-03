@@ -14,18 +14,74 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "cc/aead.h"
 #include "cc/keyset_handle.h"
+#include "cc/keyset_reader.h"
+#include "cc/util/errors.h"
+#include "cc/util/ptr_util.h"
 #include "proto/tink.pb.h"
 
+using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::Keyset;
+using google::crypto::tink::KeyTemplate;
+
+namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
 
-KeysetHandle::KeysetHandle(const Keyset& keyset) : keyset_(keyset) {}
+namespace {
+
+util::StatusOr<std::unique_ptr<Keyset>>
+Decrypt(const EncryptedKeyset& enc_keyset, const Aead& master_key_aead) {
+  auto decrypt_result =
+      master_key_aead.Decrypt(enc_keyset.encrypted_keyset(), /* aad= */ "");
+  if (!decrypt_result.ok()) return decrypt_result.status();
+  auto keyset = util::make_unique<Keyset>();
+  if (!keyset->ParseFromString(decrypt_result.ValueOrDie())) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+        "Could not parse the decrypted data as a Keyset-proto.");
+  }
+  return std::move(keyset);
+}
+
+}  // anonymous namespace
+
+// static
+util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
+    std::unique_ptr<KeysetReader> reader, const Aead& master_key_aead) {
+  auto enc_keyset_result = reader->ReadEncrypted();
+  if (!enc_keyset_result.ok()) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Error reading encrypted keyset data: %s",
+                     enc_keyset_result.status().error_message().c_str());
+  }
+
+  auto keyset_result =
+      Decrypt(*enc_keyset_result.ValueOrDie(), master_key_aead);
+  if (!keyset_result.ok()) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Error decrypting encrypted keyset: %s",
+                     keyset_result.status().error_message().c_str());
+  }
+
+  std::unique_ptr<KeysetHandle> handle(
+      new KeysetHandle(std::move(keyset_result.ValueOrDie())));
+  return std::move(handle);
+}
+
+// static
+util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
+    const KeyTemplate& key_template) {
+  return util::Status(util::error::UNIMPLEMENTED,
+      "Generation of new keysets from templates is not implemented yet.");
+}
+
+KeysetHandle::KeysetHandle(std::unique_ptr<Keyset> keyset)
+    : keyset_(std::move(keyset)) {}
 
 const Keyset& KeysetHandle::get_keyset() const {
-  return keyset_;
+  return *(keyset_.get());
 }
 
 }  // namespace tink

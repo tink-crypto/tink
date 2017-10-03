@@ -21,6 +21,7 @@
 #include <sstream>
 
 #include "cc/keyset_handle.h"
+#include "cc/keyset_reader.h"
 #include "cc/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -31,12 +32,10 @@ namespace tink {
 // loading cleartext keysets, thus its usage should be restricted.
 class CleartextKeysetHandle {
  public:
-  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> New(
-      const google::crypto::tink::Keyset& keyset);
-  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(
-      const std::string& serialized_keyset);
-  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> ParseFrom(
-      std::istream* keyset_stream);
+  // Creates a KeysetHandle with a keyset obtained via |reader|.
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> Read(
+      std::unique_ptr<KeysetReader> reader);
+
  private:
   CleartextKeysetHandle() {}
 };

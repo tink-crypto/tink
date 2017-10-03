@@ -36,6 +36,7 @@ using crypto::tink::test::AddLegacyKey;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::DummyAead;
+using crypto::tink::test::GetKeysetHandle;
 using google::crypto::tink::AesCtrHmacAeadKey;
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
@@ -316,7 +317,8 @@ TEST_F(RegistryTest, testGettingPrimitives) {
 
   // Keyset without custom key manager.
   {
-    auto result = Registry::GetPrimitives<Aead>(keyset, nullptr);
+    auto result = Registry::GetPrimitives<Aead>(*GetKeysetHandle(keyset),
+                                                nullptr);
     EXPECT_TRUE(result.ok()) << result.status();
     auto aead_set = std::move(result.ValueOrDie());
 

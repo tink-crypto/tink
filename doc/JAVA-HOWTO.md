@@ -175,7 +175,7 @@ To load encrypted keysets, you can use
 ```java
     import com.google.crypto.tink.JsonKeysetReader;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
+    import com.google.crypto.tink.integration.awskms.AwsKmsClient;
     import java.io.File;
 
     String keysetFilename = "my_keyset.json";
@@ -249,7 +249,7 @@ to encrypt or decrypt data:
 
 ### Message Authentication Code
 
-Or to compute or verify a [MAC (Message Authentication
+The following snippets shows how to compute or verify a [MAC (Message Authentication
 Code)](RIMITIVES.md#message-authentication-code):
 
 ```java
@@ -274,7 +274,7 @@ Code)](RIMITIVES.md#message-authentication-code):
 
 ### Digitial Signatures
 
-Or to sign or verify a [digital
+Here is an example of how to sign or verify a [digital
 signature](PRIMITIVES.md#digital-signatures):
 
 ```java
@@ -314,8 +314,9 @@ signature](PRIMITIVES.md#digital-signatures):
 
 ### Hybrid Encryption
 
-Or to encrypt or decrypt using [a combination of public key encryption and
-symmetric key encryption](PRIMITIVES.md#hybrid-encryption):
+To encrypt or decrypt using [a combination of public key encryption and
+symmetric key encryption](PRIMITIVES.md#hybrid-encryption) one can
+use the following:
 
 ```java
     import com.google.crypto.tink.HybridDecrypt;

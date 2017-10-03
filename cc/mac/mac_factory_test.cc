@@ -30,6 +30,7 @@
 
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
+using crypto::tink::test::GetKeysetHandle;
 using google::crypto::tink::HashType;
 using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::KeyData;
@@ -48,8 +49,7 @@ class MacFactoryTest : public ::testing::Test {
 
 TEST_F(MacFactoryTest, testBasic) {
   Keyset keyset;
-  KeysetHandle keyset_handle(keyset);
-  auto mac_result = MacFactory::GetPrimitive(keyset_handle);
+  auto mac_result = MacFactory::GetPrimitive(*GetKeysetHandle(keyset));
   EXPECT_FALSE(mac_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, mac_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
@@ -92,8 +92,7 @@ TEST_F(MacFactoryTest, testPrimitive) {
   ASSERT_TRUE(MacConfig::RegisterStandardKeyTypes().ok());;
 
   // Create a KeysetHandle and use it with the factory.
-  KeysetHandle keyset_handle(keyset);
-  auto mac_result = MacFactory::GetPrimitive(keyset_handle);
+  auto mac_result = MacFactory::GetPrimitive(*GetKeysetHandle(keyset));
   EXPECT_TRUE(mac_result.ok()) << mac_result.status();
   auto mac = std::move(mac_result.ValueOrDie());
 

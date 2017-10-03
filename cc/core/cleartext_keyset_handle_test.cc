@@ -18,6 +18,7 @@
 
 #include <istream>
 
+#include "cc/binary_keyset_reader.h"
 #include "cc/keyset_handle.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
@@ -39,68 +40,30 @@ namespace {
 class CleartextKeysetHandleTest : public ::testing::Test {
 };
 
-TEST_F(CleartextKeysetHandleTest, testFromKeysetProto) {
+TEST_F(CleartextKeysetHandleTest, testRead) {
   Keyset keyset;
-  auto result = CleartextKeysetHandle::New(keyset);
-  EXPECT_TRUE(result.ok()) << result.status();
-}
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+            KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+  {  // Reader that reads a valid keyset.
+    auto reader = std::move(
+        BinaryKeysetReader::New(keyset.SerializeAsString()).ValueOrDie());
+    auto result = CleartextKeysetHandle::Read(std::move(reader));
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto handle = std::move(result.ValueOrDie());
+    EXPECT_EQ(keyset.SerializeAsString(),
+              handle->get_keyset().SerializeAsString());
+  }
 
-TEST_F(CleartextKeysetHandleTest, testFromString) {
-  {  // Bad serialization.
-    auto result = CleartextKeysetHandle::ParseFrom("bad serialized keyset");
+  {  // Reader that fails upon read.
+    auto reader = std::move(
+        BinaryKeysetReader::New("invalid serialized keyset").ValueOrDie());
+    auto result = CleartextKeysetHandle::Read(std::move(reader));
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-  }
-  {  // Empty serialization.
-    auto result = CleartextKeysetHandle::ParseFrom("");
-    EXPECT_TRUE(result.ok()) << result.status();
-    Keyset keyset;
-    EXPECT_EQ(keyset.DebugString(),
-              result.ValueOrDie()->get_keyset().DebugString());
-  }
-  {  // Correct serialization.
-    Keyset keyset;
-    Keyset::Key key;
-    AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
-               KeyData::SYMMETRIC, &keyset);
-    AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
-               KeyData::SYMMETRIC, &keyset);
-
-    auto result = CleartextKeysetHandle::ParseFrom(keyset.SerializeAsString());
-    EXPECT_TRUE(result.ok()) << result.status();
-    EXPECT_EQ(keyset.DebugString(),
-              result.ValueOrDie()->get_keyset().DebugString());
-  }
-}
-
-TEST_F(CleartextKeysetHandleTest, testFromStream) {
-  {  // Bad serialization.
-    std::istringstream stream("some bad serialized keyset");
-    auto result = CleartextKeysetHandle::ParseFrom(&stream);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-  }
-  {  // Empty serialization.
-    std::istringstream stream("");
-    auto result = CleartextKeysetHandle::ParseFrom(&stream);
-    EXPECT_TRUE(result.ok()) << result.status();
-    Keyset keyset;
-    EXPECT_EQ(keyset.DebugString(),
-              result.ValueOrDie()->get_keyset().DebugString());
-  }
-  {  // Correct serialization.
-    Keyset keyset;
-    Keyset::Key key;
-    AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
-               KeyData::SYMMETRIC, &keyset);
-    AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
-               KeyData::SYMMETRIC, &keyset);
-
-    std::istringstream stream(keyset.SerializeAsString());
-    auto result = CleartextKeysetHandle::ParseFrom(&stream);
-    EXPECT_TRUE(result.ok()) << result.status();
-    EXPECT_EQ(keyset.DebugString(),
-              result.ValueOrDie()->get_keyset().DebugString());
   }
 }
 

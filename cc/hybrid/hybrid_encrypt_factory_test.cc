@@ -28,6 +28,7 @@
 
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
+using crypto::tink::test::GetKeysetHandle;
 using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfPublicKey;
 using google::crypto::tink::EcPointFormat;
@@ -56,9 +57,8 @@ EciesAeadHkdfPublicKey GetNewEciesPublicKey() {
 
 TEST_F(HybridEncryptFactoryTest, testBasic) {
   Keyset keyset;
-  KeysetHandle keyset_handle(keyset);
   auto hybrid_encrypt_result =
-      HybridEncryptFactory::GetPrimitive(keyset_handle);
+      HybridEncryptFactory::GetPrimitive(*GetKeysetHandle(keyset));
   EXPECT_FALSE(hybrid_encrypt_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
       hybrid_encrypt_result.status().error_code());
@@ -91,9 +91,8 @@ TEST_F(HybridEncryptFactoryTest, testPrimitive) {
   ASSERT_TRUE(HybridEncryptConfig::RegisterStandardKeyTypes().ok());;
 
   // Create a KeysetHandle and use it with the factory.
-  KeysetHandle keyset_handle(keyset);
   auto hybrid_encrypt_result =
-      HybridEncryptFactory::GetPrimitive(keyset_handle);
+      HybridEncryptFactory::GetPrimitive(*GetKeysetHandle(keyset));
   EXPECT_TRUE(hybrid_encrypt_result.ok()) << hybrid_encrypt_result.status();
   auto hybrid_encrypt = std::move(hybrid_encrypt_result.ValueOrDie());
 

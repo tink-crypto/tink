@@ -19,6 +19,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include "cc/keyset_handle.h"
+#include "cc/binary_keyset_reader.h"
+#include "cc/cleartext_keyset_handle.h"
 #include "cc/aead/aes_gcm_key_manager.h"
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/status.h"
@@ -79,6 +82,12 @@ std::string HexEncode(google::protobuf::StringPiece bytes) {
     res[2 * i + 1] = hexchars[c % 16];
   }
   return res;
+}
+
+std::unique_ptr<KeysetHandle> GetKeysetHandle(const Keyset& keyset) {
+  auto reader = std::move(
+      BinaryKeysetReader::New(keyset.SerializeAsString()).ValueOrDie());
+  return std::move(CleartextKeysetHandle::Read(std::move(reader)).ValueOrDie());
 }
 
 void AddKey(
