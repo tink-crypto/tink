@@ -12,26 +12,26 @@ http_archive(
 #-----------------------------------------------------------------------------
 # go
 #-----------------------------------------------------------------------------
-git_repository(
+http_archive(
     name = "io_bazel_rules_go",
-    remote = "https://github.com/bazelbuild/rules_go.git",
-    commit = "551e1f46cbeb470fe9d085e873c3bb83f075e18c",
+    strip_prefix = "rules_go-551e1f46cbeb470fe9d085e873c3bb83f075e18c",
+    url = "https://github.com/bazelbuild/rules_go/archive/551e1f46cbeb470fe9d085e873c3bb83f075e18c.zip",
 )
 
 #-----------------------------------------------------------------------------
 # cc
 #-----------------------------------------------------------------------------
-git_repository(
+http_archive(
     name = "boringssl",
-    commit = "e06766691547514e5bf756e4a0d926e8ca680e5a",
-    remote = "https://boringssl.googlesource.com/boringssl",
+    strip_prefix = "boringssl-e06766691547514e5bf756e4a0d926e8ca680e5a",
+    url = "https://github.com/google/boringssl/archive/e06766691547514e5bf756e4a0d926e8ca680e5a.zip",
 )
 
 # GoogleTest/GoogleMock framework. Used by most C++ unit-tests.
-git_repository(
+http_archive(
     name = "com_google_googletest",
-    commit = "61330388862cf011fa956f7f59082b9923e6be0e",
-    remote = "https://github.com/google/googletest.git",
+    strip_prefix = "googletest-61330388862cf011fa956f7f59082b9923e6be0e",
+    url = "https://github.com/google/googletest/archive/61330388862cf011fa956f7f59082b9923e6be0e.zip",
 )
 
 #-----------------------------------------------------------------------------
@@ -277,10 +277,10 @@ maven_jar(
 # objc
 #-----------------------------------------------------------------------------
 
-git_repository(
+http_archive(
     name = "build_bazel_rules_apple",
-    commit = "7ea05576182ba82ea9b951fa3d42ecdb3dc8dc59",
-    remote = "https://github.com/bazelbuild/rules_apple.git",
+    strip_prefix = "rules_apple-7ea05576182ba82ea9b951fa3d42ecdb3dc8dc59",
+    url = "https://github.com/bazelbuild/rules_apple/archive/7ea05576182ba82ea9b951fa3d42ecdb3dc8dc59.zip",
 )
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
