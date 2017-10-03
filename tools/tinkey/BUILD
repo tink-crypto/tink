@@ -21,7 +21,7 @@ java_library(
         "//java:protos",
         "@args4j//jar",
         "@com_google_guava//jar",
-        "@com_google_protobuf_java//:protobuf_java",
+        "@com_google_protobuf//:protobuf_java",
     ],
 )
 
@@ -58,7 +58,7 @@ java_library(
         "//java:test_util",
         "//java:testonly",
         "@com_fasterxml_jackson_core//jar",
-        "@com_google_protobuf_java//:protobuf_java",
+        "@com_google_protobuf//:protobuf_java",
         "@com_google_truth//jar",
         "@junit",
     ],

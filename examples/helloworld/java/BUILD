@@ -9,7 +9,7 @@ java_binary(
     ]),
     main_class = "com.helloworld.HelloWorld",
     runtime_deps = [
-        "@com_google_protobuf_java//:protobuf_java",
+        "@com_google_protobuf//:protobuf_java",
         "@org_json",
     ],
     deps = [

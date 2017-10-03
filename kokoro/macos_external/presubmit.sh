@@ -25,7 +25,7 @@ set -x
 : "${IOS_SDK_VERSION:=10.2}"
 : "${XCODE_VERSION:=8.2.1}"
 
-BAZEL_BIN="${KOKORO_GFILE_DIR}/bazel-c6122b6ad35ebbed61036b0a2bcfea92b10adb8f-darwin-x86_64"
+BAZEL_BIN="${KOKORO_GFILE_DIR}/bazel-88157011af4ddac21e404e9deea0d78668a71a99-darwin-x86_64"
 
 DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
 --strategy=CppCompile=standalone --strategy=ProtoCompile=standalone \
@@ -58,11 +58,10 @@ java -version
 
 cd github/tink/
 
-time bazel fetch ...
+time ${BAZEL_BIN} fetch ...
 
 # Build all the iOS targets.
-time ${BAZEL_BIN} build \
-  $DISABLE_SANDBOX \
+time ${BAZEL_BIN} build $DISABLE_SANDBOX \
   --compilation_mode=dbg \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \
@@ -72,14 +71,14 @@ time ${BAZEL_BIN} build \
   --ios_sdk_version="${IOS_SDK_VERSION}" \
   --xcode_version="${XCODE_VERSION}" \
   --verbose_failures \
-  //objc/... || \
-  ( ls -l ; df -h / ; exit 1 )
+  //objc/... || ( ls -l ; df -h / ; exit 1 )
 
 echo "bazel obj-c passed"
 
 # Test all targets except iOS.
 # bazel sandbox doesn't work with Kokoro's MacOS image, see b/38040081.
-time ${BAZEL_BIN} test --sandbox_tmpfs_path=$TMP $DISABLE_SANDBOX -- //... \
--//objc/... || ( ls -l ; df -h / ; exit 1 )
+time ${BAZEL_BIN} test $DISABLE_SANDBOX \
+  --sandbox_tmpfs_path=$TMP -- \
+  //... -//objc/... || ( ls -l ; df -h / ; exit 1 )
 
 echo "bazel non objc-c passed"

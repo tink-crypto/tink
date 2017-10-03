@@ -24,16 +24,17 @@ set -x
 # Workaround for some unknown issue in Kokoro.
 rm -f ~/.bazelrc
 
-# Upgrading bazel to the latest version
-# TODO(b/68000006): removing these lines after Kokoro has upgraded its copy
-sudo apt-get update
-sudo apt-get -y install bazel
-
-BAZEL_BIN="/usr/bin/bazel"
+# Using Bazel at commit 88157011af4ddac21e404e9deea0d78668a71a99.
+# In this version, {java,cc}_proto_library now look for dependencies in
+# @com_google_protobuf, instead of in @com_google_protobuf_$LANG.
+# See https://github.com/cgrushko/proto_library/issues/4.
+BAZEL_BIN="${KOKORO_GFILE_DIR}/bazel-88157011af4ddac21e404e9deea0d78668a71a99-linux-x86_64"
 
 DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
 --strategy=CppCompile=standalone --strategy=ProtoCompile=standalone \
 --strategy=GenProto=standalone --strategy=GenProtoDescriptorSet=standalone"
+
+chmod +x "${BAZEL_BIN}"
 
 echo "using bazel binary: ${BAZEL_BIN}"
 ${BAZEL_BIN} version

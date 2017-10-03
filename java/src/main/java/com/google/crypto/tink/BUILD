@@ -71,7 +71,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "@com_google_code_findbugs_jsr305",
         "@com_google_errorprone_error_prone_annotations",
-        "@com_google_protobuf_java//:protobuf_java",
+        "@com_google_protobuf//:protobuf_java",
         "@org_json",
     ] + FULL_PROTOS,
 )

@@ -37,6 +37,6 @@ def tink_objc_proto_library(name, srcs, **kwargs):
       srcs = [ ":%s_srcs" % name ],
       hdrs = [ ":%s_hdrs" % name ],
       copts = [ "-fno-objc-arc" ],
-      deps = [ "@com_google_protobuf_objc//:objectivec" ],
+      deps = [ "@com_google_protobuf//:objectivec" ],
       **kwargs
   )

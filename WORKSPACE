@@ -13,8 +13,8 @@ http_archive(
 #-----------------------------------------------------------------------------
 http_archive(
     name = "io_bazel_rules_go",
-    strip_prefix = "rules_go-551e1f46cbeb470fe9d085e873c3bb83f075e18c",
-    url = "https://github.com/bazelbuild/rules_go/archive/551e1f46cbeb470fe9d085e873c3bb83f075e18c.zip",
+    strip_prefix = "rules_go-master",
+    url = "https://github.com/bazelbuild/rules_go/archive/master.zip",
 )
 
 #-----------------------------------------------------------------------------
@@ -36,49 +36,23 @@ http_archive(
 #-----------------------------------------------------------------------------
 # proto
 #-----------------------------------------------------------------------------
-# proto_library rules implicitly depend on @com_google_protobuf//:protoc,
-# which is the proto-compiler.
+# proto_library, cc_proto_library and java_proto_library rules implicitly depend
+# on @com_google_protobuf//:proto, @com_google_protobuf//:cc_toolchain and
+# @com_google_protobuf//:java_toolchain, respectively.
 # This statement defines the @com_google_protobuf repo.
 http_archive(
     name = "com_google_protobuf",
-    strip_prefix = "protobuf-3.4.0",
-    urls = ["https://github.com/google/protobuf/releases/download/v3.4.0/protobuf-cpp-3.4.0.tar.gz"],
-    sha256 = "71434f6f836a1e479c44008bb033b2a8b2560ff539374dcdefb126be739e1635",
+    strip_prefix = "protobuf-3.4.1",
+    urls = ["https://github.com/google/protobuf/archive/v3.4.1.zip"],
 )
 
-# cc_proto_library rules implicitly depend on @com_google_protobuf_cc//:cc_toolchain,
-# which is the C++ proto runtime (base classes and common utilities).
-http_archive(
-    name = "com_google_protobuf_cc",
-    strip_prefix = "protobuf-3.4.0",
-    urls = ["https://github.com/google/protobuf/releases/download/v3.4.0/protobuf-cpp-3.4.0.tar.gz"],
-    sha256 = "71434f6f836a1e479c44008bb033b2a8b2560ff539374dcdefb126be739e1635",
-)
-
-# java_proto_library rules implicitly depend on @com_google_protobuf_java//:java_toolchain,
-# which is the Java proto runtime (base classes and common utilities).
-http_archive(
-    name = "com_google_protobuf_java",
-    strip_prefix = "protobuf-3.4.0",
-    urls = ["https://github.com/google/protobuf/releases/download/v3.4.0/protobuf-java-3.4.0.tar.gz"],
-    sha256 = "7c61081cc2346542070cd35db7d15c7f24aeeefcd3afac08ec88fec03c45d698",
-)
-
-# java_lite_proto_library rules implicitly depend on @com_google_protobuf_javalite//:javalite_toolchain,
-# which is the JavaLite proto runtime (base classes and common utilities).
+# java_lite_proto_library rules implicitly depend on
+# @com_google_protobuf_javalite//:javalite_toolchain, which is the JavaLite proto
+# runtime (base classes and common utilities).
 http_archive(
     name = "com_google_protobuf_javalite",
     strip_prefix = "protobuf-javalite",
     urls = ["https://github.com/google/protobuf/archive/javalite.zip"],
-)
-
-# objc_proto_library rules from @org_pubref_rules_protobuf require the objective
-# runtime files to build correctly. Therefore, we add a newer version of
-# google/protobuf that has the @com_google_protobuf_objc//:objectivec target.
-http_archive(
-    name = "com_google_protobuf_objc",
-    strip_prefix = "protobuf-286f0598422a70639e587b5329bd3037f5ee76b0",
-    urls = ["https://github.com/google/protobuf/archive/286f0598422a70639e587b5329bd3037f5ee76b0.zip"],
 )
 
 #-----------------------------------------------------------------------------
@@ -530,8 +504,8 @@ java_import_external(
 
 http_archive(
     name = "build_bazel_rules_apple",
-    strip_prefix = "rules_apple-7ea05576182ba82ea9b951fa3d42ecdb3dc8dc59",
-    url = "https://github.com/bazelbuild/rules_apple/archive/7ea05576182ba82ea9b951fa3d42ecdb3dc8dc59.zip",
+    strip_prefix = "rules_apple-master",
+    url = "https://github.com/bazelbuild/rules_apple/archive/master.zip",
 )
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
