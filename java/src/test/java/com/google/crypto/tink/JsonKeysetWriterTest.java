@@ -27,7 +27,7 @@ import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Random;
-import com.google.protobuf.util.JsonFormat;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
@@ -55,9 +55,8 @@ public class JsonKeysetWriterTest {
   private void testWrite_shouldWork(KeysetHandle handle1) throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     CleartextKeysetHandle.write(handle1, JsonKeysetWriter.withOutputStream(outputStream));
-    Keyset.Builder builder = Keyset.newBuilder();
-    JsonFormat.parser().merge(new String(outputStream.toByteArray(), UTF_8), builder);
-    KeysetHandle handle2 = KeysetHandle.fromKeyset(builder.build());
+    KeysetHandle handle2 = CleartextKeysetHandle.read(
+        JsonKeysetReader.withInputStream(new ByteArrayInputStream(outputStream.toByteArray())));
 
     assertKeysetHandle(handle1, handle2);
   }
@@ -89,10 +88,8 @@ public class JsonKeysetWriterTest {
     Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate));
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     handle1.write(JsonKeysetWriter.withOutputStream(outputStream), masterKey);
-    EncryptedKeyset.Builder builder = EncryptedKeyset.newBuilder();
-    JsonFormat.parser().merge(new String(outputStream.toByteArray(), UTF_8), builder);
-    KeysetHandle handle2 =
-        KeysetHandle.read(BinaryKeysetReader.withBytes(builder.build().toByteArray()), masterKey);
+    KeysetHandle handle2 = KeysetHandle.read(JsonKeysetReader.withInputStream(
+        new ByteArrayInputStream(outputStream.toByteArray())), masterKey);
 
     assertKeysetHandle(handle1, handle2);
   }

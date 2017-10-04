@@ -27,7 +27,6 @@ import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Random;
-import com.google.protobuf.util.JsonFormat;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -89,8 +88,11 @@ public class JsonKeysetReaderTest {
   public void testRead_singleKey_shouldWork() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetHandle handle1 = KeysetHandle.generateNew(template);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    CleartextKeysetHandle.write(handle1, JsonKeysetWriter.withOutputStream(outputStream));
     KeysetHandle handle2 = CleartextKeysetHandle.read(
-        JsonKeysetReader.withString(JsonFormat.printer().print(handle1.getKeyset())));
+        JsonKeysetReader.withInputStream(
+            new ByteArrayInputStream(outputStream.toByteArray())));
 
     assertKeysetHandle(handle1, handle2);
   }
@@ -104,8 +106,11 @@ public class JsonKeysetReaderTest {
         .add(template)
         .add(template)
         .getKeysetHandle();
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    CleartextKeysetHandle.write(handle1, JsonKeysetWriter.withOutputStream(outputStream));
     KeysetHandle handle2 = CleartextKeysetHandle.read(
-        JsonKeysetReader.withString(JsonFormat.printer().print(handle1.getKeyset())));
+        JsonKeysetReader.withInputStream(
+            new ByteArrayInputStream(outputStream.toByteArray())));
 
     assertKeysetHandle(handle1, handle2);
   }
@@ -278,14 +283,11 @@ public class JsonKeysetReaderTest {
         .generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     handle1.write(JsonKeysetWriter.withOutputStream(outputStream), masterKey);
-    EncryptedKeyset keyset1 = JsonKeysetReader
-        .withBytes(outputStream.toByteArray())
-        .readEncrypted();
-    String jsonKeyset = JsonFormat.printer().print(keyset1);
-    EncryptedKeyset keyset2 = JsonKeysetReader.withString(jsonKeyset).readEncrypted();
-    KeysetHandle handle2 = KeysetHandle.read(JsonKeysetReader.withString(jsonKeyset), masterKey);
+    KeysetHandle handle2 = KeysetHandle.read(
+        JsonKeysetReader.withInputStream(
+            new ByteArrayInputStream(outputStream.toByteArray())),
+        masterKey);
 
-    assertThat(keyset2).isEqualTo(keyset1);
     assertKeysetHandle(handle1, handle2);
   }
 
@@ -303,14 +305,11 @@ public class JsonKeysetReaderTest {
         .add(template)
         .getKeysetHandle();
     handle1.write(JsonKeysetWriter.withOutputStream(outputStream), masterKey);
-    EncryptedKeyset keyset1 = JsonKeysetReader
-        .withBytes(outputStream.toByteArray())
-        .readEncrypted();
-    String jsonKeyset = JsonFormat.printer().print(keyset1);
-    EncryptedKeyset keyset2 = JsonKeysetReader.withString(jsonKeyset).readEncrypted();
-    KeysetHandle handle2 = KeysetHandle.read(JsonKeysetReader.withString(jsonKeyset), masterKey);
+    KeysetHandle handle2 = KeysetHandle.read(
+        JsonKeysetReader.withInputStream(
+            new ByteArrayInputStream(outputStream.toByteArray())),
+        masterKey);
 
-    assertThat(keyset2).isEqualTo(keyset1);
     assertKeysetHandle(handle1, handle2);
   }
 
@@ -323,11 +322,7 @@ public class JsonKeysetReaderTest {
     KeysetHandle handle = KeysetHandle
         .generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     handle.write(JsonKeysetWriter.withOutputStream(outputStream), masterKey);
-    EncryptedKeyset keyset1 = JsonKeysetReader
-        .withBytes(outputStream.toByteArray())
-        .readEncrypted();
-    String jsonKeyset = JsonFormat.printer().print(keyset1);
-    JSONObject json = new JSONObject(jsonKeyset);
+    JSONObject json = new JSONObject(new String(outputStream.toByteArray(), UTF_8));
     json.remove("encryptedKeyset"); // remove key
 
     try {
