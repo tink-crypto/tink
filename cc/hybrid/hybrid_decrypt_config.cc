@@ -17,10 +17,7 @@
 #include "cc/hybrid/hybrid_decrypt_config.h"
 
 #include "cc/config.h"
-#include "cc/key_manager.h"
-#include "cc/registry.h"
 #include "cc/aead/aead_config.h"
-#include "cc/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "cc/hybrid/hybrid_decrypt_catalogue.h"
 #include "cc/util/status.h"
 #include "proto/config.pb.h"
@@ -64,8 +61,7 @@ util::Status HybridDecryptConfig::RegisterStandardKeyTypes() {
 // static
 util::Status HybridDecryptConfig::Init() {
   AeadConfig::Init();
-  return Registry::get_default_registry().AddCatalogue(
-      kCatalogueName, new HybridDecryptCatalogue());
+  return Registry::AddCatalogue(kCatalogueName, new HybridDecryptCatalogue());
 }
 
 }  // namespace tink

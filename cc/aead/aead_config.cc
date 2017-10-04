@@ -16,12 +16,9 @@
 
 #include "cc/aead/aead_config.h"
 
-#include "cc/aead.h"
 #include "cc/config.h"
-#include "cc/key_manager.h"
 #include "cc/registry.h"
 #include "cc/aead/aead_catalogue.h"
-#include "cc/aead/aes_gcm_key_manager.h"
 #include "cc/mac/mac_config.h"
 #include "cc/util/status.h"
 #include "proto/config.pb.h"
@@ -68,8 +65,7 @@ util::Status AeadConfig::RegisterStandardKeyTypes() {
 util::Status AeadConfig::Init() {
   auto status = MacConfig::Init();
   if (!status.ok()) return status;
-  return Registry::get_default_registry().AddCatalogue(kCatalogueName,
-                                                       new AeadCatalogue());
+  return Registry::AddCatalogue(kCatalogueName, new AeadCatalogue());
 }
 
 }  // namespace tink

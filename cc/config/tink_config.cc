@@ -14,13 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/hybrid_encrypt_config.h"
+#include "cc/config/tink_config.h"
 
 #include "cc/config.h"
-#include "cc/aead/aead_config.h"
-#include "cc/hybrid/hybrid_encrypt_catalogue.h"
+#include "cc/key_manager.h"
+#include "cc/registry.h"
+#include "cc/hybrid/hybrid_encrypt_config.h"
+#include "cc/hybrid/hybrid_decrypt_config.h"
 #include "cc/util/status.h"
-#include "proto/config.pb.h"
 
 namespace util = crypto::tink::util;
 
@@ -32,36 +33,27 @@ namespace {
 google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   google::crypto::tink::RegistryConfig* config =
       new google::crypto::tink::RegistryConfig();
-  config->MergeFrom(AeadConfig::Tink_1_1_0());
+  config->MergeFrom(HybridEncryptConfig::Tink_1_1_0());  // includes Mac & Aead
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
-      HybridEncryptConfig::kCatalogueName, HybridEncryptConfig::kPrimitiveName,
-      "EciesAeadHkdfPublicKey", 0, true));
-  config->set_config_name("TINK_HYBRID_ENCRYPT_1_1_0");
+      HybridDecryptConfig::kCatalogueName, HybridDecryptConfig::kPrimitiveName,
+      "EciesAeadHkdfPrivateKey", 0, true));
+  config->set_config_name("TINK_1_1_0");
   return config;
 }
 
 }  // anonymous namespace
 
-constexpr char HybridEncryptConfig::kCatalogueName[];
-constexpr char HybridEncryptConfig::kPrimitiveName[];
-
 // static
-const google::crypto::tink::RegistryConfig& HybridEncryptConfig::Tink_1_1_0() {
-  static const auto config = GenerateRegistryConfig();
+const google::crypto::tink::RegistryConfig& TinkConfig::Tink_1_1_0() {
+  static auto config = GenerateRegistryConfig();
   return *config;
 }
 
 // static
-util::Status HybridEncryptConfig::RegisterStandardKeyTypes() {
-  auto status = Init();
+util::Status TinkConfig::Init() {
+  auto status = HybridEncryptConfig::Init();  // includes Mac & Aead
   if (!status.ok()) return status;
-  return Config::Register(Tink_1_1_0());
-}
-
-// static
-util::Status HybridEncryptConfig::Init() {
-  AeadConfig::Init();
-  return Registry::AddCatalogue(kCatalogueName, new HybridEncryptCatalogue());
+  return HybridDecryptConfig::Init();
 }
 
 }  // namespace tink

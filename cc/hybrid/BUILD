@@ -54,11 +54,8 @@ cc_library(
     hdrs = ["hybrid_decrypt_config.h"],
     visibility = ["//visibility:public"],
     deps = [
-        ":ecies_aead_hkdf_private_key_manager",
         ":hybrid_decrypt_catalogue",
         "//cc:hybrid_decrypt",
-        "//cc:key_manager",
-        "//cc:registry",
         "//cc/aead:aead_config",
         "//cc/util:status",
     ],
@@ -103,11 +100,8 @@ cc_library(
     hdrs = ["hybrid_encrypt_config.h"],
     visibility = ["//visibility:public"],
     deps = [
-        ":ecies_aead_hkdf_public_key_manager",
         ":hybrid_encrypt_catalogue",
         "//cc:hybrid_encrypt",
-        "//cc:key_manager",
-        "//cc:registry",
         "//cc/aead:aead_config",
         "//cc/util:status",
     ],

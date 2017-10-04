@@ -83,16 +83,16 @@ crypto::tink::util::Status Config::Register(
   crypto::tink::util::Status status = Validate(entry);
   if (!status.ok()) return status;
   auto catalogue_result =
-      Registry::get_default_registry().get_catalogue<P>(entry.catalogue_name());
+      Registry::get_catalogue<P>(entry.catalogue_name());
   if (!catalogue_result.ok()) return catalogue_result.status();
   auto catalogue = catalogue_result.ValueOrDie();
   auto key_manager_result = catalogue->GetKeyManager(
       entry.type_url(), entry.primitive_name(), entry.key_manager_version());
   if (!key_manager_result.ok()) return key_manager_result.status();
-  return Registry::get_default_registry()
-      .RegisterKeyManager<P>(entry.type_url(),
-                          key_manager_result.ValueOrDie().release(),
-                          entry.new_key_allowed());
+  return Registry::RegisterKeyManager<P>(
+      entry.type_url(),
+      key_manager_result.ValueOrDie().release(),
+      entry.new_key_allowed());
 }
 
 }  // namespace tink

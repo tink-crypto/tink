@@ -54,7 +54,7 @@ EciesAeadHkdfDemHelper::New(const KeyTemplate& dem_key_template) {
                      "Unsupported DEM key type '%s'.", dem_type_url.c_str());
   }
   auto key_manager_result =
-      Registry::get_default_registry().get_key_manager<Aead>(dem_type_url);
+      Registry::get_key_manager<Aead>(dem_type_url);
   if (!key_manager_result.ok()) {
     return ToStatusF(util::error::FAILED_PRECONDITION,
                      "No manager for DEM key type '%s' found in the registry.",

@@ -142,10 +142,10 @@ e.g., writing to a file:
 
 Storing cleartext keysets on disk is not recommended. Tink supports encrypting
 keysets with master keys stored in a remote [key management
-systems](doc/KEY-MANAGEMENT.md).
+systems](KEY-MANAGEMENT.md).
 
 For example, you can encrypt the key material with a Google Cloud KMS key at
-`gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar`
+`gcp-kms:/projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar`
 as follows:
 
 ```java
@@ -201,12 +201,12 @@ To load cleartext keysets, use
 
 ## Obtaining and Using Primitives
 
-[_Primitives_](doc/PRIMITIVES.md) represent cryptographic operations offered by
+[_Primitives_](PRIMITIVES.md) represent cryptographic operations offered by
 Tink, hence they form the core of Tink API. A primitive is just an interface
 that specifies what operations are offered by the primitive. A primitive can
 have multiple implementations, and user chooses a desired implementation by
 using a key of corresponding type (see the [this
-section](doc/KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
+section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
 
 The following table summarizes Java implementations of primitives that are
 currently available or planned (the latter are listed in brackets).
@@ -227,7 +227,7 @@ factory offers corresponding `getPrimitive(...)` methods.
 
 Here is how you can obtain and use an [AEAD (Authenticated Encryption with
 Associated
-Data](doc/PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive
+Data](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive
 to encrypt or decrypt data:
 
 ```java
@@ -250,7 +250,7 @@ to encrypt or decrypt data:
 ### Message Authentication Code
 
 Or to compute or verify a [MAC (Message Authentication
-Code)](doc/PRIMITIVES.md#message-authentication-code):
+Code)](RIMITIVES.md#message-authentication-code):
 
 ```java
     import com.google.crypto.tink.KeysetHandle;
@@ -275,7 +275,7 @@ Code)](doc/PRIMITIVES.md#message-authentication-code):
 ### Digitial Signatures
 
 Or to sign or verify a [digital
-signature](doc/PRIMITIVES.md#digital-signatures):
+signature](PRIMITIVES.md#digital-signatures):
 
 ```java
     import com.google.crypto.tink.KeysetHandle;
@@ -315,7 +315,7 @@ signature](doc/PRIMITIVES.md#digital-signatures):
 ### Hybrid Encryption
 
 Or to encrypt or decrypt using [a combination of public key encryption and
-symmetric key encryption](doc/PRIMITIVES.md#hybrid-encryption):
+symmetric key encryption](PRIMITIVES.md#hybrid-encryption):
 
 ```java
     import com.google.crypto.tink.HybridDecrypt;

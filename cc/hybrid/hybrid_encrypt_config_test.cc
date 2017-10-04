@@ -45,7 +45,7 @@ class DummyHybridEncryptCatalogue : public Catalogue<HybridEncrypt> {
 class HybridEncryptConfigTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    Registry::get_default_registry().reset();
+    Registry::Reset();
   }
 };
 
@@ -56,7 +56,6 @@ TEST_F(HybridEncryptConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.AesGcmKey";
   std::string mac_key_type =
       "type.googleapis.com/google.crypto.tink.HmacKey";
-  auto& registry = Registry::get_default_registry();
   auto& config = HybridEncryptConfig::Tink_1_1_0();
 
   EXPECT_EQ(3, HybridEncryptConfig::Tink_1_1_0().entry_size());
@@ -80,7 +79,7 @@ TEST_F(HybridEncryptConfigTest, testBasic) {
   EXPECT_EQ(0, config.entry(2).key_manager_version());
 
   // No key manager before registration.
-  auto manager_result = registry.get_key_manager<HybridEncrypt>(key_type);
+  auto manager_result = Registry::get_key_manager<HybridEncrypt>(key_type);
   EXPECT_FALSE(manager_result.ok());
   EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
 
@@ -89,7 +88,7 @@ TEST_F(HybridEncryptConfigTest, testBasic) {
   EXPECT_TRUE(status.ok()) << status;
   status = Config::Register(HybridEncryptConfig::Tink_1_1_0());
   EXPECT_TRUE(status.ok()) << status;
-  manager_result = registry.get_key_manager<HybridEncrypt>(key_type);
+  manager_result = Registry::get_key_manager<HybridEncrypt>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
 }
@@ -111,9 +110,9 @@ TEST_F(HybridEncryptConfigTest, testInit) {
   EXPECT_TRUE(status.ok()) << status;
 
   // Reset the registry, and try overriding a catalogue with a different one.
-  Registry::get_default_registry().reset();
-  status = Registry::get_default_registry()
-      .AddCatalogue("TinkHybridEncrypt", new DummyHybridEncryptCatalogue());
+  Registry::Reset();
+  status = Registry::AddCatalogue("TinkHybridEncrypt",
+                                  new DummyHybridEncryptCatalogue());
   EXPECT_TRUE(status.ok()) << status;
   status = HybridEncryptConfig::Init();
   EXPECT_FALSE(status.ok());
@@ -123,12 +122,11 @@ TEST_F(HybridEncryptConfigTest, testInit) {
 TEST_F(HybridEncryptConfigTest, testDeprecated) {
   std::string key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
-  auto& registry = Registry::get_default_registry();
 
   // Registration of standard key types works.
   auto status = HybridEncryptConfig::RegisterStandardKeyTypes();
   EXPECT_TRUE(status.ok()) << status;
-  auto manager_result = registry.get_key_manager<HybridEncrypt>(key_type);
+  auto manager_result = Registry::get_key_manager<HybridEncrypt>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
 }

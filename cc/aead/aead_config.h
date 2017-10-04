@@ -17,9 +17,7 @@
 #ifndef TINK_AEAD_AEAD_CONFIG_H_
 #define TINK_AEAD_AEAD_CONFIG_H_
 
-#include "cc/aead.h"
 #include "cc/config.h"
-#include "cc/key_manager.h"
 #include "cc/util/status.h"
 #include "proto/config.pb.h"
 

@@ -18,7 +18,6 @@
 #define TINK_HYBRID_HYBRID_ENCRYPT_CONFIG_H_
 
 #include "cc/hybrid_encrypt.h"
-#include "cc/key_manager.h"
 #include "cc/util/status.h"
 #include "proto/config.pb.h"
 

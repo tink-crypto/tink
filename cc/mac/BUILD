@@ -23,9 +23,6 @@ cc_library(
     deps = [
         ":mac_catalogue",
         "//cc:config",
-        "//cc:key_manager",
-        "//cc:mac",
-        "//cc:registry",
         "//cc/util:status",
         "//proto:config_cc_proto",
     ],

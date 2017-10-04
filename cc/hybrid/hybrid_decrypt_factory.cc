@@ -40,8 +40,8 @@ HybridDecryptFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
 util::StatusOr<std::unique_ptr<HybridDecrypt>>
 HybridDecryptFactory::GetPrimitive(const KeysetHandle& keyset_handle,
     const KeyManager<HybridDecrypt>* custom_key_manager) {
-  auto primitives_result = Registry::get_default_registry()
-      .GetPrimitives<HybridDecrypt>(keyset_handle, custom_key_manager);
+  auto primitives_result = Registry::GetPrimitives<HybridDecrypt>(
+      keyset_handle, custom_key_manager);
   if (primitives_result.ok()) {
     return HybridDecryptSetWrapper::NewHybridDecrypt(
         std::move(primitives_result.ValueOrDie()));

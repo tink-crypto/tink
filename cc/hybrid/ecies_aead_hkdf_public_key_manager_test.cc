@@ -46,7 +46,7 @@ class EciesAeadHkdfPublicKeyManagerTest : public ::testing::Test {
  protected:
   static void SetUpTestCase() {
     auto aes_gcm_key_manager = new AesGcmKeyManager();
-    ASSERT_TRUE(Registry::get_default_registry().RegisterKeyManager(
+    ASSERT_TRUE(Registry::RegisterKeyManager(
         aes_gcm_key_manager->get_key_type(), aes_gcm_key_manager).ok());
   }
 

@@ -21,7 +21,13 @@
 namespace crypto {
 namespace tink {
 
-void Registry::reset() {
+std::mutex Registry::maps_mutex_;
+Registry::LabelToObjectMap Registry::type_to_manager_map_;
+Registry::LabelToTypeNameMap Registry::type_to_primitive_map_;
+Registry::LabelToObjectMap Registry::name_to_catalogue_map_;
+Registry::LabelToTypeNameMap Registry::name_to_primitive_map_;
+
+void Registry::Reset() {
   std::lock_guard<std::mutex> lock(maps_mutex_);
   type_to_manager_map_.clear();
   type_to_primitive_map_.clear();

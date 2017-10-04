@@ -37,7 +37,7 @@ util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
 util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
     const KeysetHandle& keyset_handle,
     const KeyManager<Mac>* custom_key_manager) {
-  auto primitives_result = Registry::get_default_registry().GetPrimitives<Mac>(
+  auto primitives_result = Registry::GetPrimitives<Mac>(
       keyset_handle, custom_key_manager);
   if (primitives_result.ok()) {
     return MacSetWrapper::NewMac(std::move(primitives_result.ValueOrDie()));

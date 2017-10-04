@@ -124,7 +124,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
   // Register DEM key manager.
   auto key_manager = util::make_unique<AesGcmKeyManager>();
   std::string dem_key_type = key_manager->get_key_type();
-  ASSERT_TRUE(Registry::get_default_registry().RegisterKeyManager(
+  ASSERT_TRUE(Registry::RegisterKeyManager(
       dem_key_type, key_manager.release()).ok());
 
   // Generate and test many keys with various parameters.

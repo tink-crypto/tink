@@ -45,13 +45,12 @@ class DummyMacCatalogue : public Catalogue<Mac> {
 class MacConfigTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    Registry::get_default_registry().reset();
+    Registry::Reset();
   }
 };
 
 TEST_F(MacConfigTest, testBasic) {
   std::string key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
-  auto& registry = Registry::get_default_registry();
   auto& config = MacConfig::Tink_1_1_0();
 
   EXPECT_EQ(1, MacConfig::Tink_1_1_0().entry_size());
@@ -62,7 +61,7 @@ TEST_F(MacConfigTest, testBasic) {
   EXPECT_EQ(0, config.entry(0).key_manager_version());
 
   // No key manager before registration.
-  auto manager_result = registry.get_key_manager<Mac>(key_type);
+  auto manager_result = Registry::get_key_manager<Mac>(key_type);
   EXPECT_FALSE(manager_result.ok());
   EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
 
@@ -71,7 +70,7 @@ TEST_F(MacConfigTest, testBasic) {
   EXPECT_TRUE(status.ok()) << status;
   status = Config::Register(MacConfig::Tink_1_1_0());
   EXPECT_TRUE(status.ok()) << status;
-  manager_result = registry.get_key_manager<Mac>(key_type);
+  manager_result = Registry::get_key_manager<Mac>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
 }
@@ -93,9 +92,8 @@ TEST_F(MacConfigTest, testInit) {
   EXPECT_TRUE(status.ok()) << status;
 
   // Reset the registry, and try overriding a catalogue with a different one.
-  Registry::get_default_registry().reset();
-  status = Registry::get_default_registry()
-      .AddCatalogue("TinkMac", new DummyMacCatalogue());
+  Registry::Reset();
+  status = Registry::AddCatalogue("TinkMac", new DummyMacCatalogue());
   EXPECT_TRUE(status.ok()) << status;
   status = MacConfig::Init();
   EXPECT_FALSE(status.ok());
@@ -104,12 +102,11 @@ TEST_F(MacConfigTest, testInit) {
 
 TEST_F(MacConfigTest, testDeprecated) {
   std::string key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
-  auto& registry = Registry::get_default_registry();
 
   // Registration of standard key types works.
   auto status = MacConfig::RegisterStandardKeyTypes();
   EXPECT_TRUE(status.ok()) << status;
-  auto manager_result = registry.get_key_manager<Mac>(key_type);
+  auto manager_result = Registry::get_key_manager<Mac>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
 }

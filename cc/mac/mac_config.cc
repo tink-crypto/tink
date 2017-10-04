@@ -17,8 +17,6 @@
 #include "cc/mac/mac_config.h"
 
 #include "cc/config.h"
-#include "cc/key_manager.h"
-#include "cc/registry.h"
 #include "cc/mac/mac_catalogue.h"
 #include "cc/util/status.h"
 
@@ -52,8 +50,7 @@ const google::crypto::tink::RegistryConfig& MacConfig::Tink_1_1_0() {
 
 // static
 util::Status MacConfig::Init() {
-  return Registry::get_default_registry().AddCatalogue(kCatalogueName,
-                                                       new MacCatalogue());
+  return Registry::AddCatalogue(kCatalogueName, new MacCatalogue());
 }
 
 // static
