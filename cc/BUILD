@@ -203,8 +203,11 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aead",
+        ":catalogue",
         ":crypto_format",
         ":registry",
+        "//cc/aead:aead_catalogue",
+        "//cc/aead:aes_gcm_key_manager",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",

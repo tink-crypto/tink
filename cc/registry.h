@@ -227,14 +227,18 @@ crypto::tink::util::Status Registry::RegisterKeyManager(
   std::lock_guard<std::mutex> lock(maps_mutex_);
   auto curr_manager = type_to_manager_map_.find(type_url.ToString());
   if (curr_manager != type_to_manager_map_.end()) {
-    return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
-                     "A manager for type '%s' has been already registered.",
-                     type_url.ToString().c_str());
+    auto existing = static_cast<KeyManager<P>*>(curr_manager->second.get());
+    if (typeid(*existing).name() != typeid(*manager).name()) {
+      return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
+                       "A manager for type '%s' has been already registered.",
+                       type_url.ToString().c_str());
+    }
+  } else {
+    type_to_manager_map_.insert(
+        std::make_pair(type_url.ToString(), std::move(entry)));
+    type_to_primitive_map_.insert(
+        std::make_pair(type_url.ToString(), typeid(P).name()));
   }
-  type_to_manager_map_.insert(
-      std::make_pair(type_url.ToString(), std::move(entry)));
-  type_to_primitive_map_.insert(
-      std::make_pair(type_url.ToString(), typeid(P).name()));
   return crypto::tink::util::Status::OK;
 }
 

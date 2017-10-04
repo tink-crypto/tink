@@ -18,8 +18,11 @@
 #include <vector>
 
 #include "cc/aead.h"
+#include "cc/catalogue.h"
 #include "cc/registry.h"
 #include "cc/crypto_format.h"
+#include "cc/aead/aead_catalogue.h"
+#include "cc/aead/aes_gcm_key_manager.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
@@ -92,6 +95,20 @@ class TestAeadKeyManager : public KeyManager<Aead> {
   std::string key_type_;
 };
 
+
+class TestAeadCatalogue : public Catalogue<Aead> {
+ public:
+  TestAeadCatalogue() {}
+
+  util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
+      GetKeyManager(StringPiece type_url,
+                    StringPiece primitive_name,
+                    uint32_t min_version) const override {
+    return util::Status(util::error::UNIMPLEMENTED,
+                        "This is a test catalogue.");
+  }
+};
+
 void register_test_managers(const std::string& key_type_prefix,
                             int manager_count) {
   for (int i = 0; i < manager_count; i++) {
@@ -155,20 +172,9 @@ TEST_F(RegistryTest, testBasic) {
   EXPECT_EQ(util::error::NOT_FOUND,
             manager_result.status().error_code());
 
-  TestAeadKeyManager* null_key_manager = nullptr;
-  util::Status status = Registry::RegisterKeyManager(key_type_1,
-                                                     null_key_manager);
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code()) << status;
-
-  status = Registry::RegisterKeyManager(key_type_1,
+  auto status = Registry::RegisterKeyManager(key_type_1,
       new TestAeadKeyManager(key_type_1));
   EXPECT_TRUE(status.ok()) << status;
-
-  status = Registry::RegisterKeyManager(key_type_1,
-      new TestAeadKeyManager(key_type_1));
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
 
   status = Registry::RegisterKeyManager(key_type_2,
       new TestAeadKeyManager(key_type_2));
@@ -185,6 +191,65 @@ TEST_F(RegistryTest, testBasic) {
   manager = manager_result.ValueOrDie();
   EXPECT_TRUE(manager->DoesSupport(key_type_2));
   EXPECT_FALSE(manager->DoesSupport(key_type_1));
+}
+
+TEST_F(RegistryTest, testRegisterKeyManager) {
+  std::string key_type_1 = AesGcmKeyManager::kKeyType;
+
+  TestAeadKeyManager* null_key_manager = nullptr;
+  auto status = Registry::RegisterKeyManager(key_type_1, null_key_manager);
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code()) << status;
+
+  // Register a key manager.
+  status = Registry::RegisterKeyManager(key_type_1,
+      new TestAeadKeyManager(key_type_1));
+  EXPECT_TRUE(status.ok()) << status;
+
+  // Register the same key manager again, it should work (idempotence).
+  EXPECT_TRUE(status.ok()) << status;
+
+  // Try overriding a key manager.
+  status = Registry::RegisterKeyManager(key_type_1, new AesGcmKeyManager());
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
+
+  // Check the key manager is still registered.
+  auto manager_result = Registry::get_key_manager<Aead>(key_type_1);
+  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+  auto manager = manager_result.ValueOrDie();
+  EXPECT_TRUE(manager->DoesSupport(key_type_1));
+}
+
+TEST_F(RegistryTest, testAddCatalogue) {
+  std::string catalogue_name = "SomeCatalogue";
+
+  TestAeadCatalogue* null_catalogue = nullptr;
+  auto status = Registry::AddCatalogue(catalogue_name, null_catalogue);
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code()) << status;
+
+  // Add a catalogue.
+  status = Registry::AddCatalogue(catalogue_name, new TestAeadCatalogue());
+  EXPECT_TRUE(status.ok()) << status;
+
+  // Add the same catalogue again, it should work (idempotence).
+  status = Registry::AddCatalogue(catalogue_name, new TestAeadCatalogue());
+  EXPECT_TRUE(status.ok()) << status;
+
+  // Try overriding a catalogue.
+  status = Registry::AddCatalogue(catalogue_name, new AeadCatalogue());
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
+
+  // Check the catalogue is still present.
+  auto catalogue_result = Registry::get_catalogue<Aead>(catalogue_name);
+  EXPECT_TRUE(catalogue_result.ok()) << catalogue_result.status();
+  auto catalogue = catalogue_result.ValueOrDie();
+  auto manager_result = catalogue->GetKeyManager("some type_url", "Aead", 0);
+  EXPECT_FALSE(manager_result.ok());
+  EXPECT_EQ(util::error::UNIMPLEMENTED, manager_result.status().error_code())
+      << manager_result.status();  // TestAeadCatalogue return UNIMPLEMENTED.
 }
 
 TEST_F(RegistryTest, testGettingPrimitives) {
