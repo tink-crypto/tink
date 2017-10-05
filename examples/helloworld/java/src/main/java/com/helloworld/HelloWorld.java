@@ -16,9 +16,9 @@ package com.helloworld;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.aead.AeadConfig;
+import java.security.GeneralSecurityException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
-import java.security.GeneralSecurityException;
 
 /**
  * A command-line tool that can encrypt and decrypt small files with AES128-GCM.

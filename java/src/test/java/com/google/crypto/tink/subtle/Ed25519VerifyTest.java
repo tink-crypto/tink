@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.subtle.Hex;
 import java.security.GeneralSecurityException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -76,7 +75,7 @@ public final class Ed25519VerifyTest {
     assertEquals(numTests, cntTests);
   }
 
-  private void checkAlgAndVersion(JSONObject jsonObj) {
+  private void checkAlgAndVersion(JSONObject jsonObj) throws Exception {
     final String expectedAlgorithm = "EDDSA";
     String algorithm = jsonObj.getString("algorithm");
     if (!expectedAlgorithm.equals(algorithm)) {

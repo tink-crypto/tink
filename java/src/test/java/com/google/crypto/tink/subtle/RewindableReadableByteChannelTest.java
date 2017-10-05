@@ -94,7 +94,7 @@ public class RewindableReadableByteChannelTest {
     }
     ByteBuffer buffer6 = ByteBuffer.allocate(42);
     try {
-      int readCount = rewindableChannel.read(buffer6);
+      int unused = rewindableChannel.read(buffer6);
       fail("Should have thrown exception, as cannot read after closing.");
     } catch (ClosedChannelException expected) {
     }
@@ -218,7 +218,7 @@ public class RewindableReadableByteChannelTest {
 
     ByteBuffer buffer = ByteBuffer.allocate(42);
     try {
-      int readCount = rewindableChannel.read(buffer);
+      int unused = rewindableChannel.read(buffer);
       fail("Should have thrown exception, as cannot read after closing.");
     } catch (ClosedChannelException expected) {
     }

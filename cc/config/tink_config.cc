@@ -23,8 +23,6 @@
 #include "cc/hybrid/hybrid_decrypt_config.h"
 #include "cc/util/status.h"
 
-namespace util = crypto::tink::util;
-
 namespace crypto {
 namespace tink {
 

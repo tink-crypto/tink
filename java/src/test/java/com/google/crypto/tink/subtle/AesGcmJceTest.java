@@ -22,7 +22,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.subtle.Hex;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashSet;

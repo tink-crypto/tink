@@ -23,8 +23,6 @@
 #include "google/protobuf/stubs/stringpiece.h"
 #include "proto/config.pb.h"
 
-namespace util = crypto::tink::util;
-
 using google::crypto::tink::KeyTypeEntry;
 using google::protobuf::StringPiece;
 
@@ -50,15 +48,15 @@ Config::GetTinkKeyTypeEntry(StringPiece catalogue_name,
 
 // static
 crypto::tink::util::Status Config::Validate(const KeyTypeEntry& entry) {
-  if (entry.type_url() == "") {
+  if (entry.type_url().empty()) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Missing type_url.");
   }
-  if (entry.primitive_name() == "") {
+  if (entry.primitive_name().empty()) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Missing primitive_name.");
   }
-  if (entry.catalogue_name() == "") {
+  if (entry.catalogue_name().empty()) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Missing catalogue_name.");
   }

@@ -72,15 +72,6 @@ public class StreamingAeadThreadSafetyTest {
     }
   }
 
-  /** Returns a plaintext of a given size. */
-  private byte[] generatePlaintext(int size) {
-    byte[] plaintext = new byte[size];
-    for (int i = 0; i < size; i++) {
-      plaintext[i] = (byte) (i % 253);
-    }
-    return plaintext;
-  }
-
   /**
    * Convenience method for encrypting some plaintext.
    *
@@ -123,6 +114,7 @@ public class StreamingAeadThreadSafetyTest {
      * Read the plaintext from the channel. This implementation assumes that the channel is blocking
      * and throws an AssertionError if an attempt to read plaintext from the channel is incomplete.
      */
+    @Override
     public void run() {
       try {
         byte[] chunk = new byte[chunkSize];
@@ -219,6 +211,7 @@ public class StreamingAeadThreadSafetyTest {
      * Write the plaintext to the channel. This implementation assumes that the channel is blocking
      * and throws an AssertionError if an attempt to write plaintext to the channel is incomplete.
      */
+    @Override
     public void run() {
       try {
         byte[] chunk = new byte[chunkSize];
@@ -347,6 +340,7 @@ public class StreamingAeadThreadSafetyTest {
      * Read the plaintext from the channel. This implementation assumes that the channel is blocking
      * and throws an AssertionError if an attempt to read plaintext from the channel is incomplete.
      */
+    @Override
     public void run() {
       SecureRandom rand = new SecureRandom();
       for (int j = 0; j < numberOfReads; j++) {

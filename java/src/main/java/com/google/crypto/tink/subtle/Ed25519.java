@@ -700,7 +700,7 @@ public final class Ed25519 {
     System.arraycopy(in, 0, inCopy, 0, in.length);
     Field25519.reduceCoefficients(inCopy);
     byte[] bytes = Field25519.contract(inCopy);
-    for (byte b: bytes) {
+    for (byte b : bytes) {
       if (b != 0) {
         return true;
       }

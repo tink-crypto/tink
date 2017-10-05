@@ -999,7 +999,7 @@ public class AesCtrHmacStreamingTest {
       }
       if (read != (pt[decryptedSize] & 0xff)) {
         fail(
-            "Incorrect decryption at postion "
+            "Incorrect decryption at position "
                 + decryptedSize
                 + " expected: "
                 + pt[decryptedSize]

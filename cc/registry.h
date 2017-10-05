@@ -119,7 +119,8 @@ class Registry {
   // The returned set is usually later "wrapped" into a class that
   // implements the corresponding Primitive-interface.
   template <class P>
-  static crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>> GetPrimitives(
+  static crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
+  GetPrimitives(
       const KeysetHandle& keyset_handle, const KeyManager<P>* custom_manager);
 
   // Resets the registry.

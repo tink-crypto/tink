@@ -23,8 +23,6 @@
 #include "cc/util/statusor.h"
 #include "cc/util/strings.h"
 
-namespace util = crypto::tink::util;
-
 namespace crypto {
 namespace tink {
 

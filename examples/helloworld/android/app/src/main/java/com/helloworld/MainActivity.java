@@ -26,6 +26,9 @@ import android.widget.EditText;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 
+/**
+ * This activity allows users to encrypt and decrypt a string.
+ */
 public class MainActivity extends AppCompatActivity {
   private static final byte[] EMPTY_ASSOCIATED_DATA = new byte[0];
 
