@@ -45,6 +45,10 @@ public class IntegrationTest {
    */
   @Test
   public void testWithTinkeyEciesAesGcmHkdf() throws Exception {
+    if (TestUtil.isAndroid()) {
+      System.out.println("testWithTinkeyEciesAesGcmHkdf doesn't work on Android, skipping");
+      return;
+    }
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
         CleartextKeysetHandle.read(BinaryKeysetReader.withFile(
             new File("testdata/ecies_private_keyset2.bin"))));
@@ -71,6 +75,11 @@ public class IntegrationTest {
    */
   @Test
   public void testWithTinkeyEciesAesCtrHmacAead() throws Exception {
+    if (TestUtil.isAndroid()) {
+      System.out.println("testWithTinkeyEciesAesGcmHkdf doesn't work on Android, skipping");
+      return;
+    }
+
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(
         CleartextKeysetHandle.read(BinaryKeysetReader.withFile(
             new File("testdata/ecies_private_keyset.bin"))));

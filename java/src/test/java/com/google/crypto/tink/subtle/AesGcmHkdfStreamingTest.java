@@ -61,8 +61,7 @@ public class AesGcmHkdfStreamingTest {
   public void testEncryptDecrypt(
       int keySizeInBytes, int segmentSize, int firstSegmentOffset, int plaintextSize, int chunkSize)
       throws Exception {
-    if (!TestUtil.isAesKeySizeSupported(keySizeInBytes)) {
-      System.out.println("Skipping a test with key size:" + (keySizeInBytes) + " bytes.");
+    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
       return;
     }
     byte[] ikm =
@@ -135,8 +134,7 @@ public class AesGcmHkdfStreamingTest {
   public void testEncryptDecryptRandomAccess(
       int keySizeInBytes, int segmentSize, int firstSegmentOffset, int plaintextSize)
       throws Exception {
-    if (!TestUtil.isAesKeySizeSupported(keySizeInBytes)) {
-      System.out.println("Skipping a test with key size:" + (keySizeInBytes) + " bytes.");
+    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
       return;
     }
     byte[] ikm =
@@ -191,8 +189,7 @@ public class AesGcmHkdfStreamingTest {
   }
 
   public void testEncryptSingleBytes(int keySizeInBytes, int plaintextSize) throws Exception {
-    if (!TestUtil.isAesKeySizeSupported(keySizeInBytes)) {
-      System.out.println("Skipping a test with key size:" + (keySizeInBytes) + " bytes.");
+    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
       return;
     }
     int firstSegmentOffset = 0;

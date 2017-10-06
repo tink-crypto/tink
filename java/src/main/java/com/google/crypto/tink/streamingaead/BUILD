@@ -22,7 +22,6 @@ FULL_PROTOS = [
     "//proto:aes_gcm_hkdf_streaming_java_proto",
     "//proto:common_java_proto",
     "//proto:config_java_proto",
-    "//proto:hmac_java_proto",
     "//proto:tink_java_proto",
 ]
 
@@ -31,7 +30,6 @@ LITE_PROTOS = [
     "//proto:aes_gcm_hkdf_streaming_java_proto_lite",
     "//proto:common_java_proto_lite",
     "//proto:config_java_proto_lite",
-    "//proto:hmac_java_proto_lite",
     "//proto:tink_java_proto_lite",
 ]
 

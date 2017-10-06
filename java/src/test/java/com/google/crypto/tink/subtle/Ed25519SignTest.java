@@ -122,6 +122,11 @@ public final class Ed25519SignTest {
 
   @Test
   public void testSigningWithWycheproofVectors() throws Exception {
+    if (TestUtil.isAndroid()) {
+      System.out.println("testSigningWithWycheproofVectors doesn't work on Android, skipping");
+      return;
+    }
+
     JSONObject json = TestUtil.readJson("testdata/wycheproof/eddsa_test.json");
     checkAlgAndVersion(json);
     int numTests = json.getInt("numberOfTests");

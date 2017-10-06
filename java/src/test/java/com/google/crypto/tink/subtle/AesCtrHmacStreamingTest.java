@@ -69,8 +69,7 @@ public class AesCtrHmacStreamingTest {
       int plaintextSize,
       int chunkSize)
       throws Exception {
-    if (!TestUtil.isAesKeySizeSupported(keySizeInBytes)) {
-      System.out.println("Skipping a test with key size:" + (keySizeInBytes) + " bytes.");
+    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
       return;
     }
     byte[] ikm =
@@ -157,8 +156,7 @@ public class AesCtrHmacStreamingTest {
       int firstSegmentOffset,
       int plaintextSize)
       throws Exception {
-    if (!TestUtil.isAesKeySizeSupported(keySizeInBytes)) {
-      System.out.println("Skipping a test with key size:" + (keySizeInBytes) + " bytes.");
+    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
       return;
     }
     byte[] ikm =
@@ -229,8 +227,7 @@ public class AesCtrHmacStreamingTest {
    * this stream.
    */
   public void testEncryptSingleBytes(int keySizeInBytes, int plaintextSize) throws Exception {
-    if (!TestUtil.isAesKeySizeSupported(keySizeInBytes)) {
-      System.out.println("Skipping a test with key size:" + (keySizeInBytes) + " bytes.");
+    if (TestUtil.shouldSkipTestWithAesKeySize(keySizeInBytes)) {
       return;
     }
 

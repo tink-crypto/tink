@@ -388,10 +388,8 @@ public class AesGcmKeyManagerTest {
   @Test
   public void testNistVectors() throws Exception {
     for (NistTestVector t : nistTestVectors) {
-      if (Cipher.getMaxAllowedKeyLength("AES") < 256 && t.keyValue.length > 16) {
-          System.out.println("Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip tests with keys larger than 128 bits.");
-          continue;
+      if (TestUtil.shouldSkipTestWithAesKeySize(t.keyValue.length)) {
+        continue;
       }
       if (t.iv.length != 12 || t.tag.length != 16) {
         // We support only 12-byte IV and 16-byte tag.

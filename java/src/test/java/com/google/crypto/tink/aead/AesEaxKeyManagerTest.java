@@ -221,6 +221,9 @@ public class AesEaxKeyManagerTest {
   @Test
   public void testPublicTestVectors() throws Exception {
     for (PublicTestVector t : publicTestVectors) {
+      if (TestUtil.shouldSkipTestWithAesKeySize(t.keyValue.length)) {
+        continue;
+      }
       Aead aead = getRawAesEax(t.keyValue, t.iv.length);
       try {
         byte[] ciphertext = Bytes.concat(t.iv, t.ciphertext, t.tag);

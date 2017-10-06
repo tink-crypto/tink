@@ -52,6 +52,8 @@ public class AesGcmJceTest {
           "Unlimited Strength Jurisdiction Policy Files are required"
               + " but not installed. Skip tests with keys larger than 128 bits.");
       keySizeInBytes = new Integer[] {16};
+    } else if (TestUtil.isAndroid()) {
+      keySizeInBytes = new Integer[] {16, 32};
     } else {
       keySizeInBytes = new Integer[] {16, 24, 32};
     }
@@ -130,10 +132,7 @@ public class AesGcmJceTest {
    */
   public void testRegression() throws Exception {
     for (GcmTestVector test : GCM_TEST_VECTORS) {
-      if (Cipher.getMaxAllowedKeyLength("AES") < 256 && test.key.length > 16) {
-        System.out.println(
-            "Unlimited Strength Jurisdiction Policy Files are required"
-                + " but not installed. Skip tests with keys larger than 128 bits.");
+      if (TestUtil.shouldSkipTestWithAesKeySize(test.key.length)) {
         continue;
       }
       AesGcmJce gcm = new AesGcmJce(test.key);
@@ -228,6 +227,11 @@ public class AesGcmJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
+    if (TestUtil.isAndroid()) {
+      System.out.println("testWycheproofVectors doesn't work on Android, skipping");
+      return;
+    }
+
     JSONObject json = TestUtil.readJson("../wycheproof/testvectors/aes_gcm_test.json");
     WycheproofTestUtil.checkAlgAndVersion(json, "AES-GCM", "0.0a8");
     int numTests = json.getInt("numberOfTests");

@@ -51,6 +51,12 @@ public final class Ed25519VerifyTest {
 
   @Test
   public void testVerificationWithWycheproofVectors() throws Exception {
+    if (TestUtil.isAndroid()) {
+      System.out.println(
+          "testVerificationWithWycheproofVectors doesn't work on Android, skipping");
+      return;
+    }
+
     JSONObject json = TestUtil.readJson("testdata/wycheproof/eddsa_test.json");
     WycheproofTestUtil.checkAlgAndVersion(json, "EDDSA", "0.0a18");
     int numTests = json.getInt("numberOfTests");

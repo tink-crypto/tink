@@ -466,15 +466,38 @@ public class TestUtil {
     return new JSONObject(new String(Util.readAll(new FileInputStream(new File(path))), UTF_8));
   }
 
-  /** Returns whether we expect an AES key size to be supported by the provider. */
-  public static boolean isAesKeySizeSupported(int bytes) throws NoSuchAlgorithmException {
-    int maxKeySize = Cipher.getMaxAllowedKeyLength("AES/CTR/NoPadding");
-    if ((bytes * 8) > maxKeySize) {
+  /**
+   * Best-effort checks that this is Android.
+   *
+   * @return true if running on Android.
+   */
+  public static boolean isAndroid() {
+    try {
+      Class.forName("android.app.Application", /*initialize=*/ false, null);
+      return true;
+    } catch (Exception e) {
+      // If Application isn't loaded, it might as well not be Android.
       return false;
     }
-    if (bytes == 16 || bytes == 24 || bytes == 32) {
+  }
+
+  /** Returns whether we should skip a test with some AES key size. */
+  public static boolean shouldSkipTestWithAesKeySize(int keySizeInBytes)
+      throws NoSuchAlgorithmException {
+    int maxKeySize = Cipher.getMaxAllowedKeyLength("AES/CTR/NoPadding");
+    if ((keySizeInBytes * 8) > maxKeySize) {
+      System.out.println(
+          String.format("Unlimited Strength Jurisdiction Policy Files are required"
+              + " but not installed. Skip tests with keys larger than %s bits.", maxKeySize));
       return true;
     }
+    // Android is using Conscrypt as its default JCE provider, but Conscrypt
+    // does not support 192-bit keys.
+    if (isAndroid() && keySizeInBytes == 24) {
+      System.out.println("Skipping tests with 192-bit keys on Android");
+      return true;
+    }
+
     return false;
   }
 
