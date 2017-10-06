@@ -71,7 +71,11 @@ class StreamingAeadEncryptingChannel implements WritableByteChannel {
       try {
         ptBuffer.flip();
         ctBuffer.clear();
-        encrypter.encryptSegment(ptBuffer, slice, false, ctBuffer);
+        if (slice.remaining() != 0) {
+          encrypter.encryptSegment(ptBuffer, slice, false, ctBuffer);
+        } else {
+          encrypter.encryptSegment(ptBuffer, false, ctBuffer);
+        }
       } catch (GeneralSecurityException ex) {
         throw new IOException(ex);
       }
