@@ -26,6 +26,15 @@ import java.util.Arrays;
  * An instance of a ReadableByteChannel that returns the plaintext for some ciphertext.
  */
 class StreamingAeadDecryptingChannel implements ReadableByteChannel {
+  // Each plaintext segment has 16 bytes more of memory than the actual plaintext that it contains.
+  // This is a workaround for an incompatibility between Conscrypt and OpenJDK in their
+  // AES-GCM implementations, see b/67416642, b/31574439, and cr/170969008 for more information.
+  // Conscrypt refused to fix this issue, but even if they fixed it, there are always Android phones
+  // running old versions of Conscrypt, so we decided to take matters into our own hands.
+  // Why 16? Actually any number larger than 16 should work. 16 is the lower bound because it's the
+  // size of the tags of each AES-GCM ciphertext segment.
+  private static final int PLAINTEXT_SEGMENT_EXTRA_SIZE = 16;
+
   /* The stream containing the ciphertext */
   private ReadableByteChannel ciphertextChannel;
 
@@ -97,7 +106,7 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
     this.ciphertextSegmentSize = ciphertextSegmentSize;
     ciphertextSegment = ByteBuffer.allocate(ciphertextSegmentSize + 1);
     ciphertextSegment.limit(0);
-    plaintextSegment = ByteBuffer.allocate(plaintextSegmentSize);
+    plaintextSegment = ByteBuffer.allocate(plaintextSegmentSize + PLAINTEXT_SEGMENT_EXTRA_SIZE);
     plaintextSegment.limit(0);
     this.ciphertextOffset = ciphertextOffset;
     headerRead = false;

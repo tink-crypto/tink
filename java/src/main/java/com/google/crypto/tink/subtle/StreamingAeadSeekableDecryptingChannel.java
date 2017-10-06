@@ -29,6 +29,15 @@ import java.util.Arrays;
  * some ciphertext.
  */
 class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
+  // Each plaintext segment has 16 bytes more of memory than the actual plaintext that it contains.
+  // This is a workaround for an incompatibility between Conscrypt and OpenJDK in their
+  // AES-GCM implementations, see b/67416642, b/31574439, and cr/170969008 for more information.
+  // Conscrypt refused to fix this issue, but even if they fixed it, there are always Android phones
+  // running old versions of Conscrypt, so we decided to take matters into our own hands.
+  // Why 16? Actually any number larger than 16 should work. 16 is the lower bound because it's the
+  // size of the tags of each AES-GCM ciphertext segment.
+  private static final int PLAINTEXT_SEGMENT_EXTRA_SIZE = 16;
+
   private final SeekableByteChannel ciphertextChannel;
   private final ByteBuffer ciphertextSegment;
   private final ByteBuffer plaintextSegment;
@@ -63,7 +72,8 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
     this.header = ByteBuffer.allocate(headerLength);
     this.ciphertextSegment = ByteBuffer.allocate(ciphertextSegmentSize);
     this.ciphertextSegmentSize = ciphertextSegmentSize;
-    this.plaintextSegment = ByteBuffer.allocate(plaintextSegmentSize);
+    this.plaintextSegment = ByteBuffer.allocate(plaintextSegmentSize
+        + PLAINTEXT_SEGMENT_EXTRA_SIZE);
     this.plaintextSegmentSize = plaintextSegmentSize;
     this.plaintextPosition = 0;
     this.headerRead = false;
