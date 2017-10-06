@@ -91,6 +91,7 @@ public class StreamingAeadThreadSafetyTest {
     return ciphertext;
   }
 
+  /** A thread that reads plaintext in multiple chunks from a channel. */
   public static class DecryptingThread extends Thread {
     private ReadableByteChannel channel;
     private ByteBuffer plaintext;
@@ -184,6 +185,7 @@ public class StreamingAeadThreadSafetyTest {
     testDecryption(stream, aad, 64);
   }
 
+  /** A thread that writes a number of chunks consisting of the same plaintextByte to a channel. */
   public static class EncryptingThread extends Thread {
     private WritableByteChannel channel;
     private int chunkSize;
@@ -191,7 +193,7 @@ public class StreamingAeadThreadSafetyTest {
     private byte plaintextByte;
 
     /**
-     * Construct a thread that write a number of chunks consisting of the same plaintextByte to a
+     * Construct a thread that writes a number of chunks consisting of the same plaintextByte to a
      * channel.
      *
      * @param channel the channel where the bytes are written to.
@@ -317,13 +319,16 @@ public class StreamingAeadThreadSafetyTest {
     testEncryption(ags, aad, chunkSize, 1000);
   }
 
+  /**
+   * A thread that randomly reads plaintext from a channel.
+   */
   public static class RandomAccessThread extends Thread {
     private SeekableByteChannel channel;
     private int numberOfReads;
     private int plaintextSize;
 
     /**
-     * Constructs a thread that randmly reads plaintext from a channel.
+     * Constructs a thread that randomly reads plaintext from a channel.
      *
      * @param channel the channel to read the plaintext from. The channel should be in blocking
      *     mode. The i-th byte of the plaintext is (byte) i.

@@ -16,14 +16,9 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.annotations.Alpha;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;
@@ -38,7 +33,7 @@ import javax.crypto.spec.SecretKeySpec;
  * chosen salt of the same size as the key and a nonce prefix.
  *
  * <p>The the format of a ciphertext is header || segment_0 || segment_1 || ... || segment_k. The
- * header has size this.headerLength(). Its format is headerLength || salt || prefix. where
+ * header has size this.getHeaderLength(). Its format is headerLength || salt || prefix. where
  * headerLength is 1 byte determining the size of the header, salt is a salt used in the key
  * derivation and prefix is the prefix of the nonce. In principle headerLength is redundant
  * information, since the length of the header can be determined from the key size.
@@ -48,7 +43,7 @@ import javax.crypto.spec.SecretKeySpec;
  * of size firstSegmentOffset align with ciphertextSegmentSize.
  */
 @Alpha
-public final class AesGcmHkdfStreaming implements StreamingAead {
+public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
   // TODO(bleichen): Some things that are not yet decided:
   //   - What can we assume about the state of objects after getting an exception?
   //   - Should there be a simple test to detect invalid ciphertext offsets?
@@ -91,7 +86,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
    * @param keySizeInBytes the key size of the sub keys
    * @param ciphertextSegmentSize the size of ciphertext segments.
    * @param firstSegmentOffset the offset of the first ciphertext segment. That means the first
-   *     segment has size ciphertextSegmentSize - headerLength() - firstSegmentOffset
+   *     segment has size ciphertextSegmentSize - getHeaderLength() - firstSegmentOffset
    * @throws InvalidAlgorithmParameterException if ikm is too short, the key size not supported or
    *     ciphertextSegmentSize is to short.
    */
@@ -106,7 +101,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
     if (!isValidKeySize) {
       throw new InvalidAlgorithmParameterException("Invalid key size");
     }
-    if (ciphertextSegmentSize <= firstSegmentOffset + headerLength() + TAG_SIZE_IN_BYTES) {
+    if (ciphertextSegmentSize <= firstSegmentOffset + getHeaderLength() + TAG_SIZE_IN_BYTES) {
       throw new InvalidAlgorithmParameterException("ciphertextSegmentSize too small");
     }
     this.ikm = Arrays.copyOf(ikm, ikm.length);
@@ -116,24 +111,44 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
     this.plaintextSegmentSize = ciphertextSegmentSize - TAG_SIZE_IN_BYTES;
   }
 
-  public int getFirstSegmentOffset() {
-    return firstSegmentOffset;
+  @Override
+  public AesGcmHkdfStreamEncrypter newStreamSegmentEncrypter(byte[] aad)
+      throws GeneralSecurityException {
+    return new AesGcmHkdfStreamEncrypter(aad);
   }
 
-  private int headerLength() {
+  @Override
+  public AesGcmHkdfStreamDecrypter newStreamSegmentDecrypter() throws GeneralSecurityException {
+    return new AesGcmHkdfStreamDecrypter();
+  }
+
+  @Override
+  public int getPlaintextSegmentSize() {
+    return plaintextSegmentSize;
+  }
+
+  @Override
+  public int getCiphertextSegmentSize() {
+    return ciphertextSegmentSize;
+  }
+
+  @Override
+  public int getHeaderLength() {
     return 1 + keySizeInBytes + NONCE_PREFIX_IN_BYTES;
   }
 
-  private int ciphertextOffset() {
-    return headerLength() + firstSegmentOffset;
+  @Override
+  public int getCiphertextOffset() {
+    return getHeaderLength() + firstSegmentOffset;
   }
 
-  /**
-   * Returns the number of bytes that a ciphertext segment is longer than the corresponding
-   * plaintext segment. Typically this is the size of the tag.
-   */
-  private int ciphertextOverhead() {
+  @Override
+  public int getCiphertextOverhead() {
     return TAG_SIZE_IN_BYTES;
+  }
+
+  public int getFirstSegmentOffset() {
+    return firstSegmentOffset;
   }
 
   /**
@@ -141,7 +156,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
    * the header and offset.
    */
   public long expectedCiphertextSize(long plaintextSize) {
-    long offset = ciphertextOffset();
+    long offset = getCiphertextOffset();
     long fullSegments = (plaintextSize + offset) / plaintextSegmentSize;
     long ciphertextSize = fullSegments * ciphertextSegmentSize;
     long lastSegmentSize = (plaintextSize + offset) % plaintextSegmentSize;
@@ -157,10 +172,6 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
 
   private byte[] randomSalt() {
     return Random.randBytes(keySizeInBytes);
-  }
-
-  public int getCiphertextSegmentSize() {
-    return ciphertextSegmentSize;
   }
 
   private GCMParameterSpec paramsForSegment(byte[] prefix, int segmentNr, boolean last) {
@@ -182,55 +193,6 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
   }
 
   /**
-   * Returns a WritableByteChannel for plaintext.
-   *
-   * @param ciphertextChannel the channel to which the ciphertext is written.
-   * @param associatedData data associated with the plaintext. This data is authenticated but not
-   *     encrypted. It must be passed into the decryption.
-   */
-  @Override
-  public WritableByteChannel newEncryptingChannel(
-      WritableByteChannel ciphertextChannel, byte[] associatedData)
-      throws GeneralSecurityException, IOException {
-    AesGcmHkdfStreamEncrypter encrypter = new AesGcmHkdfStreamEncrypter(associatedData);
-    return new StreamingAeadEncryptingChannel(
-        encrypter,
-        ciphertextChannel,
-        plaintextSegmentSize,
-        ciphertextSegmentSize,
-        ciphertextOffset());
-  }
-
-  @Override
-  public ReadableByteChannel newDecryptingChannel(
-      ReadableByteChannel ciphertextChannel, byte[] associatedData)
-      throws GeneralSecurityException, IOException {
-    return new StreamingAeadDecryptingChannel(
-        new AesGcmHkdfStreamDecrypter(),
-        ciphertextChannel,
-        associatedData,
-        plaintextSegmentSize,
-        ciphertextSegmentSize,
-        ciphertextOffset(),
-        headerLength());
-  }
-
-  @Override
-  public SeekableByteChannel newSeekableDecryptingChannel(
-      SeekableByteChannel ciphertextSource, byte[] associatedData)
-      throws GeneralSecurityException, IOException {
-    return new StreamingAeadSeekableDecryptingChannel(
-        new AesGcmHkdfStreamDecrypter(),
-        ciphertextSource,
-        associatedData,
-        plaintextSegmentSize,
-        ciphertextSegmentSize,
-        ciphertextOffset(),
-        ciphertextOverhead(),
-        headerLength());
-  }
-
-  /**
    * An instance of a crypter used to encrypt a plaintext stream. The instances have state:
    * encryptedSegments counts the number of encrypted segments. This state is used to generate the
    * IV for each segment. By enforcing that only the method encryptSegment can increment this state,
@@ -248,8 +210,8 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
       encryptedSegments = 0;
       byte[] salt = randomSalt();
       noncePrefix = randomNonce();
-      header = ByteBuffer.allocate(headerLength());
-      header.put((byte) headerLength());
+      header = ByteBuffer.allocate(getHeaderLength());
+      header.put((byte) getHeaderLength());
       header.put(salt);
       header.put(noncePrefix);
       header.flip();
@@ -295,7 +257,7 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
     }
 
     @Override
-    public int getEncryptedSegments() {
+    public synchronized int getEncryptedSegments() {
       return encryptedSegments;
     }
   }
@@ -310,11 +272,11 @@ public final class AesGcmHkdfStreaming implements StreamingAead {
 
     @Override
     public synchronized void init(ByteBuffer header, byte[] aad) throws GeneralSecurityException {
-      if (header.remaining() != headerLength()) {
+      if (header.remaining() != getHeaderLength()) {
         throw new InvalidAlgorithmParameterException("Invalid header length");
       }
       byte firstByte = header.get();
-      if (firstByte != headerLength()) {
+      if (firstByte != getHeaderLength()) {
         // We expect the first byte to be the length of the header.
         // If this is not the case then either the ciphertext is incorrectly
         // aligned or invalid.

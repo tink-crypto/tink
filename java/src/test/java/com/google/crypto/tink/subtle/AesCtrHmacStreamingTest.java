@@ -347,7 +347,7 @@ public class AesCtrHmacStreamingTest {
     for (int sample = 0; sample < samples; sample++) {
       byte[] ciphertext =
           StreamingTestUtil.encrypt(ags, plaintext, aad, ags.getFirstSegmentOffset());
-      for (int pos = ags.headerLength(); pos + blocksize <= ciphertext.length; pos++) {
+      for (int pos = ags.getHeaderLength(); pos + blocksize <= ciphertext.length; pos++) {
         String block = TestUtil.hexEncode(Arrays.copyOfRange(ciphertext, pos, pos + blocksize));
         if (!ciphertextBlocks.add(block)) {
           fail("Ciphertext contains a repeating block " + block + " at position " + pos);
@@ -366,8 +366,8 @@ public class AesCtrHmacStreamingTest {
 
   /** Encrypt some plaintext to a file, then decrypt from the file */
   @Test
-  public void testFileEncrytion() throws Exception {
-    StreamingTestUtil.testFileEncrytion(createAesCtrHmacStreaming(), tmpFolder.newFile());
+  public void testFileEncryption() throws Exception {
+    StreamingTestUtil.testFileEncryption(createAesCtrHmacStreaming(), tmpFolder.newFile());
   }
 
   /**

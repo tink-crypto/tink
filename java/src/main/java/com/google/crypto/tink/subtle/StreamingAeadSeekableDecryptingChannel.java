@@ -59,31 +59,26 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
   private final int firstSegmentOffset;
 
   public StreamingAeadSeekableDecryptingChannel(
-      StreamSegmentDecrypter decrypter,
+      NonceBasedStreamingAead streamAead,
       SeekableByteChannel ciphertext,
-      byte[] associatedData,
-      int plaintextSegmentSize,
-      int ciphertextSegmentSize,
-      int ciphertextOffset,
-      int ciphertextOverhead,
-      int headerLength) throws IOException, GeneralSecurityException {
-    this.decrypter = decrypter;
-    this.ciphertextChannel = ciphertext;
-    this.header = ByteBuffer.allocate(headerLength);
-    this.ciphertextSegment = ByteBuffer.allocate(ciphertextSegmentSize);
-    this.ciphertextSegmentSize = ciphertextSegmentSize;
-    this.plaintextSegment = ByteBuffer.allocate(plaintextSegmentSize
-        + PLAINTEXT_SEGMENT_EXTRA_SIZE);
-    this.plaintextSegmentSize = plaintextSegmentSize;
-    this.plaintextPosition = 0;
-    this.headerRead = false;
-    this.currentSegmentNr = -1;
-    this.isCurrentSegmentDecrypted = false;
-    this.ciphertextChannelSize = ciphertextChannel.size();
-    this.aad = Arrays.copyOf(associatedData, associatedData.length);
-    this.isopen = ciphertextChannel.isOpen();
+      byte[] associatedData) throws IOException, GeneralSecurityException {
+    decrypter = streamAead.newStreamSegmentDecrypter();
+    ciphertextChannel = ciphertext;
+    header = ByteBuffer.allocate(streamAead.getHeaderLength());
+    ciphertextSegmentSize = streamAead.getCiphertextSegmentSize();
+    ciphertextSegment = ByteBuffer.allocate(ciphertextSegmentSize);
+    plaintextSegmentSize = streamAead.getPlaintextSegmentSize();
+    plaintextSegment = ByteBuffer.allocate(plaintextSegmentSize + PLAINTEXT_SEGMENT_EXTRA_SIZE);
+    plaintextPosition = 0;
+    headerRead = false;
+    currentSegmentNr = -1;
+    isCurrentSegmentDecrypted = false;
+    ciphertextChannelSize = ciphertextChannel.size();
+    aad = Arrays.copyOf(associatedData, associatedData.length);
+    isopen = ciphertextChannel.isOpen();
     int  fullSegments = (int) (ciphertextChannelSize / ciphertextSegmentSize);
     int remainder = (int) (ciphertextChannelSize % ciphertextSegmentSize);
+    int ciphertextOverhead = streamAead.getCiphertextOverhead();
     if (remainder > 0) {
       numberOfSegments = fullSegments + 1;
       if (remainder < ciphertextOverhead) {
@@ -94,8 +89,8 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
       numberOfSegments = fullSegments;
       lastCiphertextSegmentSize = ciphertextSegmentSize;
     }
-    this.ciphertextOffset = ciphertextOffset;
-    this.firstSegmentOffset = ciphertextOffset - headerLength;
+    ciphertextOffset = streamAead.getCiphertextOffset();
+    firstSegmentOffset = ciphertextOffset - streamAead.getHeaderLength();
     if (firstSegmentOffset < 0) {
       throw new IOException("Invalid ciphertext offset or header length");
     }
@@ -112,7 +107,7 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
    * it contains length information that might be confidential.
    */
   @Override
-  public String toString() {
+  public synchronized String toString() {
     StringBuilder res =
       new StringBuilder();
     String ctChannel;
@@ -260,6 +255,22 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
             && plaintextSegment.remaining() == 0);
   }
 
+  /**
+   * Atomic read from a given position.
+   *
+   * This method works in the same way as read(ByteBuffer), except that is tart at the given
+   * position and does not modify the channel's position.
+   */
+  public synchronized int read(ByteBuffer dst, long start) throws IOException {
+    long oldPosition = position();
+    try {
+      position(start);
+      return read(dst);
+    } finally {
+      position(oldPosition);
+    }
+  }
+
   @Override
   public synchronized int read(ByteBuffer dst) throws IOException {
     if (!isopen) {
@@ -337,13 +348,13 @@ class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
   }
 
   @Override
-  public void close() throws IOException {
+  public synchronized void close() throws IOException {
     ciphertextChannel.close();
     isopen = false;
   }
 
   @Override
-  public boolean isOpen() {
+  public synchronized boolean isOpen() {
     return isopen;
   }
 }

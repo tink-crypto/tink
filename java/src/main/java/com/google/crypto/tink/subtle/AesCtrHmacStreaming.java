@@ -16,14 +16,9 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.annotations.Alpha;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;
@@ -40,7 +35,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * The the format of a ciphertext is
  *   header || segment_0 || segment_1 || ... || segment_k.
- * The header has size this.headerLength(). Its format is
+ * The header has size this.getHeaderLength(). Its format is
  *   headerLength || salt || prefix.
  * where headerLength is 1 byte determining the size of the header, salt is a salt used in the
  * key derivation and prefix is the prefix of the nonce.
@@ -52,7 +47,7 @@ import javax.crypto.spec.SecretKeySpec;
  * and other information of size firstSegmentOffset align with ciphertextSegmentSize.
  */
 @Alpha
-public final class AesCtrHmacStreaming implements StreamingAead {
+public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   // TODO(bleichen): Some things that are not yet decided:
   //   - What can we assume about the state of objects after getting an exception?
   //   - Should there be a simple test to detect invalid ciphertext offsets?
@@ -98,7 +93,7 @@ public final class AesCtrHmacStreaming implements StreamingAead {
    * @param tagSizeInBytes the size authentication tags
    * @param ciphertextSegmentSize the size of ciphertext segments.
    * @param firstSegmentOffset the offset of the first ciphertext segment. That means the first
-   *    segment has size ciphertextSegmentSize - headerLength() - firstSegmentOffset
+   *    segment has size ciphertextSegmentSize - getHeaderLength() - firstSegmentOffset
    * @throws InvalidAlgorithmParameterException if ikm is too short, the key size not supported or
    *    ciphertextSegmentSize is to short.
    */
@@ -141,25 +136,45 @@ public final class AesCtrHmacStreaming implements StreamingAead {
     }
   }
 
-  public int getFirstSegmentOffset() {
-    return firstSegmentOffset;
+  @Override
+  public AesCtrHmacStreamEncrypter newStreamSegmentEncrypter(byte[] aad)
+      throws GeneralSecurityException {
+    return new AesCtrHmacStreamEncrypter(aad);
   }
 
-  public int headerLength() {
+  @Override
+  public AesCtrHmacStreamDecrypter newStreamSegmentDecrypter()
+      throws GeneralSecurityException {
+    return new AesCtrHmacStreamDecrypter();
+  }
+
+  @Override
+  public int getCiphertextSegmentSize() {
+    return ciphertextSegmentSize;
+  }
+
+  @Override
+  public int getPlaintextSegmentSize() {
+    return plaintextSegmentSize;
+  }
+
+  @Override
+  public int getHeaderLength() {
     return 1 + keySizeInBytes + NONCE_PREFIX_IN_BYTES;
   }
 
-  private int ciphertextOffset() {
-    return headerLength() + firstSegmentOffset;
+  @Override
+  public int getCiphertextOffset() {
+    return getHeaderLength() + firstSegmentOffset;
   }
 
-  /**
-   * Returns the number of bytes that a ciphertext segment
-   * is longer than the corresponding plaintext segment.
-   * Typically this is the size of the tag.
-   */
-  private int ciphertextOverhead() {
+  @Override
+  public int getCiphertextOverhead() {
     return tagSizeInBytes;
+  }
+
+  public int getFirstSegmentOffset() {
+    return firstSegmentOffset;
   }
 
   /**
@@ -167,7 +182,7 @@ public final class AesCtrHmacStreaming implements StreamingAead {
    * The returned value includes the header and offset.
    */
   public long expectedCiphertextSize(long plaintextSize) {
-    long offset = ciphertextOffset();
+    long offset = getCiphertextOffset();
     long fullSegments = (plaintextSize + offset) / plaintextSegmentSize;
     long ciphertextSize = fullSegments * ciphertextSegmentSize;
     long lastSegmentSize = (plaintextSize + offset) % plaintextSegmentSize;
@@ -188,11 +203,6 @@ public final class AesCtrHmacStreaming implements StreamingAead {
   private byte[] randomSalt() {
     return Random.randBytes(keySizeInBytes);
   }
-
-  public int getCiphertextSegmentSize() {
-    return ciphertextSegmentSize;
-  }
-
 
   private byte[] nonceForSegment(byte[] prefix, int segmentNr, boolean last) {
     ByteBuffer nonce = ByteBuffer.allocate(NONCE_SIZE_IN_BYTES);
@@ -225,56 +235,6 @@ public final class AesCtrHmacStreaming implements StreamingAead {
   }
 
   /**
-   * Returns a WritableByteChannel for plaintext.
-   * @param ciphertextChannel the channel to which the ciphertext is written.
-   * @param associatedData data associated with the plaintext. This data is authenticated
-   *        but not encrypted. It must be passed into the decryption.
-   */
-  @Override
-  public WritableByteChannel newEncryptingChannel(
-      WritableByteChannel ciphertextChannel, byte[] associatedData)
-      throws GeneralSecurityException, IOException {
-    AesCtrHmacStreamEncrypter encrypter = new AesCtrHmacStreamEncrypter(associatedData);
-    return new StreamingAeadEncryptingChannel(
-        encrypter,
-        ciphertextChannel,
-        plaintextSegmentSize,
-        ciphertextSegmentSize,
-        ciphertextOffset());
-  }
-
-  @Override
-  public ReadableByteChannel newDecryptingChannel(
-      ReadableByteChannel ciphertextChannel,
-      byte[] associatedData)
-      throws GeneralSecurityException, IOException {
-    return new StreamingAeadDecryptingChannel(
-        new AesCtrHmacStreamDecrypter(),
-        ciphertextChannel,
-        associatedData,
-        plaintextSegmentSize,
-        ciphertextSegmentSize,
-        ciphertextOffset(),
-        headerLength());
-  }
-
-  @Override
-  public SeekableByteChannel newSeekableDecryptingChannel(
-      SeekableByteChannel ciphertextSource,
-      byte[] associatedData)
-      throws GeneralSecurityException, IOException {
-    return new StreamingAeadSeekableDecryptingChannel(
-        new AesCtrHmacStreamDecrypter(),
-        ciphertextSource,
-        associatedData,
-        plaintextSegmentSize,
-        ciphertextSegmentSize,
-        ciphertextOffset(),
-        ciphertextOverhead(),
-        headerLength());
-  }
-
-  /**
    * An instance of a crypter used to encrypt a plaintext stream.
    * The instances have state: encryptedSegments counts the number of encrypted
    * segments. This state is used to generate the IV for each segment.
@@ -296,8 +256,8 @@ public final class AesCtrHmacStreaming implements StreamingAead {
       encryptedSegments = 0;
       byte[] salt = randomSalt();
       noncePrefix = randomNonce();
-      header = ByteBuffer.allocate(headerLength());
-      header.put((byte) headerLength());
+      header = ByteBuffer.allocate(getHeaderLength());
+      header.put((byte) getHeaderLength());
       header.put(salt);
       header.put(noncePrefix);
       header.flip();
@@ -360,7 +320,8 @@ public final class AesCtrHmacStreaming implements StreamingAead {
     }
 
     @Override
-    public int getEncryptedSegments() {
+    // TODO(bleichen): So far this is unused.
+    public synchronized int getEncryptedSegments() {
       return encryptedSegments;
     }
   }
@@ -379,11 +340,11 @@ public final class AesCtrHmacStreaming implements StreamingAead {
 
     @Override
     public synchronized void init(ByteBuffer header, byte[] aad) throws GeneralSecurityException {
-      if (header.remaining() != headerLength()) {
+      if (header.remaining() != getHeaderLength()) {
         throw new InvalidAlgorithmParameterException("Invalid header length");
       }
       byte firstByte = header.get();
-      if (firstByte != headerLength()) {
+      if (firstByte != getHeaderLength()) {
         // We expect the first byte to be the length of the header.
         // If this is not the case then either the ciphertext is incorrectly
         // aligned or invalid.

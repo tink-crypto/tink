@@ -19,6 +19,8 @@ package com.google.crypto.tink.streamingaead;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.StreamingAead;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -64,5 +66,20 @@ final class StreamingAeadHelper implements StreamingAead {
       SeekableByteChannel ciphertextChannel, byte[] associatedData)
       throws GeneralSecurityException, IOException {
     return new SeekableByteChannelDecrypter(primitives, ciphertextChannel, associatedData);
+  }
+
+  @Override
+  public InputStream newDecryptingStream(
+      InputStream ciphertextStream,
+      byte[] associatedData)
+      throws GeneralSecurityException, IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public OutputStream newEncryptingStream(
+      OutputStream ciphertext, byte[] associatedData)
+      throws GeneralSecurityException, IOException {
+    throw new UnsupportedOperationException();
   }
 }

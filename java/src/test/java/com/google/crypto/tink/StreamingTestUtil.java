@@ -748,7 +748,7 @@ public class StreamingTestUtil {
   }
 
   /** Encrypt some plaintext to a file, then decrypt from the file */
-  public static void testFileEncrytion(StreamingAead ags, File tmpFile) throws Exception {
+  public static void testFileEncryption(StreamingAead ags, File tmpFile) throws Exception {
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
     int plaintextSize = 1 << 18;
     ByteBufferChannel plaintext = new ByteBufferChannel(generatePlaintext(plaintextSize));

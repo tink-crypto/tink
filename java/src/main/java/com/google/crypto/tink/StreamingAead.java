@@ -18,6 +18,8 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.annotations.Alpha;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -67,32 +69,32 @@ import java.security.GeneralSecurityException;
  *
  * Sample encryption:
  * ==================
- *
+ * <pre>{@code
  * StreamingAead s = ...
- * java.nio.channels.FileChannel ct =
- *     FileChannel.open(path,
- *                      java.nio.file.StandardOpenOption.CREATE,
- *                      java.nio.file.StandardOpenOption.WRITE);
+ * java.nio.channels.FileChannel ciphertextDestination =
+ *     new FileOutputStream(ciphertextFile).getChannel();
  * byte[] aad = ...
- * WritableByteChannel chan = s.newEncryptingChannel(ct, aad);
+ * WritableByteChannel encryptingChannel = s.newEncryptingChannel(ciphertextDestination, aad);
  * while ( ... ) {
- *   int r = chan.write(buffer);
+ *   int r = encryptingChannel.write(buffer);
  *   ...
  * }
- * chan.close();
+ * encryptingChannel.close();
+ * }</pre>
  *
  * Sample full decryption:
  * =======================
+ * <pre>{@code
  * StreamingAead s = ...
- * java.nio.channels.FileChannel ct =
- *     FileChannel.open(path, java.nio.file.StandardOpenOption.READ);
+ * java.nio.channels.FileChannel ciphertextDestination =
+ *     new FileInputStream(ciphertextFile).getChannel();
  * byte[] aad = ...
- * SeekableByteChannel chan = s.newDecryptingChannel(ct, aad);
+ * SeekableByteChannel decryptingChannel = s.newDecryptingChannel(ciphertextDestination, aad);
  * int chunkSize = ...
  * ByteBuffer buffer = ByteBuffer.allocate(chunkSize);
  * do {
  *   buffer.clear();
- *   int cnt = chan.read(buffer);
+ *   int cnt = decryptingChannel.read(buffer);
  *   if (cnt > 0) {
  *     // Process cnt bytes of plaintext
  *   } else if (read == -1) {
@@ -102,7 +104,7 @@ import java.security.GeneralSecurityException;
  *     // No ciphertext is available at the moment.
  *   }
  * }
- * </pre>
+ * }</pre>
  */
 @Alpha
 public interface StreamingAead {
@@ -159,5 +161,29 @@ public interface StreamingAead {
 
   ReadableByteChannel newDecryptingChannel(
       ReadableByteChannel ciphertextChannel, byte[] associatedData)
+      throws GeneralSecurityException, IOException;
+
+  /**
+   * Returns a wrapper around {@code ciphertextSource}, such that any write-operation via the
+   * wrapper results in AEAD-encryption of the written data, using {@code additionalData} as
+   * additional authenticated data. The additional data is not included in the ciphertext and has to
+   * be passed in as parameter for decryption.
+   */
+  InputStream newDecryptingStream(InputStream ciphertextSource, byte[] associatedData)
+      throws GeneralSecurityException, IOException;
+
+  /**
+   * Returns a wrapper around {@code ciphertextDestination}, such that any read-operation via the
+   * wrapper results in AEAD-decryption of the underlying ciphertext, using {@code additionalData}
+   * as additional authenticated data.
+   *
+   * <p>The returned InputStream may support {@code mark()}/{@code reset()}, but does not have to do
+   * it -- {@code markSupported()} provides the corresponding info.
+   *
+   * <p>The returned InputStream supports {@code skip()}, yet possibly in an inefficient way, i.e.
+   * by reading a sequence of blocks until the desired position. If a more efficient {@code
+   * skip()}-functionality is needed, the Channel-based API can be used.
+   */
+  OutputStream newEncryptingStream(OutputStream ciphertextDestination, byte[] associatedData)
       throws GeneralSecurityException, IOException;
 }

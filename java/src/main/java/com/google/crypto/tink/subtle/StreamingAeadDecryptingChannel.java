@@ -84,31 +84,28 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
 
   private final StreamSegmentDecrypter decrypter;
   private final int ciphertextSegmentSize;
-  private final int ciphertextOffset;
+  private final int firstCiphertextSegmentSize;
 
   public StreamingAeadDecryptingChannel(
-      StreamSegmentDecrypter decrypter,
+      NonceBasedStreamingAead streamAead,
       ReadableByteChannel ciphertextChannel,
-      byte[] associatedData,
-      int plaintextSegmentSize,
-      int ciphertextSegmentSize,
-      int ciphertextOffset,
-      int headerLength)
+      byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    this.decrypter = decrypter;
+    decrypter = streamAead.newStreamSegmentDecrypter();
     this.ciphertextChannel = ciphertextChannel;
-    header = ByteBuffer.allocate(headerLength);
+    header = ByteBuffer.allocate(streamAead.getHeaderLength());
     aad = Arrays.copyOf(associatedData, associatedData.length);
 
     // ciphertextSegment is one byte longer than a ciphertext segment,
     // so that the code can decide if the current segment is the last segment in the
     // stream.
-    this.ciphertextSegmentSize = ciphertextSegmentSize;
+    ciphertextSegmentSize = streamAead.getCiphertextSegmentSize();
     ciphertextSegment = ByteBuffer.allocate(ciphertextSegmentSize + 1);
     ciphertextSegment.limit(0);
-    plaintextSegment = ByteBuffer.allocate(plaintextSegmentSize + PLAINTEXT_SEGMENT_EXTRA_SIZE);
+    firstCiphertextSegmentSize = ciphertextSegmentSize - streamAead.getCiphertextOffset();
+    plaintextSegment = ByteBuffer.allocate(
+        streamAead.getPlaintextSegmentSize() + PLAINTEXT_SEGMENT_EXTRA_SIZE);
     plaintextSegment.limit(0);
-    this.ciphertextOffset = ciphertextOffset;
     headerRead = false;
     endOfCiphertext = false;
     endOfPlaintext = false;
@@ -190,7 +187,10 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
       // The current segment did not validate.
       // Currently this means that decryption cannot resume.
       setUndefinedState();
-      throw new IOException(ex);
+      throw new IOException(ex.getMessage() + "\n" + toString()
+                                + "\nsegmentNr:" + segmentNr
+                                + " endOfCiphertext:" + endOfCiphertext,
+                            ex);
     }
     segmentNr += 1;
     plaintextSegment.flip();
@@ -212,9 +212,8 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
       if (!tryReadHeader()) {
         return 0;
       }
-      int firstSegmentLength = ciphertextSegmentSize - ciphertextOffset;
       ciphertextSegment.clear();
-      ciphertextSegment.limit(firstSegmentLength + 1);
+      ciphertextSegment.limit(firstCiphertextSegmentSize + 1);
     }
     if (endOfPlaintext) {
       return -1;

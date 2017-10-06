@@ -29,23 +29,19 @@ import java.util.logging.Logger;
  * Static methods for obtaining {@link StreamingAead} instances.
  *
  * <p>Usage:
- *
  * <pre>{@code
- *
  * KeysetHandle keysetHandle = ...;
  * StreamingAead streamingAead = StreamingAeadFactory.getPrimitive(keysetHandle);
- * java.nio.channels.FileChannel ciphertextDesitnation =
- *     FileChannel.open(path, java.nio.file.StandardOpenOption.CREATE,
- *                            java.nio.file.StandardOpenOption.WRITE);
+ * java.nio.channels.FileChannel ciphertextDestination =
+ *     new FileOutputStream(ciphertextFile).getChannel();
  * byte[] aad = ...
- * WritableByteChannel encryptingChannel = s.newEncryptingChannel(ciphertextDesitnation, aad);
+ * WritableByteChannel encryptingChannel = s.newEncryptingChannel(ciphertextDestination, aad);
  *
  * while ( ... ) {
  *   int r = encryptingChannel.write(buffer);
  *   ...
  * }
  * encryptingChannel.close();
- *
  * }</pre>
  *
  * <p>The returned primitive works with a keyset (rather than a single key).

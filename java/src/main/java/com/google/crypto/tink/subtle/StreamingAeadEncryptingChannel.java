@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
 
@@ -34,18 +35,15 @@ class StreamingAeadEncryptingChannel implements WritableByteChannel {
   boolean open = true;
 
   public StreamingAeadEncryptingChannel(
-      StreamSegmentEncrypter encrypter,
+      NonceBasedStreamingAead streamAead,
       WritableByteChannel ciphertextChannel,
-      int plaintextSegmentSize,
-      int ciphertextSegmentSize,
-      int ciphertextOffset)
-      throws GeneralSecurityException, IOException {
+      byte[] associatedData) throws GeneralSecurityException, IOException {
     this.ciphertextChannel = ciphertextChannel;
-    this.encrypter = encrypter;
+    encrypter = streamAead.newStreamSegmentEncrypter(associatedData);
+    plaintextSegmentSize = streamAead.getPlaintextSegmentSize();
     ptBuffer = ByteBuffer.allocate(plaintextSegmentSize);
-    this.plaintextSegmentSize = plaintextSegmentSize;
-    ptBuffer.limit(plaintextSegmentSize - ciphertextOffset);
-    ctBuffer = ByteBuffer.allocate(ciphertextSegmentSize);
+    ptBuffer.limit(plaintextSegmentSize - streamAead.getCiphertextOffset());
+    ctBuffer = ByteBuffer.allocate(streamAead.getCiphertextSegmentSize());
     // At this point, ciphertextChannel might not yet be ready to receive bytes.
     // Buffering the header in ctBuffer ensures that the header will be written when writing to
     // ciphertextChannel is possible.
@@ -56,6 +54,9 @@ class StreamingAeadEncryptingChannel implements WritableByteChannel {
 
   @Override
   public synchronized int write(ByteBuffer pt) throws IOException {
+    if (!open) {
+      throw new ClosedChannelException();
+    }
     if (ctBuffer.remaining() > 0) {
       ciphertextChannel.write(ctBuffer);
     }
@@ -90,6 +91,9 @@ class StreamingAeadEncryptingChannel implements WritableByteChannel {
 
   @Override
   public synchronized void close() throws IOException {
+    if (!open) {
+      return;
+    }
     // TODO(bleichen): Is there a way to fully write the remaining ciphertext?
     //   The following is the strategy from java.nio.channels.Channels.writeFullyImpl
     //   I.e. try writing as long as at least one byte is written.
@@ -119,7 +123,7 @@ class StreamingAeadEncryptingChannel implements WritableByteChannel {
   }
 
   @Override
-  public synchronized boolean isOpen() {
+  public boolean isOpen() {
     return open;
   }
 }
