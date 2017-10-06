@@ -35,7 +35,6 @@ import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
-import java.nio.channels.FileChannel;
 import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
@@ -44,9 +43,7 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-/**
- * Helpers for streaming tests.
- */
+/** Helpers for streaming tests. */
 public class StreamingTestUtil {
   /**
    * Implements a SeekableByteChannel for testing.
@@ -294,7 +291,7 @@ public class StreamingTestUtil {
       ReadableByteChannel decChannel =
           decryptionStreamingAead.newDecryptingChannel(ciphertextChannel, aad);
       ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
-      int readCount = decChannel.read(decrypted);
+      int unused = decChannel.read(decrypted);
 
       // Compare results;
       TestUtil.assertByteArrayEquals(plaintext, decrypted.array());
@@ -306,7 +303,7 @@ public class StreamingTestUtil {
       SeekableByteChannel decChannel =
           decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, aad);
       ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
-      int readCount = decChannel.read(decrypted);
+      int unused = decChannel.read(decrypted);
 
       // Compare results;
       TestUtil.assertByteArrayEquals(plaintext, decrypted.array());
@@ -751,15 +748,14 @@ public class StreamingTestUtil {
   }
 
   /** Encrypt some plaintext to a file, then decrypt from the file */
-  public static void testFileEncrytion(StreamingAead ags, File tmpFile)
-      throws Exception {
+  public static void testFileEncrytion(StreamingAead ags, File tmpFile) throws Exception {
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
     int plaintextSize = 1 << 18;
     ByteBufferChannel plaintext = new ByteBufferChannel(generatePlaintext(plaintextSize));
 
     // Encrypt to file
-    WritableByteChannel bc = ags.newEncryptingChannel(
-        new FileOutputStream(tmpFile).getChannel(), aad);
+    WritableByteChannel bc =
+        ags.newEncryptingChannel(new FileOutputStream(tmpFile).getChannel(), aad);
     int chunkSize = 1000;
     ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
     int read;
@@ -775,8 +771,8 @@ public class StreamingTestUtil {
 
     // Decrypt the whole file and compare to plaintext
     plaintext.rewind();
-    ReadableByteChannel ptStream = ags.newDecryptingChannel(
-        new FileInputStream(tmpFile).getChannel(), aad);
+    ReadableByteChannel ptStream =
+        ags.newDecryptingChannel(new FileInputStream(tmpFile).getChannel(), aad);
     int decryptedSize = 0;
     do {
       ByteBuffer decrypted = ByteBuffer.allocate(512);
@@ -793,8 +789,8 @@ public class StreamingTestUtil {
 
     // Decrypt file partially using FileChannel and compare to plaintext
     plaintext.rewind();
-    SeekableByteChannel ptChannel = ags.newSeekableDecryptingChannel(
-        new FileInputStream(tmpFile).getChannel(), aad);
+    SeekableByteChannel ptChannel =
+        ags.newSeekableDecryptingChannel(new FileInputStream(tmpFile).getChannel(), aad);
     SecureRandom random = new SecureRandom();
     for (int samples = 0; samples < 100; samples++) {
       int start = random.nextInt(plaintextSize);

@@ -17,13 +17,11 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.StreamingTestUtil;
 import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
 import com.google.crypto.tink.TestUtil;
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
@@ -315,7 +313,6 @@ public class AesCtrHmacStreamingTest {
     int tagSize = 12;
     int segmentSize = 256;
     int offset = 8;
-    int plaintextSize = 512;
     AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
     StreamingTestUtil.testModifiedCiphertext(ags, segmentSize, offset);
   }
@@ -382,7 +379,6 @@ public class AesCtrHmacStreamingTest {
    */
   @Test
   public void testFileEncryptionWithStream() throws Exception {
-    StreamingTestUtil.testFileEncrytionWithStream(createAesCtrHmacStreaming(),
-        tmpFolder.newFile());
+    StreamingTestUtil.testFileEncrytionWithStream(createAesCtrHmacStreaming(), tmpFolder.newFile());
   }
 }
