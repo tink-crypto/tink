@@ -212,6 +212,7 @@ gen_java_test_rules(
         "//testdata:ecies_keysets",
         "//testdata:wycheproof",
         "@wycheproof//testvectors:aes_gcm",
+        "@wycheproof//testvectors:ecdsa",
     ],
     default_test_size = "small",
     large_tests = [

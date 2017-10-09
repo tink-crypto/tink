@@ -248,6 +248,7 @@
             <exclude>**/AesGcmJceTest.java</exclude>
             <exclude>**/Ed25519SignTest.java</exclude>
             <exclude>**/Ed25519VerifyTest.java</exclude>
+            <exclude>**/EcdsaVerifyJceTest.java</exclude>
           </testExcludes>
           <source>${java.version}</source>
           <target>${java.version}</target>

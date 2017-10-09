@@ -463,8 +463,7 @@ public class TestUtil {
 
   /** Gets JSONObject from file. */
   public static JSONObject readJson(String path) throws Exception {
-    return new JSONObject(
-        new String(Util.readAll(new FileInputStream(new File(path))), UTF_8));
+    return new JSONObject(new String(Util.readAll(new FileInputStream(new File(path))), UTF_8));
   }
 
   /** Returns whether we expect an AES key size to be supported by the provider. */
