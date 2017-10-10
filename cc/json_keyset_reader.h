@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_BINARY_KEYSET_READER_H_
-#define TINK_BINARY_KEYSET_READER_H_
+#ifndef TINK_JSON_KEYSET_READER_H_
+#define TINK_JSON_KEYSET_READER_H_
 
 #include <istream>
 
@@ -28,13 +28,13 @@ namespace crypto {
 namespace tink {
 
 // A KeysetReader that can read from some source cleartext or
-// encrypted keysets in proto binary wire format, cf.
+// encrypted keysets in proto JSON wire format, cf.
 // https://developers.google.com/protocol-buffers/docs/encoding
-class BinaryKeysetReader : public KeysetReader {
+class JsonKeysetReader : public KeysetReader {
  public:
-  static crypto::tink::util::StatusOr<std::unique_ptr<BinaryKeysetReader>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<JsonKeysetReader>> New(
       std::unique_ptr<std::istream> keyset_stream);
-  static crypto::tink::util::StatusOr<std::unique_ptr<BinaryKeysetReader>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<JsonKeysetReader>> New(
       google::protobuf::StringPiece serialized_keyset);
 
 
@@ -46,13 +46,16 @@ class BinaryKeysetReader : public KeysetReader {
   ReadEncrypted() override;
 
  private:
-  BinaryKeysetReader(std::unique_ptr<std::istream> keyset_stream)
-      : keyset_stream_(std::move(keyset_stream)) {}
+  JsonKeysetReader(std::unique_ptr<std::istream> keyset_stream)
+      : serialized_keyset_(""), keyset_stream_(std::move(keyset_stream)) {}
+  JsonKeysetReader(google::protobuf::StringPiece serialized_keyset)
+      : serialized_keyset_(serialized_keyset), keyset_stream_(nullptr) {}
 
+  std::string serialized_keyset_;
   std::unique_ptr<std::istream> keyset_stream_;
 };
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_BINARY_KEYSET_READER_H_
+#endif  // TINK_JSON_KEYSET_READER_H_

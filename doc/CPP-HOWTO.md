@@ -62,7 +62,7 @@ directly in C++ code, one can use
 
 ```cpp
     auto new_keyset_result = KeysetHandle::GenerateNew(key_template);
-    if (!new_keyset_result.ok()) return ERROR;
+    if (!new_keyset_result.ok()) return new_key_result.status();
     auto keyset = std::move(new_keyset_result.ValueOrDie());
     // use the keyset...
 ```
@@ -74,7 +74,7 @@ where `key_template` can be initialized with one of pre-generated templates from
 ## Loading Existing Keysets
 
 To load cleartext keysets, use
-[`CleartextKeysetHandle`](https://github.com/google/tink/blob/master/cc/cleartext_keyset_handle.h):
+[`CleartextKeysetHandle`](https://github.com/google/tink/blob/master/cc/cleartext_keyset_handle.h) and an appropriate [`KeysetReader`](https://github.com/google/tink/blob/master/cc/keyset_reader.h), depending on the wire format of the stored keyset, for example a [`BinaryKeysetReader`](https://github.com/google/tink/blob/master/cc/binary_keyset_reader.h) or a [`JsonKeysetReader`](https://github.com/google/tink/blob/master/cc/json_keyset_reader.h).
 
 ```cpp
     #include "cc/binary_keyset_reader.h"
@@ -83,32 +83,32 @@ To load cleartext keysets, use
     // ...
     std::string binary_keyset = ...;
     auto reader_result = BinaryKeysetReader::New(binary_keyset);
-    if (!reader_result.ok()) return ERROR;
+    if (!reader_result.ok()) return reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
     auto handle_result = CleartextKeysetHandle::Read(std::move(reader));
-    if (!handle_result.ok()) return ERROR;
+    if (!handle_result.ok()) return handle_result.status();
     auto keyset_handle = std::move(handle_result.ValueOrDie());
 ```
 
-To load encrypted keysets, you can use
-[`KeysetHandle`](https://github.com/google/tink/blob/master/cc/keyset_handle.h):
+To load encrypted keysets, one can use
+[`KeysetHandle`](https://github.com/google/tink/blob/master/cc/keyset_handle.h) and an appropriate [`KeysetReader`](https://github.com/google/tink/blob/master/cc/keyset_reader.h):
 
 ```cpp
     #include "cc/aead.h"
-    #include "cc/binary_keyset_reader.h"
+    #include "cc/json_keyset_reader.h"
     #include "cc/cleartext_keyset_handle.h"
     #include "cc/integration/aws_kms_client.h"
 
     // ...
-    std::string binary_encrypted_keyset = ...;
-    auto reader_result = BinaryKeysetReader::New(binary_encrypted_keyset);
-    if (!reader_result.ok()) return ERROR;
+    std::string json_encrypted_keyset = ...;
+    auto reader_result = JsonKeysetReader::New(json_encrypted_keyset);
+    if (!reader_result.ok()) return reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
     std::string master_key_uri =
         "aws-kms://arn:aws:kms:us-east-1:007084425826:key/84a65985-f868-4bfc-83c2-366618acf147";
     auto aead = std::move(AwsKmsClient::NewAead(master_key_uri).ValueOrDie());
     auto handle_result = KeysetHandle::Read(std::move(reader), *aead);
-    if (!handle_result.ok()) return ERROR;
+    if (!handle_result.ok()) return handle_result.status();
     auto keyset_handle = std::move(handle_result.ValueOrDie());
 ```
 

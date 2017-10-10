@@ -16,6 +16,7 @@ cc_library(
         "config.h",
         "hybrid_decrypt.h",
         "hybrid_encrypt.h",
+        "json_keyset_reader.h",
         "key_manager.h",
         "keyset_handle.h",
         "keyset_reader.h",
@@ -96,6 +97,20 @@ cc_library(
     name = "binary_keyset_reader",
     srcs = ["core/binary_keyset_reader.cc"],
     hdrs = ["binary_keyset_reader.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":keyset_reader",
+        "//cc/util:errors",
+        "//cc/util:ptr_util",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "json_keyset_reader",
+    srcs = ["core/json_keyset_reader.cc"],
+    hdrs = ["json_keyset_reader.h"],
     visibility = ["//visibility:public"],
     deps = [
         ":keyset_reader",
@@ -263,6 +278,19 @@ cc_test(
 )
 
 cc_test(
+    name = "json_keyset_reader_test",
+    size = "small",
+    srcs = ["core/json_keyset_reader_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":json_keyset_reader",
+        "//cc/util:test_util",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "config_test",
     size = "small",
     srcs = ["core/config_test.cc"],
@@ -294,6 +322,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":binary_keyset_reader",
+        ":json_keyset_reader",
         ":keyset_handle",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
