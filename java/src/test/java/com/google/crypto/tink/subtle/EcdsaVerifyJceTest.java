@@ -44,19 +44,8 @@ public class EcdsaVerifyJceTest {
   @Test
   public void testWycheproofVectors() throws Exception {
     JSONObject jsonObj = TestUtil.readJson("../wycheproof/testvectors/ecdsa_test.json");
-    String algorithm = jsonObj.getString("algorithm");
-    if (!algorithm.equals("ECDSA")) {
-      System.out.println("expect algorithm ECDSA , got" + algorithm);
-    }
-    final String expectedVersion = "0.0a10";
-    String generatorVersion = jsonObj.getString("generatorVersion");
-    if (!generatorVersion.equals(expectedVersion)) {
-      System.out.println(
-          "expect test vectors with version "
-              + expectedVersion
-              + " ,got vectors with version "
-              + generatorVersion);
-    }
+    WycheproofTestUtil.checkAlgAndVersion(jsonObj, "ECDSA", "0.0a10");
+    String algorithm = "ECDSA";
     int numTests = jsonObj.getInt("numberOfTests");
     int cntTests = 0;
     int errors = 0;

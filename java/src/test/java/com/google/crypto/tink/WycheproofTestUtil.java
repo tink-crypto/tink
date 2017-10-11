@@ -16,7 +16,8 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.proto.HashType;
+import java.security.GeneralSecurityException;
+import org.json.JSONObject;
 
 /** Wycheproof Test helpers. */
 public class WycheproofTestUtil {
@@ -41,5 +42,29 @@ public class WycheproofTestUtil {
       return "";
     }
     return md + "WITH" + signatureAlgorithm;
+  }
+
+  /**
+   * Check test vector against expected algorithm and version.
+   *
+   * @throw GeneralSecurityException iff algorithm and version don't match the expected algorithm
+   *     and version.
+   */
+  public static void checkAlgAndVersion(
+      JSONObject testvector, String expectedAlgorithm, String expectedVersion)
+      throws GeneralSecurityException {
+    String algorithm = testvector.getString("algorithm");
+    if (!expectedAlgorithm.equals(algorithm)) {
+      throw new GeneralSecurityException(
+          "expect algorithm " + expectedAlgorithm + ", got" + algorithm);
+    }
+    String generatorVersion = testvector.getString("generatorVersion");
+    if (!generatorVersion.equals(expectedVersion)) {
+      throw new GeneralSecurityException(
+          "expect test vectors with version "
+              + expectedVersion
+              + " ,got vectors with version "
+              + generatorVersion);
+    }
   }
 }

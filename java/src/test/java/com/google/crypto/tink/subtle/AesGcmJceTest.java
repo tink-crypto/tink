@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -228,20 +229,7 @@ public class AesGcmJceTest {
   @Test
   public void testWycheproofVectors() throws Exception {
     JSONObject json = TestUtil.readJson("../wycheproof/testvectors/aes_gcm_test.json");
-    final String expectedAlgorithm = "AES-GCM";
-    String algorithm = json.getString("algorithm");
-    if (!expectedAlgorithm.equals(algorithm)) {
-      System.out.println("expect algorithm " + expectedAlgorithm + ", got" + algorithm);
-    }
-    final String expectedVersion = "0.0a8";
-    String generatorVersion = json.getString("generatorVersion");
-    if (!generatorVersion.equals(expectedVersion)) {
-      System.out.println(
-          "expect test vectors with version "
-              + expectedVersion
-              + " ,got vectors with version "
-              + generatorVersion);
-    }
+    WycheproofTestUtil.checkAlgAndVersion(json, "AES-GCM", "0.0a8");
     int numTests = json.getInt("numberOfTests");
     int cntTests = 0;
     int cntSkippedTests = 0;
