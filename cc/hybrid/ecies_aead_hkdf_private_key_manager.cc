@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "absl/strings/string_view.h"
 #include "cc/hybrid_decrypt.h"
 #include "cc/key_manager.h"
 #include "cc/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
@@ -43,15 +44,61 @@ namespace util = crypto::tink::util;
 namespace crypto {
 namespace tink {
 
+class EciesAeadHkdfPrivateKeyFactory : public KeyFactory {
+ public:
+  EciesAeadHkdfPrivateKeyFactory() {}
+
+  // Generates a new random EciesAeadHkdfPrivateKey, based on
+  // the given 'key_format', which must contain EciesAeadHkdfKeyFormat-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  NewKey(const google::protobuf::Message& key_format) const override;
+
+  // Generates a new random EciesAeadHkdfPrivateKey, based on
+  // the given 'serialized_key_format', which must contain
+  // EciesAeadHkdfKeyFormat-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  NewKey(absl::string_view serialized_key_format) const override;
+
+  // Generates a new random EciesAeadHkdfPrivateKey based on
+  // the given 'serialized_key_format' (which must contain
+  // EciesAeadHkdfKeyFormat-proto), and wraps it in a KeyData-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
+  NewKeyData(absl::string_view serialized_key_format) const override;
+};
+
+StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPrivateKeyFactory::NewKey(
+    const google::protobuf::Message& key_format) const {
+  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
+}
+
+StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPrivateKeyFactory::NewKey(
+    absl::string_view serialized_key_format) const {
+  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
+}
+
+StatusOr<std::unique_ptr<KeyData>> EciesAeadHkdfPrivateKeyFactory::NewKeyData(
+    absl::string_view serialized_key_format) const {
+  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
+}
+
 constexpr char EciesAeadHkdfPrivateKeyManager::kKeyTypePrefix[];
 constexpr char EciesAeadHkdfPrivateKeyManager::kKeyType[];
+constexpr uint32_t EciesAeadHkdfPrivateKeyManager::kVersion;
+
+EciesAeadHkdfPrivateKeyManager::EciesAeadHkdfPrivateKeyManager()
+    : key_type_(kKeyType), key_factory_(new EciesAeadHkdfPrivateKeyFactory()) {
+}
 
 const std::string& EciesAeadHkdfPrivateKeyManager::get_key_type() const {
   return key_type_;
 }
 
+const KeyFactory& EciesAeadHkdfPrivateKeyManager::get_key_factory() const {
+  return *key_factory_;
+}
+
 uint32_t EciesAeadHkdfPrivateKeyManager::get_version() const {
-  return 0;
+  return kVersion;
 }
 
 StatusOr<std::unique_ptr<HybridDecrypt>>
@@ -96,25 +143,23 @@ EciesAeadHkdfPrivateKeyManager::GetPrimitiveImpl(
   return std::move(ecies_result.ValueOrDie());
 }
 
-StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPrivateKeyManager::NewKey(
-    const KeyTemplate& key_template) const {
-  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
-}
-
+// static
 Status EciesAeadHkdfPrivateKeyManager::Validate(
-    const EciesAeadHkdfParams& params) const {
+    const EciesAeadHkdfParams& params) {
   return Status::OK;
 }
 
+// static
 Status EciesAeadHkdfPrivateKeyManager::Validate(
-    const EciesAeadHkdfPrivateKey& key) const {
-  Status status = ValidateVersion(key.version(), get_version());
+    const EciesAeadHkdfPrivateKey& key) {
+  Status status = ValidateVersion(key.version(), kVersion);
   if (!status.ok()) return status;
   return Validate(key.public_key().params());
 }
 
+// static
 Status EciesAeadHkdfPrivateKeyManager::Validate(
-    const EciesAeadHkdfKeyFormat& key_format) const {
+    const EciesAeadHkdfKeyFormat& key_format) {
   return Status::OK;
 }
 

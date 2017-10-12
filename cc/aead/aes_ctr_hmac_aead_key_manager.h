@@ -20,6 +20,7 @@
 #ifndef TINK_AEAD_AES_CTR_HMAC_AEAD_KEY_MANAGER_H_
 #define TINK_AEAD_AES_CTR_HMAC_AEAD_KEY_MANAGER_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/aead.h"
 #include "cc/key_manager.h"
 #include "cc/util/errors.h"
@@ -38,8 +39,9 @@ class AesCtrHmacAeadKeyManager : public KeyManager<Aead> {
       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
   static constexpr char kHmacKeyType[] =
       "type.googleapis.com/google.crypto.tink.HmacKey";
+  static constexpr uint32_t kVersion = 0;
 
-  AesCtrHmacAeadKeyManager() : key_type_(kKeyType) {}
+  AesCtrHmacAeadKeyManager();
 
   // Constructs an instance of AES-CTR-HMAC-AEAD Aead for the given 'key_data',
   // which must contain AesCtrHmacAeadKey-proto.
@@ -51,32 +53,36 @@ class AesCtrHmacAeadKeyManager : public KeyManager<Aead> {
   crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
       const google::protobuf::Message& key) const override;
 
-  // Generates a new random AesCtrHmacAeadKey, based on the specified
-  // 'key_template', which must contain AesCtrHmacAeadKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
-  NewKey(const google::crypto::tink::KeyTemplate& key_template) const override;
-
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;
 
   // Returns the version of this key manager.
   uint32_t get_version() const override;
 
+  // Returns a factory that generates keys of the key type
+  // handled by this manager.
+  const KeyFactory& get_key_factory() const override;
+
   virtual ~AesCtrHmacAeadKeyManager() {}
 
  private:
+  friend class AesCtrHmacAeadKeyFactory;
+
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
+  static constexpr char kKeyFormatUrl[] =
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKeyFormat";
 
   std::string key_type_;
+  std::unique_ptr<KeyFactory> key_factory_;
 
   // Constructs an instance of AES-CTR-HMAC-AEAD Aead for the given 'key'.
   crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitiveImpl(
       const google::crypto::tink::AesCtrHmacAeadKey& key) const;
 
-  crypto::tink::util::Status Validate(
-      const google::crypto::tink::AesCtrHmacAeadKey& key) const;
-  crypto::tink::util::Status Validate(
-      const google::crypto::tink::AesCtrHmacAeadKeyFormat& key_format) const;
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::AesCtrHmacAeadKey& key);
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::AesCtrHmacAeadKeyFormat& key_format);
 };
 
 }  // namespace tink

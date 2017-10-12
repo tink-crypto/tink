@@ -29,6 +29,7 @@
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::AesEaxKey;
+using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfPublicKey;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
@@ -151,13 +152,34 @@ TEST_F(EciesAeadHkdfPublicKeyManagerTest, testPrimitives) {
 
 TEST_F(EciesAeadHkdfPublicKeyManagerTest, testNewKeyError) {
   EciesAeadHkdfPublicKeyManager key_manager;
+  const KeyFactory& key_factory = key_manager.get_key_factory();
 
-  KeyTemplate key_template;
-  auto result = key_manager.NewKey(key_template);
-  EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                      result.status().error_message());
+  { // Via NewKey(format_proto).
+    EciesAeadHkdfKeyFormat key_format;
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
+                        result.status().error_message());
+  }
+
+  { // Via NewKey(serialized_format_proto).
+    EciesAeadHkdfKeyFormat key_format;
+    auto result = key_factory.NewKey(key_format.SerializeAsString());
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
+                        result.status().error_message());
+  }
+
+  { // Via NewKeyData(serialized_format_proto).
+    EciesAeadHkdfKeyFormat key_format;
+    auto result = key_factory.NewKeyData(key_format.SerializeAsString());
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
+                        result.status().error_message());
+  }
 }
 
 }  // namespace

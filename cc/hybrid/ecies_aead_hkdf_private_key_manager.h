@@ -20,6 +20,7 @@
 #ifndef TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
 #define TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/hybrid_decrypt.h"
 #include "cc/key_manager.h"
 #include "cc/util/errors.h"
@@ -36,8 +37,9 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
  public:
   static constexpr char kKeyType[] =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  static constexpr uint32_t kVersion = 0;
 
-  EciesAeadHkdfPrivateKeyManager() : key_type_(kKeyType) {}
+  EciesAeadHkdfPrivateKeyManager();
 
   // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
   // for the given 'key_data', which must contain EciesAeadHkdfPrivateKey-proto.
@@ -49,36 +51,37 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
   crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
   GetPrimitive(const google::protobuf::Message& key) const override;
 
-  // Generates a new random EciesAeadHkdfPrivateKey, based on
-  // the given 'key_template', which must contain EciesAeadHkdfKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
-      NewKey(const google::crypto::tink::KeyTemplate& key_template)
-      const override;
-
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;
 
   // Returns the version of this key manager.
   uint32_t get_version() const override;
 
+  // Returns a factory that generates keys of the key type
+  // handled by this manager.
+  const KeyFactory& get_key_factory() const override;
+
   virtual ~EciesAeadHkdfPrivateKeyManager() {}
 
  private:
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
+  static constexpr char kKeyFormatUrl[] =
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfKeyFormat";
 
   std::string key_type_;
+  std::unique_ptr<KeyFactory> key_factory_;
 
   // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
   // for the given 'key'.
   crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitiveImpl(
-      const google::crypto::tink::EciesAeadHkdfPrivateKey& ecies_private_key) const;
+  const google::crypto::tink::EciesAeadHkdfPrivateKey& ecies_private_key) const;
 
-  crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfParams& params) const;
-  crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfPrivateKey& key) const;
-  crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfKeyFormat& key_format) const;
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::EciesAeadHkdfParams& params);
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::EciesAeadHkdfPrivateKey& key);
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::EciesAeadHkdfKeyFormat& key_format);
 };
 
 }  // namespace tink

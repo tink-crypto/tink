@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "absl/strings/string_view.h"
 #include "cc/aead.h"
 #include "cc/key_manager.h"
 #include "cc/subtle/aes_gcm_boringssl.h"
@@ -44,17 +45,95 @@ namespace util = crypto::tink::util;
 namespace crypto {
 namespace tink {
 
+class AesGcmKeyFactory : public KeyFactory {
+ public:
+  AesGcmKeyFactory() {}
+
+  // Generates a new random AesGcmKey, based on the specified 'key_format',
+  // which must contain AesGcmKeyFormat-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  NewKey(const google::protobuf::Message& key_format) const override;
+
+  // Generates a new random AesGcmKey, based on the specified
+  // 'serialized_key_format', which must contain AesGcmKeyFormat-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  NewKey(absl::string_view serialized_key_format) const override;
+
+  // Generates a new random AesGcmKey, based on the specified
+  // 'serialized_key_format' (which must contain AesGcmKeyFormat-proto),
+  // and wraps it in a KeyData-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
+  NewKeyData(absl::string_view serialized_key_format) const override;
+};
+
+StatusOr<std::unique_ptr<Message>> AesGcmKeyFactory::NewKey(
+    const google::protobuf::Message& key_format) const {
+  std::string key_format_url = std::string(AesGcmKeyManager::kKeyTypePrefix)
+      + key_format.GetDescriptor()->full_name();
+  if (key_format_url != AesGcmKeyManager::kKeyFormatUrl) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Key format proto '%s' is not supported by this manager.",
+                     key_format_url.c_str());
+  }
+  const AesGcmKeyFormat& aes_gcm_key_format =
+        reinterpret_cast<const AesGcmKeyFormat&>(key_format);
+  Status status = AesGcmKeyManager::Validate(aes_gcm_key_format);
+  if (!status.ok()) return status;
+
+  // Generate AesGcmKey.
+  std::unique_ptr<AesGcmKey> aes_gcm_key(new AesGcmKey());
+  aes_gcm_key->set_version(AesGcmKeyManager::kVersion);
+  *(aes_gcm_key->mutable_params()) = aes_gcm_key_format.params();
+  aes_gcm_key->set_key_value(
+      Random::GetRandomBytes(aes_gcm_key_format.key_size()));
+  std::unique_ptr<Message> key = std::move(aes_gcm_key);
+  return std::move(key);
+}
+
+StatusOr<std::unique_ptr<Message>> AesGcmKeyFactory::NewKey(
+    absl::string_view serialized_key_format) const {
+  AesGcmKeyFormat key_format;
+  if (!key_format.ParseFromString(std::string(serialized_key_format))) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Could not parse the passed string as proto '%s'.",
+                     AesGcmKeyManager::kKeyFormatUrl);
+  }
+  return NewKey(key_format);
+}
+
+StatusOr<std::unique_ptr<KeyData>> AesGcmKeyFactory::NewKeyData(
+    absl::string_view serialized_key_format) const {
+  auto new_key_result = NewKey(serialized_key_format);
+  if (!new_key_result.ok()) return new_key_result.status();
+  auto new_key = reinterpret_cast<const AesGcmKey&>(
+      *(new_key_result.ValueOrDie()));
+  std::unique_ptr<KeyData> key_data(new KeyData());
+  key_data->set_type_url(AesGcmKeyManager::kKeyType);
+  key_data->set_value(new_key.SerializeAsString());
+  key_data->set_key_material_type(KeyData::SYMMETRIC);
+  return std::move(key_data);
+}
+
+constexpr char AesGcmKeyManager::kKeyFormatUrl[];
 constexpr char AesGcmKeyManager::kKeyTypePrefix[];
 constexpr char AesGcmKeyManager::kKeyType[];
+constexpr uint32_t AesGcmKeyManager::kVersion;
 
 const int kMinKeySizeInBytes = 16;
+
+AesGcmKeyManager::AesGcmKeyManager()
+    : key_type_(kKeyType), key_factory_(new AesGcmKeyFactory()) {}
 
 const std::string& AesGcmKeyManager::get_key_type() const {
   return key_type_;
 }
 
 uint32_t AesGcmKeyManager::get_version() const {
-  return 0;
+  return kVersion;
+}
+
+const KeyFactory& AesGcmKeyManager::get_key_factory() const {
+  return *key_factory_;
 }
 
 StatusOr<std::unique_ptr<Aead>>
@@ -97,37 +176,14 @@ AesGcmKeyManager::GetPrimitiveImpl(const AesGcmKey& aes_gcm_key) const {
   return std::move(aes_gcm_result.ValueOrDie());
 }
 
-StatusOr<std::unique_ptr<Message>> AesGcmKeyManager::NewKey(
-    const KeyTemplate& key_template) const {
-  if (!DoesSupport(key_template.type_url())) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_template.type_url().c_str());
-  }
-
-  AesGcmKeyFormat key_format;
-  if (!key_format.ParseFromString(key_template.value())) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-        "Could not parse key_template.value as key format '%sFormat'.",
-        key_template.type_url().c_str());
-  }
-  Status status = Validate(key_format);
-  if (!status.ok()) return status;
-
-  std::unique_ptr<AesGcmKey> aes_gcm_key(new AesGcmKey());
-  aes_gcm_key->set_version(get_version());
-  *(aes_gcm_key->mutable_params()) = key_format.params();
-  aes_gcm_key->set_key_value(Random::GetRandomBytes(key_format.key_size()));
-  std::unique_ptr<Message> key = std::move(aes_gcm_key);
-  return std::move(key);
-}
-
-Status AesGcmKeyManager::Validate(const AesGcmParams& params) const {
+// static
+Status AesGcmKeyManager::Validate(const AesGcmParams& params) {
   return Status::OK;
 }
 
-Status AesGcmKeyManager::Validate(const AesGcmKey& key) const {
-  Status status = ValidateVersion(key.version(), get_version());
+// static
+Status AesGcmKeyManager::Validate(const AesGcmKey& key) {
+  Status status = ValidateVersion(key.version(), kVersion);
   if (!status.ok()) return status;
   uint32_t key_size = key.key_value().size();
   if (key_size < kMinKeySizeInBytes) {
@@ -142,7 +198,8 @@ Status AesGcmKeyManager::Validate(const AesGcmKey& key) const {
   return Validate(key.params());
 }
 
-Status AesGcmKeyManager::Validate(const AesGcmKeyFormat& key_format) const {
+// static
+Status AesGcmKeyManager::Validate(const AesGcmKeyFormat& key_format) {
   if (key_format.key_size() < kMinKeySizeInBytes) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid AesGcmKeyFormat: key_size is too small.");

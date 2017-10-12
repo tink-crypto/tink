@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "absl/strings/string_view.h"
 #include "cc/hybrid_encrypt.h"
 #include "cc/key_manager.h"
 #include "cc/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
@@ -43,15 +44,62 @@ namespace util = crypto::tink::util;
 namespace crypto {
 namespace tink {
 
+class EciesAeadHkdfPublicKeyFactory : public KeyFactory {
+ public:
+  EciesAeadHkdfPublicKeyFactory() {}
+
+  // Not implemented for public keys.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  NewKey(const google::protobuf::Message& key_format) const override;
+
+  // Not implemented for public keys.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  NewKey(absl::string_view serialized_key_format) const override;
+
+  // Not implemented for public keys.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
+  NewKeyData(absl::string_view serialized_key_format) const override;
+};
+
+StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPublicKeyFactory::NewKey(
+    const google::protobuf::Message& key_format) const {
+  return util::Status(util::error::UNIMPLEMENTED,
+                      "Operation not supported for public keys, "
+                      "please use a corresponding PrivateKeyManager.");
+}
+
+StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPublicKeyFactory::NewKey(
+    absl::string_view serialized_key_format) const {
+  return util::Status(util::error::UNIMPLEMENTED,
+                      "Operation not supported for public keys, "
+                      "please use a corresponding PrivateKeyManager.");
+}
+
+StatusOr<std::unique_ptr<KeyData>> EciesAeadHkdfPublicKeyFactory::NewKeyData(
+    absl::string_view serialized_key_format) const {
+  return util::Status(util::error::UNIMPLEMENTED,
+                      "Operation not supported for public keys, "
+                      "please use a corresponding PrivateKeyManager.");
+}
+
 constexpr char EciesAeadHkdfPublicKeyManager::kKeyTypePrefix[];
 constexpr char EciesAeadHkdfPublicKeyManager::kKeyType[];
+constexpr uint32_t EciesAeadHkdfPublicKeyManager::kVersion;
+
+EciesAeadHkdfPublicKeyManager::EciesAeadHkdfPublicKeyManager()
+    : key_type_(kKeyType), key_factory_(new EciesAeadHkdfPublicKeyFactory()) {
+}
+
+const KeyFactory& EciesAeadHkdfPublicKeyManager::get_key_factory() const {
+  return *key_factory_;
+}
 
 const std::string& EciesAeadHkdfPublicKeyManager::get_key_type() const {
   return key_type_;
 }
 
 uint32_t EciesAeadHkdfPublicKeyManager::get_version() const {
-  return 0;
+  return kVersion;
 }
 
 StatusOr<std::unique_ptr<HybridEncrypt>>
@@ -96,21 +144,16 @@ EciesAeadHkdfPublicKeyManager::GetPrimitiveImpl(
   return std::move(ecies_result.ValueOrDie());
 }
 
-StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPublicKeyManager::NewKey(
-    const KeyTemplate& key_template) const {
-  return util::Status(util::error::UNIMPLEMENTED,
-                      "Operation not supported for public keys, "
-                      "please use a corresponding PrivateKeyManager.");
-}
-
+// static
 Status EciesAeadHkdfPublicKeyManager::Validate(
-    const EciesAeadHkdfParams& params) const {
+    const EciesAeadHkdfParams& params) {
   return Status::OK;
 }
 
+// static
 Status EciesAeadHkdfPublicKeyManager::Validate(
-    const EciesAeadHkdfPublicKey& key) const {
-  Status status = ValidateVersion(key.version(), get_version());
+    const EciesAeadHkdfPublicKey& key) {
+  Status status = ValidateVersion(key.version(), kVersion);
   if (!status.ok()) return status;
   return Validate(key.params());
 }

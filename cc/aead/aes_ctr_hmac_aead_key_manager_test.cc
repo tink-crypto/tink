@@ -29,6 +29,7 @@
 using google::crypto::tink::AesCtrHmacAeadKey;
 using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::AesGcmKey;
+using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
@@ -242,27 +243,21 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testPrimitives) {
 
 TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyErrors) {
   AesCtrHmacAeadKeyManager key_manager;
+  const KeyFactory& key_factory = key_manager.get_key_factory();
 
-  {  // Bad key type.
-    KeyTemplate key_template;
-    KeyData key_data;
-    std::string bad_key_type =
-        "type.googleapis.com/google.crypto.tink.SomeOtherKey";
-    key_template.set_type_url(bad_key_type);
-    auto result = key_manager.NewKey(key_template);
+  {  // Bad key format.
+    AesGcmKeyFormat key_format;
+    auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
                         result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesGcmKeyFormat",
                         result.status().error_message());
   }
 
-  {  // Bad key value.
-    KeyTemplate key_template;
-    key_template.set_type_url(aes_ctr_hmac_aead_key_type);
-    key_template.set_value("some bad serialized proto");
-    auto result = key_manager.NewKey(key_template);
+  {  // Bad serialized key format.
+    auto result = key_factory.NewKey("some bad serialized proto");
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -272,10 +267,7 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyErrors) {
   {  // Bad AesCtrHmacAeadKeyFormat: small key_size.
     AesCtrHmacAeadKeyFormat key_format;
     key_format.mutable_aes_ctr_key_format()->set_key_size(8);
-    KeyTemplate key_template;
-    key_template.set_type_url(aes_ctr_hmac_aead_key_type);
-    key_template.set_value(key_format.SerializeAsString());
-    auto result = key_manager.NewKey(key_template);
+    auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "key_size",
@@ -287,6 +279,7 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyErrors) {
 
 TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyBasic) {
   AesCtrHmacAeadKeyManager key_manager;
+  const KeyFactory& key_factory = key_manager.get_key_factory();
   AesCtrHmacAeadKeyFormat key_format;
   auto aes_ctr_key_format = key_format.mutable_aes_ctr_key_format();
   aes_ctr_key_format->set_key_size(16);
@@ -296,19 +289,62 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyBasic) {
   hmac_key_format->mutable_params()->set_hash(HashType::SHA1);
   hmac_key_format->mutable_params()->set_tag_size(10);
 
-  KeyTemplate key_template;
-  key_template.set_type_url(aes_ctr_hmac_aead_key_type);
-  key_template.set_value(key_format.SerializeAsString());
-  auto result = key_manager.NewKey(key_template);
-  EXPECT_TRUE(result.ok()) << result.status();
-  auto key = std::move(result.ValueOrDie());
-  EXPECT_EQ(key_type_prefix + key->GetDescriptor()->full_name(),
-            aes_ctr_hmac_aead_key_type);
-  std::unique_ptr<AesCtrHmacAeadKey> aes_ctr_hmac_aead_key(
-      reinterpret_cast<AesCtrHmacAeadKey*>(key.release()));
-  EXPECT_EQ(0, aes_ctr_hmac_aead_key->version());
-  EXPECT_EQ(key_format.aes_ctr_key_format().key_size(),
-            aes_ctr_hmac_aead_key->aes_ctr_key().key_value().size());
+  { // Via NewKey(format_proto).
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key = std::move(result.ValueOrDie());
+    EXPECT_EQ(key_type_prefix + key->GetDescriptor()->full_name(),
+              aes_ctr_hmac_aead_key_type);
+    std::unique_ptr<AesCtrHmacAeadKey> aes_ctr_hmac_aead_key(
+        reinterpret_cast<AesCtrHmacAeadKey*>(key.release()));
+    EXPECT_EQ(0, aes_ctr_hmac_aead_key->version());
+    EXPECT_EQ(key_format.aes_ctr_key_format().key_size(),
+              aes_ctr_hmac_aead_key->aes_ctr_key().key_value().size());
+    auto& hmac_key_format = key_format.hmac_key_format();
+    auto& hmac_key = aes_ctr_hmac_aead_key->hmac_key();
+    EXPECT_EQ(hmac_key_format.params().hash(), hmac_key.params().hash());
+    EXPECT_EQ(hmac_key_format.params().tag_size(),
+              hmac_key.params().tag_size());
+    EXPECT_EQ(hmac_key_format.key_size(), hmac_key.key_value().size());
+  }
+
+  { // Via NewKey(serialized_format_proto).
+    auto result = key_factory.NewKey(key_format.SerializeAsString());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key = std::move(result.ValueOrDie());
+    EXPECT_EQ(key_type_prefix + key->GetDescriptor()->full_name(),
+              aes_ctr_hmac_aead_key_type);
+    std::unique_ptr<AesCtrHmacAeadKey> aes_ctr_hmac_aead_key(
+        reinterpret_cast<AesCtrHmacAeadKey*>(key.release()));
+    EXPECT_EQ(0, aes_ctr_hmac_aead_key->version());
+    EXPECT_EQ(key_format.aes_ctr_key_format().key_size(),
+              aes_ctr_hmac_aead_key->aes_ctr_key().key_value().size());
+    auto& hmac_key_format = key_format.hmac_key_format();
+    auto& hmac_key = aes_ctr_hmac_aead_key->hmac_key();
+    EXPECT_EQ(hmac_key_format.params().hash(), hmac_key.params().hash());
+    EXPECT_EQ(hmac_key_format.params().tag_size(),
+              hmac_key.params().tag_size());
+    EXPECT_EQ(hmac_key_format.key_size(), hmac_key.key_value().size());
+  }
+
+  { // Via NewKeyData(serialized_format_proto).
+    auto result = key_factory.NewKeyData(key_format.SerializeAsString());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key_data = std::move(result.ValueOrDie());
+    EXPECT_EQ(aes_ctr_hmac_aead_key_type, key_data->type_url());
+    EXPECT_EQ(KeyData::SYMMETRIC, key_data->key_material_type());
+    AesCtrHmacAeadKey aes_ctr_hmac_aead_key;
+    EXPECT_TRUE(aes_ctr_hmac_aead_key.ParseFromString(key_data->value()));
+    EXPECT_EQ(0, aes_ctr_hmac_aead_key.version());
+    EXPECT_EQ(key_format.aes_ctr_key_format().key_size(),
+              aes_ctr_hmac_aead_key.aes_ctr_key().key_value().size());
+    auto& hmac_key_format = key_format.hmac_key_format();
+    auto& hmac_key = aes_ctr_hmac_aead_key.hmac_key();
+    EXPECT_EQ(hmac_key_format.params().hash(), hmac_key.params().hash());
+    EXPECT_EQ(hmac_key_format.params().tag_size(),
+              hmac_key.params().tag_size());
+    EXPECT_EQ(hmac_key_format.key_size(), hmac_key.key_value().size());
+  }
 }
 
 }  // namespace

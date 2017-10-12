@@ -30,6 +30,28 @@
 namespace crypto {
 namespace tink {
 
+// An auxiliary container for methods that generate new key material.
+// These methods are grouped separately, as their functionality
+// is independent of the primitive of the corresponding KeyManager.
+class KeyFactory {
+ public:
+  // Generates a new random key, based on the specified 'key_format'.
+  virtual
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  NewKey(const google::protobuf::Message& key_format) const = 0;
+
+  // Generates a new random key, based on the specified 'serialized_key_format'.
+  virtual
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  NewKey(absl::string_view serialized_key_format) const = 0;
+
+  // Generates a new random key, based on the specified 'serialized_key_format',
+  // and wraps it in a KeyData-proto.
+  virtual
+  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
+  NewKeyData(absl::string_view serialized_key_format) const = 0;
+};
+
 /**
  * KeyManager "understands" keys of a specific key types: it can
  * generate keys of a supported type and create primitives for
@@ -50,16 +72,15 @@ class KeyManager {
   virtual crypto::tink::util::StatusOr<std::unique_ptr<P>>
   GetPrimitive(const google::protobuf::Message& key) const = 0;
 
-  // Generates a new random key, based on the specified 'key_template'.
-  virtual
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
-      NewKey(const google::crypto::tink::KeyTemplate& key_template) const = 0;
-
   // Returns the type_url identifying the key type handled by this manager.
   virtual const std::string& get_key_type() const = 0;
 
   // Returns the version of this key manager.
   virtual uint32_t get_version() const = 0;
+
+  // Returns a factory that generates keys of the key type
+  // handled by this manager.
+  virtual const KeyFactory& get_key_factory() const = 0;
 
   bool DoesSupport(absl::string_view key_type) const {
     return (key_type == get_key_type());

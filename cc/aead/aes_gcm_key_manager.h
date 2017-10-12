@@ -20,6 +20,7 @@
 #ifndef TINK_AEAD_AES_GCM_KEY_MANAGER_H_
 #define TINK_AEAD_AES_GCM_KEY_MANAGER_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/aead.h"
 #include "cc/key_manager.h"
 #include "cc/util/errors.h"
@@ -36,8 +37,9 @@ class AesGcmKeyManager : public KeyManager<Aead> {
  public:
   static constexpr char kKeyType[] =
       "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  static constexpr uint32_t kVersion = 0;
 
-  AesGcmKeyManager() : key_type_(kKeyType) {}
+  AesGcmKeyManager();
 
   // Constructs an instance of AES-GCM Aead for the given 'key_data',
   // which must contain AesGcmKey-proto.
@@ -49,35 +51,38 @@ class AesGcmKeyManager : public KeyManager<Aead> {
   crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const google::protobuf::Message& key) const override;
 
-  // Generates a new random AesGcmKey, based on the specified 'key_template',
-  // which must contain AesGcmKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
-      NewKey(const google::crypto::tink::KeyTemplate& key_template)
-      const override;
-
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;
 
   // Returns the version of this key manager.
   uint32_t get_version() const override;
 
+  // Returns a factory that generates keys of the key type
+  // handled by this manager.
+  const KeyFactory& get_key_factory() const override;
+
   virtual ~AesGcmKeyManager() {}
 
  private:
+  friend class AesGcmKeyFactory;
+
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
+  static constexpr char kKeyFormatUrl[] =
+      "type.googleapis.com/google.crypto.tink.AesGcmKeyFormat";
 
   std::string key_type_;
+  std::unique_ptr<KeyFactory> key_factory_;
 
   // Constructs an instance of AES-GCM Aead for the given 'key'.
   crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitiveImpl(const google::crypto::tink::AesGcmKey& key) const;
 
-  crypto::tink::util::Status Validate(
-      const google::crypto::tink::AesGcmParams& params) const;
-  crypto::tink::util::Status Validate(
-      const google::crypto::tink::AesGcmKey& key) const;
-  crypto::tink::util::Status Validate(
-      const google::crypto::tink::AesGcmKeyFormat& key_format) const;
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::AesGcmParams& params);
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::AesGcmKey& key);
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::AesGcmKeyFormat& key_format);
 };
 
 }  // namespace tink

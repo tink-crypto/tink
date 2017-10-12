@@ -26,6 +26,7 @@
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::AesEaxKey;
+using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
@@ -208,27 +209,21 @@ TEST_F(AesGcmKeyManagerTest, testPrimitives) {
 
 TEST_F(AesGcmKeyManagerTest, testNewKeyErrors) {
   AesGcmKeyManager key_manager;
+  const KeyFactory& key_factory = key_manager.get_key_factory();
 
-  {  // Bad key type.
-    KeyTemplate key_template;
-    KeyData key_data;
-    std::string bad_key_type =
-        "type.googleapis.com/google.crypto.tink.SomeOtherKey";
-    key_template.set_type_url(bad_key_type);
-    auto result = key_manager.NewKey(key_template);
+  {  // Bad key format.
+    AesEaxKeyFormat key_format;
+    auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
                         result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_key_type,
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKeyFormat",
                         result.status().error_message());
   }
 
-  {  // Bad key value.
-    KeyTemplate key_template;
-    key_template.set_type_url(aes_gcm_key_type);
-    key_template.set_value("some bad serialized proto");
-    auto result = key_manager.NewKey(key_template);
+  {  // Bad serialized key format.
+    auto result = key_factory.NewKey("some bad serialized proto");
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
@@ -238,10 +233,7 @@ TEST_F(AesGcmKeyManagerTest, testNewKeyErrors) {
   {  // Bad AesGcmKeyFormat: small key_size.
     AesGcmKeyFormat key_format;
     key_format.set_key_size(8);
-    KeyTemplate key_template;
-    key_template.set_type_url(aes_gcm_key_type);
-    key_template.set_value(key_format.SerializeAsString());
-    auto result = key_manager.NewKey(key_template);
+    auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "key_size",
@@ -253,20 +245,45 @@ TEST_F(AesGcmKeyManagerTest, testNewKeyErrors) {
 
 TEST_F(AesGcmKeyManagerTest, testNewKeyBasic) {
   AesGcmKeyManager key_manager;
+  const KeyFactory& key_factory = key_manager.get_key_factory();
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
-  KeyTemplate key_template;
-  key_template.set_type_url(aes_gcm_key_type);
-  key_template.set_value(key_format.SerializeAsString());
-  auto result = key_manager.NewKey(key_template);
-  EXPECT_TRUE(result.ok()) << result.status();
-  auto key = std::move(result.ValueOrDie());
-  EXPECT_EQ(key_type_prefix + key->GetDescriptor()->full_name(),
-            aes_gcm_key_type);
-  std::unique_ptr<AesGcmKey> aes_gcm_key(
-      reinterpret_cast<AesGcmKey*>(key.release()));
-  EXPECT_EQ(0, aes_gcm_key->version());
-  EXPECT_EQ(key_format.key_size(), aes_gcm_key->key_value().size());
+
+  { // Via NewKey(format_proto).
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key = std::move(result.ValueOrDie());
+    EXPECT_EQ(key_type_prefix + key->GetDescriptor()->full_name(),
+              aes_gcm_key_type);
+    std::unique_ptr<AesGcmKey> aes_gcm_key(
+        reinterpret_cast<AesGcmKey*>(key.release()));
+    EXPECT_EQ(0, aes_gcm_key->version());
+    EXPECT_EQ(key_format.key_size(), aes_gcm_key->key_value().size());
+  }
+
+  { // Via NewKey(serialized_format_proto).
+    auto result = key_factory.NewKey(key_format.SerializeAsString());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key = std::move(result.ValueOrDie());
+    EXPECT_EQ(key_type_prefix + key->GetDescriptor()->full_name(),
+              aes_gcm_key_type);
+    std::unique_ptr<AesGcmKey> aes_gcm_key(
+        reinterpret_cast<AesGcmKey*>(key.release()));
+    EXPECT_EQ(0, aes_gcm_key->version());
+    EXPECT_EQ(key_format.key_size(), aes_gcm_key->key_value().size());
+  }
+
+  { // Via NewKeyData(serialized_format_proto).
+    auto result = key_factory.NewKeyData(key_format.SerializeAsString());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key_data = std::move(result.ValueOrDie());
+    EXPECT_EQ(aes_gcm_key_type, key_data->type_url());
+    EXPECT_EQ(KeyData::SYMMETRIC, key_data->key_material_type());
+    AesGcmKey aes_gcm_key;
+    EXPECT_TRUE(aes_gcm_key.ParseFromString(key_data->value()));
+    EXPECT_EQ(0, aes_gcm_key.version());
+    EXPECT_EQ(key_format.key_size(), aes_gcm_key.key_value().size());
+  }
 }
 
 }  // namespace

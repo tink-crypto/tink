@@ -20,6 +20,7 @@
 #ifndef TINK_HYBRID_ECIES_AEAD_HKDF_PUBLIC_KEY_MANAGER_H_
 #define TINK_HYBRID_ECIES_AEAD_HKDF_PUBLIC_KEY_MANAGER_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/hybrid_encrypt.h"
 #include "cc/key_manager.h"
 #include "cc/util/errors.h"
@@ -36,8 +37,9 @@ class EciesAeadHkdfPublicKeyManager : public KeyManager<HybridEncrypt> {
  public:
   static constexpr char kKeyType[] =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
+  static constexpr uint32_t kVersion = 0;
 
-  EciesAeadHkdfPublicKeyManager() : key_type_(kKeyType) {}
+  EciesAeadHkdfPublicKeyManager();
 
   // Constructs an instance of ECIES-AEAD-HKDF HybridEncrypt
   // for the given 'key_data', which must contain EciesAeadHkdfPublicKey-proto.
@@ -49,16 +51,15 @@ class EciesAeadHkdfPublicKeyManager : public KeyManager<HybridEncrypt> {
   crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>>
   GetPrimitive(const google::protobuf::Message& key) const override;
 
-  // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
-      NewKey(const google::crypto::tink::KeyTemplate& key_template)
-      const override;
-
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;
 
   // Returns the version of this key manager.
   uint32_t get_version() const override;
+
+  // Returns a factory that generates keys of the key type
+  // handled by this manager.
+  const KeyFactory& get_key_factory() const override;
 
   virtual ~EciesAeadHkdfPublicKeyManager() {}
 
@@ -66,15 +67,16 @@ class EciesAeadHkdfPublicKeyManager : public KeyManager<HybridEncrypt> {
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
 
   std::string key_type_;
+  std::unique_ptr<KeyFactory> key_factory_;
 
   // Constructs an instance of HybridEncrypt for the given 'key'.
   crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>> GetPrimitiveImpl(
       const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key) const;
 
-  crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfParams& params) const;
-  crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfPublicKey& key) const;
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::EciesAeadHkdfParams& params);
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::EciesAeadHkdfPublicKey& key);
 };
 
 }  // namespace tink

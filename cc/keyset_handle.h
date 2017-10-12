@@ -57,6 +57,7 @@ class KeysetHandle {
 
  private:
   friend class CleartextKeysetHandle;
+  friend class KeysetManager;
 
   KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset);
   std::unique_ptr<google::crypto::tink::Keyset> keyset_;

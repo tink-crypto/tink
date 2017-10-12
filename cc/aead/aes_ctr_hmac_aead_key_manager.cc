@@ -48,19 +48,113 @@ namespace util = crypto::tink::util;
 namespace crypto {
 namespace tink {
 
+class AesCtrHmacAeadKeyFactory : public KeyFactory {
+ public:
+  // Generates a new random AesCtrHmacAeadKey, based on the specified
+  // 'key_format', which must contain AesCtrHmacAeadKeyFormat-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  NewKey(const google::protobuf::Message& key_format) const override;
+
+  // Generates a new random AesCtrHmacAeadKey, based on the specified
+  // 'serialized_key_format', which must contain AesCtrHmacAeadKeyFormat-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  NewKey(absl::string_view serialized_key_format) const override;
+
+  // Generates a new random AesCtrHmacAeadKey, based on the specified
+  // 'serialized_key_format' (which must contain AesCtrHmacAeadKeyFormat-proto),
+  // and wraps it in a KeyData-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
+  NewKeyData(absl::string_view serialized_key_format) const override;
+};
+
+StatusOr<std::unique_ptr<Message>> AesCtrHmacAeadKeyFactory::NewKey(
+    const google::protobuf::Message& key_format) const {
+  std::string key_format_url =
+      std::string(AesCtrHmacAeadKeyManager::kKeyTypePrefix)
+      + key_format.GetDescriptor()->full_name();
+  if (key_format_url != AesCtrHmacAeadKeyManager::kKeyFormatUrl) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Key format proto '%s' is not supported by this manager.",
+                     key_format_url.c_str());
+  }
+  const AesCtrHmacAeadKeyFormat& aes_ctr_hmac_aead_key_format =
+        reinterpret_cast<const AesCtrHmacAeadKeyFormat&>(key_format);
+  Status status =
+      AesCtrHmacAeadKeyManager::Validate(aes_ctr_hmac_aead_key_format);
+  if (!status.ok()) return status;
+
+  std::unique_ptr<AesCtrHmacAeadKey> aes_ctr_hmac_aead_key(
+      new AesCtrHmacAeadKey());
+  aes_ctr_hmac_aead_key->set_version(AesCtrHmacAeadKeyManager::kVersion);
+
+  // Generate AesCtrKey.
+  auto aes_ctr_key = aes_ctr_hmac_aead_key->mutable_aes_ctr_key();
+  aes_ctr_key->set_version(AesCtrHmacAeadKeyManager::kVersion);
+  *(aes_ctr_key->mutable_params()) =
+      aes_ctr_hmac_aead_key_format.aes_ctr_key_format().params();
+  aes_ctr_key->set_key_value(Random::GetRandomBytes(
+      aes_ctr_hmac_aead_key_format.aes_ctr_key_format().key_size()));
+
+  // Generate HmacKey.
+  auto hmac_key = aes_ctr_hmac_aead_key->mutable_hmac_key();
+  hmac_key->set_version(AesCtrHmacAeadKeyManager::kVersion);
+  *(hmac_key->mutable_params()) =
+      aes_ctr_hmac_aead_key_format.hmac_key_format().params();
+  hmac_key->set_key_value(Random::GetRandomBytes(
+      aes_ctr_hmac_aead_key_format.hmac_key_format().key_size()));
+
+  std::unique_ptr<Message> key = std::move(aes_ctr_hmac_aead_key);
+  return std::move(key);
+}
+
+StatusOr<std::unique_ptr<Message>> AesCtrHmacAeadKeyFactory::NewKey(
+    absl::string_view serialized_key_format) const {
+  AesCtrHmacAeadKeyFormat key_format;
+  if (!key_format.ParseFromString(std::string(serialized_key_format))) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Could not parse the passed string as proto '%s'.",
+                     AesCtrHmacAeadKeyManager::kKeyFormatUrl);
+  }
+  return NewKey(key_format);
+}
+
+StatusOr<std::unique_ptr<KeyData>> AesCtrHmacAeadKeyFactory::NewKeyData(
+    absl::string_view serialized_key_format) const {
+  auto new_key_result = NewKey(serialized_key_format);
+  if (!new_key_result.ok()) return new_key_result.status();
+  auto new_key = reinterpret_cast<const AesCtrHmacAeadKey&>(
+      *(new_key_result.ValueOrDie()));
+  std::unique_ptr<KeyData> key_data(new KeyData());
+  key_data->set_type_url(AesCtrHmacAeadKeyManager::kKeyType);
+  key_data->set_value(new_key.SerializeAsString());
+  key_data->set_key_material_type(KeyData::SYMMETRIC);
+  return std::move(key_data);
+}
+
 constexpr char AesCtrHmacAeadKeyManager::kHmacKeyType[];
+constexpr char AesCtrHmacAeadKeyManager::kKeyFormatUrl[];
 constexpr char AesCtrHmacAeadKeyManager::kKeyTypePrefix[];
 constexpr char AesCtrHmacAeadKeyManager::kKeyType[];
+constexpr uint32_t AesCtrHmacAeadKeyManager::kVersion;
 
 const int kMinKeySizeInBytes = 16;
 const int kMinIvSizeInBytes = 12;
 const int kMinTagSizeInBytes = 10;
 
+AesCtrHmacAeadKeyManager::AesCtrHmacAeadKeyManager()
+    : key_type_(kKeyType), key_factory_(new AesCtrHmacAeadKeyFactory()) {}
+
 const std::string& AesCtrHmacAeadKeyManager::get_key_type() const {
   return key_type_;
 }
 
-uint32_t AesCtrHmacAeadKeyManager::get_version() const { return 0; }
+const KeyFactory& AesCtrHmacAeadKeyManager::get_key_factory() const {
+  return *key_factory_;
+}
+
+uint32_t AesCtrHmacAeadKeyManager::get_version() const {
+  return kVersion;
+}
 
 StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitive(
     const KeyData& key_data) const {
@@ -117,48 +211,9 @@ StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitiveImpl(
   return std::move(cipher_res.ValueOrDie());
 }
 
-StatusOr<std::unique_ptr<Message>> AesCtrHmacAeadKeyManager::NewKey(
-    const KeyTemplate& key_template) const {
-  if (!DoesSupport(key_template.type_url())) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_template.type_url().c_str());
-  }
-
-  AesCtrHmacAeadKeyFormat key_format;
-  if (!key_format.ParseFromString(key_template.value())) {
-    return ToStatusF(
-        util::error::INVALID_ARGUMENT,
-        "Could not parse key_template.value as key format '%sFormat'.",
-        key_template.type_url().c_str());
-  }
-  Status status = Validate(key_format);
-  if (!status.ok()) return status;
-
-  std::unique_ptr<AesCtrHmacAeadKey> aes_ctr_hmac_aead_key(
-      new AesCtrHmacAeadKey());
-  aes_ctr_hmac_aead_key->set_version(get_version());
-
-  // Generate AesCtrKey.
-  auto aes_ctr_key = aes_ctr_hmac_aead_key->mutable_aes_ctr_key();
-  aes_ctr_key->set_version(get_version());
-  *(aes_ctr_key->mutable_params()) = key_format.aes_ctr_key_format().params();
-  aes_ctr_key->set_key_value(
-      Random::GetRandomBytes(key_format.aes_ctr_key_format().key_size()));
-
-  // Generate HmacKey.
-  auto hmac_key = aes_ctr_hmac_aead_key->mutable_hmac_key();
-  hmac_key->set_version(get_version());
-  *(hmac_key->mutable_params()) = key_format.hmac_key_format().params();
-  hmac_key->set_key_value(
-      Random::GetRandomBytes(key_format.hmac_key_format().key_size()));
-
-  std::unique_ptr<Message> key = std::move(aes_ctr_hmac_aead_key);
-  return std::move(key);
-}
-
-Status AesCtrHmacAeadKeyManager::Validate(const AesCtrHmacAeadKey& key) const {
-  Status status = ValidateVersion(key.version(), get_version());
+// static
+Status AesCtrHmacAeadKeyManager::Validate(const AesCtrHmacAeadKey& key) {
+  Status status = ValidateVersion(key.version(), kVersion);
   if (!status.ok()) return status;
 
   // Validate AesCtrKey.
@@ -182,8 +237,9 @@ Status AesCtrHmacAeadKeyManager::Validate(const AesCtrHmacAeadKey& key) const {
   return Status::OK;
 }
 
+// static
 Status AesCtrHmacAeadKeyManager::Validate(
-    const AesCtrHmacAeadKeyFormat& key_format) const {
+    const AesCtrHmacAeadKeyFormat& key_format) {
   // Validate AesCtrKeyFormat.
   auto aes_ctr_key_format = key_format.aes_ctr_key_format();
   if (aes_ctr_key_format.key_size() < kMinKeySizeInBytes) {

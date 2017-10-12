@@ -14,15 +14,18 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+
 #include <thread>  // NOLINT(build/c++11)
 #include <vector>
 
+#include "absl/strings/string_view.h"
 #include "cc/aead.h"
 #include "cc/catalogue.h"
 #include "cc/registry.h"
 #include "cc/crypto_format.h"
 #include "cc/aead/aead_catalogue.h"
 #include "cc/aead/aes_gcm_key_manager.h"
+#include "cc/util/ptr_util.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
@@ -61,9 +64,37 @@ class RegistryTest : public ::testing::Test {
   }
 };
 
+class TestKeyFactory : public KeyFactory {
+ public:
+  TestKeyFactory(const std::string& key_type) : key_type_(key_type) {
+  }
+
+  util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+      const Message& key_format) const override {
+    return util::Status::UNKNOWN;
+  }
+
+  util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+      absl::string_view serialized_key_format) const override {
+    return util::Status::UNKNOWN;
+  }
+
+  util::StatusOr<std::unique_ptr<KeyData>> NewKeyData(
+      absl::string_view serialized_key_format) const override {
+    auto key_data = util::make_unique<KeyData>();
+    key_data->set_type_url(key_type_);
+    key_data->set_value(std::string(serialized_key_format));
+    return std::move(key_data);
+  }
+
+ private:
+  std::string key_type_;
+};
+
 class TestAeadKeyManager : public KeyManager<Aead> {
  public:
-  TestAeadKeyManager(const std::string& key_type) : key_type_(key_type) {
+  TestAeadKeyManager(const std::string& key_type)
+      : key_type_(key_type), key_factory_(key_type) {
   }
 
   util::StatusOr<std::unique_ptr<Aead>>
@@ -77,10 +108,6 @@ class TestAeadKeyManager : public KeyManager<Aead> {
     return util::Status::UNKNOWN;
   }
 
-  util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
-      const KeyTemplate& key_template) const override {
-    return util::Status::UNKNOWN;
-  }
 
   uint32_t get_version() const override {
     return 0;
@@ -90,8 +117,13 @@ class TestAeadKeyManager : public KeyManager<Aead> {
     return key_type_;
   }
 
+  const KeyFactory& get_key_factory() const override {
+    return key_factory_;
+  }
+
  private:
   std::string key_type_;
+  TestKeyFactory key_factory_;
 };
 
 
@@ -348,6 +380,72 @@ TEST_F(RegistryTest, testGettingPrimitives) {
   }
 
   // TODO(przydatek): add test: Keyset with custom key manager.
+}
+
+TEST_F(RegistryTest, testNewKeyData) {
+  std::string key_type_1 = AesCtrHmacAeadKey::descriptor()->full_name();
+  std::string key_type_2 = AesGcmKey::descriptor()->full_name();
+  std::string key_type_3 = "yet/another/keytype";
+
+  // Register key managers.
+  util::Status status;
+  status = Registry::RegisterKeyManager(key_type_1,
+                                        new TestAeadKeyManager(key_type_1));
+  EXPECT_TRUE(status.ok()) << status;
+  status = Registry::RegisterKeyManager(key_type_2,
+                                        new TestAeadKeyManager(key_type_2));
+  EXPECT_TRUE(status.ok()) << status;
+  status = Registry::RegisterKeyManager(key_type_3,
+                                        new TestAeadKeyManager(key_type_3),
+                                        /* new_key_allowed= */ false);
+  EXPECT_TRUE(status.ok()) << status;
+
+  {  // A supported key type.
+    KeyTemplate key_template;
+    key_template.set_type_url(key_type_1);
+    key_template.set_value("test value 42");
+    auto new_key_data_result = Registry::NewKeyData(key_template);
+    EXPECT_TRUE(new_key_data_result.ok()) << new_key_data_result.status();
+    EXPECT_EQ(key_type_1, new_key_data_result.ValueOrDie()->type_url());
+    EXPECT_EQ(key_template.value(), new_key_data_result.ValueOrDie()->value());
+  }
+
+  {  // Another supported key type.
+    KeyTemplate key_template;
+    key_template.set_type_url(key_type_2);
+    key_template.set_value("yet another test value 42");
+    auto new_key_data_result = Registry::NewKeyData(key_template);
+    EXPECT_TRUE(new_key_data_result.ok()) << new_key_data_result.status();
+    EXPECT_EQ(key_type_2, new_key_data_result.ValueOrDie()->type_url());
+    EXPECT_EQ(key_template.value(), new_key_data_result.ValueOrDie()->value());
+  }
+
+  {  // A key type that does not allow NewKey-operations.
+    KeyTemplate key_template;
+    key_template.set_type_url(key_type_3);
+    key_template.set_value("some other value 72");
+    auto new_key_data_result = Registry::NewKeyData(key_template);
+    EXPECT_FALSE(new_key_data_result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT,
+              new_key_data_result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type_3,
+                        new_key_data_result.status().error_message());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "does not allow",
+                        new_key_data_result.status().error_message());
+  }
+
+  {  // A key type that is not supported.
+    KeyTemplate key_template;
+    std::string bad_type_url = "some key type that is not supported";
+    key_template.set_type_url(bad_type_url);
+    key_template.set_value("some totally other value 42");
+    auto new_key_data_result = Registry::NewKeyData(key_template);
+    EXPECT_FALSE(new_key_data_result.ok());
+    EXPECT_EQ(util::error::NOT_FOUND,
+              new_key_data_result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_type_url,
+                        new_key_data_result.status().error_message());
+  }
 }
 
 }  // namespace

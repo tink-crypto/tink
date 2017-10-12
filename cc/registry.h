@@ -125,6 +125,14 @@ class Registry {
   GetPrimitives(const KeysetHandle& keyset_handle,
                 const KeyManager<P>* custom_manager);
 
+  // Generates a new KeyData for the specified 'key_template'.
+  // It looks up a KeyManager identified by key_template.type_url,
+  // and calls KeyManager::NewKeyData.
+  // This method should be used solely for key management.
+  static crypto::tink::util::StatusOr<
+    std::unique_ptr<google::crypto::tink::KeyData>>
+  NewKeyData(const google::crypto::tink::KeyTemplate& key_template);
+
   // Resets the registry.
   // After reset the registry is empty, i.e. it contains neither catalogues
   // nor key managers. This method is intended for testing only.
@@ -135,12 +143,24 @@ class Registry {
                              std::unique_ptr<void, void (*)(void*)>>
       LabelToObjectMap;
   typedef std::unordered_map<std::string, const char*> LabelToTypeNameMap;
+  typedef std::unordered_map<std::string, bool> LabelToBoolMap;
+  typedef std::unordered_map<std::string, const KeyFactory*>
+      LabelToKeyFactoryMap;
 
-  static std::mutex maps_mutex_;
+  static std::recursive_mutex maps_mutex_;
+  // Maps for key manager data.
   static LabelToObjectMap type_to_manager_map_;      // guarded by maps_mutex_
   static LabelToTypeNameMap type_to_primitive_map_;  // guarded by maps_mutex_
+  static LabelToBoolMap type_to_new_key_allowed_map_;        // by maps_mutex_
+  static LabelToKeyFactoryMap type_to_key_factory_map_;      // by maps_mutex_
+  // Maps for catalogue-data.
   static LabelToObjectMap name_to_catalogue_map_;    // guarded by maps_mutex_
   static LabelToTypeNameMap name_to_primitive_map_;  // guarded by maps_mutex_
+
+  static crypto::tink::util::StatusOr<bool> get_new_key_allowed(
+      const std::string& type_url);
+  static crypto::tink::util::StatusOr<const KeyFactory*> get_key_factory(
+      const std::string& type_url);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -166,7 +186,7 @@ crypto::tink::util::Status Registry::AddCatalogue(
         "Parameter 'catalogue' must be non-null.");
   }
   std::unique_ptr<void, void (*)(void*)> entry(catalogue, delete_catalogue<P>);
-  std::lock_guard<std::mutex> lock(maps_mutex_);
+  std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
   auto curr_catalogue = name_to_catalogue_map_.find(catalogue_name);
   if (curr_catalogue != name_to_catalogue_map_.end()) {
     auto existing = static_cast<Catalogue<P>*>(curr_catalogue->second.get());
@@ -188,7 +208,7 @@ crypto::tink::util::Status Registry::AddCatalogue(
 template <class P>
 crypto::tink::util::StatusOr<const Catalogue<P>*> Registry::get_catalogue(
     const std::string& catalogue_name) {
-  std::lock_guard<std::mutex> lock(maps_mutex_);
+  std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
   auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name);
   if (catalogue_entry == name_to_catalogue_map_.end()) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
@@ -220,7 +240,7 @@ crypto::tink::util::Status Registry::RegisterKeyManager(
                      "The manager does not support type '%s'.",
                      type_url.c_str());
   }
-  std::lock_guard<std::mutex> lock(maps_mutex_);
+  std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
   auto curr_manager = type_to_manager_map_.find(type_url);
   if (curr_manager != type_to_manager_map_.end()) {
     auto existing = static_cast<KeyManager<P>*>(curr_manager->second.get());
@@ -230,8 +250,14 @@ crypto::tink::util::Status Registry::RegisterKeyManager(
                        type_url.c_str());
     }
   } else {
-    type_to_manager_map_.insert(std::make_pair(type_url, std::move(entry)));
-    type_to_primitive_map_.insert(std::make_pair(type_url, typeid(P).name()));
+    type_to_manager_map_.insert(
+        std::make_pair(type_url, std::move(entry)));
+    type_to_primitive_map_.insert(
+        std::make_pair(type_url, typeid(P).name()));
+    type_to_new_key_allowed_map_.insert(
+        std::make_pair(type_url, new_key_allowed));
+    type_to_key_factory_map_.insert(
+        std::make_pair(type_url, &(manager->get_key_factory())));
   }
   return crypto::tink::util::Status::OK;
 }
@@ -240,7 +266,7 @@ crypto::tink::util::Status Registry::RegisterKeyManager(
 template <class P>
 crypto::tink::util::StatusOr<const KeyManager<P>*> Registry::get_key_manager(
     const std::string& type_url) {
-  std::lock_guard<std::mutex> lock(maps_mutex_);
+  std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
   auto manager_entry = type_to_manager_map_.find(type_url);
   if (manager_entry == type_to_manager_map_.end()) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,

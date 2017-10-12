@@ -82,7 +82,8 @@ StatusOr<std::unique_ptr<Aead>> EciesAeadHkdfDemHelper::GetAead(
   if (symmetric_key_value.size() != dem_key_size_in_bytes_) {
     return Status(util::error::INTERNAL, "Wrong length of symmetric key.");
   }
-  auto new_key_result = dem_key_manager_->NewKey(dem_key_template_);
+  auto new_key_result =
+      dem_key_manager_->get_key_factory().NewKey(dem_key_template_.value());
   if (!new_key_result.ok()) return new_key_result.status();
   auto new_key = std::move(new_key_result.ValueOrDie());
   if (!ReplaceKeyBytes(symmetric_key_value, new_key.get())) {

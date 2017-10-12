@@ -245,6 +245,22 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "keyset_manager",
+    srcs = ["core/keyset_manager.cc"],
+    hdrs = ["keyset_manager.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":keyset_handle",
+        ":registry",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+        "@com_google_protobuf//:protobuf_lite",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -330,6 +346,24 @@ cc_test(
         ":json_keyset_reader",
         ":keyset_handle",
         "//cc/util:test_util",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "keyset_manager_test",
+    size = "small",
+    srcs = ["core/keyset_manager_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":config",
+        ":keyset_handle",
+        ":keyset_manager",
+        "//cc/aead:aead_config",
+        "//cc/aead:aes_gcm_key_manager",
+        "//cc/util:test_util",
+        "//proto:aes_gcm_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
