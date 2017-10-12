@@ -35,11 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for AesGcm.
- *
- * <p>TODO(bleichen): Add more tests. Maybe add NIST style verification.
- */
+/** Unit tests for AesGcm. */
 @RunWith(JUnit4.class)
 public class AesGcmJceTest {
 
@@ -56,88 +52,6 @@ public class AesGcmJceTest {
       keySizeInBytes = new Integer[] {16, 32};
     } else {
       keySizeInBytes = new Integer[] {16, 24, 32};
-    }
-  }
-
-  /** Test vectors */
-  public static class GcmTestVector {
-    final byte[] key;
-    final byte[] pt;
-    final byte[] aad;
-    final byte[] ct;
-
-    public GcmTestVector(String message, String keyMaterial, String aad, String ciphertext) {
-      this.key = TestUtil.hexDecode(keyMaterial);
-      this.pt = TestUtil.hexDecode(message);
-      this.aad = TestUtil.hexDecode(aad);
-      this.ct = TestUtil.hexDecode(ciphertext);
-    }
-  };
-
-  private static final GcmTestVector[] GCM_TEST_VECTORS = {
-    new GcmTestVector(
-        "001d0c231287c1182784554ca3a21908",
-        "5b9604fe14eadba931b0ccf34843dab9",
-        "",
-        "028318abc1824029138141a2"
-            + "26073cc1d851beff176384dc9896d5ff"
-            + "0a3ea7a5487cb5f7d70fb6c58d038554"),
-    new GcmTestVector(
-        "2035af313d1346ab00154fea78322105",
-        "aa023d0478dcb2b2312498293d9a9129",
-        "aac39231129872a2",
-        "0432bc49ac34412081288127"
-            + "eea945f3d0f98cc0fbab472a0cf24e87"
-            + "4bb9b4812519dadf9e1232016d068133"),
-    // key size:256
-    new GcmTestVector(
-        "00010203040506070809",
-        "92ace3e348cd821092cd921aa3546374299ab46209691bc28b8752d17f123c20",
-        "00000000ffffffff",
-        "00112233445566778899aabb" + "e27abdd2d2a53d2f136b" + "9a4a2579529301bcfb71c78d4060f52c"),
-    new GcmTestVector(
-        "",
-        "29d3a44f8723dc640239100c365423a312934ac80239212ac3df3421a2098123",
-        "aabbccddeeff",
-        "00112233445566778899aabb" + "2a7d77fa526b8250cb296078926b5020"),
-
-    // special cases
-    new GcmTestVector(
-        "7fd49ba712d0d28f02ef54ed18db43f8",
-        "00112233445566778899aabbccddeeff",
-        "",
-        "00112233445566778899aabb"
-            + "d8eba6a5a03403851abc27f6e15d84c0"
-            + "00000000000000000000000000000000"),
-    new GcmTestVector(
-        "ebd4a3e10cf6d41c50aeae007563b072",
-        "00112233445566778899aabbccddeeff",
-        "",
-        "000000000000000000000000"
-            + "f62d84d649e56bc8cfedc5d74a51e2f7"
-            + "ffffffffffffffffffffffffffffffff"),
-    new GcmTestVector(
-        "d593c4d8224f1b100c35e4f6c4006543",
-        "00112233445566778899aabbccddeeff",
-        "",
-        "ffffffffffffffffffffffff"
-            + "431f31e6840931fd95f94bf88296ff69"
-            + "00000000000000000000000000000000"),
-  };
-
-  @Test
-  /**
-   * A regression test with some test vectors. AesGcmJce randomizes the ciphertext. Therefore this
-   * test only checks that decryption still works.
-   */
-  public void testRegression() throws Exception {
-    for (GcmTestVector test : GCM_TEST_VECTORS) {
-      if (TestUtil.shouldSkipTestWithAesKeySize(test.key.length)) {
-        continue;
-      }
-      AesGcmJce gcm = new AesGcmJce(test.key);
-      byte[] pt = gcm.decrypt(test.ct, test.aad);
-      assertArrayEquals(test.pt, pt);
     }
   }
 
