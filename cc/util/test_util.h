@@ -105,13 +105,13 @@ class DummyAead : public Aead {
   // with the name of this DummyAead.
   crypto::tink::util::StatusOr<std::string> Encrypt(
       google::protobuf::StringPiece plaintext,
-      google::protobuf::StringPiece additional_data) const override {
+      google::protobuf::StringPiece associated_data) const override {
     return plaintext.ToString().append(aead_name_);
   }
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece additional_data) const override {
+      google::protobuf::StringPiece associated_data) const override {
     std::string c = ciphertext.ToString();
     size_t pos = c.rfind(aead_name_);
     if (pos != std::string::npos &&
@@ -158,7 +158,7 @@ class DummyHybridDecrypt : public HybridDecrypt {
   // of a plaintext with the name of this DummyHybridDecrypt.
   crypto::tink::util::StatusOr<std::string> Decrypt(
       google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece additional_data) const override {
+      google::protobuf::StringPiece context_info) const override {
     std::string c = ciphertext.ToString();
     size_t pos = c.rfind(hybrid_name_);
     if (pos != std::string::npos &&

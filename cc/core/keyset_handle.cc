@@ -34,8 +34,8 @@ namespace {
 
 util::StatusOr<std::unique_ptr<Keyset>>
 Decrypt(const EncryptedKeyset& enc_keyset, const Aead& master_key_aead) {
-  auto decrypt_result =
-      master_key_aead.Decrypt(enc_keyset.encrypted_keyset(), /* aad= */ "");
+  auto decrypt_result = master_key_aead.Decrypt(
+          enc_keyset.encrypted_keyset(), /* associated_data= */ "");
   if (!decrypt_result.ok()) return decrypt_result.status();
   auto keyset = util::make_unique<Keyset>();
   if (!keyset->ParseFromString(decrypt_result.ValueOrDie())) {

@@ -49,8 +49,8 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Binary) {
 
   {  // Good encrypted keyset.
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext =
-        aead.Encrypt(keyset.SerializeAsString(), /* aad= */ "").ValueOrDie();
+    std::string keyset_ciphertext = aead.Encrypt(
+        keyset.SerializeAsString(), /* associated_data= */ "").ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto reader = std::move(BinaryKeysetReader::New(
@@ -64,8 +64,8 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Binary) {
 
   {  // AEAD does not match the ciphertext
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext =
-        aead.Encrypt(keyset.SerializeAsString(), /* aad= */ "").ValueOrDie();
+    std::string keyset_ciphertext = aead.Encrypt(
+        keyset.SerializeAsString(), /* associated_data= */ "").ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto reader = std::move(BinaryKeysetReader::New(
@@ -78,8 +78,8 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Binary) {
 
   {  // Ciphertext does not contain actual keyset.
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext =
-        aead.Encrypt("not a serialized keyset", /* aad= */ "").ValueOrDie();
+    std::string keyset_ciphertext = aead.Encrypt(
+        "not a serialized keyset", /* associated_data= */ "").ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto reader = std::move(BinaryKeysetReader::New(
@@ -113,8 +113,8 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Json) {
 
   {  // Good encrypted keyset.
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext =
-        aead.Encrypt(keyset.SerializeAsString(), /* aad= */ "").ValueOrDie();
+    std::string keyset_ciphertext = aead.Encrypt(
+        keyset.SerializeAsString(), /* associated_data= */ "").ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     google::protobuf::util::JsonPrintOptions json_options;
@@ -135,8 +135,8 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Json) {
 
   {  // AEAD does not match the ciphertext
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext =
-        aead.Encrypt(keyset.SerializeAsString(), /* aad= */ "").ValueOrDie();
+    std::string keyset_ciphertext = aead.Encrypt(
+        keyset.SerializeAsString(), /* associated_data= */ "").ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto reader = std::move(JsonKeysetReader::New(
@@ -149,8 +149,8 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Json) {
 
   {  // Ciphertext does not contain actual keyset.
     DummyAead aead("dummy aead 42");
-    std::string keyset_ciphertext =
-        aead.Encrypt("not a serialized keyset", /* aad= */ "").ValueOrDie();
+    std::string keyset_ciphertext = aead.Encrypt(
+        "not a serialized keyset", /* associated_data= */ "").ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
     auto reader = std::move(JsonKeysetReader::New(
