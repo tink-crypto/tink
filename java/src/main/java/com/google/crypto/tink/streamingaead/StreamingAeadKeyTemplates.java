@@ -45,10 +45,10 @@ public final class StreamingAeadKeyTemplates {
    *   - AES key size: 16 bytes
    *   - AES IV size: 16 bytes
    *   - HMAC tag size: 16 bytes
-   *   - Ciphertext segment size: 256
+   *   - Ciphertext segment size: 4096
    */
   public static final KeyTemplate AES128_CTR_HMAC_STREAMING =
-      createAesCtrHmacStreamingKeyTemplate(16, 16, 16, 256);
+      createAesCtrHmacStreamingKeyTemplate(16, 16, 16, 4096);
 
   /**
    * A {@code KeyTemplate} that generates new instances of {@code AesGcmHkdfStreamingKey} with the
@@ -56,30 +56,30 @@ public final class StreamingAeadKeyTemplates {
    *   - AES key size: 32 bytes
    *   - AES IV size: 16 bytes
    *   - HMAC tag size: 32 bytes
-   *   - Ciphertext segment size: 256
+   *   - Ciphertext segment size: 4096
    */
   public static final KeyTemplate AES256_CTR_HMAC_STREAMING =
-      createAesCtrHmacStreamingKeyTemplate(32, 16, 32, 256);
+      createAesCtrHmacStreamingKeyTemplate(32, 16, 32, 4096);
 
   /**
    * A {@code KeyTemplate} that generates new instances of {@code AesGcmHkdfStreamingKey} with the
    * following parameters:
    *   - AES key size: 16 bytes
    *   - AES IV size: 16 bytes
-   *   - Ciphertext segment size: 256
+   *   - Ciphertext segment size: 4096
    */
   public static final KeyTemplate AES128_GCM_HKDF_STREAMING =
-      createAesGcmHkdfStreamingKeyTemplate(16, 16, 256);
+      createAesGcmHkdfStreamingKeyTemplate(16, 16, 4096);
 
   /**
    * A {@code KeyTemplate} that generates new instances of {@code AesGcmHkdfStreamingKey} with the
    * following parameters:
    *   - AES key size: 32 bytes
    *   - AES IV size: 16 bytes
-   *   - Ciphertext segment size: 256
+   *   - Ciphertext segment size: 4096
    */
   public static final KeyTemplate AES256_GCM_HKDF_STREAMING =
-      createAesGcmHkdfStreamingKeyTemplate(32, 16, 256);
+      createAesGcmHkdfStreamingKeyTemplate(32, 16, 4096);
 
   /**
    * @return a {@code KeyTemplate} containing a {@code AesCtrHmacStreamingKeyFormat} with some
