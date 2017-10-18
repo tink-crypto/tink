@@ -19,7 +19,6 @@ package com.google.crypto.tink.apps.paymentmethodtoken;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EciesHkdfSenderKem;
-import com.google.crypto.tink.subtle.EllipticCurves;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
@@ -37,7 +36,6 @@ class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
 
   public PaymentMethodTokenHybridEncrypt(final ECPublicKey recipientPublicKey)
       throws GeneralSecurityException {
-    EllipticCurves.checkPublicKey(recipientPublicKey);
     this.senderKem = new EciesHkdfSenderKem(recipientPublicKey);
   }
 

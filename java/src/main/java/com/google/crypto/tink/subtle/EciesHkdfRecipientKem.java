@@ -17,13 +17,8 @@
 package com.google.crypto.tink.subtle;
 
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
-import javax.crypto.KeyAgreement;
 
 /** HKDF-based KEM (key encapsulation mechanism) for ECIES recipient. */
 public final class EciesHkdfRecipientKem {
@@ -41,23 +36,11 @@ public final class EciesHkdfRecipientKem {
       int keySizeInBytes,
       EllipticCurves.PointFormatType pointFormat)
       throws GeneralSecurityException {
-    ECParameterSpec spec = recipientPrivateKey.getParams();
-    ECPoint ephemeralPublicPoint =
-        EllipticCurves.ecPointDecode(spec.getCurve(), pointFormat, kemBytes);
-    ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ephemeralPublicPoint, spec);
-    KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
-    ECPublicKey ephemeralPublicKey = (ECPublicKey) kf.generatePublic(publicKeySpec);
-    byte[] sharedSecret = getSharedSecret(ephemeralPublicKey);
+    ECPublicKey ephemeralPublicKey = EllipticCurves.getEcPublicKey(
+        recipientPrivateKey.getParams(), pointFormat, kemBytes);
+    byte[] sharedSecret = EllipticCurves.computeSharedSecret(
+        recipientPrivateKey, ephemeralPublicKey);
     return Hkdf.computeEciesHkdfSymmetricKey(
         kemBytes, sharedSecret, hmacAlgo, hkdfSalt, hkdfInfo, keySizeInBytes);
-  }
-
-  private byte[] getSharedSecret(final ECPublicKey publicKey) throws GeneralSecurityException {
-    ECParameterSpec spec = recipientPrivateKey.getParams();
-    EllipticCurves.checkPointOnCurve(publicKey.getW(), spec.getCurve());
-    KeyAgreement ka = EngineFactory.KEY_AGREEMENT.getInstance("ECDH");
-    ka.init(recipientPrivateKey);
-    ka.doPhase(publicKey, true);
-    return ka.generateSecret();
   }
 }

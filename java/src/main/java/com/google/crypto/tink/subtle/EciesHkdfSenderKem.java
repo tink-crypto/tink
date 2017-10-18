@@ -19,12 +19,8 @@ package com.google.crypto.tink.subtle;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import javax.crypto.KeyAgreement;
 
 /** HKDF-based KEM (key encapsulation mechanism) for ECIES sender. */
 public final class EciesHkdfSenderKem {
@@ -69,11 +65,11 @@ public final class EciesHkdfSenderKem {
       int keySizeInBytes,
       EllipticCurves.PointFormatType pointFormat)
       throws GeneralSecurityException {
-    KeyPair ephemeralKeyPair = generateEphemeralKey();
+    KeyPair ephemeralKeyPair = EllipticCurves.generateKeyPair(recipientPublicKey.getParams());
     ECPublicKey ephemeralPublicKey = (ECPublicKey) ephemeralKeyPair.getPublic();
     ECPrivateKey ephemeralPrivateKey = (ECPrivateKey) ephemeralKeyPair.getPrivate();
-
-    byte[] sharedSecret = getSharedSecret(ephemeralPrivateKey);
+    byte[] sharedSecret = EllipticCurves.computeSharedSecret(
+        ephemeralPrivateKey, recipientPublicKey);
     byte[] kemBytes =
         EllipticCurves.ecPointEncode(
             ephemeralPublicKey.getParams().getCurve(), pointFormat, ephemeralPublicKey.getW());
@@ -81,23 +77,5 @@ public final class EciesHkdfSenderKem {
         Hkdf.computeEciesHkdfSymmetricKey(
             kemBytes, sharedSecret, hmacAlgo, hkdfSalt, hkdfInfo, keySizeInBytes);
     return new KemKey(kemBytes, symmetricKey);
-  }
-
-  private KeyPair generateEphemeralKey() throws GeneralSecurityException {
-    ECParameterSpec spec = recipientPublicKey.getParams();
-    KeyPairGenerator keyGen = EngineFactory.KEY_PAIR_GENERATOR.getInstance("EC");
-    keyGen.initialize(spec);
-    return keyGen.generateKeyPair();
-  }
-
-  private byte[] getSharedSecret(final ECPrivateKey senderPrivateKey)
-      throws GeneralSecurityException {
-    ECPoint publicPoint = recipientPublicKey.getW();
-    ECParameterSpec spec = recipientPublicKey.getParams();
-    EllipticCurves.checkPointOnCurve(publicPoint, spec.getCurve());
-    KeyAgreement ka = EngineFactory.KEY_AGREEMENT.getInstance("ECDH");
-    ka.init(senderPrivateKey);
-    ka.doPhase(recipientPublicKey, true);
-    return ka.generateSecret();
   }
 }
