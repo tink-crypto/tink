@@ -36,6 +36,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public final class Ed25519SignTest {
+
   @Test
   public void testSigningOneKeyWithMultipleMessages() throws Exception {
     Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
@@ -120,6 +121,14 @@ public final class Ed25519SignTest {
     }
   }
 
+  private byte[] getMessage(JSONObject testcase) throws Exception {
+    if (testcase.has("msg")) {
+      return Hex.decode(testcase.getString("msg"));
+    } else {
+      return Hex.decode(testcase.getString("message"));
+    }
+  }
+
   @Test
   public void testSigningWithWycheproofVectors() throws Exception {
     if (TestUtil.isAndroid()) {
@@ -143,7 +152,7 @@ public final class Ed25519SignTest {
         JSONObject testcase = tests.getJSONObject(j);
         int tcId = testcase.getInt("tcId");
         String tc = "tcId: " + tcId + " " + testcase.getString("comment");
-        byte[] msg = Hex.decode(testcase.getString("message"));
+        byte[] msg = getMessage(testcase);
         byte[] sig = Hex.decode(testcase.getString("sig"));
         String result = testcase.getString("result");
         if (result.equals("invalid")) {

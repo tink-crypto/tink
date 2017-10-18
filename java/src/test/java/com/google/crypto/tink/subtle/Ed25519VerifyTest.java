@@ -19,8 +19,8 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.WycheproofTestUtil;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -49,11 +49,18 @@ public final class Ed25519VerifyTest {
     }
   }
 
+  private byte[] getMessage(JSONObject testcase) throws Exception {
+    if (testcase.has("msg")) {
+      return Hex.decode(testcase.getString("msg"));
+    } else {
+      return Hex.decode(testcase.getString("message"));
+    }
+  }
+
   @Test
   public void testVerificationWithWycheproofVectors() throws Exception {
     if (TestUtil.isAndroid()) {
-      System.out.println(
-          "testVerificationWithWycheproofVectors doesn't work on Android, skipping");
+      System.out.println("testVerificationWithWycheproofVectors doesn't work on Android, skipping");
       return;
     }
 
@@ -72,7 +79,7 @@ public final class Ed25519VerifyTest {
         JSONObject testcase = tests.getJSONObject(j);
         int tcId = testcase.getInt("tcId");
         String tc = "tcId: " + tcId + " " + testcase.getString("comment");
-        byte[] msg = Hex.decode(testcase.getString("message"));
+        byte[] msg = getMessage(testcase);
         byte[] sig = Hex.decode(testcase.getString("sig"));
         String result = testcase.getString("result");
         boolean verified = false;
