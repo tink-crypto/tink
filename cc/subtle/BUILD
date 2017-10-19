@@ -100,6 +100,23 @@ cc_library(
 )
 
 cc_library(
+    name = "aes_ctr_boringssl",
+    srcs = [
+        "aes_ctr_boringssl.cc",
+        "ind_cpa_cipher.h",
+    ],
+    hdrs = ["aes_ctr_boringssl.h"],
+    deps = [
+        ":random",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_protobuf//:protobuf_lite",
+    ],
+)
+
+cc_library(
     name = "random",
     srcs = ["random.cc"],
     hdrs = ["random.h"],
@@ -209,6 +226,20 @@ cc_test(
     deps = [
         ":aes_gcm_boringssl",
         "//cc:aead",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_ctr_boringssl_test",
+    size = "small",
+    srcs = ["aes_ctr_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aes_ctr_boringssl",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
