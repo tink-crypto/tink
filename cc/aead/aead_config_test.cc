@@ -33,43 +33,49 @@ class DummyAeadCatalogue : public Catalogue<Aead> {
  public:
   DummyAeadCatalogue() {}
 
-  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
-  GetKeyManager(google::protobuf::StringPiece type_url,
-                google::protobuf::StringPiece primitive_name,
-                uint32_t min_version) const override {
+  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Aead>>> GetKeyManager(
+      google::protobuf::StringPiece type_url,
+      google::protobuf::StringPiece primitive_name,
+      uint32_t min_version) const override {
     return util::Status::UNKNOWN;
   }
 };
 
-
 class AeadConfigTest : public ::testing::Test {
  protected:
-  void SetUp() override {
-    Registry::Reset();
-  }
+  void SetUp() override { Registry::Reset(); }
 };
 
 TEST_F(AeadConfigTest, testBasic) {
-  std::string key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
-  std::string mac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
+  std::string aes_ctr_hmac_aead_key_type =
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
+  std::string aes_gcm_key_type =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
   auto& config = AeadConfig::Tink_1_1_0();
 
-  EXPECT_EQ(2, AeadConfig::Tink_1_1_0().entry_size());
+  EXPECT_EQ(3, AeadConfig::Tink_1_1_0().entry_size());
 
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
-  EXPECT_EQ(mac_key_type, config.entry(0).type_url());
+  EXPECT_EQ(hmac_key_type, config.entry(0).type_url());
   EXPECT_EQ(true, config.entry(0).new_key_allowed());
   EXPECT_EQ(0, config.entry(0).key_manager_version());
 
   EXPECT_EQ("TinkAead", config.entry(1).catalogue_name());
   EXPECT_EQ("Aead", config.entry(1).primitive_name());
-  EXPECT_EQ(key_type, config.entry(1).type_url());
+  EXPECT_EQ(aes_ctr_hmac_aead_key_type, config.entry(1).type_url());
   EXPECT_EQ(true, config.entry(1).new_key_allowed());
   EXPECT_EQ(0, config.entry(1).key_manager_version());
 
+  EXPECT_EQ("TinkAead", config.entry(2).catalogue_name());
+  EXPECT_EQ("Aead", config.entry(2).primitive_name());
+  EXPECT_EQ(aes_gcm_key_type, config.entry(2).type_url());
+  EXPECT_EQ(true, config.entry(2).new_key_allowed());
+  EXPECT_EQ(0, config.entry(2).key_manager_version());
+
   // No key manager before registration.
-  auto manager_result = Registry::get_key_manager<Aead>(key_type);
+  auto manager_result = Registry::get_key_manager<Aead>(aes_gcm_key_type);
   EXPECT_FALSE(manager_result.ok());
   EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
 
@@ -78,9 +84,9 @@ TEST_F(AeadConfigTest, testBasic) {
   EXPECT_TRUE(status.ok()) << status;
   status = Config::Register(AeadConfig::Tink_1_1_0());
   EXPECT_TRUE(status.ok()) << status;
-  manager_result = Registry::get_key_manager<Aead>(key_type);
+  manager_result = Registry::get_key_manager<Aead>(aes_gcm_key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-  EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
+  EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(aes_gcm_key_type));
 }
 
 TEST_F(AeadConfigTest, testInit) {
@@ -122,7 +128,6 @@ TEST_F(AeadConfigTest, testDeprecated) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);

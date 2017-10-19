@@ -25,11 +25,6 @@ option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option objc_class_prefix = "TINKPB";
 
-message AesCtrHmacAeadParams {
-  AesCtrParams aes_ctr_params = 1;
-  HmacParams hmac_params = 2;
-}
-
 message AesCtrHmacAeadKeyFormat {
   AesCtrKeyFormat aes_ctr_key_format = 1;
   HmacKeyFormat hmac_key_format = 2;

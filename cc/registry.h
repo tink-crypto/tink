@@ -110,6 +110,14 @@ class Registry {
   static crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const google::crypto::tink::KeyData& key_data);
 
+  // Convenience method for creating a new primitive for the key given
+  // in 'key'.  It looks up a KeyManager identified by type_url,
+  // and calls manager's GetPrimitive(key)-method.
+  template <class P>
+  static crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
+      google::protobuf::StringPiece type_url,
+      const google::protobuf::Message& key);
+
   // Creates a set of primitives corresponding to the keys with
   // (status == ENABLED) in the keyset given in 'keyset_handle',
   // assuming all the corresponding key managers are present (keys
@@ -271,6 +279,18 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
   auto key_manager_result = get_key_manager<P>(key_data.type_url());
   if (key_manager_result.ok()) {
     return key_manager_result.ValueOrDie()->GetPrimitive(key_data);
+  }
+  return key_manager_result.status();
+}
+
+// static
+template <class P>
+crypto::tink::util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
+    google::protobuf::StringPiece type_url,
+    const google::protobuf::Message& key) {
+  auto key_manager_result = get_key_manager<P>(type_url);
+  if (key_manager_result.ok()) {
+    return key_manager_result.ValueOrDie()->GetPrimitive(key);
   }
   return key_manager_result.status();
 }

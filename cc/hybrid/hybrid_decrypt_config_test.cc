@@ -52,31 +52,39 @@ class HybridDecryptConfigTest : public ::testing::Test {
 TEST_F(HybridDecryptConfigTest, testBasic) {
   std::string key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-  std::string aead_key_type =
+  std::string aes_ctr_hmac_aead_key_type =
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
+  std::string aes_gcm_key_type =
       "type.googleapis.com/google.crypto.tink.AesGcmKey";
-  std::string mac_key_type =
+  std::string hmac_key_type =
       "type.googleapis.com/google.crypto.tink.HmacKey";
   auto& config = HybridDecryptConfig::Tink_1_1_0();
 
-  EXPECT_EQ(3, HybridDecryptConfig::Tink_1_1_0().entry_size());
+  EXPECT_EQ(4, HybridDecryptConfig::Tink_1_1_0().entry_size());
 
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
-  EXPECT_EQ(mac_key_type, config.entry(0).type_url());
+  EXPECT_EQ(hmac_key_type, config.entry(0).type_url());
   EXPECT_EQ(true, config.entry(0).new_key_allowed());
   EXPECT_EQ(0, config.entry(0).key_manager_version());
 
   EXPECT_EQ("TinkAead", config.entry(1).catalogue_name());
   EXPECT_EQ("Aead", config.entry(1).primitive_name());
-  EXPECT_EQ(aead_key_type, config.entry(1).type_url());
+  EXPECT_EQ(aes_ctr_hmac_aead_key_type, config.entry(1).type_url());
   EXPECT_EQ(true, config.entry(1).new_key_allowed());
   EXPECT_EQ(0, config.entry(1).key_manager_version());
 
-  EXPECT_EQ("TinkHybridDecrypt", config.entry(2).catalogue_name());
-  EXPECT_EQ("HybridDecrypt", config.entry(2).primitive_name());
-  EXPECT_EQ(key_type, config.entry(2).type_url());
+  EXPECT_EQ("TinkAead", config.entry(2).catalogue_name());
+  EXPECT_EQ("Aead", config.entry(2).primitive_name());
+  EXPECT_EQ(aes_gcm_key_type, config.entry(2).type_url());
   EXPECT_EQ(true, config.entry(2).new_key_allowed());
   EXPECT_EQ(0, config.entry(2).key_manager_version());
+
+  EXPECT_EQ("TinkHybridDecrypt", config.entry(3).catalogue_name());
+  EXPECT_EQ("HybridDecrypt", config.entry(3).primitive_name());
+  EXPECT_EQ(key_type, config.entry(3).type_url());
+  EXPECT_EQ(true, config.entry(3).new_key_allowed());
+  EXPECT_EQ(0, config.entry(3).key_manager_version());
 
   // No key manager before registration.
   auto manager_result = Registry::get_key_manager<HybridDecrypt>(key_type);

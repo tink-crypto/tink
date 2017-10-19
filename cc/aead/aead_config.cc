@@ -38,6 +38,9 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   config->MergeFrom(MacConfig::Tink_1_1_0());
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
+      "AesCtrHmacAeadKey", 0, true));
+  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
+      AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "AesGcmKey", 0, true));
   config->set_config_name("TINK_AEAD_1_1_0");
   return config;

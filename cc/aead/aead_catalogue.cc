@@ -18,6 +18,7 @@
 
 #include "cc/catalogue.h"
 #include "cc/key_manager.h"
+#include "cc/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "cc/aead/aes_gcm_key_manager.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
@@ -31,7 +32,10 @@ namespace {
 crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
 CreateKeyManager(google::protobuf::StringPiece type_url) {
   if (type_url == AesGcmKeyManager::kKeyType) {
-    std::unique_ptr<KeyManager<Aead>> manager(new  AesGcmKeyManager());
+    std::unique_ptr<KeyManager<Aead>> manager(new AesGcmKeyManager());
+    return std::move(manager);
+  } else if (type_url == AesCtrHmacAeadKeyManager::kKeyType) {
+    std::unique_ptr<KeyManager<Aead>> manager(new AesCtrHmacAeadKeyManager());
     return std::move(manager);
   }
   return ToStatusF(crypto::tink::util::error::NOT_FOUND,
