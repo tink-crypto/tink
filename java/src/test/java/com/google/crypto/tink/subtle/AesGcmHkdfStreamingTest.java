@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.StreamingTestUtil;
 import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
 import com.google.crypto.tink.TestUtil;
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import org.junit.Rule;
@@ -296,7 +295,6 @@ public class AesGcmHkdfStreamingTest {
   /** Encrypt some plaintext to a file using FileOutputStream, then decrypt from the file */
   @Test
   public void testFileEncrytionWithStream() throws Exception {
-    StreamingTestUtil.testFileEncrytionWithStream(createAesGcmStreaming(),
-        tmpFolder.newFile());
+    StreamingTestUtil.testFileEncrytionWithStream(createAesGcmStreaming(), tmpFolder.newFile());
   }
 }

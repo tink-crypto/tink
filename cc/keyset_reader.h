@@ -33,6 +33,8 @@ class KeysetReader {
   virtual crypto::tink::util::StatusOr<
     std::unique_ptr<google::crypto::tink::EncryptedKeyset>>
   ReadEncrypted() = 0;
+
+  virtual ~KeysetReader() {}
 };
 
 }  // namespace tink
