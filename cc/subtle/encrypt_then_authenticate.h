@@ -36,8 +36,7 @@ namespace tink {
 class EncryptThenAuthenticate : public Aead {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
-      std::unique_ptr<IndCpaCipher> ind_cpa_cipher,
-      std::unique_ptr<Mac> mac,
+      std::unique_ptr<IndCpaCipher> ind_cpa_cipher, std::unique_ptr<Mac> mac,
       uint8_t tag_size);
 
   // Encrypts 'plaintext' with 'additional_data' as additional authenticated
@@ -63,10 +62,8 @@ class EncryptThenAuthenticate : public Aead {
   static const int MIN_TAG_SIZE_IN_BYTES = 10;
 
   EncryptThenAuthenticate() {}
-  EncryptThenAuthenticate(
-      std::unique_ptr<IndCpaCipher> ind_cpa_cipher,
-      std::unique_ptr<Mac> mac,
-      uint8_t tag_size)
+  EncryptThenAuthenticate(std::unique_ptr<IndCpaCipher> ind_cpa_cipher,
+                          std::unique_ptr<Mac> mac, uint8_t tag_size)
       : ind_cpa_cipher_(std::move(ind_cpa_cipher)),
         mac_(std::move(mac)),
         tag_size_(tag_size) {}

@@ -69,6 +69,9 @@ public final class Commands {
     return handle;
   }
 
+  /**
+   * Encrypts a file.
+   */
   public static class EncryptCommand extends Options implements Command {
     @Override
     public void run() throws Exception {
@@ -88,6 +91,9 @@ public final class Commands {
     }
   }
 
+  /**
+   * Decrypts a file.
+   */
   public static class DecryptCommand extends Options implements Command {
     @Override
     public void run() throws Exception {

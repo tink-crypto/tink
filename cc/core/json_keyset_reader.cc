@@ -91,7 +91,7 @@ JsonKeysetReader::ReadEncrypted() {
   auto status = google::protobuf::util::JsonStringToMessage(
       *serialized_keyset, enc_keyset.get());
   if (!status.ok()) {
-    return tinkutil::Status(util::error::INVALID_ARGUMENT,
+    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
         "Could not parse the input stream as a JSON EncryptedKeyset-proto.");
   }
   return std::move(enc_keyset);

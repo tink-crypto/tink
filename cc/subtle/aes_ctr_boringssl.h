@@ -46,8 +46,7 @@ class AesCtrBoringSsl : public IndCpaCipher {
   static const uint8_t BLOCK_SIZE = 16;
 
   AesCtrBoringSsl() {}
-  AesCtrBoringSsl(google::protobuf::StringPiece key_value,
-                  uint8_t iv_size,
+  AesCtrBoringSsl(google::protobuf::StringPiece key_value, uint8_t iv_size,
                   const EVP_CIPHER *cipher);
 
   const std::string key_;

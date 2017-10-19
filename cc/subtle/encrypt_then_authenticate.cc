@@ -42,15 +42,13 @@ static const std::string longToBigEndianStr(uint64_t value) {
 }
 
 util::StatusOr<std::unique_ptr<Aead>> EncryptThenAuthenticate::New(
-    std::unique_ptr<IndCpaCipher> ind_cpa_cipher,
-    std::unique_ptr<Mac> mac,
+    std::unique_ptr<IndCpaCipher> ind_cpa_cipher, std::unique_ptr<Mac> mac,
     uint8_t tag_size) {
   if (tag_size < MIN_TAG_SIZE_IN_BYTES) {
     return util::Status(util::error::INTERNAL, "tag size too small");
   }
-  std::unique_ptr<Aead> aead(
-      new EncryptThenAuthenticate(
-          std::move(ind_cpa_cipher), std::move(mac), tag_size));
+  std::unique_ptr<Aead> aead(new EncryptThenAuthenticate(
+      std::move(ind_cpa_cipher), std::move(mac), tag_size));
   return std::move(aead);
 }
 
@@ -83,14 +81,14 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
     return util::Status(util::error::INTERNAL, "ciphertext too short");
   }
 
-  std::string payload = ciphertext.substr(0, ciphertext.size() - tag_size_);
+  std::string payload = std::string(ciphertext.data(), ciphertext.size())
+                            .substr(0, ciphertext.size() - tag_size_);
   std::string toAuthData(additional_data);
   toAuthData.append(payload);
   uint64_t aad_size_in_bits = additional_data.size() * 8;
   toAuthData.append(longToBigEndianStr(aad_size_in_bits));
   auto verified = mac_->VerifyMac(
-      ciphertext.substr(ciphertext.size() - tag_size_, tag_size_),
-      toAuthData);
+      ciphertext.substr(ciphertext.size() - tag_size_, tag_size_), toAuthData);
   if (!verified.ok()) {
     return verified;
   }

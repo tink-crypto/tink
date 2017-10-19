@@ -21,8 +21,8 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "gtest/gtest.h"
-#include "proto/aes_gcm.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
+#include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
@@ -308,13 +308,12 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyBasic) {
       reinterpret_cast<AesCtrHmacAeadKey*>(key.release()));
   EXPECT_EQ(0, aes_ctr_hmac_aead_key->version());
   EXPECT_EQ(key_format.aes_ctr_key_format().key_size(),
-      aes_ctr_hmac_aead_key->aes_ctr_key().key_value().size());
+            aes_ctr_hmac_aead_key->aes_ctr_key().key_value().size());
 }
 
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-
 
 int main(int ac, char* av[]) {
   testing::InitGoogleTest(&ac, av);

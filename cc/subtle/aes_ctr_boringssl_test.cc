@@ -92,12 +92,9 @@ TEST(AesCtrBoringSslTest, testEncryptDecrypt_invalidIvSize) {
 TEST(AesCtrBoringSslTest, testNistTestVector) {
   // NIST SP 800-38A pp 55.
   std::string key(test::HexDecodeOrDie("2b7e151628aed2a6abf7158809cf4f3c"));
-  std::string ciphertext(
-      test::HexDecodeOrDie(
-          "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff874d6191b620e3261bef6864990db6ce"));
-  std::string message(
-      test::HexDecodeOrDie(
-          "6bc1bee22e409f96e93d7e117393172a"));
+  std::string ciphertext(test::HexDecodeOrDie(
+      "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff874d6191b620e3261bef6864990db6ce"));
+  std::string message(test::HexDecodeOrDie("6bc1bee22e409f96e93d7e117393172a"));
   int iv_size = 16;
   auto res = AesCtrBoringSsl::New(key, iv_size);
   EXPECT_TRUE(res.ok()) << res.status();

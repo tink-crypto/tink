@@ -98,7 +98,10 @@ cc_library(
 
 cc_library(
     name = "encrypt_then_authenticate",
-    srcs = ["encrypt_then_authenticate.cc"],
+    srcs = [
+        "encrypt_then_authenticate.cc",
+        "ind_cpa_cipher.h",
+    ],
     hdrs = ["encrypt_then_authenticate.h"],
     deps = [
         ":aes_ctr_boringssl",
@@ -252,10 +255,13 @@ cc_test(
     srcs = ["encrypt_then_authenticate_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":aes_ctr_boringssl",
         ":encrypt_then_authenticate",
+        ":hmac_boringssl",
         ":random",
         "//cc:aead",
         "//cc:mac",
+        "//cc/util:ptr_util",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
@@ -271,6 +277,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aes_ctr_boringssl",
+        ":random",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",

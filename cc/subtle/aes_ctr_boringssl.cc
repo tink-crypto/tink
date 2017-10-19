@@ -47,8 +47,7 @@ static const EVP_CIPHER* GetCipherForKeySize(uint32_t size_in_bytes) {
 }
 
 AesCtrBoringSsl::AesCtrBoringSsl(google::protobuf::StringPiece key_value,
-                                 uint8_t iv_size,
-                                 const EVP_CIPHER* cipher)
+                                 uint8_t iv_size, const EVP_CIPHER* cipher)
     : key_(key_value), iv_size_(iv_size), cipher_(cipher) {}
 
 util::StatusOr<std::unique_ptr<IndCpaCipher>> AesCtrBoringSsl::New(
@@ -77,9 +76,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
   uint8_t iv_block[BLOCK_SIZE];
   memset(iv_block, 0, sizeof(iv_block));
   memcpy(iv_block, iv.data(), iv.size());
-  int ret = EVP_EncryptInit_ex(ctx.get(),
-                               cipher_,
-                               nullptr /* engine */,
+  int ret = EVP_EncryptInit_ex(ctx.get(), cipher_, nullptr /* engine */,
                                reinterpret_cast<const uint8_t*>(key_.data()),
                                iv_block);
   if (ret != 1) {
@@ -92,9 +89,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
   memcpy(&ct[0], reinterpret_cast<const uint8_t*>(iv.data()), iv.size());
   size_t written = iv.size();
   int len;
-  ret = EVP_EncryptUpdate(ctx.get(),
-                          &ct[written],
-                          &len,
+  ret = EVP_EncryptUpdate(ctx.get(), &ct[written], &len,
                           reinterpret_cast<const uint8_t*>(plaintext.data()),
                           plaintext.size());
   if (ret != 1) {
@@ -124,9 +119,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
   uint8_t iv_block[BLOCK_SIZE];
   memset(iv_block, 0, sizeof(iv_block));
   memcpy(iv_block, &ciphertext.data()[0], iv_size_);
-  int ret = EVP_DecryptInit_ex(ctx.get(),
-                               cipher_,
-                               nullptr /* engine */,
+  int ret = EVP_DecryptInit_ex(ctx.get(), cipher_, nullptr /* engine */,
                                reinterpret_cast<const uint8_t*>(key_.data()),
                                iv_block);
   if (ret != 1) {
@@ -142,9 +135,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
   size_t written = 0;
   int len;
   ret = EVP_DecryptUpdate(
-      ctx.get(),
-      &pt[written],
-      &len,
+      ctx.get(), &pt[written], &len,
       reinterpret_cast<const uint8_t*>(&ciphertext.data()[read]),
       plaintext_size);
   if (ret != 1) {
