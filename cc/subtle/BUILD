@@ -100,6 +100,22 @@ cc_library(
 )
 
 cc_library(
+    name = "encrypt_then_authenticate",
+    srcs = ["encrypt_then_authenticate.cc"],
+    hdrs = ["encrypt_then_authenticate.h"],
+    deps = [
+        ":aes_ctr_boringssl",
+        ":hmac_boringssl",
+        "//cc:aead",
+        "//cc:mac",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_protobuf//:protobuf_lite",
+    ],
+)
+
+cc_library(
     name = "aes_ctr_boringssl",
     srcs = [
         "aes_ctr_boringssl.cc",
@@ -229,6 +245,24 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "encrypt_then_authenticate_test",
+    size = "small",
+    srcs = ["encrypt_then_authenticate_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":encrypt_then_authenticate",
+        ":random",
+        "//cc:aead",
+        "//cc:mac",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
