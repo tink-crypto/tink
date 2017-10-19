@@ -62,6 +62,7 @@ class EciesAeadHkdfDemHelper {
   google::crypto::tink::KeyTemplate dem_key_template_;
   DemKeyType dem_key_type_;
   uint32_t dem_key_size_in_bytes_;
+  uint32_t aes_ctr_key_size_in_bytes_ = 0;
   const KeyManager<Aead>* dem_key_manager_;  // not owned
 };
 

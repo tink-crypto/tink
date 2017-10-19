@@ -136,6 +136,7 @@ cc_library(
         "//cc/util:ptr_util",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",

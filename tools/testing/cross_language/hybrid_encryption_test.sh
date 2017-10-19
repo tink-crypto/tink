@@ -7,7 +7,7 @@ CC_DECRYPT_CLI="$ROOT_DIR/tools/testing/cc/hybrid_decrypt_cli_cc"
 JAVA_ENCRYPT_CLI="$ROOT_DIR/tools/testing/hybrid_encrypt_cli_java"
 JAVA_DECRYPT_CLI="$ROOT_DIR/tools/testing/hybrid_decrypt_cli_java"
 
-KEY_TEMPLATE="$ROOT_DIR/examples/keytemplates/hybrid/ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM.ascii"
+KEY_TEMPLATES=(ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256.ascii ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM.ascii)
 
 #############################################################################
 ##### Helper functions.
@@ -18,13 +18,13 @@ generate_keys() {
   local key_name="$1"
   local key_template="$2"
 
-  priv_key_file="$TEST_TMPDIR/${key_name}_private_key.bin"
-  pub_key_file="$TEST_TMPDIR/${key_name}_public_key.bin"
+  priv_key_file="$TEST_TMPDIR/${key_name}_${key_template}_private_key.bin"
+  pub_key_file="$TEST_TMPDIR/${key_name}_${key_template}_public_key.bin"
   echo "--- Using template $key_template to generate keysets" \
       "to files $priv_key_file and $pub_key_file ..."
 
-  $TINKEY_CLI create-keyset --key-template $key_template --out-format BINARY \
-      --out $priv_key_file  || exit 1
+  $TINKEY_CLI create-keyset --key-template $ROOT_DIR/examples/keytemplates/hybrid/$key_template \
+      --out-format BINARY --out $priv_key_file  || exit 1
   $TINKEY_CLI create-public-keyset --in-format BINARY --in $priv_key_file \
       --out-format BINARY --out $pub_key_file  || exit 1
   echo "Done generating keysets."
@@ -76,72 +76,84 @@ assert_files_different() {
 cc_cc_basic_test() {
   local test_name="cc_cc_basic_test"
   echo "############ starting test $test_name ..."
-  generate_keys $test_name $KEY_TEMPLATE
-  generate_plaintext $test_name
+  for key_template in ${KEY_TEMPLATES[*]}
+  do
+    generate_keys $test_name $key_template
+    generate_plaintext $test_name
 
-  local encrypted_file="$TEST_TMPDIR/${test_name}_encrypted.bin"
-  local decrypted_file="$TEST_TMPDIR/${test_name}_decrypted.bin"
-  local context_info="some context info for $test_name"
-  $CC_ENCRYPT_CLI $pub_key_file $plaintext_file "$context_info" \
-      $encrypted_file || exit 1
-  assert_files_different $plaintext_file $encrypted_file
-  $CC_DECRYPT_CLI $priv_key_file $encrypted_file "$context_info" \
-      $decrypted_file || exit 1
-  assert_files_equal $plaintext_file $decrypted_file
+    local encrypted_file="$TEST_TMPDIR/${test_name}_encrypted.bin"
+    local decrypted_file="$TEST_TMPDIR/${test_name}_decrypted.bin"
+    local context_info="some context info for $test_name"
+    $CC_ENCRYPT_CLI $pub_key_file $plaintext_file "$context_info" \
+        $encrypted_file || exit 1
+    assert_files_different $plaintext_file $encrypted_file
+    $CC_DECRYPT_CLI $priv_key_file $encrypted_file "$context_info" \
+        $decrypted_file || exit 1
+    assert_files_equal $plaintext_file $decrypted_file
+  done
 }
 
 # Encrypt with C++, Decrypt with Java.
 cc_java_basic_test() {
   local test_name="cc_java_basic_test"
   echo "############ starting test $test_name ..."
-  generate_keys $test_name $KEY_TEMPLATE
-  generate_plaintext $test_name
+  for key_template in ${KEY_TEMPLATES[*]}
+  do
+    generate_keys $test_name $key_template
+    generate_plaintext $test_name
 
-  local encrypted_file="$TEST_TMPDIR/${test_name}_encrypted.bin"
-  local decrypted_file="$TEST_TMPDIR/${test_name}_decrypted.bin"
-  local context_info="some context info for $test_name"
-  $CC_ENCRYPT_CLI $pub_key_file $plaintext_file "$context_info" \
-      $encrypted_file || exit 1
-  assert_files_different $plaintext_file $encrypted_file
-  $JAVA_DECRYPT_CLI $priv_key_file $encrypted_file "$context_info" \
-      $decrypted_file || exit 1
-  assert_files_equal $plaintext_file $decrypted_file
+    local encrypted_file="$TEST_TMPDIR/${test_name}_encrypted.bin"
+    local decrypted_file="$TEST_TMPDIR/${test_name}_decrypted.bin"
+    local context_info="some context info for $test_name"
+    $CC_ENCRYPT_CLI $pub_key_file $plaintext_file "$context_info" \
+        $encrypted_file || exit 1
+    assert_files_different $plaintext_file $encrypted_file
+    $JAVA_DECRYPT_CLI $priv_key_file $encrypted_file "$context_info" \
+        $decrypted_file || exit 1
+    assert_files_equal $plaintext_file $decrypted_file
+  done
 }
 
 # Encrypt with Java, Decrypt with C++.
 java_cc_basic_test() {
   local test_name="java_cc_basic_test"
   echo "############ starting test $test_name ..."
-  generate_keys $test_name $KEY_TEMPLATE
-  generate_plaintext $test_name
+  for key_template in ${KEY_TEMPLATES[*]}
+  do
+    generate_keys $test_name $key_template
+    generate_plaintext $test_name
 
-  local encrypted_file="$TEST_TMPDIR/${test_name}_encrypted.bin"
-  local decrypted_file="$TEST_TMPDIR/${test_name}_decrypted.bin"
-  local context_info="some context info for $test_name"
-  $JAVA_ENCRYPT_CLI $pub_key_file $plaintext_file "$context_info" \
-      $encrypted_file || exit 1
-  assert_files_different $plaintext_file $encrypted_file
-  $CC_DECRYPT_CLI $priv_key_file $encrypted_file "$context_info" \
-      $decrypted_file || exit 1
-  assert_files_equal $plaintext_file $decrypted_file
+    local encrypted_file="$TEST_TMPDIR/${test_name}_encrypted.bin"
+    local decrypted_file="$TEST_TMPDIR/${test_name}_decrypted.bin"
+    local context_info="some context info for $test_name"
+    $JAVA_ENCRYPT_CLI $pub_key_file $plaintext_file "$context_info" \
+        $encrypted_file || exit 1
+    assert_files_different $plaintext_file $encrypted_file
+    $CC_DECRYPT_CLI $priv_key_file $encrypted_file "$context_info" \
+        $decrypted_file || exit 1
+    assert_files_equal $plaintext_file $decrypted_file
+  done
 }
 
 # Encrypt and Decrypt with Java.
 java_java_basic_test() {
   local test_name="java_java_basic_test"
   echo "############ starting test $test_name ..."
-  generate_keys $test_name $KEY_TEMPLATE
-  generate_plaintext $test_name
+  for key_template in ${KEY_TEMPLATES[*]}
+  do
+    generate_keys $test_name $key_template
+    generate_plaintext $test_name
 
-  local encrypted_file="$TEST_TMPDIR/${test_name}_encrypted.bin"
-  local decrypted_file="$TEST_TMPDIR/${test_name}_decrypted.bin"
-  local context_info="some context info for $test_name"
-  $JAVA_ENCRYPT_CLI $pub_key_file $plaintext_file "$context_info" \
-      $encrypted_file || exit 1
-  assert_files_different $plaintext_file $encrypted_file
-  $JAVA_DECRYPT_CLI $priv_key_file $encrypted_file "$context_info" \
-      $decrypted_file || exit 1
-  assert_files_equal $plaintext_file $decrypted_file
+    local encrypted_file="$TEST_TMPDIR/${test_name}_encrypted.bin"
+    local decrypted_file="$TEST_TMPDIR/${test_name}_decrypted.bin"
+    local context_info="some context info for $test_name"
+    $JAVA_ENCRYPT_CLI $pub_key_file $plaintext_file "$context_info" \
+        $encrypted_file || exit 1
+    assert_files_different $plaintext_file $encrypted_file
+    $JAVA_DECRYPT_CLI $priv_key_file $encrypted_file "$context_info" \
+        $decrypted_file || exit 1
+    assert_files_equal $plaintext_file $decrypted_file
+  done
 }
 
 #############################################################################

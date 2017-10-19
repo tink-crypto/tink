@@ -22,14 +22,17 @@
 #include "cc/util/ptr_util.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/stubs/stringpiece.h"
+#include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
+using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
+using google::crypto::tink::AesCtrHmacAeadKey;
+using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyTemplate;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
 
 namespace util = crypto::tink::util;
 
@@ -37,24 +40,35 @@ namespace crypto {
 namespace tink {
 
 // static
-StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>>
-EciesAeadHkdfDemHelper::New(const KeyTemplate& dem_key_template) {
+StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>> EciesAeadHkdfDemHelper::New(
+    const KeyTemplate& dem_key_template) {
   auto helper = util::wrap_unique(new EciesAeadHkdfDemHelper(dem_key_template));
   std::string dem_type_url = dem_key_template.type_url();
   if (dem_type_url == "type.googleapis.com/google.crypto.tink.AesGcmKey") {
     helper->dem_key_type_ = AES_GCM_KEY;
-    AesGcmKeyFormat gcm_key_format;
-    if (!gcm_key_format.ParseFromString(dem_key_template.value())) {
+    AesGcmKeyFormat key_format;
+    if (!key_format.ParseFromString(dem_key_template.value())) {
       return Status(util::error::INVALID_ARGUMENT,
                     "Invalid AesGcmKeyFormat in DEM key template");
     }
-    helper->dem_key_size_in_bytes_ = gcm_key_format.key_size();
+    helper->dem_key_size_in_bytes_ = key_format.key_size();
+  } else if (dem_type_url ==
+             "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey") {
+    helper->dem_key_type_ = AES_CTR_HMAC_AEAD_KEY;
+    AesCtrHmacAeadKeyFormat key_format;
+    if (!key_format.ParseFromString(dem_key_template.value())) {
+      return Status(util::error::INVALID_ARGUMENT,
+                    "Invalid AesCtrHmacAeadKeyFormat in DEM key template");
+    }
+    helper->aes_ctr_key_size_in_bytes_ =
+        key_format.aes_ctr_key_format().key_size();
+    helper->dem_key_size_in_bytes_ = helper->aes_ctr_key_size_in_bytes_ +
+                                     key_format.hmac_key_format().key_size();
   } else {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Unsupported DEM key type '%s'.", dem_type_url.c_str());
   }
-  auto key_manager_result =
-      Registry::get_key_manager<Aead>(dem_type_url);
+  auto key_manager_result = Registry::get_key_manager<Aead>(dem_type_url);
   if (!key_manager_result.ok()) {
     return ToStatusF(util::error::FAILED_PRECONDITION,
                      "No manager for DEM key type '%s' found in the registry.",
@@ -67,8 +81,7 @@ EciesAeadHkdfDemHelper::New(const KeyTemplate& dem_key_template) {
 StatusOr<std::unique_ptr<Aead>> EciesAeadHkdfDemHelper::GetAead(
     const std::string& symmetric_key_value) const {
   if (symmetric_key_value.size() != dem_key_size_in_bytes_) {
-    return Status(util::error::INTERNAL,
-                  "Wrong length of symmetric key.");
+    return Status(util::error::INTERNAL, "Wrong length of symmetric key.");
   }
   auto new_key_result = dem_key_manager_->NewKey(dem_key_template_);
   if (!new_key_result.ok()) return new_key_result.status();
@@ -79,12 +92,20 @@ StatusOr<std::unique_ptr<Aead>> EciesAeadHkdfDemHelper::GetAead(
   return dem_key_manager_->GetPrimitive(*new_key);
 }
 
-
 bool EciesAeadHkdfDemHelper::ReplaceKeyBytes(
-    const std::string& key_bytes, google::protobuf::Message* key) const {
+    const std::string& key_bytes, google::protobuf::Message* proto) const {
   if (dem_key_type_ == AES_GCM_KEY) {
-    AesGcmKey* aes_gcm_key = reinterpret_cast<AesGcmKey*>(key);
-    aes_gcm_key->set_key_value(key_bytes);
+    AesGcmKey* key = reinterpret_cast<AesGcmKey*>(proto);
+    key->set_key_value(key_bytes);
+    return true;
+  } else if (dem_key_type_ == AES_CTR_HMAC_AEAD_KEY) {
+    AesCtrHmacAeadKey* key = reinterpret_cast<AesCtrHmacAeadKey*>(proto);
+    auto aes_ctr_key = key->mutable_aes_ctr_key();
+    aes_ctr_key->set_key_value(key_bytes.substr(0, aes_ctr_key_size_in_bytes_));
+    auto hmac_key = key->mutable_hmac_key();
+    hmac_key->set_key_value(
+        key_bytes.substr(aes_ctr_key_size_in_bytes_,
+                         key_bytes.size() - aes_ctr_key_size_in_bytes_));
     return true;
   }
   return false;
