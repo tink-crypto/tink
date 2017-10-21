@@ -11,32 +11,52 @@ cc_library(
     name = "cc",
     hdrs = [
         "aead.h",
+        "aead_config.h",
+        "aead_factory.h",
         "binary_keyset_reader.h",
         "catalogue.h",
         "config.h",
         "hybrid_decrypt.h",
+        "hybrid_decrypt_config.h",
+        "hybrid_decrypt_factory.h",
         "hybrid_encrypt.h",
+        "hybrid_encrypt_config.h",
+        "hybrid_encrypt_factory.h",
         "json_keyset_reader.h",
         "key_manager.h",
         "keyset_handle.h",
         "keyset_reader.h",
         "mac.h",
+        "mac_config.h",
+        "mac_factory.h",
         "registry.h",
+        "tink_config.h",
     ],
-    visibility = ["//visibility:public"],
     deps = [
         ":aead",
-        ":hybrid_decrypt",
-        ":hybrid_encrypt",
+        ":binary_keyset_reader",
+        ":json_keyset_reader",
         ":key_manager",
         ":keyset_handle",
+        ":keyset_reader",
         ":mac",
         ":primitive_set",
         ":registry",
+        "//cc/aead:aead_config",
+        "//cc/aead:aead_factory",
+        "//cc/config:tink_config",
+        "//cc/hybrid:hybrid_decrypt_config",
+        "//cc/hybrid:hybrid_decrypt_factory",
+        "//cc/hybrid:hybrid_encrypt_config",
+        "//cc/hybrid:hybrid_encrypt_factory",
+        "//cc/mac:mac_config",
+        "//cc/mac:mac_factory",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:strings",
         "//cc/util:validation",
+        "//proto:config_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_protobuf//:protobuf_lite",
     ],
@@ -45,7 +65,6 @@ cc_library(
 cc_library(
     name = "aead",
     hdrs = ["aead.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
         "@com_google_protobuf//:protobuf_lite",
@@ -55,7 +74,6 @@ cc_library(
 cc_library(
     name = "hybrid_decrypt",
     hdrs = ["hybrid_decrypt.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
         "@com_google_protobuf//:protobuf_lite",
@@ -65,7 +83,6 @@ cc_library(
 cc_library(
     name = "hybrid_encrypt",
     hdrs = ["hybrid_encrypt.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
         "@com_google_protobuf//:protobuf_lite",
@@ -75,7 +92,6 @@ cc_library(
 cc_library(
     name = "mac",
     hdrs = ["mac.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:status",
         "//cc/util:statusor",
@@ -86,7 +102,6 @@ cc_library(
 cc_library(
     name = "keyset_reader",
     hdrs = ["keyset_reader.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
@@ -97,7 +112,6 @@ cc_library(
     name = "binary_keyset_reader",
     srcs = ["core/binary_keyset_reader.cc"],
     hdrs = ["binary_keyset_reader.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":keyset_reader",
         "//cc/util:errors",
@@ -111,7 +125,6 @@ cc_library(
     name = "json_keyset_reader",
     srcs = ["core/json_keyset_reader.cc"],
     hdrs = ["json_keyset_reader.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":keyset_reader",
         "//cc/util:errors",
@@ -124,7 +137,6 @@ cc_library(
 cc_library(
     name = "catalogue",
     hdrs = ["catalogue.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":key_manager",
         "//cc/util:statusor",
@@ -135,7 +147,6 @@ cc_library(
     name = "config",
     srcs = ["core/config.cc"],
     hdrs = ["config.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":aead",
         ":catalogue",
@@ -156,7 +167,6 @@ cc_library(
     name = "crypto_format",
     srcs = ["core/crypto_format.cc"],
     hdrs = ["crypto_format.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:errors",
         "//cc/util:statusor",
@@ -168,7 +178,6 @@ cc_library(
     name = "primitive_set",
     srcs = ["primitive_set.h"],
     hdrs = ["primitive_set.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":crypto_format",
         "//cc/util:errors",
@@ -182,7 +191,6 @@ cc_library(
     name = "registry",
     srcs = ["core/registry.cc"],
     hdrs = ["registry.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":catalogue",
         ":key_manager",
@@ -201,7 +209,6 @@ cc_library(
     name = "keyset_handle",
     srcs = ["core/keyset_handle.cc"],
     hdrs = ["keyset_handle.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":aead",
         ":keyset_reader",
@@ -215,7 +222,6 @@ cc_library(
     name = "cleartext_keyset_handle",
     srcs = ["core/cleartext_keyset_handle.cc"],
     hdrs = ["cleartext_keyset_handle.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":keyset_handle",
         "//cc/util:errors",
@@ -230,7 +236,6 @@ cc_library(
     name = "key_manager",
     srcs = ["key_manager.h"],
     hdrs = ["key_manager.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc/util:errors",
         "//cc/util:status",
