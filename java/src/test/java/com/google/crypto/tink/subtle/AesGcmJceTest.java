@@ -159,6 +159,10 @@ public class AesGcmJceTest {
   @Test
   /** BC had a bug, where GCM failed for messages of size > 8192 */
   public void testLongMessages() throws Exception {
+    if (TestUtil.isAndroid()) {
+      System.out.println("testLongMessages doesn't work on Android, skipping");
+      return;
+    }
     int dataSize = 16;
     while (dataSize <= (1 << 24)) {
       byte[] plaintext = Random.randBytes(dataSize);

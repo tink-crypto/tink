@@ -282,6 +282,10 @@ public class AesGcmHkdfStreamingTest {
   /** Encrypt and decrypt a long ciphertext. */
   @Test
   public void testEncryptDecryptLong() throws Exception {
+    if (TestUtil.isAndroid()) {
+      System.out.println("testEncryptDecryptLong doesn't work on Android, skipping");
+      return;
+    }
     long plaintextSize = (1L << 32) + 1234567;
     StreamingTestUtil.testEncryptDecryptLong(createAesGcmStreaming(), plaintextSize);
   }

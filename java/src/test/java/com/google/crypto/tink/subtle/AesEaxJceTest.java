@@ -67,6 +67,10 @@ public class AesEaxJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
+    if (TestUtil.isAndroid()) {
+      System.out.println("testWycheproofVectors doesn't work on Android, skipping");
+      return;
+    }
     JSONObject json = TestUtil.readJson("testdata/wycheproof/aes_eax_test.json");
     WycheproofTestUtil.checkAlgAndVersion(json, "AES-EAX", "0.0a14");
     int numTests = json.getInt("numberOfTests");
