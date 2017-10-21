@@ -120,12 +120,11 @@ public class AesGcmHkdfStreamingKeyManagerTest {
       // Expected
     }
 
-    // Unsupported HKDF HashType.
+    // Unknown HKDF HashType.
     AesGcmHkdfStreamingParams badKeyParams =
         AesGcmHkdfStreamingParams.newBuilder()
             .setCiphertextSegmentSize(128)
             .setDerivedKeySize(AES_KEY_SIZE)
-            .setHkdfHashType(HashType.SHA512)
             .build();
     keyFormat =
         AesGcmHkdfStreamingKeyFormat.newBuilder().setParams(badKeyParams).setKeySize(16).build();

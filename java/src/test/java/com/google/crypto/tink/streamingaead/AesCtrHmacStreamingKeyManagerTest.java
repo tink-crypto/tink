@@ -105,11 +105,13 @@ public class AesCtrHmacStreamingKeyManagerTest {
     assertEquals(numTests, keys.size());
   }
 
-  @Test
-  public void testNewKeyWithBadFormat() throws Exception {
-    // key_size too small.
+  private void testNewKeyWithBadFormat(AesCtrHmacStreamingParams badKeyParams) throws Exception {
     AesCtrHmacStreamingKeyFormat keyFormat =
-        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(keyParams).setKeySize(15).build();
+        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(badKeyParams).setKeySize(16).build();
+    testNewKeyWithBadFormat(keyFormat);
+  }
+
+  private void testNewKeyWithBadFormat(AesCtrHmacStreamingKeyFormat keyFormat) throws Exception {
     ByteString serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     try {
       keyManager.newKey(keyFormat);
@@ -123,29 +125,22 @@ public class AesCtrHmacStreamingKeyManagerTest {
     } catch (GeneralSecurityException expected) {
       // Expected
     }
+  }
 
-    // Unsupported HKDF HashType.
+  @Test
+  public void testNewKeyWithBadFormat() throws Exception {
+    // key_size too small.
+    AesCtrHmacStreamingKeyFormat keyFormat =
+        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(keyParams).setKeySize(15).build();
+    testNewKeyWithBadFormat(keyFormat);
+
+    // Unknown HKDF HashType.
     AesCtrHmacStreamingParams badKeyParams =
         AesCtrHmacStreamingParams.newBuilder()
             .setCiphertextSegmentSize(128)
             .setDerivedKeySize(AES_KEY_SIZE)
-            .setHkdfHashType(HashType.SHA512)
             .build();
-    keyFormat =
-        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(badKeyParams).setKeySize(16).build();
-    serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
-    try {
-      keyManager.newKey(keyFormat);
-      fail("Bad format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      keyManager.newKeyData(serializedKeyFormat);
-      fail("Bad format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    testNewKeyWithBadFormat(badKeyParams);
 
     // derived_key_size too small.
     badKeyParams =
@@ -154,21 +149,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
             .setDerivedKeySize(10)
             .setHkdfHashType(HashType.SHA256)
             .build();
-    keyFormat =
-        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(badKeyParams).setKeySize(16).build();
-    serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
-    try {
-      keyManager.newKey(keyFormat);
-      fail("Bad format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      keyManager.newKeyData(serializedKeyFormat);
-      fail("Bad format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    testNewKeyWithBadFormat(badKeyParams);
 
     // ciphertext_segment_size too small.
     badKeyParams =
@@ -177,21 +158,54 @@ public class AesCtrHmacStreamingKeyManagerTest {
             .setDerivedKeySize(AES_KEY_SIZE)
             .setHkdfHashType(HashType.SHA256)
             .build();
-    keyFormat =
-        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(badKeyParams).setKeySize(16).build();
-    serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
-    try {
-      keyManager.newKey(keyFormat);
-      fail("Bad format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      keyManager.newKeyData(serializedKeyFormat);
-      fail("Bad format, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    testNewKeyWithBadFormat(badKeyParams);
+
+    // No HmacParams.
+    badKeyParams =
+        AesCtrHmacStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(130)
+            .setDerivedKeySize(AES_KEY_SIZE)
+            .setHkdfHashType(HashType.SHA256)
+            .build();
+    testNewKeyWithBadFormat(badKeyParams);
+
+    // Unknown HmacParams.hash.
+    badKeyParams =
+        AesCtrHmacStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(130)
+            .setDerivedKeySize(AES_KEY_SIZE)
+            .setHkdfHashType(HashType.SHA256)
+            .setHmacParams(HmacParams.newBuilder().build())
+            .build();
+    testNewKeyWithBadFormat(badKeyParams);
+
+    // tag size too small.
+    badKeyParams =
+        AesCtrHmacStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(130)
+            .setDerivedKeySize(AES_KEY_SIZE)
+            .setHkdfHashType(HashType.SHA256)
+            .setHmacParams(
+                HmacParams.newBuilder()
+                    .setHash(HashType.SHA256)
+                    .setTagSize(9)
+                    .build())
+            .build();
+    testNewKeyWithBadFormat(badKeyParams);
+
+    // tag size too big.
+    badKeyParams =
+        AesCtrHmacStreamingParams.newBuilder()
+            .setCiphertextSegmentSize(130)
+            .setDerivedKeySize(AES_KEY_SIZE)
+            .setHkdfHashType(HashType.SHA256)
+            .setHmacParams(
+                HmacParams.newBuilder()
+                    .setHash(HashType.SHA256)
+                    .setTagSize(33)
+                    .build())
+            .build();
+    testNewKeyWithBadFormat(badKeyParams);
 
     // All params good.
     AesCtrHmacStreamingParams goodKeyParams =
@@ -203,7 +217,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
             .build();
     keyFormat =
         AesCtrHmacStreamingKeyFormat.newBuilder().setParams(goodKeyParams).setKeySize(16).build();
-    serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
+    ByteString serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     AesCtrHmacStreamingKey unusedKey = (AesCtrHmacStreamingKey) keyManager.newKey(keyFormat);
     unusedKey = (AesCtrHmacStreamingKey) keyManager.newKey(serializedKeyFormat);
   }

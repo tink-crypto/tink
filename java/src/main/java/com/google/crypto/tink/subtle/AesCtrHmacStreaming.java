@@ -70,26 +70,23 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   // last block of the file and 0 otherwise.
   private static final int NONCE_PREFIX_IN_BYTES = 7;
 
-  // The MAC algorithm used for the key derivation
-  private static final String HKDF_ALGORITHM = "HMACSHA256";
-
-  // The MAC algorithm used for authentication
-  // TODO(bleichen): Probably should be a parameter.
-  private static final String TAG_ALGORITHM = "HMACSHA256";
-
   private static final int HMAC_KEY_SIZE_IN_BYTES = 32;
 
-  private int keySizeInBytes;
-  private int tagSizeInBytes;
-  private int ciphertextSegmentSize;
-  private int plaintextSegmentSize;
-  private int firstSegmentOffset;
-  private byte[] ikm;
+  private final int keySizeInBytes;
+  private final String tagAlgo;
+  private final int tagSizeInBytes;
+  private final int ciphertextSegmentSize;
+  private final int plaintextSegmentSize;
+  private final int firstSegmentOffset;
+  private final String hkdfAlgo;
+  private final byte[] ikm;
 
   /**
    * Initializes a streaming primitive with a key derivation key and encryption parameters.
    * @param ikm input keying material used to derive sub keys.
+   * @param hkdfAlg the JCE MAC algorithm name, e.g., HmacSha256, used for the HKDF key derivation.
    * @param keySizeInBytes the key size of the sub keys
+   * @param tagAlgo the JCE MAC algorithm name, e.g., HmacSha256, used for authentication.
    * @param tagSizeInBytes the size authentication tags
    * @param ciphertextSegmentSize the size of ciphertext segments.
    * @param firstSegmentOffset the offset of the first ciphertext segment. That means the first
@@ -99,14 +96,18 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
    */
   public AesCtrHmacStreaming(
       byte[] ikm,
+      String hkdfAlgo,
       int keySizeInBytes,
+      String tagAlgo,
       int tagSizeInBytes,
       int ciphertextSegmentSize,
       int firstSegmentOffset) throws InvalidAlgorithmParameterException {
-    validateParameters(ikm.length, keySizeInBytes, tagSizeInBytes, ciphertextSegmentSize,
+    validateParameters(ikm.length, keySizeInBytes, tagAlgo, tagSizeInBytes, ciphertextSegmentSize,
                        firstSegmentOffset);
     this.ikm = Arrays.copyOf(ikm, ikm.length);
+    this.hkdfAlgo = hkdfAlgo;
     this.keySizeInBytes = keySizeInBytes;
+    this.tagAlgo = tagAlgo;
     this.tagSizeInBytes = tagSizeInBytes;
     this.ciphertextSegmentSize = ciphertextSegmentSize;
     this.firstSegmentOffset = firstSegmentOffset;
@@ -116,6 +117,7 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   private static void validateParameters(
       int ikmSize,
       int keySizeInBytes,
+      String tagAlgo,
       int tagSizeInBytes,
       int ciphertextSegmentSize,
       int firstSegmentOffset) throws InvalidAlgorithmParameterException {
@@ -124,11 +126,17 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
     }
     boolean isValidKeySize = keySizeInBytes == 16 || keySizeInBytes == 24 || keySizeInBytes == 32;
     if (!isValidKeySize) {
-      throw new InvalidAlgorithmParameterException("Invalid key size");
+      throw new InvalidAlgorithmParameterException("invalid key size");
     }
-    if (tagSizeInBytes < 12 || tagSizeInBytes > 32) {
-      throw new InvalidAlgorithmParameterException("Invalid tag size " + tagSizeInBytes);
+    if (tagSizeInBytes < 10) {
+      throw new InvalidAlgorithmParameterException("tag size too small " + tagSizeInBytes);
     }
+    if ((tagAlgo.equals("HmacSha1") && tagSizeInBytes > 20)
+        || (tagAlgo.equals("HmacSha256") && tagSizeInBytes > 32)
+        || (tagAlgo.equals("HmacSha512") && tagSizeInBytes > 64)) {
+      throw new InvalidAlgorithmParameterException("tag size too big");
+    }
+
     int firstPlaintextSegment = ciphertextSegmentSize - firstSegmentOffset - tagSizeInBytes
         - keySizeInBytes - NONCE_PREFIX_IN_BYTES - 1;
     if (firstPlaintextSegment <= 0) {
@@ -196,8 +204,8 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
     return EngineFactory.CIPHER.getInstance("AES/CTR/NoPadding");
   }
 
-  private static Mac macInstance() throws GeneralSecurityException {
-    return EngineFactory.MAC.getInstance(TAG_ALGORITHM);
+  private Mac macInstance() throws GeneralSecurityException {
+    return EngineFactory.MAC.getInstance(tagAlgo);
   }
 
   private byte[] randomSalt() {
@@ -222,7 +230,7 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
       byte[] salt,
       byte[] aad) throws GeneralSecurityException {
     int keyMaterialSize = keySizeInBytes + HMAC_KEY_SIZE_IN_BYTES;
-    return  Hkdf.computeHkdf(HKDF_ALGORITHM, ikm, salt, aad, keyMaterialSize);
+    return  Hkdf.computeHkdf(hkdfAlgo, ikm, salt, aad, keyMaterialSize);
   }
 
   private SecretKeySpec deriveKeySpec(byte[] keyMaterial) throws GeneralSecurityException {
@@ -231,7 +239,7 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
 
   private SecretKeySpec deriveHmacKeySpec(byte[] keyMaterial) throws GeneralSecurityException {
     return new SecretKeySpec(keyMaterial, keySizeInBytes, HMAC_KEY_SIZE_IN_BYTES,
-                             TAG_ALGORITHM);
+                             tagAlgo);
   }
 
   /**

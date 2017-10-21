@@ -70,19 +70,18 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
   // The size of the tags of each ciphertext segment.
   private static final int TAG_SIZE_IN_BYTES = 16;
 
-  // The MAC algorithm used for the key derivation
-  private static final String MAC_ALGORITHM = "HMACSHA256";
-
-  private int keySizeInBytes;
-  private int ciphertextSegmentSize;
-  private int plaintextSegmentSize;
-  private int firstSegmentOffset;
-  private byte[] ikm;
+  private final int keySizeInBytes;
+  private final int ciphertextSegmentSize;
+  private final int plaintextSegmentSize;
+  private final int firstSegmentOffset;
+  private final String hkdfAlg;
+  private final byte[] ikm;
 
   /**
    * Initializes a streaming primitive with a key derivation key and encryption parameters.
    *
    * @param ikm input keying material used to derive sub keys.
+   * @param hkdfAlg the JCE MAC algorithm name, e.g., HmacSha256, used for the HKDF key derivation.
    * @param keySizeInBytes the key size of the sub keys
    * @param ciphertextSegmentSize the size of ciphertext segments.
    * @param firstSegmentOffset the offset of the first ciphertext segment. That means the first
@@ -90,9 +89,8 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
    * @throws InvalidAlgorithmParameterException if ikm is too short, the key size not supported or
    *     ciphertextSegmentSize is to short.
    */
-  public AesGcmHkdfStreaming(
-      byte[] ikm, int keySizeInBytes, int ciphertextSegmentSize, int firstSegmentOffset)
-      throws InvalidAlgorithmParameterException {
+  public AesGcmHkdfStreaming(byte[] ikm, String hkdfAlg, int keySizeInBytes, int ciphertextSegmentSize,
+      int firstSegmentOffset) throws InvalidAlgorithmParameterException {
     // Checks
     if (ikm.length < 16) {
       throw new InvalidAlgorithmParameterException("ikm to short");
@@ -105,6 +103,7 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
       throw new InvalidAlgorithmParameterException("ciphertextSegmentSize too small");
     }
     this.ikm = Arrays.copyOf(ikm, ikm.length);
+    this.hkdfAlg = hkdfAlg;
     this.keySizeInBytes = keySizeInBytes;
     this.ciphertextSegmentSize = ciphertextSegmentSize;
     this.firstSegmentOffset = firstSegmentOffset;
@@ -188,7 +187,7 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
   }
 
   private SecretKeySpec deriveKeySpec(byte[] salt, byte[] aad) throws GeneralSecurityException {
-    byte[] key = Hkdf.computeHkdf(MAC_ALGORITHM, ikm, salt, aad, keySizeInBytes);
+    byte[] key = Hkdf.computeHkdf(hkdfAlg, ikm, salt, aad, keySizeInBytes);
     return new SecretKeySpec(key, "AES");
   }
 

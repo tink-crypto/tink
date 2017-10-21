@@ -170,7 +170,7 @@ public class StreamingAeadThreadSafetyTest {
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 512;
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, 0);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
     testDecryption(ags, aad, 64);
   }
 
@@ -181,7 +181,8 @@ public class StreamingAeadThreadSafetyTest {
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 512;
-    AesCtrHmacStreaming stream = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, 0);
+    AesCtrHmacStreaming stream = new AesCtrHmacStreaming(
+        ikm, "HmacSha256", keySize, "HmacSha256", tagSize, segmentSize, 0);
     testDecryption(stream, aad, 64);
   }
 
@@ -282,7 +283,7 @@ public class StreamingAeadThreadSafetyTest {
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
     int keySize = 16;
     int segmentSize = 512;
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, 0);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
     testEncryption(ags, aad, 129, 20);
   }
 
@@ -293,7 +294,8 @@ public class StreamingAeadThreadSafetyTest {
     int keySize = 16;
     int tagSize = 12;
     int segmentSize = 512;
-    AesCtrHmacStreaming stream = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, 0);
+    AesCtrHmacStreaming stream = new AesCtrHmacStreaming(
+        ikm, "HmacSha256", keySize, "HmacSha256", tagSize, segmentSize, 0);
     testEncryption(stream, aad, 128, 20);
   }
 
@@ -304,7 +306,7 @@ public class StreamingAeadThreadSafetyTest {
     int keySize = 16;
     int segmentSize = 512;
     int chunkSize = 2048; // the size for each concurrent read.
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, 0);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
     testEncryption(ags, aad, chunkSize, 2);
   }
 
@@ -315,7 +317,7 @@ public class StreamingAeadThreadSafetyTest {
     int keySize = 16;
     int segmentSize = 512;
     int chunkSize = 3; // the size for each concurrent read.
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, 0);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
     testEncryption(ags, aad, chunkSize, 1000);
   }
 
@@ -426,7 +428,7 @@ public class StreamingAeadThreadSafetyTest {
     int keySize = 16;
     int segmentSize = 503;
     int plaintextSize = 7654;
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, keySize, segmentSize, 0);
+    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize, segmentSize, 0);
     testRandomAccessDecryption(ags, aad, plaintextSize);
   }
 
@@ -438,7 +440,8 @@ public class StreamingAeadThreadSafetyTest {
     int tagSize = 12;
     int segmentSize = 479;
     int plaintextSize = 7654;
-    AesCtrHmacStreaming stream = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, 0);
+    AesCtrHmacStreaming stream = new AesCtrHmacStreaming(
+        ikm, "HmacSha256", keySize, "HmacSha256", tagSize, segmentSize, 0);
     testDecryption(stream, aad, plaintextSize);
   }
 }

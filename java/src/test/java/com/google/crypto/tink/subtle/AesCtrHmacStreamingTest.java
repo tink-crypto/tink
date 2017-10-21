@@ -35,7 +35,7 @@ import org.junit.runners.JUnit4;
 /**
  * Test for {@code AesCtrHmacStreaming}-implementation of {@code StreamingAead}-primitive.
  *
- * <p>TODO(b/66921440): adding more tests.
+ * <p>TODO(b/66921440): adding more tests, including tests for other MAC and HKDF algos.
  */
 @RunWith(JUnit4.class)
 public class AesCtrHmacStreamingTest {
@@ -43,11 +43,13 @@ public class AesCtrHmacStreamingTest {
 
   private AesCtrHmacStreaming createAesCtrHmacStreaming() throws Exception {
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
+    String hkdfAlgo = "HmacSha256";
     int keySize = 16;
+    String tagAlgo = "HmacSha256";
     int tagSize = 12;
     int segmentSize = 4096;
     int offset = 0;
-    return new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
+    return new AesCtrHmacStreaming(ikm, hkdfAlgo, keySize, tagAlgo, tagSize, segmentSize, offset);
   }
 
   /**
@@ -75,8 +77,8 @@ public class AesCtrHmacStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesCtrHmacStreaming ags =
-        new AesCtrHmacStreaming(
-            ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
+        new AesCtrHmacStreaming(ikm, "HmacSha256", keySizeInBytes, "HmacSha256",
+            tagSizeInBytes, segmentSize, firstSegmentOffset);
     StreamingTestUtil.testEncryptDecrypt(ags, firstSegmentOffset, plaintextSize, chunkSize);
   }
 
@@ -162,8 +164,8 @@ public class AesCtrHmacStreamingTest {
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
     AesCtrHmacStreaming ags =
-        new AesCtrHmacStreaming(
-            ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
+        new AesCtrHmacStreaming(ikm, "HmacSha256", keySizeInBytes, "HmacSha256",
+            tagSizeInBytes, segmentSize, firstSegmentOffset);
     StreamingTestUtil.testEncryptDecryptRandomAccess(ags, firstSegmentOffset, plaintextSize);
   }
 
@@ -236,9 +238,8 @@ public class AesCtrHmacStreamingTest {
     int tagSizeInBytes = 12;
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
-    AesCtrHmacStreaming ags =
-        new AesCtrHmacStreaming(
-            ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, "HmacSha256", keySizeInBytes,
+        "HmacSha256", tagSizeInBytes, segmentSize, firstSegmentOffset);
     StreamingTestUtil.testEncryptSingleBytes(ags, plaintextSize);
   }
 
@@ -267,9 +268,8 @@ public class AesCtrHmacStreamingTest {
     int tagSizeInBytes = 12;
     byte[] ikm =
         TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
-    AesCtrHmacStreaming ags =
-        new AesCtrHmacStreaming(
-            ikm, keySizeInBytes, tagSizeInBytes, segmentSize, firstSegmentOffset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, "HmacSha256", keySizeInBytes,
+        "HmacSha256", tagSizeInBytes, segmentSize, firstSegmentOffset);
 
     int plaintextSize = 1 << 15;
     int maxChunkSize = 100;
@@ -310,7 +310,8 @@ public class AesCtrHmacStreamingTest {
     int tagSize = 12;
     int segmentSize = 256;
     int offset = 8;
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, "HmacSha256", keySize,
+        "HmacSha256", tagSize, segmentSize, offset);
     StreamingTestUtil.testModifiedCiphertext(ags, segmentSize, offset);
   }
 
@@ -321,7 +322,8 @@ public class AesCtrHmacStreamingTest {
     int tagSize = 12;
     int segmentSize = 256;
     int offset = 8;
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, "HmacSha256", keySize,
+        "HmacSha256", tagSize, segmentSize, offset);
     StreamingTestUtil.testModifiedCiphertextWithSeekableByteChannel(ags, segmentSize, offset);
   }
 
@@ -342,7 +344,8 @@ public class AesCtrHmacStreamingTest {
     int plaintextSize = 2000;
     int samples = 8;
     int blocksize = 16;
-    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(ikm, keySize, tagSize, segmentSize, offset);
+    AesCtrHmacStreaming ags = new AesCtrHmacStreaming(
+        ikm, "HmacSha256", keySize, "HmacSha256", tagSize, segmentSize, offset);
     byte[] plaintext = new byte[plaintextSize];
     for (int sample = 0; sample < samples; sample++) {
       byte[] ciphertext =

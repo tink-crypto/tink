@@ -62,6 +62,8 @@ class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
     validate(keyProto);
     return new AesGcmHkdfStreaming(
         keyProto.getKeyValue().toByteArray(),
+        StreamingAeadUtil.toHmacAlgo(
+            keyProto.getParams().getHkdfHashType()),
         keyProto.getParams().getDerivedKeySize(),
         keyProto.getParams().getCiphertextSegmentSize(),
         /* firstSegmentOffset= */ 0);
@@ -144,8 +146,8 @@ class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
 
   private void validate(AesGcmHkdfStreamingParams params) throws GeneralSecurityException {
     Validators.validateAesKeySize(params.getDerivedKeySize());
-    if (params.getHkdfHashType() != HashType.SHA256) {
-      throw new GeneralSecurityException("Only hkdf_hash_type equal to SHA256 is supported");
+    if (params.getHkdfHashType() == HashType.UNKNOWN_HASH) {
+      throw new GeneralSecurityException("unknown HKDF hash type");
     }
     if (params.getCiphertextSegmentSize() < params.getDerivedKeySize() + 8) {
       throw new GeneralSecurityException(

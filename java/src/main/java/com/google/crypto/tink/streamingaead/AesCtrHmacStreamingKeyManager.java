@@ -22,6 +22,7 @@ import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingParams;
 import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.AesCtrHmacStreaming;
 import com.google.crypto.tink.subtle.Random;
@@ -40,6 +41,9 @@ class AesCtrHmacStreamingKeyManager implements KeyManager<StreamingAead> {
 
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
+
+  /** Minimum tag size in bytes. This provides minimum 80-bit security strength. */
+  private static final int MIN_TAG_SIZE_IN_BYTES = 10;
 
   /** @param serializedKey serialized {@code AesCtrHmacStreamingKey} proto */
   @Override
@@ -62,7 +66,11 @@ class AesCtrHmacStreamingKeyManager implements KeyManager<StreamingAead> {
     validate(keyProto);
     return new AesCtrHmacStreaming(
         keyProto.getKeyValue().toByteArray(),
+        StreamingAeadUtil.toHmacAlgo(
+            keyProto.getParams().getHkdfHashType()),
         keyProto.getParams().getDerivedKeySize(),
+        StreamingAeadUtil.toHmacAlgo(
+            keyProto.getParams().getHmacParams().getHash()),
         keyProto.getParams().getHmacParams().getTagSize(),
         keyProto.getParams().getCiphertextSegmentSize(),
         /* firstSegmentOffset= */ 0);
@@ -152,17 +160,43 @@ class AesCtrHmacStreamingKeyManager implements KeyManager<StreamingAead> {
 
   private void validate(AesCtrHmacStreamingParams params) throws GeneralSecurityException {
     Validators.validateAesKeySize(params.getDerivedKeySize());
-    // TODO(przydatek): extend the implementation in subtle and remove the restrictions to SHA256
-    if (params.getHkdfHashType() != HashType.SHA256) {
-      throw new GeneralSecurityException("Only hkdf_hash_type equal to SHA256 is supported");
+    if (params.getHkdfHashType() == HashType.UNKNOWN_HASH) {
+      throw new GeneralSecurityException("unknown HKDF hash type");
     }
-    if (params.getHmacParams().getHash() != HashType.SHA256) {
-      throw new GeneralSecurityException("Only hmac_params.hash equal to SHA256 is supported");
+    if (params.getHmacParams().getHash() == HashType.UNKNOWN_HASH) {
+      throw new GeneralSecurityException("unknown HMAC hash type");
     }
+    validateHmacParams(params.getHmacParams());
+
     if (params.getCiphertextSegmentSize()
         < params.getDerivedKeySize() + params.getHmacParams().getTagSize() + 8) {
       throw new GeneralSecurityException(
           "ciphertext_segment_size must be at least (derived_key_size + tag_size + 8)");
+    }
+  }
+
+  private void validateHmacParams(HmacParams params) throws GeneralSecurityException {
+    if (params.getTagSize() < MIN_TAG_SIZE_IN_BYTES) {
+      throw new GeneralSecurityException("tag size too small");
+    }
+    switch (params.getHash()) {
+      case SHA1:
+        if (params.getTagSize() > 20) {
+          throw new GeneralSecurityException("tag size too big");
+        }
+        break;
+      case SHA256:
+        if (params.getTagSize() > 32) {
+          throw new GeneralSecurityException("tag size too big");
+        }
+        break;
+      case SHA512:
+        if (params.getTagSize() > 64) {
+          throw new GeneralSecurityException("tag size too big");
+        }
+        break;
+      default:
+        throw new GeneralSecurityException("unknown hash type");
     }
   }
 }
