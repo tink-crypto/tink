@@ -1,6 +1,8 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
 licenses(["notice"])  # Apache 2.0
 
-load("//java/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
 java_binary(
     name = "hybrid_encrypt_cli_java",

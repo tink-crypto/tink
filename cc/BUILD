@@ -1,3 +1,5 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
 licenses(["notice"])  # Apache 2.0
 
 # TODO(przydatek): consider adding string_view/string_piece to util
@@ -5,8 +7,6 @@ licenses(["notice"])  # Apache 2.0
 
 # public libraries
 
-# TODO(przydatek): how to export .h-files of factories in this "main" library?
-#     (i.e. headers from //cc/aead:aead_factory and //cc/mac:mac_factory)
 cc_library(
     name = "cc",
     hdrs = [

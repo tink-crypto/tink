@@ -1,8 +1,6 @@
 licenses(["notice"])  # Apache 2.0
 
-package(
-    default_visibility = ["//visibility:public"],
-)
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 

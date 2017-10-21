@@ -1,0 +1,17 @@
+licenses(["notice"])  # Apache 2.0
+
+package_group(
+    name = "internal_pkg",
+    packages = [
+        "//apps/...",
+        "//cc/...",
+        "//examples/...",
+        "//go/...",
+        "//java/...",
+        "//objc/...",
+        "//proto/...",
+        "//tools/...",
+    ],
+)
+
+package(default_visibility = ["//tools/build_defs:internal_pkg"])

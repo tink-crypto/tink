@@ -1,4 +1,4 @@
-package(default_visibility = ["//visibility:private"])
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
 
@@ -6,9 +6,7 @@ licenses(["notice"])  # Apache 2.0
 
 java_library(
     name = "java",
-    visibility = [
-        "//visibility:public",
-    ],
+    visibility = ["//visibility:public"],
     exports = [
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink",
@@ -97,9 +95,6 @@ LITE_PROTOS = [
 
 java_library(
     name = "protos",
-    visibility = [
-        "//tools/tinkey:__pkg__",
-    ],
     exports = FULL_PROTOS,
 )
 
@@ -110,10 +105,6 @@ java_library(
 
 java_library(
     name = "cleartext_keyset_handle",
-    visibility = [
-        "//examples:__subpackages__",
-        "//tools/tinkey:__pkg__",
-    ],
     exports = [
         "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
     ],
@@ -181,9 +172,6 @@ java_library(
     srcs = glob([
         "src/test/**/*.java",
     ]),
-    visibility = [
-        "//visibility:private",
-    ],
     runtime_deps = [
         "@net_bytebuddy//jar",
         "@net_bytebuddy_agent//jar",

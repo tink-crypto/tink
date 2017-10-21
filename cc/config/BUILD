@@ -1,10 +1,11 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
     name = "tink_config",
     srcs = ["tink_config.cc"],
     hdrs = ["tink_config.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc:config",
         "//cc:key_manager",

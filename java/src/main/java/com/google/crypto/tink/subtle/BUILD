@@ -1,12 +1,8 @@
 licenses(["notice"])  # Apache 2.0
 
-package(
-    default_visibility = [
-        "//java:__subpackages__",
-    ],
-)
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("//java/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
 # common subtle
 

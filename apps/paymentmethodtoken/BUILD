@@ -1,12 +1,15 @@
-package(default_visibility = ["//visibility:private"])
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
+
+load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
 java_library(
     name = "payment_method_token",
     srcs = glob([
         "src/main/**/*.java",
     ]),
+    javacopts = JAVACOPTS,
     deps = [
         "//java",
         "@com_google_code_findbugs_jsr305//jar",

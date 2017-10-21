@@ -1,3 +1,5 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
@@ -20,7 +22,6 @@ cc_library(
     name = "aead_catalogue",
     srcs = ["aead_catalogue.cc"],
     hdrs = ["aead_catalogue.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":aes_ctr_hmac_aead_key_manager",
         ":aes_gcm_key_manager",
@@ -36,7 +37,6 @@ cc_library(
     name = "aead_config",
     srcs = ["aead_config.cc"],
     hdrs = ["aead_config.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":aead_catalogue",
         "//cc:config",
@@ -50,7 +50,6 @@ cc_library(
     name = "aead_factory",
     srcs = ["aead_factory.cc"],
     hdrs = ["aead_factory.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":aead_set_wrapper",
         ":aes_gcm_key_manager",
@@ -68,7 +67,6 @@ cc_library(
     name = "aes_gcm_key_manager",
     srcs = ["aes_gcm_key_manager.cc"],
     hdrs = ["aes_gcm_key_manager.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc:aead",
         "//cc:key_manager",
@@ -89,7 +87,6 @@ cc_library(
     name = "aes_ctr_hmac_aead_key_manager",
     srcs = ["aes_ctr_hmac_aead_key_manager.cc"],
     hdrs = ["aes_ctr_hmac_aead_key_manager.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc:aead",
         "//cc:key_manager",

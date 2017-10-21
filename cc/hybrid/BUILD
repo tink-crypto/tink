@@ -1,3 +1,5 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
@@ -36,7 +38,6 @@ cc_library(
     name = "hybrid_decrypt_catalogue",
     srcs = ["hybrid_decrypt_catalogue.cc"],
     hdrs = ["hybrid_decrypt_catalogue.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":ecies_aead_hkdf_private_key_manager",
         "//cc:catalogue",
@@ -52,7 +53,6 @@ cc_library(
     name = "hybrid_decrypt_config",
     srcs = ["hybrid_decrypt_config.cc"],
     hdrs = ["hybrid_decrypt_config.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":hybrid_decrypt_catalogue",
         "//cc:hybrid_decrypt",
@@ -65,7 +65,6 @@ cc_library(
     name = "hybrid_decrypt_factory",
     srcs = ["hybrid_decrypt_factory.cc"],
     hdrs = ["hybrid_decrypt_factory.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":hybrid_decrypt_set_wrapper",
         "//cc:hybrid_decrypt",
@@ -82,7 +81,6 @@ cc_library(
     name = "hybrid_encrypt_catalogue",
     srcs = ["hybrid_encrypt_catalogue.cc"],
     hdrs = ["hybrid_encrypt_catalogue.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":ecies_aead_hkdf_public_key_manager",
         "//cc:catalogue",
@@ -98,7 +96,6 @@ cc_library(
     name = "hybrid_encrypt_config",
     srcs = ["hybrid_encrypt_config.cc"],
     hdrs = ["hybrid_encrypt_config.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":hybrid_encrypt_catalogue",
         "//cc:hybrid_encrypt",
@@ -111,7 +108,6 @@ cc_library(
     name = "hybrid_encrypt_factory",
     srcs = ["hybrid_encrypt_factory.cc"],
     hdrs = ["hybrid_encrypt_factory.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":hybrid_encrypt_set_wrapper",
         "//cc:hybrid_encrypt",

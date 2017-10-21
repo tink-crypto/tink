@@ -1,7 +1,4 @@
-package(default_visibility = [
-    "//cc:__subpackages__",
-    "//objc:__subpackages__",
-])
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
 

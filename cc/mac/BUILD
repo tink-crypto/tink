@@ -1,3 +1,5 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
@@ -19,7 +21,6 @@ cc_library(
     name = "mac_config",
     srcs = ["mac_config.cc"],
     hdrs = ["mac_config.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":mac_catalogue",
         "//cc:config",
@@ -32,7 +33,6 @@ cc_library(
     name = "mac_catalogue",
     srcs = ["mac_catalogue.cc"],
     hdrs = ["mac_catalogue.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":hmac_key_manager",
         "//cc:catalogue",
@@ -45,7 +45,6 @@ cc_library(
     name = "mac_factory",
     srcs = ["mac_factory.cc"],
     hdrs = ["mac_factory.h"],
-    visibility = ["//visibility:public"],
     deps = [
         ":mac_set_wrapper",
         "//cc:key_manager",
@@ -62,7 +61,6 @@ cc_library(
     name = "hmac_key_manager",
     srcs = ["hmac_key_manager.cc"],
     hdrs = ["hmac_key_manager.h"],
-    visibility = ["//visibility:public"],
     deps = [
         "//cc:key_manager",
         "//cc:mac",
