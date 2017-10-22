@@ -26,6 +26,8 @@ cc_library(
         "mac.h",
         "mac_config.h",
         "mac_factory.h",
+        "public_key_sign.h",
+        "public_key_verify.h",
         "registry.h",
         "tink_config.h",
     ],
