@@ -892,17 +892,12 @@ public class EllipticCurvesTest {
     keyGen.initialize(EllipticCurves.getNistP256Params());
     ECPrivateKey priv = (ECPrivateKey) keyGen.generateKeyPair().getPrivate();
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
-    ECPublicKey validKey = (ECPublicKey) kf.generatePublic(EC_VALID_PUBLIC_KEY.getSpec());
-    String expected = Hex.encode(EllipticCurves.computeSharedSecret(priv, validKey));
     for (EcPublicKeyTestVector test : EC_MODIFIED_PUBLIC_KEYS) {
       try {
         X509EncodedKeySpec spec = test.getX509EncodedKeySpec();
         ECPublicKey modifiedKey = (ECPublicKey) kf.generatePublic(spec);
-        String shared = Hex.encode(EllipticCurves.computeSharedSecret(priv, modifiedKey));
-        // The implementation did not notice that the public key was modified.
-        // This is not nice, but at the moment we only fail the test if the
-        // modification was essential for computing the shared secret.
-        assertEquals("test:" + test.comment, expected, shared);
+        EllipticCurves.computeSharedSecret(priv, modifiedKey);
+        fail("Modified public key shouldn't be accepted");
       } catch (GeneralSecurityException ex) {
         // OK, since the public keys have been modified.
         System.out.println(
@@ -920,8 +915,6 @@ public class EllipticCurvesTest {
     keyGen.initialize(EllipticCurves.getNistP256Params());
     ECPrivateKey priv = (ECPrivateKey) keyGen.generateKeyPair().getPrivate();
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
-    ECPublicKey validKey = (ECPublicKey) kf.generatePublic(EC_VALID_PUBLIC_KEY.getSpec());
-    String expected = Hex.encode(EllipticCurves.computeSharedSecret(priv, validKey));
     for (EcPublicKeyTestVector test : EC_MODIFIED_PUBLIC_KEYS) {
       ECPublicKeySpec spec = test.getSpec();
       if (spec == null) {
@@ -931,11 +924,8 @@ public class EllipticCurvesTest {
       }
       try {
         ECPublicKey modifiedKey = (ECPublicKey) kf.generatePublic(spec);
-        String shared = Hex.encode(EllipticCurves.computeSharedSecret(priv, modifiedKey));
-        // The implementation did not notice that the public key was modified.
-        // This is not nice, but at the moment we only fail the test if the
-        // modification was essential for computing the shared secret.
-        assertEquals("test:" + test.comment, expected, shared);
+        EllipticCurves.computeSharedSecret(priv, modifiedKey);
+        fail("Modified publicKey shouldn't be accepted");
       } catch (GeneralSecurityException ex) {
         // OK, since the public keys have been modified.
         System.out.println(

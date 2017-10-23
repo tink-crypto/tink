@@ -23,6 +23,7 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECFieldFp;
@@ -93,11 +94,11 @@ public final class EllipticCurves {
   /**
    * Checks that a point is on a given elliptic curve.
    *
-   * <p>><b>Warning:</b> Please use {@link #validatePublicKey} if you want to validate a public
-   * key to avoid invalid curve attacks or small subgroup attacks in ECDH.
+   * <p>><b>Warning:</b> Please use {@link #validatePublicKey} if you want to validate a public key
+   * to avoid invalid curve attacks or small subgroup attacks in ECDH.
    *
-   * <p>This method implements the partial public key validation routine from Section 5.6.2.6 of
-   * <a href="http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf">NIST SP
+   * <p>This method implements the partial public key validation routine from Section 5.6.2.6 of <a
+   * href="http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf">NIST SP
    * 800-56A</a>. A partial public key validation is sufficient for curves with cofactor 1. See
    * Section B.3 of http://www.nsa.gov/ia/_files/SuiteB_Implementer_G-113808.pdf.
    *
@@ -109,8 +110,7 @@ public final class EllipticCurves {
    * @param ec the elliptic curve. This must be a curve over a prime order field.
    * @throws GeneralSecurityException if the field is binary or if the point is not on the curve.
    */
-  static void checkPointOnCurve(ECPoint point, EllipticCurve ec)
-      throws GeneralSecurityException {
+  static void checkPointOnCurve(ECPoint point, EllipticCurve ec) throws GeneralSecurityException {
     BigInteger p = getModulus(ec);
     BigInteger x = point.getAffineX();
     BigInteger y = point.getAffineY();
@@ -133,8 +133,8 @@ public final class EllipticCurves {
   }
 
   /**
-   * Checks that the public key's params is the same as the private key's params, and
-   * the public key is a valid point on the private key's curve.
+   * Checks that the public key's params is the same as the private key's params, and the public key
+   * is a valid point on the private key's curve.
    */
   public static void validatePublicKey(ECPublicKey publicKey, ECPrivateKey privateKey)
       throws GeneralSecurityException {
@@ -458,8 +458,9 @@ public final class EllipticCurves {
    * Returns an {@link ECPublicKey} from {@code publicKey} that is a public key in point format
    * {@code pointFormat} on {@code curve}.
    */
-  public static ECPublicKey getEcPublicKey(CurveType curve, PointFormatType pointFormat,
-      final byte[] publicKey) throws GeneralSecurityException {
+  public static ECPublicKey getEcPublicKey(
+      CurveType curve, PointFormatType pointFormat, final byte[] publicKey)
+      throws GeneralSecurityException {
     return getEcPublicKey(getCurveSpec(curve), pointFormat, publicKey);
   }
 
@@ -467,8 +468,9 @@ public final class EllipticCurves {
    * Returns an {@link ECPublicKey} from {@code publicKey} that is a public key in point format
    * {@code pointFormat} on {@code curve}.
    */
-  public static ECPublicKey getEcPublicKey(ECParameterSpec spec, PointFormatType pointFormat,
-      final byte[] publicKey) throws GeneralSecurityException {
+  public static ECPublicKey getEcPublicKey(
+      ECParameterSpec spec, PointFormatType pointFormat, final byte[] publicKey)
+      throws GeneralSecurityException {
     ECPoint point = ecPointDecode(spec.getCurve(), pointFormat, publicKey);
     ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, spec);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
@@ -494,8 +496,7 @@ public final class EllipticCurves {
   public static ECPrivateKey getEcPrivateKey(final byte[] pkcs8PrivateKey)
       throws GeneralSecurityException {
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
-    return (ECPrivateKey)
-        kf.generatePrivate(new PKCS8EncodedKeySpec(pkcs8PrivateKey));
+    return (ECPrivateKey) kf.generatePrivate(new PKCS8EncodedKeySpec(pkcs8PrivateKey));
   }
 
   /** Returns an {@code ECPrivateKey} from {@code curve} type and {@code keyValue}. */
@@ -521,8 +522,8 @@ public final class EllipticCurves {
   }
 
   /**
-   * Checks that the shared secret is on the curve of the private key, to prevent
-   * arithmetic errors or fault attacks.
+   * Checks that the shared secret is on the curve of the private key, to prevent arithmetic errors
+   * or fault attacks.
    */
   private static void validateSharedSecret(byte[] secret, ECPrivateKey privateKey)
       throws GeneralSecurityException {
@@ -539,9 +540,17 @@ public final class EllipticCurves {
   public static byte[] computeSharedSecret(ECPrivateKey myPrivateKey, ECPublicKey peerPublicKey)
       throws GeneralSecurityException {
     validatePublicKey(peerPublicKey, myPrivateKey);
+    // Explicitly reconstruct the peer public key using private key's spec. There are 2 reasons:
+    //  - The peer public key's spec is under attacker's control and should be ignored.
+    //  - In case we have a bug in validatePublicKey, this will protect us from attack.
+    ECParameterSpec privSpec = myPrivateKey.getParams();
+    EllipticCurve privCurve = privSpec.getCurve();
+    ECPublicKeySpec reconstructedPubSpec = new ECPublicKeySpec(peerPublicKey.getW(), privSpec);
+    KeyFactory kf = KeyFactory.getInstance("EC");
+    PublicKey reconstructedPubKey = kf.generatePublic(reconstructedPubSpec);
     KeyAgreement ka = EngineFactory.KEY_AGREEMENT.getInstance("ECDH");
     ka.init(myPrivateKey);
-    ka.doPhase(peerPublicKey, true /* lastPhase */);
+    ka.doPhase(reconstructedPubKey, true /* lastPhase */);
     byte[] secret = ka.generateSecret();
     validateSharedSecret(secret, myPrivateKey);
     return secret;
