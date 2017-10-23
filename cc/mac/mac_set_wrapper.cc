@@ -64,7 +64,7 @@ util::Status MacSetWrapper::VerifyMac(
     google::protobuf::StringPiece mac_value,
     google::protobuf::StringPiece data) const {
   if (mac_value.length() > CryptoFormat::kNonRawPrefixSize) {
-    google::protobuf::StringPiece key_id = mac_value.substr(0,
+    const std::string& key_id = mac_value.substr(0,
         CryptoFormat::kNonRawPrefixSize);
     auto primitives_result = mac_set_->get_primitives(key_id);
     if (primitives_result.ok()) {

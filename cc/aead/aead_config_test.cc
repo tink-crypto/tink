@@ -34,8 +34,8 @@ class DummyAeadCatalogue : public Catalogue<Aead> {
   DummyAeadCatalogue() {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Aead>>> GetKeyManager(
-      google::protobuf::StringPiece type_url,
-      google::protobuf::StringPiece primitive_name,
+      const std::string& type_url,
+      const std::string& primitive_name,
       uint32_t min_version) const override {
     return util::Status::UNKNOWN;
   }

@@ -17,11 +17,10 @@
 #ifndef TINK_HYBRID_HYBRID_DECRYPT_CATALOGUE_H_
 #define TINK_HYBRID_HYBRID_DECRYPT_CATALOGUE_H_
 
-#include "cc/hybrid_decrypt.h"
 #include "cc/catalogue.h"
+#include "cc/hybrid_decrypt.h"
 #include "cc/key_manager.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace crypto {
 namespace tink {
@@ -33,8 +32,7 @@ class HybridDecryptCatalogue : public Catalogue<HybridDecrypt> {
   HybridDecryptCatalogue() {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<HybridDecrypt>>>
-  GetKeyManager(google::protobuf::StringPiece type_url,
-                google::protobuf::StringPiece primitive_name,
+  GetKeyManager(const std::string& type_url, const std::string& primitive_name,
                 uint32_t min_version) const;
 };
 

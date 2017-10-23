@@ -28,7 +28,6 @@
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/validation.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -62,7 +61,7 @@ class Registry {
   // see https://goo.gl/x0ymDz)
   template <class P>
   static crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
-      google::protobuf::StringPiece catalogue_name);
+      const std::string& catalogue_name);
 
   // Adds the given 'catalogue' under the specified 'catalogue_name',
   // to enable custom configuration of key types and key managers.
@@ -75,21 +74,18 @@ class Registry {
   // (in case of failure, 'catalogue' is deleted).
   template <class P>
   static crypto::tink::util::Status AddCatalogue(
-      google::protobuf::StringPiece catalogue_name,
-      Catalogue<P>* catalogue);
+      const std::string& catalogue_name, Catalogue<P>* catalogue);
 
   // Registers the given 'manager' for the key type identified by 'type_url'.
   // Takes ownership of 'manager', which must be non-nullptr.
   template <class P>
   static crypto::tink::util::Status RegisterKeyManager(
-      google::protobuf::StringPiece type_url,
-      KeyManager<P>* manager,
+      const std::string& type_url, KeyManager<P>* manager,
       bool new_key_allowed);
 
   template <class P>
   static crypto::tink::util::Status RegisterKeyManager(
-      google::protobuf::StringPiece type_url,
-      KeyManager<P>* manager) {
+      const std::string& type_url, KeyManager<P>* manager) {
     return RegisterKeyManager(type_url, manager, /* new_key_allowed= */ true);
   }
 
@@ -101,7 +97,7 @@ class Registry {
   // see https://goo.gl/x0ymDz)
   template <class P>
   static crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
-      google::protobuf::StringPiece type_url);
+      const std::string& type_url);
 
   // Convenience method for creating a new primitive for the key given
   // in 'key_data'.  It looks up a KeyManager identified by key_data.type_url,
@@ -115,8 +111,7 @@ class Registry {
   // and calls manager's GetPrimitive(key)-method.
   template <class P>
   static crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      google::protobuf::StringPiece type_url,
-      const google::protobuf::Message& key);
+      const std::string& type_url, const google::protobuf::Message& key);
 
   // Creates a set of primitives corresponding to the keys with
   // (status == ENABLED) in the keyset given in 'keyset_handle',
@@ -127,26 +122,25 @@ class Registry {
   // implements the corresponding Primitive-interface.
   template <class P>
   static crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
-  GetPrimitives(
-      const KeysetHandle& keyset_handle, const KeyManager<P>* custom_manager);
+  GetPrimitives(const KeysetHandle& keyset_handle,
+                const KeyManager<P>* custom_manager);
 
   // Resets the registry.
   // After reset the registry is empty, i.e. it contains neither catalogues
   // nor key managers. This method is intended for testing only.
   static void Reset();
 
-
  private:
-  typedef std::unordered_map<std::string, std::unique_ptr<void, void(*)(void*)>>
+  typedef std::unordered_map<std::string,
+                             std::unique_ptr<void, void (*)(void*)>>
       LabelToObjectMap;
-  typedef std::unordered_map<std::string, const char*>
-      LabelToTypeNameMap;
+  typedef std::unordered_map<std::string, const char*> LabelToTypeNameMap;
 
   static std::mutex maps_mutex_;
-  static LabelToObjectMap type_to_manager_map_;        // guarded by maps_mutex_
-  static LabelToTypeNameMap type_to_primitive_map_;    // guarded by maps_mutex_
-  static LabelToObjectMap name_to_catalogue_map_;      // guarded by maps_mutex_
-  static LabelToTypeNameMap name_to_primitive_map_;    // guarded by maps_mutex_
+  static LabelToObjectMap type_to_manager_map_;      // guarded by maps_mutex_
+  static LabelToTypeNameMap type_to_primitive_map_;  // guarded by maps_mutex_
+  static LabelToObjectMap name_to_catalogue_map_;    // guarded by maps_mutex_
+  static LabelToTypeNameMap name_to_primitive_map_;  // guarded by maps_mutex_
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,29 +159,27 @@ void delete_catalogue(void* t) {
 // static
 template <class P>
 crypto::tink::util::Status Registry::AddCatalogue(
-    google::protobuf::StringPiece catalogue_name,
-    Catalogue<P>* catalogue) {
+    const std::string& catalogue_name, Catalogue<P>* catalogue) {
   if (catalogue == nullptr) {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,
         "Parameter 'catalogue' must be non-null.");
   }
-  std::unique_ptr<void, void(*)(void*)>
-      entry(catalogue, delete_catalogue<P>);
+  std::unique_ptr<void, void (*)(void*)> entry(catalogue, delete_catalogue<P>);
   std::lock_guard<std::mutex> lock(maps_mutex_);
-  auto curr_catalogue = name_to_catalogue_map_.find(catalogue_name.ToString());
+  auto curr_catalogue = name_to_catalogue_map_.find(catalogue_name);
   if (curr_catalogue != name_to_catalogue_map_.end()) {
     auto existing = static_cast<Catalogue<P>*>(curr_catalogue->second.get());
     if (typeid(*existing).name() != typeid(*catalogue).name()) {
       return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                        "A catalogue named '%s' has been already added.",
-                       catalogue_name.ToString().c_str());
+                       catalogue_name.c_str());
     }
   } else {
     name_to_catalogue_map_.insert(
-        std::make_pair(catalogue_name.ToString(), std::move(entry)));
+        std::make_pair(catalogue_name, std::move(entry)));
     name_to_primitive_map_.insert(
-        std::make_pair(catalogue_name.ToString(), typeid(P).name()));
+        std::make_pair(catalogue_name, typeid(P).name()));
   }
   return crypto::tink::util::Status::OK;
 }
@@ -195,21 +187,20 @@ crypto::tink::util::Status Registry::AddCatalogue(
 // static
 template <class P>
 crypto::tink::util::StatusOr<const Catalogue<P>*> Registry::get_catalogue(
-    google::protobuf::StringPiece catalogue_name) {
+    const std::string& catalogue_name) {
   std::lock_guard<std::mutex> lock(maps_mutex_);
-  auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name.ToString());
+  auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name);
   if (catalogue_entry == name_to_catalogue_map_.end()) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                      "No catalogue named '%s' has been added.",
-                     catalogue_name.ToString().c_str());
+                     catalogue_name.c_str());
   }
-  if (name_to_primitive_map_[catalogue_name.ToString()] != typeid(P).name()) {
+  if (name_to_primitive_map_[catalogue_name] != typeid(P).name()) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Wrong Primitive type for catalogue named '%s': "
                      "got '%s', expected '%s'",
-                     catalogue_name.ToString().c_str(),
-                     typeid(P).name(),
-                     name_to_primitive_map_[catalogue_name.ToString()]);
+                     catalogue_name.c_str(), typeid(P).name(),
+                     name_to_primitive_map_[catalogue_name]);
   }
   return static_cast<Catalogue<P>*>(catalogue_entry->second.get());
 }
@@ -217,35 +208,30 @@ crypto::tink::util::StatusOr<const Catalogue<P>*> Registry::get_catalogue(
 // static
 template <class P>
 crypto::tink::util::Status Registry::RegisterKeyManager(
-    google::protobuf::StringPiece type_url,
-    KeyManager<P>* manager,
-    bool new_key_allowed) {
+    const std::string& type_url, KeyManager<P>* manager, bool new_key_allowed) {
   if (manager == nullptr) {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,
         "Parameter 'manager' must be non-null.");
   }
-  std::unique_ptr<void, void(*)(void*)>
-      entry(manager, delete_manager<P>);
+  std::unique_ptr<void, void (*)(void*)> entry(manager, delete_manager<P>);
   if (!manager->DoesSupport(type_url)) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "The manager does not support type '%s'.",
-                     type_url.ToString().c_str());
+                     type_url.c_str());
   }
   std::lock_guard<std::mutex> lock(maps_mutex_);
-  auto curr_manager = type_to_manager_map_.find(type_url.ToString());
+  auto curr_manager = type_to_manager_map_.find(type_url);
   if (curr_manager != type_to_manager_map_.end()) {
     auto existing = static_cast<KeyManager<P>*>(curr_manager->second.get());
     if (typeid(*existing).name() != typeid(*manager).name()) {
       return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                        "A manager for type '%s' has been already registered.",
-                       type_url.ToString().c_str());
+                       type_url.c_str());
     }
   } else {
-    type_to_manager_map_.insert(
-        std::make_pair(type_url.ToString(), std::move(entry)));
-    type_to_primitive_map_.insert(
-        std::make_pair(type_url.ToString(), typeid(P).name()));
+    type_to_manager_map_.insert(std::make_pair(type_url, std::move(entry)));
+    type_to_primitive_map_.insert(std::make_pair(type_url, typeid(P).name()));
   }
   return crypto::tink::util::Status::OK;
 }
@@ -253,21 +239,20 @@ crypto::tink::util::Status Registry::RegisterKeyManager(
 // static
 template <class P>
 crypto::tink::util::StatusOr<const KeyManager<P>*> Registry::get_key_manager(
-    google::protobuf::StringPiece type_url) {
+    const std::string& type_url) {
   std::lock_guard<std::mutex> lock(maps_mutex_);
-  auto manager_entry = type_to_manager_map_.find(type_url.ToString());
+  auto manager_entry = type_to_manager_map_.find(type_url);
   if (manager_entry == type_to_manager_map_.end()) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                      "No manager for type '%s' has been registered.",
-                     type_url.ToString().c_str());
+                     type_url.c_str());
   }
-  if (type_to_primitive_map_[type_url.ToString()] != typeid(P).name()) {
+  if (type_to_primitive_map_[type_url] != typeid(P).name()) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Wrong Primitive type for key type '%s': "
                      "got '%s', expected '%s'",
-                     type_url.ToString().c_str(),
-                     typeid(P).name(),
-                     type_to_primitive_map_[type_url.ToString()]);
+                     type_url.c_str(), typeid(P).name(),
+                     type_to_primitive_map_[type_url]);
   }
   return static_cast<KeyManager<P>*>(manager_entry->second.get());
 }
@@ -286,8 +271,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
 // static
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
-    google::protobuf::StringPiece type_url,
-    const google::protobuf::Message& key) {
+    const std::string& type_url, const google::protobuf::Message& key) {
   auto key_manager_result = get_key_manager<P>(type_url);
   if (key_manager_result.ok()) {
     return key_manager_result.ValueOrDie()->GetPrimitive(key);
@@ -298,21 +282,19 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
 // static
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
-    Registry::GetPrimitives(
-        const KeysetHandle& keyset_handle,
-        const KeyManager<P>* custom_manager) {
+Registry::GetPrimitives(const KeysetHandle& keyset_handle,
+                        const KeyManager<P>* custom_manager) {
   crypto::tink::util::Status status =
       ValidateKeyset(keyset_handle.get_keyset());
   if (!status.ok()) return status;
   std::unique_ptr<PrimitiveSet<P>> primitives(new PrimitiveSet<P>());
-  for (const google::crypto::tink::Keyset::Key& key
-           : keyset_handle.get_keyset().key()) {
+  for (const google::crypto::tink::Keyset::Key& key :
+       keyset_handle.get_keyset().key()) {
     if (key.status() == google::crypto::tink::KeyStatusType::ENABLED) {
       std::unique_ptr<P> primitive;
       if (custom_manager != nullptr &&
           custom_manager->DoesSupport(key.key_data().type_url())) {
-        auto primitive_result =
-            custom_manager->GetPrimitive(key.key_data());
+        auto primitive_result = custom_manager->GetPrimitive(key.key_data());
         if (!primitive_result.ok()) return primitive_result.status();
         primitive = std::move(primitive_result.ValueOrDie());
       } else {

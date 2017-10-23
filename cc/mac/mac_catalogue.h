@@ -17,11 +17,10 @@
 #ifndef TINK_MAC_MAC_CATALOGUE_H_
 #define TINK_MAC_MAC_CATALOGUE_H_
 
-#include "cc/mac.h"
 #include "cc/catalogue.h"
 #include "cc/key_manager.h"
+#include "cc/mac.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace crypto {
 namespace tink {
@@ -32,10 +31,9 @@ class MacCatalogue : public Catalogue<Mac> {
  public:
   MacCatalogue() {}
 
-  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Mac>>>
-  GetKeyManager(google::protobuf::StringPiece type_url,
-                google::protobuf::StringPiece primitive_name,
-                uint32_t min_version) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Mac>>> GetKeyManager(
+      const std::string& type_url, const std::string& primitive_name,
+      uint32_t min_version) const override;
 };
 
 }  // namespace tink

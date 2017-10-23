@@ -55,22 +55,17 @@ class PrimitiveSet {
   template <class P2>
   class Entry {
    public:
-    Entry(std::unique_ptr<P2> primitive,
-          google::protobuf::StringPiece identifier,
-          google::crypto::tink::KeyStatusType status) :
-        primitive_(std::move(primitive)),
-        identifier_(identifier.ToString()),
-        status_(status) {
-    }
-    P2& get_primitive() const {
-    return *primitive_;
-    }
-    const std::string& get_identifier() const {
-      return identifier_;
-    }
+    Entry(std::unique_ptr<P2> primitive, const std::string& identifier,
+          google::crypto::tink::KeyStatusType status)
+        : primitive_(std::move(primitive)),
+          identifier_(identifier),
+          status_(status) {}
+    P2& get_primitive() const { return *primitive_; }
+    const std::string& get_identifier() const { return identifier_; }
     const google::crypto::tink::KeyStatusType get_status() const {
       return status_;
     }
+
    private:
     std::unique_ptr<P> primitive_;
     std::string identifier_;
@@ -84,8 +79,7 @@ class PrimitiveSet {
 
   // Adds 'primitive' to this set for the specified 'key'.
   crypto::tink::util::StatusOr<Entry<P>*> AddPrimitive(
-      std::unique_ptr<P> primitive,
-      google::crypto::tink::Keyset::Key key) {
+      std::unique_ptr<P> primitive, google::crypto::tink::Keyset::Key key) {
     auto identifier_result = CryptoFormat::get_output_prefix(key);
     if (!identifier_result.ok()) return identifier_result.status();
     std::string identifier = identifier_result.ValueOrDie();
@@ -97,14 +91,14 @@ class PrimitiveSet {
 
   // Returns the entries with primitives identifed by 'identifier'.
   crypto::tink::util::StatusOr<const Primitives*> get_primitives(
-      google::protobuf::StringPiece identifier) {
+      const std::string& identifier) {
     std::lock_guard<std::mutex> lock(primitives_mutex_);
     typename CiphertextPrefixToPrimitivesMap::iterator found =
-        primitives_.find(identifier.ToString());
+        primitives_.find(identifier);
     if (found == primitives_.end()) {
       return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                        "No primitives found for identifier '%s'.",
-                       identifier.ToString().c_str());
+                       identifier.c_str());
     }
     return &(found->second);
   }
@@ -115,14 +109,10 @@ class PrimitiveSet {
   }
 
   // Sets the given 'primary' as as the primary primitive of this set.
-  void set_primary(Entry<P>* primary) {
-    primary_ = primary;
-  }
+  void set_primary(Entry<P>* primary) { primary_ = primary; }
 
   // Returns the entry with the primary primitive.
-  const Entry<P>* get_primary() const {
-    return primary_;
-  }
+  const Entry<P>* get_primary() const { return primary_; }
 
  private:
   typedef std::unordered_map<std::string, Primitives>

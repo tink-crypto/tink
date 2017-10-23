@@ -58,7 +58,7 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
     google::protobuf::StringPiece ciphertext,
     google::protobuf::StringPiece context_info) const {
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
-    google::protobuf::StringPiece key_id = ciphertext.substr(0,
+    const std::string& key_id = ciphertext.substr(0,
         CryptoFormat::kNonRawPrefixSize);
     auto primitives_result = hybrid_decrypt_set_->get_primitives(key_id);
     if (primitives_result.ok()) {

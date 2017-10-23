@@ -16,10 +16,10 @@
 
 #include "cc/aead/aead_catalogue.h"
 
-#include "cc/catalogue.h"
-#include "cc/key_manager.h"
 #include "cc/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "cc/aead/aes_gcm_key_manager.h"
+#include "cc/catalogue.h"
+#include "cc/key_manager.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/strings.h"
@@ -30,7 +30,7 @@ namespace tink {
 namespace {
 
 crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
-CreateKeyManager(google::protobuf::StringPiece type_url) {
+CreateKeyManager(const std::string& type_url) {
   if (type_url == AesGcmKeyManager::kKeyType) {
     std::unique_ptr<KeyManager<Aead>> manager(new AesGcmKeyManager());
     return std::move(manager);
@@ -39,27 +39,27 @@ CreateKeyManager(google::protobuf::StringPiece type_url) {
     return std::move(manager);
   }
   return ToStatusF(crypto::tink::util::error::NOT_FOUND,
-                   "No key manager for type_url '%s'.",
-                   type_url.ToString().c_str());
+                   "No key manager for type_url '%s'.", type_url.c_str());
 }
 
 }  // anonymous namespace
 
 crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
-AeadCatalogue::GetKeyManager(google::protobuf::StringPiece type_url,
-                google::protobuf::StringPiece primitive_name,
-                uint32_t min_version) const {
-  if (!(to_lowercase(primitive_name.ToString()) == "aead")) {
+AeadCatalogue::GetKeyManager(const std::string& type_url,
+                             const std::string& primitive_name,
+                             uint32_t min_version) const {
+  if (!(to_lowercase(primitive_name) == "aead")) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                      "This catalogue does not support primitive %s.",
-                     primitive_name.ToString().c_str());
+                     primitive_name.c_str());
   }
   auto manager_result = CreateKeyManager(type_url);
   if (!manager_result.ok()) return manager_result;
   if (manager_result.ValueOrDie()->get_version() < min_version) {
-    return ToStatusF(crypto::tink::util::error::NOT_FOUND,
+    return ToStatusF(
+        crypto::tink::util::error::NOT_FOUND,
         "No key manager for type_url '%s' with version at least %d.",
-        type_url.ToString().c_str(), min_version);
+        type_url.c_str(), min_version);
   }
   return std::move(manager_result.ValueOrDie());
 }

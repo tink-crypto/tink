@@ -102,8 +102,8 @@ class TestAeadCatalogue : public Catalogue<Aead> {
   TestAeadCatalogue() {}
 
   util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
-      GetKeyManager(StringPiece type_url,
-                    StringPiece primitive_name,
+      GetKeyManager(const std::string& type_url,
+                    const std::string& primitive_name,
                     uint32_t min_version) const override {
     return util::Status(util::error::UNIMPLEMENTED,
                         "This is a test catalogue.");

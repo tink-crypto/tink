@@ -34,8 +34,8 @@ class DummyMacCatalogue : public Catalogue<Mac> {
   DummyMacCatalogue() {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Mac>>>
-  GetKeyManager(google::protobuf::StringPiece type_url,
-                google::protobuf::StringPiece primitive_name,
+  GetKeyManager(const std::string& type_url,
+                const std::string& primitive_name,
                 uint32_t min_version) const override {
     return util::Status::UNKNOWN;
   }

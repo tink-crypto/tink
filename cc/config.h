@@ -28,7 +28,6 @@
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/strings.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/config.pb.h"
 
 namespace crypto {
@@ -52,9 +51,9 @@ class Config {
   // Returns a KeyTypeEntry for Tink key types with the specified parameters.
   static std::unique_ptr<google::crypto::tink::KeyTypeEntry>
   GetTinkKeyTypeEntry(
-      google::protobuf::StringPiece catalogue_name,
-      google::protobuf::StringPiece primitive_name,
-      google::protobuf::StringPiece key_proto_name,
+      const std::string& catalogue_name,
+      const std::string& primitive_name,
+      const std::string& key_proto_name,
       int key_manager_version,
       bool new_key_allowed);
 

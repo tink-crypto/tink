@@ -20,27 +20,25 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/strings.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/config.pb.h"
 
 using google::crypto::tink::KeyTypeEntry;
-using google::protobuf::StringPiece;
 
 namespace crypto {
 namespace tink {
 
 // static
 std::unique_ptr<google::crypto::tink::KeyTypeEntry>
-Config::GetTinkKeyTypeEntry(StringPiece catalogue_name,
-                            StringPiece primitive_name,
-                            StringPiece key_proto_name,
+Config::GetTinkKeyTypeEntry(const std::string& catalogue_name,
+                            const std::string& primitive_name,
+                            const std::string& key_proto_name,
                             int key_manager_version,
                             bool new_key_allowed) {
   std::string prefix = "type.googleapis.com/google.crypto.tink.";
   std::unique_ptr<KeyTypeEntry> entry(new KeyTypeEntry());
   entry->set_catalogue_name(catalogue_name);
   entry->set_primitive_name(primitive_name);
-  entry->set_type_url(prefix.append(key_proto_name.ToString()));
+  entry->set_type_url(prefix.append(key_proto_name));
   entry->set_key_manager_version(key_manager_version);
   entry->set_new_key_allowed(new_key_allowed);
   return entry;
