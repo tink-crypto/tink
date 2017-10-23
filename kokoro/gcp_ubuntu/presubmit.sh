@@ -24,17 +24,32 @@ set -x
 # Workaround for some unknown issue in Kokoro.
 rm -f ~/.bazelrc
 
+# Upgrading bazel to the latest version
+# TODO(b/68000006): removing these lines after Kokoro has upgraded its copy
+sudo apt-get update
+sudo apt-get -y install bazel
+
+BAZEL_BIN="/usr/bin/bazel"
+
+DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
+--strategy=CppCompile=standalone --strategy=ProtoCompile=standalone \
+--strategy=GenProto=standalone --strategy=GenProtoDescriptorSet=standalone"
+
+echo "using bazel binary: ${BAZEL_BIN}"
+${BAZEL_BIN} version
+
+echo "using java binary: " `which java`
+java -version
+
 # Build
 cd github/tink/
 
-time bazel fetch ...
+time ${BAZEL_BIN} fetch ...
 
 # bazel sandbox doesn't work with Kokoro's MacOS image, see b/38040081.
-time bazel build --strategy=CppCompile=standalone --strategy=Turbine=standalone \
-  --strategy=ProtoCompile=standalone --strategy=GenProto=standalone \
-  --strategy=GenRule=standalone --strategy=GenProtoDescriptorSet=standalone \
-  --sandbox_tmpfs_path=$TMP -- //... -//objc/...
+time ${BAZEL_BIN} build --sandbox_tmpfs_path=$TMP $DISABLE_SANDBOX -- //... \
+-//objc/... || ( ls -l ; df -h / ; exit 1 )
 
-# Run all tests, except iOS.
-time bazel test --strategy=TestRunner=standalone --test_output=all -- //... \
--//objc/...
+# Run all tests, except objc.
+time ${BAZEL_BIN} test --strategy=TestRunner=standalone --test_output=all -- //... \
+-//objc/... || ( ls -l ; df -h / ; exit 1 )

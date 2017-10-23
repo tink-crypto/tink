@@ -4,7 +4,6 @@
 http_archive(
     name = "wycheproof",
     strip_prefix = "wycheproof-f755ff0279ddd5fa26640d959d5872764b45feb7",
-    sha256 = "8b32637abcf0c775dac424894a6586a75df821a7ffeedc467ccffa29209683e5",
     url = "https://github.com/google/wycheproof/archive/f755ff0279ddd5fa26640d959d5872764b45feb7.zip",
 )
 
@@ -71,7 +70,6 @@ http_archive(
     name = "com_google_protobuf_javalite",
     strip_prefix = "protobuf-javalite",
     urls = ["https://github.com/google/protobuf/archive/javalite.zip"],
-    sha256 = "b9ca3f706c6a6a6a744a7ba85321abce9e7d49825a19aaba6f29278871d41926",
 )
 
 # objc_proto_library rules from @org_pubref_rules_protobuf require the objective
@@ -79,7 +77,6 @@ http_archive(
 # google/protobuf that has the @com_google_protobuf_objc//:objectivec target.
 http_archive(
     name = "com_google_protobuf_objc",
-    sha256 = "6025a4bd2a1bce5414a6521f44c247a31a0bd19cb1271c8ef46880cc450a7b10",
     strip_prefix = "protobuf-286f0598422a70639e587b5329bd3037f5ee76b0",
     urls = ["https://github.com/google/protobuf/archive/286f0598422a70639e587b5329bd3037f5ee76b0.zip"],
 )
