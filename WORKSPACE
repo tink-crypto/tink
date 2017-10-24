@@ -84,6 +84,7 @@ http_archive(
 #-----------------------------------------------------------------------------
 # java
 #-----------------------------------------------------------------------------
+
 # android sdk
 android_sdk_repository(
     name = "androidsdk",
@@ -93,176 +94,435 @@ android_sdk_repository(
     api_level = 23, # M
 )
 
-maven_jar(
+load("@bazel_tools//tools/build_defs/repo:java.bzl", "java_import_external")
+
+################################################################################
+# BEGIN BAZEL MAVEN CONFIG GENERATOR
+# go/bazel-maven-config-generator
+#   args4j:args4j:2.33
+#   com.amazonaws:aws-java-sdk-core:1.11.166
+#   com.amazonaws:aws-java-sdk-kms:1.11.166
+#   com.google.auto:auto-common:0.8
+#   com.google.auto.service:auto-service:1.0-rc3
+#   com.google.api-client:google-api-client:1.22.0
+#   com.google.apis:google-api-services-cloudkms:v1-rev4-1.22.0
+#   com.google.code.findbugs:jsr305:3.0.1
+#   com.google.errorprone:error_prone_annotations:2.0.19
+#   com.google.oauth-client:google-oauth-client:1.22.0
+#   org.json:json:20170516
+#   junit:junit_4:4.12
+#   org.mockito:mockito-core:2.8.47
+#   com.google.truth:truth:0.32
+
+java_import_external(
     name = "args4j",
-    artifact = "args4j:args4j:2.33",
-    sha1 = "bd87a75374a6d6523de82fef51fc3cfe9baf9fc9",
+    licenses = ["notice"],  # MIT License
+    jar_sha256 = "91ddeaba0b24adce72291c618c00bbdce1c884755f6c4dba9c5c46e871c69ed6",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/args4j/args4j/2.33/args4j-2.33.jar",
+        "https://repo1.maven.org/maven2/args4j/args4j/2.33/args4j-2.33.jar",
+    ],
 )
 
-maven_jar(
-    name = "com_amazonaws_sdk_core",
-    artifact = "com.amazonaws:aws-java-sdk-core:1.11.166",
-    sha1 = "5f28def6d43d805cc1d795ad08187d5b463d6c9d",
+java_import_external(
+    name = "com_amazonaws_aws_java_sdk_core",
+    licenses = ["notice"],  # Apache License, Version 2.0
+    jar_sha256 = "be81b204f0ddf069a4c1f44f7e06971351aab725cbf85f542bd8dc8fdf50d5c9",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/com/amazonaws/aws-java-sdk-core/1.11.166/aws-java-sdk-core-1.11.166.jar",
+        "https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-core/1.11.166/aws-java-sdk-core-1.11.166.jar",
+    ],
+    deps = [
+        "@commons_logging",
+        "@org_apache_httpcomponents_httpclient",
+        "@software_amazon_ion_java",
+        "@com_fasterxml_jackson_core_jackson_databind",
+        "@com_fasterxml_jackson_dataformat_cbor",
+        "@joda_time",
+    ],
 )
 
-maven_jar(
-    name = "com_amazonaws_sdk_kms",
-    artifact = "com.amazonaws:aws-java-sdk-kms:1.11.166",
-    sha1 = "33a4c0d5c26c4ab6bb14c1d80cdec435f837d887",
+java_import_external(
+    name = "com_amazonaws_aws_java_sdk_kms",
+    licenses = ["notice"],  # Apache License, Version 2.0
+    jar_sha256 = "e690e02028709196ace0eb3725f06c032242e40d187171fb4fe4cdc04cf0eec5",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-kms/1.11.166/aws-java-sdk-kms-1.11.166.jar",
+        "https://maven.ibiblio.org/maven2/com/amazonaws/aws-java-sdk-kms/1.11.166/aws-java-sdk-kms-1.11.166.jar",
+    ],
+    deps = [
+        "@com_amazonaws_aws_java_sdk_core",
+        "@com_amazonaws_jmespath_java",
+    ],
 )
 
-maven_jar(
-    name = "org_apache_commons_logging",
-    artifact = "commons-logging:commons-logging:1.2",
-    sha1 = "4bfc12adfe4842bf07b657f0369c4cb522955686",
+java_import_external(
+    name = "com_amazonaws_jmespath_java",
+    licenses = ["notice"],  # Apache License, Version 2.0
+    jar_sha256 = "75e44f769a29f9d92f3dc481f38fb5ee2066fbb0c2bdd94a75f12f193962d997",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/com/amazonaws/jmespath-java/1.11.166/jmespath-java-1.11.166.jar",
+        "https://repo1.maven.org/maven2/com/amazonaws/jmespath-java/1.11.166/jmespath-java-1.11.166.jar",
+    ],
+    deps = ["@com_fasterxml_jackson_core_jackson_databind"],
 )
 
-maven_jar(
-    name = "org_apache_httpcomponents_httpclient",
-    artifact = "org.apache.httpcomponents:httpclient:4.5.3",
-    sha1 = "d1577ae15f01ef5438c5afc62162457c00a34713",
-)
-
-maven_jar(
-    name = "org_apache_httpcomponents_httpcore",
-    artifact = "org.apache.httpcomponents:httpcore:4.4.6",
-    sha1 = "e3fd8ced1f52c7574af952e2e6da0df8df08eb82",
-)
-
-maven_jar(
+java_import_external(
     name = "com_fasterxml_jackson_core",
-    artifact = "com.fasterxml.jackson.core:jackson-core:2.9.0",
-    sha1 = "88e7c6220be3b3497b3074d3fc7754213289b987",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "918c04b9f9043d51dead2192b5d94d9f065870c9f26c8defbe9c6dbc951f304f",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.6.7/jackson-core-2.6.7.jar",
+        "https://maven.ibiblio.org/maven2/com/fasterxml/jackson/core/jackson-core/2.6.7/jackson-core-2.6.7.jar",
+    ],
 )
 
-maven_jar(
-    name = "com_fasterxml_jackson_databind",
-    artifact = "com.fasterxml.jackson.core:jackson-databind:2.9.0",
-    sha1 = "14fb5f088cc0b0dc90a73ba745bcade4961a3ee3",
+java_import_external(
+    name = "com_fasterxml_jackson_core_jackson_annotations",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "03348c047d981376cc444fc466cd80bda8d7eb0698dc6a99dd52c5aa15eff5ad",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.6.0/jackson-annotations-2.6.0.jar",
+        "https://maven.ibiblio.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.6.0/jackson-annotations-2.6.0.jar",
+    ],
 )
 
-maven_jar(
-    name = "com_fasterxml_jackson_annotations",
-    artifact = "com.fasterxml.jackson.core:jackson-annotations:2.9.0",
-    sha1 = "07c10d545325e3a6e72e06381afe469fd40eb701",
+java_import_external(
+    name = "com_fasterxml_jackson_core_jackson_databind",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "c6b6043c6880697536f4ae3b9fad09517081ea22b966f0a084fa2d0c515e0a4a",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.6.7.1/jackson-databind-2.6.7.1.jar",
+        "https://maven.ibiblio.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.6.7.1/jackson-databind-2.6.7.1.jar",
+    ],
+    deps = [
+        "@com_fasterxml_jackson_core_jackson_annotations",
+        "@com_fasterxml_jackson_core",
+    ],
 )
 
-maven_jar(
-    name = "com_google_auto_common",
-    artifact = "com.google.auto:auto-common:0.8",
-    sha1 = "c6f7af0e57b9d69d81b05434ef9f3c5610d498c4",
+java_import_external(
+    name = "com_fasterxml_jackson_dataformat_cbor",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "956a0fb9186a796b8a6548909da1ee55004279647e261c7f540e5d49d4f199bf",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.6.7/jackson-dataformat-cbor-2.6.7.jar",
+        "https://repo1.maven.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.6.7/jackson-dataformat-cbor-2.6.7.jar",
+    ],
+    deps = ["@com_fasterxml_jackson_core"],
 )
 
-maven_jar(
-    name = "com_google_auto_service",
-    artifact = "com.google.auto.service:auto-service:1.0-rc3",
-    sha1 = "35c5d43b0332b8f94d473f9fee5fb1d74b5e0056",
-)
-
-maven_jar(
+java_import_external(
     name = "com_google_api_client",
-    artifact = "com.google.api-client:google-api-client:1.22.0",
-    sha1 = "0244350c0c845c583717ade13f5666a452fd0cfa",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "47c625c83a8cf97b8bbdff2acde923ff8fd3174e62aabcfc5d1b86692594ffba",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/google/api-client/google-api-client/1.22.0/google-api-client-1.22.0.jar",
+        "https://maven.ibiblio.org/maven2/com/google/api-client/google-api-client/1.22.0/google-api-client-1.22.0.jar",
+    ],
+    deps = [
+        "@com_google_oauth_client",
+        "@com_google_http_client_jackson2",
+        "@commons_codec",
+    ],
 )
 
-maven_jar(
-    name = "com_google_cloudkms",
-    artifact = "com.google.apis:google-api-services-cloudkms:v1-rev4-1.22.0",
-    sha1 = "2b85135459e6ea03a834319d49a831e73f9451a9",
+java_import_external(
+    name = "com_google_apis_google_api_services_cloudkms",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "0a991ab42838b2eb80b9880e34c25ab8076a1472a2b485dd3c8911509327f494",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/google/apis/google-api-services-cloudkms/v1-rev4-1.22.0/google-api-services-cloudkms-v1-rev4-1.22.0.jar",
+        "https://maven.ibiblio.org/maven2/com/google/apis/google-api-services-cloudkms/v1-rev4-1.22.0/google-api-services-cloudkms-v1-rev4-1.22.0.jar",
+    ],
+    deps = ["@com_google_api_client"],
 )
 
-maven_jar(
+java_import_external(
+    name = "com_google_auto_common",
+    licenses = ["notice"],  # Apache 2.0
+    jar_sha256 = "97db1709f57b91b32edacb596ef4641872f227b7d99ad90e467f0d77f5ba134a",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/google/auto/auto-common/0.8/auto-common-0.8.jar",
+        "https://maven.ibiblio.org/maven2/com/google/auto/auto-common/0.8/auto-common-0.8.jar",
+    ],
+    deps = ["@com_google_guava"],
+)
+
+java_import_external(
+    name = "com_google_auto_service",
+    licenses = ["notice"],  # Apache 2.0
+    jar_sha256 = "f68e20cc5aba8ad1759d2779c2b3725cc0bd9420c40e7b464a796b8ca1499e9e",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/com/google/auto/service/auto-service/1.0-rc3/auto-service-1.0-rc3.jar",
+        "https://repo1.maven.org/maven2/com/google/auto/service/auto-service/1.0-rc3/auto-service-1.0-rc3.jar",
+    ],
+    deps = [
+        "@com_google_auto_common",
+        "@com_google_guava",
+    ],
+)
+
+java_import_external(
+    name = "com_google_auto_value",
+    neverlink = 1,
+    licenses = ["notice"],  # Apache 2.0
+    jar_sha256 = "fd6fb139d97b427c321eb9370aeb29394e35d22d595166ca9071457448fa5660",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/google/auto/value/auto-value/1.0/auto-value-1.0.jar",
+        "https://maven.ibiblio.org/maven2/com/google/auto/value/auto-value/1.0/auto-value-1.0.jar",
+    ],
+)
+
+java_import_external(
+    name = "com_google_code_findbugs_annotations",
+    neverlink = 1,
+    licenses = ["restricted"],  # GNU Lesser Public License
+    jar_sha256 = "acc0d2c06be70e9094d70cd05dffa077735c8f9d1a870eafda130b0592528200",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/com/google/code/findbugs/annotations/3.0.1u2/annotations-3.0.1u2.jar",
+        "https://repo1.maven.org/maven2/com/google/code/findbugs/annotations/3.0.1u2/annotations-3.0.1u2.jar",
+    ],
+    deps = [
+        "@com_google_code_findbugs_jsr305",
+    ],
+)
+
+java_import_external(
     name = "com_google_code_findbugs_jsr305",
-    artifact = "com.google.code.findbugs:jsr305:3.0.1",
-    sha1 = "f7be08ec23c21485b9b5a1cf1654c2ec8c58168d",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "c885ce34249682bc0236b4a7d56efcc12048e6135a5baf7a9cde8ad8cda13fcd",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/com/google/code/findbugs/jsr305/3.0.1/jsr305-3.0.1.jar",
+        "https://repo1.maven.org/maven2/com/google/code/findbugs/jsr305/3.0.1/jsr305-3.0.1.jar",
+    ],
 )
 
-maven_jar(
-    name = "com_google_code_gson_gson",
-    artifact = "com.google.code.gson:gson:2.8.0",
-    sha1 = "c4ba5371a29ac9b2ad6129b1d39ea38750043eff",
-)
-
-maven_jar(
+java_import_external(
     name = "com_google_errorprone_error_prone_annotations",
-    artifact = "com.google.errorprone:error_prone_annotations:2.0.19",
-    sha1 = "c3754a0bdd545b00ddc26884f9e7624f8b6a14de",
+    licenses = ["notice"],  # Apache 2.0
+    jar_sha256 = "cde78ace21e46398299d0d9c6be9f47b7f971c7f045d40c78f95be9a638cbf7e",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/google/errorprone/error_prone_annotations/2.0.19/error_prone_annotations-2.0.19.jar",
+        "https://maven.ibiblio.org/maven2/com/google/errorprone/error_prone_annotations/2.0.19/error_prone_annotations-2.0.19.jar",
+    ],
 )
 
-maven_jar(
+java_import_external(
     name = "com_google_guava",
-    artifact = "com.google.guava:guava:21.0",
-    sha1 = "3a3d111be1be1b745edfa7d91678a12d7ed38709",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "36a666e3b71ae7f0f0dca23654b67e086e6c93d192f60ba5dfd5519db6c288c8",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/com/google/guava/guava/20.0/guava-20.0.jar",
+        "https://repo1.maven.org/maven2/com/google/guava/guava/20.0/guava-20.0.jar",
+    ],
 )
 
-maven_jar(
+java_import_external(
     name = "com_google_http_client",
-    artifact = "com.google.http-client:google-http-client:1.22.0",
-    sha1 = "d441fc58329c4a4c067acec04ac361627f66ecc8",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "f88ffa329ac52fb4f2ff0eb877ef7318423ac9b791a107f886ed5c7a00e77e11",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/google/http-client/google-http-client/1.22.0/google-http-client-1.22.0.jar",
+        "https://maven.ibiblio.org/maven2/com/google/http-client/google-http-client/1.22.0/google-http-client-1.22.0.jar",
+    ],
+    deps = [
+        "@com_google_code_findbugs_jsr305",
+        "@org_apache_httpcomponents_httpclient",
+        "@commons_codec",
+    ],
 )
 
-maven_jar(
+java_import_external(
     name = "com_google_http_client_jackson2",
-    artifact = "com.google.http-client:google-http-client-jackson2:1.22.0",
-    sha1 = "cc014d64ae11117e159d334c99d9c246d9b36f44",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "45b1e34b2dcef5cb496ef25a1223d19cf102b8c2ea4abf96491631b2faf4611c",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/com/google/http-client/google-http-client-jackson2/1.22.0/google-http-client-jackson2-1.22.0.jar",
+        "https://repo1.maven.org/maven2/com/google/http-client/google-http-client-jackson2/1.22.0/google-http-client-jackson2-1.22.0.jar",
+    ],
+    deps = [
+        "@com_google_http_client",
+        "@com_fasterxml_jackson_core",
+    ],
 )
 
-maven_jar(
+java_import_external(
     name = "com_google_oauth_client",
-    artifact = "com.google.oauth-client:google-oauth-client:1.22.0",
-    sha1 = "1d63f369ac78e4838a3197147012026e791008cb",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "a4c56168b3e042105d68cf136e40e74f6e27f63ed0a948df966b332678e19022",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/com/google/oauth-client/google-oauth-client/1.22.0/google-oauth-client-1.22.0.jar",
+        "https://repo1.maven.org/maven2/com/google/oauth-client/google-oauth-client/1.22.0/google-oauth-client-1.22.0.jar",
+    ],
+    deps = [
+        "@com_google_http_client",
+        "@com_google_code_findbugs_jsr305",
+    ],
 )
 
-maven_jar(
-    name = "org_json_json",
-    artifact = "org.json:json:20170516",
-    sha1 = "949abe1460757b8dc9902c562f83e49675444572",
-)
-
-maven_jar(
-    name = "joda_time",
-    artifact = "joda-time:joda-time:2.9.9",
-    sha1 = "f7b520c458572890807d143670c9b24f4de90897",
-)
-
-# for testing
-
-maven_jar(
-    name = "junit_junit_4",
-    artifact = "junit:junit:jar:4.12",
-    sha1 = "2973d150c0dc1fefe998f834810d68f278ea58ec",
-)
-
-maven_jar(
-    name = "org_mockito",
-    artifact = "org.mockito:mockito-core:2.8.47",
-    sha1 = "48840cfced22ec0c07203a0201c5ae7bc12557b5",
-)
-
-maven_jar(
+java_import_external(
     name = "com_google_truth",
-    artifact = "com.google.truth:truth:jar:0.32",
-    sha1 = "e996fb4b41dad04365112786796c945f909cfdf7",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "032eddc69652b0a1f8d458f999b4a9534965c646b8b5de0eba48ee69407051df",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/com/google/truth/truth/0.32/truth-0.32.jar",
+        "https://maven.ibiblio.org/maven2/com/google/truth/truth/0.32/truth-0.32.jar",
+    ],
+    deps = [
+        "@com_google_guava",
+        "@junit",
+        "@com_google_auto_value",
+        "@com_google_errorprone_error_prone_annotations",
+    ],
 )
 
-# mockito depends on the next 3 packages
-maven_jar(
-    name = "net_bytebuddy",
-    artifact = "net.bytebuddy:byte-buddy:1.6.14",
-    sha1 = "871c3e49dc6183d0d361601c2f1d11abb1a6b48c",
+java_import_external(
+    name = "commons_codec",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "ad19d2601c3abf0b946b5c3a4113e226a8c1e3305e395b90013b78dd94a723ce",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/commons-codec/commons-codec/1.9/commons-codec-1.9.jar",
+        "https://repo1.maven.org/maven2/commons-codec/commons-codec/1.9/commons-codec-1.9.jar",
+    ],
 )
 
-maven_jar(
-    name = "net_bytebuddy_agent",
-    artifact = "net.bytebuddy:byte-buddy-agent:1.6.14",
-    sha1 = "ba1e5ba3a84fb2fbf2f4de9138df19665eec4d59",
+java_import_external(
+    name = "commons_logging",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "daddea1ea0be0f56978ab3006b8ac92834afeefbd9b7e4e6316fca57df0fa636",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar",
+        "https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar",
+    ],
 )
 
-maven_jar(
+java_import_external(
+    name = "joda_time",
+    licenses = ["notice"],  # Apache 2
+    jar_sha256 = "b4670b95f75957c974284c5f3ada966040be2578f643c5c6083d262162061fa2",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/joda-time/joda-time/2.8.1/joda-time-2.8.1.jar",
+        "https://repo1.maven.org/maven2/joda-time/joda-time/2.8.1/joda-time-2.8.1.jar",
+    ],
+)
+
+java_import_external(
+    name = "junit",
+    licenses = ["reciprocal"],  # Eclipse Public License 1.0
+    jar_sha256 = "59721f0805e223d84b90677887d9ff567dc534d7c502ca903c0c2b17f05c116a",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/junit/junit/4.12/junit-4.12.jar",
+        "https://maven.ibiblio.org/maven2/junit/junit/4.12/junit-4.12.jar",
+    ],
+    deps = ["@org_hamcrest_core"],
+)
+
+java_import_external(
+    name = "net_bytebuddy_byte_buddy",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "917758b3c651e278a15a029ba1d42dbf802d8b0e1fe2aa4b81c5750c64f461c1",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/net/bytebuddy/byte-buddy/1.6.14/byte-buddy-1.6.14.jar",
+        "https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy/1.6.14/byte-buddy-1.6.14.jar",
+    ],
+    deps = [
+        "@com_google_code_findbugs_annotations",
+    ],
+)
+
+java_import_external(
+    name = "net_bytebuddy_byte_buddy_agent",
+    licenses = ["notice"],  # The Apache Software License, Version 2.0
+    jar_sha256 = "c141a2d6809c3eeff4a43d25992826abccebdd4b793af3e7a5f346e88ae73a33",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/net/bytebuddy/byte-buddy-agent/1.6.14/byte-buddy-agent-1.6.14.jar",
+        "https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy-agent/1.6.14/byte-buddy-agent-1.6.14.jar",
+    ],
+)
+
+java_import_external(
+    name = "org_apache_httpcomponents_httpclient",
+    licenses = ["notice"],  # Apache License, Version 2.0
+    jar_sha256 = "0dffc621400d6c632f55787d996b8aeca36b30746a716e079a985f24d8074057",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar",
+        "https://maven.ibiblio.org/maven2/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar",
+    ],
+    deps = [
+        "@org_apache_httpcomponents_httpcore",
+        "@commons_logging",
+        "@commons_codec",
+    ],
+)
+
+java_import_external(
+    name = "org_apache_httpcomponents_httpcore",
+    licenses = ["notice"],  # Apache License, Version 2.0
+    jar_sha256 = "f7bc09dc8a7003822d109634ffd3845d579d12e725ae54673e323a7ce7f5e325",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar",
+        "https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar",
+    ],
+)
+
+java_import_external(
+    name = "org_hamcrest_core",
+    licenses = ["notice"],  # New BSD License
+    jar_sha256 = "66fdef91e9739348df7a096aa384a5685f4e875584cce89386a7a47251c4d8e9",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar",
+        "https://maven.ibiblio.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar",
+    ],
+)
+
+java_import_external(
+    name = "org_json",
+    licenses = ["notice"],  # The JSON License
+    jar_sha256 = "813f37e4820f1854e8a4eb4f80df94bf1b1f2ec6c3b72692f23ab9a556256af6",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/org/json/json/20170516/json-20170516.jar",
+        "https://repo1.maven.org/maven2/org/json/json/20170516/json-20170516.jar",
+    ],
+)
+
+java_import_external(
+    name = "org_mockito_core",
+    licenses = ["notice"],  # The MIT License
+    jar_sha256 = "c496fe3790c55c07697cf37f5062f8758591ab035900bc108ce185b48df563a0",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/org/mockito/mockito-core/2.8.47/mockito-core-2.8.47.jar",
+        "https://maven.ibiblio.org/maven2/org/mockito/mockito-core/2.8.47/mockito-core-2.8.47.jar",
+    ],
+    deps = [
+        "@net_bytebuddy_byte_buddy",
+        "@net_bytebuddy_byte_buddy_agent",
+        "@org_objenesis",
+    ],
+)
+
+java_import_external(
     name = "org_objenesis",
-    artifact = "org.objenesis:objenesis:2.5",
-    sha1 = "612ecb799912ccf77cba9b3ed8c813da086076e9",
+    licenses = ["notice"],  # Apache 2
+    jar_sha256 = "293328e1b0d31ed30bb89fca542b6c52fac00989bb0e62eb9d98d630c4dd6b7c",
+    jar_urls = [
+        "https://maven.ibiblio.org/maven2/org/objenesis/objenesis/2.5/objenesis-2.5.jar",
+        "https://repo1.maven.org/maven2/org/objenesis/objenesis/2.5/objenesis-2.5.jar",
+    ],
 )
+
+java_import_external(
+    name = "software_amazon_ion_java",
+    licenses = ["notice"],  # The Apache License, Version 2.0
+    jar_sha256 = "0d127b205a1fce0abc2a3757a041748651bc66c15cf4c059bac5833b27d471a5",
+    jar_urls = [
+        "https://repo1.maven.org/maven2/software/amazon/ion/ion-java/1.0.2/ion-java-1.0.2.jar",
+        "https://maven.ibiblio.org/maven2/software/amazon/ion/ion-java/1.0.2/ion-java-1.0.2.jar",
+    ],
+)
+
+# END BAZEL MAVEN CONFIG GENERATOR
+################################################################################
 
 #-----------------------------------------------------------------------------
 # objc

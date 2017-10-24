@@ -22,7 +22,7 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
-        "@com_google_errorprone_error_prone_annotations//jar",
+        "@com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -80,7 +80,7 @@ java_library(
         ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "//java/src/main/java/com/google/crypto/tink/annotations",
-        "@com_google_errorprone_error_prone_annotations//jar",
+        "@com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -104,7 +104,7 @@ java_library(
         ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "//java/src/main/java/com/google/crypto/tink/annotations",
-        "@com_google_errorprone_error_prone_annotations//jar",
+        "@com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -131,8 +131,8 @@ java_library(
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "//java/src/main/java/com/google/crypto/tink/annotations",
-        "@com_google_code_findbugs_jsr305//jar",
-        "@com_google_errorprone_error_prone_annotations//jar",
+        "@com_google_code_findbugs_jsr305",
+        "@com_google_errorprone_error_prone_annotations",
     ],
 )
 

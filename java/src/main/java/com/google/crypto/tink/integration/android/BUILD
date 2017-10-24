@@ -25,7 +25,7 @@ android_library(
         "//java/src/main/java/com/google/crypto/tink:cleartext_keyset_handle_android",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:aead",
-        "@com_google_code_findbugs_jsr305//jar",
+        "@com_google_code_findbugs_jsr305",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
     ],
 )

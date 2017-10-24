@@ -15,7 +15,7 @@ java_library(
         "@com_google_code_findbugs_jsr305//jar",
         "@com_google_http_client//jar",
         "@joda_time//jar",
-        "@org_json_json//jar",
+        "@org_json//jar",
     ],
 )
 
@@ -34,8 +34,8 @@ java_library(
         "//java:testonly",
         "@com_google_http_client//jar",
         "@joda_time//jar",
-        "@junit_junit_4//jar",
-        "@org_json_json//jar",
+        "@junit",
+        "@org_json//jar",
     ],
 )
 

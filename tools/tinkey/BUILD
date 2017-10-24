@@ -60,7 +60,7 @@ java_library(
         "@com_fasterxml_jackson_core//jar",
         "@com_google_protobuf_java//:protobuf_java",
         "@com_google_truth//jar",
-        "@junit_junit_4//jar",
+        "@junit",
     ],
 )
 

@@ -39,7 +39,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
-        "@com_google_code_findbugs_jsr305//jar",
+        "@com_google_code_findbugs_jsr305",
     ] + FULL_PROTOS,
 )
 
@@ -53,6 +53,6 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
-        "@com_google_code_findbugs_jsr305//jar",
+        "@com_google_code_findbugs_jsr305",
     ] + LITE_PROTOS,
 )

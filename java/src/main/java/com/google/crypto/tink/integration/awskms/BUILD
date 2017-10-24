@@ -16,20 +16,19 @@ java_library(
         ":auto_service_plugin",
     ],
     runtime_deps = [
-        "@com_fasterxml_jackson_annotations//jar",
-        "@com_fasterxml_jackson_databind//jar",
-        "@com_google_code_gson_gson//jar",
-        "@joda_time//jar",
-        "@org_apache_commons_logging//jar",
-        "@org_apache_httpcomponents_httpclient//jar",
-        "@org_apache_httpcomponents_httpcore//jar",
+        "@com_fasterxml_jackson_core_jackson_annotations",
+        "@com_fasterxml_jackson_core_jackson_databind",
+        "@commons_logging",
+        "@joda_time",
+        "@org_apache_httpcomponents_httpclient",
+        "@org_apache_httpcomponents_httpcore",
     ],
     deps = [
         "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink/subtle",
-        "@com_amazonaws_sdk_core//jar",
-        "@com_amazonaws_sdk_kms//jar",
-        "@com_google_auto_service//jar",
+        "@com_amazonaws_aws_java_sdk_core",
+        "@com_amazonaws_aws_java_sdk_kms",
+        "@com_google_auto_service",
     ],
 )
 
@@ -37,8 +36,8 @@ java_plugin(
     name = "auto_service_plugin",
     processor_class = "com.google.auto.service.processor.AutoServiceProcessor",
     deps = [
-        "@com_google_auto_common//jar",
-        "@com_google_auto_service//jar",
-        "@com_google_guava//jar",
+        "@com_google_auto_common",
+        "@com_google_auto_service",
+        "@com_google_guava",
     ],
 )

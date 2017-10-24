@@ -69,10 +69,10 @@ java_library(
     deps = [
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
-        "@com_google_code_findbugs_jsr305//jar",
-        "@com_google_errorprone_error_prone_annotations//jar",
+        "@com_google_code_findbugs_jsr305",
+        "@com_google_errorprone_error_prone_annotations",
         "@com_google_protobuf_java//:protobuf_java",
-        "@org_json_json//jar",
+        "@org_json",
     ] + FULL_PROTOS,
 )
 
@@ -97,10 +97,10 @@ java_library(
     deps = [
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
-        "@com_google_code_findbugs_jsr305//jar",
-        "@com_google_errorprone_error_prone_annotations//jar",
+        "@com_google_code_findbugs_jsr305",
+        "@com_google_errorprone_error_prone_annotations",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
-        "@org_json_json//jar",
+        "@org_json",
     ] + LITE_PROTOS,
 )
 
