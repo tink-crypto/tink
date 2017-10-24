@@ -41,6 +41,7 @@ public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
       EllipticCurves.PointFormatType ecPointFormat,
       EciesAeadHkdfDemHelper demHelper)
       throws GeneralSecurityException {
+    EllipticCurves.checkPublicKey(recipientPublicKey);
     this.senderKem = new EciesHkdfSenderKem(recipientPublicKey);
     this.hkdfSalt = hkdfSalt;
     this.hkdfHmacAlgo = hkdfHmacAlgo;

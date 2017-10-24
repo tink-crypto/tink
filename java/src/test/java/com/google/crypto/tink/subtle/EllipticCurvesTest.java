@@ -887,6 +887,23 @@ public class EllipticCurvesTest {
   }
 
   @Test
+  public void testCheckPublicKeyWithPointNotOnCurve() throws Exception {
+    KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
+    // The 1st test vector contains public point that is not on the curve.
+    EcPublicKeyTestVector test = EC_MODIFIED_PUBLIC_KEYS[0];
+    ECPublicKeySpec spec = test.getSpec();
+    try {
+      ECPublicKey modifiedKey = (ECPublicKey) kf.generatePublic(spec);
+      EllipticCurves.checkPublicKey(modifiedKey);
+      fail("Modified publicKey shouldn't be accepted");
+    } catch (GeneralSecurityException ex) {
+      // OK, since the public point is not on the curve.
+      System.out.println(
+          "testCheckPublicKeyWithPointNotOnCurve" + test.comment + " throws " + ex.toString());
+    }
+  }
+
+  @Test
   public void testComputeSharedSecret_ModifiedPublicKeys_shouldFail() throws Exception {
     KeyPairGenerator keyGen = EngineFactory.KEY_PAIR_GENERATOR.getInstance("EC");
     keyGen.initialize(EllipticCurves.getNistP256Params());

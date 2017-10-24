@@ -94,7 +94,7 @@ public final class EllipticCurves {
   /**
    * Checks that a point is on a given elliptic curve.
    *
-   * <p>><b>Warning:</b> Please use {@link #validatePublicKey} if you want to validate a public key
+   * <p><b>Warning:</b> Please use {@link #validatePublicKey} if you want to validate a public key
    * to avoid invalid curve attacks or small subgroup attacks in ECDH.
    *
    * <p>This method implements the partial public key validation routine from Section 5.6.2.6 of <a
@@ -130,6 +130,22 @@ public final class EllipticCurves {
     if (!lhs.equals(rhs)) {
       throw new GeneralSecurityException("Point is not on curve");
     }
+  }
+
+  /**
+   * Checks that the point of the public key is on the curve of the public key.
+   *
+   * <p>This is a sanity check, because the curve of the public key might be under control of the
+   * adversary.
+   *
+   * <p><b>Warning:</b> Please use {@link #validatePublicKey} if you want to validate a public key
+   * to avoid invalid curve attacks or small subgroup attacks in ECDH.
+   *
+   * @param key must be a key defined over a curve using a prime order field.
+   * @throws GeneralSecurityException if the key is not valid.
+   */
+  static void checkPublicKey(ECPublicKey key) throws GeneralSecurityException {
+    checkPointOnCurve(key.getW(), key.getParams().getCurve());
   }
 
   /**
