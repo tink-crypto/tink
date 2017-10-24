@@ -33,6 +33,7 @@ import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import javax.crypto.KeyAgreement;
 
@@ -154,15 +155,21 @@ public final class EllipticCurves {
    */
   public static void validatePublicKey(ECPublicKey publicKey, ECPrivateKey privateKey)
       throws GeneralSecurityException {
+    validatePublicKeySpec(publicKey, privateKey);
+    checkPointOnCurve(publicKey.getW(), privateKey.getParams().getCurve());
+  }
+
+  /** Checks that the public key's params spec is the same as the private key's params spec. */
+  static void validatePublicKeySpec(ECPublicKey publicKey, ECPrivateKey privateKey)
+      throws GeneralSecurityException {
     ECParameterSpec publicKeySpec = publicKey.getParams();
     ECParameterSpec privateKeySpec = privateKey.getParams();
     if (!publicKeySpec.getCurve().equals(privateKeySpec.getCurve())
         || !publicKeySpec.getGenerator().equals(privateKeySpec.getGenerator())
         || !publicKeySpec.getOrder().equals(privateKeySpec.getOrder())
         || publicKeySpec.getCofactor() != privateKeySpec.getCofactor()) {
-      throw new GeneralSecurityException("invalid public key");
+      throw new GeneralSecurityException("invalid public key spec");
     }
-    checkPointOnCurve(publicKey.getW(), privateKey.getParams().getCurve());
   }
 
   /**
@@ -366,8 +373,26 @@ public final class EllipticCurves {
    * @return the point
    * @throws GeneralSecurityException if the encoded point is invalid or if the curve or format are
    *     not supported.
+   * @deprecated use {#pointDecode}
    */
+  @Deprecated
   public static ECPoint ecPointDecode(EllipticCurve curve, PointFormatType format, byte[] encoded)
+      throws GeneralSecurityException {
+    return pointDecode(curve, format, encoded);
+  }
+
+  /**
+   * Decodes an encoded point on an elliptic curve. This method checks that the encoded point is on
+   * the curve.
+   *
+   * @param curve the elliptic curve
+   * @param format the format used to enocde the point
+   * @param encoded the encoded point
+   * @return the point
+   * @throws GeneralSecurityException if the encoded point is invalid or if the curve or format are
+   *     not supported.
+   */
+  public static ECPoint pointDecode(EllipticCurve curve, PointFormatType format, byte[] encoded)
       throws GeneralSecurityException {
     int coordinateSize = fieldSizeInBytes(curve);
     switch (format) {
@@ -422,7 +447,7 @@ public final class EllipticCurves {
    * @throws GeneralSecurityException if the point is not on the curve or if the format is not
    *     supported.
    */
-  public static byte[] ecPointEncode(EllipticCurve curve, PointFormatType format, ECPoint point)
+  public static byte[] pointEncode(EllipticCurve curve, PointFormatType format, ECPoint point)
       throws GeneralSecurityException {
     checkPointOnCurve(point, curve);
     int coordinateSize = fieldSizeInBytes(curve);
@@ -471,6 +496,19 @@ public final class EllipticCurves {
   }
 
   /**
+   * Returns an {@link ECPublicKey} from {@code x509PublicKey} which is an encoding of a public
+   * key, encoded according to the ASN.1 type SubjectPublicKeyInfo.
+   *
+   * TODO(b/68672497): test that in Java one can always get this representation by using
+   * {@link ECPublicKey#getEncoded), regardless of the provider.
+   */
+  public static ECPublicKey getEcPublicKey(final byte[] x509PublicKey)
+      throws GeneralSecurityException {
+    KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
+    return (ECPublicKey) kf.generatePublic(new X509EncodedKeySpec(x509PublicKey));
+  }
+
+  /**
    * Returns an {@link ECPublicKey} from {@code publicKey} that is a public key in point format
    * {@code pointFormat} on {@code curve}.
    */
@@ -487,7 +525,7 @@ public final class EllipticCurves {
   public static ECPublicKey getEcPublicKey(
       ECParameterSpec spec, PointFormatType pointFormat, final byte[] publicKey)
       throws GeneralSecurityException {
-    ECPoint point = ecPointDecode(spec.getCurve(), pointFormat, publicKey);
+    ECPoint point = pointDecode(spec.getCurve(), pointFormat, publicKey);
     ECPublicKeySpec pubSpec = new ECPublicKeySpec(point, spec);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     return (ECPublicKey) kf.generatePublic(pubSpec);
@@ -508,7 +546,13 @@ public final class EllipticCurves {
     return (ECPublicKey) kf.generatePublic(spec);
   }
 
-  /** Returns an {@code ECPrivateKey} from {@code pkcs8PrivateKey}. */
+  /**
+   * Returns an {@code ECPrivateKey} from {@code pkcs8PrivateKey} which is an encoding of a private
+   * key, encoded according to the ASN.1 type SubjectPublicKeyInfo.
+   *
+   * TODO(b/68672497): test that in Java one can always get this representation by using
+   * {@link ECPrivateKey#getEncoded), regardless of the provider.
+   */
   public static ECPrivateKey getEcPrivateKey(final byte[] pkcs8PrivateKey)
       throws GeneralSecurityException {
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
@@ -555,18 +599,23 @@ public final class EllipticCurves {
   /* Generates the DH shared secret using {@code myPrivateKey} and {@code peerPublicKey} */
   public static byte[] computeSharedSecret(ECPrivateKey myPrivateKey, ECPublicKey peerPublicKey)
       throws GeneralSecurityException {
-    validatePublicKey(peerPublicKey, myPrivateKey);
-    // Explicitly reconstruct the peer public key using private key's spec. There are 2 reasons:
-    //  - The peer public key's spec is under attacker's control and should be ignored.
-    //  - In case we have a bug in validatePublicKey, this will protect us from attack.
+    validatePublicKeySpec(peerPublicKey, myPrivateKey);
+    return computeSharedSecret(myPrivateKey, peerPublicKey.getW());
+  }
+
+  /* Generates the DH shared secret using {@code myPrivateKey} and {@code publicPoint} */
+  public static byte[] computeSharedSecret(ECPrivateKey myPrivateKey, ECPoint publicPoint)
+      throws GeneralSecurityException {
+    checkPointOnCurve(publicPoint, myPrivateKey.getParams().getCurve());
+    // Explicitly reconstruct the peer public key using private key's spec.
     ECParameterSpec privSpec = myPrivateKey.getParams();
     EllipticCurve privCurve = privSpec.getCurve();
-    ECPublicKeySpec reconstructedPubSpec = new ECPublicKeySpec(peerPublicKey.getW(), privSpec);
+    ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(publicPoint, privSpec);
     KeyFactory kf = KeyFactory.getInstance("EC");
-    PublicKey reconstructedPubKey = kf.generatePublic(reconstructedPubSpec);
+    PublicKey publicKey = kf.generatePublic(publicKeySpec);
     KeyAgreement ka = EngineFactory.KEY_AGREEMENT.getInstance("ECDH");
     ka.init(myPrivateKey);
-    ka.doPhase(reconstructedPubKey, true /* lastPhase */);
+    ka.doPhase(publicKey, true /* lastPhase */);
     byte[] secret = ka.generateSecret();
     validateSharedSecret(secret, myPrivateKey);
     return secret;

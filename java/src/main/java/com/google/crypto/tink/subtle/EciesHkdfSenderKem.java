@@ -71,7 +71,7 @@ public final class EciesHkdfSenderKem {
     byte[] sharedSecret = EllipticCurves.computeSharedSecret(
         ephemeralPrivateKey, recipientPublicKey);
     byte[] kemBytes =
-        EllipticCurves.ecPointEncode(
+        EllipticCurves.pointEncode(
             ephemeralPublicKey.getParams().getCurve(), pointFormat, ephemeralPublicKey.getW());
     byte[] symmetricKey =
         Hkdf.computeEciesHkdfSymmetricKey(

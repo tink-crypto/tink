@@ -441,7 +441,7 @@ public class EllipticCurvesTest {
   public void testPointDecode() throws Exception {
     for (TestVector2 test : testVectors2) {
       EllipticCurve curve = EllipticCurves.getCurveSpec(test.curve).getCurve();
-      ECPoint p = EllipticCurves.ecPointDecode(curve, test.format, test.encoded);
+      ECPoint p = EllipticCurves.pointDecode(curve, test.format, test.encoded);
       assertEquals(p.getAffineX(), test.x);
       assertEquals(p.getAffineY(), test.y);
     }
@@ -452,7 +452,7 @@ public class EllipticCurvesTest {
     for (TestVector2 test : testVectors2) {
       EllipticCurve curve = EllipticCurves.getCurveSpec(test.curve).getCurve();
       ECPoint p = new ECPoint(test.x, test.y);
-      byte[] encoded = EllipticCurves.ecPointEncode(curve, test.format, p);
+      byte[] encoded = EllipticCurves.pointEncode(curve, test.format, p);
       assertEquals(TestUtil.hexEncode(encoded), TestUtil.hexEncode(test.encoded));
     }
   }
@@ -864,7 +864,7 @@ public class EllipticCurvesTest {
   };
 
   @Test
-  public void testComputeSharedSecret_invalidCurve_shouldFail() throws Exception {
+  public void testComputeSharedSecretWithInvalidCurve() throws Exception {
     KeyPair p256 = EllipticCurves.generateKeyPair(EllipticCurves.getNistP256Params());
     KeyPair p384 = EllipticCurves.generateKeyPair(EllipticCurves.getNistP384Params());
     try {
@@ -903,20 +903,45 @@ public class EllipticCurvesTest {
     }
   }
 
+  /**
+   * This test and testComputeSharedSecretWithModifiedPublicKeySpec test ECDH with modified
+   * public keys.
+   *
+   * <p>Depending on the encoding the public keys may contain a lot of redundant information, such
+   * as the order of the curve, cofactor etc. Implementations do not always use/check this
+   * information, and are vulnerable to attacks. For example, if an implementation uses the order
+   * given in the public key instead of the order derived from the private key then this could be
+   * used by an attacker to find the private key in a chosen message attack. Although some
+   * modifications might be harmless, it's better safe than sorry so the tests here require that
+   * all modifications are noticed.
+   */
   @Test
-  public void testComputeSharedSecret_ModifiedPublicKeys_shouldFail() throws Exception {
+  public void testComputeSharedSecretWithModifiedPublicKeys() throws Exception {
     KeyPairGenerator keyGen = EngineFactory.KEY_PAIR_GENERATOR.getInstance("EC");
     keyGen.initialize(EllipticCurves.getNistP256Params());
     ECPrivateKey priv = (ECPrivateKey) keyGen.generateKeyPair().getPrivate();
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
     for (EcPublicKeyTestVector test : EC_MODIFIED_PUBLIC_KEYS) {
+      X509EncodedKeySpec spec = test.getX509EncodedKeySpec();
       try {
-        X509EncodedKeySpec spec = test.getX509EncodedKeySpec();
         ECPublicKey modifiedKey = (ECPublicKey) kf.generatePublic(spec);
         EllipticCurves.computeSharedSecret(priv, modifiedKey);
-        fail("Modified public key shouldn't be accepted");
+        fail("Modified public key shouldn't be accepted: " + test.comment);
       } catch (GeneralSecurityException ex) {
-        // OK, since the public keys have been modified.
+        // Expected, since the public keys have been modified.
+        System.out.println(
+            "testComputeSharedSecret_ModifiedPublicKeys_shouldFail:"
+                + test.comment
+                + " throws "
+                + ex.toString());
+      }
+
+      try {
+        ECPublicKey modifiedKey = (ECPublicKey) kf.generatePublic(spec);
+        EllipticCurves.computeSharedSecret(priv, modifiedKey.getW());
+        fail("Modified public key shouldn't be accepted: " + test.comment);
+      } catch (GeneralSecurityException ex) {
+        // Expected, since the public keys have been modified.
         System.out.println(
             "testComputeSharedSecret_ModifiedPublicKeys_shouldFail:"
                 + test.comment
@@ -927,7 +952,7 @@ public class EllipticCurvesTest {
   }
 
   @Test
-  public void testComputeSharedSecret_ModifiedPublicKeySpec_shouldFail() throws Exception {
+  public void testComputeSharedSecretWithModifiedPublicKeySpec() throws Exception {
     KeyPairGenerator keyGen = EngineFactory.KEY_PAIR_GENERATOR.getInstance("EC");
     keyGen.initialize(EllipticCurves.getNistP256Params());
     ECPrivateKey priv = (ECPrivateKey) keyGen.generateKeyPair().getPrivate();
@@ -942,9 +967,9 @@ public class EllipticCurvesTest {
       try {
         ECPublicKey modifiedKey = (ECPublicKey) kf.generatePublic(spec);
         EllipticCurves.computeSharedSecret(priv, modifiedKey);
-        fail("Modified publicKey shouldn't be accepted");
+        fail("Modified publicKey shouldn't be accepted: " + test.comment);
       } catch (GeneralSecurityException ex) {
-        // OK, since the public keys have been modified.
+        // Expected, since the public keys have been modified.
         System.out.println(
             "testComputeSharedSecret_ModifiedPublicKeySpec_shouldFail:"
                 + test.comment

@@ -30,6 +30,8 @@ class PaymentMethodTokenConstants {
   // Zero IV is fine here because each encryption uses a unique key.
   public static final byte[] AES_CTR_ZERO_IV = new byte[16];
   public static final int HMAC_SHA256_KEY_SIZE = 16;
+  public static final EllipticCurves.CurveType P256_CURVE_TYPE =
+      EllipticCurves.CurveType.NIST_P256;
   public static final EllipticCurves.PointFormatType UNCOMPRESSED_POINT_FORMAT =
       EllipticCurves.PointFormatType.UNCOMPRESSED;
   public static final String PROTOCOL_VERSION_EC_V1 = "ECv1";
