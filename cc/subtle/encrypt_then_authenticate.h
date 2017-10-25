@@ -19,12 +19,12 @@
 
 #include <memory>
 
+#include "absl/strings/string_view.h"
 #include "cc/aead.h"
 #include "cc/mac.h"
 #include "cc/subtle/ind_cpa_cipher.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace crypto {
 namespace tink {
@@ -49,12 +49,12 @@ class EncryptThenAuthenticate : public Aead {
   // in bits represented as 64-bit bigendian unsigned integer. The final
   // ciphertext format is (ind-cpa ciphertext || mac).
   crypto::tink::util::StatusOr<std::string> Encrypt(
-      google::protobuf::StringPiece plaintext,
-      google::protobuf::StringPiece additional_data) const override;
+      absl::string_view plaintext,
+      absl::string_view additional_data) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece additional_data) const override;
+      absl::string_view ciphertext,
+      absl::string_view additional_data) const override;
 
   virtual ~EncryptThenAuthenticate() {}
 

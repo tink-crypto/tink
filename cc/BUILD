@@ -2,9 +2,6 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
 
-# TODO(przydatek): consider adding string_view/string_piece to util
-#     instead of relying on stringpiece in protobuf.
-
 # public libraries
 
 cc_library(
@@ -54,11 +51,10 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//cc/util:strings",
         "//cc/util:validation",
         "//proto:config_cc_proto",
         "//proto:tink_cc_proto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -67,7 +63,7 @@ cc_library(
     hdrs = ["aead.h"],
     deps = [
         "//cc/util:statusor",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -76,7 +72,7 @@ cc_library(
     hdrs = ["hybrid_decrypt.h"],
     deps = [
         "//cc/util:statusor",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -85,7 +81,7 @@ cc_library(
     hdrs = ["hybrid_encrypt.h"],
     deps = [
         "//cc/util:statusor",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -95,7 +91,7 @@ cc_library(
     deps = [
         "//cc/util:status",
         "//cc/util:statusor",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -118,6 +114,7 @@ cc_library(
         "//cc/util:ptr_util",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -131,6 +128,7 @@ cc_library(
         "//cc/util:ptr_util",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -158,8 +156,8 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//cc/util:strings",
         "//proto:config_cc_proto",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -183,7 +181,6 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
-        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -201,7 +198,7 @@ cc_library(
         "//cc/util:statusor",
         "//cc/util:validation",
         "//proto:tink_cc_proto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -241,6 +238,7 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
         "@com_google_protobuf//:protobuf_lite",
     ],
 )

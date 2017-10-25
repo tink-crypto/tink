@@ -16,10 +16,10 @@
 
 #include "cc/config.h"
 
+#include "absl/strings/ascii.h"
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "cc/util/strings.h"
 #include "proto/config.pb.h"
 
 using google::crypto::tink::KeyTypeEntry;
@@ -66,7 +66,7 @@ util::Status Config::Register(
     const google::crypto::tink::RegistryConfig& config) {
   for (const auto& entry : config.entry()) {
     util::Status status;
-    std::string primitive_name = to_lowercase(entry.primitive_name());
+    std::string primitive_name = absl::AsciiStrToLower(entry.primitive_name());
     std::string mac = "mac";
 
     if (primitive_name == "mac") {

@@ -37,7 +37,6 @@ cc_library(
         ":hmac_key_manager",
         "//cc:catalogue",
         "//cc/util:status",
-        "//cc/util:strings",
     ],
 )
 

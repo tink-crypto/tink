@@ -17,6 +17,7 @@
 #include "cc/subtle/ec_util.h"
 #include <memory>
 #include <string>
+
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/errors.h"
 #include "openssl/bn.h"
@@ -25,15 +26,14 @@
 
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
-using google::protobuf::StringPiece;
 
 namespace crypto {
 namespace tink {
 
 // static
 crypto::tink::util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
-    EllipticCurveType curve_type, StringPiece priv, StringPiece pub_x,
-    StringPiece pub_y) {
+    EllipticCurveType curve_type, absl::string_view priv, absl::string_view pub_x,
+    absl::string_view pub_y) {
   bssl::UniquePtr<BIGNUM> priv_key(
       BN_bin2bn(reinterpret_cast<const unsigned char *>(priv.data()),
                 priv.size(), nullptr));

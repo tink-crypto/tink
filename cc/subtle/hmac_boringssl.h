@@ -19,10 +19,10 @@
 
 #include <memory>
 
+#include "absl/strings/string_view.h"
 #include "cc/mac.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/evp.h"
 #include "proto/common.pb.h"
 
@@ -37,13 +37,13 @@ class HmacBoringSsl : public Mac {
 
   // Computes and returns the HMAC for 'data'.
   crypto::tink::util::StatusOr<std::string> ComputeMac(
-      google::protobuf::StringPiece data) const override;
+      absl::string_view data) const override;
 
   // Verifies if 'mac' is a correct HMAC for 'data'.
   // Returns Status::OK if 'mac' is correct, and a non-OK-Status otherwise.
   crypto::tink::util::Status VerifyMac(
-      google::protobuf::StringPiece mac,
-      google::protobuf::StringPiece data) const override;
+      absl::string_view mac,
+      absl::string_view data) const override;
 
   virtual ~HmacBoringSsl() {}
 

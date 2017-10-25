@@ -17,10 +17,10 @@
 #ifndef TINK_HYBRID_HYBRID_DECRYPT_SET_WRAPPER_H_
 #define TINK_HYBRID_HYBRID_DECRYPT_SET_WRAPPER_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/hybrid_decrypt.h"
 #include "cc/primitive_set.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -38,8 +38,8 @@ class HybridDecryptSetWrapper : public HybridDecrypt {
           std::unique_ptr<PrimitiveSet<HybridDecrypt>> hybrid_decrypt_set);
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece context_info) const override;
+      absl::string_view ciphertext,
+      absl::string_view context_info) const override;
 
   virtual ~HybridDecryptSetWrapper() {}
 

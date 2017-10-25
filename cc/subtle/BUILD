@@ -15,7 +15,7 @@ cc_library(
         "//cc/util:statusor",
         "//proto:common_cc_proto",
         "@boringssl//:crypto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -31,7 +31,7 @@ cc_library(
         "//cc/util:statusor",
         "//proto:common_cc_proto",
         "@boringssl//:crypto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -46,7 +46,7 @@ cc_library(
         "//cc/util:statusor",
         "//proto:common_cc_proto",
         "@boringssl//:crypto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -61,7 +61,7 @@ cc_library(
         "//cc/util:statusor",
         "//proto:common_cc_proto",
         "@boringssl//:crypto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -77,7 +77,7 @@ cc_library(
         "//cc/util:statusor",
         "//proto:common_cc_proto",
         "@boringssl//:crypto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -92,7 +92,7 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "@boringssl//:crypto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -111,7 +111,7 @@ cc_library(
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -128,7 +128,7 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "@boringssl//:crypto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -151,7 +151,7 @@ cc_library(
         "//cc/util:statusor",
         "//proto:common_cc_proto",
         "@boringssl//:crypto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 

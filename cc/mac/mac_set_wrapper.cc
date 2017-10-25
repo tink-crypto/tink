@@ -52,7 +52,7 @@ util::StatusOr<std::unique_ptr<Mac>> MacSetWrapper::NewMac(
 }
 
 util::StatusOr<std::string> MacSetWrapper::ComputeMac(
-    google::protobuf::StringPiece data) const {
+    absl::string_view data) const {
   auto compute_mac_result =
       mac_set_->get_primary()->get_primitive().ComputeMac(data);
   if (!compute_mac_result.ok()) return compute_mac_result.status();
@@ -61,14 +61,14 @@ util::StatusOr<std::string> MacSetWrapper::ComputeMac(
 }
 
 util::Status MacSetWrapper::VerifyMac(
-    google::protobuf::StringPiece mac_value,
-    google::protobuf::StringPiece data) const {
+    absl::string_view mac_value,
+    absl::string_view data) const {
   if (mac_value.length() > CryptoFormat::kNonRawPrefixSize) {
-    const std::string& key_id = mac_value.substr(0,
-        CryptoFormat::kNonRawPrefixSize);
+    const std::string& key_id = std::string(mac_value.substr(0,
+        CryptoFormat::kNonRawPrefixSize));
     auto primitives_result = mac_set_->get_primitives(key_id);
     if (primitives_result.ok()) {
-      google::protobuf::StringPiece raw_mac_value =
+      absl::string_view raw_mac_value =
           mac_value.substr(CryptoFormat::kNonRawPrefixSize);
       for (auto& mac_entry : *(primitives_result.ValueOrDie())) {
         Mac& mac = mac_entry.get_primitive();

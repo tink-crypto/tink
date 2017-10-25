@@ -17,8 +17,8 @@
 #ifndef TINK_IND_CPA_CIPHER_H_
 #define TINK_IND_CPA_CIPHER_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace crypto {
 namespace tink {
@@ -33,11 +33,11 @@ class IndCpaCipher {
   // Encrypts 'plaintext'. The resulting ciphertext is indistinguishable under
   // chosen-plaintext attack. However, it does not have integrity protection.
   virtual crypto::tink::util::StatusOr<std::string> Encrypt(
-      google::protobuf::StringPiece plaintext) const = 0;
+      absl::string_view plaintext) const = 0;
 
   // Decrypts 'ciphertext' and returns the resulting plaintext.
   virtual crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece ciphertext) const = 0;
+      absl::string_view ciphertext) const = 0;
 
   virtual ~IndCpaCipher() {}
 };

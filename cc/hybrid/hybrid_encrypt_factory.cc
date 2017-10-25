@@ -23,7 +23,6 @@
 #include "cc/hybrid/hybrid_encrypt_set_wrapper.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace util = crypto::tink::util;
 

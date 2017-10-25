@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include "absl/strings/string_view.h"
 #include "cc/aead.h"
 #include "cc/hybrid_decrypt.h"
 #include "cc/hybrid_encrypt.h"
@@ -26,7 +27,6 @@
 #include "cc/mac.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/common.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
@@ -42,14 +42,14 @@ namespace test {
 // Returns a status if the size of the input is odd or if the input contains
 // characters that are not hexadecimal.
 crypto::tink::util::StatusOr<std::string> HexDecode(
-    google::protobuf::StringPiece hex);
+    absl::string_view hex);
 
 // Converts a hexadecimal string into a string of bytes.
 // Dies if the input is not a valid hexadecimal string.
-std::string HexDecodeOrDie(google::protobuf::StringPiece hex);
+std::string HexDecodeOrDie(absl::string_view hex);
 
 // Converts a string of bytes into a hexadecimal string.
-std::string HexEncode(google::protobuf::StringPiece bytes);
+std::string HexEncode(absl::string_view bytes);
 
 // Creates a KeysetHandle object for the given 'keyset'.
 std::unique_ptr<KeysetHandle> GetKeysetHandle(
@@ -99,20 +99,20 @@ google::crypto::tink::EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
 // as a parameter of the constructor.
 class DummyAead : public Aead {
  public:
-  DummyAead(google::protobuf::StringPiece aead_name) : aead_name_(aead_name) {}
+  DummyAead(absl::string_view aead_name) : aead_name_(aead_name) {}
 
   // Computes a dummy ciphertext, which is concatenation of provided 'plaintext'
   // with the name of this DummyAead.
   crypto::tink::util::StatusOr<std::string> Encrypt(
-      google::protobuf::StringPiece plaintext,
-      google::protobuf::StringPiece associated_data) const override {
-    return plaintext.ToString().append(aead_name_);
+      absl::string_view plaintext,
+      absl::string_view associated_data) const override {
+    return std::string(plaintext.data(), plaintext.size()).append(aead_name_);
   }
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece associated_data) const override {
-    std::string c = ciphertext.ToString();
+      absl::string_view ciphertext,
+      absl::string_view associated_data) const override {
+    std::string c(ciphertext.data(), ciphertext.size());
     size_t pos = c.rfind(aead_name_);
     if (pos != std::string::npos &&
         ciphertext.length() == (unsigned)(aead_name_.length() + pos)) {
@@ -131,15 +131,15 @@ class DummyAead : public Aead {
 // as a parameter of the constructor.
 class DummyHybridEncrypt : public HybridEncrypt {
  public:
-  DummyHybridEncrypt(google::protobuf::StringPiece hybrid_name)
+  DummyHybridEncrypt(absl::string_view hybrid_name)
       : hybrid_name_(hybrid_name) {}
 
   // Computes a dummy ciphertext, which is concatenation of provided 'plaintext'
   // with the name of this DummyHybridEncrypt.
   crypto::tink::util::StatusOr<std::string> Encrypt(
-      google::protobuf::StringPiece plaintext,
-      google::protobuf::StringPiece context_info) const override {
-    return plaintext.ToString().append(hybrid_name_);
+      absl::string_view plaintext,
+      absl::string_view context_info) const override {
+    return std::string(plaintext.data(), plaintext.size()).append(hybrid_name_);
   }
 
  private:
@@ -151,15 +151,15 @@ class DummyHybridEncrypt : public HybridEncrypt {
 // as a parameter of the constructor.
 class DummyHybridDecrypt : public HybridDecrypt {
  public:
-  DummyHybridDecrypt(google::protobuf::StringPiece hybrid_name)
+  DummyHybridDecrypt(absl::string_view hybrid_name)
       : hybrid_name_(hybrid_name) {}
 
   // Decrypts a dummy ciphertext, which should be a concatenation
   // of a plaintext with the name of this DummyHybridDecrypt.
   crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece context_info) const override {
-    std::string c = ciphertext.ToString();
+      absl::string_view ciphertext,
+      absl::string_view context_info) const override {
+    std::string c(ciphertext.data(), ciphertext.size());
     size_t pos = c.rfind(hybrid_name_);
     if (pos != std::string::npos &&
         ciphertext.length() == (unsigned)(hybrid_name_.length() + pos)) {
@@ -183,14 +183,14 @@ class DummyMac : public Mac {
   // Computes a dummy MAC, which is concatenation of provided 'data'
   // with the name of this DummyMac.
   crypto::tink::util::StatusOr<std::string> ComputeMac(
-      google::protobuf::StringPiece data) const override {
-    return data.ToString().append(mac_name_);
+      absl::string_view data) const override {
+    return std::string(data.data(), data.size()).append(mac_name_);
   }
 
   crypto::tink::util::Status VerifyMac(
-      google::protobuf::StringPiece mac,
-      google::protobuf::StringPiece data) const override {
-    if (mac == (data.ToString().append(mac_name_))) {
+      absl::string_view mac,
+      absl::string_view data) const override {
+    if (mac == std::string(data.data(), data.size()).append(mac_name_)) {
       return crypto::tink::util::Status::OK;
     } else {
       return crypto::tink::util::Status(

@@ -23,7 +23,6 @@
 #include "cc/hybrid/ecies_aead_hkdf_dem_helper.h"
 #include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
@@ -59,8 +58,8 @@ EciesAeadHkdfHybridEncrypt::New(const EciesAeadHkdfPublicKey& recipient_key) {
 }
 
 StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
-    google::protobuf::StringPiece plaintext,
-    google::protobuf::StringPiece context_info) const {
+    absl::string_view plaintext,
+    absl::string_view context_info) const {
   // Use KEM to get a symmetric key.
   auto kem_key_result = sender_kem_->GenerateKey(
       recipient_key_.params().kem_params().hkdf_hash_type(),

@@ -17,9 +17,9 @@
 #ifndef TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
 #define TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/bn.h"
 #include "openssl/evp.h"
 #include "proto/common.pb.h"
@@ -44,8 +44,8 @@ class SubtleUtilBoringSSL {
   // representation of public key's x-coordinate and y-coordinate.
   static crypto::tink::util::StatusOr<EC_POINT *> GetEcPoint(
       google::crypto::tink::EllipticCurveType curve,
-      google::protobuf::StringPiece pubx,
-      google::protobuf::StringPiece puby);
+      absl::string_view pubx,
+      absl::string_view puby);
 
   // Returns a new EC key for the specified curve.
   static crypto::tink::util::StatusOr<EcKey> GetNewEcKey(
@@ -60,7 +60,7 @@ class SubtleUtilBoringSSL {
   static crypto::tink::util::StatusOr<EC_POINT *> EcPointDecode(
       google::crypto::tink::EllipticCurveType curve,
       google::crypto::tink::EcPointFormat format,
-      google::protobuf::StringPiece encoded);
+      absl::string_view encoded);
 
   // Returns the encoded public key based on curve type, point format and
   // BoringSSL's EC_POINT public key point. The uncompressed point is encoded as

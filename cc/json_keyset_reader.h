@@ -19,9 +19,9 @@
 
 #include <istream>
 
+#include "absl/strings/string_view.h"
 #include "cc/keyset_reader.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -35,7 +35,7 @@ class JsonKeysetReader : public KeysetReader {
   static crypto::tink::util::StatusOr<std::unique_ptr<JsonKeysetReader>> New(
       std::unique_ptr<std::istream> keyset_stream);
   static crypto::tink::util::StatusOr<std::unique_ptr<JsonKeysetReader>> New(
-      google::protobuf::StringPiece serialized_keyset);
+      absl::string_view serialized_keyset);
 
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::Keyset>>
@@ -48,7 +48,7 @@ class JsonKeysetReader : public KeysetReader {
  private:
   JsonKeysetReader(std::unique_ptr<std::istream> keyset_stream)
       : serialized_keyset_(""), keyset_stream_(std::move(keyset_stream)) {}
-  JsonKeysetReader(google::protobuf::StringPiece serialized_keyset)
+  JsonKeysetReader(absl::string_view serialized_keyset)
       : serialized_keyset_(serialized_keyset), keyset_stream_(nullptr) {}
 
   std::string serialized_keyset_;

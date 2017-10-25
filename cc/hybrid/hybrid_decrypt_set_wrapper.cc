@@ -55,14 +55,14 @@ HybridDecryptSetWrapper::NewHybridDecrypt(
 }
 
 util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
-    google::protobuf::StringPiece ciphertext,
-    google::protobuf::StringPiece context_info) const {
+    absl::string_view ciphertext,
+    absl::string_view context_info) const {
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
-    const std::string& key_id = ciphertext.substr(0,
-        CryptoFormat::kNonRawPrefixSize);
+    const std::string& key_id = std::string(ciphertext.substr(0,
+        CryptoFormat::kNonRawPrefixSize));
     auto primitives_result = hybrid_decrypt_set_->get_primitives(key_id);
     if (primitives_result.ok()) {
-      google::protobuf::StringPiece raw_ciphertext =
+      absl::string_view raw_ciphertext =
           ciphertext.substr(CryptoFormat::kNonRawPrefixSize);
       for (auto& hybrid_decrypt_entry : *(primitives_result.ValueOrDie())) {
         HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry.get_primitive();

@@ -17,8 +17,8 @@
 #ifndef TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 #define TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/ec.h"
 #include "proto/common.pb.h"
 
@@ -39,10 +39,10 @@ class EciesHkdfRecipientKemBoringSsl {
   // public key, then uses hkdf to derive the symmetric key from the shared
   // secret, hkdf info and hkdf salt.
   crypto::tink::util::StatusOr<std::string> GenerateKey(
-      google::protobuf::StringPiece kem_bytes,
+      absl::string_view kem_bytes,
       google::crypto::tink::HashType hash,
-      google::protobuf::StringPiece hkdf_salt,
-      google::protobuf::StringPiece hkdf_info,
+      absl::string_view hkdf_salt,
+      absl::string_view hkdf_info,
       uint32_t key_size_in_bytes,
       google::crypto::tink::EcPointFormat point_format) const;
 

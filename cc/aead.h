@@ -17,8 +17,8 @@
 #ifndef TINK_AEAD_H_
 #define TINK_AEAD_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace crypto {
 namespace tink {
@@ -36,8 +36,8 @@ class Aead {
   // The ciphertext allows for checking authenticity and integrity
   // of the associated data , but does not guarantee its secrecy.
   virtual crypto::tink::util::StatusOr<std::string> Encrypt(
-      google::protobuf::StringPiece plaintext,
-      google::protobuf::StringPiece associated_data) const = 0;
+      absl::string_view plaintext,
+      absl::string_view associated_data) const = 0;
 
   // Decrypts 'ciphertext' with 'associated_data' as associated data,
   // and returns the resulting plaintext.
@@ -45,8 +45,8 @@ class Aead {
   // of the associated data, but there are no guarantees wrt. secrecy
   // of that data.
   virtual crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece associated_data) const = 0;
+      absl::string_view ciphertext,
+      absl::string_view associated_data) const = 0;
 
   virtual ~Aead() {}
 

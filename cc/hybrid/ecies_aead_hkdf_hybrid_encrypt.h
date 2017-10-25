@@ -17,13 +17,13 @@
 #ifndef TINK_HYBRID_ECIES_AEAD_HKDF_HYBRID_ENCRYPT_H_
 #define TINK_HYBRID_ECIES_AEAD_HKDF_HYBRID_ENCRYPT_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/aead.h"
 #include "cc/hybrid_encrypt.h"
 #include "cc/key_manager.h"
 #include "cc/hybrid/ecies_aead_hkdf_dem_helper.h"
 #include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
@@ -40,8 +40,8 @@ class EciesAeadHkdfHybridEncrypt : public HybridEncrypt {
       const google::crypto::tink::EciesAeadHkdfPublicKey& recipient_key);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
-      google::protobuf::StringPiece plaintext,
-      google::protobuf::StringPiece context_info) const override;
+      absl::string_view plaintext,
+      absl::string_view context_info) const override;
 
   virtual ~EciesAeadHkdfHybridEncrypt() {}
 

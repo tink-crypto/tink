@@ -20,11 +20,11 @@
 #ifndef TINK_KEY_MANAGER_H_
 #define TINK_KEY_MANAGER_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "google/protobuf/message.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -61,7 +61,7 @@ class KeyManager {
   // Returns the version of this key manager.
   virtual uint32_t get_version() const = 0;
 
-  bool DoesSupport(google::protobuf::StringPiece key_type) const {
+  bool DoesSupport(absl::string_view key_type) const {
     return (key_type == get_key_type());
   }
 

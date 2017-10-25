@@ -24,7 +24,6 @@
 #include "cc/crypto_format.h"
 #include "cc/util/errors.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -60,8 +59,11 @@ class PrimitiveSet {
         : primitive_(std::move(primitive)),
           identifier_(identifier),
           status_(status) {}
+
     P2& get_primitive() const { return *primitive_; }
+
     const std::string& get_identifier() const { return identifier_; }
+
     const google::crypto::tink::KeyStatusType get_status() const {
       return status_;
     }

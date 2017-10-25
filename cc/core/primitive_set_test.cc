@@ -20,7 +20,6 @@
 #include "cc/crypto_format.h"
 #include "cc/mac.h"
 #include "cc/util/test_util.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 

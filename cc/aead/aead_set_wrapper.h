@@ -17,10 +17,10 @@
 #ifndef TINK_AEAD_AEAD_SET_WRAPPER_H_
 #define TINK_AEAD_AEAD_SET_WRAPPER_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/aead.h"
 #include "cc/primitive_set.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -39,12 +39,12 @@ class AeadSetWrapper : public Aead {
       std::unique_ptr<PrimitiveSet<Aead>> aead_set);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
-      google::protobuf::StringPiece plaintext,
-      google::protobuf::StringPiece associated_data) const override;
+      absl::string_view plaintext,
+      absl::string_view associated_data) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece associated_data) const override;
+      absl::string_view ciphertext,
+      absl::string_view associated_data) const override;
 
   virtual ~AeadSetWrapper() {}
 

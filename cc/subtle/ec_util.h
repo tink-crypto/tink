@@ -17,9 +17,9 @@
 #ifndef TINK_SUBTLE_EC_UTIL_H_
 #define TINK_SUBTLE_EC_UTIL_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/common.pb.h"
 
 namespace crypto {
@@ -33,9 +33,9 @@ class EcUtil {
   // key's curve.
   static crypto::tink::util::StatusOr<std::string> ComputeEcdhSharedSecret(
       google::crypto::tink::EllipticCurveType curve_type,
-      google::protobuf::StringPiece priv,
-      google::protobuf::StringPiece pub_x,
-      google::protobuf::StringPiece pub_y);
+      absl::string_view priv,
+      absl::string_view pub_x,
+      absl::string_view pub_y);
 
   // Returns the encoding size of a point on the specified elliptic curve
   // when the given 'point_format' is used.

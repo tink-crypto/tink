@@ -19,10 +19,10 @@
 
 #include <memory>
 
+#include "absl/strings/string_view.h"
 #include "cc/aead.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/evp.h"
 
 namespace crypto {
@@ -31,15 +31,15 @@ namespace tink {
 class AesGcmBoringSsl : public Aead {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
-      google::protobuf::StringPiece key_value);
+      absl::string_view key_value);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
-      google::protobuf::StringPiece plaintext,
-      google::protobuf::StringPiece additional_data) const override;
+      absl::string_view plaintext,
+      absl::string_view additional_data) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece additional_data) const override;
+      absl::string_view ciphertext,
+      absl::string_view additional_data) const override;
 
   virtual ~AesGcmBoringSsl() {}
 
@@ -48,7 +48,7 @@ class AesGcmBoringSsl : public Aead {
   static const int TAG_SIZE_IN_BYTES = 16;
 
   AesGcmBoringSsl() {}
-  AesGcmBoringSsl(google::protobuf::StringPiece key_value,
+  AesGcmBoringSsl(absl::string_view key_value,
                   const EVP_CIPHER *cipher);
 
   const std::string key_;

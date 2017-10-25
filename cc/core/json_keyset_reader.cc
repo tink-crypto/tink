@@ -24,7 +24,6 @@
 #include "cc/util/ptr_util.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "google/protobuf/util/json_util.h"
 #include "proto/tink.pb.h"
 
@@ -50,7 +49,7 @@ tinkutil::StatusOr<std::unique_ptr<JsonKeysetReader>> JsonKeysetReader::New(
 
 //  static
 tinkutil::StatusOr<std::unique_ptr<JsonKeysetReader>> JsonKeysetReader::New(
-    google::protobuf::StringPiece serialized_keyset) {
+    absl::string_view serialized_keyset) {
   std::unique_ptr<JsonKeysetReader>
       reader(new JsonKeysetReader(serialized_keyset));
   return std::move(reader);

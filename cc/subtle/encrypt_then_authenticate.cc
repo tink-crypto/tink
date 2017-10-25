@@ -25,7 +25,6 @@
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace util = crypto::tink::util;
 
@@ -53,8 +52,8 @@ util::StatusOr<std::unique_ptr<Aead>> EncryptThenAuthenticate::New(
 }
 
 util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
-    google::protobuf::StringPiece plaintext,
-    google::protobuf::StringPiece additional_data) const {
+    absl::string_view plaintext,
+    absl::string_view additional_data) const {
   auto ct = ind_cpa_cipher_->Encrypt(plaintext);
   if (!ct.ok()) {
     return ct.status();
@@ -75,8 +74,8 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
 }
 
 util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
-    google::protobuf::StringPiece ciphertext,
-    google::protobuf::StringPiece additional_data) const {
+    absl::string_view ciphertext,
+    absl::string_view additional_data) const {
   if (ciphertext.size() < tag_size_) {
     return util::Status(util::error::INTERNAL, "ciphertext too short");
   }

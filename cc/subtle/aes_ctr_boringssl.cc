@@ -24,7 +24,6 @@
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
 
@@ -46,12 +45,12 @@ static const EVP_CIPHER* GetCipherForKeySize(uint32_t size_in_bytes) {
   }
 }
 
-AesCtrBoringSsl::AesCtrBoringSsl(google::protobuf::StringPiece key_value,
+AesCtrBoringSsl::AesCtrBoringSsl(absl::string_view key_value,
                                  uint8_t iv_size, const EVP_CIPHER* cipher)
     : key_(key_value), iv_size_(iv_size), cipher_(cipher) {}
 
 util::StatusOr<std::unique_ptr<IndCpaCipher>> AesCtrBoringSsl::New(
-    google::protobuf::StringPiece key_value, uint8_t iv_size) {
+    absl::string_view key_value, uint8_t iv_size) {
   const EVP_CIPHER* cipher = GetCipherForKeySize(key_value.size());
   if (cipher == nullptr) {
     return util::Status(util::error::INTERNAL, "invalid key size");
@@ -65,7 +64,7 @@ util::StatusOr<std::unique_ptr<IndCpaCipher>> AesCtrBoringSsl::New(
 }
 
 util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
-    google::protobuf::StringPiece plaintext) const {
+    absl::string_view plaintext) const {
   bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
@@ -104,7 +103,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
 }
 
 util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
-    google::protobuf::StringPiece ciphertext) const {
+    absl::string_view ciphertext) const {
   if (ciphertext.size() < iv_size_) {
     return util::Status(util::error::INTERNAL, "ciphertext too short");
   }

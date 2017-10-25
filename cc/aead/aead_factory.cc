@@ -24,7 +24,6 @@
 #include "cc/aead/aes_gcm_key_manager.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace util = crypto::tink::util;
 

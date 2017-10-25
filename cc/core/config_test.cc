@@ -20,7 +20,6 @@
 #include "proto/config.pb.h"
 
 using google::crypto::tink::KeyTypeEntry;
-using google::protobuf::StringPiece;
 
 namespace crypto {
 namespace tink {

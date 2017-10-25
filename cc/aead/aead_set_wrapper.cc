@@ -52,23 +52,24 @@ util::StatusOr<std::unique_ptr<Aead>> AeadSetWrapper::NewAead(
 }
 
 util::StatusOr<std::string> AeadSetWrapper::Encrypt(
-    google::protobuf::StringPiece plaintext,
-    google::protobuf::StringPiece associated_data) const {
-  auto encrypt_result = aead_set_->get_primary()->get_primitive().Encrypt(
-      plaintext, associated_data);
+    absl::string_view plaintext,
+    absl::string_view associated_data) const {
+  auto encrypt_result = aead_set_->get_primary()->get_primitive()
+      .Encrypt(plaintext, associated_data);
   if (!encrypt_result.ok()) return encrypt_result.status();
   const std::string& key_id = aead_set_->get_primary()->get_identifier();
   return key_id + encrypt_result.ValueOrDie();
 }
 
 util::StatusOr<std::string> AeadSetWrapper::Decrypt(
-    google::protobuf::StringPiece ciphertext,
-    google::protobuf::StringPiece associated_data) const {
+    absl::string_view ciphertext,
+    absl::string_view associated_data) const {
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
-    const std::string& key_id = ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize);
+    const std::string& key_id = std::string(
+        ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize));
     auto primitives_result = aead_set_->get_primitives(key_id);
     if (primitives_result.ok()) {
-      google::protobuf::StringPiece raw_ciphertext =
+      absl::string_view raw_ciphertext =
           ciphertext.substr(CryptoFormat::kNonRawPrefixSize);
       for (auto& aead_entry : *(primitives_result.ValueOrDie())) {
         Aead& aead = aead_entry.get_primitive();

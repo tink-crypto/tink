@@ -20,7 +20,6 @@
 using google::crypto::tink::HashType;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::EcPointFormat;
-using google::protobuf::StringPiece;
 
 namespace util = crypto::tink::util;
 
@@ -60,7 +59,7 @@ util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
 
 // static
 util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
-    EllipticCurveType curve, StringPiece pubx, StringPiece puby) {
+    EllipticCurveType curve, absl::string_view pubx, absl::string_view puby) {
   bssl::UniquePtr<BIGNUM> bn_x(
       BN_bin2bn(reinterpret_cast<const unsigned char *>(pubx.data()),
                 pubx.size(), nullptr));
@@ -183,7 +182,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
 
 // static
 util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
-    EllipticCurveType curve, EcPointFormat format, StringPiece encoded) {
+    EllipticCurveType curve, EcPointFormat format, absl::string_view encoded) {
   auto status_or_ec_group = GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();

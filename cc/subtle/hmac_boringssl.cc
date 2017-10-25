@@ -23,7 +23,6 @@
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/digest.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
@@ -60,7 +59,7 @@ HmacBoringSsl::HmacBoringSsl(const EVP_MD* md, uint32_t tag_size,
     : md_(md), tag_size_(tag_size), key_value_(key_value) {}
 
 util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
-    google::protobuf::StringPiece data) const {
+    absl::string_view data) const {
   uint8_t buf[EVP_MAX_MD_SIZE];
   unsigned int out_len;
   const uint8_t* res = HMAC(md_, key_value_.data(), key_value_.size(),
@@ -77,8 +76,8 @@ util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
 }
 
 util::Status HmacBoringSsl::VerifyMac(
-    google::protobuf::StringPiece mac,
-    google::protobuf::StringPiece data) const {
+    absl::string_view mac,
+    absl::string_view data) const {
   if (mac.size() != tag_size_) {
     return util::Status(util::error::INVALID_ARGUMENT, "incorrect tag size");
   }

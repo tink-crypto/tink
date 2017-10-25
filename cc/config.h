@@ -27,7 +27,6 @@
 #include "cc/registry.h"
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
-#include "cc/util/strings.h"
 #include "proto/config.pb.h"
 
 namespace crypto {

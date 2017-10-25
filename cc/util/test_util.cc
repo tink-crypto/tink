@@ -26,7 +26,6 @@
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
@@ -48,12 +47,12 @@ namespace crypto {
 namespace tink {
 namespace test {
 
-util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex) {
+util::StatusOr<std::string> HexDecode(absl::string_view hex) {
   if (hex.size() % 2 != 0) {
     return util::Status(util::error::INVALID_ARGUMENT, "Input has odd size.");
   }
   std::string decoded(hex.size() / 2, static_cast<char>(0));
-  for (int i = 0; i < hex.size(); ++i) {
+  for (size_t i = 0; i < hex.size(); ++i) {
     char c = hex[i];
     char val;
     if ('0' <= c && c <= '9')
@@ -69,14 +68,14 @@ util::StatusOr<std::string> HexDecode(google::protobuf::StringPiece hex) {
   return decoded;
 }
 
-std::string HexDecodeOrDie(google::protobuf::StringPiece hex) {
+std::string HexDecodeOrDie(absl::string_view hex) {
   return HexDecode(hex).ValueOrDie();
 }
 
-std::string HexEncode(google::protobuf::StringPiece bytes) {
+std::string HexEncode(absl::string_view bytes) {
   std::string hexchars = "0123456789abcdef";
   std::string res(bytes.size() * 2, static_cast<char>(255));
-  for (int i = 0; i < bytes.size(); ++i) {
+  for (size_t i = 0; i < bytes.size(); ++i) {
     uint8_t c = static_cast<uint8_t>(bytes[i]);
     res[2 * i] = hexchars[c / 16];
     res[2 * i + 1] = hexchars[c % 16];

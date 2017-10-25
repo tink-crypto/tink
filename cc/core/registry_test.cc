@@ -26,7 +26,6 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "gtest/gtest.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
@@ -45,7 +44,6 @@ using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 using google::protobuf::Message;
-using google::protobuf::StringPiece;
 using crypto::tink::util::Status;
 
 namespace util = crypto::tink::util;

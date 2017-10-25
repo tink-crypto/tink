@@ -21,7 +21,6 @@
 #include "cc/subtle/ec_util.h"
 #include "cc/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
@@ -54,8 +53,8 @@ EciesAeadHkdfHybridDecrypt::New(const EciesAeadHkdfPrivateKey& recipient_key) {
 }
 
 util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
-    google::protobuf::StringPiece ciphertext,
-    google::protobuf::StringPiece context_info) const {
+    absl::string_view ciphertext,
+    absl::string_view context_info) const {
   // Extract KEM-bytes from the ciphertext.
   auto header_size_result = EcUtil::EncodingSizeInBytes(
       recipient_key_.public_key().params().kem_params().curve_type(),

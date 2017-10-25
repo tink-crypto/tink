@@ -17,8 +17,8 @@
 #ifndef TINK_HYBRID_DECRYPT_H_
 #define TINK_HYBRID_DECRYPT_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 
 namespace crypto {
 namespace tink {
@@ -50,8 +50,8 @@ class HybridDecrypt {
  public:
   // Decrypts 'ciphertext' verifying the integrity of 'context_info'.
   virtual crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece ciphertext,
-      google::protobuf::StringPiece context_info) const = 0;
+      absl::string_view ciphertext,
+      absl::string_view context_info) const = 0;
 
   virtual ~HybridDecrypt() {}
 };

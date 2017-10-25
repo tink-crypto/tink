@@ -17,8 +17,8 @@
 #ifndef TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 #define TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 
+#include "absl/strings/string_view.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/ec.h"
 #include "proto/common.pb.h"
 
@@ -57,8 +57,8 @@ class EciesHkdfSenderKemBoringSsl {
   // hkdf_salt.
   crypto::tink::util::StatusOr<std::unique_ptr<KemKey>> GenerateKey(
       google::crypto::tink::HashType hash,
-      google::protobuf::StringPiece hkdf_salt,
-      google::protobuf::StringPiece hkdf_info,
+      absl::string_view hkdf_salt,
+      absl::string_view hkdf_info,
       uint32_t key_size_in_bytes,
       google::crypto::tink::EcPointFormat point_format) const;
 

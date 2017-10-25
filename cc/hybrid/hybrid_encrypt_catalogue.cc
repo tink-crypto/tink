@@ -16,12 +16,12 @@
 
 #include "cc/hybrid/hybrid_encrypt_catalogue.h"
 
+#include "absl/strings/ascii.h"
 #include "cc/catalogue.h"
 #include "cc/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "cc/key_manager.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "cc/util/strings.h"
 
 namespace crypto {
 namespace tink {
@@ -45,7 +45,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<HybridEncrypt>>>
 HybridEncryptCatalogue::GetKeyManager(const std::string& type_url,
                                       const std::string& primitive_name,
                                       uint32_t min_version) const {
-  if (!(to_lowercase(primitive_name) == "hybridencrypt")) {
+  if (!(absl::AsciiStrToLower(primitive_name) == "hybridencrypt")) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                      "This catalogue does not support primitive %s.",
                      primitive_name.c_str());

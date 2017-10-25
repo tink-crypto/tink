@@ -21,6 +21,12 @@ http_archive(
 # cc
 #-----------------------------------------------------------------------------
 http_archive(
+    name = "com_google_absl",
+    strip_prefix = "abseil-cpp-6cf9c731027f4d8aebe3c60df8e64317e6870870",
+    url = "https://github.com/abseil/abseil-cpp/archive/6cf9c731027f4d8aebe3c60df8e64317e6870870.zip",
+)
+
+http_archive(
     name = "boringssl",
     strip_prefix = "boringssl-e06766691547514e5bf756e4a0d926e8ca680e5a",
     url = "https://github.com/google/boringssl/archive/e06766691547514e5bf756e4a0d926e8ca680e5a.zip",

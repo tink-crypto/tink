@@ -14,7 +14,7 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -29,7 +29,6 @@ cc_library(
         "//cc:catalogue",
         "//cc:key_manager",
         "//cc/util:status",
-        "//cc/util:strings",
     ],
 )
 

@@ -21,7 +21,6 @@
 #include "cc/registry.h"
 #include "cc/util/ptr_util.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"

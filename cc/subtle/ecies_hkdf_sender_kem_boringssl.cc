@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
+
 #include "cc/subtle/hkdf.h"
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/ptr_util.h"
@@ -24,7 +25,6 @@
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
-using google::protobuf::StringPiece;
 
 namespace util = crypto::tink::util;
 
@@ -62,8 +62,8 @@ EciesHkdfSenderKemBoringSsl::New(
 }
 
 util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl::KemKey>>
-EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, StringPiece hkdf_salt,
-                                         StringPiece hkdf_info,
+EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, absl::string_view hkdf_salt,
+                                         absl::string_view hkdf_info,
                                          uint32_t key_size_in_bytes,
                                          EcPointFormat point_format) const {
   if (peer_pub_key_.get() == nullptr) {

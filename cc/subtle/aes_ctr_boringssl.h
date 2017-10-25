@@ -19,10 +19,10 @@
 
 #include <memory>
 
+#include "absl/strings/string_view.h"
 #include "cc/subtle/ind_cpa_cipher.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "openssl/evp.h"
 
 namespace crypto {
@@ -31,13 +31,13 @@ namespace tink {
 class AesCtrBoringSsl : public IndCpaCipher {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<IndCpaCipher>> New(
-      google::protobuf::StringPiece key_value, uint8_t iv_size);
+      absl::string_view key_value, uint8_t iv_size);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
-      google::protobuf::StringPiece plaintext) const override;
+      absl::string_view plaintext) const override;
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
-      google::protobuf::StringPiece ciphertext) const override;
+      absl::string_view ciphertext) const override;
 
   virtual ~AesCtrBoringSsl() {}
 
@@ -46,7 +46,7 @@ class AesCtrBoringSsl : public IndCpaCipher {
   static const uint8_t BLOCK_SIZE = 16;
 
   AesCtrBoringSsl() {}
-  AesCtrBoringSsl(google::protobuf::StringPiece key_value, uint8_t iv_size,
+  AesCtrBoringSsl(absl::string_view key_value, uint8_t iv_size,
                   const EVP_CIPHER *cipher);
 
   const std::string key_;

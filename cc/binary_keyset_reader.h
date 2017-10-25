@@ -19,9 +19,9 @@
 
 #include <istream>
 
+#include "absl/strings/string_view.h"
 #include "cc/keyset_reader.h"
 #include "cc/util/statusor.h"
-#include "google/protobuf/stubs/stringpiece.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -35,7 +35,7 @@ class BinaryKeysetReader : public KeysetReader {
   static crypto::tink::util::StatusOr<std::unique_ptr<BinaryKeysetReader>> New(
       std::unique_ptr<std::istream> keyset_stream);
   static crypto::tink::util::StatusOr<std::unique_ptr<BinaryKeysetReader>> New(
-      google::protobuf::StringPiece serialized_keyset);
+      absl::string_view serialized_keyset);
 
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::Keyset>>

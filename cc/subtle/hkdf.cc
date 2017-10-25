@@ -23,7 +23,6 @@
 #include "openssl/hkdf.h"
 
 using google::crypto::tink::HashType;
-using google::protobuf::StringPiece;
 
 namespace util = crypto::tink::util;
 
@@ -32,9 +31,9 @@ namespace tink {
 
 // static
 util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
-                                              StringPiece ikm,
-                                              StringPiece salt,
-                                              StringPiece info,
+                                              absl::string_view ikm,
+                                              absl::string_view salt,
+                                              absl::string_view info,
                                               size_t out_len) {
   auto status_or_evp_md = SubtleUtilBoringSSL::EvpHash(hash);
   if (!status_or_evp_md.ok()) {
@@ -53,10 +52,10 @@ util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
 // static
 util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
     HashType hash,
-    StringPiece kem_bytes,
-    StringPiece shared_secret,
-    StringPiece salt,
-    StringPiece info,
+    absl::string_view kem_bytes,
+    absl::string_view shared_secret,
+    absl::string_view salt,
+    absl::string_view info,
     size_t out_len) {
   std::string ikm(kem_bytes);
   std::string shared_secret_string(shared_secret);

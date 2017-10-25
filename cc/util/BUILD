@@ -12,12 +12,6 @@ cc_library(
 )
 
 cc_library(
-    name = "strings",
-    srcs = ["strings.cc"],
-    hdrs = ["strings.h"],
-)
-
-cc_library(
     name = "ptr_util",
     srcs = ["ptr_util.h"],
     hdrs = ["ptr_util.h"],
@@ -71,7 +65,7 @@ cc_library(
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
-        "@com_google_protobuf//:protobuf_lite",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -86,18 +80,6 @@ cc_test(
     deps = [
         ":errors",
         ":status",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "strings_test",
-    size = "small",
-    srcs = ["strings_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    linkopts = ["-lpthread"],
-    deps = [
-        ":strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

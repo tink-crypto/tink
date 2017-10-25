@@ -55,8 +55,8 @@ HybridEncryptSetWrapper::NewHybridEncrypt(
 }
 
 util::StatusOr<std::string> HybridEncryptSetWrapper::Encrypt(
-    google::protobuf::StringPiece plaintext,
-    google::protobuf::StringPiece context_info) const {
+    absl::string_view plaintext,
+    absl::string_view context_info) const {
   auto primary = hybrid_encrypt_set_->get_primary();
   auto encrypt_result =
       primary->get_primitive().Encrypt(plaintext, context_info);
