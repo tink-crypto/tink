@@ -31,8 +31,9 @@ def gen_java_test_rules(test_files,
                         medium_tests=[],
                         large_tests=[],
                         enormous_tests=[],
-                        resources=[],
                         flaky_tests=[],
+                        manual_tests=[],
+                        resources=[],
                         tags=[],
                         prefix="",
                         jvm_flags=["-XX:MaxPermSize=128m"],
@@ -51,6 +52,9 @@ def gen_java_test_rules(test_files,
       test_size = "large"
     if test in enormous_tests:
       test_size = "enormous"
+    manual = []
+    if test in manual_tests:
+      manual = ["manual"]
     flaky = 0
     if (test in flaky_tests) or ("flaky" in tags):
       flaky = 1
@@ -64,7 +68,7 @@ def gen_java_test_rules(test_files,
                      jvm_flags = jvm_flags,
                      args = args,
                      flaky = flaky,
-                     tags = tags,
+                     tags = tags + manual,
                      test_class = java_class,
                      visibility = visibility,
                      shard_count = shard_count)
