@@ -23,12 +23,12 @@ import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.EllipticCurves.CurveType;
 import com.google.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -55,52 +55,51 @@ public class EciesAeadHkdfHybridEncryptTest {
     Config.register(HybridConfig.TINK_1_0_0);
   }
 
-  @Test
-  public void testBasicMultipleEncrypts() throws Exception {
-    ECParameterSpec spec =
-        EllipticCurves.getCurveSpec(HybridUtil.toCurveType(EllipticCurveType.NIST_P256));
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
-    keyGen.initialize(spec);
-    KeyPair recipientKey = keyGen.generateKeyPair();
+  private void testBasicMultipleEncrypts(CurveType curveType, KeyTemplate keyTemplate) throws Exception {
+    KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
     byte[] salt = "some salt".getBytes("UTF-8");
-    byte[] plaintext = Random.randBytes(111);
+    byte[] plaintext = Random.randBytes(20);
     byte[] context = "context info".getBytes("UTF-8");
     String hmacAlgo = HybridUtil.toHmacAlgo(HashType.SHA256);
+    HybridEncrypt hybridEncrypt =
+        new EciesAeadHkdfHybridEncrypt(
+            recipientPublicKey,
+            salt,
+            hmacAlgo,
+            EllipticCurves.PointFormatType.UNCOMPRESSED,
+            new RegistryEciesAeadHkdfDemHelper(keyTemplate));
+    HybridDecrypt hybridDecrypt =
+        new EciesAeadHkdfHybridDecrypt(
+            recipientPrivateKey,
+            salt,
+            hmacAlgo,
+            EllipticCurves.PointFormatType.UNCOMPRESSED,
+            new RegistryEciesAeadHkdfDemHelper(keyTemplate));
 
-    KeyTemplate[] keyTemplates =
-        new KeyTemplate[] {
-          AeadKeyTemplates.AES128_CTR_HMAC_SHA256, AeadKeyTemplates.AES128_GCM,
-        };
-    for (int i = 0; i < keyTemplates.length; i++) {
-      HybridEncrypt hybridEncrypt =
-          new EciesAeadHkdfHybridEncrypt(
-              recipientPublicKey,
-              salt,
-              hmacAlgo,
-              EllipticCurves.PointFormatType.UNCOMPRESSED,
-              new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
-      HybridDecrypt hybridDecrypt =
-          new EciesAeadHkdfHybridDecrypt(
-              recipientPrivateKey,
-              salt,
-              hmacAlgo,
-              EllipticCurves.PointFormatType.UNCOMPRESSED,
-              new RegistryEciesAeadHkdfDemHelper(keyTemplates[i]));
-
-      // Makes sure that the encryption is randomized.
-      Set<String> ciphertexts = new TreeSet<String>();
-      for (int j = 0; j < 1024; j++) {
-        byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
-        if (ciphertexts.contains(new String(ciphertext, "UTF-8"))) {
-          throw new GeneralSecurityException("Encryption is not randomized");
-        }
-        ciphertexts.add(new String(ciphertext, "UTF-8"));
-        byte[] decrypted = hybridDecrypt.decrypt(ciphertext, context);
-        assertArrayEquals(plaintext, decrypted);
+    // Makes sure that the encryption is randomized.
+    Set<String> ciphertexts = new TreeSet<String>();
+    for (int j = 0; j < 8; j++) {
+      byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
+      if (ciphertexts.contains(new String(ciphertext, "UTF-8"))) {
+        throw new GeneralSecurityException("Encryption is not randomized");
       }
-      assertEquals(1024, ciphertexts.size());
+      ciphertexts.add(new String(ciphertext, "UTF-8"));
+      byte[] decrypted = hybridDecrypt.decrypt(ciphertext, context);
+      assertArrayEquals(plaintext, decrypted);
     }
+    assertEquals(8, ciphertexts.size());
+  }
+
+  @Test
+  public void testBasicMultipleEncrypts() throws Exception {
+    testBasicMultipleEncrypts(CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+    testBasicMultipleEncrypts(CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+    testBasicMultipleEncrypts(CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+
+    testBasicMultipleEncrypts(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
+    testBasicMultipleEncrypts(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
+    testBasicMultipleEncrypts(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
   }
 }

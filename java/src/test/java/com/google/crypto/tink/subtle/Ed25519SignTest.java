@@ -42,8 +42,8 @@ public final class Ed25519SignTest {
     Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
     Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
     Ed25519Verify verifier = new Ed25519Verify(keyPair.getPublicKey());
-    for (int i = 0; i < 1024; i++) {
-      byte[] msg = Random.randBytes(1024);
+    for (int i = 0; i < 100; i++) {
+      byte[] msg = Random.randBytes(20);
       byte[] sig = signer.sign(msg);
       try {
         verifier.verify(sig, msg);
@@ -64,9 +64,9 @@ public final class Ed25519SignTest {
     Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
     Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
     Ed25519Verify verifier = new Ed25519Verify(keyPair.getPublicKey());
-    byte[] msg = Random.randBytes(1024);
+    byte[] msg = Random.randBytes(20);
     TreeSet<String> allSignatures = new TreeSet<String>();
-    for (int i = 0; i < 1024; i++) {
+    for (int i = 0; i < 100; i++) {
       byte[] sig = signer.sign(msg);
       allSignatures.add(TestUtil.hexEncode(sig));
       try {
@@ -100,12 +100,12 @@ public final class Ed25519SignTest {
   }
 
   @Test
-  public void testSigningWithMultipleRandomKeyAndMessages() throws Exception {
-    for (int i = 0; i < 10000; i++) {
+  public void testSigningWithMultipleRandomKeysAndMessages() throws Exception {
+    for (int i = 0; i < 100; i++) {
       Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
       Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
       Ed25519Verify verifier = new Ed25519Verify(keyPair.getPublicKey());
-      byte[] msg = Random.randBytes(1024);
+      byte[] msg = Random.randBytes(20);
       byte[] sig = signer.sign(msg);
       try {
         verifier.verify(sig, msg);

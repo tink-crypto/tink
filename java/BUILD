@@ -203,11 +203,9 @@ gen_java_test_rules(
         "@wycheproof//testvectors:ecdsa",
     ],
     default_test_size = "small",
-    large_tests = [
-        "src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest",
-    ],
     # these tests are excluded when testing with bazel test ... or on Kokoro
     manual_tests = [
+        "src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest",
         "src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest",
     ],
     medium_tests = [
