@@ -302,10 +302,4 @@ public class AesGcmHkdfStreamingTest {
   public void testFileEncryption() throws Exception {
     StreamingTestUtil.testFileEncryption(createAesGcmStreaming(), tmpFolder.newFile());
   }
-
-  /** Encrypt some plaintext to a file using FileOutputStream, then decrypt from the file */
-  @Test
-  public void testFileEncrytionWithStream() throws Exception {
-    StreamingTestUtil.testFileEncrytionWithStream(createAesGcmStreaming(), tmpFolder.newFile());
-  }
 }

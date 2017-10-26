@@ -28,6 +28,15 @@ import java.util.Arrays;
  * TODO(bleichen): define what the state is after an IOException.
  */
 class StreamingAeadDecryptingStream extends FilterInputStream {
+  // Each plaintext segment has 16 bytes more of memory than the actual plaintext that it contains.
+  // This is a workaround for an incompatibility between Conscrypt and OpenJDK in their
+  // AES-GCM implementations, see b/67416642, b/31574439, and cr/170969008 for more information.
+  // Conscrypt refused to fix this issue, but even if they fixed it, there are always Android phones
+  // running old versions of Conscrypt, so we decided to take matters into our own hands.
+  // Why 16? Actually any number larger than 16 should work. 16 is the lower bound because it's the
+  // size of the tags of each AES-GCM ciphertext segment.
+  private static final int PLAINTEXT_SEGMENT_EXTRA_SIZE = 16;
+
   /**
    * A buffer containing ciphertext that has not yet been decrypted. The limit of ciphertextSegment
    * is set such that it can contain segment plus the first character of the next segment. It is
@@ -84,7 +93,8 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
     ciphertextSegment = ByteBuffer.allocate(ciphertextSegmentSize + 1);
     ciphertextSegment.limit(0);
     firstCiphertextSegmentSize = ciphertextSegmentSize - streamAead.getCiphertextOffset();
-    plaintextSegment = ByteBuffer.allocate(streamAead.getPlaintextSegmentSize());
+    plaintextSegment = ByteBuffer.allocate(streamAead.getPlaintextSegmentSize() +
+        PLAINTEXT_SEGMENT_EXTRA_SIZE);
     plaintextSegment.limit(0);
     headerRead = false;
     endOfCiphertext = false;

@@ -349,7 +349,7 @@ public class AesCtrHmacStreamingTest {
     byte[] plaintext = new byte[plaintextSize];
     for (int sample = 0; sample < samples; sample++) {
       byte[] ciphertext =
-          StreamingTestUtil.encrypt(ags, plaintext, aad, ags.getFirstSegmentOffset());
+          StreamingTestUtil.encryptWithChannel(ags, plaintext, aad, ags.getFirstSegmentOffset());
       for (int pos = ags.getHeaderLength(); pos + blocksize <= ciphertext.length; pos++) {
         String block = TestUtil.hexEncode(Arrays.copyOfRange(ciphertext, pos, pos + blocksize));
         if (!ciphertextBlocks.add(block)) {
@@ -371,14 +371,5 @@ public class AesCtrHmacStreamingTest {
   @Test
   public void testFileEncryption() throws Exception {
     StreamingTestUtil.testFileEncryption(createAesCtrHmacStreaming(), tmpFolder.newFile());
-  }
-
-  /**
-   * Encrypts some plaintext to a file using FileOutputStream, then decrypt with a FileInputStream.
-   * Reading and writing is done byte by byte.
-   */
-  @Test
-  public void testFileEncryptionWithStream() throws Exception {
-    StreamingTestUtil.testFileEncrytionWithStream(createAesCtrHmacStreaming(), tmpFolder.newFile());
   }
 }
