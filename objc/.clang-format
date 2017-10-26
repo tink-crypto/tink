@@ -1,0 +1,11 @@
+BasedOnStyle: Google
+
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakBeforeMultilineStrings: false
+BinPackParameters: false
+ColumnLimit: 100
+ObjCSpaceBeforeProtocolList: true
+PointerBindsToType: false
+IndentWrappedFunctionNames: true

@@ -21,5 +21,19 @@ set -e
 # Display commands to stderr.
 set -x
 
-cd github/tink//maven
-mvn package
+cd github/tink/
+
+source ./kokoro/run_tests.sh
+
+# Run all manual tests.
+time ${BAZEL_BIN} test
+--strategy=TestRunner=standalone \
+--test_timeout 10000 \
+--test_output=all \
+//java:src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest \
+//java:src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest
+
+# On Linux, run all Maven tests and generate jars
+if [[ $PLATFORM == 'linux' ]]; then
+  cd maven
+  time mvn package

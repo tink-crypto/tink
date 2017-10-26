@@ -1,0 +1,16 @@
+{
+  "configDefaults" : {
+    "optionSet" : {
+
+    }
+  },
+  "projectName" : "TinkOSS",
+  "packages" : [
+    "objc",
+    "objc\/aead",
+    "objc\/util",
+    "objc\/hybrid",
+    "objc\/mac"
+  ],
+  "workspaceRoot" : "..\/.."
+}

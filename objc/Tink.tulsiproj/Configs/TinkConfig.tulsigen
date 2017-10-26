@@ -1,0 +1,86 @@
+{
+  "sourceFilters" : [
+    "bazel-genfiles\/...",
+    "cc\/...",
+    "objc\/...",
+    "proto\/..."
+  ],
+  "buildTargets" : [
+    "\/\/objc\/aead:aead_config",
+    "\/\/objc\/aead:aead_factory",
+    "\/\/objc\/hybrid:HybridTests",
+    "\/\/objc\/hybrid:ecies_aead_hkdf_private_key_manager",
+    "\/\/objc\/hybrid:ecies_aead_hkdf_public_key_manager",
+    "\/\/objc\/hybrid:hybrid_decrypt_config",
+    "\/\/objc\/hybrid:hybrid_decrypt_config_test",
+    "\/\/objc\/hybrid:hybrid_decrypt_factory",
+    "\/\/objc\/hybrid:hybrid_decrypt_factory_test",
+    "\/\/objc\/hybrid:hybrid_decrypt_internal",
+    "\/\/objc\/hybrid:hybrid_decrypt_key_manager",
+    "\/\/objc\/hybrid:hybrid_encrypt_config",
+    "\/\/objc\/hybrid:hybrid_encrypt_config_test",
+    "\/\/objc\/hybrid:hybrid_encrypt_factory",
+    "\/\/objc\/hybrid:hybrid_encrypt_internal",
+    "\/\/objc\/hybrid:hybrid_encrypt_key_manager",
+    "\/\/objc\/mac:hmac_key_manager",
+    "\/\/objc\/mac:mac_config",
+    "\/\/objc\/mac:mac_factory",
+    "\/\/objc\/mac:mac_internal",
+    "\/\/objc\/mac:mac_key_manager",
+    "\/\/objc\/util:errors",
+    "\/\/objc\/util:strings",
+    "\/\/objc:aead",
+    "\/\/objc:hybrid_decrypt",
+    "\/\/objc:hybrid_encrypt",
+    "\/\/objc:key_manager",
+    "\/\/objc:keyset_handle",
+    "\/\/objc:mac",
+    "\/\/objc:objc"
+  ],
+  "projectName" : "TinkOSS",
+  "optionSet" : {
+    "BazelBuildOptionsDebug" : {
+      "p" : "$(inherited)"
+    },
+    "BazelBuildStartupOptionsRelease" : {
+      "p" : "$(inherited)"
+    },
+    "LaunchActionPreActionScript" : {
+      "p" : "$(inherited)"
+    },
+    "BazelBuildOptionsRelease" : {
+      "p" : "$(inherited)"
+    },
+    "EnvironmentVariables" : {
+      "p" : "$(inherited)"
+    },
+    "BuildActionPreActionScript" : {
+      "p" : "$(inherited)"
+    },
+    "CommandlineArguments" : {
+      "p" : "$(inherited)"
+    },
+    "TestActionPreActionScript" : {
+      "p" : "$(inherited)"
+    },
+    "TestActionPostActionScript" : {
+      "p" : "$(inherited)"
+    },
+    "BuildActionPostActionScript" : {
+      "p" : "$(inherited)"
+    },
+    "BazelBuildStartupOptionsDebug" : {
+      "p" : "$(inherited)"
+    },
+    "LaunchActionPostActionScript" : {
+      "p" : "$(inherited)"
+    }
+  },
+  "additionalFilePaths" : [
+    "objc\/BUILD",
+    "objc\/aead\/BUILD",
+    "objc\/util\/BUILD",
+    "objc\/hybrid\/BUILD",
+    "objc\/mac\/BUILD"
+  ]
+}
