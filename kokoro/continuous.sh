@@ -37,3 +37,4 @@ time ${BAZEL_BIN} test \
 if [[ $PLATFORM == 'linux' ]]; then
   cd maven
   time mvn package
+fi
