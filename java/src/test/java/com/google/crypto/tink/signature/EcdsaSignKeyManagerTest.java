@@ -42,7 +42,6 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.util.Set;
 import java.util.TreeSet;

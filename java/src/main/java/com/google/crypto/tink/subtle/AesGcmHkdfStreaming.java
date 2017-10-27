@@ -89,8 +89,9 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
    * @throws InvalidAlgorithmParameterException if ikm is too short, the key size not supported or
    *     ciphertextSegmentSize is to short.
    */
-  public AesGcmHkdfStreaming(byte[] ikm, String hkdfAlg, int keySizeInBytes, int ciphertextSegmentSize,
-      int firstSegmentOffset) throws InvalidAlgorithmParameterException {
+  public AesGcmHkdfStreaming(byte[] ikm, String hkdfAlg, int keySizeInBytes,
+      int ciphertextSegmentSize, int firstSegmentOffset)
+      throws InvalidAlgorithmParameterException {
     // Checks
     if (ikm.length < 16) {
       throw new InvalidAlgorithmParameterException("ikm to short");

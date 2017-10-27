@@ -199,7 +199,7 @@ public class StreamingAeadThreadSafetyTest {
      *
      * @param channel the channel where the bytes are written to.
      * @param chunkSize the size of the chunks written
-     * @param numberOfChunks the number of chunks written the the channel
+     * @param numberOfChunks the number of chunks written to the channel
      * @param plaintextByte the plaintextByte repeated in all the chunks.
      */
     EncryptingThread(

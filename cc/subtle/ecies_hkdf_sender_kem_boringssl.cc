@@ -62,7 +62,8 @@ EciesHkdfSenderKemBoringSsl::New(
 }
 
 util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl::KemKey>>
-EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash, absl::string_view hkdf_salt,
+EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash,
+                                         absl::string_view hkdf_salt,
                                          absl::string_view hkdf_info,
                                          uint32_t key_size_in_bytes,
                                          EcPointFormat point_format) const {

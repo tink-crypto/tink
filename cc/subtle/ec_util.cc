@@ -32,8 +32,8 @@ namespace tink {
 
 // static
 crypto::tink::util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
-    EllipticCurveType curve_type, absl::string_view priv, absl::string_view pub_x,
-    absl::string_view pub_y) {
+    EllipticCurveType curve_type, absl::string_view priv,
+    absl::string_view pub_x, absl::string_view pub_y) {
   bssl::UniquePtr<BIGNUM> priv_key(
       BN_bin2bn(reinterpret_cast<const unsigned char *>(priv.data()),
                 priv.size(), nullptr));

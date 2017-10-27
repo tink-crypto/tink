@@ -16,16 +16,11 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
-import com.google.crypto.tink.proto.AesCtrHmacStreamingParams;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
-import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
 import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import org.junit.Test;

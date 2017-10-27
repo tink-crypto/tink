@@ -32,10 +32,8 @@ import com.google.crypto.tink.subtle.EllipticCurves.CurveType;
 import com.google.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Before;
@@ -55,7 +53,8 @@ public class EciesAeadHkdfHybridEncryptTest {
     Config.register(HybridConfig.TINK_1_0_0);
   }
 
-  private void testBasicMultipleEncrypts(CurveType curveType, KeyTemplate keyTemplate) throws Exception {
+  private void testBasicMultipleEncrypts(CurveType curveType, KeyTemplate keyTemplate)
+      throws Exception {
     KeyPair recipientKey = EllipticCurves.generateKeyPair(curveType);
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();

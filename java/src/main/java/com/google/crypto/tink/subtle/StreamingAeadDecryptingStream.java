@@ -93,8 +93,8 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
     ciphertextSegment = ByteBuffer.allocate(ciphertextSegmentSize + 1);
     ciphertextSegment.limit(0);
     firstCiphertextSegmentSize = ciphertextSegmentSize - streamAead.getCiphertextOffset();
-    plaintextSegment = ByteBuffer.allocate(streamAead.getPlaintextSegmentSize() +
-        PLAINTEXT_SEGMENT_EXTRA_SIZE);
+    plaintextSegment = ByteBuffer.allocate(streamAead.getPlaintextSegmentSize()
+        + PLAINTEXT_SEGMENT_EXTRA_SIZE);
     plaintextSegment.limit(0);
     headerRead = false;
     endOfCiphertext = false;
