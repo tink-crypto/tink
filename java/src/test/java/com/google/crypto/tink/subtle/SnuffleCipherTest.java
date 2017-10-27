@@ -22,10 +22,6 @@ import static org.junit.Assert.fail;
 
 import com.google.common.truth.Truth;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.subtle.DjbCipher.ChaCha20;
-import com.google.crypto.tink.subtle.DjbCipher.KeyStream;
-import com.google.crypto.tink.subtle.DjbCipher.XChaCha20;
-import com.google.crypto.tink.subtle.DjbCipher.XSalsa20;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -39,19 +35,19 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-/** Unit tests for {@link DjbCipher}. */
+/** Unit tests for {@link SnuffleCipher}. */
 @RunWith(Suite.class)
 @SuiteClasses({
-  DjbCipherTest.BaseTest.class,
-  DjbCipherTest.ChaCha20Test.class,
-  DjbCipherTest.XChaCha20Test.class,
-  DjbCipherTest.XSalsa20Test.class
+  SnuffleCipherTest.BaseTest.class,
+  SnuffleCipherTest.ChaCha20Test.class,
+  SnuffleCipherTest.XChaCha20Test.class,
+  SnuffleCipherTest.XSalsa20Test.class
 })
-public class DjbCipherTest {
+public class SnuffleCipherTest {
 
-  static class MockDjbCipher extends DjbCipher {
+  static class MockSnuffleCipher extends SnuffleCipher {
 
-    public MockDjbCipher(byte[] key) {
+    public MockSnuffleCipher(byte[] key) {
       super(key);
     }
 
@@ -102,7 +98,7 @@ public class DjbCipherTest {
     return ret;
   }
 
-  /** Unit tests for {@link DjbCipher} abstract class. */
+  /** Unit tests for {@link SnuffleCipher} abstract class. */
   public static class BaseTest {
 
     @Test
@@ -112,7 +108,7 @@ public class DjbCipherTest {
       nonce[4] = 2;
       nonce[8] = 2;
       nonce[12] = 2;
-      KeyStream keyStream = new KeyStream(new MockDjbCipher(new byte[32]), nonce, 3);
+      KeyStream keyStream = new KeyStream(new MockSnuffleCipher(new byte[32]), nonce, 3);
       assertThat(keyStream.next())
           .isEqualTo(new int[] {8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 12});
       assertThat(keyStream.next())
@@ -126,7 +122,7 @@ public class DjbCipherTest {
       nonce[4] = 2;
       nonce[8] = 2;
       nonce[12] = 2;
-      KeyStream keyStream = new KeyStream(new MockDjbCipher(new byte[32]), nonce, 3);
+      KeyStream keyStream = new KeyStream(new MockSnuffleCipher(new byte[32]), nonce, 3);
       assertThat(keyStream.first(20))
           .isEqualTo(new byte[] {8, 0, 0, 0, 8, 0, 0, 0, 8, 0, 0, 0, 8, 0, 0, 0, 4, 0, 0, 0});
       assertThat(keyStream.next())
@@ -137,7 +133,7 @@ public class DjbCipherTest {
 
     @Test
     public void testStateGenReadLengthGT16ThrowsIllegalArgException() {
-      KeyStream keyStream = new KeyStream(new MockDjbCipher(new byte[32]), new byte[16], 3);
+      KeyStream keyStream = new KeyStream(new MockSnuffleCipher(new byte[32]), new byte[16], 3);
       try {
         keyStream.first(64);
         fail("Expected IllegalArgumentException.");
@@ -148,7 +144,7 @@ public class DjbCipherTest {
 
     @Test
     public void testStateGenReadCalledTwiceThrowsIllegalStateException() {
-      KeyStream keyStream = new KeyStream(new MockDjbCipher(new byte[32]), new byte[16], 3);
+      KeyStream keyStream = new KeyStream(new MockSnuffleCipher(new byte[32]), new byte[16], 3);
       keyStream.first(60);
       try {
         keyStream.first(4);
@@ -162,7 +158,7 @@ public class DjbCipherTest {
 
     @Test
     public void testStateGenReadCalledAfterNextThrowsIllegalStateException() {
-      KeyStream keyStream = new KeyStream(new MockDjbCipher(new byte[32]), new byte[16], 3);
+      KeyStream keyStream = new KeyStream(new MockSnuffleCipher(new byte[32]), new byte[16], 3);
       keyStream.next();
       try {
         keyStream.first(1);
@@ -177,7 +173,7 @@ public class DjbCipherTest {
     @Test
     public void testEncryptWithOutputArgThrowsWhenOutputIsTooShort()
         throws GeneralSecurityException {
-      DjbCipher cipher = new MockDjbCipher(new byte[32]);
+      SnuffleCipher cipher = new MockSnuffleCipher(new byte[32]);
       ByteBuffer buf = ByteBuffer.allocate(10);
       try {
         cipher.encrypt(buf, new byte[11]);
@@ -188,16 +184,16 @@ public class DjbCipherTest {
     }
   }
 
-  private abstract static class DjbCipherTestBase {
+  private abstract static class SnuffleCipherTestBase {
 
-    protected abstract DjbCipher createInstance(byte[] key);
+    protected abstract SnuffleCipher createInstance(byte[] key);
 
     @Test
     public void testRandomInputs() throws GeneralSecurityException {
       for (int i = 0; i < 1000; i++) {
         byte[] expectedInput = Random.randBytes(new java.util.Random().nextInt(300));
         byte[] key = Random.randBytes(32);
-        DjbCipher cipher = createInstance(key);
+        SnuffleCipher cipher = createInstance(key);
         byte[] output = cipher.encrypt(expectedInput);
         byte[] nonce = Arrays.copyOf(output, cipher.nonceSizeInBytes());
         byte[] actualInput = cipher.decrypt(output);
@@ -235,7 +231,7 @@ public class DjbCipherTest {
 
     @Test
     public void testDecryptThrowsGeneralSecurityExpWhenCiphertextIsTooShort() {
-      DjbCipher cipher = createInstance(new byte[32]);
+      SnuffleCipher cipher = createInstance(new byte[32]);
       try {
         cipher.decrypt(new byte[2]);
         fail("Expected GeneralSecurityException.");
@@ -245,14 +241,14 @@ public class DjbCipherTest {
     }
   }
 
-  /** Unit tests for {@link DjbCipher#chaCha20(byte[])} */
-  public static class ChaCha20Test extends DjbCipherTestBase {
+  /** Unit tests for {@link SnuffleCipher#chaCha20(byte[])} */
+  public static class ChaCha20Test extends SnuffleCipherTestBase {
 
-    private static DjbCipher dummyCipher = DjbCipher.chaCha20(new byte[32]);
+    private static SnuffleCipher dummyCipher = SnuffleCipher.chaCha20(new byte[32]);
 
     @Override
-    protected DjbCipher createInstance(byte[] key) {
-      return DjbCipher.chaCha20(key);
+    protected SnuffleCipher createInstance(byte[] key) {
+      return SnuffleCipher.chaCha20(key);
     }
 
     /** https://tools.ietf.org/html/rfc7539#section-2.1.1 */
@@ -330,7 +326,7 @@ public class DjbCipherTest {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x4a, 0x00, 0x00, 0x00, 0x00
       };
-      DjbCipher cipher = createInstance(key);
+      SnuffleCipher cipher = createInstance(key);
       ByteBuffer out = ByteBuffer.allocate(in.length);
       cipher.process(out, ByteBuffer.wrap(in), nonce, 1);
       Truth.assertThat(out.array())
@@ -491,7 +487,7 @@ public class DjbCipherTest {
       byte[] in = new byte[64];
       byte[] key = new byte[32];
       byte[] nonce = new byte[12];
-      DjbCipher cipher = createInstance(key);
+      SnuffleCipher cipher = createInstance(key);
       ByteBuffer out = ByteBuffer.allocate(in.length);
       cipher.process(out, ByteBuffer.wrap(in), nonce, 0);
       Truth.assertThat(out.array())
@@ -523,7 +519,7 @@ public class DjbCipherTest {
       key[31] = 1;
       byte[] nonce = new byte[12];
       nonce[11] = 2;
-      DjbCipher cipher = createInstance(key);
+      SnuffleCipher cipher = createInstance(key);
       ByteBuffer out = ByteBuffer.allocate(in.length);
       cipher.process(out, ByteBuffer.wrap(in), nonce, 1);
       Truth.assertThat(out.array())
@@ -613,7 +609,7 @@ public class DjbCipherTest {
               });
       byte[] nonce = new byte[12];
       nonce[11] = 2;
-      DjbCipher cipher = createInstance(key);
+      SnuffleCipher cipher = createInstance(key);
       ByteBuffer out = ByteBuffer.allocate(in.length);
       cipher.process(out, ByteBuffer.wrap(in), nonce, 42);
       Truth.assertThat(out.array())
@@ -640,18 +636,18 @@ public class DjbCipherTest {
     }
   }
 
-  /** Unit tests for {@link DjbCipher#xSalsa20(byte[])} */
-  public static class XSalsa20Test extends DjbCipherTestBase {
+  /** Unit tests for {@link SnuffleCipher#xSalsa20(byte[])} */
+  public static class XSalsa20Test extends SnuffleCipherTestBase {
 
-    private static final DjbCipher dummyCipher = DjbCipher.xSalsa20(new byte[32]);
+    private static final SnuffleCipher dummyCipher = SnuffleCipher.xSalsa20(new byte[32]);
 
     @Override
-    protected DjbCipher createInstance(byte[] key) {
-      return DjbCipher.xSalsa20(key);
+    protected SnuffleCipher createInstance(byte[] key) {
+      return SnuffleCipher.xSalsa20(key);
     }
 
     private static int[] matrix(int[] bytes) {
-      return DjbCipher.toIntArray(
+      return SnuffleCipher.toIntArray(
           ByteBuffer.wrap(twosCompByte(bytes)).order(ByteOrder.LITTLE_ENDIAN));
     }
 
@@ -685,7 +681,7 @@ public class DjbCipherTest {
       ByteBuffer buf = ByteBuffer.allocate(64).order(ByteOrder.LITTLE_ENDIAN);
       for (int i = 0; i < count; i++) {
         buf.asIntBuffer().put(dummyCipher.shuffleAdd(x));
-        x = DjbCipher.toIntArray(buf);
+        x = SnuffleCipher.toIntArray(buf);
       }
       Truth.assertThat(buf.array()).isEqualTo(twosCompByte(output));
     }
@@ -871,7 +867,7 @@ public class DjbCipherTest {
     /** Testing HSalsa20, example 1 Section 8 http://cr.yp.to/highspeed/naclcrypto-20090310.pdf */
     @Test
     public void testHSalsa20_1() {
-      DjbCipher cipher =
+      SnuffleCipher cipher =
           createInstance(
               twosCompByte(
                   new int[] {
@@ -899,7 +895,7 @@ public class DjbCipherTest {
     /** Testing HSalsa20, example 2 Section 8 http://cr.yp.to/highspeed/naclcrypto-20090310.pdf */
     @Test
     public void testHSalsa20_2() {
-      DjbCipher cipher =
+      SnuffleCipher cipher =
           createInstance(
               twosCompByte(
                   new int[] {
@@ -934,7 +930,7 @@ public class DjbCipherTest {
     /** Testing HSalsa20, example 2 Section 8 http://cr.yp.to/highspeed/naclcrypto-20090310.pdf */
     @Test
     public void testHSalsa20_3() throws NoSuchAlgorithmException {
-      DjbCipher cipher =
+      SnuffleCipher cipher =
           createInstance(
               twosCompByte(
                   new int[] {
@@ -969,7 +965,7 @@ public class DjbCipherTest {
      */
     @Test
     public void testHSalsa20_4() throws GeneralSecurityException {
-      DjbCipher cipher =
+      SnuffleCipher cipher =
           createInstance(
               twosCompByte(
                   new int[] {
@@ -1033,7 +1029,7 @@ public class DjbCipherTest {
      */
     @Test
     public void testHSalsa20_5() throws GeneralSecurityException {
-      DjbCipher cipher =
+      SnuffleCipher cipher =
           createInstance(
               twosCompByte(
                   new int[] {
@@ -1062,8 +1058,8 @@ public class DjbCipherTest {
     }
   }
 
-  /** Unit tests for {@link DjbCipher#xChaCha20(byte[])} */
-  public static class XChaCha20Test extends DjbCipherTestBase {
+  /** Unit tests for {@link SnuffleCipher#xChaCha20(byte[])} */
+  public static class XChaCha20Test extends SnuffleCipherTestBase {
 
     // From libsodium's test/default/xchacha20.c (tv_hchacha20)
     private static String[][] hChaCha20Tvs = {
@@ -1180,8 +1176,8 @@ public class DjbCipherTest {
     };
 
     @Override
-    protected DjbCipher createInstance(byte[] key) {
-      return DjbCipher.xChaCha20(key);
+    protected SnuffleCipher createInstance(byte[] key) {
+      return SnuffleCipher.xChaCha20(key);
     }
 
     @Test
@@ -1197,7 +1193,7 @@ public class DjbCipherTest {
       for (String[] tv : xChaCha20Tvs) {
         ByteBuffer output = ByteBuffer.allocate(tv[2].length() / 2);
         byte[] inputZero = new byte[tv[2].length() / 2];
-        DjbCipher cipher = createInstance(TestUtil.hexDecode(tv[0]));
+        SnuffleCipher cipher = createInstance(TestUtil.hexDecode(tv[0]));
         cipher.process(output, ByteBuffer.wrap(inputZero), TestUtil.hexDecode(tv[1]), 0);
         assertThat(TestUtil.hexEncode(output.array())).isEqualTo(tv[2]);
       }

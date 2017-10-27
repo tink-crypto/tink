@@ -25,11 +25,12 @@ import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
 
 /**
- * an {@code Aead} construction with a {@link DjbCipher} and Poly1305.
+ * An {@code Aead} construction with a {@link com.google.crypto.tink.subtle.SnuffleCipher} and
+ * {@link com.google.crypto.tink.subtle.Poly1305}.
  *
- * <p>Supported DjbCiphers are documented in the static construct methods. Although the algorithms
- * are the same with their counterparts when stated explicitly (wrt. NaCl, libsodium, or RFC 7539),
- * this implementation of Poly1305 produces ciphertext with the following format: <br>
+ * <p>Supported SnuffleCiphers are documented in the static construct methods. Although the
+ * algorithms are the same with their counterparts when stated explicitly (wrt. NaCl, libsodium, or
+ * RFC 7539), this implementation of Poly1305 produces ciphertext with the following format: <br>
  * {@code nonce || actual_ciphertext || tag} and only decrypts the same format. In NaCl and
  * libsodium, messages to be encrypted are required to be padded with 0 for tag byte length and also
  * decryption produces messages that are 0 padded in XSalsa20Poly1305.(though please note that
@@ -44,21 +45,21 @@ import java.security.GeneralSecurityException;
  * (https://github.com/floodyberry/poly1305-donna) and released as public domain.
  */
 @Alpha
-public abstract class DjbCipherPoly1305 implements Aead {
+public abstract class SnuffleCipherPoly1305 implements Aead {
 
-  private final DjbCipher djbCipher;
+  private final SnuffleCipher snuffleCipher;
 
-  private DjbCipherPoly1305(DjbCipher djbCipher) {
-    this.djbCipher = djbCipher;
+  private SnuffleCipherPoly1305(SnuffleCipher snuffleCipher) {
+    this.snuffleCipher = snuffleCipher;
   }
 
   /**
    * Based on <a href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC 7539, section 2.8</a>.
    */
-  private static class DjbCipherPoly1305Ietf extends DjbCipherPoly1305 {
+  private static class SnuffleCipherPoly1305Ietf extends SnuffleCipherPoly1305 {
 
-    private DjbCipherPoly1305Ietf(DjbCipher djbCipher) {
-      super(djbCipher);
+    private SnuffleCipherPoly1305Ietf(SnuffleCipher snuffleCipher) {
+      super(snuffleCipher);
     }
 
     @Override
@@ -79,10 +80,10 @@ public abstract class DjbCipherPoly1305 implements Aead {
   }
 
   /** DJB's NaCl box compatible Poly1305. */
-  private static class DjbCipherPoly1305Nacl extends DjbCipherPoly1305 {
+  private static class SnuffleCipherPoly1305Nacl extends SnuffleCipherPoly1305 {
 
-    private DjbCipherPoly1305Nacl(DjbCipher djbCipher) {
-      super(djbCipher);
+    private SnuffleCipherPoly1305Nacl(SnuffleCipher snuffleCipher) {
+      super(snuffleCipher);
     }
 
     @Override
@@ -98,20 +99,20 @@ public abstract class DjbCipherPoly1305 implements Aead {
    * 7539.
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link
-   *     DjbCipher#KEY_SIZE_IN_BYTES}.
+   *     SnuffleCipher#KEY_SIZE_IN_BYTES}.
    */
-  public static DjbCipherPoly1305 constructChaCha20Poly1305Ietf(final byte[] key) {
-    return new DjbCipherPoly1305Ietf(DjbCipher.chaCha20(key));
+  public static SnuffleCipherPoly1305 constructChaCha20Poly1305Ietf(final byte[] key) {
+    return new SnuffleCipherPoly1305Ietf(SnuffleCipher.chaCha20(key));
   }
 
   /**
    * Constructs a new NaCl compatible XSalsa20Poly1305 cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link
-   *     DjbCipher#KEY_SIZE_IN_BYTES}.
+   *     SnuffleCipher#KEY_SIZE_IN_BYTES}.
    */
-  public static DjbCipherPoly1305 constructXSalsa20Poly1305Nacl(final byte[] key) {
-    return new DjbCipherPoly1305Nacl(DjbCipher.xSalsa20(key));
+  public static SnuffleCipherPoly1305 constructXSalsa20Poly1305Nacl(final byte[] key) {
+    return new SnuffleCipherPoly1305Nacl(SnuffleCipher.xSalsa20(key));
   }
 
   /**
@@ -119,10 +120,10 @@ public abstract class DjbCipherPoly1305 implements Aead {
    * Compatible with libsodium/crypto_aead/xchacha20poly1305/sodium/aead_xchacha20poly1305.c
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link
-   *     DjbCipher#KEY_SIZE_IN_BYTES}.
+   *     SnuffleCipher#KEY_SIZE_IN_BYTES}.
    */
-  public static DjbCipherPoly1305 constructXChaCha20Poly1305Ietf(final byte[] key) {
-    return new DjbCipherPoly1305Ietf(DjbCipher.xChaCha20(key));
+  public static SnuffleCipherPoly1305 constructXChaCha20Poly1305Ietf(final byte[] key) {
+    return new SnuffleCipherPoly1305Ietf(SnuffleCipher.xChaCha20(key));
   }
 
   private static int blockSizeMultipleCeil(int x) {
@@ -132,18 +133,18 @@ public abstract class DjbCipherPoly1305 implements Aead {
   abstract byte[] macData(byte[] aad, ByteBuffer ciphertext);
 
   public int nonceSizeInBytes() {
-    return djbCipher.nonceSizeInBytes();
+    return snuffleCipher.nonceSizeInBytes();
   }
 
   /**
    * Encrypts the {@code plaintext} with Poly1305 authentication based on {@code additionalData}.
    *
    * <p>Please note that nonce is randomly generated hence keys need to be rotated after encrypting
-   * a certain number of messages depending on the nonce size of the underlying {@link DjbCipher}.
-   * Reference: Using 96-bit random nonces, it is possible to encrypt, with a single key, up to 2^32
-   * messages with probability of collision <= 2^-32 whereas using 192-bit random nonces, the number
-   * of messages that can be encrypted with the same key is up to 2^80 with the same probability of
-   * collusion.
+   * a certain number of messages depending on the nonce size of the underlying {@link
+   * SnuffleCipher}. Reference: Using 96-bit random nonces, it is possible to encrypt, with a single
+   * key, up to 2^32 messages with probability of collision <= 2^-32 whereas using 192-bit random
+   * nonces, the number of messages that can be encrypted with the same key is up to 2^80 with the
+   * same probability of collusion.
    *
    * @param plaintext data to encrypt
    * @param additionalData additional data
@@ -164,13 +165,14 @@ public abstract class DjbCipherPoly1305 implements Aead {
       throw new IllegalArgumentException("Given ByteBuffer output is too small");
     }
     int firstPosition = output.position();
-    djbCipher.encrypt(output, plaintext);
+    snuffleCipher.encrypt(output, plaintext);
     output.position(firstPosition);
-    byte[] nonce = new byte[djbCipher.nonceSizeInBytes()];
+    byte[] nonce = new byte[snuffleCipher.nonceSizeInBytes()];
     output.get(nonce);
     output.limit(output.limit() - MAC_TAG_SIZE_IN_BYTES);
     byte[] tag =
-        Poly1305.computeMac(djbCipher.getAuthenticatorKey(nonce), macData(additionalData, output));
+        Poly1305.computeMac(
+            snuffleCipher.getAuthenticatorKey(nonce), macData(additionalData, output));
     output.limit(output.limit() + MAC_TAG_SIZE_IN_BYTES);
     output.put(tag);
   }
@@ -205,7 +207,7 @@ public abstract class DjbCipherPoly1305 implements Aead {
    */
   byte[] decrypt(ByteBuffer ciphertext, final byte[] additionalData)
       throws GeneralSecurityException {
-    if (ciphertext.remaining() < djbCipher.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
+    if (ciphertext.remaining() < snuffleCipher.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("ciphertext too short");
     }
     int firstPosition = ciphertext.position();
@@ -215,12 +217,12 @@ public abstract class DjbCipherPoly1305 implements Aead {
     // rewind to read ciphertext and compute tag.
     ciphertext.position(firstPosition);
     ciphertext.limit(ciphertext.limit() - MAC_TAG_SIZE_IN_BYTES);
-    byte[] nonce = new byte[djbCipher.nonceSizeInBytes()];
+    byte[] nonce = new byte[snuffleCipher.nonceSizeInBytes()];
     ciphertext.get(nonce);
     Poly1305.verifyMac(
-        djbCipher.getAuthenticatorKey(nonce), macData(additionalData, ciphertext), tag);
+        snuffleCipher.getAuthenticatorKey(nonce), macData(additionalData, ciphertext), tag);
     // rewind to decrypt the ciphertext.
     ciphertext.position(firstPosition);
-    return djbCipher.decrypt(ciphertext);
+    return snuffleCipher.decrypt(ciphertext);
   }
 }

@@ -21,14 +21,12 @@ import static com.google.crypto.tink.subtle.Poly1305.MAC_TAG_SIZE_IN_BYTES;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.annotations.Alpha;
-import com.google.crypto.tink.subtle.DjbCipher.ChaCha20Base;
-import com.google.crypto.tink.subtle.DjbCipher.XSalsa20;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
 /**
- * DjbCipher (e.g., ChaCha20, XChaCha20, or XSalsa20) encryption/decryption with Poly1305 for AEAD
- * and X25519 for DH key exchange.
+ * SnuffleCipher (e.g., ChaCha20, XChaCha20, or XSalsa20) encryption/decryption with Poly1305 for
+ * AEAD and X25519 for DH key exchange.
  *
  * <pre>
  * Example usage:
@@ -55,100 +53,107 @@ public final class NaClCryptoBox {
 
   private static final byte[] EMPTY_AAD = new byte[0];
 
-  private abstract static class X25519DjbCipherPoly1305Factory {
-    abstract DjbCipherPoly1305 constructFromSymmetricKey(final byte[] sharedSecret);
+  private abstract static class X25519SnuffleCipherPoly1305Factory {
+    abstract SnuffleCipherPoly1305 constructFromSymmetricKey(final byte[] sharedSecret);
 
-    DjbCipherPoly1305 constructWithKem(final byte[] privateKey, final byte[] peerPublicKey) {
+    SnuffleCipherPoly1305 constructWithKem(final byte[] privateKey, final byte[] peerPublicKey) {
       return constructFromSymmetricKey(X25519.computeSharedSecret(privateKey, peerPublicKey));
     }
   }
 
-  private static class XSalsa20Poly1305NaclFactory extends X25519DjbCipherPoly1305Factory {
+  private static class XSalsa20Poly1305NaclFactory extends X25519SnuffleCipherPoly1305Factory {
     @Override
-    public DjbCipherPoly1305 constructFromSymmetricKey(byte[] sharedSecret) {
-      return DjbCipherPoly1305.constructXSalsa20Poly1305Nacl(XSalsa20.hSalsa20(sharedSecret));
+    public SnuffleCipherPoly1305 constructFromSymmetricKey(byte[] sharedSecret) {
+      return SnuffleCipherPoly1305.constructXSalsa20Poly1305Nacl(XSalsa20.hSalsa20(sharedSecret));
     }
   }
 
-  private static class ChaCha20Poly1305IetfFactory extends X25519DjbCipherPoly1305Factory {
+  private static class ChaCha20Poly1305IetfFactory extends X25519SnuffleCipherPoly1305Factory {
     @Override
-    public DjbCipherPoly1305 constructFromSymmetricKey(byte[] sharedSecret) {
-      return DjbCipherPoly1305.constructChaCha20Poly1305Ietf(ChaCha20Base.hChaCha20(sharedSecret));
+    public SnuffleCipherPoly1305 constructFromSymmetricKey(byte[] sharedSecret) {
+      return SnuffleCipherPoly1305.constructChaCha20Poly1305Ietf(
+          ChaCha20Base.hChaCha20(sharedSecret));
     }
   }
 
-  private static class XChaCha20Poly1305IetfFactory extends X25519DjbCipherPoly1305Factory {
+  private static class XChaCha20Poly1305IetfFactory extends X25519SnuffleCipherPoly1305Factory {
     @Override
-    public DjbCipherPoly1305 constructFromSymmetricKey(byte[] sharedSecret) {
-      return DjbCipherPoly1305.constructXChaCha20Poly1305Ietf(ChaCha20Base.hChaCha20(sharedSecret));
+    public SnuffleCipherPoly1305 constructFromSymmetricKey(byte[] sharedSecret) {
+      return SnuffleCipherPoly1305.constructXChaCha20Poly1305Ietf(
+          ChaCha20Base.hChaCha20(sharedSecret));
     }
   }
 
   /**
-   * Returns a {@link HybridEncrypt} using {@link X25519} for DH key exchange, {@link XSalsa20} for
-   * the symmetric key algorithm and {@link DjbCipherPoly1305} for AEAD.
+   * Returns a {@link HybridEncrypt} using {@link X25519} for DH key exchange, {@link
+   * com.google.crypto.tink.subtle.XSalsa20} for the symmetric key algorithm and {@link
+   * SnuffleCipherPoly1305} for AEAD.
    *
    * @param peerPublicKey public key of the peer user
    */
   public static HybridEncrypt hybridEncryptWithXSalsa20Poly1305(final byte[] peerPublicKey) {
-    return new X25519DjbCipherPoly1305HybridEncrypt(
+    return new X25519SnuffleCipherPoly1305HybridEncrypt(
         peerPublicKey, new XSalsa20Poly1305NaclFactory());
   }
 
   /**
    * Returns a {@link HybridEncrypt} using {@link X25519} for DH key exchange, {@link
-   * com.google.crypto.tink.subtle.DjbCipher.ChaCha20} for the symmetric key algorithm and {@link
-   * DjbCipherPoly1305} for AEAD.
+   * com.google.crypto.tink.subtle.SnuffleCipher.ChaCha20} for the symmetric key algorithm and
+   * {@link SnuffleCipherPoly1305} for AEAD.
    *
    * @param peerPublicKey public key of the peer user
    */
   public static HybridEncrypt hybridEncryptWithChaCha20Poly1305(final byte[] peerPublicKey) {
-    return new X25519DjbCipherPoly1305HybridEncrypt(
+    return new X25519SnuffleCipherPoly1305HybridEncrypt(
         peerPublicKey, new ChaCha20Poly1305IetfFactory());
   }
 
   /**
    * Returns a {@link HybridEncrypt} using {@link X25519} for DH key exchange, {@link
-   * com.google.crypto.tink.subtle.DjbCipher.XChaCha20} for the symmetric key algorithm and {@link
-   * DjbCipherPoly1305} for AEAD.
+   * com.google.crypto.tink.subtle.SnuffleCipher.XChaCha20} for the symmetric key algorithm and
+   * {@link SnuffleCipherPoly1305} for AEAD.
    *
    * @param peerPublicKey public key of the peer user
    */
   public static HybridEncrypt hybridEncryptWithXChaCha20Poly1305(final byte[] peerPublicKey) {
-    return new X25519DjbCipherPoly1305HybridEncrypt(
+    return new X25519SnuffleCipherPoly1305HybridEncrypt(
         peerPublicKey, new XChaCha20Poly1305IetfFactory());
   }
 
   /**
-   * Returns a {@link HybridDecrypt} using {@link X25519} for DH key exchange, {@link XSalsa20} for
-   * the symmetric key algorithm and {@link DjbCipherPoly1305} for AEAD.
+   * Returns a {@link HybridDecrypt} using {@link X25519} for DH key exchange, {@link
+   * com.google.crypto.tink.subtle.XSalsa20} for the symmetric key algorithm and {@link
+   * SnuffleCipherPoly1305} for AEAD.
    *
    * @param privateKey private key for the current user
    */
   public static HybridDecrypt hybridDecryptWithXSalsa20Poly1305(final byte[] privateKey) {
-    return new X25519DjbCipherPoly1305HybridDecrypt(privateKey, new XSalsa20Poly1305NaclFactory());
+    return new X25519SnuffleCipherPoly1305HybridDecrypt(
+        privateKey, new XSalsa20Poly1305NaclFactory());
   }
 
   /**
    * Returns a {@link HybridDecrypt} using {@link X25519} for DH key exchange, {@link
-   * com.google.crypto.tink.subtle.DjbCipher.ChaCha20} for the symmetric key algorithm and {@link
-   * DjbCipherPoly1305} for AEAD.
+   * com.google.crypto.tink.subtle.SnuffleCipher.ChaCha20} for the symmetric key algorithm and
+   * {@link SnuffleCipherPoly1305} for AEAD.
    *
    * @param privateKey private key for the current user
    */
   public static HybridDecrypt hybridDecryptWithChaCha20Poly1305(final byte[] privateKey) {
-    return new X25519DjbCipherPoly1305HybridDecrypt(privateKey, new ChaCha20Poly1305IetfFactory());
+    return new X25519SnuffleCipherPoly1305HybridDecrypt(
+        privateKey, new ChaCha20Poly1305IetfFactory());
   }
 
   /**
    * Returns a {@link HybridDecrypt} using {@link X25519} for DH key exchange, {@link
-   * com.google.crypto.tink.subtle.DjbCipher.XChaCha20} for the symmetric key algorithm and {@link
-   * DjbCipherPoly1305} for AEAD.
+   * com.google.crypto.tink.subtle.SnuffleCipher.XChaCha20} for the symmetric key algorithm and
+   * {@link SnuffleCipherPoly1305} for AEAD.
    *
    * @param privateKey private key for the current user
    */
   public static HybridDecrypt hybridDecryptWithXChaCha20Poly1305(final byte[] privateKey) {
-    return new X25519DjbCipherPoly1305HybridDecrypt(privateKey, new XChaCha20Poly1305IetfFactory());
+    return new X25519SnuffleCipherPoly1305HybridDecrypt(
+        privateKey, new XChaCha20Poly1305IetfFactory());
   }
 
   /** Returns a random private key to be used on {@link X25519}. */
@@ -161,16 +166,16 @@ public final class NaClCryptoBox {
     return X25519.publicFromPrivate(privateKey);
   }
 
-  private static class X25519DjbCipherPoly1305HybridEncrypt implements HybridEncrypt {
+  private static class X25519SnuffleCipherPoly1305HybridEncrypt implements HybridEncrypt {
 
     private final ImmutableByteArray ephemeralPublicKey;
-    private final DjbCipherPoly1305 djbCipherPoly1305;
+    private final SnuffleCipherPoly1305 snuffleCipherPoly1305;
 
-    private X25519DjbCipherPoly1305HybridEncrypt(
-        final byte[] peerPublicKey, X25519DjbCipherPoly1305Factory factory) {
+    private X25519SnuffleCipherPoly1305HybridEncrypt(
+        final byte[] peerPublicKey, X25519SnuffleCipherPoly1305Factory factory) {
       final byte[] ephemeralPrivateKey = generatePrivateKey();
       ephemeralPublicKey = ImmutableByteArray.of(getPublicKey(ephemeralPrivateKey));
-      this.djbCipherPoly1305 = factory.constructWithKem(ephemeralPrivateKey, peerPublicKey);
+      this.snuffleCipherPoly1305 = factory.constructWithKem(ephemeralPrivateKey, peerPublicKey);
     }
 
     /**
@@ -185,22 +190,22 @@ public final class NaClCryptoBox {
       ByteBuffer output =
           ByteBuffer.allocate(
               Field25519.FIELD_LEN
-                  + djbCipherPoly1305.nonceSizeInBytes()
+                  + snuffleCipherPoly1305.nonceSizeInBytes()
                   + plaintext.length
                   + MAC_TAG_SIZE_IN_BYTES);
       output.put(ephemeralPublicKey.getBytes());
-      djbCipherPoly1305.encrypt(output, plaintext, EMPTY_AAD);
+      snuffleCipherPoly1305.encrypt(output, plaintext, EMPTY_AAD);
       return output.array();
     }
   }
 
-  private static class X25519DjbCipherPoly1305HybridDecrypt implements HybridDecrypt {
+  private static class X25519SnuffleCipherPoly1305HybridDecrypt implements HybridDecrypt {
 
     private final ImmutableByteArray privateKey;
-    private final X25519DjbCipherPoly1305Factory factory;
+    private final X25519SnuffleCipherPoly1305Factory factory;
 
-    private X25519DjbCipherPoly1305HybridDecrypt(
-        final byte[] privateKey, X25519DjbCipherPoly1305Factory factory) {
+    private X25519SnuffleCipherPoly1305HybridDecrypt(
+        final byte[] privateKey, X25519SnuffleCipherPoly1305Factory factory) {
       this.privateKey = ImmutableByteArray.of(privateKey);
       this.factory = factory;
     }
