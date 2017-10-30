@@ -29,7 +29,7 @@ public final class Random {
     return rand;
   }
 
-  public static final int rand(int max) {
+  public static final int randInt(int max) {
     return secureRandom.nextInt(max);
   }
 }

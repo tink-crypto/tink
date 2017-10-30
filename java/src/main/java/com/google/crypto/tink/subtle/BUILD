@@ -67,6 +67,22 @@ java_library(
     ],
 )
 
+# deterministic aead subtle
+
+java_library(
+    name = "dead",
+    srcs = [
+        "AesSiv.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        ":mac",
+        ":subtle",
+        "//java/src/main/java/com/google/crypto/tink:primitives",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
+    ],
+)
+
 # mac subtle
 
 java_library(

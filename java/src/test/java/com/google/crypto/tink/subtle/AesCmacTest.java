@@ -75,7 +75,7 @@ public class AesCmacTest {
     for (int triesKey = 0; triesKey < 100; triesKey++) {
       AesCmac c = new AesCmac(Random.randBytes(16));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
-        byte[] plaintext = Random.randBytes(Random.rand(1024) + 1);
+        byte[] plaintext = Random.randBytes(Random.randInt(1024) + 1);
         c.verifyMac(c.computeMac(plaintext), plaintext);
       }
     }
@@ -86,7 +86,7 @@ public class AesCmacTest {
     for (int triesKey = 0; triesKey < 100; triesKey++) {
       AesCmac c = new AesCmac(Random.randBytes(16));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
-        byte[] plaintext = Random.randBytes(Random.rand(1024) + 1);
+        byte[] plaintext = Random.randBytes(Random.randInt(1024) + 1);
         byte[] initialMac = c.computeMac(plaintext);
 
         // Modify every bit of the tag.

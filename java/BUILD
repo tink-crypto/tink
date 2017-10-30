@@ -45,6 +45,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:aead",
+        "//java/src/main/java/com/google/crypto/tink/subtle:dead",
         "//java/src/main/java/com/google/crypto/tink/subtle:hybrid",
         "//java/src/main/java/com/google/crypto/tink/subtle:keysdownloader",
         "//java/src/main/java/com/google/crypto/tink/subtle:mac",

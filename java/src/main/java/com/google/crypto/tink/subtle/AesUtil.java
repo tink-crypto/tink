@@ -16,9 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * A collection of byte-manipulation functions, and some more specific functions for AES-CMAC /
@@ -30,7 +28,6 @@ import java.util.Collection;
 class AesUtil {
 
   public static final int BLOCK_SIZE = 16;
-  public static final Collection<Integer> KEY_SIZES = Arrays.asList(16, 24, 32);
 
   /**
    * Multiplies value by x in the finite field GF(2^128) represented using the primitive polynomial
@@ -67,11 +64,5 @@ class AesUtil {
     byte[] result = Arrays.copyOf(x, 16);
     result[x.length] = (byte) 0x80;
     return result;
-  }
-
-  static void assertKeySized(byte[] key) throws GeneralSecurityException {
-    if (!KEY_SIZES.contains(key.length)) {
-      throw new GeneralSecurityException("The given parameter is not AES-key sized.");
-    }
   }
 }

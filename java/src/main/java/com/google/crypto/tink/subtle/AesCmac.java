@@ -18,13 +18,17 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Mac;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.util.Arrays;
+import java.util.Collection;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /** An implementation of CMAC following https://tools.ietf.org/html/rfc4493 */
 public final class AesCmac implements Mac {
+  private static final Collection<Integer> KEY_SIZES = Arrays.asList(16, 24, 32);
+
   private final SecretKey keySpec;
   private byte[] subKey1;
   private byte[] subKey2;
@@ -34,7 +38,10 @@ public final class AesCmac implements Mac {
   }
 
   public AesCmac(final byte[] key) throws GeneralSecurityException {
-    AesUtil.assertKeySized(key);
+    if (!KEY_SIZES.contains(key.length)) {
+      throw new InvalidKeyException("invalid key size");
+    }
+
     keySpec = new SecretKeySpec(key, "AES");
     generateSubKeys();
   }
