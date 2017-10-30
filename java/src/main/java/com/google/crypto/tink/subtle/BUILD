@@ -72,6 +72,8 @@ java_library(
 java_library(
     name = "mac",
     srcs = [
+        "AesCmac.java",
+        "AesUtil.java",
         "MacJce.java",
     ],
     javacopts = JAVACOPTS,

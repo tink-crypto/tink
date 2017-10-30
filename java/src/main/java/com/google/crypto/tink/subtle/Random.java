@@ -28,4 +28,8 @@ public final class Random {
     secureRandom.nextBytes(rand);
     return rand;
   }
+
+  public static final int rand(int max) {
+    return secureRandom.nextInt(max);
+  }
 }

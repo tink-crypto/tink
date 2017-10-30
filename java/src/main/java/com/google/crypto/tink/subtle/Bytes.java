@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 /** Helper methods that deal with byte arrays. */
 public final class Bytes {
@@ -58,6 +59,52 @@ public final class Bytes {
     for (byte[] chunk : chunks) {
       System.arraycopy(chunk, 0, res, pos, chunk.length);
       pos += chunk.length;
+    }
+    return res;
+  }
+
+  /**
+   * Computes the xor of two byte arrays, specifying offsets and the length to xor.
+   *
+   * @return a new byte[] of length len.
+   */
+  public static final byte[] xor(final byte[] x, int offsetX, final byte[] y, int offsetY, int len) {
+    if (len < 0 || x.length - len < offsetX  || y.length - len < offsetY) {
+      throw new IllegalArgumentException(
+          "That combination of buffers, offsets and length to xor result in out-of-bond accesses.");
+    }
+    byte[] res = new byte[len];
+    for (int i = 0; i < len; i++) {
+      res[i] = (byte) (x[i + offsetX] ^ y[i + offsetY]);
+    }
+    return res;
+  }
+
+  /**
+   * Computes the xor of two byte arrays of equal size.
+   *
+   * @return a new byte[] of length x.length.
+   */
+  public static final byte[] xor(final byte[] x, final byte[] y) {
+    if (x.length != y.length) {
+      throw new IllegalArgumentException("The lengths of x and y should match.");
+    }
+    return xor(x, 0, y, 0, x.length);
+  }
+
+  /**
+   * xors b to the end of a.
+   *
+   * @return a new byte[] of length x.length.
+   */
+  public static final byte[] xorEnd(final byte[] a, final byte[] b) {
+    if (a.length < b.length) {
+      throw new IllegalArgumentException("xorEnd requires a.length >= b.length");
+    }
+    int paddingLength = a.length - b.length;
+    byte[] res = Arrays.copyOf(a, a.length);
+    for (int i = 0; i < b.length; i++) {
+      res[paddingLength + i] ^= b[i];
     }
     return res;
   }
