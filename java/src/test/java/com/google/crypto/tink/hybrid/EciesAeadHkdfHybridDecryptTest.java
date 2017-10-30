@@ -89,26 +89,42 @@ public class EciesAeadHkdfHybridDecryptTest {
         }
       }
     }
+
     // Modify context.
-    try {
-      hybridDecrypt.decrypt(ciphertext, Arrays.copyOf(context, context.length - 1));
-      fail("Invalid context, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
+    for (int bytes = 0; bytes < context.length; bytes++) {
+      for (int bit = 0; bit < 8; bit++) {
+        byte[] modifiedContext = Arrays.copyOf(context, context.length);
+        modifiedContext[bytes] ^= (byte) (1 << bit);
+        try {
+          hybridDecrypt.decrypt(ciphertext, modifiedContext);
+          fail("Invalid context, should have thrown exception");
+        } catch (GeneralSecurityException expected) {
+          // Expected
+        }
+      }
     }
+
     // Modify salt.
-    hybridDecrypt =
-        new EciesAeadHkdfHybridDecrypt(
-            recipientPrivateKey,
-            Arrays.copyOf(salt, salt.length - 1),
-            hmacAlgo,
-            EllipticCurves.PointFormatType.UNCOMPRESSED,
-            new RegistryEciesAeadHkdfDemHelper(keyTemplate));
-    try {
-      hybridDecrypt.decrypt(ciphertext, context);
-      fail("Invalid salt, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
+    // We exclude tests that modify the length of the salt, since the salt has fixed length and
+    // modifying the length may not be detected.
+    for (int bytes = 0; bytes < salt.length; bytes++) {
+      for (int bit = 0; bit < 8; bit++) {
+        byte[] modifiedSalt = Arrays.copyOf(salt, salt.length);
+        modifiedSalt[bytes] ^= (byte) (1 << bit);
+        hybridDecrypt =
+            new EciesAeadHkdfHybridDecrypt(
+                recipientPrivateKey,
+                modifiedSalt,
+                hmacAlgo,
+                EllipticCurves.PointFormatType.UNCOMPRESSED,
+                new RegistryEciesAeadHkdfDemHelper(keyTemplate));
+        try {
+          hybridDecrypt.decrypt(ciphertext, context);
+          fail("Invalid salt, should have thrown exception");
+        } catch (GeneralSecurityException expected) {
+          // Expected
+        }
+      }
     }
   }
 
