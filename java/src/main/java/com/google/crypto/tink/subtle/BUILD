@@ -26,6 +26,20 @@ java_library(
     ],
 )
 
+java_library(
+    name = "keysdownloader",
+    srcs = [
+        "KeysDownloader.java",
+    ],
+    javacopts = JAVACOPTS,
+    deps = [
+        "@com_google_code_findbugs_jsr305",
+        "@com_google_http_client//jar",
+        "@joda_time//jar",
+        "@org_json//jar",
+    ],
+)
+
 # aead subtle
 
 java_library(
