@@ -22,6 +22,7 @@ java_library(
     name = "primitives",
     srcs = [
         "Aead.java",
+        "DeterministicAead.java",
         "HybridDecrypt.java",
         "HybridEncrypt.java",
         "Mac.java",
