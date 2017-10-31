@@ -1,0 +1,3 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+licenses(["notice"])  # Apache 2.0

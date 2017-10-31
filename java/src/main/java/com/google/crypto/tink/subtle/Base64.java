@@ -94,7 +94,7 @@ public final class Base64 {
 
   /** Decodes a url-safe base64 string to a byte array. */
   public static byte[] urlSafeDecode(String input) {
-    return decode(input, DEFAULT | NO_WRAP | URL_SAFE);
+    return decode(input, DEFAULT | NO_PADDING | NO_WRAP | URL_SAFE);
   }
 
   /**
@@ -428,7 +428,7 @@ public final class Base64 {
 
   /** Url-safe base64 encodes a byte array to a string. */
   public static String urlSafeEncode(final byte[] input) {
-    return encodeToString(input, DEFAULT | NO_WRAP | URL_SAFE);
+    return encodeToString(input, DEFAULT | NO_PADDING | NO_WRAP | URL_SAFE);
   }
 
   /**

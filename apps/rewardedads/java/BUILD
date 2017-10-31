@@ -5,21 +5,17 @@ licenses(["notice"])  # Apache 2.0
 load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
 java_library(
-    name = "paymentmethodtoken",
+    name = "java",
     srcs = glob([
         "src/main/**/*.java",
     ]),
     javacopts = JAVACOPTS,
     deps = [
         "//java",
-        "@com_google_code_findbugs_jsr305//jar",
-        "@com_google_http_client//jar",
-        "@joda_time//jar",
+        "@com_google_http_client//:com_google_http_client",
         "@org_json//jar",
     ],
 )
-
-# Tests
 
 load("//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
 
@@ -30,10 +26,9 @@ java_library(
         "src/test/**/*.java",
     ]),
     deps = [
-        ":paymentmethodtoken",
+        ":java",
         "//java:testonly",
-        "@com_google_http_client//jar",
-        "@joda_time//jar",
+        "@com_google_http_client//:com_google_http_client",
         "@junit",
         "@org_json//jar",
     ],

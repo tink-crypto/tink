@@ -51,7 +51,7 @@ import org.joda.time.Instant;
  */
 public class KeysDownloader {
   /** Default HTTP transport used by this class. */
-  public static final NetHttpTransport DEFAULT_HTTP_TRANSPORT =
+  private static final NetHttpTransport DEFAULT_HTTP_TRANSPORT =
       new NetHttpTransport.Builder().build();
 
   private static final Executor DEFAULT_BACKGROUND_EXECUTOR = Executors.newCachedThreadPool();
@@ -77,7 +77,7 @@ public class KeysDownloader {
   @GuardedBy("instanceStateLock")
   private long cacheExpirationDurationInMillis;
 
-  KeysDownloader(Executor backgroundExecutor, HttpTransport httpTransport, String url) {
+  public KeysDownloader(Executor backgroundExecutor, HttpTransport httpTransport, String url) {
     validate(url);
     this.backgroundExecutor = backgroundExecutor;
     this.httpTransport = httpTransport;
