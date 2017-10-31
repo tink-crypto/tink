@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.util.TreeSet;
 import org.json.JSONArray;
@@ -137,7 +138,7 @@ public final class Ed25519SignTest {
     }
 
     JSONObject json = TestUtil.readJson("testdata/wycheproof/eddsa_test.json");
-    checkAlgAndVersion(json);
+    WycheproofTestUtil.checkAlgAndVersion(json, "EDDSA", "0.0a18");
     int numTests = json.getInt("numberOfTests");
     int cntTests = 0;
     int cntSkippedTests = 0;
@@ -167,22 +168,5 @@ public final class Ed25519SignTest {
     }
     assertEquals(0, errors);
     assertEquals(numTests, cntTests + cntSkippedTests);
-  }
-
-  private void checkAlgAndVersion(JSONObject jsonObj) throws Exception {
-    final String expectedAlgorithm = "EDDSA";
-    String algorithm = jsonObj.getString("algorithm");
-    if (!expectedAlgorithm.equals(algorithm)) {
-      System.out.println("expect algorithm " + expectedAlgorithm + ", got" + algorithm);
-    }
-    final String expectedVersion = "0.0a18";
-    String generatorVersion = jsonObj.getString("generatorVersion");
-    if (!generatorVersion.equals(expectedVersion)) {
-      System.out.println(
-          "expect test vectors with version "
-              + expectedVersion
-              + " ,got vectors with version "
-              + generatorVersion);
-    }
   }
 }
