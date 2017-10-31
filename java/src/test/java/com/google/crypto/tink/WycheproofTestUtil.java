@@ -19,8 +19,10 @@ package com.google.crypto.tink;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.subtle.EllipticCurves;
 import java.io.File;
 import java.io.FileInputStream;
+import java.security.NoSuchAlgorithmException;
 import org.json.JSONObject;
 
 /** Wycheproof Test helpers. */
@@ -74,5 +76,23 @@ public class WycheproofTestUtil {
     }
 
     return new JSONObject(new String(Util.readAll(new FileInputStream(new File(filePath))), UTF_8));
+  }
+  /**
+   * Gets curve type from curve name.
+   *
+   * @throws NoSuchAlgorithmException iff the curve name is unknown.
+   */
+  public static EllipticCurves.CurveType getCurveType(String curveName)
+      throws NoSuchAlgorithmException {
+    switch (curveName) {
+      case "sepcp256r1":
+        return EllipticCurves.CurveType.NIST_P256;
+      case "secp384r1":
+        return EllipticCurves.CurveType.NIST_P384;
+      case "secp521r1":
+        return EllipticCurves.CurveType.NIST_P521;
+      default:
+        throw new NoSuchAlgorithmException("Unknown curve name: " + curveName);
+    }
   }
 }
