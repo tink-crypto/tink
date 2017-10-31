@@ -16,8 +16,11 @@
 
 package com.google.crypto.tink;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.FileInputStream;
 import org.json.JSONObject;
 
 /** Wycheproof Test helpers. */
@@ -45,9 +48,7 @@ public class WycheproofTestUtil {
     return md + "WITH" + signatureAlgorithm;
   }
 
-  /**
-   * Checks that test vector has the expected algorithm and version.
-   */
+  /** Checks that test vector has the expected algorithm and version. */
   public static void checkAlgAndVersion(
       JSONObject testvector, String expectedAlgorithm, String expectedVersion) throws Exception {
     String algorithm = testvector.getString("algorithm");
@@ -62,5 +63,16 @@ public class WycheproofTestUtil {
               + " ,got vectors with version "
               + generatorVersion);
     }
+  }
+
+  /** Gets JSONObject from file. */
+  public static JSONObject readJson(String path) throws Exception {
+    String filePath = path;
+    if (TestUtil.isAndroid()) {
+      // TODO(b/67385998): make this work outside google3.
+      filePath = "/sdcard/googletest/test_runfiles/google3/" + path;
+    }
+
+    return new JSONObject(new String(Util.readAll(new FileInputStream(new File(filePath))), UTF_8));
   }
 }

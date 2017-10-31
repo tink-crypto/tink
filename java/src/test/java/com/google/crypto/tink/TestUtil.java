@@ -17,7 +17,6 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -62,8 +61,6 @@ import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
-import java.io.File;
-import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -74,7 +71,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import javax.crypto.Cipher;
-import org.json.JSONObject;
 
 /** Test helpers. */
 public class TestUtil {
@@ -459,11 +455,6 @@ public class TestUtil {
       res |= (byte) (a[i] ^ b[i]);
     }
     return res == 0;
-  }
-
-  /** Gets JSONObject from file. */
-  public static JSONObject readJson(String path) throws Exception {
-    return new JSONObject(new String(Util.readAll(new FileInputStream(new File(path))), UTF_8));
   }
 
   /**

@@ -145,12 +145,7 @@ public class AesGcmJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    if (TestUtil.isAndroid()) {
-      System.out.println("testWycheproofVectors doesn't work on Android, skipping");
-      return;
-    }
-
-    JSONObject json = TestUtil.readJson("../wycheproof/testvectors/aes_gcm_test.json");
+    JSONObject json = WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_gcm_test.json");
     WycheproofTestUtil.checkAlgAndVersion(json, "AES-GCM", "0.0a8");
     int numTests = json.getInt("numberOfTests");
     int cntTests = 0;

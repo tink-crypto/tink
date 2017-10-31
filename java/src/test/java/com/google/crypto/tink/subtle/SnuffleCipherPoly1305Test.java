@@ -215,11 +215,8 @@ public class SnuffleCipherPoly1305Test {
 
     @Test
     public void testWycheproofVectors() throws Exception {
-      if (TestUtil.isAndroid()) {
-        System.out.println("testWycheproofVectors doesn't work on Android, skipping");
-        return;
-      }
-      JSONObject json = TestUtil.readJson("testdata/wycheproof/chacha20_poly1305_test.json");
+      JSONObject json =
+          WycheproofTestUtil.readJson("testdata/wycheproof/chacha20_poly1305_test.json");
       WycheproofTestUtil.checkAlgAndVersion(json, "ChaCha20Poly1305", "0.1");
       int numTests = json.getInt("numberOfTests");
       int cntTests = 0;

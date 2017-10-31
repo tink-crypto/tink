@@ -43,11 +43,7 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    if (TestUtil.isAndroid()) {
-      System.out.println("testWycheproofVectors doesn't work on Android, skipping");
-      return;
-    }
-    JSONObject jsonObj = TestUtil.readJson("../wycheproof/testvectors/ecdsa_test.json");
+    JSONObject jsonObj = WycheproofTestUtil.readJson("../wycheproof/testvectors/ecdsa_test.json");
     WycheproofTestUtil.checkAlgAndVersion(jsonObj, "ECDSA", "0.0a10");
     String algorithm = "ECDSA";
     int numTests = jsonObj.getInt("numberOfTests");
