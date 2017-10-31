@@ -247,7 +247,7 @@
             <!-- TODO: add Maven support for Wycheproof which these tests depend on -->
             <exclude>**/AesGcmJceTest.java</exclude>
             <exclude>**/AesEaxJceTest.java</exclude>
-            <exclude>**/SnuffleCipherPoly1305Test.java<exclude>
+            <exclude>**/SnuffleCipherPoly1305Test.java</exclude>
             <exclude>**/Ed25519SignTest.java</exclude>
             <exclude>**/Ed25519VerifyTest.java</exclude>
             <exclude>**/EcdsaVerifyJceTest.java</exclude>
