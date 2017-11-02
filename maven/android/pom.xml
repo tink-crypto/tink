@@ -66,11 +66,14 @@
             <exclude>**/AwsKmsClient.java</exclude>
             <exclude>**/GcpKmsAead.java</exclude>
             <exclude>**/GcpKmsClient.java</exclude>
+            <!-- not sure we need this on Android -->
+            <exclude>**/KeysDownloader.java</exclude>
           </excludes>
           <testExcludes>
             <exclude>**/AwsKmsAeadTest.java</exclude>
             <exclude>**/KmsAeadKeyManagerTest.java</exclude>
             <exclude>**/KmsEnvelopeAeadKeyManagerTest.java</exclude>
+            <exclude>**/KeysDownloaderTest.java</exclude>
             <!-- these tests depend on JsonFormat which does not work with protobuf lite -->
             <exclude>**/JsonKeysetReaderTest.java</exclude>
             <exclude>**/JsonKeysetWriterTest.java</exclude>
