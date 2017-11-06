@@ -18,18 +18,22 @@ package com.google.crypto.tink.streamingaead;
 
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.AesGcmHkdfStreaming;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This key manager generates new {@code AesGcmHkdfStreamingKey} keys and produces new instances of
@@ -130,6 +134,127 @@ class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
   @Override
   public int getVersion() {
     return VERSION;
+  }
+
+  /**
+   * @param jsonKey JSON formated {@code AesGcmHkdfStreamingKey}-proto
+   * @return {@code AesGcmHkdfStreamingKey}-proto
+   */
+  @Override
+  public MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException {
+    try {
+      JSONObject json = new JSONObject(new String(jsonKey, Util.UTF_8));
+      validateKey(json);
+      byte[] keyValue = Base64.decode(json.getString("keyValue"));
+      return AesGcmHkdfStreamingKey.newBuilder()
+          .setVersion(json.getInt("version"))
+          .setParams(paramsFromJson(json.getJSONObject("params")))
+          .setKeyValue(ByteString.copyFrom(keyValue))
+          .build();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * @param jsonKeyFormat JSON formated {@code AesGcmHkdfStreamingKeyFromat}-proto
+   * @return {@code AesGcmHkdfStreamingKeyFormat}-proto
+   */
+  @Override
+  public MessageLite jsonToKeyFormat(final byte[] jsonKeyFormat) throws GeneralSecurityException {
+    try {
+      JSONObject json = new JSONObject(new String(jsonKeyFormat, Util.UTF_8));
+      validateKeyFormat(json);
+      return AesGcmHkdfStreamingKeyFormat.newBuilder()
+          .setParams(paramsFromJson(json.getJSONObject("params")))
+          .setKeySize(json.getInt("keySize"))
+          .build();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKey},
+   * which must be a {@code AesGcmHkdfStreamingKey}-proto.
+   * @throws GeneralSecurityException if the key in {@code serializedKey} is not supported
+   */
+  @Override
+  public byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException {
+    AesGcmHkdfStreamingKey key;
+    try {
+      key = AesGcmHkdfStreamingKey.parseFrom(serializedKey);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized AesGcmHkdfStreamingKey proto", e);
+    }
+    validate(key);
+    try {
+      return new JSONObject()
+          .put("version", key.getVersion())
+          .put("params", toJson(key.getParams()))
+          .put("keyValue", Base64.encode(key.getKeyValue().toByteArray()))
+          .toString(4).getBytes(Util.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKeyFormat}
+   * which must be a {@code AesGcmHkdfStreamingKeyFormat}-proto.
+   * @throws GeneralSecurityException if the format in {@code serializedKeyFromat} is not supported
+   */
+  @Override
+  public byte[] keyFormatToJson(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    AesGcmHkdfStreamingKeyFormat format;
+    try {
+      format = AesGcmHkdfStreamingKeyFormat.parseFrom(serializedKeyFormat);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException(
+          "expected serialized AesGcmHkdfStreamingKeyFormat proto", e);
+    }
+    validate(format);
+    try {
+      return new JSONObject()
+          .put("params", toJson(format.getParams()))
+          .put("keySize", format.getKeySize())
+          .toString(4).getBytes(Util.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  private JSONObject toJson(AesGcmHkdfStreamingParams params) throws JSONException {
+    return new JSONObject()
+        .put("ciphertextSegmentSize", params.getCiphertextSegmentSize())
+        .put("derivedKeySize", params.getDerivedKeySize())
+        .put("hkdfHashType", params.getHkdfHashType().toString());
+  }
+
+  private AesGcmHkdfStreamingParams paramsFromJson(JSONObject json)
+      throws JSONException, GeneralSecurityException {
+    if (json.length() != 3 || !json.has("ciphertextSegmentSize") || !json.has("derivedKeySize")
+        || !json.has("hkdfHashType")) {
+      throw new JSONException("Invalid params.");
+    }
+    return AesGcmHkdfStreamingParams.newBuilder()
+        .setCiphertextSegmentSize(json.getInt("ciphertextSegmentSize"))
+        .setDerivedKeySize(json.getInt("derivedKeySize"))
+        .setHkdfHashType(Util.getHashType(json.getString("hkdfHashType")))
+        .build();
+  }
+
+  private void validateKey(JSONObject json) throws JSONException {
+    if (json.length() != 3 || !json.has("version") || !json.has("params")
+        || !json.has("keyValue")) {
+      throw new JSONException("Invalid key.");
+    }
+  }
+
+  private void validateKeyFormat(JSONObject json) throws JSONException {
+    if (json.length() != 2 || !json.has("params") || !json.has("keySize")) {
+      throw new JSONException("Invalid key format.");
+    }
   }
 
   private void validate(AesGcmHkdfStreamingKey key) throws GeneralSecurityException {

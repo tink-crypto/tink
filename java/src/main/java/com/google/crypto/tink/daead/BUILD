@@ -37,6 +37,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:daead",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
+        "@org_json",
     ] + FULL_PROTOS,
 )
 
@@ -50,5 +51,6 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "//java/src/main/java/com/google/crypto/tink/subtle:daead",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
+        "@org_json",
     ] + LITE_PROTOS,
 )

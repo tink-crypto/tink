@@ -18,11 +18,13 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Validators;
@@ -34,6 +36,8 @@ import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This key manager generates new {@code EcdsaPrivateKey} keys and produces new instances of {@code
@@ -64,7 +68,7 @@ class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
       throw new GeneralSecurityException("expected EcdsaPrivateKey proto");
     }
     EcdsaPrivateKey keyProto = (EcdsaPrivateKey) key;
-    validateKey(keyProto);
+    validate(keyProto);
     ECPrivateKey privateKey =
         EllipticCurves.getEcPrivateKey(
             SigUtil.toCurveType(keyProto.getPublicKey().getParams().getCurve()),
@@ -164,7 +168,81 @@ class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
     return VERSION;
   }
 
-  private void validateKey(EcdsaPrivateKey privKey) throws GeneralSecurityException {
+  /**
+   * @param jsonKey JSON formated {@code EcdsaPrivateKey}-proto
+   * @return {@code EcdsaPrivateKey}-proto
+   */
+  @Override
+  public MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException {
+    try {
+      JSONObject json = new JSONObject(new String(jsonKey, Util.UTF_8));
+      validateKey(json);
+      EcdsaVerifyKeyManager publicKeyManager = new EcdsaVerifyKeyManager();
+      return EcdsaPrivateKey.newBuilder()
+          .setVersion(json.getInt("version"))
+          .setPublicKey((EcdsaPublicKey) publicKeyManager.jsonToKey(
+              json.getJSONObject("publicKey").toString(4).getBytes(Util.UTF_8)))
+          .setKeyValue(ByteString.copyFrom(Base64.decode(json.getString("keyValue"))))
+          .build();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * @param jsonKeyFormat JSON formated {@code EcdsaPrivateKeyFromat}-proto
+   * @return {@code EcdsaKeyFormat}-proto
+   */
+  @Override
+  public MessageLite jsonToKeyFormat(final byte[] jsonKeyFormat) throws GeneralSecurityException {
+    return new EcdsaVerifyKeyManager().jsonToKeyFormat(jsonKeyFormat);
+  }
+
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKey},
+   * which must be a {@code EcdsaPrivateKey}-proto.
+   * @throws GeneralSecurityException if the key in {@code serializedKey} is not supported
+   */
+  @Override
+  public byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException {
+    EcdsaPrivateKey key;
+    try {
+      key = EcdsaPrivateKey.parseFrom(serializedKey);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized EcdsaPrivateKey proto", e);
+    }
+    validate(key);
+    EcdsaVerifyKeyManager publicKeyManager = new EcdsaVerifyKeyManager();
+    try {
+      return new JSONObject()
+          .put("version", key.getVersion())
+          .put("publicKey", new JSONObject(new String(
+              publicKeyManager.keyToJson(key.getPublicKey().toByteString()), Util.UTF_8)))
+          .put("keyValue", Base64.encode(key.getKeyValue().toByteArray()))
+          .toString(4).getBytes(Util.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKeyFormat}
+   * which must be a {@code EcdsaKeyFormat}-proto.
+   * @throws GeneralSecurityException if the format in {@code serializedKeyFromat} is not supported
+   */
+  @Override
+  public byte[] keyFormatToJson(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    return new EcdsaVerifyKeyManager().keyFormatToJson(serializedKeyFormat);
+  }
+
+  private void validateKey(JSONObject json) throws JSONException {
+    if (json.length() != 3 || !json.has("version") || !json.has("publicKey")
+        || !json.has("keyValue")) {
+      throw new JSONException("Invalid key.");
+    }
+  }
+
+  private void validate(EcdsaPrivateKey privKey) throws GeneralSecurityException {
     Validators.validateVersion(privKey.getVersion(), VERSION);
     SigUtil.validateEcdsaParams(privKey.getPublicKey().getParams());
   }

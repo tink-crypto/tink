@@ -18,11 +18,13 @@ package com.google.crypto.tink.mac;
 
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.MacJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
@@ -31,6 +33,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This key manager generates new {@code HmacKey} keys and produces new instances of {@code MacJce}.
@@ -82,6 +86,21 @@ class HmacKeyManager implements KeyManager<Mac> {
     }
   }
 
+  @Override
+  public boolean doesSupport(String typeUrl) {
+    return typeUrl.equals(TYPE_URL);
+  }
+
+  @Override
+  public String getKeyType() {
+    return TYPE_URL;
+  }
+
+  @Override
+  public int getVersion() {
+    return VERSION;
+  }
+
   /**
    * @param serializedKeyFormat serialized {@code HmacKeyFormat} proto
    * @return new {@code HmacKey} proto
@@ -128,19 +147,121 @@ class HmacKeyManager implements KeyManager<Mac> {
         .build();
   }
 
+  /**
+   * @param jsonKey JSON formated {@code HmacKey}-proto
+   * @return {@code HmacKey}-proto
+   */
   @Override
-  public boolean doesSupport(String typeUrl) {
-    return typeUrl.equals(TYPE_URL);
+  public MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException {
+    try {
+      JSONObject json = new JSONObject(new String(jsonKey, Util.UTF_8));
+      validateKey(json);
+      byte[] keyValue = Base64.decode(json.getString("keyValue"));
+      return HmacKey.newBuilder()
+          .setVersion(json.getInt("version"))
+          .setParams(paramsFromJson(json.getJSONObject("params")))
+          .setKeyValue(ByteString.copyFrom(keyValue))
+          .build();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
   }
 
+  /**
+   * @param jsonKeyFormat JSON formated {@code HmacKeyFromat}-proto
+   * @return {@code HmacKeyFormat}-proto
+   */
   @Override
-  public String getKeyType() {
-    return TYPE_URL;
+  public MessageLite jsonToKeyFormat(final byte[] jsonKeyFormat) throws GeneralSecurityException {
+    try {
+      JSONObject json = new JSONObject(new String(jsonKeyFormat, Util.UTF_8));
+      validateKeyFormat(json);
+      return HmacKeyFormat.newBuilder()
+          .setParams(paramsFromJson(json.getJSONObject("params")))
+          .setKeySize(json.getInt("keySize"))
+          .build();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
   }
 
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKey},
+   * which must be a {@code HmacKey}-proto.
+   * @throws GeneralSecurityException if the key in {@code serializedKey} is not supported
+   */
   @Override
-  public int getVersion() {
-    return VERSION;
+  public byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException {
+    HmacKey key;
+    try {
+      key = HmacKey.parseFrom(serializedKey);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized HmacKey proto", e);
+    }
+    validate(key);
+    try {
+      return new JSONObject()
+          .put("version", key.getVersion())
+          .put("params", toJson(key.getParams()))
+          .put("keyValue", Base64.encode(key.getKeyValue().toByteArray()))
+          .toString(4).getBytes(Util.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKeyFormat}
+   * which must be a {@code HmacKeyFormat}-proto.
+   * @throws GeneralSecurityException if the format in {@code serializedKeyFromat} is not supported
+   */
+  @Override
+  public byte[] keyFormatToJson(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    HmacKeyFormat format;
+    try {
+      format = HmacKeyFormat.parseFrom(serializedKeyFormat);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized HmacKeyFormat proto", e);
+    }
+    validate(format);
+    try {
+      return new JSONObject()
+          .put("params", toJson(format.getParams()))
+          .put("keySize", format.getKeySize())
+          .toString(4).getBytes(Util.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  private JSONObject toJson(HmacParams params) throws JSONException {
+    return new JSONObject()
+        .put("hash", params.getHash().toString())
+        .put("tagSize", params.getTagSize());
+  }
+
+  private HmacParams paramsFromJson(JSONObject json)
+      throws JSONException, GeneralSecurityException {
+    if (json.length() != 2 || !json.has("hash") || !json.has("tagSize")) {
+      throw new JSONException("Invalid params.");
+    }
+    return HmacParams.newBuilder()
+        .setHash(Util.getHashType(json.getString("hash")))
+        .setTagSize(json.getInt("tagSize"))
+        .build();
+  }
+
+  private void validateKey(JSONObject json) throws JSONException {
+    if (json.length() != 3 || !json.has("version") || !json.has("params")
+        || !json.has("keyValue")) {
+      throw new JSONException("Invalid key.");
+    }
+  }
+
+  private void validateKeyFormat(JSONObject json) throws JSONException {
+    if (json.length() != 2 || !json.has("params") || !json.has("keySize")) {
+      throw new JSONException("Invalid key format.");
+    }
   }
 
   private void validate(HmacKey key) throws GeneralSecurityException {

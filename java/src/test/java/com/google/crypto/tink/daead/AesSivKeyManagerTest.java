@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.daead;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -174,5 +175,154 @@ public class AesSivKeyManagerTest {
     return AesSivKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(keySize)))
         .build();
+  }
+
+  @Test
+  public void testJsonExportAndImport() throws Exception {
+    AesSivKeyManager keyManager = new AesSivKeyManager();
+    int keyCount = 2;
+
+    // Prepare example formats and keys.
+    ByteString[] formats = new ByteString[keyCount];
+    formats[0] = DeterministicAeadKeyTemplates.AES192_SIV.getValue();
+    formats[1] = DeterministicAeadKeyTemplates.AES256_SIV.getValue();
+
+    AesSivKey[] keys = new AesSivKey[keyCount];
+    for (int i = 0; i < keyCount; i++) {
+      try {
+        keys[i] = (AesSivKey) keyManager.newKey(formats[i]);
+      } catch (Exception e) {
+        throw new Exception(e.toString()
+            + "\nFailed for formats[" + i + "]: " + formats[i].toString());
+      }
+    }
+
+    // Check export and import of keys.
+    int count = 0;
+    for (AesSivKey key : keys) {
+      try {
+        byte[] json = keyManager.keyToJson(key.toByteString());
+        AesSivKey keyFromJson = (AesSivKey) keyManager.jsonToKey(json);
+        assertEquals(key.toString(), keyFromJson.toString());
+      } catch (Exception e) {
+        throw new Exception(e.toString() + "\nFailed for key: " + key.toString());
+      }
+      count++;
+    }
+    assertEquals(keyCount, count);
+
+    // Check export and import of key formats.
+    count = 0;
+    for (ByteString format : formats) {
+      try {
+        byte[] json = keyManager.keyFormatToJson(format);
+        AesSivKeyFormat formatFromJson = (AesSivKeyFormat) keyManager.jsonToKeyFormat(json);
+        assertEquals(AesSivKeyFormat.parseFrom(format).toString(), formatFromJson.toString());
+        count++;
+      } catch (Exception e) {
+        throw new Exception(e.toString() + "\nFailed for format: " + format.toString());
+      }
+    }
+    assertEquals(keyCount, count);
+  }
+
+  @Test
+  public void testJsonExportAndImportErrors() throws Exception {
+    AesSivKeyManager keyManager = new AesSivKeyManager();
+
+    try {
+      byte[] json = "some bad JSON key".getBytes();
+      AesSivKey key = (AesSivKey) keyManager.jsonToKey(json);
+      fail("Corrupted JSON, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "text must begin");
+    }
+
+    try {
+      byte[] json = "a bad JSON keyformat".getBytes();
+      AesSivKeyFormat format = (AesSivKeyFormat) keyManager.jsonToKeyFormat(json);
+      fail("Corrupted JSON, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "text must begin");
+    }
+
+    try {  // An incomplete JSON key.
+      byte[] json = "{\"version\": 0}".getBytes();
+      AesSivKey key = (AesSivKey) keyManager.jsonToKey(json);
+      fail("Incomplet JSON key, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key");
+    }
+
+    try {  // An incomplete JSON key format.
+      byte[] json = "{}".getBytes();
+      AesSivKeyFormat format = (AesSivKeyFormat) keyManager.jsonToKeyFormat(json);
+      fail("Incomplete JSON key format, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key format");
+    }
+
+    try {  // Extra name in JSON key.
+      byte[] json = ("{\"version\": 0, "
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+      AesSivKey key = (AesSivKey) keyManager.jsonToKey(json);
+      fail("Invalid JSON key, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key");
+    }
+
+    try {  // Extra name JSON key format.
+      byte[] json = ("{\"keySize\": 16, \"extraName\": 42}").getBytes();
+      AesSivKeyFormat format = (AesSivKeyFormat) keyManager.jsonToKeyFormat(json);
+      fail("Invalid JSON key format, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key format");
+    }
+
+    try {  // An incomplete AesSivKey.
+      AesSivKey key = AesSivKey.newBuilder().setVersion(42).build();
+      byte[] json = keyManager.keyToJson(key.toByteString());
+      fail("Incomplete AesSivKey, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
+
+    try {  // An incomplete AesSivKeyFormat.
+      AesSivKeyFormat format = AesSivKeyFormat.newBuilder().build();
+      byte[] json = keyManager.keyFormatToJson(format.toByteString());
+      fail("Incomplete AesSivKeyFormat, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
+
+    try {  // Wrong serialized key proto.
+      KeyData key = KeyData.newBuilder()
+          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
+      byte[] json = keyManager.keyToJson(key.toByteString());
+      fail("Wrong key proto, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
+
+    try {  // Wrong serialized key format proto.
+      KeyData format = KeyData.newBuilder()
+          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
+      byte[] json = keyManager.keyFormatToJson(format.toByteString());
+      fail("Wrong key format proto, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
   }
 }

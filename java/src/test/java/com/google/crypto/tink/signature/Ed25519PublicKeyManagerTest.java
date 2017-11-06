@@ -17,14 +17,18 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
+import com.google.crypto.tink.proto.Ed25519PublicKey;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Random;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -91,6 +95,108 @@ public class Ed25519PublicKeyManagerTest {
       } catch (GeneralSecurityException e) {
         assertExceptionContains(e, "Signature check failed.");
       }
+    }
+  }
+
+  @Test
+  public void testJsonExportAndImport() throws Exception {
+    Ed25519PublicKeyManager keyManager = new Ed25519PublicKeyManager();
+    int keyCount = 4;
+
+    // Prepare example keys.
+    Ed25519PublicKey[] keys = new Ed25519PublicKey[keyCount];
+    Ed25519PrivateKeyManager privateKeyManager = new Ed25519PrivateKeyManager();
+    for (int i = 0; i < keyCount; i++) {
+     try {
+        // Passing any proto as a parameter for newKey, as the manager doesn't use that parameter.
+       keys[i] = ((Ed25519PrivateKey) privateKeyManager.newKey(SignatureKeyTemplates.ED25519))
+           .getPublicKey();
+      } catch (Exception e) {
+        throw new Exception(e.toString() + "\nFailed for i="  + i);
+      }
+    }
+
+    // Check export and import of keys.
+    int count = 0;
+    for (Ed25519PublicKey key : keys) {
+      try {
+        byte[] json = keyManager.keyToJson(key.toByteString());
+        Ed25519PublicKey keyFromJson = (Ed25519PublicKey) keyManager.jsonToKey(json);
+        assertEquals(key.toString(), keyFromJson.toString());
+      } catch (Exception e) {
+        throw new Exception(e.toString() + "\nFailed for key: " + key.toString());
+      }
+      count++;
+    }
+    assertEquals(keyCount, count);
+  }
+
+  @Test
+  public void testJsonExportAndImportErrors() throws Exception {
+    Ed25519PublicKeyManager keyManager = new Ed25519PublicKeyManager();
+
+    // Check handling of key format protos.
+    try {
+      keyManager.keyFormatToJson(null);
+      fail("Operation not supported, should have thrown exception.");
+    } catch (Exception e) {
+      // Expected.
+      assertExceptionContains(e, "not supported");
+    }
+    try {
+      keyManager.jsonToKeyFormat(null);
+      fail("Operation not supported, should have thrown exception.");
+    } catch (Exception e) {
+      // Expected.
+      assertExceptionContains(e, "not supported");
+    }
+
+    try {  // Incorrect JSON.
+      byte[] json = "some bad JSON key".getBytes();
+      Ed25519PublicKey key = (Ed25519PublicKey) keyManager.jsonToKey(json);
+      fail("Corrupted JSON, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "text must begin");
+    }
+
+    try {  // An incomplete JSON key.
+      byte[] json = "{\"version\": 0}".getBytes();
+      Ed25519PublicKey key = (Ed25519PublicKey) keyManager.jsonToKey(json);
+      fail("Incomplet JSON key, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key");
+    }
+
+    try {  // Extra name in JSON key.
+      byte[] json = ("{\"version\": 0, \"key_value\": \"some key value\", "
+          + "\"extraName\": 42}").getBytes();
+      Ed25519PublicKey key = (Ed25519PublicKey) keyManager.jsonToKey(json);
+      fail("Invalid JSON key, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key");
+    }
+
+    try {  // An incomplete Ed25519PublicKey.
+      Ed25519PublicKey key = Ed25519PublicKey.newBuilder().setVersion(42).build();
+      byte[] json = keyManager.keyToJson(key.toByteString());
+      fail("Incomplete Ed25519PublicKey, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
+
+    try {  // Wrong serialized key proto.
+      KeyData key = KeyData.newBuilder()
+          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
+      byte[] json = keyManager.keyToJson(key.toByteString());
+      fail("Wrong key proto, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
     }
   }
 }

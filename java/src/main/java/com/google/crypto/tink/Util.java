@@ -16,18 +16,27 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.proto.EcPointFormat;
+import com.google.crypto.tink.proto.EllipticCurveType;
+import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /** Various helpers. */
-class Util {
+public class Util {
+  public static final Charset UTF_8 = Charset.forName("UTF-8");
+
   /** @return a KeysetInfo-proto from a {@code keyset} protobuf. */
   public static KeysetInfo getKeysetInfo(Keyset keyset) {
     KeysetInfo.Builder info = KeysetInfo.newBuilder().setPrimaryKeyId(keyset.getPrimaryKeyId());
@@ -110,5 +119,97 @@ class Util {
       result.write(buf, 0, count);
     }
     return result.toByteArray();
+  }
+
+  /**
+   * Returns a {@code HashType}-enum corresponding to the given string representation.
+   */
+  public static HashType getHashType(String type) throws GeneralSecurityException {
+    String uType = type.toUpperCase();
+    if (uType.equals("SHA1")) {
+      return HashType.SHA1;
+    } else if (uType.equals("SHA224")) {
+      return HashType.SHA224;
+    } else if (uType.equals("SHA256")) {
+      return HashType.SHA256;
+    } else if (uType.equals("SHA512")) {
+      return HashType.SHA512;
+    }
+    throw new GeneralSecurityException("unknown hash type: " + type);
+  }
+
+  /**
+   * Returns a {@code OutputPrefixType}-enum corresponding to the given string representation.
+   */
+  public static OutputPrefixType getOutputPrefixType(String type) throws GeneralSecurityException {
+    String uType = type.toUpperCase();
+    if (uType.equals("TINK")) {
+      return OutputPrefixType.TINK;
+    } else if (uType.equals("LEGACY")) {
+      return OutputPrefixType.LEGACY;
+    } else if (uType.equals("RAW")) {
+      return OutputPrefixType.RAW;
+    } else if (uType.equals("CRUNCHY")) {
+      return OutputPrefixType.CRUNCHY;
+    }
+    throw new GeneralSecurityException("unknown output prefix type: " + type);
+  }
+
+  /**
+   * Returns a {@code EllipticCurveType}-enum corresponding to the given string representation.
+   */
+  public static EllipticCurveType getEllipticCurveType(String type)
+      throws GeneralSecurityException {
+    String uType = type.toUpperCase();
+    if (uType.equals("NIST_P224")) {
+      return EllipticCurveType.NIST_P224;
+    } else if (uType.equals("NIST_P256")) {
+      return EllipticCurveType.NIST_P256;
+    } else if (uType.equals("NIST_P384")) {
+      return EllipticCurveType.NIST_P384;
+    } else if (uType.equals("NIST_P521")) {
+      return EllipticCurveType.NIST_P521;
+    }
+    throw new GeneralSecurityException("unknown elliptic curve type: " + type);
+  }
+
+  /**
+   * Returns a {@code EcPointFormat}-enum corresponding to the given string representation.
+   */
+  public static EcPointFormat getEcPointFormat(String format) throws GeneralSecurityException {
+    String uFormat = format.toUpperCase();
+    if (uFormat.equals("UNCOMPRESSED")) {
+      return EcPointFormat.UNCOMPRESSED;
+    } else if (uFormat.equals("COMPRESSED")) {
+      return EcPointFormat.COMPRESSED;
+    }
+    throw new GeneralSecurityException("unknown EC point format: " + format);
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static JSONObject toJson(KeyTemplate keyTemplate)
+      throws JSONException, GeneralSecurityException {
+    KeyManager keyManager = Registry.getKeyManager(keyTemplate.getTypeUrl());
+    return new JSONObject()
+        .put("typeUrl", keyTemplate.getTypeUrl())
+        .put("value", new JSONObject(new String(
+            keyManager.keyFormatToJson(keyTemplate.getValue()), UTF_8)))
+        .put("outputPrefixType", keyTemplate.getOutputPrefixType().toString());
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static KeyTemplate keyTemplateFromJson(JSONObject json) throws
+      JSONException, GeneralSecurityException {
+    if (json.length() != 3 || !json.has("typeUrl") || !json.has("value")
+        || !json.has("outputPrefixType")) {
+      throw new JSONException("Invalid DEM key template.");
+    }
+    KeyManager keyManager = Registry.getKeyManager(json.getString("typeUrl"));
+    return KeyTemplate.newBuilder()
+        .setTypeUrl(json.getString("typeUrl"))
+        .setValue(keyManager.jsonToKeyFormat(
+            json.getJSONObject("value").toString(4).getBytes(UTF_8)).toByteString())
+        .setOutputPrefixType(getOutputPrefixType(json.getString("outputPrefixType")))
+        .build();
   }
 }

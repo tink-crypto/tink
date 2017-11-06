@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.streamingaead;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -200,5 +201,179 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     serializedKeyFormat = ByteString.copyFrom(keyFormat.toByteArray());
     AesGcmHkdfStreamingKey unusedKey = (AesGcmHkdfStreamingKey) keyManager.newKey(keyFormat);
     unusedKey = (AesGcmHkdfStreamingKey) keyManager.newKey(serializedKeyFormat);
+  }
+
+  @Test
+  public void testJsonExportAndImport() throws Exception {
+    AesGcmHkdfStreamingKeyManager keyManager = new AesGcmHkdfStreamingKeyManager();
+    int keyCount = 4;
+
+    // Prepare example formats and keys.
+    ByteString[] formats = new ByteString[keyCount];
+    formats[0] = StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB.getValue();
+    formats[1] = StreamingAeadKeyTemplates.AES256_GCM_HKDF_4KB.getValue();
+    formats[2] = StreamingAeadKeyTemplates.createAesGcmHkdfStreamingKeyTemplate(
+        48, HashType.SHA224, 32, 8192).getValue();
+    formats[3] = StreamingAeadKeyTemplates.createAesGcmHkdfStreamingKeyTemplate(
+        32, HashType.SHA512, 24, 16384).getValue();
+
+    AesGcmHkdfStreamingKey[] keys = new AesGcmHkdfStreamingKey[keyCount];
+    for (int i = 0; i < keyCount; i++) {
+      try {
+        keys[i] = (AesGcmHkdfStreamingKey) keyManager.newKey(formats[i]);
+      } catch (Exception e) {
+        throw new Exception(e.toString() + "\nFailed for formats[" + i + "]:\n"
+            + AesGcmHkdfStreamingKeyFormat.parseFrom(formats[i]).toString());
+      }
+    }
+
+    // Check export and import of keys.
+    int count = 0;
+    for (AesGcmHkdfStreamingKey key : keys) {
+      try {
+        byte[] json = keyManager.keyToJson(key.toByteString());
+        AesGcmHkdfStreamingKey keyFromJson = (AesGcmHkdfStreamingKey) keyManager.jsonToKey(json);
+        assertEquals(key.toString(), keyFromJson.toString());
+      } catch (Exception e) {
+        throw new Exception(e.toString() + "\nFailed for key: " + key.toString());
+      }
+      count++;
+    }
+    assertEquals(keyCount, count);
+
+    // Check export and import of key formats.
+    count = 0;
+    for (ByteString format : formats) {
+      try {
+        byte[] json = keyManager.keyFormatToJson(format);
+        AesGcmHkdfStreamingKeyFormat formatFromJson =
+            (AesGcmHkdfStreamingKeyFormat) keyManager.jsonToKeyFormat(json);
+        assertEquals(AesGcmHkdfStreamingKeyFormat.parseFrom(format).toString(),
+            formatFromJson.toString());
+        count++;
+      } catch (Exception e) {
+        throw new Exception(e.toString() + "\nFailed for format:\n"
+            + AesGcmHkdfStreamingKeyFormat.parseFrom(format).toString());
+      }
+    }
+    assertEquals(keyCount, count);
+  }
+
+  @Test
+  public void testJsonExportAndImportErrors() throws Exception {
+    AesGcmHkdfStreamingKeyManager keyManager = new AesGcmHkdfStreamingKeyManager();
+
+    try {
+      byte[] json = "some bad JSON key".getBytes();
+      AesGcmHkdfStreamingKey key = (AesGcmHkdfStreamingKey) keyManager.jsonToKey(json);
+      fail("Corrupted JSON, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "text must begin");
+    }
+
+    try {
+      byte[] json = "a bad JSON keyformat".getBytes();
+      AesGcmHkdfStreamingKeyFormat format =
+          (AesGcmHkdfStreamingKeyFormat) keyManager.jsonToKeyFormat(json);
+      fail("Corrupted JSON, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "text must begin");
+    }
+
+    try {  // An incomplete JSON key.
+      byte[] json = "{\"version\": 0, \"params\": {}}".getBytes();
+      AesGcmHkdfStreamingKey key = (AesGcmHkdfStreamingKey) keyManager.jsonToKey(json);
+      fail("Incomplet JSON key, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key");
+    }
+
+    try {  // An incomplete JSON key format.
+      byte[] json = "{\"keySize\": 32}".getBytes();
+      AesGcmHkdfStreamingKeyFormat format =
+          (AesGcmHkdfStreamingKeyFormat) keyManager.jsonToKeyFormat(json);
+      fail("Incomplete JSON key format, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key format");
+    }
+
+    try {  // Extra name in JSON key.
+      byte[] json = ("{\"version\": 0, \"params\": {\"derivedKeySize\": 16}, "
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+      AesGcmHkdfStreamingKey key = (AesGcmHkdfStreamingKey) keyManager.jsonToKey(json);
+      fail("Invalid JSON key, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key");
+    }
+
+    try {  // Extra name JSON key format.
+      byte[] json = ("{\"params\": {\"derivedKeySize\": 16}, "
+          + "\"keySize\": 16, \"extraName\": 42}").getBytes();
+      AesGcmHkdfStreamingKeyFormat format =
+          (AesGcmHkdfStreamingKeyFormat) keyManager.jsonToKeyFormat(json);
+      fail("Invalid JSON key format, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key format");
+    }
+
+    try {  // Incomplete params in JSON key.
+      byte[] json = ("{\"version\": 0, \"params\": {\"derivedKeySize\": 16}, "
+          + "\"keyValue\": \"some key bytes\"}").getBytes();
+      AesGcmHkdfStreamingKey key = (AesGcmHkdfStreamingKey) keyManager.jsonToKey(json);
+      fail("Invalid JSON key, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid params");
+    }
+
+    try {  // An incomplete AesGcmHkdfStreamingKey.
+      AesGcmHkdfStreamingKey key = AesGcmHkdfStreamingKey.newBuilder().setVersion(42).build();
+      byte[] json = keyManager.keyToJson(key.toByteString());
+      fail("Incomplete AesGcmHkdfStreamingKey, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
+
+    try {  // An incomplete AesGcmHkdfStreamingKeyFormat.
+      AesGcmHkdfStreamingKeyFormat format =
+          AesGcmHkdfStreamingKeyFormat.newBuilder().setKeySize(42).build();
+      byte[] json = keyManager.keyFormatToJson(format.toByteString());
+      fail("Incomplete AesGcmHkdfStreamingKeyFormat, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
+
+    try {  // Wrong serialized key proto.
+      KeyData key = KeyData.newBuilder()
+          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
+      byte[] json = keyManager.keyToJson(key.toByteString());
+      fail("Wrong key proto, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "expected serialized AesGcmHkdfStreamingKey");
+    }
+
+    try {  // Wrong serialized key format proto.
+      KeyData format = KeyData.newBuilder()
+          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
+      byte[] json = keyManager.keyFormatToJson(format.toByteString());
+      fail("Wrong key format proto, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "expected serialized AesGcmHkdfStreamingKeyFormat");
+    }
   }
 }

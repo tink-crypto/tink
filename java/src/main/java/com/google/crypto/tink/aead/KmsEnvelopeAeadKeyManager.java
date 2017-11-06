@@ -20,6 +20,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKey;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
@@ -28,6 +29,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This key manager generates new {@code KmsEnvelopeAeadKey} keys and produces new instances of
@@ -118,6 +121,122 @@ class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
   @Override
   public int getVersion() {
     return VERSION;
+  }
+
+  /**
+   * @param jsonKey JSON formated {@code KmsEnvelopeAeadKey}-proto
+   * @return {@code KmsEnvelopeAeadKey}-proto
+   */
+  @Override
+  public MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException {
+    try {
+      JSONObject json = new JSONObject(new String(jsonKey, Util.UTF_8));
+      validateKey(json);
+      return KmsEnvelopeAeadKey.newBuilder()
+          .setVersion(json.getInt("version"))
+          .setParams(paramsFromJson(json.getJSONObject("params")))
+          .build();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * @param jsonKeyFormat JSON formated {@code KmsEnvelopeAeadKeyFromat}-proto
+   * @return {@code KmsEnvelopeAeadKeyFormat}-proto
+   */
+  @Override
+  public MessageLite jsonToKeyFormat(final byte[] jsonKeyFormat) throws GeneralSecurityException {
+    try {
+      JSONObject json = new JSONObject(new String(jsonKeyFormat, Util.UTF_8));
+      validateKeyFormat(json);
+      return keyFormatFromJson(json);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKey},
+   * which must be a {@code KmsEnvelopeAeadKey}-proto.
+   * @throws GeneralSecurityException if the key in {@code serializedKey} is not supported
+   */
+  @Override
+  public byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException {
+    KmsEnvelopeAeadKey key;
+    try {
+      key = KmsEnvelopeAeadKey.parseFrom(serializedKey);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized KmsEnvelopeAeadKey proto", e);
+    }
+    validate(key);
+    try {
+      return new JSONObject()
+          .put("version", key.getVersion())
+          .put("params", toJson(key.getParams()))
+          .toString(4).getBytes(Util.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKeyFormat}
+   * which must be a {@code KmsEnvelopeAeadKeyFormat}-proto.
+   * @throws GeneralSecurityException if the format in {@code serializedKeyFromat} is not supported
+   */
+  @Override
+  public byte[] keyFormatToJson(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    KmsEnvelopeAeadKeyFormat format;
+    try {
+      format = KmsEnvelopeAeadKeyFormat.parseFrom(serializedKeyFormat);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized KmsEnvelopeAeadKeyFormat proto", e);
+    }
+    validate(format);
+    try {
+      return toJson(format).toString(4).getBytes(Util.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  private JSONObject toJson(KmsEnvelopeAeadKeyFormat format)
+      throws JSONException, GeneralSecurityException {
+    return new JSONObject()
+        .put("kekUri", format.getKekUri())
+        .put("dekTemplate", Util.toJson(format.getDekTemplate()));
+  }
+
+  private KmsEnvelopeAeadKeyFormat keyFormatFromJson(JSONObject json)
+      throws JSONException, GeneralSecurityException {
+    if (json.length() != 2 || !json.has("kekUri") || !json.has("dekTemplate")) {
+      throw new JSONException("Invalid params.");
+    }
+    return KmsEnvelopeAeadKeyFormat.newBuilder()
+        .setKekUri(json.getString("kekUri"))
+        .setDekTemplate(Util.keyTemplateFromJson(json.getJSONObject("dekTemplate")))
+        .build();
+  }
+
+  private KmsEnvelopeAeadKeyFormat paramsFromJson(JSONObject json)
+      throws JSONException, GeneralSecurityException {
+    return keyFormatFromJson(json);
+  }
+
+  private void validateKey(JSONObject json) throws JSONException {
+    if (json.length() != 2 || !json.has("version") || !json.has("params")) {
+      throw new JSONException("Invalid key.");
+    }
+  }
+
+  private void validateKeyFormat(JSONObject json) throws JSONException {
+    if (json.length() != 2 || !json.has("kekUri") || !json.has("dekTemplate")) {
+      throw new JSONException("Invalid key format.");
+    }
+  }
+
+  private void validate(KmsEnvelopeAeadKeyFormat format) throws GeneralSecurityException {
   }
 
   private void validate(KmsEnvelopeAeadKey key) throws GeneralSecurityException {

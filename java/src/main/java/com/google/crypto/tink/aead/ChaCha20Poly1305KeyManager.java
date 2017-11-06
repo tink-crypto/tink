@@ -18,8 +18,10 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.ChaCha20Poly1305;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
@@ -27,6 +29,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This instance of {@code KeyManager} generates new {@code ChaCha20Poly1305} keys and produces new
@@ -58,7 +62,7 @@ class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
       throw new GeneralSecurityException("expected ChaCha20Poly1305Key proto");
     }
     ChaCha20Poly1305Key keyProto = (ChaCha20Poly1305Key) key;
-    validateKey(keyProto);
+    validate(keyProto);
     return new ChaCha20Poly1305(keyProto.getKeyValue().toByteArray());
   }
 
@@ -97,6 +101,71 @@ class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
     return VERSION;
   }
 
+  /**
+   * @param jsonKey JSON formated {@code ChaCha20Poly1305Key}-proto
+   * @return {@code ChaCha20Poly1305Key}-proto
+   */
+  @Override
+  public MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException {
+    try {
+      JSONObject json = new JSONObject(new String(jsonKey, Util.UTF_8));
+      validateKey(json);
+      byte[] keyValue = Base64.decode(json.getString("keyValue"));
+      return ChaCha20Poly1305Key.newBuilder()
+          .setVersion(json.getInt("version"))
+          .setKeyValue(ByteString.copyFrom(keyValue))
+          .build();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * Not supported.
+   */
+  @Override
+  public MessageLite jsonToKeyFormat(final byte[] unused) throws GeneralSecurityException {
+    throw new GeneralSecurityException("Operation not supported.");
+  }
+
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKey},
+   * which must be a {@code ChaCha20Poly1305Key}-proto.
+   * @throws GeneralSecurityException if the key in {@code serializedKey} is not supported
+   */
+  @Override
+  public byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException {
+    ChaCha20Poly1305Key key;
+    try {
+      key = ChaCha20Poly1305Key.parseFrom(serializedKey);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized ChaCha20Poly1305Key proto", e);
+    }
+    validate(key);
+    try {
+      return new JSONObject()
+          .put("version", key.getVersion())
+          .put("keyValue", Base64.encode(key.getKeyValue().toByteArray()))
+          .toString(4).getBytes(Util.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * Not supported.
+   */
+  @Override
+  public byte[] keyFormatToJson(ByteString unused) throws GeneralSecurityException {
+    throw new GeneralSecurityException("Operation not supported.");
+  }
+
+  private void validateKey(JSONObject json) throws JSONException {
+    if (json.length() != 2 || !json.has("version") || !json.has("keyValue")) {
+      throw new JSONException("Invalid key.");
+    }
+  }
+
   private ChaCha20Poly1305Key newKey() throws GeneralSecurityException {
     return ChaCha20Poly1305Key.newBuilder()
         .setVersion(VERSION)
@@ -104,7 +173,7 @@ class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
         .build();
   }
 
-  private void validateKey(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
+  private void validate(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
     Validators.validateVersion(keyProto.getVersion(), VERSION);
     if (keyProto.getKeyValue().size() != KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("invalid ChaCha20Poly1305Key: incorrect key length");

@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -291,6 +292,170 @@ public class EcdsaSignKeyManagerTest {
       verifier.verify(signer.sign(message), message);
     } catch (GeneralSecurityException e) {
       fail("Should not fail: " + e);
+    }
+  }
+
+  @Test
+  public void testJsonExportAndImport() throws Exception {
+    EcdsaSignKeyManager keyManager = new EcdsaSignKeyManager();
+    int keyCount = 3;
+
+    // Prepare example formats and keys.
+    ByteString[] formats = new ByteString[keyCount];
+    formats[0] = SignatureKeyTemplates.ECDSA_P256.getValue();
+    formats[1] = SignatureKeyTemplates.ECDSA_P384.getValue();
+    formats[2] = SignatureKeyTemplates.ECDSA_P521.getValue();
+
+    EcdsaPrivateKey[] keys = new EcdsaPrivateKey[keyCount];
+    for (int i = 0; i < keyCount; i++) {
+      try {
+        keys[i] = (EcdsaPrivateKey) keyManager.newKey(formats[i]);
+      } catch (Exception e) {
+        throw new Exception(e.toString() + "\nFailed for formats[" + i + "]:\n"
+            + EcdsaKeyFormat.parseFrom(formats[i]).toString());
+      }
+    }
+
+    // Check export and import of keys.
+    int count = 0;
+    for (EcdsaPrivateKey key : keys) {
+      try {
+        byte[] json = keyManager.keyToJson(key.toByteString());
+        EcdsaPrivateKey keyFromJson = (EcdsaPrivateKey) keyManager.jsonToKey(json);
+        assertEquals(key.toString(), keyFromJson.toString());
+      } catch (Exception e) {
+        throw new Exception(e.toString() + "\nFailed for key: " + key.toString());
+      }
+      count++;
+    }
+    assertEquals(keyCount, count);
+
+    // Check export and import of key formats.
+    count = 0;
+    for (ByteString format : formats) {
+      try {
+        byte[] json = keyManager.keyFormatToJson(format);
+        EcdsaKeyFormat formatFromJson = (EcdsaKeyFormat) keyManager.jsonToKeyFormat(json);
+        assertEquals(EcdsaKeyFormat.parseFrom(format).toString(), formatFromJson.toString());
+        count++;
+      } catch (Exception e) {
+        throw new Exception(e.toString() + "\nFailed for format:\n"
+            + EcdsaKeyFormat.parseFrom(format).toString());
+      }
+    }
+    assertEquals(keyCount, count);
+  }
+
+  @Test
+  public void testJsonExportAndImportErrors() throws Exception {
+    EcdsaSignKeyManager keyManager = new EcdsaSignKeyManager();
+
+    try {
+      byte[] json = "some bad JSON key".getBytes();
+      EcdsaPrivateKey key = (EcdsaPrivateKey) keyManager.jsonToKey(json);
+      fail("Corrupted JSON, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "text must begin");
+    }
+
+    try {
+      byte[] json = "a bad JSON keyformat".getBytes();
+      EcdsaKeyFormat format = (EcdsaKeyFormat) keyManager.jsonToKeyFormat(json);
+      fail("Corrupted JSON, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "text must begin");
+    }
+
+    try {  // An incomplete JSON key.
+      byte[] json = "{\"version\": 0, \"keyValue\": \"some key bytes\"}".getBytes();
+      EcdsaPrivateKey key = (EcdsaPrivateKey) keyManager.jsonToKey(json);
+      fail("Incomplet JSON key, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key");
+    }
+
+    try {  // An incomplete JSON key format.
+      byte[] json = "{}".getBytes();
+      EcdsaKeyFormat format = (EcdsaKeyFormat) keyManager.jsonToKeyFormat(json);
+      fail("Incomplete JSON key format, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key format");
+    }
+
+    try {  // Extra name in JSON key.
+      byte[] json = ("{\"version\": 0, \"publicKey\": {}, "
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+      EcdsaPrivateKey key = (EcdsaPrivateKey) keyManager.jsonToKey(json);
+      fail("Invalid JSON key, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key");
+    }
+
+    try {  // Extra name JSON key format.
+      byte[] json = ("{\"params\": {}, \"extraName\": 42}").getBytes();
+      EcdsaKeyFormat format = (EcdsaKeyFormat) keyManager.jsonToKeyFormat(json);
+      fail("Invalid JSON key format, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key format");
+    }
+
+    try {  // Incomplete public key in JSON key.
+      byte[] json = ("{\"version\": 0, \"publicKey\": {\"params\": {}}, "
+          + "\"keyValue\": \"some key bytes\"}").getBytes();
+      EcdsaPrivateKey key = (EcdsaPrivateKey) keyManager.jsonToKey(json);
+      fail("Invalid JSON key, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "JSONException");
+      assertExceptionContains(e, "Invalid key");
+    }
+
+    try {  // An incomplete EcdsaPrivateKey.
+      EcdsaPrivateKey key = EcdsaPrivateKey.newBuilder().setVersion(42).build();
+      byte[] json = keyManager.keyToJson(key.toByteString());
+      fail("Incomplete EcdsaPrivateKey, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
+
+    try {  // An incomplete EcdsaKeyFormat.
+      EcdsaKeyFormat format = EcdsaKeyFormat.newBuilder().build();
+      byte[] json = keyManager.keyFormatToJson(format.toByteString());
+      fail("Incomplete EcdsaKeyFormat, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+    }
+
+    try {  // Wrong serialized key proto.
+      KeyData key = KeyData.newBuilder()
+          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
+      byte[] json = keyManager.keyToJson(key.toByteString());
+      fail("Wrong key proto, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "expected serialized EcdsaPrivateKey");
+    }
+
+    try {  // Wrong serialized key format proto.
+      KeyData format = KeyData.newBuilder()
+          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
+      byte[] json = keyManager.keyFormatToJson(format.toByteString());
+      fail("Wrong key format proto, should have thrown exception");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      assertExceptionContains(e, "expected serialized EcdsaKeyFormat");
     }
   }
 }

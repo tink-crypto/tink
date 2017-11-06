@@ -20,11 +20,14 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKey;
+import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.HmacKey;
+import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.IndCpaCipher;
@@ -34,6 +37,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.logging.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This key manager generates new {@link AesCtrHmacAeadKey} keys and produces new instances
@@ -146,7 +151,129 @@ class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
     return VERSION;
   }
 
+  /**
+   * @param jsonKey JSON formated {@code AesCtrHmacAeadKey}-proto
+   * @return {@code AesCtrHmacAeadKey}-proto
+   */
+  @Override
+  public MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException {
+    try {
+      JSONObject json = new JSONObject(new String(jsonKey, Util.UTF_8));
+      validateKey(json);
+      KeyManager<IndCpaCipher> aesCtrKeyManager = Registry.getKeyManager(AesCtrKeyManager.TYPE_URL);
+      KeyManager<Mac> hmacKeyManager = Registry.getKeyManager(MacConfig.HMAC_TYPE_URL);
+      return AesCtrHmacAeadKey.newBuilder()
+          .setVersion(json.getInt("version"))
+          .setAesCtrKey((AesCtrKey) aesCtrKeyManager.jsonToKey(
+              json.getJSONObject("aesCtrKey").toString(4).getBytes(Util.UTF_8)))
+          .setHmacKey((HmacKey) hmacKeyManager.jsonToKey(
+              json.getJSONObject("hmacKey").toString(4).getBytes(Util.UTF_8)))
+          .build();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * @param jsonKeyFormat JSON formated {@code AesCtrHmacAeadKeyFromat}-proto
+   * @return {@code AesCtrHmacAeadKeyFormat}-proto
+   */
+  @Override
+  public MessageLite jsonToKeyFormat(final byte[] jsonKeyFormat) throws GeneralSecurityException {
+    try {
+      JSONObject json = new JSONObject(new String(jsonKeyFormat, Util.UTF_8));
+      validateKeyFormat(json);
+      KeyManager<IndCpaCipher> aesCtrKeyManager = Registry.getKeyManager(AesCtrKeyManager.TYPE_URL);
+      KeyManager<Mac> hmacKeyManager = Registry.getKeyManager(MacConfig.HMAC_TYPE_URL);
+      return AesCtrHmacAeadKeyFormat.newBuilder()
+          .setAesCtrKeyFormat((AesCtrKeyFormat) aesCtrKeyManager.jsonToKeyFormat(
+              json.getJSONObject("aesCtrKeyFormat").toString(4).getBytes(Util.UTF_8)))
+          .setHmacKeyFormat((HmacKeyFormat) hmacKeyManager.jsonToKeyFormat(
+              json.getJSONObject("hmacKeyFormat").toString(4).getBytes(Util.UTF_8)))
+          .build();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKey},
+   * which must be a {@code AesCtrHmacAeadKey}-proto.
+   * @throws GeneralSecurityException if the key in {@code serializedKey} is not supported
+   */
+  @Override
+  public byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException {
+    AesCtrHmacAeadKey key;
+    try {
+      key = AesCtrHmacAeadKey.parseFrom(serializedKey);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized AesCtrHmacAeadKey proto", e);
+    }
+    validate(key);
+    KeyManager<IndCpaCipher> aesCtrKeyManager = Registry.getKeyManager(AesCtrKeyManager.TYPE_URL);
+    KeyManager<Mac> hmacKeyManager = Registry.getKeyManager(MacConfig.HMAC_TYPE_URL);
+    try {
+      return new JSONObject()
+          .put("version", key.getVersion())
+          .put("aesCtrKey", new JSONObject(new String(
+              aesCtrKeyManager.keyToJson(key.getAesCtrKey().toByteString()), Util.UTF_8)))
+          .put("hmacKey", new JSONObject(new String(
+              hmacKeyManager.keyToJson(key.getHmacKey().toByteString()), Util.UTF_8)))
+          .toString(4).getBytes(Util.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  /**
+   * Returns a JSON-formatted serialization of the given {@code serializedKeyFormat}
+   * which must be a {@code AesCtrHmacAeadKeyFormat}-proto.
+   * @throws GeneralSecurityException if the format in {@code serializeKeyFromat} is not supported
+   */
+  @Override
+  public byte[] keyFormatToJson(ByteString serializedKeyFormat) throws GeneralSecurityException {
+    AesCtrHmacAeadKeyFormat format;
+    try {
+      format = AesCtrHmacAeadKeyFormat.parseFrom(serializedKeyFormat);
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("expected serialized AesCtrHmacAeadKeyFormat proto", e);
+    }
+    validate(format);
+    KeyManager<IndCpaCipher> aesCtrKeyManager = Registry.getKeyManager(AesCtrKeyManager.TYPE_URL);
+    KeyManager<Mac> hmacKeyManager = Registry.getKeyManager(MacConfig.HMAC_TYPE_URL);
+    try {
+      return new JSONObject()
+          .put("aesCtrKeyFormat", new JSONObject(new String(
+              aesCtrKeyManager.keyFormatToJson(
+                  format.getAesCtrKeyFormat().toByteString()), Util.UTF_8)))
+          .put("hmacKeyFormat", new JSONObject(new String(
+              hmacKeyManager.keyFormatToJson(
+                  format.getHmacKeyFormat().toByteString()), Util.UTF_8)))
+          .toString(4).getBytes(Util.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  private void validateKey(JSONObject json) throws JSONException {
+    if (json.length() != 3 || !json.has("version")
+        || !json.has("aesCtrKey") || !json.has("hmacKey")) {
+      throw new JSONException("Invalid key.");
+    }
+  }
+
+  private void validateKeyFormat(JSONObject json) throws JSONException {
+    if (json.length() != 2 || !json.has("aesCtrKeyFormat") || !json.has("hmacKeyFormat")) {
+      throw new JSONException("Invalid key format.");
+    }
+  }
+
+  private void validate(AesCtrHmacAeadKeyFormat format) throws GeneralSecurityException {
+    Validators.validateAesKeySize(format.getAesCtrKeyFormat().getKeySize());
+  }
+
   private void validate(AesCtrHmacAeadKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
+    Validators.validateAesKeySize(key.getAesCtrKey().getKeyValue().size());
   }
 }
