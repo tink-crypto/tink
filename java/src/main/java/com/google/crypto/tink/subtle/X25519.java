@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.annotations.Alpha;
+import java.security.InvalidKeyException;
 import java.util.Arrays;
 
 /**
@@ -78,31 +79,24 @@ public final class X25519 {
    * @param privateKey 32-byte private key
    * @param peersPublicValue 32-byte public value
    * @return the 32-byte shared key
-   * @throws IllegalArgumentException when either {@code privateKey} or {@code peersPublicValue} is
-   *     not 32 bytes.
+   * @throws InvalidKeyException when {@code privateKey} is not 32-byte or {@code peersPublicValue}
+   *     is invalid.
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
-  public static byte[] computeSharedSecret(byte[] privateKey, byte[] peersPublicValue) {
+  public static byte[] computeSharedSecret(byte[] privateKey, byte[] peersPublicValue)
+      throws InvalidKeyException {
     if (privateKey.length != Field25519.FIELD_LEN) {
-      throw new IllegalArgumentException("Private key must have 32 bytes.");
+      throw new InvalidKeyException("Private key must have 32 bytes.");
     }
-    if (peersPublicValue.length != Field25519.FIELD_LEN) {
-      throw new IllegalArgumentException("Peer's public key must have 32 bytes.");
-    }
-    long[] x = new long[Field25519.LIMB_CNT];
-    long[] z = new long[Field25519.LIMB_CNT + 1];
-    long[] zmone = new long[Field25519.LIMB_CNT];
+    long[] x = new long[Field25519.LIMB_CNT + 1];
 
     byte[] e = Arrays.copyOf(privateKey, Field25519.FIELD_LEN);
     e[0] &= 248;
     e[31] &= 127;
     e[31] |= 64;
 
-    long[] bp = Field25519.expand(peersPublicValue);
-    Curve25519.curveMult(x, z, e, bp);
-    Field25519.inverse(zmone, z);
-    Field25519.mult(z, x, zmone);
-    return Field25519.contract(z);
+    Curve25519.curveMult(x, e, peersPublicValue);
+    return Field25519.contract(x);
   }
 
   /**
@@ -111,11 +105,11 @@ public final class X25519 {
    *
    * @param privateKey 32-byte private key
    * @return 32-byte Diffie-Hellman public value
-   * @throws IllegalArgumentException when the {@code privateKey} is not 32 bytes.
+   * @throws InvalidKeyException when the {@code privateKey} is not 32 bytes.
    */
-  public static byte[] publicFromPrivate(byte[] privateKey) {
+  public static byte[] publicFromPrivate(byte[] privateKey) throws InvalidKeyException {
     if (privateKey.length != Field25519.FIELD_LEN) {
-      throw new IllegalArgumentException("Private key must have 32 bytes.");
+      throw new InvalidKeyException("Private key must have 32 bytes.");
     }
     byte[] base = new byte[Field25519.FIELD_LEN];
     base[0] = 9;

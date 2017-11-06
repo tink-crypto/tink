@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.annotations.Alpha;
+import java.security.InvalidKeyException;
 import java.util.Arrays;
 
 /**
@@ -32,6 +33,91 @@ import java.util.Arrays;
  */
 @Alpha
 final class Curve25519 {
+  // https://cr.yp.to/ecdh.html#validate doesn't recommend validating peer's public key. However,
+  // validating public key doesn't harm security and in certain cases, prevents unwanted edge
+  // cases.
+  // As we clear the most significant bit of peer's public key, we don't have to include public keys
+  // that are larger than 2^255.
+  static final byte[][] BANNED_PUBLIC_KEYS =
+      new byte[][] {
+        // 0
+        new byte[] {
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00
+        },
+        // 1
+        new byte[] {
+          (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+          (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+        },
+        // 325606250916557431795983626356110631294008115727848805560023387167927233504
+        new byte[] {
+          (byte) 0xe0, (byte) 0xeb, (byte) 0x7a, (byte) 0x7c,
+          (byte) 0x3b, (byte) 0x41, (byte) 0xb8, (byte) 0xae,
+          (byte) 0x16, (byte) 0x56, (byte) 0xe3, (byte) 0xfa,
+          (byte) 0xf1, (byte) 0x9f, (byte) 0xc4, (byte) 0x6a,
+          (byte) 0xda, (byte) 0x09, (byte) 0x8d, (byte) 0xeb,
+          (byte) 0x9c, (byte) 0x32, (byte) 0xb1, (byte) 0xfd,
+          (byte) 0x86, (byte) 0x62, (byte) 0x05, (byte) 0x16,
+          (byte) 0x5f, (byte) 0x49, (byte) 0xb8, (byte) 0x00,
+        },
+        // 39382357235489614581723060781553021112529911719440698176882885853963445705823
+        new byte[] {
+          (byte) 0x5f, (byte) 0x9c, (byte) 0x95, (byte) 0xbc,
+          (byte) 0xa3, (byte) 0x50, (byte) 0x8c, (byte) 0x24,
+          (byte) 0xb1, (byte) 0xd0, (byte) 0xb1, (byte) 0x55,
+          (byte) 0x9c, (byte) 0x83, (byte) 0xef, (byte) 0x5b,
+          (byte) 0x04, (byte) 0x44, (byte) 0x5c, (byte) 0xc4,
+          (byte) 0x58, (byte) 0x1c, (byte) 0x8e, (byte) 0x86,
+          (byte) 0xd8, (byte) 0x22, (byte) 0x4e, (byte) 0xdd,
+          (byte) 0xd0, (byte) 0x9f, (byte) 0x11, (byte) 0x57
+        },
+        // 2^255 - 19 - 1
+        new byte[] {
+          (byte) 0xec, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0x7f,
+        },
+        // 2^255 - 19
+        new byte[] {
+          (byte) 0xed, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0x7f
+        },
+        // 2^255 - 19 + 1
+        new byte[] {
+          (byte) 0xee, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+          (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0x7f
+        }
+      };
   /**
    * Computes Montgomery's double-and-add formulas.
    *
@@ -171,12 +257,17 @@ final class Curve25519 {
   /**
    * Calculates nQ where Q is the x-coordinate of a point on the curve.
    *
-   * @param resultx the x projective coordinate of the resulting curve point (short form)
-   * @param resultz the z projective coordinate of the resulting curve point (short form)
-   * @param n a little endian, 32-byte number
-   * @param q a point of the curve (short form)
+   * @param resultx the x projective coordinate of the resulting curve point (short form).
+   * @param n a little endian, 32-byte number.
+   * @param qBytes a little endian, 32-byte number representing the public point' x coordinate.
+   * @throws InvalidKeyException iff the public key is in the banned list or its length is not
+   *     32-byte.
+   * @throws IllegalStateException iff there is arithmetic error.
    */
-  static void curveMult(long[] resultx, long[] resultz, byte[] n, long[] q) {
+  static void curveMult(long[] resultx, byte[] n, byte[] qBytes) throws InvalidKeyException {
+    validatePubKeyAndClearMsb(qBytes);
+
+    long[] q = Field25519.expand(qBytes);
     long[] nqpqx = new long[19];
     long[] nqpqz = new long[19];
     nqpqz[0] = 1;
@@ -189,7 +280,7 @@ final class Curve25519 {
     long[] nqx2 = new long[19];
     long[] nqz2 = new long[19];
     nqz2[0] = 1;
-    long[] t = null;
+    long[] t = new long[19];
 
     System.arraycopy(q, 0, nqpqx, 0, Field25519.LIMB_CNT);
 
@@ -219,7 +310,119 @@ final class Curve25519 {
       }
     }
 
-    System.arraycopy(nqx, 0, resultx, 0, Field25519.LIMB_CNT);
-    System.arraycopy(nqz, 0, resultz, 0, Field25519.LIMB_CNT);
+    // Computes nqx/nqz.
+    long[] zmone = new long[Field25519.LIMB_CNT];
+    Field25519.inverse(zmone, nqz);
+    Field25519.mult(resultx, nqx, zmone);
+
+    // Nowadays it should be standard to protect public key crypto against flaws. I.e. if there is a
+    // computation error through a faulty CPU or if the implementation contains a bug, then if
+    // possible this should be detected at run time.
+    //
+    // The situation is a bit more tricky for X25519 where for example the implementation
+    // proposed in https://tools.ietf.org/html/rfc7748 only uses the x-coordinate. However, a
+    // verification is still possible, but depends on the actual computation.
+    //
+    // Tink's Java implementation is equivalent to RFC7748. We will use the loop invariant in the
+    // Montgomery ladder to detect fault computation. In particular, we use the following invariant:
+    // q, resultx, nqpqx/nqpqx  are x coordinates of 3 collinear points q, n*q, (n + 1)*q.
+    if (!isCollinear(q, resultx, nqpqx, nqpqz)) {
+      throw new IllegalStateException(
+          "Arithmetic error in curve multiplication with the public key:"
+              + Hex.encode(Field25519.contract(q)));
+    }
+  }
+
+  /**
+   * Validates public key and clear its most significant bit.
+   *
+   * @throws InvalidKeyException iff the {@code pubKey} is in the banned list or its length is not
+   *     32-byte.
+   */
+  private static void validatePubKeyAndClearMsb(byte[] pubKey) throws InvalidKeyException {
+    if (pubKey.length != 32) {
+      throw new InvalidKeyException("Public key length is not 32-byte");
+    }
+    // Clears the most significant bit as in the method decodeUCoordinate() of RFC7748.
+    pubKey[31] &= (byte) 0x7f;
+
+    for (int i = 0; i < BANNED_PUBLIC_KEYS.length; i++) {
+      if (Bytes.equal(BANNED_PUBLIC_KEYS[i], pubKey)) {
+        throw new InvalidKeyException("Banned public key: " + Hex.encode(BANNED_PUBLIC_KEYS[i]));
+      }
+    }
+  }
+
+  /**
+   * Checks whether there are three collinear points with x coordinate x1, x2, x3/z3.
+   *
+   * <p>TODO: extend this method to deal with the case where x1, x2 or x3/y3 may be points on the
+   * twist.
+   *
+   * @return true if three collinear points with x coordianate x1, x2, x3/z3 are collinear.
+   */
+  private static boolean isCollinear(long[] x1, long[] x2, long[] x3, long[] z3) {
+    // If x1, x2, x3 (in this method x3 is represented as x3/z3) are the x-coordinates of three
+    // collinear points on a curve, then they satisfy the equation
+    //   y^2 = x^3 + ax^2 + x
+    // They also satisfy the equation
+    //   0 = (x - x1)(x - x2)(x - x3)
+    //     = x^3 + Ax^2 + Bx + C
+    // where
+    //   A = - x1 - x2 - x3
+    //   B = x1*x2 + x2*x3 + x3*x1
+    //   C = - x1*x2*x3
+    // Hence, the three points also satisfy
+    //   y^2 = (a - A)x^2 + (1 - B)x - C
+    // This is a quadratic curve. Three distinct collinear points can only be on a quadratic
+    // curve if the quadratic curve has a line as component. And if a quadratic curve has a line
+    // as component then its discriminant is 0.
+    // Therefore, discriminant((a - A)x^2 + (1-B)x - C) = 0.
+    // In particular:
+    //   a = 486662
+    //   lhs = 4 * ((x1 + x2 + a) * z3 + x3) * (x1 * x2 * x3)
+    //   rhs = ((x1 * x2 - 1) * z3 + x3 * (x1 + x2))**2
+    //   assert (lhs - rhs)  == 0
+    //
+    // There are 2 cases that we haven't discussed:
+    //
+    //   + If x1 and x2 are both points with y-coordinate 0 then the argument doesn't hold.
+    //   However, our ECDH computation doesn't allow points of low order (see {@code
+    //   validatePublicKey}). Therefore, this edge case never happen.
+    //
+    //   + x1, x2 or x3/y3 may be points on the twist. This is in our TODO list.
+    long[] x1multx2 = new long[Field25519.LIMB_CNT];
+    long[] x1addx2 = new long[Field25519.LIMB_CNT];
+    long[] lhs = new long[Field25519.LIMB_CNT + 1];
+    long[] t = new long[Field25519.LIMB_CNT + 1];
+    long[] t2 = new long[Field25519.LIMB_CNT + 1];
+    Field25519.mult(x1multx2, x1, x2);
+    Field25519.sum(x1addx2, x1, x2);
+    long[] a = new long[Field25519.LIMB_CNT];
+    a[0] = 486662;
+    // t = x1 + x2 + a
+    Field25519.sum(t, x1addx2, a);
+    // t = (x1 + x2 + a) * z3
+    Field25519.mult(t, t, z3);
+    // t = (x1 + x2 + a) * z3 + x3
+    Field25519.sum(t, x3);
+    // t = ((x1 + x2 + a) * z3 + x3) * x1 * x2
+    Field25519.mult(t, t, x1multx2);
+    // t = ((x1 + x2 + a) * z3 + x3) * (x1 * x2 * x3)
+    Field25519.mult(t, t, x3);
+    Field25519.scalarProduct(lhs, t, 4);
+    Field25519.reduceCoefficients(lhs);
+
+    // t = x1 * x2 * z3
+    Field25519.mult(t, x1multx2, z3);
+    // t = x1 * x2 * z3 - z3
+    Field25519.sub(t, t, z3);
+    // t2 = (x1 + x2) * x3
+    Field25519.mult(t2, x1addx2, x3);
+    // t = x1 * x2 * z3 - z3 + (x1 + x2) * x3
+    Field25519.sum(t, t, t2);
+    // t = (x1 * x2 * z3 - z3 + (x1 + x2) * x3)^2
+    Field25519.square(t, t);
+    return Bytes.equal(Field25519.contract(lhs), Field25519.contract(t));
   }
 }

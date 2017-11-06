@@ -23,6 +23,7 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 
 /**
  * SnuffleCipher (e.g., ChaCha20, XChaCha20, or XSalsa20) encryption/decryption with Poly1305 for
@@ -56,7 +57,8 @@ public final class NaClCryptoBox {
   private abstract static class X25519SnuffleCipherPoly1305Factory {
     abstract SnuffleCipherPoly1305 constructFromSymmetricKey(final byte[] sharedSecret);
 
-    SnuffleCipherPoly1305 constructWithKem(final byte[] privateKey, final byte[] peerPublicKey) {
+    SnuffleCipherPoly1305 constructWithKem(final byte[] privateKey, final byte[] peerPublicKey)
+        throws InvalidKeyException {
       return constructFromSymmetricKey(X25519.computeSharedSecret(privateKey, peerPublicKey));
     }
   }
@@ -90,8 +92,10 @@ public final class NaClCryptoBox {
    * SnuffleCipherPoly1305} for AEAD.
    *
    * @param peerPublicKey public key of the peer user
+   * @throws InvalidKeyException iff the {@code peerPublicKey} is in the banned list.
    */
-  public static HybridEncrypt hybridEncryptWithXSalsa20Poly1305(final byte[] peerPublicKey) {
+  public static HybridEncrypt hybridEncryptWithXSalsa20Poly1305(final byte[] peerPublicKey)
+      throws InvalidKeyException {
     return new X25519SnuffleCipherPoly1305HybridEncrypt(
         peerPublicKey, new XSalsa20Poly1305NaclFactory());
   }
@@ -101,9 +105,11 @@ public final class NaClCryptoBox {
    * com.google.crypto.tink.subtle.SnuffleCipher.ChaCha20} for the symmetric key algorithm and
    * {@link SnuffleCipherPoly1305} for AEAD.
    *
-   * @param peerPublicKey public key of the peer user
+   * @param peerPublicKey public key of the peer user.
+   * @throws InvalidKeyException iff the {@code peerPublicKey} is in the banned list.
    */
-  public static HybridEncrypt hybridEncryptWithChaCha20Poly1305(final byte[] peerPublicKey) {
+  public static HybridEncrypt hybridEncryptWithChaCha20Poly1305(final byte[] peerPublicKey)
+      throws InvalidKeyException {
     return new X25519SnuffleCipherPoly1305HybridEncrypt(
         peerPublicKey, new ChaCha20Poly1305IetfFactory());
   }
@@ -113,9 +119,11 @@ public final class NaClCryptoBox {
    * com.google.crypto.tink.subtle.SnuffleCipher.XChaCha20} for the symmetric key algorithm and
    * {@link SnuffleCipherPoly1305} for AEAD.
    *
-   * @param peerPublicKey public key of the peer user
+   * @param peerPublicKey public key of the peer user.
+   * @throws InvalidKeyException iff the {@code peerPublicKey} is in the banned list.
    */
-  public static HybridEncrypt hybridEncryptWithXChaCha20Poly1305(final byte[] peerPublicKey) {
+  public static HybridEncrypt hybridEncryptWithXChaCha20Poly1305(final byte[] peerPublicKey)
+      throws InvalidKeyException {
     return new X25519SnuffleCipherPoly1305HybridEncrypt(
         peerPublicKey, new XChaCha20Poly1305IetfFactory());
   }
@@ -162,7 +170,7 @@ public final class NaClCryptoBox {
   }
 
   /** Returns the public key for the {@code privateKey} on {@link X25519}. */
-  public static byte[] getPublicKey(final byte[] privateKey) {
+  public static byte[] getPublicKey(final byte[] privateKey) throws InvalidKeyException {
     return X25519.publicFromPrivate(privateKey);
   }
 
@@ -172,7 +180,8 @@ public final class NaClCryptoBox {
     private final SnuffleCipherPoly1305 snuffleCipherPoly1305;
 
     private X25519SnuffleCipherPoly1305HybridEncrypt(
-        final byte[] peerPublicKey, X25519SnuffleCipherPoly1305Factory factory) {
+        final byte[] peerPublicKey, X25519SnuffleCipherPoly1305Factory factory)
+        throws InvalidKeyException {
       final byte[] ephemeralPrivateKey = generatePrivateKey();
       ephemeralPublicKey = ImmutableByteArray.of(getPublicKey(ephemeralPrivateKey));
       this.snuffleCipherPoly1305 = factory.constructWithKem(ephemeralPrivateKey, peerPublicKey);

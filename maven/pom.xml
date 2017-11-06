@@ -252,6 +252,7 @@
             <exclude>**/Ed25519VerifyTest.java</exclude>
             <exclude>**/EcdsaVerifyJceTest.java</exclude>
             <exclude>**/EllipticCurvesTest.java</exclude>
+            <exclude>**/X25519Test.java</exclude>
           </testExcludes>
           <source>${java.version}</source>
           <target>${java.version}</target>

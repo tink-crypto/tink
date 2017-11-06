@@ -24,6 +24,7 @@ import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.TestUtil;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import org.junit.Test;
@@ -42,7 +43,8 @@ public class NaClCryptoBoxTest {
 
   /** Base class for all NaClCryptoBox tests. */
   public abstract static class BaseTest {
-    public abstract HybridEncrypt getHybridEncrypt(final byte[] peersPublicKey);
+    public abstract HybridEncrypt getHybridEncrypt(final byte[] peersPublicKey)
+        throws InvalidKeyException;
 
     public abstract HybridDecrypt getHybridDecrypt(final byte[] privateKey);
 
@@ -163,7 +165,7 @@ public class NaClCryptoBoxTest {
   /** Tests for NaClCryptoBox with XSalsa20Poly1305. */
   public static class XSalsa20Poly1305Test extends BaseTest {
     @Override
-    public HybridEncrypt getHybridEncrypt(byte[] peersPublicKey) {
+    public HybridEncrypt getHybridEncrypt(byte[] peersPublicKey) throws InvalidKeyException {
       return NaClCryptoBox.hybridEncryptWithXSalsa20Poly1305(peersPublicKey);
     }
 
@@ -252,7 +254,7 @@ public class NaClCryptoBoxTest {
   /** Tests for NaClCryptoBox with ChaCha20Poly1305. */
   public static class ChaCha20Poly1305Test extends BaseTest {
     @Override
-    public HybridEncrypt getHybridEncrypt(byte[] peersPublicKey) {
+    public HybridEncrypt getHybridEncrypt(byte[] peersPublicKey) throws InvalidKeyException {
       return NaClCryptoBox.hybridEncryptWithChaCha20Poly1305(peersPublicKey);
     }
 
@@ -265,7 +267,7 @@ public class NaClCryptoBoxTest {
   /** Tests for NaClCryptoBox with XChaCha20Poly1305. */
   public static class XChaCha20Poly1305Test extends BaseTest {
     @Override
-    public HybridEncrypt getHybridEncrypt(byte[] peersPublicKey) {
+    public HybridEncrypt getHybridEncrypt(byte[] peersPublicKey) throws InvalidKeyException {
       return NaClCryptoBox.hybridEncryptWithXChaCha20Poly1305(peersPublicKey);
     }
 

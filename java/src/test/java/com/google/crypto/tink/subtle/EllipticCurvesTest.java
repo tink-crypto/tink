@@ -512,15 +512,14 @@ public class EllipticCurvesTest {
         String hexPubKey = testcase.getString("public");
         String expectedSharedSecret = testcase.getString("shared");
         String curve = testcase.getString("curve");
-        String bytesPrivKey = testcase.getString("private");
-        if (bytesPrivKey.length() % 2 == 1) {
-          bytesPrivKey = "0" + bytesPrivKey;
+        String hexPrivKey = testcase.getString("private");
+        if (hexPrivKey.length() % 2 == 1) {
+          hexPrivKey = "0" + hexPrivKey;
         }
         KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
         try {
           EllipticCurves.CurveType curveType = WycheproofTestUtil.getCurveType(curve);
-          ECPrivateKey privKey =
-              EllipticCurves.getEcPrivateKey(curveType, Hex.decode(bytesPrivKey));
+          ECPrivateKey privKey = EllipticCurves.getEcPrivateKey(curveType, Hex.decode(hexPrivKey));
           X509EncodedKeySpec x509keySpec = new X509EncodedKeySpec(Hex.decode(hexPubKey));
           ECPublicKey pubKey = (ECPublicKey) kf.generatePublic(x509keySpec);
           String sharedSecret = Hex.encode(EllipticCurves.computeSharedSecret(privKey, pubKey));

@@ -29,6 +29,7 @@ import com.google.crypto.tink.WycheproofTestUtil;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.util.Arrays;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -272,7 +273,8 @@ public class SnuffleCipherPoly1305Test {
       return SnuffleCipherPoly1305.constructXSalsa20Poly1305Nacl(key);
     }
 
-    private static byte[] sharedKey(byte[] privateKey, byte[] publicKey) {
+    private static byte[] sharedKey(byte[] privateKey, byte[] publicKey)
+        throws InvalidKeyException {
       return X25519.computeSharedSecret(privateKey, publicKey);
     }
 
