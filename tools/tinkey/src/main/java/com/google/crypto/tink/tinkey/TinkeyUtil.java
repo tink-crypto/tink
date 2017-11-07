@@ -235,7 +235,7 @@ class TinkeyUtil {
             manager = manager.enable(keyId);
             break;
         case PROMOTE_KEY:
-            manager = manager.promote(keyId);
+            manager = manager.setPrimary(keyId);
             break;
         default:
             throw new GeneralSecurityException("invalid command");

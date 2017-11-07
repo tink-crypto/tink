@@ -217,15 +217,27 @@ public final class AndroidKeysetManager {
   }
 
   /**
-   * Promotes to primary the key with {@code keyId}.
+   * Sets the key with {@code keyId} as primary.
    *
    * @throws GeneralSecurityException if the key is not found or not enabled
    */
   @GuardedBy("this")
-  public synchronized AndroidKeysetManager promote(int keyId) throws GeneralSecurityException {
-    keysetManager = keysetManager.promote(keyId);
+  public synchronized AndroidKeysetManager setPrimary(int keyId) throws GeneralSecurityException {
+    keysetManager = keysetManager.setPrimary(keyId);
     write(keysetManager);
     return this;
+  }
+
+  /**
+   * Sets the key with {@code keyId} as primary.
+   *
+   * @throws GeneralSecurityException if the key is not found or not enabled
+   * @deprecated use {@link setPrimary}
+   */
+  @GuardedBy("this")
+  @Deprecated
+  public synchronized AndroidKeysetManager promote(int keyId) throws GeneralSecurityException {
+    return setPrimary(keyId);
   }
 
   /**

@@ -51,6 +51,7 @@ import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.KeyTypeEntry;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.KeysetInfo;
@@ -560,5 +561,18 @@ public class TestUtil {
 
   public static void assertByteBufferContains(byte[] expected, ByteBuffer buffer) throws Exception {
     assertByteBufferContains("", expected, buffer);
+  }
+
+  /**
+   * Verifies that the given entry has the specified contents.
+   */
+  public static void verifyConfigEntry(KeyTypeEntry entry,
+      String catalogueName, String primitiveName, String typeUrl,
+      Boolean newKeyAllowed, int keyManagerVersion) {
+    assertEquals(catalogueName, entry.getCatalogueName());
+    assertEquals(primitiveName, entry.getPrimitiveName());
+    assertEquals(typeUrl, entry.getTypeUrl());
+    assertEquals(newKeyAllowed, entry.getNewKeyAllowed());
+    assertEquals(keyManagerVersion, entry.getKeyManagerVersion());
   }
 }

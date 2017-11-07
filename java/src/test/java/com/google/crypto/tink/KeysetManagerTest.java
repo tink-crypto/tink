@@ -41,6 +41,13 @@ public class KeysetManagerTest {
     Config.register(TinkConfig.TINK_1_0_0);
   }
 
+  private Key createEnabledKey(int keyId) {
+    return Key.newBuilder()
+        .setKeyId(keyId)
+        .setStatus(KeyStatusType.ENABLED)
+        .build();
+  }
+
   private Key createDisabledKey(int keyId) {
     return Key.newBuilder()
         .setKeyId(keyId)
@@ -48,10 +55,10 @@ public class KeysetManagerTest {
         .build();
   }
 
-  private Key createEnabledKey(int keyId) {
+  private Key createDestroyedKey(int keyId) {
     return Key.newBuilder()
         .setKeyId(keyId)
-        .setStatus(KeyStatusType.ENABLED)
+        .setStatus(KeyStatusType.DESTROYED)
         .build();
   }
 
@@ -79,6 +86,38 @@ public class KeysetManagerTest {
   }
 
   @Test
+  public void testEnable_unknownStatus_shouldThrowException() throws Exception {
+    int keyId = 42;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(createUnknownStatusKey(keyId)));
+
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .enable(keyId);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot enable");
+    }
+  }
+
+  @Test
+  public void testEnable_keyDestroyed_shouldThrowException() throws Exception {
+    int keyId = 42;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(createDestroyedKey(keyId)));
+
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .enable(keyId);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot enable");
+    }
+  }
+
+  @Test
   public void testEnable_keyNotFound_shouldThrowException() throws Exception {
     int keyId = 42;
     KeysetHandle handle = KeysetHandle.fromKeyset(
@@ -95,7 +134,98 @@ public class KeysetManagerTest {
   }
 
   @Test
-  public void testPromote_shouldPromoteKey() throws Exception {
+  public void testSetPrimary_shouldSetPrimary() throws Exception {
+    int primaryKeyId = 42;
+    int newPrimaryKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(newPrimaryKeyId)));
+    Keyset keyset = KeysetManager
+        .withKeysetHandle(handle)
+        .setPrimary(newPrimaryKeyId)
+        .getKeysetHandle()
+        .getKeyset();
+
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(newPrimaryKeyId);
+  }
+
+  @Test
+  public void testSetPrimary_keyNotFound_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int newPrimaryKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createEnabledKey(newPrimaryKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .setPrimary(44);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("key not found");
+    }
+  }
+
+  @Test
+  public void testSetPrimary_keyDisabled_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int newPrimaryKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createDisabledKey(newPrimaryKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .setPrimary(newPrimaryKeyId);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
+    }
+  }
+
+  @Test
+  public void testSetPrimary_keyDestroyed_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int newPrimaryKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createDestroyedKey(newPrimaryKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .setPrimary(newPrimaryKeyId);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
+    }
+  }
+
+  @Test
+  public void testSetPrimary_keyUnknownStatus_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int newPrimaryKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createUnknownStatusKey(newPrimaryKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .setPrimary(newPrimaryKeyId);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
+    }
+  }
+
+  // Same tests as for setPrimary() for the deprecated promote(), which should be equivalent.
+  @Test
+  public void testPromote_shouldPromote() throws Exception {
     int primaryKeyId = 42;
     int newPrimaryKeyId = 43;
     KeysetHandle handle = KeysetHandle.fromKeyset(
@@ -144,7 +274,25 @@ public class KeysetManagerTest {
           .promote(newPrimaryKeyId);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot promote key because it's not enabled");
+      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
+    }
+  }
+
+  @Test
+  public void testPromote_keyDestroyed_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int newPrimaryKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createDestroyedKey(newPrimaryKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .promote(newPrimaryKeyId);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
     }
   }
 
@@ -162,7 +310,7 @@ public class KeysetManagerTest {
           .promote(newPrimaryKeyId);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot promote key because it's not enabled");
+      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
     }
   }
 
@@ -204,6 +352,26 @@ public class KeysetManagerTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("cannot disable the primary key");
+    }
+  }
+
+  @Test
+  public void testDisable_keyDestroyed_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int otherKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createDestroyedKey(otherKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .disable(otherKeyId)
+          .getKeysetHandle()
+          .getKeyset();
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot disable key");
     }
   }
 
@@ -262,6 +430,26 @@ public class KeysetManagerTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("cannot destroy the primary key");
+    }
+  }
+
+  @Test
+  public void testDestroy_keyUnknownStatus_shouldThrowException() throws Exception {
+    int primaryKeyId = 42;
+    int otherKeyId = 43;
+    KeysetHandle handle = KeysetHandle.fromKeyset(
+        TestUtil.createKeyset(
+            createEnabledKey(primaryKeyId),
+            createUnknownStatusKey(otherKeyId)));
+    try {
+      KeysetManager
+          .withKeysetHandle(handle)
+          .destroy(otherKeyId)
+          .getKeysetHandle()
+          .getKeyset();
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("cannot destroy key");
     }
   }
 
@@ -479,18 +667,18 @@ public class KeysetManagerTest {
     assertThat(keyset.getKeyCount()).isEqualTo(12);
   }
 
-  private void enablePromoteKey(KeysetManager manager, int keyId) {
+  private void enableSetPrimaryKey(KeysetManager manager, int keyId) {
     try {
       manager
           .enable(keyId)
-          .promote(keyId);
+          .setPrimary(keyId);
     } catch (GeneralSecurityException e) {
       fail("should not throw exception: " + e);
     }
   }
 
   @Test
-  public void testThreadSafety_enablePromoteKey_shouldWork() throws Exception {
+  public void testThreadSafety_enableSetPrimaryKey_shouldWork() throws Exception {
     final int primaryKeyId = 42;
     final int keyId2 = 43;
     final int keyId3 = 44;
@@ -505,21 +693,21 @@ public class KeysetManagerTest {
         new Runnable() {
           @Override
           public void run() {
-            enablePromoteKey(manager, primaryKeyId);
+            enableSetPrimaryKey(manager, primaryKeyId);
           }
         });
     Thread thread2 = new Thread(
         new Runnable() {
           @Override
           public void run() {
-            enablePromoteKey(manager, keyId2);
+            enableSetPrimaryKey(manager, keyId2);
           }
         });
     Thread thread3 = new Thread(
         new Runnable() {
           @Override
           public void run() {
-            enablePromoteKey(manager, keyId3);
+            enableSetPrimaryKey(manager, keyId3);
           }
         });
     thread1.start();
@@ -538,19 +726,19 @@ public class KeysetManagerTest {
     assertThat(keyset.getKey(2).getStatus()).isEqualTo(KeyStatusType.ENABLED);
   }
 
-  private void disableEnablePromoteKey(KeysetManager manager, int keyId) {
+  private void disableEnableSetPrimaryKey(KeysetManager manager, int keyId) {
     try {
       manager
           .disable(keyId)
           .enable(keyId)
-          .promote(keyId);
+          .setPrimary(keyId);
     } catch (GeneralSecurityException e) {
       fail("should not throw exception: " + e);
     }
   }
 
   @Test
-  public void testThreadSafety_disableEnablePromoteKey_shouldWork() throws Exception {
+  public void testThreadSafety_disableEnableSetPrimaryKey_shouldWork() throws Exception {
     final int primaryKeyId = 42;
     final int keyId2 = 43;
     final int keyId3 = 44;
@@ -565,14 +753,14 @@ public class KeysetManagerTest {
         new Runnable() {
           @Override
           public void run() {
-            disableEnablePromoteKey(manager, keyId2);
+            disableEnableSetPrimaryKey(manager, keyId2);
           }
         });
     Thread thread3 = new Thread(
         new Runnable() {
           @Override
           public void run() {
-            disableEnablePromoteKey(manager, keyId3);
+            disableEnableSetPrimaryKey(manager, keyId3);
           }
         });
     thread2.start();

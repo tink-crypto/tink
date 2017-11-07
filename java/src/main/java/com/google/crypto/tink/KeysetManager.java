@@ -81,24 +81,36 @@ public final class KeysetManager {
   }
 
   /**
-   * Promotes to primary the key with {@code keyId}.
+   * Sets the key with {@code keyId} as primary.
    *
    * @throws GeneralSecurityException if the key is not found or not enabled
    */
   @GuardedBy("this")
-  public synchronized KeysetManager promote(int keyId) throws GeneralSecurityException {
+  public synchronized KeysetManager setPrimary(int keyId) throws GeneralSecurityException {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
       if (key.getKeyId() == keyId) {
         if (!key.getStatus().equals(KeyStatusType.ENABLED)) {
           throw new GeneralSecurityException(
-              "cannot promote key because it's not enabled: " + keyId);
+              "cannot set key as primary because it's not enabled: " + keyId);
         }
         keysetBuilder.setPrimaryKeyId(keyId);
         return this;
       }
     }
     throw new GeneralSecurityException("key not found: " + keyId);
+  }
+
+  /**
+   * Sets the key with {@code keyId} as primary.
+   *
+   * @throws GeneralSecurityException if the key is not found or not enabled
+   * @deprecated use {@link setPrimary}
+   */
+  @GuardedBy("this")
+  @Deprecated
+  public synchronized KeysetManager promote(int keyId) throws GeneralSecurityException {
+    return setPrimary(keyId);
   }
 
   /**
@@ -111,6 +123,11 @@ public final class KeysetManager {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
       if (key.getKeyId() == keyId) {
+        if (key.getStatus() != KeyStatusType.ENABLED
+            && key.getStatus() != KeyStatusType.DISABLED) {
+          throw new GeneralSecurityException(
+              "cannot enable key with id " + keyId + " and status " + key.getStatus());
+        }
         keysetBuilder.setKey(i, key.toBuilder().setStatus(KeyStatusType.ENABLED).build());
         return this;
       }
@@ -132,6 +149,11 @@ public final class KeysetManager {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
       if (key.getKeyId() == keyId) {
+        if (key.getStatus() != KeyStatusType.ENABLED
+            && key.getStatus() != KeyStatusType.DISABLED) {
+          throw new GeneralSecurityException(
+              "cannot disable key with id " + keyId + " and status " + key.getStatus());
+        }
         keysetBuilder.setKey(i, key.toBuilder().setStatus(KeyStatusType.DISABLED).build());
         return this;
       }
@@ -174,6 +196,12 @@ public final class KeysetManager {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
       if (key.getKeyId() == keyId) {
+        if (key.getStatus() != KeyStatusType.ENABLED
+            && key.getStatus() != KeyStatusType.DISABLED
+            && key.getStatus() != KeyStatusType.DESTROYED) {
+          throw new GeneralSecurityException(
+              "cannot destroy key with id " + keyId + " and status " + key.getStatus());
+        }
         keysetBuilder.setKey(
             i, key.toBuilder().setStatus(KeyStatusType.DESTROYED).clearKeyData().build());
         return this;

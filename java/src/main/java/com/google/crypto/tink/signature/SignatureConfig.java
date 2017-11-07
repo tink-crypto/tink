@@ -49,7 +49,7 @@ public final class SignatureConfig {
 
   public static final RegistryConfig TINK_1_0_0 =
       RegistryConfig.newBuilder()
-          .setConfigName("TINK_SIGNATURE_SIGN_1_0_0")
+          .setConfigName("TINK_SIGNATURE_1_0_0")
           .addEntry(
               Config.getTinkKeyTypeEntry(
                   CATALOGUE_NAME, "PublicKeySign", "EcdsaPrivateKey", 0, true))
