@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -44,7 +43,7 @@ import java.security.GeneralSecurityException;
  * Restrictions:
  * =============
  * Encryption must be done in one session. There is no possibility to modify an existing
- * ciphertext or append to it (other than reencrypt the whold file again). One reason
+ * ciphertext or append to it (other than reencrypt the whole file again). One reason
  * for this restriction is the use of AES-GCM as one cipher to implement this interface.
  * If single segments are modified then this is equivalent to reusing the same IV twice, but
  * reusing an IV twice leaks an AES-GCM key. Another reason is that implementations of this
@@ -86,19 +85,19 @@ import java.security.GeneralSecurityException;
  * =======================
  * <pre>{@code
  * StreamingAead s = ...
- * java.nio.channels.FileChannel ciphertextDestination =
+ * java.nio.channels.FileChannel ciphertextSource =
  *     new FileInputStream(ciphertextFile).getChannel();
  * byte[] aad = ...
- * SeekableByteChannel decryptingChannel = s.newDecryptingChannel(ciphertextDestination, aad);
+ * ReadableByteChannel decryptingChannel = s.newDecryptingChannel(ciphertextSource, aad);
  * int chunkSize = ...
  * ByteBuffer buffer = ByteBuffer.allocate(chunkSize);
  * do {
  *   buffer.clear();
  *   int cnt = decryptingChannel.read(buffer);
  *   if (cnt > 0) {
- *     // Process cnt bytes of plaintext
+ *     // Process cnt bytes of plaintext.
  *   } else if (read == -1) {
- *     // End of plaintext detected
+ *     // End of plaintext detected.
  *     break;
  *   } else if (read == 0) {
  *     // No ciphertext is available at the moment.
@@ -106,7 +105,6 @@ import java.security.GeneralSecurityException;
  * }
  * }</pre>
  */
-@Alpha
 public interface StreamingAead {
 
   /**
@@ -160,7 +158,7 @@ public interface StreamingAead {
       throws GeneralSecurityException, IOException;
 
   ReadableByteChannel newDecryptingChannel(
-      ReadableByteChannel ciphertextChannel, byte[] associatedData)
+      ReadableByteChannel ciphertextSource, byte[] associatedData)
       throws GeneralSecurityException, IOException;
 
   /**

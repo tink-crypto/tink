@@ -211,13 +211,14 @@ section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
 The following table summarizes Java implementations of primitives that are
 currently available or planned (the latter are listed in brackets).
 
-| Primitive          | Implementations                               |
-| ------------------ | --------------------------------------------- |
-| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, |
-:                    : (ChaCha20-Poly1305)                           :
-| MAC                | HMAC-SHA2                                     |
-| Digital Signatures | ECDSA over NIST curves, (EdDSA over Ed25519)  |
-| Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)    |
+| Primitive          | Implementations                                   |
+| ------------------ | ------------------------------------------------- |
+| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope,     |
+:                    : (ChaCha20-Poly1305)                               :
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING    |
+| MAC                | HMAC-SHA2                                         |
+| Digital Signatures | ECDSA over NIST curves, (EdDSA over edwards25519) |
+| Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)        |
 
 Tink user accesses implementations of a primitive via a factory that corresponds
 to the primitive: AEAD via `AeadFactory`, MAC via `MacFactory`, etc. where each
@@ -243,8 +244,66 @@ to encrypt or decrypt data:
     // 2. Get the primitive.
     Aead aead = AeadFactory.getPrimitive(keysetHandle);
 
-    // 3. Use the primitive.
+    // 3. Use the primitive to encrypt a plaintext,
     byte[] ciphertext = aead.encrypt(plaintext, aad);
+
+    // ... or to decrypt a ciphertext.
+    byte[] decrypted = aead.decrypt(ciphertext, aad);
+```
+
+### Symmetric Key Encryption of Streaming Data
+
+Here is how you can obtain and use an [Streaming AEAD (Streaming Authenticated Encryption with
+Associated Data)](PRIMITIVES.md#streaming-authenticated-encryption-with-associated-data) primitive
+to encrypt or decrypt data streams:
+
+```java
+    import com.google.crypto.tink.StreamingAead;
+    import com.google.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.streamingaead.StreamingAeadFactory;
+    import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
+    import java.nio.ByteBuffer
+    import java.nio.channels.FileChannel;
+    import java.nio.channels.SeekableByteChannel;
+    import java.nio.channels.WritableByteChannel;
+
+    // 1. Generate the key material.
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(
+        StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB);
+
+    // 2. Get the primitive.
+    StreamingAead streamingAead = StreamingAeadFactory.getPrimitive(keysetHandle);
+
+    // 3. Use the primitive to encrypt some data and write the ciphertext to a file,
+    FileChannel ciphertextDestination = new FileOutputStream(ciphertextFileName).getChannel();
+    byte[] aad = ...
+    WritableByteChannel encryptingChannel =
+        streamingAead.newEncryptingChannel(ciphertextDestination, aad);
+    ByteBuffer buffer = ByteBuffer.allocate(chunkSize);
+    while ( bufferContainsDataToEncrypt ) {
+      int r = encryptingChannel.write(buffer);
+      // Try to get into buffer more data for encryption.
+    }
+    // Complete the encryption (process the remaining plaintext, if any, and close the channel).
+    encryptingChannel.close();
+
+    // ... or to decrypt an existing ciphertext stream.
+    FileChannel ciphertextSource = new FileInputStream(ciphertextFileName).getChannel();
+    byte[] aad = ...
+    ReadableByteChannel decryptingChannel = s.newDecryptingChannel(ciphertextSource, aad);
+    ByteBuffer buffer = ByteBuffer.allocate(chunkSize);
+    do {
+      buffer.clear();
+      int cnt = decryptingChannel.read(buffer);
+      if (cnt > 0) {
+        // Process cnt bytes of plaintext.
+      } else if (read == -1) {
+        // End of plaintext detected.
+        break;
+      } else if (read == 0) {
+        // No ciphertext is available at the moment.
+      }
+   }
 ```
 
 ### Message Authentication Code
@@ -265,10 +324,10 @@ Code)](RIMITIVES.md#message-authentication-code):
     // 2. Get the primitive.
     Mac mac = MacFactory.getPrimitive(keysetHandle);
 
-    // 3. Use the primitive to compute a tag, or...
+    // 3. Use the primitive to compute a tag,
     byte[] tag = mac.computeMac(data);
 
-    // Verify a tag.
+    // ... or to verify a tag.
     mac.verifyMac(tag, data);
 ```
 

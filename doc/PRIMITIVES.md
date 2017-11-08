@@ -31,12 +31,42 @@ been tampered with) of that data, but not its secrecy
 Minimal properties:
 
 - _plaintext_ and _associated data_ can have arbitrary length
-   (within the range 0..2^32^ bytes) CCA2 security
+   (within the range 0..2^32^ bytes)
+- CCA2 security
 - at least 80-bit authentication strength
 - there are no secrecy or knowledge guarantees wrt. to the value of _associated data_
 - can encrypt at least 2^32^ messages with a total of 2^50^ bytes so that no
   attack has success probability larger than 2^(-32)^
 
+## Streaming Authenticated Encryption with Associated Data
+
+Streaming AEAD primitive (Streaming Authenticated Encryption with Associated
+Data) provides authenticated encryption for streaming data, and is useful when
+the data to be encrypted is too large to be processed in a single step.  Typical
+use cases include encryption of large files or encryption of live data
+streams.
+
+The underlying encryption modes are selected so that partial plaintext
+can be obtained fast by decrypting and authenticating just a part of the
+ciphertext, without need of processing the entire ciphertext.
+
+Encryption must be done in one session. There is no possibility to modify an
+existing ciphertext or to append to it (other than to reencrypt the entire file again).
+
+Instances of _Streaming AEAD_ follow the OAE2 definition proposed in the
+paper ["_Online Authenticated-Encryption and its Nonce-Reuse Misuse-Resistance_" by
+Hoang, Reyhanitabar, Rogaway and Vizár](https://eprint.iacr.org/2015/189.pdf).
+
+Minimal properties:
+
+- _plaintext_ and can have arbitrary length within the range 0..2^38^
+  and _associated data_ can have arbitrary length within the range 0..2^31^-1 bytes
+- CCA2 security
+- at least 80-bit authentication strength
+- there are no secrecy or knowledge guarantees wrt. to the value of _associated data_
+- can encrypt at least 2^32^ messages with a total of 2^68^ bytes so that no
+  attack with up to 2^32^ chosen plaintexts/chosen ciphertexts has success
+  probability larger than 2^-32^.
 
 ## Message Authentication Code
 
