@@ -160,7 +160,7 @@
   }
 
   // Call the C++ API to get the key.
-  auto st = self.ccKeyManager->NewKey(ccKeyTemplate);
+  auto st = self.ccKeyManager->get_key_factory().NewKey(ccKeyTemplate);
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st.status());
