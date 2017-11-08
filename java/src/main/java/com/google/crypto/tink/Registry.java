@@ -136,6 +136,8 @@ public final class Registry {
       String error = String.format("no catalogue found for %s. ", catalogueName);
       if (catalogueName.toLowerCase().startsWith("tinkaead")) {
         error += "Maybe call AeadConfig.init().";
+      } else if (catalogueName.toLowerCase().startsWith("tinkstreamingaead")) {
+        error += "Maybe call StreamingAeadConfig.init().";
       } else if (catalogueName.toLowerCase().startsWith("tinkhybrid")) {
         error += "Maybe call HybridConfig.init().";
       } else if (catalogueName.toLowerCase().startsWith("tinkmac")) {
