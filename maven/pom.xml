@@ -253,6 +253,13 @@
             <exclude>**/EcdsaVerifyJceTest.java</exclude>
             <exclude>**/EllipticCurvesTest.java</exclude>
             <exclude>**/X25519Test.java</exclude>
+            <!-- Tests below rely on initialization via static blocks, and don't work with Maven -->
+            <exclude>**/AeadConfigTest.java</exclude>
+            <exclude>**/MacConfigTest.java</exclude>
+            <exclude>**/HybridConfigTest.java</exclude>
+            <exclude>**/SignatureConfigTest.java</exclude>
+            <exclude>**/StreamingAeadConfigTest.java</exclude>
+            <exclude>**/TinkConfigTest.java</exclude>
           </testExcludes>
           <source>${java.version}</source>
           <target>${java.version}</target>
