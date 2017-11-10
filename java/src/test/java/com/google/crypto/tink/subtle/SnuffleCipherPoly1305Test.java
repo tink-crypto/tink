@@ -27,7 +27,7 @@ import com.google.common.truth.Truth;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.WycheproofTestUtil;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
@@ -46,6 +46,7 @@ import org.junit.runners.Suite.SuiteClasses;
   SnuffleCipherPoly1305Test.XChaCha20Poly1305IetfTest.class
 })
 public class SnuffleCipherPoly1305Test {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   /** Unit test base class for SnuffleCipherPoly1305. */
   abstract static class Poly1305TestBase {
@@ -364,7 +365,7 @@ public class SnuffleCipherPoly1305Test {
           TestUtil.hexEncode(
               ("Ladies and Gentlemen of the class of '99: If I could offer you only one "
                       + "tip for the future, sunscreen would be it.")
-                  .getBytes(StandardCharsets.US_ASCII));
+                  .getBytes(UTF_8));
       SnuffleCipherPoly1305 cipher = SnuffleCipherPoly1305.constructXChaCha20Poly1305Ietf(KEY);
       byte[] c =
           TestUtil.hexDecode(
@@ -383,7 +384,7 @@ public class SnuffleCipherPoly1305Test {
           TestUtil.hexEncode(
               ("Ladies and Gentlemen of the class of '99: If I could offer you only one "
                       + "tip for the future, sunscreen would be it.")
-                  .getBytes(StandardCharsets.US_ASCII));
+                  .getBytes(UTF_8));
       SnuffleCipherPoly1305 cipher = SnuffleCipherPoly1305.constructXChaCha20Poly1305Ietf(KEY);
       byte[] c =
           TestUtil.hexDecode(

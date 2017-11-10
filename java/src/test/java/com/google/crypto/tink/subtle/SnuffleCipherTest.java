@@ -25,7 +25,7 @@ import com.google.crypto.tink.TestUtil;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -44,6 +44,7 @@ import org.junit.runners.Suite.SuiteClasses;
   SnuffleCipherTest.XSalsa20Test.class
 })
 public class SnuffleCipherTest {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   static class MockSnuffleCipher extends SnuffleCipher {
 
@@ -315,7 +316,7 @@ public class SnuffleCipherTest {
       byte[] in =
           ("Ladies and Gentlemen of the class of '99: If I could offer you only one tip for "
                   + "the future, sunscreen would be it.")
-              .getBytes(StandardCharsets.US_ASCII);
+              .getBytes(UTF_8);
       byte[] key = {
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
         0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -514,7 +515,7 @@ public class SnuffleCipherTest {
                   + "of an IETF activity is considered an \"IETF Contribution\". Such statements "
                   + "include oral statements in IETF sessions, as well as written and electronic "
                   + "communications made at any time or place, which are addressed to")
-              .getBytes(StandardCharsets.US_ASCII);
+              .getBytes(UTF_8);
       byte[] key = new byte[32];
       key[31] = 1;
       byte[] nonce = new byte[12];

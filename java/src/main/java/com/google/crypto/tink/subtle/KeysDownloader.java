@@ -30,7 +30,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -50,6 +50,8 @@ import org.joda.time.Instant;
  * to proactively fetch the data.
  */
 public class KeysDownloader {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
+
   /** Default HTTP transport used by this class. */
   private static final NetHttpTransport DEFAULT_HTTP_TRANSPORT =
       new NetHttpTransport.Builder().build();
@@ -164,7 +166,7 @@ public class KeysDownloader {
     String data;
     InputStream contentStream = httpResponse.getContent();
     try {
-      InputStreamReader reader = new InputStreamReader(contentStream, StandardCharsets.UTF_8);
+      InputStreamReader reader = new InputStreamReader(contentStream, UTF_8);
       data = readerToString(reader);
     } finally {
       contentStream.close();

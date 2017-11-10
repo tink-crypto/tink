@@ -16,9 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 /**
  * Utilities for encoding and decoding the Base64 representation of binary data. See RFCs <a
@@ -29,6 +28,8 @@ import java.io.UnsupportedEncodingException;
  * errors.
  */
 public final class Base64 {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
+
   /** Default values for encoder/decoder flags. */
   public static final int DEFAULT = 0;
 

@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 
 import com.google.common.truth.Truth;
 import com.google.crypto.tink.TestUtil;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +33,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class Poly1305Test {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   @Test
   public void testPoly1305ComputeMacThrowsIllegalArgExpWhenKeyLenIsGreaterThan32() {
@@ -117,7 +118,7 @@ public class Poly1305Test {
     byte[] key = TestUtil.hexDecode(""
         + "85d6be7857556d337f4452fe42d506a8"
         + "0103808afb0db2fd4abff6af4149f51b");
-    byte[] in = ("Cryptographic Forum Research Group").getBytes(StandardCharsets.US_ASCII);
+    byte[] in = ("Cryptographic Forum Research Group").getBytes(UTF_8);
     Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
         + "a8061dc1305136c6c22b8baf0c0127a9"));
   }
@@ -155,7 +156,7 @@ public class Poly1305Test {
             + "of an IETF activity is considered an \"IETF Contribution\". Such statements "
             + "include oral statements in IETF sessions, as well as written and electronic "
             + "communications made at any time or place, which are addressed to")
-        .getBytes(StandardCharsets.US_ASCII);
+        .getBytes(UTF_8);
     Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
         + "36e5f6b5c5e06070f0efca96227a863e"));
   }
@@ -175,7 +176,7 @@ public class Poly1305Test {
             + "of an IETF activity is considered an \"IETF Contribution\". Such statements "
             + "include oral statements in IETF sessions, as well as written and electronic "
             + "communications made at any time or place, which are addressed to")
-        .getBytes(StandardCharsets.US_ASCII);
+        .getBytes(UTF_8);
     Truth.assertThat(Poly1305.computeMac(key, in)).isEqualTo(TestUtil.hexDecode(""
         + "f3477e7cd95417af89a6b8794c310cf0"));
   }

@@ -16,17 +16,19 @@
 
 package com.google.crypto.tink;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.subtle.EllipticCurves;
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import org.json.JSONObject;
 
 /** Wycheproof Test helpers. */
 public class WycheproofTestUtil {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
+
   /**
    * Returns the algorithm name for a digital signature algorithm with a given message digest. The
    * algorithm names used in JCA are a bit inconsequential. E.g. a dash is necessary for message

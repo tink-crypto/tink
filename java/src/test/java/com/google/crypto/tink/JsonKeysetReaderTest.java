@@ -17,7 +17,6 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadKeyTemplates;
@@ -29,6 +28,7 @@ import com.google.crypto.tink.subtle.Random;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -42,6 +42,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class JsonKeysetReaderTest {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
+
   private static final String JSON_KEYSET = "{"
       + "\"primaryKeyId\": 547623039,"
       + "\"key\": [{"

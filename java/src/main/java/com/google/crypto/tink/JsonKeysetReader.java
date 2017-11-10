@@ -16,8 +16,6 @@
 
 package com.google.crypto.tink;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -34,6 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,6 +43,8 @@ import org.json.JSONObject;
  * JSON format.
  */
 public final class JsonKeysetReader implements KeysetReader {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
+
   private final InputStream inputStream;
   private final JSONObject json;
   private boolean urlSafeBase64 = false;

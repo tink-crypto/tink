@@ -17,7 +17,6 @@
 package com.google.crypto.tink;
 
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -25,6 +24,7 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.junit.Test;
@@ -34,6 +34,8 @@ import org.junit.runners.JUnit4;
 /** Tests for PrimitiveSet. */
 @RunWith(JUnit4.class)
 public class PrimitiveSetTest {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
+
   private static class DummyMac1 implements Mac {
     public DummyMac1() {}
 
