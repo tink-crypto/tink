@@ -16,8 +16,6 @@
 
 package com.google.crypto.tink.subtle;
 
-import static org.junit.Assert.assertEquals;
-
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.TestUtil;

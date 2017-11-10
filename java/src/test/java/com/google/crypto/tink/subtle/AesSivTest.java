@@ -22,10 +22,7 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.DeterministicAead;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import javax.crypto.AEADBadTagException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,9 +35,7 @@ public class AesSivTest {
   // Copied from https://tools.ietf.org/html/rfc5297.
   public void testEncryptionWithTestVector() throws GeneralSecurityException {
     AesSiv crypter =
-        new AesSiv(
-            Hex.decode(
-                "fffefdfcfbfaf9f8f7f6f5f4f3f2f1f0f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
+        new AesSiv(Hex.decode("fffefdfcfbfaf9f8f7f6f5f4f3f2f1f0f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
     byte[] pt = Hex.decode("112233445566778899aabbccddee");
     byte[] aad = Hex.decode("101112131415161718191a1b1c1d1e1f2021222324252627");
     byte[] result = crypter.encryptDeterministically(pt, aad);
@@ -72,10 +67,10 @@ public class AesSivTest {
     for (int triesKey = 0; triesKey < 100; triesKey++) {
       DeterministicAead dead = new AesSiv(Random.randBytes(32));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
-        byte[] plaintext =  Random.randBytes(Random.randInt(1024) + 1);
+        byte[] plaintext = Random.randBytes(Random.randInt(1024) + 1);
         byte[] aad = new byte[0];
-        byte[] rebuiltPlaintext = dead.decryptDeterministically(
-            dead.encryptDeterministically(plaintext, aad), aad);
+        byte[] rebuiltPlaintext =
+            dead.decryptDeterministically(dead.encryptDeterministically(plaintext, aad), aad);
         assertEquals(Hex.encode(plaintext), Hex.encode(rebuiltPlaintext));
       }
     }
@@ -86,10 +81,10 @@ public class AesSivTest {
     for (int triesKey = 0; triesKey < 100; triesKey++) {
       DeterministicAead dead = new AesSiv(Random.randBytes(32));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
-        byte[] plaintext =  new byte[0];
+        byte[] plaintext = new byte[0];
         byte[] aad = new byte[0];
-        byte[] rebuiltPlaintext = dead.decryptDeterministically(
-            dead.encryptDeterministically(plaintext, aad), aad);
+        byte[] rebuiltPlaintext =
+            dead.decryptDeterministically(dead.encryptDeterministically(plaintext, aad), aad);
         assertEquals(Hex.encode(plaintext), Hex.encode(rebuiltPlaintext));
       }
     }
@@ -103,8 +98,8 @@ public class AesSivTest {
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
         byte[] plaintext = Random.randBytes(Random.randInt(1024) + 1);
         byte[] aad = Random.randBytes(Random.randInt(128) + 1);
-        byte[] rebuiltPlaintext = dead.decryptDeterministically(
-            dead.encryptDeterministically(plaintext, aad), aad);
+        byte[] rebuiltPlaintext =
+            dead.decryptDeterministically(dead.encryptDeterministically(plaintext, aad), aad);
         assertEquals(Hex.encode(plaintext), Hex.encode(rebuiltPlaintext));
       }
     }

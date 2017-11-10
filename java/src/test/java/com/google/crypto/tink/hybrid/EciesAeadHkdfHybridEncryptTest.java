@@ -97,8 +97,8 @@ public class EciesAeadHkdfHybridEncryptTest {
     testBasicMultipleEncrypts(CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
     testBasicMultipleEncrypts(CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
 
-    testBasicMultipleEncrypts(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);
-    testBasicMultipleEncrypts(CurveType.NIST_P384, AeadKeyTemplates.AES128_GCM);
-    testBasicMultipleEncrypts(CurveType.NIST_P521, AeadKeyTemplates.AES128_GCM);
+    testBasicMultipleEncrypts(CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+    testBasicMultipleEncrypts(CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+    testBasicMultipleEncrypts(CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
   }
 }

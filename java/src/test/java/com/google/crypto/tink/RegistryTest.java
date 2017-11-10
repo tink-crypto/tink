@@ -26,7 +26,7 @@ import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
-import com.google.crypto.tink.proto.AesGcmKey;
+import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.KeyData;
@@ -34,7 +34,7 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.AesGcmJce;
+import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.MacJce;
 import com.google.protobuf.ByteString;
@@ -78,13 +78,13 @@ public class RegistryTest {
     }
 
     @Override
-    public boolean doesSupport(String typeUrl) { // supports same keys as AesGcmKey
-      return typeUrl.equals(AeadConfig.AES_GCM_TYPE_URL);
+    public boolean doesSupport(String typeUrl) { // supports same keys as AesEaxKey
+      return typeUrl.equals(AeadConfig.AES_EAX_TYPE_URL);
     }
 
     @Override
     public String getKeyType() {
-      return AeadConfig.AES_GCM_TYPE_URL;
+      return AeadConfig.AES_EAX_TYPE_URL;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class RegistryTest {
   @Test
   public void testGetKeyManager_shouldWork() throws Exception {
     testGetKeyManager_shouldWork(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, "AesCtrHmacAeadKeyManager");
-    testGetKeyManager_shouldWork(AeadConfig.AES_GCM_TYPE_URL, "AesGcmKeyManager");
+    testGetKeyManager_shouldWork(AeadConfig.AES_EAX_TYPE_URL, "AesEaxKeyManager");
     testGetKeyManager_shouldWork(MacConfig.HMAC_TYPE_URL, "HmacKeyManager");
   }
 
@@ -191,15 +191,15 @@ public class RegistryTest {
 
   @Test
   public void testGetPrimitive_AesGcm_shouldWork() throws Exception {
-    KeyTemplate template = AeadKeyTemplates.AES128_GCM;
-    AesGcmKey aesGcmKey = (AesGcmKey) Registry.newKey(template);
-    KeyData aesGcmKeyData = Registry.newKeyData(template);
-    Aead aead = Registry.getPrimitive(aesGcmKeyData);
+    KeyTemplate template = AeadKeyTemplates.AES128_EAX;
+    AesEaxKey aesEaxKey = (AesEaxKey) Registry.newKey(template);
+    KeyData aesEaxKeyData = Registry.newKeyData(template);
+    Aead aead = Registry.getPrimitive(aesEaxKeyData);
 
-    assertThat(aesGcmKey.getKeyValue().size()).isEqualTo(16);
-    assertThat(aesGcmKeyData.getTypeUrl()).isEqualTo(AeadConfig.AES_GCM_TYPE_URL);
+    assertThat(aesEaxKey.getKeyValue().size()).isEqualTo(16);
+    assertThat(aesEaxKeyData.getTypeUrl()).isEqualTo(AeadConfig.AES_EAX_TYPE_URL);
     // This might break when we add native implementations.
-    assertThat(aead.getClass()).isEqualTo(AesGcmJce.class);
+    assertThat(aead.getClass()).isEqualTo(AesEaxJce.class);
   }
 
   @Test
@@ -220,7 +220,7 @@ public class RegistryTest {
   @Test
   public void testGetPrimitives_shouldWork() throws Exception {
     // Create a keyset, and get a PrimitiveSet.
-    KeyTemplate template1 = AeadKeyTemplates.AES128_GCM;
+    KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
     KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.newKeyData(template1);
     KeyData key2 = Registry.newKeyData(template1);
@@ -253,13 +253,13 @@ public class RegistryTest {
                 .build());
     PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle);
 
-    assertThat(aeadSet.getPrimary().getPrimitive().getClass()).isEqualTo(AesGcmJce.class);
+    assertThat(aeadSet.getPrimary().getPrimitive().getClass()).isEqualTo(AesEaxJce.class);
   }
 
   @Test
   public void testGetPrimitives_WithSomeNonEnabledKeys_shouldWork() throws Exception {
     // Try a keyset with some keys non-ENABLED.
-    KeyTemplate template1 = AeadKeyTemplates.AES128_GCM;
+    KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
     KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.newKeyData(template1);
     KeyData key2 = Registry.newKeyData(template1);
@@ -299,7 +299,7 @@ public class RegistryTest {
   @Test
   public void testGetPrimitives_CustomManager_shouldWork() throws Exception {
     // Create a keyset.
-    KeyTemplate template1 = AeadKeyTemplates.AES128_GCM;
+    KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
     KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.newKeyData(template1);
     KeyData key2 = Registry.newKeyData(template2);

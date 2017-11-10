@@ -68,8 +68,9 @@ public final class Bytes {
    *
    * @return a new byte[] of length len.
    */
-  public static final byte[] xor(final byte[] x, int offsetX, final byte[] y, int offsetY, int len) {
-    if (len < 0 || x.length - len < offsetX  || y.length - len < offsetY) {
+  public static final byte[] xor(
+      final byte[] x, int offsetX, final byte[] y, int offsetY, int len) {
+    if (len < 0 || x.length - len < offsetX || y.length - len < offsetY) {
       throw new IllegalArgumentException(
           "That combination of buffers, offsets and length to xor result in out-of-bond accesses.");
     }

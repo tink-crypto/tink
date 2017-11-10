@@ -52,8 +52,9 @@ public class JsonKeysetWriterTest {
   private void testWrite_shouldWork(KeysetHandle handle1) throws Exception {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     CleartextKeysetHandle.write(handle1, JsonKeysetWriter.withOutputStream(outputStream));
-    KeysetHandle handle2 = CleartextKeysetHandle.read(
-        JsonKeysetReader.withInputStream(new ByteArrayInputStream(outputStream.toByteArray())));
+    KeysetHandle handle2 =
+        CleartextKeysetHandle.read(
+            JsonKeysetReader.withInputStream(new ByteArrayInputStream(outputStream.toByteArray())));
 
     assertKeysetHandle(handle1, handle2);
   }
@@ -81,12 +82,14 @@ public class JsonKeysetWriterTest {
 
   private void testWriteEncrypted_shouldWork(KeysetHandle handle1) throws Exception {
     // Encrypt the keyset with an AeadKey.
-    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_GCM;
+    KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_EAX;
     Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate));
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     handle1.write(JsonKeysetWriter.withOutputStream(outputStream), masterKey);
-    KeysetHandle handle2 = KeysetHandle.read(JsonKeysetReader.withInputStream(
-        new ByteArrayInputStream(outputStream.toByteArray())), masterKey);
+    KeysetHandle handle2 =
+        KeysetHandle.read(
+            JsonKeysetReader.withInputStream(new ByteArrayInputStream(outputStream.toByteArray())),
+            masterKey);
 
     assertKeysetHandle(handle1, handle2);
   }

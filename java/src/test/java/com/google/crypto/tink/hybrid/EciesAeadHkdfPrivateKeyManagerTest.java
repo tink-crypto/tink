@@ -100,7 +100,8 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   @Test
   public void testGetPublicKeyData() throws Exception {
     KeysetHandle privateHandle =
-        KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM);
+        KeysetHandle.generateNew(
+            HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256);
     KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
     EciesAeadHkdfPrivateKeyManager privateManager = new EciesAeadHkdfPrivateKeyManager();
     KeyData publicKeyData = privateManager.getPublicKeyData(privateKeyData.getValue());
