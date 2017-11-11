@@ -88,14 +88,12 @@ func NewEncryptedKeyset(encryptedKeySet []byte, info *KeysetInfo) *EncryptedKeys
 func NewAesGcmKey(version uint32, keyValue []byte) *AesGcmKey {
   return &AesGcmKey{
     Version: version,
-    Params: nil,
     KeyValue: keyValue,
   }
 }
 
 func NewAesGcmKeyFormat(keySize uint32) *AesGcmKeyFormat {
   return &AesGcmKeyFormat{
-    Params: nil,
     KeySize: keySize,
   }
 }

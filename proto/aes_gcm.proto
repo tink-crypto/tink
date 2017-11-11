@@ -24,17 +24,12 @@ option objc_class_prefix = "TINKPB";
 
 // only allowing IV size in bytes = 12 and tag size in bytes = 16
 // Thus, accept no params.
-message AesGcmParams {
-}
-
 message AesGcmKeyFormat {
-  AesGcmParams params = 1;
   uint32 key_size = 2;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.AesGcmKey
 message AesGcmKey {
   uint32 version = 1;
-  AesGcmParams params = 2;
   bytes key_value = 3;
 }

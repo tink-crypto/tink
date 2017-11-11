@@ -27,7 +27,6 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
-import com.google.crypto.tink.proto.AesGcmParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -55,7 +54,6 @@ public class AesGcmKeyManagerTest {
   public void testNewKeyMultipleTimes() throws Exception {
     AesGcmKeyFormat gcmKeyFormat =
         AesGcmKeyFormat.newBuilder()
-            .setParams(AesGcmParams.newBuilder().build())
             .setKeySize(16)
             .build();
     ByteString serialized = ByteString.copyFrom(gcmKeyFormat.toByteArray());

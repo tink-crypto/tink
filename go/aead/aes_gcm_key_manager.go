@@ -105,7 +105,6 @@ func (km *AesGcmKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message,
   keyValue := random.GetRandomBytes(keyFormat.KeySize)
   return &gcmpb.AesGcmKey{
     Version: AES_GCM_KEY_VERSION,
-    Params: keyFormat.Params,
     KeyValue: keyValue,
   }, nil
 }

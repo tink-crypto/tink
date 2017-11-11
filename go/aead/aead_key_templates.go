@@ -41,7 +41,6 @@ func Aes256GcmKeyTemplate() *tinkpb.KeyTemplate {
 func createAesGcmKeyTemplate(keySize uint32) *tinkpb.KeyTemplate {
   format := &gcmpb.AesGcmKeyFormat{
     KeySize: keySize,
-    Params: nil,
   }
   serializedFormat, _ := proto.Marshal(format)
   return &tinkpb.KeyTemplate{

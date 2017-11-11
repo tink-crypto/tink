@@ -87,7 +87,6 @@ class AesGcmKeyManager implements KeyManager<Aead> {
     validate(format);
     return AesGcmKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-        .setParams(format.getParams())
         .setVersion(VERSION)
         .build();
   }

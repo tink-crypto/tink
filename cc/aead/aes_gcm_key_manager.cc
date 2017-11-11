@@ -33,7 +33,6 @@
 
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
-using google::crypto::tink::AesGcmParams;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 using google::protobuf::Message;
@@ -83,7 +82,6 @@ StatusOr<std::unique_ptr<Message>> AesGcmKeyFactory::NewKey(
   // Generate AesGcmKey.
   std::unique_ptr<AesGcmKey> aes_gcm_key(new AesGcmKey());
   aes_gcm_key->set_version(AesGcmKeyManager::kVersion);
-  *(aes_gcm_key->mutable_params()) = aes_gcm_key_format.params();
   aes_gcm_key->set_key_value(
       Random::GetRandomBytes(aes_gcm_key_format.key_size()));
   std::unique_ptr<Message> key = std::move(aes_gcm_key);
@@ -177,11 +175,6 @@ AesGcmKeyManager::GetPrimitiveImpl(const AesGcmKey& aes_gcm_key) const {
 }
 
 // static
-Status AesGcmKeyManager::Validate(const AesGcmParams& params) {
-  return Status::OK;
-}
-
-// static
 Status AesGcmKeyManager::Validate(const AesGcmKey& key) {
   Status status = ValidateVersion(key.version(), kVersion);
   if (!status.ok()) return status;
@@ -195,7 +188,7 @@ Status AesGcmKeyManager::Validate(const AesGcmKey& key) {
                        "Invalid AesGcmKey: key_value has %d bytes; "
                        "supported sizes: 16, 24, or 32 bytes.", key_size);
   }
-  return Validate(key.params());
+  return Status::OK;
 }
 
 // static
@@ -204,7 +197,7 @@ Status AesGcmKeyManager::Validate(const AesGcmKeyFormat& key_format) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid AesGcmKeyFormat: key_size is too small.");
   }
-  return Validate(key_format.params());
+  return Status::OK;
 }
 
 }  // namespace tink

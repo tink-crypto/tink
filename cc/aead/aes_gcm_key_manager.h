@@ -78,8 +78,6 @@ class AesGcmKeyManager : public KeyManager<Aead> {
   GetPrimitiveImpl(const google::crypto::tink::AesGcmKey& key) const;
 
   static crypto::tink::util::Status Validate(
-      const google::crypto::tink::AesGcmParams& params);
-  static crypto::tink::util::Status Validate(
       const google::crypto::tink::AesGcmKey& key);
   static crypto::tink::util::Status Validate(
       const google::crypto::tink::AesGcmKeyFormat& key_format);
