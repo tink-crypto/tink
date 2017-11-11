@@ -25,7 +25,7 @@ import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
-import com.google.crypto.tink.subtle.KeysDownloader;
+import com.google.crypto.tink.util.KeysDownloader;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;

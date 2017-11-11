@@ -20,7 +20,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
-import com.google.crypto.tink.subtle.KeysDownloader;
+import com.google.crypto.tink.util.KeysDownloader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;

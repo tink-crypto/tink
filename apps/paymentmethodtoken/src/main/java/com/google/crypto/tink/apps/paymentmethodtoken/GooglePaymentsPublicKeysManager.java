@@ -18,7 +18,7 @@ package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.crypto.tink.subtle.KeysDownloader;
+import com.google.crypto.tink.util.KeysDownloader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
@@ -70,11 +70,12 @@ public class GooglePaymentsPublicKeysManager {
 
   GooglePaymentsPublicKeysManager(
       Executor backgroundExecutor, HttpTransport httpTransport, String keysUrl) {
-    this.downloader = new KeysDownloader.Builder()
-        .setUrl(keysUrl)
-        .setExecutor(backgroundExecutor)
-        .setHttpTransport(httpTransport)
-        .build();
+    this.downloader =
+        new KeysDownloader.Builder()
+            .setUrl(keysUrl)
+            .setExecutor(backgroundExecutor)
+            .setHttpTransport(httpTransport)
+            .build();
   }
 
   HttpTransport getHttpTransport() {

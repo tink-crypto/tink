@@ -18,6 +18,7 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/mac",
         "//java/src/main/java/com/google/crypto/tink/signature",
         "//java/src/main/java/com/google/crypto/tink/streamingaead",
+        "//java/src/main/java/com/google/crypto/tink/util:keysdownloader",
     ],
 )
 
@@ -47,7 +48,6 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle:aead",
         "//java/src/main/java/com/google/crypto/tink/subtle:dead",
         "//java/src/main/java/com/google/crypto/tink/subtle:hybrid",
-        "//java/src/main/java/com/google/crypto/tink/subtle:keysdownloader",
         "//java/src/main/java/com/google/crypto/tink/subtle:mac",
         "//java/src/main/java/com/google/crypto/tink/subtle:signature",
         "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
