@@ -58,7 +58,7 @@ public class AeadCatalogueTest {
     RegistryConfig config = AeadConfig.TINK_1_0_0;
     int count = 0;
     for (KeyTypeEntry entry : config.getEntryList()) {
-      if (entry.getPrimitiveName() == "Aead") {
+      if ("Aead".equals(entry.getPrimitiveName())) {
         count = count + 1;
         KeyManager<Aead> manager = catalogue.getKeyManager(
             entry.getTypeUrl(), "aead", entry.getKeyManagerVersion());
@@ -75,7 +75,7 @@ public class AeadCatalogueTest {
 
     // Wrong primitive name.
     try {
-      KeyManager<Aead> manager = catalogue.getKeyManager(keyType, "mac", 0);
+      catalogue.getKeyManager(keyType, "mac", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");
@@ -83,7 +83,7 @@ public class AeadCatalogueTest {
 
     // Wrong key manager version.
     try {
-      KeyManager<Aead> manager = catalogue.getKeyManager(keyType, "aead", 1);
+      catalogue.getKeyManager(keyType, "aead", 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager");
@@ -92,7 +92,7 @@ public class AeadCatalogueTest {
 
     // Wrong key type.
     try {
-      KeyManager<Aead> manager = catalogue.getKeyManager("some.unknown.key.type", "aead", 0);
+      catalogue.getKeyManager("some.unknown.key.type", "aead", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");

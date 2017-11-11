@@ -18,7 +18,6 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
@@ -65,22 +64,17 @@ public class NaClCryptoBoxTest {
         HybridDecrypt hybridDecrypt = getHybridDecrypt(peersPrivateKey);
         byte[] expectedInput = plaintextGenerator.call();
         byte[] ciphertext = hybridEncrypt.encrypt(expectedInput, null);
-        byte[] actualInput = null;
-        try {
-          actualInput = hybridDecrypt.decrypt(ciphertext, null);
-          assertTrue(Arrays.equals(expectedInput, actualInput));
-        } catch (Throwable e) {
-          String error =
-              String.format(
-                  "\n\nMessage: %s\nPeersPrivateKey: %s\nPeersPublicKey: %s\nCiphertext: %s\n"
-                      + "Decrypted Msg: %s\n",
-                  TestUtil.hexEncode(expectedInput),
-                  TestUtil.hexEncode(peersPrivateKey),
-                  TestUtil.hexEncode(peersPublicKey),
-                  TestUtil.hexEncode(ciphertext),
-                  actualInput == null ? "null" : TestUtil.hexEncode(actualInput));
-          fail(error + e.getMessage());
-        }
+        byte[] actualInput = hybridDecrypt.decrypt(ciphertext, null);
+        String error =
+            String.format(
+                "\n\nMessage: %s\nPeersPrivateKey: %s\nPeersPublicKey: %s\nCiphertext: %s\n"
+                    + "Decrypted Msg: %s\n",
+                TestUtil.hexEncode(expectedInput),
+                TestUtil.hexEncode(peersPrivateKey),
+                TestUtil.hexEncode(peersPublicKey),
+                TestUtil.hexEncode(ciphertext),
+                actualInput == null ? "null" : TestUtil.hexEncode(actualInput));
+        assertTrue(error, Arrays.equals(expectedInput, actualInput));
       }
     }
 
@@ -88,25 +82,20 @@ public class NaClCryptoBoxTest {
     public void testVectors() throws GeneralSecurityException {
       for (String[] tv : getTestVectors()) {
         HybridDecrypt hybridDecrypt = getHybridDecrypt(TestUtil.hexDecode(tv[0]));
-        byte[] plaintext = null;
-        try {
-          plaintext =
-              hybridDecrypt.decrypt(TestUtil.hexDecode(tv[1] + tv[2] + tv[3] + tv[4]), null);
-          assertEquals(tv[5], TestUtil.hexEncode(plaintext));
-        } catch (Throwable e) {
-          String error =
-              String.format(
-                  "\n\nMessage: %s\nPrivateKey: %s\nPeersPublicKey: %s\nNonce: %s\nCiphertext: %s\n"
-                      + "Tag: %s\nDecrypted Msg: %s\n",
-                  tv[5],
-                  tv[0],
-                  tv[1],
-                  tv[2],
-                  tv[3],
-                  tv[4],
-                  plaintext == null ? "null" : TestUtil.hexEncode(plaintext));
-          fail(error + e.getMessage());
-        }
+        byte[] plaintext =
+            hybridDecrypt.decrypt(TestUtil.hexDecode(tv[1] + tv[2] + tv[3] + tv[4]), null);
+        String error =
+            String.format(
+                "\n\nMessage: %s\nPrivateKey: %s\nPeersPublicKey: %s\nNonce: %s\nCiphertext: %s\n"
+                    + "Tag: %s\nDecrypted Msg: %s\n",
+                tv[5],
+                tv[0],
+                tv[1],
+                tv[2],
+                tv[3],
+                tv[4],
+                plaintext == null ? "null" : TestUtil.hexEncode(plaintext));
+        assertEquals(error, tv[5], TestUtil.hexEncode(plaintext));
       }
     }
 

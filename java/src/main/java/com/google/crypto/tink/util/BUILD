@@ -16,6 +16,5 @@ java_library(
         "@com_google_code_findbugs_jsr305",
         "@com_google_http_client//jar",
         "@joda_time//jar",
-        "@org_json//jar",
     ],
 )

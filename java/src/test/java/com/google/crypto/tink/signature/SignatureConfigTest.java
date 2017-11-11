@@ -20,10 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.Config;
-import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.RegistryConfig;
@@ -35,9 +32,8 @@ import org.junit.runners.JUnit4;
 import org.junit.runners.MethodSorters;
 
 /**
- * Tests for SignatureConfig.
- * Using FixedMethodOrder to ensure that aaaTestInitialization runs first,
- * as it tests execution of a static block within SignatureConfig-class.
+ * Tests for SignatureConfig. Using FixedMethodOrder to ensure that aaaTestInitialization runs
+ * first, as it tests execution of a static block within SignatureConfig-class.
  */
 @RunWith(JUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -47,7 +43,7 @@ public class SignatureConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
     try {
-      Catalogue catalogue = Registry.getCatalogue("tinksignature");
+      Registry.getCatalogue("tinksignature");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
@@ -55,9 +51,9 @@ public class SignatureConfigTest {
     }
     // Get the config proto, now the catalogues should be present,
     // as init() was triggered by a static block.
-    RegistryConfig config = SignatureConfig.TINK_1_0_0;
-    Catalogue catalogue = Registry.getCatalogue("tinksignature");
-    catalogue = Registry.getCatalogue("tinksignature");
+    RegistryConfig unused = SignatureConfig.TINK_1_0_0;
+    Registry.getCatalogue("tinksignature");
+    Registry.getCatalogue("tinksignature");
 
     // Running init() manually again should succeed.
     SignatureConfig.init();
@@ -69,31 +65,47 @@ public class SignatureConfigTest {
     assertEquals(4, config.getEntryCount());
     assertEquals("TINK_SIGNATURE_1_0_0", config.getConfigName());
 
-    TestUtil.verifyConfigEntry(config.getEntry(0),
-        "TinkSignature", "PublicKeySign",
-        "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(1),
-        "TinkSignature", "PublicKeySign",
-        "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(2),
-        "TinkSignature", "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.EcdsaPublicKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(3),
-        "TinkSignature", "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.Ed25519PublicKey", true, 0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkSignature",
+        "PublicKeySign",
+        "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(1),
+        "TinkSignature",
+        "PublicKeySign",
+        "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(2),
+        "TinkSignature",
+        "PublicKeyVerify",
+        "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(3),
+        "TinkSignature",
+        "PublicKeyVerify",
+        "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
+        true,
+        0);
   }
 
   @Test
   public void testRegistration() throws Exception {
     String typeUrl = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
     try {
-      KeyManager<PublicKeySign> manager = Registry.getKeyManager(typeUrl);
+      Registry.getKeyManager(typeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
     }
     // After registration the key manager should be present.
     Config.register(SignatureConfig.TINK_1_0_0);
-    KeyManager<PublicKeySign> manager = Registry.getKeyManager(typeUrl);
+    Registry.getKeyManager(typeUrl);
   }
 }

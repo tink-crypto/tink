@@ -20,11 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.Config;
-import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -35,9 +32,8 @@ import org.junit.runners.JUnit4;
 import org.junit.runners.MethodSorters;
 
 /**
- * Tests for StreamingAeadConfig.
- * Using FixedMethodOrder to ensure that aaaTestInitialization runs first,
- * as it tests execution of a static block within StreamingAeadConfig-class.
+ * Tests for StreamingAeadConfig. Using FixedMethodOrder to ensure that aaaTestInitialization runs
+ * first, as it tests execution of a static block within StreamingAeadConfig-class.
  */
 @RunWith(JUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -47,14 +43,14 @@ public class StreamingAeadConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
     try {
-      Catalogue catalogue = Registry.getCatalogue("tinkstreamingaead");
+      Registry.getCatalogue("tinkstreamingaead");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
       assertThat(e.toString()).contains("StreamingAeadConfig.init()");
     }
     try {
-      Catalogue catalogue = Registry.getCatalogue("TinkStreamingAead");
+      Registry.getCatalogue("TinkStreamingAead");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
@@ -62,8 +58,8 @@ public class StreamingAeadConfigTest {
     }
     // Get the config proto, now the catalogues should be present,
     // as init() was triggered by a static block.
-    RegistryConfig config = StreamingAeadConfig.TINK_1_1_0;
-    Catalogue catalogue = Registry.getCatalogue("TinkStreamingAead");
+    RegistryConfig unused = StreamingAeadConfig.TINK_1_1_0;
+    Registry.getCatalogue("TinkStreamingAead");
 
     // Running init() manually again should succeed.
     StreamingAeadConfig.init();
@@ -75,25 +71,33 @@ public class StreamingAeadConfigTest {
     assertEquals(2, config.getEntryCount());
     assertEquals("TINK_STREAMINGAEAD_1_1_0", config.getConfigName());
 
-    TestUtil.verifyConfigEntry(config.getEntry(0),
-        "TinkStreamingAead", "StreamingAead",
-        "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(1),
-        "TinkStreamingAead", "StreamingAead",
-        "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey", true, 0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkStreamingAead",
+        "StreamingAead",
+        "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(1),
+        "TinkStreamingAead",
+        "StreamingAead",
+        "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey",
+        true,
+        0);
   }
 
   @Test
   public void testRegistration() throws Exception {
     String typeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
     try {
-      KeyManager<StreamingAead> manager = Registry.getKeyManager(typeUrl);
+      Registry.getKeyManager(typeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
     }
     // After registration the key manager should be present.
     Config.register(StreamingAeadConfig.TINK_1_1_0);
-    KeyManager<StreamingAead> manager = Registry.getKeyManager(typeUrl);
+    Registry.getKeyManager(typeUrl);
   }
 }

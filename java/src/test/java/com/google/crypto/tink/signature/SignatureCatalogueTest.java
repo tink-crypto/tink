@@ -74,13 +74,13 @@ public class SignatureCatalogueTest {
     RegistryConfig config = SignatureConfig.TINK_1_0_0;
     int count = 0;
     for (KeyTypeEntry entry : config.getEntryList()) {
-      if (entry.getPrimitiveName() == "PublicKeySign") {
+      if ("PublicKeySign".equals(entry.getPrimitiveName())) {
         count = count + 1;
         KeyManager<PublicKeySign> manager = catalogue.getKeyManager(
             entry.getTypeUrl(), "publickeysign", entry.getKeyManagerVersion());
         assertThat(manager.doesSupport(entry.getTypeUrl())).isTrue();
       }
-      if (entry.getPrimitiveName() == "PublicKeyVerify") {
+      if ("PublicKeyVerify".equals(entry.getPrimitiveName())) {
         count = count + 1;
         KeyManager<PublicKeyVerify> manager = catalogue.getKeyManager(
             entry.getTypeUrl(), "publickeyverify", entry.getKeyManagerVersion());
@@ -97,7 +97,7 @@ public class SignatureCatalogueTest {
 
     // Wrong primitive name.
     try {
-      KeyManager<PublicKeySign> manager = catalogue.getKeyManager(keyType, "aead", 0);
+      catalogue.getKeyManager(keyType, "aead", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");
@@ -105,7 +105,7 @@ public class SignatureCatalogueTest {
 
     // Wrong key manager version.
     try {
-      KeyManager<PublicKeySign> manager = catalogue.getKeyManager(keyType, "publickeysign", 1);
+      catalogue.getKeyManager(keyType, "publickeysign", 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager");
@@ -114,8 +114,7 @@ public class SignatureCatalogueTest {
 
     // Wrong key type.
     try {
-      KeyManager<PublicKeySign> manager =
-          catalogue.getKeyManager("some.unknown.key.type", "publickeysign", 0);
+      catalogue.getKeyManager("some.unknown.key.type", "publickeysign", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");

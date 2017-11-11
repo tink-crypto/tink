@@ -61,27 +61,18 @@ public class SnuffleCipherPoly1305Test {
         byte[] key = Random.randBytes(KEY_SIZE_IN_BYTES);
         SnuffleCipherPoly1305 cipher = createInstance(key);
         byte[] output = cipher.encrypt(expectedInput, aad);
-        byte[] nonce =
-            Arrays.copyOfRange(
-                output, MAC_TAG_SIZE_IN_BYTES, cipher.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES);
-        byte[] actualInput = null;
-        try {
-          actualInput = cipher.decrypt(output, aad);
-          assertTrue(Arrays.equals(expectedInput, actualInput));
-        } catch (Throwable e) {
-          String error =
-              String.format(
-                  "\n\nIteration: %d\nMessage: %s\nAad: %s\nKey: %s\nNonce: %s\nOutput: %s\n"
-                      + "Decrypted Msg: %s\n",
-                  i,
-                  TestUtil.hexEncode(expectedInput),
-                  TestUtil.hexEncode(aad),
-                  TestUtil.hexEncode(key),
-                  TestUtil.hexEncode(nonce),
-                  TestUtil.hexEncode(output),
-                  actualInput == null ? "null" : TestUtil.hexEncode(actualInput));
-          fail(error + e.getMessage());
-        }
+        byte[] actualInput = cipher.decrypt(output, aad);
+        String error =
+            String.format(
+                "\n\nIteration: %d\nMessage: %s\nAad: %s\nKey: %s\nOutput: %s\n"
+                    + "Decrypted Msg: %s\n",
+                i,
+                TestUtil.hexEncode(expectedInput),
+                TestUtil.hexEncode(aad),
+                TestUtil.hexEncode(key),
+                TestUtil.hexEncode(output),
+                actualInput == null ? "null" : TestUtil.hexEncode(actualInput));
+        assertTrue(error, Arrays.equals(expectedInput, actualInput));
       }
     }
 

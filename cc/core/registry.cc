@@ -22,14 +22,9 @@
 #include "cc/util/statusor.h"
 #include "proto/tink.pb.h"
 
-
-
-using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
-
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

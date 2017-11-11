@@ -74,13 +74,13 @@ public class HybridCatalogueTest {
     RegistryConfig config = HybridConfig.TINK_1_0_0;
     int count = 0;
     for (KeyTypeEntry entry : config.getEntryList()) {
-      if (entry.getPrimitiveName() == "HybridEncrypt") {
+      if ("HybridEncrypt".equals(entry.getPrimitiveName())) {
         count = count + 1;
         KeyManager<HybridEncrypt> manager = catalogue.getKeyManager(
             entry.getTypeUrl(), "hybridencrypt", entry.getKeyManagerVersion());
         assertThat(manager.doesSupport(entry.getTypeUrl())).isTrue();
       }
-      if (entry.getPrimitiveName() == "HybridDecrypt") {
+      if ("HybridDecrypt".equals(entry.getPrimitiveName())) {
         count = count + 1;
         KeyManager<HybridDecrypt> manager = catalogue.getKeyManager(
             entry.getTypeUrl(), "hybriddecrypt", entry.getKeyManagerVersion());
@@ -97,7 +97,7 @@ public class HybridCatalogueTest {
 
     // Wrong primitive name.
     try {
-      KeyManager<HybridEncrypt> manager = catalogue.getKeyManager(keyType, "aead", 0);
+      catalogue.getKeyManager(keyType, "aead", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");
@@ -105,7 +105,7 @@ public class HybridCatalogueTest {
 
     // Wrong key manager version.
     try {
-      KeyManager<HybridEncrypt> manager = catalogue.getKeyManager(keyType, "hybridencrypt", 1);
+      catalogue.getKeyManager(keyType, "hybridencrypt", 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager");
@@ -114,8 +114,7 @@ public class HybridCatalogueTest {
 
     // Wrong key type.
     try {
-      KeyManager<HybridEncrypt> manager =
-          catalogue.getKeyManager("some.unknown.key.type", "hybridencrypt", 0);
+      catalogue.getKeyManager("some.unknown.key.type", "hybridencrypt", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");

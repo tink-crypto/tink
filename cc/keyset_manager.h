@@ -38,7 +38,7 @@ class KeysetManager {
   KeysetManager() {}
 
   // Creates a new KeysetManager that contains a Keyset with a single key
-  // generated freshly according the the specificaiton in 'key_template'.
+  // generated freshly according the specification in 'key_template'.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetManager>> New(
       const google::crypto::tink::KeyTemplate& key_template);
 

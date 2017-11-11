@@ -58,7 +58,7 @@ public class StreamingAeadCatalogueTest {
     RegistryConfig config = StreamingAeadConfig.TINK_1_1_0;
     int count = 0;
     for (KeyTypeEntry entry : config.getEntryList()) {
-      if (entry.getPrimitiveName() == "StreamingAead") {
+      if ("StreamingAead".equals(entry.getPrimitiveName())) {
         count = count + 1;
         KeyManager<StreamingAead> manager = catalogue.getKeyManager(
             entry.getTypeUrl(), "streamingaead", entry.getKeyManagerVersion());
@@ -75,7 +75,7 @@ public class StreamingAeadCatalogueTest {
 
     // Wrong primitive name.
     try {
-      KeyManager<StreamingAead> manager = catalogue.getKeyManager(keyType, "aead", 0);
+      catalogue.getKeyManager(keyType, "aead", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");
@@ -83,7 +83,7 @@ public class StreamingAeadCatalogueTest {
 
     // Wrong key manager version.
     try {
-      KeyManager<StreamingAead> manager = catalogue.getKeyManager(keyType, "StreamingAead", 1);
+      catalogue.getKeyManager(keyType, "StreamingAead", 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager");
@@ -92,8 +92,7 @@ public class StreamingAeadCatalogueTest {
 
     // Wrong key type.
     try {
-      KeyManager<StreamingAead> manager =
-          catalogue.getKeyManager("some.unknown.key.type", "streamingAead", 0);
+      catalogue.getKeyManager("some.unknown.key.type", "streamingAead", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");

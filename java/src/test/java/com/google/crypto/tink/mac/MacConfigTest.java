@@ -20,10 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.Config;
-import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.RegistryConfig;
@@ -35,9 +32,8 @@ import org.junit.runners.JUnit4;
 import org.junit.runners.MethodSorters;
 
 /**
- * Tests for MacConfig.
- * Using FixedMethodOrder to ensure that aaaTestInitialization runs first,
- * as it tests execution of a static block within MacConfig-class.
+ * Tests for MacConfig. Using FixedMethodOrder to ensure that aaaTestInitialization runs first, as
+ * it tests execution of a static block within MacConfig-class.
  */
 @RunWith(JUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -47,7 +43,7 @@ public class MacConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
     try {
-      Catalogue catalogue = Registry.getCatalogue("tinkmac");
+      Registry.getCatalogue("tinkmac");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
@@ -55,9 +51,9 @@ public class MacConfigTest {
     }
     // Get the config proto, now the catalogues should be present,
     // as init() was triggered by a static block.
-    RegistryConfig config = MacConfig.TINK_1_0_0;
-    Catalogue catalogue = Registry.getCatalogue("tinkmac");
-    catalogue = Registry.getCatalogue("tinkmac");
+    RegistryConfig unused = MacConfig.TINK_1_0_0;
+    Registry.getCatalogue("tinkmac");
+    Registry.getCatalogue("tinkmac");
 
     // Running init() manually again should succeed.
     MacConfig.init();
@@ -69,21 +65,26 @@ public class MacConfigTest {
     assertEquals(1, config.getEntryCount());
     assertEquals("TINK_MAC_1_0_0", config.getConfigName());
 
-    TestUtil.verifyConfigEntry(config.getEntry(0),
-        "TinkMac", "Mac", "type.googleapis.com/google.crypto.tink.HmacKey", true, 0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkMac",
+        "Mac",
+        "type.googleapis.com/google.crypto.tink.HmacKey",
+        true,
+        0);
   }
 
   @Test
   public void testRegistration() throws Exception {
     String typeUrl = "type.googleapis.com/google.crypto.tink.HmacKey";
     try {
-      KeyManager<Mac> manager = Registry.getKeyManager(typeUrl);
+      Registry.getKeyManager(typeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
     }
     // After registration the key manager should be present.
     Config.register(MacConfig.TINK_1_0_0);
-    KeyManager<Mac> manager = Registry.getKeyManager(typeUrl);
+    Registry.getKeyManager(typeUrl);
   }
 }

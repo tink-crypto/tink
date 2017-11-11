@@ -26,14 +26,11 @@
 #include "cc/util/ptr_util.h"
 #include "proto/tink.pb.h"
 
-using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
@@ -82,7 +79,7 @@ std::unique_ptr<KeysetHandle> KeysetManager::GetKeysetHandle() {
   std::unique_ptr<Keyset> keyset_copy(new Keyset(keyset_));
   std::unique_ptr<KeysetHandle> handle(
       new KeysetHandle(std::move(keyset_copy)));
-  return std::move(handle);
+  return handle;
 }
 
 StatusOr<uint32_t> KeysetManager::Add(const KeyTemplate& key_template) {

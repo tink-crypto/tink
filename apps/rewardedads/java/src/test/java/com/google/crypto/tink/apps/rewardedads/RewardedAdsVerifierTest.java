@@ -184,7 +184,7 @@ public class RewardedAdsVerifierTest {
         signUrl(REWARD_URL, GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64, KEY_ID).getBytes(UTF_8);
     for (int i = REWARD_HOST_AND_PATH.length(); i < REWARD_URL.length(); i++) {
       byte[] modifiedUrl = Arrays.copyOf(validSignedUrl, validSignedUrl.length);
-      modifiedUrl[i] ^= 0xff;
+      modifiedUrl[i] = (byte) (modifiedUrl[i] ^ 0xff);
       try {
         verifier.verify(new String(modifiedUrl, UTF_8));
         fail("Expected GeneralSecurityException");
@@ -208,7 +208,7 @@ public class RewardedAdsVerifierTest {
     byte[] validSig = signer.sign(REWARD_URL.getBytes(UTF_8));
     for (int i = 0; i < validSig.length; i++) {
       byte[] modifiedSig = Arrays.copyOf(validSig, validSig.length);
-      modifiedSig[i] ^= 0xff;
+      modifiedSig[i] = (byte) (modifiedSig[i] ^ 0xff);
       String modifiedUrl = buildUrl(REWARD_URL, modifiedSig, KEY_ID);
       try {
         verifier.verify(modifiedUrl);

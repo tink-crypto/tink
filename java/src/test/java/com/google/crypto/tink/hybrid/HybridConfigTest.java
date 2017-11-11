@@ -20,10 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.Config;
-import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.RegistryConfig;
@@ -35,8 +32,7 @@ import org.junit.runners.JUnit4;
 import org.junit.runners.MethodSorters;
 
 /**
- * Tests for HybridConfig.
- * Using FixedMethodOrder to ensure that aaaTestInitialization runs first,
+ * Tests for HybridConfig. Using FixedMethodOrder to ensure that aaaTestInitialization runs first,
  * as it tests execution of a static block within HybridConfig-class.
  */
 @RunWith(JUnit4.class)
@@ -47,14 +43,14 @@ public class HybridConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
     try {
-      Catalogue catalogue = Registry.getCatalogue("tinkmac");
+      Registry.getCatalogue("tinkmac");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
       assertThat(e.toString()).contains("MacConfig.init()");
     }
     try {
-      Catalogue catalogue = Registry.getCatalogue("tinkhybrid");
+      Registry.getCatalogue("tinkhybrid");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
@@ -62,9 +58,9 @@ public class HybridConfigTest {
     }
     // Get the config proto, now the catalogues should be present,
     // as init() was triggered by a static block.
-    RegistryConfig config = HybridConfig.TINK_1_0_0;
-    Catalogue catalogue = Registry.getCatalogue("tinkmac");
-    catalogue = Registry.getCatalogue("tinkhybrid");
+    RegistryConfig unused = HybridConfig.TINK_1_0_0;
+    Registry.getCatalogue("tinkmac");
+    Registry.getCatalogue("tinkhybrid");
 
     // Running init() manually again should succeed.
     HybridConfig.init();
@@ -76,39 +72,82 @@ public class HybridConfigTest {
     assertEquals(9, config.getEntryCount());
     assertEquals("TINK_HYBRID_1_0_0", config.getConfigName());
 
-    TestUtil.verifyConfigEntry(config.getEntry(0),
-        "TinkMac", "Mac", "type.googleapis.com/google.crypto.tink.HmacKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(1),
-        "TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(2),
-        "TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.AesEaxKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(3),
-        "TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.AesGcmKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(4),
-        "TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(5),
-        "TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.KmsAeadKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(6),
-        "TinkAead", "Aead", "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(7),
-        "TinkHybrid", "HybridDecrypt",
-        "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey", true, 0);
-    TestUtil.verifyConfigEntry(config.getEntry(8),
-        "TinkHybrid", "HybridEncrypt",
-        "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey", true, 0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkMac",
+        "Mac",
+        "type.googleapis.com/google.crypto.tink.HmacKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(1),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(2),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesEaxKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(3),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesGcmKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(4),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(5),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.KmsAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(6),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(7),
+        "TinkHybrid",
+        "HybridDecrypt",
+        "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(8),
+        "TinkHybrid",
+        "HybridEncrypt",
+        "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+        true,
+        0);
   }
 
   @Test
   public void testRegistration() throws Exception {
     String typeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
     try {
-      KeyManager<HybridDecrypt> manager = Registry.getKeyManager(typeUrl);
+      Registry.getKeyManager(typeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
     }
     // After registration the key manager should be present.
     Config.register(HybridConfig.TINK_1_0_0);
-    KeyManager<HybridDecrypt> manager = Registry.getKeyManager(typeUrl);
+    Registry.getKeyManager(typeUrl);
   }
 }

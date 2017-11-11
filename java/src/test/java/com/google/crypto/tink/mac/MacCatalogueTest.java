@@ -58,7 +58,7 @@ public class MacCatalogueTest {
     RegistryConfig config = MacConfig.TINK_1_0_0;
     int count = 0;
     for (KeyTypeEntry entry : config.getEntryList()) {
-      if (entry.getPrimitiveName() == "Mac") {
+      if ("Mac".equals(entry.getPrimitiveName())) {
         count = count + 1;
         KeyManager<Mac> manager = catalogue.getKeyManager(
             entry.getTypeUrl(), "mac", entry.getKeyManagerVersion());
@@ -75,7 +75,7 @@ public class MacCatalogueTest {
 
     // Wrong primitive name.
     try {
-      KeyManager<Mac> manager = catalogue.getKeyManager(keyType, "aead", 0);
+      catalogue.getKeyManager(keyType, "aead", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");
@@ -83,7 +83,7 @@ public class MacCatalogueTest {
 
     // Wrong key manager version.
     try {
-      KeyManager<Mac> manager = catalogue.getKeyManager(keyType, "mac", 1);
+      catalogue.getKeyManager(keyType, "mac", 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager");
@@ -92,7 +92,7 @@ public class MacCatalogueTest {
 
     // Wrong key type.
     try {
-      KeyManager<Mac> manager = catalogue.getKeyManager("some.unknown.key.type", "mac", 0);
+      catalogue.getKeyManager("some.unknown.key.type", "mac", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");

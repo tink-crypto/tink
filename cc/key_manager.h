@@ -50,6 +50,8 @@ class KeyFactory {
   virtual
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   NewKeyData(absl::string_view serialized_key_format) const = 0;
+
+  virtual ~KeyFactory() {}
 };
 
 /**

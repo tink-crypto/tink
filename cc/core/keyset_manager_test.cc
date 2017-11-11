@@ -24,14 +24,8 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::test::AddRawKey;
-using crypto::tink::test::AddTinkKey;
-using crypto::tink::test::DummyAead;
-
-using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
-using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;

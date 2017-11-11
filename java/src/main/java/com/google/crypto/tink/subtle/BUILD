@@ -65,7 +65,6 @@ java_library(
         ":mac",
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/annotations",
     ],
 )
 
