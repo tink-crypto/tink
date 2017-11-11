@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
 
 /**
  * A stream cipher based on RFC7539 (i.e., uses 96-bit random nonces).
@@ -27,15 +28,14 @@ import java.nio.ByteBuffer;
  */
 @Alpha
 class ChaCha20 extends ChaCha20Base {
-
-  ChaCha20(byte[] key) {
-    super(key);
+  ChaCha20(final byte[] key, int initialCounter) throws InvalidKeyException {
+    super(key, initialCounter);
   }
 
   @Override
-  int[] initialState(final byte[] nonce, int counter) {
+  int[] createInitialState(final byte[] nonce, int counter) {
     // Set the initial state based on https://tools.ietf.org/html/rfc7539#section-2.3
-    int[] state = new int[SnuffleCipher.BLOCK_SIZE_IN_INTS];
+    int[] state = new int[Snuffle.BLOCK_SIZE_IN_INTS];
     ChaCha20Base.setSigma(state);
     ChaCha20Base.setKey(state, key.getBytes());
     state[12] = counter;
@@ -44,17 +44,7 @@ class ChaCha20 extends ChaCha20Base {
   }
 
   @Override
-  void incrementCounter(int[] state) {
-    state[12]++;
-  }
-
-  @Override
   int nonceSizeInBytes() {
     return 12;
-  }
-
-  @Override
-  KeyStream getKeyStream(byte[] nonce) {
-    return new KeyStream(this, nonce, 1);
   }
 }

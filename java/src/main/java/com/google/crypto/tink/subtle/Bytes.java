@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -79,6 +80,22 @@ public final class Bytes {
       res[i] = (byte) (x[i + offsetX] ^ y[i + offsetY]);
     }
     return res;
+  }
+
+  /**
+   * Computes the xor of two byte buffers, specifying the length to xor, and
+   * stores the result to {@code output}.
+   *
+   * @return a new byte[] of length len.
+   */
+  public static final void xor(ByteBuffer output, ByteBuffer x, ByteBuffer y, int len) {
+    if (len < 0 || x.remaining() < len || y.remaining() < len || output.remaining() < len) {
+      throw new IllegalArgumentException(
+          "That combination of buffers, offsets and length to xor result in out-of-bond accesses.");
+    }
+    for (int i = 0; i < len; i++) {
+      output.put((byte) (x.get() ^ y.get()));
+    }
   }
 
   /**

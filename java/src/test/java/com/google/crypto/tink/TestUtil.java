@@ -575,4 +575,15 @@ public class TestUtil {
     assertEquals(newKeyAllowed, entry.getNewKeyAllowed());
     assertEquals(keyManagerVersion, entry.getKeyManagerVersion());
   }
+
+  /**
+   * Convert an array of long to an array of int.
+   */
+  public static int[] twoCompInt(long[] a) {
+    int[] ret = new int[a.length];
+    for (int i = 0; i < a.length; i++) {
+      ret[i] = (int) (a[i] - (a[i] > Integer.MAX_VALUE ? (1L << 32) : 0));
+    }
+    return ret;
+  }
 }

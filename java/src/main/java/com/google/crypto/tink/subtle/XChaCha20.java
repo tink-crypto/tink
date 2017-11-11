@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
 
 /**
  * {@link XChaCha20} stream cipher based on
@@ -32,16 +33,16 @@ class XChaCha20 extends ChaCha20Base {
    * Constructs a new XChaCha20 cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link
-   *     SnuffleCipher#KEY_SIZE_IN_BYTES}.
+   *     Snuffle#KEY_SIZE_IN_BYTES}.
    */
-  XChaCha20(byte[] key) {
-    super(key);
+  XChaCha20(byte[] key, int initialCounter) throws InvalidKeyException {
+    super(key, initialCounter);
   }
 
   @Override
-  int[] initialState(final byte[] nonce, int counter) {
+  int[] createInitialState(final byte[] nonce, int counter) {
     // Set the initial state based on https://cr.yp.to/snuffle/xsalsa-20081128.pdf
-    int[] state = new int[SnuffleCipher.BLOCK_SIZE_IN_INTS];
+    int[] state = new int[Snuffle.BLOCK_SIZE_IN_INTS];
     ChaCha20Base.setSigma(state);
     ChaCha20Base.setKey(state, hChaCha20(key.getBytes(), nonce));
     int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
@@ -53,20 +54,7 @@ class XChaCha20 extends ChaCha20Base {
   }
 
   @Override
-  void incrementCounter(int[] state) {
-    state[12]++;
-    if (state[12] == 0) {
-      state[13]++;
-    }
-  }
-
-  @Override
   int nonceSizeInBytes() {
     return 24;
-  }
-
-  @Override
-  KeyStream getKeyStream(byte[] nonce) {
-    return new KeyStream(this, nonce, 1);
   }
 }

@@ -1,5 +1,4 @@
-// Copyright 2017 Google Inc.
-//
+// Copyright 2017 Google Inc. //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,28 +15,59 @@
 
 package com.google.crypto.tink.subtle;
 
-import static com.google.crypto.tink.subtle.Poly1305.MAC_KEY_SIZE_IN_BYTES;
-
 import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.InvalidKeyException;
 
 /**
- * XSalsa20 stream cipher. https://cr.yp.to/snuffle/xsalsa-20081128.pdf
+ * XSalsa20 stream cipher, see https://cr.yp.to/snuffle/xsalsa-20081128.pdf.
  *
  * <p>This cipher is meant to be used to construct an AEAD with Poly1305.
  */
 @Alpha
-class XSalsa20 extends SnuffleCipher {
+class XSalsa20 extends Snuffle {
+  private static final byte[] ZERO_16_BYTES = new byte[16];
 
   /**
    * Constructs a new {@link XSalsa20} cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link
-   *     SnuffleCipher#KEY_SIZE_IN_BYTES}.
+   *     Snuffle#KEY_SIZE_IN_BYTES}.
    */
-  XSalsa20(byte[] key) {
-    super(key);
+  XSalsa20(final byte[] key, int initialCounter) throws InvalidKeyException {
+    super(key, initialCounter);
+  }
+
+  @Override
+  ByteBuffer getKeyStreamBlock(final byte[] nonce, int counter) {
+    int[] state = createInitialState(nonce, counter);
+    int[] workingState = state.clone();
+    shuffleState(workingState);
+    for (int i = 0; i < state.length; i++) {
+      state[i] += workingState[i];
+    }
+    ByteBuffer out = ByteBuffer.allocate(BLOCK_SIZE_IN_BYTES).order(ByteOrder.LITTLE_ENDIAN);
+    out.asIntBuffer().put(state, 0, BLOCK_SIZE_IN_INTS);
+    return out;
+  }
+
+  @Override
+  int nonceSizeInBytes() {
+    return 24;
+  }
+
+  private int[] createInitialState(final byte[] nonce, int counter) {
+    // Set the initial state based on https://cr.yp.to/snuffle/xsalsa-20081128.pdf
+    int[] state = new int[BLOCK_SIZE_IN_INTS];
+    setSigma(state);
+    setKey(state, hSalsa20(key.getBytes(), nonce));
+    int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
+    state[6] = nonceInt[4];
+    state[7] = nonceInt[5];
+    state[8] = counter;
+    state[9] = 0;
+    return state;
   }
 
   static void quarterRound(int[] x, int a, int b, int c, int d) {
@@ -61,16 +91,11 @@ class XSalsa20 extends SnuffleCipher {
     quarterRound(state, 15, 12, 13, 14);
   }
 
-  private static void shuffleInternal(final int[] state) {
+  private static void shuffleState(final int[] state) {
     for (int i = 0; i < 10; i++) {
       columnRound(state);
       rowRound(state);
     }
-  }
-
-  @Override
-  void shuffle(final int[] state) {
-    shuffleInternal(state);
   }
 
   private static void setSigma(int[] state) {
@@ -90,7 +115,7 @@ class XSalsa20 extends SnuffleCipher {
     return hSalsa20(key, ZERO_16_BYTES);
   }
 
-  private static byte[] hSalsa20(final byte[] key, final byte[] nonce) {
+  static byte[] hSalsa20(final byte[] key, final byte[] nonce) {
     int[] state = new int[BLOCK_SIZE_IN_INTS];
     setSigma(state);
     setKey(state, key);
@@ -99,7 +124,7 @@ class XSalsa20 extends SnuffleCipher {
     state[7] = nonceInt[1];
     state[8] = nonceInt[2];
     state[9] = nonceInt[3];
-    shuffleInternal(state);
+    shuffleState(state);
     // state[0] = state[0]
     state[1] = state[5];
     state[2] = state[10];
@@ -111,39 +136,5 @@ class XSalsa20 extends SnuffleCipher {
     ByteBuffer buf = ByteBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN);
     buf.asIntBuffer().put(state, 0, 8);
     return buf.array();
-  }
-
-  @Override
-  int[] initialState(final byte[] nonce, int counter) {
-    // Set the initial state based on https://cr.yp.to/snuffle/xsalsa-20081128.pdf
-    int[] state = new int[SnuffleCipher.BLOCK_SIZE_IN_INTS];
-    setSigma(state);
-    setKey(state, hSalsa20(key.getBytes(), nonce));
-    int[] nonceInt = toIntArray(ByteBuffer.wrap(nonce));
-    state[6] = nonceInt[4];
-    state[7] = nonceInt[5];
-    state[8] = counter;
-    state[9] = 0;
-    return state;
-  }
-
-  @Override
-  void incrementCounter(int[] state) {
-    state[8]++;
-    if (state[8] == 0) {
-      state[9]++;
-    }
-  }
-
-  @Override
-  int nonceSizeInBytes() {
-    return 24;
-  }
-
-  @Override
-  KeyStream getKeyStream(byte[] nonce) {
-    KeyStream keyStream = new KeyStream(this, nonce, 0);
-    keyStream.first(MAC_KEY_SIZE_IN_BYTES); // skip the aead sub key.
-    return keyStream;
   }
 }

@@ -158,7 +158,21 @@ public class AeadThreadSafetyTest {
   @Test
   public void testChaChaPoly1305() throws Exception {
     byte[] key = Random.randBytes(32);
-    Aead cipher = SnuffleCipherPoly1305.constructXChaCha20Poly1305Ietf(key);
+    Aead cipher = new ChaCha20Poly1305(key);
+    testEncryptionDecryption(cipher, 5, 128, 20);
+  }
+
+  @Test
+  public void testXChaChaPoly1305() throws Exception {
+    byte[] key = Random.randBytes(32);
+    Aead cipher = new XChaCha20Poly1305(key);
+    testEncryptionDecryption(cipher, 5, 128, 20);
+  }
+
+  @Test
+  public void testXSalsaPoly1305() throws Exception {
+    byte[] key = Random.randBytes(32);
+    Aead cipher = new XSalsa20Poly1305(key);
     testEncryptionDecryption(cipher, 5, 128, 20);
   }
 }
