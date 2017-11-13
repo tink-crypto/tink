@@ -49,10 +49,10 @@ public class ConfigTest {
     return RegistryConfig.newBuilder()
         .addEntry(
             Config.getTinkKeyTypeEntry(
-                "TinkHybrid", "HybridDecrypt", "EciesAeadHkdfPrivateKey", 0, true))
+                "TinkHybridDecrypt", "HybridDecrypt", "EciesAeadHkdfPrivateKey", 0, true))
         .addEntry(
             Config.getTinkKeyTypeEntry(
-                "TinkHybrid", "HybridEncrypt", "EciesAeadHkdfPublicKey", 0, true))
+                "TinkHybridEncrypt", "HybridEncrypt", "EciesAeadHkdfPublicKey", 0, true))
         .setConfigName("TINK_HYBRID_1_0_0")
         .build();
   }
@@ -61,10 +61,10 @@ public class ConfigTest {
     return RegistryConfig.newBuilder()
         .addEntry(
             Config.getTinkKeyTypeEntry(
-                "TinkSignature", "PublicKeySign", "EcdsaPrivateKey", 0, true))
+                "TinkPublicKeySign", "PublicKeySign", "EcdsaPrivateKey", 0, true))
         .addEntry(
             Config.getTinkKeyTypeEntry(
-                "TinkSignature", "PublicKeyVerify", "Ed25519PublicKey", 0, true))
+                "TinkPublicKeyVerify", "PublicKeyVerify", "Ed25519PublicKey", 0, true))
         .build();
   }
 

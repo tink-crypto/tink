@@ -76,6 +76,8 @@ public final class Registry {
 
   private static final ConcurrentMap<String, Boolean> newKeyAllowedMap =
       new ConcurrentHashMap<String, Boolean>(); // typeUrl -> newKeyAllowed mapping
+
+  @SuppressWarnings("rawtypes")
   private static final ConcurrentMap<String, Catalogue> catalogueMap =
       new ConcurrentHashMap<String, Catalogue>(); //  name -> catalogue mapping
   /**
@@ -102,7 +104,8 @@ public final class Registry {
    * @throws GeneralSecurityException if there's an existing catalogue is not an instance of the
    *     same class as {@code catalogue}
    */
-  public static synchronized void addCatalogue(String catalogueName, Catalogue catalogue)
+  @SuppressWarnings("unchecked")
+  public static synchronized <P> void addCatalogue(String catalogueName, Catalogue<P> catalogue)
       throws GeneralSecurityException {
     if (catalogueName == null) {
       throw new IllegalArgumentException("catalogueName must be non-null.");
@@ -111,7 +114,7 @@ public final class Registry {
       throw new IllegalArgumentException("catalogue must be non-null.");
     }
     if (catalogueMap.containsKey(catalogueName.toLowerCase())) {
-      Catalogue existing = catalogueMap.get(catalogueName.toLowerCase());
+      Catalogue<P> existing = catalogueMap.get(catalogueName.toLowerCase());
       if (!catalogue.getClass().equals(existing.getClass())) {
         logger.warning(
             "Attempted overwrite of a catalogueName catalogue for name " + catalogueName);
@@ -127,22 +130,26 @@ public final class Registry {
    *
    * @throws GeneralSecurityException if cannot find any catalogue
    */
-  public static Catalogue getCatalogue(String catalogueName) throws GeneralSecurityException {
+  public static <P> Catalogue<P> getCatalogue(String catalogueName)
+      throws GeneralSecurityException {
     if (catalogueName == null) {
       throw new IllegalArgumentException("catalogueName must be non-null.");
     }
-    Catalogue catalogue = catalogueMap.get(catalogueName.toLowerCase());
+    @SuppressWarnings("unchecked")
+    Catalogue<P> catalogue = catalogueMap.get(catalogueName.toLowerCase());
     if (catalogue == null) {
       String error = String.format("no catalogue found for %s. ", catalogueName);
       if (catalogueName.toLowerCase().startsWith("tinkaead")) {
         error += "Maybe call AeadConfig.init().";
       } else if (catalogueName.toLowerCase().startsWith("tinkstreamingaead")) {
         error += "Maybe call StreamingAeadConfig.init().";
-      } else if (catalogueName.toLowerCase().startsWith("tinkhybrid")) {
+      } else if (catalogueName.toLowerCase().startsWith("tinkhybriddecrypt")
+          || catalogueName.toLowerCase().startsWith("tinkhybridencrypt")) {
         error += "Maybe call HybridConfig.init().";
       } else if (catalogueName.toLowerCase().startsWith("tinkmac")) {
         error += "Maybe call MacConfig.init().";
-      } else if (catalogueName.toLowerCase().startsWith("tinksignature")) {
+      } else if (catalogueName.toLowerCase().startsWith("tinkpublickeysign")
+          || catalogueName.toLowerCase().startsWith("tinkpublickeyverify")) {
         error += "Maybe call SignatureConfig.init().";
       } else if (catalogueName.toLowerCase().startsWith("tink")) {
         error += "Maybe call TinkConfig.init().";

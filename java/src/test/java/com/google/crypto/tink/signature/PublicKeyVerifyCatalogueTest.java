@@ -14,15 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.hybrid;
+package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.KeyTypeEntry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -30,60 +29,38 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for HybridCatalogue.
- */
+/** Tests for PublicKeyVerifyCatalogue. */
 @RunWith(JUnit4.class)
-public class HybridCatalogueTest {
+public class PublicKeyVerifyCatalogueTest {
 
   @Test
   public void testBasic() throws Exception {
-    HybridCatalogue catalogue = new HybridCatalogue();
+    PublicKeyVerifyCatalogue catalogue = new PublicKeyVerifyCatalogue();
 
-    // Check a single key type for encryption, incl. case-insensitve primitive name.
-    String keyType = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
+    // Check a single key type for verifying, incl. case-insensitve primitive name.
+    String keyType = "type.googleapis.com/google.crypto.tink.Ed25519PublicKey";
     {
-      KeyManager<HybridEncrypt> manager = catalogue.getKeyManager(keyType, "HybridEncrypt", 0);
+      KeyManager<PublicKeyVerify> manager = catalogue.getKeyManager(keyType, "PublicKeyVerify", 0);
       assertThat(manager.doesSupport(keyType)).isTrue();
     }
     {
-      KeyManager<HybridEncrypt> manager = catalogue.getKeyManager(keyType, "HybRIdEncRYPt", 0);
+      KeyManager<PublicKeyVerify> manager = catalogue.getKeyManager(keyType, "PUBLicKeYVerIFY", 0);
       assertThat(manager.doesSupport(keyType)).isTrue();
     }
     {
-      KeyManager<HybridEncrypt> manager = catalogue.getKeyManager(keyType, "HYBRIdeNCRYPT", 0);
-      assertThat(manager.doesSupport(keyType)).isTrue();
-    }
-
-    // Check a single key type for decryption, incl. case-insensitve primitive name.
-    keyType = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-    {
-      KeyManager<HybridDecrypt> manager = catalogue.getKeyManager(keyType, "HybridDecrypt", 0);
-      assertThat(manager.doesSupport(keyType)).isTrue();
-    }
-    {
-      KeyManager<HybridDecrypt> manager = catalogue.getKeyManager(keyType, "HyBRidDeCRYPt", 0);
-      assertThat(manager.doesSupport(keyType)).isTrue();
-    }
-    {
-      KeyManager<HybridDecrypt> manager = catalogue.getKeyManager(keyType, "HYBRIDDecRYPT", 0);
+      KeyManager<PublicKeyVerify> manager = catalogue.getKeyManager(keyType, "PUBLICKEYVERIFY", 0);
       assertThat(manager.doesSupport(keyType)).isTrue();
     }
 
-    // Check all entries from the current HybridConfig.
-    RegistryConfig config = HybridConfig.TINK_1_0_0;
+    // Check all entries from the current SignatureConfig.
+    RegistryConfig config = SignatureConfig.TINK_1_0_0;
     int count = 0;
     for (KeyTypeEntry entry : config.getEntryList()) {
-      if ("HybridEncrypt".equals(entry.getPrimitiveName())) {
+      if (entry.getPrimitiveName() == "PublicKeyVerify") {
         count = count + 1;
-        KeyManager<HybridEncrypt> manager = catalogue.getKeyManager(
-            entry.getTypeUrl(), "hybridencrypt", entry.getKeyManagerVersion());
-        assertThat(manager.doesSupport(entry.getTypeUrl())).isTrue();
-      }
-      if ("HybridDecrypt".equals(entry.getPrimitiveName())) {
-        count = count + 1;
-        KeyManager<HybridDecrypt> manager = catalogue.getKeyManager(
-            entry.getTypeUrl(), "hybriddecrypt", entry.getKeyManagerVersion());
+        KeyManager<PublicKeyVerify> manager =
+            catalogue.getKeyManager(
+                entry.getTypeUrl(), "publickeyverify", entry.getKeyManagerVersion());
         assertThat(manager.doesSupport(entry.getTypeUrl())).isTrue();
       }
     }
@@ -92,12 +69,12 @@ public class HybridCatalogueTest {
 
   @Test
   public void testErrors() throws Exception {
-    HybridCatalogue catalogue = new HybridCatalogue();
-    String keyType = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
+    PublicKeyVerifyCatalogue catalogue = new PublicKeyVerifyCatalogue();
+    String keyType = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
 
     // Wrong primitive name.
     try {
-      catalogue.getKeyManager(keyType, "aead", 0);
+      KeyManager<PublicKeyVerify> manager = catalogue.getKeyManager(keyType, "aead", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");
@@ -105,7 +82,7 @@ public class HybridCatalogueTest {
 
     // Wrong key manager version.
     try {
-      catalogue.getKeyManager(keyType, "hybridencrypt", 1);
+      KeyManager<PublicKeyVerify> manager = catalogue.getKeyManager(keyType, "publickeyverify", 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager");
@@ -114,7 +91,8 @@ public class HybridCatalogueTest {
 
     // Wrong key type.
     try {
-      catalogue.getKeyManager("some.unknown.key.type", "hybridencrypt", 0);
+      KeyManager<PublicKeyVerify> manager =
+          catalogue.getKeyManager("some.unknown.key.type", "publickeyverify", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");

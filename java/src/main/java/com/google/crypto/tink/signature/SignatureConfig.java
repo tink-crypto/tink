@@ -40,28 +40,29 @@ import java.security.GeneralSecurityException;
 public final class SignatureConfig {
   public static final String ECDSA_PUBLIC_KEY_TYPE_URL = EcdsaVerifyKeyManager.TYPE_URL;
   public static final String ECDSA_PRIVATE_KEY_TYPE_URL = EcdsaSignKeyManager.TYPE_URL;
-  @Alpha
-  public static final String ED25519_PUBLIC_KEY_TYPE_URL = Ed25519PublicKeyManager.TYPE_URL;
+  @Alpha public static final String ED25519_PUBLIC_KEY_TYPE_URL = Ed25519PublicKeyManager.TYPE_URL;
+
   @Alpha
   public static final String ED25519_PRIVATE_KEY_TYPE_URL = Ed25519PrivateKeyManager.TYPE_URL;
 
-  private static final String CATALOGUE_NAME = "TinkSignature";
+  private static final String PUBLIC_KEY_SIGN_CATALOGUE_NAME = "TinkPublicKeySign";
+  private static final String PUBLIC_KEY_VERIFY_CATALOGUE_NAME = "TinkPublicKeyVerify";
 
   public static final RegistryConfig TINK_1_0_0 =
       RegistryConfig.newBuilder()
           .setConfigName("TINK_SIGNATURE_1_0_0")
           .addEntry(
               Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, "PublicKeySign", "EcdsaPrivateKey", 0, true))
+                  PUBLIC_KEY_SIGN_CATALOGUE_NAME, "PublicKeySign", "EcdsaPrivateKey", 0, true))
           .addEntry(
               Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, "PublicKeySign", "Ed25519PrivateKey", 0, true))
+                  PUBLIC_KEY_SIGN_CATALOGUE_NAME, "PublicKeySign", "Ed25519PrivateKey", 0, true))
           .addEntry(
               Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, "PublicKeyVerify", "EcdsaPublicKey", 0, true))
+                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "EcdsaPublicKey", 0, true))
           .addEntry(
               Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, "PublicKeyVerify", "Ed25519PublicKey", 0, true))
+                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "Ed25519PublicKey", 0, true))
           .build();
 
   static {
@@ -78,6 +79,7 @@ public final class SignatureConfig {
    * supported in Tink.
    */
   public static void init() throws GeneralSecurityException {
-    Registry.addCatalogue(CATALOGUE_NAME, new SignatureCatalogue());
+    Registry.addCatalogue(PUBLIC_KEY_SIGN_CATALOGUE_NAME, new PublicKeySignCatalogue());
+    Registry.addCatalogue(PUBLIC_KEY_VERIFY_CATALOGUE_NAME, new PublicKeyVerifyCatalogue());
   }
 }

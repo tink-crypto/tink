@@ -22,7 +22,7 @@ import com.google.crypto.tink.StreamingAead;
 import java.security.GeneralSecurityException;
 
 /** A catalogue of {@link StreamingAead} key managers. */
-class StreamingAeadCatalogue implements Catalogue {
+class StreamingAeadCatalogue implements Catalogue<StreamingAead> {
   public StreamingAeadCatalogue() {}
 
   /**
@@ -30,10 +30,9 @@ class StreamingAeadCatalogue implements Catalogue {
    *     {@code minVersion} (if it exists in the catalogue).
    */
   @Override
-  @SuppressWarnings("rawtypes")
-  public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion)
-      throws GeneralSecurityException {
-    KeyManager keyManager;
+  public KeyManager<StreamingAead> getKeyManager(
+      String typeUrl, String primitiveName, int minVersion) throws GeneralSecurityException {
+    KeyManager<StreamingAead> keyManager;
     switch (primitiveName.toLowerCase()) {
       case "streamingaead":
         keyManager = streamingAeadKeyManager(typeUrl);

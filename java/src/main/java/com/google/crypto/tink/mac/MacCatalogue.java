@@ -22,7 +22,7 @@ import com.google.crypto.tink.Mac;
 import java.security.GeneralSecurityException;
 
 /** A catalogue of {@link Mac} key managers. */
-class MacCatalogue implements Catalogue {
+class MacCatalogue implements Catalogue<Mac> {
   public MacCatalogue() {}
 
   /**
@@ -30,10 +30,9 @@ class MacCatalogue implements Catalogue {
    *     {@code minVersion} (if it exists in the catalogue).
    */
   @Override
-  @SuppressWarnings("rawtypes")
-  public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion)
+  public KeyManager<Mac> getKeyManager(String typeUrl, String primitiveName, int minVersion)
       throws GeneralSecurityException {
-    KeyManager keyManager;
+    KeyManager<Mac> keyManager;
     switch (primitiveName.toLowerCase()) {
       case "mac":
         keyManager = macKeyManager(typeUrl);

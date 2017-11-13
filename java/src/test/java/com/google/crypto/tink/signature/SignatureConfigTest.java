@@ -43,7 +43,14 @@ public class SignatureConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
     try {
-      Registry.getCatalogue("tinksignature");
+      Registry.getCatalogue("tinkpublickeysign");
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("no catalogue found");
+      assertThat(e.toString()).contains("SignatureConfig.init()");
+    }
+    try {
+      Registry.getCatalogue("tinkpublickeyverify");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
@@ -52,8 +59,8 @@ public class SignatureConfigTest {
     // Get the config proto, now the catalogues should be present,
     // as init() was triggered by a static block.
     RegistryConfig unused = SignatureConfig.TINK_1_0_0;
-    Registry.getCatalogue("tinksignature");
-    Registry.getCatalogue("tinksignature");
+    Registry.getCatalogue("tinkpublickeysign");
+    Registry.getCatalogue("tinkpublickeyverify");
 
     // Running init() manually again should succeed.
     SignatureConfig.init();
@@ -67,28 +74,28 @@ public class SignatureConfigTest {
 
     TestUtil.verifyConfigEntry(
         config.getEntry(0),
-        "TinkSignature",
+        "TinkPublicKeySign",
         "PublicKeySign",
         "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(1),
-        "TinkSignature",
+        "TinkPublicKeySign",
         "PublicKeySign",
         "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(2),
-        "TinkSignature",
+        "TinkPublicKeyVerify",
         "PublicKeyVerify",
         "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(3),
-        "TinkSignature",
+        "TinkPublicKeyVerify",
         "PublicKeyVerify",
         "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
         true,

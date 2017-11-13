@@ -55,14 +55,28 @@ public class TinkConfigTest {
       assertThat(e.toString()).contains("AeadConfig.init()");
     }
     try {
-      Registry.getCatalogue("tinkhybrid");
+      Registry.getCatalogue("tinkhybriddecrypt");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
       assertThat(e.toString()).contains("HybridConfig.init()");
     }
     try {
-      Registry.getCatalogue("tinksignature");
+      Registry.getCatalogue("tinkhybridencrypt");
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("no catalogue found");
+      assertThat(e.toString()).contains("HybridConfig.init()");
+    }
+    try {
+      Registry.getCatalogue("tinkpublickeysign");
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("no catalogue found");
+      assertThat(e.toString()).contains("SignatureConfig.init()");
+    }
+    try {
+      Registry.getCatalogue("tinkpublickeyverify");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
@@ -73,8 +87,10 @@ public class TinkConfigTest {
     RegistryConfig unused = TinkConfig.TINK_1_0_0;
     Registry.getCatalogue("tinkmac");
     Registry.getCatalogue("tinkaead");
-    Registry.getCatalogue("tinkhybrid");
-    Registry.getCatalogue("tinksignature");
+    Registry.getCatalogue("tinkhybridencrypt");
+    Registry.getCatalogue("tinkhybriddecrypt");
+    Registry.getCatalogue("tinkpublickeysign");
+    Registry.getCatalogue("tinkpublickeyverify");
   }
 
   @Test
@@ -134,42 +150,42 @@ public class TinkConfigTest {
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(7),
-        "TinkHybrid",
+        "TinkHybridDecrypt",
         "HybridDecrypt",
         "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(8),
-        "TinkHybrid",
+        "TinkHybridEncrypt",
         "HybridEncrypt",
         "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(9),
-        "TinkSignature",
+        "TinkPublicKeySign",
         "PublicKeySign",
         "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(10),
-        "TinkSignature",
+        "TinkPublicKeySign",
         "PublicKeySign",
         "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(11),
-        "TinkSignature",
+        "TinkPublicKeyVerify",
         "PublicKeyVerify",
         "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(12),
-        "TinkSignature",
+        "TinkPublicKeyVerify",
         "PublicKeyVerify",
         "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
         true,

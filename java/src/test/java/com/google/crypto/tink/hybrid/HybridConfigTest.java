@@ -50,7 +50,14 @@ public class HybridConfigTest {
       assertThat(e.toString()).contains("MacConfig.init()");
     }
     try {
-      Registry.getCatalogue("tinkhybrid");
+      Registry.getCatalogue("tinkhybridencrypt");
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("no catalogue found");
+      assertThat(e.toString()).contains("HybridConfig.init()");
+    }
+    try {
+      Registry.getCatalogue("tinkhybriddecrypt");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
@@ -60,7 +67,8 @@ public class HybridConfigTest {
     // as init() was triggered by a static block.
     RegistryConfig unused = HybridConfig.TINK_1_0_0;
     Registry.getCatalogue("tinkmac");
-    Registry.getCatalogue("tinkhybrid");
+    Registry.getCatalogue("tinkhybriddecrypt");
+    Registry.getCatalogue("tinkhybridencrypt");
 
     // Running init() manually again should succeed.
     HybridConfig.init();
@@ -123,14 +131,14 @@ public class HybridConfigTest {
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(7),
-        "TinkHybrid",
+        "TinkHybridDecrypt",
         "HybridDecrypt",
         "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(8),
-        "TinkHybrid",
+        "TinkHybridEncrypt",
         "HybridEncrypt",
         "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
         true,

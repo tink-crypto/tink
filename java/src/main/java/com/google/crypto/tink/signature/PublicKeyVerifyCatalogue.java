@@ -14,28 +14,28 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.aead;
+package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PublicKeyVerify;
 import java.security.GeneralSecurityException;
 
-/** A catalogue of {@link Aead} key managers. */
-class AeadCatalogue implements Catalogue<Aead> {
-  public AeadCatalogue() {}
+/** A catalogue of {@link PublicKeyVerify} key managers. */
+class PublicKeyVerifyCatalogue implements Catalogue<PublicKeyVerify> {
+  public PublicKeyVerifyCatalogue() {}
 
   /**
    * @return a KeyManager for the given {@code typeUrl}, {@code primitiveName} and version at least
    *     {@code minVersion} (if it exists in the catalogue).
    */
   @Override
-  public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion)
-      throws GeneralSecurityException {
-    KeyManager<Aead> keyManager;
+  public KeyManager<PublicKeyVerify> getKeyManager(
+      String typeUrl, String primitiveName, int minVersion) throws GeneralSecurityException {
+    KeyManager<PublicKeyVerify> keyManager;
     switch (primitiveName.toLowerCase()) {
-      case "aead":
-        keyManager = aeadKeyManager(typeUrl);
+      case "publickeyverify":
+        keyManager = publicKeyVerifyKeyManager(typeUrl);
         break;
       default:
         throw new GeneralSecurityException(
@@ -49,23 +49,17 @@ class AeadCatalogue implements Catalogue<Aead> {
     return keyManager;
   }
 
-  private KeyManager<Aead> aeadKeyManager(String typeUrl) throws GeneralSecurityException {
+  private KeyManager<PublicKeyVerify> publicKeyVerifyKeyManager(String typeUrl)
+      throws GeneralSecurityException {
     switch (typeUrl) {
-      case AesCtrHmacAeadKeyManager.TYPE_URL:
-        return new AesCtrHmacAeadKeyManager();
-      case AesEaxKeyManager.TYPE_URL:
-        return new AesEaxKeyManager();
-      case AesGcmKeyManager.TYPE_URL:
-        return new AesGcmKeyManager();
-      case ChaCha20Poly1305KeyManager.TYPE_URL:
-        return new ChaCha20Poly1305KeyManager();
-      case KmsAeadKeyManager.TYPE_URL:
-        return new KmsAeadKeyManager();
-      case KmsEnvelopeAeadKeyManager.TYPE_URL:
-        return new KmsEnvelopeAeadKeyManager();
+      case EcdsaVerifyKeyManager.TYPE_URL:
+        return new EcdsaVerifyKeyManager();
+      case Ed25519PublicKeyManager.TYPE_URL:
+        return new Ed25519PublicKeyManager();
       default:
         throw new GeneralSecurityException(
-            String.format("No support for primitive 'Aead' with key type '%s'.", typeUrl));
+            String.format(
+                "No support for primitive 'PublicKeyVerify' with key type '%s'.", typeUrl));
     }
   }
 }

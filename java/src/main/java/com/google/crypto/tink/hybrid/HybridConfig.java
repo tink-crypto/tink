@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.Config;
@@ -41,18 +42,26 @@ public final class HybridConfig {
       EciesAeadHkdfPublicKeyManager.TYPE_URL;
   public static final String ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE_URL =
       EciesAeadHkdfPrivateKeyManager.TYPE_URL;
-
-  private static final String CATALOGUE_NAME = "TinkHybrid";
+  private static final String HYBRID_ENCRYPT_CATALOGUE_NAME = "TinkHybridEncrypt";
+  private static final String HYBRID_DECRYPT_CATALOGUE_NAME = "TinkHybridDecrypt";
 
   public static final RegistryConfig TINK_1_0_0 =
       RegistryConfig.newBuilder()
           .mergeFrom(AeadConfig.TINK_1_0_0)
           .addEntry(
               Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, "HybridDecrypt", "EciesAeadHkdfPrivateKey", 0, true))
+                  HYBRID_DECRYPT_CATALOGUE_NAME,
+                  "HybridDecrypt",
+                  "EciesAeadHkdfPrivateKey",
+                  0,
+                  true))
           .addEntry(
               Config.getTinkKeyTypeEntry(
-                  CATALOGUE_NAME, "HybridEncrypt", "EciesAeadHkdfPublicKey", 0, true))
+                  HYBRID_ENCRYPT_CATALOGUE_NAME,
+                  "HybridEncrypt",
+                  "EciesAeadHkdfPublicKey",
+                  0,
+                  true))
           .setConfigName("TINK_HYBRID_1_0_0")
           .build();
 
@@ -74,7 +83,8 @@ public final class HybridConfig {
    * registers all Aead and Mac catalogues.
    */
   public static void init() throws GeneralSecurityException {
-    Registry.addCatalogue(CATALOGUE_NAME, new HybridCatalogue());
+    Registry.addCatalogue(HYBRID_ENCRYPT_CATALOGUE_NAME, new HybridEncryptCatalogue());
+    Registry.addCatalogue(HYBRID_DECRYPT_CATALOGUE_NAME, new HybridDecryptCatalogue());
     AeadConfig.init(); // includes Mac
   }
 }

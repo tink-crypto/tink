@@ -19,28 +19,23 @@ package com.google.crypto.tink.signature;
 import com.google.crypto.tink.Catalogue;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.PublicKeyVerify;
 import java.security.GeneralSecurityException;
 
-/** A catalogue of {@link PublicKeySign} and {@link PublicKeyVerify} key managers. */
-class SignatureCatalogue implements Catalogue {
-  public SignatureCatalogue() {}
+/** A catalogue of {@link PublicKeySign} key managers. */
+class PublicKeySignCatalogue implements Catalogue<PublicKeySign> {
+  public PublicKeySignCatalogue() {}
 
   /**
    * @return a KeyManager for the given {@code typeUrl}, {@code primitiveName} and version at least
    *     {@code minVersion} (if it exists in the catalogue).
    */
   @Override
-  @SuppressWarnings("rawtypes")
-  public KeyManager getKeyManager(String typeUrl, String primitiveName, int minVersion)
-      throws GeneralSecurityException {
-    KeyManager keyManager;
+  public KeyManager<PublicKeySign> getKeyManager(
+      String typeUrl, String primitiveName, int minVersion) throws GeneralSecurityException {
+    KeyManager<PublicKeySign> keyManager;
     switch (primitiveName.toLowerCase()) {
       case "publickeysign":
         keyManager = publicKeySignKeyManager(typeUrl);
-        break;
-      case "publickeyverify":
-        keyManager = publicKeyVerifyKeyManager(typeUrl);
         break;
       default:
         throw new GeneralSecurityException(
@@ -64,20 +59,6 @@ class SignatureCatalogue implements Catalogue {
       default:
         throw new GeneralSecurityException(
             String.format("No support for primitive 'PublicKeySign' with key type '%s'.", typeUrl));
-    }
-  }
-
-  private KeyManager<PublicKeyVerify> publicKeyVerifyKeyManager(String typeUrl)
-      throws GeneralSecurityException {
-    switch (typeUrl) {
-      case EcdsaVerifyKeyManager.TYPE_URL:
-        return new EcdsaVerifyKeyManager();
-      case Ed25519PublicKeyManager.TYPE_URL:
-        return new Ed25519PublicKeyManager();
-      default:
-        throw new GeneralSecurityException(
-            String.format(
-                "No support for primitive 'PublicKeyVerify' with key type '%s'.", typeUrl));
     }
   }
 }

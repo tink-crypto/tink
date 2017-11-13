@@ -14,28 +14,28 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.aead;
+package com.google.crypto.tink.hybrid;
 
-import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Catalogue;
+import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyManager;
 import java.security.GeneralSecurityException;
 
-/** A catalogue of {@link Aead} key managers. */
-class AeadCatalogue implements Catalogue<Aead> {
-  public AeadCatalogue() {}
+/** A catalogue of {@link HybridEncrypt} key managers. */
+class HybridEncryptCatalogue implements Catalogue<HybridEncrypt> {
+  public HybridEncryptCatalogue() {}
 
   /**
    * @return a KeyManager for the given {@code typeUrl}, {@code primitiveName} and version at least
    *     {@code minVersion} (if it exists in the catalogue).
    */
   @Override
-  public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion)
+  public KeyManager<HybridEncrypt> getKeyManager(String typeUrl, String primitiveName, int minVersion)
       throws GeneralSecurityException {
-    KeyManager<Aead> keyManager;
+    KeyManager<HybridEncrypt> keyManager;
     switch (primitiveName.toLowerCase()) {
-      case "aead":
-        keyManager = aeadKeyManager(typeUrl);
+      case "hybridencrypt":
+        keyManager = hybridEncryptKeyManager(typeUrl);
         break;
       default:
         throw new GeneralSecurityException(
@@ -49,23 +49,14 @@ class AeadCatalogue implements Catalogue<Aead> {
     return keyManager;
   }
 
-  private KeyManager<Aead> aeadKeyManager(String typeUrl) throws GeneralSecurityException {
+  private KeyManager<HybridEncrypt> hybridEncryptKeyManager(String typeUrl)
+      throws GeneralSecurityException {
     switch (typeUrl) {
-      case AesCtrHmacAeadKeyManager.TYPE_URL:
-        return new AesCtrHmacAeadKeyManager();
-      case AesEaxKeyManager.TYPE_URL:
-        return new AesEaxKeyManager();
-      case AesGcmKeyManager.TYPE_URL:
-        return new AesGcmKeyManager();
-      case ChaCha20Poly1305KeyManager.TYPE_URL:
-        return new ChaCha20Poly1305KeyManager();
-      case KmsAeadKeyManager.TYPE_URL:
-        return new KmsAeadKeyManager();
-      case KmsEnvelopeAeadKeyManager.TYPE_URL:
-        return new KmsEnvelopeAeadKeyManager();
+      case EciesAeadHkdfPublicKeyManager.TYPE_URL:
+        return new EciesAeadHkdfPublicKeyManager();
       default:
         throw new GeneralSecurityException(
-            String.format("No support for primitive 'Aead' with key type '%s'.", typeUrl));
+            String.format("No support for primitive 'HybridEncrypt' with key type '%s'.", typeUrl));
     }
   }
 }
