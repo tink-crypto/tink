@@ -29,6 +29,12 @@ NS_ASSUME_NONNULL_BEGIN
  * decryption the ciphertext allows for checking the integrity of @c contextInfo (but there are no
  * guarantees with regard to secrecy or authenticity of @c contextInfo).
  *
+ * WARNING: Hybrid Encryption does not provide authenticity, that is the recipient of an encrypted
+ * message does not know the identity of the sender. Similar to general public-key encryption
+ * schemes the security goal of Hybrid Encryption is to provide privacy only. In other words,
+ * Hybrid Encryption is secure if and only if the recipient can accept anonymous messages or can
+ * rely on other mechanisms to authenticate the sender.
+ *
  * @c contextInfo can be empty or nil, but to ensure the correct decryption of the resulting
  * ciphertext the same value must be provided for the decryption operation.
  *

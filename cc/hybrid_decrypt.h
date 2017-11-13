@@ -34,6 +34,13 @@ namespace tink {
 // checking the integrity of 'context_info' (but there are no
 // guarantees wrt. to secrecy or authenticity of 'context_info').
 //
+// WARNING: hybrid encryption does not provide authenticity, that is the
+// recipient of an encrypted message does not know the identity of the sender.
+// Similar to general public-key encryption schemes the security goal of
+// hybrid encryption is to provide privacy only. In other words, hybrid
+// encryption is secure if and only if the recipient can accept anonymous
+// messages or can rely on other mechanisms to authenticate the sender.
+//
 // 'context_info' can be empty or null, but to ensure the correct
 // decryption of the ciphertext the same value must be provided
 // as was used during encryption operation (cf. HybridEncrypt-interface).

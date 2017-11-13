@@ -94,8 +94,14 @@ convenience of public-key encryption: to encrypt a message a fresh symmetric key
 is generated and used to encrypt the actual plaintext data, while the
 recipient’s public key is used to encrypt the symmetric key only, and the final
 ciphertext consists of the symmetric ciphertext and the encrypted symmetric
-key. Note that hybrid encryption does not provide authenticity of the message
-(ie. the recipient does not know who the sender is).
+key.
+
+**WARNING** Hybrid Encryption does not provide authenticity, that is the
+recipient of an encrypted message does not know the identity of the sender.
+Similar to general public-key encryption schemes the security goal of Hybrid
+Encryption is to provide privacy only. In other words, Hybrid Encryption is
+secure if and only if the recipient can accept anonymous messages or can rely
+on other mechanism to authenticate the sender.
 
 The functionality of Hybrid Encryption is represented in Tink as a pair of
 primitives: HybridEncrypt for encryption of data, and HybridDecrypt for
