@@ -126,6 +126,45 @@ go_proto_library(
 )
 
 # -----------------------------------------------
+# aes-siv
+# -----------------------------------------------
+proto_library(
+    name = "aes_siv",
+    srcs = [
+        "aes_siv.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "aes_siv_cc_proto",
+    deps = [":aes_siv"],
+)
+
+java_proto_library(
+    name = "aes_siv_java_proto",
+    deps = [":aes_siv"],
+)
+
+java_lite_proto_library(
+    name = "aes_siv_java_proto_lite",
+    deps = [":aes_siv"],
+)
+
+go_proto_library(
+    name = "aes_siv_go_proto",
+    srcs = [
+        "aes_siv.proto",
+    ],
+)
+
+objc_proto_compile(
+    name = "aes_siv_objc_pb",
+    protos = ["aes_siv.proto"],
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+)
+
+# -----------------------------------------------
 # ecdsa
 # -----------------------------------------------
 proto_library(

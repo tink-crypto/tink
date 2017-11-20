@@ -20,10 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.TestUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
 import javax.crypto.AEADBadTagException;
+import javax.crypto.Cipher;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -31,26 +34,27 @@ import org.junit.runners.JUnit4;
 /** Tests for AesSiv */
 @RunWith(JUnit4.class)
 public class AesSivTest {
-  @Test
-  // Copied from https://tools.ietf.org/html/rfc5297.
-  public void testEncryptionWithTestVector() throws GeneralSecurityException {
-    AesSiv crypter =
-        new AesSiv(Hex.decode("fffefdfcfbfaf9f8f7f6f5f4f3f2f1f0f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
-    byte[] pt = Hex.decode("112233445566778899aabbccddee");
-    byte[] aad = Hex.decode("101112131415161718191a1b1c1d1e1f2021222324252627");
-    byte[] result = crypter.encryptDeterministically(pt, aad);
-    String hex = Hex.encode(result);
-    System.out.println("result  : " + hex);
-    System.out.println("expected: 85632d07c6e8f37f950acd320a2ecc9340c02b9690c4dc04daef7f6afe5c");
-    assertEquals("85632d07c6e8f37f950acd320a2ecc9340c02b9690c4dc04daef7f6afe5c", hex);
-    byte[] decryptedPt = crypter.decryptDeterministically(result, aad);
-    assertEquals("112233445566778899aabbccddee", Hex.encode(decryptedPt));
+
+  private Integer[] keySizeInBytes;
+
+  @Before
+  public void setUp() throws Exception {
+    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
+      System.out.println(
+          "Unlimited Strength Jurisdiction Policy Files are required"
+              + " but not installed. Skip most AesSiv tests.");
+      keySizeInBytes = new Integer[] {};
+    } else if (TestUtil.isAndroid()) {
+      keySizeInBytes = new Integer[] {64};
+    } else {
+      keySizeInBytes = new Integer[] {48, 64};
+    }
   }
 
   @Test
-  public void testRepeatedEncryptionWithEmptyPlaintext() throws GeneralSecurityException {
-    for (int triesKey = 0; triesKey < 100; triesKey++) {
-      DeterministicAead dead = new AesSiv(Random.randBytes(32));
+  public void testEncryptDecryptWithEmptyPlaintext() throws GeneralSecurityException {
+    for (int keySize : keySizeInBytes) {
+      DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
         byte[] plaintext = new byte[0];
         byte[] aad = Random.randBytes(Random.randInt(128) + 1);
@@ -63,9 +67,9 @@ public class AesSivTest {
   }
 
   @Test
-  public void testRepeatedEncryptionWithEmptyAssociatedData() throws GeneralSecurityException {
-    for (int triesKey = 0; triesKey < 100; triesKey++) {
-      DeterministicAead dead = new AesSiv(Random.randBytes(32));
+  public void testEncryptDecryptWithEmptyAssociatedData() throws GeneralSecurityException {
+    for (int keySize : keySizeInBytes) {
+      DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
         byte[] plaintext = Random.randBytes(Random.randInt(1024) + 1);
         byte[] aad = new byte[0];
@@ -77,9 +81,10 @@ public class AesSivTest {
   }
 
   @Test
-  public void testRepeatedEncryptionWithEmptyInput() throws GeneralSecurityException {
-    for (int triesKey = 0; triesKey < 100; triesKey++) {
-      DeterministicAead dead = new AesSiv(Random.randBytes(32));
+  public void testEncryptDecryptWithEmptyPlaintextAndEmptyAssociatedData()
+      throws GeneralSecurityException {
+    for (int keySize : keySizeInBytes) {
+      DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
         byte[] plaintext = new byte[0];
         byte[] aad = new byte[0];
@@ -91,9 +96,9 @@ public class AesSivTest {
   }
 
   @Test
-  public void testRepeatedEncryptions() throws GeneralSecurityException {
-    for (int triesKey = 0; triesKey < 100; triesKey++) {
-      DeterministicAead dead = new AesSiv(Random.randBytes(32));
+  public void testEncryptDecrypt() throws GeneralSecurityException {
+    for (int keySize : keySizeInBytes) {
+      DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
 
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
         byte[] plaintext = Random.randBytes(Random.randInt(1024) + 1);
@@ -105,9 +110,8 @@ public class AesSivTest {
     }
   }
 
-  @Test
-  public void testModifiedCiphertext() throws GeneralSecurityException {
-    byte[] key = Random.randBytes(32);
+  private static void testModifiedCiphertext(int keySize) throws GeneralSecurityException {
+    byte[] key = Random.randBytes(keySize);
     DeterministicAead crypter = new AesSiv(key);
     byte[] plaintext = Random.randBytes(10);
     byte[] aad = Random.randBytes(10);
@@ -142,39 +146,14 @@ public class AesSivTest {
   }
 
   @Test
-  public void testInvalidKeySizes() throws GeneralSecurityException {
-    try {
-      new AesSiv(Random.randBytes(16));
-    } catch (InvalidKeyException ex) {
-      // expected.
-    }
-
-    int i = Random.randInt(100);
-    if (i == 24 || i == 32) {
-      i = Random.randInt(100);
-    }
-
-    try {
-      new AesSiv(Random.randBytes(i));
-    } catch (InvalidKeyException ex) {
-      // expected.
+  public void testModifiedCiphertext() throws GeneralSecurityException {
+    for (int keySize : keySizeInBytes) {
+      testModifiedCiphertext(keySize);
     }
   }
 
-  @Test
-  public void testInvalidCiphertextSizes() throws GeneralSecurityException {
-    byte[] key = Random.randBytes(32);
-    DeterministicAead crypter = new AesSiv(key);
-    try {
-      crypter.decryptDeterministically(Random.randBytes(15), Random.randBytes(20));
-    } catch (GeneralSecurityException ex) {
-      // expected.
-    }
-  }
-
-  @Test
-  public void testModifiedAssociatedData() throws GeneralSecurityException {
-    byte[] key = Random.randBytes(32);
+  private static void testModifiedAssociatedData(int keySize) throws GeneralSecurityException {
+    byte[] key = Random.randBytes(keySize);
     DeterministicAead crypter = new AesSiv(key);
     byte[] plaintext = Random.randBytes(10);
     byte[] aad = Random.randBytes(10);
@@ -190,6 +169,37 @@ public class AesSivTest {
         } catch (AEADBadTagException ex) {
           // This is expected.
         }
+      }
+    }
+  }
+
+  @Test
+  public void testModifiedAssociatedData() throws GeneralSecurityException {
+    for (int keySize : keySizeInBytes) {
+      testModifiedAssociatedData(keySize);
+    }
+  }
+
+  @Test
+  public void testInvalidKeySizes() throws GeneralSecurityException {
+    try {
+      // AesSiv doesn't accept 32-byte keys.
+      new AesSiv(Random.randBytes(32));
+      fail("32-byte keys should not be accepted");
+    } catch (InvalidKeyException ex) {
+      // expected.
+    }
+
+    for (int j = 0; j < 100; j++) {
+      if (j == 48 || j == 64) {
+        continue;
+      }
+
+      try {
+        new AesSiv(Random.randBytes(j));
+        fail("Keys with invalid size should not be accepted: " + j);
+      } catch (InvalidKeyException ex) {
+        // expected.
       }
     }
   }

@@ -44,7 +44,7 @@ public final class AesCmac implements Mac {
 
   public AesCmac(final byte[] key, int tagSizeInBytes) throws GeneralSecurityException {
     if (!KEY_SIZES.contains(key.length)) {
-      throw new InvalidKeyException("invalid key size");
+      throw new InvalidKeyException("invalid key size: " + key.length);
     }
     if (tagSizeInBytes < MIN_TAG_SIZE_IN_BYTES) {
       throw new InvalidAlgorithmParameterException(

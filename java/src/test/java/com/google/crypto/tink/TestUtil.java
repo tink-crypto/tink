@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadFactory;
+import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
@@ -35,6 +36,7 @@ import com.google.crypto.tink.proto.AesEaxParams;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
 import com.google.crypto.tink.proto.AesGcmKey;
+import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
@@ -229,6 +231,14 @@ public class TestUtil {
         AesCtrHmacAeadKey.newBuilder().setAesCtrKey(aesCtrKey).setHmacKey(hmacKey).build();
     return createKeyData(
         keyProto, AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, KeyData.KeyMaterialType.SYMMETRIC);
+  }
+
+  /** @return a {@code KeyData} containing a {@code AesSivKey}. */
+  public static KeyData createAesSivKeyData(int keySize) throws Exception {
+    AesSivKey keyProto =
+        AesSivKey.newBuilder().setKeyValue(ByteString.copyFrom(Random.randBytes(keySize))).build();
+    return TestUtil.createKeyData(
+        keyProto, DeterministicAeadConfig.AES_SIV_TYPE_URL, KeyData.KeyMaterialType.SYMMETRIC);
   }
 
   /** @return a {@code KeyData} containing a {@code AesGcmKey}. */
@@ -479,8 +489,10 @@ public class TestUtil {
     int maxKeySize = Cipher.getMaxAllowedKeyLength("AES/CTR/NoPadding");
     if ((keySizeInBytes * 8) > maxKeySize) {
       System.out.println(
-          String.format("Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip tests with keys larger than %s bits.", maxKeySize));
+          String.format(
+              "Unlimited Strength Jurisdiction Policy Files are required"
+                  + " but not installed. Skip tests with keys larger than %s bits.",
+              maxKeySize));
       return true;
     }
     // Android is using Conscrypt as its default JCE provider, but Conscrypt
@@ -563,12 +575,14 @@ public class TestUtil {
     assertByteBufferContains("", expected, buffer);
   }
 
-  /**
-   * Verifies that the given entry has the specified contents.
-   */
-  public static void verifyConfigEntry(KeyTypeEntry entry,
-      String catalogueName, String primitiveName, String typeUrl,
-      Boolean newKeyAllowed, int keyManagerVersion) {
+  /** Verifies that the given entry has the specified contents. */
+  public static void verifyConfigEntry(
+      KeyTypeEntry entry,
+      String catalogueName,
+      String primitiveName,
+      String typeUrl,
+      Boolean newKeyAllowed,
+      int keyManagerVersion) {
     assertEquals(catalogueName, entry.getCatalogueName());
     assertEquals(primitiveName, entry.getPrimitiveName());
     assertEquals(typeUrl, entry.getTypeUrl());

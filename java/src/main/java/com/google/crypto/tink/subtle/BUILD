@@ -58,7 +58,7 @@ java_library(
 # deterministic aead subtle
 
 java_library(
-    name = "dead",
+    name = "daead",
     srcs = [
         "AesSiv.java",
     ],

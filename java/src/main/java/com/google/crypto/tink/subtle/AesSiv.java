@@ -37,7 +37,7 @@ import javax.crypto.spec.SecretKeySpec;
 public final class AesSiv implements DeterministicAead {
   // Do not support 128-bit keys because it might not provide 128-bit security level in
   // multi-user setting.
-  private static final Collection<Integer> KEY_SIZES = Arrays.asList(24, 32);
+  private static final Collection<Integer> KEY_SIZES = Arrays.asList(48, 64);
   private static final byte[] BLOCK_ZERO = new byte[AesUtil.BLOCK_SIZE];
   private static final byte[] BLOCK_ONE = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0x01
@@ -51,7 +51,8 @@ public final class AesSiv implements DeterministicAead {
 
   public AesSiv(final byte[] key) throws GeneralSecurityException {
     if (!KEY_SIZES.contains(key.length)) {
-      throw new InvalidKeyException("invalid key size");
+      throw new InvalidKeyException(
+          "invalid key size: " + key.length + "; acceptable values are 48 or 64 bytes");
     }
 
     byte[] k1 = Arrays.copyOfRange(key, 0, key.length / 2);

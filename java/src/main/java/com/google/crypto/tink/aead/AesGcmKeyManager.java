@@ -43,7 +43,7 @@ class AesGcmKeyManager implements KeyManager<Aead> {
   public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
       AesGcmKey keyProto = AesGcmKey.parseFrom(serializedKey);
-      return new AesGcmJce(keyProto.getKeyValue().toByteArray());
+      return getPrimitive(keyProto);
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("expected AesGcmKey proto");
     }
