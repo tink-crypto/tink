@@ -16,9 +16,11 @@
 
 package com.google.crypto.tink.config;
 
+import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridConfig;
 import com.google.crypto.tink.proto.RegistryConfig;
 import com.google.crypto.tink.signature.SignatureConfig;
+import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import java.security.GeneralSecurityException;
 
 /**
@@ -40,11 +42,22 @@ public final class TinkConfig {
           .setConfigName("TINK_1_0_0")
           .build();
 
+  public static final RegistryConfig TINK_1_1_0 =
+      RegistryConfig.newBuilder()
+          .mergeFrom(
+              HybridConfig.TINK_1_0_0) // include AeadConfig.TINK_1_0_0 and MacConfig.TINK_1_0_0
+          .mergeFrom(SignatureConfig.TINK_1_0_0)
+          .mergeFrom(DeterministicAeadConfig.TINK_1_1_0)
+          .mergeFrom(StreamingAeadConfig.TINK_1_1_0)
+          .setConfigName("TINK_1_1_0")
+          .build();
+
   /**
    * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle all key types supported in Tink.
    */
   public static void init() throws GeneralSecurityException {
+    DeterministicAeadConfig.init();
     HybridConfig.init(); // includes Aead and Mac
     SignatureConfig.init();
   }

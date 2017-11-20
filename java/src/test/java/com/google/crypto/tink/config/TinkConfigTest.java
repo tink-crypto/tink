@@ -84,9 +84,10 @@ public class TinkConfigTest {
     }
     // Get the config proto, now the catalogues should be present,
     // as init()'s were triggered by static block in referenced Config-classes.
-    RegistryConfig unused = TinkConfig.TINK_1_0_0;
+    RegistryConfig unused = TinkConfig.TINK_1_1_0;
     Registry.getCatalogue("tinkmac");
     Registry.getCatalogue("tinkaead");
+    Registry.getCatalogue("tinkdeterministicaead");
     Registry.getCatalogue("tinkhybridencrypt");
     Registry.getCatalogue("tinkhybriddecrypt");
     Registry.getCatalogue("tinkpublickeysign");
@@ -94,7 +95,7 @@ public class TinkConfigTest {
   }
 
   @Test
-  public void testConfigContents() throws Exception {
+  public void testConfigContentsVersion1_0_0() throws Exception {
     RegistryConfig config = TinkConfig.TINK_1_0_0;
     assertEquals(13, config.getEntryCount());
     assertEquals("TINK_1_0_0", config.getConfigName());
@@ -193,11 +194,133 @@ public class TinkConfigTest {
   }
 
   @Test
+  public void testConfigContentsVersion1_1_0() throws Exception {
+    RegistryConfig config = TinkConfig.TINK_1_1_0;
+    assertEquals(16, config.getEntryCount());
+    assertEquals("TINK_1_1_0", config.getConfigName());
+
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkMac",
+        "Mac",
+        "type.googleapis.com/google.crypto.tink.HmacKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(1),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(2),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesEaxKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(3),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesGcmKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(4),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(5),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.KmsAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(6),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(7),
+        "TinkHybridDecrypt",
+        "HybridDecrypt",
+        "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(8),
+        "TinkHybridEncrypt",
+        "HybridEncrypt",
+        "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(9),
+        "TinkPublicKeySign",
+        "PublicKeySign",
+        "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(10),
+        "TinkPublicKeySign",
+        "PublicKeySign",
+        "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(11),
+        "TinkPublicKeyVerify",
+        "PublicKeyVerify",
+        "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(12),
+        "TinkPublicKeyVerify",
+        "PublicKeyVerify",
+        "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(13),
+        "TinkDeterministicAead",
+        "DeterministicAead",
+        "type.googleapis.com/google.crypto.tink.AesSivKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(14),
+        "TinkStreamingAead",
+        "StreamingAead",
+        "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(15),
+        "TinkStreamingAead",
+        "StreamingAead",
+        "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey",
+        true,
+        0);
+  }
+
+  @Test
   public void testRegistration() throws Exception {
     String macTypeUrl = "type.googleapis.com/google.crypto.tink.HmacKey";
     String aeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
+    String daeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesSivKey";
     String hybridTypeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
     String signTypeUrl = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+    String streamingAeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
     try {
       Registry.getKeyManager(macTypeUrl);
       fail("Expected GeneralSecurityException");
@@ -206,6 +329,12 @@ public class TinkConfigTest {
     }
     try {
       Registry.getKeyManager(aeadTypeUrl);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("No key manager found");
+    }
+    try {
+      Registry.getKeyManager(daeadTypeUrl);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
@@ -222,11 +351,19 @@ public class TinkConfigTest {
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager found");
     }
+    try {
+      Registry.getKeyManager(streamingAeadTypeUrl);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("No key manager found");
+    }
     // After registration the key managers should be present.
-    Config.register(TinkConfig.TINK_1_0_0);
+    Config.register(TinkConfig.TINK_1_1_0);
     Registry.getKeyManager(macTypeUrl);
     Registry.getKeyManager(aeadTypeUrl);
+    Registry.getKeyManager(daeadTypeUrl);
     Registry.getKeyManager(hybridTypeUrl);
     Registry.getKeyManager(signTypeUrl);
+    Registry.getKeyManager(streamingAeadTypeUrl);
   }
 }

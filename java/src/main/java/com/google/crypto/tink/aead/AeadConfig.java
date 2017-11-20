@@ -64,6 +64,11 @@ public final class AeadConfig {
       .setConfigName("TINK_AEAD_1_0_0")
       .build();
 
+  public static final RegistryConfig TINK_1_1_0 = RegistryConfig.newBuilder()
+      .mergeFrom(TINK_1_0_0)
+      .setConfigName("TINK_AEAD_1_1_0")
+      .build();
+
   static {
     try {
       init();
@@ -95,6 +100,6 @@ public final class AeadConfig {
    */
   @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    Config.register(TINK_1_0_0);
+    Config.register(TINK_1_1_0);
   }
 }

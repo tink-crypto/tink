@@ -65,6 +65,13 @@ public final class SignatureConfig {
                   PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "Ed25519PublicKey", 0, true))
           .build();
 
+
+  public static final RegistryConfig TINK_1_1_0 =
+      RegistryConfig.newBuilder()
+          .mergeFrom(TINK_1_0_0)
+          .setConfigName("TINK_SIGNATURE_1_1_0")
+          .build();
+
   static {
     try {
       init();

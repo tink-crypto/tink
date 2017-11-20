@@ -58,7 +58,7 @@ public class SignatureConfigTest {
     }
     // Get the config proto, now the catalogues should be present,
     // as init() was triggered by a static block.
-    RegistryConfig unused = SignatureConfig.TINK_1_0_0;
+    RegistryConfig unused = SignatureConfig.TINK_1_1_0;
     Registry.getCatalogue("tinkpublickeysign");
     Registry.getCatalogue("tinkpublickeyverify");
 
@@ -103,6 +103,42 @@ public class SignatureConfigTest {
   }
 
   @Test
+  public void testConfigContents1_1_0() throws Exception {
+    RegistryConfig config = SignatureConfig.TINK_1_1_0;
+    assertEquals(4, config.getEntryCount());
+    assertEquals("TINK_SIGNATURE_1_1_0", config.getConfigName());
+
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkPublicKeySign",
+        "PublicKeySign",
+        "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(1),
+        "TinkPublicKeySign",
+        "PublicKeySign",
+        "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(2),
+        "TinkPublicKeyVerify",
+        "PublicKeyVerify",
+        "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(3),
+        "TinkPublicKeyVerify",
+        "PublicKeyVerify",
+        "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
+        true,
+        0);
+  }
+
+  @Test
   public void testRegistration() throws Exception {
     String typeUrl = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
     try {
@@ -112,7 +148,7 @@ public class SignatureConfigTest {
       assertThat(e.toString()).contains("No key manager found");
     }
     // After registration the key manager should be present.
-    Config.register(SignatureConfig.TINK_1_0_0);
+    Config.register(SignatureConfig.TINK_1_1_0);
     Registry.getKeyManager(typeUrl);
   }
 }

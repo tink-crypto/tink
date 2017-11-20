@@ -65,6 +65,12 @@ public final class HybridConfig {
           .setConfigName("TINK_HYBRID_1_0_0")
           .build();
 
+  public static final RegistryConfig TINK_1_1_0 =
+      RegistryConfig.newBuilder()
+          .mergeFrom(TINK_1_0_0)
+          .setConfigName("TINK_HYBRID_1_1_0")
+          .build();
+
   static {
     try {
       init();

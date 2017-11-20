@@ -255,6 +255,7 @@
             <exclude>**/X25519Test.java</exclude>
             <!-- Tests below rely on initialization via static blocks, and don't work with Maven -->
             <exclude>**/AeadConfigTest.java</exclude>
+            <exclude>**/DeterministicAeadConfigTest.java</exclude>
             <exclude>**/MacConfigTest.java</exclude>
             <exclude>**/HybridConfigTest.java</exclude>
             <exclude>**/SignatureConfigTest.java</exclude>

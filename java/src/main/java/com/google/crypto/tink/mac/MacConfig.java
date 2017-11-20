@@ -45,6 +45,12 @@ public final class MacConfig {
           .addEntry(Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "HmacKey", 0, true))
           .build();
 
+  public static final RegistryConfig TINK_1_1_0 =
+      RegistryConfig.newBuilder()
+          .mergeFrom(TINK_1_0_0)
+          .setConfigName("TINK_MAC_1_1_0")
+          .build();
+
   static {
     try {
       init();
@@ -71,6 +77,6 @@ public final class MacConfig {
    */
   @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
-    Config.register(TINK_1_0_0);
+    Config.register(TINK_1_1_0);
   }
 }

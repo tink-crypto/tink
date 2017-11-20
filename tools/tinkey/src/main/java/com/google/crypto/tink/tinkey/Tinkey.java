@@ -26,7 +26,7 @@ import org.kohsuke.args4j.CmdLineParser;
  */
 public final class Tinkey {
   public static void main(String[] args) throws Exception {
-    Config.register(TinkConfig.TINK_1_0_0);
+    Config.register(TinkConfig.TINK_1_1_0);
     TinkeyCommands commands = new TinkeyCommands();
     CmdLineParser parser = new CmdLineParser(commands);
 

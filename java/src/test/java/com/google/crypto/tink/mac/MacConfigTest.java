@@ -51,7 +51,7 @@ public class MacConfigTest {
     }
     // Get the config proto, now the catalogues should be present,
     // as init() was triggered by a static block.
-    RegistryConfig unused = MacConfig.TINK_1_0_0;
+    RegistryConfig unused = MacConfig.TINK_1_1_0;
     Registry.getCatalogue("tinkmac");
     Registry.getCatalogue("tinkmac");
 
@@ -60,10 +60,25 @@ public class MacConfigTest {
   }
 
   @Test
-  public void testConfigContents() throws Exception {
+  public void testConfigContents1_0_0() throws Exception {
     RegistryConfig config = MacConfig.TINK_1_0_0;
     assertEquals(1, config.getEntryCount());
     assertEquals("TINK_MAC_1_0_0", config.getConfigName());
+
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkMac",
+        "Mac",
+        "type.googleapis.com/google.crypto.tink.HmacKey",
+        true,
+        0);
+  }
+
+  @Test
+  public void testConfigContents1_1_0() throws Exception {
+    RegistryConfig config = MacConfig.TINK_1_1_0;
+    assertEquals(1, config.getEntryCount());
+    assertEquals("TINK_MAC_1_1_0", config.getConfigName());
 
     TestUtil.verifyConfigEntry(
         config.getEntry(0),
@@ -84,7 +99,7 @@ public class MacConfigTest {
       assertThat(e.toString()).contains("No key manager found");
     }
     // After registration the key manager should be present.
-    Config.register(MacConfig.TINK_1_0_0);
+    Config.register(MacConfig.TINK_1_1_0);
     Registry.getKeyManager(typeUrl);
   }
 }

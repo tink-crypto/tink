@@ -11,8 +11,10 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
+        "//java/src/main/java/com/google/crypto/tink/daead",
         "//java/src/main/java/com/google/crypto/tink/hybrid",
         "//java/src/main/java/com/google/crypto/tink/signature",
+        "//java/src/main/java/com/google/crypto/tink/streamingaead",
         "//proto:config_java_proto",
     ],
 )
@@ -24,8 +26,10 @@ java_library(
     ],
     javacopts = JAVACOPTS,
     deps = [
+        "//java/src/main/java/com/google/crypto/tink/daead:android",
         "//java/src/main/java/com/google/crypto/tink/hybrid:android",
         "//java/src/main/java/com/google/crypto/tink/signature:android",
+        "//java/src/main/java/com/google/crypto/tink/streamingaead:android",
         "//proto:config_java_proto_lite",
     ],
 )

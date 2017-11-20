@@ -65,7 +65,7 @@ public class HybridConfigTest {
     }
     // Get the config proto, now the catalogues should be present,
     // as init() was triggered by a static block.
-    RegistryConfig unused = HybridConfig.TINK_1_0_0;
+    RegistryConfig unused = HybridConfig.TINK_1_1_0;
     Registry.getCatalogue("tinkmac");
     Registry.getCatalogue("tinkhybriddecrypt");
     Registry.getCatalogue("tinkhybridencrypt");
@@ -75,10 +75,81 @@ public class HybridConfigTest {
   }
 
   @Test
-  public void testConfigContents() throws Exception {
+  public void testConfigContents1_0_0() throws Exception {
     RegistryConfig config = HybridConfig.TINK_1_0_0;
     assertEquals(9, config.getEntryCount());
     assertEquals("TINK_HYBRID_1_0_0", config.getConfigName());
+
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkMac",
+        "Mac",
+        "type.googleapis.com/google.crypto.tink.HmacKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(1),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(2),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesEaxKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(3),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesGcmKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(4),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(5),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.KmsAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(6),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(7),
+        "TinkHybridDecrypt",
+        "HybridDecrypt",
+        "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(8),
+        "TinkHybridEncrypt",
+        "HybridEncrypt",
+        "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+        true,
+        0);
+  }
+
+  @Test
+  public void testConfigContents1_1_0() throws Exception {
+    RegistryConfig config = HybridConfig.TINK_1_1_0;
+    assertEquals(9, config.getEntryCount());
+    assertEquals("TINK_HYBRID_1_1_0", config.getConfigName());
 
     TestUtil.verifyConfigEntry(
         config.getEntry(0),
@@ -155,7 +226,7 @@ public class HybridConfigTest {
       assertThat(e.toString()).contains("No key manager found");
     }
     // After registration the key manager should be present.
-    Config.register(HybridConfig.TINK_1_0_0);
+    Config.register(HybridConfig.TINK_1_1_0);
     Registry.getKeyManager(typeUrl);
   }
 }
