@@ -18,9 +18,14 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Mac;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
 
 /** Mac implementations in JCE. */
 public final class MacJce implements Mac {
+  static final int MIN_TAG_SIZE_IN_BYTES = 10;
+  static final int MIN_KEY_SIZE_IN_BYTES = 16;
+
   private javax.crypto.Mac mac;
   private final int digestSize;
   private final String algorithm;
@@ -28,6 +33,30 @@ public final class MacJce implements Mac {
 
   public MacJce(String algorithm, java.security.Key key, int digestSize)
       throws GeneralSecurityException {
+    if (digestSize < MIN_TAG_SIZE_IN_BYTES) {
+      throw new InvalidAlgorithmParameterException(
+          "tag size too small, need at least " + MIN_TAG_SIZE_IN_BYTES + " bytes");
+    }
+    switch (algorithm) {
+      case "HMACSHA1":
+        if (digestSize > 20) {
+          throw new InvalidAlgorithmParameterException("tag size too big");
+        }
+        break;
+      case "HMACSHA256":
+        if (digestSize > 32) {
+          throw new InvalidAlgorithmParameterException("tag size too big");
+        }
+        break;
+      case "HMACSHA512":
+        if (digestSize > 64) {
+          throw new InvalidAlgorithmParameterException("tag size too big");
+        }
+        break;
+      default:
+        throw new NoSuchAlgorithmException("unknown Hmac algorithm: " + algorithm);
+    }
+
     this.algorithm = algorithm;
     this.digestSize = digestSize;
     this.key = key;
@@ -58,4 +87,4 @@ public final class MacJce implements Mac {
       throw new GeneralSecurityException("invalid MAC");
     }
   }
-};
+}

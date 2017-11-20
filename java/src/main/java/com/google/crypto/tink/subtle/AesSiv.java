@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.annotations.Alpha;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ import javax.crypto.spec.SecretKeySpec;
  * <p>To meet the security requirements of {@link DeterministicAead}, this cipher can only be used
  * with 192-bit or 256-bit keys.
  */
+@Alpha
 public final class AesSiv implements DeterministicAead {
   // Do not support 128-bit keys because it might not provide 128-bit security level in
   // multi-user setting.
@@ -54,7 +56,7 @@ public final class AesSiv implements DeterministicAead {
 
     byte[] k1 = Arrays.copyOfRange(key, 0, key.length / 2);
     this.aesCtrKey = Arrays.copyOfRange(key, key.length / 2, key.length);
-    this.cmacForS2V = new AesCmac(k1);
+    this.cmacForS2V = new AesCmac(k1, AesUtil.BLOCK_SIZE);
   }
 
   /**

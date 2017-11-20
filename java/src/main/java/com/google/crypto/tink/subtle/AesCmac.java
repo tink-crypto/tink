@@ -17,7 +17,9 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.annotations.Alpha;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,10 +28,13 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /** An implementation of CMAC following https://tools.ietf.org/html/rfc4493 */
+@Alpha
 public final class AesCmac implements Mac {
+  static final int MIN_TAG_SIZE_IN_BYTES = 10;
   private static final Collection<Integer> KEY_SIZES = Arrays.asList(16, 24, 32);
 
   private final SecretKey keySpec;
+  private final int tagSizeInBytes;
   private byte[] subKey1;
   private byte[] subKey2;
 
@@ -37,12 +42,21 @@ public final class AesCmac implements Mac {
     return EngineFactory.CIPHER.getInstance("AES/ECB/NoPadding");
   }
 
-  public AesCmac(final byte[] key) throws GeneralSecurityException {
+  public AesCmac(final byte[] key, int tagSizeInBytes) throws GeneralSecurityException {
     if (!KEY_SIZES.contains(key.length)) {
       throw new InvalidKeyException("invalid key size");
     }
+    if (tagSizeInBytes < MIN_TAG_SIZE_IN_BYTES) {
+      throw new InvalidAlgorithmParameterException(
+          "tag size too small, min is " + MIN_TAG_SIZE_IN_BYTES + " bytes");
+    }
+    if (tagSizeInBytes > AesUtil.BLOCK_SIZE) {
+      throw new InvalidAlgorithmParameterException(
+          "tag size too large, max is " + AesUtil.BLOCK_SIZE + " bytes");
+    }
 
     keySpec = new SecretKeySpec(key, "AES");
+    this.tagSizeInBytes = tagSizeInBytes;
     generateSubKeys();
   }
 
@@ -64,13 +78,11 @@ public final class AesCmac implements Mac {
     // Step 4
     byte[] mLast;
     if (flag) {
-      mLast =
-          Bytes.xor(data, (n - 1) * AesUtil.BLOCK_SIZE, subKey1, 0, AesUtil.BLOCK_SIZE);
+      mLast = Bytes.xor(data, (n - 1) * AesUtil.BLOCK_SIZE, subKey1, 0, AesUtil.BLOCK_SIZE);
     } else {
       mLast =
           Bytes.xor(
-              AesUtil.cmacPad(
-                  Arrays.copyOfRange(data, (n - 1) * AesUtil.BLOCK_SIZE, data.length)),
+              AesUtil.cmacPad(Arrays.copyOfRange(data, (n - 1) * AesUtil.BLOCK_SIZE, data.length)),
               subKey2);
     }
 
@@ -86,7 +98,9 @@ public final class AesCmac implements Mac {
     y = Bytes.xor(mLast, x);
 
     // Step 7
-    return aes.doFinal(y);
+    byte[] tag = new byte[tagSizeInBytes];
+    System.arraycopy(aes.doFinal(y), 0, tag, 0, tagSizeInBytes);
+    return tag;
   }
 
   @Override
