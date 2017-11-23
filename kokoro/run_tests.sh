@@ -26,11 +26,6 @@ rm -f ~/.bazelrc
 
 PLATFORM=`uname | tr '[:upper:]' '[:lower:]'`
 
-if [[ $PLATFORM == "darwin" ]]; then
-  # fixing https://stackoverflow.com/questions/36908041/git-could-not-expand-include-path-gitcinclude-fatal-bad-config-file-line
-  sudo sed -i.bak s#~#/Users/kbuilder#g /usr/local/git/etc/gitconfig
-fi
-
 # Using Bazel at commit 88157011af4ddac21e404e9deea0d78668a71a99.
 # In this version, {java,cc}_proto_library now look for dependencies in
 # @com_google_protobuf, instead of in @com_google_protobuf_$LANG.
@@ -51,6 +46,8 @@ echo "using java binary: " `which java`
 java -version
 
 run_linux_tests() {
+  time ${BAZEL_BIN} fetch ...
+
   # Build all targets, except objc.
   time ${BAZEL_BIN} build $DISABLE_SANDBOX \
   -- //... \
@@ -67,8 +64,7 @@ run_macos_tests() {
   : "${IOS_SDK_VERSION:=10.2}"
   : "${XCODE_VERSION:=8.2.1}"
 
-  export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-  export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+  time ${BAZEL_BIN} fetch ...
 
   # Build all the iOS targets.
   time ${BAZEL_BIN} build $DISABLE_SANDBOX \
@@ -83,11 +79,10 @@ run_macos_tests() {
   //objc/... || ( ls -l ; df -h / ; exit 1 )
 }
 
-# Fetch all dependencies.
-time ${BAZEL_BIN} fetch ...
-
-run_linux_tests
-
 if [[ $PLATFORM == 'darwin' ]]; then
+  export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+  export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
   run_macos_tests
 fi
+
+run_linux_tests
