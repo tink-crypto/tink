@@ -247,10 +247,10 @@
             <!-- TODO: add Maven support for Wycheproof which these tests depend on -->
             <exclude>**/AesGcmJceTest.java</exclude>
             <exclude>**/AesEaxJceTest.java</exclude>
-            <exclude>**/SnuffleCipherPoly1305Test.java</exclude>
+            <exclude>**/ChaCha20Poly1305Test.java</exclude>
+            <exclude>**/EcdsaVerifyJceTest.java</exclude>
             <exclude>**/Ed25519SignTest.java</exclude>
             <exclude>**/Ed25519VerifyTest.java</exclude>
-            <exclude>**/EcdsaVerifyJceTest.java</exclude>
             <exclude>**/EllipticCurvesTest.java</exclude>
             <exclude>**/X25519Test.java</exclude>
             <!-- Tests below rely on initialization via static blocks, and don't work with Maven -->
