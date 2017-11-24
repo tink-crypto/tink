@@ -93,9 +93,8 @@ public class ChaCha20Test {
   public void testQuarterRound() {
     int[] x = TestUtil.twoCompInt(new long[] {0x11111111, 0x01020304, 0x9b8d6f43, 0x01234567});
     ChaCha20.quarterRound(x, 0, 1, 2, 3);
-    Truth.assertThat(x)
-        .isEqualTo(
-            TestUtil.twoCompInt(new long[] {0xea2a92f4, 0xcb1cf8ce, 0x4581472e, 0x5881c4bb}));
+    Truth.assertThat(x).isEqualTo(
+        TestUtil.twoCompInt(new long[] {0xea2a92f4, 0xcb1cf8ce, 0x4581472e, 0x5881c4bb}));
   }
 
   /** https://tools.ietf.org/html/rfc7539#section-2.2.1 */

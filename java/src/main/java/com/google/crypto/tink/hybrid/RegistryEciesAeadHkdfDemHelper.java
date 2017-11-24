@@ -41,10 +41,10 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
   private final String demKeyTypeUrl;
   private final int symmetricKeySize;
 
-  // used iff demKeyType == AES_GCM_KEY
+  // used iff demKeyTypeUrl == AeadConfig.AES_GCM_TYPE_URL
   private AesGcmKey aesGcmKey;
 
-  // used iff demKeyType == AES_CTR_HMAC_AEAD_KEY
+  // used iff demKeyTypeUrl == AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL
   private AesCtrHmacAeadKey aesCtrHmacAeadKey;
   private int aesCtrKeySize;
 
@@ -83,12 +83,14 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
 
   @Override
   public Aead getAead(final byte[] symmetricKeyValue) throws GeneralSecurityException {
+    if (symmetricKeyValue.length != getSymmetricKeySizeInBytes()) {
+      throw new GeneralSecurityException("Symmetric key has incorrect length");
+    }
     if (demKeyTypeUrl.equals(AeadConfig.AES_GCM_TYPE_URL)) {
-      AesGcmKey aeadKey =
-          AesGcmKey.newBuilder()
-              .mergeFrom(aesGcmKey)
-              .setKeyValue(ByteString.copyFrom(symmetricKeyValue))
-              .build();
+      AesGcmKey aeadKey = AesGcmKey.newBuilder()
+          .mergeFrom(aesGcmKey)
+          .setKeyValue(ByteString.copyFrom(symmetricKeyValue, 0, symmetricKeySize))
+          .build();
       return Registry.getPrimitive(demKeyTypeUrl, aeadKey);
     } else if (demKeyTypeUrl.equals(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)) {
       byte[] aesCtrKeyValue = Arrays.copyOfRange(symmetricKeyValue, 0, aesCtrKeySize);

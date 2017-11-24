@@ -101,9 +101,8 @@ public class MacJceTest {
     }
     // Test with random keys.
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac =
-          new MacJce(
-              t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
+      Mac mac = new MacJce(
+          t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
         try {
@@ -135,9 +134,8 @@ public class MacJceTest {
     }
     // Test with random keys.
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac =
-          new MacJce(
-              t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
+      Mac mac = new MacJce(
+          t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
         try {
@@ -169,9 +167,8 @@ public class MacJceTest {
     }
     // Test with random keys.
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac =
-          new MacJce(
-              t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
+      Mac mac = new MacJce(
+          t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
       for (int b = 0; b < t.tag.length; b++) {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length);
