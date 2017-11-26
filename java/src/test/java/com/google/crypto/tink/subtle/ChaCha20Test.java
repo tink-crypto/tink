@@ -18,12 +18,10 @@ package com.google.crypto.tink.subtle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TestUtil;
 import com.google.common.truth.Truth;
+import com.google.crypto.tink.TestUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import org.junit.Test;
@@ -53,7 +51,8 @@ public class ChaCha20Test {
                 TestUtil.hexEncode(key),
                 TestUtil.hexEncode(output),
                 TestUtil.hexEncode(actualInput)),
-            expectedInput, actualInput);
+            expectedInput,
+            actualInput);
       }
     }
   }
@@ -95,7 +94,8 @@ public class ChaCha20Test {
     int[] x = TestUtil.twoCompInt(new long[] {0x11111111, 0x01020304, 0x9b8d6f43, 0x01234567});
     ChaCha20.quarterRound(x, 0, 1, 2, 3);
     Truth.assertThat(x)
-        .isEqualTo(TestUtil.twoCompInt(new long[] {0xea2a92f4, 0xcb1cf8ce, 0x4581472e, 0x5881c4bb}));
+        .isEqualTo(
+            TestUtil.twoCompInt(new long[] {0xea2a92f4, 0xcb1cf8ce, 0x4581472e, 0x5881c4bb}));
   }
 
   /** https://tools.ietf.org/html/rfc7539#section-2.2.1 */

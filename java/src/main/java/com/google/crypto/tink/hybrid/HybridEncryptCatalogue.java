@@ -30,8 +30,8 @@ class HybridEncryptCatalogue implements Catalogue<HybridEncrypt> {
    *     {@code minVersion} (if it exists in the catalogue).
    */
   @Override
-  public KeyManager<HybridEncrypt> getKeyManager(String typeUrl, String primitiveName, int minVersion)
-      throws GeneralSecurityException {
+  public KeyManager<HybridEncrypt> getKeyManager(
+      String typeUrl, String primitiveName, int minVersion) throws GeneralSecurityException {
     KeyManager<HybridEncrypt> keyManager;
     switch (primitiveName.toLowerCase()) {
       case "hybridencrypt":

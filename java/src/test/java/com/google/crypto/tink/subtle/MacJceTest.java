@@ -23,14 +23,12 @@ import com.google.crypto.tink.Mac;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;
-import org.junit.Test;
-import com.google.crypto.tink.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Unit tests for {@link MacJce}. */
+/** Unit tests for MacJce. */
 @RunWith(JUnit4.class)
 public class MacJceTest {
   private static class MacTestVector {
@@ -103,7 +101,9 @@ public class MacJceTest {
     }
     // Test with random keys.
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac = new MacJce(t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
+      Mac mac =
+          new MacJce(
+              t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
         try {
@@ -135,7 +135,9 @@ public class MacJceTest {
     }
     // Test with random keys.
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac = new MacJce(t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
+      Mac mac =
+          new MacJce(
+              t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
         try {
@@ -167,7 +169,9 @@ public class MacJceTest {
     }
     // Test with random keys.
     for (MacTestVector t : HMAC_TEST_VECTORS) {
-      Mac mac = new MacJce(t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
+      Mac mac =
+          new MacJce(
+              t.algName, new SecretKeySpec(Random.randBytes(t.key.length), "HMAC"), t.tag.length);
       for (int b = 0; b < t.tag.length; b++) {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length);
@@ -208,7 +212,8 @@ public class MacJceTest {
     testThrowExceptionIfTagSizeIsTooLarge("HMACSHA512", 65);
   }
 
-  private static void testThrowExceptionIfTagSizeIsTooLarge(String algoName, int tagSize) throws Exception {
+  private static void testThrowExceptionIfTagSizeIsTooLarge(String algoName, int tagSize)
+      throws Exception {
     try {
       new MacJce(algoName, new SecretKeySpec(Random.randBytes(16), "HMAC"), tagSize);
       fail("Expected InvalidAlgorithmParameterException");

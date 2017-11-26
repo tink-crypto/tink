@@ -56,7 +56,7 @@ public class PublicKeyVerifyCatalogueTest {
     RegistryConfig config = SignatureConfig.TINK_1_0_0;
     int count = 0;
     for (KeyTypeEntry entry : config.getEntryList()) {
-      if (entry.getPrimitiveName() == "PublicKeyVerify") {
+      if ("PublicKeyVerify".equals(entry.getPrimitiveName())) {
         count = count + 1;
         KeyManager<PublicKeyVerify> manager =
             catalogue.getKeyManager(
@@ -74,7 +74,7 @@ public class PublicKeyVerifyCatalogueTest {
 
     // Wrong primitive name.
     try {
-      KeyManager<PublicKeyVerify> manager = catalogue.getKeyManager(keyType, "aead", 0);
+      catalogue.getKeyManager(keyType, "aead", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");
@@ -82,7 +82,7 @@ public class PublicKeyVerifyCatalogueTest {
 
     // Wrong key manager version.
     try {
-      KeyManager<PublicKeyVerify> manager = catalogue.getKeyManager(keyType, "publickeyverify", 1);
+      catalogue.getKeyManager(keyType, "publickeyverify", 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager");
@@ -91,8 +91,7 @@ public class PublicKeyVerifyCatalogueTest {
 
     // Wrong key type.
     try {
-      KeyManager<PublicKeyVerify> manager =
-          catalogue.getKeyManager("some.unknown.key.type", "publickeyverify", 0);
+      catalogue.getKeyManager("some.unknown.key.type", "publickeyverify", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");

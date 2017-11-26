@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.KeyTypeEntry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -30,9 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for PublicKeySignCatalogue.
- */
+/** Tests for PublicKeySignCatalogue. */
 @RunWith(JUnit4.class)
 public class PublicKeySignCatalogueTest {
 
@@ -61,8 +58,9 @@ public class PublicKeySignCatalogueTest {
     for (KeyTypeEntry entry : config.getEntryList()) {
       if ("PublicKeySign".equals(entry.getPrimitiveName())) {
         count = count + 1;
-        KeyManager<PublicKeySign> manager = catalogue.getKeyManager(
-            entry.getTypeUrl(), "publickeysign", entry.getKeyManagerVersion());
+        KeyManager<PublicKeySign> manager =
+            catalogue.getKeyManager(
+                entry.getTypeUrl(), "publickeysign", entry.getKeyManagerVersion());
         assertThat(manager.doesSupport(entry.getTypeUrl())).isTrue();
       }
     }

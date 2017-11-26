@@ -56,7 +56,7 @@ public class HybridDecryptCatalogueTest {
     RegistryConfig config = HybridConfig.TINK_1_0_0;
     int count = 0;
     for (KeyTypeEntry entry : config.getEntryList()) {
-      if (entry.getPrimitiveName() == "HybridDecrypt") {
+      if ("HybridDecrypt".equals(entry.getPrimitiveName())) {
         count = count + 1;
         KeyManager<HybridDecrypt> manager =
             catalogue.getKeyManager(
@@ -74,7 +74,7 @@ public class HybridDecryptCatalogueTest {
 
     // Wrong primitive name.
     try {
-      KeyManager<HybridDecrypt> manager = catalogue.getKeyManager(keyType, "aead", 0);
+      catalogue.getKeyManager(keyType, "aead", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");
@@ -82,7 +82,7 @@ public class HybridDecryptCatalogueTest {
 
     // Wrong key manager version.
     try {
-      KeyManager<HybridDecrypt> manager = catalogue.getKeyManager(keyType, "hybriddecrypt", 1);
+      catalogue.getKeyManager(keyType, "hybriddecrypt", 1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No key manager");
@@ -91,8 +91,7 @@ public class HybridDecryptCatalogueTest {
 
     // Wrong key type.
     try {
-      KeyManager<HybridDecrypt> manager =
-          catalogue.getKeyManager("some.unknown.key.type", "hybriddecrypt", 0);
+      catalogue.getKeyManager("some.unknown.key.type", "hybriddecrypt", 0);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("No support for primitive");

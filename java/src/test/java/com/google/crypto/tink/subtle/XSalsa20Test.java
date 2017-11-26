@@ -18,12 +18,10 @@ package com.google.crypto.tink.subtle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.TestUtil;
 import com.google.common.truth.Truth;
+import com.google.crypto.tink.TestUtil;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
@@ -38,7 +36,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class XSalsa20Test {
   public Snuffle createInstance(byte[] key) throws InvalidKeyException {
-    return new XSalsa20(key, 0 /** initial counter */);
+    return new XSalsa20(
+        key, 0
+        /** initial counter */
+        );
   }
 
   @Test
@@ -273,7 +274,11 @@ public class XSalsa20Test {
   @Test
   public void testKeyStreamNaClBoxTestVectors() throws Exception {
     byte[] key = Hex.decode("1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389");
-    Snuffle cipher = new XSalsa20(key, 0 /** initial counter */);
+    Snuffle cipher =
+        new XSalsa20(
+            key, 0
+            /** initial counter */
+            );
     byte[] nonce = Hex.decode("69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37");
     ByteBuffer out = ByteBuffer.allocate(65536 * 64).order(ByteOrder.LITTLE_ENDIAN);
     for (int i = 0; i < 65536; i++) {

@@ -195,7 +195,6 @@ public class ChaCha20Poly1305Test {
     JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
-      int keySize = group.getInt("keySize");
       JSONArray tests = group.getJSONArray("tests");
       for (int j = 0; j < tests.length(); j++) {
         cntTests++;

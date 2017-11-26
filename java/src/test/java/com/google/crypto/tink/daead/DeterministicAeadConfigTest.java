@@ -32,8 +32,8 @@ import org.junit.runners.JUnit4;
 import org.junit.runners.MethodSorters;
 
 /**
- * Tests for DeterministicAeadConfig. Using FixedMethodOrder to ensure that aaaTestInitialization runs first, as
- * it tests execution of a static block within DeterministicAeadConfig-class.
+ * Tests for DeterministicAeadConfig. Using FixedMethodOrder to ensure that aaaTestInitialization
+ * runs first, as it tests execution of a static block within DeterministicAeadConfig-class.
  */
 @RunWith(JUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.nio.ByteBuffer;
 import org.junit.Test;
@@ -96,36 +97,56 @@ public class BytesTest {
     Bytes.xorEnd(TWO_ONES, THREE_ZEROES);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void xorByteBufferNegativeLength() {
     ByteBuffer output = ByteBuffer.allocate(10);
     ByteBuffer x = ByteBuffer.allocate(10);
     ByteBuffer y = ByteBuffer.allocate(10);
-    Bytes.xor(output, x, y, -1);
+    try {
+      Bytes.xor(output, x, y, -1);
+      fail("Expected IllegalArgumentException");
+    } catch (IllegalArgumentException ex) {
+      // expected;
+    }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void xorByteBufferLengthLargerThanOutput() {
     ByteBuffer output = ByteBuffer.allocate(9);
     ByteBuffer x = ByteBuffer.allocate(10);
     ByteBuffer y = ByteBuffer.allocate(10);
-    Bytes.xor(output, x, y, 10);
+    try {
+      Bytes.xor(output, x, y, 10);
+      fail("Expected IllegalArgumentException");
+    } catch (IllegalArgumentException ex) {
+      // expected;
+    }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void xorByteBufferLengthLargerThanFirstInput() {
     ByteBuffer output = ByteBuffer.allocate(10);
     ByteBuffer x = ByteBuffer.allocate(9);
     ByteBuffer y = ByteBuffer.allocate(10);
-    Bytes.xor(output, x, y, 10);
+    try {
+      Bytes.xor(output, x, y, 10);
+      fail("Expected IllegalArgumentException");
+    } catch (IllegalArgumentException ex) {
+      // expected;
+    }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void xorByteBufferLengthLargerThanSecondInput() {
     ByteBuffer output = ByteBuffer.allocate(10);
     ByteBuffer x = ByteBuffer.allocate(10);
     ByteBuffer y = ByteBuffer.allocate(9);
-    Bytes.xor(output, x, y, 10);
+    try {
+      Bytes.xor(output, x, y, 10);
+      fail("Expected IllegalArgumentException");
+    } catch (IllegalArgumentException ex) {
+      // expected;
+    }
   }
 
   @Test

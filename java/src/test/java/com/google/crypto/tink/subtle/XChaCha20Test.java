@@ -18,8 +18,6 @@ package com.google.crypto.tink.subtle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
@@ -52,7 +50,8 @@ public class XChaCha20Test {
                 TestUtil.hexEncode(key),
                 TestUtil.hexEncode(output),
                 TestUtil.hexEncode(actualInput)),
-            expectedInput, actualInput);
+            expectedInput,
+            actualInput);
       }
     }
   }
