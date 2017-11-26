@@ -42,6 +42,7 @@ public class StreamingAeadFactoryTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
+    StreamingAeadConfig.init();
     Config.register(StreamingAeadConfig.TINK_1_1_0);
   }
 

@@ -49,6 +49,7 @@ public class AesSivKeyManagerTest {
 
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
+    DeterministicAeadConfig.init();
     Config.register(DeterministicAeadConfig.TINK_1_1_0);
   }
 

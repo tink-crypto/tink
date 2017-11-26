@@ -47,6 +47,7 @@ public class DeterministicAeadFactoryTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
+    DeterministicAeadConfig.init();
     Config.register(DeterministicAeadConfig.TINK_1_1_0);
   }
 
