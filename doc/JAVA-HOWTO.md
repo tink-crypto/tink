@@ -211,14 +211,17 @@ section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
 The following table summarizes Java implementations of primitives that are
 currently available or planned (the latter are listed in brackets).
 
-| Primitive          | Implementations                                   |
-| ------------------ | ------------------------------------------------- |
-| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope,     |
-:                    : (ChaCha20-Poly1305)                               :
-| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING    |
-| MAC                | HMAC-SHA2                                         |
-| Digital Signatures | ECDSA over NIST curves, (EdDSA over edwards25519) |
-| Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)        |
+| Primitive          | Implementations                                                    |
+| ------------------ | ------------------------------------------------------------------ |
+| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope,  (ChaCha20-Poly1305) |
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING                     |
+| Deterministic AEAD | AES-SIV                                                            |
+| MAC                | HMAC-SHA2                                                          |
+| Digital Signatures | ECDSA over NIST curves, (EdDSA over edwards25519)                  |
+| Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)                         |
+
+Exact listings of primitives and their implementations available in a release _x.y.z_ of Tink
+are given in a corresponding [`TinkConfig.TINK_x_y_z`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config/TinkConfig.java)-variable.
 
 Tink user accesses implementations of a primitive via a factory that corresponds
 to the primitive: AEAD via `AeadFactory`, MAC via `MacFactory`, etc. where each
