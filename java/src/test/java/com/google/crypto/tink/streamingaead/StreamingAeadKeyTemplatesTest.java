@@ -89,4 +89,51 @@ public class StreamingAeadKeyTemplatesTest {
     assertEquals(HashType.SHA256, format.getParams().getHkdfHashType());
     assertEquals(4096,            format.getParams().getCiphertextSegmentSize());
   }
+
+  @Test
+  public void testCreateAesCtrHmacStreamingKeyTemplate() throws Exception {
+    // Intentionally using "weird" or invalid values for parameters,
+    // to test that the function correctly puts them in the resulting template.
+    int mainKeySize = 42;
+    int derivedKeySize = 24;
+    int tagSize = 45;
+    int ciphertextSegmentSize = 12345;
+    HashType hkdfHashType = HashType.SHA512;
+    HashType macHashType = HashType.SHA224;
+    KeyTemplate template = StreamingAeadKeyTemplates.createAesCtrHmacStreamingKeyTemplate(
+        mainKeySize, hkdfHashType, derivedKeySize,
+        macHashType, tagSize, ciphertextSegmentSize);
+    assertEquals(AesCtrHmacStreamingKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
+    AesCtrHmacStreamingKeyFormat format = AesCtrHmacStreamingKeyFormat.parseFrom(
+        template.getValue());
+
+    assertEquals(mainKeySize,           format.getKeySize());
+    assertEquals(derivedKeySize,        format.getParams().getDerivedKeySize());
+    assertEquals(hkdfHashType,          format.getParams().getHkdfHashType());
+    assertEquals(ciphertextSegmentSize, format.getParams().getCiphertextSegmentSize());
+    assertEquals(macHashType,           format.getParams().getHmacParams().getHash());
+    assertEquals(tagSize,               format.getParams().getHmacParams().getTagSize());
+  }
+
+  @Test
+  public void testCreateAesGcmHkdfStreamingKeyTemplate() throws Exception {
+    // Intentionally using "weird" or invalid values for parameters,
+    // to test that the function correctly puts them in the resulting template.
+    int mainKeySize = 42;
+    int derivedKeySize = 24;
+    int ciphertextSegmentSize = 12345;
+    HashType hkdfHashType = HashType.SHA512;
+    KeyTemplate template = StreamingAeadKeyTemplates.createAesGcmHkdfStreamingKeyTemplate(
+        mainKeySize, hkdfHashType, derivedKeySize, ciphertextSegmentSize);
+    assertEquals(AesGcmHkdfStreamingKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
+    AesGcmHkdfStreamingKeyFormat format = AesGcmHkdfStreamingKeyFormat.parseFrom(
+        template.getValue());
+
+    assertEquals(mainKeySize,           format.getKeySize());
+    assertEquals(derivedKeySize,        format.getParams().getDerivedKeySize());
+    assertEquals(hkdfHashType,          format.getParams().getHkdfHashType());
+    assertEquals(ciphertextSegmentSize, format.getParams().getCiphertextSegmentSize());
+  }
 }

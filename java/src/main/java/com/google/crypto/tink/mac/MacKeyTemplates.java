@@ -20,6 +20,7 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code Mac}. One can use these templates
@@ -68,6 +69,7 @@ public final class MacKeyTemplates {
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl(HmacKeyManager.TYPE_URL)
+        .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
 }

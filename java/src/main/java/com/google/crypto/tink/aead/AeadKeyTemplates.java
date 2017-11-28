@@ -29,6 +29,7 @@ import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.KmsAeadKeyFormat;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
+import com.google.crypto.tink.proto.OutputPrefixType;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code Aead} keys. One can use these templates
@@ -102,6 +103,7 @@ public final class AeadKeyTemplates {
   public static final KeyTemplate CHACHA20_POLY1305 =
       KeyTemplate.newBuilder()
         .setTypeUrl(ChaCha20Poly1305KeyManager.TYPE_URL)
+        .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
 
   /**
@@ -115,6 +117,7 @@ public final class AeadKeyTemplates {
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl(AesGcmKeyManager.TYPE_URL)
+        .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
 
@@ -130,6 +133,7 @@ public final class AeadKeyTemplates {
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl(AesEaxKeyManager.TYPE_URL)
+        .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
 
@@ -155,6 +159,7 @@ public final class AeadKeyTemplates {
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl(AesCtrHmacAeadKeyManager.TYPE_URL)
+        .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
 
@@ -169,6 +174,7 @@ public final class AeadKeyTemplates {
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl(KmsAeadKeyManager.TYPE_URL)
+        .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
 
@@ -185,6 +191,7 @@ public final class AeadKeyTemplates {
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl(KmsEnvelopeAeadKeyManager.TYPE_URL)
+        .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
 }

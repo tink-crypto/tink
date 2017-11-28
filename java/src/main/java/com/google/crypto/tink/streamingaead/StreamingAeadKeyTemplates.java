@@ -85,7 +85,7 @@ public final class StreamingAeadKeyTemplates {
    * </ul>
    */
   public static final KeyTemplate AES128_GCM_HKDF_4KB =
-      createAesGcmStreamingKeyTemplate(16, HashType.SHA256, 16, 4096);
+      createAesGcmHkdfStreamingKeyTemplate(16, HashType.SHA256, 16, 4096);
 
   /**
    * A {@code KeyTemplate} that generates new instances of {@code AesGcmHkdfStreamingKey} with the
@@ -99,7 +99,7 @@ public final class StreamingAeadKeyTemplates {
    * </ul>
    */
   public static final KeyTemplate AES256_GCM_HKDF_4KB =
-      createAesGcmStreamingKeyTemplate(32, HashType.SHA256, 32, 4096);
+      createAesGcmHkdfStreamingKeyTemplate(32, HashType.SHA256, 32, 4096);
 
  /**
    * @return a {@code KeyTemplate} containing a {@code AesCtrHmacStreamingKeyFormat} with some
@@ -131,10 +131,10 @@ public final class StreamingAeadKeyTemplates {
   }
 
   /**
-   * @return a {@code KeyTemplate} containing a {@code AesEaxKeyFormat} with some specified
-   *     parameters.
+   * @return a {@code KeyTemplate} containing a {@code AesGcmHkdfStreamingKeyFormat}
+   *     with some specified parameters.
    */
-  public static KeyTemplate createAesGcmStreamingKeyTemplate(
+  public static KeyTemplate createAesGcmHkdfStreamingKeyTemplate(
       int mainKeySize, HashType hkdfHashType, int derivedKeySize, int ciphertextSegmentSize) {
     AesGcmHkdfStreamingParams keyParams =
         AesGcmHkdfStreamingParams.newBuilder()

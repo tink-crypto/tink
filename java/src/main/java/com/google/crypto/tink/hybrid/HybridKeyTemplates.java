@@ -25,6 +25,7 @@ import com.google.crypto.tink.proto.EciesHkdfKemParams;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ByteString;
 
 /**
@@ -82,6 +83,7 @@ public final class HybridKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setTypeUrl(EciesAeadHkdfPrivateKeyManager.TYPE_URL)
+        .setOutputPrefixType(OutputPrefixType.TINK)
         .setValue(format.toByteString())
         .build();
   }

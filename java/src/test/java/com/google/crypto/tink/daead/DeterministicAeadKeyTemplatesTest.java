@@ -49,4 +49,17 @@ public class DeterministicAeadKeyTemplatesTest {
 
     assertEquals(64, format.getKeySize());
   }
+
+  @Test
+  public void testCreateAesSivKeyTemplate() throws Exception {
+    // Intentionally using "weird" or invalid values for parameters,
+    // to test that the function correctly puts them in the resulting template.
+    int keySize = 42;
+    KeyTemplate template = DeterministicAeadKeyTemplates.createAesSivKeyTemplate(keySize);
+    assertEquals(AesSivKeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
+    AesSivKeyFormat format = AesSivKeyFormat.parseFrom(template.getValue());
+
+    assertEquals(keySize, format.getKeySize());
+  }
 }

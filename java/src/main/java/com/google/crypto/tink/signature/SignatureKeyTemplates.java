@@ -23,6 +23,7 @@ import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
 
 /**
  * Pre-generated {@code KeyTemplate} for {@code PublicKeySign} and {@code PublicKeyVerify}.
@@ -71,6 +72,7 @@ public final class SignatureKeyTemplates {
   @Alpha
   public static final KeyTemplate ED25519 = KeyTemplate.newBuilder()
       .setTypeUrl(Ed25519PrivateKeyManager.TYPE_URL)
+      .setOutputPrefixType(OutputPrefixType.TINK)
       .build();
 
   /**
@@ -90,6 +92,7 @@ public final class SignatureKeyTemplates {
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
         .setTypeUrl(EcdsaSignKeyManager.TYPE_URL)
+        .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
 }
