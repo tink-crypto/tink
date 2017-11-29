@@ -82,6 +82,38 @@ cc_library(
 )
 
 cc_library(
+    name = "ecdsa_sign_boringssl",
+    srcs = ["ecdsa_sign_boringssl.cc"],
+    hdrs = ["ecdsa_sign_boringssl.h"],
+    deps = [
+        ":common_enums",
+        ":subtle_util_boringssl",
+        "//cc:public_key_sign",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "ecdsa_verify_boringssl",
+    srcs = ["ecdsa_verify_boringssl.cc"],
+    hdrs = ["ecdsa_verify_boringssl.h"],
+    deps = [
+        ":common_enums",
+        ":subtle_util_boringssl",
+        "//cc:public_key_verify",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "aes_gcm_boringssl",
     srcs = ["aes_gcm_boringssl.cc"],
     hdrs = ["aes_gcm_boringssl.h"],
@@ -283,6 +315,42 @@ cc_test(
     deps = [
         ":aes_ctr_boringssl",
         ":random",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ecdsa_sign_boringssl_test",
+    size = "small",
+    srcs = ["ecdsa_sign_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":common_enums",
+        ":ecdsa_sign_boringssl",
+        ":ecdsa_verify_boringssl",
+        "//cc:public_key_sign",
+        "//cc:public_key_verify",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ecdsa_verify_boringssl_test",
+    size = "small",
+    srcs = ["ecdsa_verify_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":common_enums",
+        ":ecdsa_sign_boringssl",
+        ":ecdsa_verify_boringssl",
+        "//cc:public_key_sign",
+        "//cc:public_key_verify",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",

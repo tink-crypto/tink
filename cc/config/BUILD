@@ -11,6 +11,7 @@ cc_library(
         "//cc:key_manager",
         "//cc/hybrid:hybrid_decrypt_config",
         "//cc/hybrid:hybrid_encrypt_config",
+        "//cc/signature:signature_config",
         "//cc/util:status",
         "//proto:config_cc_proto",
     ],

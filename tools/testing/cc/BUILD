@@ -46,3 +46,23 @@ cc_binary(
         "//cc",
     ],
 )
+
+cc_binary(
+    name = "public_key_sign_cli_cc",
+    srcs = ["public_key_sign_cli.cc"],
+    visibility = ["//tools/testing:__subpackages__"],
+    deps = [
+        ":cli_util",
+        "//cc",
+    ],
+)
+
+cc_binary(
+    name = "public_key_verify_cli_cc",
+    srcs = ["public_key_verify_cli.cc"],
+    visibility = ["//tools/testing:__subpackages__"],
+    deps = [
+        ":cli_util",
+        "//cc",
+    ],
+)

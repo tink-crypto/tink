@@ -30,10 +30,13 @@
 #include "cc/util/statusor.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
+#include "proto/ecdsa.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::AesGcmKeyFormat;
+using google::crypto::tink::EcdsaPrivateKey;
+using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::OutputPrefixType;
@@ -178,6 +181,33 @@ EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
   aead_dem->set_type_url(dem_key_type);
   aead_dem->set_value(key_format.SerializeAsString());
   return ecies_key;
+}
+
+EcdsaPrivateKey GetEcdsaTestPrivateKey(
+    subtle::EllipticCurveType curve_type,
+    subtle::HashType hash_type) {
+  return GetEcdsaTestPrivateKey(
+      Enums::SubtleToProto(curve_type),
+      Enums::SubtleToProto(hash_type));
+}
+
+EcdsaPrivateKey GetEcdsaTestPrivateKey(
+    google::crypto::tink::EllipticCurveType curve_type,
+    google::crypto::tink::HashType hash_type) {
+  auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+      Enums::ProtoToSubtle(curve_type)).ValueOrDie();
+  EcdsaPrivateKey ecdsa_key;
+  ecdsa_key.set_version(0);
+  ecdsa_key.set_key_value(test_key.priv);
+  auto public_key = ecdsa_key.mutable_public_key();
+  public_key->set_version(0);
+  public_key->set_x(test_key.pub_x);
+  public_key->set_y(test_key.pub_y);
+  auto params = public_key->mutable_params();
+  params->set_hash_type(hash_type);
+  params->set_curve(curve_type);
+  params->set_encoding(EcdsaSignatureEncoding::DER);
+  return ecdsa_key;
 }
 
 }  // namespace test

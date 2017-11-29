@@ -49,7 +49,7 @@ generate_plaintext() {
 
   plaintext_file="$TEST_TMPDIR/${plaintext_name}_plaintext.bin"
   echo "This is some plaintext message to be encrypted"\
-    "named $plaintext_name just like that." > $plaintext_file
+      "named $plaintext_name just like that." > $plaintext_file
 }
 
 
@@ -66,6 +66,21 @@ assert_files_equal() {
     exit 1
   fi
   echo "+++ Success: the files are equal."
+}
+
+# Checks that the given file has the expected content.
+assert_file_equals() {
+  local expected_content="$1"
+  local given_file="$2"
+  echo "*** Checking that given file: $given_file"
+  echo "    has content equal to \"$expected_content\""
+  local file_content=`cat $given_file`
+  if [ "$expected_content" != "$file_content" ]; then
+    echo "--- Failure. expected content: \"$expected_content\","\
+        " actual content: \"$file_content\""
+    exit 1
+  fi
+  echo "+++ Success: the file has expected content: \"$expected_content\"."
 }
 
 # Checks that two files are different.

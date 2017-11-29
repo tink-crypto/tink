@@ -65,21 +65,21 @@ StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPublicKeyFactory::NewKey(
     const google::protobuf::Message& key_format) const {
   return util::Status(util::error::UNIMPLEMENTED,
                       "Operation not supported for public keys, "
-                      "please use a corresponding PrivateKeyManager.");
+                      "please use EciesAeadHkdfPrivateKeyManager.");
 }
 
 StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPublicKeyFactory::NewKey(
     absl::string_view serialized_key_format) const {
   return util::Status(util::error::UNIMPLEMENTED,
                       "Operation not supported for public keys, "
-                      "please use a corresponding PrivateKeyManager.");
+                      "please use EciesAeadHkdfPrivateKeyManager.");
 }
 
 StatusOr<std::unique_ptr<KeyData>> EciesAeadHkdfPublicKeyFactory::NewKeyData(
     absl::string_view serialized_key_format) const {
   return util::Status(util::error::UNIMPLEMENTED,
                       "Operation not supported for public keys, "
-                      "please use a corresponding PrivateKeyManager.");
+                      "please use EciesAeadHkdfPrivateKeyManager.");
 }
 
 constexpr char EciesAeadHkdfPublicKeyManager::kKeyTypePrefix[];

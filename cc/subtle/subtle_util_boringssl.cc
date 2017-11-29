@@ -16,7 +16,9 @@
 
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/subtle/common_enums.h"
+#include "openssl/bio.h"
 #include "openssl/ec.h"
+#include "openssl/err.h"
 
 namespace util = crypto::tink::util;
 
@@ -263,6 +265,23 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
     default:
       return util::Status(util::error::INTERNAL, "Unsupported point format");
   }
+}
+
+
+std::string BioToString(BIO* bio) {
+  char* buf;
+  int bytes_available = BIO_get_mem_data(bio, &buf);
+  if (bytes_available == 0) {
+    return std::string();
+  }
+  return std::string(buf, bytes_available);
+}
+
+// static
+std::string SubtleUtilBoringSSL::GetErrors() {
+  bssl::UniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
+  ERR_print_errors(bio.get());
+  return BioToString(bio.get());
 }
 
 }  // namespace subtle

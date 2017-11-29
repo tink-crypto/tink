@@ -40,3 +40,20 @@ sh_test(
         "//tools/tinkey",
     ],
 )
+
+sh_test(
+    name = "signature_test",
+    size = "small",
+    srcs = [
+        "signature_test.sh",
+    ],
+    data = [
+        ":test_lib",
+        "//examples/keytemplates:signature",
+        "//tools/testing:public_key_sign_cli_java",
+        "//tools/testing:public_key_verify_cli_java",
+        "//tools/testing/cc:public_key_sign_cli_cc",
+        "//tools/testing/cc:public_key_verify_cli_cc",
+        "//tools/tinkey",
+    ],
+)

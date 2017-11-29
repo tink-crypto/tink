@@ -28,13 +28,18 @@ cc_library(
         "mac_config.h",
         "mac_factory.h",
         "public_key_sign.h",
+        "public_key_sign_factory.h",
         "public_key_verify.h",
+        "public_key_verify_factory.h",
         "registry.h",
+        "signature_config.h",
         "tink_config.h",
     ],
     deps = [
         ":aead",
         ":binary_keyset_reader",
+        ":hybrid_decrypt",
+        ":hybrid_encrypt",
         ":json_keyset_reader",
         ":key_manager",
         ":keyset_handle",
@@ -42,6 +47,8 @@ cc_library(
         ":keyset_reader",
         ":mac",
         ":primitive_set",
+        ":public_key_sign",
+        ":public_key_verify",
         ":registry",
         "//cc/aead:aead_config",
         "//cc/aead:aead_factory",
@@ -52,6 +59,9 @@ cc_library(
         "//cc/hybrid:hybrid_encrypt_factory",
         "//cc/mac:mac_config",
         "//cc/mac:mac_factory",
+        "//cc/signature:public_key_sign_factory",
+        "//cc/signature:public_key_verify_factory",
+        "//cc/signature:signature_config",
         "//cc/util:errors",
         "//cc/util:ptr_util",
         "//cc/util:status",
@@ -96,6 +106,24 @@ cc_library(
     deps = [
         "//cc/util:status",
         "//cc/util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "public_key_sign",
+    hdrs = ["public_key_sign.h"],
+    deps = [
+        "//cc/util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "public_key_verify",
+    hdrs = ["public_key_verify.h"],
+    deps = [
+        "//cc/util:status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -157,6 +185,8 @@ cc_library(
         ":hybrid_encrypt",
         ":key_manager",
         ":mac",
+        ":public_key_sign",
+        ":public_key_verify",
         ":registry",
         "//cc/util:errors",
         "//cc/util:status",

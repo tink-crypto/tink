@@ -17,11 +17,13 @@
 #include "cc/config/tink_config.h"
 
 #include "cc/aead.h"
+#include "cc/catalogue.h"
+#include "cc/config.h"
 #include "cc/hybrid_decrypt.h"
 #include "cc/hybrid_encrypt.h"
 #include "cc/mac.h"
-#include "cc/catalogue.h"
-#include "cc/config.h"
+#include "cc/public_key_sign.h"
+#include "cc/public_key_verify.h"
 #include "cc/registry.h"
 #include "cc/util/status.h"
 #include "gtest/gtest.h"
@@ -51,6 +53,10 @@ class TinkConfigTest : public ::testing::Test {
 };
 
 TEST_F(TinkConfigTest, testBasic) {
+  std::string public_key_sign_key_type =
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+  std::string public_key_verify_key_type =
+      "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
   std::string hybrid_encrypt_key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
   std::string hybrid_decrypt_key_type =
@@ -63,7 +69,7 @@ TEST_F(TinkConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.HmacKey";
   auto& config = TinkConfig::Tink_1_1_0();
 
-  EXPECT_EQ(5, TinkConfig::Tink_1_1_0().entry_size());
+  EXPECT_EQ(7, TinkConfig::Tink_1_1_0().entry_size());
 
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
@@ -95,6 +101,18 @@ TEST_F(TinkConfigTest, testBasic) {
   EXPECT_EQ(true, config.entry(4).new_key_allowed());
   EXPECT_EQ(0, config.entry(4).key_manager_version());
 
+  EXPECT_EQ("TinkPublicKeySign", config.entry(5).catalogue_name());
+  EXPECT_EQ("PublicKeySign", config.entry(5).primitive_name());
+  EXPECT_EQ(public_key_sign_key_type, config.entry(5).type_url());
+  EXPECT_EQ(true, config.entry(5).new_key_allowed());
+  EXPECT_EQ(0, config.entry(5).key_manager_version());
+
+  EXPECT_EQ("TinkPublicKeyVerify", config.entry(6).catalogue_name());
+  EXPECT_EQ("PublicKeyVerify", config.entry(6).primitive_name());
+  EXPECT_EQ(public_key_verify_key_type, config.entry(6).type_url());
+  EXPECT_EQ(true, config.entry(6).new_key_allowed());
+  EXPECT_EQ(0, config.entry(6).key_manager_version());
+
   // No key manager before registration.
   {
     auto manager_result = Registry::get_key_manager<Aead>(aes_gcm_key_type);
@@ -115,6 +133,18 @@ TEST_F(TinkConfigTest, testBasic) {
   {
     auto manager_result =
         Registry::get_key_manager<HybridDecrypt>(hybrid_decrypt_key_type);
+    EXPECT_FALSE(manager_result.ok());
+    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  }
+  {
+    auto manager_result =
+        Registry::get_key_manager<PublicKeySign>(public_key_sign_key_type);
+    EXPECT_FALSE(manager_result.ok());
+    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  }
+  {
+    auto manager_result =
+        Registry::get_key_manager<PublicKeyVerify>(public_key_verify_key_type);
     EXPECT_FALSE(manager_result.ok());
     EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
   }
@@ -147,6 +177,20 @@ TEST_F(TinkConfigTest, testBasic) {
     EXPECT_TRUE(manager_result.ok()) << manager_result.status();
     EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(
         hybrid_decrypt_key_type));
+  }
+  {
+    auto manager_result =
+        Registry::get_key_manager<PublicKeySign>(public_key_sign_key_type);
+    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(
+        public_key_sign_key_type));
+  }
+  {
+    auto manager_result =
+        Registry::get_key_manager<PublicKeyVerify>(public_key_verify_key_type);
+    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(
+        public_key_verify_key_type));
   }
 }
 

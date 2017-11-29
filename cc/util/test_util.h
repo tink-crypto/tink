@@ -26,9 +26,12 @@
 #include "cc/keyset_handle.h"
 #include "cc/mac.h"
 #include "cc/subtle/common_enums.h"
+#include "cc/public_key_sign.h"
+#include "cc/public_key_verify.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "proto/common.pb.h"
+#include "proto/ecdsa.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
@@ -102,6 +105,18 @@ google::crypto::tink::EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
     google::crypto::tink::EcPointFormat ec_point_format,
     google::crypto::tink::HashType hash_type,
     uint32_t aes_gcm_key_size);
+
+// Generates a fresh test key for EC DSA for the given 'curve_type'
+// and 'hash_type'.  The resulting signatures will use DER-encoding.
+google::crypto::tink::EcdsaPrivateKey GetEcdsaTestPrivateKey(
+    subtle::EllipticCurveType curve_type,
+    subtle::HashType hash_type);
+
+// Generates a fresh test key for EC DSA for the given 'curve_type'
+// and 'hash_type'.  The resulting signatures will use DER-encoding.
+google::crypto::tink::EcdsaPrivateKey GetEcdsaTestPrivateKey(
+    google::crypto::tink::EllipticCurveType curve_type,
+    google::crypto::tink::HashType hash_type);
 
 // A dummy implementation of Aead-interface.
 // An instance of DummyAead can be identified by a name specified
@@ -180,6 +195,51 @@ class DummyHybridDecrypt : public HybridDecrypt {
 
  private:
   std::string hybrid_name_;
+};
+
+// A dummy implementation of PublicKeySign-interface.
+// An instance of DummyPublicKeySign can be identified by a name specified
+// as a parameter of the constructor.
+class DummyPublicKeySign : public PublicKeySign {
+ public:
+  DummyPublicKeySign(absl::string_view signature_name)
+      : signature_name_(signature_name) {}
+
+  // Computes a dummy signature, which is a concatenation of 'data'
+  // with the name of this DummyPublicKeySign.
+  crypto::tink::util::StatusOr<std::string> Sign(
+      absl::string_view data) const override {
+    return std::string(data.data(), data.size()).append(signature_name_);
+  }
+
+ private:
+  std::string signature_name_;
+};
+
+// A dummy implementation of PublicKeyVerify-interface.
+// An instance of DummyPublicKeyVerify can be identified by a name specified
+// as a parameter of the constructor.
+class DummyPublicKeyVerify : public PublicKeyVerify {
+ public:
+  DummyPublicKeyVerify(absl::string_view signature_name)
+      : signature_name_(signature_name) {}
+
+  // Verifies a dummy signature, should be a concatenation of the name
+  // of this DummyPublicKeyVerify with the provided 'data'.
+  crypto::tink::util::Status Verify(
+      absl::string_view signature, absl::string_view data) const override {
+    size_t pos = signature.rfind(signature_name_);
+    if (pos != std::string::npos &&
+        signature.length() == (unsigned)(signature_name_.length() + pos)) {
+      return crypto::tink::util::Status::OK;
+    }
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INVALID_ARGUMENT,
+        "Invalid signature.");
+  }
+
+ private:
+  std::string signature_name_;
 };
 
 // A dummy implementation of Mac-interface.

@@ -16,6 +16,12 @@
 
 #include "cc/config.h"
 
+#include "cc/mac.h"
+#include "cc/aead.h"
+#include "cc/hybrid_decrypt.h"
+#include "cc/hybrid_encrypt.h"
+#include "cc/public_key_sign.h"
+#include "cc/public_key_verify.h"
 #include "absl/strings/ascii.h"
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
@@ -67,7 +73,6 @@ util::Status Config::Register(
   for (const auto& entry : config.entry()) {
     util::Status status;
     std::string primitive_name = absl::AsciiStrToLower(entry.primitive_name());
-    std::string mac = "mac";
 
     if (primitive_name == "mac") {
       status = Register<Mac>(entry);
@@ -77,6 +82,10 @@ util::Status Config::Register(
       status = Register<HybridDecrypt>(entry);
     } else if (primitive_name == "hybridencrypt") {
       status = Register<HybridEncrypt>(entry);
+    } else if (primitive_name == "publickeysign") {
+      status = Register<PublicKeySign>(entry);
+    } else if (primitive_name == "publickeyverify") {
+      status = Register<PublicKeyVerify>(entry);
     } else {
       status = ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                          "A non-standard primitive '%s' '%s', "

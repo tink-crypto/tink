@@ -21,6 +21,7 @@
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/errors.h"
 #include "cc/util/ptr_util.h"
+#include "openssl/bn.h"
 #include "openssl/ec.h"
 
 namespace util = crypto::tink::util;

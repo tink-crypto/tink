@@ -22,6 +22,7 @@
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "openssl/bn.h"
+#include "openssl/err.h"
 #include "openssl/evp.h"
 
 namespace crypto {
@@ -36,6 +37,10 @@ class SubtleUtilBoringSSL {
     std::string pub_y;
     std::string priv;    // big integer in bigendian represnetation
   };
+
+  // Returns BoringSSL error strings accumulated in the error queue,
+  // thus emptying the queue.
+  static std::string GetErrors();
 
   // Returns BoringSSL's EC_GROUP constructed from the curve type.
   static crypto::tink::util::StatusOr<EC_GROUP *> GetEcGroup(

@@ -61,3 +61,33 @@ java_binary(
         "//java:testonly",
     ],
 )
+
+java_binary(
+    name = "public_key_sign_cli_java",
+    testonly = 1,
+    srcs = [
+        "java/com/google/crypto/tink/testing/PublicKeySignCli.java",
+    ],
+    javacopts = JAVACOPTS,
+    main_class = "com.google.crypto.tink.testing.PublicKeySignCli",
+    visibility = ["//tools/testing:__subpackages__"],
+    deps = [
+        ":cli_util",
+        "//java:testonly",
+    ],
+)
+
+java_binary(
+    name = "public_key_verify_cli_java",
+    testonly = 1,
+    srcs = [
+        "java/com/google/crypto/tink/testing/PublicKeyVerifyCli.java",
+    ],
+    javacopts = JAVACOPTS,
+    main_class = "com.google.crypto.tink.testing.PublicKeyVerifyCli",
+    visibility = ["//tools/testing:__subpackages__"],
+    deps = [
+        ":cli_util",
+        "//java:testonly",
+    ],
+)
