@@ -20,6 +20,7 @@
 #include "cc/registry.h"
 #include "cc/aead/aes_gcm_key_manager.h"
 #include "cc/subtle/subtle_util_boringssl.h"
+#include "cc/util/enums.h"
 #include "cc/util/ptr_util.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
@@ -83,7 +84,8 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testInvalidKeys) {
 
   {  // Unsupported DEM key type.
     EllipticCurveType curve = EllipticCurveType::NIST_P256;
-    auto test_key = SubtleUtilBoringSSL::GetNewEcKey(curve).ValueOrDie();
+    auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+        util::Enums::ProtoToSubtle(curve)).ValueOrDie();
     EciesAeadHkdfPublicKey recipient_key;
     recipient_key.set_version(0);
     recipient_key.set_x(test_key.pub_x);

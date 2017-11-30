@@ -49,13 +49,13 @@ class EciesAeadHkdfHybridDecrypt : public HybridDecrypt {
 
   EciesAeadHkdfHybridDecrypt(
       const google::crypto::tink::EciesAeadHkdfPrivateKey& recipient_key,
-      std::unique_ptr<EciesHkdfRecipientKemBoringSsl> recipient_kem,
+      std::unique_ptr<subtle::EciesHkdfRecipientKemBoringSsl> recipient_kem,
       std::unique_ptr<EciesAeadHkdfDemHelper> dem_helper)
       : recipient_key_(recipient_key), recipient_kem_(std::move(recipient_kem)),
         dem_helper_(std::move(dem_helper)) {}
 
   google::crypto::tink::EciesAeadHkdfPrivateKey recipient_key_;
-  std::unique_ptr<EciesHkdfRecipientKemBoringSsl> recipient_kem_;
+  std::unique_ptr<subtle::EciesHkdfRecipientKemBoringSsl> recipient_kem_;
   std::unique_ptr<EciesAeadHkdfDemHelper> dem_helper_;
 };
 

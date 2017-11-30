@@ -22,6 +22,7 @@
 #include "cc/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 #include "cc/subtle/random.h"
 #include "cc/subtle/subtle_util_boringssl.h"
+#include "cc/util/enums.h"
 #include "cc/util/ptr_util.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
@@ -30,6 +31,7 @@
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "gtest/gtest.h"
 
+using crypto::tink::subtle::Random;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
 using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
@@ -87,7 +89,8 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
 
   {  // Unsupported DEM key type.
     EllipticCurveType curve = EllipticCurveType::NIST_P256;
-    auto test_key = SubtleUtilBoringSSL::GetNewEcKey(curve).ValueOrDie();
+    auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+        util::Enums::ProtoToSubtle(curve)).ValueOrDie();
     EciesAeadHkdfPrivateKey recipient_key;
     recipient_key.set_version(0);
     recipient_key.set_key_value("some key value bytes");

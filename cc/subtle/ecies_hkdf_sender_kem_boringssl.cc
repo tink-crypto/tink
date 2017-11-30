@@ -16,20 +16,17 @@
 
 #include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
 
+#include "cc/subtle/common_enums.h"
 #include "cc/subtle/hkdf.h"
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/ptr_util.h"
 #include "openssl/bn.h"
-#include "proto/common.pb.h"
-
-using google::crypto::tink::EcPointFormat;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::HashType;
 
 namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 EciesHkdfSenderKemBoringSsl::KemKey::KemKey(const std::string& kem_bytes,
                                             const std::string& symmetric_key)
@@ -44,14 +41,16 @@ std::string EciesHkdfSenderKemBoringSsl::KemKey::KemKey::get_symmetric_key() {
 }
 
 EciesHkdfSenderKemBoringSsl::EciesHkdfSenderKemBoringSsl(
-EllipticCurveType curve, const std::string& pubx, const std::string& puby)
+    subtle::EllipticCurveType curve,
+    const std::string& pubx, const std::string& puby)
     : curve_(curve), pubx_(pubx), puby_(puby), peer_pub_key_(nullptr) {
 }
 
 // static
 util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
 EciesHkdfSenderKemBoringSsl::New(
-    EllipticCurveType curve, const std::string& pubx, const std::string& puby) {
+    subtle::EllipticCurveType curve,
+    const std::string& pubx, const std::string& puby) {
   auto status_or_ec_point =
       SubtleUtilBoringSSL::GetEcPoint(curve, pubx, puby);
   if (!status_or_ec_point.ok()) return status_or_ec_point.status();
@@ -62,11 +61,12 @@ EciesHkdfSenderKemBoringSsl::New(
 }
 
 util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl::KemKey>>
-EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash,
-                                         absl::string_view hkdf_salt,
-                                         absl::string_view hkdf_info,
-                                         uint32_t key_size_in_bytes,
-                                         EcPointFormat point_format) const {
+EciesHkdfSenderKemBoringSsl::GenerateKey(
+    subtle::HashType hash,
+    absl::string_view hkdf_salt,
+    absl::string_view hkdf_info,
+    uint32_t key_size_in_bytes,
+    subtle::EcPointFormat point_format) const {
   if (peer_pub_key_.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "peer_pub_key_ wasn't initialized");
@@ -109,5 +109,6 @@ EciesHkdfSenderKemBoringSsl::GenerateKey(HashType hash,
   return std::move(kem_key);
 }
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

@@ -27,6 +27,7 @@
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 class AesGcmBoringSsl : public Aead {
  public:
@@ -60,6 +61,7 @@ class AesGcmBoringSsl : public Aead {
   const EVP_CIPHER *cipher_;
 };
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

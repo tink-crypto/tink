@@ -19,6 +19,7 @@
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 namespace {
 
 class RandomTest : public ::testing::Test {};
@@ -35,6 +36,7 @@ TEST_F(RandomTest, testBasic) {
 }
 
 }  // namespace
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

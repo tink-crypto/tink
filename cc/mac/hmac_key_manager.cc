@@ -23,6 +23,7 @@
 #include "cc/key_manager.h"
 #include "cc/subtle/hmac_boringssl.h"
 #include "cc/subtle/random.h"
+#include "cc/util/enums.h"
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
@@ -87,7 +88,8 @@ StatusOr<std::unique_ptr<Message>> HmacKeyFactory::NewKey(
   std::unique_ptr<HmacKey> hmac_key(new HmacKey());
   hmac_key->set_version(HmacKeyManager::kVersion);
   *(hmac_key->mutable_params()) = hmac_key_format.params();
-  hmac_key->set_key_value(Random::GetRandomBytes(hmac_key_format.key_size()));
+  hmac_key->set_key_value(
+      subtle::Random::GetRandomBytes(hmac_key_format.key_size()));
   std::unique_ptr<Message> key = std::move(hmac_key);
   return std::move(key);
 }
@@ -174,9 +176,10 @@ StatusOr<std::unique_ptr<Mac>>
 HmacKeyManager::GetPrimitiveImpl(const HmacKey& hmac_key) const {
   Status status = Validate(hmac_key);
   if (!status.ok()) return status;
-  auto hmac_result = HmacBoringSsl::New(hmac_key.params().hash(),
-                                      hmac_key.params().tag_size(),
-                                      hmac_key.key_value());
+  auto hmac_result = subtle::HmacBoringSsl::New(
+      util::Enums::ProtoToSubtle(hmac_key.params().hash()),
+      hmac_key.params().tag_size(),
+      hmac_key.key_value());
   if (!hmac_result.ok()) return hmac_result.status();
   return std::move(hmac_result.ValueOrDie());
 }

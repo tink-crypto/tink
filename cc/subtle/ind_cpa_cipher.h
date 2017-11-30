@@ -22,6 +22,7 @@
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 ///////////////////////////////////////////////////////////////////////////////
 // This interface for symmetric key ciphers that are indistinguishable against
@@ -42,6 +43,7 @@ class IndCpaCipher {
   virtual ~IndCpaCipher() {}
 };
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

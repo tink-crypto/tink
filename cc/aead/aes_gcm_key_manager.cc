@@ -83,7 +83,7 @@ StatusOr<std::unique_ptr<Message>> AesGcmKeyFactory::NewKey(
   std::unique_ptr<AesGcmKey> aes_gcm_key(new AesGcmKey());
   aes_gcm_key->set_version(AesGcmKeyManager::kVersion);
   aes_gcm_key->set_key_value(
-      Random::GetRandomBytes(aes_gcm_key_format.key_size()));
+      subtle::Random::GetRandomBytes(aes_gcm_key_format.key_size()));
   std::unique_ptr<Message> key = std::move(aes_gcm_key);
   return std::move(key);
 }
@@ -169,7 +169,7 @@ StatusOr<std::unique_ptr<Aead>>
 AesGcmKeyManager::GetPrimitiveImpl(const AesGcmKey& aes_gcm_key) const {
   Status status = Validate(aes_gcm_key);
   if (!status.ok()) return status;
-  auto aes_gcm_result = AesGcmBoringSsl::New(aes_gcm_key.key_value());
+  auto aes_gcm_result = subtle::AesGcmBoringSsl::New(aes_gcm_key.key_value());
   if (!aes_gcm_result.ok()) return aes_gcm_result.status();
   return std::move(aes_gcm_result.ValueOrDie());
 }

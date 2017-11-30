@@ -20,6 +20,7 @@
 #include "cc/hybrid/ecies_aead_hkdf_dem_helper.h"
 #include "cc/subtle/ec_util.h"
 #include "cc/subtle/ecies_hkdf_recipient_kem_boringssl.h"
+#include "cc/util/enums.h"
 #include "cc/util/statusor.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
@@ -37,8 +38,9 @@ EciesAeadHkdfHybridDecrypt::New(const EciesAeadHkdfPrivateKey& recipient_key) {
   util::Status status = Validate(recipient_key);
   if (!status.ok()) return status;
 
-  auto kem_result = EciesHkdfRecipientKemBoringSsl::New(
-      recipient_key.public_key().params().kem_params().curve_type(),
+  auto kem_result = subtle::EciesHkdfRecipientKemBoringSsl::New(
+      util::Enums::ProtoToSubtle(
+          recipient_key.public_key().params().kem_params().curve_type()),
       recipient_key.key_value());
   if (!kem_result.ok()) return kem_result.status();
 
@@ -56,9 +58,11 @@ util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
     absl::string_view ciphertext,
     absl::string_view context_info) const {
   // Extract KEM-bytes from the ciphertext.
-  auto header_size_result = EcUtil::EncodingSizeInBytes(
-      recipient_key_.public_key().params().kem_params().curve_type(),
-      recipient_key_.public_key().params().ec_point_format());
+  auto header_size_result = subtle::EcUtil::EncodingSizeInBytes(
+      util::Enums::ProtoToSubtle(
+          recipient_key_.public_key().params().kem_params().curve_type()),
+      util::Enums::ProtoToSubtle(
+          recipient_key_.public_key().params().ec_point_format()));
   if (!header_size_result.ok()) return header_size_result.status();
   auto header_size = header_size_result.ValueOrDie();
   if (ciphertext.size() < header_size) {
@@ -70,11 +74,13 @@ util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
   // Use KEM to get a symmetric key.
   auto symmetric_key_result = recipient_kem_->GenerateKey(
       kem_bytes,
-      recipient_key_.public_key().params().kem_params().hkdf_hash_type(),
+      util::Enums::ProtoToSubtle(
+          recipient_key_.public_key().params().kem_params().hkdf_hash_type()),
       recipient_key_.public_key().params().kem_params().hkdf_salt(),
       context_info,
       dem_helper_->dem_key_size_in_bytes(),
-      recipient_key_.public_key().params().ec_point_format());
+      util::Enums::ProtoToSubtle(
+          recipient_key_.public_key().params().ec_point_format()));
   if (!symmetric_key_result.ok()) return symmetric_key_result.status();
   auto symmetric_key = std::move(symmetric_key_result.ValueOrDie());
 

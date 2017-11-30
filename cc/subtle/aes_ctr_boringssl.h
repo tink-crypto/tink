@@ -27,6 +27,7 @@
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 class AesCtrBoringSsl : public IndCpaCipher {
  public:
@@ -55,6 +56,7 @@ class AesCtrBoringSsl : public IndCpaCipher {
   const EVP_CIPHER *cipher_;
 };
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

@@ -28,6 +28,7 @@
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 // This primitive performs an encrypt-then-Mac operation on plaintext and
 // additional authenticated data (aad). The Mac is computed over (aad ||
@@ -73,6 +74,7 @@ class EncryptThenAuthenticate : public Aead {
   uint8_t tag_size_;
 };
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

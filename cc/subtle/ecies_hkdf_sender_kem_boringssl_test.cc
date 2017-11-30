@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/status.h"
@@ -22,14 +23,11 @@
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 
-using google::crypto::tink::EcPointFormat;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::HashType;
-
 // TODO(quannguyen): Add extensive tests.
 // It's important to test compatability with Java.
 namespace crypto {
 namespace tink {
+namespace subtle {
 namespace {
 
 class EciesHkdfSenderKemBoringSslTest : public ::testing::Test {};
@@ -77,7 +75,9 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, testSenderRecipientBasic) {
               test::HexEncode(status_or_shared_secret.ValueOrDie()));
   }
 }
+
 }  // namespace
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

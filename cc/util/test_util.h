@@ -25,6 +25,7 @@
 #include "cc/hybrid_encrypt.h"
 #include "cc/keyset_handle.h"
 #include "cc/mac.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "proto/common.pb.h"
@@ -85,6 +86,14 @@ void AddRawKey(
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset);
 
+
+// Generates a fresh test key for ECIES-AEAD-HKDF for the given curve,
+// using AesGcm with the specified key size as AEAD, and HKDF with 'hash_type'.
+google::crypto::tink::EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
+    subtle::EllipticCurveType curve_type,
+    subtle::EcPointFormat ec_point_format,
+    subtle::HashType hash_type,
+    uint32_t aes_gcm_key_size);
 
 // Generates a fresh test key for ECIES-AEAD-HKDF for the given curve,
 // using AesGcm with the specified key size as AEAD, and HKDF with 'hash_type'.

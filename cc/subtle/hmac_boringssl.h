@@ -21,18 +21,19 @@
 
 #include "absl/strings/string_view.h"
 #include "cc/mac.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "openssl/evp.h"
-#include "proto/common.pb.h"
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 class HmacBoringSsl : public Mac {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<Mac>> New(
-      google::crypto::tink::HashType hash_type,
+      HashType hash_type,
       uint32_t tag_size, const std::string& key_value);
 
   // Computes and returns the HMAC for 'data'.
@@ -58,6 +59,7 @@ class HmacBoringSsl : public Mac {
   std::string key_value_;
 };
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

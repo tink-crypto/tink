@@ -22,6 +22,7 @@
 #include "cc/registry.h"
 #include "cc/hybrid/ecies_aead_hkdf_dem_helper.h"
 #include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
+#include "cc/util/enums.h"
 #include "cc/util/statusor.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
@@ -42,8 +43,9 @@ EciesAeadHkdfHybridEncrypt::New(const EciesAeadHkdfPublicKey& recipient_key) {
   Status status = Validate(recipient_key);
   if (!status.ok()) return status;
 
-  auto kem_result = EciesHkdfSenderKemBoringSsl::New(
-      recipient_key.params().kem_params().curve_type(),
+  auto kem_result = subtle::EciesHkdfSenderKemBoringSsl::New(
+      util::Enums::ProtoToSubtle(
+          recipient_key.params().kem_params().curve_type()),
       recipient_key.x(), recipient_key.y());
   if (!kem_result.ok()) return kem_result.status();
 
@@ -62,11 +64,13 @@ StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
     absl::string_view context_info) const {
   // Use KEM to get a symmetric key.
   auto kem_key_result = sender_kem_->GenerateKey(
-      recipient_key_.params().kem_params().hkdf_hash_type(),
+      util::Enums::ProtoToSubtle(
+          recipient_key_.params().kem_params().hkdf_hash_type()),
       recipient_key_.params().kem_params().hkdf_salt(),
       context_info,
       dem_helper_->dem_key_size_in_bytes(),
-      recipient_key_.params().ec_point_format());
+      util::Enums::ProtoToSubtle(
+          recipient_key_.params().ec_point_format()));
   if (!kem_key_result.ok()) return kem_key_result.status();
   auto kem_key = std::move(kem_key_result.ValueOrDie());
 

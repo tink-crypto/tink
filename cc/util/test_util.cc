@@ -23,7 +23,9 @@
 #include "cc/binary_keyset_reader.h"
 #include "cc/cleartext_keyset_handle.h"
 #include "cc/aead/aes_gcm_key_manager.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/subtle/subtle_util_boringssl.h"
+#include "cc/util/enums.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "proto/aes_gcm.pb.h"
@@ -33,13 +35,11 @@
 
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
-using google::crypto::tink::EcPointFormat;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::HashType;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::OutputPrefixType;
-using crypto::tink::util::error::Code;
+using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
+using crypto::tink::util::error::Code;
 
 namespace util = crypto::tink::util;
 
@@ -140,11 +140,24 @@ void AddRawKey(
 }
 
 EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
-    EllipticCurveType curve_type,
-    EcPointFormat ec_point_format,
-    HashType hash_type,
+    subtle::EllipticCurveType curve_type,
+    subtle::EcPointFormat ec_point_format,
+    subtle::HashType hash_type,
     uint32_t aes_gcm_key_size) {
-  auto test_key = SubtleUtilBoringSSL::GetNewEcKey(curve_type).ValueOrDie();
+  return GetEciesAesGcmHkdfTestKey(
+      Enums::SubtleToProto(curve_type),
+      Enums::SubtleToProto(ec_point_format),
+      Enums::SubtleToProto(hash_type),
+      aes_gcm_key_size);
+}
+
+EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
+    google::crypto::tink::EllipticCurveType curve_type,
+    google::crypto::tink::EcPointFormat ec_point_format,
+    google::crypto::tink::HashType hash_type,
+    uint32_t aes_gcm_key_size) {
+  auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+      Enums::ProtoToSubtle(curve_type)).ValueOrDie();
   EciesAeadHkdfPrivateKey ecies_key;
   ecies_key.set_version(0);
   ecies_key.set_key_value(test_key.priv);

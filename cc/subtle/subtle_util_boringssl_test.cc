@@ -15,6 +15,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/subtle_util_boringssl.h"
+
+#include "cc/subtle/common_enums.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
@@ -23,11 +25,9 @@
 #include "openssl/evp.h"
 #include "openssl/x509.h"
 
-using google::crypto::tink::EcPointFormat;
-using google::crypto::tink::EllipticCurveType;
-
 namespace crypto {
 namespace tink {
+namespace subtle {
 namespace {
 
 class SubtleUtilBoringSSLTest : public ::testing::Test {};
@@ -113,6 +113,7 @@ TEST_F(SubtleUtilBoringSSLTest, testEcPointDecode) {
 }
 
 }  // namespace
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

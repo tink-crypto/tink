@@ -27,6 +27,7 @@
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 namespace {
 
 TEST(AesCtrBoringSslTest, testEncryptDecrypt) {
@@ -117,6 +118,7 @@ TEST(AesCtrBoringSslTest, testMultipleEncrypt) {
 }
 
 }  // namespace
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

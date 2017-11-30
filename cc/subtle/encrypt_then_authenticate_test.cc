@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "cc/subtle/aes_ctr_boringssl.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/subtle/hmac_boringssl.h"
 #include "cc/subtle/random.h"
 #include "cc/util/ptr_util.h"
@@ -27,12 +28,10 @@
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
-#include "proto/common.pb.h"
-
-using google::crypto::tink::HashType;
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 namespace {
 
 // Copied from
@@ -236,6 +235,7 @@ TEST(EncryptThenAuthenticateTest, testDecrypt_modifiedCiphertext) {
 }
 
 }  // namespace
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

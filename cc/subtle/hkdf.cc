@@ -17,17 +17,17 @@
 #include "cc/subtle/hkdf.h"
 
 #include "cc/subtle/subtle_util_boringssl.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "openssl/evp.h"
 #include "openssl/hkdf.h"
 
-using google::crypto::tink::HashType;
-
 namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 // static
 util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
@@ -63,5 +63,6 @@ util::StatusOr<std::string> Hkdf::ComputeEciesHkdfSymmetricKey(
   return Hkdf::ComputeHkdf(hash, ikm, salt, info, out_len);
 }
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

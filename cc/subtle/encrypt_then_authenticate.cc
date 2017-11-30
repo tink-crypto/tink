@@ -30,6 +30,7 @@ namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 static const std::string longToBigEndianStr(uint64_t value) {
   uint8_t bytes[8];
@@ -100,5 +101,6 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
   return pt.ValueOrDie();
 }
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

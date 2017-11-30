@@ -18,12 +18,13 @@
 #define TINK_SUBTLE_EC_UTIL_H_
 
 #include "absl/strings/string_view.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
-#include "proto/common.pb.h"
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 class EcUtil {
  public:
@@ -32,7 +33,7 @@ class EcUtil {
   // Returns an error if the public key is not a valid point on the private
   // key's curve.
   static crypto::tink::util::StatusOr<std::string> ComputeEcdhSharedSecret(
-      google::crypto::tink::EllipticCurveType curve_type,
+      EllipticCurveType curve_type,
       absl::string_view priv,
       absl::string_view pub_x,
       absl::string_view pub_y);
@@ -40,15 +41,14 @@ class EcUtil {
   // Returns the encoding size of a point on the specified elliptic curve
   // when the given 'point_format' is used.
   static crypto::tink::util::StatusOr<uint32_t> EncodingSizeInBytes(
-      google::crypto::tink::EllipticCurveType curve_type,
-      google::crypto::tink::EcPointFormat point_format);
+      EllipticCurveType curve_type, EcPointFormat point_format);
 
   // Returns the size (in bytes) of an element of the field over which
   // the curve is defined.
-  static uint32_t FieldSizeInBytes(
-      google::crypto::tink::EllipticCurveType curve_type);
+  static uint32_t FieldSizeInBytes(EllipticCurveType curve_type);
 };
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

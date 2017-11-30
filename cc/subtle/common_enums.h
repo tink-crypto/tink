@@ -14,24 +14,44 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_SUBTLE_RANDOM_H_
-#define TINK_SUBTLE_RANDOM_H_
+#ifndef TINK_SUBTLE_COMMON_ENUMS_H_
+#define TINK_SUBTLE_COMMON_ENUMS_H_
 
 #include <string>
-#include <memory>
 
 namespace crypto {
 namespace tink {
 namespace subtle {
 
-class Random {
- public:
-  // Returns a random string of desired length.
-  static std::string GetRandomBytes(size_t length);
+// Common enums used by classes in subtle.
+enum EllipticCurveType {
+  UNKNOWN_CURVE = 0,
+  NIST_P224 = 1,
+  NIST_P256 = 2,
+  NIST_P384 = 3,
+  NIST_P521 = 4,
 };
+
+enum EcPointFormat {
+  UNKNOWN_FORMAT = 0,
+  UNCOMPRESSED = 1,
+  COMPRESSED = 2,
+};
+
+enum HashType {
+  UNKNOWN_HASH = 0,
+  SHA1 = 1,  // SHA1 for digital signature is deprecated but HMAC-SHA1 is fine.
+  SHA224 = 2,
+  SHA256 = 3,
+  SHA512 = 4,
+};
+
+std::string EnumToString(EllipticCurveType type);
+std::string EnumToString(EcPointFormat format);
+std::string EnumToString(HashType type);
 
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_SUBTLE_HMAC_RANDOM_H_
+#endif  // TINK_SUBTLE_COMMON_ENUMS_H_

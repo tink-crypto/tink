@@ -92,7 +92,7 @@ StatusOr<std::unique_ptr<Message>> AesCtrHmacAeadKeyFactory::NewKey(
   aes_ctr_key->set_version(AesCtrHmacAeadKeyManager::kVersion);
   *(aes_ctr_key->mutable_params()) =
       aes_ctr_hmac_aead_key_format.aes_ctr_key_format().params();
-  aes_ctr_key->set_key_value(Random::GetRandomBytes(
+  aes_ctr_key->set_key_value(subtle::Random::GetRandomBytes(
       aes_ctr_hmac_aead_key_format.aes_ctr_key_format().key_size()));
 
   // Generate HmacKey.
@@ -100,7 +100,7 @@ StatusOr<std::unique_ptr<Message>> AesCtrHmacAeadKeyFactory::NewKey(
   hmac_key->set_version(AesCtrHmacAeadKeyManager::kVersion);
   *(hmac_key->mutable_params()) =
       aes_ctr_hmac_aead_key_format.hmac_key_format().params();
-  hmac_key->set_key_value(Random::GetRandomBytes(
+  hmac_key->set_key_value(subtle::Random::GetRandomBytes(
       aes_ctr_hmac_aead_key_format.hmac_key_format().key_size()));
 
   std::unique_ptr<Message> key = std::move(aes_ctr_hmac_aead_key);
@@ -192,7 +192,7 @@ StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitiveImpl(
     const AesCtrHmacAeadKey& aes_ctr_hmac_aead_key) const {
   Status status = Validate(aes_ctr_hmac_aead_key);
   if (!status.ok()) return status;
-  auto aes_ctr_result = AesCtrBoringSsl::New(
+  auto aes_ctr_result = subtle::AesCtrBoringSsl::New(
       aes_ctr_hmac_aead_key.aes_ctr_key().key_value(),
       aes_ctr_hmac_aead_key.aes_ctr_key().params().iv_size());
   if (!aes_ctr_result.ok()) return aes_ctr_result.status();
@@ -201,7 +201,7 @@ StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitiveImpl(
       kHmacKeyType, aes_ctr_hmac_aead_key.hmac_key());
   if (!hmac_result.ok()) return hmac_result.status();
 
-  auto cipher_res = EncryptThenAuthenticate::New(
+  auto cipher_res = subtle::EncryptThenAuthenticate::New(
       std::move(aes_ctr_result.ValueOrDie()),
       std::move(hmac_result.ValueOrDie()),
       aes_ctr_hmac_aead_key.hmac_key().params().tag_size());

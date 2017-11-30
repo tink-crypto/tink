@@ -18,12 +18,13 @@
 #define TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 
 #include "absl/strings/string_view.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/util/statusor.h"
 #include "openssl/ec.h"
-#include "proto/common.pb.h"
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 // HKDF-based KEM (key encapsulation mechanism) for ECIES sender,
 // using Boring SSL for the underlying cryptographic operations.
@@ -48,7 +49,7 @@ class EciesHkdfSenderKemBoringSsl {
   // public key point.  The public key's coordinates are big-endian byte array.
   static
   crypto::tink::util::StatusOr<std::unique_ptr<EciesHkdfSenderKemBoringSsl>>
-      New(google::crypto::tink::EllipticCurveType curve,
+      New(EllipticCurveType curve,
           const std::string& pubx,
           const std::string& puby);
 
@@ -57,23 +58,24 @@ class EciesHkdfSenderKemBoringSsl {
   // to derive the symmetric key from the shared secret, 'hkdf_info' and
   // hkdf_salt.
   crypto::tink::util::StatusOr<std::unique_ptr<KemKey>> GenerateKey(
-      google::crypto::tink::HashType hash,
+      HashType hash,
       absl::string_view hkdf_salt,
       absl::string_view hkdf_info,
       uint32_t key_size_in_bytes,
-      google::crypto::tink::EcPointFormat point_format) const;
+      EcPointFormat point_format) const;
 
  private:
   EciesHkdfSenderKemBoringSsl(
-      google::crypto::tink::EllipticCurveType curve,
+      EllipticCurveType curve,
       const std::string& pubx, const std::string& puby);
 
-  google::crypto::tink::EllipticCurveType curve_;
+  EllipticCurveType curve_;
   std::string pubx_;
   std::string puby_;
   bssl::UniquePtr<EC_POINT> peer_pub_key_;
 };
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

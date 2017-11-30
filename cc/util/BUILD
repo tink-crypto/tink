@@ -18,6 +18,16 @@ cc_library(
 )
 
 cc_library(
+    name = "enums",
+    srcs = ["enums.cc"],
+    hdrs = ["enums.h"],
+    deps = [
+        "//cc/subtle:common_enums",
+        "//proto:common_cc_proto",
+    ],
+)
+
+cc_library(
     name = "status",
     srcs = ["status.cc"],
     hdrs = ["status.h"],
@@ -50,6 +60,7 @@ cc_library(
     srcs = ["test_util.cc"],
     hdrs = ["test_util.h"],
     deps = [
+        ":enums",
         ":status",
         ":statusor",
         "//cc:aead",
@@ -70,6 +81,20 @@ cc_library(
 )
 
 # tests
+
+cc_test(
+    name = "enums_test",
+    size = "small",
+    srcs = ["enums_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":enums",
+        "//cc/subtle:common_enums",
+        "//proto:common_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "errors_test",

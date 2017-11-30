@@ -15,16 +15,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/subtle_util_boringssl.h"
+#include "cc/subtle/common_enums.h"
 #include "openssl/ec.h"
-
-using google::crypto::tink::HashType;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::EcPointFormat;
 
 namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 namespace {
 
@@ -267,5 +265,6 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
   }
 }
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

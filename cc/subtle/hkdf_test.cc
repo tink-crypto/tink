@@ -15,15 +15,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/hkdf.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 
-using google::crypto::tink::HashType;
-
 namespace crypto {
 namespace tink {
+namespace subtle {
 namespace {
 
 class HkdfTest : public ::testing::Test {};
@@ -112,6 +112,7 @@ TEST_F(HkdfTest, testLongOutput) {
             "BoringSSL's HKDF failed");
 }
 }  // namespace
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

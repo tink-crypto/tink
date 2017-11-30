@@ -20,6 +20,7 @@
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 // static
 std::string Random::GetRandomBytes(size_t length) {
@@ -31,5 +32,6 @@ std::string Random::GetRandomBytes(size_t length) {
   return std::string(reinterpret_cast<const char *>(buf.get()), length);
 }
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

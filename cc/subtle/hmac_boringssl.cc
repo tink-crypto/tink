@@ -19,6 +19,7 @@
 #include <string>
 
 #include "cc/mac.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/errors.h"
 #include "cc/util/status.h"
@@ -27,14 +28,12 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
-#include "proto/common.pb.h"
-
-using google::crypto::tink::HashType;
 
 namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 // static
 util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
@@ -101,5 +100,6 @@ util::Status HmacBoringSsl::VerifyMac(
   }
 }
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

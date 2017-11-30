@@ -15,20 +15,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cc/subtle/ec_util.h"
+
 #include <memory>
 #include <string>
 
+#include "cc/subtle/common_enums.h"
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/errors.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/x509.h"
 
-using google::crypto::tink::EcPointFormat;
-using google::crypto::tink::EllipticCurveType;
-
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 // static
 crypto::tink::util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
@@ -48,8 +48,7 @@ crypto::tink::util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
 }
 
 // static
-uint32_t EcUtil::FieldSizeInBytes(
-    EllipticCurveType curve_type) {
+uint32_t EcUtil::FieldSizeInBytes(EllipticCurveType curve_type) {
   auto ec_group_result = SubtleUtilBoringSSL::GetEcGroup(curve_type);
   if (!ec_group_result.ok()) return 0;
   bssl::UniquePtr<EC_GROUP> ec_group(ec_group_result.ValueOrDie());
@@ -63,7 +62,7 @@ crypto::tink::util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
   if (coordinate_size == 0) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Unsupported elliptic curve type: %s",
-                     EllipticCurveType_Name(curve_type).c_str());
+                     EnumToString(curve_type).c_str());
   }
   switch (point_format) {
   case EcPointFormat::UNCOMPRESSED:
@@ -73,9 +72,10 @@ crypto::tink::util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
   default:
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Unsupported elliptic curve point format: %s",
-                     EcPointFormat_Name(point_format).c_str());
+                     EnumToString(point_format).c_str());
   }
 }
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

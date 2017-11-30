@@ -65,6 +65,7 @@ cc_library(
         "//cc:mac",
         "//cc/subtle:hmac_boringssl",
         "//cc/subtle:random",
+        "//cc/util:enums",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",

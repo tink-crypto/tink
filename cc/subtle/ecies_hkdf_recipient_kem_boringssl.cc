@@ -16,21 +16,18 @@
 
 #include "cc/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
+#include "cc/subtle/common_enums.h"
 #include "cc/subtle/hkdf.h"
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/util/errors.h"
 #include "cc/util/ptr_util.h"
 #include "openssl/ec.h"
 
-using google::crypto::tink::EcPointFormat;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::HashType;
-using absl::string_view;
-
 namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 // static
 util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
@@ -51,8 +48,11 @@ EciesHkdfRecipientKemBoringSsl::EciesHkdfRecipientKemBoringSsl(
     : curve_(curve), priv_key_value_(priv_key_value) {}
 
 util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
-    absl::string_view kem_bytes, HashType hash, absl::string_view hkdf_salt,
-    absl::string_view hkdf_info, uint32_t key_size_in_bytes,
+    absl::string_view kem_bytes,
+    HashType hash,
+    absl::string_view hkdf_salt,
+    absl::string_view hkdf_info,
+    uint32_t key_size_in_bytes,
     EcPointFormat point_format) const {
   auto status_or_ec_point =
       SubtleUtilBoringSSL::EcPointDecode(curve_, point_format, kem_bytes);
@@ -75,5 +75,6 @@ util::StatusOr<std::string> EciesHkdfRecipientKemBoringSsl::GenerateKey(
       hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
 }
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

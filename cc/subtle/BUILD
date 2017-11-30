@@ -7,13 +7,13 @@ cc_library(
     srcs = ["ecies_hkdf_recipient_kem_boringssl.cc"],
     hdrs = ["ecies_hkdf_recipient_kem_boringssl.h"],
     deps = [
+        ":common_enums",
         ":hkdf",
         ":subtle_util_boringssl",
         "//cc/util:errors",
         "//cc/util:ptr_util",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:common_cc_proto",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
@@ -24,12 +24,12 @@ cc_library(
     srcs = ["ecies_hkdf_sender_kem_boringssl.cc"],
     hdrs = ["ecies_hkdf_sender_kem_boringssl.h"],
     deps = [
+        ":common_enums",
         ":hkdf",
         ":subtle_util_boringssl",
         "//cc/util:ptr_util",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:common_cc_proto",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
@@ -40,11 +40,11 @@ cc_library(
     srcs = ["ec_util.cc"],
     hdrs = ["ec_util.h"],
     deps = [
+        ":common_enums",
         ":subtle_util_boringssl",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:common_cc_proto",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
@@ -55,11 +55,11 @@ cc_library(
     srcs = ["hkdf.cc"],
     hdrs = ["hkdf.h"],
     deps = [
+        ":common_enums",
         ":subtle_util_boringssl",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:common_cc_proto",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
@@ -70,12 +70,12 @@ cc_library(
     srcs = ["hmac_boringssl.cc"],
     hdrs = ["hmac_boringssl.h"],
     deps = [
+        ":common_enums",
         ":subtle_util_boringssl",
         "//cc:mac",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:common_cc_proto",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
@@ -142,14 +142,20 @@ cc_library(
 )
 
 cc_library(
+    name = "common_enums",
+    srcs = ["common_enums.cc"],
+    hdrs = ["common_enums.h"],
+)
+
+cc_library(
     name = "subtle_util_boringssl",
     srcs = ["subtle_util_boringssl.cc"],
     hdrs = ["subtle_util_boringssl.h"],
     deps = [
+        ":common_enums",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:common_cc_proto",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
@@ -162,11 +168,11 @@ cc_test(
     srcs = ["ecies_hkdf_recipient_kem_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":common_enums",
         ":ecies_hkdf_recipient_kem_boringssl",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
-        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -177,13 +183,13 @@ cc_test(
     srcs = ["ecies_hkdf_sender_kem_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":common_enums",
         ":ecies_hkdf_recipient_kem_boringssl",
         ":ecies_hkdf_sender_kem_boringssl",
         ":subtle_util_boringssl",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
-        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -198,7 +204,6 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
-        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -209,11 +214,11 @@ cc_test(
     srcs = ["hkdf_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":common_enums",
         ":hkdf",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
-        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -224,12 +229,12 @@ cc_test(
     srcs = ["hmac_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":common_enums",
         ":hmac_boringssl",
         "//cc:mac",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
-        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -256,6 +261,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aes_ctr_boringssl",
+        ":common_enums",
         ":encrypt_then_authenticate",
         ":hmac_boringssl",
         ":random",
@@ -265,7 +271,6 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
-        "//proto:common_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -293,6 +298,18 @@ cc_test(
     linkopts = ["-pthread"],
     deps = [
         ":random",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "common_enums_test",
+    size = "small",
+    srcs = ["common_enums_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-pthread"],
+    deps = [
+        ":common_enums",
         "@com_google_googletest//:gtest_main",
     ],
 )

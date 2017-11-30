@@ -16,17 +16,15 @@
 
 #include "cc/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
+#include "cc/subtle/common_enums.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 
-using google::crypto::tink::EcPointFormat;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::HashType;
-
 namespace crypto {
 namespace tink {
+namespace subtle {
 namespace {
 
 class EciesHkdfRecipientKemBoringSslTest : public ::testing::Test {};
@@ -67,7 +65,9 @@ TEST_F(EciesHkdfRecipientKemBoringSslTest, testBasic) {
     EXPECT_EQ(test.out_key_hex, test::HexEncode(status_or_string.ValueOrDie()));
   }
 }
+
 }  // namespace
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

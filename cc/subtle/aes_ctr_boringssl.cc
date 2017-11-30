@@ -31,6 +31,7 @@ namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 
 static const EVP_CIPHER* GetCipherForKeySize(uint32_t size_in_bytes) {
   switch (size_in_bytes) {
@@ -148,5 +149,6 @@ util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
   return std::string(reinterpret_cast<const char*>(&pt[0]), written);
 }
 
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

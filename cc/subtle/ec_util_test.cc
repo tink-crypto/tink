@@ -20,10 +20,9 @@
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
 
-using google::crypto::tink::EllipticCurveType;
-
 namespace crypto {
 namespace tink {
+namespace subtle {
 namespace {
 
 // TODO(quannguyen): Add extensive tests.
@@ -90,6 +89,7 @@ TEST_F(EcUtilTest, testBasic) {
 }
 
 }  // namespace
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 

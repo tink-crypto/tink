@@ -19,16 +19,15 @@
 #include <string>
 
 #include "cc/mac.h"
+#include "cc/subtle/common_enums.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
 #include "gtest/gtest.h"
-#include "proto/common.pb.h"
-
-using google::crypto::tink::HashType;
 
 namespace crypto {
 namespace tink {
+namespace subtle {
 namespace {
 
 class HmacBoringSslTest : public ::testing::Test {
@@ -117,6 +116,7 @@ TEST_F(HmacBoringSslTest, testTruncation) {
 //    hash. (HMAC hashes these keys).
 
 }  // namespace
+}  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
 
