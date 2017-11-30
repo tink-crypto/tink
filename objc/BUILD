@@ -2,6 +2,8 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_unit_test")
+
 # public libraries
 
 objc_library(
@@ -79,4 +81,60 @@ objc_library(
         "TINKHybridEncrypt.h",
     ],
     visibility = ["//visibility:public"],
+)
+
+objc_library(
+    name = "keyset_reader",
+    hdrs = ["TINKKeysetReader.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto:all_objc_proto",
+    ],
+)
+
+objc_library(
+    name = "binary_keyset_reader",
+    srcs = ["core/TINKBinaryKeysetReader.mm"],
+    hdrs = [
+        "TINKBinaryKeysetReader.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":keyset_reader",
+        "//cc:binary_keyset_reader",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "//proto:all_objc_proto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+############################
+#         Tests            #
+############################
+
+ios_unit_test(
+    name = "TinkTests",
+    minimum_os_version = "9.0",
+    deps = [
+        ":UnitTestLib",
+    ],
+)
+
+objc_library(
+    name = "UnitTestLib",
+    testonly = 1,
+    srcs = glob([
+        "Tests/UnitTests/**/*.m",
+        "Tests/UnitTests/**/*.mm",
+    ]),
+    hdrs = glob([
+        "Tests/UnitTests/**/*.h",
+    ]),
+    deps = [
+        ":binary_keyset_reader",
+        "//cc/util:test_util",
+        "//objc/util:strings",
+        "//proto:all_objc_proto",
+    ],
 )

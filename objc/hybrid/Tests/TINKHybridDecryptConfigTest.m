@@ -49,8 +49,8 @@
 - (void)testRegisterStandardKeyTypes {
   XCTAssertTrue([TINKHybridDecryptConfig registerStandardKeyTypes]);
 
-  // Calling it a second time should fail because the types are already registered.
-  XCTAssertFalse([TINKHybridDecryptConfig registerStandardKeyTypes]);
+  // Calling it a second time must not fail.
+  XCTAssertTrue([TINKHybridDecryptConfig registerStandardKeyTypes]);
 }
 
 @end

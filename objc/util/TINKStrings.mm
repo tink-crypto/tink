@@ -37,6 +37,10 @@ NSData* TINKStringToNSData(std::string s) {
   return [NSData dataWithBytes:s.data() length:s.size()];
 }
 
+NSData* TINKStringViewToNSData(absl::string_view s) {
+  return [NSData dataWithBytes:s.data() length:s.size()];
+}
+
 std::string TINKPBSerializeToString(GPBMessage* message, NSError** error) {
   NSData* serializedPB = [message data];
   if (!serializedPB) {

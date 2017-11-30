@@ -18,21 +18,21 @@
 
 #import <Foundation/Foundation.h>
 
-#import "GPBProtocolBuffers.h"
+#import "proto/Tink.pbobjc.h"
 
-#include "absl/strings/string_view.h"
+NS_ASSUME_NONNULL_BEGIN
 
-/** Converts a absl::string_view to NSString. */
-NSString* TINKStringPieceToNSString(absl::string_view s);
+/**
+ * The protocol for keyset readers.
+ */
+@protocol TINKKeysetReader <NSObject>
 
-/** Converts a C++ std::string to NSString. */
-NSString* TINKStringToNSString(std::string s);
+/* Reads a Keyset. Returns nil in case of error and sets error to a descriptive value. */
+- (nullable TINKPBKeyset *)readWithError:(NSError **)error;
 
-/** Converts a C++ std::string to NSData. */
-NSData* TINKStringToNSData(std::string s);
+/* Reads an EncryptedKeyset. Returns nil in case of error and sets error to a descriptive value. */
+- (nullable TINKPBEncryptedKeyset *)readEncryptedWithError:(NSError **)error;
 
-/** Serializes an Obj-C protocol buffer to a C++ std::string. */
-std::string TINKPBSerializeToString(GPBMessage* message, NSError** error);
+@end
 
-/** Converts a absl::string_view to NSData. */
-NSData* TINKStringViewToNSData(absl::string_view s);
+NS_ASSUME_NONNULL_END
