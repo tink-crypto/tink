@@ -28,6 +28,7 @@ import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +40,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class RegistryEciesAeadHkdfDemHelperTest {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
+
   @Before
   public void setUp() throws Exception {
     Config.register(AeadConfig.TINK_1_0_0);
@@ -101,8 +104,8 @@ public class RegistryEciesAeadHkdfDemHelperTest {
     templates[2] = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     templates[3] = AeadKeyTemplates.AES256_CTR_HMAC_SHA256;
 
-    byte[] plaintext = "some plaintext string".getBytes();
-    byte[] associatedData = "some associated data".getBytes();
+    byte[] plaintext = "some plaintext string".getBytes(UTF_8);
+    byte[] associatedData = "some associated data".getBytes(UTF_8);
     int count = 0;
     for (KeyTemplate template : templates) {
       RegistryEciesAeadHkdfDemHelper helper = new RegistryEciesAeadHkdfDemHelper(template);

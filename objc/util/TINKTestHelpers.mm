@@ -18,8 +18,8 @@
 
 #import "objc/util/TINKTestHelpers.h"
 
+#include "cc/subtle/common_enums.h"
 #include "cc/subtle/subtle_util_boringssl.h"
-#include "proto/common.pb.h"
 
 #import <Foundation/Foundation.h>
 
@@ -90,8 +90,9 @@ TINKPBEciesAeadHkdfPrivateKey *TINKGetEciesAesGcmHkdfTestKey(TINKPBEllipticCurve
                                                              TINKPBEcPointFormat ecPointFormat,
                                                              TINKPBHashType hashType,
                                                              uint32_t aesGcmKeySize) {
-  auto test_key = crypto::tink::SubtleUtilBoringSSL::GetNewEcKey(
-                      static_cast<google::crypto::tink::EllipticCurveType>(curveType))
+  /* TODO(candrian): replace the static_cast below with an explicit translation */
+  auto test_key = crypto::tink::subtle::SubtleUtilBoringSSL::GetNewEcKey(
+                      static_cast<crypto::tink::subtle::EllipticCurveType>(curveType))
                       .ValueOrDie();
 
   TINKPBEciesAeadHkdfPrivateKey *eciesKey = [[TINKPBEciesAeadHkdfPrivateKey alloc] init];

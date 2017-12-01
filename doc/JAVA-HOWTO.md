@@ -550,7 +550,7 @@ above), you should provide definitions of three messages:
 
 Here are a few conventions/recommendations wrt. defining these messages
 (see [tink.proto](https://github.com/google/tink/blob/master/proto/tink.proto)
-and defintions of [existing key types](https://github.com/google/tink/blob/master/proto/)
+and definitions of [existing key types](https://github.com/google/tink/blob/master/proto/)
 for details):
 
  * `...Key` should contain a version field (a monotonic counter, `uint32 version;`),

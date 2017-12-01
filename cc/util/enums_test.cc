@@ -22,9 +22,7 @@
 
 using crypto::tink::util::Enums;
 
-namespace proto = google::crypto::tink;
-namespace subtle = crypto::tink::subtle;
-
+namespace pb = google::crypto::tink;
 
 namespace crypto {
 namespace tink {
@@ -34,39 +32,39 @@ class EnumsTest : public ::testing::Test {
 };
 
 TEST_F(EnumsTest, testEllipticCurveType) {
-  EXPECT_EQ(proto::EllipticCurveType::NIST_P224,
+  EXPECT_EQ(pb::EllipticCurveType::NIST_P224,
             Enums::SubtleToProto(subtle::EllipticCurveType::NIST_P224));
-  EXPECT_EQ(proto::EllipticCurveType::NIST_P256,
+  EXPECT_EQ(pb::EllipticCurveType::NIST_P256,
             Enums::SubtleToProto(subtle::EllipticCurveType::NIST_P256));
-  EXPECT_EQ(proto::EllipticCurveType::NIST_P384,
+  EXPECT_EQ(pb::EllipticCurveType::NIST_P384,
             Enums::SubtleToProto(subtle::EllipticCurveType::NIST_P384));
-  EXPECT_EQ(proto::EllipticCurveType::NIST_P521,
+  EXPECT_EQ(pb::EllipticCurveType::NIST_P521,
             Enums::SubtleToProto(subtle::EllipticCurveType::NIST_P521));
-  EXPECT_EQ(proto::EllipticCurveType::UNKNOWN_CURVE,
+  EXPECT_EQ(pb::EllipticCurveType::UNKNOWN_CURVE,
             Enums::SubtleToProto(subtle::EllipticCurveType::UNKNOWN_CURVE));
-  EXPECT_EQ(proto::EllipticCurveType::UNKNOWN_CURVE,
+  EXPECT_EQ(pb::EllipticCurveType::UNKNOWN_CURVE,
             Enums::SubtleToProto((subtle::EllipticCurveType)42));
 
   EXPECT_EQ(subtle::EllipticCurveType::NIST_P224,
-            Enums::ProtoToSubtle(proto::EllipticCurveType::NIST_P224));
+            Enums::ProtoToSubtle(pb::EllipticCurveType::NIST_P224));
   EXPECT_EQ(subtle::EllipticCurveType::NIST_P256,
-            Enums::ProtoToSubtle(proto::EllipticCurveType::NIST_P256));
+            Enums::ProtoToSubtle(pb::EllipticCurveType::NIST_P256));
   EXPECT_EQ(subtle::EllipticCurveType::NIST_P384,
-            Enums::ProtoToSubtle(proto::EllipticCurveType::NIST_P384));
+            Enums::ProtoToSubtle(pb::EllipticCurveType::NIST_P384));
   EXPECT_EQ(subtle::EllipticCurveType::NIST_P521,
-            Enums::ProtoToSubtle(proto::EllipticCurveType::NIST_P521));
+            Enums::ProtoToSubtle(pb::EllipticCurveType::NIST_P521));
   EXPECT_EQ(subtle::EllipticCurveType::UNKNOWN_CURVE,
-            Enums::ProtoToSubtle(proto::EllipticCurveType::UNKNOWN_CURVE));
+            Enums::ProtoToSubtle(pb::EllipticCurveType::UNKNOWN_CURVE));
   EXPECT_EQ(subtle::EllipticCurveType::UNKNOWN_CURVE,
-            Enums::ProtoToSubtle((proto::EllipticCurveType)42));
+            Enums::ProtoToSubtle((pb::EllipticCurveType)42));
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_type = (int)proto::EllipticCurveType_MIN;
-       int_type <= (int)proto::EllipticCurveType_MAX;
+  for (int int_type = (int)pb::EllipticCurveType_MIN;
+       int_type <= (int)pb::EllipticCurveType_MAX;
        int_type++) {
-    if (proto::EllipticCurveType_IsValid(int_type)) {
-      proto::EllipticCurveType type = (proto::EllipticCurveType)int_type;
+    if (pb::EllipticCurveType_IsValid(int_type)) {
+      pb::EllipticCurveType type = (pb::EllipticCurveType)int_type;
       EXPECT_EQ(type,
                 Enums::SubtleToProto(Enums::ProtoToSubtle(type)));
       count++;
@@ -76,39 +74,39 @@ TEST_F(EnumsTest, testEllipticCurveType) {
 }
 
 TEST_F(EnumsTest, testHashType) {
-  EXPECT_EQ(proto::HashType::SHA1,
+  EXPECT_EQ(pb::HashType::SHA1,
             Enums::SubtleToProto(subtle::HashType::SHA1));
-  EXPECT_EQ(proto::HashType::SHA224,
+  EXPECT_EQ(pb::HashType::SHA224,
             Enums::SubtleToProto(subtle::HashType::SHA224));
-  EXPECT_EQ(proto::HashType::SHA256,
+  EXPECT_EQ(pb::HashType::SHA256,
             Enums::SubtleToProto(subtle::HashType::SHA256));
-  EXPECT_EQ(proto::HashType::SHA512,
+  EXPECT_EQ(pb::HashType::SHA512,
             Enums::SubtleToProto(subtle::HashType::SHA512));
-  EXPECT_EQ(proto::HashType::UNKNOWN_HASH,
+  EXPECT_EQ(pb::HashType::UNKNOWN_HASH,
             Enums::SubtleToProto(subtle::HashType::UNKNOWN_HASH));
-  EXPECT_EQ(proto::HashType::UNKNOWN_HASH,
+  EXPECT_EQ(pb::HashType::UNKNOWN_HASH,
             Enums::SubtleToProto((subtle::HashType)42));
 
   EXPECT_EQ(subtle::HashType::SHA1,
-            Enums::ProtoToSubtle(proto::HashType::SHA1));
+            Enums::ProtoToSubtle(pb::HashType::SHA1));
   EXPECT_EQ(subtle::HashType::SHA224,
-            Enums::ProtoToSubtle(proto::HashType::SHA224));
+            Enums::ProtoToSubtle(pb::HashType::SHA224));
   EXPECT_EQ(subtle::HashType::SHA256,
-            Enums::ProtoToSubtle(proto::HashType::SHA256));
+            Enums::ProtoToSubtle(pb::HashType::SHA256));
   EXPECT_EQ(subtle::HashType::SHA512,
-            Enums::ProtoToSubtle(proto::HashType::SHA512));
+            Enums::ProtoToSubtle(pb::HashType::SHA512));
   EXPECT_EQ(subtle::HashType::UNKNOWN_HASH,
-            Enums::ProtoToSubtle(proto::HashType::UNKNOWN_HASH));
+            Enums::ProtoToSubtle(pb::HashType::UNKNOWN_HASH));
   EXPECT_EQ(subtle::HashType::UNKNOWN_HASH,
-            Enums::ProtoToSubtle((proto::HashType)42));
+            Enums::ProtoToSubtle((pb::HashType)42));
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_type = (int)proto::HashType_MIN;
-       int_type <= (int)proto::HashType_MAX;
+  for (int int_type = (int)pb::HashType_MIN;
+       int_type <= (int)pb::HashType_MAX;
        int_type++) {
-    if (proto::HashType_IsValid(int_type)) {
-      proto::HashType type = (proto::HashType)int_type;
+    if (pb::HashType_IsValid(int_type)) {
+      pb::HashType type = (pb::HashType)int_type;
       EXPECT_EQ(type,
                 Enums::SubtleToProto(Enums::ProtoToSubtle(type)));
       count++;
@@ -118,31 +116,31 @@ TEST_F(EnumsTest, testHashType) {
 }
 
 TEST_F(EnumsTest, testEcPointFormat) {
-  EXPECT_EQ(proto::EcPointFormat::UNCOMPRESSED,
+  EXPECT_EQ(pb::EcPointFormat::UNCOMPRESSED,
             Enums::SubtleToProto(subtle::EcPointFormat::UNCOMPRESSED));
-  EXPECT_EQ(proto::EcPointFormat::COMPRESSED,
+  EXPECT_EQ(pb::EcPointFormat::COMPRESSED,
             Enums::SubtleToProto(subtle::EcPointFormat::COMPRESSED));
-  EXPECT_EQ(proto::EcPointFormat::UNKNOWN_FORMAT,
+  EXPECT_EQ(pb::EcPointFormat::UNKNOWN_FORMAT,
             Enums::SubtleToProto(subtle::EcPointFormat::UNKNOWN_FORMAT));
-  EXPECT_EQ(proto::EcPointFormat::UNKNOWN_FORMAT,
+  EXPECT_EQ(pb::EcPointFormat::UNKNOWN_FORMAT,
             Enums::SubtleToProto((subtle::EcPointFormat)42));
 
   EXPECT_EQ(subtle::EcPointFormat::UNCOMPRESSED,
-            Enums::ProtoToSubtle(proto::EcPointFormat::UNCOMPRESSED));
+            Enums::ProtoToSubtle(pb::EcPointFormat::UNCOMPRESSED));
   EXPECT_EQ(subtle::EcPointFormat::COMPRESSED,
-            Enums::ProtoToSubtle(proto::EcPointFormat::COMPRESSED));
+            Enums::ProtoToSubtle(pb::EcPointFormat::COMPRESSED));
   EXPECT_EQ(subtle::EcPointFormat::UNKNOWN_FORMAT,
-            Enums::ProtoToSubtle(proto::EcPointFormat::UNKNOWN_FORMAT));
+            Enums::ProtoToSubtle(pb::EcPointFormat::UNKNOWN_FORMAT));
   EXPECT_EQ(subtle::EcPointFormat::UNKNOWN_FORMAT,
-            Enums::ProtoToSubtle((proto::EcPointFormat)42));
+            Enums::ProtoToSubtle((pb::EcPointFormat)42));
 
   // Check that enum conversion covers the entire range of the proto-enum.
   int count = 0;
-  for (int int_format = (int)proto::EcPointFormat_MIN;
-       int_format <= (int)proto::EcPointFormat_MAX;
+  for (int int_format = (int)pb::EcPointFormat_MIN;
+       int_format <= (int)pb::EcPointFormat_MAX;
        int_format++) {
-    if (proto::EcPointFormat_IsValid(int_format)) {
-      proto::EcPointFormat format = (proto::EcPointFormat)int_format;
+    if (pb::EcPointFormat_IsValid(int_format)) {
+      pb::EcPointFormat format = (pb::EcPointFormat)int_format;
       EXPECT_EQ(format,
                 Enums::SubtleToProto(Enums::ProtoToSubtle(format)));
       count++;

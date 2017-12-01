@@ -17,39 +17,38 @@
 #include "cc/util/enums.h"
 #include "proto/common.pb.h"
 
-namespace proto = google::crypto::tink;
-namespace subtle = crypto::tink::subtle;
+namespace pb = google::crypto::tink;
 
 namespace crypto {
 namespace tink {
 namespace util {
 
 // static
-proto::EllipticCurveType Enums::SubtleToProto(subtle::EllipticCurveType type) {
+pb::EllipticCurveType Enums::SubtleToProto(subtle::EllipticCurveType type) {
   switch (type) {
   case subtle::EllipticCurveType::NIST_P224:
-    return proto::EllipticCurveType::NIST_P224;
+    return pb::EllipticCurveType::NIST_P224;
   case subtle::EllipticCurveType::NIST_P256:
-    return proto::EllipticCurveType::NIST_P256;
+    return pb::EllipticCurveType::NIST_P256;
   case subtle::EllipticCurveType::NIST_P384:
-    return proto::EllipticCurveType::NIST_P384;
+    return pb::EllipticCurveType::NIST_P384;
   case subtle::EllipticCurveType::NIST_P521:
-    return proto::EllipticCurveType::NIST_P521;
+    return pb::EllipticCurveType::NIST_P521;
   default:
-    return proto::EllipticCurveType::UNKNOWN_CURVE;
+    return pb::EllipticCurveType::UNKNOWN_CURVE;
   }
 }
 
 // static
-subtle::EllipticCurveType Enums::ProtoToSubtle(proto::EllipticCurveType type) {
+subtle::EllipticCurveType Enums::ProtoToSubtle(pb::EllipticCurveType type) {
   switch (type) {
-  case proto::EllipticCurveType::NIST_P224:
+  case pb::EllipticCurveType::NIST_P224:
     return subtle::EllipticCurveType::NIST_P224;
-  case proto::EllipticCurveType::NIST_P256:
+  case pb::EllipticCurveType::NIST_P256:
     return subtle::EllipticCurveType::NIST_P256;
-  case proto::EllipticCurveType::NIST_P384:
+  case pb::EllipticCurveType::NIST_P384:
     return subtle::EllipticCurveType::NIST_P384;
-  case proto::EllipticCurveType::NIST_P521:
+  case pb::EllipticCurveType::NIST_P521:
     return subtle::EllipticCurveType::NIST_P521;
   default:
     return subtle::EllipticCurveType::UNKNOWN_CURVE;
@@ -57,23 +56,23 @@ subtle::EllipticCurveType Enums::ProtoToSubtle(proto::EllipticCurveType type) {
 }
 
 // static
-proto::EcPointFormat Enums::SubtleToProto(subtle::EcPointFormat format) {
+pb::EcPointFormat Enums::SubtleToProto(subtle::EcPointFormat format) {
   switch (format) {
   case subtle::EcPointFormat::UNCOMPRESSED:
-    return proto::EcPointFormat::UNCOMPRESSED;
+    return pb::EcPointFormat::UNCOMPRESSED;
   case subtle::EcPointFormat::COMPRESSED:
-    return proto::EcPointFormat::COMPRESSED;
+    return pb::EcPointFormat::COMPRESSED;
   default:
-    return proto::EcPointFormat::UNKNOWN_FORMAT;
+    return pb::EcPointFormat::UNKNOWN_FORMAT;
   }
 }
 
 // static
-subtle::EcPointFormat Enums::ProtoToSubtle(proto::EcPointFormat format) {
+subtle::EcPointFormat Enums::ProtoToSubtle(pb::EcPointFormat format) {
   switch (format) {
-  case proto::EcPointFormat::UNCOMPRESSED:
+  case pb::EcPointFormat::UNCOMPRESSED:
     return subtle::EcPointFormat::UNCOMPRESSED;
-  case proto::EcPointFormat::COMPRESSED:
+  case pb::EcPointFormat::COMPRESSED:
     return subtle::EcPointFormat::COMPRESSED;
   default:
     return subtle::EcPointFormat::UNKNOWN_FORMAT;
@@ -81,31 +80,31 @@ subtle::EcPointFormat Enums::ProtoToSubtle(proto::EcPointFormat format) {
 }
 
 // static
-proto::HashType Enums::SubtleToProto(subtle::HashType type) {
+pb::HashType Enums::SubtleToProto(subtle::HashType type) {
   switch (type) {
   case subtle::HashType::SHA1:
-    return proto::HashType::SHA1;
+    return pb::HashType::SHA1;
   case subtle::HashType::SHA224:
-    return proto::HashType::SHA224;
+    return pb::HashType::SHA224;
   case subtle::HashType::SHA256:
-    return proto::HashType::SHA256;
+    return pb::HashType::SHA256;
   case subtle::HashType::SHA512:
-    return proto::HashType::SHA512;
+    return pb::HashType::SHA512;
   default:
-    return proto::HashType::UNKNOWN_HASH;
+    return pb::HashType::UNKNOWN_HASH;
   }
 }
 
 // static
-subtle::HashType Enums::ProtoToSubtle(proto::HashType type) {
+subtle::HashType Enums::ProtoToSubtle(pb::HashType type) {
   switch (type) {
-  case proto::HashType::SHA1:
+  case pb::HashType::SHA1:
     return subtle::HashType::SHA1;
-  case proto::HashType::SHA224:
+  case pb::HashType::SHA224:
     return subtle::HashType::SHA224;
-  case proto::HashType::SHA256:
+  case pb::HashType::SHA256:
     return subtle::HashType::SHA256;
-  case proto::HashType::SHA512:
+  case pb::HashType::SHA512:
     return subtle::HashType::SHA512;
   default:
     return subtle::HashType::UNKNOWN_HASH;

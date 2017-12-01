@@ -24,7 +24,7 @@
 #include "gtest/gtest.h"
 
 // TODO(quannguyen): Add extensive tests.
-// It's important to test compatability with Java.
+// It's important to test compatibility with Java.
 namespace crypto {
 namespace tink {
 namespace subtle {
