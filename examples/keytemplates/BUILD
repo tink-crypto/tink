@@ -5,3 +5,9 @@ filegroup(
     srcs = glob(["hybrid/*.ascii"]),
     visibility = ["//visibility:public"],
 )
+
+filegroup(
+    name = "aead",
+    srcs = glob(["aead/*.ascii"]),
+    visibility = ["//visibility:public"],
+)

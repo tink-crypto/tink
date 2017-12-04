@@ -29,7 +29,7 @@ namespace tink {
 //
 // To register all Tink key types provided in Tink release 1.1.0 one can do:
 //
-//   Config::Register(TinkConfig::Tink_1_1_0());
+//   auto status = Config::Register(TinkConfig::Tink_1_1_0());
 //
 class TinkConfig {
  public:

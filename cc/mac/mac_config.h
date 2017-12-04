@@ -29,7 +29,7 @@ namespace tink {
 //
 // To register all Mac key types provided in Tink release 1.1.0 one can do:
 //
-//   Config::Register(MacConfig::Tink_1_1_0());
+//   auto status = Config::Register(MacConfig::Tink_1_1_0());
 //
 // For more information on creation and usage of Mac instances see MacFactory.
 class MacConfig {

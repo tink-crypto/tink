@@ -32,7 +32,7 @@ namespace tink {
 // To register all HybridEncrypt key types provided in Tink release 1.1.0
 // one can do:
 //
-//   Config::Register(HybridEncryptConfig::Tink_1_1_0());
+//   auto status = Config::Register(HybridEncryptConfig::Tink_1_1_0());
 //
 // For more information on creation and usage of HybridEncrypt instances
 // see HybridEncryptFactory.

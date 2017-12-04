@@ -16,22 +16,9 @@
 
 package com.google.crypto.tink.testing;
 
-import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.hybrid.HybridConfig;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.nio.file.Paths;
 
 /**
  * A command-line utility for testing HybridDecrypt-primitives.
@@ -42,16 +29,6 @@ import java.nio.file.Paths;
  *  output-file:  name of the output file for the resulting ciphertext
  */
 public class HybridDecryptCli {
-  private static byte[] getStreamContents(InputStream inputStream) throws IOException {
-    ByteArrayOutputStream result = new ByteArrayOutputStream();
-    byte[] buffer = new byte[1024];
-    int length;
-    while ((length = inputStream.read(buffer)) != -1) {
-      result.write(buffer, 0, length);
-    }
-    return result.toByteArray();
-  }
-
   public static void main(String[] args) throws Exception {
     if (args.length != 4) {
       System.out.println(
@@ -66,30 +43,27 @@ public class HybridDecryptCli {
         + ciphertextFilename + " with context info '" + contextInfo + "'.");
     System.out.println("The resulting plaintext will be written to file " + outputFilename);
 
+    // Init Tink.
+    CliUtil.initTink();
+
     // Read the keyset.
     System.out.println("Reading the keyset...");
-    KeysetHandle keysetHandle = CleartextKeysetHandle.read(
-        BinaryKeysetReader.withFile(new File(keysetFilename)));
+    KeysetHandle keysetHandle = CliUtil.readKeyset(keysetFilename);
 
     // Get the primitive.
     System.out.println("Getting the primitive...");
-    Config.register(HybridConfig.TINK_1_0_0);
     HybridDecrypt hybridDecrypt = HybridDecryptFactory.getPrimitive(keysetHandle);
 
     // Read the ciphertext.
-    System.out.println("Reading the ciphertext...");
-    InputStream ciphertextStream = new FileInputStream(Paths.get(ciphertextFilename).toFile());
-    byte[] ciphertext = getStreamContents(ciphertextStream);
-    ciphertextStream.close();
+    byte[] ciphertext = CliUtil.read(ciphertextFilename);
 
-    // Compute the plaintext and write it to the output file.
+    // Compute the plaintext.
     System.out.println("Decrypting...");
-    byte[] plaintext = hybridDecrypt.decrypt(
-        ciphertext, contextInfo.getBytes(Charset.forName("UTF-8")));
-    System.out.println("Writing the ciphertext...");
-    OutputStream outputStream = new FileOutputStream(Paths.get(outputFilename).toFile());
-    outputStream.write(plaintext);
-    outputStream.close();
+    byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo.getBytes(CliUtil.UTF_8));
+
+    // Write the plaintext to the output file.
+    CliUtil.write(plaintext, outputFilename);
+
     System.out.println("All done.");
   }
 }

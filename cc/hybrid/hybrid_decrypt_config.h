@@ -33,7 +33,7 @@ namespace tink {
 // To register all HybridDecrypt key types provided in Tink release 1.1.0
 // one can do:
 //
-//   Config::Register(HybridDecryptConfig::Tink_1_1_0());
+//   auto status = Config::Register(HybridDecryptConfig::Tink_1_1_0());
 //
 // For more information on creation and usage of HybridDecrypt instances
 // see HybridDecryptFactory.

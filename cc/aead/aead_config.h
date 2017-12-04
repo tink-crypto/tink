@@ -30,7 +30,7 @@ namespace tink {
 //
 // To register all Aead key types provided in Tink release 1.1.0 one can do:
 //
-//   Config::Register(AeadConfig::Tink_1_1_0());
+//   auto status = Config::Register(AeadConfig::Tink_1_1_0());
 //
 // For more information on creation and usage of Aead instances see AeadFactory.
 class AeadConfig {

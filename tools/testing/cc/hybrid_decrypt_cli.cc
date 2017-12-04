@@ -17,17 +17,12 @@
 #include <iostream>
 #include <fstream>
 
-#include "cc/binary_keyset_reader.h"
-#include "cc/cleartext_keyset_handle.h"
 #include "cc/hybrid_decrypt.h"
 #include "cc/keyset_handle.h"
-#include "cc/hybrid/hybrid_decrypt_config.h"
 #include "cc/hybrid/hybrid_decrypt_factory.h"
 #include "cc/util/status.h"
+#include "tools/testing/cc/cli_util.h"
 
-using crypto::tink::BinaryKeysetReader;
-using crypto::tink::CleartextKeysetHandle;
-using crypto::tink::HybridDecryptConfig;
 using crypto::tink::HybridDecryptFactory;
 using crypto::tink::KeysetHandle;
 
@@ -54,34 +49,14 @@ int main(int argc, char** argv) {
             << "The resulting ciphertext will be written to file "
             << output_filename << std::endl;
 
+  // Init Tink;
+  CliUtil::InitTink();
+
   // Read the keyset.
-  std::clog << "Reading the keyset...\n";
-  std::unique_ptr<std::ifstream> keyset_stream(new std::ifstream());
-  keyset_stream->open(keyset_filename, std::ifstream::in);
-  auto keyset_reader_result = BinaryKeysetReader::New(std::move(keyset_stream));
-  if (!keyset_reader_result.ok()) {
-    std::clog << "Reading the keyset failed: "
-              << keyset_reader_result.status().error_message() << std::endl;
-    exit(1);
-  }
-  auto keyset_handle_result = CleartextKeysetHandle::Read(
-      std::move(keyset_reader_result.ValueOrDie()));
-  if (!keyset_handle_result.ok()) {
-    std::clog << "Reading the keyset failed: "
-              << keyset_handle_result.status().error_message() << std::endl;
-    exit(1);
-  }
   std::unique_ptr<KeysetHandle> keyset_handle =
-      std::move(keyset_handle_result.ValueOrDie());
+      std::move(CliUtil::ReadKeyset(keyset_filename));
 
   // Get the primitive.
-  std::clog << "Initializing the factory...\n";
-  auto status = HybridDecryptConfig::RegisterStandardKeyTypes();
-  if (!status.ok()) {
-    std::clog << "Factory initialization failed: "
-              << status.error_message() << std::endl;
-    exit(1);
-  }
   auto primitive_result = HybridDecryptFactory::GetPrimitive(*keyset_handle);
   if (!primitive_result.ok()) {
     std::clog << "Getting HybridDecrypt-primitive from the factory failed: "
@@ -92,35 +67,20 @@ int main(int argc, char** argv) {
       std::move(primitive_result.ValueOrDie());
 
   // Read the ciphertext.
-  std::clog << "Reading the ciphertext...\n";
-  std::ifstream ciphertext_stream;
-  ciphertext_stream.open(ciphertext_filename, std::ifstream::in);
-  if (!ciphertext_stream.is_open()) {
-    std::clog << "Error opening ciphertext file "
-              << ciphertext_filename << std::endl;
-    exit(1);
-  }
-  std::stringstream ciphertext;
-  ciphertext << ciphertext_stream.rdbuf();
-  ciphertext_stream.close();
+  std::string ciphertext = CliUtil::Read(ciphertext_filename);
 
-  // Compute the plaintext and write it to the output file.
+  // Compute the plaintext.
   std::clog << "Decrypting...\n";
-  auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext.str(), context_info);
+  auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
   if (!decrypt_result.ok()) {
     std::clog << "Error while decrypting the ciphertext:"
               << decrypt_result.status().error_message() << std::endl;
     exit(1);
   }
-  std::clog << "Writing the plaintext...\n";
-  std::ofstream output_stream(output_filename,
-                              std::ofstream::out | std::ofstream::binary);
-  if (!output_stream.is_open()) {
-    std::clog << "Error opening output file " << output_filename << std::endl;
-    exit(1);
-  }
-  output_stream << decrypt_result.ValueOrDie();
-  output_stream.close();
+
+  // Write the plaintext to the output file.
+  CliUtil::Write(decrypt_result.ValueOrDie(), output_filename);
+
   std::clog << "All done.\n";
   return 0;
 }
