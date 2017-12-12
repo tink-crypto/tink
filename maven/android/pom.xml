@@ -15,7 +15,19 @@
   <artifactId>tink-android</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <!-- library versions -->
+    <json.version>20170516</json.version>
+  </properties>
+
   <dependencies>
+    <!-- JSON dependency must appear before android, to replace stubs from android.jar -->
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>${json.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>com.google.android</groupId>
       <artifactId>android</artifactId>
@@ -74,9 +86,6 @@
             <exclude>**/KmsAeadKeyManagerTest.java</exclude>
             <exclude>**/KmsEnvelopeAeadKeyManagerTest.java</exclude>
             <exclude>**/KeysDownloaderTest.java</exclude>
-            <!-- these tests depend on JsonFormat which does not work with protobuf lite -->
-            <exclude>**/JsonKeysetReaderTest.java</exclude>
-            <exclude>**/JsonKeysetWriterTest.java</exclude>
             <!-- TODO: add Maven support for Wycheproof which these tests depend on -->
             <exclude>**/AesGcmJceTest.java</exclude>
             <exclude>**/AesEaxJceTest.java</exclude>

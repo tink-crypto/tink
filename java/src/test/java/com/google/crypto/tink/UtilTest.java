@@ -311,12 +311,6 @@ public class UtilTest {
 
   @Test
   public void testJsonExportOfKeyTemplates() throws Exception {
-    try {
-      Util.toJson(AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
-      fail("Registry not initialized, should not find key manager.");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "No key manager found");
-    }
     Config.register(HybridConfig.TINK_1_0_0);  // Contains Aead.
 
     int templateCount = 4;
