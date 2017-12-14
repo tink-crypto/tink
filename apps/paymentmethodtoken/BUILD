@@ -19,6 +19,19 @@ java_library(
     ],
 )
 
+java_binary(
+    name = "recipientkeygen",
+    srcs = glob([
+        "src/main/**/PaymentMethodTokenRecipientKeyGen.java",
+    ]),
+    javacopts = JAVACOPTS,
+    main_class = "com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenRecipientKeyGen",
+    deps = [
+        ":paymentmethodtoken",
+        "//java",
+    ],
+)
+
 # Tests
 
 load("//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
