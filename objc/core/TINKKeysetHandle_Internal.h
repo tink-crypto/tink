@@ -19,11 +19,11 @@
 #import "objc/TINKKeysetHandle.h"
 
 #include "cc/keyset_handle.h"
-#include "proto/tink.pb.h"
 
 @interface TINKKeysetHandle ()
 
-@property(nonatomic, readonly, nonnull) google::crypto::tink::Keyset *ccKeysetPB;
-@property(nonatomic, readonly, nonnull) crypto::tink::KeysetHandle *ccKeysetHandle;
+- (instancetype)initWithCCKeysetHandle:(std::unique_ptr<crypto::tink::KeysetHandle>)ccKeysetHandle;
+- (crypto::tink::KeysetHandle *)ccKeysetHandle;
+- (void)setCcKeysetHandle:(std::unique_ptr<crypto::tink::KeysetHandle>)handle;
 
 @end

@@ -13,6 +13,7 @@ objc_library(
         "//objc:aead",
         "//objc:keyset_handle",
         "//objc/util:errors",
+        "//proto:all_objc_proto",
         "@com_google_absl//absl/strings",
     ],
 )

@@ -18,7 +18,9 @@
 
 #import <Foundation/Foundation.h>
 
-@class TINKPBKeyset;
+#import "objc/TINKAead.h"
+#import "objc/TINKKeysetReader.h"
+#import "proto/Tink.pbobjc.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -28,18 +30,35 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKKeysetHandle : NSObject
 
-@property(nonatomic, readonly) TINKPBKeyset *keyset;
-
-/** Use initWithKeyset: to get an instance of TINKKeysetHandle. */
+/**
+ * Use -initWithKeysetReader:andKey:error: or -initWithTemplate:error: to get an instance of
+ * TINKKeysetHandle.
+ */
 - (nullable instancetype)init NS_UNAVAILABLE;
 
 /**
- * Designated initializer.
+ * Creates a TINKKeysetHandle from an encrypted keyset obtained via @c reader using @c aeadKey to
+ * decrypt the keyset.
  *
- * @param keyset  An instance of TINKPBKeyset protocol buffer.
- * @return        An instance of TINKKeysetHandle or nil in case of error.
+ * @param reader  An instance of TINKKeysetReader.
+ * @param aeadKey An instance of TINKAead that's used to decrypt the keyset.
+ * @param error   If non-nil it will be populated with a descriptive error message.
+ * @return        A TINKKeysetHandle, or nil in case of error.
  */
-- (nullable instancetype)initWithKeyset:(TINKPBKeyset *)keyset NS_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithKeysetReader:(TINKKeysetReader *)reader
+                                       andKey:(TINKAead *)aeadKey
+                                        error:(NSError **)error;
+
+/**
+ * Returns a new TINKKeysetHandle that contains a single fresh key generated according to
+ * @c keyTemplate.
+ *
+ * @param keyTemplate A TINKPBKeyTemplate protocol buffer that describes the key to be generated.
+ * @param error       If non-nil it will be populated with a descriptive error message.
+ * @return            A TINKKeysetHandle, or nil in case of error.
+ */
+- (nullable instancetype)initWithKeyTemplate:(TINKPBKeyTemplate *)keyTemplate
+                                       error:(NSError **)error;
 
 @end
 

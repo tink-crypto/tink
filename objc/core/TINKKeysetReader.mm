@@ -18,10 +18,25 @@
 
 #import <Foundation/Foundation.h>
 
-#include "cc/util/status.h"
+#import "objc/TINKKeysetReader.h"
+#import "objc/core/TINKKeysetReader_Internal.h"
 
-/** Converts a C++ Status code to NSError. */
-NSError* TINKStatusToError(const crypto::tink::util::Status& status);
+#include "cc/keyset_reader.h"
 
-/** Creates an NSError given a Tink error code and a message. */
-NSError* TINKError(crypto::tink::util::error::Code code, NSString* message);
+@implementation TINKKeysetReader {
+  std::unique_ptr<crypto::tink::KeysetReader> _ccReader;
+}
+
+- (void)setCcReader:(std::unique_ptr<crypto::tink::KeysetReader>)ccReader {
+  _ccReader = std::move(ccReader);
+}
+
+- (std::unique_ptr<crypto::tink::KeysetReader>)ccReader {
+  return std::move(_ccReader);
+}
+
+- (void)dealloc {
+  _ccReader.reset();
+}
+
+@end

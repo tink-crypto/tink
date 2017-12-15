@@ -44,7 +44,11 @@ objc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        ":aead",
+        ":keyset_reader",
         "//cc:keyset_handle",
+        "//cc/util:status",
+        "//objc/util:errors",
         "//objc/util:strings",
         "//proto:all_objc_proto",
         "@com_google_absl//absl/strings",
@@ -85,9 +89,14 @@ objc_library(
 
 objc_library(
     name = "keyset_reader",
-    hdrs = ["TINKKeysetReader.h"],
+    srcs = ["core/TINKKeysetReader.mm"],
+    hdrs = [
+        "TINKKeysetReader.h",
+        "core/TINKKeysetReader_Internal.h",
+    ],
     visibility = ["//visibility:public"],
     deps = [
+        "//cc:keyset_reader",
         "//proto:all_objc_proto",
     ],
 )
@@ -132,7 +141,9 @@ objc_library(
         "Tests/UnitTests/**/*.h",
     ]),
     deps = [
+        ":aead",
         ":binary_keyset_reader",
+        ":keyset_handle",
         "//cc/util:test_util",
         "//objc/util:strings",
         "//proto:all_objc_proto",

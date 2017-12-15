@@ -23,9 +23,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * The protocol for keyset readers.
+ * Parent class for keyset readers.
  */
-@protocol TINKKeysetReader <NSObject>
+@interface TINKKeysetReader : NSObject
 
 /* Reads a Keyset. Returns nil in case of error and sets error to a descriptive value. */
 - (nullable TINKPBKeyset *)readWithError:(NSError **)error;

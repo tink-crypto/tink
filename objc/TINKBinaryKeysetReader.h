@@ -23,7 +23,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface TINKBinaryKeysetReader : NSObject <TINKKeysetReader>
+@interface TINKBinaryKeysetReader : TINKKeysetReader
 
 - (nullable instancetype)init NS_UNAVAILABLE;
 

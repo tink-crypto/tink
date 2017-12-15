@@ -17,42 +17,87 @@
  */
 
 #import "objc/TINKKeysetHandle.h"
-#import "objc/core/TINKKeysetHandle_Internal.h"
 
 #include "cc/keyset_handle.h"
+#include "cc/util/status.h"
 #include "proto/tink.pb.h"
 
+#import "objc/TINKAead.h"
+#import "objc/TINKAead_Internal.h"
+#import "objc/TINKKeysetReader.h"
+#import "objc/core/TINKKeysetReader_Internal.h"
+#import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
 #import "proto/Tink.pbobjc.h"
 
-@implementation TINKKeysetHandle
+@implementation TINKKeysetHandle {
+  std::unique_ptr<crypto::tink::KeysetHandle> _ccKeysetHandle;
+}
 
-- (instancetype)initWithKeyset:(TINKPBKeyset *)keyset {
+- (instancetype)initWithCCKeysetHandle:(std::unique_ptr<crypto::tink::KeysetHandle>)ccKeysetHandle {
   self = [super init];
   if (self) {
-    // Serialize the Obj-C protocol buffer.
-    std::string serializedKeyset = TINKPBSerializeToString(keyset, nil);
-
-    // Deserialize it to a C++ protocol buffer.
-    _ccKeysetPB = new google::crypto::tink::Keyset();
-    if (!_ccKeysetPB || !_ccKeysetPB->ParseFromString(serializedKeyset)) {
-      return nil;
-    }
-
-    _ccKeysetHandle = new crypto::tink::KeysetHandle(*_ccKeysetPB);
-    if (!_ccKeysetHandle) {
-      delete _ccKeysetPB;
-      return nil;
-    }
-
-    _keyset = keyset;
+    _ccKeysetHandle = std::move(ccKeysetHandle);
   }
   return self;
 }
 
 - (void)dealloc {
-  delete _ccKeysetHandle;
-  delete _ccKeysetPB;
+  _ccKeysetHandle.reset();
+}
+
+- (nullable instancetype)initWithKeysetReader:(TINKKeysetReader *)reader
+                                       andKey:(TINKAead *)aeadKey
+                                        error:(NSError **)error {
+  crypto::tink::Aead *ccAead = aeadKey.primitive;
+
+  // KeysetHandle::Read takes ownership of reader.ccReader.
+  auto st = crypto::tink::KeysetHandle::Read(std::move(reader.ccReader), *ccAead);
+  if (!st.ok()) {
+    if (error) {
+      *error = TINKStatusToError(st.status());
+      return nil;
+    }
+  }
+
+  return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
+}
+
+- (nullable instancetype)initWithKeyTemplate:(TINKPBKeyTemplate *)keyTemplate
+                                       error:(NSError **)error {
+  // Serialize the Obj-C protocol buffer.
+  std::string serializedKeyTemplate = TINKPBSerializeToString(keyTemplate, error);
+  if (serializedKeyTemplate.empty()) {
+    return nil;
+  }
+
+  // Deserialize it to a C++ protocol buffer.
+  google::crypto::tink::KeyTemplate ccKeyTemplate;
+  if (!ccKeyTemplate.ParseFromString(serializedKeyTemplate)) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "Could not parse keyTemplate."));
+    }
+    return nil;
+  }
+
+  auto st = crypto::tink::KeysetHandle::GenerateNew(ccKeyTemplate);
+  if (!st.ok()) {
+    if (error) {
+      *error = TINKStatusToError(st.status());
+    }
+    return nil;
+  }
+
+  return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
+}
+
+- (crypto::tink::KeysetHandle *)ccKeysetHandle {
+  return _ccKeysetHandle.get();
+}
+
+- (void)setCcKeysetHandle:(std::unique_ptr<crypto::tink::KeysetHandle>)handle {
+  _ccKeysetHandle = std::move(handle);
 }
 
 @end

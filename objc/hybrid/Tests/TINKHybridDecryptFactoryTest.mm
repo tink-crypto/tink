@@ -20,6 +20,7 @@
 
 #include "cc/crypto_format.h"
 #include "cc/util/status.h"
+#include "cc/util/test_util.h"
 
 #import "proto/EciesAeadHkdf.pbobjc.h"
 #import "proto/Tink.pbobjc.h"
@@ -85,7 +86,7 @@ static NSData *encrypt(id<TINKHybridEncrypt> hybridEncrypt,
   // Get the key prefix using the C++ CryptoFormat API.
   // TODO(candrian): Update this to use the Obj-C API when it is implemented.
   std::string output_prefix =
-      crypto::tink::CryptoFormat::get_output_prefix(keysetHandle.ccKeysetPB->key(keyIndex))
+      crypto::tink::CryptoFormat::get_output_prefix(keysetHandle.ccKeysetHandle->get_keyset().key(keyIndex))
           .ValueOrDie();
   NSData *outputPrefix = TINKStringToNSData(output_prefix);
   [ciphertext appendData:outputPrefix];
@@ -98,8 +99,8 @@ static NSData *encrypt(id<TINKHybridEncrypt> hybridEncrypt,
 @implementation TINKHybridDecryptFactoryTest
 
 - (void)testPrimitiveWithEmptyKeyset {
-  TINKPBKeyset *keyset = [[TINKPBKeyset alloc] init];
-  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithKeyset:keyset];
+  google::crypto::tink::Keyset keyset;
+  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(keyset)];
   XCTAssertNotNil(keysetHandle);
 
   NSError *error = nil;
@@ -122,10 +123,15 @@ static NSData *encrypt(id<TINKHybridEncrypt> hybridEncrypt,
   TINKPBEciesAeadHkdfPrivateKey *eciesKey2 = getNewEciesPrivateKey();
   TINKPBEciesAeadHkdfPrivateKey *eciesKey3 = getNewEciesPrivateKey();
   TINKPBKeyset *keyset = createTestKeyset(eciesKey1, eciesKey2, eciesKey3);
-  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithKeyset:keyset];
+  google::crypto::tink::Keyset ccKeyset;
+  NSError *error = nil;
+  std::string serializedKeyset = TINKPBSerializeToString(keyset, &error);
+  XCTAssertNil(error);
+  XCTAssertTrue(ccKeyset.ParseFromString(serializedKeyset));
+  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccKeyset)];
 
   // Get a HybridDecrypt primitive using the test Keyset.
-  NSError *error = nil;
+  error = nil;
   id<TINKHybridDecrypt> hybridDecrypt =
       [TINKHybridDecryptFactory primitiveWithKeysetHandle:keysetHandle error:&error];
   XCTAssertNotNil(hybridDecrypt);

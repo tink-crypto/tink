@@ -29,3 +29,11 @@ NSError *TINKStatusToError(const crypto::tink::util::Status &status) {
   };
   return [NSError errorWithDomain:kTinkErrorDomain code:status.error_code() userInfo:userInfo];
 }
+
+NSError *TINKError(crypto::tink::util::error::Code code, NSString *message) {
+  NSDictionary *userInfo = @{
+    NSLocalizedDescriptionKey : NSLocalizedString(@"Tink Error", nil),
+    NSLocalizedFailureReasonErrorKey : NSLocalizedString(message, nil),
+  };
+  return [NSError errorWithDomain:kTinkErrorDomain code:code userInfo:userInfo];
+}

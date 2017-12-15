@@ -17,6 +17,9 @@
  */
 
 #import "objc/TINKBinaryKeysetReader.h"
+
+#import "objc/TINKKeysetReader.h"
+#import "objc/core/TINKKeysetReader_Internal.h"
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
 #import "proto/Tink.pbobjc.h"
@@ -25,9 +28,7 @@
 #include "cc/binary_keyset_reader.h"
 #include "proto/tink.pb.h"
 
-@implementation TINKBinaryKeysetReader {
-  std::unique_ptr<crypto::tink::BinaryKeysetReader> _ccReader;
-}
+@implementation TINKBinaryKeysetReader
 
 - (instancetype)initWithSerializedKeyset:(NSData *)keyset error:(NSError **)error {
   if (keyset == nil) {
@@ -47,17 +48,13 @@
       }
       return nil;
     }
-    _ccReader = std::move(st.ValueOrDie());
+    self.ccReader = std::move(st.ValueOrDie());
   }
   return self;
 }
 
-- (void)dealloc {
-  _ccReader.reset();
-}
-
 - (TINKPBKeyset *)readWithError:(NSError **)error {
-  auto st = _ccReader->Read();
+  auto st = self.ccReader->Read();
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st.status());
@@ -89,7 +86,7 @@
 }
 
 - (TINKPBEncryptedKeyset *)readEncryptedWithError:(NSError **)error {
-  auto st = _ccReader->ReadEncrypted();
+  auto st = self.ccReader->ReadEncrypted();
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st.status());

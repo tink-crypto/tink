@@ -19,6 +19,8 @@
 #import <XCTest/XCTest.h>
 
 #include "cc/util/status.h"
+#include "cc/util/test_util.h"
+#include "proto/tink.pb.h"
 
 #import "proto/Common.pbobjc.h"
 #import "proto/EciesAeadHkdf.pbobjc.h"
@@ -26,6 +28,7 @@
 
 #import "objc/TINKHybridEncrypt.h"
 #import "objc/TINKKeysetHandle.h"
+#import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/hybrid/TINKHybridEncryptConfig.h"
 #import "objc/hybrid/TINKHybridEncryptFactory.h"
 #import "objc/util/TINKStrings.h"
@@ -44,8 +47,8 @@ static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
 @implementation TINKHybridEncryptFactoryTest
 
 - (void)testPrimitiveWithEmptyKeyset {
-  TINKPBKeyset *keyset = [[TINKPBKeyset alloc] init];
-  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithKeyset:keyset];
+  google::crypto::tink::Keyset keyset;
+  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(keyset)];
 
   NSError *error = nil;
   id<TINKHybridEncrypt> primitive =
@@ -82,12 +85,19 @@ static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
   // Initialize the registry.
   [TINKHybridEncryptConfig registerStandardKeyTypes];
 
+  NSError *error = nil;
+  std::string serializedKeyset = TINKPBSerializeToString(keyset, &error);
+  XCTAssertNil(error);
+
+  google::crypto::tink::Keyset ccKeyset;
+  XCTAssertTrue(ccKeyset.ParseFromString(serializedKeyset));
+
   // Create a KeysetHandle and use it with the factory.
-  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithKeyset:keyset];
+  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccKeyset)];
   XCTAssertNotNil(keysetHandle);
 
   // Get a HybridEncrypt primitive.
-  NSError *error = nil;
+  error = nil;
   id<TINKHybridEncrypt> primitive =
       [TINKHybridEncryptFactory primitiveWithKeysetHandle:keysetHandle error:&error];
   XCTAssertNotNil(primitive);
