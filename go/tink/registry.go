@@ -13,45 +13,44 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
 package tink
 
 import (
-	"fmt"
-	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/util/util"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
-	"sync"
+  "fmt"
+  "sync"
+  "github.com/google/tink/go/util/util"
+  "github.com/golang/protobuf/proto"
+  tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // Mapping between typeUrl and KeyManager.
 // Using mutex for concurrency read and write
 type keyManagerMap struct {
-	sync.RWMutex
-	m map[string]KeyManager
+  sync.RWMutex
+  m map[string]KeyManager
 }
 
 // NewKeyManagerMap creates a new instance of keyManagerMap.
 func NewKeyManagerMap() *keyManagerMap {
-	kmMap := new(keyManagerMap)
-	kmMap.m = make(map[string]KeyManager)
-	return kmMap
+  kmMap := new(keyManagerMap)
+  kmMap.m = make(map[string]KeyManager)
+  return kmMap
 }
 
 // Get returns whether the specified typeUrl exists in the map and
 // the corresponding value if it exists.
 func (kmMap *keyManagerMap) Get(typeUrl string) (KeyManager, bool) {
-	kmMap.RLock()
-	defer kmMap.RUnlock()
-	km, existed := kmMap.m[typeUrl]
-	return km, existed
+  kmMap.RLock()
+  defer kmMap.RUnlock()
+  km, existed := kmMap.m[typeUrl]
+  return km, existed
 }
 
 // Put associates the given keyManager with the given typeUrl in the map.
 func (kmMap *keyManagerMap) Put(typeUrl string, keyManager KeyManager) {
-	kmMap.Lock()
-	defer kmMap.Unlock()
-	kmMap.m[typeUrl] = keyManager
+  kmMap.Lock()
+  defer kmMap.Unlock()
+  kmMap.m[typeUrl] = keyManager
 }
 
 // Registry for KeyMangers. <p>
@@ -69,15 +68,15 @@ func (kmMap *keyManagerMap) Put(typeUrl string, keyManager KeyManager) {
 // KeyManagers. Registry is public though, to enable configurations with custom
 // primitives and KeyManagers.
 type registry struct {
-	// Thread-safe mapping between typeUrl and KeyManager.
-	keyManagers *keyManagerMap
+  // Thread-safe mapping between typeUrl and KeyManager.
+  keyManagers *keyManagerMap
 }
 
 // newRegistry creates a new instance of registry.
 func newRegistry() *registry {
-	reg := new(registry)
-	reg.keyManagers = NewKeyManagerMap()
-	return reg
+  reg := new(registry)
+  reg.keyManagers = NewKeyManagerMap()
+  return reg
 }
 
 // registryInstance is a shared instance of registry. It is initialized only once
@@ -87,106 +86,106 @@ var once sync.Once
 
 // Registry creates an instance of registry if there isn't and returns the instance.
 func Registry() *registry {
-	// only create the registry instance once
-	once.Do(func() {
-		registryInstance = newRegistry()
-	})
-	return registryInstance
+  // only create the registry instance once
+  once.Do(func() {
+    registryInstance = newRegistry()
+  })
+  return registryInstance
 }
 
 // RegisterKeyManager registers the given key manager.
 // It does nothing if there already exists a key manager with the same type url.
 // It returns true if the key manager is registered; false otherwise.
 func (reg *registry) RegisterKeyManager(manager KeyManager) (bool, error) {
-	if manager == nil {
-		return false, fmt.Errorf("registry: invalid key manager")
-	}
-	typeUrl := manager.GetKeyType()
-	// try to get the key manager with the given typeUrl, return false if there is
-	_, existed := reg.keyManagers.Get(typeUrl)
-	if existed {
-		return false, nil
-	}
-	// add the manager
-	reg.keyManagers.Put(typeUrl, manager)
-	return true, nil
+  if manager == nil {
+    return false, fmt.Errorf("registry: invalid key manager")
+  }
+  typeUrl := manager.GetKeyType()
+  // try to get the key manager with the given typeUrl, return false if there is
+  _, existed := reg.keyManagers.Get(typeUrl)
+  if existed {
+    return false, nil
+  }
+  // add the manager
+  reg.keyManagers.Put(typeUrl, manager)
+  return true, nil
 }
 
 // GetKeyManager returns the key manager for the given type url if existed.
 func (reg *registry) GetKeyManager(typeUrl string) (KeyManager, error) {
-	manager, existed := reg.keyManagers.Get(typeUrl)
-	if !existed {
-		return nil, fmt.Errorf("registry: unsupported key type: %s", typeUrl)
-	}
-	return manager, nil
+  manager, existed := reg.keyManagers.Get(typeUrl)
+  if !existed {
+    return nil, fmt.Errorf("registry: unsupported key type: %s", typeUrl)
+  }
+  return manager, nil
 }
 
 // NewKeyData generates a new KeyData for the given KeyTemplate.
 func (reg *registry) NewKeyData(template *tinkpb.KeyTemplate) (*tinkpb.KeyData, error) {
-	if template == nil {
-		return nil, fmt.Errorf("registry: invalid key template")
-	}
-	manager, err := reg.GetKeyManager(template.TypeUrl)
-	if err != nil {
-		return nil, err
-	}
-	return manager.NewKeyData(template.Value)
+  if template == nil {
+    return nil, fmt.Errorf("registry: invalid key template")
+  }
+  manager, err := reg.GetKeyManager(template.TypeUrl)
+  if err != nil {
+    return nil, err
+  }
+  return manager.NewKeyData(template.Value)
 }
 
 // NewKeyFromKeyTemplate generates a new key for the given KeyTemplate.
 func (reg *registry) NewKeyFromKeyTemplate(template *tinkpb.KeyTemplate) (proto.Message, error) {
-	if template == nil {
-		return nil, fmt.Errorf("registry: invalid key template")
-	}
-	manager, err := reg.GetKeyManager(template.TypeUrl)
-	if err != nil {
-		return nil, err
-	}
-	return manager.NewKeyFromSerializedKeyFormat(template.Value)
+  if template == nil {
+    return nil, fmt.Errorf("registry: invalid key template")
+  }
+  manager, err := reg.GetKeyManager(template.TypeUrl)
+  if err != nil {
+    return nil, err
+  }
+  return manager.NewKeyFromSerializedKeyFormat(template.Value)
 }
 
 // NewKeyFromKeyFormat generates a new key for the given KeyFormat using the
 // KeyManager identified by the given typeUrl.
 func (reg *registry) NewKeyFromKeyFormat(typeUrl string,
-	format proto.Message) (proto.Message, error) {
-	manager, err := reg.GetKeyManager(typeUrl)
-	if err != nil {
-		return nil, err
-	}
-	return manager.NewKeyFromKeyFormat(format)
+                                        format proto.Message) (proto.Message, error) {
+  manager, err := reg.GetKeyManager(typeUrl)
+  if err != nil {
+    return nil, err
+  }
+  return manager.NewKeyFromKeyFormat(format)
 }
 
 // GetPrimitiveFromKey creates a new primitive for the given key using the KeyManager
 // identified by the given typeUrl.
 func (reg *registry) GetPrimitiveFromKey(typeUrl string,
-	key proto.Message) (interface{}, error) {
-	manager, err := reg.GetKeyManager(typeUrl)
-	if err != nil {
-		return nil, err
-	}
-	return manager.GetPrimitiveFromKey(key)
+                                        key proto.Message) (interface{}, error) {
+  manager, err := reg.GetKeyManager(typeUrl)
+  if err != nil {
+    return nil, err
+  }
+  return manager.GetPrimitiveFromKey(key);
 }
 
 // GetPrimitiveFromKeyData creates a new primitive for the key given in the given KeyData.
 func (reg *registry) GetPrimitiveFromKeyData(keyData *tinkpb.KeyData) (interface{}, error) {
-	if keyData == nil {
-		return nil, fmt.Errorf("registry: invalid key data")
-	}
-	return reg.GetPrimitiveFromSerializedKey(keyData.TypeUrl, keyData.Value)
+  if keyData == nil {
+    return nil, fmt.Errorf("registry: invalid key data")
+  }
+  return reg.GetPrimitiveFromSerializedKey(keyData.TypeUrl, keyData.Value)
 }
 
 // GetPrimitiveFromSerializedKey creates a new primitive for the given serialized key
 // using the KeyManager identified by the given typeUrl.
 func (reg *registry) GetPrimitiveFromSerializedKey(typeUrl string,
-	serializedKey []byte) (interface{}, error) {
-	if len(serializedKey) == 0 {
-		return nil, fmt.Errorf("registry: invalid serialized key")
-	}
-	manager, err := reg.GetKeyManager(typeUrl)
-	if err != nil {
-		return nil, err
-	}
-	return manager.GetPrimitiveFromSerializedKey(serializedKey)
+                                                  serializedKey []byte) (interface{}, error) {
+  if len(serializedKey) == 0 {
+    return nil, fmt.Errorf("registry: invalid serialized key")
+  }
+  manager, err := reg.GetKeyManager(typeUrl)
+  if err != nil {
+    return nil, err
+  }
+  return manager.GetPrimitiveFromSerializedKey(serializedKey);
 }
 
 // GetPrimitives creates a set of primitives corresponding to the keys with
@@ -196,7 +195,7 @@ func (reg *registry) GetPrimitiveFromSerializedKey(typeUrl string,
 // The returned set is usually later "wrapped" into a class that implements
 // the corresponding Primitive-interface.
 func (reg *registry) GetPrimitives(keysetHandle *KeysetHandle) (*PrimitiveSet, error) {
-	return reg.GetPrimitivesWithCustomManager(keysetHandle, nil)
+  return reg.GetPrimitivesWithCustomManager(keysetHandle, nil)
 }
 
 // GetPrimitivesWithCustomManager creates a set of primitives corresponding to
@@ -212,53 +211,53 @@ func (reg *registry) GetPrimitives(keysetHandle *KeysetHandle) (*PrimitiveSet, e
 // The returned set is usually later "wrapped" into a class that implements
 // the corresponding Primitive-interface.
 func (reg *registry) GetPrimitivesWithCustomManager(
-	keysetHandle *KeysetHandle, customManager KeyManager) (*PrimitiveSet, error) {
-	// TODO(thaidn): check that all keys are of the same primitive
-	if keysetHandle == nil {
-		return nil, fmt.Errorf("registry: invalid keyset handle")
-	}
-	keyset := keysetHandle.Keyset()
-	if err := util.ValidateKeyset(keyset); err != nil {
-		return nil, fmt.Errorf("registry: invalid keyset: %s", err)
-	}
-	primitiveSet := NewPrimitiveSet()
-	for _, key := range keyset.Key {
-		if key.Status != tinkpb.KeyStatusType_ENABLED {
-			continue
-		}
-		var primitive interface{}
-		var err error
-		if customManager != nil && customManager.DoesSupport(key.KeyData.TypeUrl) {
-			primitive, err = customManager.GetPrimitiveFromSerializedKey(key.KeyData.Value)
-		} else {
-			primitive, err = reg.GetPrimitiveFromKeyData(key.KeyData)
-		}
-		if err != nil {
-			return nil, fmt.Errorf("registry: cannot get primitive from key: %s", err)
-		}
-		entry, err := primitiveSet.AddPrimitive(primitive, key)
-		if err != nil {
-			return nil, fmt.Errorf("registry: cannot add primitive: %s", err)
-		}
-		if key.KeyId == keyset.PrimaryKeyId {
-			primitiveSet.SetPrimary(entry)
-		}
-	}
-	return primitiveSet, nil
+    keysetHandle *KeysetHandle, customManager KeyManager) (*PrimitiveSet, error) {
+  // TODO(thaidn): check that all keys are of the same primitive
+  if keysetHandle == nil {
+    return nil, fmt.Errorf("registry: invalid keyset handle")
+  }
+  keyset := keysetHandle.Keyset()
+  if err := util.ValidateKeyset(keyset); err != nil {
+    return nil, fmt.Errorf("registry: invalid keyset: %s", err)
+  }
+  primitiveSet := NewPrimitiveSet()
+  for _, key := range keyset.Key {
+    if key.Status != tinkpb.KeyStatusType_ENABLED {
+      continue
+    }
+    var primitive interface{}
+    var err error
+    if customManager != nil && customManager.DoesSupport(key.KeyData.TypeUrl) {
+      primitive, err = customManager.GetPrimitiveFromSerializedKey(key.KeyData.Value)
+    } else {
+      primitive, err = reg.GetPrimitiveFromKeyData(key.KeyData)
+    }
+    if err != nil {
+      return nil, fmt.Errorf("registry: cannot get primitive from key: %s", err)
+    }
+    entry, err := primitiveSet.AddPrimitive(primitive, key)
+    if err != nil {
+      return nil, fmt.Errorf("registry: cannot add primitive: %s", err)
+    }
+    if key.KeyId == keyset.PrimaryKeyId {
+      primitiveSet.SetPrimary(entry)
+    }
+  }
+  return primitiveSet, nil
 }
 
 // GetPublicKeyData is Convenience method for extracting the public key data
 // from the given serialized private key. It looks up a PrivateKeyManager
 // identified by the given typeUrl, and calls the manager's GetPublicKeyData() method.
 func (reg *registry) GetPublicKeyData(typeUrl string,
-	serializedPrivKey []byte) (*tinkpb.KeyData, error) {
-	keyManager, err := reg.GetKeyManager(typeUrl)
-	if err != nil {
-		return nil, err
-	}
-	privateKeyManager, ok := keyManager.(PrivateKeyManager)
-	if !ok {
-		return nil, fmt.Errorf("registry: %s is not belong to a PrivateKeyManager", typeUrl)
-	}
-	return privateKeyManager.GetPublicKeyData(serializedPrivKey)
+                                    serializedPrivKey []byte) (*tinkpb.KeyData, error) {
+  keyManager, err := reg.GetKeyManager(typeUrl)
+  if err != nil {
+    return nil, err
+  }
+  privateKeyManager, ok := keyManager.(PrivateKeyManager)
+  if !ok {
+    return nil, fmt.Errorf("registry: %s is not belong to a PrivateKeyManager", typeUrl)
+  }
+  return privateKeyManager.GetPublicKeyData(serializedPrivKey)
 }

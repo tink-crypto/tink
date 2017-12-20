@@ -50,10 +50,19 @@ Tink is written by a group of cryptographers and security engineers at Google,
 but it is **not an official Google product**. In particular, it is not meant as
 a replacement or successor of [Keyczar](https://github.com/google/keyczar).
 
-**Current Status** [Tink for Java](doc/JAVA-HOWTO.md) is field tested and ready
-for production -- it is used in several Google products such as AdMob, Android
-Pay, and Google Android Search App. Tink for C++, Obj-C and Go are in active
-development.
+**Current Status**
+
+* [Tink for Java](doc/JAVA-HOWTO.md) is field tested and ready for production --
+  it is used in several Google products such as AdMob, Android Pay, and Google
+  Android Search App.
+
+* [Tink for C++](doc/CPP-HOWTO.md) is catching up with
+  [Tink for Java](doc/JAVA-HOWTO.md) in terms of features and stability,
+  and the offered functionality is 100%-compatible with Java
+  (cf. [cross-language tests](tools/testing/cross_language/).
+  We plan to make a first C++ release soon.
+
+* Tink for Obj-C and Go are in active development.
 
 ## Getting started
 
@@ -128,6 +137,7 @@ testing.
 *   [Tink Primitives](doc/PRIMITIVES.md)
 *   [Key Management](doc/KEY-MANAGEMENT.md)
 *   [Java HOW-TO](doc/JAVA-HOWTO.md)
+*   [C++ HOW-TO](doc/CPP-HOWTO.md)
 *   [Tinkey](doc/TINKEY.md)
 
 ## Contact and mailing list

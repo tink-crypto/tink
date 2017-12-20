@@ -13,33 +13,32 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
 package tink
 
 import (
-	"encoding/binary"
-	"fmt"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+  "fmt"
+  "encoding/binary"
+  tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 /**
  * Constants and convenience methods that deal with crypto format.
  */
 const (
-	// Prefix size of Tink and Legacy key types.
-	NON_RAW_PREFIX_SIZE = 5
+  // Prefix size of Tink and Legacy key types.
+  NON_RAW_PREFIX_SIZE = 5
 
-	// Legacy or Crunchy prefix starts with \x00 and followed by a 4-byte key id.
-	LEGACY_PREFIX_SIZE = NON_RAW_PREFIX_SIZE
-	LEGACY_START_BYTE  = byte(0)
+  // Legacy or Crunchy prefix starts with \x00 and followed by a 4-byte key id.
+  LEGACY_PREFIX_SIZE = NON_RAW_PREFIX_SIZE
+  LEGACY_START_BYTE = byte(0)
 
-	// Tink prefix starts with \x01 and followed by a 4-byte key id.
-	TINK_PREFIX_SIZE = NON_RAW_PREFIX_SIZE
-	TINK_START_BYTE  = byte(1)
+  // Tink prefix starts with \x01 and followed by a 4-byte key id.
+  TINK_PREFIX_SIZE = NON_RAW_PREFIX_SIZE
+  TINK_START_BYTE = byte(1)
 
-	// Raw prefix is empty.
-	RAW_PREFIX_SIZE = 0
-	RAW_PREFIX      = ""
+  // Raw prefix is empty.
+  RAW_PREFIX_SIZE = 0;
+  RAW_PREFIX = ""
 )
 
 /**
@@ -53,16 +52,16 @@ const (
  * @return a prefix.
  */
 func GetOutputPrefix(key *tinkpb.Keyset_Key) (string, error) {
-	switch key.OutputPrefixType {
-	case tinkpb.OutputPrefixType_LEGACY, tinkpb.OutputPrefixType_CRUNCHY:
-		return createOutputPrefix(LEGACY_PREFIX_SIZE, LEGACY_START_BYTE, key.KeyId), nil
-	case tinkpb.OutputPrefixType_TINK:
-		return createOutputPrefix(TINK_PREFIX_SIZE, TINK_START_BYTE, key.KeyId), nil
-	case tinkpb.OutputPrefixType_RAW:
-		return RAW_PREFIX, nil
-	default:
-		return "", fmt.Errorf("crypto_format: unknown output prefix type")
-	}
+  switch key.OutputPrefixType {
+    case tinkpb.OutputPrefixType_LEGACY, tinkpb.OutputPrefixType_CRUNCHY:
+      return createOutputPrefix(LEGACY_PREFIX_SIZE, LEGACY_START_BYTE, key.KeyId), nil
+    case tinkpb.OutputPrefixType_TINK:
+      return createOutputPrefix(TINK_PREFIX_SIZE, TINK_START_BYTE, key.KeyId), nil
+    case tinkpb.OutputPrefixType_RAW:
+      return RAW_PREFIX, nil
+    default:
+      return "", fmt.Errorf("crypto_format: unknown output prefix type")
+  }
 }
 
 /**
@@ -70,8 +69,8 @@ func GetOutputPrefix(key *tinkpb.Keyset_Key) (string, error) {
  * of the prefix, followed by 4 bytes of {@code keyId} in Big Endian encoding.
  */
 func createOutputPrefix(size int, startByte byte, keyId uint32) string {
-	prefix := make([]byte, size)
-	prefix[0] = startByte
-	binary.BigEndian.PutUint32(prefix[1:], keyId)
-	return string(prefix)
+  prefix := make([]byte, size)
+  prefix[0] = startByte
+  binary.BigEndian.PutUint32(prefix[1:], keyId)
+  return string(prefix)
 }

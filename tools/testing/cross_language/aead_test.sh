@@ -18,21 +18,23 @@ aead_basic_test() {
   local encrypt_cli="$2"
   local decrypt_cli="$2"
   local key_templates=$4
+
   echo "############ starting test $test_name for the following templates:"
   echo $key_templates
   for key_template in ${key_templates[*]}
   do
-    generate_symmetric_key "aead" $test_name $key_template
-    generate_plaintext $test_name
+    local test_instance="${test_name}_${key_template}"
+    generate_symmetric_key "aead" $test_instance $key_template
+    generate_plaintext $test_instance
 
-    local encrypted_file="$TEST_TMPDIR/${test_name}_encrypted.bin"
-    local decrypted_file="$TEST_TMPDIR/${test_name}_decrypted.bin"
-    local associated_data="some associated data for $test_name"
-    $encrypt_cli $symmetric_key_file "encrypt" $plaintext_file "$associated_data" \
-        $encrypted_file || exit 1
+    local encrypted_file="$TEST_TMPDIR/${test_instance}_encrypted.bin"
+    local decrypted_file="$TEST_TMPDIR/${test_instance}_decrypted.bin"
+    local associated_data="some associated data for $test_instance"
+    $encrypt_cli $symmetric_key_file "encrypt" $plaintext_file\
+        "$associated_data" $encrypted_file || exit 1
     assert_files_different $plaintext_file $encrypted_file
-    $decrypt_cli $symmetric_key_file "decrypt" $encrypted_file "$associated_data" \
-        $decrypted_file || exit 1
+    $decrypt_cli $symmetric_key_file "decrypt" $encrypted_file\
+        "$associated_data" $decrypted_file || exit 1
     assert_files_equal $plaintext_file $decrypted_file
   done
 }

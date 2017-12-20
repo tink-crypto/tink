@@ -13,17 +13,16 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
 package tink
 
 import (
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+  tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // PrivateKeyManager is a special type of KeyManager that understands private key types.
 type PrivateKeyManager interface {
-	KeyManager
+  KeyManager
 
-	// GetPublicKeyData extracts the public key data from the private key.
-	GetPublicKeyData(serializedKey []byte) (*tinkpb.KeyData, error)
+  // GetPublicKeyData extracts the public key data from the private key.
+  GetPublicKeyData(serializedKey []byte) (*tinkpb.KeyData, error)
 }

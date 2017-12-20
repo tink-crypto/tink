@@ -13,23 +13,22 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
 package mac_test
 
 import (
-	"github.com/google/tink/go/mac/mac"
-	"github.com/google/tink/go/tink/tink"
-	"testing"
+  "testing"
+  "github.com/google/tink/go/mac/mac"
+  "github.com/google/tink/go/tink/tink"
 )
 
 func TestRegistration(t *testing.T) {
-	success, err := mac.Config().RegisterStandardKeyTypes()
-	if !success || err != nil {
-		t.Errorf("cannot register standard key types")
-	}
-	keyManager, err := tink.Registry().GetKeyManager(mac.HMAC_TYPE_URL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-	var _ = keyManager.(*mac.HmacKeyManager)
+  success, err := mac.Config().RegisterStandardKeyTypes()
+  if !success || err != nil {
+    t.Errorf("cannot register standard key types")
+  }
+  keyManager, err := tink.Registry().GetKeyManager(mac.HMAC_TYPE_URL)
+  if err != nil {
+    t.Errorf("unexpected error: %s", err)
+  }
+  var _ = keyManager.(*mac.HmacKeyManager)
 }

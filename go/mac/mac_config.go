@@ -13,12 +13,11 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
 package mac
 
 import (
-	"github.com/google/tink/go/tink/tink"
-	"sync"
+  "sync"
+  "github.com/google/tink/go/tink/tink"
 )
 
 // Config offers convenience methods for initializing mac.Factory()
@@ -32,32 +31,31 @@ import (
 // This divison allows for gradual retiring insecure or obsolete key types.
 var configInstance *config
 var configOnce sync.Once
-
-type config struct{}
+type config struct {}
 
 // Config creates an instance of config if there isn't and returns the instance.
 func Config() *config {
-	configOnce.Do(func() {
-		configInstance = new(config)
-	})
-	return configInstance
+  configOnce.Do(func() {
+    configInstance = new(config)
+  })
+  return configInstance
 }
 
 // RegisterStandardKeyTypes registers standard Mac key types and their managers
 // with the Registry.
 func (c *config) RegisterStandardKeyTypes() (bool, error) {
-	return c.RegisterKeyManager(NewHmacKeyManager())
+  return c.RegisterKeyManager(NewHmacKeyManager())
 }
 
 // RegisterLegacyKeyTypes registers legacy Mac key types and their managers
 // with the Registry.
 func (c *config) RegisterLegacyKeyTypes() (bool, error) {
-	return false, nil
+  return false, nil
 }
 
 // RegisterKeyManager registers the given keyManager for the key type given in
 // keyManager.KeyType(). It returns true if registration was successful, false if
 // there already exisits a key manager for the key type.
 func (c *config) RegisterKeyManager(keyManager tink.KeyManager) (bool, error) {
-	return tink.Registry().RegisterKeyManager(keyManager)
+  return tink.Registry().RegisterKeyManager(keyManager)
 }

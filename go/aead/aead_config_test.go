@@ -13,31 +13,30 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
 package aead_test
 
 import (
-	"github.com/google/tink/go/aead/aead"
-	"github.com/google/tink/go/tink/tink"
-	"testing"
+  "testing"
+  "github.com/google/tink/go/tink/tink"
+  "github.com/google/tink/go/aead/aead"
 )
 
 func TestConfigInstance(t *testing.T) {
-	c := aead.Config()
-	if c == nil {
-		t.Errorf("Config() returns nil")
-	}
+  c := aead.Config()
+  if c == nil {
+    t.Errorf("Config() returns nil")
+  }
 }
 
 func TestConfigRegistration(t *testing.T) {
-	success, err := aead.Config().RegisterStandardKeyTypes()
-	if !success || err != nil {
-		t.Errorf("cannot register standard key types")
-	}
-	// check for AES-GCM key manager
-	keyManager, err := tink.Registry().GetKeyManager(aead.AES_GCM_TYPE_URL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-	var _ = keyManager.(*aead.AesGcmKeyManager)
+  success, err := aead.Config().RegisterStandardKeyTypes()
+  if !success || err != nil {
+    t.Errorf("cannot register standard key types")
+  }
+  // check for AES-GCM key manager
+  keyManager, err := tink.Registry().GetKeyManager(aead.AES_GCM_TYPE_URL)
+  if err != nil {
+    t.Errorf("unexpected error: %s", err)
+  }
+  var _ = keyManager.(*aead.AesGcmKeyManager)
 }

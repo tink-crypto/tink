@@ -21,6 +21,7 @@ signature_basic_test() {
   local sign_cli="$2"
   local verify_cli="$3"
   local key_templates=$4
+
   echo "############ starting test $test_name for the following templates:"
   echo $key_templates
   for key_template in ${key_templates[*]}

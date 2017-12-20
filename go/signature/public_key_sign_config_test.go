@@ -13,31 +13,30 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
 package signature_test
 
 import (
-	"github.com/google/tink/go/signature/signature"
-	"github.com/google/tink/go/tink/tink"
-	"testing"
+  "testing"
+  "github.com/google/tink/go/tink/tink"
+  "github.com/google/tink/go/signature/signature"
 )
 
 func TestPublicKeySignConfigInstance(t *testing.T) {
-	config := signature.PublicKeySignConfig()
-	if config == nil {
-		t.Errorf("instance of publicKeySignConfig is nil")
-	}
+  config := signature.PublicKeySignConfig()
+  if config == nil {
+    t.Errorf("instance of publicKeySignConfig is nil")
+  }
 }
 
 func TestPublicKeySignConfigRegistration(t *testing.T) {
-	_, err := signature.PublicKeySignConfig().RegisterStandardKeyTypes()
-	if err != nil {
-		t.Errorf("cannot register standard key types")
-	}
-	// check for EcdsaSignKeyManager
-	keyManager, err := tink.Registry().GetKeyManager(signature.ECDSA_SIGN_TYPE_URL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-	var _ = keyManager.(*signature.EcdsaSignKeyManager)
+  _, err := signature.PublicKeySignConfig().RegisterStandardKeyTypes()
+  if err != nil {
+    t.Errorf("cannot register standard key types")
+  }
+  // check for EcdsaSignKeyManager
+  keyManager, err := tink.Registry().GetKeyManager(signature.ECDSA_SIGN_TYPE_URL)
+  if err != nil {
+    t.Errorf("unexpected error: %s", err)
+  }
+  var _ = keyManager.(*signature.EcdsaSignKeyManager)
 }

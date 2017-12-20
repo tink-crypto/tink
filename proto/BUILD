@@ -75,7 +75,6 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "tink_go_proto",
-    ignore_go_package_option = 1,
     srcs = [
         "tink.proto",
     ],
