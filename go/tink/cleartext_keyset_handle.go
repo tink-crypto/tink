@@ -16,10 +16,10 @@
 package tink
 
 import (
-  "fmt"
-  "sync"
-  "github.com/golang/protobuf/proto"
-  tinkpb "github.com/google/tink/proto/tink_go_proto"
+	"fmt"
+	"github.com/golang/protobuf/proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	"sync"
 )
 
 // cleartextKeysetHandle provides utilities to creates keyset handles from
@@ -27,46 +27,47 @@ import (
 // should be restricted.
 var ckhInstance *cleartextKeysetHandle
 var cleartextKeysetHandleOnce sync.Once
-type cleartextKeysetHandle struct {}
+
+type cleartextKeysetHandle struct{}
 
 // CleartextKeysetHandle returns the single instance of cleartextKeysetHandle.
 func CleartextKeysetHandle() *cleartextKeysetHandle {
-  cleartextKeysetHandleOnce.Do(func() {
-    ckhInstance = new(cleartextKeysetHandle)
-  })
-  return ckhInstance
+	cleartextKeysetHandleOnce.Do(func() {
+		ckhInstance = new(cleartextKeysetHandle)
+	})
+	return ckhInstance
 }
 
 var errInvalidKeyset = fmt.Errorf("cleartext_keyset_handle: invalid keyset")
 
 // ParseSerializedKeyset creates a new keyset handle from the given serialized keyset.
 func (_ *cleartextKeysetHandle) ParseSerializedKeyset(serialized []byte) (*KeysetHandle, error) {
-  if len(serialized) == 0 {
-    return nil, errInvalidKeyset
-  }
-  keyset := new(tinkpb.Keyset)
-  if err := proto.Unmarshal(serialized, keyset); err != nil {
-    return nil, errInvalidKeyset
-  }
-  return newKeysetHandle(keyset, nil)
+	if len(serialized) == 0 {
+		return nil, errInvalidKeyset
+	}
+	keyset := new(tinkpb.Keyset)
+	if err := proto.Unmarshal(serialized, keyset); err != nil {
+		return nil, errInvalidKeyset
+	}
+	return newKeysetHandle(keyset, nil)
 }
 
 // ParseKeyset creates a new keyset handle from the given keyset.
 func (_ *cleartextKeysetHandle) ParseKeyset(keyset *tinkpb.Keyset) (*KeysetHandle, error) {
-  return newKeysetHandle(keyset, nil)
+	return newKeysetHandle(keyset, nil)
 }
 
 // GenerateNew creates a keyset handle that contains a single fresh key generated
 // according to the given key template.
 func (_ *cleartextKeysetHandle) GenerateNew(template *tinkpb.KeyTemplate) (*KeysetHandle, error) {
-  manager := NewKeysetManager(template, nil, nil)
-  err := manager.Rotate()
-  if err != nil {
-    return nil, fmt.Errorf("cleartext_keyset_handle: cannot rotate keyset manager: %s", err)
-  }
-  handle, err := manager.GetKeysetHandle()
-  if err != nil {
-    return nil, fmt.Errorf("cleartext_keyset_handle: cannot get keyset handle: %s", err)
-  }
-  return handle, nil
+	manager := NewKeysetManager(template, nil, nil)
+	err := manager.Rotate()
+	if err != nil {
+		return nil, fmt.Errorf("cleartext_keyset_handle: cannot rotate keyset manager: %s", err)
+	}
+	handle, err := manager.GetKeysetHandle()
+	if err != nil {
+		return nil, fmt.Errorf("cleartext_keyset_handle: cannot get keyset handle: %s", err)
+	}
+	return handle, nil
 }

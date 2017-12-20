@@ -21,22 +21,22 @@ package tink
  * but not its secrecy. (see RFC 5116, https://tools.ietf.org/html/rfc5116)
  */
 type Aead interface {
-  /**
-   * Encrypts {@code plaintext} with {@code additionalData} as additional
-   * authenticated data. The resulting ciphertext allows for checking
-   * authenticity and integrity of additional data ({@code additionalData}),
-   * but does not guarantee its secrecy.
-   *
-   * @return resulting ciphertext.
-   */
-  Encrypt(plaintext []byte, additionalData []byte) ([]byte, error)
+	/**
+	 * Encrypts {@code plaintext} with {@code additionalData} as additional
+	 * authenticated data. The resulting ciphertext allows for checking
+	 * authenticity and integrity of additional data ({@code additionalData}),
+	 * but does not guarantee its secrecy.
+	 *
+	 * @return resulting ciphertext.
+	 */
+	Encrypt(plaintext []byte, additionalData []byte) ([]byte, error)
 
-  /**
-   * Decrypts {@code ciphertext} with {@code additionalData} as additional
-   * authenticated data. The decryption verifies the authenticity and integrity
-   * of the additional data, but there are no guarantees wrt. secrecy of that data.
-   *
-   * @return resulting plaintext.
-   */
-  Decrypt(ciphertext []byte, additionalData []byte) ([]byte, error)
+	/**
+	 * Decrypts {@code ciphertext} with {@code additionalData} as additional
+	 * authenticated data. The decryption verifies the authenticity and integrity
+	 * of the additional data, but there are no guarantees wrt. secrecy of that data.
+	 *
+	 * @return resulting plaintext.
+	 */
+	Decrypt(ciphertext []byte, additionalData []byte) ([]byte, error)
 }

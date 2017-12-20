@@ -16,8 +16,8 @@
 package signature
 
 import (
-  "sync"
-  "github.com/google/tink/go/tink/tink"
+	"github.com/google/tink/go/tink/tink"
+	"sync"
 )
 
 // PublicKeySignConfig contains convenience methods for initializing the Registry with native
@@ -34,32 +34,32 @@ import (
 var publicKeySignConfigInstance *publicKeySignConfig
 var publicKeySignConfigOnce sync.Once
 
-type publicKeySignConfig struct {}
+type publicKeySignConfig struct{}
 
 // PublicKeySignConfig creates an instance of publicKeySignConfig if there isn't
 // and returns the instance.
 func PublicKeySignConfig() *publicKeySignConfig {
-  publicKeySignConfigOnce.Do(func() {
-    publicKeySignConfigInstance = new(publicKeySignConfig)
-  })
-  return publicKeySignConfigInstance
+	publicKeySignConfigOnce.Do(func() {
+		publicKeySignConfigInstance = new(publicKeySignConfig)
+	})
+	return publicKeySignConfigInstance
 }
 
 // RegisterStandardKeyTypes registers standard Aead key types and their managers
 // with the Registry.
 func (c *publicKeySignConfig) RegisterStandardKeyTypes() (bool, error) {
-  return c.RegisterKeyManager(NewEcdsaSignKeyManager())
+	return c.RegisterKeyManager(NewEcdsaSignKeyManager())
 }
 
 // RegisterLegacyKeyTypes registers legacy Aead key types and their managers
 // with the Registry.
 func (c *publicKeySignConfig) RegisterLegacyKeyTypes() (bool, error) {
-  return false, nil
+	return false, nil
 }
 
 // RegisterKeyManager registers the given keyManager for the key type given in
 // keyManager.KeyType(). It returns true if registration was successful, false if
 // there already exisits a key manager for the key type.
 func (c *publicKeySignConfig) RegisterKeyManager(keyManager tink.KeyManager) (bool, error) {
-  return tink.Registry().RegisterKeyManager(keyManager)
+	return tink.Registry().RegisterKeyManager(keyManager)
 }

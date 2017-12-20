@@ -20,12 +20,12 @@ package tink
  * Implementations of this interface are secure against adaptive chosen-message attacks.
  * Signing data ensures authenticity and integrity of that data, but not its secrecy.
  */
-type PublicKeyVerify interface{
-  /**
-   * Verifies whether {@code signature} is a valid signature for {@code data}.
-   *
-   * @return an error if {@code signature} is not a valid signature for
-   * {@code data}; nil otherwise.
-   */
-  Verify(signature []byte, data []byte) error
+type PublicKeyVerify interface {
+	/**
+	 * Verifies whether {@code signature} is a valid signature for {@code data}.
+	 *
+	 * @return an error if {@code signature} is not a valid signature for
+	 * {@code data}; nil otherwise.
+	 */
+	Verify(signature []byte, data []byte) error
 }
