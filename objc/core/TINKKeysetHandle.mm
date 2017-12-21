@@ -52,7 +52,7 @@
   crypto::tink::Aead *ccAead = aeadKey.primitive;
 
   // KeysetHandle::Read takes ownership of reader.ccReader.
-  auto st = crypto::tink::KeysetHandle::Read(std::move(reader.ccReader), *ccAead);
+  auto st = crypto::tink::KeysetHandle::Read(reader.ccReader, *ccAead);
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st.status());

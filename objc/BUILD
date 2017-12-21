@@ -118,6 +118,22 @@ objc_library(
     ],
 )
 
+objc_library(
+    name = "cleartext_keyset_handle",
+    srcs = ["core/TINKKeysetHandle+Cleartext.mm"],
+    hdrs = [
+        "TINKKeysetHandle+Cleartext.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":keyset_handle",
+        ":keyset_reader",
+        "//cc:cleartext_keyset_handle",
+        "//objc/util:errors",
+        "//proto:all_objc_proto",
+    ],
+)
+
 ############################
 #         Tests            #
 ############################
@@ -143,6 +159,7 @@ objc_library(
     deps = [
         ":aead",
         ":binary_keyset_reader",
+        ":cleartext_keyset_handle",
         ":keyset_handle",
         "//cc/util:test_util",
         "//objc/util:strings",
