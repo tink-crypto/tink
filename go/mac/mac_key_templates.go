@@ -16,10 +16,10 @@
 package mac
 
 import (
-  "github.com/golang/protobuf/proto"
-  hmacpb "github.com/google/tink/proto/hmac_go_proto"
-  tinkpb "github.com/google/tink/proto/tink_go_proto"
-  commonpb "github.com/google/tink/proto/common_go_proto"
+	"github.com/golang/protobuf/proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	hmacpb "github.com/google/tink/proto/hmac_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // This file contains pre-generated KeyTemplate for MAC.
@@ -30,7 +30,7 @@ import (
 //   - Tag size: 16 bytes
 //   - Hash function: SHA256
 func HmacSha256Tag128KeyTemplate() *tinkpb.KeyTemplate {
-  return createHmacKeyTemplate(32, 16, commonpb.HashType_SHA256)
+	return createHmacKeyTemplate(32, 16, commonpb.HashType_SHA256)
 }
 
 // HmacSha256Tag256KeyTemplate is a KeyTemplate for HmacKey with the following
@@ -39,24 +39,24 @@ func HmacSha256Tag128KeyTemplate() *tinkpb.KeyTemplate {
 //   - Tag size: 32 bytes
 //   - Hash function: SHA256
 func HmacSha256Tag256KeyTemplate() *tinkpb.KeyTemplate {
-  return createHmacKeyTemplate(32, 32, commonpb.HashType_SHA256)
+	return createHmacKeyTemplate(32, 32, commonpb.HashType_SHA256)
 }
 
 // createHmacKeyTemplate creates a new KeyTemplate for Hmac using the given parameters.
 func createHmacKeyTemplate(keySize uint32,
-                          tagSize uint32,
-                          hashType commonpb.HashType) *tinkpb.KeyTemplate {
-  params := hmacpb.HmacParams{
-    Hash: hashType,
-    TagSize: tagSize,
-  }
-  format := hmacpb.HmacKeyFormat{
-    Params: &params,
-    KeySize: keySize,
-  }
-  serializedFormat, _ := proto.Marshal(&format)
-  return &tinkpb.KeyTemplate{
-    TypeUrl: HMAC_TYPE_URL,
-    Value: serializedFormat,
-  }
+	tagSize uint32,
+	hashType commonpb.HashType) *tinkpb.KeyTemplate {
+	params := hmacpb.HmacParams{
+		Hash:    hashType,
+		TagSize: tagSize,
+	}
+	format := hmacpb.HmacKeyFormat{
+		Params:  &params,
+		KeySize: keySize,
+	}
+	serializedFormat, _ := proto.Marshal(&format)
+	return &tinkpb.KeyTemplate{
+		TypeUrl: HMAC_TYPE_URL,
+		Value:   serializedFormat,
+	}
 }

@@ -16,38 +16,38 @@
 package aead_test
 
 import (
-  "fmt"
-  "testing"
-  "github.com/google/tink/go/aead/aead"
-  "github.com/golang/protobuf/proto"
-  gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
-  tinkpb "github.com/google/tink/proto/tink_go_proto"
+	"fmt"
+	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/aead/aead"
+	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	"testing"
 )
 
 func TestAesGcmKeyTemplates(t *testing.T) {
-  // AES-GCM 128 bit
-  template := aead.Aes128GcmKeyTemplate()
-  if err := checkAesGcmKeyTemplate(template, uint32(16)); err != nil {
-    t.Errorf("invalid AES-128 GCM key template: %s", err)
-  }
-  // AES-GCM 256 bit
-  template = aead.Aes256GcmKeyTemplate()
-  if err := checkAesGcmKeyTemplate(template, uint32(32)); err != nil {
-    t.Errorf("invalid AES-256 GCM key template: %s", err)
-  }
+	// AES-GCM 128 bit
+	template := aead.Aes128GcmKeyTemplate()
+	if err := checkAesGcmKeyTemplate(template, uint32(16)); err != nil {
+		t.Errorf("invalid AES-128 GCM key template: %s", err)
+	}
+	// AES-GCM 256 bit
+	template = aead.Aes256GcmKeyTemplate()
+	if err := checkAesGcmKeyTemplate(template, uint32(32)); err != nil {
+		t.Errorf("invalid AES-256 GCM key template: %s", err)
+	}
 }
 
 func checkAesGcmKeyTemplate(template *tinkpb.KeyTemplate, keySize uint32) error {
-  if template.TypeUrl != aead.AES_GCM_TYPE_URL {
-    return fmt.Errorf("incorrect type url")
-  }
-  keyFormat := new(gcmpb.AesGcmKeyFormat)
-  err := proto.Unmarshal(template.Value, keyFormat)
-  if err != nil {
-    return fmt.Errorf("cannot deserialize key format: %s", err)
-  }
-  if keyFormat.KeySize != keySize {
-    return fmt.Errorf("incorrect key size, expect %d, got %d", keySize, keyFormat.KeySize)
-  }
-  return nil
+	if template.TypeUrl != aead.AES_GCM_TYPE_URL {
+		return fmt.Errorf("incorrect type url")
+	}
+	keyFormat := new(gcmpb.AesGcmKeyFormat)
+	err := proto.Unmarshal(template.Value, keyFormat)
+	if err != nil {
+		return fmt.Errorf("cannot deserialize key format: %s", err)
+	}
+	if keyFormat.KeySize != keySize {
+		return fmt.Errorf("incorrect key size, expect %d, got %d", keySize, keyFormat.KeySize)
+	}
+	return nil
 }
