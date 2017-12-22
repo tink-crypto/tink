@@ -148,7 +148,7 @@ class HmacKeyManager implements KeyManager<Mac> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code HmacKey}-proto
+   * @param jsonKey JSON formatted {@code HmacKey}-proto
    * @return {@code HmacKey}-proto
    */
   @Override
@@ -168,7 +168,7 @@ class HmacKeyManager implements KeyManager<Mac> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code HmacKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code HmacKeyFromat}-proto
    * @return {@code HmacKeyFormat}-proto
    */
   @Override

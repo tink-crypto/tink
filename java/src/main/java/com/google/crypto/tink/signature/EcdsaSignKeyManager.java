@@ -169,7 +169,7 @@ class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code EcdsaPrivateKey}-proto
+   * @param jsonKey JSON formatted {@code EcdsaPrivateKey}-proto
    * @return {@code EcdsaPrivateKey}-proto
    */
   @Override
@@ -190,7 +190,7 @@ class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code EcdsaPrivateKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code EcdsaPrivateKeyFromat}-proto
    * @return {@code EcdsaKeyFormat}-proto
    */
   @Override

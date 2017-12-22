@@ -25,6 +25,7 @@ import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -115,6 +116,7 @@ public class ChaCha20Poly1305KeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     ChaCha20Poly1305KeyManager keyManager = new ChaCha20Poly1305KeyManager();
 
@@ -136,7 +138,7 @@ public class ChaCha20Poly1305KeyManagerTest {
     }
 
     try {  // Incorrect JSON.
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       ChaCha20Poly1305Key key = (ChaCha20Poly1305Key) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -146,7 +148,7 @@ public class ChaCha20Poly1305KeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = "{\"version\": 0 }}".getBytes();
+      byte[] json = "{\"version\": 0 }}".getBytes(Util.UTF_8);
       ChaCha20Poly1305Key key = (ChaCha20Poly1305Key) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -157,7 +159,7 @@ public class ChaCha20Poly1305KeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0}, "
-          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes(Util.UTF_8);
       ChaCha20Poly1305Key key = (ChaCha20Poly1305Key) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {

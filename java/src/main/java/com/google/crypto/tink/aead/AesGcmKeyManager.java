@@ -125,7 +125,7 @@ class AesGcmKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code AesGcmKey}-proto
+   * @param jsonKey JSON formatted {@code AesGcmKey}-proto
    * @return {@code AesGcmKey}-proto
    */
   @Override
@@ -144,7 +144,7 @@ class AesGcmKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code AesGcmKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code AesGcmKeyFromat}-proto
    * @return {@code AesGcmKeyFormat}-proto
    */
   @Override

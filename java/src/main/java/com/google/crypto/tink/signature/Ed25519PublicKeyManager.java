@@ -105,7 +105,7 @@ class Ed25519PublicKeyManager implements KeyManager<PublicKeyVerify> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code Ed25519PublicKey}-proto
+   * @param jsonKey JSON formatted {@code Ed25519PublicKey}-proto
    * @return {@code Ed25519PublicKey}-proto
    */
   @Override

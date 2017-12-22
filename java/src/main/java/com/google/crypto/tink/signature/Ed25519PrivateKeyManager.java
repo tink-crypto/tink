@@ -113,7 +113,7 @@ class Ed25519PrivateKeyManager implements PrivateKeyManager<PublicKeySign> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code Ed25519PrivateKey}-proto
+   * @param jsonKey JSON formatted {@code Ed25519PrivateKey}-proto
    * @return {@code Ed25519PrivateKey}-proto
    */
   @Override

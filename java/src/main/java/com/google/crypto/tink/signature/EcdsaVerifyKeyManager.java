@@ -115,7 +115,7 @@ class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code EcdsaPublicKey}-proto
+   * @param jsonKey JSON formatted {@code EcdsaPublicKey}-proto
    * @return {@code EcdsaPublicKey}-proto
    */
   @Override
@@ -135,7 +135,7 @@ class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code EcdsaKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code EcdsaKeyFromat}-proto
    * @return {@code EcdsaKeyFormat}-proto
    */
   @Override

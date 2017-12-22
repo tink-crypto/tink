@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
@@ -144,11 +145,12 @@ public class HmacKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     HmacKeyManager keyManager = new HmacKeyManager();
 
     try {
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       HmacKey key = (HmacKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -158,7 +160,7 @@ public class HmacKeyManagerTest {
     }
 
     try {
-      byte[] json = "a bad JSON keyformat".getBytes();
+      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
       HmacKeyFormat format = (HmacKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -168,7 +170,7 @@ public class HmacKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = "{\"params\": {\"tagSize\": 16, \"hash\": \"SHA256\"}}".getBytes();
+      byte[] json = "{\"params\": {\"tagSize\": 16, \"hash\": \"SHA256\"}}".getBytes(Util.UTF_8);
       HmacKey key = (HmacKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -178,7 +180,7 @@ public class HmacKeyManagerTest {
     }
 
     try {  // An incomplete JSON key format.
-      byte[] json = "{\"params\": {\"tagSize\": 16, \"hash\": \"SHA256\"}}".getBytes();
+      byte[] json = "{\"params\": {\"tagSize\": 16, \"hash\": \"SHA256\"}}".getBytes(Util.UTF_8);
       HmacKeyFormat format = (HmacKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Incomplete JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -189,7 +191,7 @@ public class HmacKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": {\"tagSize\": 16, \"hash\": \"SHA256\"}, "
-          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes(Util.UTF_8);
       HmacKey key = (HmacKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -200,7 +202,7 @@ public class HmacKeyManagerTest {
 
     try {  // Extra name JSON key format.
       byte[] json = ("{\"params\": {\"tagSize\": 16, \"hash\": \"SHA256\"}, "
-          + "\"keySize\": 16, \"extraName\": 42}").getBytes();
+          + "\"keySize\": 16, \"extraName\": 42}").getBytes(Util.UTF_8);
       HmacKeyFormat format = (HmacKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Invalid JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -211,7 +213,7 @@ public class HmacKeyManagerTest {
 
     try {  // Incomplete params in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": {\"tagSize\": 16}, "
-          + "\"keyValue\": \"some key bytes\"}").getBytes();
+          + "\"keyValue\": \"some key bytes\"}").getBytes(Util.UTF_8);
       HmacKey key = (HmacKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -222,7 +224,7 @@ public class HmacKeyManagerTest {
 
     try {  // Extra name in JSON key params.
       byte[] json = ("{\"params\": {\"tagSize\": 16, \"hash\": \"SHA256\", \"extraName\": 42}, "
-          + "\"keyValue\": \"some key bytes\", \"version\": 0}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"version\": 0}").getBytes(Util.UTF_8);
       HmacKey key = (HmacKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {

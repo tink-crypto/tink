@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
@@ -358,11 +359,12 @@ public class EcdsaVerifyKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     EcdsaVerifyKeyManager keyManager = new EcdsaVerifyKeyManager();
 
     try {
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       EcdsaPublicKey key = (EcdsaPublicKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -372,7 +374,7 @@ public class EcdsaVerifyKeyManagerTest {
     }
 
     try {
-      byte[] json = "a bad JSON keyformat".getBytes();
+      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
       EcdsaKeyFormat format = (EcdsaKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -382,7 +384,7 @@ public class EcdsaVerifyKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = "{\"version\": 0, \"x\": \"some x coordinate\"}".getBytes();
+      byte[] json = "{\"version\": 0, \"x\": \"some x coordinate\"}".getBytes(Util.UTF_8);
       EcdsaPublicKey key = (EcdsaPublicKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -392,7 +394,7 @@ public class EcdsaVerifyKeyManagerTest {
     }
 
     try {  // An incomplete JSON key format.
-      byte[] json = "{}".getBytes();
+      byte[] json = "{}".getBytes(Util.UTF_8);
       EcdsaKeyFormat format = (EcdsaKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Incomplete JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -403,7 +405,7 @@ public class EcdsaVerifyKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": {}, "
-          + "\"x\": \"x value\", \"y\": \"y value\", \"extraName\": 42}").getBytes();
+          + "\"x\": \"x value\", \"y\": \"y value\", \"extraName\": 42}").getBytes(Util.UTF_8);
       EcdsaPublicKey key = (EcdsaPublicKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -413,7 +415,7 @@ public class EcdsaVerifyKeyManagerTest {
     }
 
     try {  // Extra name JSON key format.
-      byte[] json = ("{\"params\": {}, \"extraName\": 42}").getBytes();
+      byte[] json = ("{\"params\": {}, \"extraName\": 42}").getBytes(Util.UTF_8);
       EcdsaKeyFormat format = (EcdsaKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Invalid JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -424,7 +426,7 @@ public class EcdsaVerifyKeyManagerTest {
 
     try {  // Incomplete params in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": { \"hashType\": \"SHA256\"}, "
-          + "\"x\": \"xvalue\", \"y\": \"yvalue\"}").getBytes();
+          + "\"x\": \"xvalue\", \"y\": \"yvalue\"}").getBytes(Util.UTF_8);
       EcdsaPublicKey key = (EcdsaPublicKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {

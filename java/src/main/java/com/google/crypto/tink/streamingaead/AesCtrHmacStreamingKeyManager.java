@@ -144,7 +144,7 @@ class AesCtrHmacStreamingKeyManager implements KeyManager<StreamingAead> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code AesCtrHmacStreamingKey}-proto
+   * @param jsonKey JSON formatted {@code AesCtrHmacStreamingKey}-proto
    * @return {@code AesCtrHmacStreamingKey}-proto
    */
   @Override
@@ -164,7 +164,7 @@ class AesCtrHmacStreamingKeyManager implements KeyManager<StreamingAead> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code AesCtrHmacStreamingKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code AesCtrHmacStreamingKeyFromat}-proto
    * @return {@code AesCtrHmacStreamingKeyFormat}-proto
    */
   @Override

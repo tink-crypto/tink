@@ -131,7 +131,7 @@ class KmsAeadKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code KmsAeadKey}-proto
+   * @param jsonKey JSON formatted {@code KmsAeadKey}-proto
    * @return {@code KmsAeadKey}-proto
    */
   @Override
@@ -149,7 +149,7 @@ class KmsAeadKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code KmsAeadKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code KmsAeadKeyFromat}-proto
    * @return {@code KmsAeadKeyFormat}-proto
    */
   @Override

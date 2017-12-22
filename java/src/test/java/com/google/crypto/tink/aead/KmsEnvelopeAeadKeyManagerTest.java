@@ -27,6 +27,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -194,11 +195,12 @@ public class KmsEnvelopeAeadKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     KmsEnvelopeAeadKeyManager keyManager = new KmsEnvelopeAeadKeyManager();
 
     try {
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       KmsEnvelopeAeadKey key = (KmsEnvelopeAeadKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -208,7 +210,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
     }
 
     try {
-      byte[] json = "a bad JSON keyformat".getBytes();
+      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
       KmsEnvelopeAeadKeyFormat format = (KmsEnvelopeAeadKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -218,7 +220,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = ("{\"version\": 0}").getBytes();
+      byte[] json = ("{\"version\": 0}").getBytes(Util.UTF_8);
       KmsEnvelopeAeadKey key = (KmsEnvelopeAeadKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -228,7 +230,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
     }
 
     try {  // An incomplete JSON key format.
-      byte[] json = ("{\"kekUri\": \"some URI\"}").getBytes();
+      byte[] json = ("{\"kekUri\": \"some URI\"}").getBytes(Util.UTF_8);
       KmsEnvelopeAeadKeyFormat format = (KmsEnvelopeAeadKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Incomplete JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -239,7 +241,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": {\"kekUri\": \"some URI\"}, "
-          + "\"extraName\": 42}").getBytes();
+          + "\"extraName\": 42}").getBytes(Util.UTF_8);
       KmsEnvelopeAeadKey key = (KmsEnvelopeAeadKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -250,7 +252,7 @@ public class KmsEnvelopeAeadKeyManagerTest {
 
     try {  // Extra name JSON key format.
       byte[] json = ("{\"kekUri\": \"some URI\", \"dekTemplate\": { \"typeUrl\": \"type URL\"}, "
-          + "\"extraName\": 42}").getBytes();
+          + "\"extraName\": 42}").getBytes(Util.UTF_8);
       KmsEnvelopeAeadKeyFormat format = (KmsEnvelopeAeadKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Invalid JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {

@@ -127,7 +127,7 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code EciesAeadHkdfPublicKey}-proto
+   * @param jsonKey JSON formatted {@code EciesAeadHkdfPublicKey}-proto
    * @return {@code EciesAeadHkdfPublicKey}-proto
    */
   @Override
@@ -147,7 +147,7 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code EciesAeadHkdfPublicKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code EciesAeadHkdfPublicKeyFromat}-proto
    * @return {@code EciesAeadHkdfKeyFormat}-proto
    */
   @Override

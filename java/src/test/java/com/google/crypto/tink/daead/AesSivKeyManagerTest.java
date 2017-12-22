@@ -25,6 +25,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
@@ -227,11 +228,12 @@ public class AesSivKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     AesSivKeyManager keyManager = new AesSivKeyManager();
 
     try {
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       AesSivKey key = (AesSivKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -241,7 +243,7 @@ public class AesSivKeyManagerTest {
     }
 
     try {
-      byte[] json = "a bad JSON keyformat".getBytes();
+      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
       AesSivKeyFormat format = (AesSivKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -251,7 +253,7 @@ public class AesSivKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = "{\"version\": 0}".getBytes();
+      byte[] json = "{\"version\": 0}".getBytes(Util.UTF_8);
       AesSivKey key = (AesSivKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -261,7 +263,7 @@ public class AesSivKeyManagerTest {
     }
 
     try {  // An incomplete JSON key format.
-      byte[] json = "{}".getBytes();
+      byte[] json = "{}".getBytes(Util.UTF_8);
       AesSivKeyFormat format = (AesSivKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Incomplete JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -272,7 +274,7 @@ public class AesSivKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, "
-          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes(Util.UTF_8);
       AesSivKey key = (AesSivKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -282,7 +284,7 @@ public class AesSivKeyManagerTest {
     }
 
     try {  // Extra name JSON key format.
-      byte[] json = ("{\"keySize\": 16, \"extraName\": 42}").getBytes();
+      byte[] json = ("{\"keySize\": 16, \"extraName\": 42}").getBytes(Util.UTF_8);
       AesSivKeyFormat format = (AesSivKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Invalid JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {

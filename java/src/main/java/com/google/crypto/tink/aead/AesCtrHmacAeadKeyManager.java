@@ -152,7 +152,7 @@ class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code AesCtrHmacAeadKey}-proto
+   * @param jsonKey JSON formatted {@code AesCtrHmacAeadKey}-proto
    * @return {@code AesCtrHmacAeadKey}-proto
    */
   @Override
@@ -175,7 +175,7 @@ class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code AesCtrHmacAeadKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code AesCtrHmacAeadKeyFromat}-proto
    * @return {@code AesCtrHmacAeadKeyFormat}-proto
    */
   @Override

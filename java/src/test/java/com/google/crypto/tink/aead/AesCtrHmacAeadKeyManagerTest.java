@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Config;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
@@ -156,11 +157,12 @@ public class AesCtrHmacAeadKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     AesCtrHmacAeadKeyManager keyManager = new AesCtrHmacAeadKeyManager();
 
     try {
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       AesCtrHmacAeadKey key = (AesCtrHmacAeadKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -170,7 +172,7 @@ public class AesCtrHmacAeadKeyManagerTest {
     }
 
     try {
-      byte[] json = "a bad JSON keyformat".getBytes();
+      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
       AesCtrHmacAeadKeyFormat format = (AesCtrHmacAeadKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -180,7 +182,7 @@ public class AesCtrHmacAeadKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = ("{\"version\": 0, \"aesCtrKey\": {\"someName\": 42}}").getBytes();
+      byte[] json = ("{\"version\": 0, \"aesCtrKey\": {\"someName\": 42}}").getBytes(Util.UTF_8);
       AesCtrHmacAeadKey key = (AesCtrHmacAeadKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -190,7 +192,7 @@ public class AesCtrHmacAeadKeyManagerTest {
     }
 
     try {  // An incomplete JSON key format.
-      byte[] json = ("{\"aesCtrKeyFormat\": {\"someName\": 42}}").getBytes();
+      byte[] json = ("{\"aesCtrKeyFormat\": {\"someName\": 42}}").getBytes(Util.UTF_8);
       AesCtrHmacAeadKeyFormat format = (AesCtrHmacAeadKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Incomplete JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -201,7 +203,7 @@ public class AesCtrHmacAeadKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, \"aesCtrKey\": {\"someName\": 42}, "
-          + "\"hmacKey\": {\"someName\": 42}, \"extraName\": 42}").getBytes();
+          + "\"hmacKey\": {\"someName\": 42}, \"extraName\": 42}").getBytes(Util.UTF_8);
       AesCtrHmacAeadKey key = (AesCtrHmacAeadKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -212,7 +214,7 @@ public class AesCtrHmacAeadKeyManagerTest {
 
     try {  // Extra name JSON key format.
       byte[] json = ("{\"aesCtrKeyFormat\": {\"someName\": 42}, "
-          + "\"hmacKeyFormat\": {\"someName\": 42}, \"extraName\": 42}").getBytes();
+          + "\"hmacKeyFormat\": {\"someName\": 42}, \"extraName\": 42}").getBytes(Util.UTF_8);
       AesCtrHmacAeadKeyFormat format = (AesCtrHmacAeadKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Invalid JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {

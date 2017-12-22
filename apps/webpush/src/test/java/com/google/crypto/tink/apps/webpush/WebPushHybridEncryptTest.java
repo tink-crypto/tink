@@ -204,7 +204,6 @@ public class WebPushHybridEncryptTest {
   @Test
   public void testNonNullContextInfo() throws Exception {
     KeyPair uaKeyPair = EllipticCurves.generateKeyPair(WebPushConstants.NIST_P256_CURVE_TYPE);
-    ECPrivateKey uaPrivateKey = (ECPrivateKey) uaKeyPair.getPrivate();
     ECPublicKey uaPublicKey = (ECPublicKey) uaKeyPair.getPublic();
     byte[] authSecret = Random.randBytes(16);
 
@@ -217,7 +216,7 @@ public class WebPushHybridEncryptTest {
     byte[] contextInfo = new byte[0];
 
     try {
-      byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
+      byte[] unusedCiphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException ex) {
       // expected;

@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData;
@@ -132,6 +133,7 @@ public class Ed25519PublicKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     Ed25519PublicKeyManager keyManager = new Ed25519PublicKeyManager();
 
@@ -152,7 +154,7 @@ public class Ed25519PublicKeyManagerTest {
     }
 
     try {  // Incorrect JSON.
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       Ed25519PublicKey key = (Ed25519PublicKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -162,7 +164,7 @@ public class Ed25519PublicKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = "{\"version\": 0}".getBytes();
+      byte[] json = "{\"version\": 0}".getBytes(Util.UTF_8);
       Ed25519PublicKey key = (Ed25519PublicKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -173,7 +175,7 @@ public class Ed25519PublicKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, \"key_value\": \"some key value\", "
-          + "\"extraName\": 42}").getBytes();
+          + "\"extraName\": 42}").getBytes(Util.UTF_8);
       Ed25519PublicKey key = (Ed25519PublicKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {

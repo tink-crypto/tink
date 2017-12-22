@@ -127,7 +127,7 @@ class AesSivKeyManager implements KeyManager<DeterministicAead> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code AesSivKey}-proto
+   * @param jsonKey JSON formatted {@code AesSivKey}-proto
    * @return {@code AesSivKey}-proto
    */
   @Override
@@ -146,7 +146,7 @@ class AesSivKeyManager implements KeyManager<DeterministicAead> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code AesSivKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code AesSivKeyFromat}-proto
    * @return {@code AesSivKeyFormat}-proto
    */
   @Override

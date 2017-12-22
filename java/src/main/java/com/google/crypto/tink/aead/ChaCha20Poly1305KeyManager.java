@@ -102,7 +102,7 @@ class ChaCha20Poly1305KeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code ChaCha20Poly1305Key}-proto
+   * @param jsonKey JSON formatted {@code ChaCha20Poly1305Key}-proto
    * @return {@code ChaCha20Poly1305Key}-proto
    */
   @Override

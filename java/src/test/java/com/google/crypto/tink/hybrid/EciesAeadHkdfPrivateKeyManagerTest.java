@@ -26,6 +26,7 @@ import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
@@ -136,10 +137,11 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     formats[1] = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256.getValue();
     formats[2] = HybridKeyTemplates.createEciesAeadHkdfKeyTemplate(
               EllipticCurveType.NIST_P384, HashType.SHA512, EcPointFormat.COMPRESSED,
-              AeadKeyTemplates.AES128_CTR_HMAC_SHA256, "some HKDF salt".getBytes()).getValue();
+              AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
+              "some HKDF salt".getBytes(Util.UTF_8)).getValue();
     formats[3] = HybridKeyTemplates.createEciesAeadHkdfKeyTemplate(
               EllipticCurveType.NIST_P521, HashType.SHA256, EcPointFormat.COMPRESSED,
-              AeadKeyTemplates.AES256_GCM, "another HKDF salt".getBytes()).getValue();
+              AeadKeyTemplates.AES256_GCM, "another HKDF salt".getBytes(Util.UTF_8)).getValue();
 
     EciesAeadHkdfPrivateKey[] keys = new EciesAeadHkdfPrivateKey[keyCount];
     for (int i = 0; i < keyCount; i++) {
@@ -183,11 +185,12 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     EciesAeadHkdfPrivateKeyManager keyManager = new EciesAeadHkdfPrivateKeyManager();
 
     try {
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       EciesAeadHkdfPrivateKey key = (EciesAeadHkdfPrivateKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -197,7 +200,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     }
 
     try {
-      byte[] json = "a bad JSON keyformat".getBytes();
+      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
       EciesAeadHkdfKeyFormat format = (EciesAeadHkdfKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -207,7 +210,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = "{\"version\": 0, \"keyValue\": \"some key bytes\"}".getBytes();
+      byte[] json = "{\"version\": 0, \"keyValue\": \"some key bytes\"}".getBytes(Util.UTF_8);
       EciesAeadHkdfPrivateKey key = (EciesAeadHkdfPrivateKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -217,7 +220,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     }
 
     try {  // An incomplete JSON key format.
-      byte[] json = "{}".getBytes();
+      byte[] json = "{}".getBytes(Util.UTF_8);
       EciesAeadHkdfKeyFormat format = (EciesAeadHkdfKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Incomplete JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -228,7 +231,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, \"publicKey\": {}, "
-          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes(Util.UTF_8);
       EciesAeadHkdfPrivateKey key = (EciesAeadHkdfPrivateKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -238,7 +241,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     }
 
     try {  // Extra name JSON key format.
-      byte[] json = ("{\"params\": {}, \"extraName\": 42}").getBytes();
+      byte[] json = ("{\"params\": {}, \"extraName\": 42}").getBytes(Util.UTF_8);
       EciesAeadHkdfKeyFormat format = (EciesAeadHkdfKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Invalid JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -249,7 +252,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
 
     try {  // Incomplete public key in JSON key.
       byte[] json = ("{\"version\": 0, \"publicKey\": {\"params\": {}}, "
-          + "\"keyValue\": \"some key bytes\"}").getBytes();
+          + "\"keyValue\": \"some key bytes\"}").getBytes(Util.UTF_8);
       EciesAeadHkdfPrivateKey key = (EciesAeadHkdfPrivateKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {

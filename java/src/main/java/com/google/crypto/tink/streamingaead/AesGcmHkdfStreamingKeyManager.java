@@ -137,7 +137,7 @@ class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code AesGcmHkdfStreamingKey}-proto
+   * @param jsonKey JSON formatted {@code AesGcmHkdfStreamingKey}-proto
    * @return {@code AesGcmHkdfStreamingKey}-proto
    */
   @Override
@@ -157,7 +157,7 @@ class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code AesGcmHkdfStreamingKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code AesGcmHkdfStreamingKeyFromat}-proto
    * @return {@code AesGcmHkdfStreamingKeyFormat}-proto
    */
   @Override

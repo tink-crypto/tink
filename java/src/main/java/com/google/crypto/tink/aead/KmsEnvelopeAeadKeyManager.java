@@ -124,7 +124,7 @@ class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code KmsEnvelopeAeadKey}-proto
+   * @param jsonKey JSON formatted {@code KmsEnvelopeAeadKey}-proto
    * @return {@code KmsEnvelopeAeadKey}-proto
    */
   @Override
@@ -142,7 +142,7 @@ class KmsEnvelopeAeadKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code KmsEnvelopeAeadKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code KmsEnvelopeAeadKeyFromat}-proto
    * @return {@code KmsEnvelopeAeadKeyFormat}-proto
    */
   @Override

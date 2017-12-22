@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.StreamingTestUtil;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingParams;
@@ -280,11 +281,12 @@ public class AesCtrHmacStreamingKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     AesCtrHmacStreamingKeyManager keyManager = new AesCtrHmacStreamingKeyManager();
 
     try {
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       AesCtrHmacStreamingKey key = (AesCtrHmacStreamingKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -294,7 +296,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
     }
 
     try {
-      byte[] json = "a bad JSON keyformat".getBytes();
+      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
       AesCtrHmacStreamingKeyFormat format =
           (AesCtrHmacStreamingKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Corrupted JSON, should have thrown exception");
@@ -305,7 +307,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = "{\"version\": 0, \"params\": {}}".getBytes();
+      byte[] json = "{\"version\": 0, \"params\": {}}".getBytes(Util.UTF_8);
       AesCtrHmacStreamingKey key = (AesCtrHmacStreamingKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -315,7 +317,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
     }
 
     try {  // An incomplete JSON key format.
-      byte[] json = "{\"keySize\": 32}".getBytes();
+      byte[] json = "{\"keySize\": 32}".getBytes(Util.UTF_8);
       AesCtrHmacStreamingKeyFormat format =
           (AesCtrHmacStreamingKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Incomplete JSON key format, should have thrown exception");
@@ -327,7 +329,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": {\"derivedKeySize\": 16}, "
-          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes(Util.UTF_8);
       AesCtrHmacStreamingKey key = (AesCtrHmacStreamingKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -338,7 +340,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
 
     try {  // Extra name JSON key format.
       byte[] json = ("{\"params\": {\"derivedKeySize\": 16}, "
-          + "\"keySize\": 16, \"extraName\": 42}").getBytes();
+          + "\"keySize\": 16, \"extraName\": 42}").getBytes(Util.UTF_8);
       AesCtrHmacStreamingKeyFormat format =
           (AesCtrHmacStreamingKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Invalid JSON key format, should have thrown exception");
@@ -350,7 +352,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
 
     try {  // Incomplete params in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": {\"derivedKeySize\": 16}, "
-          + "\"keyValue\": \"some key bytes\"}").getBytes();
+          + "\"keyValue\": \"some key bytes\"}").getBytes(Util.UTF_8);
       AesCtrHmacStreamingKey key = (AesCtrHmacStreamingKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {

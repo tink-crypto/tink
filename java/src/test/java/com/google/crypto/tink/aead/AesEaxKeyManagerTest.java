@@ -26,6 +26,7 @@ import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.AesEaxParams;
@@ -331,11 +332,12 @@ public class AesEaxKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     AesEaxKeyManager keyManager = new AesEaxKeyManager();
 
     try {
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       AesEaxKey key = (AesEaxKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -345,7 +347,7 @@ public class AesEaxKeyManagerTest {
     }
 
     try {
-      byte[] json = "a bad JSON keyformat".getBytes();
+      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
       AesEaxKeyFormat format = (AesEaxKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -355,7 +357,7 @@ public class AesEaxKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = "{\"params\": {\"ivSize\": 16}}".getBytes();
+      byte[] json = "{\"params\": {\"ivSize\": 16}}".getBytes(Util.UTF_8);
       AesEaxKey key = (AesEaxKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -365,7 +367,7 @@ public class AesEaxKeyManagerTest {
     }
 
     try {  // An incomplete JSON key format.
-      byte[] json = "{\"params\": {}}".getBytes();
+      byte[] json = "{\"params\": {}}".getBytes(Util.UTF_8);
       AesEaxKeyFormat format = (AesEaxKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Incomplete JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -376,7 +378,7 @@ public class AesEaxKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": {\"ivSize\": 16}, "
-          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes(Util.UTF_8);
       AesEaxKey key = (AesEaxKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -387,7 +389,7 @@ public class AesEaxKeyManagerTest {
 
     try {  // Extra name JSON key format.
       byte[] json = ("{\"params\": {\"ivSize\": 16}, "
-          + "\"keySize\": 16, \"extraName\": 42}").getBytes();
+          + "\"keySize\": 16, \"extraName\": 42}").getBytes(Util.UTF_8);
       AesEaxKeyFormat format = (AesEaxKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Invalid JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -398,7 +400,7 @@ public class AesEaxKeyManagerTest {
 
     try {  // Incomplete params in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": {}, "
-          + "\"keyValue\": \"some key bytes\"}").getBytes();
+          + "\"keyValue\": \"some key bytes\"}").getBytes(Util.UTF_8);
       AesEaxKey key = (AesEaxKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -409,7 +411,7 @@ public class AesEaxKeyManagerTest {
 
     try {  // Extra name in JSON key params.
       byte[] json = ("{\"params\": {\"ivSize\": 16, \"extraName\": 42}, "
-          + "\"keyValue\": \"some key bytes\", \"version\": 0}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"version\": 0}").getBytes(Util.UTF_8);
       AesEaxKey key = (AesEaxKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {

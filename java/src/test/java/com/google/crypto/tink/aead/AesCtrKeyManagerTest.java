@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.AesCtrKey;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.AesCtrParams;
@@ -150,11 +151,12 @@ public class AesCtrKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     AesCtrKeyManager keyManager = new AesCtrKeyManager();
 
     try {
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       AesCtrKey key = (AesCtrKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -164,7 +166,7 @@ public class AesCtrKeyManagerTest {
     }
 
     try {
-      byte[] json = "a bad JSON keyformat".getBytes();
+      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
       AesCtrKeyFormat format = (AesCtrKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -174,7 +176,7 @@ public class AesCtrKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = "{\"params\": {\"tagSize\": 16, \"hash\": \"SHA256\"}}".getBytes();
+      byte[] json = "{\"params\": {\"tagSize\": 16, \"hash\": \"SHA256\"}}".getBytes(Util.UTF_8);
       AesCtrKey key = (AesCtrKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -184,7 +186,7 @@ public class AesCtrKeyManagerTest {
     }
 
     try {  // An incomplete JSON key format.
-      byte[] json = "{\"params\": {\"tagSize\": 16, \"hash\": \"SHA256\"}}".getBytes();
+      byte[] json = "{\"params\": {\"tagSize\": 16, \"hash\": \"SHA256\"}}".getBytes(Util.UTF_8);
       AesCtrKeyFormat format = (AesCtrKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Incomplete JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -195,7 +197,7 @@ public class AesCtrKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": {\"ivSize\": 16}, "
-          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes(Util.UTF_8);
       AesCtrKey key = (AesCtrKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -206,7 +208,7 @@ public class AesCtrKeyManagerTest {
 
     try {  // Extra name JSON key format.
       byte[] json = ("{\"params\": {\"ivSize\": 16}, "
-          + "\"keySize\": 16, \"extraName\": 42}").getBytes();
+          + "\"keySize\": 16, \"extraName\": 42}").getBytes(Util.UTF_8);
       AesCtrKeyFormat format = (AesCtrKeyFormat) keyManager.jsonToKeyFormat(json);
       fail("Invalid JSON key format, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -217,7 +219,7 @@ public class AesCtrKeyManagerTest {
 
     try {  // Incomplete params in JSON key.
       byte[] json = ("{\"version\": 0, \"params\": {\"tagSize\": 16}, "
-          + "\"keyValue\": \"some key bytes\"}").getBytes();
+          + "\"keyValue\": \"some key bytes\"}").getBytes(Util.UTF_8);
       AesCtrKey key = (AesCtrKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -228,7 +230,7 @@ public class AesCtrKeyManagerTest {
 
     try {  // Extra name in JSON key params.
       byte[] json = ("{\"params\": {\"ivSize\": 16, \"extraName\": 42}, "
-          + "\"keyValue\": \"some key bytes\", \"version\": 0}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"version\": 0}").getBytes(Util.UTF_8);
       AesCtrKey key = (AesCtrKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {

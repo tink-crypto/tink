@@ -76,17 +76,18 @@ public class SignatureThreadSafetyTest {
   /** A thread that signs the same message multiple times. */
   public static class SigningThread extends Thread {
     private PublicKeySign signer;
-    private Set signatures;
+    private Set<String> signatures;
     private byte[] message;
     private int count;
 
     /**
-     * Constructs a thread that signs a number of messages.
+     * Constructs a thread that generates a number of signatures of a given message.
      *
      * @param signer an instance that is signing messages.
      * @param signatures a set to which the generated signatures are added. This must be a
      *     synchronized set if it is shared among multiple threads.
-     * @param the number of signatures that are generated.
+     * @param message the number message to be signed.
+     * @param count the number of signatures that are generated.
      */
     SigningThread(PublicKeySign signer, Set<String> signatures, byte[] message, int count) {
       this.signer = signer;

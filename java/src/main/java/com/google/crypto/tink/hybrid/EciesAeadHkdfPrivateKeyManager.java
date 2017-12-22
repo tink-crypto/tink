@@ -180,7 +180,7 @@ class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt>
   }
 
   /**
-   * @param jsonKey JSON formated {@code EciesAeadHkdfPrivateKey}-proto
+   * @param jsonKey JSON formatted {@code EciesAeadHkdfPrivateKey}-proto
    * @return {@code EciesAeadHkdfPrivateKey}-proto
    */
   @Override
@@ -201,7 +201,7 @@ class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt>
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code EciesAeadHkdfPrivateKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code EciesAeadHkdfPrivateKeyFromat}-proto
    * @return {@code EciesAeadHkdfKeyFormat}-proto
    */
   @Override

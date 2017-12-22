@@ -127,7 +127,7 @@ class AesEaxKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code AesEaxKey}-proto
+   * @param jsonKey JSON formatted {@code AesEaxKey}-proto
    * @return {@code AesEaxKey}-proto
    */
   @Override
@@ -147,7 +147,7 @@ class AesEaxKeyManager implements KeyManager<Aead> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code AesEaxKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code AesEaxKeyFromat}-proto
    * @return {@code AesEaxKeyFormat}-proto
    */
   @Override

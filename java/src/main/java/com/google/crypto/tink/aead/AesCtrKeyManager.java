@@ -137,7 +137,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   }
 
   /**
-   * @param jsonKey JSON formated {@code AesCtrKey}-proto
+   * @param jsonKey JSON formatted {@code AesCtrKey}-proto
    * @return {@code AesCtrKey}-proto
    */
   @Override
@@ -157,7 +157,7 @@ class AesCtrKeyManager implements KeyManager<IndCpaCipher> {
   }
 
   /**
-   * @param jsonKeyFormat JSON formated {@code AesCtrKeyFromat}-proto
+   * @param jsonKeyFormat JSON formatted {@code AesCtrKeyFromat}-proto
    * @return {@code AesCtrKeyFormat}-proto
    */
   @Override

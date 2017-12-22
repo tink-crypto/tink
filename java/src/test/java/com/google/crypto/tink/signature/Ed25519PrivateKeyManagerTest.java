@@ -27,6 +27,7 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -132,6 +133,7 @@ public class Ed25519PrivateKeyManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unused")  // Unused key/json-variables are not set unless test fails.
   public void testJsonExportAndImportErrors() throws Exception {
     Ed25519PrivateKeyManager keyManager = new Ed25519PrivateKeyManager();
 
@@ -152,7 +154,7 @@ public class Ed25519PrivateKeyManagerTest {
     }
 
     try {  // Incorrect JSON.
-      byte[] json = "some bad JSON key".getBytes();
+      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
       Ed25519PrivateKey key = (Ed25519PrivateKey) keyManager.jsonToKey(json);
       fail("Corrupted JSON, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -162,7 +164,7 @@ public class Ed25519PrivateKeyManagerTest {
     }
 
     try {  // An incomplete JSON key.
-      byte[] json = "{\"version\": 0, \"keyValue\": \"some key bytes\"}".getBytes();
+      byte[] json = "{\"version\": 0, \"keyValue\": \"some key bytes\"}".getBytes(Util.UTF_8);
       Ed25519PrivateKey key = (Ed25519PrivateKey) keyManager.jsonToKey(json);
       fail("Incomplet JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -173,7 +175,7 @@ public class Ed25519PrivateKeyManagerTest {
 
     try {  // Extra name in JSON key.
       byte[] json = ("{\"version\": 0, \"publicKey\": {}, "
-          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes();
+          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes(Util.UTF_8);
       Ed25519PrivateKey key = (Ed25519PrivateKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
@@ -184,7 +186,7 @@ public class Ed25519PrivateKeyManagerTest {
 
     try {  // Incomplete public key in JSON key.
       byte[] json = ("{\"version\": 0, \"publicKey\": {\"version\": 42}, "
-          + "\"keyValue\": \"some key bytes\"}").getBytes();
+          + "\"keyValue\": \"some key bytes\"}").getBytes(Util.UTF_8);
       Ed25519PrivateKey key = (Ed25519PrivateKey) keyManager.jsonToKey(json);
       fail("Invalid JSON key, should have thrown exception");
     } catch (GeneralSecurityException e) {
