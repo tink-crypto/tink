@@ -48,7 +48,8 @@ static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
 
 - (void)testPrimitiveWithEmptyKeyset {
   google::crypto::tink::Keyset keyset;
-  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(keyset)];
+  TINKKeysetHandle *keysetHandle =
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(keyset)];
 
   NSError *error = nil;
   id<TINKHybridEncrypt> primitive =
@@ -93,7 +94,8 @@ static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
   XCTAssertTrue(ccKeyset.ParseFromString(serializedKeyset));
 
   // Create a KeysetHandle and use it with the factory.
-  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccKeyset)];
+  TINKKeysetHandle *keysetHandle =
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccKeyset)];
   XCTAssertNotNil(keysetHandle);
 
   // Get a HybridEncrypt primitive.

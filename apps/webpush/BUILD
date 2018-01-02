@@ -9,10 +9,6 @@ java_library(
     ]),
     deps = [
         "//java",
-        "@com_google_code_findbugs_jsr305//jar",
-        "@com_google_http_client//jar",
-        "@joda_time//jar",
-        "@org_json//jar",
     ],
 )
 

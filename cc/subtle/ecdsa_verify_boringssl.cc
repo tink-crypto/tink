@@ -94,7 +94,7 @@ util::Status EcdsaVerifyBoringSsl::Verify(
     return util::Status(util::error::UNKNOWN,
                         "Signature is not valid.");
   } else {
-    // an error occurded during the verification
+    // an error occurred during the verification
     return util::Status(util::error::INTERNAL,
                         "An error occured during verification.");
   }

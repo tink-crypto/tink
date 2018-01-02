@@ -32,7 +32,6 @@
 using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::GetKeysetHandle;
 using google::crypto::tink::EcdsaPrivateKey;
-using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;

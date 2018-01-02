@@ -27,7 +27,7 @@ import java.security.GeneralSecurityException;
  *   keyset-file:  name of the file with the keyset to be used for verifying
  *   signature-file:  name of the file that contains the signature
  *   message-file:  name of the file that contains message to be verified
- *   output-file:  name of the output file for the the verification result (valid/invalid)
+ *   output-file:  name of the output file for the verification result (valid/invalid)
  */
 public class PublicKeyVerifyCli {
   public static void main(String[] args) throws Exception {

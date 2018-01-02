@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 
   // Read the keyset.
   std::unique_ptr<KeysetHandle> keyset_handle =
-      std::move(CliUtil::ReadKeyset(keyset_filename));
+      CliUtil::ReadKeyset(keyset_filename);
 
   // Get the primitive.
   auto primitive_result = PublicKeySignFactory::GetPrimitive(*keyset_handle);

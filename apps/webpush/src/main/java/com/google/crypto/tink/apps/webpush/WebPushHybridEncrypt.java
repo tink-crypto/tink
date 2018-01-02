@@ -39,6 +39,7 @@ import javax.crypto.spec.SecretKeySpec;
  * is formatted according to RFC 8188 section 2, and looks as follows
  *
  * <pre>
+ * // NOLINTNEXTLINE
  * +-----------+----------------+------------------+---------------------------------------------------
  * | salt (16) | recordsize (4) | publickeylen (1) | publickey (publickeylen) | aes128-gcm-ciphertext |
  * +-----------+----------------+------------------+---------------------------------------------------
