@@ -27,8 +27,6 @@
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
 
-namespace util = crypto::tink::util;
-
 namespace crypto {
 namespace tink {
 namespace subtle {

@@ -26,8 +26,6 @@ using crypto::tink::test::DummyPublicKeyVerify;
 using google::crypto::tink::OutputPrefixType;
 using google::crypto::tink::Keyset;
 
-namespace util = crypto::tink::util;
-
 namespace crypto {
 namespace tink {
 namespace {

@@ -33,18 +33,13 @@
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
-using google::crypto::tink::EcdsaKeyFormat;
-using google::crypto::tink::EcdsaParams;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EcdsaPublicKey;
 using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
 using google::protobuf::Message;
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

@@ -38,8 +38,6 @@ using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 
-namespace util = crypto::tink::util;
-
 namespace crypto {
 namespace tink {
 namespace {

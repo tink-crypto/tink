@@ -30,13 +30,10 @@
 using google::crypto::tink::AesEaxKey;
 using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaPrivateKey;
-using google::crypto::tink::EcdsaPublicKey;
 using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
-
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

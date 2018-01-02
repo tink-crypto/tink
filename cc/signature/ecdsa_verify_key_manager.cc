@@ -39,13 +39,10 @@ using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
-using google::crypto::tink::KeyTemplate;
 using google::protobuf::Message;
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

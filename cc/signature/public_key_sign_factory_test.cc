@@ -29,21 +29,15 @@
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::GetKeysetHandle;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EcdsaKeyFormat;
-using google::crypto::tink::EcdsaSignatureEncoding;
-using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::KeyTemplate;
-
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

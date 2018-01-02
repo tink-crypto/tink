@@ -21,8 +21,6 @@
 #include "cc/primitive_set.h"
 #include "cc/util/statusor.h"
 
-namespace util = crypto::tink::util;
-
 namespace crypto {
 namespace tink {
 
