@@ -13,44 +13,45 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 package mac_test
 
 import (
-  "fmt"
-  "testing"
-  "github.com/google/tink/go/mac/mac"
-  "github.com/golang/protobuf/proto"
-  hmacpb "github.com/google/tink/proto/hmac_go_proto"
-  tinkpb "github.com/google/tink/proto/tink_go_proto"
-  commonpb "github.com/google/tink/proto/common_go_proto"
+	"fmt"
+	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/mac/mac"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	hmacpb "github.com/google/tink/proto/hmac_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	"testing"
 )
 
 func TestTemplates(t *testing.T) {
-  template := mac.HmacSha256Tag128KeyTemplate()
-  if err := checkTemplate(template, 32, 16, commonpb.HashType_SHA256); err != nil {
-    t.Errorf("incorrect HmacSha256Tag128KeyTemplate: %s", err)
-  }
-  template = mac.HmacSha256Tag256KeyTemplate()
-  if err := checkTemplate(template, 32, 32, commonpb.HashType_SHA256); err != nil {
-    t.Errorf("incorrect HmacSha256Tag256KeyTemplate: %s", err)
-  }
+	template := mac.HmacSha256Tag128KeyTemplate()
+	if err := checkTemplate(template, 32, 16, commonpb.HashType_SHA256); err != nil {
+		t.Errorf("incorrect HmacSha256Tag128KeyTemplate: %s", err)
+	}
+	template = mac.HmacSha256Tag256KeyTemplate()
+	if err := checkTemplate(template, 32, 32, commonpb.HashType_SHA256); err != nil {
+		t.Errorf("incorrect HmacSha256Tag256KeyTemplate: %s", err)
+	}
 }
 
 func checkTemplate(template *tinkpb.KeyTemplate,
-                  keySize uint32,
-                  tagSize uint32,
-                  hashType commonpb.HashType) error {
-  if template.TypeUrl != mac.HMAC_TYPE_URL {
-    return fmt.Errorf("TypeUrl is incorrect")
-  }
-  format := new(hmacpb.HmacKeyFormat)
-  if err := proto.Unmarshal(template.Value, format); err != nil {
-    return fmt.Errorf("unable to unmarshal serialized key format")
-  }
-  if format.KeySize != keySize ||
-      format.Params.Hash != hashType ||
-      format.Params.TagSize != tagSize {
-    return fmt.Errorf("KeyFormat is incorrect")
-  }
-  return nil
+	keySize uint32,
+	tagSize uint32,
+	hashType commonpb.HashType) error {
+	if template.TypeUrl != mac.HMAC_TYPE_URL {
+		return fmt.Errorf("TypeUrl is incorrect")
+	}
+	format := new(hmacpb.HmacKeyFormat)
+	if err := proto.Unmarshal(template.Value, format); err != nil {
+		return fmt.Errorf("unable to unmarshal serialized key format")
+	}
+	if format.KeySize != keySize ||
+		format.Params.Hash != hashType ||
+		format.Params.TagSize != tagSize {
+		return fmt.Errorf("KeyFormat is incorrect")
+	}
+	return nil
 }

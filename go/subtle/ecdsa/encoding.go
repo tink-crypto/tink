@@ -12,23 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
+
 package ecdsa
 
 import (
-  "bytes"
-  "encoding/asn1"
-  "fmt"
+	"bytes"
+	"encoding/asn1"
+	"fmt"
 )
 
 var errInvalidLength = fmt.Errorf("invalid length")
 
 // asn1encode encodes the given ECDSA signature using ASN.1 encoding.
 func asn1encode(sig *EcdsaSignature) ([]byte, error) {
-  ret, err := asn1.Marshal(*sig)
-  if err != nil {
-    return nil, fmt.Errorf("asn.1 encoding failed")
-  }
-  return ret, nil
+	ret, err := asn1.Marshal(*sig)
+	if err != nil {
+		return nil, fmt.Errorf("asn.1 encoding failed")
+	}
+	return ret, nil
 }
 
 var errAsn1Decoding = fmt.Errorf("asn.1 decoding failed")
@@ -40,19 +41,19 @@ var errAsn1Decoding = fmt.Errorf("asn.1 decoding failed")
 // we marshal the obtained signature object again. Since DER encoding is deterministic,
 // we expect that the obtained bytes would be equal to the input.
 func asn1decode(b []byte) (*EcdsaSignature, error) {
-  // parse the signature
-  sig := new(EcdsaSignature)
-  _, err := asn1.Unmarshal(b, sig)
-  if err != nil {
-    return nil, errAsn1Decoding
-  }
-  // encode the signature again
-  encoded, err := asn1.Marshal(*sig)
-  if err != nil {
-    return nil, errAsn1Decoding
-  }
-  if !bytes.Equal(b, encoded) {
-    return nil, errAsn1Decoding
-  }
-  return sig, nil
+	// parse the signature
+	sig := new(EcdsaSignature)
+	_, err := asn1.Unmarshal(b, sig)
+	if err != nil {
+		return nil, errAsn1Decoding
+	}
+	// encode the signature again
+	encoded, err := asn1.Marshal(*sig)
+	if err != nil {
+		return nil, errAsn1Decoding
+	}
+	if !bytes.Equal(b, encoded) {
+		return nil, errAsn1Decoding
+	}
+	return sig, nil
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 package tink
 
 /**
@@ -20,11 +21,11 @@ package tink
  * Implementations of this interface are secure against adaptive chosen-message attacks.
  * Signing data ensures authenticity and integrity of that data, but not its secrecy.
  */
-type PublicKeySign interface{
-  /**
-   * Computes the signature for {@code data}.
-   *
-   * @return the signature of {$code data}.
-   */
-  Sign(data []byte) ([]byte, error)
+type PublicKeySign interface {
+	/**
+	 * Computes the signature for {@code data}.
+	 *
+	 * @return the signature of {$code data}.
+	 */
+	Sign(data []byte) ([]byte, error)
 }

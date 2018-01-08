@@ -13,34 +13,35 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 package testutil_test
 
 import (
-  "testing"
-  "bytes"
-  "github.com/google/tink/go/tink/tink"
-  "github.com/google/tink/go/util/testutil"
+	"bytes"
+	"github.com/google/tink/go/tink/tink"
+	"github.com/google/tink/go/util/testutil"
+	"testing"
 )
 
 func TestDummyAead(t *testing.T) {
-  // Assert that DummyAead implements the Aead interface.
-  var _ tink.Aead = (*testutil.DummyAead)(nil)
+	// Assert that DummyAead implements the Aead interface.
+	var _ tink.Aead = (*testutil.DummyAead)(nil)
 }
 
 func TestDummyMac(t *testing.T) {
-  // Assert that DummyMac implements the Aead interface.
-  var _ tink.Mac = (*testutil.DummyMac)(nil)
-  // try to compute mac
-  data := []byte{1, 2, 3, 4, 5}
-  dummyMac := &testutil.DummyMac{Name: "Mac12347"}
-  digest, err := dummyMac.ComputeMac(data)
-  if err != nil {
-    t.Errorf("unexpected error: %s", err)
-  }
-  if bytes.Compare(append(data, dummyMac.Name...), digest) != 0 {
-    t.Errorf("incorrect digest")
-  }
-  if valid, err := dummyMac.VerifyMac(nil, nil); valid == false || err != nil {
-    t.Errorf("unexpected result of VerifyMac")
-  }
+	// Assert that DummyMac implements the Aead interface.
+	var _ tink.Mac = (*testutil.DummyMac)(nil)
+	// try to compute mac
+	data := []byte{1, 2, 3, 4, 5}
+	dummyMac := &testutil.DummyMac{Name: "Mac12347"}
+	digest, err := dummyMac.ComputeMac(data)
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+	}
+	if bytes.Compare(append(data, dummyMac.Name...), digest) != 0 {
+		t.Errorf("incorrect digest")
+	}
+	if valid, err := dummyMac.VerifyMac(nil, nil); valid == false || err != nil {
+		t.Errorf("unexpected result of VerifyMac")
+	}
 }

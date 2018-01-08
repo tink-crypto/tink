@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
+
 package random_test
 
 import (
-  "testing"
-  "github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/subtle/random"
+	"testing"
 )
 
 func TestGetRandomBytes(t *testing.T) {
-  for i := 0; i <= 32; i++ {
-    buf := random.GetRandomBytes(uint32(i))
-    if len(buf) != i {
-      t.Errorf("length of the output doesn't match the input")
-    }
-  }
+	for i := 0; i <= 32; i++ {
+		buf := random.GetRandomBytes(uint32(i))
+		if len(buf) != i {
+			t.Errorf("length of the output doesn't match the input")
+		}
+	}
 }

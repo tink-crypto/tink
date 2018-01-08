@@ -13,14 +13,15 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 package signature
 
 import (
-  "github.com/google/tink/go/util/util"
-  "github.com/golang/protobuf/proto"
-  ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
-  tinkpb "github.com/google/tink/proto/tink_go_proto"
-  commonpb "github.com/google/tink/proto/common_go_proto"
+	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/util/util"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // This file contains pre-generated KeyTemplate for PublicKeySign and PublicKeyVerify.
@@ -32,9 +33,9 @@ import (
 //   - Curve: NIST P-256
 //   - Signature encoding: DER
 func EcdsaP256KeyTemplate() *tinkpb.KeyTemplate {
-  return createEcdsaKeyTemplate(commonpb.HashType_SHA256,
-                                commonpb.EllipticCurveType_NIST_P256,
-                                ecdsapb.EcdsaSignatureEncoding_DER)
+	return createEcdsaKeyTemplate(commonpb.HashType_SHA256,
+		commonpb.EllipticCurveType_NIST_P256,
+		ecdsapb.EcdsaSignatureEncoding_DER)
 }
 
 // EcdsaP384KeyTemplate is a KeyTemplate of EcdsaPrivateKey with the following parameters:
@@ -42,9 +43,9 @@ func EcdsaP256KeyTemplate() *tinkpb.KeyTemplate {
 //   - Curve: NIST P-384
 //   - Signature encoding: DER
 func EcdsaP384KeyTemplate() *tinkpb.KeyTemplate {
-  return createEcdsaKeyTemplate(commonpb.HashType_SHA512,
-                                commonpb.EllipticCurveType_NIST_P384,
-                                ecdsapb.EcdsaSignatureEncoding_DER)
+	return createEcdsaKeyTemplate(commonpb.HashType_SHA512,
+		commonpb.EllipticCurveType_NIST_P384,
+		ecdsapb.EcdsaSignatureEncoding_DER)
 }
 
 // EcdsaP521KeyTemplate is a KeyTemplate of EcdsaPrivateKey with the following parameters:
@@ -52,21 +53,21 @@ func EcdsaP384KeyTemplate() *tinkpb.KeyTemplate {
 //   - Curve: NIST P-521
 //   - Signature encoding: DER
 func EcdsaP521KeyTemplate() *tinkpb.KeyTemplate {
-  return createEcdsaKeyTemplate(commonpb.HashType_SHA512,
-                                commonpb.EllipticCurveType_NIST_P521,
-                                ecdsapb.EcdsaSignatureEncoding_DER)
+	return createEcdsaKeyTemplate(commonpb.HashType_SHA512,
+		commonpb.EllipticCurveType_NIST_P521,
+		ecdsapb.EcdsaSignatureEncoding_DER)
 }
 
 // createEcdsaKeyTemplate creates a KeyTemplate containing a EcdasKeyFormat
 // with the given parameters.
 func createEcdsaKeyTemplate(hashType commonpb.HashType,
-                            curve commonpb.EllipticCurveType,
-                            encoding ecdsapb.EcdsaSignatureEncoding) *tinkpb.KeyTemplate {
-  params := util.NewEcdsaParams(hashType, curve, encoding)
-  format := util.NewEcdsaKeyFormat(params)
-  serializedFormat, _ := proto.Marshal(format)
-  return &tinkpb.KeyTemplate{
-    TypeUrl: ECDSA_SIGN_TYPE_URL,
-    Value: serializedFormat,
-  }
+	curve commonpb.EllipticCurveType,
+	encoding ecdsapb.EcdsaSignatureEncoding) *tinkpb.KeyTemplate {
+	params := util.NewEcdsaParams(hashType, curve, encoding)
+	format := util.NewEcdsaKeyFormat(params)
+	serializedFormat, _ := proto.Marshal(format)
+	return &tinkpb.KeyTemplate{
+		TypeUrl: ECDSA_SIGN_TYPE_URL,
+		Value:   serializedFormat,
+	}
 }
