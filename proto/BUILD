@@ -78,6 +78,7 @@ go_proto_library(
     srcs = [
         "tink.proto",
     ],
+    ignore_go_package_option = 1,
     deps = [
         ":common_go_proto",
     ],
