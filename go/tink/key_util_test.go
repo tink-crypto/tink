@@ -14,31 +14,31 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package util_test
+package tink_test
 
 import (
-	"github.com/google/tink/go/util/testutil"
-	"github.com/google/tink/go/util"
+	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"testing"
 )
 
 func TestValidateVersion(t *testing.T) {
-	if util.ValidateVersion(2, 1) == nil ||
-		util.ValidateVersion(1, 1) != nil ||
-		util.ValidateVersion(1, 2) != nil {
+	if tink.ValidateVersion(2, 1) == nil ||
+		tink.ValidateVersion(1, 1) != nil ||
+		tink.ValidateVersion(1, 2) != nil {
 		t.Errorf("incorrect version validation")
 	}
 }
 
 func TestGetKeyInfo(t *testing.T) {
-	_, err := util.GetKeyInfo(nil)
+	_, err := tink.GetKeyInfo(nil)
 	if err == nil {
 		t.Errorf("expect an error when input is nil")
 	}
-	keyData := util.NewKeyData("some url", []byte{1}, tinkpb.KeyData_SYMMETRIC)
-	key := util.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	info, err := util.GetKeyInfo(key)
+	keyData := tink.NewKeyData("some url", []byte{1}, tinkpb.KeyData_SYMMETRIC)
+	key := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	info, err := tink.GetKeyInfo(key)
 	if err != nil {
 		t.Errorf("unexpected error")
 	}
@@ -48,14 +48,14 @@ func TestGetKeyInfo(t *testing.T) {
 }
 
 func TestGetKeysetInfo(t *testing.T) {
-	_, err := util.GetKeysetInfo(nil)
+	_, err := tink.GetKeysetInfo(nil)
 	if err == nil {
 		t.Errorf("expect an error when input is nil")
 	}
-	keyData := util.NewKeyData("some url", []byte{1}, tinkpb.KeyData_SYMMETRIC)
-	key := util.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := util.NewKeyset(1, []*tinkpb.Keyset_Key{key})
-	keysetInfo, err := util.GetKeysetInfo(keyset)
+	keyData := tink.NewKeyData("some url", []byte{1}, tinkpb.KeyData_SYMMETRIC)
+	key := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keyset := tink.NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	keysetInfo, err := tink.GetKeysetInfo(keyset)
 	if keysetInfo.PrimaryKeyId != keyset.PrimaryKeyId {
 		t.Errorf("PrimaryKeyId mismatched")
 	}
@@ -69,7 +69,7 @@ func TestGetKeysetInfo(t *testing.T) {
 func TestValidateKey(t *testing.T) {
 	invalidKeys := generateInvalidKeys()
 	for i, key := range invalidKeys {
-		if err := util.ValidateKey(key); err == nil {
+		if err := tink.ValidateKey(key); err == nil {
 			t.Errorf("expect an error for invalid key #%d", i)
 		}
 	}
@@ -78,12 +78,12 @@ func TestValidateKey(t *testing.T) {
 func TestValidateKeyset(t *testing.T) {
 	var err error
 	// nil input
-	if err = util.ValidateKeyset(nil); err == nil {
+	if err = tink.ValidateKeyset(nil); err == nil {
 		t.Errorf("expect an error when keyset is nil")
 	}
 	// empty keyset
 	emptyKeys := make([]*tinkpb.Keyset_Key, 0)
-	if err = util.ValidateKeyset(util.NewKeyset(1, emptyKeys)); err == nil {
+	if err = tink.ValidateKeyset(tink.NewKeyset(1, emptyKeys)); err == nil {
 		t.Errorf("expect an error when keyset is empty")
 	}
 	// no primary key
@@ -91,7 +91,7 @@ func TestValidateKeyset(t *testing.T) {
 	keys = []*tinkpb.Keyset_Key{
 		testutil.NewDummyKey(1, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK),
 	}
-	if err = util.ValidateKeyset(util.NewKeyset(2, keys)); err == nil {
+	if err = tink.ValidateKeyset(tink.NewKeyset(2, keys)); err == nil {
 		t.Errorf("expect an error when there is no primary key")
 	}
 	// primary key is disabled
@@ -99,7 +99,7 @@ func TestValidateKeyset(t *testing.T) {
 		testutil.NewDummyKey(1, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK),
 		testutil.NewDummyKey(2, tinkpb.KeyStatusType_DISABLED, tinkpb.OutputPrefixType_LEGACY),
 	}
-	if err = util.ValidateKeyset(util.NewKeyset(2, keys)); err == nil {
+	if err = tink.ValidateKeyset(tink.NewKeyset(2, keys)); err == nil {
 		t.Errorf("expect an error when primary key is disabled")
 	}
 	// multiple primary keys
@@ -107,13 +107,13 @@ func TestValidateKeyset(t *testing.T) {
 		testutil.NewDummyKey(1, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK),
 		testutil.NewDummyKey(1, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_LEGACY),
 	}
-	if err = util.ValidateKeyset(util.NewKeyset(1, keys)); err == nil {
+	if err = tink.ValidateKeyset(tink.NewKeyset(1, keys)); err == nil {
 		t.Errorf("expect an error when there are multiple primary keys")
 	}
 	// invalid keys
 	invalidKeys := generateInvalidKeys()
 	for i, key := range invalidKeys {
-		err = util.ValidateKeyset(util.NewKeyset(1, []*tinkpb.Keyset_Key{key}))
+		err = tink.ValidateKeyset(tink.NewKeyset(1, []*tinkpb.Keyset_Key{key}))
 		if err == nil {
 			t.Errorf("expect an error when validate invalid key %d", i)
 		}
@@ -124,11 +124,11 @@ func generateInvalidKeys() []*tinkpb.Keyset_Key {
 	return []*tinkpb.Keyset_Key{
 		nil,
 		// nil KeyData
-		util.NewKey(nil, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+		tink.NewKey(nil, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
 		// unknown status
-		util.NewKey(new(tinkpb.KeyData), tinkpb.KeyStatusType_UNKNOWN_STATUS, 1, tinkpb.OutputPrefixType_TINK),
+		tink.NewKey(new(tinkpb.KeyData), tinkpb.KeyStatusType_UNKNOWN_STATUS, 1, tinkpb.OutputPrefixType_TINK),
 		// unknown prefix
-		util.NewKey(new(tinkpb.KeyData), tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_UNKNOWN_PREFIX),
+		tink.NewKey(new(tinkpb.KeyData), tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_UNKNOWN_PREFIX),
 	}
 }
 

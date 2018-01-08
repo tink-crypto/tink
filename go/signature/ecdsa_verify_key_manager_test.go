@@ -20,7 +20,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/ecdsa"
-	"github.com/google/tink/go/util/testutil"
+	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_proto"
 	"testing"
 )

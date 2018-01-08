@@ -27,7 +27,6 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle/subtleutil"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util"
 	. "github.com/google/tink/proto/aes_gcm_proto"
 	. "github.com/google/tink/proto/common_proto"
 	. "github.com/google/tink/proto/ecdsa_proto"
@@ -103,13 +102,13 @@ func NewTestHmacKeyset(tagSize uint32,
 
 func NewTestKeyset(keyData *KeyData,
 	primaryOutputPrefixType OutputPrefixType) *Keyset {
-	primaryKey := util.NewKey(keyData, KeyStatusType_ENABLED, 42, primaryOutputPrefixType)
-	rawKey := util.NewKey(keyData, KeyStatusType_ENABLED, 43, OutputPrefixType_RAW)
-	legacyKey := util.NewKey(keyData, KeyStatusType_ENABLED, 44, OutputPrefixType_LEGACY)
-	tinkKey := util.NewKey(keyData, KeyStatusType_ENABLED, 45, OutputPrefixType_TINK)
-	crunchyKey := util.NewKey(keyData, KeyStatusType_ENABLED, 46, OutputPrefixType_CRUNCHY)
+	primaryKey := tink.NewKey(keyData, KeyStatusType_ENABLED, 42, primaryOutputPrefixType)
+	rawKey := tink.NewKey(keyData, KeyStatusType_ENABLED, 43, OutputPrefixType_RAW)
+	legacyKey := tink.NewKey(keyData, KeyStatusType_ENABLED, 44, OutputPrefixType_LEGACY)
+	tinkKey := tink.NewKey(keyData, KeyStatusType_ENABLED, 45, OutputPrefixType_TINK)
+	crunchyKey := tink.NewKey(keyData, KeyStatusType_ENABLED, 46, OutputPrefixType_CRUNCHY)
 	keys := []*Keyset_Key{primaryKey, rawKey, legacyKey, tinkKey, crunchyKey}
-	return util.NewKeyset(primaryKey.KeyId, keys)
+	return tink.NewKeyset(primaryKey.KeyId, keys)
 }
 
 func NewDummyKey(keyId int, status KeyStatusType, outputPrefixType OutputPrefixType) *Keyset_Key {
@@ -124,12 +123,12 @@ func NewDummyKey(keyId int, status KeyStatusType, outputPrefixType OutputPrefixT
 func NewEcdsaPrivateKey(hashType HashType, curve EllipticCurveType) *EcdsaPrivateKey {
 	curveName, _ := EllipticCurveType_name[int32(curve)]
 	priv, _ := ecdsa.GenerateKey(subtleutil.GetCurve(curveName), rand.Reader)
-	params := util.NewEcdsaParams(hashType,
+	params := signature.NewEcdsaParams(hashType,
 		curve,
 		EcdsaSignatureEncoding_DER)
-	publicKey := util.NewEcdsaPublicKey(signature.ECDSA_VERIFY_KEY_VERSION,
+	publicKey := signature.NewEcdsaPublicKey(signature.ECDSA_VERIFY_KEY_VERSION,
 		params, priv.X.Bytes(), priv.Y.Bytes())
-	return util.NewEcdsaPrivateKey(signature.ECDSA_SIGN_KEY_VERSION,
+	return signature.NewEcdsaPrivateKey(signature.ECDSA_SIGN_KEY_VERSION,
 		publicKey, priv.D.Bytes())
 }
 
@@ -149,14 +148,14 @@ func NewEcdsaPublicKey(hashType HashType, curve EllipticCurveType) *EcdsaPublicK
 
 func NewAesGcmKey(keySize uint32) *AesGcmKey {
 	keyValue := random.GetRandomBytes(keySize)
-	return util.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, keyValue)
+	return aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, keyValue)
 }
 
 func NewAesGcmKeyData(keySize uint32) *KeyData {
 	keyValue := random.GetRandomBytes(keySize)
-	key := util.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, keyValue)
+	key := aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, keyValue)
 	serializedKey, _ := proto.Marshal(key)
-	return util.NewKeyData(aead.AES_GCM_TYPE_URL, serializedKey, KeyData_SYMMETRIC)
+	return tink.NewKeyData(aead.AES_GCM_TYPE_URL, serializedKey, KeyData_SYMMETRIC)
 }
 
 func NewSerializedAesGcmKey(keySize uint32) []byte {
@@ -169,15 +168,15 @@ func NewSerializedAesGcmKey(keySize uint32) []byte {
 }
 
 func NewHmacKey(hashType HashType, tagSize uint32) *HmacKey {
-	params := util.NewHmacParams(hashType, tagSize)
+	params := mac.NewHmacParams(hashType, tagSize)
 	keyValue := random.GetRandomBytes(20)
-	return util.NewHmacKey(params, mac.HMAC_KEY_VERSION, keyValue)
+	return mac.NewHmacKey(params, mac.HMAC_KEY_VERSION, keyValue)
 }
 
 func NewHmacKeyFormat(hashType HashType, tagSize uint32) *HmacKeyFormat {
-	params := util.NewHmacParams(hashType, tagSize)
+	params := mac.NewHmacParams(hashType, tagSize)
 	keySize := uint32(20)
-	return util.NewHmacKeyFormat(params, keySize)
+	return mac.NewHmacKeyFormat(params, keySize)
 }
 
 func NewHmacKeysetManager() *tink.KeysetManager {

@@ -23,8 +23,7 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/subtle/aes"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/util/testutil"
-	"github.com/google/tink/go/util"
+	"github.com/google/tink/go/testutil"
 	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"testing"
@@ -90,7 +89,7 @@ func TestAesGcmGetPrimitiveWithInvalidInput(t *testing.T) {
 
 func TestAesGcmNewKeyMultipleTimes(t *testing.T) {
 	keyManager := aead.NewAesGcmKeyManager()
-	format := util.NewAesGcmKeyFormat(32)
+	format := aead.NewAesGcmKeyFormat(32)
 	serializedFormat, _ := proto.Marshal(format)
 	keys := make(map[string]bool)
 	nTest := 26
@@ -111,7 +110,7 @@ func TestAesGcmNewKeyMultipleTimes(t *testing.T) {
 func TestAesGcmNewKeyBasic(t *testing.T) {
 	keyManager := aead.NewAesGcmKeyManager()
 	for _, keySize := range keySizes {
-		format := util.NewAesGcmKeyFormat(uint32(keySize))
+		format := aead.NewAesGcmKeyFormat(uint32(keySize))
 		m, err := keyManager.NewKeyFromKeyFormat(format)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
@@ -162,7 +161,7 @@ func TestAesGcmNewKeyWithInvalidInput(t *testing.T) {
 func TestAesGcmNewKeyDataBasic(t *testing.T) {
 	keyManager := aead.NewAesGcmKeyManager()
 	for _, keySize := range keySizes {
-		format := util.NewAesGcmKeyFormat(uint32(keySize))
+		format := aead.NewAesGcmKeyFormat(uint32(keySize))
 		serializedFormat, _ := proto.Marshal(format)
 		keyData, err := keyManager.NewKeyData(serializedFormat)
 		if err != nil {
@@ -223,24 +222,24 @@ func TestAesGcmGetKeyType(t *testing.T) {
 func genInvalidAesGcmKeys() []proto.Message {
 	return []proto.Message{
 		// not a AesGcmKey
-		util.NewAesGcmKeyFormat(32),
+		aead.NewAesGcmKeyFormat(32),
 		// bad key size
-		util.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(17)),
-		util.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(25)),
-		util.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(33)),
+		aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(17)),
+		aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(25)),
+		aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(33)),
 		// bad version
-		util.NewAesGcmKey(aead.AES_GCM_KEY_VERSION+1, random.GetRandomBytes(16)),
+		aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION+1, random.GetRandomBytes(16)),
 	}
 }
 
 func genInvalidAesGcmKeyFormats() []proto.Message {
 	return []proto.Message{
 		// not AesGcmKeyFormat
-		util.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(16)),
+		aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(16)),
 		// invalid key size
-		util.NewAesGcmKeyFormat(uint32(15)),
-		util.NewAesGcmKeyFormat(uint32(23)),
-		util.NewAesGcmKeyFormat(uint32(31)),
+		aead.NewAesGcmKeyFormat(uint32(15)),
+		aead.NewAesGcmKeyFormat(uint32(23)),
+		aead.NewAesGcmKeyFormat(uint32(31)),
 	}
 }
 

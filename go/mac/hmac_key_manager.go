@@ -22,7 +22,6 @@ import (
 	"github.com/google/tink/go/subtle/hmac"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )
@@ -72,7 +71,7 @@ func (km *HmacKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, err
 	if err := km.validateKey(key); err != nil {
 		return nil, err
 	}
-	hash := util.GetHashName(key.Params.Hash)
+	hash := tink.GetHashName(key.Params.Hash)
 	hmac, err := hmac.New(hash, key.KeyValue, key.Params.TagSize)
 	if err != nil {
 		return nil, err
@@ -104,7 +103,7 @@ func (km *HmacKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message, e
 		return nil, fmt.Errorf("hmac_key_manager: invalid key format: %s", err)
 	}
 	keyValue := random.GetRandomBytes(keyFormat.KeySize)
-	return util.NewHmacKey(keyFormat.Params, HMAC_KEY_VERSION, keyValue), nil
+	return NewHmacKey(keyFormat.Params, HMAC_KEY_VERSION, keyValue), nil
 }
 
 // NewKeyData generates a new KeyData according to specification in the given
@@ -118,7 +117,7 @@ func (km *HmacKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyDat
 	if err != nil {
 		return nil, errInvalidHmacKeyFormat
 	}
-	return util.NewKeyData(HMAC_TYPE_URL, serializedKey, tinkpb.KeyData_SYMMETRIC), nil
+	return tink.NewKeyData(HMAC_TYPE_URL, serializedKey, tinkpb.KeyData_SYMMETRIC), nil
 }
 
 // DoesSupport checks whether this KeyManager supports the given key type.
@@ -134,17 +133,17 @@ func (_ *HmacKeyManager) GetKeyType() string {
 // validateKey validates the given HmacKey. It only validates the version of the
 // key because other parameters will be validated in primitive construction.
 func (_ *HmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
-	err := util.ValidateVersion(key.Version, HMAC_KEY_VERSION)
+	err := tink.ValidateVersion(key.Version, HMAC_KEY_VERSION)
 	if err != nil {
 		return fmt.Errorf("hmac_key_manager: %s", err)
 	}
 	keySize := uint32(len(key.KeyValue))
-	hash := util.GetHashName(key.Params.Hash)
+	hash := tink.GetHashName(key.Params.Hash)
 	return hmac.ValidateParams(hash, keySize, key.Params.TagSize)
 }
 
 // validateKeyFormat validates the given HmacKeyFormat
 func (_ *HmacKeyManager) validateKeyFormat(format *hmacpb.HmacKeyFormat) error {
-	hash := util.GetHashName(format.Params.Hash)
+	hash := tink.GetHashName(format.Params.Hash)
 	return hmac.ValidateParams(hash, format.KeySize, format.Params.TagSize)
 }

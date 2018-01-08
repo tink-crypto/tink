@@ -22,8 +22,7 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util/testutil"
-	"github.com/google/tink/go/util"
+	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"testing"
 )
@@ -100,7 +99,7 @@ func TestEncryptedKeysetHandleParseWithInvalidKeyset(t *testing.T) {
 		t.Errorf("expect an error when serialized keyset is modified")
 	}
 	// encrypted keyset contains a keyset with no key
-	keyset = util.NewKeyset(1, []*tinkpb.Keyset_Key{})
+	keyset = tink.NewKeyset(1, []*tinkpb.Keyset_Key{})
 	encryptedKeyset, _ = tink.EncryptKeyset(keyset, masterKey)
 	serialized, _ = proto.Marshal(encryptedKeyset)
 	_, err = tink.EncryptedKeysetHandle().ParseKeyset(encryptedKeyset, masterKey)

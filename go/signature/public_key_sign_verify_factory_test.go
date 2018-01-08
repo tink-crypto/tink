@@ -21,8 +21,7 @@ import (
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util/testutil"
-	"github.com/google/tink/go/util"
+	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"testing"
@@ -55,10 +54,10 @@ func TestPublicKeySignVerifyFactory(t *testing.T) {
 		tinkpb.OutputPrefixType_CRUNCHY,
 		4)
 	privKeys := []*tinkpb.Keyset_Key{tinkPriv, legacyPriv, rawPriv, crunchyPriv}
-	privKeyset := util.NewKeyset(privKeys[0].KeyId, privKeys)
+	privKeyset := tink.NewKeyset(privKeys[0].KeyId, privKeys)
 	privKeysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(privKeyset)
 	pubKeys := []*tinkpb.Keyset_Key{tinkPub, legacyPub, rawPub, crunchyPub}
-	pubKeyset := util.NewKeyset(pubKeys[0].KeyId, pubKeys)
+	pubKeyset := tink.NewKeyset(pubKeys[0].KeyId, pubKeys)
 	pubKeysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(pubKeyset)
 
 	// sign some random data
@@ -85,7 +84,7 @@ func TestPublicKeySignVerifyFactory(t *testing.T) {
 		tinkpb.OutputPrefixType_TINK,
 		1)
 	pubKeys = []*tinkpb.Keyset_Key{randomPub}
-	pubKeyset = util.NewKeyset(pubKeys[0].KeyId, pubKeys)
+	pubKeyset = tink.NewKeyset(pubKeys[0].KeyId, pubKeys)
 	pubKeysetHandle, _ = tink.CleartextKeysetHandle().ParseKeyset(pubKeyset)
 	verifier, err = signature.PublicKeyVerifyFactory().GetPrimitive(pubKeysetHandle)
 	if err != nil {
@@ -102,15 +101,15 @@ func newEcdsaKeysetKeypair(hashType commonpb.HashType,
 	keyId uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
 	key := testutil.NewEcdsaPrivateKey(hashType, curve)
 	serializedKey, _ := proto.Marshal(key)
-	keyData := util.NewKeyData(signature.ECDSA_SIGN_TYPE_URL,
+	keyData := tink.NewKeyData(signature.ECDSA_SIGN_TYPE_URL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PRIVATE)
-	privKey := util.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyId, outputPrefixType)
+	privKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyId, outputPrefixType)
 
 	serializedKey, _ = proto.Marshal(key.PublicKey)
-	keyData = util.NewKeyData(signature.ECDSA_VERIFY_TYPE_URL,
+	keyData = tink.NewKeyData(signature.ECDSA_VERIFY_TYPE_URL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PUBLIC)
-	pubKey := util.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyId, outputPrefixType)
+	pubKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyId, outputPrefixType)
 	return privKey, pubKey
 }

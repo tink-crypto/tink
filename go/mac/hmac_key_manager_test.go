@@ -25,8 +25,7 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle/subtleutil"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util/testutil"
-	"github.com/google/tink/go/util"
+	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_proto"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
@@ -240,7 +239,7 @@ func genInvalidHmacKeys() []proto.Message {
 	shortKey.KeyValue = []byte{1, 1}
 	return []proto.Message{
 		// not a HmacKey
-		util.NewHmacParams(commonpb.HashType_SHA256, 32),
+		mac.NewHmacParams(commonpb.HashType_SHA256, 32),
 		// bad version
 		badVersionKey,
 		// tag size too big
@@ -261,7 +260,7 @@ func genInvalidHmacKeyFormats() []proto.Message {
 	shortKeyFormat.KeySize = 1
 	return []proto.Message{
 		// not a HmacKeyFormat
-		util.NewHmacParams(commonpb.HashType_SHA256, 32),
+		mac.NewHmacParams(commonpb.HashType_SHA256, 32),
 		// tag size too big
 		testutil.NewHmacKeyFormat(commonpb.HashType_SHA1, 21),
 		testutil.NewHmacKeyFormat(commonpb.HashType_SHA256, 33),
@@ -298,7 +297,7 @@ func validateHmacKey(format *hmacpb.HmacKeyFormat, key *hmacpb.HmacKey) error {
 		key.Params.Hash != format.Params.Hash {
 		return fmt.Errorf("key format and generated key do not match")
 	}
-	p, err := hmac.New(util.GetHashName(key.Params.Hash), key.KeyValue, key.Params.TagSize)
+	p, err := hmac.New(tink.GetHashName(key.Params.Hash), key.KeyValue, key.Params.TagSize)
 	if err != nil {
 		return fmt.Errorf("cannot create primitive from key: %s", err)
 	}
@@ -310,7 +309,7 @@ func validateHmacPrimitive(p *hmac.Hmac, key *hmacpb.HmacKey) error {
 	if !bytes.Equal(p.Key, key.KeyValue) ||
 		p.TagSize != key.Params.TagSize ||
 		reflect.ValueOf(p.HashFunc).Pointer() !=
-			reflect.ValueOf(subtleutil.GetHashFunc(util.GetHashName(key.Params.Hash))).Pointer() {
+			reflect.ValueOf(subtleutil.GetHashFunc(tink.GetHashName(key.Params.Hash))).Pointer() {
 		return fmt.Errorf("primitive and key do not matched")
 	}
 	data := random.GetRandomBytes(20)

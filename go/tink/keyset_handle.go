@@ -18,7 +18,6 @@ package tink
 
 import (
 	"fmt"
-	"github.com/google/tink/go/util"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
@@ -92,7 +91,7 @@ func (h *KeysetHandle) EncryptedKeyset() *tinkpb.EncryptedKeyset {
 
 // KeysetInfo returns a KeysetInfo object that doesn't contain actual key material.
 func (h *KeysetHandle) KeysetInfo() (*tinkpb.KeysetInfo, error) {
-	return util.GetKeysetInfo(h.keyset)
+	return GetKeysetInfo(h.keyset)
 }
 
 // String returns the string representation of the KeysetInfo.

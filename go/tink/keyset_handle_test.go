@@ -17,17 +17,16 @@
 package tink
 
 import (
-	"github.com/google/tink/go/util"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"testing"
 )
 
 func TestNewKeysetHandleBasic(t *testing.T) {
-	keyData := util.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
-	key := util.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := util.NewKeyset(1, []*tinkpb.Keyset_Key{key})
-	keysetInfo, _ := util.GetKeysetInfo(keyset)
-	encryptedKeyset := util.NewEncryptedKeyset([]byte{1}, keysetInfo)
+	keyData := NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keyset := NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	keysetInfo, _ := GetKeysetInfo(keyset)
+	encryptedKeyset := NewEncryptedKeyset([]byte{1}, keysetInfo)
 	h, err := newKeysetHandle(keyset, encryptedKeyset)
 	if err != nil {
 		t.Errorf("unexpected error when creating new KeysetHandle")

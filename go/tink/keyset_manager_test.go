@@ -21,7 +21,7 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util/testutil"
+	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"strings"
 	"testing"

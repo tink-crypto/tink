@@ -24,7 +24,6 @@ import (
 	subtleEcdsa "github.com/google/tink/go/subtle/ecdsa"
 	"github.com/google/tink/go/subtle/subtleutil"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )
@@ -75,7 +74,7 @@ func (km *EcdsaSignKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}
 	if err := km.validateKey(key); err != nil {
 		return nil, err
 	}
-	hash, curve, encoding := util.GetEcdsaParamNames(key.PublicKey.Params)
+	hash, curve, encoding := GetEcdsaParamNames(key.PublicKey.Params)
 	ret, err := subtleEcdsa.NewEcdsaSign(hash, curve, encoding, key.KeyValue)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_sign_key_manager: %s", err)
@@ -108,11 +107,11 @@ func (km *EcdsaSignKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Messa
 	}
 	// generate key
 	params := format.Params
-	curve := util.GetCurveName(params.Curve)
+	curve := tink.GetCurveName(params.Curve)
 	tmpKey, _ := ecdsa.GenerateKey(subtleutil.GetCurve(curve), rand.Reader)
 	keyValue := tmpKey.D.Bytes()
-	pub := util.NewEcdsaPublicKey(ECDSA_SIGN_KEY_VERSION, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
-	priv := util.NewEcdsaPrivateKey(ECDSA_SIGN_KEY_VERSION, pub, keyValue)
+	pub := NewEcdsaPublicKey(ECDSA_SIGN_KEY_VERSION, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
+	priv := NewEcdsaPrivateKey(ECDSA_SIGN_KEY_VERSION, pub, keyValue)
 	return priv, nil
 }
 
@@ -163,15 +162,15 @@ func (_ *EcdsaSignKeyManager) GetKeyType() string {
 
 // validateKey validates the given EcdsaPrivateKey.
 func (_ *EcdsaSignKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
-	if err := util.ValidateVersion(key.Version, ECDSA_SIGN_KEY_VERSION); err != nil {
+	if err := tink.ValidateVersion(key.Version, ECDSA_SIGN_KEY_VERSION); err != nil {
 		return fmt.Errorf("ecdsa_sign_key_manager: %s", err)
 	}
-	hash, curve, encoding := util.GetEcdsaParamNames(key.PublicKey.Params)
+	hash, curve, encoding := GetEcdsaParamNames(key.PublicKey.Params)
 	return subtleEcdsa.ValidateParams(hash, curve, encoding)
 }
 
 // validateKeyFormat validates the given EcdsaKeyFormat.
 func (_ *EcdsaSignKeyManager) validateKeyFormat(format *ecdsapb.EcdsaKeyFormat) error {
-	hash, curve, encoding := util.GetEcdsaParamNames(format.Params)
+	hash, curve, encoding := GetEcdsaParamNames(format.Params)
 	return subtleEcdsa.ValidateParams(hash, curve, encoding)
 }

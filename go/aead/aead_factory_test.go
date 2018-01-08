@@ -23,8 +23,7 @@ import (
 	"github.com/google/tink/go/subtle/aes"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util/testutil"
-	"github.com/google/tink/go/util"
+	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"strings"
 	"testing"
@@ -64,7 +63,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if rawKey.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("expect a raw key")
 	}
-	keyset2 := util.NewKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
+	keyset2 := tink.NewKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
 	keysetHandle2, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset2)
 	a2, err := aead.Factory().GetPrimitive(keysetHandle2)
 	if err != nil {

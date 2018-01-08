@@ -18,7 +18,6 @@ package signature
 
 import (
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/util"
 	commonpb "github.com/google/tink/proto/common_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
@@ -63,8 +62,8 @@ func EcdsaP521KeyTemplate() *tinkpb.KeyTemplate {
 func createEcdsaKeyTemplate(hashType commonpb.HashType,
 	curve commonpb.EllipticCurveType,
 	encoding ecdsapb.EcdsaSignatureEncoding) *tinkpb.KeyTemplate {
-	params := util.NewEcdsaParams(hashType, curve, encoding)
-	format := util.NewEcdsaKeyFormat(params)
+	params := NewEcdsaParams(hashType, curve, encoding)
+	format := NewEcdsaKeyFormat(params)
 	serializedFormat, _ := proto.Marshal(format)
 	return &tinkpb.KeyTemplate{
 		TypeUrl: ECDSA_SIGN_TYPE_URL,

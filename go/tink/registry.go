@@ -19,7 +19,6 @@ package tink
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/util"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"sync"
 )
@@ -218,7 +217,7 @@ func (reg *registry) GetPrimitivesWithCustomManager(
 		return nil, fmt.Errorf("registry: invalid keyset handle")
 	}
 	keyset := keysetHandle.Keyset()
-	if err := util.ValidateKeyset(keyset); err != nil {
+	if err := ValidateKeyset(keyset); err != nil {
 		return nil, fmt.Errorf("registry: invalid keyset: %s", err)
 	}
 	primitiveSet := NewPrimitiveSet()

@@ -19,7 +19,7 @@ package tink_test
 import (
 	"fmt"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util/testutil"
+	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"reflect"
 	"testing"

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	proto "github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/util"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
@@ -70,7 +69,7 @@ func (km *KeysetManager) RotateWithTemplate(keyTemplate *tinkpb.KeyTemplate) err
 	if outputPrefixType == tinkpb.OutputPrefixType_UNKNOWN_PREFIX {
 		outputPrefixType = tinkpb.OutputPrefixType_TINK
 	}
-	key := util.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
+	key := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
 	// Set the new key as the primary key
 	km.keyset.Key = append(km.keyset.Key, key)
 	km.keyset.PrimaryKeyId = keyID
@@ -158,11 +157,11 @@ func EncryptKeyset(keyset *tinkpb.Keyset,
 		return nil, fmt.Errorf("keyset_manager: encryption failed: %s", err)
 	}
 	// get keyset info
-	info, err := util.GetKeysetInfo(keyset)
+	info, err := GetKeysetInfo(keyset)
 	if err != nil {
 		return nil, fmt.Errorf("keyset_manager: cannot get keyset info: %s", err)
 	}
-	encryptedKeyset := util.NewEncryptedKeyset(encrypted, info)
+	encryptedKeyset := NewEncryptedKeyset(encrypted, info)
 	return encryptedKeyset, nil
 }
 

@@ -24,8 +24,7 @@ import (
 	"github.com/google/tink/go/subtle/aes"
 	"github.com/google/tink/go/subtle/hmac"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util/testutil"
-	"github.com/google/tink/go/util"
+	"github.com/google/tink/go/testutil"
 	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
 	commonpb "github.com/google/tink/proto/common_proto"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
@@ -187,7 +186,7 @@ func TestNewKeyFromKeyTemplate(t *testing.T) {
 func TestNewKeyFromKeyFormat(t *testing.T) {
 	setupRegistryTests()
 	// use aes-gcm key format
-	format := util.NewAesGcmKeyFormat(16)
+	format := aead.NewAesGcmKeyFormat(16)
 	key, err := tink.Registry().NewKeyFromKeyFormat(aead.AES_GCM_TYPE_URL, format)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
@@ -295,9 +294,9 @@ func TestGetPrimitives(t *testing.T) {
 	template2 := aead.Aes256GcmKeyTemplate()
 	keyData1, _ := tink.Registry().NewKeyData(template1)
 	keyData2, _ := tink.Registry().NewKeyData(template2)
-	keyset := util.NewKeyset(2, []*tinkpb.Keyset_Key{
-		util.NewKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
-		util.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
+	keyset := tink.NewKeyset(2, []*tinkpb.Keyset_Key{
+		tink.NewKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+		tink.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset)
 	ps, err := tink.Registry().GetPrimitives(handle)
@@ -320,38 +319,38 @@ func TestGetPrimitives(t *testing.T) {
 		t.Errorf("expect an error when keysethandle is nil")
 	}
 	// keyset is empty
-	keyset = util.NewKeyset(1, []*tinkpb.Keyset_Key{})
+	keyset = tink.NewKeyset(1, []*tinkpb.Keyset_Key{})
 	handle, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset)
 	if _, err := tink.Registry().GetPrimitives(handle); err == nil {
 		t.Errorf("expect an error when keyset is empty")
 	}
-	keyset = util.NewKeyset(1, nil)
+	keyset = tink.NewKeyset(1, nil)
 	handle, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset)
 	if _, err := tink.Registry().GetPrimitives(handle); err == nil {
 		t.Errorf("expect an error when keyset is empty")
 	}
 	// no primary key
-	keyset = util.NewKeyset(3, []*tinkpb.Keyset_Key{
-		util.NewKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
-		util.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
+	keyset = tink.NewKeyset(3, []*tinkpb.Keyset_Key{
+		tink.NewKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+		tink.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset)
 	if _, err := tink.Registry().GetPrimitives(handle); err == nil {
 		t.Errorf("expect an error when there is no primary key")
 	}
 	// there is primary key but it is disabled
-	keyset = util.NewKeyset(1, []*tinkpb.Keyset_Key{
-		util.NewKey(keyData1, tinkpb.KeyStatusType_DISABLED, 1, tinkpb.OutputPrefixType_TINK),
-		util.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
+	keyset = tink.NewKeyset(1, []*tinkpb.Keyset_Key{
+		tink.NewKey(keyData1, tinkpb.KeyStatusType_DISABLED, 1, tinkpb.OutputPrefixType_TINK),
+		tink.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset)
 	if _, err := tink.Registry().GetPrimitives(handle); err == nil {
 		t.Errorf("expect an error when primary key is disabled")
 	}
 	// multiple primary keys
-	keyset = util.NewKeyset(1, []*tinkpb.Keyset_Key{
-		util.NewKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
-		util.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+	keyset = tink.NewKeyset(1, []*tinkpb.Keyset_Key{
+		tink.NewKey(keyData1, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
+		tink.NewKey(keyData2, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset)
 	if _, err := tink.Registry().GetPrimitives(handle); err == nil {

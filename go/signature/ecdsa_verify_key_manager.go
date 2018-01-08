@@ -21,7 +21,6 @@ import (
 	"github.com/golang/protobuf/proto"
 	subtleEcdsa "github.com/google/tink/go/subtle/ecdsa"
 	"github.com/google/tink/go/tink"
-	"github.com/google/tink/go/util"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )
@@ -73,7 +72,7 @@ func (km *EcdsaVerifyKeyManager) GetPrimitiveFromKey(m proto.Message) (interface
 	if err := km.validateKey(key); err != nil {
 		return nil, fmt.Errorf("ecdsa_verify_key_manager: %s", err)
 	}
-	hash, curve, encoding := util.GetEcdsaParamNames(key.Params)
+	hash, curve, encoding := GetEcdsaParamNames(key.Params)
 	ret, err := subtleEcdsa.NewEcdsaVerify(hash, curve, encoding, key.X, key.Y)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_verify_key_manager: invalid key: %s", err)
@@ -109,9 +108,9 @@ func (_ *EcdsaVerifyKeyManager) GetKeyType() string {
 
 // validateKey validates the given EcdsaPublicKey.
 func (_ *EcdsaVerifyKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) error {
-	if err := util.ValidateVersion(key.Version, ECDSA_VERIFY_KEY_VERSION); err != nil {
+	if err := tink.ValidateVersion(key.Version, ECDSA_VERIFY_KEY_VERSION); err != nil {
 		return fmt.Errorf("ecdsa_verify_key_manager: %s", err)
 	}
-	hash, curve, encoding := util.GetEcdsaParamNames(key.Params)
+	hash, curve, encoding := GetEcdsaParamNames(key.Params)
 	return subtleEcdsa.ValidateParams(hash, curve, encoding)
 }

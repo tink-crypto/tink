@@ -22,8 +22,7 @@ import (
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/ecdsa"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/util/testutil"
-	"github.com/google/tink/go/util"
+	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
@@ -100,9 +99,9 @@ func TestEcdsaSignNewKeyBasic(t *testing.T) {
 	testParams := genValidEcdsaParams()
 	km := signature.NewEcdsaSignKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		params := util.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := util.NewEcdsaKeyFormat(params)
+		format := signature.NewEcdsaKeyFormat(params)
 		tmp, err := km.NewKeyFromKeyFormat(format)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
@@ -129,9 +128,9 @@ func TestEcdsaSignNewKeyWithInvalidInput(t *testing.T) {
 	// invalid hash and curve type
 	testParams := genInvalidEcdsaParams()
 	for i := 0; i < len(testParams); i++ {
-		params := util.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := util.NewEcdsaKeyFormat(params)
+		format := signature.NewEcdsaKeyFormat(params)
 		if _, err := km.NewKeyFromKeyFormat(format); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -143,9 +142,9 @@ func TestEcdsaSignNewKeyWithInvalidInput(t *testing.T) {
 	// invalid encoding
 	testParams = genValidEcdsaParams()
 	for i := 0; i < len(testParams); i++ {
-		params := util.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_UNKNOWN_ENCODING)
-		format := util.NewEcdsaKeyFormat(params)
+		format := signature.NewEcdsaKeyFormat(params)
 		if _, err := km.NewKeyFromKeyFormat(format); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -172,9 +171,9 @@ func TestEcdsaSignNewKeyMultipleTimes(t *testing.T) {
 	nTest := 27
 	for i := 0; i < len(testParams); i++ {
 		keys := make(map[string]bool)
-		params := util.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := util.NewEcdsaKeyFormat(params)
+		format := signature.NewEcdsaKeyFormat(params)
 		serializedFormat, _ := proto.Marshal(format)
 		for j := 0; j < nTest; j++ {
 			key, _ := km.NewKeyFromKeyFormat(format)
@@ -199,9 +198,9 @@ func TestEcdsaSignNewKeyDataBasic(t *testing.T) {
 	km := signature.NewEcdsaSignKeyManager()
 	testParams := genValidEcdsaParams()
 	for i := 0; i < len(testParams); i++ {
-		params := util.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := util.NewEcdsaKeyFormat(params)
+		format := signature.NewEcdsaKeyFormat(params)
 		serializedFormat, _ := proto.Marshal(format)
 
 		keyData, err := km.NewKeyData(serializedFormat)
@@ -230,9 +229,9 @@ func TestEcdsaSignNewKeyDataWithInvalidInput(t *testing.T) {
 	km := signature.NewEcdsaSignKeyManager()
 	testParams := genInvalidEcdsaParams()
 	for i := 0; i < len(testParams); i++ {
-		params := util.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := util.NewEcdsaKeyFormat(params)
+		format := signature.NewEcdsaKeyFormat(params)
 		serializedFormat, _ := proto.Marshal(format)
 
 		if _, err := km.NewKeyData(serializedFormat); err == nil {
@@ -327,7 +326,7 @@ func validateEcdsaPrivateKey(key *ecdsapb.EcdsaPrivateKey, params *ecdsapb.Ecdsa
 		}
 	}
 	// try to sign and verify with the key
-	hash, curve, encoding := util.GetEcdsaParamNames(publicKey.Params)
+	hash, curve, encoding := signature.GetEcdsaParamNames(publicKey.Params)
 	signer, err := ecdsa.NewEcdsaSign(hash, curve, encoding, key.KeyValue)
 	if err != nil {
 		return fmt.Errorf("unexpected error when creating EcdsaSign: %s", err)
