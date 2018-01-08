@@ -17,8 +17,8 @@
 package signature_test
 
 import (
-	"github.com/google/tink/go/signature/signature"
-	"github.com/google/tink/go/tink/tink"
+	"github.com/google/tink/go/signature"
+	"github.com/google/tink/go/tink"
 	"testing"
 )
 

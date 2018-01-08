@@ -21,8 +21,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/subtle/hmac"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink/tink"
-	"github.com/google/tink/go/util/util"
+	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/util"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )

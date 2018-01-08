@@ -18,7 +18,7 @@ package testutil_test
 
 import (
 	"bytes"
-	"github.com/google/tink/go/tink/tink"
+	"github.com/google/tink/go/tink"
 	"github.com/google/tink/go/util/testutil"
 	"testing"
 )

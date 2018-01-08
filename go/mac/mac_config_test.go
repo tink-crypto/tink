@@ -17,8 +17,8 @@
 package mac_test
 
 import (
-	"github.com/google/tink/go/mac/mac"
-	"github.com/google/tink/go/tink/tink"
+	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/tink"
 	"testing"
 )
 

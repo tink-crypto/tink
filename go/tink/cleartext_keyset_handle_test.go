@@ -19,8 +19,8 @@ package tink_test
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/mac/mac"
-	"github.com/google/tink/go/tink/tink"
+	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/tink"
 	"github.com/google/tink/go/util/testutil"
 	"testing"
 )

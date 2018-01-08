@@ -18,7 +18,7 @@ package signature
 
 import (
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/util/util"
+	"github.com/google/tink/go/util"
 	commonpb "github.com/google/tink/proto/common_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"

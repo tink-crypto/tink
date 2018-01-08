@@ -18,7 +18,7 @@ package aead
 
 import (
 	"fmt"
-	"github.com/google/tink/go/tink/tink"
+	"github.com/google/tink/go/tink"
 	"sync"
 )
 

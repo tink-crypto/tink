@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "ecdsa.go",
+        "ecdsa_sign.go",
+        "ecdsa_verify.go",
+        "encoding.go",
+    ],
+    importpath = "github.com/google/tink/go/subtle/ecdsa",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//go/subtle/subtleutil:go_default_library",
+        "//go/tink:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_xtest",
+    srcs = [
+        "ecdsa_sign_verify_test.go",
+        "ecdsa_test.go",
+    ],
+    data = [
+        "@wycheproof//testvectors:ecdsa",  # keep
+    ],
+    importpath = "github.com/google/tink/go/subtle/ecdsa_test",
+    deps = [
+        ":go_default_library",
+        "//go/subtle/random:go_default_library",
+        "//go/subtle/subtleutil:go_default_library",
+    ],
+)

@@ -19,7 +19,7 @@ package tink
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/util/util"
+	"github.com/google/tink/go/util"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"sync"
 )

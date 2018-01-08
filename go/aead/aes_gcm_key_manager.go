@@ -21,8 +21,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/subtle/aes"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink/tink"
-	"github.com/google/tink/go/util/util"
+	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/util"
 	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )

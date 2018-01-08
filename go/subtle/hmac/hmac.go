@@ -19,7 +19,7 @@ import (
 	"crypto/hmac"
 	"fmt"
 	"github.com/google/tink/go/subtle/subtleutil"
-	"github.com/google/tink/go/tink/primitives"
+	"github.com/google/tink/go/tink"
 	"hash"
 )
 

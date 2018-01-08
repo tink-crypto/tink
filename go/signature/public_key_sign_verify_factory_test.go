@@ -18,11 +18,11 @@ package signature_test
 
 import (
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/signature/signature"
+	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink/tink"
+	"github.com/google/tink/go/tink"
 	"github.com/google/tink/go/util/testutil"
-	"github.com/google/tink/go/util/util"
+	"github.com/google/tink/go/util"
 	commonpb "github.com/google/tink/proto/common_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 	"testing"

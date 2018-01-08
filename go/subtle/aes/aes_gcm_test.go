@@ -184,7 +184,7 @@ type testcase struct {
 }
 
 func TestVectors(t *testing.T) {
-	f, err := os.Open("../../../wycheproof/testvectors/aes_gcm_test.json")
+	f, err := os.Open("../../../../wycheproof/testvectors/aes_gcm_test.json")
 	if err != nil {
 		t.Fatal("cannot open file: %s", err)
 	}

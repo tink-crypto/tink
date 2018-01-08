@@ -23,8 +23,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	subtleEcdsa "github.com/google/tink/go/subtle/ecdsa"
 	"github.com/google/tink/go/subtle/subtleutil"
-	"github.com/google/tink/go/tink/tink"
-	"github.com/google/tink/go/util/util"
+	"github.com/google/tink/go/tink"
+	"github.com/google/tink/go/util"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )

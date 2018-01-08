@@ -19,7 +19,7 @@ package mac_test
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/mac/mac"
+	"github.com/google/tink/go/mac"
 	commonpb "github.com/google/tink/proto/common_proto"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"

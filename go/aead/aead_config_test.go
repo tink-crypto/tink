@@ -17,8 +17,8 @@
 package aead_test
 
 import (
-	"github.com/google/tink/go/aead/aead"
-	"github.com/google/tink/go/tink/tink"
+	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/tink"
 	"testing"
 )
 
