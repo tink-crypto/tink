@@ -328,8 +328,8 @@ final class Curve25519 {
     // q, resultx, nqpqx/nqpqx  are x coordinates of 3 collinear points q, n*q, (n + 1)*q.
     if (!isCollinear(q, resultx, nqpqx, nqpqz)) {
       throw new IllegalStateException(
-          "Arithmetic error in curve multiplication with the public key:"
-              + Hex.encode(Field25519.contract(q)));
+          "Arithmetic error in curve multiplication with the public key: "
+              + Hex.encode(qBytes));
     }
   }
 
@@ -355,9 +355,6 @@ final class Curve25519 {
 
   /**
    * Checks whether there are three collinear points with x coordinate x1, x2, x3/z3.
-   *
-   * <p>TODO: extend this method to deal with the case where x1, x2 or x3/y3 may be points on the
-   * twist.
    *
    * @return true if three collinear points with x coordianate x1, x2, x3/z3 are collinear.
    */
@@ -386,11 +383,15 @@ final class Curve25519 {
     //
     // There are 2 cases that we haven't discussed:
     //
-    //   + If x1 and x2 are both points with y-coordinate 0 then the argument doesn't hold.
+    //   * If x1 and x2 are both points with y-coordinate 0 then the argument doesn't hold.
     //   However, our ECDH computation doesn't allow points of low order (see {@code
     //   validatePublicKey}). Therefore, this edge case never happen.
     //
-    //   + x1, x2 or x3/y3 may be points on the twist. This is in our TODO list.
+    //   * x1, x2 or x3/y3 may be points on the twist. If so, they satisfy the equation
+    //     2y^2 = x^3 + ax^2 + x
+    //   Hence, the three points also satisfy
+    //     2y^2 = (a - A)x^2 + (1 - B)x - C
+    //   Thus, this collinear check should work for this case too.
     long[] x1multx2 = new long[Field25519.LIMB_CNT];
     long[] x1addx2 = new long[Field25519.LIMB_CNT];
     long[] lhs = new long[Field25519.LIMB_CNT + 1];
