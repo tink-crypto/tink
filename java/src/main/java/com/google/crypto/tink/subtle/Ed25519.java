@@ -120,6 +120,32 @@ public final class Ed25519 {
       s[31] = (byte) (s[31] ^ (getLsb(x) << 7));
       return s;
     }
+
+    /** Checks that the point is on curve */
+    boolean isOnCurve() {
+      long[] x2 = new long[LIMB_CNT];
+      Field25519.square(x2, x);
+      long[] y2 = new long[LIMB_CNT];
+      Field25519.square(y2, y);
+      long[] z2 = new long[LIMB_CNT];
+      Field25519.square(z2, z);
+      long[] z4 = new long[LIMB_CNT];
+      Field25519.square(z4, z2);
+      long[] lhs = new long[LIMB_CNT];
+      // lhs = y^2 - x^2
+      Field25519.sub(lhs, y2, x2);
+      // lhs = z^2 * (y2 - x2)
+      Field25519.mult(lhs, lhs, z2);
+      long[] rhs = new long[LIMB_CNT];
+      // rhs = x^2 * y^2
+      Field25519.mult(rhs, x2, y2);
+      // rhs = D * x^2 * y^2
+      Field25519.mult(rhs, rhs, D);
+      // rhs = z^4 + D * x^2 * y^2
+      Field25519.sum(rhs, z4);
+      // z^2 (y^2 - x^2) == z^4 + D * x^2 * y^2
+      return Bytes.equal(Field25519.contract(lhs), Field25519.contract(rhs));
+    }
   }
 
   /**
@@ -540,6 +566,7 @@ public final class Ed25519 {
    *
    * Preconditions:
    * a[31] <= 127
+   * @throws IllegalStateException iff there is arithmetic error.
    */
   @SuppressWarnings("NarrowingCompoundAssignment")
   private static XYZ scalarMultWithBase(byte[] a) {
@@ -590,7 +617,13 @@ public final class Ed25519 {
       add(ret, XYZT.fromPartialXYZT(xyzt, ret), t);
     }
 
-    return new XYZ(ret);
+    // This check is to protect against flaws, i.e. if there is a computation error through a
+    // faulty CPU or if the implementation contains a bug.
+    XYZ result = new XYZ(ret);
+    if (!result.isOnCurve()) {
+      throw new IllegalStateException("arithmetic error in scalar multiplication");
+    }
+    return result;
   }
 
   /**
