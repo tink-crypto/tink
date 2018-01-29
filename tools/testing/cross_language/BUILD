@@ -25,7 +25,7 @@ sh_test(
 
 sh_test(
     name = "aead_test",
-    size = "small",
+    size = "medium",
     srcs = [
         "aead_test.sh",
     ],
@@ -40,7 +40,7 @@ sh_test(
 
 sh_test(
     name = "hybrid_encryption_test",
-    size = "small",
+    size = "medium",
     srcs = [
         "hybrid_encryption_test.sh",
     ],
@@ -57,7 +57,7 @@ sh_test(
 
 sh_test(
     name = "signature_test",
-    size = "small",
+    size = "medium",
     srcs = [
         "signature_test.sh",
     ],
