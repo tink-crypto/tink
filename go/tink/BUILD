@@ -76,9 +76,6 @@ go_test(
     srcs = TINK_INTERNAL_TEST_SRCS,
     importpath = "github.com/google/tink/go/tink/tink_test",
     library = ":tink",
-    deps = [
-        "//go/signature",
-    ],
 )
 
 # primitives only

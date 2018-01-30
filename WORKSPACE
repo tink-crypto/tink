@@ -510,8 +510,8 @@ java_import_external(
 
 http_archive(
     name = "build_bazel_rules_apple",
-    strip_prefix = "rules_apple-master",
-    url = "https://github.com/bazelbuild/rules_apple/archive/master.zip",
+    strip_prefix = "rules_apple-a2b620070d373e4f265194b69f65e9e5c17fbcb8",
+    url = "https://github.com/bazelbuild/rules_apple/archive/a2b620070d373e4f265194b69f65e9e5c17fbcb8.zip",
 )
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")

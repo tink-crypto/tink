@@ -140,7 +140,13 @@ public class DaeadThreadSafetyTest {
   @Test
   public void testAesSiv256() throws Exception {
     byte[] key = Random.randBytes(64);
-    AesSiv siv = new AesSiv(key);
+    AesSiv siv;
+    try {
+      siv = new AesSiv(key);
+    } catch (GeneralSecurityException ex) {
+      System.out.println("Skipping test: AES-SIV with 256 bit AES keys is not supported.");
+      return;
+    }
     testEncryptionDecryption(siv, 5, 128, 20);
   }
 }

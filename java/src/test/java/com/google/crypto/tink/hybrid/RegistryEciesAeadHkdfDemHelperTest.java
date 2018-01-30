@@ -30,36 +30,70 @@ import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
+import javax.crypto.Cipher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for RegistryEciesAeadHkdfDemHelper.
- */
+/** Tests for RegistryEciesAeadHkdfDemHelper. */
 @RunWith(JUnit4.class)
 public class RegistryEciesAeadHkdfDemHelperTest {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
+  private KeyTemplate[] keyTemplates;
+
   @Before
   public void setUp() throws Exception {
     Config.register(AeadConfig.TINK_1_0_0);
+
+    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
+      System.out.println(
+          "Unlimited Strength Jurisdiction Policy Files are required"
+              + " but not installed. Skip tests with keys larger than 128 bits.");
+      keyTemplates =
+          new KeyTemplate[] {AeadKeyTemplates.AES128_GCM, AeadKeyTemplates.AES128_CTR_HMAC_SHA256};
+    } else {
+      keyTemplates =
+          new KeyTemplate[] {
+            AeadKeyTemplates.AES128_GCM,
+            AeadKeyTemplates.AES256_GCM,
+            AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
+            AeadKeyTemplates.AES256_CTR_HMAC_SHA256
+          };
+    }
   }
 
   @Test
-  public void testConstructor() throws Exception {
+  public void testConstructorWith128BitCiphers() throws Exception {
     RegistryEciesAeadHkdfDemHelper helper;
 
     // Supported templates.
     helper = new RegistryEciesAeadHkdfDemHelper(AeadKeyTemplates.AES128_GCM);
     assertEquals(16, helper.getSymmetricKeySizeInBytes());
-    helper = new RegistryEciesAeadHkdfDemHelper(AeadKeyTemplates.AES256_GCM);
-    assertEquals(32, helper.getSymmetricKeySizeInBytes());
     helper = new RegistryEciesAeadHkdfDemHelper(AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
     assertEquals(48, helper.getSymmetricKeySizeInBytes());
+  }
+
+  @Test
+  public void testConstructorWith256BitCiphers() throws Exception {
+    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
+      System.out.println(
+          "Unlimited Strength Jurisdiction Policy Files are required"
+              + " but not installed. Skip tests with keys larger than 128 bits.");
+      return;
+    }
+    // Supported templates.
+    RegistryEciesAeadHkdfDemHelper helper =
+        new RegistryEciesAeadHkdfDemHelper(AeadKeyTemplates.AES256_GCM);
+    assertEquals(32, helper.getSymmetricKeySizeInBytes());
     helper = new RegistryEciesAeadHkdfDemHelper(AeadKeyTemplates.AES256_CTR_HMAC_SHA256);
     assertEquals(64, helper.getSymmetricKeySizeInBytes());
+  }
+
+  @Test
+  public void testConstructorWithUnsupportedTemplates() throws Exception {
+    RegistryEciesAeadHkdfDemHelper helper;
 
     // Unsupported templates.
     int templateCount = 4;
@@ -83,10 +117,11 @@ public class RegistryEciesAeadHkdfDemHelperTest {
     assertEquals(templateCount, count);
 
     // An inconsistent template.
-    KeyTemplate template = KeyTemplate.newBuilder()
-        .setTypeUrl(AeadKeyTemplates.AES128_CTR_HMAC_SHA256.getTypeUrl())
-        .setValue(SignatureKeyTemplates.ECDSA_P256.getValue())
-        .build();
+    KeyTemplate template =
+        KeyTemplate.newBuilder()
+            .setTypeUrl(AeadKeyTemplates.AES128_CTR_HMAC_SHA256.getTypeUrl())
+            .setValue(SignatureKeyTemplates.ECDSA_P256.getValue())
+            .build();
     try {
       helper = new RegistryEciesAeadHkdfDemHelper(template);
       fail("Inconsistent template, should have thrown exception:\n" + template.toString());
@@ -97,17 +132,10 @@ public class RegistryEciesAeadHkdfDemHelperTest {
 
   @Test
   public void testGetAead() throws Exception {
-    int templateCount = 4;
-    KeyTemplate[] templates = new KeyTemplate[templateCount];
-    templates[0] = AeadKeyTemplates.AES128_GCM;
-    templates[1] = AeadKeyTemplates.AES256_GCM;
-    templates[2] = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    templates[3] = AeadKeyTemplates.AES256_CTR_HMAC_SHA256;
-
     byte[] plaintext = "some plaintext string".getBytes(UTF_8);
     byte[] associatedData = "some associated data".getBytes(UTF_8);
     int count = 0;
-    for (KeyTemplate template : templates) {
+    for (KeyTemplate template : keyTemplates) {
       RegistryEciesAeadHkdfDemHelper helper = new RegistryEciesAeadHkdfDemHelper(template);
       byte[] symmetricKey = Random.randBytes(helper.getSymmetricKeySizeInBytes());
       Aead aead = helper.getAead(symmetricKey);
@@ -136,6 +164,6 @@ public class RegistryEciesAeadHkdfDemHelperTest {
       }
       count++;
     }
-    assertEquals(templateCount, count);
+    assertEquals(keyTemplates.length, count);
   }
 }

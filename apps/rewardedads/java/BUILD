@@ -12,7 +12,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "//java",
-        "@com_google_http_client//:com_google_http_client",
+        "@com_google_http_client",
         "@org_json//jar",
     ],
 )
@@ -28,7 +28,7 @@ java_library(
     deps = [
         ":java",
         "//java:testonly",
-        "@com_google_http_client//:com_google_http_client",
+        "@com_google_http_client",
         "@junit",
         "@org_json//jar",
     ],

@@ -26,10 +26,7 @@ rm -f ~/.bazelrc
 
 PLATFORM=`uname | tr '[:upper:]' '[:lower:]'`
 
-# Using Bazel at commit 88157011af4ddac21e404e9deea0d78668a71a99.
-# In this version, {java,cc}_proto_library now look for dependencies in
-# @com_google_protobuf, instead of in @com_google_protobuf_$LANG.
-# See https://github.com/cgrushko/proto_library/issues/4.
+# Using Bazel 0.9.0.
 BAZEL_BIN="${KOKORO_GFILE_DIR}/bazel-${PLATFORM}-x86_64"
 
 DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
@@ -44,6 +41,9 @@ ${BAZEL_BIN} version
 
 echo "using java binary: " `which java`
 java -version
+
+echo "using go: " `which go`
+go version
 
 run_linux_tests() {
   time ${BAZEL_BIN} fetch ...
