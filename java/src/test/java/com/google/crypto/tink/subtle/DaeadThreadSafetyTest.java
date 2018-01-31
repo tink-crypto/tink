@@ -131,7 +131,8 @@ public class DaeadThreadSafetyTest {
     try {
       siv = new AesSiv(key);
     } catch (GeneralSecurityException ex) {
-      System.out.println("Skipping test: AES-SIV with 192 bit AES keys is not supported.");
+      System.out.println(
+          "Skipping test: AES-SIV with 192 bit AES keys is not supported: " + ex.toString());
       return;
     }
     testEncryptionDecryption(siv, 5, 128, 20);
@@ -144,7 +145,8 @@ public class DaeadThreadSafetyTest {
     try {
       siv = new AesSiv(key);
     } catch (GeneralSecurityException ex) {
-      System.out.println("Skipping test: AES-SIV with 256 bit AES keys is not supported.");
+      System.out.println(
+          "Skipping test: AES-SIV with 256 bit AES keys is not supported: " + ex.toString());
       return;
     }
     testEncryptionDecryption(siv, 5, 128, 20);

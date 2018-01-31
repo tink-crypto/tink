@@ -5,7 +5,7 @@ CC_AEAD_CLI="$ROOT_DIR/tools/testing/cc/aead_cli_cc"
 JAVA_AEAD_CLI="$ROOT_DIR/tools/testing/aead_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
 
-KEY_TEMPLATES=(AES128_GCM.ascii AES128_CTR_HMAC_SHA256.ascii)
+KEY_TEMPLATES=(AES128_GCM.ascii AES256_GCM.ascii AES128_CTR_HMAC_SHA256.ascii AES256_CTR_HMAC_SHA256.ascii)
 
 source $TEST_UTIL || exit 1
 
@@ -14,9 +14,9 @@ source $TEST_UTIL || exit 1
 
 # Basic tests of AEAD-implementations.
 aead_basic_test() {
-  local test_name="$1-hybrid-basic-test"
+  local test_name="$1-aead-basic-test"
   local encrypt_cli="$2"
-  local decrypt_cli="$2"
+  local decrypt_cli="$3"
   local key_templates=$4
 
   echo "############ starting test $test_name for the following templates:"
