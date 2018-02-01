@@ -54,7 +54,8 @@ run_linux_tests() {
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run all tests, except manual and objc tests.
-  time ${BAZEL_BIN} test --strategy=TestRunner=standalone --test_output=all \
+  time ${BAZEL_BIN} --host_javabase="$JAVA_HOME" test \
+  --strategy=TestRunner=standalone --test_output=all \
   -- //... \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
 }
