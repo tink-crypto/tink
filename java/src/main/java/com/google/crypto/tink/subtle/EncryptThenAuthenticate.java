@@ -53,8 +53,13 @@ public final class EncryptThenAuthenticate implements Aead {
    * @return resulting ciphertext.
    */
   @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
+      throws GeneralSecurityException {
     byte[] ciphertext = cipher.encrypt(plaintext);
+    byte[] aad = associatedData;
+    if (aad == null) {
+      aad = new byte[0];
+    }
     byte[] aadLengthInBits =
         Arrays.copyOf(ByteBuffer.allocate(8).putLong(8L * aad.length).array(), 8);
     byte[] macValue = mac.computeMac(Bytes.concat(aad, ciphertext, aadLengthInBits));
@@ -72,13 +77,18 @@ public final class EncryptThenAuthenticate implements Aead {
    * @return resulting plaintext.
    */
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] aad) throws GeneralSecurityException {
+  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
+      throws GeneralSecurityException {
     if (ciphertext.length < macLength) {
       throw new GeneralSecurityException("ciphertext too short");
     }
     byte[] rawCiphertext = Arrays.copyOfRange(ciphertext, 0, ciphertext.length - macLength);
     byte[] macValue =
         Arrays.copyOfRange(ciphertext, ciphertext.length - macLength, ciphertext.length);
+    byte[] aad = associatedData;
+    if (aad == null) {
+      aad = new byte[0];
+    }
     byte[] aadLengthInBits =
         Arrays.copyOf(ByteBuffer.allocate(8).putLong(8L * aad.length).array(), 8);
     mac.verifyMac(macValue, Bytes.concat(aad, rawCiphertext, aadLengthInBits));

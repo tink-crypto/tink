@@ -167,7 +167,11 @@ public final class AesEaxJce implements Aead {
     Cipher ecb = Cipher.getInstance("AES/ECB/NOPADDING");
     ecb.init(Cipher.ENCRYPT_MODE, keySpec);
     byte[] n = omac(ecb, 0, iv, 0, iv.length);
-    byte[] h = omac(ecb, 1, associatedData, 0, associatedData.length);
+    byte[] aad = associatedData;
+    if (aad == null) {
+      aad = new byte[0];
+    }
+    byte[] h = omac(ecb, 1, aad, 0, aad.length);
     Cipher ctr = Cipher.getInstance("AES/CTR/NOPADDING");
     ctr.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(n));
     ctr.doFinal(plaintext, 0, plaintext.length, ciphertext, ivSizeInBytes);
@@ -190,7 +194,11 @@ public final class AesEaxJce implements Aead {
     Cipher ecb = Cipher.getInstance("AES/ECB/NOPADDING");
     ecb.init(Cipher.ENCRYPT_MODE, keySpec);
     byte[] n = omac(ecb, 0, ciphertext, 0, ivSizeInBytes);
-    byte[] h = omac(ecb, 1, associatedData, 0, associatedData.length);
+    byte[] aad = associatedData;
+    if (aad == null) {
+      aad = new byte[0];
+    }
+    byte[] h = omac(ecb, 1, aad, 0, aad.length);
     byte[] t = omac(ecb, 2, ciphertext, ivSizeInBytes, plaintextLength);
     byte res = 0;
     int offset = ciphertext.length - TAG_SIZE_IN_BYTES;

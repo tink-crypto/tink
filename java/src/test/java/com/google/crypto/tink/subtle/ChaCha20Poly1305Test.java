@@ -162,6 +162,74 @@ public class ChaCha20Poly1305Test {
     }
   }
 
+  @Test
+  public void testNullPlaintextOrCiphertext() throws Exception {
+    Aead aead = createInstance(Random.randBytes(KEY_SIZE));
+    try {
+      byte[] aad = new byte[] {1, 2, 3};
+      byte[] unused = aead.encrypt(null, aad);
+      fail("Encrypting a null plaintext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+    try {
+      byte[] unused = aead.encrypt(null, null);
+      fail("Encrypting a null plaintext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+    try {
+      byte[] aad = new byte[] {1, 2, 3};
+      byte[] unused = aead.decrypt(null, aad);
+      fail("Decrypting a null ciphertext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+    try {
+      byte[] unused = aead.decrypt(null, null);
+      fail("Decrypting a null ciphertext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+  }
+
+  @Test
+  public void testEmptyAssociatedData() throws Exception {
+    byte[] aad = new byte[0];
+    Aead aead = createInstance(Random.randBytes(KEY_SIZE));
+    for (int messageSize = 0; messageSize < 75; messageSize++) {
+      byte[] message = Random.randBytes(messageSize);
+      {  // encrypting with aad as a 0-length array
+        byte[] ciphertext = aead.encrypt(message, aad);
+        byte[] decrypted = aead.decrypt(ciphertext, aad);
+        assertArrayEquals(message, decrypted);
+        byte[] decrypted2 = aead.decrypt(ciphertext, null);
+        assertArrayEquals(message, decrypted2);
+        try {
+          byte[] badAad = new byte[] {1, 2, 3};
+          byte[] unused = aead.decrypt(ciphertext, badAad);
+          fail("Decrypting with modified aad should fail");
+        } catch (AEADBadTagException ex) {
+          // This is expected.
+        }
+      }
+      {  // encrypting with aad equal to null
+        byte[] ciphertext = aead.encrypt(message, null);
+        byte[] decrypted = aead.decrypt(ciphertext, aad);
+        assertArrayEquals(message, decrypted);
+        byte[] decrypted2 = aead.decrypt(ciphertext, null);
+        assertArrayEquals(message, decrypted2);
+        try {
+          byte[] badAad = new byte[] {1, 2, 3};
+          byte[] unused = aead.decrypt(ciphertext, badAad);
+          fail("Decrypting with modified aad should fail");
+        } catch (AEADBadTagException ex) {
+          // This is expected.
+        }
+      }
+    }
+  }
+
   /**
    * This is a very simple test for the randomness of the nonce. The test simply checks that the
    * multiple ciphertexts of the same message are distinct.

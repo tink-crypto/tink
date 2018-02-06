@@ -194,4 +194,74 @@ public class AesEaxJceTest {
       }
     }
   }
+
+  @Test
+  public void testNullPlaintextOrCiphertext() throws Exception {
+    AesEaxJce eax = new AesEaxJce(Random.randBytes(KEY_SIZE), IV_SIZE);
+    try {
+      byte[] aad = new byte[] {1, 2, 3};
+      byte[] unused = eax.encrypt(null, aad);
+      fail("Encrypting a null plaintext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+    try {
+      byte[] unused = eax.encrypt(null, null);
+      fail("Encrypting a null plaintext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+    try {
+      byte[] aad = new byte[] {1, 2, 3};
+      byte[] unused = eax.decrypt(null, aad);
+      fail("Decrypting a null ciphertext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+    try {
+      byte[] unused = eax.decrypt(null, null);
+      fail("Decrypting a null ciphertext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+  }
+
+  @Test
+  public void testEmptyAssociatedData() throws Exception {
+    byte[] aad = new byte[0];
+    byte[] key = Random.randBytes(KEY_SIZE);
+    AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
+    for (int messageSize = 0; messageSize < 75; messageSize++) {
+      byte[] message = Random.randBytes(messageSize);
+      {  // encrypting with aad as a 0-length array
+        byte[] ciphertext = eax.encrypt(message, aad);
+        byte[] decrypted = eax.decrypt(ciphertext, aad);
+        assertArrayEquals(message, decrypted);
+        byte[] decrypted2 = eax.decrypt(ciphertext, null);
+        assertArrayEquals(message, decrypted2);
+        try {
+          byte[] badAad = new byte[] {1, 2, 3};
+          byte[] unused = eax.decrypt(ciphertext, badAad);
+          fail("Decrypting with modified aad should fail");
+        } catch (AEADBadTagException ex) {
+          // This is expected.
+        }
+      }
+      {  // encrypting with aad equal to null
+        byte[] ciphertext = eax.encrypt(message, null);
+        byte[] decrypted = eax.decrypt(ciphertext, aad);
+        assertArrayEquals(message, decrypted);
+        byte[] decrypted2 = eax.decrypt(ciphertext, null);
+        assertArrayEquals(message, decrypted2);
+        try {
+          byte[] badAad = new byte[] {1, 2, 3};
+          byte[] unused = eax.decrypt(ciphertext, badAad);
+          fail("Decrypting with modified aad should fail");
+        } catch (AEADBadTagException ex) {
+          // This is expected.
+        }
+      }
+    }
+  }
+
 }

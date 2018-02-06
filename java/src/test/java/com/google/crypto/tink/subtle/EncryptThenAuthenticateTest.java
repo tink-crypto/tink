@@ -181,6 +181,72 @@ public class EncryptThenAuthenticateTest {
   }
 
   @Test
+  public void testNullPlaintextOrCiphertext() throws Exception {
+    Aead aead = getAead(Random.randBytes(16), Random.randBytes(16), 16, 16, "HMACSHA256");
+    try {
+      byte[] aad = new byte[] {1, 2, 3};
+      byte[] unused = aead.encrypt(null, aad);
+      fail("Encrypting a null plaintext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+    try {
+      byte[] unused = aead.encrypt(null, null);
+      fail("Encrypting a null plaintext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+    try {
+      byte[] aad = new byte[] {1, 2, 3};
+      byte[] unused = aead.decrypt(null, aad);
+      fail("Decrypting a null ciphertext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+    try {
+      byte[] unused = aead.decrypt(null, null);
+      fail("Decrypting a null ciphertext should fail");
+    } catch (NullPointerException ex) {
+      // This is expected.
+    }
+  }
+
+  @Test
+  public void testEmptyAssociatedData() throws Exception {
+    Aead aead = getAead(Random.randBytes(16), Random.randBytes(16), 16, 16, "HMACSHA256");
+    byte[] aad = new byte[0];
+    byte[] plaintext = Random.randBytes(1001);
+    {  // encrypting with aad as a 0-length array
+      byte[] ciphertext = aead.encrypt(plaintext, aad);
+      byte[] decrypted = aead.decrypt(ciphertext, aad);
+      assertArrayEquals(plaintext, decrypted);
+      byte[] decrypted2 = aead.decrypt(ciphertext, null);
+      assertArrayEquals(plaintext, decrypted2);
+      try {
+        byte[] badAad = new byte[] {1, 2, 3};
+        byte[] unused = aead.decrypt(ciphertext, badAad);
+        fail("Decrypting with modified aad should fail");
+      } catch (GeneralSecurityException expected) {
+        // This is expected.
+      }
+    }
+    {  // encrypting with aad equal to null
+      byte[] ciphertext = aead.encrypt(plaintext, null);
+      byte[] decrypted = aead.decrypt(ciphertext, aad);
+      assertArrayEquals(plaintext, decrypted);
+      byte[] decrypted2 = aead.decrypt(ciphertext, null);
+      assertArrayEquals(plaintext, decrypted2);
+      try {
+        byte[] badAad = new byte[] {1, 2, 3};
+        byte[] unused = aead.decrypt(ciphertext, badAad);
+        fail("Decrypting with modified aad should fail");
+      } catch (GeneralSecurityException expected) {
+        // This is expected.
+      }
+    }
+  }
+
+  @Test
   public void testTruncation() throws Exception {
     Aead aead = getAead(Random.randBytes(16), Random.randBytes(16), 16, 16, "HMACSHA256");
     byte[] plaintext = Random.randBytes(1001);

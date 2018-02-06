@@ -50,7 +50,7 @@ abstract class SnufflePoly1305 implements Aead {
       throws InvalidKeyException;
 
   /**
-   * Encrypts the {@code plaintext} with Poly1305 authentication based on {@code additionalData}.
+   * Encrypts the {@code plaintext} with Poly1305 authentication based on {@code associatedData}.
    *
    * <p>Please note that nonce is randomly generated hence keys need to be rotated after encrypting
    * a certain number of messages depending on the nonce size of the underlying {@link Snuffle}.
@@ -60,11 +60,11 @@ abstract class SnufflePoly1305 implements Aead {
    * collusion.
    *
    * @param plaintext data to encrypt
-   * @param additionalData additional data
+   * @param associatedData associated authenticated data
    * @return ciphertext with the following format {@code nonce || actual_ciphertext || tag}
    */
   @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] additionalData)
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
     if (plaintext.length > Integer.MAX_VALUE - snuffle.nonceSizeInBytes() - MAC_TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("plaintext too long");
@@ -72,11 +72,11 @@ abstract class SnufflePoly1305 implements Aead {
     ByteBuffer ciphertext =
         ByteBuffer.allocate(plaintext.length + snuffle.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES);
 
-    encrypt(ciphertext, plaintext, additionalData);
+    encrypt(ciphertext, plaintext, associatedData);
     return ciphertext.array();
   }
 
-  private void encrypt(ByteBuffer output, final byte[] plaintext, final byte[] additionalData)
+  private void encrypt(ByteBuffer output, final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
     if (output.remaining()
         < plaintext.length + snuffle.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
@@ -88,7 +88,11 @@ abstract class SnufflePoly1305 implements Aead {
     byte[] nonce = new byte[snuffle.nonceSizeInBytes()];
     output.get(nonce);
     output.limit(output.limit() - MAC_TAG_SIZE_IN_BYTES);
-    byte[] tag = Poly1305.computeMac(getMacKey(nonce), macDataRfc7539(additionalData, output));
+    byte[] aad = associatedData;
+    if (aad == null) {
+      aad = new byte[0];
+    }
+    byte[] tag = Poly1305.computeMac(getMacKey(nonce), macDataRfc7539(aad, output));
     output.limit(output.limit() + MAC_TAG_SIZE_IN_BYTES);
     output.put(tag);
   }
@@ -98,16 +102,16 @@ abstract class SnufflePoly1305 implements Aead {
    * tag}
    *
    * @param ciphertext with format {@code nonce || actual_ciphertext || tag}
-   * @param additionalData additional data
+   * @param associatedData associated authenticated data
    * @return plaintext if authentication is successful.
    * @throws GeneralSecurityException when ciphertext is shorter than nonce size + tag size or when
-   *     computed tag based on {@code ciphertext} and {@code additionalData} does not match the tag
+   *     computed tag based on {@code ciphertext} and {@code associatedData} does not match the tag
    *     given in {@code ciphertext}.
    */
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] additionalData)
+  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
-    return decrypt(ByteBuffer.wrap(ciphertext), additionalData);
+    return decrypt(ByteBuffer.wrap(ciphertext), associatedData);
   }
 
   /**
@@ -115,12 +119,12 @@ abstract class SnufflePoly1305 implements Aead {
    * tag}
    *
    * @param ciphertext with format {@code nonce || actual_ciphertext || tag}
-   * @param additionalData additional data
+   * @param associatedData associated authenticated data
    * @return plaintext if authentication is successful
    * @throws GeneralSecurityException when ciphertext is shorter than nonce size + tag size
    * @throws AEADBadTagException when the tag is invalid
    */
-  private byte[] decrypt(ByteBuffer ciphertext, final byte[] additionalData)
+  private byte[] decrypt(ByteBuffer ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
     if (ciphertext.remaining() < snuffle.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("ciphertext too short");
@@ -134,8 +138,12 @@ abstract class SnufflePoly1305 implements Aead {
     ciphertext.limit(ciphertext.limit() - MAC_TAG_SIZE_IN_BYTES);
     byte[] nonce = new byte[snuffle.nonceSizeInBytes()];
     ciphertext.get(nonce);
+    byte[] aad = associatedData;
+    if (aad == null) {
+      aad = new byte[0];
+    }
     try {
-      Poly1305.verifyMac(getMacKey(nonce), macDataRfc7539(additionalData, ciphertext), tag);
+      Poly1305.verifyMac(getMacKey(nonce), macDataRfc7539(aad, ciphertext), tag);
     } catch (GeneralSecurityException ex) {
       throw new AEADBadTagException(ex.toString());
     }

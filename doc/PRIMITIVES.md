@@ -23,7 +23,7 @@ AEAD primitive (Authenticated Encryption with Associated Data) provides
 functionality of symmetric authenticated encryption. Implementations of this
 primitive are secure against adaptive chosen ciphertext attacks.  When
 encrypting a plaintext one can optionally provide _associated data_ that should
-be authenticated but not encrypted. That is, the encryption with additional data
+be authenticated but not encrypted. That is, the encryption with associated data
 ensures authenticity (ie. who the sender is) and integrity (ie. data has not
 been tampered with) of that data, but not its secrecy
 (see [RFC 5116](https://tools.ietf.org/html/rfc5116)).

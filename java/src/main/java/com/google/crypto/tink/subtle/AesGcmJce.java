@@ -41,7 +41,8 @@ public final class AesGcmJce implements Aead {
   }
 
   @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] aad) throws GeneralSecurityException {
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
+      throws GeneralSecurityException {
     // Check that ciphertext is not longer than the max. size of a Java array.
     if (plaintext.length > Integer.MAX_VALUE - IV_SIZE_IN_BYTES - TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("plaintext too long");
@@ -53,6 +54,10 @@ public final class AesGcmJce implements Aead {
     Cipher cipher = instance();
     GCMParameterSpec params = new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, iv);
     cipher.init(Cipher.ENCRYPT_MODE, keySpec, params);
+    byte[] aad = associatedData;
+    if (aad == null) {
+      aad = new byte[0];
+    }
     cipher.updateAAD(aad);
     int unusedWritten =
         cipher.doFinal(plaintext, 0, plaintext.length, ciphertext, IV_SIZE_IN_BYTES);
@@ -60,7 +65,8 @@ public final class AesGcmJce implements Aead {
   }
 
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] aad) throws GeneralSecurityException {
+  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
+      throws GeneralSecurityException {
     if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("ciphertext too short");
     }
@@ -68,6 +74,10 @@ public final class AesGcmJce implements Aead {
         new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, ciphertext, 0, IV_SIZE_IN_BYTES);
     Cipher cipher = instance();
     cipher.init(Cipher.DECRYPT_MODE, keySpec, params);
+    byte[] aad = associatedData;
+    if (aad == null) {
+      aad = new byte[0];
+    }
     cipher.updateAAD(aad);
     return cipher.doFinal(ciphertext, IV_SIZE_IN_BYTES, ciphertext.length - IV_SIZE_IN_BYTES);
   }

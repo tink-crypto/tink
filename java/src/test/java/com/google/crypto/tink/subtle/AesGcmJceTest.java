@@ -208,6 +208,79 @@ public class AesGcmJceTest {
   }
 
   @Test
+  public void testNullPlaintextOrCiphertext() throws Exception {
+    for (int keySize : keySizeInBytes) {
+      AesGcmJce gcm = new AesGcmJce(Random.randBytes(keySize));
+      try {
+        byte[] aad = new byte[] {1, 2, 3};
+        byte[] unused = gcm.encrypt(null, aad);
+        fail("Encrypting a null plaintext should fail");
+      } catch (NullPointerException ex) {
+        // This is expected.
+      }
+      try {
+        byte[] unused = gcm.encrypt(null, null);
+        fail("Encrypting a null plaintext should fail");
+      } catch (NullPointerException ex) {
+        // This is expected.
+      }
+      try {
+        byte[] aad = new byte[] {1, 2, 3};
+        byte[] unused = gcm.decrypt(null, aad);
+        fail("Decrypting a null ciphertext should fail");
+      } catch (NullPointerException ex) {
+        // This is expected.
+      }
+      try {
+        byte[] unused = gcm.decrypt(null, null);
+        fail("Decrypting a null ciphertext should fail");
+      } catch (NullPointerException ex) {
+        // This is expected.
+      }
+    }
+  }
+
+  @Test
+  public void testEmptyAssociatedData() throws Exception {
+    byte[] aad = new byte[0];
+    for (int keySize : keySizeInBytes) {
+      byte[] key = Random.randBytes(keySize);
+      AesGcmJce gcm = new AesGcmJce(key);
+      for (int messageSize = 0; messageSize < 75; messageSize++) {
+        byte[] message = Random.randBytes(messageSize);
+        {  // encrypting with aad as a 0-length array
+          byte[] ciphertext = gcm.encrypt(message, aad);
+          byte[] decrypted = gcm.decrypt(ciphertext, aad);
+          assertArrayEquals(message, decrypted);
+          byte[] decrypted2 = gcm.decrypt(ciphertext, null);
+          assertArrayEquals(message, decrypted2);
+          try {
+            byte[] badAad = new byte[] {1, 2, 3};
+            byte[] unused = gcm.decrypt(ciphertext, badAad);
+            fail("Decrypting with modified aad should fail");
+          } catch (AEADBadTagException ex) {
+            // This is expected.
+          }
+        }
+        {  // encrypting with aad equal to null
+          byte[] ciphertext = gcm.encrypt(message, null);
+          byte[] decrypted = gcm.decrypt(ciphertext, aad);
+          assertArrayEquals(message, decrypted);
+          byte[] decrypted2 = gcm.decrypt(ciphertext, null);
+          assertArrayEquals(message, decrypted2);
+          try {
+            byte[] badAad = new byte[] {1, 2, 3};
+            byte[] unused = gcm.decrypt(ciphertext, badAad);
+            fail("Decrypting with modified aad should fail");
+          } catch (AEADBadTagException ex) {
+            // This is expected.
+          }
+        }
+      }
+    }
+  }
+
+  @Test
   /**
    * This is a very simple test for the randomness of the nonce. The test simply checks that the
    * multiple ciphertexts of the same message are distinct.
