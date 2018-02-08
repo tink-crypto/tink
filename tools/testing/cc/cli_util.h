@@ -22,6 +22,26 @@
 // Helper function for CLI applications.
 class CliUtil {
  public:
+  // Returns a BinaryKeysetReader that reads from the specified file.
+  // In case of errors writes a log message and aborts.
+  static std::unique_ptr<crypto::tink::KeysetReader> GetBinaryKeysetReader(
+      const std::string& filename);
+
+  // Returns a JsonKeysetReader that reads from the specified file.
+  // In case of errors writes a log message and aborts.
+  static std::unique_ptr<crypto::tink::KeysetReader> GetJsonKeysetReader(
+      const std::string& filename);
+
+  // Returns a BinaryKeysetWriter that writes from the specified file.
+  // In case of errors writes a log message and aborts.
+  static std::unique_ptr<crypto::tink::KeysetWriter> GetBinaryKeysetWriter(
+      const std::string& filename);
+
+  // Returns a JsonKeysetWriter that writes from the specified file.
+  // In case of errors writes a log message and aborts.
+  static std::unique_ptr<crypto::tink::KeysetWriter> GetJsonKeysetWriter(
+      const std::string& filename);
+
   // Reads a keyset from the specified file.
   // In case of errors writes a log message and aborts.
   static std::unique_ptr<crypto::tink::KeysetHandle> ReadKeyset(

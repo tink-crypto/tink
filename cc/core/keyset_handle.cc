@@ -17,6 +17,7 @@
 #include "cc/aead.h"
 #include "cc/keyset_handle.h"
 #include "cc/keyset_reader.h"
+#include "cc/keyset_writer.h"
 #include "cc/util/errors.h"
 #include "cc/util/ptr_util.h"
 #include "proto/tink.pb.h"
@@ -31,6 +32,16 @@ namespace crypto {
 namespace tink {
 
 namespace {
+
+util::StatusOr<std::unique_ptr<EncryptedKeyset>>
+Encrypt(const Keyset& keyset, const Aead& master_key_aead) {
+  auto encrypt_result = master_key_aead.Encrypt(
+          keyset.SerializeAsString(), /* associated_data= */ "");
+  if (!encrypt_result.ok()) return encrypt_result.status();
+  auto enc_keyset = util::make_unique<EncryptedKeyset>();
+  enc_keyset->set_encrypted_keyset(encrypt_result.ValueOrDie());
+  return std::move(enc_keyset);
+}
 
 util::StatusOr<std::unique_ptr<Keyset>>
 Decrypt(const EncryptedKeyset& enc_keyset, const Aead& master_key_aead) {
@@ -68,6 +79,21 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
   std::unique_ptr<KeysetHandle> handle(
       new KeysetHandle(std::move(keyset_result.ValueOrDie())));
   return std::move(handle);
+}
+
+util::Status KeysetHandle::WriteEncrypted(const Aead& master_key_aead,
+                                          KeysetWriter* writer) {
+  if (writer == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Writer must be non-null");
+  }
+  auto encrypt_result = Encrypt(get_keyset(), master_key_aead);
+  if (!encrypt_result.ok()) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Encryption of the keyset failed: %s",
+                     encrypt_result.status().error_message().c_str());
+  }
+  return writer->Write(*(encrypt_result.ValueOrDie().get()));
 }
 
 // static

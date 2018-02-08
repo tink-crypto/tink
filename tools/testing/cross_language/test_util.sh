@@ -36,6 +36,10 @@ generate_symmetric_key() {
   local templates_subdir="$1"
   local key_name="$2"
   local key_template="$3"
+  local output_format="$4"
+  if [ "$output_format" == "" ]; then
+    output_format="BINARY"
+  fi
 
   local key_template_file="$KEY_TEMPLATES_DIR/$templates_subdir/$key_template"
 
@@ -44,7 +48,7 @@ generate_symmetric_key() {
       "to file $symmetric_key_file ..."
 
   $TINKEY_CLI create-keyset --key-template $key_template_file\
-      --out-format BINARY --out $symmetric_key_file  || exit 1
+      --out-format $output_format --out $symmetric_key_file  || exit 1
   echo "Done generating a symmetric keyset."
 }
 

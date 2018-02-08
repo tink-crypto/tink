@@ -15,7 +15,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "cc/binary_keyset_reader.h"
+#include "cc/cleartext_keyset_handle.h"
 #include "cc/json_keyset_reader.h"
+#include "cc/json_keyset_writer.h"
 #include "cc/keyset_handle.h"
 #include "cc/util/test_util.h"
 #include "google/protobuf/util/json_util.h"
@@ -171,6 +173,48 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Json) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
   }
+}
+
+TEST_F(KeysetHandleTest, testWriteEncryptedKeyset_Json) {
+  // Prepare a valid keyset handle
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+            KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+  auto reader = std::move(
+      BinaryKeysetReader::New(keyset.SerializeAsString()).ValueOrDie());
+  auto keyset_handle = std::move(
+      CleartextKeysetHandle::Read(std::move(reader)).ValueOrDie());
+
+  // Prepare a keyset writer.
+  DummyAead aead("dummy aead 42");
+  std::stringbuf buffer;
+  std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
+  auto writer = std::move(
+      JsonKeysetWriter::New(std::move(destination_stream)).ValueOrDie());
+
+  // Write the keyset handle and check the result.
+  auto status = keyset_handle->WriteEncrypted(aead, writer.get());
+  EXPECT_TRUE(status.ok()) << status;
+  EncryptedKeyset encrypted_keyset;
+  auto json_status = google::protobuf::util::JsonStringToMessage(
+      buffer.str(), &encrypted_keyset);
+  EXPECT_TRUE(json_status.ok())
+      << "Could not parse JSON from string:\n" << buffer.str() << "\n"
+      << json_status;
+  auto decrypt_result = aead.Decrypt(encrypted_keyset.encrypted_keyset(),
+                                     /* associated_data= */ "");
+  EXPECT_TRUE(decrypt_result.status().ok()) << decrypt_result.status();
+  auto decrypted = decrypt_result.ValueOrDie();
+  EXPECT_EQ(decrypted, keyset.SerializeAsString());
+
+  // Try writing to a null-writer.
+  status = keyset_handle->WriteEncrypted(aead, nullptr);
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
 }
 
 }  // namespace

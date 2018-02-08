@@ -19,6 +19,7 @@
 
 #include "cc/aead.h"
 #include "cc/keyset_reader.h"
+#include "cc/keyset_writer.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -41,6 +42,12 @@ class KeysetHandle {
   // according to |key_template|.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template);
+
+  // Encrypts the underlying keyset with the provided |master_key_aead|
+  // and writes the resulting EncrytpedKeyset to the given |writer|,
+  // which must be non-null.
+  crypto::tink::util::Status  WriteEncrypted(const Aead& master_key_aead,
+                                             KeysetWriter* writer);
 
   // Returns keyset held by this handle.
   // For internal use only, do not use outside Tink-code as it will be

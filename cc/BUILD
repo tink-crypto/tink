@@ -11,6 +11,7 @@ cc_library(
         "aead_config.h",
         "aead_factory.h",
         "binary_keyset_reader.h",
+        "binary_keyset_writer.h",
         "catalogue.h",
         "config.h",
         "hybrid_decrypt.h",
@@ -20,10 +21,12 @@ cc_library(
         "hybrid_encrypt_config.h",
         "hybrid_encrypt_factory.h",
         "json_keyset_reader.h",
+        "json_keyset_writer.h",
         "key_manager.h",
         "keyset_handle.h",
         "keyset_manager.h",
         "keyset_reader.h",
+        "keyset_writer.h",
         "mac.h",
         "mac_config.h",
         "mac_factory.h",
@@ -38,9 +41,11 @@ cc_library(
     deps = [
         ":aead",
         ":binary_keyset_reader",
+        ":binary_keyset_writer",
         ":hybrid_decrypt",
         ":hybrid_encrypt",
         ":json_keyset_reader",
+        ":json_keyset_writer",
         ":key_manager",
         ":keyset_handle",
         ":keyset_manager",
@@ -138,6 +143,15 @@ cc_library(
 )
 
 cc_library(
+    name = "keyset_writer",
+    hdrs = ["keyset_writer.h"],
+    deps = [
+        "//cc/util:status",
+        "//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
     name = "binary_keyset_reader",
     srcs = ["core/binary_keyset_reader.cc"],
     hdrs = ["binary_keyset_reader.h"],
@@ -152,6 +166,21 @@ cc_library(
 )
 
 cc_library(
+    name = "binary_keyset_writer",
+    srcs = ["core/binary_keyset_writer.cc"],
+    hdrs = ["binary_keyset_writer.h"],
+    deps = [
+        ":keyset_writer",
+        "//cc/util:errors",
+        "//cc/util:ptr_util",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "json_keyset_reader",
     srcs = ["core/json_keyset_reader.cc"],
     hdrs = ["json_keyset_reader.h"],
@@ -159,6 +188,21 @@ cc_library(
         ":keyset_reader",
         "//cc/util:errors",
         "//cc/util:ptr_util",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "json_keyset_writer",
+    srcs = ["core/json_keyset_writer.cc"],
+    hdrs = ["json_keyset_writer.h"],
+    deps = [
+        ":keyset_writer",
+        "//cc/util:errors",
+        "//cc/util:ptr_util",
+        "//cc/util:status",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
@@ -244,6 +288,7 @@ cc_library(
     deps = [
         ":aead",
         ":keyset_reader",
+        ":keyset_writer",
         "//cc/util:errors",
         "//cc/util:ptr_util",
         "//proto:tink_cc_proto",
@@ -334,12 +379,38 @@ cc_test(
 )
 
 cc_test(
+    name = "binary_keyset_writer_test",
+    size = "small",
+    srcs = ["core/binary_keyset_writer_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":binary_keyset_writer",
+        "//cc/util:test_util",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "json_keyset_reader_test",
     size = "small",
     srcs = ["core/json_keyset_reader_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":json_keyset_reader",
+        "//cc/util:test_util",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "json_keyset_writer_test",
+    size = "small",
+    srcs = ["core/json_keyset_writer_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":json_keyset_writer",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
@@ -378,7 +449,9 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":binary_keyset_reader",
+        ":cleartext_keyset_handle",
         ":json_keyset_reader",
+        ":json_keyset_writer",
         ":keyset_handle",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",

@@ -12,8 +12,20 @@ cc_library(
         "//cc:binary_keyset_reader",
         "//cc:cleartext_keyset_handle",
         "//cc:config",
+        "//cc:json_keyset_reader",
+        "//cc:json_keyset_writer",
         "//cc/config:tink_config",
         "//cc/util:status",
+    ],
+)
+
+cc_binary(
+    name = "keyset_reader_writer_cli",
+    srcs = ["keyset_reader_writer_cli.cc"],
+    visibility = ["//tools/testing:__subpackages__"],
+    deps = [
+        ":cli_util",
+        "//cc",
     ],
 )
 

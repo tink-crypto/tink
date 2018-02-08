@@ -10,6 +10,20 @@ filegroup(
 )
 
 sh_test(
+    name = "keyset_reader_writer_test",
+    size = "small",
+    srcs = [
+        "keyset_reader_writer_test.sh",
+    ],
+    data = [
+        ":test_lib",
+        "//examples/keytemplates:aead",
+        "//tools/testing/cc:keyset_reader_writer_cli",
+        "//tools/tinkey",
+    ],
+)
+
+sh_test(
     name = "aead_test",
     size = "small",
     srcs = [

@@ -30,16 +30,16 @@
 using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::Keyset;
 
-namespace tinkutil = crypto::tink::util;
+namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
 
 //  static
-tinkutil::StatusOr<std::unique_ptr<JsonKeysetReader>> JsonKeysetReader::New(
+util::StatusOr<std::unique_ptr<JsonKeysetReader>> JsonKeysetReader::New(
     std::unique_ptr<std::istream> keyset_stream) {
   if (keyset_stream == nullptr) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
                         "keyset_stream must be non-null.");
   }
   std::unique_ptr<JsonKeysetReader> reader(
@@ -48,14 +48,14 @@ tinkutil::StatusOr<std::unique_ptr<JsonKeysetReader>> JsonKeysetReader::New(
 }
 
 //  static
-tinkutil::StatusOr<std::unique_ptr<JsonKeysetReader>> JsonKeysetReader::New(
+util::StatusOr<std::unique_ptr<JsonKeysetReader>> JsonKeysetReader::New(
     absl::string_view serialized_keyset) {
   std::unique_ptr<JsonKeysetReader>
       reader(new JsonKeysetReader(serialized_keyset));
   return std::move(reader);
 }
 
-tinkutil::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
+util::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
   std::string serialized_keyset_from_stream;
   std::string* serialized_keyset;
   if (keyset_stream_ == nullptr) {
@@ -65,17 +65,17 @@ tinkutil::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
         std::istreambuf_iterator<char>(*keyset_stream_), {});
     serialized_keyset = &serialized_keyset_from_stream;
   }
-  auto keyset = tinkutil::make_unique<Keyset>();
+  auto keyset = util::make_unique<Keyset>();
   auto status = google::protobuf::util::JsonStringToMessage(
       *serialized_keyset, keyset.get());
   if (!status.ok()) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
         "Could not parse the input stream as a JSON Keyset-proto.");
   }
   return std::move(keyset);
 }
 
-tinkutil::StatusOr<std::unique_ptr<EncryptedKeyset>>
+util::StatusOr<std::unique_ptr<EncryptedKeyset>>
 JsonKeysetReader::ReadEncrypted() {
   std::string serialized_keyset_from_stream;
   std::string* serialized_keyset;
@@ -86,11 +86,11 @@ JsonKeysetReader::ReadEncrypted() {
         std::istreambuf_iterator<char>(*keyset_stream_), {});
     serialized_keyset = &serialized_keyset_from_stream;
   }
-  auto enc_keyset = tinkutil::make_unique<EncryptedKeyset>();
+  auto enc_keyset = util::make_unique<EncryptedKeyset>();
   auto status = google::protobuf::util::JsonStringToMessage(
       *serialized_keyset, enc_keyset.get());
   if (!status.ok()) {
-    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+    return util::Status(util::error::INVALID_ARGUMENT,
         "Could not parse the input stream as a JSON EncryptedKeyset-proto.");
   }
   return std::move(enc_keyset);

@@ -21,31 +21,93 @@
 #include <sstream>
 
 #include "cc/binary_keyset_reader.h"
+#include "cc/binary_keyset_writer.h"
 #include "cc/cleartext_keyset_handle.h"
+#include "cc/keyset_reader.h"
+#include "cc/keyset_writer.h"
+#include "cc/json_keyset_reader.h"
+#include "cc/json_keyset_writer.h"
 #include "cc/config.h"
 #include "cc/keyset_handle.h"
 #include "cc/config/tink_config.h"
 #include "cc/util/status.h"
 
 using crypto::tink::BinaryKeysetReader;
+using crypto::tink::BinaryKeysetWriter;
 using crypto::tink::CleartextKeysetHandle;
 using crypto::tink::Config;
+using crypto::tink::JsonKeysetReader;
+using crypto::tink::JsonKeysetWriter;
 using crypto::tink::KeysetHandle;
+using crypto::tink::KeysetReader;
+using crypto::tink::KeysetWriter;
 using crypto::tink::TinkConfig;
 
 // static
-std::unique_ptr<KeysetHandle> CliUtil::ReadKeyset(const std::string& filename) {
-  std::clog << "Reading the keyset...\n";
+std::unique_ptr<KeysetReader> CliUtil::GetBinaryKeysetReader(
+    const std::string& filename) {
+  std::clog << "Creating a BinaryKeysetReader...\n";
   std::unique_ptr<std::ifstream> keyset_stream(new std::ifstream());
   keyset_stream->open(filename, std::ifstream::in);
   auto keyset_reader_result = BinaryKeysetReader::New(std::move(keyset_stream));
   if (!keyset_reader_result.ok()) {
-    std::clog << "Reading the keyset failed: "
+    std::clog << "Creation of the reader failed: "
               << keyset_reader_result.status().error_message() << std::endl;
     exit(1);
   }
-  auto keyset_handle_result = CleartextKeysetHandle::Read(
-      std::move(keyset_reader_result.ValueOrDie()));
+  return std::move(keyset_reader_result.ValueOrDie());
+}
+
+// static
+std::unique_ptr<KeysetReader> CliUtil::GetJsonKeysetReader(
+    const std::string& filename) {
+  std::clog << "Creating a JsonKeysetReader...\n";
+  std::unique_ptr<std::ifstream> keyset_stream(new std::ifstream());
+  keyset_stream->open(filename, std::ifstream::in);
+  auto keyset_reader_result = JsonKeysetReader::New(std::move(keyset_stream));
+  if (!keyset_reader_result.ok()) {
+    std::clog << "Creation of the reader failed: "
+              << keyset_reader_result.status().error_message() << std::endl;
+    exit(1);
+  }
+  return std::move(keyset_reader_result.ValueOrDie());
+}
+
+// static
+std::unique_ptr<KeysetWriter> CliUtil::GetBinaryKeysetWriter(
+    const std::string& filename) {
+  std::clog << "Creating a BinaryKeysetWriter...\n";
+  std::unique_ptr<std::ofstream> keyset_stream(new std::ofstream());
+  keyset_stream->open(filename, std::ofstream::out);
+  auto keyset_writer_result = BinaryKeysetWriter::New(std::move(keyset_stream));
+  if (!keyset_writer_result.ok()) {
+    std::clog << "Creation of the writer failed: "
+              << keyset_writer_result.status().error_message() << std::endl;
+    exit(1);
+  }
+  return std::move(keyset_writer_result.ValueOrDie());
+}
+
+// static
+std::unique_ptr<KeysetWriter> CliUtil::GetJsonKeysetWriter(
+    const std::string& filename) {
+  std::clog << "Creating a JsonKeysetWriter...\n";
+  std::unique_ptr<std::ofstream> keyset_stream(new std::ofstream());
+  keyset_stream->open(filename, std::ifstream::out);
+  auto keyset_writer_result = JsonKeysetWriter::New(std::move(keyset_stream));
+  if (!keyset_writer_result.ok()) {
+    std::clog << "Creation of the writer failed: "
+              << keyset_writer_result.status().error_message() << std::endl;
+    exit(1);
+  }
+  return std::move(keyset_writer_result.ValueOrDie());
+}
+
+// static
+std::unique_ptr<KeysetHandle> CliUtil::ReadKeyset(const std::string& filename) {
+  auto keyset_reader = std::move(GetBinaryKeysetReader(filename));
+  auto keyset_handle_result =
+      CleartextKeysetHandle::Read(std::move(keyset_reader));
   if (!keyset_handle_result.ok()) {
     std::clog << "Reading the keyset failed: "
               << keyset_handle_result.status().error_message() << std::endl;
