@@ -248,7 +248,7 @@ public final class RewardedAdsVerifier {
      * the private keys corresponding to the public keys added. Adding multiple keys is useful for
      * handling key rotation.
      */
-    public Builder addVerifyingPublicKey(int keyId, final String val)
+    public Builder addVerifyingPublicKey(final int keyId, final String val)
         throws GeneralSecurityException {
       this.verifyingPublicKeysProviders.add(
           new VerifyingPublicKeysProvider() {
@@ -270,7 +270,7 @@ public final class RewardedAdsVerifier {
      * this method if you can't use {@link #fetchVerifyingPublicKeysWith} and be aware you will need
      * to handle Google key rotations yourself.
      */
-    public Builder addVerifyingPublicKey(int keyId, final ECPublicKey val)
+    public Builder addVerifyingPublicKey(final int keyId, final ECPublicKey val)
         throws GeneralSecurityException {
       this.verifyingPublicKeysProviders.add(
           new VerifyingPublicKeysProvider() {
