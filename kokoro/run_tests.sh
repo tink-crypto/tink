@@ -62,8 +62,8 @@ run_linux_tests() {
 
 run_macos_tests() {
   # Default values for iOS SDK and Xcode. Can be overriden by another script.
-  : "${IOS_SDK_VERSION:=10.2}"
-  : "${XCODE_VERSION:=8.2.1}"
+  : "${IOS_SDK_VERSION:=11.1}"
+  : "${XCODE_VERSION:=9.1}"
 
   time ${BAZEL_BIN} fetch ...
 
