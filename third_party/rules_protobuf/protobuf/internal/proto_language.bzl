@@ -74,7 +74,7 @@ def _proto_language_deps_impl(ctx):
                 deps.append(file)
 
     return struct(
-        files = set(deps),
+        files = depset(deps),
     )
 
 proto_language_deps = rule(
