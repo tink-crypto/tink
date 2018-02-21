@@ -18,7 +18,7 @@ package tink_test
 
 import (
 	"github.com/google/tink/go/tink/tink"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 	"testing"
 )
 

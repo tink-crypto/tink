@@ -22,7 +22,7 @@ import (
 	proto "github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/util/util"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
 // emptyAad is the additional authenticated data that is used in the encryption

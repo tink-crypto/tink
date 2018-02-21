@@ -17,7 +17,7 @@
 package tink
 
 import (
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
 // PrivateKeyManager is a special type of KeyManager that understands private key types.

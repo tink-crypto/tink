@@ -19,7 +19,7 @@ package signature
 import (
 	"fmt"
 	"github.com/google/tink/go/tink/tink"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 	"sync"
 )
 

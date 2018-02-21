@@ -25,8 +25,8 @@ import (
 	"github.com/google/tink/go/subtle/subtleutil"
 	"github.com/google/tink/go/tink/tink"
 	"github.com/google/tink/go/util/util"
-	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
 const (

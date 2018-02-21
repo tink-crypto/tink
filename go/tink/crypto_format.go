@@ -19,7 +19,7 @@ package tink
 import (
 	"encoding/binary"
 	"fmt"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
 /**

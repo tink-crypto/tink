@@ -19,7 +19,7 @@ package tink
 import (
 	"fmt"
 	"github.com/google/tink/go/util/util"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
 var errKeysetHandleInvalidKeyset = fmt.Errorf("keyset_handle: invalid keyset")

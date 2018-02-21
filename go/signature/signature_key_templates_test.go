@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/signature/signature"
-	commonpb "github.com/google/tink/proto/common_go_proto"
-	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	commonpb "github.com/google/tink/proto/common_proto"
+	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 	"testing"
 )
 

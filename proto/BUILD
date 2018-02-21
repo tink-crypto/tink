@@ -2,7 +2,7 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
 
-load("@io_bazel_rules_go//proto:go_proto_library.bzl", "go_proto_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 load("//third_party/rules_protobuf/objc:rules.bzl", "objc_proto_compile")
 load("//proto:objc.bzl", "tink_objc_proto_library")
 
@@ -10,7 +10,7 @@ load("//proto:objc.bzl", "tink_objc_proto_library")
 # common
 # -----------------------------------------------
 proto_library(
-    name = "common",
+    name = "common_proto",
     srcs = [
         "common.proto",
     ],
@@ -18,24 +18,23 @@ proto_library(
 
 cc_proto_library(
     name = "common_cc_proto",
-    deps = [":common"],
+    deps = [":common_proto"],
 )
 
 java_proto_library(
     name = "common_java_proto",
-    deps = [":common"],
+    deps = [":common_proto"],
 )
 
 java_lite_proto_library(
     name = "common_java_proto_lite",
-    deps = [":common"],
+    deps = [":common_proto"],
 )
 
 go_proto_library(
     name = "common_go_proto",
-    srcs = [
-        "common.proto",
-    ],
+    importpath = "github.com/google/tink/proto/common_proto",
+    proto = ":common_proto",
 )
 
 objc_proto_compile(
@@ -49,39 +48,35 @@ objc_proto_compile(
 # tink
 # -----------------------------------------------
 proto_library(
-    name = "tink",
+    name = "tink_proto",
     srcs = [
         "tink.proto",
     ],
     deps = [
-        ":common",
+        ":common_proto",
     ],
 )
 
 cc_proto_library(
     name = "tink_cc_proto",
-    deps = [":tink"],
+    deps = [":tink_proto"],
 )
 
 java_proto_library(
     name = "tink_java_proto",
-    deps = [":tink"],
+    deps = [":tink_proto"],
 )
 
 java_lite_proto_library(
     name = "tink_java_proto_lite",
-    deps = [":tink"],
+    deps = [":tink_proto"],
 )
 
 go_proto_library(
     name = "tink_go_proto",
-    srcs = [
-        "tink.proto",
-    ],
-    ignore_go_package_option = 1,
-    deps = [
-        ":common_go_proto",
-    ],
+    importpath = "github.com/google/tink/proto/tink_proto",
+    proto = ":tink_proto",
+    deps = [":common_go_proto"],
 )
 
 objc_proto_compile(
@@ -95,7 +90,7 @@ objc_proto_compile(
 # config
 # -----------------------------------------------
 proto_library(
-    name = "config",
+    name = "config_proto",
     srcs = [
         "config.proto",
     ],
@@ -103,34 +98,30 @@ proto_library(
 
 cc_proto_library(
     name = "config_cc_proto",
-    deps = [":config"],
+    deps = [":config_proto"],
 )
 
 java_proto_library(
     name = "config_java_proto",
-    deps = [":config"],
+    deps = [":config_proto"],
 )
 
 java_lite_proto_library(
     name = "config_java_proto_lite",
-    deps = [":config"],
+    deps = [":config_proto"],
 )
 
 go_proto_library(
     name = "config_go_proto",
-    srcs = [
-        "config.proto",
-    ],
-    deps = [
-        ":common_go_proto",
-    ],
+    importpath = "github.com/google/tink/proto/config_proto",
+    proto = ":config_proto",
 )
 
 # -----------------------------------------------
 # aes-siv
 # -----------------------------------------------
 proto_library(
-    name = "aes_siv",
+    name = "aes_siv_proto",
     srcs = [
         "aes_siv.proto",
     ],
@@ -138,24 +129,23 @@ proto_library(
 
 cc_proto_library(
     name = "aes_siv_cc_proto",
-    deps = [":aes_siv"],
+    deps = [":aes_siv_proto"],
 )
 
 java_proto_library(
     name = "aes_siv_java_proto",
-    deps = [":aes_siv"],
+    deps = [":aes_siv_proto"],
 )
 
 java_lite_proto_library(
     name = "aes_siv_java_proto_lite",
-    deps = [":aes_siv"],
+    deps = [":aes_siv_proto"],
 )
 
 go_proto_library(
     name = "aes_siv_go_proto",
-    srcs = [
-        "aes_siv.proto",
-    ],
+    importpath = "github.com/google/tink/proto/aes_siv_proto",
+    proto = ":aes_siv_proto",
 )
 
 objc_proto_compile(
@@ -169,38 +159,35 @@ objc_proto_compile(
 # ecdsa
 # -----------------------------------------------
 proto_library(
-    name = "ecdsa",
+    name = "ecdsa_proto",
     srcs = [
         "ecdsa.proto",
     ],
     deps = [
-        ":common",
+        ":common_proto",
     ],
 )
 
 cc_proto_library(
     name = "ecdsa_cc_proto",
-    deps = [":ecdsa"],
+    deps = [":ecdsa_proto"],
 )
 
 java_proto_library(
     name = "ecdsa_java_proto",
-    deps = [":ecdsa"],
+    deps = [":ecdsa_proto"],
 )
 
 java_lite_proto_library(
     name = "ecdsa_java_proto_lite",
-    deps = [":ecdsa"],
+    deps = [":ecdsa_proto"],
 )
 
 go_proto_library(
     name = "ecdsa_go_proto",
-    srcs = [
-        "ecdsa.proto",
-    ],
-    deps = [
-        ":common_go_proto",
-    ],
+    importpath = "github.com/google/tink/proto/ecdsa_proto",
+    proto = ":ecdsa_proto",
+    deps = [":common_go_proto"],
 )
 
 objc_proto_compile(
@@ -215,7 +202,7 @@ objc_proto_compile(
 # ed25519
 # -----------------------------------------------
 proto_library(
-    name = "ed25519",
+    name = "ed25519_proto",
     srcs = [
         "ed25519.proto",
     ],
@@ -223,24 +210,23 @@ proto_library(
 
 cc_proto_library(
     name = "ed25519_cc_proto",
-    deps = [":ed25519"],
+    deps = [":ed25519_proto"],
 )
 
 java_proto_library(
     name = "ed25519_java_proto",
-    deps = [":ed25519"],
+    deps = [":ed25519_proto"],
 )
 
 java_lite_proto_library(
     name = "ed25519_java_proto_lite",
-    deps = [":ed25519"],
+    deps = [":ed25519_proto"],
 )
 
 go_proto_library(
     name = "ed25519_go_proto",
-    srcs = [
-        "ed25519.proto",
-    ],
+    importpath = "github.com/google/tink/proto/ed25519_proto",
+    proto = ":ed25519_proto",
 )
 
 objc_proto_compile(
@@ -254,36 +240,33 @@ objc_proto_compile(
 # hmac
 # -----------------------------------------------
 proto_library(
-    name = "hmac",
+    name = "hmac_proto",
     srcs = [
         "hmac.proto",
     ],
-    deps = [":common"],
+    deps = [":common_proto"],
 )
 
 cc_proto_library(
     name = "hmac_cc_proto",
-    deps = [":hmac"],
+    deps = [":hmac_proto"],
 )
 
 java_proto_library(
     name = "hmac_java_proto",
-    deps = [":hmac"],
+    deps = [":hmac_proto"],
 )
 
 java_lite_proto_library(
     name = "hmac_java_proto_lite",
-    deps = [":hmac"],
+    deps = [":hmac_proto"],
 )
 
 go_proto_library(
     name = "hmac_go_proto",
-    srcs = [
-        "hmac.proto",
-    ],
-    deps = [
-        ":common_go_proto",
-    ],
+    importpath = "github.com/google/tink/proto/hmac_proto",
+    proto = ":hmac_proto",
+    deps = [":common_go_proto"],
 )
 
 objc_proto_compile(
@@ -298,7 +281,7 @@ objc_proto_compile(
 # aes_ctr
 # -----------------------------------------------
 proto_library(
-    name = "aes_ctr",
+    name = "aes_ctr_proto",
     srcs = [
         "aes_ctr.proto",
     ],
@@ -306,24 +289,23 @@ proto_library(
 
 cc_proto_library(
     name = "aes_ctr_cc_proto",
-    deps = [":aes_ctr"],
+    deps = [":aes_ctr_proto"],
 )
 
 java_proto_library(
     name = "aes_ctr_java_proto",
-    deps = [":aes_ctr"],
+    deps = [":aes_ctr_proto"],
 )
 
 java_lite_proto_library(
     name = "aes_ctr_java_proto_lite",
-    deps = [":aes_ctr"],
+    deps = [":aes_ctr_proto"],
 )
 
 go_proto_library(
     name = "aes_ctr_go_proto",
-    srcs = [
-        "aes_ctr.proto",
-    ],
+    importpath = "github.com/google/tink/proto/aes_ctr_proto",
+    proto = ":aes_ctr_proto",
 )
 
 objc_proto_compile(
@@ -337,36 +319,35 @@ objc_proto_compile(
 # aes_ctr_hmac_aead
 # -----------------------------------------------
 proto_library(
-    name = "aes_ctr_hmac_aead",
+    name = "aes_ctr_hmac_aead_proto",
     srcs = [
         "aes_ctr_hmac_aead.proto",
     ],
     deps = [
-        ":aes_ctr",
-        ":hmac",
+        ":aes_ctr_proto",
+        ":hmac_proto",
     ],
 )
 
 cc_proto_library(
     name = "aes_ctr_hmac_aead_cc_proto",
-    deps = [":aes_ctr_hmac_aead"],
+    deps = [":aes_ctr_hmac_aead_proto"],
 )
 
 java_proto_library(
     name = "aes_ctr_hmac_aead_java_proto",
-    deps = [":aes_ctr_hmac_aead"],
+    deps = [":aes_ctr_hmac_aead_proto"],
 )
 
 java_lite_proto_library(
     name = "aes_ctr_hmac_aead_java_proto_lite",
-    deps = [":aes_ctr_hmac_aead"],
+    deps = [":aes_ctr_hmac_aead_proto"],
 )
 
 go_proto_library(
     name = "aes_ctr_hmac_aead_go_proto",
-    srcs = [
-        "aes_ctr_hmac_aead.proto",
-    ],
+    importpath = "github.com/google/tink/proto/aes_ctr_hmac_aead_proto",
+    proto = ":aes_ctr_hmac_aead_proto",
     deps = [
         ":aes_ctr_go_proto",
         ":hmac_go_proto",
@@ -388,7 +369,7 @@ objc_proto_compile(
 # aes_gcm
 # -----------------------------------------------
 proto_library(
-    name = "aes_gcm",
+    name = "aes_gcm_proto",
     srcs = [
         "aes_gcm.proto",
     ],
@@ -396,24 +377,23 @@ proto_library(
 
 cc_proto_library(
     name = "aes_gcm_cc_proto",
-    deps = [":aes_gcm"],
+    deps = [":aes_gcm_proto"],
 )
 
 java_proto_library(
     name = "aes_gcm_java_proto",
-    deps = [":aes_gcm"],
+    deps = [":aes_gcm_proto"],
 )
 
 java_lite_proto_library(
     name = "aes_gcm_java_proto_lite",
-    deps = [":aes_gcm"],
+    deps = [":aes_gcm_proto"],
 )
 
 go_proto_library(
     name = "aes_gcm_go_proto",
-    srcs = [
-        "aes_gcm.proto",
-    ],
+    importpath = "github.com/google/tink/proto/aes_gcm_proto",
+    proto = ":aes_gcm_proto",
 )
 
 objc_proto_compile(
@@ -427,34 +407,33 @@ objc_proto_compile(
 # aes_ctr_hmac_streaming
 # -----------------------------------------------
 proto_library(
-    name = "aes_ctr_hmac_streaming",
+    name = "aes_ctr_hmac_streaming_proto",
     srcs = ["aes_ctr_hmac_streaming.proto"],
     deps = [
-        ":common",
-        ":hmac",
+        ":common_proto",
+        ":hmac_proto",
     ],
 )
 
 cc_proto_library(
     name = "aes_ctr_hmac_streaming_cc_proto",
-    deps = [":aes_ctr_hmac_streaming"],
+    deps = [":aes_ctr_hmac_streaming_proto"],
 )
 
 java_proto_library(
     name = "aes_ctr_hmac_streaming_java_proto",
-    deps = [":aes_ctr_hmac_streaming"],
+    deps = [":aes_ctr_hmac_streaming_proto"],
 )
 
 java_lite_proto_library(
     name = "aes_ctr_hmac_streaming_java_proto_lite",
-    deps = [":aes_ctr_hmac_streaming"],
+    deps = [":aes_ctr_hmac_streaming_proto"],
 )
 
 go_proto_library(
     name = "aes_ctr_hmac_streaming_go_proto",
-    srcs = [
-        "aes_ctr_hmac_streaming.proto",
-    ],
+    importpath = "github.com/google/tink/proto/aes_ctr_hmac_streaming_proto",
+    proto = ":aes_ctr_hmac_streaming_proto",
     deps = [
         ":common_go_proto",
         ":hmac_go_proto",
@@ -476,34 +455,31 @@ objc_proto_compile(
 # aes_gcm_hkdf_streaming
 # -----------------------------------------------
 proto_library(
-    name = "aes_gcm_hkdf_streaming",
+    name = "aes_gcm_hkdf_streaming_proto",
     srcs = ["aes_gcm_hkdf_streaming.proto"],
-    deps = [":common"],
+    deps = [":common_proto"],
 )
 
 cc_proto_library(
     name = "aes_gcm_hkdf_streaming_cc_proto",
-    deps = [":aes_gcm_hkdf_streaming"],
+    deps = [":aes_gcm_hkdf_streaming_proto"],
 )
 
 java_proto_library(
     name = "aes_gcm_hkdf_streaming_java_proto",
-    deps = [":aes_gcm_hkdf_streaming"],
+    deps = [":aes_gcm_hkdf_streaming_proto"],
 )
 
 java_lite_proto_library(
     name = "aes_gcm_hkdf_streaming_java_proto_lite",
-    deps = [":aes_gcm_hkdf_streaming"],
+    deps = [":aes_gcm_hkdf_streaming_proto"],
 )
 
 go_proto_library(
     name = "aes_gcm_hkdf_streaming_go_proto",
-    srcs = [
-        "aes_gcm_hkdf_streaming.proto",
-    ],
-    deps = [
-        ":common_go_proto",
-    ],
+    importpath = "github.com/google/tink/proto/aes_gcm_hkdf_streaming_proto",
+    proto = ":aes_gcm_hkdf_streaming_proto",
+    deps = [":common_go_proto"],
 )
 
 objc_proto_compile(
@@ -520,7 +496,7 @@ objc_proto_compile(
 # aes_eax
 # -----------------------------------------------
 proto_library(
-    name = "aes_eax",
+    name = "aes_eax_proto",
     srcs = [
         "aes_eax.proto",
     ],
@@ -528,24 +504,23 @@ proto_library(
 
 cc_proto_library(
     name = "aes_eax_cc_proto",
-    deps = [":aes_eax"],
+    deps = [":aes_eax_proto"],
 )
 
 java_proto_library(
     name = "aes_eax_java_proto",
-    deps = [":aes_eax"],
+    deps = [":aes_eax_proto"],
 )
 
 java_lite_proto_library(
     name = "aes_eax_java_proto_lite",
-    deps = [":aes_eax"],
+    deps = [":aes_eax_proto"],
 )
 
 go_proto_library(
     name = "aes_eax_go_proto",
-    srcs = [
-        "aes_eax.proto",
-    ],
+    importpath = "github.com/google/tink/proto/aes_eax_proto",
+    proto = ":aes_eax_proto",
 )
 
 objc_proto_compile(
@@ -559,7 +534,7 @@ objc_proto_compile(
 # chacha20_poly1305
 # -----------------------------------------------
 proto_library(
-    name = "chacha20_poly1305",
+    name = "chacha20_poly1305_proto",
     srcs = [
         "chacha20_poly1305.proto",
     ],
@@ -567,24 +542,23 @@ proto_library(
 
 cc_proto_library(
     name = "chacha20_poly1305_cc_proto",
-    deps = [":chacha20_poly1305"],
+    deps = [":chacha20_poly1305_proto"],
 )
 
 java_proto_library(
     name = "chacha20_poly1305_java_proto",
-    deps = [":chacha20_poly1305"],
+    deps = [":chacha20_poly1305_proto"],
 )
 
 java_lite_proto_library(
     name = "chacha20_poly1305_java_proto_lite",
-    deps = [":chacha20_poly1305"],
+    deps = [":chacha20_poly1305_proto"],
 )
 
 go_proto_library(
     name = "chacha20_poly1305_go_proto",
-    srcs = [
-        "chacha20_poly1305.proto",
-    ],
+    importpath = "github.com/google/tink/proto/chacha20_poly1305_proto",
+    proto = ":chacha20_poly1305_proto",
 )
 
 objc_proto_compile(
@@ -598,7 +572,7 @@ objc_proto_compile(
 # kms_aead
 # -----------------------------------------------
 proto_library(
-    name = "kms_aead",
+    name = "kms_aead_proto",
     srcs = [
         "kms_aead.proto",
     ],
@@ -606,24 +580,23 @@ proto_library(
 
 cc_proto_library(
     name = "kms_aead_cc_proto",
-    deps = [":kms_aead"],
+    deps = [":kms_aead_proto"],
 )
 
 java_proto_library(
     name = "kms_aead_java_proto",
-    deps = [":kms_aead"],
+    deps = [":kms_aead_proto"],
 )
 
 java_lite_proto_library(
     name = "kms_aead_java_proto_lite",
-    deps = [":kms_aead"],
+    deps = [":kms_aead_proto"],
 )
 
 go_proto_library(
     name = "kms_aead_go_proto",
-    srcs = [
-        "kms_aead.proto",
-    ],
+    importpath = "github.com/google/tink/proto/kms_aead_proto",
+    proto = ":kms_aead_proto",
 )
 
 objc_proto_compile(
@@ -637,36 +610,33 @@ objc_proto_compile(
 # kms_envelope
 # -----------------------------------------------
 proto_library(
-    name = "kms_envelope",
+    name = "kms_envelope_proto",
     srcs = [
         "kms_envelope.proto",
     ],
-    deps = [":tink"],
+    deps = [":tink_proto"],
 )
 
 cc_proto_library(
     name = "kms_envelope_cc_proto",
-    deps = [":kms_envelope"],
+    deps = [":kms_envelope_proto"],
 )
 
 java_proto_library(
     name = "kms_envelope_java_proto",
-    deps = [":kms_envelope"],
+    deps = [":kms_envelope_proto"],
 )
 
 java_lite_proto_library(
     name = "kms_envelope_java_proto_lite",
-    deps = [":kms_envelope"],
+    deps = [":kms_envelope_proto"],
 )
 
 go_proto_library(
     name = "kms_envelope_go_proto",
-    srcs = [
-        "kms_envelope.proto",
-    ],
-    deps = [
-        ":tink_go_proto",
-    ],
+    importpath = "github.com/google/tink/proto/kms_envelope_proto",
+    proto = ":kms_envelope_proto",
+    deps = [":tink_go_proto"],
 )
 
 objc_proto_compile(
@@ -683,36 +653,35 @@ objc_proto_compile(
 # ecies_aead_hkdf
 # -----------------------------------------------
 proto_library(
-    name = "ecies_aead_hkdf",
+    name = "ecies_aead_hkdf_proto",
     srcs = [
         "ecies_aead_hkdf.proto",
     ],
     deps = [
-        ":common",
-        ":tink",
+        ":common_proto",
+        ":tink_proto",
     ],
 )
 
 cc_proto_library(
     name = "ecies_aead_hkdf_cc_proto",
-    deps = [":ecies_aead_hkdf"],
+    deps = [":ecies_aead_hkdf_proto"],
 )
 
 java_proto_library(
     name = "ecies_aead_hkdf_java_proto",
-    deps = [":ecies_aead_hkdf"],
+    deps = [":ecies_aead_hkdf_proto"],
 )
 
 java_lite_proto_library(
     name = "ecies_aead_hkdf_java_proto_lite",
-    deps = [":ecies_aead_hkdf"],
+    deps = [":ecies_aead_hkdf_proto"],
 )
 
 go_proto_library(
     name = "ecies_aead_hkdf_go_proto",
-    srcs = [
-        "ecies_aead_hkdf.proto",
-    ],
+    importpath = "github.com/google/tink/proto/ecies_aead_hkdf_proto",
+    proto = ":ecies_aead_hkdf_proto",
     deps = [
         ":common_go_proto",
         ":tink_go_proto",

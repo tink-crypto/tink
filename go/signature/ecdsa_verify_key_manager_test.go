@@ -21,7 +21,7 @@ import (
 	"github.com/google/tink/go/signature/signature"
 	"github.com/google/tink/go/subtle/ecdsa"
 	"github.com/google/tink/go/util/testutil"
-	commonpb "github.com/google/tink/proto/common_go_proto"
+	commonpb "github.com/google/tink/proto/common_proto"
 	"testing"
 )
 

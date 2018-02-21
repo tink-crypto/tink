@@ -23,8 +23,8 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink/tink"
 	"github.com/google/tink/go/util/util"
-	hmacpb "github.com/google/tink/proto/hmac_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	hmacpb "github.com/google/tink/proto/hmac_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
 const (

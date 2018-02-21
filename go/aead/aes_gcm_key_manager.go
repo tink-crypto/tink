@@ -23,8 +23,8 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink/tink"
 	"github.com/google/tink/go/util/util"
-	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
-	tinkpb "github.com/google/tink/proto/tink_go_proto"
+	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
 const (
