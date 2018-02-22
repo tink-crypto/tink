@@ -32,18 +32,12 @@ public final class AwsKmsAead implements Aead {
   /** This client knows how to talk to AWS KMS. */
   private final AWSKMS kmsClient;
 
-  // The location of a crypto key in AWS KMS.
+  // The location of a crypto key in AWS KMS, without the aws-kms:// prefix.
   private final String keyArn;
 
   public AwsKmsAead(AWSKMS kmsClient, String keyUri) throws GeneralSecurityException {
     this.kmsClient = kmsClient;
     this.keyArn = keyUri;
-  }
-
-  // Decryption does't need a keyArn.
-  public AwsKmsAead(AWSKMS kmsClient) {
-    this.kmsClient = kmsClient;
-    this.keyArn = null;
   }
 
   @Override

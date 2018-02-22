@@ -42,7 +42,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class AwsKmsAeadTest {
-  private static final String KEY_ID = "aws-kms://123";
+  private static final String KEY_ID = "123";
   @Mock private AWSKMS mockKms;
 
   @Test
