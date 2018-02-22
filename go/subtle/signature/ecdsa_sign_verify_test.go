@@ -13,7 +13,7 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
-package ecdsa_test
+package signature_test
 
 import (
 	"crypto/ecdsa"
@@ -21,9 +21,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	subtleEcdsa "github.com/google/tink/go/subtle/ecdsa"
+	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/subtle/subtleutil"
+	subtleSignature "github.com/google/tink/go/subtle/signature"
 	"os"
 	"testing"
 )
@@ -33,13 +33,13 @@ func TestSignVerify(t *testing.T) {
 	hash := "SHA256"
 	curve := "NIST_P256"
 	encoding := "DER"
-	priv, _ := ecdsa.GenerateKey(subtleutil.GetCurve(curve), rand.Reader)
+	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
 	// Use the private key and public key directly to create new instances
-	signer, err := subtleEcdsa.NewEcdsaSignFromPrivateKey(hash, encoding, priv)
+	signer, err := subtleSignature.NewEcdsaSignFromPrivateKey(hash, encoding, priv)
 	if err != nil {
 		t.Errorf("unexpected error when creating EcdsaSign: %s", err)
 	}
-	verifier, err := subtleEcdsa.NewEcdsaVerifyFromPublicKey(hash, encoding, &priv.PublicKey)
+	verifier, err := subtleSignature.NewEcdsaVerifyFromPublicKey(hash, encoding, &priv.PublicKey)
 	if err != nil {
 		t.Errorf("unexpected error when creating EcdsaVerify: %s", err)
 	}
@@ -53,11 +53,11 @@ func TestSignVerify(t *testing.T) {
 	}
 
 	// Use byte slices to create new instances
-	signer, err = subtleEcdsa.NewEcdsaSign(hash, curve, encoding, priv.D.Bytes())
+	signer, err = subtleSignature.NewEcdsaSign(hash, curve, encoding, priv.D.Bytes())
 	if err != nil {
 		t.Errorf("unexpected error when creating EcdsaSign: %s", err)
 	}
-	verifier, err = subtleEcdsa.NewEcdsaVerify(hash, curve, encoding, priv.X.Bytes(), priv.Y.Bytes())
+	verifier, err = subtleSignature.NewEcdsaVerify(hash, curve, encoding, priv.X.Bytes(), priv.Y.Bytes())
 	if err != nil {
 		t.Errorf("unexpected error when creating EcdsaVerify: %s", err)
 	}
@@ -113,21 +113,21 @@ func TestVectors(t *testing.T) {
 		t.Errorf("cannot decode content of file: %s", err)
 	}
 	for _, g := range content.TestGroups {
-		hash := subtleutil.ConvertHashName(g.Sha)
-		curve := subtleutil.ConvertCurveName(g.Key.Curve)
+		hash := subtle.ConvertHashName(g.Sha)
+		curve := subtle.ConvertCurveName(g.Key.Curve)
 		if hash == "" || curve == "" {
 			continue
 		}
 		encoding := "DER"
-		x, err := subtleutil.NewBigIntFromHex(g.Key.Wx)
+		x, err := subtle.NewBigIntFromHex(g.Key.Wx)
 		if err != nil {
 			t.Errorf("cannot decode wx: %s", err)
 		}
-		y, err := subtleutil.NewBigIntFromHex(g.Key.Wy)
+		y, err := subtle.NewBigIntFromHex(g.Key.Wy)
 		if err != nil {
 			t.Errorf("cannot decode wy: %s", err)
 		}
-		verifier, err := subtleEcdsa.NewEcdsaVerify(hash, curve, encoding, x.Bytes(), y.Bytes())
+		verifier, err := subtleSignature.NewEcdsaVerify(hash, curve, encoding, x.Bytes(), y.Bytes())
 		if err != nil {
 			continue
 		}

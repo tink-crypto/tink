@@ -21,10 +21,10 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/subtle/aes"
-	"github.com/google/tink/go/subtle/hmac"
-	"github.com/google/tink/go/tink"
+	subtleAead "github.com/google/tink/go/subtle/aead"
+	subtleMac "github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/testutil"
+	"github.com/google/tink/go/tink"
 	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
 	commonpb "github.com/google/tink/proto/common_proto"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
@@ -217,7 +217,7 @@ func TestGetPrimitiveFromKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ *hmac.Hmac = p.(*hmac.Hmac)
+	var _ *subtleMac.Hmac = p.(*subtleMac.Hmac)
 	// unregistered url
 	if _, err := tink.Registry().GetPrimitiveFromKey("some url", key); err == nil {
 		t.Errorf("expect an error when typeUrl has not been registered")
@@ -240,7 +240,7 @@ func TestGetPrimitiveFromKeyData(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ *hmac.Hmac = p.(*hmac.Hmac)
+	var _ *subtleMac.Hmac = p.(*subtleMac.Hmac)
 	// unregistered url
 	keyData.TypeUrl = "some url"
 	if _, err := tink.Registry().GetPrimitiveFromKeyData(keyData); err == nil {
@@ -266,7 +266,7 @@ func TestGetPrimitiveFromSerializedKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ *hmac.Hmac = p.(*hmac.Hmac)
+	var _ *subtleMac.Hmac = p.(*subtleMac.Hmac)
 	// unregistered url
 	if _, err := tink.Registry().GetPrimitiveFromSerializedKey("some url", serializedKey); err == nil {
 		t.Errorf("expect an error when typeUrl has not been registered")
@@ -303,7 +303,7 @@ func TestGetPrimitives(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var aesGcm *aes.AesGcm = ps.Primary().Primitive().(*aes.AesGcm)
+	var aesGcm *subtleAead.AesGcm = ps.Primary().Primitive().(*subtleAead.AesGcm)
 	if len(aesGcm.Key) != 32 {
 		t.Errorf("primitive doesn't match input keyset handle")
 	}

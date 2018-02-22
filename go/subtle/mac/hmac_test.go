@@ -17,7 +17,7 @@ package hmac_test
 
 import (
 	"encoding/hex"
-	"github.com/google/tink/go/subtle/hmac"
+	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
 	"strings"
 	"testing"
@@ -59,7 +59,7 @@ var hmacTests = []struct {
 
 func TestHmacBasic(t *testing.T) {
 	for i, test := range hmacTests {
-		cipher, err := hmac.New(test.hashAlg, test.key, test.tagSize)
+		cipher, err := mac.NewHmac(test.hashAlg, test.key, test.tagSize)
 		if err != nil {
 			t.Errorf("cannot create new mac in test case %d: %s", i, err)
 		}
@@ -80,37 +80,37 @@ func TestHmacBasic(t *testing.T) {
 
 func TestNewHmacWithInvalidInput(t *testing.T) {
 	// invalid hash algorithm
-	_, err := hmac.New("SHA224", random.GetRandomBytes(16), 32)
+	_, err := mac.NewHmac("SHA224", random.GetRandomBytes(16), 32)
 	if err == nil || !strings.Contains(err.Error(), "invalid hash algorithm") {
 		t.Errorf("expect an error when hash algorithm is invalid")
 	}
 	// key too short
-	_, err = hmac.New("SHA256", random.GetRandomBytes(1), 32)
+	_, err = mac.NewHmac("SHA256", random.GetRandomBytes(1), 32)
 	if err == nil || !strings.Contains(err.Error(), "key too short") {
 		t.Errorf("expect an error when key is too short")
 	}
 	// tag too short
-	_, err = hmac.New("SHA256", random.GetRandomBytes(16), 9)
+	_, err = mac.NewHmac("SHA256", random.GetRandomBytes(16), 9)
 	if err == nil || !strings.Contains(err.Error(), "tag size too small") {
 		t.Errorf("expect an error when tag size is too small")
 	}
 	// tag too big
-	_, err = hmac.New("SHA1", random.GetRandomBytes(16), 21)
+	_, err = mac.NewHmac("SHA1", random.GetRandomBytes(16), 21)
 	if err == nil || !strings.Contains(err.Error(), "tag size too big") {
 		t.Errorf("expect an error when tag size is too big")
 	}
-	_, err = hmac.New("SHA256", random.GetRandomBytes(16), 33)
+	_, err = mac.NewHmac("SHA256", random.GetRandomBytes(16), 33)
 	if err == nil || !strings.Contains(err.Error(), "tag size too big") {
 		t.Errorf("expect an error when tag size is too big")
 	}
-	_, err = hmac.New("SHA512", random.GetRandomBytes(16), 65)
+	_, err = mac.NewHmac("SHA512", random.GetRandomBytes(16), 65)
 	if err == nil || !strings.Contains(err.Error(), "tag size too big") {
 		t.Errorf("expect an error when tag size is too big")
 	}
 }
 
 func TestComputeMacWithInvalidInput(t *testing.T) {
-	cipher, err := hmac.New("SHA256", random.GetRandomBytes(16), 32)
+	cipher, err := mac.NewHmac("SHA256", random.GetRandomBytes(16), 32)
 	if err != nil {
 		t.Errorf("unexpected error when creating new Hmac")
 	}
@@ -120,7 +120,7 @@ func TestComputeMacWithInvalidInput(t *testing.T) {
 }
 
 func TestVerifyMacWithInvalidInput(t *testing.T) {
-	cipher, err := hmac.New("SHA256", random.GetRandomBytes(16), 32)
+	cipher, err := mac.NewHmac("SHA256", random.GetRandomBytes(16), 32)
 	if err != nil {
 		t.Errorf("unexpected error when creating new Hmac")
 	}
@@ -134,7 +134,7 @@ func TestVerifyMacWithInvalidInput(t *testing.T) {
 
 func TestHmacModification(t *testing.T) {
 	for i, test := range hmacTests {
-		cipher, err := hmac.New(test.hashAlg, test.key, test.tagSize)
+		cipher, err := mac.NewHmac(test.hashAlg, test.key, test.tagSize)
 		if err != nil {
 			t.Errorf("cannot create new mac in test case %d: %s", i, err)
 		}
@@ -155,7 +155,7 @@ func TestHmacModification(t *testing.T) {
 
 func TestHmacTruncation(t *testing.T) {
 	for i, test := range hmacTests {
-		cipher, err := hmac.New(test.hashAlg, test.key, test.tagSize)
+		cipher, err := mac.NewHmac(test.hashAlg, test.key, test.tagSize)
 		if err != nil {
 			t.Errorf("cannot create new mac in test case %d: %s", i, err)
 		}

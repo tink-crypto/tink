@@ -19,7 +19,7 @@ package signature
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	subtleEcdsa "github.com/google/tink/go/subtle/ecdsa"
+	subtleSignature "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/tink"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
@@ -73,7 +73,7 @@ func (km *EcdsaVerifyKeyManager) GetPrimitiveFromKey(m proto.Message) (interface
 		return nil, fmt.Errorf("ecdsa_verify_key_manager: %s", err)
 	}
 	hash, curve, encoding := GetEcdsaParamNames(key.Params)
-	ret, err := subtleEcdsa.NewEcdsaVerify(hash, curve, encoding, key.X, key.Y)
+	ret, err := subtleSignature.NewEcdsaVerify(hash, curve, encoding, key.X, key.Y)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_verify_key_manager: invalid key: %s", err)
 	}
@@ -112,5 +112,5 @@ func (_ *EcdsaVerifyKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) error {
 		return fmt.Errorf("ecdsa_verify_key_manager: %s", err)
 	}
 	hash, curve, encoding := GetEcdsaParamNames(key.Params)
-	return subtleEcdsa.ValidateParams(hash, curve, encoding)
+	return subtleSignature.ValidateEcdsaParams(hash, curve, encoding)
 }

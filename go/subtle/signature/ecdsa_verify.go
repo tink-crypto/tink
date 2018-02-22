@@ -13,12 +13,12 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
-package ecdsa
+package signature
 
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"github.com/google/tink/go/subtle/subtleutil"
+	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
 	"hash"
 	"math/big"
@@ -44,7 +44,7 @@ func NewEcdsaVerify(hashAlg string,
 	x []byte,
 	y []byte) (*EcdsaVerify, error) {
 	publicKey := &ecdsa.PublicKey{
-		Curve: subtleutil.GetCurve(curve),
+		Curve: subtle.GetCurve(curve),
 		X:     new(big.Int).SetBytes(x),
 		Y:     new(big.Int).SetBytes(y),
 	}
@@ -57,11 +57,11 @@ func NewEcdsaVerifyFromPublicKey(hashAlg string, encoding string,
 	if publicKey.Curve == nil {
 		return nil, fmt.Errorf("ecdsa_verify: invalid curve")
 	}
-	curve := subtleutil.ConvertCurveName(publicKey.Curve.Params().Name)
-	if err := ValidateParams(hashAlg, curve, encoding); err != nil {
+	curve := subtle.ConvertCurveName(publicKey.Curve.Params().Name)
+	if err := ValidateEcdsaParams(hashAlg, curve, encoding); err != nil {
 		return nil, fmt.Errorf("ecdsa_verify: %s", err)
 	}
-	hashFunc := subtleutil.GetHashFunc(hashAlg)
+	hashFunc := subtle.GetHashFunc(hashAlg)
 	return &EcdsaVerify{
 		publicKey: publicKey,
 		hashFunc:  hashFunc,
@@ -72,11 +72,11 @@ func NewEcdsaVerifyFromPublicKey(hashAlg string, encoding string,
 // Verify verifies whether the given signature is valid for the given data.
 // It returns an error if the signature is not valid; nil otherwise.
 func (e *EcdsaVerify) Verify(signatureBytes []byte, data []byte) error {
-	signature, err := DecodeSignature(signatureBytes, e.encoding)
+	signature, err := DecodeEcdsaSignature(signatureBytes, e.encoding)
 	if err != nil {
 		return errInvalidSignature
 	}
-	hashed := subtleutil.ComputeHash(e.hashFunc, data)
+	hashed := subtle.ComputeHash(e.hashFunc, data)
 	valid := ecdsa.Verify(e.publicKey, hashed, signature.R, signature.S)
 	if valid {
 		return nil

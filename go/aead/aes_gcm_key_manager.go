@@ -19,7 +19,7 @@ package aead
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/subtle/aes"
+	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
@@ -72,7 +72,7 @@ func (km *AesGcmKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, e
 	if err := km.validateKey(key); err != nil {
 		return nil, err
 	}
-	ret, err := aes.NewAesGcm(key.KeyValue)
+	ret, err := aead.NewAesGcm(key.KeyValue)
 	if err != nil {
 		return nil, fmt.Errorf("aes_gcm_key_manager: cannot create new primitive: %s", err)
 	}
@@ -144,7 +144,7 @@ func (_ *AesGcmKeyManager) validateKey(key *gcmpb.AesGcmKey) error {
 		return fmt.Errorf("aes_gcm_key_manager: %s", err)
 	}
 	keySize := uint32(len(key.KeyValue))
-	if err := aes.ValidateAesKeySize(keySize); err != nil {
+	if err := aead.ValidateAesKeySize(keySize); err != nil {
 		return fmt.Errorf("aes_gcm_key_manager: %s", err)
 	}
 	return nil
@@ -152,7 +152,7 @@ func (_ *AesGcmKeyManager) validateKey(key *gcmpb.AesGcmKey) error {
 
 // validateKeyFormat validates the given AesGcmKeyFormat.
 func (_ *AesGcmKeyManager) validateKeyFormat(format *gcmpb.AesGcmKeyFormat) error {
-	if err := aes.ValidateAesKeySize(format.KeySize); err != nil {
+	if err := aead.ValidateAesKeySize(format.KeySize); err != nil {
 		return fmt.Errorf("aes_gcm_key_manager: %s", err)
 	}
 	return nil

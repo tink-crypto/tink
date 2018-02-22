@@ -13,12 +13,12 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
-package hmac
+package mac
 
 import (
 	"crypto/hmac"
 	"fmt"
-	"github.com/google/tink/go/subtle/subtleutil"
+	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
 	"hash"
 )
@@ -51,12 +51,12 @@ type Hmac struct {
 var _ tink.Mac = (*Hmac)(nil)
 
 // New creates a new instance of Hmac
-func New(hashAlg string, key []byte, tagSize uint32) (*Hmac, error) {
+func NewHmac(hashAlg string, key []byte, tagSize uint32) (*Hmac, error) {
 	keySize := uint32(len(key))
-	if err := ValidateParams(hashAlg, keySize, tagSize); err != nil {
+	if err := ValidateHmacParams(hashAlg, keySize, tagSize); err != nil {
 		return nil, fmt.Errorf("hmac: %s", err)
 	}
-	hashFunc := subtleutil.GetHashFunc(hashAlg)
+	hashFunc := subtle.GetHashFunc(hashAlg)
 	if hashFunc == nil {
 		return nil, fmt.Errorf("hmac: invalid hash algorithm")
 	}
@@ -68,7 +68,7 @@ func New(hashAlg string, key []byte, tagSize uint32) (*Hmac, error) {
 }
 
 // ValidateParams validates parameters of Hmac constructor.
-func ValidateParams(hash string, keySize uint32, tagSize uint32) error {
+func ValidateHmacParams(hash string, keySize uint32, tagSize uint32) error {
 	// validate tag size
 	maxTagSize, found := maxTagSizeInBytes[hash]
 	if !found {

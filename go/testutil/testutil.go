@@ -24,8 +24,8 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/signature"
+	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/subtle/subtleutil"
 	"github.com/google/tink/go/tink"
 	. "github.com/google/tink/proto/aes_gcm_proto"
 	. "github.com/google/tink/proto/common_proto"
@@ -122,7 +122,7 @@ func NewDummyKey(keyId int, status KeyStatusType, outputPrefixType OutputPrefixT
 
 func NewEcdsaPrivateKey(hashType HashType, curve EllipticCurveType) *EcdsaPrivateKey {
 	curveName, _ := EllipticCurveType_name[int32(curve)]
-	priv, _ := ecdsa.GenerateKey(subtleutil.GetCurve(curveName), rand.Reader)
+	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
 	params := signature.NewEcdsaParams(hashType,
 		curve,
 		EcdsaSignatureEncoding_DER)

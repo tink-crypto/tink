@@ -19,7 +19,7 @@ package signature_test
 import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/signature"
-	"github.com/google/tink/go/subtle/ecdsa"
+	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_proto"
 	"testing"
@@ -41,14 +41,14 @@ func TestEcdsaVerifyGetPrimitiveBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
-		var _ *ecdsa.EcdsaVerify = tmp.(*ecdsa.EcdsaVerify)
+		var _ *subtleSig.EcdsaVerify = tmp.(*subtleSig.EcdsaVerify)
 
 		serializedKey, _ := proto.Marshal(key)
 		tmp, err = km.GetPrimitiveFromSerializedKey(serializedKey)
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
-		var _ *ecdsa.EcdsaVerify = tmp.(*ecdsa.EcdsaVerify)
+		var _ *subtleSig.EcdsaVerify = tmp.(*subtleSig.EcdsaVerify)
 	}
 }
 

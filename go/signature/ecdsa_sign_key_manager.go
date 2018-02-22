@@ -21,8 +21,8 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	subtleEcdsa "github.com/google/tink/go/subtle/ecdsa"
-	"github.com/google/tink/go/subtle/subtleutil"
+	"github.com/google/tink/go/subtle"
+	subtleSignature "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/tink"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
@@ -75,7 +75,7 @@ func (km *EcdsaSignKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}
 		return nil, err
 	}
 	hash, curve, encoding := GetEcdsaParamNames(key.PublicKey.Params)
-	ret, err := subtleEcdsa.NewEcdsaSign(hash, curve, encoding, key.KeyValue)
+	ret, err := subtleSignature.NewEcdsaSign(hash, curve, encoding, key.KeyValue)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_sign_key_manager: %s", err)
 	}
@@ -108,7 +108,7 @@ func (km *EcdsaSignKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Messa
 	// generate key
 	params := format.Params
 	curve := tink.GetCurveName(params.Curve)
-	tmpKey, _ := ecdsa.GenerateKey(subtleutil.GetCurve(curve), rand.Reader)
+	tmpKey, _ := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
 	keyValue := tmpKey.D.Bytes()
 	pub := NewEcdsaPublicKey(ECDSA_SIGN_KEY_VERSION, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
 	priv := NewEcdsaPrivateKey(ECDSA_SIGN_KEY_VERSION, pub, keyValue)
@@ -166,11 +166,11 @@ func (_ *EcdsaSignKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
 		return fmt.Errorf("ecdsa_sign_key_manager: %s", err)
 	}
 	hash, curve, encoding := GetEcdsaParamNames(key.PublicKey.Params)
-	return subtleEcdsa.ValidateParams(hash, curve, encoding)
+	return subtleSignature.ValidateEcdsaParams(hash, curve, encoding)
 }
 
 // validateKeyFormat validates the given EcdsaKeyFormat.
 func (_ *EcdsaSignKeyManager) validateKeyFormat(format *ecdsapb.EcdsaKeyFormat) error {
 	hash, curve, encoding := GetEcdsaParamNames(format.Params)
-	return subtleEcdsa.ValidateParams(hash, curve, encoding)
+	return subtleSignature.ValidateEcdsaParams(hash, curve, encoding)
 }

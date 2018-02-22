@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/signature"
-	"github.com/google/tink/go/subtle/ecdsa"
 	"github.com/google/tink/go/subtle/random"
+	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
@@ -51,14 +51,14 @@ func TestEcdsaSignGetPrimitiveBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
-		var _ *ecdsa.EcdsaSign = tmp.(*ecdsa.EcdsaSign)
+		var _ *subtleSig.EcdsaSign = tmp.(*subtleSig.EcdsaSign)
 
 		serializedKey, _ := proto.Marshal(key)
 		tmp, err = km.GetPrimitiveFromSerializedKey(serializedKey)
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
-		var _ *ecdsa.EcdsaSign = tmp.(*ecdsa.EcdsaSign)
+		var _ *subtleSig.EcdsaSign = tmp.(*subtleSig.EcdsaSign)
 	}
 }
 
@@ -327,11 +327,11 @@ func validateEcdsaPrivateKey(key *ecdsapb.EcdsaPrivateKey, params *ecdsapb.Ecdsa
 	}
 	// try to sign and verify with the key
 	hash, curve, encoding := signature.GetEcdsaParamNames(publicKey.Params)
-	signer, err := ecdsa.NewEcdsaSign(hash, curve, encoding, key.KeyValue)
+	signer, err := subtleSig.NewEcdsaSign(hash, curve, encoding, key.KeyValue)
 	if err != nil {
 		return fmt.Errorf("unexpected error when creating EcdsaSign: %s", err)
 	}
-	verifier, err := ecdsa.NewEcdsaVerify(hash, curve, encoding, publicKey.X, publicKey.Y)
+	verifier, err := subtleSig.NewEcdsaVerify(hash, curve, encoding, publicKey.X, publicKey.Y)
 	if err != nil {
 		return fmt.Errorf("unexpected error when creating EcdsaVerify: %s", err)
 	}

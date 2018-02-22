@@ -13,13 +13,13 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
-package aes_test
+package aead_test
 
 import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/google/tink/go/subtle/aes"
+	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"os"
 	"testing"
@@ -32,12 +32,12 @@ var keySizes = []int{16, 24, 32}
 func TestAesGcmTagLength(t *testing.T) {
 	for _, keySize := range keySizes {
 		key := random.GetRandomBytes(uint32(keySize))
-		a, _ := aes.NewAesGcm(key)
+		a, _ := aead.NewAesGcm(key)
 		ad := random.GetRandomBytes(32)
 		pt := random.GetRandomBytes(32)
 		ct, _ := a.Encrypt(pt, ad)
-		actualTagSize := len(ct) - aes.AES_GCM_IV_SIZE - len(pt)
-		if actualTagSize != aes.AES_GCM_TAG_SIZE {
+		actualTagSize := len(ct) - aead.AES_GCM_IV_SIZE - len(pt)
+		if actualTagSize != aead.AES_GCM_TAG_SIZE {
 			t.Errorf("tag size is not 128 bit, it is %d bit", actualTagSize*8)
 		}
 	}
@@ -45,10 +45,10 @@ func TestAesGcmTagLength(t *testing.T) {
 
 func TestAesGcmKeySize(t *testing.T) {
 	for _, keySize := range keySizes {
-		if _, err := aes.NewAesGcm(make([]byte, keySize)); err != nil {
+		if _, err := aead.NewAesGcm(make([]byte, keySize)); err != nil {
 			t.Errorf("unexpected error when key size is %d btyes", keySize)
 		}
-		if _, err := aes.NewAesGcm(make([]byte, keySize+1)); err == nil {
+		if _, err := aead.NewAesGcm(make([]byte, keySize+1)); err == nil {
 			t.Errorf("expect an error when key size is not supported %d", keySize)
 		}
 	}
@@ -57,7 +57,7 @@ func TestAesGcmKeySize(t *testing.T) {
 func TestAesGcmEncryptDecrypt(t *testing.T) {
 	for _, keySize := range keySizes {
 		key := random.GetRandomBytes(uint32(keySize))
-		a, err := aes.NewAesGcm(key)
+		a, err := aead.NewAesGcm(key)
 		if err != nil {
 			t.Errorf("unexpected error when creating new cipher: %s", err)
 		}
@@ -86,7 +86,7 @@ func TestAesGcmLongMessages(t *testing.T) {
 		ad := random.GetRandomBytes(uint32(ptSize / 3))
 		for _, keySize := range keySizes {
 			key := random.GetRandomBytes(uint32(keySize))
-			a, _ := aes.NewAesGcm(key)
+			a, _ := aead.NewAesGcm(key)
 			ct, _ := a.Encrypt(pt, ad)
 			decrypted, _ := a.Decrypt(ct, ad)
 			if !bytes.Equal(pt, decrypted) {
@@ -101,7 +101,7 @@ func TestAesGcmModifyCiphertext(t *testing.T) {
 	ad := random.GetRandomBytes(33)
 	key := random.GetRandomBytes(16)
 	pt := random.GetRandomBytes(32)
-	a, _ := aes.NewAesGcm(key)
+	a, _ := aead.NewAesGcm(key)
 	ct, _ := a.Encrypt(pt, ad)
 	// flipping bits
 	for i := 0; i < len(ct); i++ {
@@ -143,7 +143,7 @@ func TestAesGcmRandomNonce(t *testing.T) {
 	key := random.GetRandomBytes(16)
 	pt := []byte{}
 	ad := []byte{}
-	a, _ := aes.NewAesGcm(key)
+	a, _ := aead.NewAesGcm(key)
 	ctSet := make(map[string]bool)
 	for i := 0; i < nSample; i++ {
 		ct, _ := a.Encrypt(pt, ad)
@@ -195,10 +195,10 @@ func TestVectors(t *testing.T) {
 	}
 
 	for _, g := range data.TestGroups {
-		if err := aes.ValidateAesKeySize(g.KeySize / 8); err != nil {
+		if err := aead.ValidateAesKeySize(g.KeySize / 8); err != nil {
 			continue
 		}
-		if g.IvSize != aes.AES_GCM_IV_SIZE*8 {
+		if g.IvSize != aead.AES_GCM_IV_SIZE*8 {
 			continue
 		}
 		for _, tc := range g.Tests {
@@ -231,7 +231,7 @@ func TestVectors(t *testing.T) {
 			combinedCt = append(combinedCt, ct...)
 			combinedCt = append(combinedCt, tag...)
 			// create cipher and do encryption
-			cipher, err := aes.NewAesGcm(key)
+			cipher, err := aead.NewAesGcm(key)
 			if err != nil {
 				t.Errorf("cannot create new instance of AesGcm in test case %d: %s", tc.TcId, err)
 				continue

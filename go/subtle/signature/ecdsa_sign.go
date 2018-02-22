@@ -13,13 +13,13 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
-package ecdsa
+package signature
 
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"fmt"
-	"github.com/google/tink/go/subtle/subtleutil"
+	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
 	"hash"
 	"math/big"
@@ -41,7 +41,7 @@ func NewEcdsaSign(hashAlg string,
 	curve string,
 	encoding string,
 	keyValue []byte) (*EcdsaSign, error) {
-	publicKey := ecdsa.PublicKey{Curve: subtleutil.GetCurve(curve), X: nil, Y: nil}
+	publicKey := ecdsa.PublicKey{Curve: subtle.GetCurve(curve), X: nil, Y: nil}
 	d := new(big.Int).SetBytes(keyValue)
 	privateKey := &ecdsa.PrivateKey{PublicKey: publicKey, D: d}
 	return NewEcdsaSignFromPrivateKey(hashAlg, encoding, privateKey)
@@ -54,11 +54,11 @@ func NewEcdsaSignFromPrivateKey(hashAlg string,
 	if privateKey.Curve == nil {
 		return nil, fmt.Errorf("ecdsa_sign: invalid curve")
 	}
-	curve := subtleutil.ConvertCurveName(privateKey.Curve.Params().Name)
-	if err := ValidateParams(hashAlg, curve, encoding); err != nil {
+	curve := subtle.ConvertCurveName(privateKey.Curve.Params().Name)
+	if err := ValidateEcdsaParams(hashAlg, curve, encoding); err != nil {
 		return nil, fmt.Errorf("ecdsa_sign: %s", err)
 	}
-	hashFunc := subtleutil.GetHashFunc(hashAlg)
+	hashFunc := subtle.GetHashFunc(hashAlg)
 	return &EcdsaSign{
 		privateKey: privateKey,
 		hashFunc:   hashFunc,
@@ -68,14 +68,14 @@ func NewEcdsaSignFromPrivateKey(hashAlg string,
 
 // Sign computes a signature for the given data.
 func (e *EcdsaSign) Sign(data []byte) ([]byte, error) {
-	hashed := subtleutil.ComputeHash(e.hashFunc, data)
+	hashed := subtle.ComputeHash(e.hashFunc, data)
 	r, s, err := ecdsa.Sign(rand.Reader, e.privateKey, hashed)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_sign: signing failed: %s", err)
 	}
 	// format the signature
-	sig := NewSignature(r, s)
-	ret, err := sig.Encode(e.encoding)
+	sig := NewEcdsaSignature(r, s)
+	ret, err := sig.EncodeEcdsaSignature(e.encoding)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_sign: signing failed: %s", err)
 	}

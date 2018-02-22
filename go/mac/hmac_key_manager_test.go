@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/subtle/hmac"
+	"github.com/google/tink/go/subtle"
+	subtleMac "github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/subtle/subtleutil"
-	"github.com/google/tink/go/tink"
 	"github.com/google/tink/go/testutil"
+	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_proto"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
@@ -42,7 +42,7 @@ func TestGetPrimitiveBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
 		}
-		if err := validateHmacPrimitive(p.(*hmac.Hmac), key); err != nil {
+		if err := validateHmacPrimitive(p.(*subtleMac.Hmac), key); err != nil {
 			t.Errorf("%s", err)
 		}
 
@@ -51,7 +51,7 @@ func TestGetPrimitiveBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
 		}
-		if err := validateHmacPrimitive(p.(*hmac.Hmac), key); err != nil {
+		if err := validateHmacPrimitive(p.(*subtleMac.Hmac), key); err != nil {
 			t.Errorf("%s", err)
 		}
 	}
@@ -297,7 +297,7 @@ func validateHmacKey(format *hmacpb.HmacKeyFormat, key *hmacpb.HmacKey) error {
 		key.Params.Hash != format.Params.Hash {
 		return fmt.Errorf("key format and generated key do not match")
 	}
-	p, err := hmac.New(tink.GetHashName(key.Params.Hash), key.KeyValue, key.Params.TagSize)
+	p, err := subtleMac.NewHmac(tink.GetHashName(key.Params.Hash), key.KeyValue, key.Params.TagSize)
 	if err != nil {
 		return fmt.Errorf("cannot create primitive from key: %s", err)
 	}
@@ -305,11 +305,11 @@ func validateHmacKey(format *hmacpb.HmacKeyFormat, key *hmacpb.HmacKey) error {
 }
 
 // validateHmacPrimitive checks whether the given primitive matches the given HmacKey
-func validateHmacPrimitive(p *hmac.Hmac, key *hmacpb.HmacKey) error {
+func validateHmacPrimitive(p *subtleMac.Hmac, key *hmacpb.HmacKey) error {
 	if !bytes.Equal(p.Key, key.KeyValue) ||
 		p.TagSize != key.Params.TagSize ||
 		reflect.ValueOf(p.HashFunc).Pointer() !=
-			reflect.ValueOf(subtleutil.GetHashFunc(tink.GetHashName(key.Params.Hash))).Pointer() {
+			reflect.ValueOf(subtle.GetHashFunc(tink.GetHashName(key.Params.Hash))).Pointer() {
 		return fmt.Errorf("primitive and key do not matched")
 	}
 	data := random.GetRandomBytes(20)

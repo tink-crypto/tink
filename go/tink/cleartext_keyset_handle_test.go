@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/tink"
 	"github.com/google/tink/go/testutil"
+	"github.com/google/tink/go/tink"
 	"testing"
 )
 

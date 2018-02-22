@@ -2,14 +2,14 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
-    srcs = ["subtleutil.go"],
-    importpath = "github.com/google/tink/go/subtle/subtleutil",
+    srcs = ["util.go"],
+    importpath = "github.com/google/tink/go/subtle",
     visibility = ["//visibility:public"],
 )
 
 go_test(
     name = "go_default_xtest",
-    srcs = ["subtleutil_test.go"],
-    importpath = "github.com/google/tink/go/subtle/subtleutil_test",
+    srcs = ["util_test.go"],
+    importpath = "github.com/google/tink/go/subtle_test",
     deps = [":go_default_library"],
 )

@@ -19,7 +19,7 @@ package mac
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/subtle/hmac"
+	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
@@ -72,7 +72,7 @@ func (km *HmacKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, err
 		return nil, err
 	}
 	hash := tink.GetHashName(key.Params.Hash)
-	hmac, err := hmac.New(hash, key.KeyValue, key.Params.TagSize)
+	hmac, err := mac.NewHmac(hash, key.KeyValue, key.Params.TagSize)
 	if err != nil {
 		return nil, err
 	}
@@ -139,11 +139,11 @@ func (_ *HmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
 	}
 	keySize := uint32(len(key.KeyValue))
 	hash := tink.GetHashName(key.Params.Hash)
-	return hmac.ValidateParams(hash, keySize, key.Params.TagSize)
+	return mac.ValidateHmacParams(hash, keySize, key.Params.TagSize)
 }
 
 // validateKeyFormat validates the given HmacKeyFormat
 func (_ *HmacKeyManager) validateKeyFormat(format *hmacpb.HmacKeyFormat) error {
 	hash := tink.GetHashName(format.Params.Hash)
-	return hmac.ValidateParams(hash, format.KeySize, format.Params.TagSize)
+	return mac.ValidateHmacParams(hash, format.KeySize, format.Params.TagSize)
 }

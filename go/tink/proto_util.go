@@ -66,6 +66,6 @@ func GetHashName(hashType HashType) string {
 }
 
 func GetCurveName(curve EllipticCurveType) string {
-  ret, _ := EllipticCurveType_name[int32(curve)]
-  return ret
+	ret, _ := EllipticCurveType_name[int32(curve)]
+	return ret
 }

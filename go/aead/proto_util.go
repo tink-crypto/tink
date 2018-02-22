@@ -17,19 +17,19 @@
 package aead
 
 import (
-  . "github.com/google/tink/proto/aes_gcm_proto"
+	. "github.com/google/tink/proto/aes_gcm_proto"
 )
 
 // Utilities for AesGcm protos
 func NewAesGcmKey(version uint32, keyValue []byte) *AesGcmKey {
-  return &AesGcmKey{
-    Version:  version,
-    KeyValue: keyValue,
-  }
+	return &AesGcmKey{
+		Version:  version,
+		KeyValue: keyValue,
+	}
 }
 
 func NewAesGcmKeyFormat(keySize uint32) *AesGcmKeyFormat {
-  return &AesGcmKeyFormat{
-    KeySize: keySize,
-  }
+	return &AesGcmKeyFormat{
+		KeySize: keySize,
+	}
 }
