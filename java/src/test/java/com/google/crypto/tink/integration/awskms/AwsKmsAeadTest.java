@@ -42,9 +42,8 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class AwsKmsAeadTest {
-
+  private static final String KEY_ID = "aws-kms://123";
   @Mock private AWSKMS mockKms;
-  private final String keyId = "aws-kms://123";
 
   @Test
   public void testEncryptDecrypt() throws Exception {
@@ -55,10 +54,11 @@ public class AwsKmsAeadTest {
     when(mockKms.encrypt(isA(EncryptRequest.class)))
         .thenReturn(mockEncryptResult);
 
-    Aead aead = new AwsKmsAead(mockKms, keyId);
+    Aead aead = new AwsKmsAead(mockKms, KEY_ID);
     byte[] aad = Random.randBytes(20);
     for (int messageSize = 0; messageSize < 75; messageSize++) {
       byte[] message = Random.randBytes(messageSize);
+      when(mockDecryptResult.getKeyId()).thenReturn(KEY_ID);
       when(mockDecryptResult.getPlaintext()).thenReturn(ByteBuffer.wrap(message));
       when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
       byte[] ciphertext = aead.encrypt(message, aad);
@@ -68,12 +68,12 @@ public class AwsKmsAeadTest {
   }
 
   @Test
-  public void testEncrypt_shouldThrowExceptionIfRequestFailed() throws Exception {
+  public void testEncryptShouldThrowExceptionIfRequestFailed() throws Exception {
     AmazonServiceException exception = mock(AmazonServiceException.class);
     when(mockKms.encrypt(isA(EncryptRequest.class)))
         .thenThrow(exception);
 
-    Aead aead = new AwsKmsAead(mockKms, keyId);
+    Aead aead = new AwsKmsAead(mockKms, KEY_ID);
     byte[] aad = Random.randBytes(20);
     byte[] message = Random.randBytes(20);
     try {
@@ -85,7 +85,7 @@ public class AwsKmsAeadTest {
   }
 
   @Test
-  public void testDecrypt_shouldThrowExceptionIfRequestFailed() throws Exception {
+  public void testDecryptShouldThrowExceptionIfRequestFailed() throws Exception {
     EncryptResult mockEncryptResult = mock(EncryptResult.class);
     when(mockKms.encrypt(isA(EncryptRequest.class)))
         .thenReturn(mockEncryptResult);
@@ -93,10 +93,33 @@ public class AwsKmsAeadTest {
     when(mockKms.decrypt(isA(DecryptRequest.class)))
         .thenThrow(exception);
 
-    Aead aead = new AwsKmsAead(mockKms, keyId);
+    Aead aead = new AwsKmsAead(mockKms, KEY_ID);
     byte[] aad = Random.randBytes(20);
     byte[] message = Random.randBytes(20);
     when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
+    byte[] ciphertext = aead.encrypt(message, aad);
+    try {
+      aead.decrypt(ciphertext, aad);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected.
+    }
+  }
+
+  @Test
+  public void testDecryptShouldThrowExceptionIfKeyIdIsDifferent() throws Exception {
+    DecryptResult mockDecryptResult = mock(DecryptResult.class);
+    EncryptResult mockEncryptResult = mock(EncryptResult.class);
+    when(mockKms.decrypt(isA(DecryptRequest.class)))
+        .thenReturn(mockDecryptResult);
+    when(mockKms.encrypt(isA(EncryptRequest.class)))
+        .thenReturn(mockEncryptResult);
+
+    Aead aead = new AwsKmsAead(mockKms, KEY_ID);
+    byte[] aad = Random.randBytes(20);
+    byte[] message = Random.randBytes(20);
+    when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
+    when(mockDecryptResult.getKeyId()).thenReturn(KEY_ID + "1");
     byte[] ciphertext = aead.encrypt(message, aad);
     try {
       aead.decrypt(ciphertext, aad);

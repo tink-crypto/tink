@@ -19,6 +19,7 @@ package com.google.crypto.tink.integration.awskms;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.DecryptRequest;
+import com.amazonaws.services.kms.model.DecryptResult;
 import com.amazonaws.services.kms.model.EncryptRequest;
 import com.amazonaws.util.BinaryUtils;
 import com.google.crypto.tink.Aead;
@@ -68,7 +69,11 @@ public final class AwsKmsAead implements Aead {
       if (associatedData != null && associatedData.length != 0) {
         req = req.addEncryptionContextEntry("associatedData", BinaryUtils.toHex(associatedData));
       }
-      return kmsClient.decrypt(req).getPlaintext().array();
+      DecryptResult result = kmsClient.decrypt(req);
+      if (!result.getKeyId().equals(keyArn)) {
+        throw new GeneralSecurityException("decryption failed: wrong key id");
+      }
+      return result.getPlaintext().array();
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("decryption failed", e);
     }
