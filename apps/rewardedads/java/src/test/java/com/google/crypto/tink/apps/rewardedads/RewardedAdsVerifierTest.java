@@ -63,7 +63,7 @@ public class RewardedAdsVerifierTest {
           + "FPU8rTtwMDr8LixetUjVLNkJTHxTxLQuMytPqKt39Vbtt7czPq3+yu1F";
 
   // must match the value in GOOGLE_VERIFYING_PUBLIC_KEYS_JSON
-  private static final int KEY_ID = 1234;
+  private static final long KEY_ID = 1234;
   private static final String REWARD_HOST_AND_PATH = "https://publisher.com/blah?";
   private static final String REWARD_QUERY = "foo1=bar1&foo2=bar2";
   private static final String REWARD_URL = REWARD_HOST_AND_PATH + REWARD_QUERY;
@@ -72,7 +72,7 @@ public class RewardedAdsVerifierTest {
       "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEU8E6JppGKFG40r5dDU1idHRN52NuwsemFzXZh1oUqh3bGUPgPioH+RoW"
           + "nmVSUQz1WfM2426w9f0GADuXzpUkcw==";
 
-  private static String signUrl(String rewardUrl, String privateKey, int keyId) throws Exception {
+  private static String signUrl(String rewardUrl, String privateKey, long keyId) throws Exception {
     EcdsaSignJce signer =
         new EcdsaSignJce(
             EllipticCurves.getEcPrivateKey(Base64.decode(privateKey)), "SHA256WithECDSA");
@@ -80,7 +80,7 @@ public class RewardedAdsVerifierTest {
     return buildUrl(rewardUrl, signer.sign(queryString.getBytes(UTF_8)), keyId);
   }
 
-  private static String buildUrl(String rewardUrl, byte[] sig, int keyId) {
+  private static String buildUrl(String rewardUrl, byte[] sig, long keyId) {
     return new StringBuilder(rewardUrl)
         .append("&")
         .append(RewardedAdsVerifier.SIGNATURE_PARAM_NAME)
@@ -98,6 +98,21 @@ public class RewardedAdsVerifierTest {
             .setVerifyingPublicKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
             .build();
     verifier.verify(signUrl(REWARD_URL, GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64, KEY_ID));
+  }
+
+  @Test
+  public void testShouldVerifyIfKeyIdIsLargerThanMaxInt() throws Exception {
+    long keyId = Integer.MAX_VALUE + 1;
+    JSONObject trustedKeysJson = new JSONObject(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON);
+    trustedKeysJson
+        .getJSONArray("keys")
+        .getJSONObject(0)
+        .put("keyId", keyId);
+    RewardedAdsVerifier verifier =
+        new RewardedAdsVerifier.Builder()
+            .setVerifyingPublicKeys(trustedKeysJson.toString())
+            .build();
+    verifier.verify(signUrl(REWARD_URL, GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64, keyId));
   }
 
   @Test

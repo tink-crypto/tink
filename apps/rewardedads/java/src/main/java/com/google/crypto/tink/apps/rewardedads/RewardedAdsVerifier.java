@@ -73,14 +73,13 @@ public final class RewardedAdsVerifier {
   public static final String SIGNATURE_PARAM_NAME = "signature=";
   public static final String KEY_ID_PARAM_NAME = "key_id=";
 
-  // TODO(b/69107476): updating these endpoints once they're determined.
   /** URL to fetch keys for environment production. */
   public static final String PUBLIC_KEYS_URL_PROD =
-      "https://admob.developers.google.com/rewardedads/keys.json";
+      "https://www.gstatic.com/admob/reward/verifier-keys.json";
 
   /** URL to fetch keys for environment test. */
   public static final String PUBLIC_KEYS_URL_TEST =
-      "https://admob.developers.google.com/rewardedads/test/keys.json";
+      "https://www.gstatic.com/admob/reward/verifier-keys-test.json";
 
   /**
    * Instance configured to talk to fetch keys from production environment (from {@link
@@ -140,15 +139,15 @@ public final class RewardedAdsVerifier {
     String sig =
         sigAndKeyId.substring(
             SIGNATURE_PARAM_NAME.length(), i - 1 /* i - 1 instead of i because of & */);
-    int keyId = Integer.valueOf(sigAndKeyId.substring(i + KEY_ID_PARAM_NAME.length()));
+    long keyId = Long.valueOf(sigAndKeyId.substring(i + KEY_ID_PARAM_NAME.length()));
     verify(tbsData, keyId, Base64.urlSafeDecode(sig));
   }
 
-  private void verify(final byte[] tbs, int keyId, final byte[] signature)
+  private void verify(final byte[] tbs, long keyId, final byte[] signature)
       throws GeneralSecurityException {
     boolean foundKeyId = false;
     for (VerifyingPublicKeysProvider provider : verifyingPublicKeysProviders) {
-      Map<Integer, ECPublicKey> publicKeys = provider.get();
+      Map<Long, ECPublicKey> publicKeys = provider.get();
       if (publicKeys.containsKey(keyId)) {
         foundKeyId = true;
         ECPublicKey publicKey = publicKeys.get(keyId);
@@ -178,7 +177,7 @@ public final class RewardedAdsVerifier {
       this.verifyingPublicKeysProviders.add(
           new VerifyingPublicKeysProvider() {
             @Override
-            public Map<Integer, ECPublicKey> get() throws GeneralSecurityException {
+            public Map<Long, ECPublicKey> get() throws GeneralSecurityException {
               try {
                 return parsePublicKeysJson(downloader.download());
               } catch (IOException e) {
@@ -225,7 +224,7 @@ public final class RewardedAdsVerifier {
       this.verifyingPublicKeysProviders.add(
           new VerifyingPublicKeysProvider() {
             @Override
-            public Map<Integer, ECPublicKey> get() throws GeneralSecurityException {
+            public Map<Long, ECPublicKey> get() throws GeneralSecurityException {
               return parsePublicKeysJson(publicKeysJson);
             }
           });
@@ -248,12 +247,12 @@ public final class RewardedAdsVerifier {
      * the private keys corresponding to the public keys added. Adding multiple keys is useful for
      * handling key rotation.
      */
-    public Builder addVerifyingPublicKey(final int keyId, final String val)
+    public Builder addVerifyingPublicKey(final long keyId, final String val)
         throws GeneralSecurityException {
       this.verifyingPublicKeysProviders.add(
           new VerifyingPublicKeysProvider() {
             @Override
-            public Map<Integer, ECPublicKey> get() throws GeneralSecurityException {
+            public Map<Long, ECPublicKey> get() throws GeneralSecurityException {
               return Collections.singletonMap(
                   keyId, EllipticCurves.getEcPublicKey(Base64.decode(val)));
             }
@@ -270,12 +269,12 @@ public final class RewardedAdsVerifier {
      * this method if you can't use {@link #fetchVerifyingPublicKeysWith} and be aware you will need
      * to handle Google key rotations yourself.
      */
-    public Builder addVerifyingPublicKey(final int keyId, final ECPublicKey val)
+    public Builder addVerifyingPublicKey(final long keyId, final ECPublicKey val)
         throws GeneralSecurityException {
       this.verifyingPublicKeysProviders.add(
           new VerifyingPublicKeysProvider() {
             @Override
-            public Map<Integer, ECPublicKey> get() throws GeneralSecurityException {
+            public Map<Long, ECPublicKey> get() throws GeneralSecurityException {
               return Collections.singletonMap(keyId, val);
             }
           });
@@ -287,15 +286,15 @@ public final class RewardedAdsVerifier {
     }
   }
 
-  private static Map<Integer, ECPublicKey> parsePublicKeysJson(String publicKeysJson)
+  private static Map<Long, ECPublicKey> parsePublicKeysJson(String publicKeysJson)
       throws GeneralSecurityException {
-    Map<Integer, ECPublicKey> publicKeys = new HashMap<>();
+    Map<Long, ECPublicKey> publicKeys = new HashMap<>();
     try {
       JSONArray keys = new JSONObject(publicKeysJson).getJSONArray("keys");
       for (int i = 0; i < keys.length(); i++) {
         JSONObject key = keys.getJSONObject(i);
         publicKeys.put(
-            key.getInt("keyId"),
+            key.getLong("keyId"),
             EllipticCurves.getEcPublicKey(Base64.decode(key.getString("base64"))));
       }
     } catch (JSONException e) {
@@ -308,6 +307,6 @@ public final class RewardedAdsVerifier {
   }
 
   private interface VerifyingPublicKeysProvider {
-    Map<Integer, ECPublicKey> get() throws GeneralSecurityException;
+    Map<Long, ECPublicKey> get() throws GeneralSecurityException;
   }
 }
