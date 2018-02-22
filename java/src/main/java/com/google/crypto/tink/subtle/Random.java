@@ -20,16 +20,27 @@ import java.security.SecureRandom;
 
 /** A simple wrapper of SecureRandom. */
 public final class Random {
-  private static final SecureRandom secureRandom = new SecureRandom();
+  private static final ThreadLocal<SecureRandom> localRandom = new ThreadLocal<SecureRandom>() {
+    @Override
+    protected SecureRandom initialValue() {
+      return newDefaultSecureRandom();
+    }
+  };
+
+  private static SecureRandom newDefaultSecureRandom() {
+    SecureRandom retval = new SecureRandom();
+    retval.nextLong(); // force seeding
+    return retval;
+  }
 
   /** @return a random byte array of size {@code size}. */
   public static byte[] randBytes(int size) {
     byte[] rand = new byte[size];
-    secureRandom.nextBytes(rand);
+    localRandom.get().nextBytes(rand);
     return rand;
   }
 
   public static final int randInt(int max) {
-    return secureRandom.nextInt(max);
+    return localRandom.get().nextInt(max);
   }
 }
