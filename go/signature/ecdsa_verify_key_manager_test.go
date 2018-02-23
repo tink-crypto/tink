@@ -17,12 +17,13 @@
 package signature_test
 
 import (
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/signature"
 	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
 	commonpb "github.com/google/tink/proto/common_proto"
-	"testing"
 )
 
 func TestNewEcdsaVerifyKeyManager(t *testing.T) {
@@ -58,11 +59,11 @@ func TestEcdsaVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	for i := 0; i < len(testParams); i++ {
 		key := testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve)
 		if _, err := km.GetPrimitiveFromKey(key); err == nil {
-			t.Errorf("expect an error in test case %d")
+			t.Errorf("expect an error in test case %d", i)
 		}
 		serializedKey, _ := proto.Marshal(key)
 		if _, err := km.GetPrimitiveFromSerializedKey(serializedKey); err == nil {
-			t.Errorf("expect an error in test case %d")
+			t.Errorf("expect an error in test case %d", i)
 		}
 	}
 	// invalid version

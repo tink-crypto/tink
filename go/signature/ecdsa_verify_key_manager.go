@@ -18,6 +18,7 @@ package signature
 
 import (
 	"fmt"
+
 	"github.com/golang/protobuf/proto"
 	subtleSignature "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/tink"
@@ -35,7 +36,6 @@ const (
 
 // common errors
 var errInvalidEcdsaVerifyKey = fmt.Errorf("ecdsa_verify_key_manager: invalid key")
-var errInvalidEcdsaVerifyKeyFormat = fmt.Errorf("ecdsa_verify_key_manager: invalid key format")
 var errEcdsaVerifyNotImplemented = fmt.Errorf("ecdsa_verify_key_manager: not implemented")
 
 // EcdsaVerifyKeyManager is an implementation of KeyManager interface.

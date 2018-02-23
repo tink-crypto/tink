@@ -18,6 +18,9 @@ package tink_test
 
 import (
 	"fmt"
+	"sync"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
@@ -29,8 +32,6 @@ import (
 	commonpb "github.com/google/tink/proto/common_proto"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"sync"
-	"testing"
 )
 
 func TestKeyManagerMapBasic(t *testing.T) {
@@ -45,7 +46,7 @@ func TestKeyManagerMapBasic(t *testing.T) {
 	}
 	var _ = tmp.(*mac.HmacKeyManager)
 	// Get type url that doesn't exist
-	if _, existed := kmMap.Get("some url"); existed == true {
+	if _, existed := kmMap.Get("some url"); existed {
 		t.Errorf("unknown typeUrl shouldn't exist in the map")
 	}
 }
@@ -121,7 +122,7 @@ func TestKeyManagerRegistrationWithCollision(t *testing.T) {
 	var dummyKeyManager tink.KeyManager = new(testutil.DummyAeadKeyManager)
 	// this should not overwrite the existing manager.
 	ok, err := tink.Registry().RegisterKeyManager(dummyKeyManager)
-	if ok == true || err != nil {
+	if ok || err != nil {
 		t.Errorf("AES_GCM_TYPE_URL shouldn't be registered again")
 	}
 	km, err := tink.Registry().GetKeyManager(aead.AES_GCM_TYPE_URL)

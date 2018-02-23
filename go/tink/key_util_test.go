@@ -17,10 +17,11 @@
 package tink_test
 
 import (
+	"testing"
+
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"testing"
 )
 
 func TestValidateVersion(t *testing.T) {
@@ -56,6 +57,9 @@ func TestGetKeysetInfo(t *testing.T) {
 	key := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
 	keyset := tink.NewKeyset(1, []*tinkpb.Keyset_Key{key})
 	keysetInfo, err := tink.GetKeysetInfo(keyset)
+	if err != nil {
+		t.Error("This should not error here")
+	}
 	if keysetInfo.PrimaryKeyId != keyset.PrimaryKeyId {
 		t.Errorf("PrimaryKeyId mismatched")
 	}
@@ -87,8 +91,7 @@ func TestValidateKeyset(t *testing.T) {
 		t.Errorf("expect an error when keyset is empty")
 	}
 	// no primary key
-	var keys []*tinkpb.Keyset_Key
-	keys = []*tinkpb.Keyset_Key{
+	keys := []*tinkpb.Keyset_Key{
 		testutil.NewDummyKey(1, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK),
 	}
 	if err = tink.ValidateKeyset(tink.NewKeyset(2, keys)); err == nil {

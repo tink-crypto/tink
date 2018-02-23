@@ -18,9 +18,10 @@ package testutil_test
 
 import (
 	"bytes"
+	"testing"
+
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
-	"testing"
 )
 
 func TestDummyAead(t *testing.T) {
@@ -38,10 +39,10 @@ func TestDummyMac(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	if bytes.Compare(append(data, dummyMac.Name...), digest) != 0 {
+	if !bytes.Equal(append(data, dummyMac.Name...), digest) {
 		t.Errorf("incorrect digest")
 	}
-	if valid, err := dummyMac.VerifyMac(nil, nil); valid == false || err != nil {
+	if valid, err := dummyMac.VerifyMac(nil, nil); !valid || err != nil {
 		t.Errorf("unexpected result of VerifyMac")
 	}
 }

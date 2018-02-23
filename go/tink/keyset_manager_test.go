@@ -18,23 +18,24 @@ package tink_test
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"strings"
-	"testing"
 )
 
 func setupKeysetManagerTest() {
 	_, err := mac.Config().RegisterStandardKeyTypes()
 	if err != nil {
-		panic(fmt.Sprintln("cannot register mac key types: %s", err))
+		panic(fmt.Sprintf("cannot register mac key types: %s", err))
 	}
 	_, err = aead.Config().RegisterStandardKeyTypes()
 	if err != nil {
-		panic(fmt.Sprintln("cannot register aead key types: %s", err))
+		panic(fmt.Sprintf("cannot register aead key types: %s", err))
 	}
 }
 

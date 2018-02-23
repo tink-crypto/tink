@@ -59,7 +59,7 @@ func NewEcdsaKeyFormat(params *EcdsaParams) *EcdsaKeyFormat {
 }
 
 func GetEcdsaSignatureEncodingName(encoding EcdsaSignatureEncoding) string {
-	ret, _ := EcdsaSignatureEncoding_name[int32(encoding)]
+	ret := EcdsaSignatureEncoding_name[int32(encoding)]
 	return ret
 }
 
