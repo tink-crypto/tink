@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.subtle.EllipticCurves;
 import java.io.File;
@@ -57,15 +56,20 @@ public class WycheproofTestUtil {
       JSONObject testvector, String expectedAlgorithm, String expectedVersion) throws Exception {
     String algorithm = testvector.getString("algorithm");
     if (!expectedAlgorithm.equals(algorithm)) {
-      fail("expect algorithm " + expectedAlgorithm + ", got" + algorithm);
+      // No need to worry about mismatched algorithm names if nothing else goes wrong.
+      System.out.println("Expecting algorithm " + expectedAlgorithm + ", got " + algorithm + ".");
     }
     String generatorVersion = testvector.getString("generatorVersion");
     if (!generatorVersion.equals(expectedVersion)) {
-      fail(
-          "expect test vectors with version "
+      // No need to worry about mismatched versions if nothing else goes wrong.
+      System.out.println(
+          "Expecting test vectors with version "
               + expectedVersion
-              + " ,got vectors with version "
-              + generatorVersion);
+              + ", got vectors with version "
+              + generatorVersion
+              + " for "
+              + expectedAlgorithm
+              + ".");
     }
   }
 
