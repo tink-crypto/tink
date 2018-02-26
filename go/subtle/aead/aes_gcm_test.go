@@ -187,7 +187,7 @@ type testcase struct {
 func TestVectors(t *testing.T) {
 	f, err := os.Open("../../../../wycheproof/testvectors/aes_gcm_test.json")
 	if err != nil {
-		t.Fatalf("cannot open file: %s", err)
+		t.Fatalf("cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath", err)
 	}
 	parser := json.NewDecoder(f)
 	data := new(testdata)
