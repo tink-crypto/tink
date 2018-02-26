@@ -18,6 +18,7 @@ package tink
 
 import (
 	"fmt"
+
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
@@ -104,8 +105,6 @@ func (h *KeysetHandle) String() string {
 }
 
 func (h *KeysetHandle) validateKeyData(keyData *tinkpb.KeyData) error {
-	if _, err := Registry().GetPrimitiveFromKeyData(keyData); err != nil {
-		return err
-	}
-	return nil
+	_, err := Registry().GetPrimitiveFromKeyData(keyData)
+	return err
 }

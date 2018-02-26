@@ -19,10 +19,11 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/google/tink/go/subtle/aead"
-	"github.com/google/tink/go/subtle/random"
 	"os"
 	"testing"
+
+	"github.com/google/tink/go/subtle/aead"
+	"github.com/google/tink/go/subtle/random"
 )
 
 var keySizes = []int{16, 24, 32}
@@ -117,7 +118,7 @@ func TestAesGcmModifyCiphertext(t *testing.T) {
 	// truncated ciphertext
 	for i := 1; i < len(ct); i++ {
 		if _, err := a.Decrypt(ct[:i], ad); err == nil {
-			t.Errorf("expect an error ciphertext is truncated until byte %s", i)
+			t.Errorf("expect an error ciphertext is truncated until byte %d", i)
 		}
 	}
 	// modify additinal authenticated data
@@ -186,12 +187,12 @@ type testcase struct {
 func TestVectors(t *testing.T) {
 	f, err := os.Open("../../../../wycheproof/testvectors/aes_gcm_test.json")
 	if err != nil {
-		t.Fatal("cannot open file: %s", err)
+		t.Fatalf("cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath", err)
 	}
 	parser := json.NewDecoder(f)
 	data := new(testdata)
 	if err := parser.Decode(data); err != nil {
-		t.Fatal("cannot decode test data: %s", err)
+		t.Fatalf("cannot decode test data: %s", err)
 	}
 
 	for _, g := range data.TestGroups {
@@ -240,7 +241,7 @@ func TestVectors(t *testing.T) {
 			if err != nil {
 				t.Errorf("unexpected error in test case %d: %s", tc.TcId, err)
 			}
-			if bytes.Compare(decrypted, msg) != 0 {
+			if !bytes.Equal(decrypted, msg) {
 				t.Errorf("failed in test case %d", tc.TcId)
 			}
 		}

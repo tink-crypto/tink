@@ -76,7 +76,7 @@ func ValidateEcdsaParams(hashAlg string, curve string, encoding string) error {
 			return fmt.Errorf("invalid hash type, expect SHA-512")
 		}
 	default:
-		return fmt.Errorf("unsupported curve: %d", curve)
+		return fmt.Errorf("unsupported curve: %s", curve)
 	}
 	return nil
 }

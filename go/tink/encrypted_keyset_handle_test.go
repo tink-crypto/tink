@@ -18,21 +18,22 @@ package tink_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"testing"
 )
 
 func setupEncryptedKeysetHandleTest() {
 	if _, err := aead.Config().RegisterStandardKeyTypes(); err != nil {
-		panic(fmt.Sprintln("cannot register aead key types: %s", err))
+		panic(fmt.Sprintf("cannot register aead key types: %s", err))
 	}
 	if _, err := mac.Config().RegisterStandardKeyTypes(); err != nil {
-		panic(fmt.Sprintln("cannot register mac key types: %s", err))
+		panic(fmt.Sprintf("cannot register mac key types: %s", err))
 	}
 }
 

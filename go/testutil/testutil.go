@@ -20,6 +20,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"fmt"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/mac"
@@ -121,7 +122,7 @@ func NewDummyKey(keyId int, status KeyStatusType, outputPrefixType OutputPrefixT
 }
 
 func NewEcdsaPrivateKey(hashType HashType, curve EllipticCurveType) *EcdsaPrivateKey {
-	curveName, _ := EllipticCurveType_name[int32(curve)]
+	curveName := EllipticCurveType_name[int32(curve)]
 	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
 	params := signature.NewEcdsaParams(hashType,
 		curve,

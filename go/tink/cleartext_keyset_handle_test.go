@@ -18,16 +18,17 @@ package tink_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
-	"testing"
 )
 
 func setupCleartextKeysetHandleTest() {
 	if _, err := mac.Config().RegisterStandardKeyTypes(); err != nil {
-		panic(fmt.Sprintln("cannot register mac key types: %s", err))
+		panic(fmt.Sprintf("cannot register mac key types: %s", err))
 	}
 }
 

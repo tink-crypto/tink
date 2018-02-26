@@ -21,8 +21,6 @@ import (
 	"fmt"
 )
 
-var errInvalidLength = fmt.Errorf("invalid length")
-
 // asn1encode encodes the given ECDSA signature using ASN.1 encoding.
 func asn1encode(sig *EcdsaSignature) ([]byte, error) {
 	ret, err := asn1.Marshal(*sig)

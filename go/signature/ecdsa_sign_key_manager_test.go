@@ -18,6 +18,9 @@ package signature_test
 
 import (
 	"fmt"
+	"math/big"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
@@ -26,8 +29,6 @@ import (
 	commonpb "github.com/google/tink/proto/common_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"math/big"
-	"testing"
 )
 
 type ecdsaParams struct {
@@ -38,7 +39,7 @@ type ecdsaParams struct {
 func TestNewEcdsaSignKeyManager(t *testing.T) {
 	var km *signature.EcdsaSignKeyManager = signature.NewEcdsaSignKeyManager()
 	if km == nil {
-		t.Errorf("NewEcdsaSignKeyManager returns nil")
+		t.Error("NewEcdsaSignKeyManager returns nil")
 	}
 }
 
@@ -69,11 +70,11 @@ func TestEcdsaSignGetPrimitiveWithInvalidInput(t *testing.T) {
 	for i := 0; i < len(testParams); i++ {
 		key := testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve)
 		if _, err := km.GetPrimitiveFromKey(key); err == nil {
-			t.Errorf("expect an error in test case %d")
+			t.Errorf("expect an error in test case %d", i)
 		}
 		serializedKey, _ := proto.Marshal(key)
 		if _, err := km.GetPrimitiveFromSerializedKey(serializedKey); err == nil {
-			t.Errorf("expect an error in test case %d")
+			t.Errorf("expect an error in test case %d", i)
 		}
 	}
 	// invalid version

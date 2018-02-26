@@ -61,11 +61,9 @@ func NewEncryptedKeyset(encryptedKeySet []byte, info *KeysetInfo) *EncryptedKeys
 
 // utilities for converting proto types to strings
 func GetHashName(hashType HashType) string {
-	ret, _ := HashType_name[int32(hashType)]
-	return ret
+	return HashType_name[int32(hashType)]
 }
 
 func GetCurveName(curve EllipticCurveType) string {
-	ret, _ := EllipticCurveType_name[int32(curve)]
-	return ret
+	return EllipticCurveType_name[int32(curve)]
 }
