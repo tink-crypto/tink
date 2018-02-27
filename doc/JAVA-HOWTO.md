@@ -39,7 +39,7 @@ dependencies {
 ### Snapshots
 
 Snapshots of Tink built from the master branch are available through Maven using
-version `1.1.0-SNAPSHOT`, or `1.1.0-android-SNAPSHOT` for the Android flavor.
+version `HEAD-SNAPSHOT`.
 
 To add a dependency using Maven:
 
@@ -62,10 +62,9 @@ To add a dependency using Maven:
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>tink</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
   <!-- or, for Android: -->
   <artifactId>tink-android</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>HEAD-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -77,9 +76,9 @@ repositories {
 }
 
 dependencies {
-  compile 'com.google.crypto.tink:tink:1.0.0'
+  compile 'com.google.crypto.tink:tink:HEAD-SNAPSHOT'
   // or, for Android:
-  compile 'com.google.crypto.tink:tink-android:1.0.0'
+  compile 'com.google.crypto.tink:tink-android:HEAD-SNAPSHOT'
 }
 ```
 

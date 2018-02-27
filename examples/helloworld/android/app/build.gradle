@@ -34,6 +34,6 @@ dependencies {
     compile 'com.android.support:design:26.+'
     testCompile 'junit:junit:4.12'
 
-    // Tink 1.1.0-SNAPSHOT for Android.
-    compile 'com.google.crypto.tink:tink-android:1.1.0-SNAPSHOT'
+    // Tink HEAD-SNAPSHOT for Android.
+    compile 'com.google.crypto.tink:tink-android:HEAD-SNAPSHOT'
 }

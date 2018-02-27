@@ -1,5 +1,20 @@
 #!/bin/sh
 
+# Copyright 2017 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+####################################################################################
+
 # Fail on any error.
 set -e
 
@@ -7,8 +22,15 @@ set -e
 set -x
 
 readonly MVN_GOAL="$1"
-shift 1
+readonly VERSION="$2"
+shift 2
 readonly EXTRA_MAVEN_ARGS=("$@")
+
+if [ -z "${VERSION}" ]
+then
+  echo "Must set the VERSION variable"
+  exit 1
+fi
 
 library_output_file() {
   library=$1
@@ -28,12 +50,22 @@ deploy_library() {
   javadoc=$2
   pomfile=$3
   bazel build $library $javadoc
+  
+  # Update the version
+  sed -i \
+    's/VERSION_PLACEHOLDER/'"$VERSION"'/' \
+    $pomfile
 
   mvn $MVN_GOAL \
     -Dfile=$(library_output_file $library) \
     -Djavadoc=$(library_output_file $javadoc) \
     -DpomFile=$pomfile \
     "${EXTRA_MAVEN_ARGS[@]:+${EXTRA_MAVEN_ARGS[@]}}"
+
+  # Reverse the version change
+  sed -i \
+    's/'"$VERSION"'/VERSION_PLACEHOLDER/' \
+    $pomfile
 }
 
 deploy_library \
