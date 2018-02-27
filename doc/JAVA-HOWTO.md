@@ -13,7 +13,7 @@ Tink for Java comes in two flavors:
 Tink can be installed with Maven or Gradle. The Maven group ID is
 `com.google.crypto.tink`, and the artifact ID is `tink`.
 
-To add a dependency on Tink using Maven, use the following:
+To add a dependency using Maven:
 
 ```xml
 <dependency>
@@ -36,21 +36,52 @@ dependencies {
 }
 ```
 
-The Android flavor requires setting the ANDROID_HOME environment variable
-pointing to an installation of Android SDK 23 or newer. For example, this is the
-setting on a machine of one of the maintainers:
-
-```shell
-$ echo $ANDROID_HOME
-/Users/user/Library/Android/sdk/
-$ ls /Users/user/Library/Android/sdk/platforms/
-android-21  android-23  android-24  android-26
-```
-
 ### Snapshots
 
 Snapshots of Tink built from the master branch are available through Maven using
 version `1.1.0-SNAPSHOT`, or `1.1.0-android-SNAPSHOT` for the Android flavor.
+
+To add a dependency using Maven:
+
+```xml
+<repositories>
+<repository>
+  <id>sonatype-snapshots</id>
+  <name>sonatype-snapshots</name>
+  <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+  <snapshots>
+    <enabled>true</enabled>
+    <updatePolicy>always</updatePolicy>
+  </snapshots>
+  <releases>
+    <updatePolicy>always</updatePolicy>
+  </releases>
+</repository>
+</repositories>
+
+<dependency>
+  <groupId>com.google.crypto.tink</groupId>
+  <artifactId>tink</artifactId>
+  <version>1.1.0-SNAPSHOT</version>
+  <!-- or, for Android: -->
+  <artifactId>tink-android</artifactId>
+  <version>1.1.0-SNAPSHOT</version>
+</dependency>
+```
+
+To add a dependency using Gradle:
+
+```
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
+dependencies {
+  compile 'com.google.crypto.tink:tink:1.0.0'
+  // or, for Android:
+  compile 'com.google.crypto.tink:tink-android:1.0.0'
+}
+```
 
 ## Important Warnings
 

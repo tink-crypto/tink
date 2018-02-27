@@ -4,6 +4,15 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "*.java",
+        ],
+    ),
+)
+
 # public interfaces
 
 java_library(
@@ -15,9 +24,9 @@ java_library(
 
 android_library(
     name = "android",
-    srcs = glob([
-        "*.java",
-    ]),
+    srcs = [
+        ":srcs",
+    ],
     javacopts = JAVACOPTS,
     deps = [
         ":protos",

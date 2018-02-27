@@ -4,15 +4,21 @@ licenses(["notice"])  # Apache 2.0
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "src/main/**/*.java",
+        ],
+    ),
+)
+
 java_library(
     name = "paymentmethodtoken",
-    srcs = glob([
-        "src/main/**/*.java",
-    ]),
+    srcs = [":srcs"],
     javacopts = JAVACOPTS,
     deps = [
         "//java",
-        "@com_google_code_findbugs_jsr305//jar",
         "@com_google_http_client//jar",
         "@joda_time//jar",
         "@org_json//jar",
@@ -29,6 +35,22 @@ java_binary(
     deps = [
         ":paymentmethodtoken",
         "//java",
+    ],
+)
+
+# Maven Jars
+
+load("//tools:javadoc.bzl", "javadoc_library")
+
+javadoc_library(
+    name = "libpaymentmethodtoken-javadoc",
+    srcs = [":srcs"],
+    doctitle = "Tink Cryptography API for Google Payment Method Token",
+    root_packages = [
+        "com.google.crypto.tink.apps.paymentmethodtoken",
+    ],
+    deps = [
+        ":paymentmethodtoken"
     ],
 )
 

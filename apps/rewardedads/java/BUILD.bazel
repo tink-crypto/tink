@@ -4,11 +4,18 @@ licenses(["notice"])  # Apache 2.0
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "src/main/**/*.java",
+        ],
+    ),
+)
+
 java_library(
     name = "java",
-    srcs = glob([
-        "src/main/**/*.java",
-    ]),
+    srcs = [":srcs"],
     javacopts = JAVACOPTS,
     deps = [
         "//java",
@@ -16,6 +23,24 @@ java_library(
         "@org_json//jar",
     ],
 )
+
+# Maven Jars
+
+load("//tools:javadoc.bzl", "javadoc_library")
+
+javadoc_library(
+    name = "librewardedads-javadoc",
+    srcs = [":srcs"],
+    doctitle = "Tink Cryptography API for Google Mobile Rewarded Video Ads SSV",
+    root_packages = [
+        "com.google.crypto.tink.apps.rewardedads",
+    ],
+    deps = [
+        ":java"
+    ],
+)
+
+# Tests
 
 load("//tools:gen_java_test_rules.bzl", "gen_java_test_rules")
 

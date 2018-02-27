@@ -4,6 +4,15 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "*.java",
+        ],
+    ),
+)
+
 # common subtle
 
 java_library(

@@ -23,7 +23,8 @@ set -x
 
 echo -e "Publishing Maven snapshot...\n"
 
-mvn clean source:jar javadoc:jar deploy -Dgpg.skip=true \
+bash $(dirname $0)/execute-deploy.sh \
+"deploy:deploy-file" \
 -DrepositoryId=ossrh \
 -Durl=https://oss.sonatype.org/content/repositories/snapshots \
 --settings=$(dirname $0)/settings.xml

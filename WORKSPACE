@@ -520,3 +520,11 @@ go_register_toolchains()
 
 load("@io_bazel_rules_go//proto:def.bzl", "proto_register_toolchains")
 proto_register_toolchains()
+
+#-----------------------------------------------------------------------------
+# jarjar
+#-----------------------------------------------------------------------------
+
+load("//tools:jarjar.bzl", "jarjar_deps")
+
+jarjar_deps()

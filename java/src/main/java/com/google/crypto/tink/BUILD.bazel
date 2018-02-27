@@ -4,13 +4,13 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
-FULL_PROTOS = [
+full_protos = [
     "//proto:common_java_proto",
     "//proto:config_java_proto",
     "//proto:tink_java_proto",
 ]
 
-LITE_PROTOS = [
+lite_protos = [
     "//proto:common_java_proto_lite",
     "//proto:config_java_proto_lite",
     "//proto:tink_java_proto_lite",
@@ -54,7 +54,7 @@ filegroup(
 # core, without restricted APIs
 
 filegroup(
-    name = "tink_srcs",
+    name = "srcs",
     srcs = glob(
         [
             "*.java",
@@ -65,16 +65,16 @@ filegroup(
 
 java_library(
     name = "tink",
-    srcs = [":tink_srcs"],
+    srcs = [":srcs"],
     javacopts = JAVACOPTS,
-    deps = [
+    deps = full_protos + [
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "@com_google_code_findbugs_jsr305",
         "@com_google_errorprone_error_prone_annotations",
         "@com_google_protobuf//:protobuf_java",
         "@org_json",
-    ] + FULL_PROTOS,
+    ],
 )
 
 filegroup(
@@ -95,14 +95,14 @@ java_library(
     name = "android",
     srcs = [":android_srcs"],
     javacopts = JAVACOPTS,
-    deps = [
+    deps = lite_protos + [
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "@com_google_code_findbugs_jsr305",
         "@com_google_errorprone_error_prone_annotations",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
         "@org_json",
-    ] + LITE_PROTOS,
+    ],
 )
 
 java_library(
@@ -111,10 +111,10 @@ java_library(
         ":cleartext_keyset_handle_srcs",
     ],
     javacopts = JAVACOPTS,
-    deps = [
+    deps = full_protos + [
         ":tink",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
-    ] + FULL_PROTOS,
+    ],
 )
 
 java_library(
@@ -123,8 +123,8 @@ java_library(
         ":cleartext_keyset_handle_srcs",
     ],
     javacopts = JAVACOPTS,
-    deps = [
+    deps = lite_protos + [
         ":android",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
-    ] + LITE_PROTOS,
+    ],
 )

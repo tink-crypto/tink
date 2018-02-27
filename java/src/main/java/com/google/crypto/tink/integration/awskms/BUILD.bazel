@@ -4,13 +4,22 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "*.java",
+        ],
+    ),
+)
+
 # public interfaces
 
 java_library(
     name = "awskms",
-    srcs = glob([
-        "*.java",
-    ]),
+    srcs = [
+        ":srcs",
+    ],
     javacopts = JAVACOPTS,
     plugins = [
         ":auto_service_plugin",

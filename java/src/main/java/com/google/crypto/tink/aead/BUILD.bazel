@@ -5,7 +5,7 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
 filegroup(
-    name = "aead_srcs",
+    name = "srcs",
     srcs = glob(
         [
             "*.java",
@@ -13,7 +13,7 @@ filegroup(
     ),
 )
 
-FULL_PROTOS = [
+full_protos = [
     "//proto:aes_ctr_hmac_aead_java_proto",
     "//proto:aes_ctr_java_proto",
     "//proto:aes_eax_java_proto",
@@ -27,7 +27,7 @@ FULL_PROTOS = [
     "//proto:tink_java_proto",
 ]
 
-LITE_PROTOS = [
+lite_protos = [
     "//proto:aes_ctr_hmac_aead_java_proto_lite",
     "//proto:aes_ctr_java_proto_lite",
     "//proto:aes_eax_java_proto_lite",
@@ -43,9 +43,9 @@ LITE_PROTOS = [
 
 java_library(
     name = "aead",
-    srcs = [":aead_srcs"],
+    srcs = [":srcs"],
     javacopts = JAVACOPTS,
-    deps = [
+    deps = full_protos + [
         "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/mac",
@@ -53,14 +53,14 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle:aead",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
         "@org_json",
-    ] + FULL_PROTOS,
+    ],
 )
 
 java_library(
     name = "android",
-    srcs = [":aead_srcs"],
+    srcs = [":srcs"],
     javacopts = JAVACOPTS,
-    deps = [
+    deps = lite_protos + [
         "//java/src/main/java/com/google/crypto/tink:android",
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/mac:android",
@@ -68,5 +68,5 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/subtle:aead",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
         "@org_json",
-    ] + LITE_PROTOS,
+    ],
 )

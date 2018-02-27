@@ -4,11 +4,18 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "*.java",
+        ],
+    ),
+)
+
 java_library(
     name = "config",
-    srcs = [
-        "TinkConfig.java",
-    ],
+    srcs = [":srcs"],
     javacopts = JAVACOPTS,
     deps = [
         "//java/src/main/java/com/google/crypto/tink/daead",
@@ -21,9 +28,7 @@ java_library(
 
 java_library(
     name = "android",
-    srcs = [
-        "TinkConfig.java",
-    ],
+    srcs = [":srcs"],
     javacopts = JAVACOPTS,
     deps = [
         "//java/src/main/java/com/google/crypto/tink/daead:android",

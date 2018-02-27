@@ -19,17 +19,21 @@ android {
     }
 }
 
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
-        // This is already included in Tink.
+        // This is already included in protobuf-lite that Tink depends on.
         exclude group: 'com.google.code.findbugs'
     })
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:design:26.+'
     testCompile 'junit:junit:4.12'
 
-    // Tink 1.0.0 for Android.
-    compile 'com.google.crypto.tink:tink-android:1.0.0'
+    // Tink 1.1.0-SNAPSHOT for Android.
+    compile 'com.google.crypto.tink:tink-android:1.1.0-SNAPSHOT'
 }

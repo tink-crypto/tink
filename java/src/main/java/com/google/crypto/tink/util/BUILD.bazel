@@ -4,12 +4,19 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS")
 
-# keys downloader
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        [
+            "*.java",
+        ],
+    ),
+)
 
 java_library(
-    name = "keysdownloader",
+    name = "util",
     srcs = [
-        "KeysDownloader.java",
+        ":srcs",
     ],
     javacopts = JAVACOPTS,
     deps = [

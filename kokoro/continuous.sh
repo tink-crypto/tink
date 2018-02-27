@@ -35,6 +35,5 @@ time ${BAZEL_BIN} test \
 
 # On Linux, run all Maven tests and upload snapshot jars
 if [[ $PLATFORM == 'linux' ]]; then
-  cd maven
-  source ./publish-snapshot.sh
+  ./maven/publish-snapshot.sh
 fi
