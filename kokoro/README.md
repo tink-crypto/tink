@@ -15,4 +15,5 @@ conditions is met:
  - The pull request is created by a Googler.
  - The pull request is attached with a kokoro:run label.
 
-Continuous builds are triggered for every new commit.
+Continuous builds are triggered for every new commit, and upload to Maven snapshot
+versions of Tink and apps.

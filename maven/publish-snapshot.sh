@@ -21,20 +21,11 @@ set -e
 # Display commands to stderr.
 set -x
 
-cd github/tink/
+echo -e "Publishing Maven snapshot...\n"
 
-source ./kokoro/run_tests.sh
+mvn clean source:jar javadoc:jar deploy -Dgpg.skip=true \
+-DrepositoryId=ossrh \
+-Durl=https://oss.sonatype.org/content/repositories/snapshots \
+--settings=$(dirname $0)/settings.xml
 
-# Run all manual tests.
-time ${BAZEL_BIN} test \
---strategy=TestRunner=standalone \
---test_timeout 10000 \
---test_output=all \
-//java:src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest \
-//java:src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest
-
-# On Linux, run all Maven tests and upload snapshot jars
-if [[ $PLATFORM == 'linux' ]]; then
-  cd maven
-  source ./publish-snapshot.sh
-fi
+echo -e "Published Maven snapshot"
