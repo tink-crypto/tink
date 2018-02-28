@@ -21,7 +21,8 @@ set -e
 # Display commands to stderr.
 set -x
 
-cd github/tink/
+# Change to repo root
+cd git*/tink
 
 source ./kokoro/run_tests.sh
 
