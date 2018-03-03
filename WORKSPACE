@@ -7,16 +7,6 @@ http_archive(
     url = "https://github.com/google/wycheproof/archive/f755ff0279ddd5fa26640d959d5872764b45feb7.zip",
 )
 
-# go packages
-#-----------------------------------------------------------------------------
-# go
-#-----------------------------------------------------------------------------
-http_archive(
-    name = "io_bazel_rules_go",
-    strip_prefix = "rules_go-master",
-    url = "https://github.com/bazelbuild/rules_go/archive/master.zip",
-)
-
 #-----------------------------------------------------------------------------
 # cc
 #-----------------------------------------------------------------------------
@@ -514,12 +504,18 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_apple/archive/a2b620070d373e4f265194b69f65e9e5c17fbcb8.zip",
 )
 
+#-----------------------------------------------------------------------------
+# go
+#-----------------------------------------------------------------------------
+http_archive(
+    name = "io_bazel_rules_go",
+    url = "https://github.com/bazelbuild/rules_go/releases/download/0.10.1/rules_go-0.10.1.tar.gz",
+    sha256 = "4b14d8dd31c6dbaf3ff871adcd03f28c3274e42abc855cb8fb4d01233c0154dc",
+)
+
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
 go_rules_dependencies()
 go_register_toolchains()
-
-load("@io_bazel_rules_go//proto:def.bzl", "proto_register_toolchains")
-proto_register_toolchains()
 
 #-----------------------------------------------------------------------------
 # jarjar
