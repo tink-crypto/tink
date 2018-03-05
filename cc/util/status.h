@@ -123,7 +123,7 @@ enum Code {
 }  // namespace error
 
 
-// A Status is a combination of an error code and a string message (for non-OK
+// A Status is a combination of an error code and a std::string message (for non-OK
 // error codes).
 class Status {
  public:

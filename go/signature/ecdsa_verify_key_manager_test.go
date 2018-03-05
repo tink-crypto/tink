@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -69,7 +67,7 @@ func TestEcdsaVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid version
 	key := testutil.NewEcdsaPublicKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
-	key.Version = signature.ECDSA_VERIFY_KEY_VERSION + 1
+	key.Version = signature.EcdsaVerifyKeyVersion + 1
 	if _, err := km.GetPrimitiveFromKey(key); err == nil {
 		t.Errorf("expect an error when version is invalid")
 	}

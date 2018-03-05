@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,12 +16,13 @@ package signature_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/signature"
 	commonpb "github.com/google/tink/proto/common_proto"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"testing"
 )
 
 func TestEcdsaKeyTemplates(t *testing.T) {
@@ -62,8 +61,8 @@ func checkEcdsaKeyTemplate(template *tinkpb.KeyTemplate,
 	hashType commonpb.HashType,
 	curve commonpb.EllipticCurveType,
 	encoding ecdsapb.EcdsaSignatureEncoding) error {
-	if template.TypeUrl != signature.ECDSA_SIGN_TYPE_URL {
-		return fmt.Errorf("incorrect typeurl: expect %s, got %s", signature.ECDSA_SIGN_TYPE_URL, template.TypeUrl)
+	if template.TypeUrl != signature.EcdsaSignTypeURL {
+		return fmt.Errorf("incorrect typeurl: expect %s, got %s", signature.EcdsaSignTypeURL, template.TypeUrl)
 	}
 	format := new(ecdsapb.EcdsaKeyFormat)
 	if err := proto.Unmarshal(template.Value, format); err != nil {

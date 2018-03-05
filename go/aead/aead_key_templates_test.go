@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,11 +16,12 @@ package aead_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"testing"
 )
 
 func TestAesGcmKeyTemplates(t *testing.T) {
@@ -39,7 +38,7 @@ func TestAesGcmKeyTemplates(t *testing.T) {
 }
 
 func checkAesGcmKeyTemplate(template *tinkpb.KeyTemplate, keySize uint32) error {
-	if template.TypeUrl != aead.AES_GCM_TYPE_URL {
+	if template.TypeUrl != aead.AesGcmTypeURL {
 		return fmt.Errorf("incorrect type url")
 	}
 	keyFormat := new(gcmpb.AesGcmKeyFormat)

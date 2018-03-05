@@ -42,13 +42,10 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    JSONObject jsonObj = WycheproofTestUtil.readJson("../wycheproof/testvectors/ecdsa_test.json");
-    WycheproofTestUtil.checkAlgAndVersion(jsonObj, "ECDSA", "0.0a10");
-    String algorithm = "ECDSA";
-    int numTests = jsonObj.getInt("numberOfTests");
-    int cntTests = 0;
+    JSONObject jsonObj = WycheproofTestUtil.readJson("testdata/wycheproof/ecdsa_test.json");
+
     int errors = 0;
-    int skippedTests = 0;
+    int cntSkippedTests = 0;
     JSONArray testGroups = jsonObj.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
@@ -57,18 +54,18 @@ public class EcdsaVerifyJceTest {
       byte[] encodedPubKey = Hex.decode(group.getString("keyDer"));
       X509EncodedKeySpec x509keySpec = new X509EncodedKeySpec(encodedPubKey);
       String sha = group.getString("sha");
-      String signatureAlgorithm = WycheproofTestUtil.getSignatureAlgorithmName(sha, algorithm);
+      String signatureAlgorithm = WycheproofTestUtil.getSignatureAlgorithmName(sha, "ECDSA");
 
       JSONArray tests = group.getJSONArray("tests");
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
-        int tcId = testcase.getInt("tcId");
-        // Temporarily skip the following testcases (b/68042214):
-        // - Testcase 106 which fails on Kokoro. The next version of Wycheproof test
-        //   vectors will change the testcase's result to "acceptable".
-        // - Testcase 31 which throws OutOfMemory error in MacOS.
-        if (signatureAlgorithm.isEmpty() || tcId == 106 || tcId == 31) {
-          skippedTests++;
+        String tcId =
+            String.format(
+                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
+
+        if (signatureAlgorithm.isEmpty()) {
+          System.out.printf("Skipping %s because signature algorithm is empty", tcId);
+          cntSkippedTests++;
           continue;
         }
         EcdsaVerifyJce verifier;
@@ -77,33 +74,29 @@ public class EcdsaVerifyJceTest {
           verifier = new EcdsaVerifyJce(pubKey, signatureAlgorithm);
         } catch (GeneralSecurityException ignored) {
           // Invalid or unsupported public key.
-          skippedTests++;
+          System.out.printf("Skipping %s, exception: %s", tcId, ignored);
+          cntSkippedTests++;
           continue;
         }
-        String tc = "tcId: " + tcId + " " + testcase.getString("comment");
         byte[] msg = getMessage(testcase);
         byte[] sig = Hex.decode(testcase.getString("sig"));
         String result = testcase.getString("result");
-        boolean verified = false;
         try {
           verifier.verify(sig, msg);
-          verified = true;
+          if (result.equals("invalid")) {
+            System.out.printf("FAIL %s: accepting invalid signature%n", tcId);
+            errors++;
+          }
         } catch (GeneralSecurityException ex) {
-          verified = false;
-          tc += " exception: " + ex;
+          if (result.equals("valid")) {
+            System.out.printf("FAIL %s: rejecting valid signature, exception: %s%n", tcId, ex);
+            errors++;
+          }
         }
-        if (!verified && result.equals("valid")) {
-          System.out.println("Valid signature not verified, testcase : " + tc);
-          errors++;
-        } else if (verified && result.equals("invalid")) {
-          System.out.println("Invalid signature verified, testcase: " + tc);
-          errors++;
-        }
-        cntTests++;
       }
     }
+    System.out.printf("Number of tests skipped: %d", cntSkippedTests);
     assertEquals(0, errors);
-    assertEquals(numTests, cntTests + skippedTests);
   }
 
   private byte[] getMessage(JSONObject testcase) throws Exception {
@@ -133,11 +126,7 @@ public class EcdsaVerifyJceTest {
 
     // Verify with EcdsaVerifyJce.
     EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, "SHA256WithECDSA");
-    try {
-      verifier.verify(signature, message.getBytes("UTF-8"));
-    } catch (GeneralSecurityException ex) {
-      fail("Valid signature, should not throw exception");
-    }
+    verifier.verify(signature, message.getBytes("UTF-8"));
   }
 
   @Test

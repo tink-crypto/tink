@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,31 +11,24 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
+// Package tink defines interfaces for the crypto primitives that Tink supports.
 package tink
 
-/**
- * The interface for authenticated encryption with additional authenticated data.
- * Implementations of this interface are secure against adaptive chosen ciphertext attacks.
- * Encryption with additional data ensures authenticity and integrity of that data,
- * but not its secrecy. (see RFC 5116, https://tools.ietf.org/html/rfc5116)
- */
+/*
+Aead is the interface for authenticated encryption with additional authenticated data.
+Implementations of this interface are secure against adaptive chosen ciphertext attacks.
+Encryption with additional data ensures authenticity and integrity of that data, but not
+its secrecy. (see RFC 5116, https://tools.ietf.org/html/rfc5116)
+*/
 type Aead interface {
-	/**
-	 * Encrypts {@code plaintext} with {@code additionalData} as additional
-	 * authenticated data. The resulting ciphertext allows for checking
-	 * authenticity and integrity of additional data ({@code additionalData}),
-	 * but does not guarantee its secrecy.
-	 *
-	 * @return resulting ciphertext.
-	 */
+	// Encrypt encrypts {@code plaintext} with {@code additionalData} as additional
+	// authenticated data. The resulting ciphertext allows for checking
+	// authenticity and integrity of additional data ({@code additionalData}),
+	// but does not guarantee its secrecy.
 	Encrypt(plaintext []byte, additionalData []byte) ([]byte, error)
 
-	/**
-	 * Decrypts {@code ciphertext} with {@code additionalData} as additional
-	 * authenticated data. The decryption verifies the authenticity and integrity
-	 * of the additional data, but there are no guarantees wrt. secrecy of that data.
-	 *
-	 * @return resulting plaintext.
-	 */
+	// Decrypt decrypts {@code ciphertext} with {@code additionalData} as additional
+	// authenticated data. The decryption verifies the authenticity and integrity
+	// of the additional data, but there are no guarantees wrt. secrecy of that data.
 	Decrypt(ciphertext []byte, additionalData []byte) ([]byte, error)
 }

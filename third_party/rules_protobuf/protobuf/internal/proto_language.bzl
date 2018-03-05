@@ -1,3 +1,7 @@
+"""Compiles protobuf.
+
+"""
+
 def _proto_language_impl(ctx):
     prefix = None
     if hasattr(ctx.attr.prefix, "go_prefix"):

@@ -51,28 +51,6 @@ public class WycheproofTestUtil {
     return md + "WITH" + signatureAlgorithm;
   }
 
-  /** Checks that test vector has the expected algorithm and version. */
-  public static void checkAlgAndVersion(
-      JSONObject testvector, String expectedAlgorithm, String expectedVersion) throws Exception {
-    String algorithm = testvector.getString("algorithm");
-    if (!expectedAlgorithm.equals(algorithm)) {
-      // No need to worry about mismatched algorithm names if nothing else goes wrong.
-      System.out.println("Expecting algorithm " + expectedAlgorithm + ", got " + algorithm + ".");
-    }
-    String generatorVersion = testvector.getString("generatorVersion");
-    if (!generatorVersion.equals(expectedVersion)) {
-      // No need to worry about mismatched versions if nothing else goes wrong.
-      System.out.println(
-          "Expecting test vectors with version "
-              + expectedVersion
-              + ", got vectors with version "
-              + generatorVersion
-              + " for "
-              + expectedAlgorithm
-              + ".");
-    }
-  }
-
   /** Gets JSONObject from file. */
   public static JSONObject readJson(String path) throws Exception {
     String filePath = path;
@@ -81,7 +59,16 @@ public class WycheproofTestUtil {
       filePath = "/sdcard/googletest/test_runfiles/google3/" + path;
     }
 
-    return new JSONObject(new String(Util.readAll(new FileInputStream(new File(filePath))), UTF_8));
+    JSONObject result =
+        new JSONObject(new String(Util.readAll(new FileInputStream(new File(filePath))), UTF_8));
+    String algorithm = result.getString("algorithm");
+    String generatorVersion = result.getString("generatorVersion");
+    int numTests = result.getInt("numberOfTests");
+    System.out.println(
+        String.format(
+            "Total %d test cases for algorithm %s with generator version %s",
+            numTests, algorithm, generatorVersion));
+    return result;
   }
   /**
    * Gets curve type from curve name.

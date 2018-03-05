@@ -456,43 +456,8 @@ public class EllipticCurvesTest {
   }
 
   @Test
-  public void testCheckPublicKeyWithPointNotOnCurve() throws Exception {
-    JSONObject json = WycheproofTestUtil.readJson("testdata/wycheproof/ecdh_test.json");
-    WycheproofTestUtil.checkAlgAndVersion(json, "ECDH", "0.1.3");
-    JSONArray testGroups = json.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
-      JSONArray tests = group.getJSONArray("tests");
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
-        int tcid = testcase.getInt("tcId");
-        // Test vectors 139, 140, 141 contain public points that aren't on the curve.
-        if (tcid < 139 || tcid > 141) {
-          continue;
-        }
-        String hexPubKey = testcase.getString("public");
-        KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
-        try {
-          X509EncodedKeySpec x509keySpec = new X509EncodedKeySpec(Hex.decode(hexPubKey));
-          ECPublicKey pubKey = (ECPublicKey) kf.generatePublic(x509keySpec);
-          EllipticCurves.checkPublicKey(pubKey);
-          fail("Public point not on curve shouldn't be accepted, test case: " + tcid);
-        } catch (GeneralSecurityException ex) {
-          // Expected, since the public point is not on the curve.
-          System.out.println("testCheckPublicKeyWithPointNotOnCurve, throws " + ex.toString());
-        }
-      }
-    }
-  }
-
-  @Test
   public void testComputeSharedSecretWithWycheproofTestVectors() throws Exception {
     JSONObject json = WycheproofTestUtil.readJson("testdata/wycheproof/ecdh_test.json");
-    WycheproofTestUtil.checkAlgAndVersion(json, "ECDH", "0.1.3");
-    int numTests = json.getInt("numberOfTests");
-    int passedTests = 0;
-    int rejectedTests = 0; // invalid test vectors leading to exceptions
-    int skippedTests = 0; // valid test vectors leading to exceptions
     int errors = 0;
     JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
@@ -500,14 +465,9 @@ public class EllipticCurvesTest {
       JSONArray tests = group.getJSONArray("tests");
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
-        int tcid = testcase.getInt("tcId");
-        // Skips known issue CVE-2017-10176 which hasn't been fixed in some OpenJDK versions.
-        if (tcid == 137) {
-          skippedTests++;
-          continue;
-        }
-        String comment = testcase.getString("comment");
-        String tc = "tcId: " + tcid + " comment: " + comment;
+        String tcId =
+            String.format(
+                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
         String result = testcase.getString("result");
         String hexPubKey = testcase.getString("public");
         String expectedSharedSecret = testcase.getString("shared");
@@ -524,43 +484,32 @@ public class EllipticCurvesTest {
           ECPublicKey pubKey = (ECPublicKey) kf.generatePublic(x509keySpec);
           String sharedSecret = Hex.encode(EllipticCurves.computeSharedSecret(privKey, pubKey));
           if (result.equals("invalid")) {
-            System.out.println(
-                "Computed ECDH with invalid parameters" + tc + " shared:" + sharedSecret);
+            System.out.printf(
+                "FAIL %s: accepting invalid parameters, shared secret: %s%n", tcId, sharedSecret);
             errors++;
           } else if (!expectedSharedSecret.equals(sharedSecret)) {
-            System.out.println(
-                "Incorrect ECDH computation"
-                    + tc
-                    + "\nshared secret:"
-                    + sharedSecret
-                    + "\nexpected shared secret:"
-                    + expectedSharedSecret);
+            System.out.printf(
+                "FAIL %s: incorrect shared secret, computed: %s, expected: %s%n",
+                tcId, sharedSecret, expectedSharedSecret);
             errors++;
-          } else {
-            passedTests++;
           }
         } catch (NoSuchAlgorithmException ex) {
-          // When the curve is not implemented, this is the expected exception.
           if (result.equals("valid")) {
-            skippedTests++;
-          } else {
-            rejectedTests++;
+            // When the curve is not implemented, this is the expected exception.
+            continue;
           }
         } catch (GeneralSecurityException ex) {
           if (result.equals("valid")) {
-            System.out.println("Test vector with tcID:" + tc + " throws:" + ex.toString());
+            System.out.printf("FAIL %s, exception %s%n", tcId, ex);
             errors++;
-          } else {
-            rejectedTests++;
           }
         } catch (Exception ex) {
           // Other exceptions typically indicate that something is wrong with the implementation.
-          System.out.println("Test vector with tcID:" + tc + " throws:" + ex.toString());
+          System.out.printf("FAIL %s, exception %s%n", tcId, ex);
           errors++;
         }
       }
     }
     assertEquals(0, errors);
-    assertEquals(numTests, passedTests + rejectedTests + skippedTests);
   }
 }

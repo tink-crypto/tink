@@ -1546,6 +1546,35 @@ public final class Ed25519 {
     return Bytes.concat(rB, s);
   }
 
+
+  // The order of the generator as unsigned bytes in little endian order.
+  // (2^252 + 0x14def9dea2f79cd65812631a5cf5d3ed, cf. RFC 7748)
+  static final byte[] GROUP_ORDER = new byte[] {
+     (byte) 0xed, (byte) 0xd3, (byte) 0xf5, (byte) 0x5c,
+     (byte) 0x1a, (byte) 0x63, (byte) 0x12, (byte) 0x58,
+     (byte) 0xd6, (byte) 0x9c, (byte) 0xf7, (byte) 0xa2,
+     (byte) 0xde, (byte) 0xf9, (byte) 0xde, (byte) 0x14,
+     (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+     (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+     (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+     (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x10};
+
+  // Checks whether s represents an integer smaller than the order of the group.
+  // This is needed to ensure that EdDSA signatures are non-malleable, as failing to check
+  // the range of S allows to modify signatures (cf. RFC 8032, Section 5.2.7 and Section 8.4.)
+  // @param s an integer in little-endian order.
+  private static boolean isSmallerThanGroupOrder(byte[] s) {
+    for (int j = FIELD_LEN - 1; j >= 0; j--) {
+      // compare unsigned bytes
+      int a = s[j] & 0xff;
+      int b = GROUP_ORDER[j] & 0xff;
+      if (a != b) {
+        return a < b;
+      }
+    }
+    return false;
+  }
+
   /**
    * Returns true if the EdDSA {@code signature} with {@code message}, can be verified with
    * {@code publicKey}.
@@ -1558,6 +1587,10 @@ public final class Ed25519 {
     if (signature.length != SIGNATURE_LEN) {
       return false;
     }
+    byte[] s = Arrays.copyOfRange(signature, FIELD_LEN, SIGNATURE_LEN);
+    if (!isSmallerThanGroupOrder(s)) {
+      return false;
+    }
     MessageDigest digest = EngineFactory.MESSAGE_DIGEST.getInstance("SHA-512");
     digest.update(signature, 0, FIELD_LEN);
     digest.update(publicKey);
@@ -1566,8 +1599,7 @@ public final class Ed25519 {
     reduce(h);
 
     XYZT negPublicKey = XYZT.fromBytesNegateVarTime(publicKey);
-    XYZ xyz = doubleScalarMultVarTime(h, negPublicKey,
-        Arrays.copyOfRange(signature, FIELD_LEN, SIGNATURE_LEN));
+    XYZ xyz = doubleScalarMultVarTime(h, negPublicKey, s);
     byte[] expectedR = xyz.toBytes();
     for (int i = 0; i < FIELD_LEN; i++) {
       if (expectedR[i] != signature[i]) {

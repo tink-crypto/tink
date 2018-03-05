@@ -63,7 +63,7 @@ def gen_java_test_rules(test_files,
     if (test in flaky_tests) or ("flaky" in tags):
       flaky = 1
     java_class = _package_from_path(
-        PACKAGE_NAME + "/" + _strip_right(test, ".java"))
+        native.package_name() + "/" + _strip_right(test, ".java"))
     native.java_test(name = prefix + test,
                      runtime_deps = deps,
                      data = data,

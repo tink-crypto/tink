@@ -58,20 +58,21 @@ public class AesSivTest {
   @Test
   public void testWycheproofVectors() throws Exception {
     JSONObject json = WycheproofTestUtil.readJson("testdata/wycheproof/aes_siv_cmac_test.json");
-    WycheproofTestUtil.checkAlgAndVersion(json, "AES-SIV-CMAC", "0.1.6");
     JSONArray testGroups = json.getJSONArray("testGroups");
+    int cntSkippedTests = 0;
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
       int keySize = group.getInt("keySize");
       JSONArray tests = group.getJSONArray("tests");
       if (!Arrays.asList(keySizeInBytes).contains(keySize / 8)) {
-        System.out.println("Skipping tests with key size: " + keySize);
+        cntSkippedTests += tests.length();
         continue;
       }
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
-        int tcid = testcase.getInt("tcId");
-        String comment = "tcId: " + tcid + " " + testcase.getString("comment");
+        String tcId =
+            String.format(
+                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
         byte[] key = Hex.decode(testcase.getString("key"));
         byte[] msg = Hex.decode(testcase.getString("msg"));
         byte[] aad = Hex.decode(testcase.getString("aad"));
@@ -80,23 +81,25 @@ public class AesSivTest {
         // "valid" are test vectors with matching plaintext and ciphertext.
         // "invalid" are test vectors with invalid parameters or invalid ciphertext.
         String result = testcase.getString("result");
-
         DeterministicAead daead = new AesSiv(key);
         if (result.equals("valid")) {
           byte[] ciphertext = daead.encryptDeterministically(msg, aad);
-          assertEquals(comment, Hex.encode(ct), Hex.encode(ciphertext));
+          assertEquals(tcId, Hex.encode(ct), Hex.encode(ciphertext));
           byte[] plaintext = daead.decryptDeterministically(ct, aad);
-          assertEquals(comment, Hex.encode(msg), Hex.encode(plaintext));
+          assertEquals(tcId, Hex.encode(msg), Hex.encode(plaintext));
         } else {
           try {
             byte[] plaintext = daead.decryptDeterministically(ct, aad);
-            fail("Decrypted invalid ciphertext:" + comment + " as:" + Hex.encode(plaintext));
+            fail(
+                String.format(
+                    "FAIL %s: decrypted invalid ciphertext as %s", tcId, Hex.encode(plaintext)));
           } catch (GeneralSecurityException ex) {
             // This is expected
           }
         }
       }
     }
+    System.out.printf("Number of tests skipped: %d", cntSkippedTests);
   }
 
   @Test

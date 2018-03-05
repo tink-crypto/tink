@@ -42,7 +42,7 @@ class CryptoFormat {
 
   // Raw prefix is empty.
   static const int kRawPrefixSize = 0;
-  static const std::string kRawPrefix;  // empty string
+  static const std::string kRawPrefix;  // empty std::string
 
   // Generates the prefix for the outputs handled by the specified 'key'.
   // Returns an error if the prefix type of 'key' is invalid.

@@ -12,11 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Combine a bunch of jars into one single jar.
+
+"""
+
 def jarjar_deps():
   """
-  Deps that are necessary to build jarjar_binary() but aren't used in the regular build process for
-  Dagger, so they are organized separately from the workspace file.
+  Deps that are necessary to build jarjar_binary().
+
+  These deps aren't used in the regular build process for Tink, so they are
+  organized separately from the workspace file.
   """
+
   native.maven_jar(
       name = "org_codehaus_plexus_plexus_utils",
       artifact = "org.codehaus.plexus:plexus-utils:3.0.20",
@@ -121,10 +128,15 @@ def jarjar_deps():
 
 def jarjar_library(name, deps, rules_file):
   """
-  Combines `deps` into one jar file named <name>.jar and jarjar with the rules specified in
-  `rules_file`.
+  Combines `deps` into `name`.jar with the rules specified in `rules_file`.
 
-  See: https://github.com/pantsbuild/jarjar
+  See: https://github.com/pantsbuild/jarjar.
+
+  Args:
+    name: the output jar
+    deps: the input jars
+    rules_file: the jarjar rules
+
   """
   native.genrule(
       name = name,

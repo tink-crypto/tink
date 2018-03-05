@@ -37,8 +37,8 @@ namespace tink {
 //   KeysetHandle keyset_handle = ...;
 //   std::unique_ptr<Mac> mac =
 //       std::move(MacFactory.GetPrimitive(keyset_handle).ValueOrDie());
-//   string data = ...;
-//   string mac_value = mac.ComputeMac(data).ValueOrDie();
+//   std::string data = ...;
+//   std::string mac_value = mac.ComputeMac(data).ValueOrDie();
 //
 class MacFactory {
  public:

@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,12 +16,13 @@ package mac_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/mac"
 	commonpb "github.com/google/tink/proto/common_proto"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"testing"
 )
 
 func TestTemplates(t *testing.T) {
@@ -41,7 +40,7 @@ func checkTemplate(template *tinkpb.KeyTemplate,
 	keySize uint32,
 	tagSize uint32,
 	hashType commonpb.HashType) error {
-	if template.TypeUrl != mac.HMAC_TYPE_URL {
+	if template.TypeUrl != mac.HmacTypeURL {
 		return fmt.Errorf("TypeUrl is incorrect")
 	}
 	format := new(hmacpb.HmacKeyFormat)

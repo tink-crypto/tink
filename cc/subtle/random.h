@@ -26,7 +26,7 @@ namespace subtle {
 
 class Random {
  public:
-  // Returns a random string of desired length.
+  // Returns a random std::string of desired length.
   static std::string GetRandomBytes(size_t length);
 };
 

@@ -12,6 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Generates a Javadoc jar path/to/target/<name>.jar.
+
+Arguments:
+  srcs: source files to process
+  deps: targets that contain references to other types referenced in Javadoc. This can be the
+      java_library/android_library target(s) for the same sources
+  root_packages: Java packages to include in generated Javadoc. Any subpackages not listed in
+      exclude_packages will be included as well
+  exclude_packages: Java packages to exclude from generated Javadoc
+  android_api_level: If Android APIs are used, the API level to compile against to generate
+      Javadoc
+  doctitle: title for Javadoc's index.html. See javadoc -doctitle
+"""
+
 _EXTERNAL_JAVADOC_LINKS = [
     "https://docs.oracle.com/javase/7/docs/api/",
     "https://developer.android.com/reference/",
@@ -36,9 +51,10 @@ def _javadoc_library(ctx):
   classpath = depset()
   for dep in ctx.attr.deps:
     for transitive_dep in dep.java.transitive_deps:
-      classpath += [transitive_dep]
+      tmp = depset([transitive_dep])
+      classpath = depset(transitive=[classpath, tmp])
   if ctx.attr._android_jar:
-    classpath += ctx.attr._android_jar.files
+    classpath = depset(transitive=[classpath, ctx.attr._android_jar.files])
 
   inputs += classpath.to_list()
 
@@ -69,7 +85,7 @@ def _javadoc_library(ctx):
 
   jar_command = "%s cf %s -C tmp ." % (ctx.file._jar_binary.path, ctx.outputs.jar.path)
 
-  ctx.action(
+  ctx.actions.run_shell(
       inputs = inputs + ctx.files._jdk,
       command = "%s && %s" % (" ".join(javadoc_command), jar_command),
       outputs = [ctx.outputs.jar])
@@ -102,17 +118,3 @@ javadoc_library = rule(
     outputs = {"jar": "%{name}.jar"},
     implementation = _javadoc_library,
 )
-"""
-Generates a Javadoc jar path/to/target/<name>.jar.
-
-Arguments:
-  srcs: source files to process
-  deps: targets that contain references to other types referenced in Javadoc. This can be the
-      java_library/android_library target(s) for the same sources
-  root_packages: Java packages to include in generated Javadoc. Any subpackages not listed in
-      exclude_packages will be included as well
-  exclude_packages: Java packages to exclude from generated Javadoc
-  android_api_level: If Android APIs are used, the API level to compile against to generate
-      Javadoc
-  doctitle: title for Javadoc's index.html. See javadoc -doctitle
-"""

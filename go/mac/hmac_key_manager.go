@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,6 +16,7 @@ package mac
 
 import (
 	"fmt"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
@@ -27,12 +26,11 @@ import (
 )
 
 const (
-	// Type url that this manager supports.
-	HMAC_TYPE_URL = "type.googleapis.com/google.crypto.tink.HmacKey"
+	// HmacTypeURL is the only type URL that this manager supports.
+	HmacTypeURL = "type.googleapis.com/google.crypto.tink.HmacKey"
 
-	// Current version of this key manager.
-	// Keys with version equal or smaller are supported.
-	HMAC_KEY_VERSION = uint32(0)
+	// HmacKeyVersion is the maxmimal version of keys that this key manager supports.
+	HmacKeyVersion = uint32(0)
 )
 
 var errInvalidHmacKey = fmt.Errorf("hmac_key_manager: invalid key")
@@ -103,7 +101,7 @@ func (km *HmacKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message, e
 		return nil, fmt.Errorf("hmac_key_manager: invalid key format: %s", err)
 	}
 	keyValue := random.GetRandomBytes(keyFormat.KeySize)
-	return NewHmacKey(keyFormat.Params, HMAC_KEY_VERSION, keyValue), nil
+	return NewHmacKey(keyFormat.Params, HmacKeyVersion, keyValue), nil
 }
 
 // NewKeyData generates a new KeyData according to specification in the given
@@ -117,23 +115,23 @@ func (km *HmacKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyDat
 	if err != nil {
 		return nil, errInvalidHmacKeyFormat
 	}
-	return tink.NewKeyData(HMAC_TYPE_URL, serializedKey, tinkpb.KeyData_SYMMETRIC), nil
+	return tink.NewKeyData(HmacTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC), nil
 }
 
 // DoesSupport checks whether this KeyManager supports the given key type.
-func (_ *HmacKeyManager) DoesSupport(typeUrl string) bool {
-	return typeUrl == HMAC_TYPE_URL
+func (km *HmacKeyManager) DoesSupport(typeURL string) bool {
+	return typeURL == HmacTypeURL
 }
 
 // GetKeyType returns the type URL of keys managed by this KeyManager.
-func (_ *HmacKeyManager) GetKeyType() string {
-	return HMAC_TYPE_URL
+func (km *HmacKeyManager) GetKeyType() string {
+	return HmacTypeURL
 }
 
 // validateKey validates the given HmacKey. It only validates the version of the
 // key because other parameters will be validated in primitive construction.
-func (_ *HmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
-	err := tink.ValidateVersion(key.Version, HMAC_KEY_VERSION)
+func (km *HmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
+	err := tink.ValidateVersion(key.Version, HmacKeyVersion)
 	if err != nil {
 		return fmt.Errorf("hmac_key_manager: %s", err)
 	}
@@ -143,7 +141,10 @@ func (_ *HmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
 }
 
 // validateKeyFormat validates the given HmacKeyFormat
-func (_ *HmacKeyManager) validateKeyFormat(format *hmacpb.HmacKeyFormat) error {
+func (km *HmacKeyManager) validateKeyFormat(format *hmacpb.HmacKeyFormat) error {
+	if format.Params == nil {
+		return fmt.Errorf("null HMAC params")
+	}
 	hash := tink.GetHashName(format.Params.Hash)
 	return mac.ValidateHmacParams(hash, format.KeySize, format.Params.TagSize)
 }

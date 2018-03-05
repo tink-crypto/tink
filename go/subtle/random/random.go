@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,6 +11,7 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
+// Package random provides functions that generate random numbers or bytes.
 package random
 
 import (
@@ -20,9 +19,7 @@ import (
 	"encoding/binary"
 )
 
-/**
- * Generates random bytes.
- */
+// GetRandomBytes randomly generates n bytes.
 func GetRandomBytes(n uint32) []byte {
 	buf := make([]byte, n)
 	_, err := rand.Read(buf)
@@ -32,6 +29,7 @@ func GetRandomBytes(n uint32) []byte {
 	return buf
 }
 
+// GetRandomUint32 randomly generates an unsigned 32-bit integer.
 func GetRandomUint32() uint32 {
 	b := GetRandomBytes(4)
 	return binary.BigEndian.Uint32(b)

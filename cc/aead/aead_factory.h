@@ -36,9 +36,9 @@ namespace tink {
 //   KeysetHandle keyset_handle = ...;
 //   std::unique_ptr<Aead> aead =
 //       std::move(AeadFactory.GetPrimitive(keyset_handle).ValueOrDie());
-//   string plaintext = ...;
-//   string aad = ...;
-//   string ciphertext = aead.Encrypt(plaintext, aad).ValueOrDie();
+//   std::string plaintext = ...;
+//   std::string aad = ...;
+//   std::string ciphertext = aead.Encrypt(plaintext, aad).ValueOrDie();
 //
 class AeadFactory {
  public:

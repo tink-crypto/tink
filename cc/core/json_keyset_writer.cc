@@ -31,14 +31,14 @@
 using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::Keyset;
 
-namespace util = crypto::tink::util;
+namespace tinkutil = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
 
 namespace {
 
-util::Status WriteProto(const google::protobuf::Message& proto,
+tinkutil::Status WriteProto(const google::protobuf::Message& proto,
                         std::ostream* destination) {
   google::protobuf::util::JsonPrintOptions json_options;
   json_options.add_whitespace = true;
@@ -47,37 +47,38 @@ util::Status WriteProto(const google::protobuf::Message& proto,
   auto status = google::protobuf::util::MessageToJsonString(
       proto, &serialized_proto, json_options);
   if (!status.ok()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
         "Conversion of the keyset to JSON failed: " + status.ToString());
   }
   (*destination) << serialized_proto;
   if (destination->fail()) {
-    return util::Status(util::error::UNKNOWN,
+    return tinkutil::Status(tinkutil::error::UNKNOWN,
                             "Error writing to the destination stream.");
   }
-  return util::Status::OK;
+  return tinkutil::Status::OK;
 }
 
 }  // anonymous namespace
 
 
 //  static
-util::StatusOr<std::unique_ptr<JsonKeysetWriter>> JsonKeysetWriter::New(
+tinkutil::StatusOr<std::unique_ptr<JsonKeysetWriter>> JsonKeysetWriter::New(
     std::unique_ptr<std::ostream> destination_stream) {
   if (destination_stream == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "destination_stream must be non-null.");
+    return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
+                            "destination_stream must be non-null.");
   }
   std::unique_ptr<JsonKeysetWriter> writer(
       new JsonKeysetWriter(std::move(destination_stream)));
   return std::move(writer);
 }
 
-util::Status JsonKeysetWriter::Write(const Keyset& keyset) {
+tinkutil::Status JsonKeysetWriter::Write(const Keyset& keyset) {
   return WriteProto(keyset, destination_stream_.get());
 }
 
-util::Status JsonKeysetWriter::Write(const EncryptedKeyset& encrypted_keyset) {
+tinkutil::Status JsonKeysetWriter::Write(
+    const EncryptedKeyset& encrypted_keyset) {
   return WriteProto(encrypted_keyset, destination_stream_.get());
 }
 

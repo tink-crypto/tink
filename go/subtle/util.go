@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,6 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// Package subtle provides utility functions.
 package subtle
 
 import (
@@ -26,8 +25,8 @@ import (
 	"math/big"
 )
 
-// ConvertTestVectorHashName converts different forms of a hash name to the
-// hash name that tink recognizes
+// ConvertHashName converts different forms of a hash name to the
+// hash name that tink recognizes.
 func ConvertHashName(name string) string {
 	switch name {
 	case "SHA-256":

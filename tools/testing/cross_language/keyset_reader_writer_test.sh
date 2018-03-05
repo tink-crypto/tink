@@ -30,14 +30,16 @@ keyset_reader_writer_basic_test() {
   local output_file="$TEST_TMPDIR/${test_instance}_output.${output_format}"
   $CC_KEYSET_RW_CLI $input_format $input_file $output_format $output_file
 
-  local orig_java_keyset="$TEST_TMPDIR/${test_instance}_orig_keyset_java.json"
-  local copy_cc_keyset="$TEST_TMPDIR/${test_instance}_copy_keyset_cc.json"
+  # Use binary representation for output comparison, as JSON representation
+  # seems not to be deterministic, and the order of fields varies.
+  local orig_java_keyset="$TEST_TMPDIR/${test_instance}_orig_keyset_java.bin"
+  local copy_cc_keyset="$TEST_TMPDIR/${test_instance}_copy_keyset_cc.bin"
   echo "### generating JSON representation of the original keyset"
   $JAVA_KEYSET_RW_CLI convert-keyset --in-format $input_format\
-    --in $input_file --out-format "JSON" > $orig_java_keyset
+    --in $input_file --out-format "BINARY" > $orig_java_keyset
   echo "### generating JSON representation of the copied keyset"
   $JAVA_KEYSET_RW_CLI convert-keyset --in-format $output_format\
-    --in $output_file --out-format "JSON" > $copy_cc_keyset
+    --in $output_file --out-format "BINARY" > $copy_cc_keyset
   assert_files_equal $orig_java_keyset $copy_cc_keyset
 }
 

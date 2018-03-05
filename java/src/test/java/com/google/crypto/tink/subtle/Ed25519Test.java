@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -27,6 +28,16 @@ import org.junit.runners.JUnit4;
 /** Unit tests for Ed25519. */
 @RunWith(JUnit4.class)
 public class Ed25519Test {
+  @Test
+  public void testGroupOrder() throws Exception {
+    assertEquals(32, Ed25519.GROUP_ORDER.length);
+    byte[] result = Ed25519.scalarMultWithBaseToBytes(Ed25519.GROUP_ORDER);
+    assertEquals(1, result[0]);
+    for (int i = 1; i < 32; i++) {
+      assertEquals(0, result[i]);
+    }
+  }
+
   /** Test whether sign/verify method accidentally changes the public key or hashedPrivateKey. */
   @Test
   public void testUnmodifiedKey() throws Exception {

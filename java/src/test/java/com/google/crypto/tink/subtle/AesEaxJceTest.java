@@ -68,11 +68,8 @@ public class AesEaxJceTest {
   @Test
   public void testWycheproofVectors() throws Exception {
     JSONObject json = WycheproofTestUtil.readJson("testdata/wycheproof/aes_eax_test.json");
-    WycheproofTestUtil.checkAlgAndVersion(json, "AES-EAX", "0.0a14");
-    int numTests = json.getInt("numberOfTests");
-    int cntTests = 0;
-    int cntSkippedTests = 0;
     int errors = 0;
+    int cntSkippedTests = 0;
     JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
@@ -85,10 +82,10 @@ public class AesEaxJceTest {
         continue;
       }
       for (int j = 0; j < tests.length(); j++) {
-        cntTests++;
         JSONObject testcase = tests.getJSONObject(j);
-        int tcid = testcase.getInt("tcId");
-        String tc = "tcId: " + tcid + " " + testcase.getString("comment");
+        String tcId =
+            String.format(
+                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
         byte[] iv = Hex.decode(testcase.getString("iv"));
         byte[] key = Hex.decode(testcase.getString("key"));
         byte[] msg = Hex.decode(testcase.getString("msg"));
@@ -102,24 +99,28 @@ public class AesEaxJceTest {
           byte[] decrypted = eax.decrypt(ciphertext, aad);
           boolean eq = TestUtil.arrayEquals(decrypted, msg);
           if (result.equals("invalid")) {
-            System.out.println("Decrypted invalid ciphertext " + tc + " eq:" + eq);
+            System.out.printf(
+                "FAIL %s: accepting invalid ciphertext, cleartext: %s, decrypted: %s%n",
+                tcId, Hex.encode(msg), Hex.encode(decrypted));
             errors++;
           } else {
             if (!eq) {
-              System.out.println(
-                  "Incorrect decryption " + tc + " decrypted:" + TestUtil.hexEncode(decrypted));
+              System.out.printf(
+                  "FAIL %s: incorrect decryption, result: %s, expected: %s%n",
+                  tcId, Hex.encode(decrypted), Hex.encode(msg));
+              errors++;
             }
           }
         } catch (GeneralSecurityException ex) {
           if (result.equals("valid")) {
-            System.out.println("Failed to decrypt " + tc);
+            System.out.printf("FAIL %s: cannot decrypt, exception %s%n", tcId, ex);
             errors++;
           }
         }
       }
     }
+    System.out.printf("Number of tests skipped: %d", cntSkippedTests);
     assertEquals(0, errors);
-    assertEquals(numTests, cntTests + cntSkippedTests);
   }
 
   @Test

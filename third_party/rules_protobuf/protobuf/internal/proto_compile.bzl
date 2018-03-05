@@ -1,3 +1,7 @@
+"""Compiles protobuf.
+
+"""
+
 def _capitalize(s):
   return s[0:1].upper() + s[1:]
 

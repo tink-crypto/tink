@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,15 +16,16 @@ package signature
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"github.com/google/tink/go/subtle"
-	"github.com/google/tink/go/tink"
 	"hash"
 	"math/big"
+
+	"github.com/google/tink/go/subtle"
+	"github.com/google/tink/go/tink"
 )
 
 var errInvalidSignature = fmt.Errorf("ecdsa_verify: invalid signature")
 
-// ecdsaVerify is an implementation of PublicKeyVerify for ECDSA.
+// EcdsaVerify is an implementation of PublicKeyVerify for ECDSA.
 // At the moment, the implementation only accepts signatures with strict DER encoding.
 type EcdsaVerify struct {
 	publicKey *ecdsa.PublicKey

@@ -42,17 +42,17 @@ namespace test {
 // Various utilities for testing.
 ///////////////////////////////////////////////////////////////////////////////
 
-// Converts a hexadecimal string into a string of bytes.
+// Converts a hexadecimal std::string into a std::string of bytes.
 // Returns a status if the size of the input is odd or if the input contains
 // characters that are not hexadecimal.
 crypto::tink::util::StatusOr<std::string> HexDecode(
     absl::string_view hex);
 
-// Converts a hexadecimal string into a string of bytes.
-// Dies if the input is not a valid hexadecimal string.
+// Converts a hexadecimal std::string into a std::string of bytes.
+// Dies if the input is not a valid hexadecimal std::string.
 std::string HexDecodeOrDie(absl::string_view hex);
 
-// Converts a string of bytes into a hexadecimal string.
+// Converts a std::string of bytes into a hexadecimal std::string.
 std::string HexEncode(absl::string_view bytes);
 
 // Creates a KeysetHandle object for the given 'keyset'.

@@ -84,7 +84,7 @@ public class Ed25519PublicKeyManagerTest {
       verifier.verify(copySig, message);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "Given signature's 3 most significant bits must be 0.");
+      assertExceptionContains(e, "Signature check failed.");
     }
     // Flip other bytes.
     for (int i = 0; i < signature.length - 1; i++) {

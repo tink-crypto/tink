@@ -1,8 +1,10 @@
+// Copyright 2018 Google Inc.
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -10,18 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-package tink
+#ifndef TINK_AEAD_KEY_TEMPLATES_H_
+#define TINK_AEAD_KEY_TEMPLATES_H_
 
-import (
-	tinkpb "github.com/google/tink/proto/tink_proto"
-)
+#include "cc/aead/aead_key_templates.h"  // IWYU pragma: export
 
-// PrivateKeyManager is a special type of KeyManager that understands private key types.
-type PrivateKeyManager interface {
-	KeyManager
-
-	// GetPublicKeyData extracts the public key data from the private key.
-	GetPublicKeyData(serializedKey []byte) (*tinkpb.KeyData, error)
-}
+#endif  // TINK_AEAD_KEY_TEMPLATES_H_

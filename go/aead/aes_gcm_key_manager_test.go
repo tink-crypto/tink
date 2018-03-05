@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -19,6 +17,8 @@ package aead_test
 import (
 	"bytes"
 	"fmt"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	subteAead "github.com/google/tink/go/subtle/aead"
@@ -26,7 +26,6 @@ import (
 	"github.com/google/tink/go/testutil"
 	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"testing"
 )
 
 var keySizes = []uint32{16, 24, 32}
@@ -167,7 +166,7 @@ func TestAesGcmNewKeyDataBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
-		if keyData.TypeUrl != aead.AES_GCM_TYPE_URL {
+		if keyData.TypeUrl != aead.AesGcmTypeURL {
 			t.Errorf("incorrect type url")
 		}
 		if keyData.KeyMaterialType != tinkpb.KeyData_SYMMETRIC {
@@ -204,17 +203,17 @@ func TestAesGcmNewKeyDataWithInvalidInput(t *testing.T) {
 
 func TestAesGcmDoesSupport(t *testing.T) {
 	keyManager := aead.NewAesGcmKeyManager()
-	if !keyManager.DoesSupport(aead.AES_GCM_TYPE_URL) {
-		t.Errorf("AesGcmKeyManager must support %s", aead.AES_GCM_TYPE_URL)
+	if !keyManager.DoesSupport(aead.AesGcmTypeURL) {
+		t.Errorf("AesGcmKeyManager must support %s", aead.AesGcmTypeURL)
 	}
 	if keyManager.DoesSupport("some bad type") {
-		t.Errorf("AesGcmKeyManager must support only %s", aead.AES_GCM_TYPE_URL)
+		t.Errorf("AesGcmKeyManager must support only %s", aead.AesGcmTypeURL)
 	}
 }
 
 func TestAesGcmGetKeyType(t *testing.T) {
 	keyManager := aead.NewAesGcmKeyManager()
-	if keyManager.GetKeyType() != aead.AES_GCM_TYPE_URL {
+	if keyManager.GetKeyType() != aead.AesGcmTypeURL {
 		t.Errorf("incorrect key type")
 	}
 }
@@ -224,18 +223,18 @@ func genInvalidAesGcmKeys() []proto.Message {
 		// not a AesGcmKey
 		aead.NewAesGcmKeyFormat(32),
 		// bad key size
-		aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(17)),
-		aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(25)),
-		aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(33)),
+		aead.NewAesGcmKey(aead.AesGcmKeyVersion, random.GetRandomBytes(17)),
+		aead.NewAesGcmKey(aead.AesGcmKeyVersion, random.GetRandomBytes(25)),
+		aead.NewAesGcmKey(aead.AesGcmKeyVersion, random.GetRandomBytes(33)),
 		// bad version
-		aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION+1, random.GetRandomBytes(16)),
+		aead.NewAesGcmKey(aead.AesGcmKeyVersion+1, random.GetRandomBytes(16)),
 	}
 }
 
 func genInvalidAesGcmKeyFormats() []proto.Message {
 	return []proto.Message{
 		// not AesGcmKeyFormat
-		aead.NewAesGcmKey(aead.AES_GCM_KEY_VERSION, random.GetRandomBytes(16)),
+		aead.NewAesGcmKey(aead.AesGcmKeyVersion, random.GetRandomBytes(16)),
 		// invalid key size
 		aead.NewAesGcmKeyFormat(uint32(15)),
 		aead.NewAesGcmKeyFormat(uint32(23)),
@@ -247,7 +246,7 @@ func validateAesGcmKey(key *gcmpb.AesGcmKey, format *gcmpb.AesGcmKeyFormat) erro
 	if uint32(len(key.KeyValue)) != format.KeySize {
 		return fmt.Errorf("incorrect key size")
 	}
-	if key.Version != aead.AES_GCM_KEY_VERSION {
+	if key.Version != aead.AesGcmKeyVersion {
 		return fmt.Errorf("incorrect key version")
 	}
 	// try to encrypt and decrypt

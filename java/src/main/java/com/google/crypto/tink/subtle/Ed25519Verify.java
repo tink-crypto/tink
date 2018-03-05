@@ -37,6 +37,8 @@ import java.security.GeneralSecurityException;
  *   // all the rest of security exceptions.
  * }
  * </pre>
+ *  TODO(bleichen): Actually, the implementation does not follow the above description:
+ *                  an invalid signature does not throw a SignatureException.
  */
 @Alpha
 @Immutable
@@ -60,9 +62,6 @@ public final class Ed25519Verify implements PublicKeyVerify {
     if (signature.length != SIGNATURE_LEN) {
       throw new GeneralSecurityException(
           String.format("The length of the signature is not %s.", SIGNATURE_LEN));
-    }
-    if (((signature[SIGNATURE_LEN - 1] & 0xff) & 224) != 0) {
-      throw new GeneralSecurityException("Given signature's 3 most significant bits must be 0.");
     }
     if (!Ed25519.verify(data, signature, publicKey.getBytes())) {
       throw new GeneralSecurityException("Signature check failed.");

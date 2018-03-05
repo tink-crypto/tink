@@ -176,7 +176,7 @@ public class EncryptThenAuthenticateTest {
       byte[] plaintext1 = aead.decrypt(ciphertext, aad);
       assertArrayEquals(plaintext, plaintext1);
     } catch (GeneralSecurityException e) {
-      fail("Valid ciphertext and aad, should have passed");
+      fail("Valid ciphertext and aad, should have passed: " + e);
     }
   }
 

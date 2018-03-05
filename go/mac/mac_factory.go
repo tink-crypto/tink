@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,8 +16,9 @@ package mac
 
 import (
 	"fmt"
-	"github.com/google/tink/go/tink"
 	"sync"
+
+	"github.com/google/tink/go/tink"
 )
 
 // Factory provides methods that allow obtaining a Mac primitive from a KeysetHandle.
@@ -36,7 +35,7 @@ var factoryOnce sync.Once
 
 type factory struct{}
 
-// factory creates an instance of factory if there isn't and returns the instance.
+// Factory creates an instance of factory if there isn't and returns the instance.
 func Factory() *factory {
 	factoryOnce.Do(func() {
 		factoryInstance = new(factory)
@@ -100,7 +99,7 @@ var errInvalidMac = fmt.Errorf("mac_factory: invalid mac")
 func (m *primitiveSetMac) VerifyMac(mac []byte, data []byte) (bool, error) {
 	// This also rejects raw MAC with size of 4 bytes or fewer. Those MACs are
 	// clearly insecure, thus should be discouraged.
-	prefixSize := tink.NON_RAW_PREFIX_SIZE
+	prefixSize := tink.NonRawPrefixSize
 	if len(mac) <= prefixSize {
 		return false, errInvalidMac
 	}

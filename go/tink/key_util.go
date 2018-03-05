@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,6 +16,7 @@ package tink
 
 import (
 	"fmt"
+
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
@@ -33,9 +32,7 @@ func ValidateVersion(version uint32, maxExpected uint32) error {
 	return nil
 }
 
-/**
- * @return a tinkpb.KeysetInfo-proto from a {@code keyset} protobuf.
- */
+// GetKeysetInfo returns a KeysetInfo from a Keyset protobuf.
 func GetKeysetInfo(keyset *tinkpb.Keyset) (*tinkpb.KeysetInfo, error) {
 	if keyset == nil {
 		return nil, fmt.Errorf("key_util: Gettinkpb.KeysetInfo() called with nil")
@@ -55,9 +52,7 @@ func GetKeysetInfo(keyset *tinkpb.Keyset) (*tinkpb.KeysetInfo, error) {
 	}, nil
 }
 
-/**
- * @return a KeyInfo-proto from a {@code key} protobuf.
- */
+// GetKeyInfo returns a KeyInfo from a Key protobuf.
 func GetKeyInfo(key *tinkpb.Keyset_Key) (*tinkpb.KeysetInfo_KeyInfo, error) {
 	if key == nil {
 		return nil, fmt.Errorf("keyutil: GetKeyInfo() called with nil")
@@ -70,11 +65,8 @@ func GetKeyInfo(key *tinkpb.Keyset_Key) (*tinkpb.KeysetInfo_KeyInfo, error) {
 	}, nil
 }
 
-/**
- * Validates the given key set.
- * Returns nil if it is valid; an error otherwise.
- */
-// TODO(thaidn): use TypeLiteral to ensure that all keys are of the same primitive.
+// ValidateKeyset validates the given key set.
+// Returns nil if it is valid; an error otherwise.
 func ValidateKeyset(keyset *tinkpb.Keyset) error {
 	if keyset == nil {
 		return fmt.Errorf("keyutil: ValidateKeyset() called with nil")
@@ -82,13 +74,13 @@ func ValidateKeyset(keyset *tinkpb.Keyset) error {
 	if len(keyset.Key) == 0 {
 		return fmt.Errorf("keyutil: empty keyset")
 	}
-	primaryKeyId := keyset.PrimaryKeyId
+	primaryKeyID := keyset.PrimaryKeyId
 	hasPrimaryKey := false
 	for _, key := range keyset.Key {
 		if err := ValidateKey(key); err != nil {
 			return err
 		}
-		if key.Status == tinkpb.KeyStatusType_ENABLED && key.KeyId == primaryKeyId {
+		if key.Status == tinkpb.KeyStatusType_ENABLED && key.KeyId == primaryKeyID {
 			if hasPrimaryKey {
 				return fmt.Errorf("keyutil: keyset contains multiple primary keys")
 			}
@@ -101,10 +93,10 @@ func ValidateKeyset(keyset *tinkpb.Keyset) error {
 	return nil
 }
 
-/**
- * Validates the given key.
- * Returns nil if it is valid; an error otherwise
- */
+/*
+ValidateKey validates the given key.
+Returns nil if it is valid; an error otherwise.
+*/
 func ValidateKey(key *tinkpb.Keyset_Key) error {
 	if key == nil {
 		return fmt.Errorf("keyutil: ValidateKey() called with nil")

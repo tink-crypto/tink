@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,9 +15,10 @@
 package mac_test
 
 import (
+	"testing"
+
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/tink"
-	"testing"
 )
 
 func TestRegistration(t *testing.T) {
@@ -27,7 +26,7 @@ func TestRegistration(t *testing.T) {
 	if !success || err != nil {
 		t.Errorf("cannot register standard key types")
 	}
-	keyManager, err := tink.Registry().GetKeyManager(mac.HMAC_TYPE_URL)
+	keyManager, err := tink.Registry().GetKeyManager(mac.HmacTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

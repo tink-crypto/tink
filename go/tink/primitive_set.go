@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,6 +16,7 @@ package tink
 
 import (
 	"fmt"
+
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
@@ -41,40 +40,44 @@ func NewEntry(p interface{}, id string, stt tinkpb.KeyStatusType,
 	}
 }
 
+// Primitive returns the crypto primitive associated with the key entry.
 func (e *Entry) Primitive() interface{} {
 	return e.primitive
 }
 
+// Status returns the status of the key entry.
 func (e *Entry) Status() tinkpb.KeyStatusType {
 	return e.status
 }
 
+// Identifier returns the identifier of the key entry.
 func (e *Entry) Identifier() string {
 	return e.identifier
 }
 
+// OutputPrefixType returns the OutputPrefixType of the key entry.
 func (e *Entry) OutputPrefixType() tinkpb.OutputPrefixType {
 	return e.outputPrefixType
 }
 
-/**
- * A container class for a set of primitives (i.e. implementations of cryptographic
- * primitives offered by Tink).  It provides also additional properties for the primitives
- * it holds.  In particular, one of the primitives in the set can be distinguished as
- * "the primary" one. <p>
- *
- * PrimitiveSet is an auxiliary class used for supporting key rotation: primitives in a set
- * correspond to keys in a keyset.  Users will usually work with primitive instances,
- * which essentially wrap primitive sets.  For example an instance of an Aead-primitive
- * for a given keyset holds a set of Aead-primitives corresponding to the keys in the keyset,
- * and uses the set members to do the actual crypto operations: to encrypt data the primary
- * Aead-primitive from the set is used, and upon decryption the ciphertext's prefix
- * determines the id of the primitive from the set. <p>
- *
- * PrimitiveSet is a public class to allow its use in implementations of custom primitives.
- */
+/*
+PrimitiveSet is a container class for a set of primitives (i.e. implementations of cryptographic
+primitives offered by Tink).  It provides also additional properties for the primitives
+it holds.  In particular, one of the primitives in the set can be distinguished as
+"the primary" one. <p>
+
+PrimitiveSet is an auxiliary class used for supporting key rotation: primitives in a set
+correspond to keys in a keyset.  Users will usually work with primitive instances,
+which essentially wrap primitive sets.  For example an instance of an Aead-primitive
+for a given keyset holds a set of Aead-primitives corresponding to the keys in the keyset,
+and uses the set members to do the actual crypto operations: to encrypt data the primary
+Aead-primitive from the set is used, and upon decryption the ciphertext's prefix
+determines the id of the primitive from the set. <p>
+
+PrimitiveSet is a public class to allow its use in implementations of custom primitives.
+*/
 type PrimitiveSet struct {
-	// Primary entry
+	// Primary entry.
 	primary *Entry
 
 	// The primitives are stored in a map of
@@ -94,7 +97,7 @@ func NewPrimitiveSet() *PrimitiveSet {
 
 // GetRawPrimitives returns all primitives in the set that have RAW prefix.
 func (ps *PrimitiveSet) GetRawPrimitives() ([]*Entry, error) {
-	return ps.GetPrimitivesWithStringIdentifier(RAW_PREFIX)
+	return ps.GetPrimitivesWithStringIdentifier(RawPrefix)
 }
 
 // GetPrimitivesWithKey returns all primitives in the set that have prefix equal
@@ -126,7 +129,7 @@ func (ps *PrimitiveSet) GetPrimitivesWithStringIdentifier(id string) ([]*Entry, 
 	return result, nil
 }
 
-// GetPrimitives returns all primitives of the set.
+// Primitives returns all primitives of the set.
 func (ps *PrimitiveSet) Primitives() map[string][]*Entry {
 	return ps.primitives
 }

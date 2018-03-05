@@ -102,7 +102,7 @@ TEST_F(BinaryKeysetReaderTest, testReaderCreation) {
 }
 
 TEST_F(BinaryKeysetReaderTest, testReadFromString) {
-  {  // Good string.
+  {  // Good std::string.
     auto reader_result = BinaryKeysetReader::New(good_serialized_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
@@ -112,7 +112,7 @@ TEST_F(BinaryKeysetReaderTest, testReadFromString) {
     EXPECT_EQ(good_serialized_keyset_, keyset->SerializeAsString());
   }
 
-  {  // Bad string.
+  {  // Bad std::string.
     auto reader_result = BinaryKeysetReader::New(bad_serialized_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
@@ -152,7 +152,7 @@ TEST_F(BinaryKeysetReaderTest, testReadFromStream) {
 }
 
 TEST_F(BinaryKeysetReaderTest, testReadEncryptedFromString) {
-  {  // Good string.
+  {  // Good std::string.
     auto reader_result =
         BinaryKeysetReader::New(good_serialized_encrypted_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
@@ -164,7 +164,7 @@ TEST_F(BinaryKeysetReaderTest, testReadEncryptedFromString) {
               encrypted_keyset->SerializeAsString());
   }
 
-  {  // Bad string.
+  {  // Bad std::string.
     auto reader_result = BinaryKeysetReader::New(bad_serialized_keyset_);
     EXPECT_TRUE(reader_result.ok()) << reader_result.status();
     auto reader = std::move(reader_result.ValueOrDie());
@@ -191,7 +191,7 @@ TEST_F(BinaryKeysetReaderTest, testReadEncryptedFromStream) {
               encrypted_keyset->SerializeAsString());
   }
 
-  {  // Bad string.
+  {  // Bad std::string.
     std::unique_ptr<std::istream> bad_keyset_stream(
         new std::stringstream(std::string(bad_serialized_keyset_),
                               std::ios_base::in));

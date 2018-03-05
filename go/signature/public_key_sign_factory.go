@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,9 +16,10 @@ package signature
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"sync"
 )
 
 // PublicKeySignFactory allows obtaining a PublicKeySign primitive from a
@@ -30,7 +29,7 @@ var publicKeySignFactoryOnce sync.Once
 
 type publicKeySignFactory struct{}
 
-// publicKeySignFactory creates an instance of publicKeySignFactory if there isn't
+// PublicKeySignFactory creates an instance of publicKeySignFactory if there isn't
 // and returns the instance.
 func PublicKeySignFactory() *publicKeySignFactory {
 	publicKeySignFactoryOnce.Do(func() {
@@ -80,7 +79,7 @@ func (s *primitiveSetPublicKeySign) Sign(data []byte) ([]byte, error) {
 	var signedData []byte
 	if primary.OutputPrefixType() == tinkpb.OutputPrefixType_LEGACY {
 		signedData = append(signedData, data...)
-		signedData = append(signedData, tink.LEGACY_START_BYTE)
+		signedData = append(signedData, tink.LegacyStartByte)
 	} else {
 		signedData = data
 	}

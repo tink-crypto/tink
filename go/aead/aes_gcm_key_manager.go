@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,6 +16,7 @@ package aead
 
 import (
 	"fmt"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
@@ -27,11 +26,11 @@ import (
 )
 
 const (
-	// Supported version
-	AES_GCM_KEY_VERSION = 0
+	// AesGcmKeyVersion is the maxmimal version of keys that this key manager supports.
+	AesGcmKeyVersion = 0
 
-	// Supported type url
-	AES_GCM_TYPE_URL = "type.googleapis.com/google.crypto.tink.AesGcmKey"
+	// AesGcmTypeURL is the url that this key manager supports.
+	AesGcmTypeURL = "type.googleapis.com/google.crypto.tink.AesGcmKey"
 )
 
 // common errors
@@ -104,7 +103,7 @@ func (km *AesGcmKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message,
 	}
 	keyValue := random.GetRandomBytes(keyFormat.KeySize)
 	return &gcmpb.AesGcmKey{
-		Version:  AES_GCM_KEY_VERSION,
+		Version:  AesGcmKeyVersion,
 		KeyValue: keyValue,
 	}, nil
 }
@@ -121,25 +120,25 @@ func (km *AesGcmKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyD
 		return nil, err
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         AES_GCM_TYPE_URL,
+		TypeUrl:         AesGcmTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
 	}, nil
 }
 
 // DoesSupport indicates if this key manager supports the given key type.
-func (_ *AesGcmKeyManager) DoesSupport(typeUrl string) bool {
-	return typeUrl == AES_GCM_TYPE_URL
+func (km *AesGcmKeyManager) DoesSupport(typeURL string) bool {
+	return typeURL == AesGcmTypeURL
 }
 
 // GetKeyType returns the key type of keys managed by this key manager.
-func (_ *AesGcmKeyManager) GetKeyType() string {
-	return AES_GCM_TYPE_URL
+func (km *AesGcmKeyManager) GetKeyType() string {
+	return AesGcmTypeURL
 }
 
 // validateKey validates the given AesGcmKey.
-func (_ *AesGcmKeyManager) validateKey(key *gcmpb.AesGcmKey) error {
-	err := tink.ValidateVersion(key.Version, AES_GCM_KEY_VERSION)
+func (km *AesGcmKeyManager) validateKey(key *gcmpb.AesGcmKey) error {
+	err := tink.ValidateVersion(key.Version, AesGcmKeyVersion)
 	if err != nil {
 		return fmt.Errorf("aes_gcm_key_manager: %s", err)
 	}
@@ -151,7 +150,7 @@ func (_ *AesGcmKeyManager) validateKey(key *gcmpb.AesGcmKey) error {
 }
 
 // validateKeyFormat validates the given AesGcmKeyFormat.
-func (_ *AesGcmKeyManager) validateKeyFormat(format *gcmpb.AesGcmKeyFormat) error {
+func (km *AesGcmKeyManager) validateKeyFormat(format *gcmpb.AesGcmKeyFormat) error {
 	if err := aead.ValidateAesKeySize(format.KeySize); err != nil {
 		return fmt.Errorf("aes_gcm_key_manager: %s", err)
 	}

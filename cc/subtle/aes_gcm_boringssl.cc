@@ -94,7 +94,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
     return util::Status(util::error::INTERNAL, "AAD is not supported");
   }
   size_t ciphertext_size = iv.size() + plaintext.size() + TAG_SIZE_IN_BYTES;
-  // TODO(bleichen): Check if it is OK to work on a string.
+  // TODO(bleichen): Check if it is OK to work on a std::string.
   //   This is unclear since some compiler may use copy-on-write.
   // Allocates 1 byte more than necessary because we may potentially access
   // &ct[ciphertext_size] causing vector range check error.

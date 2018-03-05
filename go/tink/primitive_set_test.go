@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,27 +16,28 @@ package tink_test
 
 import (
 	"fmt"
+	"reflect"
+	"testing"
+
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"reflect"
-	"testing"
 )
 
 func genKeysForPrimitiveSetTest() []*tinkpb.Keyset_Key {
-	var keyId0 = 1234543
-	var keyId1 = 7213743
-	var keyId2 = keyId1
-	var keyId3 = 947327
-	var keyId4 = 529472
-	var keyId5 = keyId0
+	var keyID0 = 1234543
+	var keyID1 = 7213743
+	var keyID2 = keyID1
+	var keyID3 = 947327
+	var keyID4 = 529472
+	var keyID5 = keyID0
 	return []*tinkpb.Keyset_Key{
-		testutil.NewDummyKey(keyId0, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK),
-		testutil.NewDummyKey(keyId1, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_LEGACY),
-		testutil.NewDummyKey(keyId2, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK),
-		testutil.NewDummyKey(keyId3, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_RAW),
-		testutil.NewDummyKey(keyId4, tinkpb.KeyStatusType_DISABLED, tinkpb.OutputPrefixType_RAW),
-		testutil.NewDummyKey(keyId5, tinkpb.KeyStatusType_DISABLED, tinkpb.OutputPrefixType_TINK),
+		testutil.NewDummyKey(keyID0, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK),
+		testutil.NewDummyKey(keyID1, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_LEGACY),
+		testutil.NewDummyKey(keyID2, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_TINK),
+		testutil.NewDummyKey(keyID3, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_RAW),
+		testutil.NewDummyKey(keyID4, tinkpb.KeyStatusType_DISABLED, tinkpb.OutputPrefixType_RAW),
+		testutil.NewDummyKey(keyID5, tinkpb.KeyStatusType_DISABLED, tinkpb.OutputPrefixType_TINK),
 	}
 }
 
@@ -61,10 +60,10 @@ func TestPrimitiveSetBasic(t *testing.T) {
 		}
 	}
 	// set primary entry
-	primaryId := 2
-	ps.SetPrimary(entries[primaryId])
+	primaryID := 2
+	ps.SetPrimary(entries[primaryID])
 	// validate the primitive in primary
-	if !validateEntry(ps.Primary(), macs[primaryId], keys[primaryId].Status, keys[primaryId].OutputPrefixType) {
+	if !validateEntry(ps.Primary(), macs[primaryID], keys[primaryID].Status, keys[primaryID].OutputPrefixType) {
 		t.Errorf("SetPrimary is not working correctly")
 	}
 	// check raw primitive

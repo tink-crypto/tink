@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,6 +15,8 @@
 package signature_test
 
 import (
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
@@ -24,7 +24,6 @@ import (
 	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"testing"
 )
 
 func TestPublicKeySignFactoryInstance(t *testing.T) {
@@ -98,18 +97,18 @@ func TestPublicKeySignVerifyFactory(t *testing.T) {
 func newEcdsaKeysetKeypair(hashType commonpb.HashType,
 	curve commonpb.EllipticCurveType,
 	outputPrefixType tinkpb.OutputPrefixType,
-	keyId uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
+	keyID uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
 	key := testutil.NewEcdsaPrivateKey(hashType, curve)
 	serializedKey, _ := proto.Marshal(key)
-	keyData := tink.NewKeyData(signature.ECDSA_SIGN_TYPE_URL,
+	keyData := tink.NewKeyData(signature.EcdsaSignTypeURL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PRIVATE)
-	privKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyId, outputPrefixType)
+	privKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
 
 	serializedKey, _ = proto.Marshal(key.PublicKey)
-	keyData = tink.NewKeyData(signature.ECDSA_VERIFY_TYPE_URL,
+	keyData = tink.NewKeyData(signature.EcdsaVerifyTypeURL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PUBLIC)
-	pubKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyId, outputPrefixType)
+	pubKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
 	return privKey, pubKey
 }

@@ -105,7 +105,7 @@ std::unique_ptr<KeysetWriter> CliUtil::GetJsonKeysetWriter(
 
 // static
 std::unique_ptr<KeysetHandle> CliUtil::ReadKeyset(const std::string& filename) {
-  auto keyset_reader = std::move(GetBinaryKeysetReader(filename));
+  auto keyset_reader = GetBinaryKeysetReader(filename);
   auto keyset_handle_result =
       CleartextKeysetHandle::Read(std::move(keyset_reader));
   if (!keyset_handle_result.ok()) {

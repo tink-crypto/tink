@@ -15,7 +15,7 @@ go_test(
     name = "go_default_xtest",
     srcs = ["aes_gcm_test.go"],
     data = [
-        "@wycheproof//testvectors:aes_gcm",  # keep
+        "//testdata:wycheproof",  # keep
     ],
     importpath = "github.com/google/tink/go/subtle/aead_test",
     deps = [

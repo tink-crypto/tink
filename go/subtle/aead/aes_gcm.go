@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,20 +11,23 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
+// Package aead provides subtle implementations of the Aead primitive.
 package aead
 
 import (
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
+
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
 
 const (
-	// All instances of this class use a 12 byte IV and 16 byte tag
-	AES_GCM_IV_SIZE  = 12
-	AES_GCM_TAG_SIZE = 16
+	// AesGcmIvSize is the only IV size that this implementation supports.
+	AesGcmIvSize = 12
+	// AesGcmTagSize is the only tag size that this implementation supports.
+	AesGcmTagSize = 16
 )
 
 // AesGcm is an implementation of Aead interface.
@@ -84,15 +85,15 @@ func (a *AesGcm) Encrypt(pt []byte, aad []byte) ([]byte, error) {
 
 // Decrypt decrypts {@code ct} with {@code aad} as the additionalauthenticated data.
 func (a *AesGcm) Decrypt(ct []byte, aad []byte) ([]byte, error) {
-	if len(ct) < AES_GCM_IV_SIZE+AES_GCM_TAG_SIZE {
+	if len(ct) < AesGcmIvSize+AesGcmTagSize {
 		return nil, fmt.Errorf("aes_gcm: ciphertext too short")
 	}
 	cipher, err := a.newCipher(a.Key)
 	if err != nil {
 		return nil, err
 	}
-	iv := ct[:AES_GCM_IV_SIZE]
-	pt, err := cipher.Open(nil, iv, ct[AES_GCM_IV_SIZE:], aad)
+	iv := ct[:AesGcmIvSize]
+	pt, err := cipher.Open(nil, iv, ct[AesGcmIvSize:], aad)
 	if err != nil {
 		return nil, fmt.Errorf("aes_gcm: %s", err)
 	}
@@ -101,7 +102,7 @@ func (a *AesGcm) Decrypt(ct []byte, aad []byte) ([]byte, error) {
 
 // newIV creates a new IV for encryption.
 func (a *AesGcm) newIV() []byte {
-	return random.GetRandomBytes(AES_GCM_IV_SIZE)
+	return random.GetRandomBytes(AesGcmIvSize)
 }
 
 var errCipher = fmt.Errorf("aes_gcm: initializing cipher failed")

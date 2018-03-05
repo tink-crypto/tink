@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,23 +13,16 @@
 
 package tink
 
-/**
- * Interface for MACs (Message Authentication Codes).
- * This interface should be used for authentication only, and not for other purposes
- * (for example, it should not be used to generate pseudorandom bytes).
- */
+/*
+Mac is the interface for MACs (Message Authentication Codes).
+This interface should be used for authentication only, and not for other purposes
+(for example, it should not be used to generate pseudorandom bytes).
+*/
 type Mac interface {
-	/**
-	 * Computes message authentication code (MAC) for {@code data}.
-	 *
-	 * @return MAC value.
-	 */
+
+	// ComputeMac Computes message authentication code (MAC) for {@code data}.
 	ComputeMac(data []byte) ([]byte, error)
 
-	/**
-	 * Verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
-	 *
-	 * @return 0 if {@code mac} is correct; 1 otherwise.
-	 */
+	// VerifyMac verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
 	VerifyMac(mac []byte, data []byte) (bool, error)
 }

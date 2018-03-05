@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,53 +15,57 @@
 package tink
 
 import (
-	. "github.com/google/tink/proto/common_proto"
-	. "github.com/google/tink/proto/tink_proto"
+	commonpb "github.com/google/tink/proto/common_proto"
+	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
-// Utilities for Key Protos
-func NewKeyData(typeUrl string,
+// NewKeyData creates a new KeyData with the specified parameters.
+func NewKeyData(typeURL string,
 	value []byte,
-	materialType KeyData_KeyMaterialType) *KeyData {
-	return &KeyData{
-		TypeUrl:         typeUrl,
+	materialType tinkpb.KeyData_KeyMaterialType) *tinkpb.KeyData {
+	return &tinkpb.KeyData{
+		TypeUrl:         typeURL,
 		Value:           value,
 		KeyMaterialType: materialType,
 	}
 }
 
-func NewKey(keyData *KeyData,
-	status KeyStatusType,
-	keyId uint32,
-	prefixType OutputPrefixType) *Keyset_Key {
-	return &Keyset_Key{
+// NewKey creates a new Key with the specified parameters.
+func NewKey(keyData *tinkpb.KeyData,
+	status tinkpb.KeyStatusType,
+	keyID uint32,
+	prefixType tinkpb.OutputPrefixType) *tinkpb.Keyset_Key {
+	return &tinkpb.Keyset_Key{
 		KeyData:          keyData,
 		Status:           status,
-		KeyId:            keyId,
+		KeyId:            keyID,
 		OutputPrefixType: prefixType,
 	}
 }
 
-func NewKeyset(primaryKeyId uint32,
-	keys []*Keyset_Key) *Keyset {
-	return &Keyset{
-		PrimaryKeyId: primaryKeyId,
+// NewKeyset creates a new Keyset with the specified parameters.
+func NewKeyset(primaryKeyID uint32,
+	keys []*tinkpb.Keyset_Key) *tinkpb.Keyset {
+	return &tinkpb.Keyset{
+		PrimaryKeyId: primaryKeyID,
 		Key:          keys,
 	}
 }
 
-func NewEncryptedKeyset(encryptedKeySet []byte, info *KeysetInfo) *EncryptedKeyset {
-	return &EncryptedKeyset{
+// NewEncryptedKeyset creates a new EncryptedKeyset with a specified parameters.
+func NewEncryptedKeyset(encryptedKeySet []byte, info *tinkpb.KeysetInfo) *tinkpb.EncryptedKeyset {
+	return &tinkpb.EncryptedKeyset{
 		EncryptedKeyset: encryptedKeySet,
 		KeysetInfo:      info,
 	}
 }
 
-// utilities for converting proto types to strings
-func GetHashName(hashType HashType) string {
-	return HashType_name[int32(hashType)]
+// GetHashName returns the name of the HashType.
+func GetHashName(hashType commonpb.HashType) string {
+	return commonpb.HashType_name[int32(hashType)]
 }
 
-func GetCurveName(curve EllipticCurveType) string {
-	return EllipticCurveType_name[int32(curve)]
+// GetCurveName returns the name of the EllipticCurveType.
+func GetCurveName(curve commonpb.EllipticCurveType) string {
+	return commonpb.EllipticCurveType_name[int32(curve)]
 }

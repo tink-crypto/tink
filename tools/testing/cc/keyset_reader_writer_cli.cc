@@ -51,11 +51,9 @@ int main(int argc, char** argv) {
 
   std::unique_ptr<KeysetReader> keyset_reader;
   if (input_format == "JSON") {
-    keyset_reader =
-        std::move(CliUtil::GetJsonKeysetReader(input_keyset_filename));
+    keyset_reader = CliUtil::GetJsonKeysetReader(input_keyset_filename);
   } else if (input_format == "BINARY") {
-    keyset_reader =
-        std::move(CliUtil::GetBinaryKeysetReader(input_keyset_filename));
+    keyset_reader = CliUtil::GetBinaryKeysetReader(input_keyset_filename);
   } else {
     std::clog << "Unknown input format: '" << input_format << "'.\n"
               << "Expected 'JSON' or 'BINARY'.\n";
@@ -63,11 +61,9 @@ int main(int argc, char** argv) {
   }
   std::unique_ptr<KeysetWriter> keyset_writer;
   if (output_format == "JSON") {
-    keyset_writer =
-        std::move(CliUtil::GetJsonKeysetWriter(output_keyset_filename));
+    keyset_writer = CliUtil::GetJsonKeysetWriter(output_keyset_filename);
   } else if (output_format == "BINARY") {
-    keyset_writer =
-        std::move(CliUtil::GetBinaryKeysetWriter(output_keyset_filename));
+    keyset_writer = CliUtil::GetBinaryKeysetWriter(output_keyset_filename);
   } else {
     std::clog << "Unknown output format: '" << input_format << "'.\n"
               << "Expected 'JSON' or 'BINARY'.\n";

@@ -30,7 +30,7 @@ using crypto::tink::KeysetHandle;
 // It requires 4 arguments:
 //   keyset-file:  name of the file with the keyset to be used for decryption
 //   ciphertext-file:  name of the file that contains ciphertext to be decrypted
-//   context-info:  a string to be used as "context info" during the decryption
+//   context-info:  a std::string to be used as "context info" during the decryption
 //   output-file:  name of the output file for the resulting plaintext
 int main(int argc, char** argv) {
   if (argc != 5) {

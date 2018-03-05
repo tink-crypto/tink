@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -19,14 +17,15 @@ package aead_test
 import (
 	"bytes"
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/google/tink/go/aead"
 	subtleAead "github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"strings"
-	"testing"
 )
 
 func setupFactoryTest() {
@@ -69,7 +68,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if err != nil {
 		t.Errorf("GetPrimitive failed: %s", err)
 	}
-	if err := validateAeadFactoryCipher(a2, a, tink.RAW_PREFIX); err != nil {
+	if err := validateAeadFactoryCipher(a2, a, tink.RawPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
 
@@ -100,7 +99,7 @@ func TestFactoryRawKeyAsPrimary(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot get primitive from keyset handle: %s", err)
 	}
-	if err := validateAeadFactoryCipher(a, a, tink.RAW_PREFIX); err != nil {
+	if err := validateAeadFactoryCipher(a, a, tink.RawPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
 }
@@ -124,7 +123,7 @@ func validateAeadFactoryCipher(encryptCipher tink.Aead,
 	if string(ct[:prefixSize]) != expectedPrefix {
 		return fmt.Errorf("incorrect prefix with regular plaintext")
 	}
-	if prefixSize+len(pt)+subtleAead.AES_GCM_IV_SIZE+subtleAead.AES_GCM_TAG_SIZE != len(ct) {
+	if prefixSize+len(pt)+subtleAead.AesGcmIvSize+subtleAead.AesGcmTagSize != len(ct) {
 		return fmt.Errorf("lengths of plaintext and ciphertext don't match with regular plaintext")
 	}
 
@@ -142,7 +141,7 @@ func validateAeadFactoryCipher(encryptCipher tink.Aead,
 	if string(ct[:prefixSize]) != expectedPrefix {
 		return fmt.Errorf("incorrect prefix with short plaintext")
 	}
-	if prefixSize+len(pt)+subtleAead.AES_GCM_IV_SIZE+subtleAead.AES_GCM_TAG_SIZE != len(ct) {
+	if prefixSize+len(pt)+subtleAead.AesGcmIvSize+subtleAead.AesGcmTagSize != len(ct) {
 		return fmt.Errorf("lengths of plaintext and ciphertext don't match with short plaintext")
 	}
 	return nil

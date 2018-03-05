@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,9 +16,10 @@ package signature
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"sync"
 )
 
 // publicKeyVerifyFactory allows obtaining a PublicKeySign primitive from a
@@ -76,19 +75,19 @@ var errInvalidSignature = fmt.Errorf("public_key_verify_factory: invalid signatu
 
 // Verify checks whether the given signature is a valid signature of the given data.
 func (v *primitiveSetPublicKeyVerify) Verify(signature []byte, data []byte) error {
-	if len(signature) < tink.NON_RAW_PREFIX_SIZE {
+	if len(signature) < tink.NonRawPrefixSize {
 		return errInvalidSignature
 	}
 	// try non-raw keys
-	prefix := signature[:tink.NON_RAW_PREFIX_SIZE]
-	signatureNoPrefix := signature[tink.NON_RAW_PREFIX_SIZE:]
+	prefix := signature[:tink.NonRawPrefixSize]
+	signatureNoPrefix := signature[tink.NonRawPrefixSize:]
 	entries, err := v.ps.GetPrimitivesWithByteIdentifier(prefix)
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
 			var signedData []byte
 			if entries[i].OutputPrefixType() == tinkpb.OutputPrefixType_LEGACY {
 				signedData = append(signedData, data...)
-				signedData = append(signedData, tink.LEGACY_START_BYTE)
+				signedData = append(signedData, tink.LegacyStartByte)
 			} else {
 				signedData = data
 			}

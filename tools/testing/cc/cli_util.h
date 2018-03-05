@@ -51,7 +51,7 @@ class CliUtil {
   // In case of errors writes a log message and aborts.
   static void InitTink();
 
-  // Reads the specified file and returns the contents as a string.
+  // Reads the specified file and returns the contents as a std::string.
   // In case of errors writes a log message and aborts.
   static std::string Read(const std::string& filename);
 

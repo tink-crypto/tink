@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,11 +19,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/google/tink/go/subtle"
-	"github.com/google/tink/go/subtle/random"
-	subtleSignature "github.com/google/tink/go/subtle/signature"
 	"os"
 	"testing"
+
+	"github.com/google/tink/go/subtle/random"
+	subtleSignature "github.com/google/tink/go/subtle/signature"
+	"github.com/google/tink/go/subtle"
 )
 
 func TestSignVerify(t *testing.T) {
@@ -99,11 +98,11 @@ type testcase struct {
 	Message string
 	Result  string
 	Sig     string
-	TcId    uint32
+	TcID    uint32
 }
 
 func TestVectors(t *testing.T) {
-	f, err := os.Open("../../../../wycheproof/testvectors/ecdsa_test.json")
+	f, err := os.Open("../../../testdata/wycheproof/ecdsa_test.json")
 	if err != nil {
 		t.Errorf("cannot open file: %s", err)
 	}
@@ -134,16 +133,16 @@ func TestVectors(t *testing.T) {
 		for _, tc := range g.Tests {
 			message, err := hex.DecodeString(tc.Message)
 			if err != nil {
-				t.Errorf("cannot decode message in test case %d: %s", tc.TcId, err)
+				t.Errorf("cannot decode message in test case %d: %s", tc.TcID, err)
 			}
 			sig, err := hex.DecodeString(tc.Sig)
 			if err != nil {
-				t.Errorf("cannot decode signature in test case %d: %s", tc.TcId, err)
+				t.Errorf("cannot decode signature in test case %d: %s", tc.TcID, err)
 			}
 			err = verifier.Verify(sig, message)
 			if (tc.Result == "valid" && err != nil) ||
 				(tc.Result == "invalid" && err == nil) {
-				fmt.Println("failed in test case ", tc.TcId, err)
+				fmt.Println("failed in test case ", tc.TcID, err)
 			}
 		}
 	}

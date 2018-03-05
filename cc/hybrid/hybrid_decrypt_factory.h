@@ -38,9 +38,9 @@ namespace tink {
 //   KeysetHandle keyset_handle = ...;
 //   std::unique_ptr<HybridDecrypt> hybrid_decrypt = std::move(
 //           HybridDecryptFactory.GetPrimitive(keyset_handle).ValueOrDie());
-//   string ciphertext = ...;
-//   string context_info = ...;
-//   string plaintext =
+//   std::string ciphertext = ...;
+//   std::string context_info = ...;
+//   std::string plaintext =
 //       hybrid_decrypt.Decrypt(ciphertext, context_info).ValueOrDie();
 //
 class HybridDecryptFactory {

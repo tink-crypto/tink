@@ -93,7 +93,7 @@ public class RegistryEciesAeadHkdfDemHelperTest {
 
   @Test
   public void testConstructorWithUnsupportedTemplates() throws Exception {
-    RegistryEciesAeadHkdfDemHelper helper;
+    RegistryEciesAeadHkdfDemHelper unusedHelper;
 
     // Unsupported templates.
     int templateCount = 4;
@@ -105,7 +105,7 @@ public class RegistryEciesAeadHkdfDemHelperTest {
     int count = 0;
     for (KeyTemplate template : templates) {
       try {
-        helper = new RegistryEciesAeadHkdfDemHelper(template);
+        unusedHelper = new RegistryEciesAeadHkdfDemHelper(template);
         fail("DEM type not supported, should have thrown exception:\n" + template.toString());
       } catch (GeneralSecurityException e) {
         // Expected.
@@ -123,7 +123,7 @@ public class RegistryEciesAeadHkdfDemHelperTest {
             .setValue(SignatureKeyTemplates.ECDSA_P256.getValue())
             .build();
     try {
-      helper = new RegistryEciesAeadHkdfDemHelper(template);
+      unusedHelper = new RegistryEciesAeadHkdfDemHelper(template);
       fail("Inconsistent template, should have thrown exception:\n" + template.toString());
     } catch (GeneralSecurityException e) {
       // Expected.

@@ -127,8 +127,8 @@ public interface StreamingAead {
    *
    * @param ciphertextSource the ciphertext
    * @param associatedData the data associated with the ciphertext.
-   * @return {@link SeekableByteChannel} that allows random read access to the plaintext. The following
-   *     methods of SeekableByteChannel are implemented:
+   * @return {@link SeekableByteChannel} that allows random read access to the plaintext.
+   *     The following methods of SeekableByteChannel are implemented:
    *     <ul>
    *       <li>{@code long position()} Returns the channel's position in the plaintext.
    *       <li>{@code SeekableByteChannel  position(long newPosition)} Sets the channel's

@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -19,13 +17,14 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"fmt"
-	"github.com/google/tink/go/subtle"
-	"github.com/google/tink/go/tink"
 	"hash"
 	"math/big"
+
+	"github.com/google/tink/go/subtle"
+	"github.com/google/tink/go/tink"
 )
 
-// ecdsaSign is an implementation of PublicKeySign for ECDSA.
+// EcdsaSign is an implementation of PublicKeySign for ECDSA.
 // At the moment, the implementation only accepts DER encoding.
 type EcdsaSign struct {
 	privateKey *ecdsa.PrivateKey
@@ -41,10 +40,12 @@ func NewEcdsaSign(hashAlg string,
 	curve string,
 	encoding string,
 	keyValue []byte) (*EcdsaSign, error) {
-	publicKey := ecdsa.PublicKey{Curve: subtle.GetCurve(curve), X: nil, Y: nil}
-	d := new(big.Int).SetBytes(keyValue)
-	privateKey := &ecdsa.PrivateKey{PublicKey: publicKey, D: d}
-	return NewEcdsaSignFromPrivateKey(hashAlg, encoding, privateKey)
+	privKey := new(ecdsa.PrivateKey)
+	c := subtle.GetCurve(curve)
+	privKey.PublicKey.Curve = c
+	privKey.D = new(big.Int).SetBytes(keyValue)
+	privKey.PublicKey.X, privKey.PublicKey.Y = c.ScalarBaseMult(keyValue)
+	return NewEcdsaSignFromPrivateKey(hashAlg, encoding, privKey)
 }
 
 // NewEcdsaSignFromPrivateKey creates a new instance of EcdsaSign

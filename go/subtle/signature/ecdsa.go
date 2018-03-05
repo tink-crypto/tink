@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,6 +11,7 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
+// Package signature provides subtle implementations of the PublicKeySign and PublicKeyVerify primitives.
 package signature
 
 import (
@@ -22,7 +21,7 @@ import (
 
 var errUnsupportedEncoding = fmt.Errorf("ecdsa: unsupported encoding")
 
-// ecdsaSignature is a struct holding r and s values of an ECDSA signature.
+// EcdsaSignature is a struct holding r and s values of an ECDSA signature.
 type EcdsaSignature struct {
 	R, S *big.Int
 }
@@ -32,7 +31,7 @@ func NewEcdsaSignature(r, s *big.Int) *EcdsaSignature {
 	return &EcdsaSignature{R: r, S: s}
 }
 
-// Encode converts the signature to the given encoding format.
+// EncodeEcdsaSignature converts the signature to the given encoding format.
 // Only DER encoding is supported now.
 func (sig *EcdsaSignature) EncodeEcdsaSignature(encoding string) ([]byte, error) {
 	switch encoding {

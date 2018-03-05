@@ -50,7 +50,7 @@ deploy_library() {
   javadoc=$2
   pomfile=$3
   bazel build $library $javadoc
-  
+
   # Update the version
   sed -i \
     's/VERSION_PLACEHOLDER/'"$VERSION"'/' \

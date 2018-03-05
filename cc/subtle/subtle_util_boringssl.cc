@@ -16,7 +16,6 @@
 
 #include "cc/subtle/subtle_util_boringssl.h"
 #include "cc/subtle/common_enums.h"
-#include "openssl/bio.h"
 #include "openssl/ec.h"
 #include "openssl/err.h"
 
@@ -28,12 +27,21 @@ namespace subtle {
 
 namespace {
 
-std::string bn2str(const BIGNUM* bn) {
-  size_t bn_size_in_bytes = BN_num_bytes(bn);
-  std::unique_ptr<uint8_t[]> res(new uint8_t[bn_size_in_bytes]);
-  BN_bn2bin(bn, &res.get()[0]);
-  return std::string(reinterpret_cast<const char*>(res.get()),
-                     bn_size_in_bytes);
+util::StatusOr<std::string> bn2str(const BIGNUM* bn, size_t len) {
+  std::unique_ptr<uint8_t[]> res(new uint8_t[len]);
+  if (1 != BN_bn2bin_padded(res.get(), len, bn)) {
+    return util::Status(util::error::INTERNAL, "Value too large");
+  }
+  return std::string(reinterpret_cast<const char*>(res.get()), len);
+}
+
+size_t ScalarSizeInBytes(const EC_GROUP* group) {
+  return BN_num_bytes(EC_GROUP_get0_order(group));
+}
+
+size_t FieldElementSizeInBytes(const EC_GROUP* group) {
+  unsigned degree_bits = EC_GROUP_get_degree(group);
+  return (degree_bits + 7) / 8;
 }
 
 }  // namespace
@@ -103,9 +111,23 @@ SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType curve_type) {
   }
   EcKey ec_key;
   ec_key.curve = curve_type;
-  ec_key.pub_x = bn2str(pub_key_x_bn.get());
-  ec_key.pub_y = bn2str(pub_key_y_bn.get());
-  ec_key.priv = bn2str(priv_key);
+  auto pub_x_str =
+      bn2str(pub_key_x_bn.get(), FieldElementSizeInBytes(group.get()));
+  if (!pub_x_str.ok()) {
+    return pub_x_str.status();
+  }
+  ec_key.pub_x = pub_x_str.ValueOrDie();
+  auto pub_y_str =
+      bn2str(pub_key_y_bn.get(), FieldElementSizeInBytes(group.get()));
+  if (!pub_y_str.ok()) {
+    return pub_y_str.status();
+  }
+  ec_key.pub_y = pub_y_str.ValueOrDie();
+  auto priv_key_str = bn2str(priv_key, ScalarSizeInBytes(group.get()));
+  if (!priv_key_str.ok()) {
+    return priv_key_str.status();
+  }
+  ec_key.priv = priv_key_str.ValueOrDie();
   return ec_key;
 }
 
@@ -151,33 +173,14 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
       EC_POINT_is_on_curve(priv_group.get(), shared_point.get(), nullptr)) {
     return util::Status(util::error::INTERNAL, "Shared point is not on curve");
   }
+  // Get shared point's x coordinate.
   bssl::UniquePtr<BIGNUM> shared_x(BN_new());
-  bssl::UniquePtr<BIGNUM> shared_y(BN_new());
   if (1 != EC_POINT_get_affine_coordinates_GFp(priv_group.get(),
-               shared_point.get(), shared_x.get(), shared_y.get(), nullptr)) {
+               shared_point.get(), shared_x.get(), nullptr, nullptr)) {
     return util::Status(util::error::INTERNAL,
                         "EC_POINT_get_affine_coordinates_GFp failed");
   }
-
-  // Get shared point's x coordinate.
-  unsigned curve_size_in_bits = EC_GROUP_get_degree(priv_group.get());
-  unsigned curve_size_in_bytes = (curve_size_in_bits + 7) / 8;
-  unsigned x_size_in_bytes = BN_num_bytes(shared_x.get());
-  std::unique_ptr<uint8_t[]> shared_secret_bytes(
-      new uint8_t[curve_size_in_bytes]);
-  memset(shared_secret_bytes.get(), 0, curve_size_in_bytes);
-  if (curve_size_in_bytes < x_size_in_bytes) {
-    return util::Status(util::error::INTERNAL,
-                        "The x-coordinate of the shared point is larger than "
-                        "the size of the curve");
-  }
-  unsigned zeros = curve_size_in_bytes - x_size_in_bytes;
-  size_t written = BN_bn2bin(shared_x.get(), &shared_secret_bytes.get()[zeros]);
-  if (written != x_size_in_bytes) {
-    return util::Status(util::error::INTERNAL, "BN_bn_2bin failed");
-  }
-  return std::string(reinterpret_cast<char *>(shared_secret_bytes.get()),
-                     curve_size_in_bytes);
+  return bn2str(shared_x.get(), FieldElementSizeInBytes(priv_group.get()));
 }
 
 // static
@@ -268,20 +271,16 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
 }
 
 
-std::string BioToString(BIO* bio) {
-  char* buf;
-  int bytes_available = BIO_get_mem_data(bio, &buf);
-  if (bytes_available == 0) {
-    return std::string();
-  }
-  return std::string(buf, bytes_available);
-}
-
 // static
 std::string SubtleUtilBoringSSL::GetErrors() {
-  bssl::UniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
-  ERR_print_errors(bio.get());
-  return BioToString(bio.get());
+  std::string ret;
+  ERR_print_errors_cb(
+      [](const char *str, size_t len, void *ctx) -> int {
+        static_cast<std::string *>(ctx)->append(str, len);
+        return 1;
+      },
+      &ret);
+  return ret;
 }
 
 }  // namespace subtle

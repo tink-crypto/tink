@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -80,7 +78,7 @@ func TestEcdsaSignGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid version
 	key := testutil.NewEcdsaPrivateKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
-	key.Version = signature.ECDSA_SIGN_KEY_VERSION + 1
+	key.Version = signature.EcdsaSignKeyVersion + 1
 	if _, err := km.GetPrimitiveFromKey(key); err == nil {
 		t.Errorf("expect an error when version is invalid")
 	}
@@ -208,9 +206,9 @@ func TestEcdsaSignNewKeyDataBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error in test case  %d: %s", i, err)
 		}
-		if keyData.TypeUrl != signature.ECDSA_SIGN_TYPE_URL {
+		if keyData.TypeUrl != signature.EcdsaSignTypeURL {
 			t.Errorf("incorrect type url in test case  %d: expect %s, got %s",
-				i, signature.ECDSA_SIGN_TYPE_URL, keyData.TypeUrl)
+				i, signature.EcdsaSignTypeURL, keyData.TypeUrl)
 		}
 		if keyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PRIVATE {
 			t.Errorf("incorrect key material type in test case  %d: expect %s, got %s",
@@ -256,7 +254,7 @@ func TestGetPublicKeyDataBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
-		if pubKeyData.TypeUrl != signature.ECDSA_VERIFY_TYPE_URL {
+		if pubKeyData.TypeUrl != signature.EcdsaVerifyTypeURL {
 			t.Errorf("incorrect type url: %s", pubKeyData.TypeUrl)
 		}
 		if pubKeyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PUBLIC {
@@ -292,14 +290,14 @@ func TestGetPublicKeyDataWithInvalidInput(t *testing.T) {
 var errSmallKey = fmt.Errorf("private key doesn't have adequate size")
 
 func validateEcdsaPrivateKey(key *ecdsapb.EcdsaPrivateKey, params *ecdsapb.EcdsaParams) error {
-	if key.Version != signature.ECDSA_SIGN_KEY_VERSION {
+	if key.Version != signature.EcdsaSignKeyVersion {
 		return fmt.Errorf("incorrect private key's version: expect %d, got %d",
-			signature.ECDSA_SIGN_KEY_VERSION, key.Version)
+			signature.EcdsaSignKeyVersion, key.Version)
 	}
 	publicKey := key.PublicKey
-	if publicKey.Version != signature.ECDSA_SIGN_KEY_VERSION {
+	if publicKey.Version != signature.EcdsaSignKeyVersion {
 		return fmt.Errorf("incorrect public key's version: expect %d, got %d",
-			signature.ECDSA_SIGN_KEY_VERSION, key.Version)
+			signature.EcdsaSignKeyVersion, key.Version)
 	}
 	if params.HashType != publicKey.Params.HashType ||
 		params.Curve != publicKey.Params.Curve ||

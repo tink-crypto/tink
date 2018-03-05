@@ -32,7 +32,7 @@ using crypto::tink::KeysetHandle;
 //   operation: the actual AEAD-operation, i.e. "encrypt" or "decrypt"
 //   input-file:  name of the file with input (plaintext for encryption, or
 //                or ciphertext for decryption)
-//   associated-data:  a string to be used as assciated data
+//   associated-data:  a std::string to be used as assciated data
 //   output-file:  name of the file for the resulting output
 int main(int argc, char** argv) {
   if (argc != 6) {

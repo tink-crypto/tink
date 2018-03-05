@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,25 +15,26 @@
 package tink_test
 
 import (
+	"testing"
+
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"testing"
 )
 
 var tests = []struct {
-	keyId  uint32
+	keyID  uint32
 	result string // expected prefix
 }{
 	{
-		keyId:  1000000,
+		keyID:  1000000,
 		result: string([]byte{0, 15, 66, 64}),
 	},
 	{
-		keyId:  4294967295,
+		keyID:  4294967295,
 		result: string([]byte{255, 255, 255, 255}),
 	},
 	{
-		keyId:  0,
+		keyID:  0,
 		result: string([]byte{0, 0, 0, 0}),
 	},
 }
@@ -43,29 +42,29 @@ var tests = []struct {
 func TestGetOutputPrefix(t *testing.T) {
 	key := new(tinkpb.Keyset_Key)
 	for i, test := range tests {
-		key.KeyId = test.keyId
+		key.KeyId = test.keyID
 		// legacy type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_LEGACY
 		prefix, err := tink.GetOutputPrefix(key)
-		if err != nil || !validatePrefix(prefix, tink.LEGACY_START_BYTE, test.result) {
+		if err != nil || !validatePrefix(prefix, tink.LegacyStartByte, test.result) {
 			t.Errorf("incorrect legacy prefix in test %d", i)
 		}
 		// crunchy type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_CRUNCHY
 		prefix, err = tink.GetOutputPrefix(key)
-		if err != nil || !validatePrefix(prefix, tink.LEGACY_START_BYTE, test.result) {
+		if err != nil || !validatePrefix(prefix, tink.LegacyStartByte, test.result) {
 			t.Errorf("incorrect legacy prefix in test %d", i)
 		}
 		// tink type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_TINK
 		prefix, err = tink.GetOutputPrefix(key)
-		if err != nil || !validatePrefix(prefix, tink.TINK_START_BYTE, test.result) {
+		if err != nil || !validatePrefix(prefix, tink.TinkStartByte, test.result) {
 			t.Errorf("incorrect tink prefix in test %d", i)
 		}
 		// raw type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_RAW
 		prefix, err = tink.GetOutputPrefix(key)
-		if err != nil || prefix != tink.RAW_PREFIX {
+		if err != nil || prefix != tink.RawPrefix {
 			t.Errorf("incorrect raw prefix in test %d", i)
 		}
 	}

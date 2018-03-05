@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -37,8 +35,8 @@ func TestAesGcmTagLength(t *testing.T) {
 		ad := random.GetRandomBytes(32)
 		pt := random.GetRandomBytes(32)
 		ct, _ := a.Encrypt(pt, ad)
-		actualTagSize := len(ct) - aead.AES_GCM_IV_SIZE - len(pt)
-		if actualTagSize != aead.AES_GCM_TAG_SIZE {
+		actualTagSize := len(ct) - aead.AesGcmIvSize - len(pt)
+		if actualTagSize != aead.AesGcmTagSize {
 			t.Errorf("tag size is not 128 bit, it is %d bit", actualTagSize*8)
 		}
 	}
@@ -181,11 +179,11 @@ type testcase struct {
 	Msg     string
 	Result  string
 	Tag     string
-	TcId    uint32
+	TcID    uint32
 }
 
 func TestVectors(t *testing.T) {
-	f, err := os.Open("../../../../wycheproof/testvectors/aes_gcm_test.json")
+	f, err := os.Open("../../../testdata/wycheproof/aes_gcm_test.json")
 	if err != nil {
 		t.Fatalf("cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath", err)
 	}
@@ -199,33 +197,33 @@ func TestVectors(t *testing.T) {
 		if err := aead.ValidateAesKeySize(g.KeySize / 8); err != nil {
 			continue
 		}
-		if g.IvSize != aead.AES_GCM_IV_SIZE*8 {
+		if g.IvSize != aead.AesGcmIvSize*8 {
 			continue
 		}
 		for _, tc := range g.Tests {
 			key, err := hex.DecodeString(tc.Key)
 			if err != nil {
-				t.Errorf("cannot decode key in test case %d: %s", tc.TcId, err)
+				t.Errorf("cannot decode key in test case %d: %s", tc.TcID, err)
 			}
 			aad, err := hex.DecodeString(tc.Aad)
 			if err != nil {
-				t.Errorf("cannot decode aad in test case %d: %s", tc.TcId, err)
+				t.Errorf("cannot decode aad in test case %d: %s", tc.TcID, err)
 			}
 			msg, err := hex.DecodeString(tc.Msg)
 			if err != nil {
-				t.Errorf("cannot decode msg in test case %d: %s", tc.TcId, err)
+				t.Errorf("cannot decode msg in test case %d: %s", tc.TcID, err)
 			}
 			ct, err := hex.DecodeString(tc.Ct)
 			if err != nil {
-				t.Errorf("cannot decode ct in test case %d: %s", tc.TcId, err)
+				t.Errorf("cannot decode ct in test case %d: %s", tc.TcID, err)
 			}
 			iv, err := hex.DecodeString(tc.Iv)
 			if err != nil {
-				t.Errorf("cannot decode iv in test case %d: %s", tc.TcId, err)
+				t.Errorf("cannot decode iv in test case %d: %s", tc.TcID, err)
 			}
 			tag, err := hex.DecodeString(tc.Tag)
 			if err != nil {
-				t.Errorf("cannot decode tag in test case %d: %s", tc.TcId, err)
+				t.Errorf("cannot decode tag in test case %d: %s", tc.TcID, err)
 			}
 			var combinedCt []byte
 			combinedCt = append(combinedCt, iv...)
@@ -234,15 +232,15 @@ func TestVectors(t *testing.T) {
 			// create cipher and do encryption
 			cipher, err := aead.NewAesGcm(key)
 			if err != nil {
-				t.Errorf("cannot create new instance of AesGcm in test case %d: %s", tc.TcId, err)
+				t.Errorf("cannot create new instance of AesGcm in test case %d: %s", tc.TcID, err)
 				continue
 			}
 			decrypted, err := cipher.Decrypt(combinedCt, aad)
 			if err != nil {
-				t.Errorf("unexpected error in test case %d: %s", tc.TcId, err)
+				t.Errorf("unexpected error in test case %d: %s", tc.TcID, err)
 			}
 			if !bytes.Equal(decrypted, msg) {
-				t.Errorf("failed in test case %d", tc.TcId)
+				t.Errorf("failed in test case %d", tc.TcID)
 			}
 		}
 	}

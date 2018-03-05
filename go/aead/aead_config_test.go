@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,9 +15,10 @@
 package aead_test
 
 import (
+	"testing"
+
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/tink"
-	"testing"
 )
 
 func TestConfigInstance(t *testing.T) {
@@ -35,7 +34,7 @@ func TestConfigRegistration(t *testing.T) {
 		t.Errorf("cannot register standard key types")
 	}
 	// check for AES-GCM key manager
-	keyManager, err := tink.Registry().GetKeyManager(aead.AES_GCM_TYPE_URL)
+	keyManager, err := tink.Registry().GetKeyManager(aead.AesGcmTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

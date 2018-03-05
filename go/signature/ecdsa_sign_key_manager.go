@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,20 +18,21 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"fmt"
+
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/subtle"
 	subtleSignature "github.com/google/tink/go/subtle/signature"
+	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
 	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
 )
 
 const (
-	// Supported version
-	ECDSA_SIGN_KEY_VERSION = 0
+	// EcdsaSignKeyVersion is the maximum version of keys that this manager supports.
+	EcdsaSignKeyVersion = 0
 
-	// Supported type url
-	ECDSA_SIGN_TYPE_URL = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey"
+	// EcdsaSignTypeURL is the only type URL that this manager supports.
+	EcdsaSignTypeURL = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey"
 )
 
 // common errors
@@ -110,8 +109,8 @@ func (km *EcdsaSignKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Messa
 	curve := tink.GetCurveName(params.Curve)
 	tmpKey, _ := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
 	keyValue := tmpKey.D.Bytes()
-	pub := NewEcdsaPublicKey(ECDSA_SIGN_KEY_VERSION, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
-	priv := NewEcdsaPrivateKey(ECDSA_SIGN_KEY_VERSION, pub, keyValue)
+	pub := NewEcdsaPublicKey(EcdsaSignKeyVersion, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
+	priv := NewEcdsaPrivateKey(EcdsaSignKeyVersion, pub, keyValue)
 	return priv, nil
 }
 
@@ -127,7 +126,7 @@ func (km *EcdsaSignKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.K
 		return nil, errInvalidEcdsaSignKeyFormat
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         ECDSA_SIGN_TYPE_URL,
+		TypeUrl:         EcdsaSignTypeURL,
 		Value:           serializedKey,
 		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
 	}, nil
@@ -144,25 +143,25 @@ func (km *EcdsaSignKeyManager) GetPublicKeyData(serializedPrivKey []byte) (*tink
 		return nil, errInvalidEcdsaSignKey
 	}
 	return &tinkpb.KeyData{
-		TypeUrl:         ECDSA_VERIFY_TYPE_URL,
+		TypeUrl:         EcdsaVerifyTypeURL,
 		Value:           serializedPubKey,
 		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
 	}, nil
 }
 
 // DoesSupport indicates if this key manager supports the given key type.
-func (_ *EcdsaSignKeyManager) DoesSupport(typeUrl string) bool {
-	return typeUrl == ECDSA_SIGN_TYPE_URL
+func (km *EcdsaSignKeyManager) DoesSupport(typeURL string) bool {
+	return typeURL == EcdsaSignTypeURL
 }
 
 // GetKeyType returns the key type of keys managed by this key manager.
-func (_ *EcdsaSignKeyManager) GetKeyType() string {
-	return ECDSA_SIGN_TYPE_URL
+func (km *EcdsaSignKeyManager) GetKeyType() string {
+	return EcdsaSignTypeURL
 }
 
 // validateKey validates the given EcdsaPrivateKey.
-func (_ *EcdsaSignKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
-	if err := tink.ValidateVersion(key.Version, ECDSA_SIGN_KEY_VERSION); err != nil {
+func (km *EcdsaSignKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
+	if err := tink.ValidateVersion(key.Version, EcdsaSignKeyVersion); err != nil {
 		return fmt.Errorf("ecdsa_sign_key_manager: %s", err)
 	}
 	hash, curve, encoding := GetEcdsaParamNames(key.PublicKey.Params)
@@ -170,7 +169,7 @@ func (_ *EcdsaSignKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
 }
 
 // validateKeyFormat validates the given EcdsaKeyFormat.
-func (_ *EcdsaSignKeyManager) validateKeyFormat(format *ecdsapb.EcdsaKeyFormat) error {
+func (km *EcdsaSignKeyManager) validateKeyFormat(format *ecdsapb.EcdsaKeyFormat) error {
 	hash, curve, encoding := GetEcdsaParamNames(format.Params)
 	return subtleSignature.ValidateEcdsaParams(hash, curve, encoding)
 }

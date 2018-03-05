@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,12 +16,13 @@ package mac_test
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"strings"
-	"testing"
 )
 
 func TestFactoryMultipleKeys(t *testing.T) {
@@ -55,7 +54,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if err != nil {
 		t.Errorf("GetPrimitive failed: %s", err)
 	}
-	if err := verifyMacPrimitive(p2, p, tink.RAW_PREFIX, tagSize); err != nil {
+	if err := verifyMacPrimitive(p2, p, tink.RawPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
 	}
 
@@ -86,7 +85,7 @@ func TestFactoryRawKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("GetPrimitive failed: %s", err)
 	}
-	if err := verifyMacPrimitive(p, p, tink.RAW_PREFIX, tagSize); err != nil {
+	if err := verifyMacPrimitive(p, p, tink.RawPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
 	}
 }

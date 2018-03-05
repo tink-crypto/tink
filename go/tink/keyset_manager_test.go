@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -59,7 +57,7 @@ func TestKeysetManagerBasic(t *testing.T) {
 		t.Errorf("expect the number of keys in the keyset is 1")
 	}
 	if keyset.Key[0].KeyId != keyset.PrimaryKeyId ||
-		keyset.Key[0].KeyData.TypeUrl != mac.HMAC_TYPE_URL ||
+		keyset.Key[0].KeyData.TypeUrl != mac.HmacTypeURL ||
 		keyset.Key[0].Status != tinkpb.KeyStatusType_ENABLED ||
 		keyset.Key[0].OutputPrefixType != tinkpb.OutputPrefixType_TINK {
 		t.Errorf("incorrect key information: %s", keyset.Key[0])
@@ -98,7 +96,7 @@ func TestEncryptedKeyset(t *testing.T) {
 	if info.PrimaryKeyId != info.KeyInfo[0].KeyId {
 		t.Errorf("incorrect primary key id: %d >< %d", info.PrimaryKeyId, info.KeyInfo[0].KeyId)
 	}
-	if info.KeyInfo[0].TypeUrl != mac.HMAC_TYPE_URL ||
+	if info.KeyInfo[0].TypeUrl != mac.HmacTypeURL ||
 		info.KeyInfo[0].Status != tinkpb.KeyStatusType_ENABLED ||
 		info.KeyInfo[0].OutputPrefixType != tinkpb.OutputPrefixType_TINK {
 		t.Errorf("incorrect key info: %s", info.KeyInfo[0])

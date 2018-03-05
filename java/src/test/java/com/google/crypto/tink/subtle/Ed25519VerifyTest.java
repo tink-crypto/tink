@@ -59,9 +59,6 @@ public final class Ed25519VerifyTest {
   @Test
   public void testVerificationWithWycheproofVectors() throws Exception {
     JSONObject json = WycheproofTestUtil.readJson("testdata/wycheproof/eddsa_test.json");
-    WycheproofTestUtil.checkAlgAndVersion(json, "EDDSA", "0.0a18");
-    int numTests = json.getInt("numberOfTests");
-    int cntTests = 0;
     int errors = 0;
     JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
@@ -71,31 +68,27 @@ public final class Ed25519VerifyTest {
       JSONArray tests = group.getJSONArray("tests");
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
-        int tcId = testcase.getInt("tcId");
-        String tc = "tcId: " + tcId + " " + testcase.getString("comment");
+        String tcId =
+            String.format(
+                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
         byte[] msg = getMessage(testcase);
         byte[] sig = Hex.decode(testcase.getString("sig"));
         String result = testcase.getString("result");
-        boolean verified = false;
         Ed25519Verify verifier = new Ed25519Verify(publicKey);
         try {
           verifier.verify(sig, msg);
-          verified = true;
+          if (result.equals("invalid")) {
+            System.out.printf("FAIL %s: accepting invalid signature%n", tcId);
+            errors++;
+          }
         } catch (GeneralSecurityException ex) {
-          verified = false;
-          tc += " exception: " + ex;
+          if (result.equals("valid")) {
+            System.out.printf("FAIL %s: rejecting valid signature, exception: %s%n", tcId, ex);
+            errors++;
+          }
         }
-        if (!verified && result.equals("valid")) {
-          System.out.println("Valid signature not verified, testcase : " + tc);
-          errors++;
-        } else if (verified && result.equals("invalid")) {
-          System.out.println("Invalid signature verified, testcase: " + tc);
-          errors++;
-        }
-        cntTests++;
       }
     }
     assertEquals(0, errors);
-    assertEquals(numTests, cntTests);
   }
 }

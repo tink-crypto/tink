@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -27,11 +25,11 @@ import (
 )
 
 const (
-	// Supported version
-	ECDSA_VERIFY_KEY_VERSION = 0
+	// EcdsaVerifyKeyVersion is the maximum version of keys that this manager supports.
+	EcdsaVerifyKeyVersion = 0
 
-	// Supported type url
-	ECDSA_VERIFY_TYPE_URL = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey"
+	// EcdsaVerifyTypeURL is the only type URL that this manager supports.
+	EcdsaVerifyTypeURL = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey"
 )
 
 // common errors
@@ -97,18 +95,18 @@ func (km *EcdsaVerifyKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb
 }
 
 // DoesSupport indicates if this key manager supports the given key type.
-func (_ *EcdsaVerifyKeyManager) DoesSupport(typeUrl string) bool {
-	return typeUrl == ECDSA_VERIFY_TYPE_URL
+func (km *EcdsaVerifyKeyManager) DoesSupport(typeURL string) bool {
+	return typeURL == EcdsaVerifyTypeURL
 }
 
 // GetKeyType returns the key type of keys managed by this key manager.
-func (_ *EcdsaVerifyKeyManager) GetKeyType() string {
-	return ECDSA_VERIFY_TYPE_URL
+func (km *EcdsaVerifyKeyManager) GetKeyType() string {
+	return EcdsaVerifyTypeURL
 }
 
 // validateKey validates the given EcdsaPublicKey.
-func (_ *EcdsaVerifyKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) error {
-	if err := tink.ValidateVersion(key.Version, ECDSA_VERIFY_KEY_VERSION); err != nil {
+func (km *EcdsaVerifyKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) error {
+	if err := tink.ValidateVersion(key.Version, EcdsaVerifyKeyVersion); err != nil {
 		return fmt.Errorf("ecdsa_verify_key_manager: %s", err)
 	}
 	hash, curve, encoding := GetEcdsaParamNames(key.Params)

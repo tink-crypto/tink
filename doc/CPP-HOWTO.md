@@ -13,7 +13,7 @@ For example, if you want to use all implementations of all primitives in Tink
 1.1.0, the initialization would look as follows:
 
 ```cpp
-   #include cc/config/tink_config.h
+   #include third_party/tink/cc/config/tink_config.h
 
    // ...
    auto status = TinkConfig::Init();
@@ -25,7 +25,7 @@ For example, if you want to use all implementations of all primitives in Tink
 To use only implementations of the AEAD primitive:
 
 ```cpp
-   #include cc/aead/aead_config.h
+   #include "cc/aead/aead_config.h"
 
    // ...
    auto status = AeadConfig::Init();
@@ -38,8 +38,8 @@ For custom initialization the registration proceeds directly via
 `Registry`-class:
 
 ```cpp
-   #include cc/registry.h
-   #include custom_project/custom_aead_key_manager.h
+   #include "cc/registry.h"
+   #include "custom_project/custom_aead_key_manager.h"
 
    // ...
    auto status = Registry::RegisterKeyManager(
@@ -186,4 +186,3 @@ symmetric key encryption](PRIMITIVES.md#hybrid-encryption):
     if (!plaintext_result.ok()) return plaintext.status();
     auto plaintext = std::move(plaintext_result.ValueOrDie());
 ```
-

@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,14 +11,16 @@
 // limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
+// Package mac provides subtle implementations of the Mac primitive.
 package mac
 
 import (
 	"crypto/hmac"
 	"fmt"
+	"hash"
+
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
-	"hash"
 )
 
 const (
@@ -50,7 +50,7 @@ type Hmac struct {
 // This makes sure that Hmac implements the tink.Mac interface
 var _ tink.Mac = (*Hmac)(nil)
 
-// New creates a new instance of Hmac
+// NewHmac creates a new instance of Hmac with the specified key and tag size.
 func NewHmac(hashAlg string, key []byte, tagSize uint32) (*Hmac, error) {
 	keySize := uint32(len(key))
 	if err := ValidateHmacParams(hashAlg, keySize, tagSize); err != nil {
@@ -67,7 +67,7 @@ func NewHmac(hashAlg string, key []byte, tagSize uint32) (*Hmac, error) {
 	}, nil
 }
 
-// ValidateParams validates parameters of Hmac constructor.
+// ValidateHmacParams validates parameters of Hmac constructor.
 func ValidateHmacParams(hash string, keySize uint32, tagSize uint32) error {
 	// validate tag size
 	maxTagSize, found := maxTagSizeInBytes[hash]

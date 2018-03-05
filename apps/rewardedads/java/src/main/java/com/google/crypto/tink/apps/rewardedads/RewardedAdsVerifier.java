@@ -139,7 +139,7 @@ public final class RewardedAdsVerifier {
     String sig =
         sigAndKeyId.substring(
             SIGNATURE_PARAM_NAME.length(), i - 1 /* i - 1 instead of i because of & */);
-    long keyId = Long.valueOf(sigAndKeyId.substring(i + KEY_ID_PARAM_NAME.length()));
+    long keyId = Long.parseLong(sigAndKeyId.substring(i + KEY_ID_PARAM_NAME.length()));
     verify(tbsData, keyId, Base64.urlSafeDecode(sig));
   }
 

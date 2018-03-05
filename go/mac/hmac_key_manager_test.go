@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -19,18 +17,19 @@ package mac_test
 import (
 	"bytes"
 	"fmt"
+	"reflect"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/mac"
-	"github.com/google/tink/go/subtle"
 	subtleMac "github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 	commonpb "github.com/google/tink/proto/common_proto"
 	hmacpb "github.com/google/tink/proto/hmac_proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"reflect"
-	"testing"
 )
 
 func TestGetPrimitiveBasic(t *testing.T) {
@@ -42,7 +41,7 @@ func TestGetPrimitiveBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
 		}
-		if err := validateHmacPrimitive(p.(*subtleMac.Hmac), key); err != nil {
+		if err := validateHmacPrimitive(p, key); err != nil {
 			t.Errorf("%s", err)
 		}
 
@@ -51,7 +50,7 @@ func TestGetPrimitiveBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
 		}
-		if err := validateHmacPrimitive(p.(*subtleMac.Hmac), key); err != nil {
+		if err := validateHmacPrimitive(p, key); err != nil {
 			t.Errorf("%s", err)
 		}
 	}
@@ -149,7 +148,10 @@ func TestNewKeyWithInvalidInput(t *testing.T) {
 			t.Errorf("expect an error in test case %d: %s", i, err)
 		}
 
-		serializedFormat, _ := proto.Marshal(format)
+		serializedFormat, err := proto.Marshal(format)
+		if err != nil {
+			fmt.Println("Error!")
+		}
 		if _, err := km.NewKeyFromSerializedKeyFormat(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d: %s", i, err)
 		}
@@ -177,7 +179,7 @@ func TestNewKeyDataBasic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
 		}
-		if keyData.TypeUrl != mac.HMAC_TYPE_URL {
+		if keyData.TypeUrl != mac.HmacTypeURL {
 			t.Errorf("incorrect type url in test case %d", i)
 		}
 		if keyData.KeyMaterialType != tinkpb.KeyData_SYMMETRIC {
@@ -212,17 +214,17 @@ func TestNewKeyDataWithInvalidInput(t *testing.T) {
 
 func TestDoesSupport(t *testing.T) {
 	km := mac.NewHmacKeyManager()
-	if !km.DoesSupport(mac.HMAC_TYPE_URL) {
-		t.Errorf("HmacKeyManager must support %s", mac.HMAC_TYPE_URL)
+	if !km.DoesSupport(mac.HmacTypeURL) {
+		t.Errorf("HmacKeyManager must support %s", mac.HmacTypeURL)
 	}
 	if km.DoesSupport("some bad type") {
-		t.Errorf("HmacKeyManager must support only %s", mac.HMAC_TYPE_URL)
+		t.Errorf("HmacKeyManager must support only %s", mac.HmacTypeURL)
 	}
 }
 
 func TestGetKeyType(t *testing.T) {
 	km := mac.NewHmacKeyManager()
-	if km.GetKeyType() != mac.HMAC_TYPE_URL {
+	if km.GetKeyType() != mac.HmacTypeURL {
 		t.Errorf("incorrect GetKeyType()")
 	}
 }
@@ -234,7 +236,7 @@ func TestKeyManagerInterface(t *testing.T) {
 
 func genInvalidHmacKeys() []proto.Message {
 	badVersionKey := testutil.NewHmacKey(commonpb.HashType_SHA256, 32)
-	badVersionKey.Version += 1
+	badVersionKey.Version++
 	shortKey := testutil.NewHmacKey(commonpb.HashType_SHA256, 32)
 	shortKey.KeyValue = []byte{1, 1}
 	return []proto.Message{
@@ -305,19 +307,20 @@ func validateHmacKey(format *hmacpb.HmacKeyFormat, key *hmacpb.HmacKey) error {
 }
 
 // validateHmacPrimitive checks whether the given primitive matches the given HmacKey
-func validateHmacPrimitive(p *subtleMac.Hmac, key *hmacpb.HmacKey) error {
-	if !bytes.Equal(p.Key, key.KeyValue) ||
-		p.TagSize != key.Params.TagSize ||
-		reflect.ValueOf(p.HashFunc).Pointer() !=
+func validateHmacPrimitive(p interface{}, key *hmacpb.HmacKey) error {
+	hmacPrimitive := p.(*subtleMac.Hmac)
+	if !bytes.Equal(hmacPrimitive.Key, key.KeyValue) ||
+		hmacPrimitive.TagSize != key.Params.TagSize ||
+		reflect.ValueOf(hmacPrimitive.HashFunc).Pointer() !=
 			reflect.ValueOf(subtle.GetHashFunc(tink.GetHashName(key.Params.Hash))).Pointer() {
 		return fmt.Errorf("primitive and key do not matched")
 	}
 	data := random.GetRandomBytes(20)
-	mac, err := p.ComputeMac(data)
+	mac, err := hmacPrimitive.ComputeMac(data)
 	if err != nil {
 		return fmt.Errorf("mac computation failed: %s", err)
 	}
-	if valid, err := p.VerifyMac(mac, data); !valid || err != nil {
+	if valid, err := hmacPrimitive.VerifyMac(mac, data); !valid || err != nil {
 		return fmt.Errorf("mac verification failed: %s", err)
 	}
 	return nil

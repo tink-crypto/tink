@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,9 +16,10 @@ package tink
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/golang/protobuf/proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"sync"
 )
 
 // cleartextKeysetHandle provides utilities to creates keyset handles from
@@ -42,7 +41,7 @@ func CleartextKeysetHandle() *cleartextKeysetHandle {
 var errInvalidKeyset = fmt.Errorf("cleartext_keyset_handle: invalid keyset")
 
 // ParseSerializedKeyset creates a new keyset handle from the given serialized keyset.
-func (_ *cleartextKeysetHandle) ParseSerializedKeyset(serialized []byte) (*KeysetHandle, error) {
+func (kh *cleartextKeysetHandle) ParseSerializedKeyset(serialized []byte) (*KeysetHandle, error) {
 	if len(serialized) == 0 {
 		return nil, errInvalidKeyset
 	}
@@ -54,13 +53,13 @@ func (_ *cleartextKeysetHandle) ParseSerializedKeyset(serialized []byte) (*Keyse
 }
 
 // ParseKeyset creates a new keyset handle from the given keyset.
-func (_ *cleartextKeysetHandle) ParseKeyset(keyset *tinkpb.Keyset) (*KeysetHandle, error) {
+func (kh *cleartextKeysetHandle) ParseKeyset(keyset *tinkpb.Keyset) (*KeysetHandle, error) {
 	return newKeysetHandle(keyset, nil)
 }
 
 // GenerateNew creates a keyset handle that contains a single fresh key generated
 // according to the given key template.
-func (_ *cleartextKeysetHandle) GenerateNew(template *tinkpb.KeyTemplate) (*KeysetHandle, error) {
+func (kh *cleartextKeysetHandle) GenerateNew(template *tinkpb.KeyTemplate) (*KeysetHandle, error) {
 	manager := NewKeysetManager(template, nil, nil)
 	err := manager.Rotate()
 	if err != nil {

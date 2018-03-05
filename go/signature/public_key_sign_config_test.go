@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,9 +15,10 @@
 package signature_test
 
 import (
+	"testing"
+
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/tink"
-	"testing"
 )
 
 func TestPublicKeySignConfigInstance(t *testing.T) {
@@ -35,7 +34,7 @@ func TestPublicKeySignConfigRegistration(t *testing.T) {
 		t.Errorf("cannot register standard key types")
 	}
 	// check for EcdsaSignKeyManager
-	keyManager, err := tink.Registry().GetKeyManager(signature.ECDSA_SIGN_TYPE_URL)
+	keyManager, err := tink.Registry().GetKeyManager(signature.EcdsaSignTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

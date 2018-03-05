@@ -136,65 +136,53 @@ public final class X25519Test {
   @Test
   public void testComputeSharedSecretWithWycheproofVectors() throws Exception {
     JSONObject json = WycheproofTestUtil.readJson("testdata/wycheproof/x25519_test.json");
-    WycheproofTestUtil.checkAlgAndVersion(json, "X25519", "0.1.3");
-    int numTests = json.getInt("numberOfTests");
-    // The number of test vectors where the expected and actual shared secret match.
-    int passedTests = 0;
-    // The number of test vectors where X25519 rejected the input values for a valid reason. These
-    // are test vectors where the field "result" is either "acceptable" or "invalid".
-    int rejectedTests = 0;
-    // The number of test vectors where X25519 computes the wrong shared secret and accepts invalid
-    // key.
     int errors = 0;
+    int cntSkippedTests = 0;
     JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
       JSONArray tests = group.getJSONArray("tests");
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
-        int tcid = testcase.getInt("tcId");
-        String comment = testcase.getString("comment");
-        String tc = "tcId: " + tcid + " " + comment;
+        String tcId =
+            String.format(
+                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
         String result = testcase.getString("result");
         String hexPubKey = testcase.getString("public");
         String hexPrivKey = testcase.getString("private");
         String expectedSharedSecret = testcase.getString("shared");
         String curve = testcase.getString("curve");
         if (!curve.equals("curve25519")) {
-          System.out.println("Unknown curve name: " + curve);
-          passedTests++;
+          System.out.printf("Skipping %s, unknown curve name: %s", tcId, curve);
+          cntSkippedTests++;
           continue;
         }
         try {
           String sharedSecret =
               Hex.encode(X25519.computeSharedSecret(Hex.decode(hexPrivKey), Hex.decode(hexPubKey)));
           if (result.equals("invalid")) {
-            System.out.println(
-                "Computed X25519 with invalid parameters" + tc + " shared:" + sharedSecret);
+            System.out.printf(
+                "FAIL %s: accepting invalid parameters, shared secret: %s%n", tcId, sharedSecret);
             errors++;
           } else if (!expectedSharedSecret.equals(sharedSecret)) {
-            System.out.println(
-                "Incorrect X25519's ECDH computation"
-                    + tc
-                    + "\nshared secret:"
-                    + sharedSecret
-                    + "\nexpected shared secret:"
-                    + expectedSharedSecret);
+            System.out.printf(
+                "FAIL %s: incorrect shared secret, computed: %s, expected: %s%n",
+                tcId, sharedSecret, expectedSharedSecret);
             errors++;
-          } else {
-            passedTests++;
           }
-        } catch (InvalidKeyException ex) {
+        } catch (GeneralSecurityException ex) {
           if (result.equals("valid")) {
-            System.out.println("Test vector with tcId: " + tc + " throws:" + ex.toString());
+            System.out.printf("FAIL %s, exception %s%n", tcId, ex);
             errors++;
-          } else {
-            rejectedTests++;
           }
+        } catch (Exception ex) {
+          // Other exceptions typically indicate that something is wrong with the implementation.
+          System.out.printf("FAIL %s, exception %s%n", tcId, ex);
+          errors++;
         }
       }
     }
+    System.out.printf("Number of tests skipped: %d", cntSkippedTests);
     assertEquals(0, errors);
-    assertEquals(numTests, passedTests + rejectedTests);
   }
 }

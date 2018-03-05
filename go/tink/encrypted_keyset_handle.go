@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,9 +16,10 @@ package tink
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/golang/protobuf/proto"
 	tinkpb "github.com/google/tink/proto/tink_proto"
-	"sync"
 )
 
 // encryptedKeysetHandle provides utilities to create keyset handles from keysets
@@ -43,7 +42,7 @@ var errInvalidMasterKey = fmt.Errorf("encrypted_keyset_handle: invalid master ke
 
 // ParseSerializedKeyset creates a new keyset handle from the given serialized
 // EncryptedKeyset. The keyset is encrypted with the given master key.
-func (handle *encryptedKeysetHandle) ParseSerializedKeyset(
+func (h *encryptedKeysetHandle) ParseSerializedKeyset(
 	serializedEncryptedKeyset []byte, masterKey Aead) (*KeysetHandle, error) {
 	if len(serializedEncryptedKeyset) == 0 {
 		return nil, errInvalidEncryptedKeyset
@@ -55,11 +54,11 @@ func (handle *encryptedKeysetHandle) ParseSerializedKeyset(
 	if err := proto.Unmarshal(serializedEncryptedKeyset, encryptedKeyset); err != nil {
 		return nil, errInvalidEncryptedKeyset
 	}
-	return handle.ParseKeyset(encryptedKeyset, masterKey)
+	return h.ParseKeyset(encryptedKeyset, masterKey)
 }
 
 // ParseKeyset creates a new keyset handle from the given EncryptedKeyset and master key.
-func (_ *encryptedKeysetHandle) ParseKeyset(
+func (h *encryptedKeysetHandle) ParseKeyset(
 	encryptedKeyset *tinkpb.EncryptedKeyset, masterKey Aead) (*KeysetHandle, error) {
 	if encryptedKeyset == nil || len(encryptedKeyset.EncryptedKeyset) == 0 {
 		return nil, errInvalidEncryptedKeyset
@@ -76,7 +75,7 @@ func (_ *encryptedKeysetHandle) ParseKeyset(
 
 // GenerateNew creates a keyset handle that contains a single fresh key generated
 // according to the given key template. The keyset is encrypted with the given master key.
-func (_ *encryptedKeysetHandle) GenerateNew(
+func (h *encryptedKeysetHandle) GenerateNew(
 	template *tinkpb.KeyTemplate, masterKey Aead) (*KeysetHandle, error) {
 	if masterKey == nil {
 		return nil, errInvalidMasterKey

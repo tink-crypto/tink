@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,28 +15,30 @@
 package mac
 
 import (
-	. "github.com/google/tink/proto/common_proto"
-	. "github.com/google/tink/proto/hmac_proto"
+	commonpb "github.com/google/tink/proto/common_proto"
+	hmacpb "github.com/google/tink/proto/hmac_proto"
 )
 
-// Utilities for Hmac Protos
-func NewHmacParams(hashType HashType, tagSize uint32) *HmacParams {
-	return &HmacParams{
+// NewHmacParams returns a new HmacParams.
+func NewHmacParams(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacParams {
+	return &hmacpb.HmacParams{
 		Hash:    hashType,
 		TagSize: tagSize,
 	}
 }
 
-func NewHmacKey(params *HmacParams, version uint32, keyValue []byte) *HmacKey {
-	return &HmacKey{
+// NewHmacKey returns a new HmacKey.
+func NewHmacKey(params *hmacpb.HmacParams, version uint32, keyValue []byte) *hmacpb.HmacKey {
+	return &hmacpb.HmacKey{
 		Version:  version,
 		Params:   params,
 		KeyValue: keyValue,
 	}
 }
 
-func NewHmacKeyFormat(params *HmacParams, keySize uint32) *HmacKeyFormat {
-	return &HmacKeyFormat{
+// NewHmacKeyFormat returns a new HmacKeyFormat.
+func NewHmacKeyFormat(params *hmacpb.HmacParams, keySize uint32) *hmacpb.HmacKeyFormat {
+	return &hmacpb.HmacKeyFormat{
 		Params:  params,
 		KeySize: keySize,
 	}

@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,8 +16,9 @@ package aead
 
 import (
 	"fmt"
-	"github.com/google/tink/go/tink"
 	"sync"
+
+	"github.com/google/tink/go/tink"
 )
 
 // Factory offers methods for obtaining a primitive from a KeysetHandle.
@@ -37,7 +36,7 @@ var factoryOnce sync.Once
 
 type factory struct{}
 
-// factory creates an instance of factory if there isn't and returns the instance.
+// Factory creates an instance of factory if there isn't and returns the instance.
 func Factory() *factory {
 	factoryOnce.Do(func() {
 		factoryInstance = new(factory)
@@ -98,7 +97,7 @@ func (a *primitiveSetAead) Encrypt(pt []byte, ad []byte) ([]byte, error) {
 // ciphertext is authenticated.
 func (a *primitiveSetAead) Decrypt(ct []byte, ad []byte) ([]byte, error) {
 	// try non-raw keys
-	prefixSize := tink.NON_RAW_PREFIX_SIZE
+	prefixSize := tink.NonRawPrefixSize
 	if len(ct) > prefixSize {
 		prefix := ct[:prefixSize]
 		ctNoPrefix := ct[prefixSize:]

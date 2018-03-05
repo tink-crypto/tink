@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,19 +15,20 @@
 package aead
 
 import (
-	. "github.com/google/tink/proto/aes_gcm_proto"
+	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
 )
 
-// Utilities for AesGcm protos
-func NewAesGcmKey(version uint32, keyValue []byte) *AesGcmKey {
-	return &AesGcmKey{
+// NewAesGcmKey returns a new AesGcmKey.
+func NewAesGcmKey(version uint32, keyValue []byte) *gcmpb.AesGcmKey {
+	return &gcmpb.AesGcmKey{
 		Version:  version,
 		KeyValue: keyValue,
 	}
 }
 
-func NewAesGcmKeyFormat(keySize uint32) *AesGcmKeyFormat {
-	return &AesGcmKeyFormat{
+// NewAesGcmKeyFormat returns a new AesGcmKeyFormat.
+func NewAesGcmKeyFormat(keySize uint32) *gcmpb.AesGcmKeyFormat {
+	return &gcmpb.AesGcmKeyFormat{
 		KeySize: keySize,
 	}
 }

@@ -133,10 +133,6 @@ public final class Ed25519SignTest {
   @Test
   public void testSigningWithWycheproofVectors() throws Exception {
     JSONObject json = WycheproofTestUtil.readJson("testdata/wycheproof/eddsa_test.json");
-    WycheproofTestUtil.checkAlgAndVersion(json, "EDDSA", "0.0a18");
-    int numTests = json.getInt("numberOfTests");
-    int cntTests = 0;
-    int cntSkippedTests = 0;
     int errors = 0;
     JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
@@ -146,22 +142,20 @@ public final class Ed25519SignTest {
       JSONArray tests = group.getJSONArray("tests");
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
-        int tcId = testcase.getInt("tcId");
-        String tc = "tcId: " + tcId + " " + testcase.getString("comment");
+        String tcId =
+            String.format(
+                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
         byte[] msg = getMessage(testcase);
         byte[] sig = Hex.decode(testcase.getString("sig"));
         String result = testcase.getString("result");
         if (result.equals("invalid")) {
-          cntSkippedTests++;
           continue;
         }
         Ed25519Sign signer = new Ed25519Sign(privateKey);
         byte[] computedSig = signer.sign(msg);
-        assertArrayEquals("Test case: " + tc, sig, computedSig);
-        cntTests++;
+        assertArrayEquals(tcId, sig, computedSig);
       }
     }
     assertEquals(0, errors);
-    assertEquals(numTests, cntTests + cntSkippedTests);
   }
 }

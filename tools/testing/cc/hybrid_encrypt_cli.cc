@@ -27,7 +27,7 @@ using crypto::tink::KeysetHandle;
 // It requires 4 arguments:
 //   keyset-file:  name of the file with the keyset to be used for encryption
 //   plaintext-file:  name of the file that contains plaintext to be encrypted
-//   context-info:  a string to be used as "context info" during the encryption
+//   context-info:  a std::string to be used as "context info" during the encryption
 //   output-file:  name of the output file for the resulting ciphertext
 int main(int argc, char** argv) {
   if (argc != 5) {
