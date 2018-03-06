@@ -2,6 +2,7 @@ package paymentmethodtoken
 
 import (
 	"encoding/json"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -82,10 +83,12 @@ func TestVerifyWorksWithAlternateKey(t *testing.T) {
 	recipient.RecipientID = RECIPIENT_ID
 	recipient.RecipientPrivateKey = MERCHANT_PRIVATE_KEY_PKCS8_BASE64
 
+	log.Print("hi")
+
 	payToken := GooglePayTokenResponse{}
 	err = json.Unmarshal([]byte(CIPHERTEXT), payToken)
 	assert.NoError(t, err)
-	err = recipient.Unseal(payToken)
+	err = recipient.Verify(payToken)
 	assert.NoError(t, err)
 
 }

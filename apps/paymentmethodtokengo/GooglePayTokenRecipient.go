@@ -3,18 +3,21 @@ package paymentmethodtoken
 import (
 	"crypto/ecdsa"
 	"crypto/x509"
+	"encoding/binary"
 
 	"github.com/google/tink/go/subtle/signature"
 )
 
 type GooglePayTokenResponse struct {
-	ProtocolVersion string `json:"protocolVersion"`
-	Signature       string `json:"signature"`
-	SignedMessage   struct {
-		EncryptedMessage   string `json:"encryptedMessage"`
-		EphemeralPublicKey string `json:"ephemeralPublicKey"`
-		Tag                string `json:"tag"`
-	} `json:"signedMessage"`
+	ProtocolVersion  string `json:"protocolVersion"`
+	Signature        string `json:"signature"`
+	SignedMessageStr string `json:"signedMessage"`
+}
+
+type SignedMessage struct {
+	EncryptedMessage   string `json:"encryptedMessage"`
+	EphemeralPublicKey string `json:"ephemeralPublicKey"`
+	Tag                string `json:"tag"`
 }
 
 type DecryptedMessage struct {
@@ -40,13 +43,20 @@ func (g *GooglePayTokenRecipient) GenerateECKey() string {
 	return "test"
 }
 
-func (g *GooglePayTokenRecipient) generateSignedMessage(resp GooglePayTokenResponse) []byte {
-	return make([]byte, 100)
+func (g *GooglePayTokenRecipient) generateToVerify(resp GooglePayTokenResponse) []byte {
+	toConvert := []string{"Google", g.RecipientID, "ECv1", resp.SignedMessageStr} //Order matters
+	toReturn := make([]byte, 0)
+	for i := 0; i < len(toConvert); i++ {
+		bytesLength := make([]byte, 4)
+		binary.LittleEndian.PutUint32(bytesLength, uint32(len(toConvert[i])))
+		toReturn = append(toReturn, bytesLength...)
+		toReturn = append(toReturn, []byte(toConvert[i])...)
+	}
+	return toReturn
 }
 
 func (g *GooglePayTokenRecipient) Unseal(resp GooglePayTokenResponse) error {
-	signedMessage := g.generateSignedMessage(resp)
-	err := g.Verify(signedMessage, []byte(resp.SignedMessage.EncryptedMessage))
+	err := g.Verify(resp)
 	if err != nil {
 		return err
 	}
@@ -54,14 +64,20 @@ func (g *GooglePayTokenRecipient) Unseal(resp GooglePayTokenResponse) error {
 	return nil
 }
 
-func (g *GooglePayTokenRecipient) Verify(signatureBytes []byte, signedMessage []byte) error {
+//Verify
+func (g *GooglePayTokenRecipient) Verify(resp GooglePayTokenResponse) error {
+	toVerify := g.generateToVerify(resp)
+	signatureBytes := []byte(resp.Signature)
 	keyData, err := x509.ParsePKIXPublicKey([]byte(g.KeyMananger.CurrentKeys.Keys[0].KeyValue)) //TODO:this is ugly
+	if err != nil {
+		return err
+	}
 	publicKey := keyData.(*ecdsa.PublicKey)
 	verifier, err := signature.NewEcdsaVerifyFromPublicKey("SHA256", "DER", publicKey)
 	if err != nil {
 		return err
 	}
-	err = verifier.Verify(signatureBytes, signedMessage)
+	err = verifier.Verify(signatureBytes, toVerify)
 	if err != nil {
 		return err
 	}

@@ -13,4 +13,5 @@ tulsigen-*
 **/local.properties
 **/build/**
 .externalNativeBuild
-
+apps/paymentmethodtokengo/vendor/*
+!apps/paymentmethodtokengo/vendor/vendor.json
