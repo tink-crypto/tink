@@ -1,9 +1,13 @@
-package paymentmethodtoken
+package paymentmethodtokengo
 
 import (
 	"crypto/ecdsa"
-	"crypto/x509"
+	"crypto/elliptic"
+	"encoding/asn1"
+	"encoding/base64"
 	"encoding/binary"
+	"log"
+	"math/big"
 
 	"github.com/google/tink/go/subtle/signature"
 )
@@ -68,12 +72,26 @@ func (g *GooglePayTokenRecipient) Unseal(resp GooglePayTokenResponse) error {
 func (g *GooglePayTokenRecipient) Verify(resp GooglePayTokenResponse) error {
 	toVerify := g.generateToVerify(resp)
 	signatureBytes := []byte(resp.Signature)
-	keyData, err := x509.ParsePKIXPublicKey([]byte(g.KeyMananger.CurrentKeys.Keys[0].KeyValue)) //TODO:this is ugly
+
+	asn1Key := Asn1GooglePublicKey{}
+	bytesToUnmarshal, err := base64.StdEncoding.DecodeString(g.KeyMananger.CurrentKeys.Keys[0].KeyValue)
 	if err != nil {
 		return err
 	}
-	publicKey := keyData.(*ecdsa.PublicKey)
-	verifier, err := signature.NewEcdsaVerifyFromPublicKey("SHA256", "DER", publicKey)
+	_, err = asn1.Unmarshal(bytesToUnmarshal, &asn1Key) //TODO:this is ugly
+	if err != nil {
+		log.Println(g.KeyMananger.CurrentKeys.Keys[0].KeyValue)
+		return err
+	}
+
+	x := new(big.Int)
+	x.SetBytes(asn1Key.Bits.Bytes[1:33])
+	y := new(big.Int)
+	y.SetBytes(asn1Key.Bits.Bytes[34:65])
+
+	publicKey := ecdsa.PublicKey{Curve: elliptic.P256(), X: x, Y: y}
+
+	verifier, err := signature.NewEcdsaVerifyFromPublicKey("SHA256", "DER", &publicKey)
 	if err != nil {
 		return err
 	}

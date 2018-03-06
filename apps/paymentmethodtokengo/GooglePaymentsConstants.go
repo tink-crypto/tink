@@ -1,4 +1,4 @@
-package paymentmethodtoken
+package paymentmethodtokengo
 
 type GooglePayConstants struct {
 	GOOGLE_SENDER_ID              string

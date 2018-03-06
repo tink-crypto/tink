@@ -1,4 +1,4 @@
-package paymentmethodtoken
+package paymentmethodtokengo
 
 import (
 	"encoding/json"
@@ -35,8 +35,8 @@ var GOOGLE_VERIFYING_PUBLIC_KEYS_JSON = "{\n" +
 	"      \"keyValue\": \"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEPYnHwS8uegWAewQtlxizmLFynw" +
 	"HcxRT1PK07cDA6/C4sXrVI1SzZCUx8U8S0LjMrT6ird/VW7be3Mz6t/srtRQ==\",\n" +
 	"      \"protocolVersion\": \"ECv1\"\n" +
-	"    },\n" +
-	"  ],\n" +
+	"    }\n" +
+	"  ]\n" +
 	"}"
 
 /**
@@ -69,9 +69,9 @@ var CIPHERTEXT = "{" + "\"protocolVersion\":\"ECv1\"," +
 var ALTERNATE_PUBLIC_SIGNING_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEU8E6JppGKFG40r5dDU1idHRN52NuwsemFzXZh1oUqh3bGUPgPioH+RoW" +
 	"nmVSUQz1WfM2426w9f0GADuXzpUkcw=="
 
-func TestVerifyWorksWithAlternateKey(t *testing.T) {
+func TestVerifyWorksWithKey(t *testing.T) {
 	var trustedKeysJson KeysResponse
-	err := json.Unmarshal([]byte(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON), trustedKeysJson)
+	err := json.Unmarshal([]byte(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON), &trustedKeysJson)
 	assert.NoError(t, err)
 
 	keyManager := GooglePaymentsPublicKeyManager{}
@@ -83,11 +83,12 @@ func TestVerifyWorksWithAlternateKey(t *testing.T) {
 	recipient.RecipientID = RECIPIENT_ID
 	recipient.RecipientPrivateKey = MERCHANT_PRIVATE_KEY_PKCS8_BASE64
 
-	log.Print("hi")
-
 	payToken := GooglePayTokenResponse{}
-	err = json.Unmarshal([]byte(CIPHERTEXT), payToken)
+	err = json.Unmarshal([]byte(CIPHERTEXT), &payToken)
 	assert.NoError(t, err)
+
+	log.Print(recipient.KeyMananger.CurrentKeys.Keys[0].KeyValue)
+
 	err = recipient.Verify(payToken)
 	assert.NoError(t, err)
 
