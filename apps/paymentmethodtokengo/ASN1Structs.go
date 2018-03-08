@@ -19,12 +19,15 @@ type Asn1GooglePublicKey struct {
 	Bits asn1.BitString
 }
 
-func (key *Asn1GooglePublicKey) DecodePublicKey(keyVal string) (*big.Int, *big.Int, error) {
+// DecodePublicKey base64 decodes and unmarshals to get x and y
+func DecodePublicKey(keyVal string) (*big.Int, *big.Int, error) {
 	bytesToUnmarshal, err := base64.StdEncoding.DecodeString(keyVal)
 	if err != nil {
 		return nil, nil, err
 	}
-	_, err = asn1.Unmarshal(bytesToUnmarshal, key)
+
+	key := Asn1GooglePublicKey{}
+	_, err = asn1.Unmarshal(bytesToUnmarshal, &key)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -33,6 +36,7 @@ func (key *Asn1GooglePublicKey) DecodePublicKey(keyVal string) (*big.Int, *big.I
 	x.SetBytes(key.Bits.Bytes[1:33])
 	y := new(big.Int)
 	y.SetBytes(key.Bits.Bytes[33:65])
+
 	return x, y, nil
 }
 

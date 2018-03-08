@@ -112,5 +112,6 @@ func TestUnsealWorksWithKey(t *testing.T) {
 	decrypted, err := recipient.Unseal(payToken)
 	assert.NotNil(t, decrypted)
 	assert.NoError(t, err)
+	assert.Equal(t, *decrypted, PLAINTEXT)
 
 }

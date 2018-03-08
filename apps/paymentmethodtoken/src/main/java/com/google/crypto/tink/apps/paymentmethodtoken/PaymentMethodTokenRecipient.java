@@ -19,6 +19,7 @@ package com.google.crypto.tink.apps.paymentmethodtoken;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -31,6 +32,7 @@ import org.joda.time.Instant;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.util.Arrays;
 
 /**
  * An implementation of the recipient side of <a
@@ -287,6 +289,10 @@ public final class PaymentMethodTokenRecipient {
             recipientId,
             PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1,
             signedMessage);
+    System.out.println("yolo");
+    System.out.println(Arrays.toString(signedBytes) + "\n");
+    System.out.println(Base64.encode(signedBytes));
+    String str = Base64.encode(signedBytes);
     verify(signature, signedBytes);
     String decryptedMessage = decrypt(signedMessage);
     validateDecryptedMessage(decryptedMessage);

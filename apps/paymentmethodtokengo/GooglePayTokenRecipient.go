@@ -1,13 +1,18 @@
 package paymentmethodtokengo
 
 import (
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
-	"log"
+	"errors"
 
+	"github.com/google/tink/go/subtle/ecies"
+	"github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/subtle/signature"
 )
 
@@ -54,7 +59,7 @@ func (g *GooglePayTokenRecipient) generateToVerify(resp GooglePayTokenResponse) 
 	return toReturn
 }
 
-func (g *GooglePayTokenRecipient) Unseal(resp GooglePayTokenResponse) (*DecryptedMessage, error) {
+func (g *GooglePayTokenRecipient) Unseal(resp GooglePayTokenResponse) (*string, error) {
 	err := g.Verify(resp)
 	if err != nil {
 		return nil, err
@@ -65,40 +70,71 @@ func (g *GooglePayTokenRecipient) Unseal(resp GooglePayTokenResponse) (*Decrypte
 		return nil, err
 	}
 
-	pk, err := base64.StdEncoding.DecodeString(signedMessage.EphemeralPublicKey)
+	googlePayConstants := getConstants()
+
+	merchantPrivateKey, err := ParsePrivateKey(g.RecipientPrivateKey)
 	if err != nil {
 		return nil, err
 	}
 
-	googlePayConstants := getConstants()
-	symmetricKeySize := googlePayConstants.AES_CTR_KEY_SIZE + googlePayConstants.HMAC_SHA256_KEY_SIZE
+	eciesHkdf := ecies.EciesHkdfRecipientKem{*merchantPrivateKey}
+	if err != nil {
+		return nil, err
+	}
+	kem, err := base64.StdEncoding.DecodeString(signedMessage.EphemeralPublicKey)
+	if err != nil {
+		return nil, err
+	}
 
-	log.Println(pk, symmetricKeySize)
-	// merchantPrivateKey := ecdsa.PrivateKey{, D}
+	key, err := eciesHkdf.GenerateKey(kem,
+		googlePayConstants.HMAC_SHA256_ALGO,
+		googlePayConstants.HKDF_EMPTY_SALT,
+		googlePayConstants.GOOGLE_CONTEXT_INFO_ECV1,
+		googlePayConstants.AES_CTR_KEY_SIZE,
+		googlePayConstants.HMAC_SHA256_KEY_SIZE)
+	if err != nil {
+		return nil, err
+	}
+	hmacSha256Key := key[googlePayConstants.AES_CTR_KEY_SIZE:]
+	encryptedMessage, err := base64.StdEncoding.DecodeString(signedMessage.EncryptedMessage)
+	if err != nil {
+		return nil, err
+	}
 
-	// eciesHkdf := subtle.EciesHkdfRecipientKem{ecdsa.PrivateKey}
-	// byte[] demKey =
-	// 		recipientKem.generateKey(
-	// 				kem,
-	// 				PaymentMethodTokenConstants.HMAC_SHA256_ALGO,
-	// 				PaymentMethodTokenConstants.HKDF_EMPTY_SALT,
-	// 				contextInfo,
-	// 				symmetricKeySize,
-	// 				PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
-	// byte[] hmacSha256Key =
-	// 		Arrays.copyOfRange(
-	// 				demKey, PaymentMethodTokenConstants.AES_CTR_KEY_SIZE, symmetricKeySize);
-	// byte[] encryptedMessage =
-	// 		Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
-	// byte[] computedTag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key, encryptedMessage);
-	// byte[] expectedTag = Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_TAG_KEY));
-	// if (!Bytes.equal(expectedTag, computedTag)) {
-	// 	throw new GeneralSecurityException("cannot decrypt; invalid MAC");
-	// }
-	// byte[] aesCtrKey =
-	// 		Arrays.copyOfRange(demKey, 0, PaymentMethodTokenConstants.AES_CTR_KEY_SIZE);
+	expectedTag, err := base64.StdEncoding.DecodeString(signedMessage.Tag)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	hmac, err := mac.NewHmac("SHA256", hmacSha256Key, uint32(len(expectedTag)))
+	if err != nil {
+		return nil, err
+	}
+
+	computedTag, err := hmac.ComputeMac(encryptedMessage)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !bytes.Equal(expectedTag, computedTag) {
+		return nil, errors.New("MAC tag was not verified")
+	}
+
+	aesCTRKey := key[:googlePayConstants.AES_CTR_KEY_SIZE]
+
+	block, err := aes.NewCipher(aesCTRKey)
+	if err != nil {
+		return nil, err
+	}
+
+	stream := cipher.NewCTR(block, googlePayConstants.AES_CTR_ALGO_IV)
+	decryptedMessageBytes := make([]byte, len(encryptedMessage))
+
+	stream.XORKeyStream(decryptedMessageBytes, encryptedMessage)
+
+	decryptedMessage := string(decryptedMessageBytes)
+	return &decryptedMessage, nil
 }
 
 func (g *GooglePayTokenRecipient) Decrypt(resp GooglePayTokenResponse) error {
@@ -114,8 +150,7 @@ func (g *GooglePayTokenRecipient) Verify(resp GooglePayTokenResponse) error {
 		return err
 	}
 
-	googlePublicKey := Asn1GooglePublicKey{}
-	x, y, err := googlePublicKey.DecodePublicKey(g.KeyMananger.CurrentKeys.Keys[0].KeyValue)
+	x, y, err := DecodePublicKey(g.KeyMananger.CurrentKeys.Keys[0].KeyValue)
 
 	publicKey := ecdsa.PublicKey{Curve: elliptic.P256(), X: x, Y: y}
 
