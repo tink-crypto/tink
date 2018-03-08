@@ -2,7 +2,6 @@ package paymentmethodtokengo
 
 import (
 	"encoding/json"
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -87,9 +86,31 @@ func TestVerifyWorksWithKey(t *testing.T) {
 	err = json.Unmarshal([]byte(CIPHERTEXT), &payToken)
 	assert.NoError(t, err)
 
-	log.Print(recipient.KeyMananger.CurrentKeys.Keys[0].KeyValue)
-
 	err = recipient.Verify(payToken)
+	assert.NoError(t, err)
+
+}
+
+func TestUnsealWorksWithKey(t *testing.T) {
+	var trustedKeysJson KeysResponse
+	err := json.Unmarshal([]byte(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON), &trustedKeysJson)
+	assert.NoError(t, err)
+
+	keyManager := GooglePaymentsPublicKeyManager{}
+	keyManager.CurrentKeys = trustedKeysJson
+	keyManager.KeysUrl = KEYS_URL_TEST
+
+	recipient := GooglePayTokenRecipient{}
+	recipient.KeyMananger = keyManager
+	recipient.RecipientID = RECIPIENT_ID
+	recipient.RecipientPrivateKey = MERCHANT_PRIVATE_KEY_PKCS8_BASE64
+
+	payToken := GooglePayTokenResponse{}
+	err = json.Unmarshal([]byte(CIPHERTEXT), &payToken)
+	assert.NoError(t, err)
+
+	decrypted, err := recipient.Unseal(payToken)
+	assert.NotNil(t, decrypted)
 	assert.NoError(t, err)
 
 }

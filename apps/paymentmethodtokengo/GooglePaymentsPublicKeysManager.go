@@ -1,7 +1,6 @@
 package paymentmethodtokengo
 
 import (
-	"encoding/asn1"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -12,15 +11,6 @@ const KEYS_URL_TEST = "https://payments.developers.google.com/paymentmethodtoken
 
 type KeysResponse struct {
 	Keys []Key `json:"keys"`
-}
-
-//This is the structure of the key which we asn1 unmarshal into
-type Asn1GooglePublicKey struct {
-	Metadata struct {
-		KeyType   asn1.ObjectIdentifier
-		CurveType asn1.ObjectIdentifier
-	}
-	Bits asn1.BitString
 }
 
 type Key struct {

@@ -272,7 +272,7 @@ public final class PaymentMethodTokenRecipient {
       throw new GeneralSecurityException("cannot unseal; invalid JSON message");
     }
   }
-//randomWord
+
   private String unsealV1(final String sealedMessage)
       throws GeneralSecurityException, JSONException {
     JSONObject jsonMsg = new JSONObject(sealedMessage);
@@ -363,7 +363,7 @@ public final class PaymentMethodTokenRecipient {
       throw new GeneralSecurityException("invalid version: " + version);
     }
   }
-  //randomWord
+
   private static List<ECPublicKey> parseTrustedSigningKeysJson(
       String protocolVersion, String trustedSigningKeysJson) throws GeneralSecurityException {
     List<ECPublicKey> senderVerifyingKeys = new ArrayList<>();
