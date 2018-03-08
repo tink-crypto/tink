@@ -13,10 +13,3 @@ go_test(
     importpath = "github.com/google/tink/go/subtle_test",
     deps = [":go_default_library"],
 )
-
-# Import Go dependencies.
-go_repository(
-    name = "com_golang_x_crypto",
-    importpath = "golang.org/x/crypto/...",
-    commit = "85f98707c97e11569271e4d9b3d397e079c4f4d0",
-)

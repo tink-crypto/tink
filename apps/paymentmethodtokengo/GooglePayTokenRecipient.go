@@ -10,6 +10,8 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"strconv"
+	"time"
 
 	"github.com/google/tink/go/subtle/ecies"
 	"github.com/google/tink/go/subtle/mac"
@@ -41,10 +43,10 @@ type DecryptedMessage struct {
 }
 
 type GooglePayTokenRecipient struct {
-	RecipientID         string
-	RecipientPrivateKey string
-	KeyMananger         GooglePaymentsPublicKeyManager
-	Constants           GooglePayConstants
+	RecipientID          string
+	RecipientPrivateKeys []string
+	KeyMananger          GooglePaymentsPublicKeyManager
+	Constants            GooglePayConstants
 }
 
 func (g *GooglePayTokenRecipient) generateToVerify(resp GooglePayTokenResponse) []byte {
@@ -59,20 +61,17 @@ func (g *GooglePayTokenRecipient) generateToVerify(resp GooglePayTokenResponse) 
 	return toReturn
 }
 
-func (g *GooglePayTokenRecipient) Unseal(resp GooglePayTokenResponse) (*string, error) {
-	err := g.Verify(resp)
-	if err != nil {
-		return nil, err
-	}
+//Decrypt decrypts encryptedMessage string into decrypted raw string
+func (g *GooglePayTokenRecipient) Decrypt(resp GooglePayTokenResponse, recipientKeyIndex int) (*string, error) {
 	signedMessage := SignedMessage{}
-	err = json.Unmarshal([]byte(resp.SignedMessageStr), &signedMessage)
+	err := json.Unmarshal([]byte(resp.SignedMessageStr), &signedMessage)
 	if err != nil {
 		return nil, err
 	}
 
 	googlePayConstants := getConstants()
 
-	merchantPrivateKey, err := ParsePrivateKey(g.RecipientPrivateKey)
+	merchantPrivateKey, err := ParsePrivateKey(g.RecipientPrivateKeys[recipientKeyIndex])
 	if err != nil {
 		return nil, err
 	}
@@ -137,12 +136,61 @@ func (g *GooglePayTokenRecipient) Unseal(resp GooglePayTokenResponse) (*string, 
 	return &decryptedMessage, nil
 }
 
-func (g *GooglePayTokenRecipient) Decrypt(resp GooglePayTokenResponse) error {
+//Unseal iterates through all publicKeys and merchantPrivateKeys,
+//	marshalls data into DecryptedMessage struct, then checks expiration
+func (g *GooglePayTokenRecipient) Unseal(resp GooglePayTokenResponse) (*DecryptedMessage, error) {
+
+	//Cycle through all public keys
+	var err error
+	for i := 0; i < len(g.KeyMananger.CurrentKeys.Keys); i++ {
+		err := g.Verify(resp, i)
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	//iterate all privatekeys to find the one which works
+	var decryptedMessage *string
+	for i := 0; i < len(g.RecipientPrivateKeys); i++ {
+		decryptedMessage, err = g.Decrypt(resp, i)
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	decryptedMessageStruct := DecryptedMessage{}
+	err = json.Unmarshal([]byte(*decryptedMessage), &decryptedMessageStruct)
+	if err != nil {
+		return nil, err
+	}
+
+	err = validateExpirationDate(decryptedMessageStruct)
+	if err != nil {
+		return nil, err
+	}
+
+	return &decryptedMessageStruct, nil
+}
+
+func validateExpirationDate(mess DecryptedMessage) error {
+	expiration, err := strconv.ParseInt(mess.MessageExpiration, 0, 0)
+	if err != nil {
+		return err
+	}
+	if expiration < time.Now().Unix() {
+		return errors.New("Message is expired!")
+	}
 	return nil
 }
 
-//Verify
-func (g *GooglePayTokenRecipient) Verify(resp GooglePayTokenResponse) error {
+// Verify authenticates message using ECDSA and specific public key
+func (g *GooglePayTokenRecipient) Verify(resp GooglePayTokenResponse, publicKeyIndex int) error {
 	toVerify := g.generateToVerify(resp)
 
 	signatureBytes, err := base64.StdEncoding.DecodeString(resp.Signature)
@@ -150,11 +198,11 @@ func (g *GooglePayTokenRecipient) Verify(resp GooglePayTokenResponse) error {
 		return err
 	}
 
-	x, y, err := DecodePublicKey(g.KeyMananger.CurrentKeys.Keys[0].KeyValue)
+	x, y, err := DecodePublicKey(g.KeyMananger.CurrentKeys.Keys[publicKeyIndex].KeyValue)
 
-	publicKey := ecdsa.PublicKey{Curve: elliptic.P256(), X: x, Y: y}
+	ecdsaPublicKey := ecdsa.PublicKey{Curve: elliptic.P256(), X: x, Y: y}
 
-	verifier, err := signature.NewEcdsaVerifyFromPublicKey("SHA256", "DER", &publicKey)
+	verifier, err := signature.NewEcdsaVerifyFromPublicKey("SHA256", "DER", &ecdsaPublicKey)
 	if err != nil {
 		return err
 	}

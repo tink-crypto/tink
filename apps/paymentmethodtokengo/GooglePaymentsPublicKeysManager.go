@@ -18,15 +18,16 @@ type Key struct {
 	ProtocolVersion string `json:"protocolVersion"`
 }
 
+//GooglePaymentsPublicKeyManager regularly rotates public keys
+//	for ecdsa verification, so this both stores and refreshes signingKeys
 type GooglePaymentsPublicKeyManager struct {
 	KeysUrl     string
 	CurrentKeys KeysResponse
 }
 
-func (g *GooglePaymentsPublicKeyManager) RefreshSigningKeys() string {
+func (g *GooglePaymentsPublicKeyManager) RefreshSigningKeys() error {
 	resp, _ := http.Get(g.KeysUrl)
 	defer resp.Body.Close()
 	respBody, _ := ioutil.ReadAll(resp.Body)
-	json.Unmarshal(respBody, g.CurrentKeys)
-	return g.CurrentKeys.Keys[0].KeyValue //TODO: we need to rotate through these... we really shouldn't return anything
+	return json.Unmarshal(respBody, g.CurrentKeys)
 }

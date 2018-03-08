@@ -80,18 +80,18 @@ func TestVerifyWorksWithKey(t *testing.T) {
 	recipient := GooglePayTokenRecipient{}
 	recipient.KeyMananger = keyManager
 	recipient.RecipientID = RECIPIENT_ID
-	recipient.RecipientPrivateKey = MERCHANT_PRIVATE_KEY_PKCS8_BASE64
+	recipient.RecipientPrivateKeys = []string{MERCHANT_PRIVATE_KEY_PKCS8_BASE64}
 
 	payToken := GooglePayTokenResponse{}
 	err = json.Unmarshal([]byte(CIPHERTEXT), &payToken)
 	assert.NoError(t, err)
 
-	err = recipient.Verify(payToken)
+	err = recipient.Verify(payToken, 0)
 	assert.NoError(t, err)
 
 }
 
-func TestUnsealWorksWithKey(t *testing.T) {
+func TestDecryptWorksWithKey(t *testing.T) {
 	var trustedKeysJson KeysResponse
 	err := json.Unmarshal([]byte(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON), &trustedKeysJson)
 	assert.NoError(t, err)
@@ -103,13 +103,13 @@ func TestUnsealWorksWithKey(t *testing.T) {
 	recipient := GooglePayTokenRecipient{}
 	recipient.KeyMananger = keyManager
 	recipient.RecipientID = RECIPIENT_ID
-	recipient.RecipientPrivateKey = MERCHANT_PRIVATE_KEY_PKCS8_BASE64
+	recipient.RecipientPrivateKeys = []string{MERCHANT_PRIVATE_KEY_PKCS8_BASE64}
 
 	payToken := GooglePayTokenResponse{}
 	err = json.Unmarshal([]byte(CIPHERTEXT), &payToken)
 	assert.NoError(t, err)
 
-	decrypted, err := recipient.Unseal(payToken)
+	decrypted, err := recipient.Decrypt(payToken, 0)
 	assert.NotNil(t, decrypted)
 	assert.NoError(t, err)
 	assert.Equal(t, *decrypted, PLAINTEXT)

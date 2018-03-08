@@ -1,5 +1,6 @@
 package paymentmethodtokengo
 
+//GooglePayConstants stores the same constants as from Java code
 type GooglePayConstants struct {
 	GOOGLE_SENDER_ID              string
 	HMAC_SHA256_ALGO              string
