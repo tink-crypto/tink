@@ -18,57 +18,45 @@
 
 #import <Foundation/Foundation.h>
 
-@class TINKAead;
 @class TINKKeysetHandle;
+@protocol TINKAead;
+
+NS_ASSUME_NONNULL_BEGIN;
 
 /**
- * TINKAeadFactory allows obtaining a primitive from a TINKKeysetHandle.
+ * TINKAeadFactory allows for obtaining a TINKAead primitive from a TINKKeysetHandle.
  *
- * TINKAeadFactory gets primitives from the Registry. The factory allows initalizing the Registry
- * with native key types and their managers that Tink supports out of the box. These key types are
- * divided in two groups:
- *
- *  - standard: secure and safe to use in new code. Over time, with new developments in
- *    cryptanalysis and computing power, some standard key types might become legacy.
- *
- *  - legacy: deprecated and insecure or obsolete, should not be used in new code. Existing users
- *    should upgrade to one of the standard key types.
- *
- * This divison allows for gradual retiring insecure or obsolete key types.
- *
- * For example, here is how one can obtain and use an Aead primitive:
+ * TINKAeadFactory gets primitives from the Registry, which can be initialized via convenience
+ * methods from TINKAeadConfig. Here is an example how one can obtain and use a TINKAead primitive:
  *
  * NSError *error = nil;
- * [TINKAeadConfig registerStandardKeyTypes];
- * TINKKeysetHandle *handle = [TINKKeysetHandle initWithKeyset:keyset];
- * TINKAead *aead = [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
- * if (error) {
- *   // handle error
+ * TINKAeadConfig *aeadConfig = [TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
+ *                                                               error:&error];
+ * if (!aeadConfig || error) {
+ *   // handle error.
  * }
  *
- * NSString *plaintext = ...;
- * NSString *data = ...;
- * error = nil;
- * NSString *ciphertext = [aead encrypt:plaintext withAdditionalData:data error:&error];
- * if (error) {
- *   // handle error
+ * if (![TINKConfig registerConfig:aeadConfig error:&error]) {
+ *   // handle error.
  * }
+ *
+ * TINKKeysetHandle keysetHandle = ...;
+ * id<TINKAead> aead = [TINKAeadFactory primitiveWithKeysetHandle:keysetHandle error:&error];
+ * if (!aead || error) {
+ *   // handle error.
+ * }
+ *
+ * NSData *plaintext = ...;
+ * NSData *additionalData = ...;
+ * NSData *ciphertext = [aead encrypt:plaintext withAdditionalData:additionalData error:&error];
  */
 @interface TINKAeadFactory : NSObject
-
 /**
- * Returns an Aead-primitive that uses key material from the keyset specified via @c keysetHandle.
+ * Returns an object that conforms to the TINKAead protocol. It uses key material from the keyset
+ * specified via @c keysetHandle.
  */
-+ (nullable TINKAead *)primitiveWithKeysetHandle:(nonnull TINKKeysetHandle *)keysetHandle
-                                           error:(NSError *_Nullable *_Nonnull)error;
-
-/**
- * Returns an Aead-primitive that uses key material from the keyset specified via @c keysetHandle
- * and is instantiated by the given @c customKeyManager (instead of the key manager from the
- * Registry).
- */
-+ (nullable TINKAead *)primitiveWithKeysetHandle:(nonnull TINKKeysetHandle *)keysetHandle
-                                   andKeyManager:(nullable NSObject *)keyManager
-                                           error:(NSError *_Nullable *_Nonnull)error NS_UNAVAILABLE;
-
++ (nullable id<TINKAead>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle
+                                             error:(NSError **)error;
 @end
+
+NS_ASSUME_NONNULL_END;

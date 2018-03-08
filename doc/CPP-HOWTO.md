@@ -13,7 +13,7 @@ For example, if you want to use all implementations of all primitives in Tink
 1.1.0, the initialization would look as follows:
 
 ```cpp
-   #include third_party/tink/cc/config/tink_config.h
+   #include "cc/config/tink_config.h"
 
    // ...
    auto status = TinkConfig::Init();

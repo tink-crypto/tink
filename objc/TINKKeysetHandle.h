@@ -18,9 +18,9 @@
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKAead.h"
-#import "objc/TINKKeysetReader.h"
-#import "proto/Tink.pbobjc.h"
+@class TINKKeysetReader;
+@class TINKPBKeyTemplate;
+@protocol TINKAead;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -46,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @return        A TINKKeysetHandle, or nil in case of error.
  */
 - (nullable instancetype)initWithKeysetReader:(TINKKeysetReader *)reader
-                                       andKey:(TINKAead *)aeadKey
+                                       andKey:(id<TINKAead>)aeadKey
                                         error:(NSError **)error;
 
 /**
@@ -63,3 +63,4 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+

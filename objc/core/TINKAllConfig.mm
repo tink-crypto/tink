@@ -16,21 +16,25 @@
  **************************************************************************
  */
 
-#import "objc/aead/TINKAeadConfig.h"
+#import "objc/TINKAllConfig.h"
+
+#include "cc/config/tink_config.h"
+#include "cc/util/errors.h"
+#include "proto/config.pb.h"
+
+#import <Foundation/Foundation.h>
 
 #import "objc/TINKRegistryConfig.h"
 #import "objc/TINKVersion.h"
 #import "objc/core/TINKRegistryConfig_Internal.h"
 #import "objc/util/TINKErrors.h"
+#import "objc/util/TINKStrings.h"
+#import "proto/Config.pbobjc.h"
 
-#include "cc/aead/aead_config.h"
-#include "cc/util/status.h"
-#include "proto/config.pb.h"
-
-@implementation TINKAeadConfig
+@implementation TINKAllConfig
 
 - (instancetype)initWithVersion:(TINKVersion)version error:(NSError **)error {
-  auto st = crypto::tink::AeadConfig::Init();
+  auto st = crypto::tink::TinkConfig::Init();
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st);
@@ -41,7 +45,7 @@
   google::crypto::tink::RegistryConfig ccConfig;
   switch (version) {
     case TINKVersion1_1_0:
-      ccConfig = crypto::tink::AeadConfig::Tink_1_1_0();
+      ccConfig = crypto::tink::TinkConfig::Tink_1_1_0();
       break;
     default:
       if (error) {

@@ -18,29 +18,39 @@
 
 #import <Foundation/Foundation.h>
 
-/**
- * TINKAeadConfig offers convenience methods for initializing TINKAeadFactory
- * and the underlying Registry.INSTANCE. In particular, it  allows for
- * initalizing the Registry with native key types and their managers
- * that Tink supports out of the box. These key types are divided in
- * two groups:
- *
- *  - standard: secure and safe to use in new code. Over time, with
- *    new developments in cryptanalysis and computing power, some
- *    standard key types might become legacy.
- *
- *  - legacy: deprecated and insecure or obsolete, should not be used
- *    in new code. Existing users should upgrade to one of the standard
- *    key types.
- *
- * This divison allows for gradual retiring insecure or obsolete key types.
- *
- * For more information on how to obtain and use Aead primitives
- * see TINKAeadFactory.
- */
-@interface TINKAeadConfig : NSObject
+#import "objc/TINKRegistryConfig.h"
+#import "objc/TINKVersion.h"
 
-/** Registers standard Aead key types and their managers with the Registry. */
-+ (BOOL)registerStandardKeyTypes;
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ * This class is used for registering with the Registry all instances of Aead key types supported in
+ * a particular release of Tink.
+ *
+ * To register all Aead key types provided in Tink release 1.1.0 one can do:
+ *
+ * NSError *error = nil;
+ * TINKAeadConfig *aeadConfig = [TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
+ *                                                               error:&error];
+ * if (!aeadConfig || error) {
+ *   // handle error.
+ * }
+ *
+ * if (![TINKConfig registerConfig:aeadConfig error:&error]) {
+ *   // handle error.
+ * }
+ *
+ * For more information on the creation and usage of TINKAead instances see TINKAeadFactory.
+ */
+@interface TINKAeadConfig : TINKRegistryConfig
+
+/* Use initWithVersion:error: to get an instance of TINKAeadConfig. */
+- (nullable instancetype)init NS_UNAVAILABLE;
+
+/* Returns config of Aead implementations supported in given @c version of Tink. */
+- (nullable instancetype)initWithVersion:(TINKVersion)version
+                                   error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 
 @end
+
+NS_ASSUME_NONNULL_END

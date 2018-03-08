@@ -70,34 +70,20 @@ util::Status EcdsaVerifyBoringSsl::Verify(
   // Compute the digest.
   unsigned int digest_size;
   uint8_t digest[EVP_MAX_MD_SIZE];
-  bssl::UniquePtr<EVP_MD_CTX> mdctx(EVP_MD_CTX_create());
-  if (!EVP_DigestInit_ex(mdctx.get(), hash_, nullptr)) {
-    return util::Status(util::error::INTERNAL, "Could not compute digest.");
-  }
-  if (!EVP_DigestUpdate(mdctx.get(), data.data(), data.size())) {
-    return util::Status(util::error::INTERNAL, "Could not compute digest.");
-  }
-  if (!EVP_DigestFinal_ex(mdctx.get(), digest, &digest_size)) {
+  if (1 != EVP_Digest(data.data(), data.size(), digest, &digest_size, hash_,
+                  nullptr)) {
     return util::Status(util::error::INTERNAL, "Could not compute digest.");
   }
 
   // Verify the signature.
-  const uint8_t* ptr = reinterpret_cast<const uint8_t*>(signature.data());
-  bssl::UniquePtr<ECDSA_SIG> sig(
-      d2i_ECDSA_SIG(nullptr, &ptr, signature.length()));
-  int status = ECDSA_do_verify(digest, digest_size, sig.get(), key_.get());
-  if (status == 1) {
-    // signature is valid
-    return util::Status::OK;
-  } else if (status == 0) {
+  if (1 != ECDSA_verify(0 /* unused */, digest, digest_size,
+                    reinterpret_cast<const uint8_t*>(signature.data()),
+                    signature.size(), key_.get())) {
     // signature is invalid
-    return util::Status(util::error::UNKNOWN,
-                        "Signature is not valid.");
-  } else {
-    // an error occurred during the verification
-    return util::Status(util::error::INTERNAL,
-                        "An error occured during verification.");
+    return util::Status(util::error::UNKNOWN, "Signature is not valid.");
   }
+  // signature is valid
+  return util::Status::OK;
 }
 
 }  // namespace subtle

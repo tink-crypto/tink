@@ -18,17 +18,17 @@
 
 #import "objc/TINKKeysetHandle.h"
 
-#include "cc/keyset_handle.h"
-#include "cc/util/status.h"
-#include "proto/tink.pb.h"
-
 #import "objc/TINKAead.h"
-#import "objc/TINKAead_Internal.h"
 #import "objc/TINKKeysetReader.h"
+#import "objc/aead/TINKAeadInternal.h"
 #import "objc/core/TINKKeysetReader_Internal.h"
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
 #import "proto/Tink.pbobjc.h"
+
+#include "cc/keyset_handle.h"
+#include "cc/util/status.h"
+#include "proto/tink.pb.h"
 
 @implementation TINKKeysetHandle {
   std::unique_ptr<crypto::tink::KeysetHandle> _ccKeysetHandle;
@@ -46,12 +46,29 @@
   _ccKeysetHandle.reset();
 }
 
-- (nullable instancetype)initWithKeysetReader:(TINKKeysetReader *)reader
-                                       andKey:(TINKAead *)aeadKey
-                                        error:(NSError **)error {
-  crypto::tink::Aead *ccAead = aeadKey.primitive;
+- (instancetype)initWithKeysetReader:(TINKKeysetReader *)reader
+                              andKey:(id<TINKAead>)aeadKey
+                               error:(NSError **)error {
+  if (![aeadKey isKindOfClass:[TINKAeadInternal class]]) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "Invalid instance of TINKAead."));
+    }
+    return nil;
+  }
 
-  // KeysetHandle::Read takes ownership of reader.ccReader.
+  TINKAeadInternal *aead = aeadKey;
+  crypto::tink::Aead *ccAead = [aead ccAead];
+  if (!ccAead) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "Failed to get C++ Aead instance."));
+    }
+    return nil;
+  }
+
+  // TODO(przydatek): KeysetHandle::Read takes ownership of reader.ccReader and thus will make
+  // the property invalid.
   auto st = crypto::tink::KeysetHandle::Read(reader.ccReader, *ccAead);
   if (!st.ok()) {
     if (error) {
@@ -63,8 +80,7 @@
   return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
 }
 
-- (nullable instancetype)initWithKeyTemplate:(TINKPBKeyTemplate *)keyTemplate
-                                       error:(NSError **)error {
+- (instancetype)initWithKeyTemplate:(TINKPBKeyTemplate *)keyTemplate error:(NSError **)error {
   // Serialize the Obj-C protocol buffer.
   std::string serializedKeyTemplate = TINKPBSerializeToString(keyTemplate, error);
   if (serializedKeyTemplate.empty()) {

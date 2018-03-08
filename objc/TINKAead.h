@@ -18,16 +18,15 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * The interface for authenticated encryption with additional authenticated data. Implementations of
  * this interface are secure against adaptive chosen ciphertext attacks. Encryption with additional
  * data ensures authenticity and integrity of that data, but not its secrecy. (see RFC 5116,
  * https://tools.ietf.org/html/rfc5116)
  */
-@interface TINKAead : NSObject
-
-/** Use TINKAeadFactory to get an instance of TINKAead. */
-- (nullable instancetype)init NS_UNAVAILABLE;
+@protocol TINKAead <NSObject>
 
 /**
  * Encrypts @c plaintext with @c additionalData as additional authenticated data, and returns the
@@ -38,9 +37,9 @@
  * @param additionalData  Additional authenticated data.
  * @return                The encrypted data on success; nil in case of error.
  */
-- (nullable NSData *)encrypt:(nonnull NSData *)plaintext
-          withAdditionalData:(nonnull NSData *)additionalData
-                       error:(NSError *_Nullable *_Nonnull)error;
+- (nullable NSData *)encrypt:(NSData *)plaintext
+          withAdditionalData:(NSData *)additionalData
+                       error:(NSError **)error;
 
 /**
  * Decrypts @c ciphertext with @c additionalData as additional authenticated data, and returns the
@@ -51,8 +50,10 @@
  * @param additionalData  Additional authenticated data.
  * @return                The decrypted data on success; nil in case of error.
  */
-- (nullable NSData *)decrypt:(nonnull NSData *)ciphertext
-          withAdditionalData:(nonnull NSData *)additionalData
-                       error:(NSError *_Nullable *_Nonnull)error;
+- (nullable NSData *)decrypt:(NSData *)ciphertext
+          withAdditionalData:(NSData *)additionalData
+                       error:(NSError **)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

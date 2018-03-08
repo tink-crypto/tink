@@ -16,14 +16,32 @@
  **************************************************************************
  */
 
-#import "objc/TINKAead.h"
+#import "objc/TINKConfig.h"
 
-#include "cc/aead.h"
+#import <Foundation/Foundation.h>
 
-@interface TINKAead ()
-@property(nonatomic, nonnull, readonly) crypto::tink::Aead *primitive;
+#import "objc/TINKRegistryConfig.h"
+#import "objc/core/TINKRegistryConfig_Internal.h"
+#import "objc/util/TINKErrors.h"
+#import "objc/util/TINKStrings.h"
+#import "proto/Config.pbobjc.h"
 
-- (nullable instancetype)initWithPrimitive:(nonnull crypto::tink::Aead *)primitive
-    NS_DESIGNATED_INITIALIZER;
+#include "cc/config.h"
+#include "cc/util/errors.h"
+#include "proto/config.pb.h"
+
+@implementation TINKConfig
+
++ (BOOL)registerConfig:(TINKRegistryConfig *)config error:(NSError **)error {
+  auto st = crypto::tink::Config::Register(config.ccConfig);
+  if (!st.ok()) {
+    if (error) {
+      *error = TINKStatusToError(st);
+    }
+    return NO;
+  }
+
+  return YES;
+}
 
 @end

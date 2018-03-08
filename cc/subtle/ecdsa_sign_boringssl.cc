@@ -82,32 +82,20 @@ util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
   // Compute the digest.
   unsigned int digest_size;
   uint8_t digest[EVP_MAX_MD_SIZE];
-  bssl::UniquePtr<EVP_MD_CTX> mdctx(EVP_MD_CTX_create());
-  if (!EVP_DigestInit_ex(mdctx.get(), hash_, nullptr)) {
-    return util::Status(util::error::INTERNAL, "Could not compute digest.");
-  }
-  if (!EVP_DigestUpdate(mdctx.get(), data.data(), data.size())) {
-    return util::Status(util::error::INTERNAL, "Could not compute digest.");
-  }
-  if (!EVP_DigestFinal_ex(mdctx.get(), digest, &digest_size)) {
+  if (1 != EVP_Digest(data.data(), data.size(), digest, &digest_size, hash_,
+                  nullptr)) {
     return util::Status(util::error::INTERNAL, "Could not compute digest.");
   }
 
   // Compute the signature.
-  bssl::UniquePtr<ECDSA_SIG> signature(ECDSA_do_sign(
-      digest, digest_size, key_.get()));
-  if (signature == nullptr) {
+  std::vector<uint8_t> buffer(ECDSA_size(key_.get()));
+  unsigned int sig_length;
+  if (1 != ECDSA_sign(0 /* unused */, digest, digest_size, buffer.data(),
+                  &sig_length, key_.get())) {
     return util::Status(util::error::INTERNAL, "Signing failed.");
   }
 
-  // Get DER-encoding of the signature.
-  const size_t buffer_size = i2d_ECDSA_SIG(signature.get(), nullptr);
-  std::vector<uint8_t> buffer(buffer_size);
-  uint8_t* ptr = &buffer[0];
-  const size_t sig_length = i2d_ECDSA_SIG(signature.get(), &ptr);
-  std::string der_signature;
-  der_signature.assign(reinterpret_cast<char*>(&buffer[0]), sig_length);
-  return der_signature;
+  return std::string(reinterpret_cast<char*>(buffer.data()), sig_length);
 }
 
 }  // namespace subtle

@@ -53,6 +53,9 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
   auto status = verifier->Verify(signature, message);
   EXPECT_TRUE(status.ok()) << status;
 
+  status = verifier->Verify(signature + "some trailing data", message);
+  EXPECT_FALSE(status.ok()) << status;
+
   status = verifier->Verify("some bad signature", message);
   EXPECT_FALSE(status.ok());
 

@@ -22,8 +22,8 @@
 #import <XCTest/XCTest.h>
 
 #import "objc/TINKAead.h"
-#import "objc/TINKAead_Internal.h"
 #import "objc/TINKBinaryKeysetReader.h"
+#import "objc/aead/TINKAeadInternal.h"
 #import "objc/util/TINKStrings.h"
 #import "proto/Tink.pbobjc.h"
 
@@ -60,8 +60,9 @@ static TINKPBKeyset *gKeyset;
 }
 
 - (void)testGoodEncryptedKeyset_Binary {
-  crypto::tink::test::DummyAead *ccAead = new crypto::tink::test::DummyAead("dummy aead 42");
-  TINKAead *aead = [[TINKAead alloc] initWithPrimitive:ccAead];
+  auto ccAead =
+      std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("dummy aead 42"));
+  TINKAeadInternal *aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccAead)];
 
   NSData *keysetCiphertext = [aead encrypt:gKeyset.data withAdditionalData:[NSData data] error:nil];
 
@@ -84,8 +85,9 @@ static TINKPBKeyset *gKeyset;
 }
 
 - (void)testWrongAead_Binary {
-  crypto::tink::test::DummyAead *ccAead = new crypto::tink::test::DummyAead("dummy aead 42");
-  TINKAead *aead = [[TINKAead alloc] initWithPrimitive:ccAead];
+  auto ccAead =
+      std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("dummy aead 42"));
+  TINKAeadInternal *aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccAead)];
 
   NSData *keysetCiphertext = [aead encrypt:gKeyset.data withAdditionalData:[NSData data] error:nil];
 
@@ -95,8 +97,9 @@ static TINKPBKeyset *gKeyset;
   TINKBinaryKeysetReader *reader =
       [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:encryptedKeyset.data error:nil];
 
-  crypto::tink::test::DummyAead *ccWrongAead = new crypto::tink::test::DummyAead("wrong aead");
-  TINKAead *wrongAead = [[TINKAead alloc] initWithPrimitive:ccWrongAead];
+  auto ccWrongAead =
+      std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("wrong aead"));
+  TINKAeadInternal *wrongAead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccWrongAead)];
 
   NSError *error = nil;
   TINKKeysetHandle *handle =
@@ -106,8 +109,9 @@ static TINKPBKeyset *gKeyset;
 }
 
 - (void)testNoKeysetInCiphertext_Binary {
-  crypto::tink::test::DummyAead *ccAead = new crypto::tink::test::DummyAead("dummy aead 42");
-  TINKAead *aead = [[TINKAead alloc] initWithPrimitive:ccAead];
+  auto ccAead =
+      std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("dummy aead 42"));
+  TINKAeadInternal *aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccAead)];
   NSData *keysetCiphertext =
       [aead encrypt:[@"not a serialized keyset" dataUsingEncoding:NSUTF8StringEncoding]
           withAdditionalData:[NSData data]
@@ -124,8 +128,9 @@ static TINKPBKeyset *gKeyset;
 }
 
 - (void)testWrongCiphertext_Binary {
-  crypto::tink::test::DummyAead *ccAead = new crypto::tink::test::DummyAead("dummy aead 42");
-  TINKAead *aead = [[TINKAead alloc] initWithPrimitive:ccAead];
+  auto ccAead =
+      std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("dummy aead 42"));
+  TINKAeadInternal *aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccAead)];
   NSString *keysetCiphertext = @"totally wrong ciphertext";
 
   TINKPBEncryptedKeyset *encryptedKeyset = [[TINKPBEncryptedKeyset alloc] init];
@@ -152,3 +157,4 @@ static TINKPBKeyset *gKeyset;
 }
 
 @end
+

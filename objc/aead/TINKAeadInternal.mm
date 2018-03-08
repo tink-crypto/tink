@@ -16,54 +16,80 @@
  **************************************************************************
  */
 
-#import "objc/TINKAead.h"
-#import "objc/TINKAead_Internal.h"
+#import "objc/aead/TINKAeadInternal.h"
 
+#import "objc/TINKAead.h"
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
 
 #include "absl/strings/string_view.h"
 #include "cc/aead.h"
 
-@implementation TINKAead
+@implementation TINKAeadInternal {
+  std::unique_ptr<crypto::tink::Aead> _ccAead;
+}
 
-- (instancetype)initWithPrimitive:(crypto::tink::Aead *)primitive {
-  if (self = [super init]) {
-    _primitive = primitive;
+- (instancetype)initWithCCAead:(std::unique_ptr<crypto::tink::Aead>)ccAead {
+  self = [super init];
+  if (self) {
+    _ccAead = std::move(ccAead);
   }
   return self;
 }
 
 - (void)dealloc {
-  delete _primitive;
+  _ccAead.reset();
 }
 
 - (NSData *)encrypt:(NSData *)plaintext
     withAdditionalData:(NSData *)additionalData
                  error:(NSError **)error {
-  auto st = _primitive->Encrypt(
+  absl::string_view ccAdditionalData;
+  if (additionalData && additionalData.length > 0) {
+    ccAdditionalData =
+        absl::string_view(static_cast<const char *>(additionalData.bytes), additionalData.length);
+  }
+
+  auto st = _ccAead->Encrypt(
       absl::string_view(static_cast<const char *>(plaintext.bytes), plaintext.length),
-      absl::string_view(static_cast<const char *>(additionalData.bytes),
-                                    additionalData.length));
+      ccAdditionalData);
   if (!st.ok()) {
-    *error = TINKStatusToError(st.status());
+    if (error) {
+      *error = TINKStatusToError(st.status());
+    }
     return nil;
   }
+
   return TINKStringToNSData(st.ValueOrDie());
 }
 
 - (NSData *)decrypt:(NSData *)ciphertext
     withAdditionalData:(NSData *)additionalData
                  error:(NSError **)error {
-  auto st = _primitive->Decrypt(
+  absl::string_view ccAdditionalData;
+  if (additionalData && additionalData.length > 0) {
+    ccAdditionalData =
+        absl::string_view(static_cast<const char *>(additionalData.bytes), additionalData.length);
+  }
+
+  auto st = _ccAead->Decrypt(
       absl::string_view(static_cast<const char *>(ciphertext.bytes), ciphertext.length),
-      absl::string_view(static_cast<const char *>(additionalData.bytes),
-                                    additionalData.length));
+      ccAdditionalData);
   if (!st.ok()) {
-    *error = TINKStatusToError(st.status());
+    if (error) {
+      *error = TINKStatusToError(st.status());
+    }
     return nil;
   }
+
   return TINKStringToNSData(st.ValueOrDie());
+}
+
+- (nullable crypto::tink::Aead *)ccAead {
+  if (!_ccAead) {
+    return nil;
+  }
+  return _ccAead.get();
 }
 
 @end

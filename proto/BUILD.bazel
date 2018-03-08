@@ -43,7 +43,6 @@ objc_proto_compile(
     name = "common_objc_pb",
     protos = ["common.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
 )
 
 # -----------------------------------------------
@@ -85,7 +84,6 @@ objc_proto_compile(
     name = "tink_objc_pb",
     protos = ["tink.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
 )
 
 # -----------------------------------------------
@@ -117,6 +115,12 @@ go_proto_library(
     name = "config_go_proto",
     importpath = "github.com/google/tink/proto/config_proto",
     proto = ":config_proto",
+)
+
+objc_proto_compile(
+    name = "config_objc_pb",
+    protos = ["config.proto"],
+    tags = ["manual"],
 )
 
 # -----------------------------------------------
@@ -154,7 +158,6 @@ objc_proto_compile(
     name = "aes_siv_objc_pb",
     protos = ["aes_siv.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
 )
 
 # -----------------------------------------------
@@ -196,7 +199,6 @@ objc_proto_compile(
     name = "ecdsa_objc_pb",
     protos = ["ecdsa.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
     deps = [":common_objc_pb"],
 )
 
@@ -235,7 +237,6 @@ objc_proto_compile(
     name = "ed25519_objc_pb",
     protos = ["ed25519.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
 )
 
 # -----------------------------------------------
@@ -275,7 +276,6 @@ objc_proto_compile(
     name = "hmac_objc_pb",
     protos = ["hmac.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
     deps = [":common_objc_pb"],
 )
 
@@ -314,7 +314,6 @@ objc_proto_compile(
     name = "aes_ctr_objc_pb",
     protos = ["aes_ctr.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
 )
 
 # -----------------------------------------------
@@ -360,7 +359,6 @@ objc_proto_compile(
     name = "aes_ctr_hmac_aead_objc_pb",
     protos = ["aes_ctr_hmac_aead.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
     deps = [
         ":aes_ctr_objc_pb",
         ":hmac_objc_pb",
@@ -402,7 +400,6 @@ objc_proto_compile(
     name = "aes_gcm_objc_pb",
     protos = ["aes_gcm.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
 )
 
 # -----------------------------------------------
@@ -446,7 +443,6 @@ objc_proto_compile(
     name = "aes_ctr_hmac_streaming_objc_pb",
     protos = ["aes_ctr_hmac_streaming.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
     deps = [
         ":common_objc_pb",
         ":hmac_objc_pb",
@@ -488,7 +484,6 @@ objc_proto_compile(
     name = "aes_gcm_hkdf_streaming_objc_pb",
     protos = ["aes_gcm_hkdf_streaming.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
     deps = [
         ":common_objc_pb",
     ],
@@ -529,7 +524,6 @@ objc_proto_compile(
     name = "aes_eax_objc_pb",
     protos = ["aes_eax.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
 )
 
 # -----------------------------------------------
@@ -567,7 +561,6 @@ objc_proto_compile(
     name = "chacha20_poly1305_objc_pb",
     protos = ["chacha20_poly1305.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
 )
 
 # -----------------------------------------------
@@ -605,7 +598,6 @@ objc_proto_compile(
     name = "kms_aead_objc_pb",
     protos = ["kms_aead.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
 )
 
 # -----------------------------------------------
@@ -645,7 +637,6 @@ objc_proto_compile(
     name = "kms_envelope_objc_pb",
     protos = ["kms_envelope.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
     deps = [
         ":tink_objc_pb",
     ],
@@ -694,7 +685,6 @@ objc_proto_compile(
     name = "ecies_aead_hkdf_objc_pb",
     protos = ["ecies_aead_hkdf.proto"],
     tags = ["manual"],
-    visibility = ["//visibility:private"],
     deps = [
         ":common_objc_pb",
         ":tink_objc_pb",
@@ -715,6 +705,7 @@ tink_objc_proto_library(
         ":aes_gcm_objc_pb",
         ":chacha20_poly1305_objc_pb",
         ":common_objc_pb",
+        ":config_objc_pb",
         ":ecdsa_objc_pb",
         ":ecies_aead_hkdf_objc_pb",
         ":ed25519_objc_pb",

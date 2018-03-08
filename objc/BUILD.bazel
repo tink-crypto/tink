@@ -21,18 +21,8 @@ objc_library(
 
 objc_library(
     name = "aead",
-    srcs = ["TINKAead.mm"],
-    hdrs = [
-        "TINKAead.h",
-        "TINKAead_Internal.h",
-    ],
+    hdrs = ["TINKAead.h"],
     visibility = ["//visibility:public"],
-    deps = [
-        "//cc:aead",
-        "//objc/util:errors",
-        "//objc/util:strings",
-        "@com_google_absl//absl/strings",
-    ],
 )
 
 objc_library(
@@ -48,6 +38,7 @@ objc_library(
         ":keyset_reader",
         "//cc:keyset_handle",
         "//cc/util:status",
+        "//objc/aead:aead_internal",
         "//objc/util:errors",
         "//objc/util:strings",
         "//proto:all_objc_proto",
@@ -134,6 +125,84 @@ objc_library(
     ],
 )
 
+objc_library(
+    name = "config",
+    srcs = ["core/TINKConfig.mm"],
+    hdrs = [
+        "TINKConfig.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":registry_config",
+        "//cc:config",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "//proto:all_objc_proto",
+    ],
+)
+
+objc_library(
+    name = "version",
+    srcs = [],
+    hdrs = [
+        "TINKVersion.h",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+objc_library(
+    name = "all_config",
+    srcs = ["core/TINKAllConfig.mm"],
+    hdrs = [
+        "TINKAllConfig.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":registry_config",
+        "//cc/config:tink_config",
+        "//cc/util:errors",
+        "//objc:version",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "//proto:all_objc_proto",
+    ],
+)
+
+objc_library(
+    name = "registry_config",
+    srcs = ["core/TINKRegistryConfig.mm"],
+    hdrs = [
+        "TINKRegistryConfig.h",
+        "core/TINKRegistryConfig_Internal.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":config_pb",
+        ":version",
+    ],
+)
+
+cc_library(
+    name = "aes_gcm_pb",
+    deps = [
+        "//proto:aes_gcm_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "config_pb",
+    deps = [
+        "//proto:config_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "tink_pb",
+    deps = [
+        "//proto:tink_cc_proto",
+    ],
+)
+
 ############################
 #         Tests            #
 ############################
@@ -158,10 +227,25 @@ objc_library(
     ]),
     deps = [
         ":aead",
+        ":aes_gcm_pb",
+        ":all_config",
         ":binary_keyset_reader",
         ":cleartext_keyset_handle",
-        ":keyset_handle",
+        ":config",
+        ":registry_config",
+        ":tink_pb",
+        ":version",
+        "//cc:aead",
+        "//cc:crypto_format",
+        "//cc:keyset_handle",
+        "//cc/aead:aead_config",
+        "//cc/aead:aead_factory",
+        "//cc/aead:aes_gcm_key_manager",
+        "//cc/util:status",
         "//cc/util:test_util",
+        "//objc/aead:aead_config",
+        "//objc/aead:aead_factory",
+        "//objc/aead:aead_internal",
         "//objc/util:strings",
         "//proto:all_objc_proto",
     ],

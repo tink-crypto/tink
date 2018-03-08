@@ -21,39 +21,37 @@
 #import <Foundation/Foundation.h>
 
 #import "objc/TINKAead.h"
-#import "objc/TINKAead_Internal.h"
 #import "objc/TINKKeysetHandle.h"
+#import "objc/aead/TINKAeadInternal.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKErrors.h"
 
 #include "cc/aead/aead_factory.h"
 #include "cc/keyset_handle.h"
 #include "cc/util/status.h"
-#include "proto/tink.pb.h"
-
-using namespace crypto::tink;
 
 @implementation TINKAeadFactory
 
-+ (TINKAead *)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle error:(NSError **)error {
-  *error = nil;
-  KeysetHandle *handle = [keysetHandle ccKeysetHandle];
++ (id<TINKAead>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle error:(NSError **)error {
+  crypto::tink::KeysetHandle *handle = [keysetHandle ccKeysetHandle];
 
-  auto aead = AeadFactory::GetPrimitive(*handle);
-  if (!aead.ok()) {
-    *error = TINKStatusToError(aead.status());
+  auto st = crypto::tink::AeadFactory::GetPrimitive(*handle);
+  if (!st.ok()) {
+    if (error) {
+      *error = TINKStatusToError(st.status());
+    }
+    return nil;
+  }
+  id<TINKAead> aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(st.ValueOrDie())];
+  if (!aead) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::RESOURCE_EXHAUSTED, "Cannot initialize TINKAead"));
+    }
     return nil;
   }
 
-  auto primitive = aead.ValueOrDie().release();
-  TINKAead *tnkAead = [[TINKAead alloc] initWithPrimitive:primitive];
-  if (!tnkAead) {
-    *error = TINKStatusToError(crypto::tink::util::Status(
-        crypto::tink::util::error::RESOURCE_EXHAUSTED, "Cannot initialize TINKAead"));
-    return nil;
-  }
-
-  return tnkAead;
+  return aead;
 }
 
 @end

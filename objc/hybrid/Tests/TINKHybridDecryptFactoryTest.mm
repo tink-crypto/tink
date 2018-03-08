@@ -86,8 +86,8 @@ static NSData *encrypt(id<TINKHybridEncrypt> hybridEncrypt,
   // Get the key prefix using the C++ CryptoFormat API.
   // TODO(candrian): Update this to use the Obj-C API when it is implemented.
   std::string output_prefix =
-      crypto::tink::CryptoFormat::get_output_prefix(
-            keysetHandle.ccKeysetHandle->get_keyset().key(keyIndex)).ValueOrDie();
+      crypto::tink::CryptoFormat::get_output_prefix(keysetHandle.ccKeysetHandle->get_keyset().key(keyIndex))
+          .ValueOrDie();
   NSData *outputPrefix = TINKStringToNSData(output_prefix);
   [ciphertext appendData:outputPrefix];
 
@@ -100,8 +100,7 @@ static NSData *encrypt(id<TINKHybridEncrypt> hybridEncrypt,
 
 - (void)testPrimitiveWithEmptyKeyset {
   google::crypto::tink::Keyset keyset;
-  TINKKeysetHandle *keysetHandle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(keyset)];
+  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(keyset)];
   XCTAssertNotNil(keysetHandle);
 
   NSError *error = nil;
@@ -129,9 +128,7 @@ static NSData *encrypt(id<TINKHybridEncrypt> hybridEncrypt,
   std::string serializedKeyset = TINKPBSerializeToString(keyset, &error);
   XCTAssertNil(error);
   XCTAssertTrue(ccKeyset.ParseFromString(serializedKeyset));
-  // NOLINTNEXTLINE
-  TINKKeysetHandle *keysetHandle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccKeyset)];
+  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccKeyset)];
 
   // Get a HybridDecrypt primitive using the test Keyset.
   error = nil;
