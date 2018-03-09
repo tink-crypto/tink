@@ -18,11 +18,13 @@
 
 #include <string>
 
+#include "third_party/jsoncpp/reader.h"
 #include "cc/public_key_sign.h"
 #include "cc/public_key_verify.h"
 #include "cc/subtle/ecdsa_sign_boringssl.h"
 #include "cc/subtle/common_enums.h"
 #include "cc/subtle/subtle_util_boringssl.h"
+#include "cc/subtle/wycheproof_util.h"
 #include "cc/util/status.h"
 #include "cc/util/statusor.h"
 #include "cc/util/test_util.h"
@@ -63,7 +65,120 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
   EXPECT_FALSE(status.ok());
 }
 
-// TODO(bleichen): add Wycheproof tests.
+// Integers in Wycheproof are represented as signed bigendian hexadecimal
+// strings in twos complement representation.
+// Integers in EcKey are unsigned and are represented as an array of bytes
+// using bigendian order.
+// GetInteger can assume that val is always 0 or a positive integer, since
+// they are values from the key: a convention in Wycheproof is that parameters
+// in the test group are valid, only values in the test vector itself may
+// be invalid.
+static std::string GetInteger(const Json::Value &val) {
+  std::string hex = val.asString();
+  // Check that the integer is 0 or positive.
+  if (!hex.empty()) {
+    CHECK_LT(0, hex.size());
+    CHECK_GT('8', hex[0]);
+  }
+  // Since val is a hexadecimal integer it can have an odd length.
+  if (hex.size() % 2 == 1) {
+    // Avoid a leading 0 byte.
+    if (hex[0] == '0') {
+      hex = std::string(hex, 1, hex.size()-1);
+    } else {
+      hex = "0" + hex;
+    }
+  }
+  return test::HexDecodeOrDie(hex);
+}
+
+static util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>>
+GetVerifier(const Json::Value &test_group) {
+  SubtleUtilBoringSSL::EcKey *key = new SubtleUtilBoringSSL::EcKey();
+  key->pub_x = GetInteger(test_group["key"]["wx"]);
+  key->pub_y = GetInteger(test_group["key"]["wy"]);
+  key->curve = WycheproofUtil::GetEllipticCurveType(test_group["key"]["curve"]);
+  HashType md = WycheproofUtil::GetHashType(test_group["sha"]);
+  return EcdsaVerifyBoringSsl::New(*key, md);
+}
+
+// Tests signature verification using the test vectors in the specified file.
+// allow_skipping determines whether it is OK to skip a test because
+// a verfier cannot be constructed. This option can be used for
+// if a file contains test vectors that are not necessarily supported
+// by tink.
+bool TestSignatures(const std::string& filename, bool allow_skipping) {
+  std::unique_ptr<Json::Value> root =
+      WycheproofUtil::ReadTestVectors(filename);
+  VLOG(0) << (*root)["algorithm"].asString();
+  VLOG(0) << "generator version " << (*root)["generatorVersion"].asString();
+  VLOG(0) << "expected version 0.2.5";
+  int passed_tests = 0;
+  int failed_tests = 0;
+  for (const Json::Value& test_group : (*root)["testGroups"]) {
+    auto verifier_result = GetVerifier(test_group);
+    if (!verifier_result.ok()) {
+      std::string curve = test_group["key"]["curve"].asString();
+      if (allow_skipping) {
+        VLOG(0) << "Could not construct verifier for curve " << curve;
+      } else {
+        ADD_FAILURE() << "Could not construct verifier for curve " << curve;
+        failed_tests += test_group["tests"].size();
+      }
+      continue;
+    }
+    auto verifier = std::move(verifier_result.ValueOrDie());
+    for (const Json::Value& test : test_group["tests"]) {
+      std::string expected = test["result"].asString();
+      std::string msg = WycheproofUtil::GetBytes(test["msg"]);
+      std::string sig = WycheproofUtil::GetBytes(test["sig"]);
+      std::string id = test["tcId"].asString() + " " + test["comment"].asString();
+      auto status = verifier->Verify(sig, msg);
+      if (expected == "valid") {
+        if (status.ok()) {
+          ++passed_tests;
+        } else {
+          ++failed_tests;
+          ADD_FAILURE() << "Valid signature not verified:" << id
+              << " status:" << status;
+        }
+      } else if (expected == "invalid") {
+        if (!status.ok()) {
+          ++passed_tests;
+        } else {
+          ++failed_tests;
+          ADD_FAILURE() << "Invalid signature verified:" << id;
+        }
+      } else if (expected == "acceptable") {
+        // The validity of the signature is undefined. Hence the test passes
+        // but we log the result since we might still want to know if the
+        // library is strict or forgiving.
+        ++passed_tests;
+        VLOG(0) << "Acceptable signature:" << id << ":" << status;
+      } else {
+        ++failed_tests;
+        ADD_FAILURE() << "Invalid field result:" << expected;
+      }
+    }
+  }
+  int num_tests = (*root)["numberOfTests"].asInt();
+  VLOG(0) << "total number of tests: " << num_tests;
+  VLOG(0) << "number of tests passed:" << passed_tests;
+  VLOG(0) << "number of tests failed:" << failed_tests;
+  return failed_tests == 0;
+}
+
+TEST_F(EcdsaSignBoringSslTest, testVectorsNistP256) {
+  ASSERT_TRUE(TestSignatures("ecdsa_secp256r1_sha256_test.json", false));
+}
+
+TEST_F(EcdsaSignBoringSslTest, testVectorsNistP384) {
+  ASSERT_TRUE(TestSignatures("ecdsa_secp384r1_sha512_test.json", false));
+}
+
+TEST_F(EcdsaSignBoringSslTest, testVectorsNistP521) {
+  ASSERT_TRUE(TestSignatures("ecdsa_secp521r1_sha512_test.json", false));
+}
 
 }  // namespace
 }  // namespace subtle
