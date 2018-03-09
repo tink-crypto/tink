@@ -254,7 +254,7 @@ class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt>
   }
 
   private void validate(EciesAeadHkdfPrivateKey keyProto) throws GeneralSecurityException {
-    // TODO(przydatek): add more checks.
+    // TODO(b/74249437): add more checks.
     Validators.validateVersion(keyProto.getVersion(), VERSION);
     HybridUtil.validate(keyProto.getPublicKey().getParams());
   }

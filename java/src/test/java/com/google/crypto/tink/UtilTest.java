@@ -334,5 +334,5 @@ public class UtilTest {
     assertEquals(templateCount, count);
   }
 
-  // TODO(thaidn): add tests for other functions.
+  // TODO(b/74251398): add tests for other functions.
 }

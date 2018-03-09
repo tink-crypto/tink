@@ -30,7 +30,7 @@ namespace tink {
 // key material.
 class KeysetHandle {
  public:
-  // TODO(przydatek): refactor to ensure that creation KeysetHandle-objects
+  // TODO(b/74409123): refactor to ensure that creation KeysetHandle-objects
   //   can be controlled (as in Java).
 
   // Creates a KeysetHandle from an encrypted keyset obtained via |reader|
@@ -53,14 +53,6 @@ class KeysetHandle {
   // For internal use only, do not use outside Tink-code as it will be
   // deprecated/hidden soon.
   const google::crypto::tink::Keyset& get_keyset() const;
-
-  // This constructor is here only so that ObjC code doesn't break.
-  // TODO(b/64722726): remove the dependency and the constructor.
-  explicit KeysetHandle(const google::crypto::tink::Keyset& keyset) {
-    std::unique_ptr<google::crypto::tink::Keyset> keyset_copy(
-        new google::crypto::tink::Keyset(keyset));
-    keyset_ = std::move(keyset_copy);
-  }
 
  private:
   friend class CleartextKeysetHandle;

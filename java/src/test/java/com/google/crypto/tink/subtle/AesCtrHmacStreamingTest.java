@@ -362,7 +362,6 @@ public class AesCtrHmacStreamingTest {
   /** Encrypt and decrypt a long ciphertext. */
   @Test
   public void testEncryptDecryptLong() throws Exception {
-    // TODO(b/66918385): test with more than 4GB of data.
     long plaintextSize = (1L << 26) + 1234567;
     StreamingTestUtil.testEncryptDecryptLong(createAesCtrHmacStreaming(), plaintextSize);
   }

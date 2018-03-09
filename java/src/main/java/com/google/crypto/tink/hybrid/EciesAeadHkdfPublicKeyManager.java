@@ -283,12 +283,12 @@ class EciesAeadHkdfPublicKeyManager implements KeyManager<HybridEncrypt> {
   }
 
   private void validate(EciesAeadHkdfKeyFormat format) throws GeneralSecurityException {
-    // TODO(przydatek): add more checks.
+    // TODO(b/74251423): add more checks.
     HybridUtil.validate(format.getParams());
   }
 
   private void validate(EciesAeadHkdfPublicKey key) throws GeneralSecurityException {
-    // TODO(przydatek): add more checks.
+    // TODO(b/74251423): add more checks.
     Validators.validateVersion(key.getVersion(), VERSION);
     HybridUtil.validate(key.getParams());
   }

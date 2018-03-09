@@ -56,7 +56,7 @@ final class SigUtil {
     switch (encoding) {
       case DER:
         break;
-        // TODO(quannguyen): support other signature encodings.
+        // TODO(b/74249423): support other signature encodings.
       default:
         throw new GeneralSecurityException("unsupported signature encoding");
     }

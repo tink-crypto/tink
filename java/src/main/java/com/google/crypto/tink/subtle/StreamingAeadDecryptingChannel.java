@@ -148,7 +148,7 @@ class StreamingAeadDecryptingChannel implements ReadableByteChannel {
         decrypter.init(header, aad);
         headerRead = true;
       } catch (GeneralSecurityException ex) {
-        // TODO(bleichen): Try to define the state of this.
+        // TODO(b/74249330): Try to define the state of this.
         setUndefinedState();
         throw new IOException(ex);
       }

@@ -65,7 +65,7 @@ import java.util.logging.Logger;
  * Aead aead = AeadFactory.getPrimitive(keysetHandle);
  * }</pre>
  */
-// TODO(przydatek): make the read only methods, e.g., getKeyManager, getCatalogue, etc.
+// TODO(b/74249234): make the read only methods, e.g., getKeyManager, getCatalogue, etc.
 // thread-safe.
 public final class Registry {
   private static final Logger logger = Logger.getLogger(Registry.class.getName());

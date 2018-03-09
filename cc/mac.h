@@ -41,8 +41,6 @@ class Mac {
       absl::string_view data) const = 0;
 
   virtual ~Mac() {}
-
-  // TODO(przydatek): add asynchronous API.
 };
 
 }  // namespace tink

@@ -44,7 +44,7 @@ import org.junit.runners.JUnit4;
 /**
  * Unit tests for EciesAeadHkdfHybridEncrypt.
  *
- * <p>TODO(przydatek): Add more tests.
+ * <p>TODO(b/74250701): Add more tests.
  */
 @RunWith(JUnit4.class)
 public class EciesAeadHkdfHybridEncryptTest {

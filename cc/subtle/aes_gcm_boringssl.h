@@ -56,8 +56,6 @@ class AesGcmBoringSsl : public Aead {
   // cipher_ is a singleton owned by BoringSsl.
   // Preferable would be to use the AEAD interface, but unfortunately this
   // interface does not support 192-bit keys.
-  // TODO(bleichen): We should find a way to deprecate OpenSSL, since the
-  //   interfaces of this library are confusing and errorprone.
   const EVP_CIPHER *cipher_;
 };
 

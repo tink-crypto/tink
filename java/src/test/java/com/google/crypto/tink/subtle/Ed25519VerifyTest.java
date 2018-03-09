@@ -30,7 +30,6 @@ import org.junit.runners.JUnit4;
 /**
  * Unit tests for {@link Ed25519Verify}.
  *
- * <p>TODO(quannguyen): Use Github Wycheproof's test vectors once it's available (b/66825199).
  */
 @RunWith(JUnit4.class)
 public final class Ed25519VerifyTest {

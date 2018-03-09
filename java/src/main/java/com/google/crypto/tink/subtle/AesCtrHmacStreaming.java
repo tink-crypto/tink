@@ -328,7 +328,7 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
     }
 
     @Override
-    // TODO(bleichen): So far this is unused.
+    // TODO(b/74250492): So far this is unused.
     public synchronized int getEncryptedSegments() {
       return encryptedSegments;
     }
