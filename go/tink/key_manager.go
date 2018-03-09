@@ -16,7 +16,7 @@ package tink
 
 import (
 	"github.com/golang/protobuf/proto"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 /*

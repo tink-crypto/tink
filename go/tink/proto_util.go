@@ -15,8 +15,8 @@
 package tink
 
 import (
-	commonpb "github.com/google/tink/proto/common_proto"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // NewKeyData creates a new KeyData with the specified parameters.

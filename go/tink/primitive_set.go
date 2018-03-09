@@ -17,7 +17,7 @@ package tink
 import (
 	"fmt"
 
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // Entry represents a single entry in the keyset. In addition to the actual primitive,

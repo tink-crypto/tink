@@ -18,7 +18,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 /**
@@ -38,7 +38,7 @@ const (
 
 	// Raw prefix is empty.
 	RawPrefixSize = 0
-	RawPrefix      = ""
+	RawPrefix     = ""
 )
 
 /*

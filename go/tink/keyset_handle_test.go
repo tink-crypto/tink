@@ -17,7 +17,7 @@ package tink
 import (
 	"testing"
 
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestNewKeysetHandleBasic(t *testing.T) {

@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/tink"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 var tests = []struct {

@@ -19,7 +19,7 @@ import (
 	"sync"
 
 	"github.com/golang/protobuf/proto"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // cleartextKeysetHandle provides utilities to creates keyset handles from

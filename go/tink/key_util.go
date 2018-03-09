@@ -17,7 +17,7 @@ package tink
 import (
 	"fmt"
 
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // ValidateVersion checks whether the given version is valid. The version is valid

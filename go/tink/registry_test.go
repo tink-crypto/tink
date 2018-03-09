@@ -26,10 +26,10 @@ import (
 	subtleMac "github.com/google/tink/go/subtle/mac"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
-	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
-	commonpb "github.com/google/tink/proto/common_proto"
-	hmacpb "github.com/google/tink/proto/hmac_proto"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	hmacpb "github.com/google/tink/proto/hmac_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestKeyManagerMapBasic(t *testing.T) {

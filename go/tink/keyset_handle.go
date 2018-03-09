@@ -17,7 +17,7 @@ package tink
 import (
 	"fmt"
 
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 var errKeysetHandleInvalidKeyset = fmt.Errorf("keyset_handle: invalid keyset")
