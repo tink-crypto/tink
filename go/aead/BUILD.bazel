@@ -29,7 +29,6 @@ go_test(
         "aead_key_templates_test.go",
         "aes_gcm_key_manager_test.go",
     ],
-    importpath = "github.com/google/tink/go/aead_test",
     deps = [
         ":go_default_library",
         "//go/subtle/aead:go_default_library",

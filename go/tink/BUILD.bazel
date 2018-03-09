@@ -50,7 +50,6 @@ go_test(
         "primitive_set_test.go",
         "registry_test.go",
     ],
-    importpath = "github.com/google/tink/go/tink_test",
     deps = [
         ":go_default_library",
         "//go/aead:go_default_library",

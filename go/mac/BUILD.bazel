@@ -30,7 +30,6 @@ go_test(
         "mac_factory_test.go",
         "mac_key_templates_test.go",
     ],
-    importpath = "github.com/google/tink/go/mac_test",
     deps = [
         ":go_default_library",
         "//go/subtle:go_default_library",

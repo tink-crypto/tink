@@ -25,7 +25,6 @@ go_test(
     data = [
         "//testdata:wycheproof",  # keep
     ],
-    importpath = "github.com/google/tink/go/subtle/signature_test",
     deps = [
         ":go_default_library",
         "//go/subtle:go_default_library",

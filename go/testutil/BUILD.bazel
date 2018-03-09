@@ -24,7 +24,6 @@ go_library(
 go_test(
     name = "go_default_xtest",
     srcs = ["testutil_test.go"],
-    importpath = "github.com/google/tink/go/testutil_test",
     deps = [
         "//go/testutil:go_default_library",
         "//go/tink:go_default_library",

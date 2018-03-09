@@ -10,6 +10,5 @@ go_library(
 go_test(
     name = "go_default_xtest",
     srcs = ["util_test.go"],
-    importpath = "github.com/google/tink/go/subtle_test",
     deps = [":go_default_library"],
 )
