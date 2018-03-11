@@ -15,8 +15,8 @@
 package mac
 
 import (
-	commonpb "github.com/google/tink/proto/common_proto"
-	hmacpb "github.com/google/tink/proto/hmac_proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 )
 
 // NewHmacParams returns a new HmacParams.

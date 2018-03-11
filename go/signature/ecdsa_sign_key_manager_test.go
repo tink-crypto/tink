@@ -24,9 +24,9 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
-	commonpb "github.com/google/tink/proto/common_proto"
-	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 type ecdsaParams struct {

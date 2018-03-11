@@ -27,11 +27,11 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
 	"github.com/google/tink/go/tink"
-	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
-	commonpb "github.com/google/tink/proto/common_proto"
-	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
-	hmacpb "github.com/google/tink/proto/hmac_proto"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
+	hmacpb "github.com/google/tink/proto/hmac_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // DummyAeadKeyManager is a dummy implementation of the KeyManager interface.

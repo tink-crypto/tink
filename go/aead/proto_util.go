@@ -15,7 +15,7 @@
 package aead
 
 import (
-	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
+	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
 )
 
 // NewAesGcmKey returns a new AesGcmKey.

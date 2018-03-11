@@ -21,7 +21,7 @@ import (
 	"github.com/google/tink/go/signature"
 	subtleSig "github.com/google/tink/go/subtle/signature"
 	"github.com/google/tink/go/testutil"
-	commonpb "github.com/google/tink/proto/common_proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
 )
 
 func TestNewEcdsaVerifyKeyManager(t *testing.T) {

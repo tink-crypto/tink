@@ -25,7 +25,7 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func setupFactoryTest() {

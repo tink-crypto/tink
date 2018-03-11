@@ -22,8 +22,8 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
-	commonpb "github.com/google/tink/proto/common_proto"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestPublicKeySignFactoryInstance(t *testing.T) {

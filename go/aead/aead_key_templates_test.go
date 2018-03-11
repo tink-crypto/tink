@@ -20,8 +20,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
-	gcmpb "github.com/google/tink/proto/aes_gcm_proto"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestAesGcmKeyTemplates(t *testing.T) {

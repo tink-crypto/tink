@@ -19,7 +19,7 @@ import (
 	"sync"
 
 	"github.com/google/tink/go/tink"
-	tinkpb "github.com/google/tink/proto/tink_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 // PublicKeySignFactory allows obtaining a PublicKeySign primitive from a

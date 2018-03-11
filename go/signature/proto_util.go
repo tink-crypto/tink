@@ -16,8 +16,8 @@ package signature
 
 import (
 	"github.com/google/tink/go/tink"
-	commonpb "github.com/google/tink/proto/common_proto"
-	ecdsapb "github.com/google/tink/proto/ecdsa_proto"
+	commonpb "github.com/google/tink/proto/common_go_proto"
+	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 )
 
 // NewEcdsaPrivateKey creates a EcdsaPrivateKey with the specified paramaters.
