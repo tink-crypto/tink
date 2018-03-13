@@ -18,7 +18,7 @@
 #define TINK_SUBTLE_WYCHEPROOF_UTIL_H_
 
 #include <memory>
-#include "include/json/value.h"
+#include "third_party/jsoncpp/value.h"
 #include "cc/subtle/common_enums.h"
 
 namespace crypto {

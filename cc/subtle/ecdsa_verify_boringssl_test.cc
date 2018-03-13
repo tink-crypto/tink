@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "include/json/reader.h"
+#include "third_party/jsoncpp/reader.h"
 #include "cc/public_key_sign.h"
 #include "cc/public_key_verify.h"
 #include "cc/subtle/ecdsa_sign_boringssl.h"
@@ -110,9 +110,9 @@ GetVerifier(const Json::Value &test_group) {
 bool TestSignatures(const std::string& filename, bool allow_skipping) {
   std::unique_ptr<Json::Value> root =
       WycheproofUtil::ReadTestVectors(filename);
-  std::cout << (*root)["algorithm"].asString();
-  std::cout << "generator version " << (*root)["generatorVersion"].asString();
-  std::cout << "expected version 0.2.5";
+  VLOG(0) << (*root)["algorithm"].asString();
+  VLOG(0) << "generator version " << (*root)["generatorVersion"].asString();
+  VLOG(0) << "expected version 0.2.5";
   int passed_tests = 0;
   int failed_tests = 0;
   for (const Json::Value& test_group : (*root)["testGroups"]) {
@@ -120,7 +120,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
     if (!verifier_result.ok()) {
       std::string curve = test_group["key"]["curve"].asString();
       if (allow_skipping) {
-        std::cout << "Could not construct verifier for curve " << curve;
+        VLOG(0) << "Could not construct verifier for curve " << curve;
       } else {
         ADD_FAILURE() << "Could not construct verifier for curve " << curve;
         failed_tests += test_group["tests"].size();
@@ -154,7 +154,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
         // but we log the result since we might still want to know if the
         // library is strict or forgiving.
         ++passed_tests;
-        std::cout << "Acceptable signature:" << id << ":" << status;
+        VLOG(0) << "Acceptable signature:" << id << ":" << status;
       } else {
         ++failed_tests;
         ADD_FAILURE() << "Invalid field result:" << expected;
@@ -162,9 +162,9 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
     }
   }
   int num_tests = (*root)["numberOfTests"].asInt();
-  std::cout << "total number of tests: " << num_tests;
-  std::cout << "number of tests passed:" << passed_tests;
-  std::cout << "number of tests failed:" << failed_tests;
+  VLOG(0) << "total number of tests: " << num_tests;
+  VLOG(0) << "number of tests passed:" << passed_tests;
+  VLOG(0) << "number of tests failed:" << failed_tests;
   return failed_tests == 0;
 }
 

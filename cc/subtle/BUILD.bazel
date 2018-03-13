@@ -2,6 +2,40 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
 
+PUBLIC_APIS = [
+    "common_enums.h",
+    "aes_gcm_boringssl.h",
+    "encrypt_then_authenticate.h",
+    "hmac_boringssl.h",
+    "hkdf.h",
+    "ind_cpa_cipher.h",
+    "random.h",
+]
+
+cc_library(
+    name = "subtle",
+    hdrs = PUBLIC_APIS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":aes_gcm_boringssl",
+        ":common_enums",
+        ":encrypt_then_authenticate",
+        ":hkdf",
+        ":hmac_boringssl",
+        ":random",
+        "//cc:aead",
+        "//cc:hybrid_decrypt",
+        "//cc:hybrid_encrypt",
+        "//cc:mac",
+        "//cc:public_key_sign",
+        "//cc:public_key_verify",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 cc_library(
     name = "ecies_hkdf_recipient_kem_boringssl",
     srcs = ["ecies_hkdf_recipient_kem_boringssl.cc"],
