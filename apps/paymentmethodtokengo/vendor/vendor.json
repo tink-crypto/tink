@@ -1,0 +1,69 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "dvabztWVQX8f6oMLRyv4dLH+TGY=",
+			"origin": "github.com/stretchr/testify/vendor/github.com/davecgh/go-spew/spew",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "b89eecf5ca5db6d3ba60b237ffe3df7bafb7662f",
+			"revisionTime": "2018-03-03T13:51:14Z"
+		},
+		{
+			"checksumSHA1": "WX1+2gktHcBmE9MGwFSGs7oqexU=",
+			"path": "github.com/golang/protobuf/proto",
+			"revision": "bbd03ef6da3a115852eaf24c8a1c46aeb39aa175",
+			"revisionTime": "2018-02-02T18:43:18Z"
+		},
+		{
+			"checksumSHA1": "6s6YjKvuJa7ekWzQe1aO0SQe7oU=",
+			"path": "github.com/google/tink/go/subtle",
+			"revision": "50d90fe74292a60c4dac4433ef1f81f1b7e3284c",
+			"revisionTime": "2018-03-06T15:03:19Z"
+		},
+		{
+			"checksumSHA1": "dSpC0BEtdQqJn5SX6R54hAehpYc=",
+			"path": "github.com/google/tink/go/subtle/random",
+			"revision": "50d90fe74292a60c4dac4433ef1f81f1b7e3284c",
+			"revisionTime": "2018-03-06T15:03:19Z"
+		},
+		{
+			"checksumSHA1": "MXYDSTYbUngJJDGz2SXdU9bjBHE=",
+			"path": "github.com/google/tink/go/subtle/signature",
+			"revision": "50d90fe74292a60c4dac4433ef1f81f1b7e3284c",
+			"revisionTime": "2018-03-06T15:03:19Z"
+		},
+		{
+			"checksumSHA1": "Ty5i4Z17lMTvUzrZCDq1wpQMd70=",
+			"path": "github.com/google/tink/go/tink",
+			"revision": "50d90fe74292a60c4dac4433ef1f81f1b7e3284c",
+			"revisionTime": "2018-03-06T15:03:19Z"
+		},
+		{
+			"checksumSHA1": "P7s5IpC8L89R8G9fnWEYGAFqJ5M=",
+			"path": "github.com/google/tink/proto/common_proto",
+			"revision": "50d90fe74292a60c4dac4433ef1f81f1b7e3284c",
+			"revisionTime": "2018-03-06T15:03:19Z"
+		},
+		{
+			"checksumSHA1": "LRDERo6mV8uI+X5NQkvfxONElvE=",
+			"path": "github.com/google/tink/proto/tink_proto",
+			"revision": "50d90fe74292a60c4dac4433ef1f81f1b7e3284c",
+			"revisionTime": "2018-03-06T15:03:19Z"
+		},
+		{
+			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
+			"origin": "github.com/stretchr/testify/vendor/github.com/pmezard/go-difflib/difflib",
+			"path": "github.com/pmezard/go-difflib/difflib",
+			"revision": "b89eecf5ca5db6d3ba60b237ffe3df7bafb7662f",
+			"revisionTime": "2018-03-03T13:51:14Z"
+		},
+		{
+			"checksumSHA1": "5QKvAdxb0E47Nzn7iI25AfgAvOI=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "b89eecf5ca5db6d3ba60b237ffe3df7bafb7662f",
+			"revisionTime": "2018-03-03T13:51:14Z"
+		}
+	],
+	"rootPath": "github.com/google/tink/apps/paymentmethodtokengo"
+}
