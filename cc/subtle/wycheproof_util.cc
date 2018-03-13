@@ -20,8 +20,8 @@
 #include <iostream>
 #include <memory>
 
-#include "third_party/jsoncpp/reader.h"
-#include "third_party/jsoncpp/value.h"
+#include "include/json/reader.h"
+#include "include/json/value.h"
 #include "cc/subtle/common_enums.h"
 #include "cc/util/test_util.h"
 
