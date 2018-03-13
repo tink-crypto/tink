@@ -75,11 +75,6 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
 // be invalid.
 static std::string GetInteger(const Json::Value &val) {
   std::string hex = val.asString();
-  // Check that the integer is 0 or positive.
-  if (!hex.empty()) {
-    CHECK_LT(0, hex.size());
-    CHECK_GT('8', hex[0]);
-  }
   // Since val is a hexadecimal integer it can have an odd length.
   if (hex.size() % 2 == 1) {
     // Avoid a leading 0 byte.

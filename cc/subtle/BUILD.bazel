@@ -227,7 +227,20 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "wycheproof_util",
+    srcs = ["wycheproof_util.cc"],
+    hdrs = ["wycheproof_util.h"],
+    deps = [
+        ":common_enums",
+        "//cc/util:test_util",
+        "@com_google_absl//absl/strings",
+        "@jsoncpp//:jsoncpp",
+    ],
+)
+
 # tests
+
 cc_test(
     name = "ecies_hkdf_recipient_kem_boringssl_test",
     size = "small",
@@ -379,16 +392,21 @@ cc_test(
     size = "small",
     srcs = ["ecdsa_verify_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    data = [
+        "//testdata:wycheproof",
+    ],
     deps = [
         ":common_enums",
         ":ecdsa_sign_boringssl",
         ":ecdsa_verify_boringssl",
+        ":wycheproof_util",
         "//cc:public_key_sign",
         "//cc:public_key_verify",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
         "@com_google_googletest//:gtest_main",
+        "@jsoncpp//:jsoncpp",
     ],
 )
 

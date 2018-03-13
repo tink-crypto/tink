@@ -51,6 +51,17 @@ http_archive(
     urls = ["https://github.com/google/protobuf/archive/javalite.zip"],
 )
 
+new_http_archive(
+    name = "jsoncpp",
+    urls = [
+        "https://mirror.bazel.build/github.com/open-source-parsers/jsoncpp/archive/11086dd6a7eba04289944367ca82cea71299ed70.tar.gz",
+        "https://github.com/open-source-parsers/jsoncpp/archive/11086dd6a7eba04289944367ca82cea71299ed70.tar.gz",
+    ],
+    sha256 = "07d34db40593d257324ec5fb9debc4dc33f29f8fb44e33a2eeb35503e61d0fe2",
+    strip_prefix = "jsoncpp-11086dd6a7eba04289944367ca82cea71299ed70",
+    build_file = "third_party/jsoncpp.BUILD.bazel",
+)
+
 #-----------------------------------------------------------------------------
 # java
 #-----------------------------------------------------------------------------
