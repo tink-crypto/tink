@@ -22,7 +22,7 @@ package google.crypto.tink;
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option objc_class_prefix = "TINKPB";
-option go_package = "github.com/google/tink/proto/common_proto";
+option go_package = "github.com/google/tink/proto/common_go_proto";
 
 enum EllipticCurveType {
   UNKNOWN_CURVE = 0;

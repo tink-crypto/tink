@@ -24,7 +24,7 @@ package google.crypto.tink;
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option objc_class_prefix = "TINKPB";
-option go_package = "github.com/google/tink/proto/ed25519_proto";
+option go_package = "github.com/google/tink/proto/ed25519_go_proto";
 
 // key_type: type.googleapis.com/google.crypto.tink.Ed25519PublicKey
 message Ed25519PublicKey {

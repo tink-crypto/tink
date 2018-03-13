@@ -21,7 +21,7 @@ package google.crypto.tink;
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option objc_class_prefix = "TINKPB";
-option go_package = "github.com/google/tink/proto/chacha20_poly1305_proto";
+option go_package = "github.com/google/tink/proto/chacha20_poly1305_go_proto";
 
 // key_type: type.googleapis.com/google.crypto.tink.ChaCha20Poly1305.
 // This key type actually implements ChaCha20Poly1305 as described
