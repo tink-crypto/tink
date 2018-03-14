@@ -111,25 +111,9 @@ func (prv *EllipticPrivateKey) GenerateShared(pub *EllipticPublicKey, skLen, mac
 	return sk, nil
 }
 
-var (
-	ErrKeyDataTooLong = fmt.Errorf("ecies: can't supply requested key data")
-	ErrSharedTooLong  = fmt.Errorf("ecies: shared secret is too long")
-	ErrInvalidMessage = fmt.Errorf("ecies: invalid message")
-)
-
-var (
-	big2To32   = new(big.Int).Exp(big.NewInt(2), big.NewInt(32), nil)
-	big2To32M1 = new(big.Int).Sub(big2To32, big.NewInt(1))
-)
-
 // The default curve for this package is the NIST P256 curve, which
 // provides security equivalent to AES-128.
 var DefaultCurve = elliptic.P256()
-
-var (
-	ErrUnsupportedECDHAlgorithm   = fmt.Errorf("ecies: unsupported ECDH algorithm")
-	ErrUnsupportedECIESParameters = fmt.Errorf("ecies: unsupported ECIES parameters")
-)
 
 type ECIESParams struct {
 	Hash      func() hash.Hash // hash function
