@@ -37,7 +37,7 @@ func cmpParams(p1, p2 *ECIESParams) bool {
 }
 
 // cmpPublic returns true if the two public keys represent the same pojnt.
-func cmpPublic(pub1, pub2 PublicKey) bool {
+func cmpPublic(pub1, pub2 EllipticPublicKey) bool {
 	if pub1.X == nil || pub1.Y == nil {
 		fmt.Println(ErrInvalidPublicKey.Error())
 		return false
@@ -53,7 +53,7 @@ func cmpPublic(pub1, pub2 PublicKey) bool {
 }
 
 // cmpPrivate returns true if the two private keys are the same.
-func cmpPrivate(prv1, prv2 *PrivateKey) bool {
+func cmpPrivate(prv1, prv2 *EllipticPrivateKey) bool {
 	if prv1 == nil || prv1.D == nil {
 		return false
 	} else if prv2 == nil || prv2.D == nil {
@@ -61,7 +61,7 @@ func cmpPrivate(prv1, prv2 *PrivateKey) bool {
 	} else if prv1.D.Cmp(prv2.D) != 0 {
 		return false
 	} else {
-		return cmpPublic(prv1.PublicKey, prv2.PublicKey)
+		return cmpPublic(prv1.EllipticPublicKey, prv2.EllipticPublicKey)
 	}
 }
 
@@ -72,7 +72,7 @@ func TestSharedKey(t *testing.T) {
 		fmt.Println(err.Error())
 		t.FailNow()
 	}
-	skLen = MaxSharedKeyLength(&prv1.PublicKey) / 2
+	skLen = MaxSharedKeyLength(&prv1.EllipticPublicKey) / 2
 
 	prv2, err := GenerateKey(rand.Reader, DefaultCurve, nil)
 	if err != nil {
@@ -80,13 +80,13 @@ func TestSharedKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	sk1, err := prv1.GenerateShared(&prv2.PublicKey, skLen, skLen)
+	sk1, err := prv1.GenerateShared(&prv2.EllipticPublicKey, skLen, skLen)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
 	}
 
-	sk2, err := prv2.GenerateShared(&prv1.PublicKey, skLen, skLen)
+	sk2, err := prv2.GenerateShared(&prv1.EllipticPublicKey, skLen, skLen)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
@@ -113,13 +113,13 @@ func TestTooBigSharedKey(t *testing.T) {
 		t.FailNow()
 	}
 
-	_, err = prv1.GenerateShared(&prv2.PublicKey, skLen*2, skLen*2)
+	_, err = prv1.GenerateShared(&prv2.EllipticPublicKey, skLen*2, skLen*2)
 	if err != ErrSharedKeyTooBig {
 		fmt.Println("ecdh: shared key should be too large for curve")
 		t.FailNow()
 	}
 
-	_, err = prv2.GenerateShared(&prv1.PublicKey, skLen*2, skLen*2)
+	_, err = prv2.GenerateShared(&prv1.EllipticPublicKey, skLen*2, skLen*2)
 	if err != ErrSharedKeyTooBig {
 		fmt.Println("ecdh: shared key should be too large for curve")
 		t.FailNow()
@@ -135,7 +135,7 @@ func TestMarshalPublic(t *testing.T) {
 		t.FailNow()
 	}
 
-	out, err := MarshalPublic(&prv.PublicKey)
+	out, err := MarshalPublic(&prv.EllipticPublicKey)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
@@ -147,7 +147,7 @@ func TestMarshalPublic(t *testing.T) {
 		t.FailNow()
 	}
 
-	if !cmpPublic(prv.PublicKey, *pub) {
+	if !cmpPublic(prv.EllipticPublicKey, *pub) {
 		fmt.Println("ecies: failed to unmarshal public key")
 		t.FailNow()
 	}
@@ -222,7 +222,7 @@ func TestPublicPEM(t *testing.T) {
 		t.FailNow()
 	}
 
-	out, err := ExportPublicPEM(&prv.PublicKey)
+	out, err := ExportPublicPEM(&prv.EllipticPublicKey)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
@@ -236,7 +236,7 @@ func TestPublicPEM(t *testing.T) {
 	if err != nil {
 		fmt.Println(err.Error())
 		t.FailNow()
-	} else if !cmpPublic(prv.PublicKey, *pub2) {
+	} else if !cmpPublic(prv.EllipticPublicKey, *pub2) {
 		fmt.Println("ecdh: import from PEM failed")
 		t.FailNow()
 	}
@@ -261,7 +261,7 @@ func BenchmarkGenSharedKeyP256(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		_, err := prv.GenerateShared(&prv.PublicKey, skLen, skLen)
+		_, err := prv.GenerateShared(&prv.EllipticPublicKey, skLen, skLen)
 		if err != nil {
 			fmt.Println(err.Error())
 			b.FailNow()

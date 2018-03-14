@@ -371,7 +371,7 @@ type eccAlgorithmSet struct {
 	ECIES asnECIESParameters `asn1:"optional"`
 }
 
-func marshalSubjectPublicKeyInfo(pub *PublicKey) (subj asnSubjectPublicKeyInfo, err error) {
+func marshalSubjectPublicKeyInfo(pub *EllipticPublicKey) (subj asnSubjectPublicKeyInfo, err error) {
 	subj.Algorithm = idEcPublicKeySupplemented
 	curve, ok := oidFromNamedCurve(pub.Curve)
 	if !ok {
@@ -392,7 +392,7 @@ func marshalSubjectPublicKeyInfo(pub *PublicKey) (subj asnSubjectPublicKeyInfo, 
 }
 
 // Encode a public key to DER format.
-func MarshalPublic(pub *PublicKey) ([]byte, error) {
+func MarshalPublic(pub *EllipticPublicKey) ([]byte, error) {
 	subj, err := marshalSubjectPublicKeyInfo(pub)
 	if err != nil {
 		return nil, err
@@ -401,7 +401,7 @@ func MarshalPublic(pub *PublicKey) ([]byte, error) {
 }
 
 // Decode a DER-encoded public key.
-func UnmarshalPublic(in []byte) (pub *PublicKey, err error) {
+func UnmarshalPublic(in []byte) (pub *EllipticPublicKey, err error) {
 	var subj asnSubjectPublicKeyInfo
 
 	if _, err = asn1.Unmarshal(in, &subj); err != nil {
@@ -411,7 +411,7 @@ func UnmarshalPublic(in []byte) (pub *PublicKey, err error) {
 		err = ErrInvalidPublicKey
 		return
 	}
-	pub = new(PublicKey)
+	pub = new(EllipticPublicKey)
 	pub.Curve = namedCurveFromOID(subj.Supplements.ECDomain)
 	x, y := elliptic.Unmarshal(pub.Curve, subj.PublicKey.Bytes)
 	if x == nil {
@@ -431,19 +431,19 @@ func UnmarshalPublic(in []byte) (pub *PublicKey, err error) {
 	return
 }
 
-func marshalPrivateKey(prv *PrivateKey) (ecprv asnPrivateKey, err error) {
+func marshalPrivateKey(prv *EllipticPrivateKey) (ecprv asnPrivateKey, err error) {
 	ecprv.Version = asnECPrivKeyVer1
 	ecprv.Private = prv.D.Bytes()
 
 	var ok bool
-	ecprv.Curve, ok = oidFromNamedCurve(prv.PublicKey.Curve)
+	ecprv.Curve, ok = oidFromNamedCurve(prv.EllipticPublicKey.Curve)
 	if !ok {
 		err = ErrInvalidPrivateKey
 		return
 	}
 
 	var pub []byte
-	if pub, err = MarshalPublic(&prv.PublicKey); err != nil {
+	if pub, err = MarshalPublic(&prv.EllipticPublicKey); err != nil {
 		return
 	} else {
 		ecprv.Public = asn1.BitString{
@@ -455,7 +455,7 @@ func marshalPrivateKey(prv *PrivateKey) (ecprv asnPrivateKey, err error) {
 }
 
 // Encode a private key to DER format.
-func MarshalPrivate(prv *PrivateKey) ([]byte, error) {
+func MarshalPrivate(prv *EllipticPrivateKey) ([]byte, error) {
 	ecprv, err := marshalPrivateKey(prv)
 	if err != nil {
 		return nil, err
@@ -464,7 +464,7 @@ func MarshalPrivate(prv *PrivateKey) ([]byte, error) {
 }
 
 // Decode a private key from a DER-encoded format.
-func UnmarshalPrivate(in []byte) (prv *PrivateKey, err error) {
+func UnmarshalPrivate(in []byte) (prv *EllipticPrivateKey, err error) {
 	var ecprv asnPrivateKey
 
 	if _, err = asn1.Unmarshal(in, &ecprv); err != nil {
@@ -480,20 +480,20 @@ func UnmarshalPrivate(in []byte) (prv *PrivateKey, err error) {
 		return
 	}
 
-	prv = new(PrivateKey)
+	prv = new(EllipticPrivateKey)
 	prv.D = new(big.Int).SetBytes(ecprv.Private)
 
 	if pub, err := UnmarshalPublic(ecprv.Public.Bytes); err != nil {
 		return nil, err
 	} else {
-		prv.PublicKey = *pub
+		prv.EllipticPublicKey = *pub
 	}
 
 	return
 }
 
 // Export a public key to PEM format.
-func ExportPublicPEM(pub *PublicKey) (out []byte, err error) {
+func ExportPublicPEM(pub *EllipticPublicKey) (out []byte, err error) {
 	der, err := MarshalPublic(pub)
 	if err != nil {
 		return
@@ -514,7 +514,7 @@ func ExportPublicPEM(pub *PublicKey) (out []byte, err error) {
 }
 
 // Export a private key to PEM format.
-func ExportPrivatePEM(prv *PrivateKey) (out []byte, err error) {
+func ExportPrivatePEM(prv *EllipticPrivateKey) (out []byte, err error) {
 	der, err := MarshalPrivate(prv)
 	if err != nil {
 		return
@@ -535,7 +535,7 @@ func ExportPrivatePEM(prv *PrivateKey) (out []byte, err error) {
 }
 
 // Import a PEM-encoded public key.
-func ImportPublicPEM(in []byte) (pub *PublicKey, err error) {
+func ImportPublicPEM(in []byte) (pub *EllipticPublicKey, err error) {
 	p, _ := pem.Decode(in)
 	if p == nil || p.Type != "ELLIPTIC CURVE PUBLIC KEY" {
 		return nil, ErrInvalidPublicKey
@@ -546,7 +546,7 @@ func ImportPublicPEM(in []byte) (pub *PublicKey, err error) {
 }
 
 // Import a PEM-encoded private key.
-func ImportPrivatePEM(in []byte) (prv *PrivateKey, err error) {
+func ImportPrivatePEM(in []byte) (prv *EllipticPrivateKey, err error) {
 	p, _ := pem.Decode(in)
 	if p == nil || p.Type != "ELLIPTIC CURVE PRIVATE KEY" {
 		return nil, ErrInvalidPrivateKey

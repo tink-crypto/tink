@@ -26,7 +26,7 @@ var (
 )
 
 // PublicKey is a representation of an elliptic curve public key.
-type PublicKey struct {
+type EllipticPublicKey struct {
 	X *big.Int
 	Y *big.Int
 	elliptic.Curve
@@ -34,13 +34,13 @@ type PublicKey struct {
 }
 
 // Export an ECIES public key as an ECDSA public key.
-func (pub *PublicKey) ExportECDSA() *ecdsa.PublicKey {
+func (pub *EllipticPublicKey) ExportECDSA() *ecdsa.PublicKey {
 	return &ecdsa.PublicKey{pub.Curve, pub.X, pub.Y}
 }
 
 // Import an ECDSA public key as an ECIES public key.
-func ImportECDSAPublic(pub *ecdsa.PublicKey) *PublicKey {
-	return &PublicKey{
+func ImportECDSAPublic(pub *ecdsa.PublicKey) *EllipticPublicKey {
+	return &EllipticPublicKey{
 		X:      pub.X,
 		Y:      pub.Y,
 		Curve:  pub.Curve,
@@ -49,52 +49,52 @@ func ImportECDSAPublic(pub *ecdsa.PublicKey) *PublicKey {
 }
 
 // PrivateKey is a representation of an elliptic curve private key.
-type PrivateKey struct {
-	PublicKey
+type EllipticPrivateKey struct {
+	EllipticPublicKey
 	D *big.Int
 }
 
 // Export an ECIES private key as an ECDSA private key.
-func (prv *PrivateKey) ExportECDSA() *ecdsa.PrivateKey {
-	pub := &prv.PublicKey
+func (prv *EllipticPrivateKey) ExportECDSA() *ecdsa.PrivateKey {
+	pub := &prv.EllipticPublicKey
 	pubECDSA := pub.ExportECDSA()
 	return &ecdsa.PrivateKey{*pubECDSA, prv.D}
 }
 
 // Import an ECDSA private key as an ECIES private key.
-func ImportECDSA(prv *ecdsa.PrivateKey) *PrivateKey {
+func ImportECDSA(prv *ecdsa.PrivateKey) *EllipticPrivateKey {
 	pub := ImportECDSAPublic(&prv.PublicKey)
-	return &PrivateKey{*pub, prv.D}
+	return &EllipticPrivateKey{*pub, prv.D}
 }
 
 // Generate an elliptic curve public / private keypair. If params is nil,
 // the recommended default paramters for the key will be chosen.
-func GenerateKey(rand io.Reader, curve elliptic.Curve, params *ECIESParams) (prv *PrivateKey, err error) {
+func GenerateKey(rand io.Reader, curve elliptic.Curve, params *ECIESParams) (prv *EllipticPrivateKey, err error) {
 	pb, x, y, err := elliptic.GenerateKey(curve, rand)
 	if err != nil {
 		return
 	}
-	prv = new(PrivateKey)
-	prv.PublicKey.X = x
-	prv.PublicKey.Y = y
-	prv.PublicKey.Curve = curve
+	prv = new(EllipticPrivateKey)
+	prv.EllipticPublicKey.X = x
+	prv.EllipticPublicKey.Y = y
+	prv.EllipticPublicKey.Curve = curve
 	prv.D = new(big.Int).SetBytes(pb)
 	if params == nil {
 		params = ParamsFromCurve(curve)
 	}
-	prv.PublicKey.Params = params
+	prv.EllipticPublicKey.Params = params
 	return
 }
 
 // MaxSharedKeyLength returns the maximum length of the shared key the
 // public key can produce.
-func MaxSharedKeyLength(pub *PublicKey) int {
+func MaxSharedKeyLength(pub *EllipticPublicKey) int {
 	return (pub.Curve.Params().BitSize + 7) / 8
 }
 
 // ECDH key agreement method used to establish secret keys for encryption.
-func (prv *PrivateKey) GenerateShared(pub *PublicKey, skLen, macLen int) (sk []byte, err error) {
-	if prv.PublicKey.Curve != pub.Curve {
+func (prv *EllipticPrivateKey) GenerateShared(pub *EllipticPublicKey, skLen, macLen int) (sk []byte, err error) {
+	if prv.EllipticPublicKey.Curve != pub.Curve {
 		return nil, ErrInvalidCurve
 	}
 	if skLen+macLen > MaxSharedKeyLength(pub) {
