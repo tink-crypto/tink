@@ -1,4 +1,5 @@
 //https://github.com/obscuren/ecies
+// See conditions and license on:
 //https://github.com/ethereum/go-ethereum/blob/master/crypto/ecies/ecies.go
 package subtle
 
