@@ -16,12 +16,7 @@ type HKDF struct {
 // GenerateKeyWithHash is just a shallow wrapper around x/crypto/hkdf, takes an actual hash function
 func (h *HKDF) GenerateKeyWithHash(hash func() hash.Hash, secret, salt, info []byte, keySize int) ([]byte, error) {
 	keyReader := hkdf.New(hash, secret, salt, info)
-	key := make([]byte, keySize)
-	_, err := keyReader.Read(key)
-	if err != nil {
-		return nil, err
-	}
-	return key, nil
+	return generateIV(keySize, keyReader)
 }
 
 // GenerateKey is just a shallow wrapper around x/crypto/hkdf, takes the name of a hash function
