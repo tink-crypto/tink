@@ -12,7 +12,7 @@ import (
 HKDF-based KEM (key encapsulation mechanism) for ECIES recipient
 **/
 type EciesHkdfRecipientKem struct {
-	priv subtle.EllipticPrivateKey
+	Priv subtle.EllipticPrivateKey
 }
 
 /** GenerateKey is the key derivation function
@@ -23,10 +23,10 @@ func (e *EciesHkdfRecipientKem) GenerateKey(kem []byte, hashAlgo string, hkdfSal
 	y := big.Int{}
 	y.SetBytes(kem[33:65])
 	ephemeralPublicKey := subtle.EllipticPublicKey{
-		Curve: e.priv.Curve,
+		Curve: e.Priv.Curve,
 		X:     &x,
 		Y:     &y}
-	sharedSecret, err := e.priv.GenerateShared(&ephemeralPublicKey, symKeySize+macKeySize)
+	sharedSecret, err := e.Priv.GenerateShared(&ephemeralPublicKey, symKeySize+macKeySize)
 	if err != nil {
 		return nil, err
 	}
