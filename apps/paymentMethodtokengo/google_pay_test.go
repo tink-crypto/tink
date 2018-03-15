@@ -1,5 +1,7 @@
 package paymentmethodtokengo
 
+//These tests are stolen from java app
+
 import (
 	"encoding/json"
 	"testing"
