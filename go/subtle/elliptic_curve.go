@@ -11,8 +11,8 @@ import (
 )
 
 type EllipticPublicKey struct {
-	X, Y  *big.Int
 	Curve elliptic.Curve
+	X, Y  *big.Int
 }
 
 type EllipticPrivateKey struct {
