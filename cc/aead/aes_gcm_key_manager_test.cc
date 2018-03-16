@@ -14,11 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/aead/aes_gcm_key_manager.h"
+#include "tink/aead/aes_gcm_key_manager.h"
 
-#include "cc/aead.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "gtest/gtest.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"

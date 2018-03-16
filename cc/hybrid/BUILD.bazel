@@ -16,6 +16,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -32,6 +34,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -46,6 +50,8 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -58,6 +64,8 @@ cc_library(
         "//cc/aead:aead_config",
         "//cc/util:status",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -74,6 +82,8 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -88,6 +98,8 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -100,6 +112,8 @@ cc_library(
         "//cc/aead:aead_config",
         "//cc/util:status",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -116,6 +130,8 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -135,6 +151,8 @@ cc_library(
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -155,6 +173,8 @@ cc_library(
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -176,6 +196,8 @@ cc_library(
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -194,6 +216,8 @@ cc_library(
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -212,6 +236,8 @@ cc_library(
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 # tests

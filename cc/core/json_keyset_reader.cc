@@ -14,16 +14,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/json_keyset_reader.h"
+#include "tink/json_keyset_reader.h"
 
 #include <iostream>
 #include <istream>
 #include <sstream>
 
-#include "cc/util/errors.h"
-#include "cc/util/ptr_util.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/util/errors.h"
+#include "tink/util/ptr_util.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "google/protobuf/util/json_util.h"
 #include "proto/tink.pb.h"
 

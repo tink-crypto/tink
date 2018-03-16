@@ -14,19 +14,19 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/encrypt_then_authenticate.h"
+#include "tink/subtle/encrypt_then_authenticate.h"
 
 #include <string>
 #include <vector>
 
-#include "cc/subtle/aes_ctr_boringssl.h"
-#include "cc/subtle/common_enums.h"
-#include "cc/subtle/hmac_boringssl.h"
-#include "cc/subtle/random.h"
-#include "cc/util/ptr_util.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
-#include "cc/util/test_util.h"
+#include "tink/subtle/aes_ctr_boringssl.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/hmac_boringssl.h"
+#include "tink/subtle/random.h"
+#include "tink/util/ptr_util.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 
 namespace crypto {

@@ -13,13 +13,13 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-#include "cc/keyset_manager.h"
+#include "tink/keyset_manager.h"
 
-#include "cc/config.h"
-#include "cc/keyset_handle.h"
-#include "cc/aead/aead_config.h"
-#include "cc/aead/aes_gcm_key_manager.h"
-#include "cc/util/test_util.h"
+#include "tink/config.h"
+#include "tink/keyset_handle.h"
+#include "tink/aead/aead_config.h"
+#include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"

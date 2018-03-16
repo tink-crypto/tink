@@ -14,14 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/hybrid_decrypt_catalogue.h"
+#include "tink/hybrid/hybrid_decrypt_catalogue.h"
 
 #include "absl/strings/ascii.h"
-#include "cc/catalogue.h"
-#include "cc/hybrid/ecies_aead_hkdf_private_key_manager.h"
-#include "cc/key_manager.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/catalogue.h"
+#include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
+#include "tink/key_manager.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

@@ -14,16 +14,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/aead/aead_factory.h"
+#include "tink/aead/aead_factory.h"
 
-#include "cc/aead.h"
-#include "cc/key_manager.h"
-#include "cc/keyset_handle.h"
-#include "cc/registry.h"
-#include "cc/aead/aead_set_wrapper.h"
-#include "cc/aead/aes_gcm_key_manager.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/key_manager.h"
+#include "tink/keyset_handle.h"
+#include "tink/registry.h"
+#include "tink/aead/aead_set_wrapper.h"
+#include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace util = crypto::tink::util;
 

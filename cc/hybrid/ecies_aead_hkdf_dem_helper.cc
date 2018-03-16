@@ -14,13 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/ecies_aead_hkdf_dem_helper.h"
+#include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
 
-#include "cc/aead.h"
-#include "cc/key_manager.h"
-#include "cc/registry.h"
-#include "cc/util/ptr_util.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/key_manager.h"
+#include "tink/registry.h"
+#include "tink/util/ptr_util.h"
+#include "tink/util/statusor.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"

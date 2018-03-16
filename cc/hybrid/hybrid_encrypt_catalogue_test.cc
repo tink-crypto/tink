@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/hybrid_encrypt_catalogue.h"
+#include "tink/hybrid/hybrid_encrypt_catalogue.h"
 
-#include "cc/catalogue.h"
-#include "cc/hybrid/hybrid_encrypt_config.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/catalogue.h"
+#include "tink/hybrid/hybrid_encrypt_config.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "gtest/gtest.h"
 
 namespace crypto {

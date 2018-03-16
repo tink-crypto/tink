@@ -17,10 +17,10 @@
 #ifndef TINK_HYBRID_HYBRID_ENCRYPT_FACTORY_H_
 #define TINK_HYBRID_HYBRID_ENCRYPT_FACTORY_H_
 
-#include "cc/hybrid_encrypt.h"
-#include "cc/key_manager.h"
-#include "cc/keyset_handle.h"
-#include "cc/util/statusor.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/key_manager.h"
+#include "tink/keyset_handle.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

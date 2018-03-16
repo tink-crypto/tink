@@ -85,6 +85,8 @@ cc_library(
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -94,6 +96,8 @@ cc_library(
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -103,6 +107,8 @@ cc_library(
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -113,6 +119,8 @@ cc_library(
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -122,6 +130,8 @@ cc_library(
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -131,6 +141,8 @@ cc_library(
         "//cc/util:status",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -140,6 +152,8 @@ cc_library(
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -149,6 +163,8 @@ cc_library(
         "//cc/util:status",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -163,6 +179,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -178,6 +196,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -192,6 +212,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -207,6 +229,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -216,6 +240,8 @@ cc_library(
         ":key_manager",
         "//cc/util:statusor",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -238,6 +264,8 @@ cc_library(
         "//proto:config_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -249,6 +277,8 @@ cc_library(
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -261,6 +291,8 @@ cc_library(
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -279,6 +311,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -293,6 +327,8 @@ cc_library(
         "//cc/util:ptr_util",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -307,6 +343,8 @@ cc_library(
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -321,6 +359,8 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_protobuf//:protobuf_lite",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -339,6 +379,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_protobuf//:protobuf_lite",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 # tests

@@ -18,12 +18,12 @@
 #define TINK_HYBRID_ECIES_AEAD_HKDF_HYBRID_ENCRYPT_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/aead.h"
-#include "cc/hybrid_encrypt.h"
-#include "cc/key_manager.h"
-#include "cc/hybrid/ecies_aead_hkdf_dem_helper.h"
-#include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/key_manager.h"
+#include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
+#include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
+#include "tink/util/statusor.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 

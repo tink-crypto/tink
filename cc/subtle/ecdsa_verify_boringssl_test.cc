@@ -14,20 +14,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/ecdsa_verify_boringssl.h"
+#include "tink/subtle/ecdsa_verify_boringssl.h"
 
 #include <string>
 
 #include "include/json/reader.h"
-#include "cc/public_key_sign.h"
-#include "cc/public_key_verify.h"
-#include "cc/subtle/ecdsa_sign_boringssl.h"
-#include "cc/subtle/common_enums.h"
-#include "cc/subtle/subtle_util_boringssl.h"
-#include "cc/subtle/wycheproof_util.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
-#include "cc/util/test_util.h"
+#include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
+#include "tink/subtle/ecdsa_sign_boringssl.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/subtle/wycheproof_util.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 
 namespace crypto {

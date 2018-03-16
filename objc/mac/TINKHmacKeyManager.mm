@@ -28,8 +28,8 @@
 #import "proto/Hmac.pbobjc.h"
 #import "proto/Tink.pbobjc.h"
 
-#include "cc/mac/hmac_key_manager.h"
-#include "cc/util/status.h"
+#include "tink/mac/hmac_key_manager.h"
+#include "tink/util/status.h"
 #include "google/protobuf/message.h"
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"

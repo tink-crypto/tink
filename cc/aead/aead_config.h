@@ -17,8 +17,8 @@
 #ifndef TINK_AEAD_AEAD_CONFIG_H_
 #define TINK_AEAD_AEAD_CONFIG_H_
 
-#include "cc/config.h"
-#include "cc/util/status.h"
+#include "tink/config.h"
+#include "tink/util/status.h"
 #include "proto/config.pb.h"
 
 namespace crypto {

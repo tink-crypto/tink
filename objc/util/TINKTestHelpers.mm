@@ -18,8 +18,8 @@
 
 #import "objc/util/TINKTestHelpers.h"
 
-#include "cc/subtle/common_enums.h"
-#include "cc/subtle/subtle_util_boringssl.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 
 #import <Foundation/Foundation.h>
 

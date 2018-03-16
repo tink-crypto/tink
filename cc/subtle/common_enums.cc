@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/common_enums.h"
+#include "tink/subtle/common_enums.h"
 
 #include <string>
 

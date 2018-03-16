@@ -21,7 +21,7 @@
 #import "objc/TINKKeysetReader.h"
 #import "objc/core/TINKKeysetReader_Internal.h"
 
-#include "cc/keyset_reader.h"
+#include "tink/keyset_reader.h"
 
 @implementation TINKKeysetReader {
   std::unique_ptr<crypto::tink::KeysetReader> _ccReader;

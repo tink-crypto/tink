@@ -26,9 +26,9 @@
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKErrors.h"
 
-#include "cc/aead/aead_factory.h"
-#include "cc/keyset_handle.h"
-#include "cc/util/status.h"
+#include "tink/aead/aead_factory.h"
+#include "tink/keyset_handle.h"
+#include "tink/util/status.h"
 
 @implementation TINKAeadFactory
 

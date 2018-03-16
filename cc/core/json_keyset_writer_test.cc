@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/json_keyset_writer.h"
+#include "tink/json_keyset_writer.h"
 
 #include <ostream>
 #include <sstream>
 
-#include "cc/util/test_util.h"
+#include "tink/util/test_util.h"
 #include "google/protobuf/util/json_util.h"
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"

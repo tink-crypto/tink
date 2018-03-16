@@ -14,17 +14,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/binary_keyset_writer.h"
+#include "tink/binary_keyset_writer.h"
 
 #include <ostream>
 #include <istream>
 #include <sstream>
 
 #include "google/protobuf/message.h"
-#include "cc/util/errors.h"
-#include "cc/util/ptr_util.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/util/errors.h"
+#include "tink/util/ptr_util.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EncryptedKeyset;

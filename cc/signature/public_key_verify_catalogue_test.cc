@@ -14,11 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/signature/public_key_verify_catalogue.h"
+#include "tink/signature/public_key_verify_catalogue.h"
 
-#include "cc/catalogue.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/catalogue.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "gtest/gtest.h"
 
 namespace crypto {

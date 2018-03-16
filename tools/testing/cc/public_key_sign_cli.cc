@@ -17,10 +17,10 @@
 #include <iostream>
 #include <fstream>
 
-#include "cc/public_key_sign.h"
-#include "cc/keyset_handle.h"
-#include "cc/signature/public_key_sign_factory.h"
-#include "cc/util/status.h"
+#include "tink/public_key_sign.h"
+#include "tink/keyset_handle.h"
+#include "tink/signature/public_key_sign_factory.h"
+#include "tink/util/status.h"
 #include "tools/testing/cc/cli_util.h"
 
 using crypto::tink::PublicKeySignFactory;

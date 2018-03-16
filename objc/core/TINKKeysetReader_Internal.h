@@ -18,7 +18,7 @@
 
 #import "objc/TINKKeysetReader.h"
 
-#include "cc/keyset_reader.h"
+#include "tink/keyset_reader.h"
 
 @interface TINKKeysetReader ()
 

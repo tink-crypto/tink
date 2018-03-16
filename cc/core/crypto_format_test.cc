@@ -15,7 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "cc/crypto_format.h"
+#include "tink/crypto_format.h"
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 

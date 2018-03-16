@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/binary_keyset_writer.h"
+#include "tink/binary_keyset_writer.h"
 
 #include <ostream>
 #include <sstream>
 
-#include "cc/util/test_util.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 

@@ -18,7 +18,7 @@
 
 #import "objc/TINKKeysetHandle+Cleartext.h"
 
-#include "cc/cleartext_keyset_handle.h"
+#include "tink/cleartext_keyset_handle.h"
 
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"

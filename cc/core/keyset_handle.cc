@@ -14,12 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/aead.h"
-#include "cc/keyset_handle.h"
-#include "cc/keyset_reader.h"
-#include "cc/keyset_writer.h"
-#include "cc/util/errors.h"
-#include "cc/util/ptr_util.h"
+#include "tink/aead.h"
+#include "tink/keyset_handle.h"
+#include "tink/keyset_reader.h"
+#include "tink/keyset_writer.h"
+#include "tink/util/errors.h"
+#include "tink/util/ptr_util.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EncryptedKeyset;

@@ -14,16 +14,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/aes_gcm_boringssl.h"
+#include "tink/subtle/aes_gcm_boringssl.h"
 
 #include <string>
 #include <vector>
 
-#include "cc/aead.h"
-#include "cc/subtle/random.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/subtle/random.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
 

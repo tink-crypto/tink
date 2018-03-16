@@ -21,9 +21,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "cc/crypto_format.h"
-#include "cc/util/errors.h"
-#include "cc/util/statusor.h"
+#include "tink/crypto_format.h"
+#include "tink/util/errors.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

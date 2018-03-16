@@ -14,8 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/config.h"
-#include "cc/mac.h"
+#include "tink/config.h"
+#include "tink/mac.h"
 #include "gtest/gtest.h"
 #include "proto/config.pb.h"
 

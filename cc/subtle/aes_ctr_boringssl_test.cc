@@ -14,15 +14,15 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/aes_ctr_boringssl.h"
+#include "tink/subtle/aes_ctr_boringssl.h"
 
 #include <string>
 #include <vector>
 
-#include "cc/subtle/random.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
-#include "cc/util/test_util.h"
+#include "tink/subtle/random.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 
 namespace crypto {

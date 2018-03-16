@@ -14,13 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/signature/public_key_verify_set_wrapper.h"
+#include "tink/signature/public_key_verify_set_wrapper.h"
 
-#include "cc/public_key_verify.h"
-#include "cc/crypto_format.h"
-#include "cc/primitive_set.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/public_key_verify.h"
+#include "tink/crypto_format.h"
+#include "tink/primitive_set.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

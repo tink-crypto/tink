@@ -16,6 +16,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -32,6 +34,8 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -48,6 +52,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -64,6 +70,8 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -86,6 +94,8 @@ cc_library(
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -107,6 +117,8 @@ cc_library(
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -121,6 +133,8 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -135,6 +149,8 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -149,6 +165,8 @@ cc_library(
         "//cc/util:status",
         "//proto:config_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 # tests

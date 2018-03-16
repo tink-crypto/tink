@@ -14,13 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/mac/mac_factory.h"
+#include "tink/mac/mac_factory.h"
 
-#include "cc/mac.h"
-#include "cc/registry.h"
-#include "cc/mac/mac_set_wrapper.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/mac.h"
+#include "tink/registry.h"
+#include "tink/mac/mac_set_wrapper.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace util = crypto::tink::util;
 

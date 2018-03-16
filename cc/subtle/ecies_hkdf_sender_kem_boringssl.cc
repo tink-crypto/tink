@@ -14,12 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
+#include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 
-#include "cc/subtle/common_enums.h"
-#include "cc/subtle/hkdf.h"
-#include "cc/subtle/subtle_util_boringssl.h"
-#include "cc/util/ptr_util.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/hkdf.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/ptr_util.h"
 #include "openssl/bn.h"
 
 namespace util = crypto::tink::util;

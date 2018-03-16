@@ -17,7 +17,7 @@
 #ifndef TINK_UTIL_ERRORS_H_
 #define TINK_UTIL_ERRORS_H_
 
-#include "cc/util/status.h"
+#include "tink/util/status.h"
 
 // from #include "absl/base/port.h"
 #define PRINTF_ATTRIBUTE(string_index, first_to_check)                  \

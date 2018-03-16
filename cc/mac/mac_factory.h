@@ -17,11 +17,11 @@
 #ifndef TINK_MAC_MAC_FACTORY_H_
 #define TINK_MAC_MAC_FACTORY_H_
 
-#include "cc/key_manager.h"
-#include "cc/keyset_handle.h"
-#include "cc/mac.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/key_manager.h"
+#include "tink/keyset_handle.h"
+#include "tink/mac.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

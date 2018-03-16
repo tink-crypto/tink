@@ -27,11 +27,11 @@
 #import "objc/mac/TINKMacKeyManager_Internal.h"
 #import "objc/util/TINKErrors.h"
 
-#include "cc/key_manager.h"
-#include "cc/keyset_handle.h"
-#include "cc/mac.h"
-#include "cc/mac/mac_factory.h"
-#include "cc/util/status.h"
+#include "tink/key_manager.h"
+#include "tink/keyset_handle.h"
+#include "tink/mac.h"
+#include "tink/mac/mac_factory.h"
+#include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
 @implementation TINKMacFactory

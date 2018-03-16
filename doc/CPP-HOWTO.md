@@ -13,7 +13,7 @@ For example, if you want to use all implementations of all primitives in Tink
 1.1.0, the initialization would look as follows:
 
 ```cpp
-   #include "cc/config/tink_config.h"
+   #include "tink/config/tink_config.h"
 
    // ...
    auto status = TinkConfig::Init();
@@ -25,7 +25,7 @@ For example, if you want to use all implementations of all primitives in Tink
 To use only implementations of the AEAD primitive:
 
 ```cpp
-   #include "cc/aead/aead_config.h"
+   #include "tink/aead/aead_config.h"
 
    // ...
    auto status = AeadConfig::Init();
@@ -38,7 +38,7 @@ For custom initialization the registration proceeds directly via
 `Registry`-class:
 
 ```cpp
-   #include "cc/registry.h"
+   #include "tink/registry.h"
    #include "custom_project/custom_aead_key_manager.h"
 
    // ...
@@ -77,8 +77,8 @@ To load cleartext keysets, use
 [`CleartextKeysetHandle`](https://github.com/google/tink/blob/master/cc/cleartext_keyset_handle.h) and an appropriate [`KeysetReader`](https://github.com/google/tink/blob/master/cc/keyset_reader.h), depending on the wire format of the stored keyset, for example a [`BinaryKeysetReader`](https://github.com/google/tink/blob/master/cc/binary_keyset_reader.h) or a [`JsonKeysetReader`](https://github.com/google/tink/blob/master/cc/json_keyset_reader.h).
 
 ```cpp
-    #include "cc/binary_keyset_reader.h"
-    #include "cc/cleartext_keyset_handle.h"
+    #include "tink/binary_keyset_reader.h"
+    #include "tink/cleartext_keyset_handle.h"
 
     // ...
     std::string binary_keyset = ...;
@@ -94,10 +94,10 @@ To load encrypted keysets, one can use
 [`KeysetHandle`](https://github.com/google/tink/blob/master/cc/keyset_handle.h) and an appropriate [`KeysetReader`](https://github.com/google/tink/blob/master/cc/keyset_reader.h):
 
 ```cpp
-    #include "cc/aead.h"
-    #include "cc/json_keyset_reader.h"
-    #include "cc/cleartext_keyset_handle.h"
-    #include "cc/integration/aws_kms_client.h"
+    #include "tink/aead.h"
+    #include "tink/json_keyset_reader.h"
+    #include "tink/cleartext_keyset_handle.h"
+    #include "tink/integration/aws_kms_client.h"
 
     // ...
     std::string json_encrypted_keyset = ...;
@@ -143,9 +143,9 @@ Data](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive
 to encrypt or decrypt data:
 
 ```cpp
-    #include "cc/aead.h"
-    #include "cc/keyset_handle.h"
-    #include "cc/aead/aead_factory.h"
+    #include "tink/aead.h"
+    #include "tink/keyset_handle.h"
+    #include "tink/aead/aead_factory.h"
 
 
     // 1. Get a handle to the key material.
@@ -168,9 +168,9 @@ To decrypt using [a combination of public key encryption and
 symmetric key encryption](PRIMITIVES.md#hybrid-encryption):
 
 ```cpp
-    #include "cc/hybrid_decrypt.h"
-    #include "cc/keyset_handle.h"
-    #include "cc/hybrid/hybrid_decrypt_factory.h"
+    #include "tink/hybrid_decrypt.h"
+    #include "tink/keyset_handle.h"
+    #include "tink/hybrid/hybrid_decrypt_factory.h"
 
 
     // 1. Get a handle to the key material.

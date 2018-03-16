@@ -20,7 +20,7 @@
 
 #import <Foundation/Foundation.h>
 
-#include "cc/aead.h"
+#include "tink/aead.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

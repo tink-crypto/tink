@@ -18,7 +18,7 @@
 #define PUBLIC_KEY_VERIFY_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/util/status.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {

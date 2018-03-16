@@ -14,11 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/mac/mac_set_wrapper.h"
-#include "cc/mac.h"
-#include "cc/primitive_set.h"
-#include "cc/util/status.h"
-#include "cc/util/test_util.h"
+#include "tink/mac/mac_set_wrapper.h"
+#include "tink/mac.h"
+#include "tink/primitive_set.h"
+#include "tink/util/status.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 
 using crypto::tink::test::DummyMac;

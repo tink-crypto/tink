@@ -14,18 +14,18 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/config/tink_config.h"
+#include "tink/config/tink_config.h"
 
-#include "cc/aead.h"
-#include "cc/catalogue.h"
-#include "cc/config.h"
-#include "cc/hybrid_decrypt.h"
-#include "cc/hybrid_encrypt.h"
-#include "cc/mac.h"
-#include "cc/public_key_sign.h"
-#include "cc/public_key_verify.h"
-#include "cc/registry.h"
-#include "cc/util/status.h"
+#include "tink/aead.h"
+#include "tink/catalogue.h"
+#include "tink/config.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/mac.h"
+#include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
+#include "tink/registry.h"
+#include "tink/util/status.h"
 #include "gtest/gtest.h"
 
 namespace crypto {

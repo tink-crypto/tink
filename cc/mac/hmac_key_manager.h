@@ -21,11 +21,11 @@
 #define TINK_MAC_HMAC_KEY_MANAGER_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/mac.h"
-#include "cc/key_manager.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/mac.h"
+#include "tink/key_manager.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "google/protobuf/message.h"
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"

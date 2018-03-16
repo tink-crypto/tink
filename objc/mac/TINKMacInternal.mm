@@ -22,7 +22,7 @@
 #import "objc/util/TINKStrings.h"
 
 #include "absl/strings/string_view.h"
-#include "cc/mac.h"
+#include "tink/mac.h"
 
 @implementation TINKMacInternal
 

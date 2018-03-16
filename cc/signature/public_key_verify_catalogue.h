@@ -17,10 +17,10 @@
 #ifndef TINK_SIGNATURE_PUBLIC_KEY_VERIFY_CATALOGUE_H_
 #define TINK_SIGNATURE_PUBLIC_KEY_VERIFY_CATALOGUE_H_
 
-#include "cc/catalogue.h"
-#include "cc/public_key_verify.h"
-#include "cc/key_manager.h"
-#include "cc/util/statusor.h"
+#include "tink/catalogue.h"
+#include "tink/public_key_verify.h"
+#include "tink/key_manager.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

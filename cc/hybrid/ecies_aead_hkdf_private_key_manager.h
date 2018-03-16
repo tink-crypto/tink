@@ -21,11 +21,11 @@
 #define TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/hybrid_decrypt.h"
-#include "cc/key_manager.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/key_manager.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "google/protobuf/message.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"

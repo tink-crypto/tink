@@ -17,7 +17,7 @@
  */
 #import "objc/util/TINKErrors.h"
 
-#include "cc/util/status.h"
+#include "tink/util/status.h"
 
 static NSString *const kTinkErrorDomain = @"TinkErrorDomain";
 

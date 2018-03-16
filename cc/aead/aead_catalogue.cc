@@ -14,15 +14,15 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/aead/aead_catalogue.h"
+#include "tink/aead/aead_catalogue.h"
 
 #include "absl/strings/ascii.h"
-#include "cc/aead/aes_ctr_hmac_aead_key_manager.h"
-#include "cc/aead/aes_gcm_key_manager.h"
-#include "cc/catalogue.h"
-#include "cc/key_manager.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
+#include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/catalogue.h"
+#include "tink/key_manager.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

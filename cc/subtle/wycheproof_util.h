@@ -19,7 +19,7 @@
 
 #include <memory>
 #include "include/json/value.h"
-#include "cc/subtle/common_enums.h"
+#include "tink/subtle/common_enums.h"
 
 namespace crypto {
 namespace tink {

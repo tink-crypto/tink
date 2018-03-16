@@ -17,8 +17,8 @@
 #include <stdarg.h>
 
 #include "gtest/gtest.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {

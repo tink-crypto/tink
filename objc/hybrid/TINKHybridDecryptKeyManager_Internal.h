@@ -18,8 +18,8 @@
 
 #import "objc/hybrid/TINKHybridDecryptKeyManager.h"
 
-#include "cc/hybrid_decrypt.h"
-#include "cc/key_manager.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/key_manager.h"
 
 @interface TINKHybridDecryptKeyManager ()
 

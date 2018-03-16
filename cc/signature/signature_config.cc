@@ -14,13 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/signature/signature_config.h"
+#include "tink/signature/signature_config.h"
 
-#include "cc/config.h"
-#include "cc/registry.h"
-#include "cc/signature/public_key_sign_catalogue.h"
-#include "cc/signature/public_key_verify_catalogue.h"
-#include "cc/util/status.h"
+#include "tink/config.h"
+#include "tink/registry.h"
+#include "tink/signature/public_key_sign_catalogue.h"
+#include "tink/signature/public_key_verify_catalogue.h"
+#include "tink/util/status.h"
 #include "proto/config.pb.h"
 
 namespace crypto {

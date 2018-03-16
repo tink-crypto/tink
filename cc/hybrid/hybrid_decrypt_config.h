@@ -17,9 +17,9 @@
 #ifndef TINK_HYBRID_HYBRID_DECRYPT_CONFIG_H_
 #define TINK_HYBRID_HYBRID_DECRYPT_CONFIG_H_
 
-#include "cc/hybrid_decrypt.h"
-#include "cc/key_manager.h"
-#include "cc/util/status.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/key_manager.h"
+#include "tink/util/status.h"
 #include "proto/config.pb.h"
 
 namespace crypto {

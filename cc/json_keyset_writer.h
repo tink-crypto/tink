@@ -20,9 +20,9 @@
 #include <ostream>
 
 #include "absl/strings/string_view.h"
-#include "cc/keyset_writer.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/keyset_writer.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

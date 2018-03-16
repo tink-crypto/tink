@@ -26,8 +26,8 @@
 #import "objc/util/TINKStrings.h"
 #import "proto/Config.pbobjc.h"
 
-#include "cc/config.h"
-#include "cc/util/errors.h"
+#include "tink/config.h"
+#include "tink/util/errors.h"
 #include "proto/config.pb.h"
 
 @implementation TINKConfig

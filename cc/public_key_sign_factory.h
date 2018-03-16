@@ -17,6 +17,6 @@
 #ifndef TINK_PUBLIC_KEY_SIGN_FACTORY_H_
 #define TINK_PUBLIC_KEY_SIGN_FACTORY_H_
 
-#include "cc/signature/public_key_sign_factory.h"  // IWYU pragma: export
+#include "tink/signature/public_key_sign_factory.h"  // IWYU pragma: export
 
 #endif  // TINK_PUBLIC_KEY_SIGN_FACTORY_H_

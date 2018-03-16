@@ -14,11 +14,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/mac/mac_config.h"
+#include "tink/mac/mac_config.h"
 
-#include "cc/config.h"
-#include "cc/mac/mac_catalogue.h"
-#include "cc/util/status.h"
+#include "tink/config.h"
+#include "tink/mac/mac_catalogue.h"
+#include "tink/util/status.h"
 
 namespace util = crypto::tink::util;
 

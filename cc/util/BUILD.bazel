@@ -9,12 +9,16 @@ cc_library(
     deps = [
         ":status",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
     name = "ptr_util",
     srcs = ["ptr_util.h"],
     hdrs = ["ptr_util.h"],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -25,6 +29,8 @@ cc_library(
         "//cc/subtle:common_enums",
         "//proto:common_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -32,6 +38,8 @@ cc_library(
     srcs = ["status.cc"],
     hdrs = ["status.h"],
     visibility = ["//visibility:public"],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -42,6 +50,8 @@ cc_library(
     deps = [
         ":status",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -53,6 +63,8 @@ cc_library(
         ":status",
         "//proto:tink_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -81,6 +93,8 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 # tests

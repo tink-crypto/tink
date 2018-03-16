@@ -20,7 +20,7 @@
 #include <iostream>
 #include <utility>
 
-#include "cc/util/status.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {

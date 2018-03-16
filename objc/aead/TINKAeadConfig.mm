@@ -23,8 +23,8 @@
 #import "objc/core/TINKRegistryConfig_Internal.h"
 #import "objc/util/TINKErrors.h"
 
-#include "cc/aead/aead_config.h"
-#include "cc/util/status.h"
+#include "tink/aead/aead_config.h"
+#include "tink/util/status.h"
 #include "proto/config.pb.h"
 
 @implementation TINKAeadConfig

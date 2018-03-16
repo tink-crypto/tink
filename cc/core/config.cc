@@ -14,18 +14,18 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/config.h"
+#include "tink/config.h"
 
-#include "cc/mac.h"
-#include "cc/aead.h"
-#include "cc/hybrid_decrypt.h"
-#include "cc/hybrid_encrypt.h"
-#include "cc/public_key_sign.h"
-#include "cc/public_key_verify.h"
+#include "tink/mac.h"
+#include "tink/aead.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
 #include "absl/strings/ascii.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/config.pb.h"
 
 using google::crypto::tink::KeyTypeEntry;

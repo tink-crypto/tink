@@ -20,8 +20,8 @@
 #include <istream>
 
 #include "absl/strings/string_view.h"
-#include "cc/keyset_reader.h"
-#include "cc/util/statusor.h"
+#include "tink/keyset_reader.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

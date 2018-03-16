@@ -18,7 +18,7 @@
 
 #import "objc/hybrid/TINKHybridDecryptConfig.h"
 
-#include "cc/hybrid/hybrid_decrypt_config.h"
+#include "tink/hybrid/hybrid_decrypt_config.h"
 
 #import "objc/TINKKeyManager.h"
 #import "objc/hybrid/TINKHybridDecryptKeyManager.h"

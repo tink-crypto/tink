@@ -19,7 +19,7 @@
 #import <Foundation/Foundation.h>
 #import "objc/TINKHybridEncrypt.h"
 
-#include "cc/hybrid_encrypt.h"
+#include "tink/hybrid_encrypt.h"
 
 /**
  * This interface is internal-only. Use TINKHybridEncryptFactory to get an instance that conforms to

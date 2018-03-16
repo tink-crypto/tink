@@ -14,21 +14,21 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/signature/ecdsa_sign_key_manager.h"
+#include "tink/signature/ecdsa_sign_key_manager.h"
 
 #include <map>
 
 #include "absl/strings/string_view.h"
-#include "cc/public_key_sign.h"
-#include "cc/key_manager.h"
-#include "cc/signature/ecdsa_verify_key_manager.h"
-#include "cc/subtle/ecdsa_sign_boringssl.h"
-#include "cc/subtle/subtle_util_boringssl.h"
-#include "cc/util/enums.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
-#include "cc/util/validation.h"
+#include "tink/public_key_sign.h"
+#include "tink/key_manager.h"
+#include "tink/signature/ecdsa_verify_key_manager.h"
+#include "tink/subtle/ecdsa_sign_boringssl.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/enums.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "tink/util/validation.h"
 #include "google/protobuf/message.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"

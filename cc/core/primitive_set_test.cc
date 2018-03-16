@@ -16,10 +16,10 @@
 
 #include <thread>  // NOLINT(build/c++11)
 
-#include "cc/primitive_set.h"
-#include "cc/crypto_format.h"
-#include "cc/mac.h"
-#include "cc/util/test_util.h"
+#include "tink/primitive_set.h"
+#include "tink/crypto_format.h"
+#include "tink/mac.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 

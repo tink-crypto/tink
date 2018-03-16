@@ -17,9 +17,9 @@
 #ifndef TINK_KEYSET_HANDLE_H_
 #define TINK_KEYSET_HANDLE_H_
 
-#include "cc/aead.h"
-#include "cc/keyset_reader.h"
-#include "cc/keyset_writer.h"
+#include "tink/aead.h"
+#include "tink/keyset_reader.h"
+#include "tink/keyset_writer.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

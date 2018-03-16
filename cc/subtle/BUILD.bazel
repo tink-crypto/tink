@@ -34,6 +34,19 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
+    name = "ind_cpa_cipher",
+    hdrs = ["ind_cpa_cipher.h"],
+    deps = [
+        "//cc/util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -51,6 +64,8 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -67,6 +82,8 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -82,6 +99,8 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -97,6 +116,8 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -113,6 +134,8 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -129,6 +152,8 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -145,6 +170,8 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -160,18 +187,18 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
     name = "encrypt_then_authenticate",
-    srcs = [
-        "encrypt_then_authenticate.cc",
-        "ind_cpa_cipher.h",
-    ],
+    srcs = ["encrypt_then_authenticate.cc"],
     hdrs = ["encrypt_then_authenticate.h"],
     deps = [
         ":aes_ctr_boringssl",
         ":hmac_boringssl",
+        ":ind_cpa_cipher",
         "//cc:aead",
         "//cc:mac",
         "//cc/util:errors",
@@ -179,16 +206,16 @@ cc_library(
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
     name = "aes_ctr_boringssl",
-    srcs = [
-        "aes_ctr_boringssl.cc",
-        "ind_cpa_cipher.h",
-    ],
+    srcs = ["aes_ctr_boringssl.cc"],
     hdrs = ["aes_ctr_boringssl.h"],
     deps = [
+        ":ind_cpa_cipher",
         ":random",
         "//cc/util:errors",
         "//cc/util:status",
@@ -196,6 +223,8 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -205,12 +234,16 @@ cc_library(
     deps = [
         "@boringssl//:crypto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
     name = "common_enums",
     srcs = ["common_enums.cc"],
     hdrs = ["common_enums.h"],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -225,6 +258,8 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -237,6 +272,8 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@jsoncpp//:jsoncpp",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 # tests

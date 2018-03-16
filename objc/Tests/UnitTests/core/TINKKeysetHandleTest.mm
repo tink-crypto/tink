@@ -27,7 +27,7 @@
 #import "objc/util/TINKStrings.h"
 #import "proto/Tink.pbobjc.h"
 
-#include "cc/util/test_util.h"
+#include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
 static TINKPBKeyset *gKeyset;

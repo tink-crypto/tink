@@ -14,20 +14,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/util/test_util.h"
+#include "tink/util/test_util.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "cc/keyset_handle.h"
-#include "cc/binary_keyset_reader.h"
-#include "cc/cleartext_keyset_handle.h"
-#include "cc/aead/aes_gcm_key_manager.h"
-#include "cc/subtle/common_enums.h"
-#include "cc/subtle/subtle_util_boringssl.h"
-#include "cc/util/enums.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/keyset_handle.h"
+#include "tink/binary_keyset_reader.h"
+#include "tink/cleartext_keyset_handle.h"
+#include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/enums.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"

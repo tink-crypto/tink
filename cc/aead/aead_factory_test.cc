@@ -13,15 +13,15 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-#include "cc/aead/aead_factory.h"
+#include "tink/aead/aead_factory.h"
 
-#include "cc/aead.h"
-#include "cc/crypto_format.h"
-#include "cc/keyset_handle.h"
-#include "cc/aead/aead_config.h"
-#include "cc/aead/aes_gcm_key_manager.h"
-#include "cc/util/status.h"
-#include "cc/util/test_util.h"
+#include "tink/aead.h"
+#include "tink/crypto_format.h"
+#include "tink/keyset_handle.h"
+#include "tink/aead/aead_config.h"
+#include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/util/status.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"

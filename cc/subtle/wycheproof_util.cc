@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/wycheproof_util.h"
+#include "tink/subtle/wycheproof_util.h"
 
 #include <fstream>
 #include <iostream>
@@ -22,8 +22,8 @@
 
 #include "include/json/reader.h"
 #include "include/json/value.h"
-#include "cc/subtle/common_enums.h"
-#include "cc/util/test_util.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {

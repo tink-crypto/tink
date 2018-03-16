@@ -18,7 +18,7 @@
 
 #import "objc/TINKKeysetHandle.h"
 
-#include "cc/keyset_handle.h"
+#include "tink/keyset_handle.h"
 
 @interface TINKKeysetHandle ()
 

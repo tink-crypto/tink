@@ -18,7 +18,7 @@
 #define PUBLIC_KEY_SIGN_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/util/statusor.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

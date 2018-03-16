@@ -17,10 +17,10 @@
 #ifndef TINK_HYBRID_HYBRID_ENCRYPT_CATALOGUE_H_
 #define TINK_HYBRID_HYBRID_ENCRYPT_CATALOGUE_H_
 
-#include "cc/catalogue.h"
-#include "cc/hybrid_encrypt.h"
-#include "cc/key_manager.h"
-#include "cc/util/statusor.h"
+#include "tink/catalogue.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/key_manager.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

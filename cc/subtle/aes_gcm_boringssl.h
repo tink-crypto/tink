@@ -20,9 +20,9 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
-#include "cc/aead.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "openssl/evp.h"
 
 namespace crypto {

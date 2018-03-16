@@ -22,7 +22,7 @@
 #import "objc/util/TINKStrings.h"
 
 #include "absl/strings/string_view.h"
-#include "cc/hybrid_encrypt.h"
+#include "tink/hybrid_encrypt.h"
 
 @implementation TINKHybridEncryptInternal
 

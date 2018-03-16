@@ -14,11 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/signature/public_key_verify_set_wrapper.h"
-#include "cc/public_key_verify.h"
-#include "cc/primitive_set.h"
-#include "cc/util/status.h"
-#include "cc/util/test_util.h"
+#include "tink/signature/public_key_verify_set_wrapper.h"
+#include "tink/public_key_verify.h"
+#include "tink/primitive_set.h"
+#include "tink/util/status.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 
 using crypto::tink::test::DummyPublicKeySign;

@@ -14,9 +14,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/util/enums.h"
+#include "tink/util/enums.h"
 
-#include "cc/subtle/common_enums.h"
+#include "tink/subtle/common_enums.h"
 #include "gtest/gtest.h"
 #include "proto/common.pb.h"
 

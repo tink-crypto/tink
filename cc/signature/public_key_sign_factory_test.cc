@@ -14,17 +14,17 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/signature/public_key_sign_factory.h"
+#include "tink/signature/public_key_sign_factory.h"
 
-#include "cc/config.h"
-#include "cc/public_key_sign.h"
-#include "cc/crypto_format.h"
-#include "cc/keyset_handle.h"
-#include "cc/registry.h"
-#include "cc/signature/ecdsa_sign_key_manager.h"
-#include "cc/signature/signature_config.h"
-#include "cc/util/status.h"
-#include "cc/util/test_util.h"
+#include "tink/config.h"
+#include "tink/public_key_sign.h"
+#include "tink/crypto_format.h"
+#include "tink/keyset_handle.h"
+#include "tink/registry.h"
+#include "tink/signature/ecdsa_sign_key_manager.h"
+#include "tink/signature/signature_config.h"
+#include "tink/util/status.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"

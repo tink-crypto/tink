@@ -14,11 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/hybrid_decrypt_set_wrapper.h"
-#include "cc/hybrid_decrypt.h"
-#include "cc/primitive_set.h"
-#include "cc/util/status.h"
-#include "cc/util/test_util.h"
+#include "tink/hybrid/hybrid_decrypt_set_wrapper.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/primitive_set.h"
+#include "tink/util/status.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 
 using crypto::tink::test::DummyHybridDecrypt;

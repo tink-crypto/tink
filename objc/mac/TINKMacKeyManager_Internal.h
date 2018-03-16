@@ -18,8 +18,8 @@
 
 #import "objc/mac/TINKMacKeyManager.h"
 
-#include "cc/key_manager.h"
-#include "cc/mac.h"
+#include "tink/key_manager.h"
+#include "tink/mac.h"
 
 @interface TINKMacKeyManager ()
 

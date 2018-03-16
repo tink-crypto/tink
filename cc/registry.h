@@ -21,13 +21,13 @@
 #include <typeinfo>
 #include <unordered_map>
 
-#include "cc/catalogue.h"
-#include "cc/key_manager.h"
-#include "cc/keyset_handle.h"
-#include "cc/primitive_set.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "cc/util/validation.h"
+#include "tink/catalogue.h"
+#include "tink/key_manager.h"
+#include "tink/keyset_handle.h"
+#include "tink/primitive_set.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/validation.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

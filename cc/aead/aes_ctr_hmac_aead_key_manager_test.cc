@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/aead/aes_ctr_hmac_aead_key_manager.h"
+#include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 
-#include "cc/config.h"
-#include "cc/mac/mac_config.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/config.h"
+#include "tink/mac/mac_config.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "gtest/gtest.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"

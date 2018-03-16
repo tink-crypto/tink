@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/random.h"
+#include "tink/subtle/random.h"
 #include "gtest/gtest.h"
 
 namespace crypto {

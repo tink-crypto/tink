@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/util/enums.h"
+#include "tink/util/enums.h"
 #include "proto/common.pb.h"
 
 namespace pb = google::crypto::tink;

@@ -14,11 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/hkdf.h"
-#include "cc/subtle/common_enums.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
-#include "cc/util/test_util.h"
+#include "tink/subtle/hkdf.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 
 namespace crypto {

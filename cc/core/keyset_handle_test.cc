@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/binary_keyset_reader.h"
-#include "cc/cleartext_keyset_handle.h"
-#include "cc/json_keyset_reader.h"
-#include "cc/json_keyset_writer.h"
-#include "cc/keyset_handle.h"
-#include "cc/util/test_util.h"
+#include "tink/binary_keyset_reader.h"
+#include "tink/cleartext_keyset_handle.h"
+#include "tink/json_keyset_reader.h"
+#include "tink/json_keyset_writer.h"
+#include "tink/keyset_handle.h"
+#include "tink/util/test_util.h"
 #include "google/protobuf/util/json_util.h"
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"

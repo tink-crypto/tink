@@ -14,12 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/util/errors.h"
+#include "tink/util/errors.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "cc/util/status.h"
+#include "tink/util/status.h"
 
 using crypto::tink::util::error::Code;
 using crypto::tink::util::Status;

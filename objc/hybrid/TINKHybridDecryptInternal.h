@@ -20,7 +20,7 @@
 
 #import <Foundation/Foundation.h>
 
-#include "cc/hybrid_decrypt.h"
+#include "tink/hybrid_decrypt.h"
 
 /**
  * This interface is internal-only. Use TINKHybridDecryptFactory to get an instance that conforms to

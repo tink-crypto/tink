@@ -14,14 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/signature/public_key_verify_catalogue.h"
+#include "tink/signature/public_key_verify_catalogue.h"
 
 #include "absl/strings/ascii.h"
-#include "cc/catalogue.h"
-#include "cc/signature/ecdsa_verify_key_manager.h"
-#include "cc/key_manager.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/catalogue.h"
+#include "tink/signature/ecdsa_verify_key_manager.h"
+#include "tink/key_manager.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

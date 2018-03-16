@@ -14,12 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/ecdsa_verify_boringssl.h"
+#include "tink/subtle/ecdsa_verify_boringssl.h"
 
 #include "absl/strings/str_cat.h"
-#include "cc/subtle/common_enums.h"
-#include "cc/subtle/subtle_util_boringssl.h"
-#include "cc/util/errors.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/errors.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/ecdsa.h"

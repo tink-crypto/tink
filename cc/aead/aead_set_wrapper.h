@@ -18,9 +18,9 @@
 #define TINK_AEAD_AEAD_SET_WRAPPER_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/aead.h"
-#include "cc/primitive_set.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/primitive_set.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

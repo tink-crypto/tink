@@ -17,7 +17,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "cc/keyset_handle.h"
+#include "tink/keyset_handle.h"
 
 // Helper function for CLI applications.
 class CliUtil {

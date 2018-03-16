@@ -14,12 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/hybrid_encrypt_config.h"
+#include "tink/hybrid/hybrid_encrypt_config.h"
 
-#include "cc/config.h"
-#include "cc/aead/aead_config.h"
-#include "cc/hybrid/hybrid_encrypt_catalogue.h"
-#include "cc/util/status.h"
+#include "tink/config.h"
+#include "tink/aead/aead_config.h"
+#include "tink/hybrid/hybrid_encrypt_catalogue.h"
+#include "tink/util/status.h"
 #include "proto/config.pb.h"
 
 namespace util = crypto::tink::util;

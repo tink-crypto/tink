@@ -18,9 +18,9 @@
 #define TINK_HYBRID_ECIES_AEAD_HKDF_DEM_HELPER_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/aead.h"
-#include "cc/key_manager.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/key_manager.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

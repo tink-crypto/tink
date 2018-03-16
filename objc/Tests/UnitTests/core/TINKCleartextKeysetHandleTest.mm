@@ -25,7 +25,7 @@
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKStrings.h"
 
-#include "cc/util/test_util.h"
+#include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
 @interface TINKCleartextKeysetHandleTest : XCTestCase

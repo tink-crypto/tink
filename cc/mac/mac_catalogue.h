@@ -17,10 +17,10 @@
 #ifndef TINK_MAC_MAC_CATALOGUE_H_
 #define TINK_MAC_MAC_CATALOGUE_H_
 
-#include "cc/catalogue.h"
-#include "cc/key_manager.h"
-#include "cc/mac.h"
-#include "cc/util/statusor.h"
+#include "tink/catalogue.h"
+#include "tink/key_manager.h"
+#include "tink/mac.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

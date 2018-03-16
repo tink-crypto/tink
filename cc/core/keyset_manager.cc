@@ -14,16 +14,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/keyset_manager.h"
+#include "tink/keyset_manager.h"
 
 #include <inttypes.h>
 #include <random>
 
-#include "cc/keyset_handle.h"
-#include "cc/keyset_reader.h"
-#include "cc/registry.h"
-#include "cc/util/errors.h"
-#include "cc/util/ptr_util.h"
+#include "tink/keyset_handle.h"
+#include "tink/keyset_reader.h"
+#include "tink/registry.h"
+#include "tink/util/errors.h"
+#include "tink/util/ptr_util.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::Keyset;

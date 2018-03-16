@@ -14,17 +14,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/encrypt_then_authenticate.h"
+#include "tink/subtle/encrypt_then_authenticate.h"
 
 #include <string>
 #include <vector>
 
-#include "cc/aead.h"
-#include "cc/mac.h"
-#include "cc/subtle/ind_cpa_cipher.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/mac.h"
+#include "tink/subtle/ind_cpa_cipher.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace util = crypto::tink::util;
 

@@ -14,13 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/aead/aead_config.h"
+#include "tink/aead/aead_config.h"
 
-#include "cc/config.h"
-#include "cc/registry.h"
-#include "cc/aead/aead_catalogue.h"
-#include "cc/mac/mac_config.h"
-#include "cc/util/status.h"
+#include "tink/config.h"
+#include "tink/registry.h"
+#include "tink/aead/aead_catalogue.h"
+#include "tink/mac/mac_config.h"
+#include "tink/util/status.h"
 #include "proto/config.pb.h"
 
 namespace util = crypto::tink::util;

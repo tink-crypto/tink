@@ -14,10 +14,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/util/validation.h"
+#include "tink/util/validation.h"
 
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
 namespace util = crypto::tink::util;

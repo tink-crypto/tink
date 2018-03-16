@@ -18,10 +18,10 @@
 #define TINK_SIGNATURE_PUBLIC_KEY_VERIFY_SET_WRAPPER_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/public_key_verify.h"
-#include "cc/primitive_set.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/public_key_verify.h"
+#include "tink/primitive_set.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

@@ -21,11 +21,11 @@
 #define TINK_AEAD_AES_CTR_HMAC_AEAD_KEY_MANAGER_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/aead.h"
-#include "cc/key_manager.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/key_manager.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "google/protobuf/message.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/tink.pb.h"

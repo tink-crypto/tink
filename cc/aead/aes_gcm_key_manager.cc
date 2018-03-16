@@ -14,19 +14,19 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/aead/aes_gcm_key_manager.h"
+#include "tink/aead/aes_gcm_key_manager.h"
 
 #include <map>
 
 #include "absl/strings/string_view.h"
-#include "cc/aead.h"
-#include "cc/key_manager.h"
-#include "cc/subtle/aes_gcm_boringssl.h"
-#include "cc/subtle/random.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
-#include "cc/util/validation.h"
+#include "tink/aead.h"
+#include "tink/key_manager.h"
+#include "tink/subtle/aes_gcm_boringssl.h"
+#include "tink/subtle/random.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "tink/util/validation.h"
 #include "google/protobuf/message.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"

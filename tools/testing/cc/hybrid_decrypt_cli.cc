@@ -17,10 +17,10 @@
 #include <iostream>
 #include <fstream>
 
-#include "cc/hybrid_decrypt.h"
-#include "cc/keyset_handle.h"
-#include "cc/hybrid/hybrid_decrypt_factory.h"
-#include "cc/util/status.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/keyset_handle.h"
+#include "tink/hybrid/hybrid_decrypt_factory.h"
+#include "tink/util/status.h"
 #include "tools/testing/cc/cli_util.h"
 
 using crypto::tink::HybridDecryptFactory;

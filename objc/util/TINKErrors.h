@@ -18,7 +18,7 @@
 
 #import <Foundation/Foundation.h>
 
-#include "cc/util/status.h"
+#include "tink/util/status.h"
 
 /** Converts a C++ Status code to NSError. */
 NSError* TINKStatusToError(const crypto::tink::util::Status& status);

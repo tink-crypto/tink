@@ -17,7 +17,7 @@
 #ifndef TINK_KEYSET_READER_H_
 #define TINK_KEYSET_READER_H_
 
-#include "cc/util/statusor.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

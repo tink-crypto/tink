@@ -19,7 +19,7 @@
 #import <Foundation/Foundation.h>
 #import "objc/TINKMac.h"
 
-#include "cc/mac.h"
+#include "tink/mac.h"
 
 /**
  * This interface is internal-only. Use TINKMacFactory to get an instance

@@ -20,10 +20,10 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
-#include "cc/mac.h"
-#include "cc/subtle/common_enums.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/mac.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "openssl/evp.h"
 
 namespace crypto {

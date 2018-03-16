@@ -18,8 +18,8 @@
 
 #import <XCTest/XCTest.h>
 
-#include "cc/util/status.h"
-#include "cc/util/test_util.h"
+#include "tink/util/status.h"
+#include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
 #import "proto/Common.pbobjc.h"

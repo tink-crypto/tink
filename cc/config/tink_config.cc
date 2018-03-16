@@ -14,15 +14,15 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/config/tink_config.h"
+#include "tink/config/tink_config.h"
 
-#include "cc/config.h"
-#include "cc/key_manager.h"
-#include "cc/registry.h"
-#include "cc/hybrid/hybrid_encrypt_config.h"
-#include "cc/hybrid/hybrid_decrypt_config.h"
-#include "cc/signature/signature_config.h"
-#include "cc/util/status.h"
+#include "tink/config.h"
+#include "tink/key_manager.h"
+#include "tink/registry.h"
+#include "tink/hybrid/hybrid_encrypt_config.h"
+#include "tink/hybrid/hybrid_decrypt_config.h"
+#include "tink/signature/signature_config.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {

@@ -21,9 +21,9 @@
 #define TINK_KEY_MANAGER_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "google/protobuf/message.h"
 #include "proto/tink.pb.h"
 

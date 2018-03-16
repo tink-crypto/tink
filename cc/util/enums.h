@@ -17,7 +17,7 @@
 #ifndef TINK_UTIL_ENUMS_H_
 #define TINK_UTIL_ENUMS_H_
 
-#include "cc/subtle/common_enums.h"
+#include "tink/subtle/common_enums.h"
 #include "proto/common.pb.h"
 
 namespace crypto {

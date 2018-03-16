@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/subtle_util_boringssl.h"
-#include "cc/subtle/common_enums.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/subtle/common_enums.h"
 #include "openssl/ec.h"
 #include "openssl/err.h"
 

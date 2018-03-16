@@ -16,7 +16,7 @@
 
 #include <sstream>
 
-#include "cc/util/status.h"
+#include "tink/util/status.h"
 
 using ::std::ostream;
 

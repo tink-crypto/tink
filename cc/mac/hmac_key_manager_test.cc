@@ -14,11 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/mac/hmac_key_manager.h"
+#include "tink/mac/hmac_key_manager.h"
 
-#include "cc/mac.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/mac.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "gtest/gtest.h"
 #include "proto/aes_ctr.pb.h"
 #include "proto/common.pb.h"

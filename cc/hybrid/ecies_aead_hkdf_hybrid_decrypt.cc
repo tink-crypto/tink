@@ -14,14 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
+#include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 
-#include "cc/hybrid_decrypt.h"
-#include "cc/hybrid/ecies_aead_hkdf_dem_helper.h"
-#include "cc/subtle/ec_util.h"
-#include "cc/subtle/ecies_hkdf_recipient_kem_boringssl.h"
-#include "cc/util/enums.h"
-#include "cc/util/statusor.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
+#include "tink/subtle/ec_util.h"
+#include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
+#include "tink/util/enums.h"
+#include "tink/util/statusor.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 

@@ -14,14 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/ec_util.h"
+#include "tink/subtle/ec_util.h"
 
 #include <memory>
 #include <string>
 
-#include "cc/subtle/common_enums.h"
-#include "cc/subtle/subtle_util_boringssl.h"
-#include "cc/util/errors.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/errors.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/x509.h"

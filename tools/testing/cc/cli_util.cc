@@ -20,17 +20,17 @@
 #include <fstream>
 #include <sstream>
 
-#include "cc/binary_keyset_reader.h"
-#include "cc/binary_keyset_writer.h"
-#include "cc/cleartext_keyset_handle.h"
-#include "cc/keyset_reader.h"
-#include "cc/keyset_writer.h"
-#include "cc/json_keyset_reader.h"
-#include "cc/json_keyset_writer.h"
-#include "cc/config.h"
-#include "cc/keyset_handle.h"
-#include "cc/config/tink_config.h"
-#include "cc/util/status.h"
+#include "tink/binary_keyset_reader.h"
+#include "tink/binary_keyset_writer.h"
+#include "tink/cleartext_keyset_handle.h"
+#include "tink/keyset_reader.h"
+#include "tink/keyset_writer.h"
+#include "tink/json_keyset_reader.h"
+#include "tink/json_keyset_writer.h"
+#include "tink/config.h"
+#include "tink/keyset_handle.h"
+#include "tink/config/tink_config.h"
+#include "tink/util/status.h"
 
 using crypto::tink::BinaryKeysetReader;
 using crypto::tink::BinaryKeysetWriter;

@@ -14,10 +14,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid_encrypt.h"
-#include "cc/keyset_handle.h"
-#include "cc/hybrid/hybrid_encrypt_factory.h"
-#include "cc/util/status.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/keyset_handle.h"
+#include "tink/hybrid/hybrid_encrypt_factory.h"
+#include "tink/util/status.h"
 #include "tools/testing/cc/cli_util.h"
 
 using crypto::tink::HybridEncryptFactory;

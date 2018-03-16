@@ -18,10 +18,10 @@
 
 #import "objc/hybrid/TINKEciesAeadHkdfPublicKeyManager.h"
 
-#include "cc/hybrid/ecies_aead_hkdf_public_key_manager.h"
-#include "cc/hybrid_encrypt.h"
-#include "cc/key_manager.h"
-#include "cc/util/status.h"
+#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/key_manager.h"
+#include "tink/util/status.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 

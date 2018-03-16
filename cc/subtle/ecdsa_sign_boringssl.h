@@ -20,10 +20,10 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
-#include "cc/subtle/common_enums.h"
-#include "cc/subtle/subtle_util_boringssl.h"
-#include "cc/public_key_sign.h"
-#include "cc/util/statusor.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/public_key_sign.h"
+#include "tink/util/statusor.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
 

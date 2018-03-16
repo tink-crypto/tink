@@ -14,16 +14,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/cleartext_keyset_handle.h"
+#include "tink/cleartext_keyset_handle.h"
 
 #include <istream>
 
-#include "cc/keyset_handle.h"
-#include "cc/keyset_reader.h"
-#include "cc/util/errors.h"
-#include "cc/util/ptr_util.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/keyset_handle.h"
+#include "tink/keyset_reader.h"
+#include "tink/util/errors.h"
+#include "tink/util/ptr_util.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::Keyset;

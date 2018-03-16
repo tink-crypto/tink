@@ -23,7 +23,7 @@
 #import "objc/util/TINKStrings.h"
 
 #include "absl/strings/string_view.h"
-#include "cc/aead.h"
+#include "tink/aead.h"
 
 @implementation TINKAeadInternal {
   std::unique_ptr<crypto::tink::Aead> _ccAead;

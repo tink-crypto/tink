@@ -18,8 +18,8 @@
 #define TINK_MAC_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

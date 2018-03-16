@@ -22,7 +22,7 @@
 #import "objc/mac/TINKMacKeyManager.h"
 #import "objc/mac/TINKMacKeyManager_Internal.h"
 
-#include "cc/mac/mac_config.h"
+#include "tink/mac/mac_config.h"
 
 @implementation TINKMacConfig
 

@@ -17,6 +17,6 @@
 #ifndef TINK_AEAD_KEY_TEMPLATES_H_
 #define TINK_AEAD_KEY_TEMPLATES_H_
 
-#include "cc/aead/aead_key_templates.h"  // IWYU pragma: export
+#include "tink/aead/aead_key_templates.h"  // IWYU pragma: export
 
 #endif  // TINK_AEAD_KEY_TEMPLATES_H_

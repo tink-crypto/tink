@@ -25,7 +25,7 @@
 #import "proto/Tink.pbobjc.h"
 
 #include "absl/strings/string_view.h"
-#include "cc/binary_keyset_reader.h"
+#include "tink/binary_keyset_reader.h"
 #include "proto/tink.pb.h"
 
 @implementation TINKBinaryKeysetReader

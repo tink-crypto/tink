@@ -26,8 +26,8 @@
 #import "objc/util/TINKStrings.h"
 #import "proto/Tink.pbobjc.h"
 
-#include "cc/keyset_handle.h"
-#include "cc/util/status.h"
+#include "tink/keyset_handle.h"
+#include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
 @implementation TINKKeysetHandle {

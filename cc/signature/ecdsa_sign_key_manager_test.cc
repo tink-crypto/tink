@@ -14,13 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/signature/ecdsa_sign_key_manager.h"
+#include "tink/signature/ecdsa_sign_key_manager.h"
 
-#include "cc/public_key_sign.h"
-#include "cc/registry.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
-#include "cc/util/test_util.h"
+#include "tink/public_key_sign.h"
+#include "tink/registry.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"

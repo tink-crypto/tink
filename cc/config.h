@@ -17,16 +17,16 @@
 #ifndef TINK_CONFIG_H_
 #define TINK_CONFIG_H_
 
-#include "cc/aead.h"
-#include "cc/catalogue.h"
-#include "cc/config.h"
-#include "cc/hybrid_encrypt.h"
-#include "cc/hybrid_decrypt.h"
-#include "cc/key_manager.h"
-#include "cc/mac.h"
-#include "cc/registry.h"
-#include "cc/util/errors.h"
-#include "cc/util/status.h"
+#include "tink/aead.h"
+#include "tink/catalogue.h"
+#include "tink/config.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/key_manager.h"
+#include "tink/mac.h"
+#include "tink/registry.h"
+#include "tink/util/errors.h"
+#include "tink/util/status.h"
 #include "proto/config.pb.h"
 
 namespace crypto {

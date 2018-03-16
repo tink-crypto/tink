@@ -14,16 +14,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
+#include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 
-#include "cc/aead.h"
-#include "cc/hybrid_encrypt.h"
-#include "cc/key_manager.h"
-#include "cc/registry.h"
-#include "cc/hybrid/ecies_aead_hkdf_dem_helper.h"
-#include "cc/subtle/ecies_hkdf_sender_kem_boringssl.h"
-#include "cc/util/enums.h"
-#include "cc/util/statusor.h"
+#include "tink/aead.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/key_manager.h"
+#include "tink/registry.h"
+#include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
+#include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
+#include "tink/util/enums.h"
+#include "tink/util/statusor.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"

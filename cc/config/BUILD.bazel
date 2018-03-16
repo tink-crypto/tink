@@ -15,6 +15,8 @@ cc_library(
         "//cc/util:status",
         "//proto:config_cc_proto",
     ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 # tests

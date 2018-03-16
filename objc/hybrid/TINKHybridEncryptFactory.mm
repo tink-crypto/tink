@@ -18,11 +18,11 @@
 
 #import "objc/hybrid/TINKHybridEncryptFactory.h"
 
-#include "cc/hybrid/hybrid_encrypt_factory.h"
-#include "cc/hybrid_encrypt.h"
-#include "cc/key_manager.h"
-#include "cc/keyset_handle.h"
-#include "cc/util/status.h"
+#include "tink/hybrid/hybrid_encrypt_factory.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/key_manager.h"
+#include "tink/keyset_handle.h"
+#include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
 #import "objc/TINKHybridEncrypt.h"

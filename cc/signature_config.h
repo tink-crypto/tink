@@ -17,6 +17,6 @@
 #ifndef TINK_SIGNATURE_CONFIG_H_
 #define TINK_SIGNATURE_CONFIG_H_
 
-#include "cc/signature/signature_config.h"  // IWYU pragma: export
+#include "tink/signature/signature_config.h"  // IWYU pragma: export
 
 #endif  // TINK_SIGNATURE_CONFIG_H_

@@ -14,14 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/ecies_aead_hkdf_public_key_manager.h"
+#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 
-#include "cc/hybrid_encrypt.h"
-#include "cc/registry.h"
-#include "cc/aead/aes_gcm_key_manager.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
-#include "cc/util/test_util.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/registry.h"
+#include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/common.pb.h"

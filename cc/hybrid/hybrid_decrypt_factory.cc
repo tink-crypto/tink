@@ -14,15 +14,15 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/hybrid_decrypt_factory.h"
+#include "tink/hybrid/hybrid_decrypt_factory.h"
 
-#include "cc/hybrid_decrypt.h"
-#include "cc/key_manager.h"
-#include "cc/keyset_handle.h"
-#include "cc/registry.h"
-#include "cc/hybrid/hybrid_decrypt_set_wrapper.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/key_manager.h"
+#include "tink/keyset_handle.h"
+#include "tink/registry.h"
+#include "tink/hybrid/hybrid_decrypt_set_wrapper.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace util = crypto::tink::util;
 

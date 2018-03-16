@@ -17,8 +17,8 @@
 #ifndef TINK_HYBRID_HYBRID_ENCRYPT_CONFIG_H_
 #define TINK_HYBRID_HYBRID_ENCRYPT_CONFIG_H_
 
-#include "cc/hybrid_encrypt.h"
-#include "cc/util/status.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/util/status.h"
 #include "proto/config.pb.h"
 
 namespace crypto {

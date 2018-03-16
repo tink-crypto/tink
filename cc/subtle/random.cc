@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/random.h"
+#include "tink/subtle/random.h"
 #include <string>
 #include "openssl/rand.h"
 

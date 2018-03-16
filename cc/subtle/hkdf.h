@@ -18,9 +18,9 @@
 #define TINK_SUBTLE_HKDF_H_
 
 #include "absl/strings/string_view.h"
-#include "cc/subtle/common_enums.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

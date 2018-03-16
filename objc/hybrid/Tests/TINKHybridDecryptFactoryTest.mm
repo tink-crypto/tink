@@ -18,9 +18,9 @@
 
 #import <XCTest/XCTest.h>
 
-#include "cc/crypto_format.h"
-#include "cc/util/status.h"
-#include "cc/util/test_util.h"
+#include "tink/crypto_format.h"
+#include "tink/util/status.h"
+#include "tink/util/test_util.h"
 
 #import "proto/EciesAeadHkdf.pbobjc.h"
 #import "proto/Tink.pbobjc.h"

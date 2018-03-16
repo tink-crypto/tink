@@ -14,15 +14,15 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cc/signature/public_key_sign_factory.h"
+#include "tink/signature/public_key_sign_factory.h"
 
-#include "cc/public_key_sign.h"
-#include "cc/key_manager.h"
-#include "cc/keyset_handle.h"
-#include "cc/registry.h"
-#include "cc/signature/public_key_sign_set_wrapper.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
+#include "tink/public_key_sign.h"
+#include "tink/key_manager.h"
+#include "tink/keyset_handle.h"
+#include "tink/registry.h"
+#include "tink/signature/public_key_sign_set_wrapper.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

@@ -24,7 +24,7 @@
 #import "objc/TINKRegistryConfig.h"
 #import "objc/core/TINKRegistryConfig_Internal.h"
 
-#include "cc/aead/aead_config.h"
+#include "tink/aead/aead_config.h"
 #include "proto/config.pb.h"
 
 @interface TINKAeadConfigTest : XCTestCase

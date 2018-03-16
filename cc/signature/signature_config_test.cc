@@ -14,14 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/signature/signature_config.h"
+#include "tink/signature/signature_config.h"
 
-#include "cc/catalogue.h"
-#include "cc/config.h"
-#include "cc/public_key_sign.h"
-#include "cc/public_key_verify.h"
-#include "cc/registry.h"
-#include "cc/util/status.h"
+#include "tink/catalogue.h"
+#include "tink/config.h"
+#include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
+#include "tink/registry.h"
+#include "tink/util/status.h"
 #include "gtest/gtest.h"
 
 namespace crypto {

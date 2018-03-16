@@ -14,14 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/hybrid_encrypt_factory.h"
+#include "tink/hybrid/hybrid_encrypt_factory.h"
 
-#include "cc/hybrid_encrypt.h"
-#include "cc/crypto_format.h"
-#include "cc/keyset_handle.h"
-#include "cc/hybrid/hybrid_encrypt_config.h"
-#include "cc/util/status.h"
-#include "cc/util/test_util.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/crypto_format.h"
+#include "tink/keyset_handle.h"
+#include "tink/hybrid/hybrid_encrypt_config.h"
+#include "tink/util/status.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"

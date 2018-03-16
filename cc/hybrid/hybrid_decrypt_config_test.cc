@@ -14,13 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/hybrid/hybrid_decrypt_config.h"
+#include "tink/hybrid/hybrid_decrypt_config.h"
 
-#include "cc/hybrid_decrypt.h"
-#include "cc/catalogue.h"
-#include "cc/config.h"
-#include "cc/registry.h"
-#include "cc/util/status.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/catalogue.h"
+#include "tink/config.h"
+#include "tink/registry.h"
+#include "tink/util/status.h"
 #include "gtest/gtest.h"
 
 namespace util = crypto::tink::util;

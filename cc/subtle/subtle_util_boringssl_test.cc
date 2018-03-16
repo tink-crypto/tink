@@ -14,12 +14,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cc/subtle/subtle_util_boringssl.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 
-#include "cc/subtle/common_enums.h"
-#include "cc/util/status.h"
-#include "cc/util/statusor.h"
-#include "cc/util/test_util.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
