@@ -33,7 +33,8 @@
 @implementation TINKAeadConfigTest
 
 - (void)testConfigContents {
-  std::string aes_ctr_hmac_aead_key_type = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
+  std::string aes_ctr_hmac_aead_key_type =
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
   std::string aes_gcm_key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
   std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
 
