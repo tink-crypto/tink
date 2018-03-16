@@ -18,19 +18,15 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * This instance of {@code KeyManager} generates new {@code Ed25519PrivateKey} keys and produces new
@@ -110,77 +106,6 @@ class Ed25519PrivateKeyManager implements PrivateKeyManager<PublicKeySign> {
   @Override
   public int getVersion() {
     return VERSION;
-  }
-
-  /**
-   * @param jsonKey JSON formatted {@code Ed25519PrivateKey}-proto
-   * @return {@code Ed25519PrivateKey}-proto
-   */
-  @Override
-  public MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException {
-    try {
-      JSONObject json = new JSONObject(new String(jsonKey, Util.UTF_8));
-      validateKey(json);
-      Ed25519PublicKeyManager publicKeyManager = new Ed25519PublicKeyManager();
-      return Ed25519PrivateKey.newBuilder()
-          .setVersion(json.getInt("version"))
-          .setKeyValue(ByteString.copyFrom(Base64.decode(json.getString("keyValue"))))
-          .setPublicKey((Ed25519PublicKey) publicKeyManager.jsonToKey(
-              json.getJSONObject("publicKey").toString(4).getBytes(Util.UTF_8)))
-          .build();
-    } catch (JSONException e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  /**
-   * Not supported.
-   */
-  @Override
-  public MessageLite jsonToKeyFormat(final byte[] jsonKeyFormat) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Operation not supported.");
-  }
-
-  /**
-   * Returns a JSON-formatted serialization of the given {@code serializedKey},
-   * which must be a {@code Ed25519PrivateKey}-proto.
-   * @throws GeneralSecurityException if the key in {@code serializedKey} is not supported
-   */
-  @Override
-  public byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException {
-    Ed25519PrivateKey key;
-    try {
-      key = Ed25519PrivateKey.parseFrom(serializedKey);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized Ed25519PrivateKey proto", e);
-    }
-    validate(key);
-    Ed25519PublicKeyManager publicKeyManager = new Ed25519PublicKeyManager();
-    try {
-      return new JSONObject()
-          .put("version", key.getVersion())
-          .put("keyValue", Base64.encode(key.getKeyValue().toByteArray()))
-          .put("publicKey", new JSONObject(new String(
-              publicKeyManager.keyToJson(key.getPublicKey().toByteString()), Util.UTF_8)))
-          .toString(4).getBytes(Util.UTF_8);
-    } catch (JSONException e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  /**
-   * Not supported.
-   */
-  @Override
-  public byte[] keyFormatToJson(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Operation not supported.");
-  }
-
-  private void validateKey(JSONObject json) throws JSONException {
-    if (json.length() != 3 || !json.has("version") || !json.has("keyValue")
-        || !json.has("publicKey")) {
-      throw new JSONException("Invalid key.");
-    }
   }
 
   private Ed25519PrivateKey newKey() throws GeneralSecurityException {

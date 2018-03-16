@@ -135,7 +135,8 @@ public final class X25519Test {
 
   @Test
   public void testComputeSharedSecretWithWycheproofVectors() throws Exception {
-    JSONObject json = WycheproofTestUtil.readJson("testdata/wycheproof/x25519_test.json");
+    JSONObject json =
+        WycheproofTestUtil.readJson("testdata/wycheproof/x25519_test.json");
     int errors = 0;
     int cntSkippedTests = 0;
     JSONArray testGroups = json.getJSONArray("testGroups");

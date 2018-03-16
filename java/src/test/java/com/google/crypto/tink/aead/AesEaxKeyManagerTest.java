@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.aead;
 
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -26,7 +25,6 @@ import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.AesEaxParams;
@@ -278,182 +276,5 @@ public class AesEaxKeyManagerTest {
     assertEquals(
         CryptoFormat.NON_RAW_PREFIX_SIZE + 16 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */,
         ciphertext.length);
-  }
-
-  @Test
-  public void testJsonExportAndImport() throws Exception {
-    AesEaxKeyManager keyManager = new AesEaxKeyManager();
-    int keyCount = 4;
-
-    // Prepare example formats and keys.
-    ByteString[] formats = new ByteString[keyCount];
-    formats[0] = AeadKeyTemplates.AES128_EAX.getValue();
-    formats[1] = AeadKeyTemplates.AES256_EAX.getValue();
-    formats[2] = AeadKeyTemplates.createAesEaxKeyTemplate(16, 12).getValue();
-    formats[3] = AeadKeyTemplates.createAesEaxKeyTemplate(32, 12).getValue();
-
-    AesEaxKey[] keys = new AesEaxKey[keyCount];
-    for (int i = 0; i < keyCount; i++) {
-      try {
-        keys[i] = (AesEaxKey) keyManager.newKey(formats[i]);
-      } catch (Exception e) {
-        throw new Exception(e.toString()
-            + "\nFailed for formats[" + i + "]: " + formats[i].toString());
-      }
-    }
-
-    // Check export and import of keys.
-    int count = 0;
-    for (AesEaxKey key : keys) {
-      try {
-        byte[] json = keyManager.keyToJson(key.toByteString());
-        AesEaxKey keyFromJson = (AesEaxKey) keyManager.jsonToKey(json);
-        assertEquals(key.toString(), keyFromJson.toString());
-      } catch (Exception e) {
-        throw new Exception(e.toString() + "\nFailed for key: " + key.toString());
-      }
-      count++;
-    }
-    assertEquals(keyCount, count);
-
-    // Check export and import of key formats.
-    count = 0;
-    for (ByteString format : formats) {
-      try {
-        byte[] json = keyManager.keyFormatToJson(format);
-        AesEaxKeyFormat formatFromJson = (AesEaxKeyFormat) keyManager.jsonToKeyFormat(json);
-        assertEquals(AesEaxKeyFormat.parseFrom(format).toString(), formatFromJson.toString());
-        count++;
-      } catch (Exception e) {
-        throw new Exception(e.toString() + "\nFailed for format: " + format.toString());
-      }
-    }
-    assertEquals(keyCount, count);
-  }
-
-  @Test
-  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
-  public void testJsonExportAndImportErrors() throws Exception {
-    AesEaxKeyManager keyManager = new AesEaxKeyManager();
-
-    try {
-      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
-      AesEaxKey key = (AesEaxKey) keyManager.jsonToKey(json);
-      fail("Corrupted JSON, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "text must begin");
-    }
-
-    try {
-      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
-      AesEaxKeyFormat format = (AesEaxKeyFormat) keyManager.jsonToKeyFormat(json);
-      fail("Corrupted JSON, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "text must begin");
-    }
-
-    try {  // An incomplete JSON key.
-      byte[] json = "{\"params\": {\"ivSize\": 16}}".getBytes(Util.UTF_8);
-      AesEaxKey key = (AesEaxKey) keyManager.jsonToKey(json);
-      fail("Incomplet JSON key, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "Invalid key");
-    }
-
-    try {  // An incomplete JSON key format.
-      byte[] json = "{\"params\": {}}".getBytes(Util.UTF_8);
-      AesEaxKeyFormat format = (AesEaxKeyFormat) keyManager.jsonToKeyFormat(json);
-      fail("Incomplete JSON key format, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "Invalid key format");
-    }
-
-    try {  // Extra name in JSON key.
-      byte[] json = ("{\"version\": 0, \"params\": {\"ivSize\": 16}, "
-          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes(Util.UTF_8);
-      AesEaxKey key = (AesEaxKey) keyManager.jsonToKey(json);
-      fail("Invalid JSON key, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "Invalid key");
-    }
-
-    try {  // Extra name JSON key format.
-      byte[] json = ("{\"params\": {\"ivSize\": 16}, "
-          + "\"keySize\": 16, \"extraName\": 42}").getBytes(Util.UTF_8);
-      AesEaxKeyFormat format = (AesEaxKeyFormat) keyManager.jsonToKeyFormat(json);
-      fail("Invalid JSON key format, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "Invalid key format");
-    }
-
-    try {  // Incomplete params in JSON key.
-      byte[] json = ("{\"version\": 0, \"params\": {}, "
-          + "\"keyValue\": \"some key bytes\"}").getBytes(Util.UTF_8);
-      AesEaxKey key = (AesEaxKey) keyManager.jsonToKey(json);
-      fail("Invalid JSON key, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "Invalid params");
-    }
-
-    try {  // Extra name in JSON key params.
-      byte[] json = ("{\"params\": {\"ivSize\": 16, \"extraName\": 42}, "
-          + "\"keyValue\": \"some key bytes\", \"version\": 0}").getBytes(Util.UTF_8);
-      AesEaxKey key = (AesEaxKey) keyManager.jsonToKey(json);
-      fail("Invalid JSON key, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "Invalid params");
-    }
-
-    try {  // An incomplete AesEaxKey.
-      AesEaxKey key = AesEaxKey.newBuilder().setVersion(42).build();
-      byte[] json = keyManager.keyToJson(key.toByteString());
-      fail("Incomplete AesEaxKey, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-    }
-
-    try {  // An incomplete AesEaxKeyFormat.
-      AesEaxKeyFormat format = AesEaxKeyFormat.newBuilder().setKeySize(42).build();
-      byte[] json = keyManager.keyFormatToJson(format.toByteString());
-      fail("Incomplete AesEaxKeyFormat, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-    }
-
-    try {  // Wrong serialized key proto.
-      KeyData key = KeyData.newBuilder()
-          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
-      byte[] json = keyManager.keyToJson(key.toByteString());
-      fail("Wrong key proto, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "expected serialized AesEaxKey");
-    }
-
-    try {  // Wrong serialized key format proto.
-      KeyData format = KeyData.newBuilder()
-          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
-      byte[] json = keyManager.keyFormatToJson(format.toByteString());
-      fail("Wrong key format proto, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "expected serialized AesEaxKeyFormat");
-    }
   }
 }

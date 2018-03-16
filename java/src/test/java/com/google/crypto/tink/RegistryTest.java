@@ -91,26 +91,6 @@ public class RegistryTest {
     public int getVersion() {
       return 0;
     }
-
-    @Override
-    public MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException {
-      return null;
-    }
-
-    @Override
-    public MessageLite jsonToKeyFormat(final byte[] jsonKeyFormat) throws GeneralSecurityException {
-      return null;
-    }
-
-    @Override
-    public byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException {
-      return null;
-    }
-
-    @Override
-    public byte[] keyFormatToJson(ByteString serializedKeyFormat) throws GeneralSecurityException {
-      return null;
-    }
   }
 
   @BeforeClass

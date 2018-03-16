@@ -57,7 +57,8 @@ public class AesSivTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    JSONObject json = WycheproofTestUtil.readJson("testdata/wycheproof/aes_siv_cmac_test.json");
+    JSONObject json =
+        WycheproofTestUtil.readJson("testdata/wycheproof/aes_siv_cmac_test.json");
     JSONArray testGroups = json.getJSONArray("testGroups");
     int cntSkippedTests = 0;
     for (int i = 0; i < testGroups.length(); i++) {

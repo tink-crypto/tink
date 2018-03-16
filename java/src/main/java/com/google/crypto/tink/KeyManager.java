@@ -53,17 +53,6 @@ public interface KeyManager<P> {
    */
   P getPrimitive(MessageLite key) throws GeneralSecurityException;
 
-  /** @return true iff this KeyManager supports key type identified by {@code typeUrl}. */
-  boolean doesSupport(String typeUrl);
-
-  /** @return the type URL that identifies the key type of keys managed by this KeyManager. */
-  String getKeyType();
-
-  /** @return the version number of this KeyManager. */
-  int getVersion();
-
-  // APIs for Key Management
-
   /**
    * Generates a new key according to specification in {@code serializedKeyFormat}, which must be a
    * serialized key format protocol buffer handled by this manager.
@@ -81,6 +70,17 @@ public interface KeyManager<P> {
    */
   MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException;
 
+  /** @return true iff this KeyManager supports key type identified by {@code typeUrl}. */
+  boolean doesSupport(String typeUrl);
+
+  /** @return the type URL that identifies the key type of keys managed by this KeyManager. */
+  String getKeyType();
+
+  /** @return the version number of this KeyManager. */
+  int getVersion();
+
+  // APIs for Key Management
+
   /**
    * Generates a new {@code KeyData} according to specification in {@code serializedkeyFormat}.
    *
@@ -90,33 +90,4 @@ public interface KeyManager<P> {
    * @throws GeneralSecurityException if the specified format is wrong or not supported
    */
   KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException;
-
-  /**
-   * Creates a key proto from the JSON-formatted serialization given in {@code jsonKey}.
-   *
-   * @return the parsed key
-   * @throws GeneralSecurityException if the specified serialization could not be parsed
-   */
-  MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException;
-
-  /**
-   * Creates a key format-proto from the JSON-formatted serialization
-   * given in {@code jsonKeyFormat}.
-   *
-   * @return the parsed key format
-   * @throws GeneralSecurityException if the specified serialization could not be parsed
-   */
-  MessageLite jsonToKeyFormat(final byte[] jsonKeyFormat) throws GeneralSecurityException;
-
-  /**
-   * Returns a JSON-formatted serialization of the given {@code serializedKey}.
-   * @throws GeneralSecurityException if the key in {@code serializedKey} is not supported
-   */
-  byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException;
-
-  /**
-   * Returns a JSON-formatted serialization of the given {@code serializedKeyFormat}
-   * @throws GeneralSecurityException if the format in {@code serializedkeyFromat} is not supported
-   */
-  byte[] keyFormatToJson(ByteString serializedKeyFormat) throws GeneralSecurityException;
 }

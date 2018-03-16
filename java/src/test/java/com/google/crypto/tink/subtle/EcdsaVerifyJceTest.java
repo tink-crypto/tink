@@ -42,7 +42,8 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    JSONObject jsonObj = WycheproofTestUtil.readJson("testdata/wycheproof/ecdsa_test.json");
+    JSONObject jsonObj =
+        WycheproofTestUtil.readJson("testdata/wycheproof/ecdsa_test.json");
 
     int errors = 0;
     int cntSkippedTests = 0;

@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.aead;
 
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -26,7 +25,6 @@ import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
@@ -430,156 +428,5 @@ public class AesGcmKeyManagerTest {
     assertEquals(
         CryptoFormat.NON_RAW_PREFIX_SIZE + 12 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */,
         ciphertext.length);
-  }
-
-  @Test
-  public void testJsonExportAndImport() throws Exception {
-    AesGcmKeyManager keyManager = new AesGcmKeyManager();
-    int keyCount = 3;
-
-    // Prepare example formats and keys.
-    ByteString[] formats = new ByteString[keyCount];
-    formats[0] = AeadKeyTemplates.AES128_GCM.getValue();
-    formats[1] = AeadKeyTemplates.AES256_GCM.getValue();
-    formats[2] = AeadKeyTemplates.createAesGcmKeyTemplate(24).getValue();
-
-    AesGcmKey[] keys = new AesGcmKey[keyCount];
-    for (int i = 0; i < keyCount; i++) {
-      try {
-        keys[i] = (AesGcmKey) keyManager.newKey(formats[i]);
-      } catch (Exception e) {
-        throw new Exception(e.toString()
-            + "\nFailed for formats[" + i + "]: " + formats[i].toString());
-      }
-    }
-
-    // Check export and import of keys.
-    int count = 0;
-    for (AesGcmKey key : keys) {
-      try {
-        byte[] json = keyManager.keyToJson(key.toByteString());
-        AesGcmKey keyFromJson = (AesGcmKey) keyManager.jsonToKey(json);
-        assertEquals(key.toString(), keyFromJson.toString());
-      } catch (Exception e) {
-        throw new Exception(e.toString() + "\nFailed for key: " + key.toString());
-      }
-      count++;
-    }
-    assertEquals(keyCount, count);
-
-    // Check export and import of key formats.
-    count = 0;
-    for (ByteString format : formats) {
-      try {
-        byte[] json = keyManager.keyFormatToJson(format);
-        AesGcmKeyFormat formatFromJson = (AesGcmKeyFormat) keyManager.jsonToKeyFormat(json);
-        assertEquals(AesGcmKeyFormat.parseFrom(format).toString(), formatFromJson.toString());
-        count++;
-      } catch (Exception e) {
-        throw new Exception(e.toString() + "\nFailed for format: " + format.toString());
-      }
-    }
-    assertEquals(keyCount, count);
-  }
-
-  @Test
-  @SuppressWarnings("unused")  // Unused key/format/json-variables are not set unless test fails.
-  public void testJsonExportAndImportErrors() throws Exception {
-    AesGcmKeyManager keyManager = new AesGcmKeyManager();
-
-    try {
-      byte[] json = "some bad JSON key".getBytes(Util.UTF_8);
-      AesGcmKey key = (AesGcmKey) keyManager.jsonToKey(json);
-      fail("Corrupted JSON, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "text must begin");
-    }
-
-    try {
-      byte[] json = "a bad JSON keyformat".getBytes(Util.UTF_8);
-      AesGcmKeyFormat format = (AesGcmKeyFormat) keyManager.jsonToKeyFormat(json);
-      fail("Corrupted JSON, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "text must begin");
-    }
-
-    try {  // An incomplete JSON key.
-      byte[] json = "{\"version\": 0}".getBytes(Util.UTF_8);
-      AesGcmKey key = (AesGcmKey) keyManager.jsonToKey(json);
-      fail("Incomplet JSON key, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "Invalid key");
-    }
-
-    try {  // An incomplete JSON key format.
-      byte[] json = "{}".getBytes(Util.UTF_8);
-      AesGcmKeyFormat format = (AesGcmKeyFormat) keyManager.jsonToKeyFormat(json);
-      fail("Incomplete JSON key format, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "Invalid key format");
-    }
-
-    try {  // Extra name in JSON key.
-      byte[] json = ("{\"version\": 0, "
-          + "\"keyValue\": \"some key bytes\", \"extraName\": 42}").getBytes(Util.UTF_8);
-      AesGcmKey key = (AesGcmKey) keyManager.jsonToKey(json);
-      fail("Invalid JSON key, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "Invalid key");
-    }
-
-    try {  // Extra name JSON key format.
-      byte[] json = ("{\"keySize\": 16, \"extraName\": 42}").getBytes(Util.UTF_8);
-      AesGcmKeyFormat format = (AesGcmKeyFormat) keyManager.jsonToKeyFormat(json);
-      fail("Invalid JSON key format, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "JSONException");
-      assertExceptionContains(e, "Invalid key format");
-    }
-
-    try {  // An incomplete AesGcmKey.
-      AesGcmKey key = AesGcmKey.newBuilder().setVersion(42).build();
-      byte[] json = keyManager.keyToJson(key.toByteString());
-      fail("Incomplete AesGcmKey, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-    }
-
-    try {  // An incomplete AesGcmKeyFormat.
-      AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().build();
-      byte[] json = keyManager.keyFormatToJson(format.toByteString());
-      fail("Incomplete AesGcmKeyFormat, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-    }
-
-    try {  // Wrong serialized key proto.
-      KeyData key = KeyData.newBuilder()
-          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
-      byte[] json = keyManager.keyToJson(key.toByteString());
-      fail("Wrong key proto, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-    }
-
-    try {  // Wrong serialized key format proto.
-      KeyData format = KeyData.newBuilder()
-          .setTypeUrl("some URL").setValue(ByteString.copyFromUtf8("some value")).build();
-      byte[] json = keyManager.keyFormatToJson(format.toByteString());
-      fail("Wrong key format proto, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-    }
   }
 }

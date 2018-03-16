@@ -254,7 +254,8 @@ public class ChaCha20Poly1305Test {
   @Test
   public void testWycheproofVectors() throws Exception {
     JSONObject json =
-        WycheproofTestUtil.readJson("testdata/wycheproof/chacha20_poly1305_test.json");
+        WycheproofTestUtil.readJson(
+            "testdata/wycheproof/chacha20_poly1305_test.json");
     int errors = 0;
     JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {

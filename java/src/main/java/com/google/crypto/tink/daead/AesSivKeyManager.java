@@ -18,12 +18,10 @@ package com.google.crypto.tink.daead;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.AesSiv;
-import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
@@ -32,8 +30,6 @@ import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * This key manager generates new {@code AesSivKey} keys and produces new instances of {@code
@@ -124,101 +120,6 @@ class AesSivKeyManager implements KeyManager<DeterministicAead> {
   @Override
   public int getVersion() {
     return VERSION;
-  }
-
-  /**
-   * @param jsonKey JSON formatted {@code AesSivKey}-proto
-   * @return {@code AesSivKey}-proto
-   */
-  @Override
-  public MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException {
-    try {
-      JSONObject json = new JSONObject(new String(jsonKey, Util.UTF_8));
-      validateKey(json);
-      byte[] keyValue = Base64.decode(json.getString("keyValue"));
-      return AesSivKey.newBuilder()
-          .setVersion(json.getInt("version"))
-          .setKeyValue(ByteString.copyFrom(keyValue))
-          .build();
-    } catch (JSONException e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  /**
-   * @param jsonKeyFormat JSON formatted {@code AesSivKeyFromat}-proto
-   * @return {@code AesSivKeyFormat}-proto
-   */
-  @Override
-  public MessageLite jsonToKeyFormat(final byte[] jsonKeyFormat) throws GeneralSecurityException {
-    try {
-      JSONObject json = new JSONObject(new String(jsonKeyFormat, Util.UTF_8));
-      validateKeyFormat(json);
-      return AesSivKeyFormat.newBuilder()
-          .setKeySize(json.getInt("keySize"))
-          .build();
-    } catch (JSONException e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  /**
-   * Returns a JSON-formatted serialization of the given {@code serializedKey},
-   * which must be a {@code AesSivKey}-proto.
-   * @throws GeneralSecurityException if the key in {@code serializedKey} is not supported
-   */
-  @Override
-  public byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException {
-    AesSivKey key;
-    try {
-      key = AesSivKey.parseFrom(serializedKey);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized AesSivKey proto", e);
-    }
-    validate(key);
-    try {
-      return new JSONObject()
-          .put("version", key.getVersion())
-          .put("keyValue", Base64.encode(key.getKeyValue().toByteArray()))
-          .toString(4).getBytes(Util.UTF_8);
-    } catch (JSONException e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  /**
-   * Returns a JSON-formatted serialization of the given {@code serializedKeyFormat}
-   * which must be a {@code AesSivKeyFormat}-proto.
-   * @throws GeneralSecurityException if the format in {@code serializedKeyFromat} is not supported
-   */
-  @Override
-  public byte[] keyFormatToJson(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    AesSivKeyFormat format;
-    try {
-      format = AesSivKeyFormat.parseFrom(serializedKeyFormat);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized AesSivKeyFormat proto", e);
-    }
-    validate(format);
-    try {
-      return new JSONObject()
-          .put("keySize", format.getKeySize())
-          .toString(4).getBytes(Util.UTF_8);
-    } catch (JSONException e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  private void validateKey(JSONObject json) throws JSONException {
-    if (json.length() != 2 || !json.has("version") || !json.has("keyValue")) {
-      throw new JSONException("Invalid key.");
-    }
-  }
-
-  private void validateKeyFormat(JSONObject json) throws JSONException {
-    if (json.length() != 1 || !json.has("keySize")) {
-      throw new JSONException("Invalid key format.");
-    }
   }
 
   private void validate(AesSivKey key) throws GeneralSecurityException {

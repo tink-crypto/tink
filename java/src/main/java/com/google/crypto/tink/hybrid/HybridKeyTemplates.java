@@ -85,7 +85,6 @@ public final class HybridKeyTemplates {
         .setTypeUrl(EciesAeadHkdfPrivateKeyManager.TYPE_URL)
         .setOutputPrefixType(OutputPrefixType.TINK)
         .setValue(format.toByteString())
-        .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
 

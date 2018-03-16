@@ -18,21 +18,16 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
-import com.google.crypto.tink.Util;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
-import com.google.crypto.tink.proto.AesEaxParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.subtle.AesEaxJce;
-import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * This key manager generates new {@code AesEaxKey} keys and produces new instances of {@code
@@ -126,120 +121,6 @@ class AesEaxKeyManager implements KeyManager<Aead> {
     return VERSION;
   }
 
-  /**
-   * @param jsonKey JSON formatted {@code AesEaxKey}-proto
-   * @return {@code AesEaxKey}-proto
-   */
-  @Override
-  public MessageLite jsonToKey(final byte[] jsonKey) throws GeneralSecurityException {
-    try {
-      JSONObject json = new JSONObject(new String(jsonKey, Util.UTF_8));
-      validateKey(json);
-      byte[] keyValue = Base64.decode(json.getString("keyValue"));
-      return AesEaxKey.newBuilder()
-          .setVersion(json.getInt("version"))
-          .setParams(paramsFromJson(json.getJSONObject("params")))
-          .setKeyValue(ByteString.copyFrom(keyValue))
-          .build();
-    } catch (JSONException e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  /**
-   * @param jsonKeyFormat JSON formatted {@code AesEaxKeyFromat}-proto
-   * @return {@code AesEaxKeyFormat}-proto
-   */
-  @Override
-  public MessageLite jsonToKeyFormat(final byte[] jsonKeyFormat) throws GeneralSecurityException {
-    try {
-      JSONObject json = new JSONObject(new String(jsonKeyFormat, Util.UTF_8));
-      validateKeyFormat(json);
-      return AesEaxKeyFormat.newBuilder()
-          .setParams(paramsFromJson(json.getJSONObject("params")))
-          .setKeySize(json.getInt("keySize"))
-          .build();
-    } catch (JSONException e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  /**
-   * Returns a JSON-formatted serialization of the given {@code serializedKey},
-   * which must be a {@code AesEaxKey}-proto.
-   * @throws GeneralSecurityException if the key in {@code serializedKey} is not supported
-   */
-  @Override
-  public byte[] keyToJson(ByteString serializedKey) throws GeneralSecurityException {
-    AesEaxKey key;
-    try {
-      key = AesEaxKey.parseFrom(serializedKey);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized AesEaxKey proto", e);
-    }
-    validate(key);
-    try {
-      return new JSONObject()
-          .put("version", key.getVersion())
-          .put("params", toJson(key.getParams()))
-          .put("keyValue", Base64.encode(key.getKeyValue().toByteArray()))
-          .toString(4).getBytes(Util.UTF_8);
-    } catch (JSONException e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  /**
-   * Returns a JSON-formatted serialization of the given {@code serializedKeyFormat}
-   * which must be a {@code AesEaxKeyFormat}-proto.
-   * @throws GeneralSecurityException if the format in {@code serializedKeyFromat} is not supported
-   */
-  @Override
-  public byte[] keyFormatToJson(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    AesEaxKeyFormat format;
-    try {
-      format = AesEaxKeyFormat.parseFrom(serializedKeyFormat);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized AesEaxKeyFormat proto", e);
-    }
-    validate(format);
-    try {
-      return new JSONObject()
-          .put("params", toJson(format.getParams()))
-          .put("keySize", format.getKeySize())
-          .toString(4).getBytes(Util.UTF_8);
-    } catch (JSONException e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  private JSONObject toJson(AesEaxParams params) throws JSONException {
-    return new JSONObject()
-        .put("ivSize", params.getIvSize());
-  }
-
-  private AesEaxParams paramsFromJson(JSONObject json)
-      throws JSONException, GeneralSecurityException {
-    if (json.length() != 1 || !json.has("ivSize")) {
-      throw new JSONException("Invalid params.");
-    }
-    return AesEaxParams.newBuilder()
-        .setIvSize(json.getInt("ivSize"))
-        .build();
-  }
-
-  private void validateKey(JSONObject json) throws JSONException {
-    if (json.length() != 3 || !json.has("version") || !json.has("params")
-        || !json.has("keyValue")) {
-      throw new JSONException("Invalid key.");
-    }
-  }
-
-  private void validateKeyFormat(JSONObject json) throws JSONException {
-    if (json.length() != 2 || !json.has("params") || !json.has("keySize")) {
-      throw new JSONException("Invalid key format.");
-    }
-  }
 
   private void validate(AesEaxKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);

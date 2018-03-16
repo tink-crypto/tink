@@ -457,7 +457,8 @@ public class EllipticCurvesTest {
 
   @Test
   public void testComputeSharedSecretWithWycheproofTestVectors() throws Exception {
-    JSONObject json = WycheproofTestUtil.readJson("testdata/wycheproof/ecdh_test.json");
+    JSONObject json =
+        WycheproofTestUtil.readJson("testdata/wycheproof/ecdh_test.json");
     int errors = 0;
     JSONArray testGroups = json.getJSONArray("testGroups");
     for (int i = 0; i < testGroups.length(); i++) {
