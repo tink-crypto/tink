@@ -1,0 +1,3636 @@
+{
+  "algorithm" : "ECDSA",
+  "generatorVersion" : "0.4",
+  "numberOfTests" : 326,
+  "notes" : {
+    "BER" : "This is a signature with correct values for (r, s) but using some alternative BER encoding instead of DER encoding. Implementations should not accept such signatures to limit signature malleability.",
+    "EdgeCase" : "Edge case values such as r=1 and s=0 can lead to forgeries if the ECDSA implementation does not check boundaries and computes s^(-1)==0.",
+    "GroupIsomorphism" : "Some EC groups have isomorphic groups that allow an efficient implementation. This is a test vector that contains values that are edge cases on such an isomorphic group.",
+    "MissingZero" : "Some implementations of ECDSA and DSA incorrectly encode r and s by not including leading zeros in the ASN encoding of integers when necessary. Hence, some implementations (e.g. jdk) allow signatures with incorrect ASN encodings assuming that the signature is otherwise valid.",
+    "PointDuplication" : "Some implementations of ECDSA do not handle duplication and points at infinity correctly. This is a test vector that has been specially crafted to check for such an omission."
+  },
+  "header" : [],
+  "testGroups" : [
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004572eab7376d052dfc40923db25342ea9cbfce4b8581e104a4c8f37c94a700ec5dc05a481b2b695320c6f1ad2dd8628633cdb75a91245c265",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABFcuq3N20FLfxAkj2yU0LqnL/OS4\nWB4QSkyPN8lKcA7F3AWkgbK2lTIMbxrS3YYoYzzbdakSRcJl\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "572eab7376d052dfc40923db25342ea9cbfce4b8581e104a4c8f37c9",
+        "wy" : "4a700ec5dc05a481b2b695320c6f1ad2dd8628633cdb75a91245c265"
+      },
+      "tests" : [
+        {
+          "tcId" : 1,
+          "comment" : "signature malleability",
+          "msg" : "313233343030",
+          "sig" : "303d021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021c139c78243a6e36e124d5f5e14b4cb8754abdf20ff1a501d5666a428f",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 2,
+          "comment" : "random signature",
+          "msg" : "313233343030",
+          "sig" : "303d021d00d4ee58357e6fc6288bbeda0858f6ee1d0ce1590e263f0e419c46208b021c30cb8303ba3bb01cf07f5bd3fd9bebc9edbf06606b7a715790cea0f8",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 3,
+          "comment" : "random signature",
+          "msg" : "313233343030",
+          "sig" : "303c021c60ac28620ff7aebeafdecad41bf33f30dbb1cd75090b7899ec72dafa021c7e7aa45fdd0b023a3760046ca34f0e602b0f025e0bab6d1a6a474b4f",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 4,
+          "comment" : "random signature",
+          "msg" : "313233343030",
+          "sig" : "303d021c3882068e4c2a00a0d5e6ecc2d5c8361f967eb941b620ecf41150ce7a021d00b57dd94442067388935684cf9ee7825ed505b767708bb36ef0fdf0c0",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 5,
+          "comment" : "random signature",
+          "msg" : "313233343030",
+          "sig" : "303c021c6ef36b8ef54e0153365902acdeaf4af78f2525743d8d941b700ac5de021c7127f4d83f4be641c7e929641a1c5e1bc79cde1ab857e91b2120e6cc",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 6,
+          "comment" : "random signature",
+          "msg" : "313233343030",
+          "sig" : "303d021d00be025ae1a255b8febaa0e45da32e2589d6e390c31c192443d0ad0f04021c47701271f1d8f3338ef40f565d6f44c4100a02061f1b2574b9fed264",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 7,
+          "comment" : "Legacy:ASN encoding of r misses leading 0",
+          "msg" : "313233343030",
+          "sig" : "303d021ccb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "acceptable",
+          "flags" : [
+            "MissingZero"
+          ]
+        },
+        {
+          "tcId" : 8,
+          "comment" : "Legacy:ASN encoding of s misses leading 0",
+          "msg" : "313233343030",
+          "sig" : "303d021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021cc424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "acceptable",
+          "flags" : [
+            "MissingZero"
+          ]
+        },
+        {
+          "tcId" : 9,
+          "comment" : "valid",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 10,
+          "comment" : "long form encoding of length",
+          "msg" : "313233343030",
+          "sig" : "30813e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 11,
+          "comment" : "long form encoding of length",
+          "msg" : "313233343030",
+          "sig" : "303f02811d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 12,
+          "comment" : "long form encoding of length",
+          "msg" : "313233343030",
+          "sig" : "303f021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d302811d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 13,
+          "comment" : "length contains leading 0",
+          "msg" : "313233343030",
+          "sig" : "3082003e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 14,
+          "comment" : "length contains leading 0",
+          "msg" : "313233343030",
+          "sig" : "30400282001d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 15,
+          "comment" : "length contains leading 0",
+          "msg" : "313233343030",
+          "sig" : "3040021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30282001d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 16,
+          "comment" : "wrong length",
+          "msg" : "313233343030",
+          "sig" : "303f021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 17,
+          "comment" : "wrong length",
+          "msg" : "313233343030",
+          "sig" : "303d021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 18,
+          "comment" : "wrong length",
+          "msg" : "313233343030",
+          "sig" : "303e021e00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 19,
+          "comment" : "wrong length",
+          "msg" : "313233343030",
+          "sig" : "303e021c00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 20,
+          "comment" : "wrong length",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021e00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 21,
+          "comment" : "wrong length",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021c00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 22,
+          "comment" : "uint32 overflow in length",
+          "msg" : "313233343030",
+          "sig" : "3085010000003e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 23,
+          "comment" : "uint32 overflow in length",
+          "msg" : "313233343030",
+          "sig" : "30430285010000001d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 24,
+          "comment" : "uint32 overflow in length",
+          "msg" : "313233343030",
+          "sig" : "3043021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30285010000001d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 25,
+          "comment" : "uint64 overflow in length",
+          "msg" : "313233343030",
+          "sig" : "308901000000000000003e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 26,
+          "comment" : "uint64 overflow in length",
+          "msg" : "313233343030",
+          "sig" : "3047028901000000000000001d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 27,
+          "comment" : "uint64 overflow in length",
+          "msg" : "313233343030",
+          "sig" : "3047021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3028901000000000000001d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 28,
+          "comment" : "length = 2**31 - 1",
+          "msg" : "313233343030",
+          "sig" : "30847fffffff021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 29,
+          "comment" : "length = 2**31 - 1",
+          "msg" : "313233343030",
+          "sig" : "304202847fffffff00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 30,
+          "comment" : "length = 2**31 - 1",
+          "msg" : "313233343030",
+          "sig" : "3042021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d302847fffffff00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 31,
+          "comment" : "length = 2**32 - 1",
+          "msg" : "313233343030",
+          "sig" : "3084ffffffff021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 32,
+          "comment" : "length = 2**32 - 1",
+          "msg" : "313233343030",
+          "sig" : "30420284ffffffff00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 33,
+          "comment" : "length = 2**32 - 1",
+          "msg" : "313233343030",
+          "sig" : "3042021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30284ffffffff00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 34,
+          "comment" : "length = 2**40 - 1",
+          "msg" : "313233343030",
+          "sig" : "3085ffffffffff021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 35,
+          "comment" : "length = 2**40 - 1",
+          "msg" : "313233343030",
+          "sig" : "30430285ffffffffff00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 36,
+          "comment" : "length = 2**40 - 1",
+          "msg" : "313233343030",
+          "sig" : "3043021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30285ffffffffff00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 37,
+          "comment" : "length = 2**64 - 1",
+          "msg" : "313233343030",
+          "sig" : "3088ffffffffffffffff021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 38,
+          "comment" : "length = 2**64 - 1",
+          "msg" : "313233343030",
+          "sig" : "30460288ffffffffffffffff00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 39,
+          "comment" : "length = 2**64 - 1",
+          "msg" : "313233343030",
+          "sig" : "3046021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30288ffffffffffffffff00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 40,
+          "comment" : "incorrect length",
+          "msg" : "313233343030",
+          "sig" : "30ff021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 41,
+          "comment" : "incorrect length",
+          "msg" : "313233343030",
+          "sig" : "303e02ff00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 42,
+          "comment" : "incorrect length",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d302ff00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 43,
+          "comment" : "indefinite length without termination",
+          "msg" : "313233343030",
+          "sig" : "3080021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 44,
+          "comment" : "indefinite length without termination",
+          "msg" : "313233343030",
+          "sig" : "303e028000cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 45,
+          "comment" : "indefinite length without termination",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3028000c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 46,
+          "comment" : "removing sequence",
+          "msg" : "313233343030",
+          "sig" : "",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 47,
+          "comment" : "appending 0's to sequence",
+          "msg" : "313233343030",
+          "sig" : "3040021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 48,
+          "comment" : "prepending 0's to sequence",
+          "msg" : "313233343030",
+          "sig" : "30400000021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 49,
+          "comment" : "appending unused 0's",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 50,
+          "comment" : "appending unused 0's",
+          "msg" : "313233343030",
+          "sig" : "3040021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30000021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 51,
+          "comment" : "appending null value",
+          "msg" : "313233343030",
+          "sig" : "3040021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100500",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 52,
+          "comment" : "appending null value",
+          "msg" : "313233343030",
+          "sig" : "3040021f00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30500021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 53,
+          "comment" : "appending null value",
+          "msg" : "313233343030",
+          "sig" : "3040021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021f00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100500",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 54,
+          "comment" : "including garbage",
+          "msg" : "313233343030",
+          "sig" : "3043498177303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 55,
+          "comment" : "including garbage",
+          "msg" : "313233343030",
+          "sig" : "30422500303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 56,
+          "comment" : "including garbage",
+          "msg" : "313233343030",
+          "sig" : "3040303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100004deadbeef",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 57,
+          "comment" : "including garbage",
+          "msg" : "313233343030",
+          "sig" : "30432222498177021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 58,
+          "comment" : "including garbage",
+          "msg" : "313233343030",
+          "sig" : "304222212500021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 59,
+          "comment" : "including garbage",
+          "msg" : "313233343030",
+          "sig" : "3046221f021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30004deadbeef021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 60,
+          "comment" : "including garbage",
+          "msg" : "313233343030",
+          "sig" : "3043021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d32222498177021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 61,
+          "comment" : "including garbage",
+          "msg" : "313233343030",
+          "sig" : "3042021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d322212500021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 62,
+          "comment" : "including garbage",
+          "msg" : "313233343030",
+          "sig" : "3046021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3221f021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100004deadbeef",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 63,
+          "comment" : "including undefined tags",
+          "msg" : "313233343030",
+          "sig" : "3046aa00bb00cd00303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 64,
+          "comment" : "including undefined tags",
+          "msg" : "313233343030",
+          "sig" : "3044aa02aabb303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 65,
+          "comment" : "including undefined tags",
+          "msg" : "313233343030",
+          "sig" : "30462225aa00bb00cd00021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 66,
+          "comment" : "including undefined tags",
+          "msg" : "313233343030",
+          "sig" : "30442223aa02aabb021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 67,
+          "comment" : "including undefined tags",
+          "msg" : "313233343030",
+          "sig" : "3046021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d32225aa00bb00cd00021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 68,
+          "comment" : "including undefined tags",
+          "msg" : "313233343030",
+          "sig" : "3044021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d32223aa02aabb021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 69,
+          "comment" : "using composition with indefinite length",
+          "msg" : "313233343030",
+          "sig" : "3080303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 70,
+          "comment" : "using composition with indefinite length",
+          "msg" : "313233343030",
+          "sig" : "30422280021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30000021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 71,
+          "comment" : "using composition with indefinite length",
+          "msg" : "313233343030",
+          "sig" : "3042021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d32280021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 72,
+          "comment" : "using composition with wrong tag",
+          "msg" : "313233343030",
+          "sig" : "3080313e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 73,
+          "comment" : "using composition with wrong tag",
+          "msg" : "313233343030",
+          "sig" : "30422280031d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30000021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 74,
+          "comment" : "using composition with wrong tag",
+          "msg" : "313233343030",
+          "sig" : "3042021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d32280031d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 75,
+          "comment" : "Replacing sequence with NULL",
+          "msg" : "313233343030",
+          "sig" : "0500",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 76,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "2e3e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 77,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "2f3e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 78,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "313e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 79,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "323e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 80,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "ff3e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 81,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "303e001d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 82,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "303e011d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 83,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "303e031d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 84,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "303e041d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 85,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "303eff1d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 86,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3001d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 87,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3011d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 88,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3031d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 89,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3041d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 90,
+          "comment" : "changing tag value",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3ff1d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 91,
+          "comment" : "dropping value of sequence",
+          "msg" : "313233343030",
+          "sig" : "3000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 92,
+          "comment" : "using composition",
+          "msg" : "313233343030",
+          "sig" : "3042300102303d1d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 93,
+          "comment" : "using composition",
+          "msg" : "313233343030",
+          "sig" : "30422221020100021ccb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 94,
+          "comment" : "using composition",
+          "msg" : "313233343030",
+          "sig" : "3042021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d32221020100021cc424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 95,
+          "comment" : "truncate sequence",
+          "msg" : "313233343030",
+          "sig" : "303d021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 96,
+          "comment" : "truncate sequence",
+          "msg" : "313233343030",
+          "sig" : "303d1d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 97,
+          "comment" : "indefinite length",
+          "msg" : "313233343030",
+          "sig" : "3080021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 98,
+          "comment" : "indefinite length with truncated delimiter",
+          "msg" : "313233343030",
+          "sig" : "3080021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d511000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 99,
+          "comment" : "indefinite length with additional element",
+          "msg" : "313233343030",
+          "sig" : "3080021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d511005000000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 100,
+          "comment" : "indefinite length with truncated element",
+          "msg" : "313233343030",
+          "sig" : "3080021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110060811220000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 101,
+          "comment" : "indefinite length with garbage",
+          "msg" : "313233343030",
+          "sig" : "3080021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100000fe02beef",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 102,
+          "comment" : "indefinite length with nonempty EOC",
+          "msg" : "313233343030",
+          "sig" : "3080021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100002beef",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 103,
+          "comment" : "prepend empty sequence",
+          "msg" : "313233343030",
+          "sig" : "30403000021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 104,
+          "comment" : "append empty sequence",
+          "msg" : "313233343030",
+          "sig" : "3040021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51103000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 105,
+          "comment" : "sequence of sequence",
+          "msg" : "313233343030",
+          "sig" : "3040303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 106,
+          "comment" : "truncated sequence",
+          "msg" : "313233343030",
+          "sig" : "301f021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 107,
+          "comment" : "repeat element in sequence",
+          "msg" : "313233343030",
+          "sig" : "305d021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 108,
+          "comment" : "removing integer",
+          "msg" : "313233343030",
+          "sig" : "301f021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 109,
+          "comment" : "appending 0's to integer",
+          "msg" : "313233343030",
+          "sig" : "3040021f00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30000021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 110,
+          "comment" : "appending 0's to integer",
+          "msg" : "313233343030",
+          "sig" : "3040021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021f00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51100000",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 111,
+          "comment" : "prepending 0's to integer",
+          "msg" : "313233343030",
+          "sig" : "3040021f000000cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 112,
+          "comment" : "prepending 0's to integer",
+          "msg" : "313233343030",
+          "sig" : "3040021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021f000000c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 113,
+          "comment" : "Replacing integer with NULL",
+          "msg" : "313233343030",
+          "sig" : "30210500021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 114,
+          "comment" : "Replacing integer with NULL",
+          "msg" : "313233343030",
+          "sig" : "3021021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30500",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 115,
+          "comment" : "dropping value of integer",
+          "msg" : "313233343030",
+          "sig" : "30210200021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 116,
+          "comment" : "dropping value of integer",
+          "msg" : "313233343030",
+          "sig" : "3021021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d30200",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 117,
+          "comment" : "modify first byte of integer",
+          "msg" : "313233343030",
+          "sig" : "303e021d02cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 118,
+          "comment" : "modify first byte of integer",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d02c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 119,
+          "comment" : "modify last byte of integer",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af263146004896153021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 120,
+          "comment" : "modify last byte of integer",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5190",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 121,
+          "comment" : "truncate integer",
+          "msg" : "313233343030",
+          "sig" : "303d021c00cb68ac9765c7641785df237e9951e1429581879af2631460048961021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 122,
+          "comment" : "truncate integer",
+          "msg" : "313233343030",
+          "sig" : "303d021ccb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 123,
+          "comment" : "truncate integer",
+          "msg" : "313233343030",
+          "sig" : "303d021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021c00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d51",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 124,
+          "comment" : "truncate integer",
+          "msg" : "313233343030",
+          "sig" : "303d021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021cc424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 125,
+          "comment" : "leading ff in integer",
+          "msg" : "313233343030",
+          "sig" : "303f021eff00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 126,
+          "comment" : "leading ff in integer",
+          "msg" : "313233343030",
+          "sig" : "303f021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021eff00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 127,
+          "comment" : "infinity",
+          "msg" : "313233343030",
+          "sig" : "3022090180021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 128,
+          "comment" : "infinity",
+          "msg" : "313233343030",
+          "sig" : "3022021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3090180",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 129,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303e021d01a329e1418c0aca9daff753a40f22dcdb669843e66041d103aa30f572021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 130,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303d021cf3a777ed3f83fd915bc6f3592380e5a9c46acb4f848457bc5ee1ce34021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 131,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303e021dff349753689a389be87a20dc8166ae1ebd6a7e78650d9ceb9ffb769e2d021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 132,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303d021c0c588812c07c026ea4390ca6dc7f1a563b9534b07b7ba843a11e31cc021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 133,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303e021dfe5cd61ebe73f535625008ac5bf0dd23249967bc199fbe2efc55cf0a8e021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 134,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303e021d01cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 135,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303d021c349753689a389be87a20dc8166ae1ebd6a7e78650d9ceb9ffb769e2d021d00c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 136,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d019be5f1301218962b2f5a6a69a0553ebc576f8686ea187771e4e4e4af",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 137,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303d021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021cec6387dbc591c91edb2a0a1eb4b3478ab5420df00e5afe2a9995bd71",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 138,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021dff3bdb437a142ad05afabdc5bbd57bbcdc79a735c483c64531c0c2aef0",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 139,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021dfe641a0ecfede769d4d0a595965faac143a890797915e7888e1b1b1b51",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 140,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303e021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021d01c424bc85ebd52fa505423a442a8443238658ca3b7c39bace3f3d5110",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 141,
+          "comment" : "Modified r or s, e.g. by adding or subtracting the order of the group",
+          "msg" : "313233343030",
+          "sig" : "303d021d00cb68ac9765c7641785df237e9951e1429581879af2631460048961d3021c3bdb437a142ad05afabdc5bbd57bbcdc79a735c483c64531c0c2aef0",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 142,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3006020100020100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 143,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3006020100020101",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 144,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30060201000201ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 145,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022020100021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 146,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022020100021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 147,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022020100021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 148,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022020100021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 149,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022020100021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 150,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3008020100090380fe01",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 151,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3006020101020100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 152,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3006020101020101",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 153,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30060201010201ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 154,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022020101021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 155,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022020101021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 156,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022020101021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 157,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022020101021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 158,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022020101021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 159,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3008020101090380fe01",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 160,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30060201ff020100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 161,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30060201ff020101",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 162,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30060201ff0201ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 163,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30220201ff021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 164,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30220201ff021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 165,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30220201ff021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 166,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30220201ff021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 167,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30220201ff021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 168,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "30080201ff090380fe01",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 169,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f020100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 170,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f020101",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 171,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f0201ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 172,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 173,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 174,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 175,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 176,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 177,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3024021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f090380fe01",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 178,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e020100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 179,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e020101",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 180,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e0201ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 181,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 182,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 183,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 184,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 185,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 186,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3024021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e090380fe01",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 187,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0020100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 188,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0020101",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 189,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a00201ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 190,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 191,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 192,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 193,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 194,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 195,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3024021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0090380fe01",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 196,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff020100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 197,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff020101",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 198,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff0201ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 199,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 200,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 201,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 202,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 203,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 204,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3024021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff090380fe01",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 205,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100020100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 206,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100020101",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 207,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c1000201ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 208,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939f",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 209,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 210,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 211,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0ff",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 212,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 213,
+          "comment" : "Signature with special case values for r and s",
+          "msg" : "313233343030",
+          "sig" : "3024021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c100090380fe01",
+          "result" : "invalid",
+          "flags" : [
+            "EdgeCase"
+          ]
+        },
+        {
+          "tcId" : 214,
+          "comment" : "Edge case for Shamir multiplication",
+          "msg" : "3935333838",
+          "sig" : "303d021c0e7ecab2276f035c0dc70520ebd5ae3cb7b7a8f21fa5687eee92c462021d0085a85332f8c899b53d43091b02e6956b391817e175a8b1f40dca7e00",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004a0ef7db1bee0aedb5a5634f4f3b1b88d97d2a07f806a718efe19014daee1043f9e929c32d74ab0e4eeba2623f17ba281b6be87745b59f60e",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABKDvfbG+4K7bWlY09POxuI2X0qB/\ngGpxjv4ZAU2u4QQ/npKcMtdKsOTuuiYj8Xuigba+h3RbWfYO\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0a0ef7db1bee0aedb5a5634f4f3b1b88d97d2a07f806a718efe19014d",
+        "wy" : "0aee1043f9e929c32d74ab0e4eeba2623f17ba281b6be87745b59f60e"
+      },
+      "tests" : [
+        {
+          "tcId" : 215,
+          "comment" : "k*G has a large x-coordinate",
+          "msg" : "313233343030",
+          "sig" : "3030020f00dbeedf884b0c29fbcd51d9212d5f021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939c",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 216,
+          "comment" : "r too large",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d1d787b09f075797da89f57ec8c0fe021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939c",
+          "result" : "invalid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00043adda407bad7f593e83d7d484fd14c23dda17f8d460c222aa7257577cd62443b2b770291f65904dacf75ff975f1a667187e0e4f50c14889c",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABDrdpAe61/WT6D19SE/RTCPdoX+N\nRgwiKqcldXfNYkQ7K3cCkfZZBNrPdf+XXxpmcYfg5PUMFIic\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "3adda407bad7f593e83d7d484fd14c23dda17f8d460c222aa7257577",
+        "wy" : "0cd62443b2b770291f65904dacf75ff975f1a667187e0e4f50c14889c"
+      },
+      "tests" : [
+        {
+          "tcId" : 217,
+          "comment" : "r,s are large",
+          "msg" : "313233343030",
+          "sig" : "303e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939e021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7939d",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a000424587ce1dbff281dcab1794519806281ad4e0997492510677fb651069296996e83b808676cbf6f28c92b84303314b63a0308134f222d0ec2",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABCRYfOHb/ygdyrF5RRmAYoGtTgmX\nSSUQZ3+2UQaSlplug7gIZ2y/byjJK4QwMxS2OgMIE08iLQ7C\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "24587ce1dbff281dcab1794519806281ad4e0997492510677fb65106",
+        "wy" : "09296996e83b808676cbf6f28c92b84303314b63a0308134f222d0ec2"
+      },
+      "tests" : [
+        {
+          "tcId" : 218,
+          "comment" : "r and s^-1 have a large Hamming weight",
+          "msg" : "313233343030",
+          "sig" : "303c021c7fffffffffffffffffffffffffffffffffffffffffffffffffffffff021c63f0e34258bb9061547906d0c3827c504422c139e6d6e1078b37aa44",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004c45c51d5a9b213e41ca6f15cb8aa1bc0b8b73d3a8a23a14f5a3da4dfbc78cc6176d3b831e68800671768043c11bf63a695918df6ec87378a",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABMRcUdWpshPkHKbxXLiqG8C4tz06\niiOhT1o9pN+8eMxhdtO4MeaIAGcXaAQ8Eb9jppWRjfbshzeK\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0c45c51d5a9b213e41ca6f15cb8aa1bc0b8b73d3a8a23a14f5a3da4df",
+        "wy" : "0bc78cc6176d3b831e68800671768043c11bf63a695918df6ec87378a"
+      },
+      "tests" : [
+        {
+          "tcId" : 219,
+          "comment" : "r and s^-1 have a large Hamming weight",
+          "msg" : "313233343030",
+          "sig" : "303c021c7fffffffffffffffffffffffffffffffffffffffffffffffffffffff021c6eb1fbfa8df87d4fa10c833f7dd1bbe7ef0144ff71537975378f91ec",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a000436a5344da08a421edc6c3beb7de97a7559fc101c1489ff2b5036d8f6207bf4666e4df606bd0d9823a52b58ddfdfc1da70513c5f9990f8085",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABDalNE2gikIe3Gw7633penVZ/BAc\nFIn/K1A22PYge/Rmbk32Br0NmCOlK1jd/fwdpwUTxfmZD4CF\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "36a5344da08a421edc6c3beb7de97a7559fc101c1489ff2b5036d8f6",
+        "wy" : "207bf4666e4df606bd0d9823a52b58ddfdfc1da70513c5f9990f8085"
+      },
+      "tests" : [
+        {
+          "tcId" : 220,
+          "comment" : "small r and s",
+          "msg" : "313233343030",
+          "sig" : "3006020101020101",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00044095c095a9648951da352b837f368e0be67d79fd57eadfffeddfb455ccdcfabea19e96d4d20e42b8ae23c2519426018e25a64dea85d8a68b",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABECVwJWpZIlR2jUrg382jgvmfXn9\nV+rf/+3ftFXM3Pq+oZ6W1NIOQriuI8JRlCYBjiWmTeqF2KaL\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "4095c095a9648951da352b837f368e0be67d79fd57eadfffeddfb455",
+        "wy" : "0ccdcfabea19e96d4d20e42b8ae23c2519426018e25a64dea85d8a68b"
+      },
+      "tests" : [
+        {
+          "tcId" : 221,
+          "comment" : "small r and s",
+          "msg" : "313233343030",
+          "sig" : "3006020101020102",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004cc352ac48aacb6495ec3831b21ccd4d3197136292bf6f20f2280256664321991e67f7dbc22602ecbdb3122edce5ff85d923143cecc0d4f6d",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABMw1KsSKrLZJXsODGyHM1NMZcTYp\nK/byDyKAJWZkMhmR5n99vCJgLsvbMSLtzl/4XZIxQ87MDU9t\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0cc352ac48aacb6495ec3831b21ccd4d3197136292bf6f20f22802566",
+        "wy" : "64321991e67f7dbc22602ecbdb3122edce5ff85d923143cecc0d4f6d"
+      },
+      "tests" : [
+        {
+          "tcId" : 222,
+          "comment" : "small r and s",
+          "msg" : "313233343030",
+          "sig" : "3006020101020103",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 223,
+          "comment" : "r is larger than n",
+          "msg" : "313233343030",
+          "sig" : "3022021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a0020103",
+          "result" : "invalid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00049148f29c67f83c705eefb59c92954775f90c15e225da2e996abcdd1dc9db1aa1e15277c4555d24118239e53fd2f0b5e7ea807eb3de1ee350",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABJFI8pxn+DxwXu+1nJKVR3X5DBXi\nJdoumWq83R3J2xqh4VJ3xFVdJBGCOeU/0vC15+qAfrPeHuNQ\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "09148f29c67f83c705eefb59c92954775f90c15e225da2e996abcdd1d",
+        "wy" : "0c9db1aa1e15277c4555d24118239e53fd2f0b5e7ea807eb3de1ee350"
+      },
+      "tests" : [
+        {
+          "tcId" : 224,
+          "comment" : "s is larger than n",
+          "msg" : "313233343030",
+          "sig" : "3022020101021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5ba6a26",
+          "result" : "invalid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00049bf045a43a5f14d5e412ee181f111d6e53961120531f3c50ca701e78be9eb95146f4f2be96949976a7aa49d31593a7da2edd907652398c3a",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABJvwRaQ6XxTV5BLuGB8RHW5TlhEg\nUx88UMpwHni+nrlRRvTyvpaUmXanqknTFZOn2i7dkHZSOYw6\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "09bf045a43a5f14d5e412ee181f111d6e53961120531f3c50ca701e78",
+        "wy" : "0be9eb95146f4f2be96949976a7aa49d31593a7da2edd907652398c3a"
+      },
+      "tests" : [
+        {
+          "tcId" : 225,
+          "comment" : "small r and s^-1",
+          "msg" : "313233343030",
+          "sig" : "302302020102021d009dfe5cfd9b02fe7a6f747bf31dd581d0a93cfecc66a1173d611dfd3c",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a000487739e2821ed9567e88702fa8c6d083c97c1f3f1eb32d13f751fb0736d02eba05e8cb94672d09ebc11051d52ec7bd4dc7767301b67034212",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABIdznigh7ZVn6IcC+oxtCDyXwfPx\n6zLRP3UfsHNtAuugXoy5RnLQnrwRBR1S7HvU3HdnMBtnA0IS\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "087739e2821ed9567e88702fa8c6d083c97c1f3f1eb32d13f751fb073",
+        "wy" : "6d02eba05e8cb94672d09ebc11051d52ec7bd4dc7767301b67034212"
+      },
+      "tests" : [
+        {
+          "tcId" : 226,
+          "comment" : "smallish r and s^-1",
+          "msg" : "313233343030",
+          "sig" : "302702072d9b4d347952cc021c43e235748bd3b1bfa14c92234a90261acc3e9086810801a36746bcee",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00041a515cbe957bfc070e4c4a75d6fd5e7c15b1e255eb42fead06c9d2636252cc0d234318394df7db65b0a52e06953ca6c21ec95774d39efdc9",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABBpRXL6Ve/wHDkxKddb9XnwVseJV\n60L+rQbJ0mNiUswNI0MYOU3322WwpS4GlTymwh7JV3TTnv3J\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "1a515cbe957bfc070e4c4a75d6fd5e7c15b1e255eb42fead06c9d263",
+        "wy" : "6252cc0d234318394df7db65b0a52e06953ca6c21ec95774d39efdc9"
+      },
+      "tests" : [
+        {
+          "tcId" : 227,
+          "comment" : "100-bit r and small s^-1",
+          "msg" : "313233343030",
+          "sig" : "302e020d1033e67e37b32b445580bf4efb021d00a8bdf46532d8136beb21dbf178090c7e7dad2caa8eb52cef8d830fd8",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004d6a16e194e12b96db8e1bb0250d950f7b3129b14bba0efb157c4423e625a0c8c20838bd97fbc89f1670028754a09ad28f62de5eea6e07bc1",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABNahbhlOErltuOG7AlDZUPezEpsU\nu6DvsVfEQj5iWgyMIIOL2X+8ifFnACh1SgmtKPYt5e6m4HvB\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0d6a16e194e12b96db8e1bb0250d950f7b3129b14bba0efb157c4423e",
+        "wy" : "625a0c8c20838bd97fbc89f1670028754a09ad28f62de5eea6e07bc1"
+      },
+      "tests" : [
+        {
+          "tcId" : 228,
+          "comment" : "small r and 100 bit s^-1",
+          "msg" : "313233343030",
+          "sig" : "302202020102021c73168a8994e5f71793081cb7afbe3c0af4bf7aa336cf9de31ef85314",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004c012950d074bb01b0a1988a5b59b959104275baf757e53029b046a1542f50fe27f3ebac9036558ef30ebcb812027bf0ef46cda51969541bb",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABMASlQ0HS7AbChmIpbWblZEEJ1uv\ndX5TApsEahVC9Q/ifz66yQNlWO8w68uBICe/DvRs2lGWlUG7\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0c012950d074bb01b0a1988a5b59b959104275baf757e53029b046a15",
+        "wy" : "42f50fe27f3ebac9036558ef30ebcb812027bf0ef46cda51969541bb"
+      },
+      "tests" : [
+        {
+          "tcId" : 229,
+          "comment" : "100-bit r and s^-1",
+          "msg" : "313233343030",
+          "sig" : "302d020d062522bbd3ecbe7c39e93e7c24021c73168a8994e5f71793081cb7afbe3c0af4bf7aa336cf9de31ef85314",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004d15c13a1be99d9eb77d688104a18e24242d205a4026f4a65629e59ee7e3ddf9abbb7d532b6e81a6e11f30d5b55feb8ee707c4fedf99c0607",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABNFcE6G+mdnrd9aIEEoY4kJC0gWk\nAm9KZWKeWe5+Pd+au7fVMrboGm4R8w1bVf647nB8T+35nAYH\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0d15c13a1be99d9eb77d688104a18e24242d205a4026f4a65629e59ee",
+        "wy" : "7e3ddf9abbb7d532b6e81a6e11f30d5b55feb8ee707c4fedf99c0607"
+      },
+      "tests" : [
+        {
+          "tcId" : 230,
+          "comment" : "r and s^-1 are close to n",
+          "msg" : "313233343030",
+          "sig" : "303d021d00d7c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a7931f021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00043fe01972c0622ea812d30652c9fe2febee708123b1626d744f87db0da572c7e1e3a48195e6221d983f782fdc9e7c55bd5fdf7b679b0f8756",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABD/gGXLAYi6oEtMGUsn+L+vucIEj\nsWJtdE+H2w2lcsfh46SBleYiHZg/eC/cnnxVvV/fe2ebD4dW\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "3fe01972c0622ea812d30652c9fe2febee708123b1626d744f87db0d",
+        "wy" : "0a572c7e1e3a48195e6221d983f782fdc9e7c55bd5fdf7b679b0f8756"
+      },
+      "tests" : [
+        {
+          "tcId" : 231,
+          "comment" : "s == 1",
+          "msg" : "313233343030",
+          "sig" : "3021021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a020101",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 232,
+          "comment" : "s == 0",
+          "msg" : "313233343030",
+          "sig" : "3021021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a020100",
+          "result" : "invalid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004d4b6e5112406fb743b6bb55f49ea2030d904420831ebddacd67bba89652265384b75d850e7c27f4e33ed6c576df0ff969470a9ef25ffafcd",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABNS25REkBvt0O2u1X0nqIDDZBEII\nMevdrNZ7uollImU4S3XYUOfCf04z7WxXbfD/lpRwqe8l/6/N\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0d4b6e5112406fb743b6bb55f49ea2030d904420831ebddacd67bba89",
+        "wy" : "652265384b75d850e7c27f4e33ed6c576df0ff969470a9ef25ffafcd"
+      },
+      "tests" : [
+        {
+          "tcId" : 233,
+          "comment" : "point at infinity during verify",
+          "msg" : "313233343030",
+          "sig" : "303c021c6be09a551321b343150c1812bae87dcc688b5e25b6ef5e51d2d3c9cf021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a",
+          "result" : "invalid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a000455a7b0100613fabd957b42600835c6d42e01e04252593bdde3b1727887708a05aba2f93f1a1e1ecb703ec9a8ee6d6013a101d397012a8cce",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABFWnsBAGE/q9lXtCYAg1xtQuAeBC\nUlk73eOxcniHcIoFq6L5PxoeHstwPsmo7m1gE6EB05cBKozO\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "55a7b0100613fabd957b42600835c6d42e01e04252593bdde3b17278",
+        "wy" : "087708a05aba2f93f1a1e1ecb703ec9a8ee6d6013a101d397012a8cce"
+      },
+      "tests" : [
+        {
+          "tcId" : 234,
+          "comment" : "u1 == 1",
+          "msg" : "313233343030",
+          "sig" : "303c021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a021c753bb40078934081d7bd113ec49b19ef09d1ba33498690516d4d122c",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00041ada54dc015861680d8bb2d311b90e82db75aa9e8217b92611fa03cb84c611551197298b3274875cb94686e758f0a1a9675c0bc157451a76",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABBraVNwBWGFoDYuy0xG5DoLbdaqe\nghe5JhH6A8uExhFVEZcpizJ0h1y5RobnWPChqWdcC8FXRRp2\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "1ada54dc015861680d8bb2d311b90e82db75aa9e8217b92611fa03cb",
+        "wy" : "084c611551197298b3274875cb94686e758f0a1a9675c0bc157451a76"
+      },
+      "tests" : [
+        {
+          "tcId" : 235,
+          "comment" : "u1 == n - 1",
+          "msg" : "313233343030",
+          "sig" : "303c021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a021c628580a9adb02604525b1ee6b135e1a9c745021824582c52385a8173",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004c67b6429785334a608dde949a8abe641dbd3601ebce1e675fe71a8e527d2e8727dc4f618493550bb940151bca6826f714c5b31854038f44d",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABMZ7ZCl4UzSmCN3pSair5kHb02Ae\nvOHmdf5xqOUn0uhyfcT2GEk1ULuUAVG8poJvcUxbMYVAOPRN\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0c67b6429785334a608dde949a8abe641dbd3601ebce1e675fe71a8e5",
+        "wy" : "27d2e8727dc4f618493550bb940151bca6826f714c5b31854038f44d"
+      },
+      "tests" : [
+        {
+          "tcId" : 236,
+          "comment" : "u2 == 1",
+          "msg" : "313233343030",
+          "sig" : "303c021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00041dcc7a5ad111a33627f92dd875ba4a06f6a7c2befdd1050488d057a7341cae0be72a99776db5bd79b463e2d3882764af9c0245d084a3342d",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABB3MelrREaM2J/kt2HW6Sgb2p8K+\n/dEFBIjQV6c0HK4L5yqZd221vXm0Y+LTiCdkr5wCRdCEozQt\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "1dcc7a5ad111a33627f92dd875ba4a06f6a7c2befdd1050488d057a7",
+        "wy" : "341cae0be72a99776db5bd79b463e2d3882764af9c0245d084a3342d"
+      },
+      "tests" : [
+        {
+          "tcId" : 237,
+          "comment" : "u2 == n - 1",
+          "msg" : "313233343030",
+          "sig" : "303d021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a021d008fd6231c198244597165756e4e8b5265e0b9d2dcf3e9d317c3c50d15",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004bdf708a01c6a814728d394b7f29bf6579734862d8af8e6ff786fbe49901cd462946e5e36cc97c9896df2e18177456d282a7a26a38084c086",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABL33CKAcaoFHKNOUt/Kb9leXNIYt\nivjm/3hvvkmQHNRilG5eNsyXyYlt8uGBd0VtKCp6JqOAhMCG\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0bdf708a01c6a814728d394b7f29bf6579734862d8af8e6ff786fbe49",
+        "wy" : "0901cd462946e5e36cc97c9896df2e18177456d282a7a26a38084c086"
+      },
+      "tests" : [
+        {
+          "tcId" : 238,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303d021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021d00b6ea09c6ec5e0484b94f25d890145b0ae3ffbb98b716addd92debdce",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00040c531fb3d996faa22407df1305ff6ae0bfe94e1c2022f4730d0f8a4abd8073950459562e539ac0895433757e25209b12534ff30fe3d37c71",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABAxTH7PZlvqiJAffEwX/auC/6U4c\nICL0cw0Pikq9gHOVBFlWLlOawIlUM3V+JSCbElNP8w/j03xx\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0c531fb3d996faa22407df1305ff6ae0bfe94e1c2022f4730d0f8a4a",
+        "wy" : "0bd8073950459562e539ac0895433757e25209b12534ff30fe3d37c71"
+      },
+      "tests" : [
+        {
+          "tcId" : 239,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c2f62a9cf48e3ca602eef4e33afa43f2dceb922a40a67de79f7b1ae38",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00046782954082418e0002a0812672ac2123b6334b341340555096bcf6c61f6fa1a8fea617d9dda14461d63aa448f205a39b25501a6b1d42ee5f",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABGeClUCCQY4AAqCBJnKsISO2M0s0\nE0BVUJa89sYfb6Go/qYX2d2hRGHWOqRI8gWjmyVQGmsdQu5f\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "6782954082418e0002a0812672ac2123b6334b341340555096bcf6c6",
+        "wy" : "1f6fa1a8fea617d9dda14461d63aa448f205a39b25501a6b1d42ee5f"
+      },
+      "tests" : [
+        {
+          "tcId" : 240,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c618dfc54408bec1cb37c7ee52b60adbc8d3a6c26457c39d013e88e81",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00045b5e6eaba7597ae641420ace6af2575839f161b27b91b270f18bf7d0496ab3c3072fa6ee5578fc814f74d148ecbc2a98cfdc5d40ec7e6980",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABFtebqunWXrmQUIKzmryV1g58WGy\ne5GycPGL99BJarPDBy+m7lV4/IFPdNFI7LwqmM/cXUDsfmmA\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "5b5e6eaba7597ae641420ace6af2575839f161b27b91b270f18bf7d0",
+        "wy" : "496ab3c3072fa6ee5578fc814f74d148ecbc2a98cfdc5d40ec7e6980"
+      },
+      "tests" : [
+        {
+          "tcId" : 241,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c010de57124c0930ef800e764b5585927977e2ad2d8b82e7cb648af52",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00048e661a06ad55b5227801ea4309a72b9cd94973bc873c0405e1247d1e64898b822c363cac8821302de38a914268aaa67db2561878f0f90a02",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABI5mGgatVbUieAHqQwmnK5zZSXO8\nhzwEBeEkfR5kiYuCLDY8rIghMC3jipFCaKqmfbJWGHjw+QoC\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "08e661a06ad55b5227801ea4309a72b9cd94973bc873c0405e1247d1e",
+        "wy" : "64898b822c363cac8821302de38a914268aaa67db2561878f0f90a02"
+      },
+      "tests" : [
+        {
+          "tcId" : 242,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c033ef5010beced04c4928868513ed1878ce677a6ed810e9b99dd9794",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004b3d2b93f1488657262140f96c108aa0485939bd99440240a7a7d54e388968174b061853739f8b0471c76126539dc57cc6d7c1f539f686674",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABLPSuT8UiGVyYhQPlsEIqgSFk5vZ\nlEAkCnp9VOOIloF0sGGFNzn4sEccdhJlOdxXzG18H1OfaGZ0\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0b3d2b93f1488657262140f96c108aa0485939bd99440240a7a7d54e3",
+        "wy" : "088968174b061853739f8b0471c76126539dc57cc6d7c1f539f686674"
+      },
+      "tests" : [
+        {
+          "tcId" : 243,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c067dea0217d9da09892510d0a27da30f19ccef4ddb021d3733bb2f28",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004ba830dbf83075cd182bc9322c1f6299a4ce3cf4ddde0e6fcee50f0d62b153f6f377a88809c9dd50d8d61eb6794514448165786a7c6558dcc",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABLqDDb+DB1zRgryTIsH2KZpM489N\n3eDm/O5Q8NYrFT9vN3qIgJyd1Q2NYetnlFFESBZXhqfGVY3M\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0ba830dbf83075cd182bc9322c1f6299a4ce3cf4ddde0e6fcee50f0d6",
+        "wy" : "2b153f6f377a88809c9dd50d8d61eb6794514448165786a7c6558dcc"
+      },
+      "tests" : [
+        {
+          "tcId" : 244,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c45847e02fd01a3cc9e063f961fb920ab3271ec09996f75bca7fe6d3f",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a000477f40222e4a79a0fa7e510887e69eba31f6dd7067121dafe739bbe13d0ffab7222cf6d827c51eb53abac506bc0a5d7c1a5a7e1683d49e43e",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABHf0AiLkp5oPp+UQiH5p66MfbdcG\ncSHa/nObvhPQ/6tyIs9tgnxR61OrrFBrwKXXwaWn4Wg9SeQ+\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "77f40222e4a79a0fa7e510887e69eba31f6dd7067121dafe739bbe13",
+        "wy" : "0d0ffab7222cf6d827c51eb53abac506bc0a5d7c1a5a7e1683d49e43e"
+      },
+      "tests" : [
+        {
+          "tcId" : 245,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c0b4cbe866d1920634138c8798fcc41479447e5ae760794e1e5797928",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004597b5a3c106b8c4e9a7e7a517cd740e77667c8a2d06c510e5e3b728d9cc249e827f5fff902122eb26badc4a7da6555b489ba98982d388125",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABFl7WjwQa4xOmn56UXzXQOd2Z8ii\n0GxRDl47co2cwknoJ/X/+QISLrJrrcSn2mVVtIm6mJgtOIEl\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "597b5a3c106b8c4e9a7e7a517cd740e77667c8a2d06c510e5e3b728d",
+        "wy" : "09cc249e827f5fff902122eb26badc4a7da6555b489ba98982d388125"
+      },
+      "tests" : [
+        {
+          "tcId" : 246,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c20d72ae339e5620170c90a4ce5bca08ded1700b2b6c80ec612c8d5d1",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00040f2453e7585cb1392ff4fa11869f8c10b2f9cf4f2a18b866e8f37c2bd1566ef04928797579d40f3310ebaf477a4e78a235861928328634df",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABA8kU+dYXLE5L/T6EYafjBCy+c9P\nKhi4ZujzfCvRVm7wSSh5dXnUDzMQ669Hek54ojWGGSgyhjTf\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0f2453e7585cb1392ff4fa11869f8c10b2f9cf4f2a18b866e8f37c2b",
+        "wy" : "0d1566ef04928797579d40f3310ebaf477a4e78a235861928328634df"
+      },
+      "tests" : [
+        {
+          "tcId" : 247,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303d021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021d009d235aa9e9f9c6453e39a78613836ea14c2ddf31c91b747aef010a89",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a000410cb3dbce4da518e04eb125cf3b44bef0451bad3e7cbbad5328b85bb358651b478bcf200684fd310e6d14acd23dc2a760475df0f5b8a758c",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABBDLPbzk2lGOBOsSXPO0S+8EUbrT\n58u61TKLhbs1hlG0eLzyAGhP0xDm0UrNI9wqdgR13w9binWM\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "10cb3dbce4da518e04eb125cf3b44bef0451bad3e7cbbad5328b85bb",
+        "wy" : "358651b478bcf200684fd310e6d14acd23dc2a760475df0f5b8a758c"
+      },
+      "tests" : [
+        {
+          "tcId" : 248,
+          "comment" : "edge case for u1",
+          "msg" : "313233343030",
+          "sig" : "303d021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021d009ca7987f3367a9516eca57855098d4aaaf289438d9ad7b39dcc81110",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00042c27732aaaa3f8b16664a48a1dd06fc0fe40f65742751e5c04b7eff507804b2dbee79ffe56dc4f4a6062ced6f375b80b5ad2cf3a2921b395",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABCwncyqqo/ixZmSkih3Qb8D+QPZX\nQnUeXAS37/UHgEstvuef/lbcT0pgYs7W83W4C1rSzzopIbOV\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "2c27732aaaa3f8b16664a48a1dd06fc0fe40f65742751e5c04b7eff5",
+        "wy" : "7804b2dbee79ffe56dc4f4a6062ced6f375b80b5ad2cf3a2921b395"
+      },
+      "tests" : [
+        {
+          "tcId" : 249,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c7295bc38b76bccd7635d6561d1f053dd9b079419249f94368c8d3133",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00048ced556877ee15af314aed5dfc43a00fbb7626fbdc7b81ff7dbea2f898f5e26f7fc3276da2a8e869b0afbc41ef3b40326080aa85ce62c2ab",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABIztVWh37hWvMUrtXfxDoA+7dib7\n3HuB/32+oviY9eJvf8MnbaKo6Gmwr7xB7ztAMmCAqoXOYsKr\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "08ced556877ee15af314aed5dfc43a00fbb7626fbdc7b81ff7dbea2f8",
+        "wy" : "098f5e26f7fc3276da2a8e869b0afbc41ef3b40326080aa85ce62c2ab"
+      },
+      "tests" : [
+        {
+          "tcId" : 250,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303d021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021d00938f2db2b72061abd7eb6e5c8fe685391e966ec0c769d0c538e0678a",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a000442b19b22506c4fd89fa28c5909d97f8ffebdc82804dcc7bf6a570ae21a974ee08b484fa05e1fbb89c48c50754ba1e40a658a5ced409c6361",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABEKxmyJQbE/Yn6KMWQnZf4/+vcgo\nBNzHv2pXCuIal07gi0hPoF4fu4nEjFB1S6HkCmWKXO1AnGNh\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "42b19b22506c4fd89fa28c5909d97f8ffebdc82804dcc7bf6a570ae2",
+        "wy" : "1a974ee08b484fa05e1fbb89c48c50754ba1e40a658a5ced409c6361"
+      },
+      "tests" : [
+        {
+          "tcId" : 251,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c7f907c8e32e60e2ba4033ee7d65f3fe8fd23719c7a9c6f5e52f18c47",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00042095e12116cebdd4e8bc1cc184b538b1515f789e3be4b03a4183fae5d0926e446875abdcd12c8239e607961cadd00a2e899d821db11d5679",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABCCV4SEWzr3U6LwcwYS1OLFRX3ie\nO+SwOkGD+uXQkm5EaHWr3NEsgjnmB5YcrdAKLomdgh2xHVZ5\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "2095e12116cebdd4e8bc1cc184b538b1515f789e3be4b03a4183fae5",
+        "wy" : "0d0926e446875abdcd12c8239e607961cadd00a2e899d821db11d5679"
+      },
+      "tests" : [
+        {
+          "tcId" : 252,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c34c3978c3a1dac921f6235c82a02edb9342285469426bb10f82897c4",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a000458f82eb2ca6e3474a90e29ac56dcb63d88e669e0a40204e6202af7c5a0e85e4039f343255b4fe4bdc1191a7845bdd7eb908ecd8779a27963",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABFj4LrLKbjR0qQ4prFbctj2I5mng\npAIE5iAq98Wg6F5AOfNDJVtP5L3BGRp4Rb3X65COzYd5onlj\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "58f82eb2ca6e3474a90e29ac56dcb63d88e669e0a40204e6202af7c5",
+        "wy" : "0a0e85e4039f343255b4fe4bdc1191a7845bdd7eb908ecd8779a27963"
+      },
+      "tests" : [
+        {
+          "tcId" : 253,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303d021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021d009701d6523d3d3f5b8ac8402680b3cab8966e2651cfc1739fcd3c0749",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a000471f2c4a7c3f71311a793458ff12262a863518fb30dbb7a80701030b8b6b08428fabdb69c8a8e9e327daed0795fb84e0d8817086022d3b23b",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABHHyxKfD9xMRp5NFj/EiYqhjUY+z\nDbt6gHAQMLi2sIQo+r22nIqOnjJ9rtB5X7hODYgXCGAi07I7\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "71f2c4a7c3f71311a793458ff12262a863518fb30dbb7a80701030b8",
+        "wy" : "0b6b08428fabdb69c8a8e9e327daed0795fb84e0d8817086022d3b23b"
+      },
+      "tests" : [
+        {
+          "tcId" : 254,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c564277fa54371830eb7850278b9699d85bc5905831a42a9bf4d07af3",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00043cfcf64eece994c35c56e915e4ed1883ba6ec34fe396c11acd8f47d263cdfbaa34401100b5b10af771bb46c0d53446f7aa847956c9363494",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABDz89k7s6ZTDXFbpFeTtGIO6bsNP\n45bBGs2PR9JjzfuqNEARALWxCvdxu0bA1TRG96qEeVbJNjSU\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "3cfcf64eece994c35c56e915e4ed1883ba6ec34fe396c11acd8f47d2",
+        "wy" : "63cdfbaa34401100b5b10af771bb46c0d53446f7aa847956c9363494"
+      },
+      "tests" : [
+        {
+          "tcId" : 255,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c7794fbdee638f657ac1e4c65284c144b3efa7bf4109e6cca605c4f4c",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00044c404decbc0697b207fa08982ef0fedb001eeb43f37404dab97a9a7747191bc240dfd440274e06955611f9923fad6949b2cc157a185c8229",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABExATey8BpeyB/oImC7w/tsAHutD\n83QE2rl6mndHGRvCQN/UQCdOBpVWEfmSP61pSbLMFXoYXIIp\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "4c404decbc0697b207fa08982ef0fedb001eeb43f37404dab97a9a77",
+        "wy" : "47191bc240dfd440274e06955611f9923fad6949b2cc157a185c8229"
+      },
+      "tests" : [
+        {
+          "tcId" : 256,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303d021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021d00b5200da7a45837f5b71c47e1b94c7862a1e4becba30a908ada219487",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00047be4b0ea0b15b96f91312c15c81629e40c4418f70b86c5bcdc258fd979cbef8ea2a77ca092db0eb954a9e33e82b9c5f110c8c990b9235a57",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABHvksOoLFblvkTEsFcgWKeQMRBj3\nC4bFvNwlj9l5y++Ooqd8oJLbDrlUqeM+grnF8RDIyZC5I1pX\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "7be4b0ea0b15b96f91312c15c81629e40c4418f70b86c5bcdc258fd9",
+        "wy" : "79cbef8ea2a77ca092db0eb954a9e33e82b9c5f110c8c990b9235a57"
+      },
+      "tests" : [
+        {
+          "tcId" : 257,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303c021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021c652b78716ed799aec6bacac3a3e0a7bb360f2832493f286d191a626c",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a000464a64cffa54066499264991e47a0f14bca6319a1c27e1508e2016b56bda7c17a04d9cb88eadb7296cf87dfbfadfe65056837a797d66997dd",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABGSmTP+lQGZJkmSZHkeg8UvKYxmh\nwn4VCOIBa1a9p8F6BNnLiOrbcpbPh9+/rf5lBWg3p5fWaZfd\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "64a64cffa54066499264991e47a0f14bca6319a1c27e1508e2016b56",
+        "wy" : "0bda7c17a04d9cb88eadb7296cf87dfbfadfe65056837a797d66997dd"
+      },
+      "tests" : [
+        {
+          "tcId" : 258,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303d021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021d0097c134aa264366862a18302575d0fb98d116bc4b6ddebca3a5a793a2",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00043d4c4e3c5ba7a533c8a3386d6ff77a81351346e1894b2560b406a63ea349775946799eeb274926b4d957328f6c7d50f6760291acdaeb114f",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABD1MTjxbp6UzyKM4bW/3eoE1E0bh\niUslYLQGpj6jSXdZRnme6ydJJrTZVzKPbH1Q9nYCkaza6xFP\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "3d4c4e3c5ba7a533c8a3386d6ff77a81351346e1894b2560b406a63e",
+        "wy" : "0a349775946799eeb274926b4d957328f6c7d50f6760291acdaeb114f"
+      },
+      "tests" : [
+        {
+          "tcId" : 259,
+          "comment" : "edge case for u2",
+          "msg" : "313233343030",
+          "sig" : "303d021c7ffffffffffffffffffffffffffffffffffffffffffffffffffffffa021d00aba8d89c2c94ba58e70db786a6181dc0e71d16f3f43d9600fc4c8ff3",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00044db8e8ac43f22df75c9c09fe193b9cd83d5c9b73f37d1494761724b0a76082c35da862a1e2e8626ffa94ed18fcb1d897ec7ab52c322553ff",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABE246KxD8i33XJwJ/hk7nNg9XJtz\n830UlHYXJLCnYILDXahioeLoYm/6lO0Y/LHYl+x6tSwyJVP/\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "4db8e8ac43f22df75c9c09fe193b9cd83d5c9b73f37d1494761724b0",
+        "wy" : "0a76082c35da862a1e2e8626ffa94ed18fcb1d897ec7ab52c322553ff"
+      },
+      "tests" : [
+        {
+          "tcId" : 260,
+          "comment" : "point duplication during verification",
+          "msg" : "313233343030",
+          "sig" : "303d021c7af295e6e4787252f34c527af562ca27214a66f6d6db4fd2c112b564021d00b1d010f74062eeaac0cecb2c3c2c4d288a576bf6f0a00347c6a5b562",
+          "result" : "valid",
+          "flags" : [
+            "PointDuplication"
+          ]
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00044db8e8ac43f22df75c9c09fe193b9cd83d5c9b73f37d1494761724b03060b1e6c89b03e4472fcdb57b3cea6eb3ed2ebfab5fd4c94ca36d00",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABE246KxD8i33XJwJ/hk7nNg9XJtz\n830UlHYXJLAwYLHmyJsD5EcvzbV7POpus+0uv6tf1MlMo20A\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "4db8e8ac43f22df75c9c09fe193b9cd83d5c9b73f37d1494761724b0",
+        "wy" : "3060b1e6c89b03e4472fcdb57b3cea6eb3ed2ebfab5fd4c94ca36d00"
+      },
+      "tests" : [
+        {
+          "tcId" : 261,
+          "comment" : "duplication bug",
+          "msg" : "313233343030",
+          "sig" : "303d021c7af295e6e4787252f34c527af562ca27214a66f6d6db4fd2c112b564021d00b1d010f74062eeaac0cecb2c3c2c4d288a576bf6f0a00347c6a5b562",
+          "result" : "invalid",
+          "flags" : [
+            "PointDuplication"
+          ]
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00042b92268208d522450c42f3fcbda409c3ace2a5f857ea10612c6093f8315eb2d448134e716b032078b68301622e3c2186ab583d976e769feb",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABCuSJoII1SJFDELz/L2kCcOs4qX4\nV+oQYSxgk/gxXrLUSBNOcWsDIHi2gwFiLjwhhqtYPZdudp/r\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "2b92268208d522450c42f3fcbda409c3ace2a5f857ea10612c6093f8",
+        "wy" : "315eb2d448134e716b032078b68301622e3c2186ab583d976e769feb"
+      },
+      "tests" : [
+        {
+          "tcId" : 262,
+          "comment" : "comparison with point at infinity ",
+          "msg" : "313233343030",
+          "sig" : "303c021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a021c2b26a42207a714813b9e70077df698b829d158dbe2c625ba5454b71f",
+          "result" : "invalid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00044d4bd5693d86dd9a6016ba806d8031f94dc8e2d33c6f5871a00b64732a4662f29524ece754828b9d829c0a0724d9bd9d288d21f87e3fb1fa",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABE1L1Wk9ht2aYBa6gG2AMflNyOLT\nPG9YcaALZHMqRmLylSTs51SCi52CnAoHJNm9nSiNIfh+P7H6\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "4d4bd5693d86dd9a6016ba806d8031f94dc8e2d33c6f5871a00b6473",
+        "wy" : "2a4662f29524ece754828b9d829c0a0724d9bd9d288d21f87e3fb1fa"
+      },
+      "tests" : [
+        {
+          "tcId" : 263,
+          "comment" : "extreme value for k",
+          "msg" : "313233343030",
+          "sig" : "303c021c33b7e498bcda1a33e61a67af56a36d12df7032255ddf5e1ec65a5669021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004606ce6f8c77ac17d5b7515d5851eed155ea120cd07ca4277b35b8d365f716b62aee9a81a011bd1d2bceaf37d5f3a61e5f7307e0bb9c892c8",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABGBs5vjHesF9W3UV1YUe7RVeoSDN\nB8pCd7NbjTZfcWtirumoGgEb0dK86vN9Xzph5fcwfgu5yJLI\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "606ce6f8c77ac17d5b7515d5851eed155ea120cd07ca4277b35b8d36",
+        "wy" : "5f716b62aee9a81a011bd1d2bceaf37d5f3a61e5f7307e0bb9c892c8"
+      },
+      "tests" : [
+        {
+          "tcId" : 264,
+          "comment" : "extreme value for k",
+          "msg" : "313233343030",
+          "sig" : "303c021c0d9029ad2c7e5cf4340823b2a87dc68c9e4ce3174c1e6efdee12c07d021c47eb118e0cc1222cb8b2bab72745a932f05ce96e79f4e98be1e2868a",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00040d9029ad2c7e5cf4340823b2a87dc68c9e4ce3174c1e6efdee12c07d58aa56f772c0726f24c6b89e4ecdac24354b9e99caa3f6d3761402cd",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABA2QKa0sflz0NAgjsqh9xoyeTOMX\nTB5u/e4SwH1Yqlb3csBybyTGuJ5OzawkNUuemcqj9tN2FALN\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0d9029ad2c7e5cf4340823b2a87dc68c9e4ce3174c1e6efdee12c07d",
+        "wy" : "58aa56f772c0726f24c6b89e4ecdac24354b9e99caa3f6d3761402cd"
+      },
+      "tests" : [
+        {
+          "tcId" : 265,
+          "comment" : "testing point duplication",
+          "msg" : "313233343030",
+          "sig" : "303c021c753bb40078934081d7bd113ec49b19ef09d1ba33498690516d4d122c021c1ed2753ce0e50ea573ba500559f948838b95889d0fb21af2ce85a75f",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 266,
+          "comment" : "testing point duplication",
+          "msg" : "313233343030",
+          "sig" : "303c021c628580a9adb02604525b1ee6b135e1a9c745021824582c52385a8173021c1ed2753ce0e50ea573ba500559f948838b95889d0fb21af2ce85a75f",
+          "result" : "invalid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00040d9029ad2c7e5cf4340823b2a87dc68c9e4ce3174c1e6efdee12c07d7f16ddb2b382f4170551778727042b637b5368bdcd36932208b4be32",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABA2QKa0sflz0NAgjsqh9xoyeTOMX\nTB5u/e4SwH1/Ft2ys4L0FwVRd4cnBCtje1Novc02kyIItL4y\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0d9029ad2c7e5cf4340823b2a87dc68c9e4ce3174c1e6efdee12c07d",
+        "wy" : "7f16ddb2b382f4170551778727042b637b5368bdcd36932208b4be32"
+      },
+      "tests" : [
+        {
+          "tcId" : 267,
+          "comment" : "testing point duplication",
+          "msg" : "313233343030",
+          "sig" : "303c021c753bb40078934081d7bd113ec49b19ef09d1ba33498690516d4d122c021c1ed2753ce0e50ea573ba500559f948838b95889d0fb21af2ce85a75f",
+          "result" : "invalid",
+          "flags" : []
+        },
+        {
+          "tcId" : 268,
+          "comment" : "testing point duplication",
+          "msg" : "313233343030",
+          "sig" : "303c021c628580a9adb02604525b1ee6b135e1a9c745021824582c52385a8173021c1ed2753ce0e50ea573ba500559f948838b95889d0fb21af2ce85a75f",
+          "result" : "invalid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004b554fc25e9f098eaf1466c35328c97305d0d4aa0e4462e8baf7a8e7ed08fc40eb01dc855577baea9e3070770616f57b17ea9854cad93881a",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABLVU/CXp8Jjq8UZsNTKMlzBdDUqg\n5EYui696jn7Qj8QOsB3IVVd7rqnjBwdwYW9XsX6phUytk4ga\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0b554fc25e9f098eaf1466c35328c97305d0d4aa0e4462e8baf7a8e7e",
+        "wy" : "0d08fc40eb01dc855577baea9e3070770616f57b17ea9854cad93881a"
+      },
+      "tests" : [
+        {
+          "tcId" : 269,
+          "comment" : "pseudorandom signature",
+          "msg" : "",
+          "sig" : "303e021d00b982bea80d10816bb450a3faaaed4ed54fb197b3bff95af25d7d3786021d009e6ea2e58713f1304d29debf8559a74a89e018bae28b05556e5482a1",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 270,
+          "comment" : "pseudorandom signature",
+          "msg" : "",
+          "sig" : "303d021d00ba756b27dd4f6c795578207f7422ad8e1ce9b2269c1cdd78f399f5e5021c349524440fc7eaf8553471eb36806d6f57ac2cc622b96acb6cb6fa4b",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 271,
+          "comment" : "pseudorandom signature",
+          "msg" : "",
+          "sig" : "303c021c20c0d4cd5c5919bb5fd7597fb16b8b688a0920a09fc8f905c61d5837021c10265abb068dc3652696dc9cfd6bde3faf0d255113d2c67541919bb3",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 272,
+          "comment" : "pseudorandom signature",
+          "msg" : "",
+          "sig" : "303d021d00cb3fd8aa5afa71fef0def1e8bfb6f9d3294852ff7796e4ed1969d69b021c2ba29a89dbab65c1f4f6493699a49f6525c53e7079e3e8b04aa27cef",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 273,
+          "comment" : "pseudorandom signature",
+          "msg" : "",
+          "sig" : "303c021c434e3dd89c62d184ebbff3381998d65e262587551e2d5cd7c363c348021c04cd5dcbdf55da37ddb017b43c598011de9ef44ccd3f7beb58b0b865",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 274,
+          "comment" : "pseudorandom signature",
+          "msg" : "",
+          "sig" : "303c021c32e4338400d6da3000a387cabd9c591bb6655b30778e88c936e6568c021c1c221fc827fe59b7031d55feb72e115b4b5ccd66b25b0ecc36000046",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 275,
+          "comment" : "pseudorandom signature",
+          "msg" : "",
+          "sig" : "303c021c710c37bdd281f6b555b19191f276124495e6f3107dadeac88093607f021c30708492dc458cb80df1bd89bcba5f8396008878bfa171f45659527a",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 276,
+          "comment" : "pseudorandom signature",
+          "msg" : "",
+          "sig" : "303e021d009e0697c0da456a2307ec34976b81824da7ab53dc4aef71f18f88239f021d00b832d148bb79764875b34173a3a571b12f3bc272fb959a2520ca4495",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 277,
+          "comment" : "pseudorandom signature",
+          "msg" : "",
+          "sig" : "303c021c785207e4354e55e458ac8e2c097b5627f63c19d8ae04e9f7042c18b7021c2abae674a4d5f4894bed0eac8a25d0bb025beb7c0a234ad16c4ccf99",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 278,
+          "comment" : "pseudorandom signature",
+          "msg" : "",
+          "sig" : "303c021c129dce4db87a34c9c6a3bd0ffb9e08457827447c87ee0591f3476656021c79306c25b6922814f44dfa7cf3f1dec3341b9f4c3b9ad7633f10ccaa",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 279,
+          "comment" : "pseudorandom signature",
+          "msg" : "4d7367",
+          "sig" : "303c021c4dabc5fe962b5f8a6681e94a2165d9b6be1940f20e27ceb73fc4ea7d021c746e9bba7efb90fcecc263c229a16d809d3547c28a26cd71a52abdc5",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 280,
+          "comment" : "pseudorandom signature",
+          "msg" : "4d7367",
+          "sig" : "303d021d00babe417d8a35754274546468ad80844ebe757569f032d8dce504f5b5021c7770f402ed46775e945cccf1d63c1c789a182c74c86f9de42987624f",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 281,
+          "comment" : "pseudorandom signature",
+          "msg" : "4d7367",
+          "sig" : "303d021c3d060bfd635fd6e77fddc1364cab4fb1d1e947c3d18f7ffb6931c540021d00bf2b652d489cd938939fbb606b827d4ba2797ea179601da68e6b7a94",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 282,
+          "comment" : "pseudorandom signature",
+          "msg" : "4d7367",
+          "sig" : "303e021d00926000093199a8ffea2b30807353c589bfa67c1cab70416235e2a4f5021d00d600ab30ab70afcadfd7905df9abc7079ffe44b1b834822dc21a7442",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 283,
+          "comment" : "pseudorandom signature",
+          "msg" : "4d7367",
+          "sig" : "303c021c4e48f99f529802582c5dee87a916d8e1906e0495a9c1bfb88adbf15e021c57d614ab7e5ab325dbf617ae8368e41d6800ea75e72ed3f96e3fb13f",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 284,
+          "comment" : "pseudorandom signature",
+          "msg" : "4d7367",
+          "sig" : "303e021d00b26058ec42348b7fd8760589b381971d656fee1ccaf90258fdebda12021d00bda18580af3355a4dab38b5d1ae24273cd3b562ceb7ba41c1f80a105",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 285,
+          "comment" : "pseudorandom signature",
+          "msg" : "4d7367",
+          "sig" : "303e021d00aa05f1c9c2891640907eca5b95de643896818e2805b8f616d463ab8e021d00873230841c15abd2064936d1e7e40ae092b0a773d92b83e20dd3a01f",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 286,
+          "comment" : "pseudorandom signature",
+          "msg" : "4d7367",
+          "sig" : "303c021c430c2580dfe044ccdd85b4ff20a5cfe3a04e645f20e2c6cedb180940021c3669a152244b98e5b9a1dcf2744574efc6905e7047caf04303e88c62",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 287,
+          "comment" : "pseudorandom signature",
+          "msg" : "4d7367",
+          "sig" : "303d021d00d07c02eff9cbbfc044bb1b01a46873fe2d9dc8979a9540e4dbd07d68021c539547a6035138f187e61d9db461fd294e958bc9137b41ee13ba79dc",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 288,
+          "comment" : "pseudorandom signature",
+          "msg" : "4d7367",
+          "sig" : "303c021c5cf7da29833d9d79ce765b41445cfeb87097e9b09af84c60a95d1204021c1908014a0e861d27b5dbe4785e2f340aa6618084a0dd180dd81af796",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 289,
+          "comment" : "pseudorandom signature",
+          "msg" : "313233343030",
+          "sig" : "303d021d0095b11e320007a2e0f8ce00f9058ca9b919e8d6aad544a8f9808b44a1021c15a962019c85a5b1fa7474162d03cd0e528e8b93bcc84920af579f61",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 290,
+          "comment" : "pseudorandom signature",
+          "msg" : "313233343030",
+          "sig" : "303c021c35c61adeca7686039807e7c7cfa52b9820d02c3e42330127e0dbed89021c0b9561879279d6cf7f3d31bb44ec2e01cbee2fe67349a5e6e9703cff",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 291,
+          "comment" : "pseudorandom signature",
+          "msg" : "313233343030",
+          "sig" : "303c021c26654e4fddebbc950fc1e4a2f38d2d0ec7f99d87efb408dea83b89f4021c3e0a8eff55b91708625add7b1cb06090a0ca9090ca32e823b37d867b",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 292,
+          "comment" : "pseudorandom signature",
+          "msg" : "313233343030",
+          "sig" : "303c021c7c6741f30ef739b439840a08a3ee1f642eb60ecfc5c285cfd645f36b021c5492572d19f0721f3c586d1948bba2ee218301a0c2d24d0ceb37cc5c",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 293,
+          "comment" : "pseudorandom signature",
+          "msg" : "313233343030",
+          "sig" : "303d021c74c449469f41e7c0bf63a70c37c4e1144b4398665b0f7d7880069364021d00baf380e709c209b16071b36a6898a55b4844b6a49d9c8dbb9c658724",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 294,
+          "comment" : "pseudorandom signature",
+          "msg" : "313233343030",
+          "sig" : "303c021c2fb12ab3ddb4a17ae88b082ce89a0c7b8dc0beed0ebcd3884b4b9a78021c3e526f6bd6e114bec8cd0ed2f7f755dcab5facdcbf8ec9f9a0f3fd10",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 295,
+          "comment" : "pseudorandom signature",
+          "msg" : "313233343030",
+          "sig" : "303d021d00c9aa0a2bd104d97f05f4da5e7330c242da7935d43e5834228b0ab14b021c3d1cc35a16fa1f006e9037d630fc43345892902f51e633fb172569ba",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 296,
+          "comment" : "pseudorandom signature",
+          "msg" : "313233343030",
+          "sig" : "303d021d00b4d81368ef579cc9029ed8c8211e9270cf79cce2431006a583f5a304021c385cac816b704e26b80b701c4e80b5303702d58aa0715f608a5391d9",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 297,
+          "comment" : "pseudorandom signature",
+          "msg" : "313233343030",
+          "sig" : "303e021d008056544bd4d2d5b01087d3b0751b0a341d0b350f6780e5caae67b11f021d00b98eb47d89aadbfdf6c4279d8829753b440e735cb38b1dbb428d7a0f",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 298,
+          "comment" : "pseudorandom signature",
+          "msg" : "313233343030",
+          "sig" : "303c021c25145fc2a37861e8289ee269e8fee366730843f32017a9b6b83a7fe8021c7eeb69a821418a70a8a9eee2c59607036796918839f67a588f155b0c",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 299,
+          "comment" : "pseudorandom signature",
+          "msg" : "0000000000000000000000000000000000000000",
+          "sig" : "303e021d009e4dab9e0b0097e365783fc05f010c160d361df7925b0ddbdfece88b021d008406a365f078f031e6fad6511d69f8a65483c19a5a800c39490f7510",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 300,
+          "comment" : "pseudorandom signature",
+          "msg" : "0000000000000000000000000000000000000000",
+          "sig" : "303d021c10ea9ef0f6b0762ebed9ec2ec0e8fde0b254c87beff6a975710d4ee9021d00d29cbcb4b2c0b475bdebdd6c7a2043bccb1ceda19a84cd6234f68b2c",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 301,
+          "comment" : "pseudorandom signature",
+          "msg" : "0000000000000000000000000000000000000000",
+          "sig" : "303d021c7e362ec35e0c072e374cf04fb6eff855fcd8e10288113225976e033c021d009e1182ce4e7595357fa495615ceb02df59c416868cb28a58474e030f",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 302,
+          "comment" : "pseudorandom signature",
+          "msg" : "0000000000000000000000000000000000000000",
+          "sig" : "303d021c104d42246af6d22318e688dafbb0703146817ee657d1b12499423460021d00a75680daa57dcce75f3cff4cf3b02909805943c3f5310b1f013b6d24",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 303,
+          "comment" : "pseudorandom signature",
+          "msg" : "0000000000000000000000000000000000000000",
+          "sig" : "303d021d00a23101edfa421660e5bd64ec13bc5260c10b2bb61e6887d09b64c649021c5610c1da8da1e3af8da09e11ef0bf307b073e8665cac9bbbaac83c59",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 304,
+          "comment" : "pseudorandom signature",
+          "msg" : "0000000000000000000000000000000000000000",
+          "sig" : "303d021c44eb3256b59074a5405ba06f4c99d3fc19fa6ed1ff933f075d3d6e66021d00821fa7514a75cf244e4c2071541c4477dfc40bfeafd179127a5fa68f",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 305,
+          "comment" : "pseudorandom signature",
+          "msg" : "0000000000000000000000000000000000000000",
+          "sig" : "303d021d00c3a73348f5d2d0b6a2fff18c1b54462139f40f5b332717cd30072013021c2c7b47057955964960eb90f2d7b81bb21dc8bc4525f2e5a14e02a981",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 306,
+          "comment" : "pseudorandom signature",
+          "msg" : "0000000000000000000000000000000000000000",
+          "sig" : "303d021c4b03770b93c962d4acc12fe635a755524fcb773faa783679cfa8c882021d00d1e3320eafe1a8f81016391687fdb7f0aa35922c36b9537655217f64",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 307,
+          "comment" : "pseudorandom signature",
+          "msg" : "0000000000000000000000000000000000000000",
+          "sig" : "303c021c35acb58706f19cf74b862c34671de7a67f50f86ae298e6ddc9333626021c29c56614e6e2ba3231c998898c9265c6ec6fbca521d01ddc4368e0f5",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 308,
+          "comment" : "pseudorandom signature",
+          "msg" : "0000000000000000000000000000000000000000",
+          "sig" : "303e021d00c61fbbf5c63cb8e3426c95c327e329edbda7b6ffe75312df8bae43ed021d00a07284d3b51cc9d42aefb07c21b9304b7f3087610a82ba421c6eab92",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004802a0f51204ef6a829211bc0740887461ee4aba736e9caee000000007fb931e06300451362d444106eeb5dabddca650fec4be55fc545f7c8",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABIAqD1EgTvaoKSEbwHQIh0Ye5Kun\nNunK7gAAAAB/uTHgYwBFE2LURBBu612r3cplD+xL5V/FRffI\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0802a0f51204ef6a829211bc0740887461ee4aba736e9caee00000000",
+        "wy" : "7fb931e06300451362d444106eeb5dabddca650fec4be55fc545f7c8"
+      },
+      "tests" : [
+        {
+          "tcId" : 309,
+          "comment" : "x-coordinate of the public key has many trailing 0's",
+          "msg" : "4d657373616765",
+          "sig" : "303c021c0c93fd7f6dd0b697d5c287ee61aee4dcbedcc20885c1e6215b8b3608021c3bc7a1beccf1a8e83af2f5162fc539a1d062bd639a2fbec512907a27",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 310,
+          "comment" : "x-coordinate of the public key has many trailing 0's",
+          "msg" : "4d657373616765",
+          "sig" : "303e021d009e0b620a2f313ada756463a22988afb6571b3b030a4285b185e1cc80021d00c3eba04c42e64d4028acabcdcb7b2eed1b3cfb560b8d7d14fb26aca3",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 311,
+          "comment" : "x-coordinate of the public key has many trailing 0's",
+          "msg" : "4d657373616765",
+          "sig" : "303d021d00a306f500da4f0a30946479936aaf9c637676b0f02d20ae0d981c25eb021c015647f2500bcbe3204bdb804972b841890b4e53196cd8b188993151",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004cb320c84f26c00a1b4ad7146914cae126529165de7363d8aef9abd05a397d46b87283176b7f69da1f94615ca4431fc47b2a0e60c00000000",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABMsyDITybAChtK1xRpFMrhJlKRZd\n5zY9iu+avQWjl9Rrhygxdrf2naH5RhXKRDH8R7Kg5gwAAAAA\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0cb320c84f26c00a1b4ad7146914cae126529165de7363d8aef9abd05",
+        "wy" : "0a397d46b87283176b7f69da1f94615ca4431fc47b2a0e60c00000000"
+      },
+      "tests" : [
+        {
+          "tcId" : 312,
+          "comment" : "y-coordinate of the public key has many trailing 0's",
+          "msg" : "4d657373616765",
+          "sig" : "303c021c04f00dd44fdd8ae6b08b86ccbdd7d615aa9e498a89b35094c8a9a6fe021c49617a1617c56ce90d41c53eef4e628f24c047a06e02c1f92123441f",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 313,
+          "comment" : "y-coordinate of the public key has many trailing 0's",
+          "msg" : "4d657373616765",
+          "sig" : "303c021c1286f6a7375bf68051e31b2e32b5f6c0988c9189799256e7ce64e291021c52d3c1f9e777f23c17cbc832d0e5a84bb68b13debf393878d1a06498",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 314,
+          "comment" : "y-coordinate of the public key has many trailing 0's",
+          "msg" : "4d657373616765",
+          "sig" : "303c021c582825df2368dcb92fbba3fa6454d149d3b860e3ff326afe36215813021c49334fc6a70418dbc454da6a997bc8376270c3a38863adb2aa70bb0f",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00040000000081df971744a25ac99472c3ff5a8fc49b86fc9fb570448ff977f2d07c1c9296b2f77478d13d5ab1c63993962f2dd08ee7c313dece",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABAAAAACB35cXRKJayZRyw/9aj8Sb\nhvyftXBEj/l38tB8HJKWsvd0eNE9WrHGOZOWLy3QjufDE97O\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "081df971744a25ac99472c3ff5a8fc49b86fc9fb570448ff9",
+        "wy" : "77f2d07c1c9296b2f77478d13d5ab1c63993962f2dd08ee7c313dece"
+      },
+      "tests" : [
+        {
+          "tcId" : 315,
+          "comment" : "x-coordinate of the public key is small",
+          "msg" : "4d657373616765",
+          "sig" : "303d021c5a11718c90a02459800f109e4e840cc261d782d64e1c8a4712dd9081021d00d283b1c1e110a4620a696fdf74a9c7792352139d54cced8c973d9e7e",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 316,
+          "comment" : "x-coordinate of the public key is small",
+          "msg" : "4d657373616765",
+          "sig" : "303d021d00d577f23e592414e351b3928a593c5d2f89f0c72df513bfbc6535babb021c1bb09dd235124a14e0246946f280450f15576912aeb735b73ce828bc",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 317,
+          "comment" : "x-coordinate of the public key is small",
+          "msg" : "4d657373616765",
+          "sig" : "303e021d00af8f836e63995dc715a4d3c6842c4e6c6cf4586df76e4659d809eec9021d0085befd0b1bb8ae182c05d071dad180224d22533dce737d4dda74d5d1",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00040d28b4f7fe1f6c6fa6a77d11e43bd3e9271758df34c65fa577a6dd3b000000002801d48382861684b8d2cbd7e5989a0d7c15a7e819b573aa",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABA0otPf+H2xvpqd9EeQ70+knF1jf\nNMZfpXem3TsAAAAAKAHUg4KGFoS40svX5ZiaDXwVp+gZtXOq\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0d28b4f7fe1f6c6fa6a77d11e43bd3e9271758df34c65fa577a6dd3b",
+        "wy" : "2801d48382861684b8d2cbd7e5989a0d7c15a7e819b573aa"
+      },
+      "tests" : [
+        {
+          "tcId" : 318,
+          "comment" : "y-coordinate of the public key is small",
+          "msg" : "4d657373616765",
+          "sig" : "303d021c156aa78692c78e9769aba728c9eea78835b55000901ba50794a33efc021d00b9785df40a2213377481311b1a81d310e76341927b8fba0d6e3ec7ad",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 319,
+          "comment" : "y-coordinate of the public key is small",
+          "msg" : "4d657373616765",
+          "sig" : "303d021d009274d46a7ffa1299a372e821bd89728de83ef87c46af67043a634b02021c19e4bbec8b03fa772a3622bf4893e581efadf9d20bd60806d82676b6",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 320,
+          "comment" : "y-coordinate of the public key is small",
+          "msg" : "4d657373616765",
+          "sig" : "303d021d00cf6a9cba285e56493cbb462b7b16128a0cf1c7058447945daef34149021c29a687839e8ee03c5372a113733c081f413d1f9405ddfe47e18fcc54",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a00040d28b4f7fe1f6c6fa6a77d11e43bd3e9271758df34c65fa577a6dd3bd7c134a9fe419202a79219a0bcff0bafcb066d4a1bc4e20d65134d55",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABA0otPf+H2xvpqd9EeQ70+knF1jf\nNMZfpXem3TvXwTSp/kGSAqeSGaC8/wuvywZtShvE4g1lE01V\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "0d28b4f7fe1f6c6fa6a77d11e43bd3e9271758df34c65fa577a6dd3b",
+        "wy" : "0d7c134a9fe419202a79219a0bcff0bafcb066d4a1bc4e20d65134d55"
+      },
+      "tests" : [
+        {
+          "tcId" : 321,
+          "comment" : "y-coordinate of the public key is large",
+          "msg" : "4d657373616765",
+          "sig" : "303c021c592e54a0ea950ac7cd830f56c7954a769f81aa55e8e101bee19b3b27021c48375fdd4d9014c9b60b63c70bfe98c844be668f2d3a2e259262b945",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 322,
+          "comment" : "y-coordinate of the public key is large",
+          "msg" : "4d657373616765",
+          "sig" : "303c021c1ec0ef4d5bedafe5081f7adae32db4d0aa946f130acedabae26d90dc021c627e81d7eb358f59e8a8630527d4e8946d1cad2196761836d97d953c",
+          "result" : "valid",
+          "flags" : []
+        },
+        {
+          "tcId" : 323,
+          "comment" : "y-coordinate of the public key is large",
+          "msg" : "4d657373616765",
+          "sig" : "303d021c5faf035ed5774eeb0adc187ff485a846aa2abcf1e7f859b1b910f25c021d008bf12a1c00b18f66c228352de49cc4fb827a09fc86f722ce561ba5fa",
+          "result" : "valid",
+          "flags" : []
+        }
+      ]
+    },
+    {
+      "keyDer" : "3052301406072a8648ce3d020106092b2403030208010105033a0004512e581731c9c460bb705b60da976ccb1b0ef421785106ba2ccdd2380f21d5bacdf81c0cb78fa151237db3130ad4def373f3e523398c2cf7",
+      "keyPem" : "-----BEGIN PUBLIC KEY-----\nMFIwFAYHKoZIzj0CAQYJKyQDAwIIAQEFAzoABFEuWBcxycRgu3BbYNqXbMsbDvQh\neFEGuizN0jgPIdW6zfgcDLePoVEjfbMTCtTe83Pz5SM5jCz3\n-----END PUBLIC KEY-----",
+      "sha" : "SHA-224",
+      "type" : "ECDSAVer",
+      "key" : {
+        "curve" : "brainpoolP224r1",
+        "keySize" : 224,
+        "type" : "ECPublicKey",
+        "wx" : "512e581731c9c460bb705b60da976ccb1b0ef421785106ba2ccdd238",
+        "wy" : "0f21d5bacdf81c0cb78fa151237db3130ad4def373f3e523398c2cf7"
+      },
+      "tests" : [
+        {
+          "tcId" : 324,
+          "comment" : "y-coordinate of the public key has many trailing 1's on brainpoolP224t1",
+          "msg" : "4d657373616765",
+          "sig" : "303d021c52b2d369f18df56372afe7feb38413f232b4fb9ca16c6f6fedc64189021d00c1b19f137773ef3201cd341c381e4f9449cc0e6c688a351d7a6070b2",
+          "result" : "valid",
+          "flags" : [
+            "GroupIsomorphism"
+          ]
+        },
+        {
+          "tcId" : 325,
+          "comment" : "y-coordinate of the public key has many trailing 1's on brainpoolP224t1",
+          "msg" : "4d657373616765",
+          "sig" : "303c021c5b889d288aaa81674d32006e81279c57ed56a035c878d3e2b687bec3021c0da621d5fa9813263c7f58f8e0155d6f0c330a56c594defc2ebdf0a0",
+          "result" : "valid",
+          "flags" : [
+            "GroupIsomorphism"
+          ]
+        },
+        {
+          "tcId" : 326,
+          "comment" : "y-coordinate of the public key has many trailing 1's on brainpoolP224t1",
+          "msg" : "4d657373616765",
+          "sig" : "303e021d00b6f8a80187180aad8a5c896be214314601a1585f2ccb28bc7e8e8f01021d00a90c68c14a67f5d59cec70dc0f473b5c14013b056d12cbc0f7153b1d",
+          "result" : "valid",
+          "flags" : [
+            "GroupIsomorphism"
+          ]
+        }
+      ]
+    }
+  ]
+}

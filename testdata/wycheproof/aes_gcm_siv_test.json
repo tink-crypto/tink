@@ -1,9 +1,11 @@
 {
   "algorithm" : "AES-GCM",
-  "generatorVersion" : "0.2.3",
+  "generatorVersion" : "0.4",
   "numberOfTests" : 143,
-  "header" : [
-  ],
+  "notes" : {
+    "ConstructedIv" : "The counter for AES-GCM-SIV is reduced modulo 2**32. This test vector was constructed to test for correct wrapping of the counter."
+  },
+  "header" : [],
   "testGroups" : [
     {
       "ivSize" : 96,
@@ -20,7 +22,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "dc20e2d83f25705bb49e439eca56de25",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 2,
@@ -31,7 +34,8 @@
           "msg" : "0100000000000000",
           "ct" : "b5d839330ac7b786",
           "tag" : "578782fff6013b815b287c22493a364c",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 3,
@@ -42,7 +46,8 @@
           "msg" : "010000000000000000000000",
           "ct" : "7323ea61d05932260047d942",
           "tag" : "a4978db357391a0bc4fdec8b0d106639",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 4,
@@ -53,7 +58,8 @@
           "msg" : "01000000000000000000000000000000",
           "ct" : "743f7c8077ab25f8624e2e948579cf77",
           "tag" : "303aaf90f6fe21199c6068577437a0c4",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 5,
@@ -64,7 +70,8 @@
           "msg" : "0100000000000000000000000000000002000000000000000000000000000000",
           "ct" : "84e07e62ba83a6585417245d7ec413a9fe427d6315c09b57ce45f2e3936a9445",
           "tag" : "1a8e45dcd4578c667cd86847bf6155ff",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 6,
@@ -75,7 +82,8 @@
           "msg" : "010000000000000000000000000000000200000000000000000000000000000003000000000000000000000000000000",
           "ct" : "3fd24ce1f5a67b75bf2351f181a475c7b800a5b4d3dcf70106b1eea82fa1d64df42bf7226122fa92e17a40eeaac1201b",
           "tag" : "5e6e311dbf395d35b0fe39c2714388f8",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 7,
@@ -86,7 +94,8 @@
           "msg" : "01000000000000000000000000000000020000000000000000000000000000000300000000000000000000000000000004000000000000000000000000000000",
           "ct" : "2433668f1058190f6d43e360f4f35cd8e475127cfca7028ea8ab5c20f7ab2af02516a2bdcbc08d521be37ff28c152bba36697f25b4cd169c6590d1dd39566d3f",
           "tag" : "8a263dd317aa88d56bdf3936dba75bb8",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 8,
@@ -97,7 +106,8 @@
           "msg" : "0200000000000000",
           "ct" : "1e6daba35669f427",
           "tag" : "3b0a1a2560969cdf790d99759abd1508",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 9,
@@ -108,7 +118,8 @@
           "msg" : "020000000000000000000000",
           "ct" : "296c7889fd99f41917f44620",
           "tag" : "08299c5102745aaa3a0c469fad9e075a",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 10,
@@ -119,7 +130,8 @@
           "msg" : "02000000000000000000000000000000",
           "ct" : "e2b0c5da79a901c1745f700525cb335b",
           "tag" : "8f8936ec039e4e4bb97ebd8c4457441f",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 11,
@@ -130,7 +142,8 @@
           "msg" : "0200000000000000000000000000000003000000000000000000000000000000",
           "ct" : "620048ef3c1e73e57e02bb8562c416a319e73e4caac8e96a1ecb2933145a1d71",
           "tag" : "e6af6a7f87287da059a71684ed3498e1",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 12,
@@ -141,7 +154,8 @@
           "msg" : "020000000000000000000000000000000300000000000000000000000000000004000000000000000000000000000000",
           "ct" : "50c8303ea93925d64090d07bd109dfd9515a5a33431019c17d93465999a8b0053201d723120a8562b838cdff25bf9d1e",
           "tag" : "6a8cc3865f76897c2e4b245cf31c51f2",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 13,
@@ -152,7 +166,8 @@
           "msg" : "02000000000000000000000000000000030000000000000000000000000000000400000000000000000000000000000005000000000000000000000000000000",
           "ct" : "2f5c64059db55ee0fb847ed513003746aca4e61c711b5de2e7a77ffd02da42feec601910d3467bb8b36ebbaebce5fba30d36c95f48a3e7980f0e7ac299332a80",
           "tag" : "cdc46ae475563de037001ef84ae21744",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 14,
@@ -163,7 +178,8 @@
           "msg" : "02000000",
           "ct" : "a8fe3e87",
           "tag" : "07eb1f84fb28f8cb73de8e99e2f48a14",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 15,
@@ -174,7 +190,8 @@
           "msg" : "0300000000000000000000000000000004000000",
           "ct" : "6bb0fecf5ded9b77f902c7d5da236a4391dd0297",
           "tag" : "24afc9805e976f451e6d87f6fe106514",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 16,
@@ -185,7 +202,8 @@
           "msg" : "030000000000000000000000000000000400",
           "ct" : "44d0aaf6fb2f1f34add5e8064e83e12a2ada",
           "tag" : "bff9b2ef00fb47920cc72a0c0f13b9fd",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 17,
@@ -196,7 +214,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "a4194b79071b01a87d65f706e3949578",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 18,
@@ -207,7 +226,8 @@
           "msg" : "7a806c",
           "ct" : "af60eb",
           "tag" : "711bd85bc1e4d3e0a462e074eea428a8",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 19,
@@ -218,7 +238,8 @@
           "msg" : "bdc66f146545",
           "ct" : "bb93a3e34d3c",
           "tag" : "d6a9c45545cfc11f03ad743dba20f966",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 20,
@@ -229,7 +250,8 @@
           "msg" : "1177441f195495860f",
           "ct" : "4f37281f7ad12949d0",
           "tag" : "1d02fd0cd174c84fc5dae2f60f52fd2b",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 21,
@@ -240,7 +262,8 @@
           "msg" : "9f572c614b4745914474e7c7",
           "ct" : "f54673c5ddf710c745641c8b",
           "tag" : "c1dc2f871fb7561da1286e655e24b7b0",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 22,
@@ -251,7 +274,8 @@
           "msg" : "0d8c8451178082355c9e940fea2f58",
           "ct" : "c9ff545e07b88a015f05b274540aa1",
           "tag" : "83b3449b9f39552de99dc214a1190b0b",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 23,
@@ -262,7 +286,8 @@
           "msg" : "6b3db4da3d57aa94842b9803a96e07fb6de7",
           "ct" : "6298b296e24e8cc35dce0bed484b7f30d580",
           "tag" : "3e377094f04709f64d7b985310a4db84",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 24,
@@ -273,7 +298,8 @@
           "msg" : "e42a3c02c25b64869e146d7b233987bddfc240871d",
           "ct" : "391cc328d484a4f46406181bcd62efd9b3ee197d05",
           "tag" : "2d15506c84a9edd65e13e9d24a2a6e70",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 25,
@@ -284,7 +310,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "596d0538e48526be1c991e40cc031073",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 26,
@@ -295,7 +322,8 @@
           "msg" : "35",
           "ct" : "4f",
           "tag" : "8b2b805fc0885e2b470d9dbe6cb15ed3",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 27,
@@ -306,7 +334,8 @@
           "msg" : "d10989f2c52e94ad",
           "ct" : "04c7a55f97846e54",
           "tag" : "48168ff846356c33032c719b518f18a8",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 28,
@@ -317,7 +346,8 @@
           "msg" : "4dcc1485365866e25ac3f2ca6aba97",
           "ct" : "fd9521041b0397a15b0070b93f48a9",
           "tag" : "09df91414578f7faf757d04ee26ab901",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 29,
@@ -328,7 +358,8 @@
           "msg" : "25b12e28ac0ef6ead0226a3b2288c800",
           "ct" : "6eb905287ddfafc32f6b1c10046c089f",
           "tag" : "4ff9f939a77c34b0cb1ee75fcb0dd29a",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 30,
@@ -339,7 +370,8 @@
           "msg" : "fee62fde973fe025ad6b322dcdf3c63fc7",
           "ct" : "6f62bd09d4f36f73e289ab6dd114727fe3",
           "tag" : "ea727c084db2bc948de0928edddd7fcf",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 31,
@@ -350,7 +382,8 @@
           "msg" : "c08f085e6a9e0ef3636280c11ecfadf0c1e72919ffc17eaf",
           "ct" : "80133a4bea7311f0d3c9835144c37c4ef0ef20c8f2e36be1",
           "tag" : "b92f47c1af6713e14fbdf60efebb50c6",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 32,
@@ -361,7 +394,8 @@
           "msg" : "1851956319256ebb0f9ccaf325a24abfc5c3e90b055e57cdc0c7ab2165ae03b1",
           "ct" : "778b308e4ca17607df36c0b94695bc64603173b814701a9f69147b42478a0b1f",
           "tag" : "b75c98952c0aa11958a55c9c2ecf33f5",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 33,
@@ -372,7 +406,8 @@
           "msg" : "127b150080ec0bc7704e26f4ab11abb6",
           "ct" : "173ba6370171be47dbb6163a63a3b725",
           "tag" : "53aefed6e971d5a1f435f0730a6dd0fd",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 34,
@@ -383,7 +418,8 @@
           "msg" : "437aeb94d842283ba57bb758e3d229f0",
           "ct" : "959f0ff12481dedc4302ad7a904f9486",
           "tag" : "0215be2ab9b0672a7b82893891057c9c",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 35,
@@ -394,7 +430,8 @@
           "msg" : "26eb70672eef03667b34cc7d0df05872",
           "ct" : "8ae3a16a237f1358ac8cfeb5f4cc2818",
           "tag" : "28f5aa8a34a9f7c01c17759d142b1bae",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 36,
@@ -405,7 +442,8 @@
           "msg" : "f6538476daf04524cf134309dd84e187",
           "ct" : "d5220f6a49d1e4c10d38c77c8156ebd0",
           "tag" : "80b50f526286dad22d40984636f0e9ce",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 37,
@@ -416,7 +454,8 @@
           "msg" : "3baf3edf04dc0c97aae081cdeb08021d",
           "ct" : "3e771b9376e1d1cde3d9b73349c958bc",
           "tag" : "ebd3ea678a1e87839a4356584ea89bac",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 38,
@@ -427,7 +466,8 @@
           "msg" : "602c98997ee03fd11ce00e92de193977",
           "ct" : "05b568a589d0a77a8ee9c6f06415c6b6",
           "tag" : "91ba5089dffb7538199c441728d5f84a",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 39,
@@ -438,7 +478,10 @@
           "msg" : "43488548d88e6f774bcd2d52c18fbcc933a4e9a9613ff3edbe959ec59522adc098b3133b8d17b9e9dad631ad33752c95",
           "ct" : "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : [
+            "ConstructedIv"
+          ]
         },
         {
           "tcId" : 40,
@@ -449,7 +492,10 @@
           "msg" : "f012c6a7eb0e8af5bc45e015e7680a693dc709b95383f6a94babec1bc36e4be3cf4f55a31a94f11c6c3f90eed99682bc",
           "ct" : "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : [
+            "ConstructedIv"
+          ]
         },
         {
           "tcId" : 41,
@@ -460,7 +506,10 @@
           "msg" : "71ceee58179d6fb968521e9594dbf98cc0040f6aa38fe873c32a9b122d6cbfd51aa4778b3f4f37be7348690d97e2468b",
           "ct" : "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           "tag" : "fefffffffefffffffefffffffeffffff",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : [
+            "ConstructedIv"
+          ]
         },
         {
           "tcId" : 42,
@@ -471,7 +520,10 @@
           "msg" : "2e14f9e9a09ea204557367898a80dcad117af3666bea25762b70633a9f3614fbe631ba617c371fd5566d5e613496e69f",
           "ct" : "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           "tag" : "ffffff7f00112233445566778899aabb",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : [
+            "ConstructedIv"
+          ]
         },
         {
           "tcId" : 43,
@@ -482,7 +534,10 @@
           "msg" : "27fac75879c9d87cd52a0793137ba792f6f145148158eb538f2081e09cd0315986a7025045ecbb2ca1bb18a17bfcd567",
           "ct" : "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           "tag" : "ffffffffffffff7f0011223344556677",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : [
+            "ConstructedIv"
+          ]
         },
         {
           "tcId" : 44,
@@ -493,7 +548,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 45,
@@ -504,7 +560,8 @@
           "msg" : "03c0e39b77bd62d32568f4c86c90bfdb",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 46,
@@ -515,7 +572,8 @@
           "msg" : "63995888995b338c",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 47,
@@ -526,7 +584,8 @@
           "msg" : "03c0e39b77bd62d32568f4c86c90bfdb",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 48,
@@ -537,7 +596,8 @@
           "msg" : "63995888995b338c",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 49,
@@ -548,7 +608,8 @@
           "msg" : "03c0e39b77bd62d32568f4c86c90bfdb",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 50,
@@ -559,7 +620,8 @@
           "msg" : "63995888995b338c",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 51,
@@ -570,7 +632,8 @@
           "msg" : "0fed395814f1750a",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 52,
@@ -581,7 +644,8 @@
           "msg" : "63995888995b338c",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 53,
@@ -592,7 +656,8 @@
           "msg" : "0fed395814f1750a",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 54,
@@ -603,7 +668,8 @@
           "msg" : "63995888995b338c",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 55,
@@ -614,7 +680,8 @@
           "msg" : "0fed395814f1750a",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 56,
@@ -625,7 +692,8 @@
           "msg" : "03c0e39b77bd62d32568f4c86c90bfdb",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 57,
@@ -636,7 +704,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 58,
@@ -647,7 +716,8 @@
           "msg" : "63995888995b338c",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 59,
@@ -658,7 +728,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 60,
@@ -669,7 +740,8 @@
           "msg" : "03c0e39b77bd62d32568f4c86c90bfdb",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 61,
@@ -680,7 +752,8 @@
           "msg" : "0fed395814f1750a",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 62,
@@ -691,7 +764,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 63,
@@ -702,7 +776,8 @@
           "msg" : "63995888995b338c",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 64,
@@ -713,7 +788,8 @@
           "msg" : "0fed395814f1750a",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 65,
@@ -724,7 +800,8 @@
           "msg" : "0fed395814f1750a",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 66,
@@ -735,7 +812,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 67,
@@ -746,7 +824,8 @@
           "msg" : "03c0e39b77bd62d32568f4c86c90bfdb",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 68,
@@ -757,7 +836,8 @@
           "msg" : "63995888995b338c",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 69,
@@ -768,7 +848,8 @@
           "msg" : "63995888995b338c",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         }
       ]
     },
@@ -787,7 +868,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "07f5f4169bbf55a8400cd47ea6fd400f",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 71,
@@ -798,7 +880,8 @@
           "msg" : "0100000000000000",
           "ct" : "c2ef328e5c71c83b",
           "tag" : "843122130f7364b761e0b97427e3df28",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 72,
@@ -809,7 +892,8 @@
           "msg" : "010000000000000000000000",
           "ct" : "9aab2aeb3faa0a34aea8e2b1",
           "tag" : "8ca50da9ae6559e48fd10f6e5c9ca17e",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 73,
@@ -820,7 +904,8 @@
           "msg" : "01000000000000000000000000000000",
           "ct" : "85a01b63025ba19b7fd3ddfc033b3e76",
           "tag" : "c9eac6fa700942702e90862383c6c366",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 74,
@@ -831,7 +916,8 @@
           "msg" : "0100000000000000000000000000000002000000000000000000000000000000",
           "ct" : "4a6a9db4c8c6549201b9edb53006cba821ec9cf850948a7c86c68ac7539d027f",
           "tag" : "e819e63abcd020b006a976397632eb5d",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 75,
@@ -842,7 +928,8 @@
           "msg" : "010000000000000000000000000000000200000000000000000000000000000003000000000000000000000000000000",
           "ct" : "c00d121893a9fa603f48ccc1ca3c57ce7499245ea0046db16c53c7c66fe717e39cf6c748837b61f6ee3adcee17534ed5",
           "tag" : "790bc96880a99ba804bd12c0e6a22cc4",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 76,
@@ -853,7 +940,8 @@
           "msg" : "01000000000000000000000000000000020000000000000000000000000000000300000000000000000000000000000004000000000000000000000000000000",
           "ct" : "c2d5160a1f8683834910acdafc41fbb1632d4a353e8b905ec9a5499ac34f96c7e1049eb080883891a4db8caaa1f99dd004d80487540735234e3744512c6f90ce",
           "tag" : "112864c269fc0d9d88c61fa47e39aa08",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 77,
@@ -864,7 +952,8 @@
           "msg" : "0200000000000000",
           "ct" : "1de22967237a8132",
           "tag" : "91213f267e3b452f02d01ae33e4ec854",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 78,
@@ -875,7 +964,8 @@
           "msg" : "020000000000000000000000",
           "ct" : "163d6f9cc1b346cd453a2e4c",
           "tag" : "c1a4a19ae800941ccdc57cc8413c277f",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 79,
@@ -886,7 +976,8 @@
           "msg" : "02000000000000000000000000000000",
           "ct" : "c91545823cc24f17dbb0e9e807d5ec17",
           "tag" : "b292d28ff61189e8e49f3875ef91aff7",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 80,
@@ -897,7 +988,8 @@
           "msg" : "0200000000000000000000000000000003000000000000000000000000000000",
           "ct" : "07dad364bfc2b9da89116d7bef6daaaf6f255510aa654f920ac81b94e8bad365",
           "tag" : "aea1bad12702e1965604374aab96dbbc",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 81,
@@ -908,7 +1000,8 @@
           "msg" : "020000000000000000000000000000000300000000000000000000000000000004000000000000000000000000000000",
           "ct" : "c67a1f0f567a5198aa1fcc8e3f21314336f7f51ca8b1af61feac35a86416fa47fbca3b5f749cdf564527f2314f42fe25",
           "tag" : "03332742b228c647173616cfd44c54eb",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 82,
@@ -919,7 +1012,8 @@
           "msg" : "02000000000000000000000000000000030000000000000000000000000000000400000000000000000000000000000005000000000000000000000000000000",
           "ct" : "67fd45e126bfb9a79930c43aad2d36967d3f0e4d217c1e551f59727870beefc98cb933a8fce9de887b1e40799988db1fc3f91880ed405b2dd298318858467c89",
           "tag" : "5bde0285037c5de81e5b570a049b62a0",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 83,
@@ -930,7 +1024,8 @@
           "msg" : "02000000",
           "ct" : "22b3f4cd",
           "tag" : "1835e517741dfddccfa07fa4661b74cf",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 84,
@@ -941,7 +1036,8 @@
           "msg" : "0300000000000000000000000000000004000000",
           "ct" : "43dd0163cdb48f9fe3212bf61b201976067f342b",
           "tag" : "b879ad976d8242acc188ab59cabfe307",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 85,
@@ -952,7 +1048,8 @@
           "msg" : "030000000000000000000000000000000400",
           "ct" : "462401724b5ce6588d5a54aae5375513a075",
           "tag" : "cfcdf5042112aa29685c912fc2056543",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 86,
@@ -963,7 +1060,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "169fbb2fbf389a995f6390af22228a62",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 87,
@@ -974,7 +1072,8 @@
           "msg" : "671fdd",
           "ct" : "0eaccb",
           "tag" : "93da9bb81333aee0c785b240d319719d",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 88,
@@ -985,7 +1084,8 @@
           "msg" : "195495860f04",
           "ct" : "a254dad4f3f9",
           "tag" : "6b62b84dc40c84636a5ec12020ec8c2c",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 89,
@@ -996,7 +1096,8 @@
           "msg" : "c9882e5386fd9f92ec",
           "ct" : "0df9e308678244c44b",
           "tag" : "c0fd3dc6628dfe55ebb0b9fb2295c8c2",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 90,
@@ -1007,7 +1108,8 @@
           "msg" : "1db2316fd568378da107b52b",
           "ct" : "8dbeb9f7255bf5769dd56692",
           "tag" : "404099c2587f64979f21826706d497d5",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 91,
@@ -1018,7 +1120,8 @@
           "msg" : "21702de0de18baa9c9596291b08466",
           "ct" : "793576dfa5c0f88729a7ed3c2f1bff",
           "tag" : "b3080d28f6ebb5d3648ce97bd5ba67fd",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 92,
@@ -1029,7 +1132,8 @@
           "msg" : "b202b370ef9768ec6561c4fe6b7e7296fa85",
           "ct" : "857e16a64915a787637687db4a9519635cdd",
           "tag" : "454fc2a154fea91f8363a39fec7d0a49",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 93,
@@ -1040,7 +1144,8 @@
           "msg" : "ced532ce4159b035277d4dfbb7db62968b13cd4eec",
           "ct" : "626660c26ea6612fb17ad91e8e767639edd6c9faee",
           "tag" : "9d6c7029675b89eaf4ba1ded1a286594",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 94,
@@ -1051,7 +1156,8 @@
           "msg" : "000000000000000000000000000000004db923dc793ee6497c76dcc03a98e108",
           "ct" : "f3f80f2cf0cb2dd9c5984fcda908456cc537703b5ba70324a6793a7bf218d3ea",
           "tag" : "ffffffff000000000000000000000000",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 95,
@@ -1062,7 +1168,8 @@
           "msg" : "eb3640277c7ffd1303c7a542d02d3e4c0000000000000000",
           "ct" : "18ce4f0b8cb4d0cac65fea8f79257b20888e53e72299e56d",
           "tag" : "ffffffff000000000000000000000000",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 96,
@@ -1073,7 +1180,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "181720f6ecdcdd332c89d20e09f11b0f",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 97,
@@ -1084,7 +1192,8 @@
           "msg" : "2a",
           "ct" : "fa",
           "tag" : "868ee11a7fe13996ac26962a7e861962",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 98,
@@ -1095,7 +1204,8 @@
           "msg" : "be3308f72a2c6aed",
           "ct" : "c32210c306fac7dc",
           "tag" : "da60d8ff4d550e6801b0ce488ed1b6fe",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 99,
@@ -1106,7 +1216,8 @@
           "msg" : "51f8c1f731ea14acdb210a6d973e07",
           "ct" : "0180029193bbb29e326b5817e8ea01",
           "tag" : "4dd43e861c5f141a693ebc056ed0f0f9",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 100,
@@ -1117,7 +1228,8 @@
           "msg" : "549b365af913f3b081131ccb6b825588",
           "ct" : "31cb136074adcd00cf75e9587d7e8424",
           "tag" : "567871b7aaaf3c00f42fd9d5962df514",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 101,
@@ -1128,7 +1240,8 @@
           "msg" : "3ff1514b1c503915918f0c0c31094a6e1f",
           "ct" : "c97e58e8730a567e8bdf5eb981cdd5f323",
           "tag" : "4b2dc825fef9dc6bf234f2b8ff798f9e",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 102,
@@ -1139,7 +1252,8 @@
           "msg" : "10f1ecf9c60584665d9ae5efe279e7f7377eea6916d2b111",
           "ct" : "c2669f9fc8fe6013c4dd22468d43c2af73647b7018531d29",
           "tag" : "06a58c8d44e99b3262cad0e920df1f85",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 103,
@@ -1150,7 +1264,8 @@
           "msg" : "b9c554cbc36ac18ae897df7beecac1dbeb4eafa156bb60ce2e5d48f05715e678",
           "ct" : "faaef557c31a231115f393c4b3c1a1413fb40b4204458d5f9ef8a9f2f12486ae",
           "tag" : "72fc457255aadf708719c46986caefad",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 104,
@@ -1161,7 +1276,8 @@
           "msg" : "e5ccaa441bc814688f8f6e8f28b500b2",
           "ct" : "12fffdccd1e5a9708fa30ccf99137067",
           "tag" : "688e0b634f51c4f6d983629c8a63c1c0",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 105,
@@ -1172,7 +1288,8 @@
           "msg" : "02cde168fba3f544bbd0332f7adeada8",
           "ct" : "b75b8e96de2ef9704ade5c64cab59671",
           "tag" : "dec00ceb899c4a6a29be67f1b30435e0",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 106,
@@ -1183,7 +1300,8 @@
           "msg" : "16ddd23ff53f3d23c06334487040eb47",
           "ct" : "8e67034384170a646e9eea1606a8e899",
           "tag" : "fe7a3dd42beb5ff70bb471ff76f0d341",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 107,
@@ -1194,7 +1312,8 @@
           "msg" : "623b7850c321e2cf0c6fbcc8dfd1aff2",
           "ct" : "7eeb00c65fe7e0c79255e3cd90013588",
           "tag" : "957d35fb25fdc17f00db33756967fd02",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 108,
@@ -1205,7 +1324,8 @@
           "msg" : "87b3a4d7b26d8d3203a0de1d64ef82e3",
           "ct" : "f83e3b4333400d6393d085fe947057c4",
           "tag" : "7a30291bb506ae3961f61d683c9d94d1",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 109,
@@ -1216,7 +1336,8 @@
           "msg" : "dc9e9eaf11e314182df6a4eba17aec9c",
           "ct" : "97db4d850442eb33e6089af6f3cadf7b",
           "tag" : "3ccbb125b2835754c1409d227e374d0b",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : []
         },
         {
           "tcId" : 110,
@@ -1227,7 +1348,10 @@
           "msg" : "bdd411814564c4218d224d50591c818855a862a0a519ac0b3d71a2edb12aa71eb81959bcc6b84c45aa424c9aca0b7bdd",
           "ct" : "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : [
+            "ConstructedIv"
+          ]
         },
         {
           "tcId" : 111,
@@ -1238,7 +1362,10 @@
           "msg" : "d04846a01f472262e60a1cb4cfcbdcb05c3f819628a3a49395c5dae96c434b2417ce071699afa74a60c32c0bafd9c01a",
           "ct" : "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : [
+            "ConstructedIv"
+          ]
         },
         {
           "tcId" : 112,
@@ -1249,7 +1376,10 @@
           "msg" : "79637cee9decf33e3080de3d2c55bd21cd529ba8080b583edb6cfe13cda04bd00debe58b8cd48d6e02a1ecfc4d87923a",
           "ct" : "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           "tag" : "fefffffffefffffffefffffffeffffff",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : [
+            "ConstructedIv"
+          ]
         },
         {
           "tcId" : 113,
@@ -1260,7 +1390,10 @@
           "msg" : "6492a73880dac7f36743715b0fc7063d3e46a25044310bba5849ed88bfcb54b0adbe3978040bda849906e1aa09d1a8e3",
           "ct" : "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           "tag" : "ffffff7f00112233445566778899aabb",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : [
+            "ConstructedIv"
+          ]
         },
         {
           "tcId" : 114,
@@ -1271,7 +1404,10 @@
           "msg" : "7848d9e872f40bca1b82a4e7185fb75193b3496cc1dc2a72b86ed156ab8389e71687ed25eb6485e66561fa8c39853368",
           "ct" : "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           "tag" : "ffffffffffffff7f0011223344556677",
-          "result" : "valid"
+          "result" : "valid",
+          "flags" : [
+            "ConstructedIv"
+          ]
         },
         {
           "tcId" : 115,
@@ -1282,7 +1418,8 @@
           "msg" : "f663044a4e7dd822aba0b7de2d869981",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 116,
@@ -1293,7 +1430,8 @@
           "msg" : "49861b1fb6bcf8e4",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 117,
@@ -1304,7 +1442,8 @@
           "msg" : "49861b1fb6bcf8e4",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 118,
@@ -1315,7 +1454,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 119,
@@ -1326,7 +1466,8 @@
           "msg" : "759dfbbb8a251ccc",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 120,
@@ -1337,7 +1478,8 @@
           "msg" : "49861b1fb6bcf8e4",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 121,
@@ -1348,7 +1490,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 122,
@@ -1359,7 +1502,8 @@
           "msg" : "759dfbbb8a251ccc",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 123,
@@ -1370,7 +1514,8 @@
           "msg" : "f663044a4e7dd822aba0b7de2d869981",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 124,
@@ -1381,7 +1526,8 @@
           "msg" : "759dfbbb8a251ccc",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 125,
@@ -1392,7 +1538,8 @@
           "msg" : "f663044a4e7dd822aba0b7de2d869981",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 126,
@@ -1403,7 +1550,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 127,
@@ -1414,7 +1562,8 @@
           "msg" : "49861b1fb6bcf8e4",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 128,
@@ -1425,7 +1574,8 @@
           "msg" : "759dfbbb8a251ccc",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 129,
@@ -1436,7 +1586,8 @@
           "msg" : "f663044a4e7dd822aba0b7de2d869981",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 130,
@@ -1447,7 +1598,8 @@
           "msg" : "759dfbbb8a251ccc",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 131,
@@ -1458,7 +1610,8 @@
           "msg" : "49861b1fb6bcf8e4",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 132,
@@ -1469,7 +1622,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 133,
@@ -1480,7 +1634,8 @@
           "msg" : "f663044a4e7dd822aba0b7de2d869981",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 134,
@@ -1491,7 +1646,8 @@
           "msg" : "759dfbbb8a251ccc",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 135,
@@ -1502,7 +1658,8 @@
           "msg" : "f663044a4e7dd822aba0b7de2d869981",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 136,
@@ -1513,7 +1670,8 @@
           "msg" : "759dfbbb8a251ccc",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 137,
@@ -1524,7 +1682,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 138,
@@ -1535,7 +1694,8 @@
           "msg" : "759dfbbb8a251ccc",
           "ct" : "0000000000000000",
           "tag" : "00000000000000000000000000000000",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 139,
@@ -1546,7 +1706,8 @@
           "msg" : "49861b1fb6bcf8e4",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 140,
@@ -1557,7 +1718,8 @@
           "msg" : "",
           "ct" : "",
           "tag" : "0987e35e40981a2730c1740c7201731f",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 141,
@@ -1568,7 +1730,8 @@
           "msg" : "f663044a4e7dd822aba0b7de2d869981",
           "ct" : "00000000000000000000000000000000",
           "tag" : "13a1883272188b4c8d2727178198fe95",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 142,
@@ -1579,7 +1742,8 @@
           "msg" : "49861b1fb6bcf8e4",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         },
         {
           "tcId" : 143,
@@ -1590,7 +1754,8 @@
           "msg" : "49861b1fb6bcf8e4",
           "ct" : "ffffffffffffffff",
           "tag" : "ffffffffffffffffffffffffffffffff",
-          "result" : "invalid"
+          "result" : "invalid",
+          "flags" : []
         }
       ]
     }
