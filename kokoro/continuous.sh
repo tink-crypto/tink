@@ -27,7 +27,7 @@ cd git*/tink
 source ./kokoro/run_tests.sh
 
 # Run all manual tests.
-time ${BAZEL_BIN} test \
+time bazel test \
 --strategy=TestRunner=standalone \
 --test_timeout 10000 \
 --test_output=all \

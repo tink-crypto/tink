@@ -21,23 +21,21 @@ set -e
 # Display commands to stderr.
 set -x
 
-# Workaround for some unknown issue in Kokoro.
-rm -f ~/.bazelrc
+# Workaround b/73748835#comment5.
+sed -i "" "s/output_base/output_user_root/" ~/.bazelrc
 
 PLATFORM=`uname | tr '[:upper:]' '[:lower:]'`
-
-# Using Bazel 0.9.0.
-BAZEL_BIN="${KOKORO_GFILE_DIR}/bazel-${PLATFORM}-x86_64"
 
 DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
 --strategy=CppCompile=standalone --strategy=ProtoCompile=standalone \
 --strategy=GenProto=standalone --strategy=GenProtoDescriptorSet=standalone \
 --sandbox_tmpfs_path=${TMP}"
 
-chmod +x "${BAZEL_BIN}"
+# Install the latest version of Bazel.
+use_bazel.sh latest
 
-echo "using bazel binary: ${BAZEL_BIN}"
-${BAZEL_BIN} version
+echo "using bazel binary: `which bazel`"
+bazel version
 
 echo "using java binary: " `which java`
 java -version
@@ -46,15 +44,15 @@ echo "using go: " `which go`
 go version
 
 run_linux_tests() {
-  time ${BAZEL_BIN} fetch ...
+  time bazel fetch ...
 
   # Build all targets, except objc.
-  time ${BAZEL_BIN} build $DISABLE_SANDBOX \
+  time bazel build $DISABLE_SANDBOX \
   -- //... \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run all tests, except manual and objc tests.
-  time ${BAZEL_BIN} --host_javabase="$JAVA_HOME" test \
+  time bazel --host_javabase="$JAVA_HOME" test \
   --strategy=TestRunner=standalone --test_output=all \
   -- //... \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
@@ -65,10 +63,10 @@ run_macos_tests() {
   : "${IOS_SDK_VERSION:=11.1}"
   : "${XCODE_VERSION:=9.1}"
 
-  time ${BAZEL_BIN} fetch ...
+  time bazel fetch ...
 
   # Build all the iOS targets.
-  time ${BAZEL_BIN} build $DISABLE_SANDBOX \
+  time bazel build $DISABLE_SANDBOX \
   --compilation_mode=dbg \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \
