@@ -17,7 +17,6 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//examples/keytemplates:aead",
         "//tools/testing/cc:keyset_reader_writer_cli",
         "//tools/tinkey",
     ],
@@ -31,7 +30,6 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//examples/keytemplates:aead",
         "//tools/testing:aead_cli_java",
         "//tools/testing/cc:aead_cli_cc",
         "//tools/tinkey",
@@ -46,7 +44,6 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//examples/keytemplates:hybrid",
         "//tools/testing:hybrid_decrypt_cli_java",
         "//tools/testing:hybrid_encrypt_cli_java",
         "//tools/testing/cc:hybrid_decrypt_cli_cc",
@@ -63,7 +60,6 @@ sh_test(
     ],
     data = [
         ":test_lib",
-        "//examples/keytemplates:signature",
         "//tools/testing:public_key_sign_cli_java",
         "//tools/testing:public_key_verify_cli_java",
         "//tools/testing/cc:public_key_sign_cli_cc",

@@ -33,6 +33,7 @@ public final class Tinkey {
     try {
       parser.parseArgument(args);
     } catch (CmdLineException e) {
+      System.out.println("Argument wrong!");
       System.out.println(e);
       System.out.println();
       e.getParser().printUsage(System.out);

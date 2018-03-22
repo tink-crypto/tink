@@ -2,7 +2,6 @@
 
 ROOT_DIR="$TEST_SRCDIR/__main__"
 TINKEY_CLI="$ROOT_DIR/tools/tinkey/tinkey"
-KEY_TEMPLATES_DIR="$ROOT_DIR/examples/keytemplates"
 
 #############################################################################
 ##### Helper functions.
@@ -15,14 +14,12 @@ generate_asymmetric_keys() {
   local key_name="$2"
   local key_template="$3"
 
-  local key_template_file="$KEY_TEMPLATES_DIR/$templates_subdir/$key_template"
-
   priv_key_file="$TEST_TMPDIR/${key_name}_private_key.bin"
   pub_key_file="$TEST_TMPDIR/${key_name}_public_key.bin"
-  echo "--- Using template $key_template_file to generate keysets"\
+  echo "--- Using template $key_template to generate keysets"\
       "to files $priv_key_file and $pub_key_file ..."
 
-  $TINKEY_CLI create-keyset --key-template  $key_template_file\
+  $TINKEY_CLI create-keyset --key-template  $key_template\
       --out-format BINARY --out $priv_key_file  || exit 1
   $TINKEY_CLI create-public-keyset --in-format BINARY --in $priv_key_file\
       --out-format BINARY --out $pub_key_file  || exit 1
@@ -41,13 +38,11 @@ generate_symmetric_key() {
     output_format="BINARY"
   fi
 
-  local key_template_file="$KEY_TEMPLATES_DIR/$templates_subdir/$key_template"
-
   symmetric_key_file="$TEST_TMPDIR/${key_name}_symmetric_key.bin"
-  echo "--- Using template $key_template_file to generate keyset"\
+  echo "--- Using template $key_template to generate keyset"\
       "to file $symmetric_key_file ..."
 
-  $TINKEY_CLI create-keyset --key-template $key_template_file\
+  $TINKEY_CLI create-keyset --key-template $key_template\
       --out-format $output_format --out $symmetric_key_file  || exit 1
   echo "Done generating a symmetric keyset."
 }

@@ -5,7 +5,7 @@ CC_AEAD_CLI="$ROOT_DIR/tools/testing/cc/aead_cli_cc"
 JAVA_AEAD_CLI="$ROOT_DIR/tools/testing/aead_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
 
-KEY_TEMPLATES=(AES128_GCM.ascii AES256_GCM.ascii AES128_CTR_HMAC_SHA256.ascii AES256_CTR_HMAC_SHA256.ascii)
+KEY_TEMPLATES=(AES128_GCM AES256_GCM AES128_CTR_HMAC_SHA256 AES256_CTR_HMAC_SHA256)
 
 source $TEST_UTIL || exit 1
 

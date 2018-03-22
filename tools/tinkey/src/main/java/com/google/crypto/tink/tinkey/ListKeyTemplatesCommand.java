@@ -17,23 +17,12 @@
 package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.proto.KeyTemplate;
-import org.kohsuke.args4j.Option;
 
-/**
- * Args for command to create a keyset.
- */
-class CreateKeysetOptions extends OutOptions {
-  @Option(
-    name = "--key-template",
-    handler = KeyTemplateHandler.class,
-    metaVar = "AES128_GCM",
-    required = true,
-    usage = "The key template name. Run list-key-templates to get supported names."
-  )
-  KeyTemplate keyTemplate;
+/** Creates a new {@link KeyTemplate}. */
+public class ListKeyTemplatesCommand implements Command {
 
   @Override
-  void validate() {
-    super.validate();
+  public void run() throws Exception {
+    TinkeyUtil.printAllKeyTemplates();
   }
 }

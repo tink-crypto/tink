@@ -17,10 +17,6 @@
 package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.subtle.Validators;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.OptionDef;
@@ -41,12 +37,11 @@ public class KeyTemplateHandler extends OptionHandler<KeyTemplate> {
 
   @Override
   public final int parseArguments(final Parameters params) throws CmdLineException {
-    final String token = params.getParameter(0);
-    Path keyTemplatePath = Paths.get(token);
+    String templateName = params.getParameter(0);
     try {
-      Validators.validateExists(keyTemplatePath.toFile());
-      setter.addValue(TinkeyUtil.readKeyTemplateFromTextFile(keyTemplatePath));
-    } catch (IOException e) {
+      setter.addValue(TinkeyUtil.findKeyTemplate(templateName));
+    } catch (Exception e) {
+      e.printStackTrace();
       throw new CmdLineException(owner, e.getMessage(), e);
     }
     return 1;
@@ -54,6 +49,6 @@ public class KeyTemplateHandler extends OptionHandler<KeyTemplate> {
 
   @Override
   public String getDefaultMetaVariable() {
-    return "aes-128-gcm.proto";
+    return "AES128_GCM";
   }
 }

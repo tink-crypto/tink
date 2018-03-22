@@ -25,21 +25,25 @@ import org.kohsuke.args4j.spi.SubCommands;
  * Defines the different sub-commands and their parameters, for command-line invocation.
  */
 public final class TinkeyCommands {
-  @Argument(metaVar = "command", required = true, handler = SubCommandHandler.class,
-      usage = "Command to run")
+  @Argument(
+    metaVar = "command",
+    required = true,
+    handler = SubCommandHandler.class,
+    usage = "Command to run"
+  )
   @SubCommands({
-      @SubCommand(name = "add-key", impl = AddKeyCommand.class),
-      @SubCommand(name = "convert-keyset", impl = ConvertKeysetCommand.class),
-      @SubCommand(name = "create-keyset", impl = CreateKeysetCommand.class),
-      @SubCommand(name = "create-public-keyset", impl = CreatePublicKeysetCommand.class),
-      @SubCommand(name = "create-key-template", impl = CreateKeyTemplateCommand.class),
-      @SubCommand(name = "delete-key", impl = DeleteKeyCommand.class),
-      @SubCommand(name = "destroy-key", impl = DestroyKeyCommand.class),
-      @SubCommand(name = "disable-key", impl = DisableKeyCommand.class),
-      @SubCommand(name = "enable-key", impl = EnableKeyCommand.class),
-      @SubCommand(name = "list-keyset", impl = ListKeysetCommand.class),
-      @SubCommand(name = "rotate-keyset", impl = RotateKeysetCommand.class),
-      @SubCommand(name = "promote-key", impl = PromoteKeyCommand.class),
+    @SubCommand(name = "add-key", impl = AddKeyCommand.class),
+    @SubCommand(name = "convert-keyset", impl = ConvertKeysetCommand.class),
+    @SubCommand(name = "create-keyset", impl = CreateKeysetCommand.class),
+    @SubCommand(name = "create-public-keyset", impl = CreatePublicKeysetCommand.class),
+    @SubCommand(name = "delete-key", impl = DeleteKeyCommand.class),
+    @SubCommand(name = "destroy-key", impl = DestroyKeyCommand.class),
+    @SubCommand(name = "disable-key", impl = DisableKeyCommand.class),
+    @SubCommand(name = "enable-key", impl = EnableKeyCommand.class),
+    @SubCommand(name = "list-keyset", impl = ListKeysetCommand.class),
+    @SubCommand(name = "list-key-templates", impl = ListKeyTemplatesCommand.class),
+    @SubCommand(name = "rotate-keyset", impl = RotateKeysetCommand.class),
+    @SubCommand(name = "promote-key", impl = PromoteKeyCommand.class),
   })
   Command command;
 }

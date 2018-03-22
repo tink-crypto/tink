@@ -137,16 +137,25 @@ be used for common key management tasks.
 
 Still, if there is a need to generate a KeysetHandle with fresh key material
 directly in Java code, you can use
-[`KeysetHandle`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeysetHandle.java):
+[`KeysetHandle`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeysetHandle.java).
+For example, you can generate a keyset containing a randomly generated
+AES128-GCM key as follows.
 
 ```java
+    import com.google.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.aead.AeadKeyTemplates;
+
+    KeyTemplate keyTemplate = AeadKeyTemplates.AES128_GCM;
     KeysetHandle keysetHandle = KeysetHandle.generateNew(keyTemplate);
 ```
 
-where `keyTemplate` can be initialized with one of pre-generated templates from
-[examples/keytemplates](https://github.com/google/tink/tree/master/examples/keytemplates)-folder.
-Alternatively, you can also use
-[`KeysetManager`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeysetManager.java).
+Recommended key templates for MAC, digital signature and hybrid encryption can
+be found in
+[MacKeyTemplates](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/mac/MacKeyTemplates.java),
+[SignatureKeyTemplates](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/signature/SignatureKeyTemplates.java)
+and
+[HybridKeyTemplates](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/hybrid/HybridKeyTemplates.java),
+respectively.
 
 ## Storing Keysets
 

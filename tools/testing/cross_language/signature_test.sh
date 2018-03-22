@@ -7,7 +7,7 @@ JAVA_SIGN_CLI="$ROOT_DIR/tools/testing/public_key_sign_cli_java"
 JAVA_VERIFY_CLI="$ROOT_DIR/tools/testing/public_key_verify_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
 
-KEY_TEMPLATES=(ECDSA_P256.ascii ECDSA_P384.ascii ECDSA_P521.ascii)
+KEY_TEMPLATES=(ECDSA_P256 ECDSA_P384 ECDSA_P521)
 
 source $TEST_UTIL || exit 1
 

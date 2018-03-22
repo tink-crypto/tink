@@ -34,7 +34,7 @@ Available commands:
 *   `convert-keyset`: Changes format, encrypts, decrypts a keyset.
 *   `create-keyset`: Creates a new keyset.
 *   `create-public-keyset`: Creates a public keyset from a private keyset.
-*   `create-key-template`: Creates a new key template.
+*   `list-key-templates`: Lists all supported key templates.
 *   `delete-key`: Deletes a specified key in a keyset.
 *   `disable-key`: Disables a specified key in a keyset.
 *   `enable-key`: Enables a specified key in a keyset.
@@ -52,20 +52,20 @@ generate your own templates with `tinkey create-key-template`.
 -   Generate a keyset, and write it to `private-keyset.cfg`
 
 ```shell
-tinkey create-keyset --key-template ECDSA_P256.ascii --out private-keyset.cfg
+tinkey create-keyset --key-template ECDSA_P256 --out private-keyset.cfg
 ```
 
 -   Add a new key to a keyset
 
 ```shell
-tinkey add-key --key-template ECDSA_P384.ascii --in private-keyset.cfg \
+tinkey add-key --key-template ECDSA_P384 --in private-keyset.cfg \
 --out private-keyset.cfg
 ```
 
 -   Rotate a keyset by adding a primary key
 
 ```shell
-tinkey rotate-keyset --key-template ED25519.ascii --in private-keyset.cfg \
+tinkey rotate-keyset --key-template ED25519 --in private-keyset.cfg \
 --out private-keyset.cfg
 ```
 
@@ -127,7 +127,7 @@ in the following examples with appropriate key URIs.
     default credentials
 
 ```shell
-tinkey create-keyset --key-template AES128_GCM.ascii --out encrypted-keyset.cfg \
+tinkey create-keyset --key-template AES128_GCM --out encrypted-keyset.cfg \
 --master-key-uri gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar
 ```
 
@@ -135,7 +135,7 @@ tinkey create-keyset --key-template AES128_GCM.ascii --out encrypted-keyset.cfg 
     credentials in `credentials.json`
 
 ```shell
-tinkey create-keyset --key-template AES128_GCM.ascii --out encrypted-keyset.cfg \
+tinkey create-keyset --key-template AES128_GCM --out encrypted-keyset.cfg \
 --master-key-uri gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar
 --credential credential.json
 ```
@@ -168,7 +168,7 @@ tinkey convert-keyset --out encrypted-keyset.cfg --in cleartext-keyset.cfg \
 -   Add a new key to an encrypted keyset, using default credentials
 
 ```shell
-tinkey add-key --key-template AES256_GCM.ascii --in encrypted-keyset.cfg \
+tinkey add-key --key-template AES256_GCM --in encrypted-keyset.cfg \
 --out encrypted-keyset.cfg \
 --master-key-uri gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar
 ```
@@ -176,7 +176,7 @@ tinkey add-key --key-template AES256_GCM.ascii --in encrypted-keyset.cfg \
 -   Rotate an encrypted keyset by adding a primary key
 
 ```shell
-tinkey rotate-keyset --key-template AES256_GCM.ascii --in encrypted-keyset.cfg \
+tinkey rotate-keyset --key-template AES256_GCM --in encrypted-keyset.cfg \
 --out encrypted-keyset.cfg \
 --master-key-uri gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar
 ```
