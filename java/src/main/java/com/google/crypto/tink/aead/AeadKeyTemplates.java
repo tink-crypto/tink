@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.AesCtrParams;
@@ -99,7 +98,6 @@ public final class AeadKeyTemplates {
   /**
    * A {@code KeyTemplate} that generates new instances of {@code ChaCha20Poly1305Key}.
    */
-  @Alpha
   public static final KeyTemplate CHACHA20_POLY1305 =
       KeyTemplate.newBuilder()
         .setTypeUrl(ChaCha20Poly1305KeyManager.TYPE_URL)
