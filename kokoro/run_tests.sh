@@ -22,7 +22,7 @@ set -e
 set -x
 
 # Workaround b/73748835#comment5.
-sed -i "" "s/output_base/output_user_root/" ~/.bazelrc
+rm -f ~/.bazelrc
 
 PLATFORM=`uname | tr '[:upper:]' '[:lower:]'`
 
