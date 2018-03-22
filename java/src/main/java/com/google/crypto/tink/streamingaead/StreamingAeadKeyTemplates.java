@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingParams;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
@@ -39,7 +38,6 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  *   StreamingAead ags = StreamingAeadFactory.getPrimitive(handle);
  * </pre>
  */
-@Alpha
 public final class StreamingAeadKeyTemplates {
   /**
    * A {@code KeyTemplate} that generates new instances of {@code AesCtrHmacStreamingKey} with the

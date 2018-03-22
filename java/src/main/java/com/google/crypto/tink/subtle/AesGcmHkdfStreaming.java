@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
@@ -42,7 +41,6 @@ import javax.crypto.spec.SecretKeySpec;
  * ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header and other information
  * of size firstSegmentOffset align with ciphertextSegmentSize.
  */
-@Alpha
 public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
   // TODO(bleichen): Some things that are not yet decided:
   //   - What can we assume about the state of objects after getting an exception?

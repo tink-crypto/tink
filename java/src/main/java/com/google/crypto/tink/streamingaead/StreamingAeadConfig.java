@@ -18,7 +18,6 @@ package com.google.crypto.tink.streamingaead;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
@@ -35,7 +34,6 @@ import java.security.GeneralSecurityException;
  * <p>For more information on how to obtain and use instances of StreamingAead,
  * see {@link StreamingAeadFactory}.
  */
-@Alpha
 public final class StreamingAeadConfig {
   public static final String AES_CTR_HMAC_STREAMINGAEAD_TYPE_URL =
       AesCtrHmacStreamingKeyManager.TYPE_URL;

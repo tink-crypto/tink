@@ -17,7 +17,6 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.StreamingAead;
-import com.google.crypto.tink.annotations.Alpha;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,8 +30,7 @@ import java.security.GeneralSecurityException;
  * "Online Authenticated-Encryption and its Nonce-Reuse Misuse-Resistance" by Hoang, Reyhanitabar,
  * Rogaway and Vizár https://eprint.iacr.org/2015/189.pdf
  */
-@Alpha
-public abstract class NonceBasedStreamingAead implements StreamingAead {
+abstract class NonceBasedStreamingAead implements StreamingAead {
 
   // Abstract methods that the subclass has to implement.
   public abstract StreamSegmentEncrypter newStreamSegmentEncrypter(byte[] associatedData)
