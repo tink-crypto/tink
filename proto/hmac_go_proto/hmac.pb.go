@@ -32,7 +32,7 @@ package hmac_go_proto
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import google_crypto_tink "github.com/google/tink/proto/common_proto"
+import google_crypto_tink "github.com/google/tink/proto/common_go_proto"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
