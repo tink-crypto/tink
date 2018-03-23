@@ -27,7 +27,7 @@ It has these top-level messages:
 	HmacKey
 	HmacKeyFormat
 */
-package hmac_proto
+package hmac_go_proto
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"

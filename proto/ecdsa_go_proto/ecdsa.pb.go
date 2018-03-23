@@ -28,7 +28,7 @@ It has these top-level messages:
 	EcdsaPrivateKey
 	EcdsaKeyFormat
 */
-package ecdsa_proto
+package ecdsa_go_proto
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"

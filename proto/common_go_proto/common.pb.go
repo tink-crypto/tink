@@ -24,7 +24,7 @@ It is generated from these files:
 
 It has these top-level messages:
 */
-package common_proto
+package common_go_proto
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"

@@ -29,7 +29,7 @@ It has these top-level messages:
 	KeysetInfo
 	EncryptedKeyset
 */
-package tink_proto
+package tink_go_proto
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"

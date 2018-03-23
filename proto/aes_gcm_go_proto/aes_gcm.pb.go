@@ -26,7 +26,7 @@ It has these top-level messages:
 	AesGcmKeyFormat
 	AesGcmKey
 */
-package aes_gcm_proto
+package aes_gcm_go_proto
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
