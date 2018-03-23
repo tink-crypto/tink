@@ -511,8 +511,22 @@ java_import_external(
 
 http_archive(
     name = "build_bazel_rules_apple",
-    strip_prefix = "rules_apple-a2b620070d373e4f265194b69f65e9e5c17fbcb8",
-    url = "https://github.com/bazelbuild/rules_apple/archive/a2b620070d373e4f265194b69f65e9e5c17fbcb8.zip",
+    strip_prefix = "rules_apple-0.3.0",
+    url = "https://github.com/bazelbuild/rules_apple/archive/0.3.0.zip",
+    sha256 = "0c2f7b903c2334a3e7e0b565f0f80a854047ac36202978318f853cb762bf33f3",
+)
+
+http_archive(
+    name = "bazel_skylib",
+    strip_prefix = "bazel-skylib-0.3.1",
+    url = "https://github.com/bazelbuild/bazel-skylib/archive/0.3.1.zip",
+    sha256 = "95518adafc9a2b656667bbf517a952e54ce7f350779d0dd95133db4eb5c27fb1",
+)
+
+http_file(
+    name = "xctestrunner",
+    executable = 1,
+    url = "https://github.com/google/xctestrunner/releases/download/0.2.1/ios_test_runner.par",
 )
 
 #-----------------------------------------------------------------------------
