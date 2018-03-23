@@ -10,7 +10,7 @@
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>tink-android</artifactId>
   <version>VERSION_PLACEHOLDER</version>
-  <packaging>aar</packaging>
+  <packaging>jar</packaging>
 
   <licenses>
     <license>
