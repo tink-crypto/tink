@@ -130,6 +130,12 @@ public final class AesSiv implements DeterministicAead {
 
     byte[] ctrCiphertext = Arrays.copyOfRange(ciphertext, AesUtil.BLOCK_SIZE, ciphertext.length);
     byte[] decryptedPt = aesCtr.doFinal(ctrCiphertext);
+    if (ctrCiphertext.length == 0 && decryptedPt == null && SubtleUtil.isAndroid()) {
+      // On Android KitKat (19) and Lollipop (21), Cipher.doFinal returns a null pointer when the
+      // ciphertext is empty, instead of an empty plaintext. Here we attempt to fix this bug. This
+      // is safe because if the plaintext is not empty, the next integrity check would reject it.
+      decryptedPt = new byte[0];
+    }
     byte[] computedIv = s2v(associatedData, decryptedPt);
 
     if (Bytes.equal(expectedIv, computedIv)) {

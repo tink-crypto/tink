@@ -26,7 +26,6 @@ import com.google.crypto.tink.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashSet;
-import javax.crypto.AEADBadTagException;
 import javax.crypto.Cipher;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -108,8 +107,11 @@ public class AesGcmJceTest {
         try {
           byte[] unused = gcm.decrypt(modified, aad);
           fail("Decrypting modified ciphertext should fail");
-        } catch (AEADBadTagException ex) {
+        } catch (GeneralSecurityException ex) {
           // This is expected.
+          // This could be a AeadBadTagException when the tag verification
+          // fails or some not yet specified Exception when the ciphertext is too short.
+          // In all cases a GeneralSecurityException or a subclass of it must be thrown.
         }
       }
     }
@@ -136,8 +138,11 @@ public class AesGcmJceTest {
         try {
           byte[] unused = gcm.decrypt(ciphertext, modified);
           fail("Decrypting with modified aad should fail");
-        } catch (AEADBadTagException ex) {
+        } catch (GeneralSecurityException ex) {
           // This is expected.
+          // This could be a AeadBadTagException when the tag verification
+          // fails or some not yet specified Exception when the ciphertext is too short.
+          // In all cases a GeneralSecurityException or a subclass of it must be thrown.
         }
       }
     }
@@ -260,8 +265,11 @@ public class AesGcmJceTest {
             byte[] badAad = new byte[] {1, 2, 3};
             byte[] unused = gcm.decrypt(ciphertext, badAad);
             fail("Decrypting with modified aad should fail");
-          } catch (AEADBadTagException ex) {
+          } catch (GeneralSecurityException ex) {
             // This is expected.
+            // This could be a AeadBadTagException when the tag verification
+            // fails or some not yet specified Exception when the ciphertext is too short.
+            // In all cases a GeneralSecurityException or a subclass of it must be thrown.
           }
         }
         {  // encrypting with aad equal to null
@@ -274,8 +282,11 @@ public class AesGcmJceTest {
             byte[] badAad = new byte[] {1, 2, 3};
             byte[] unused = gcm.decrypt(ciphertext, badAad);
             fail("Decrypting with modified aad should fail");
-          } catch (AEADBadTagException ex) {
+          } catch (GeneralSecurityException ex) {
             // This is expected.
+            // This could be a AeadBadTagException when the tag verification
+            // fails or some not yet specified Exception when the ciphertext is too short.
+            // In all cases a GeneralSecurityException or a subclass of it must be thrown.
           }
         }
       }

@@ -21,6 +21,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
+import com.google.crypto.tink.StreamingTestUtil.SeekableByteBufferChannel;
 import com.google.crypto.tink.TestUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -142,7 +143,7 @@ public class StreamingAeadThreadSafetyTest {
     int numberOfThreads = 10;
     int plaintextSize = 5432; // The plaintext size for each thread.
     byte[] ciphertext = encrypt(stream, new byte[numberOfThreads * plaintextSize], aad);
-    ByteBufferChannel ctChannel = new ByteBufferChannel(ciphertext);
+    SeekableByteChannel ctChannel = new SeekableByteBufferChannel(ciphertext);
     SeekableByteChannel decChannel = stream.newSeekableDecryptingChannel(ctChannel, aad);
 
     ExceptionHandler exceptionHandler = new ExceptionHandler();
@@ -403,7 +404,7 @@ public class StreamingAeadThreadSafetyTest {
       plaintext[i] = (byte) i;
     }
     byte[] ciphertext = encrypt(stream, plaintext, aad);
-    ByteBufferChannel ctChannel = new ByteBufferChannel(ciphertext);
+    SeekableByteChannel ctChannel = new SeekableByteBufferChannel(ciphertext);
     SeekableByteChannel decChannel = stream.newSeekableDecryptingChannel(ctChannel, aad);
 
     ExceptionHandler exceptionHandler = new ExceptionHandler();

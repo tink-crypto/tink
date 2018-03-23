@@ -20,7 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.StreamingTestUtil;
-import com.google.crypto.tink.StreamingTestUtil.ByteBufferChannel;
+import com.google.crypto.tink.StreamingTestUtil.SeekableByteBufferChannel;
 import com.google.crypto.tink.TestUtil;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
@@ -238,7 +238,7 @@ public class AesGcmHkdfStreamingTest {
     byte[] plaintext = StreamingTestUtil.generatePlaintext(plaintextSize);
     int ciphertextLength = (int) ags.expectedCiphertextSize(plaintextSize);
     ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
-    WritableByteChannel ctChannel = new ByteBufferChannel(ciphertext, maxChunkSize);
+    WritableByteChannel ctChannel = new SeekableByteBufferChannel(ciphertext, maxChunkSize);
     WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, aad);
     ByteBuffer plaintextBuffer = ByteBuffer.wrap(plaintext);
     int loops = 0;

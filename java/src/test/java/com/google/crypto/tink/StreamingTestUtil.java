@@ -51,15 +51,78 @@ public class StreamingTestUtil {
    *
    * <p>The implementation is backed by a ByteBuffer.
    */
-  public static class ByteBufferChannel implements SeekableByteChannel {
-    private final ByteBuffer buffer;
+  public static class SeekableByteBufferChannel extends ByteBufferChannel
+      implements SeekableByteChannel {
+    public SeekableByteBufferChannel(ByteBuffer buffer) {
+      super(buffer);
+    }
+
+    public SeekableByteBufferChannel(ByteBuffer buffer, int maxChunkSize) {
+      super(buffer, maxChunkSize);
+    }
+
+    public SeekableByteBufferChannel(byte[] bytes) {
+      super(bytes);
+    }
+
+    @Override
+    public long position() throws ClosedChannelException {
+      checkIsOpen();
+      return buffer.position();
+    }
+
+    @Override
+    public synchronized SeekableByteBufferChannel position(long newPosition)
+        throws ClosedChannelException {
+      checkIsOpen();
+      if (newPosition < 0) {
+        throw new IllegalArgumentException("negative position");
+      }
+      if (newPosition > buffer.limit()) {
+        newPosition = buffer.limit();
+      }
+      buffer.position((int) newPosition);
+      return this;
+    }
+
+    @Override
+    public int write(ByteBuffer src) throws IOException {
+      checkIsOpen();
+      // not the most efficient way
+      int size = Math.min(buffer.remaining(), src.remaining());
+      size = Math.min(size, maxChunkSize);
+      byte[] bytes = new byte[size];
+      src.get(bytes);
+      buffer.put(bytes);
+      return size;
+    }
+
+    @Override
+    public long size() throws ClosedChannelException {
+      checkIsOpen();
+      return buffer.limit();
+    }
+
+    @Override
+    public SeekableByteChannel truncate(long size) {
+      throw new NonWritableChannelException();
+    }
+  }
+
+  /**
+   * Implements a ReadableByteChannel for testing.
+   *
+   * <p>The implementation is backed by a ByteBuffer.
+   */
+  public static class ByteBufferChannel implements ReadableByteChannel {
+    final ByteBuffer buffer;
 
     /**
      * Defines the maximal size of a chunk that is transferred with a single write. This can be used
      * to test the behavior of streaming encryption with channels where not always sufficiently many
      * bytes are available during reads and writes.
      */
-    private final int maxChunkSize;
+    final int maxChunkSize;
 
     /** keeps track whether the channel is still open. */
     private boolean isopen;
@@ -82,29 +145,10 @@ public class StreamingTestUtil {
       isopen = true;
     }
 
-    private void checkIsOpen() throws ClosedChannelException {
+    void checkIsOpen() throws ClosedChannelException {
       if (!isopen) {
         throw new ClosedChannelException();
       }
-    }
-
-    @Override
-    public long position() throws ClosedChannelException {
-      checkIsOpen();
-      return buffer.position();
-    }
-
-    @Override
-    public synchronized ByteBufferChannel position(long newPosition) throws ClosedChannelException {
-      checkIsOpen();
-      if (newPosition < 0) {
-        throw new IllegalArgumentException("negative position");
-      }
-      if (newPosition > buffer.limit()) {
-        newPosition = buffer.limit();
-      }
-      buffer.position((int) newPosition);
-      return this;
     }
 
     @Override
@@ -120,29 +164,6 @@ public class StreamingTestUtil {
       buffer.get(bytes);
       dst.put(bytes);
       return size;
-    }
-
-    @Override
-    public int write(ByteBuffer src) throws IOException {
-      checkIsOpen();
-      // not the most efficient way
-      int size = Math.min(buffer.remaining(), src.remaining());
-      size = Math.min(size, maxChunkSize);
-      byte[] bytes = new byte[size];
-      src.get(bytes);
-      buffer.put(bytes);
-      return size;
-    }
-
-    @Override
-    public long size() throws ClosedChannelException {
-      checkIsOpen();
-      return buffer.limit();
-    }
-
-    @Override
-    public SeekableByteChannel truncate(long size) throws NonWritableChannelException {
-      throw new NonWritableChannelException();
     }
 
     @Override
@@ -300,7 +321,8 @@ public class StreamingTestUtil {
 
     // Decrypt ciphertext via SeekableByteChannel.
     {
-      ByteBufferChannel ciphertextChannel = new ByteBufferChannel(ciphertext.toByteArray());
+      SeekableByteChannel ciphertextChannel =
+          new SeekableByteBufferChannel(ciphertext.toByteArray());
       SeekableByteChannel decChannel =
           decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, aad);
       ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
@@ -358,7 +380,8 @@ public class StreamingTestUtil {
 
     // Construct an InputStream from the ciphertext where the first
     // firstSegmentOffset bytes have already been read.
-    ReadableByteChannel ctChannel = new ByteBufferChannel(ciphertext).position(firstSegmentOffset);
+    ReadableByteChannel ctChannel =
+        new SeekableByteBufferChannel(ciphertext).position(firstSegmentOffset);
 
     // Construct an InputStream that returns the plaintext.
     ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, aad);
@@ -443,7 +466,7 @@ public class StreamingTestUtil {
     byte[] ciphertext = encryptWithChannel(ags, plaintext, aad, firstSegmentOffset);
 
     // Construct a channel with random access for the ciphertext.
-    ByteBufferChannel bbc = new ByteBufferChannel(ciphertext);
+    SeekableByteChannel bbc = new SeekableByteBufferChannel(ciphertext);
     SeekableByteChannel ptChannel = ags.newSeekableDecryptingChannel(bbc, aad);
 
     for (int start = 0; start < plaintextSize; start += 1 + start / 2) {
@@ -522,7 +545,7 @@ public class StreamingTestUtil {
 
     // Decrypts a sequence of strings.
     // channels.newReader does not always return the requested number of characters.
-    ByteBufferChannel ctBuffer = new ByteBufferChannel(ByteBuffer.wrap(ciphertext));
+    SeekableByteChannel ctBuffer = new SeekableByteBufferChannel(ByteBuffer.wrap(ciphertext));
     Reader reader = Channels.newReader(ags.newSeekableDecryptingChannel(ctBuffer, aad), "UTF-8");
     for (int i = 0; i < repetitions; i++) {
       char[] chunk = new char[stringWithNonAsciiChars.length()];
@@ -563,7 +586,7 @@ public class StreamingTestUtil {
       int chunkSize,
       byte[] plaintext)
       throws Exception {
-    ByteBufferChannel ct = new ByteBufferChannel(modifiedCiphertext);
+    SeekableByteChannel ct = new SeekableByteBufferChannel(modifiedCiphertext);
     ct.position(firstSegmentOffset);
     ReadableByteChannel ptChannel = ags.newDecryptingChannel(ct, aad);
     int position = 0;
@@ -660,7 +683,7 @@ public class StreamingTestUtil {
   private static void tryDecryptModifiedCiphertextWithSeekableByteChannel(
       StreamingAead ags, byte[] modifiedCiphertext, byte[] aad, byte[] plaintext) throws Exception {
 
-    ByteBufferChannel bbc = new ByteBufferChannel(modifiedCiphertext);
+    SeekableByteChannel bbc = new SeekableByteBufferChannel(modifiedCiphertext);
     SeekableByteChannel ptChannel;
     // Failing in the constructor is valid in principle, but does not happen
     // with the current implementation. Hence we don't catch these exceptions at the moment.
@@ -850,7 +873,8 @@ public class StreamingTestUtil {
       throws Exception {
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
     int plaintextSize = 1 << 18;
-    ByteBufferChannel plaintext = new ByteBufferChannel(generatePlaintext(plaintextSize));
+    SeekableByteBufferChannel plaintext =
+        new SeekableByteBufferChannel(generatePlaintext(plaintextSize));
 
     // Encrypt to file
     WritableByteChannel bc =
