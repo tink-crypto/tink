@@ -19,6 +19,7 @@ java_library(
     javacopts = JAVACOPTS,
     deps = [
         "//java",
+        "//java/src/main/java/com/google/crypto/tink/annotations",
         "@com_google_http_client//jar",
         "@joda_time//jar",
         "@org_json//jar",

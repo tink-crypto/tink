@@ -1,0 +1,142 @@
+// Copyright 2018 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+package com.google.crypto.tink.apps.paymentmethodtoken;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.joda.time.Duration;
+import org.joda.time.Instant;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+/** Tests for {@link SenderIntermediateSigningKeySigner}. */
+@RunWith(JUnit4.class)
+public class SenderIntermediateSigningKeySignerTest {
+
+  /**
+   * Sample Google private signing key for the ECv2 protocolVersion.
+   *
+   * <p>Base64 version of the private key encoded in PKCS8 format.
+   */
+  private static final String GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64 =
+      "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgKvEdSS8f0mjTCNKev"
+          + "aKXIzfNC5b4A104gJWI9TsLIMqhRANCAAT/X7ccFVJt2/6Ps1oCt2AzKhIAz"
+          + "jfJHJ3Op2DVPGh1LMD3oOPgxzUSIqujHG6dq9Ui93Eacl4VWJPMW/MVHHIL";
+
+  /**
+   * Sample Google intermediate public signing key for the ECv2 protocolVersion.
+   *
+   * <p>Base64 version of the public key encoded in ASN.1 type SubjectPublicKeyInfo defined in the
+   * X.509 standard.
+   */
+  private static final String GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64 =
+      "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE/1+3HBVSbdv+j7NaArdgMyoSAM43yR"
+          + "ydzqdg1TxodSzA96Dj4Mc1EiKroxxunavVIvdxGnJeFViTzFvzFRxyCw==";
+
+  @Test
+  public void shouldProduceSignedSenderIntermediateSigningKeyJson() throws Exception {
+    String encoded =
+        new SenderIntermediateSigningKeySigner.Builder()
+            .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
+            .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
+            .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64)
+            .expiration(123456)
+            .build()
+            .sign();
+
+    JSONObject decodedSignedIntermediateSigningKey = new JSONObject(encoded);
+    assertTrue(decodedSignedIntermediateSigningKey.get("signedKey") instanceof String);
+    assertTrue(decodedSignedIntermediateSigningKey.get("signatures") instanceof JSONArray);
+    assertEquals(2, decodedSignedIntermediateSigningKey.length());
+    JSONObject signedKey =
+        new JSONObject(decodedSignedIntermediateSigningKey.getString("signedKey"));
+    assertTrue(signedKey.get("keyValue") instanceof String);
+    assertTrue(signedKey.get("keyExpiration") instanceof String);
+    assertEquals(2, signedKey.length());
+    assertEquals(
+        GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64, signedKey.getString("keyValue"));
+    assertEquals("123456", signedKey.getString("keyExpiration"));
+    assertEquals(1, decodedSignedIntermediateSigningKey.getJSONArray("signatures").length());
+    assertNotEquals(
+        0, decodedSignedIntermediateSigningKey.getJSONArray("signatures").getString(0).length());
+  }
+
+  @Test
+  public void shouldThrowIfExpirationNotSet() throws Exception {
+    try {
+      new SenderIntermediateSigningKeySigner.Builder()
+          .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
+          .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
+          .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64)
+          // no expiration
+          .build();
+      fail("Should have thrown!");
+    } catch (IllegalArgumentException expected) {
+      assertEquals("must set expiration using Builder.expiration", expected.getMessage());
+    }
+  }
+
+  @Test
+  public void shouldThrowIfExpirationIsNegative() throws Exception {
+    try {
+      new SenderIntermediateSigningKeySigner.Builder()
+          .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
+          .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
+          .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64)
+          .expiration(-1)
+          .build();
+      fail("Should have thrown!");
+    } catch (IllegalArgumentException expected) {
+      assertEquals("invalid negative expiration", expected.getMessage());
+    }
+  }
+
+  @Test
+  public void shouldThrowIfNoSenderSigningKeyAdded() throws Exception {
+    try {
+      new SenderIntermediateSigningKeySigner.Builder()
+          .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
+          .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
+          // no call to addSenderSigningKey
+          .expiration(Instant.now().plus(Duration.standardDays(1)).getMillis())
+          .build();
+      fail("Should have thrown!");
+    } catch (IllegalArgumentException expected) {
+      assertEquals(
+          "must add at least one sender's signing key using Builder.addSenderSigningKey",
+          expected.getMessage());
+    }
+  }
+
+  @Test
+  public void shouldThrowIfInvalidProtocolVersionSet() throws Exception {
+    try {
+      new SenderIntermediateSigningKeySigner.Builder()
+          .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
+          .build();
+      fail("Should have thrown!");
+    } catch (IllegalArgumentException expected) {
+      assertEquals("invalid version: ECv1", expected.getMessage());
+    }
+  }
+}

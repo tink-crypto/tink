@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
+import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import java.nio.charset.StandardCharsets;
 
@@ -35,13 +36,18 @@ class PaymentMethodTokenConstants {
   public static final EllipticCurves.PointFormatType UNCOMPRESSED_POINT_FORMAT =
       EllipticCurves.PointFormatType.UNCOMPRESSED;
   public static final String PROTOCOL_VERSION_EC_V1 = "ECv1";
+  @Alpha public static final String PROTOCOL_VERSION_EC_V2 = "ECv2";
   public static final String ECDSA_SHA256_SIGNING_ALGO = "SHA256WithECDSA";
 
   public static final String JSON_ENCRYPTED_MESSAGE_KEY = "encryptedMessage";
-  public static final String JSON_TAG_KEY = "tag";
   public static final String JSON_EPHEMERAL_PUBLIC_KEY = "ephemeralPublicKey";
-  public static final String JSON_SIGNATURE_KEY = "signature";
-  public static final String JSON_SIGNED_MESSAGE_KEY = "signedMessage";
-  public static final String JSON_PROTOCOL_VERSION_KEY = "protocolVersion";
+  public static final String JSON_KEY_EXPIRATION_KEY = "keyExpiration";
+  public static final String JSON_KEY_VALUE_KEY = "keyValue";
   public static final String JSON_MESSAGE_EXPIRATION_KEY = "messageExpiration";
+  public static final String JSON_PROTOCOL_VERSION_KEY = "protocolVersion";
+  public static final String JSON_SIGNATURE_KEY = "signature";
+  public static final String JSON_SIGNATURES_KEY = "signatures";
+  public static final String JSON_SIGNED_KEY_KEY = "signedKey";
+  public static final String JSON_SIGNED_MESSAGE_KEY = "signedMessage";
+  public static final String JSON_TAG_KEY = "tag";
 }
