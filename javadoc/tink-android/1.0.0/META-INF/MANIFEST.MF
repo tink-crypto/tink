@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven 3.1.1
+Built-By: waltercacau
+Build-Jdk: 1.8.0_112-google-v7
+
