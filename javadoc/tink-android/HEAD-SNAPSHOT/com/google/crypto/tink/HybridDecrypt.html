@@ -113,11 +113,13 @@ var activeTableTab = "activeTableTab";
  symmetric key only, and the final ciphertext consists of the symmetric ciphertext and the
  encrypted symmetric key.
 
- <p><b>WARNING</b>: Hybrid Encryption does not provide authenticity, that is the recipient of an
- encrypted message does not know the identity of the sender. Similar to general public-key
- encryption schemes the security goal of Hybrid Encryption is to provide privacy only. In other
- words, Hybrid Encryption is secure if and only if the recipient can accept anonymous messages or
- can rely on other mechanisms to authenticate the sender.
+ <p><b>WARNING</b>
+
+ <p>Hybrid Encryption does not provide authenticity, that is the recipient of an encrypted message
+ does not know the identity of the sender. Similar to general public-key encryption schemes the
+ security goal of Hybrid Encryption is to provide privacy only. In other words, Hybrid Encryption
+ is secure if and only if the recipient can accept anonymous messages or can rely on other
+ mechanisms to authenticate the sender.
 
  <p>The functionality of Hybrid Encryption is represented as a pair of primitives (interfaces):
  <a href="../../../../com/google/crypto/tink/HybridEncrypt.html" title="interface in com.google.crypto.tink"><code>HybridEncrypt</code></a> for encryption of data, and <a href="../../../../com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink"><code>HybridDecrypt</code></a> for decryption.

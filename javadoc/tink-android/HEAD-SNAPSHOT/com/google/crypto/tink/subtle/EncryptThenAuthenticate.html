@@ -116,9 +116,11 @@ var activeTableTab = "activeTableTab";
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></pre>
 <div class="block">This primitive performs an encrypt-then-Mac operation on plaintext and additional authenticated
- data (aad). The Mac is computed over (aad || ciphertext || size of aad), thus it doesn't violate
- the <a href="https://en.wikipedia.org/wiki/Horton_Principle">Horton Principle</a>. This
- implementation is based on <a
+ data (aad).
+
+ <p>The Mac is computed over (aad || ciphertext || size of aad), thus it doesn't violate the <a
+ href="https://en.wikipedia.org/wiki/Horton_Principle">Horton Principle</a>. This implementation
+ is based on <a
  href="http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05">Authenticated Encryption
  with AES-CBC and HMAC-SHA</a>.</div>
 </li>

@@ -110,14 +110,17 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">AeadKeyTemplates</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">Pre-generated <code>KeyTemplate</code> for <code>Aead</code> keys. One can use these templates
- to generate new <code>Keyset</code> with <code>KeysetHandle</code>. To generate a new keyset
- that contains a single <code>AesGcmKey</code>, one can do:
- <pre>
-   Config.register(AeadConfig.TINK_1_0_0);
-   KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
-   Aead aead = AeadFactory.getPrimitive(handle);
- </pre></div>
+<div class="block">Pre-generated <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> for <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> keys.
+
+ <p>One can use these templates to generate new <a href="../../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> with
+ <a href="../../../../../com/google/crypto/tink/KeysetHandle.html#generateNew-com.google.crypto.tink.proto.KeyTemplate-"><code>KeysetHandle.generateNew(com.google.crypto.tink.proto.KeyTemplate)</code></a>. To generate a new keyset that contains a
+ single <a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmKey</code></a>, one can do:
+
+ <pre><code>
+ Config.register(AeadConfig.TINK_1_0_0);
+ KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
+ Aead aead = AeadFactory.getPrimitive(handle);
+ </code></pre></div>
 </li>
 </ul>
 </div>
@@ -139,65 +142,77 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_CTR_HMAC_SHA256">AES128_CTR_HMAC_SHA256</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the
- following parameters:
-   - AES key size: 16 bytes
-   - AES IV size: 16 bytes
-   - HMAC key size: 32 bytes
-   - HMAC tag size: 16 bytes
-   - HMAC hash function: SHA256</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKey</code></a> with the following parameters:
+
+ 
+   AES key size: 16 bytes
+   AES CTR IV size: 16 byte
+   HMAC key size: 32 bytes
+   HMAC tag size: 16 bytes
+   HMAC hash function: SHA256
+ </div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_EAX">AES128_EAX</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesEaxKey</code> with the following
- parameters:
-   - Key size: 16 bytes
-   - IV size: 16 bytes.</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <code>com.google.crypto.tink.proto.AesEaxKey</code> with the following parameters:
+
+ 
+   Key size: 16 bytes
+   IV size: 16 bytes
+ </div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_GCM">AES128_GCM</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following
- parameters:
-   - Key size: 16 bytes</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmKey</code></a> with the following parameters:
+
+ 
+   Key size: 16 bytes
+ </div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_CTR_HMAC_SHA256">AES256_CTR_HMAC_SHA256</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the
- following parameters:
-   - AES key size: 32 bytes
-   - AES IV size: 16 bytes
-   - HMAC key size: 32 bytes
-   - HMAC tag size: 32 bytes
-   - HMAC hash function: SHA256</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKey</code></a> with the following parameters:
+
+ 
+   AES key size: 32 bytes
+   AES CTR IV size: 16 byte
+   HMAC key size: 32 bytes
+   HMAC tag size: 32 bytes
+   HMAC hash function: SHA256
+ </div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_EAX">AES256_EAX</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesEaxKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - IV size: 16 bytes</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/AesEaxKey.html" title="class in com.google.crypto.tink.proto"><code>AesEaxKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+   IV size: 16 bytes
+ </div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_GCM">AES256_GCM</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following
- parameters:
-   - Key size: 32 bytes</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+ </div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#CHACHA20_POLY1305">CHACHA20_POLY1305</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>ChaCha20Poly1305Key</code>.</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/ChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto"><code>ChaCha20Poly1305Key</code></a>.</div>
 </td>
 </tr>
 </table>
@@ -287,9 +302,15 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES128_GCM</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> AES128_GCM</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following
- parameters:
-   - Key size: 16 bytes</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Key size: 16 bytes
+ </ul>
+
+ <p>On Android KitKat (API level 19), the <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> instance generated
+ by this key template does not support associated data. It might not work at all in older
+ versions.</div>
 </li>
 </ul>
 <a name="AES256_GCM">
@@ -299,9 +320,15 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES256_GCM</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> AES256_GCM</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following
- parameters:
-   - Key size: 32 bytes</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Key size: 32 bytes
+ </ul>
+
+ <p>On Android KitKat (API level 19), the <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> instance generated
+ by this key template does not support associated data. It might not work at all in older
+ versions.</div>
 </li>
 </ul>
 <a name="AES128_EAX">
@@ -311,10 +338,12 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES128_EAX</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> AES128_EAX</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesEaxKey</code> with the following
- parameters:
-   - Key size: 16 bytes
-   - IV size: 16 bytes.</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <code>com.google.crypto.tink.proto.AesEaxKey</code> with the following parameters:
+
+ <ul>
+   <li>Key size: 16 bytes
+   <li>IV size: 16 bytes
+ </ul></div>
 </li>
 </ul>
 <a name="AES256_EAX">
@@ -324,10 +353,12 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES256_EAX</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> AES256_EAX</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesEaxKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - IV size: 16 bytes</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/AesEaxKey.html" title="class in com.google.crypto.tink.proto"><code>AesEaxKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Key size: 32 bytes
+   <li>IV size: 16 bytes
+ </ul></div>
 </li>
 </ul>
 <a name="AES128_CTR_HMAC_SHA256">
@@ -337,13 +368,15 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES128_CTR_HMAC_SHA256</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> AES128_CTR_HMAC_SHA256</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the
- following parameters:
-   - AES key size: 16 bytes
-   - AES IV size: 16 bytes
-   - HMAC key size: 32 bytes
-   - HMAC tag size: 16 bytes
-   - HMAC hash function: SHA256</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKey</code></a> with the following parameters:
+
+ <ul>
+   <li>AES key size: 16 bytes
+   <li>AES CTR IV size: 16 byte
+   <li>HMAC key size: 32 bytes
+   <li>HMAC tag size: 16 bytes
+   <li>HMAC hash function: SHA256
+ </ul></div>
 </li>
 </ul>
 <a name="AES256_CTR_HMAC_SHA256">
@@ -353,13 +386,15 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>AES256_CTR_HMAC_SHA256</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> AES256_CTR_HMAC_SHA256</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the
- following parameters:
-   - AES key size: 32 bytes
-   - AES IV size: 16 bytes
-   - HMAC key size: 32 bytes
-   - HMAC tag size: 32 bytes
-   - HMAC hash function: SHA256</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKey</code></a> with the following parameters:
+
+ <ul>
+   <li>AES key size: 32 bytes
+   <li>AES CTR IV size: 16 byte
+   <li>HMAC key size: 32 bytes
+   <li>HMAC tag size: 32 bytes
+   <li>HMAC hash function: SHA256
+ </ul></div>
 </li>
 </ul>
 <a name="CHACHA20_POLY1305">
@@ -369,7 +404,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>CHACHA20_POLY1305</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> CHACHA20_POLY1305</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>ChaCha20Poly1305Key</code>.</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/ChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto"><code>ChaCha20Poly1305Key</code></a>.</div>
 </li>
 </ul>
 </li>
@@ -406,8 +441,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;createAesGcmKeyTemplate(int&nbsp;keySize)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <code>KeyTemplate</code> containing a <code>AesGcmKeyFormat</code> with some specified
- parameters.</dd>
+<dd>a <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> containing a <a href="../../../../../com/google/crypto/tink/proto/AesGcmKeyFormat.html" title="class in com.google.crypto.tink.proto"><code>AesGcmKeyFormat</code></a> with some specified
+     parameters.</dd>
 </dl>
 </li>
 </ul>
@@ -421,8 +456,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                   int&nbsp;ivSize)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <code>KeyTemplate</code> containing a <code>AesEaxKeyFormat</code> with some specified
- parameters.</dd>
+<dd>a <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> containing a <a href="../../../../../com/google/crypto/tink/proto/AesEaxKeyFormat.html" title="class in com.google.crypto.tink.proto"><code>AesEaxKeyFormat</code></a> with some specified
+     parameters.</dd>
 </dl>
 </li>
 </ul>
@@ -439,8 +474,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                           <a href="../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;hashType)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <code>KeyTemplate</code> containing a <code>AesCtrHmacAeadKeyFormat</code> with some
- specific parameters.</dd>
+<dd>a <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> containing a <a href="../../../../../com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKeyFormat</code></a> with some specific
+     parameters.</dd>
 </dl>
 </li>
 </ul>
@@ -453,8 +488,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;createKmsAeadKeyTemplate(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keyUri)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a new <code>KeyTemplate</code> that can generate a <code>KmsAeadKey</code> pointing to
- <code>keyUri</code>.</dd>
+<dd>a new <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that can generate a <code>KmsAeadKey</code> pointing to <code>keyUri</code>.</dd>
 </dl>
 </li>
 </ul>
@@ -468,8 +502,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                            <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;dekTemplate)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a new <code>KeyTemplate</code> that can generate a <code>KmsEnvelopeAeadKey</code> whose
- KEK is pointing to <code>kekUri</code> and DEK template is <code>dekTemplate</code>.</dd>
+<dd>a new <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that can generate a <a href="../../../../../com/google/crypto/tink/proto/KmsEnvelopeAeadKey.html" title="class in com.google.crypto.tink.proto"><code>KmsEnvelopeAeadKey</code></a> whose KEK is pointing to <code>kekUri</code>
+     and DEK template is <code>dekTemplate</code>.</dd>
 </dl>
 </li>
 </ul>

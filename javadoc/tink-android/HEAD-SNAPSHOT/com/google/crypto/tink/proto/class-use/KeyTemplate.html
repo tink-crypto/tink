@@ -152,7 +152,7 @@
 <tr class="rowColor">
 <td class="colFirst"><code>static &lt;P&gt;&nbsp;<a href="../../../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
 <td class="colLast"><span class="typeNameLabel">Registry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/Registry.html#newKeyData-com.google.crypto.tink.proto.KeyTemplate-">newKeyData</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>
-<div class="block">Convenience method for generating a new <code>KeyData</code> for the specified <code>template</code>.</div>
+<div class="block">Convenience method for generating a new <a href="../../../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto"><code>KeyData</code></a> for the specified <code>template</code>.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -179,65 +179,77 @@
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_CTR_HMAC_SHA256">AES128_CTR_HMAC_SHA256</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the
- following parameters:
-   - AES key size: 16 bytes
-   - AES IV size: 16 bytes
-   - HMAC key size: 32 bytes
-   - HMAC tag size: 16 bytes
-   - HMAC hash function: SHA256</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKey</code></a> with the following parameters:
+
+ 
+   AES key size: 16 bytes
+   AES CTR IV size: 16 byte
+   HMAC key size: 32 bytes
+   HMAC tag size: 16 bytes
+   HMAC hash function: SHA256
+ </div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_EAX">AES128_EAX</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesEaxKey</code> with the following
- parameters:
-   - Key size: 16 bytes
-   - IV size: 16 bytes.</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <code>com.google.crypto.tink.proto.AesEaxKey</code> with the following parameters:
+
+ 
+   Key size: 16 bytes
+   IV size: 16 bytes
+ </div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_GCM">AES128_GCM</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following
- parameters:
-   - Key size: 16 bytes</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmKey</code></a> with the following parameters:
+
+ 
+   Key size: 16 bytes
+ </div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_CTR_HMAC_SHA256">AES256_CTR_HMAC_SHA256</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the
- following parameters:
-   - AES key size: 32 bytes
-   - AES IV size: 16 bytes
-   - HMAC key size: 32 bytes
-   - HMAC tag size: 32 bytes
-   - HMAC hash function: SHA256</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKey</code></a> with the following parameters:
+
+ 
+   AES key size: 32 bytes
+   AES CTR IV size: 16 byte
+   HMAC key size: 32 bytes
+   HMAC tag size: 32 bytes
+   HMAC hash function: SHA256
+ </div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_EAX">AES256_EAX</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesEaxKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - IV size: 16 bytes</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/AesEaxKey.html" title="class in com.google.crypto.tink.proto"><code>AesEaxKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+   IV size: 16 bytes
+ </div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_GCM">AES256_GCM</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following
- parameters:
-   - Key size: 32 bytes</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+ </div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#CHACHA20_POLY1305">CHACHA20_POLY1305</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>ChaCha20Poly1305Key</code>.</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/ChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto"><code>ChaCha20Poly1305Key</code></a>.</div>
 </td>
 </tr>
 </tbody>
@@ -357,25 +369,31 @@
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">HybridKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/hybrid/HybridKeyTemplates.html#ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256">ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EciesAeadHkdfPrivateKey</code>
- with the following parameters:
-   - KEM: ECDH over NIST P-256
-   - DEM: AES128-CTR-HMAC-SHA256 with the following parameters:
-     - AES key size: 128 bits
-     - IV size: 128 bits
-     - HMAC key size: 256 bits
-     - HMAC tag size: 128 bits
-   - KDF: HKDF-HMAC-SHA256 with empty salt</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfPrivateKey</code></a> with the following parameters:
+
+ 
+   KEM: ECDH over NIST P-256
+   DEM: AES128-CTR-HMAC-SHA256 with the following parameters
+       
+         AES key size: 16 bytes
+         AES CTR IV size: 16 bytes
+         HMAC key size: 32 bytes
+         HMAC tag size: 16 bytes
+       
+   KDF: HKDF-HMAC-SHA256 with an empty salt
+ </div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">HybridKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/hybrid/HybridKeyTemplates.html#ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM">ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EciesAeadHkdfPrivateKey</code>
- with the following parameters:
-   - KEM: ECDH over NIST P-256
-   - DEM: AES128-GCM
-   - KDF: HKDF-HMAC-SHA256 with empty salt</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfPrivateKey</code></a> with the following parameters:
+
+ 
+   KEM: ECDH over NIST P-256
+   DEM: AES128-GCM
+   KDF: HKDF-HMAC-SHA256 with an empty salt
+ </div>
 </td>
 </tr>
 </tbody>
@@ -470,21 +488,25 @@
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">MacKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA256_128BITTAG">HMAC_SHA256_128BITTAG</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - Tag size: 16 bytes
-   - Hash function: SHA256</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/HmacKey.html" title="class in com.google.crypto.tink.proto"><code>HmacKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+   Tag size: 16 bytes
+   Hash function: SHA256
+ </div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">MacKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA256_256BITTAG">HMAC_SHA256_256BITTAG</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - Tag size: 32 bytes
-   - Hash function: SHA256</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/HmacKey.html" title="class in com.google.crypto.tink.proto"><code>HmacKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+   Tag size: 32 bytes
+   Hash function: SHA256
+ </div>
 </td>
 </tr>
 </tbody>
@@ -678,37 +700,40 @@
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P256">ECDSA_P256</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA256
-   - Curve: NIST P-256
-   - Signature encoding: DER</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA256
+   Curve: NIST P-256
+   Signature encoding: DER (this is the encoding that Java uses).</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P384">ECDSA_P384</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA512
-   - Curve: NIST P-384
-   - Signature encoding: DER</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA512
+   Curve: NIST P-384
+   Signature encoding: DER (this is the encoding that Java uses).</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P521">ECDSA_P521</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA512
-   - Curve: NIST P-521
-   - Signature encoding: DER</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA512
+   Curve: NIST P-384
+   Signature encoding: DER (this is the encoding that Java uses).</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ED25519">ED25519</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>Ed25519PrivateKey</code>.</div>
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/Ed25519PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>Ed25519PrivateKey</code></a>.</div>
 </td>
 </tr>
 </tbody>
@@ -743,8 +768,7 @@
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">StreamingAeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_CTR_HMAC_SHA256_4KB">AES128_CTR_HMAC_SHA256_4KB</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the
- following parameters:
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacStreamingKey</code></a> with the following parameters:
 
  
    Size of the main key: 16 bytes
@@ -759,8 +783,7 @@
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">StreamingAeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_GCM_HKDF_4KB">AES128_GCM_HKDF_4KB</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmHkdfStreamingKey</code> with the
- following parameters:
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/AesGcmHkdfStreamingKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmHkdfStreamingKey</code></a> with the following parameters:
 
  
    Size of the main key: 16 bytes
@@ -773,8 +796,7 @@
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">StreamingAeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_CTR_HMAC_SHA256_4KB">AES256_CTR_HMAC_SHA256_4KB</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the
- following parameters:
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacStreamingKey</code></a> with the following parameters:
 
  
    Size of the main key: 32 bytes
@@ -789,8 +811,7 @@
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">StreamingAeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_GCM_HKDF_4KB">AES256_GCM_HKDF_4KB</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmHkdfStreamingKey</code> with the
- following parameters:
+<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/AesGcmHkdfStreamingKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmHkdfStreamingKey</code></a> with the following parameters:
 
  
    Size of the main key: 32 bytes

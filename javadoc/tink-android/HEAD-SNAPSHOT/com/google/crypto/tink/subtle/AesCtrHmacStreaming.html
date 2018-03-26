@@ -116,21 +116,18 @@ var activeTableTab = "activeTableTab";
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">Streaming encryption using AES-CTR and HMAC.
 
- Each ciphertext uses a new AES-CTR key and HMAC key that ared derived from the key derivation
+ <p>Each ciphertext uses a new AES-CTR key and HMAC key that ared derived from the key derivation
  key, a randomly chosen salt of the same size as the key and a nonce prefix using HKDF.
 
- The the format of a ciphertext is
-   header || segment_0 || segment_1 || ... || segment_k.
- The header has size this.getHeaderLength(). Its format is
-   headerLength || salt || prefix.
- where headerLength is 1 byte determining the size of the header, salt is a salt used in the
- key derivation and prefix is the prefix of the nonce.
- In principle headerLength is redundant information, since the length of the header can be
- determined from the key size.
+ <p>The the format of a ciphertext is header || segment_0 || segment_1 || ... || segment_k. The
+ header has size this.getHeaderLength(). Its format is headerLength || salt || prefix. where
+ headerLength is 1 byte determining the size of the header, salt is a salt used in the key
+ derivation and prefix is the prefix of the nonce. In principle headerLength is redundant
+ information, since the length of the header can be determined from the key size.
 
- segment_i is the i-th segment of the ciphertext. The size of segment_1 .. segment_{k-1}
- is ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header
- and other information of size firstSegmentOffset align with ciphertextSegmentSize.</div>
+ <p>segment_i is the i-th segment of the ciphertext. The size of segment_1 .. segment_{k-1} is
+ ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header and other information
+ of size firstSegmentOffset align with ciphertextSegmentSize.</div>
 </li>
 </ul>
 </div>
@@ -177,8 +174,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>long</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesCtrHmacStreaming.html#expectedCiphertextSize-long-">expectedCiphertextSize</a></span>(long&nbsp;plaintextSize)</code>
-<div class="block">Returns the expected size of the ciphertext for a given plaintext
- The returned value includes the header and offset.</div>
+<div class="block">Returns the expected size of the ciphertext for a given plaintext The returned value includes
+ the header and offset.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -296,10 +293,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dd><code>tagSizeInBytes</code> - the size authentication tags</dd>
 <dd><code>ciphertextSegmentSize</code> - the size of ciphertext segments.</dd>
 <dd><code>firstSegmentOffset</code> - the offset of the first ciphertext segment. That means the first
-    segment has size ciphertextSegmentSize - getHeaderLength() - firstSegmentOffset</dd>
+     segment has size ciphertextSegmentSize - getHeaderLength() - firstSegmentOffset</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/InvalidAlgorithmParameterException.html?is-external=true" title="class or interface in java.security">InvalidAlgorithmParameterException</a></code> - if ikm is too short, the key size not supported or
-    ciphertextSegmentSize is to short.</dd>
+     ciphertextSegmentSize is to short.</dd>
 </dl>
 </li>
 </ul>
@@ -400,8 +397,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>expectedCiphertextSize</h4>
 <pre>public&nbsp;long&nbsp;expectedCiphertextSize(long&nbsp;plaintextSize)</pre>
-<div class="block">Returns the expected size of the ciphertext for a given plaintext
- The returned value includes the header and offset.</div>
+<div class="block">Returns the expected size of the ciphertext for a given plaintext The returned value includes
+ the header and offset.</div>
 </li>
 </ul>
 <a name="newEncryptingChannel-java.nio.channels.WritableByteChannel-byte:A-">
@@ -461,7 +458,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                  throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
                                                         <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../com/google/crypto/tink/StreamingAead.html#newSeekableDecryptingChannel-java.nio.channels.SeekableByteChannel-byte:A-">StreamingAead</a></code></span></div>
-<div class="block">Returns a SeekableByteChannel that allows to access the plaintext.</div>
+<div class="block">Returns a SeekableByteChannel that allows to access the plaintext.
+
+ <p>This method does not work on Android Marshmallow (API level 23) or older because these
+ Android versions don't have the java.nio.channels.SeekableByteChannel interface.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/StreamingAead.html#newSeekableDecryptingChannel-java.nio.channels.SeekableByteChannel-byte:A-">newSeekableDecryptingChannel</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink">StreamingAead</a></code></dd>
@@ -469,36 +469,33 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dd><code>ciphertextSource</code> - the ciphertext</dd>
 <dd><code>associatedData</code> - the data associated with the ciphertext.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd><a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels"><code>SeekableByteChannel</code></a> that allows random read access to the plaintext.
-     The following methods of SeekableByteChannel are implemented:
+<dd><a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/SeekableByteChannel.html?is-external=true" title="class or interface in java.nio.channels"><code>SeekableByteChannel</code></a> that allows random read access to the plaintext. The
+     following methods of SeekableByteChannel are implemented:
      <ul>
        <li><code>long position()</code> Returns the channel's position in the plaintext.
-       <li><code>SeekableByteChannel  position(long newPosition)</code> Sets the channel's
-           position. Setting the position to a value greater than the plaintext size is legal.
-           A later attempt to read byte will immediately return an end-of-file indication.
-       <li><code>int read(ByteBuffer dst)</code> Bytes are read starting at the channel's
-           position, and then the position is updated with the number of bytes actually read.
-           All bytes returned have been authenticated. If the end of the stream has been reached
-           -1 is returned. A result of -1 is authenticated (e.g. by checking the MAC of the last
-           ciphertext chunk.)   A call to this function attempts to fill dst, but it may return
+       <li><code>SeekableByteChannel position(long newPosition)</code> Sets the channel's position.
+           Setting the position to a value greater than the plaintext size is legal. A later
+           attempt to read byte will immediately return an end-of-file indication.
+       <li><code>int read(ByteBuffer dst)</code> Bytes are read starting at the channel's position,
+           and then the position is updated with the number of bytes actually read. All bytes
+           returned have been authenticated. If the end of the stream has been reached -1 is
+           returned. A result of -1 is authenticated (e.g. by checking the MAC of the last
+           ciphertext chunk.) A call to this function attempts to fill dst, but it may return
            fewer bytes than requested, e.g. if the underlying ciphertextSource does not provide
            the requested number of bytes or if the plaintext ended.
-
-           Throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io"><code>IOException</code></a> if a MAC verification failed.
-           TODO: Should we extend the interface with read(ByteBuffer dst, long position)
-                 to avoid race conditions?
-       <li><code>long size()</code> Returns the size of the plaintext.
-           TODO: Decide whether the result should be authenticated)
-       <li><code>SeekableByteChannel truncate(long size)</code> throws
-           <code>NonWritableChannelException</code> because the channel is read-only.
+           <p>Throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io"><code>IOException</code></a> if a MAC verification failed. TODO: Should we extend
+           the interface with read(ByteBuffer dst, long position) to avoid race conditions?
+       <li><code>long size()</code> Returns the size of the plaintext. TODO: Decide whether the
+           result should be authenticated)
+       <li><code>SeekableByteChannel truncate(long size)</code> throws <code>NonWritableChannelException</code> because the channel is read-only.
        <li><code>int write(ByteBuffer src)</code> throws <code>NonWritableChannelException</code> because
            the channel is read-only.
        <li><code>close()</code> closes the channel
        <li><code>isOpen()</code>
      </ul></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the header of the ciphertext is corrupt or
-     if associatedData is not correct.</dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the header of the ciphertext is corrupt or if
+     associatedData is not correct.</dd>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code> - if an IOException occurred while reading from ciphertextDestination.</dd>
 </dl>
 </li>

@@ -110,16 +110,17 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">HybridKeyTemplates</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">Pre-generated <code>KeyTemplate</code> for <code>HybridDecrypt</code> and <code>HybridEncrypt</code>
- primitives. One can use these templates to generate new <code>Keyset</code> with
- <code>KeysetHandle</code>. To generate a new keyset that contains a single
- <code>EciesAeadHkdfPrivateKey</code>, one can do:
- <pre>
-   Config.register(HybridConfig.TINK_1_0_0);
-   KeysetHandle handle = KeysetHandle.generateNew(
-       HybridKeyTemplates.ECIES_P256_HKDF_AES128_GCM);
-   PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
- </pre></div>
+<div class="block">Pre-generated <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> for <code>HybridDecrypt</code> and <code>HybridEncrypt</code> primitives.
+
+ <p>One can use these templates to generate new <a href="../../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> with
+ <code>KeysetHandle#generateNew</code>. To generate a new keyset that contains a single <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfPrivateKey</code></a>, one can do:
+
+ <pre><code>
+ Config.register(HybridConfig.TINK_1_0_0);
+ KeysetHandle handle = KeysetHandle.generateNew(
+     HybridKeyTemplates.ECIES_P256_HKDF_AES128_GCM);
+ PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
+ </code></pre></div>
 </li>
 </ul>
 </div>
@@ -141,25 +142,31 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridKeyTemplates.html#ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256">ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EciesAeadHkdfPrivateKey</code>
- with the following parameters:
-   - KEM: ECDH over NIST P-256
-   - DEM: AES128-CTR-HMAC-SHA256 with the following parameters:
-     - AES key size: 128 bits
-     - IV size: 128 bits
-     - HMAC key size: 256 bits
-     - HMAC tag size: 128 bits
-   - KDF: HKDF-HMAC-SHA256 with empty salt</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfPrivateKey</code></a> with the following parameters:
+
+ 
+   KEM: ECDH over NIST P-256
+   DEM: AES128-CTR-HMAC-SHA256 with the following parameters
+       
+         AES key size: 16 bytes
+         AES CTR IV size: 16 bytes
+         HMAC key size: 32 bytes
+         HMAC tag size: 16 bytes
+       
+   KDF: HKDF-HMAC-SHA256 with an empty salt
+ </div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/HybridKeyTemplates.html#ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM">ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EciesAeadHkdfPrivateKey</code>
- with the following parameters:
-   - KEM: ECDH over NIST P-256
-   - DEM: AES128-GCM
-   - KDF: HKDF-HMAC-SHA256 with empty salt</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfPrivateKey</code></a> with the following parameters:
+
+ 
+   KEM: ECDH over NIST P-256
+   DEM: AES128-GCM
+   KDF: HKDF-HMAC-SHA256 with an empty salt
+ </div>
 </td>
 </tr>
 </table>
@@ -239,11 +246,17 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EciesAeadHkdfPrivateKey</code>
- with the following parameters:
-   - KEM: ECDH over NIST P-256
-   - DEM: AES128-GCM
-   - KDF: HKDF-HMAC-SHA256 with empty salt</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfPrivateKey</code></a> with the following parameters:
+
+ <ul>
+   <li>KEM: ECDH over NIST P-256
+   <li>DEM: AES128-GCM
+   <li>KDF: HKDF-HMAC-SHA256 with an empty salt
+ </ul>
+
+ <p>Unlike other key templates that use AES-GCM, the instances of <code>HybridDecrypt</code>
+ generated by this key template has no limitation on Android KitKat (API level 19). They might
+ not work in older versions though.</div>
 </li>
 </ul>
 <a name="ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256">
@@ -253,15 +266,19 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EciesAeadHkdfPrivateKey</code>
- with the following parameters:
-   - KEM: ECDH over NIST P-256
-   - DEM: AES128-CTR-HMAC-SHA256 with the following parameters:
-     - AES key size: 128 bits
-     - IV size: 128 bits
-     - HMAC key size: 256 bits
-     - HMAC tag size: 128 bits
-   - KDF: HKDF-HMAC-SHA256 with empty salt</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfPrivateKey</code></a> with the following parameters:
+
+ <ul>
+   <li>KEM: ECDH over NIST P-256
+   <li>DEM: AES128-CTR-HMAC-SHA256 with the following parameters
+       <ul>
+         <li>AES key size: 16 bytes
+         <li>AES CTR IV size: 16 bytes
+         <li>HMAC key size: 32 bytes
+         <li>HMAC tag size: 16 bytes
+       </ul>
+   <li>KDF: HKDF-HMAC-SHA256 with an empty salt
+ </ul></div>
 </li>
 </ul>
 </li>
@@ -302,7 +319,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                          byte[]&nbsp;salt)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <code>KeyTemplate</code> containing a {code EciesAeadHkdfKeyFormat}.</dd>
+<dd>a <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> containing a <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfKeyFormat.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfKeyFormat</code></a>.</dd>
 </dl>
 </li>
 </ul>
@@ -319,7 +336,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                             byte[]&nbsp;salt)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <code>EciesAeadHkdfParams</code> with the specified parameters.</dd>
+<dd>a <a href="../../../../../com/google/crypto/tink/proto/EciesAeadHkdfParams.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfParams</code></a> with the specified parameters.</dd>
 </dl>
 </li>
 </ul>

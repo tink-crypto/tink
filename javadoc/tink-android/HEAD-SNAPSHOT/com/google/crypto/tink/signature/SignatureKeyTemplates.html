@@ -110,14 +110,17 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">SignatureKeyTemplates</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">Pre-generated <code>KeyTemplate</code> for <code>PublicKeySign</code> and <code>PublicKeyVerify</code>.
- One can use these templates to generate new <code>Keyset</code> with <code>KeysetHandle</code>.
- To generate a new keyset that contains a single <code>EcdsaPrivateKey</code>, one can do:
- <pre>
-   Config.register(SignatureConfig.TINK_1_0_0);
-   KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
-   PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
- </pre></div>
+<div class="block">Pre-generated <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> for <a href="../../../../../com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><code>PublicKeySign</code></a> and <a href="../../../../../com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink"><code>PublicKeyVerify</code></a>.
+
+ <p>One can use these templates to generate new <a href="../../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> with
+ <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a>. To generate a new keyset that contains a single
+ <code>EcdsaPrivateKey</code>, one can do:
+
+ <pre><code>
+ Config.register(SignatureConfig.TINK_1_0_0);
+ KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+ PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
+ </code></pre></div>
 </li>
 </ul>
 </div>
@@ -139,37 +142,40 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P256">ECDSA_P256</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA256
-   - Curve: NIST P-256
-   - Signature encoding: DER</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA256
+   Curve: NIST P-256
+   Signature encoding: DER (this is the encoding that Java uses).</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P384">ECDSA_P384</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA512
-   - Curve: NIST P-384
-   - Signature encoding: DER</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA512
+   Curve: NIST P-384
+   Signature encoding: DER (this is the encoding that Java uses).</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P521">ECDSA_P521</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA512
-   - Curve: NIST P-521
-   - Signature encoding: DER</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA512
+   Curve: NIST P-384
+   Signature encoding: DER (this is the encoding that Java uses).</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ED25519">ED25519</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>Ed25519PrivateKey</code>.</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>Ed25519PrivateKey</code></a>.</div>
 </td>
 </tr>
 </table>
@@ -239,11 +245,13 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECDSA_P256</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> ECDSA_P256</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA256
-   - Curve: NIST P-256
-   - Signature encoding: DER</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Hash function: SHA256
+   <li>Curve: NIST P-256
+   <li>Signature encoding: DER (this is the encoding that Java uses).
+ </ul></div>
 </li>
 </ul>
 <a name="ECDSA_P384">
@@ -253,11 +261,13 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECDSA_P384</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> ECDSA_P384</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA512
-   - Curve: NIST P-384
-   - Signature encoding: DER</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Hash function: SHA512
+   <li>Curve: NIST P-384
+   <li>Signature encoding: DER (this is the encoding that Java uses).
+ </ul></div>
 </li>
 </ul>
 <a name="ECDSA_P521">
@@ -267,11 +277,13 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>ECDSA_P521</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> ECDSA_P521</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA512
-   - Curve: NIST P-521
-   - Signature encoding: DER</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Hash function: SHA512
+   <li>Curve: NIST P-384
+   <li>Signature encoding: DER (this is the encoding that Java uses).
+ </ul></div>
 </li>
 </ul>
 <a name="ED25519">
@@ -282,7 +294,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <h4>ED25519</h4>
 <pre>@Alpha
 public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> ED25519</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>Ed25519PrivateKey</code>.</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>Ed25519PrivateKey</code></a>.</div>
 </li>
 </ul>
 </li>
@@ -321,8 +333,8 @@ public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/Ke
                                                  <a href="../../../../../com/google/crypto/tink/proto/EcdsaSignatureEncoding.html" title="enum in com.google.crypto.tink.proto">EcdsaSignatureEncoding</a>&nbsp;encoding)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <code>KeyTemplate</code> containing a <code>HmacKeyFormat</code> with some specified
- parameters.</dd>
+<dd>a <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> containing a <code>HmacKeyFormat</code> with some specified
+     parameters.</dd>
 </dl>
 </li>
 </ul>

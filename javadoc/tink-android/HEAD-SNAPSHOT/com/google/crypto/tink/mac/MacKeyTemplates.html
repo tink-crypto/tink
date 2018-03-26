@@ -110,14 +110,17 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">MacKeyTemplates</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">Pre-generated <code>KeyTemplate</code> for <code>Mac</code>. One can use these templates
- to generate new <code>Keyset</code> with <code>KeysetHandle</code>. To generate a new keyset
- that contains a single <code>HmacKey</code>, one can do:
- <pre>
-   Config.register(Mac.TINK_1_0_0);
-   KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
-   Mac mac = MacFactory.getPrimitive(handle);
- </pre></div>
+<div class="block">Pre-generated <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> for <a href="../../../../../com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink"><code>Mac</code></a>.
+
+ <p>One can use these templates to generate new <a href="../../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> with
+ <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a>. To generate a new keyset that contains a single
+ <a href="../../../../../com/google/crypto/tink/proto/HmacKey.html" title="class in com.google.crypto.tink.proto"><code>HmacKey</code></a>, one can do:
+
+ <pre><code>
+ Config.register(Mac.TINK_1_0_0);
+ KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+ Mac mac = MacFactory.getPrimitive(handle);
+ </code></pre></div>
 </li>
 </ul>
 </div>
@@ -139,21 +142,25 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA256_128BITTAG">HMAC_SHA256_128BITTAG</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - Tag size: 16 bytes
-   - Hash function: SHA256</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/HmacKey.html" title="class in com.google.crypto.tink.proto"><code>HmacKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+   Tag size: 16 bytes
+   Hash function: SHA256
+ </div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA256_256BITTAG">HMAC_SHA256_256BITTAG</a></span></code>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - Tag size: 32 bytes
-   - Hash function: SHA256</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/HmacKey.html" title="class in com.google.crypto.tink.proto"><code>HmacKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+   Tag size: 32 bytes
+   Hash function: SHA256
+ </div>
 </td>
 </tr>
 </table>
@@ -223,11 +230,13 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>HMAC_SHA256_128BITTAG</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> HMAC_SHA256_128BITTAG</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - Tag size: 16 bytes
-   - Hash function: SHA256</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/HmacKey.html" title="class in com.google.crypto.tink.proto"><code>HmacKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Key size: 32 bytes
+   <li>Tag size: 16 bytes
+   <li>Hash function: SHA256
+ </ul></div>
 </li>
 </ul>
 <a name="HMAC_SHA256_256BITTAG">
@@ -237,11 +246,13 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>HMAC_SHA256_256BITTAG</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> HMAC_SHA256_256BITTAG</pre>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - Tag size: 32 bytes
-   - Hash function: SHA256</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/HmacKey.html" title="class in com.google.crypto.tink.proto"><code>HmacKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Key size: 32 bytes
+   <li>Tag size: 32 bytes
+   <li>Hash function: SHA256
+ </ul></div>
 </li>
 </ul>
 </li>
@@ -280,8 +291,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                 <a href="../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;hashType)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <code>KeyTemplate</code> containing a <code>HmacKeyFormat</code> with some specified
- parameters.</dd>
+<dd>a <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> containing a <a href="../../../../../com/google/crypto/tink/proto/HmacKeyFormat.html" title="class in com.google.crypto.tink.proto"><code>HmacKeyFormat</code></a> with some specified
+     parameters.</dd>
 </dl>
 </li>
 </ul>

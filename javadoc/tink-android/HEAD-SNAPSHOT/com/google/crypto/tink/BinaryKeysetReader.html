@@ -149,20 +149,20 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#withBytes-byte:A-">withBytes</a></span>(byte[]&nbsp;bytes)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#withBytes-byte:A-">withBytes</a></span>(byte[]&nbsp;bytes)</code>
+<div class="block">Static method to create a BinaryKeysetReader from a byte arrary.</div>
+</td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#withFile-java.io.File-">withFile</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/File.html?is-external=true" title="class or interface in java.io">File</a>&nbsp;file)</code>
-<div class="block">Note: the input file won't be read until <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a BinaryKeysetReader from a file.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#withInputStream-java.io.InputStream-">withInputStream</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;stream)</code>
-<div class="block">Note: the input stream won't be read until <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a BinaryKeysetReader from an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io"><code>InputStream</code></a>.</div>
 </td>
 </tr>
 </table>
@@ -194,8 +194,9 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <li class="blockList">
 <h4>withInputStream</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;withInputStream(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;stream)</pre>
-<div class="block">Note: the input stream won't be read until <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a BinaryKeysetReader from an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io"><code>InputStream</code></a>.
+
+ <p>Note: the input stream won't be read until <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>read()</code></a> or <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
 </li>
 </ul>
 <a name="withBytes-byte:A-">
@@ -205,6 +206,7 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <li class="blockList">
 <h4>withBytes</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;withBytes(byte[]&nbsp;bytes)</pre>
+<div class="block">Static method to create a BinaryKeysetReader from a byte arrary.</div>
 </li>
 </ul>
 <a name="withFile-java.io.File-">
@@ -215,8 +217,9 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <h4>withFile</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;withFile(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/File.html?is-external=true" title="class or interface in java.io">File</a>&nbsp;file)
                              throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
-<div class="block">Note: the input file won't be read until <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a BinaryKeysetReader from a file.
+
+ <p>Note: the input file won't be read until <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>read()</code></a> or <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
