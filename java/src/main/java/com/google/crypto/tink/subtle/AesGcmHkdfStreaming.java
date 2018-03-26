@@ -26,7 +26,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Streaming encryption using AES-GCM with HKDF as key derivation function.
+ * Streaming encryption using {@code AES-GCM} with {@code HKDF} as key derivation function.
  *
  * <p>Each ciphertext uses a new AES-GCM key that is derived from the key derivation key, a randomly
  * chosen salt of the same size as the key and a nonce prefix.
@@ -40,6 +40,8 @@ import javax.crypto.spec.SecretKeySpec;
  * <p>segment_i is the i-th segment of the ciphertext. The size of segment_1 .. segment_{k-1} is
  * ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header and other information
  * of size firstSegmentOffset align with ciphertextSegmentSize.
+ *
+ * <p>This class does not work on Android KitKat (API level 19) or older.
  */
 public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
   // TODO(bleichen): Some things that are not yet decided:

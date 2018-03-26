@@ -31,82 +31,112 @@ import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
 import com.google.crypto.tink.proto.OutputPrefixType;
 
 /**
- * Pre-generated {@code KeyTemplate} for {@code Aead} keys. One can use these templates
- * to generate new {@code Keyset} with {@code KeysetHandle}. To generate a new keyset
- * that contains a single {@code AesGcmKey}, one can do:
- * <pre>
- *   Config.register(AeadConfig.TINK_1_0_0);
- *   KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
- *   Aead aead = AeadFactory.getPrimitive(handle);
- * </pre>
+ * Pre-generated {@link KeyTemplate} for {@link com.google.crypto.tink.Aead} keys.
+ *
+ * <p>One can use these templates to generate new {@link com.google.crypto.tink.proto.Keyset} with
+ * {@link com.google.crypto.tink.KeysetHandle#generateNew}. To generate a new keyset that contains a
+ * single {@link com.google.crypto.tink.proto.AesGcmKey}, one can do:
+ *
+ * <pre>{@code
+ * Config.register(AeadConfig.TINK_1_0_0);
+ * KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
+ * Aead aead = AeadFactory.getPrimitive(handle);
+ * }</pre>
  */
 public final class AeadKeyTemplates {
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code AesGcmKey} with the following
-   * parameters:
-   *   - Key size: 16 bytes
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.AesGcmKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Key size: 16 bytes
+   * </ul>
+   *
+   * <p>On Android KitKat (API level 19), the {@link com.google.crypto.tink.Aead} instance generated
+   * by this key template does not support associated data. It might not work at all in older
+   * versions.
    */
   public static final KeyTemplate AES128_GCM = createAesGcmKeyTemplate(16);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code AesGcmKey} with the following
-   * parameters:
-   *   - Key size: 32 bytes
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.AesGcmKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Key size: 32 bytes
+   * </ul>
+   *
+   * <p>On Android KitKat (API level 19), the {@link com.google.crypto.tink.Aead} instance generated
+   * by this key template does not support associated data. It might not work at all in older
+   * versions.
    */
   public static final KeyTemplate AES256_GCM = createAesGcmKeyTemplate(32);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code AesEaxKey} with the following
-   * parameters:
-   *   - Key size: 16 bytes
-   *   - IV size: 16 bytes.
+   * A {@link KeyTemplate} that generates new instances of {@code
+   * com.google.crypto.tink.proto.AesEaxKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Key size: 16 bytes
+   *   <li>IV size: 16 bytes
+   * </ul>
    */
   public static final KeyTemplate AES128_EAX = createAesEaxKeyTemplate(16, 16);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code AesEaxKey} with the following
-   * parameters:
-   *   - Key size: 32 bytes
-   *   - IV size: 16 bytes
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.AesEaxKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Key size: 32 bytes
+   *   <li>IV size: 16 bytes
+   * </ul>
    */
   public static final KeyTemplate AES256_EAX = createAesEaxKeyTemplate(32, 16);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code AesCtrHmacAeadKey} with the
-   * following parameters:
-   *   - AES key size: 16 bytes
-   *   - AES IV size: 16 bytes
-   *   - HMAC key size: 32 bytes
-   *   - HMAC tag size: 16 bytes
-   *   - HMAC hash function: SHA256
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.AesCtrHmacAeadKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>AES key size: 16 bytes
+   *   <li>AES CTR IV size: 16 byte
+   *   <li>HMAC key size: 32 bytes
+   *   <li>HMAC tag size: 16 bytes
+   *   <li>HMAC hash function: SHA256
+   * </ul>
    */
   public static final KeyTemplate AES128_CTR_HMAC_SHA256 =
       createAesCtrHmacAeadKeyTemplate(16, 16, 32, 16, HashType.SHA256);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code AesCtrHmacAeadKey} with the
-   * following parameters:
-   *   - AES key size: 32 bytes
-   *   - AES IV size: 16 bytes
-   *   - HMAC key size: 32 bytes
-   *   - HMAC tag size: 32 bytes
-   *   - HMAC hash function: SHA256
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.AesCtrHmacAeadKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>AES key size: 32 bytes
+   *   <li>AES CTR IV size: 16 byte
+   *   <li>HMAC key size: 32 bytes
+   *   <li>HMAC tag size: 32 bytes
+   *   <li>HMAC hash function: SHA256
+   * </ul>
    */
   public static final KeyTemplate AES256_CTR_HMAC_SHA256 =
       createAesCtrHmacAeadKeyTemplate(32, 16, 32, 32, HashType.SHA256);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code ChaCha20Poly1305Key}.
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.ChaCha20Poly1305Key}.
    */
   public static final KeyTemplate CHACHA20_POLY1305 =
       KeyTemplate.newBuilder()
-        .setTypeUrl(ChaCha20Poly1305KeyManager.TYPE_URL)
-        .setOutputPrefixType(OutputPrefixType.TINK)
-        .build();
+          .setTypeUrl(ChaCha20Poly1305KeyManager.TYPE_URL)
+          .setOutputPrefixType(OutputPrefixType.TINK)
+          .build();
 
   /**
-   * @return a {@code KeyTemplate} containing a {@code AesGcmKeyFormat} with some specified
-   * parameters.
+   * @return a {@link KeyTemplate} containing a {@link AesGcmKeyFormat} with some specified
+   *     parameters.
    */
   public static KeyTemplate createAesGcmKeyTemplate(int keySize) {
     AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder()
@@ -120,8 +150,8 @@ public final class AeadKeyTemplates {
   }
 
   /**
-   * @return a {@code KeyTemplate} containing a {@code AesEaxKeyFormat} with some specified
-   * parameters.
+   * @return a {@link KeyTemplate} containing a {@link AesEaxKeyFormat} with some specified
+   *     parameters.
    */
   public static KeyTemplate createAesEaxKeyTemplate(int keySize, int ivSize) {
     AesEaxKeyFormat format = AesEaxKeyFormat.newBuilder()
@@ -136,11 +166,11 @@ public final class AeadKeyTemplates {
   }
 
   /**
-   * @return a {@code KeyTemplate} containing a {@code AesCtrHmacAeadKeyFormat} with some
-   * specific parameters.
+   * @return a {@link KeyTemplate} containing a {@link AesCtrHmacAeadKeyFormat} with some specific
+   *     parameters.
    */
-  public static KeyTemplate createAesCtrHmacAeadKeyTemplate(int aesKeySize, int ivSize,
-      int hmacKeySize, int tagSize, HashType hashType) {
+  public static KeyTemplate createAesCtrHmacAeadKeyTemplate(
+      int aesKeySize, int ivSize, int hmacKeySize, int tagSize, HashType hashType) {
     AesCtrKeyFormat aesCtrKeyFormat = AesCtrKeyFormat.newBuilder()
         .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
         .setKeySize(aesKeySize)
@@ -162,8 +192,8 @@ public final class AeadKeyTemplates {
   }
 
   /**
-   * @return a new {@code KeyTemplate} that can generate a {@code KmsAeadKey} pointing to
-   * {@code keyUri}.
+   * @return a new {@link KeyTemplate} that can generate a {@link KmsAeadKey} pointing to {@code
+   *     keyUri}.
    */
   public static KeyTemplate createKmsAeadKeyTemplate(String keyUri) {
     KmsAeadKeyFormat format = KmsAeadKeyFormat.newBuilder()
@@ -177,11 +207,12 @@ public final class AeadKeyTemplates {
   }
 
   /**
-   * @return a new {@code KeyTemplate} that can generate a {@code KmsEnvelopeAeadKey} whose
-   * KEK is pointing to {@code kekUri} and DEK template is {@code dekTemplate}.
+   * @return a new {@link KeyTemplate} that can generate a {@link
+   *     com.google.crypto.tink.proto.KmsEnvelopeAeadKey} whose KEK is pointing to {@code kekUri}
+   *     and DEK template is {@code dekTemplate}.
    */
   public static KeyTemplate createKmsEnvelopeAeadKeyTemplate(
-    String kekUri, KeyTemplate dekTemplate) {
+      String kekUri, KeyTemplate dekTemplate) {
     KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.newBuilder()
         .setDekTemplate(dekTemplate)
         .setKekUri(kekUri)
