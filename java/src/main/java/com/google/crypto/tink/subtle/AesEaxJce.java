@@ -27,9 +27,11 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * This class implements the EAX mode using AES. EAX is an encryption mode proposed by Bellare,
- * Rogaway and Wagner (http://web.cs.ucdavis.edu/~rogaway/papers/eax.pdf). The encryption mode is an
- * alternative to CCM and has been proposed as a NIST standard:
+ * This class implements the EAX mode using AES.
+ *
+ * <p>EAX is an encryption mode proposed by Bellare, Rogaway and Wagner
+ * (http://web.cs.ucdavis.edu/~rogaway/papers/eax.pdf). The encryption mode is an alternative to CCM
+ * and has been proposed as a NIST standard:
  * http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/eax/eax-spec.pdf
  *
  * <p>The parameter choices have been restricted to a small set of options:

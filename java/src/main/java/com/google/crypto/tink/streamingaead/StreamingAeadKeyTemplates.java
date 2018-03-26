@@ -32,16 +32,16 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * {@code KeysetHandle}. To generate a new keyset that contains a {@link AesGcmHkdfStreamingKey},
  * one can do:
  *
- * <pre>
- *   Config.register(StreamingAeadConfig.TINK_1_0_0);
- *   KeysetHandle handle = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB);
- *   StreamingAead ags = StreamingAeadFactory.getPrimitive(handle);
- * </pre>
+ * <pre>{@code
+ * Config.register(StreamingAeadConfig.TINK_1_0_0);
+ * KeysetHandle handle = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB);
+ * StreamingAead ags = StreamingAeadFactory.getPrimitive(handle);
+ * }</pre>
  */
 public final class StreamingAeadKeyTemplates {
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code AesCtrHmacStreamingKey} with the
-   * following parameters:
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.AesCtrHmacStreamingKey} with the following parameters:
    *
    * <ul>
    *   <li>Size of the main key: 16 bytes
@@ -56,8 +56,8 @@ public final class StreamingAeadKeyTemplates {
       createAesCtrHmacStreamingKeyTemplate(16, HashType.SHA256, 16, HashType.SHA256, 32, 4096);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code AesCtrHmacStreamingKey} with the
-   * following parameters:
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.AesCtrHmacStreamingKey} with the following parameters:
    *
    * <ul>
    *   <li>Size of the main key: 32 bytes
@@ -72,8 +72,8 @@ public final class StreamingAeadKeyTemplates {
       createAesCtrHmacStreamingKeyTemplate(32, HashType.SHA256, 32, HashType.SHA256, 32, 4096);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code AesGcmHkdfStreamingKey} with the
-   * following parameters:
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.AesGcmHkdfStreamingKey} with the following parameters:
    *
    * <ul>
    *   <li>Size of the main key: 16 bytes
@@ -86,8 +86,8 @@ public final class StreamingAeadKeyTemplates {
       createAesGcmHkdfStreamingKeyTemplate(16, HashType.SHA256, 16, 4096);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code AesGcmHkdfStreamingKey} with the
-   * following parameters:
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.AesGcmHkdfStreamingKey} with the following parameters:
    *
    * <ul>
    *   <li>Size of the main key: 32 bytes
@@ -99,12 +99,16 @@ public final class StreamingAeadKeyTemplates {
   public static final KeyTemplate AES256_GCM_HKDF_4KB =
       createAesGcmHkdfStreamingKeyTemplate(32, HashType.SHA256, 32, 4096);
 
- /**
-   * @return a {@code KeyTemplate} containing a {@code AesCtrHmacStreamingKeyFormat} with some
+  /**
+   * @return a {@link KeyTemplate} containing a {@link AesCtrHmacStreamingKeyFormat} with some
    *     specified parameters.
    */
-  public static KeyTemplate createAesCtrHmacStreamingKeyTemplate(int mainKeySize,
-      HashType hkdfHashType, int derivedKeySize, HashType macHashType, int tagSize,
+  public static KeyTemplate createAesCtrHmacStreamingKeyTemplate(
+      int mainKeySize,
+      HashType hkdfHashType,
+      int derivedKeySize,
+      HashType macHashType,
+      int tagSize,
       int ciphertextSegmentSize) {
     HmacParams hmacParams = HmacParams.newBuilder()
         .setHash(macHashType)

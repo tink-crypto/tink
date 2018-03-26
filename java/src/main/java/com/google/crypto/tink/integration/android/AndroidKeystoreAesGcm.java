@@ -27,10 +27,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
 /**
- * An {@link Aead} that does AES-GCM encryption with a key stored in
- * <a href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
+ * An {@link Aead} that does AES-GCM encryption with a key stored in <a
+ * href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
  *
- * <p>This class requires Android M or newer.
+ * <p>This class requires Android M (API level 23) or newer.
  */
 @TargetApi(VERSION_CODES.M)
 public final class AndroidKeystoreAesGcm implements Aead {

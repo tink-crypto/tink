@@ -34,8 +34,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A {@link KeysetWriter} that can write to some source cleartext or encrypted keysets in proto JSON
- * format.
+ * A {@link KeysetWriter} that can write to some source cleartext or encrypted keysets in <a
+ * href="https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/util/JsonFormat">proto
+ * JSON format</a>.
  */
 public final class JsonKeysetWriter implements KeysetWriter {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -46,18 +47,26 @@ public final class JsonKeysetWriter implements KeysetWriter {
     outputStream = stream;
   }
 
+  /** Static method to create a JsonKeysetWriter that writes to an {@link OutputStream}. */
   public static KeysetWriter withOutputStream(OutputStream stream) {
     return new JsonKeysetWriter(stream);
   }
 
+  /** Static method to create a JsonKeysetWriter that writes to a file. */
   public static KeysetWriter withFile(File file) throws IOException {
     return new JsonKeysetWriter(new FileOutputStream(file));
   }
 
+  /** Static method to create a JsonKeysetWriter that writes to a file path. */
   public static KeysetWriter withPath(String path) throws IOException {
     return withFile(new File(path));
   }
 
+  /**
+   * Static method to create a JsonKeysetWriter that writes to a file path.
+   *
+   * <p>This method only works on Android API level 26 or newer.
+   */
   public static KeysetWriter withPath(Path path) throws IOException {
     return withFile(path.toFile());
   }

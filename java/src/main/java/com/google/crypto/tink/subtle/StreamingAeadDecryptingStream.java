@@ -25,7 +25,8 @@ import java.util.Arrays;
 
 /**
  * An instance of a InputStream that returns the plaintext for some ciphertext.
- * TODO(bleichen): define what the state is after an IOException.
+ *
+ * <p>TODO(bleichen): define what the state is after an IOException.
  */
 class StreamingAeadDecryptingStream extends FilterInputStream {
   // Each plaintext segment has 16 bytes more of memory than the actual plaintext that it contains.

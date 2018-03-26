@@ -73,7 +73,7 @@ public final class MacConfig {
    * <p>Deprecated-yet-still-supported key types are registered in so-called "no new key"-mode,
    * which allows for usage of existing keys forbids generation of new key material.
    *
-   * @deprecated
+   * @deprecated use {@link Config#register}
    */
   @Deprecated
   public static void registerStandardKeyTypes() throws GeneralSecurityException {

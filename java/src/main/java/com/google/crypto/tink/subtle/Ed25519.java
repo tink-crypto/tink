@@ -31,13 +31,17 @@ import java.util.Arrays;
 
 /**
  * This implementation is based on the ed25519/ref10 implementation in NaCl.
- * The twisted Edwards curve implemented:
- * -x^2 + y^2 = 1 + (-121665 / 121666 mod 2^255-19)*x^2*y^2
  *
- * See
- * Bernstein D.J., Birkner P., Joye M., Lange T., Peters C. (2008) Twisted Edwards Curves.
- * Hisil H., Wong K.KH., Carter G., Dawson E. (2008) Twisted Edwards Curves Revisited.
- * for more information.
+ * <p>It implements this twisted Edwards curve:
+ *
+ * <pre>
+ * -x^2 + y^2 = 1 + (-121665 / 121666 mod 2^255-19)*x^2*y^2
+ * </pre>
+ *
+ * @see <a href="https://eprint.iacr.org/2008/013.pdf">Bernstein D.J., Birkner P., Joye M., Lange
+ *     T., Peters C. (2008) Twisted Edwards Curves</a>
+ * @see <a href="https://eprint.iacr.org/2008/522.pdf">Hisil H., Wong K.KH., Carter G., Dawson E.
+ *     (2008) Twisted Edwards Curves Revisited</a>
  */
 @Alpha
 public final class Ed25519 {

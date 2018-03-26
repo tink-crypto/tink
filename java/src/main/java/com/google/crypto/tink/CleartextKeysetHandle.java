@@ -27,14 +27,13 @@ import java.security.GeneralSecurityException;
  * <p><b>Warning</b>
  *
  * <p>Reading or writing cleartext keysets is a bad practice, usage of this API should be
- * restricted. Users can read (write) encrypted keysets using {@link KeysetHandle#read} ( {@link
- * KeysetHandle#write}.
+ * restricted. Users can read encrypted keysets using {@link KeysetHandle#read}.
  */
 public final class CleartextKeysetHandle {
   /**
    * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
    * @throws GeneralSecurityException
-   * @deprecated use {@link CleartextKeysetHandle#read} instead
+   * @deprecated use {@link #read} instead
    */
   @Deprecated
   public static final KeysetHandle parseFrom(final byte[] serialized)
@@ -48,7 +47,7 @@ public final class CleartextKeysetHandle {
   }
 
   /**
-   * @return a new {@link KeysetHandle} from a keyset obtained from {@code reader}.
+   * @return a new {@link KeysetHandle} from a {@link Keyset} read with {@code reader}.
    * @throws GeneralSecurityException
    */
   public static KeysetHandle read(KeysetReader reader)
@@ -57,7 +56,7 @@ public final class CleartextKeysetHandle {
   }
 
   /**
-   * Serializes and writes the keyset managed by {@code handle} to {@code keysetWriter}.
+   * Serializes and writes the {@link Keyset} managed by {@code handle} to {@code keysetWriter}.
    *
    * @throws IOException
    */

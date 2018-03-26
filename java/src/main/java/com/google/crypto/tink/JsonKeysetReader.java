@@ -39,8 +39,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A {@link KeysetReader} that can read from source source cleartext or encrypted keysets in proto
- * JSON format.
+ * A {@link KeysetReader} that can read from source source cleartext or encrypted keysets in <a
+ * href="https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/util/JsonFormat">proto
+ * JSON format</a>.
  */
 public final class JsonKeysetReader implements KeysetReader {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -60,44 +61,59 @@ public final class JsonKeysetReader implements KeysetReader {
   }
 
   /**
-   * Note: the input stream won't be read until {@link JsonKeysetReader#read} or
-   * {@link JsonKeysetReader#readEncrypted} is called.
+   * Static method to create a JsonKeysetReader from an {@link InputStream}.
+   *
+   * <p>Note: the input stream won't be read until {@link JsonKeysetReader#read} or {@link
+   * JsonKeysetReader#readEncrypted} is called.
    */
   public static KeysetReader withInputStream(InputStream input) throws IOException {
     return new JsonKeysetReader(input);
   }
 
+  /** Static method to create a JsonKeysetReader from an {@link JSONObject}. */
   public static JsonKeysetReader withJsonObject(JSONObject input) {
     return new JsonKeysetReader(input);
   }
 
+  /** Static method to create a JsonKeysetReader from a string. */
   public static JsonKeysetReader withString(String input) {
     return new JsonKeysetReader(new ByteArrayInputStream(input.getBytes(UTF_8)));
   }
 
+  /** Static method to create a JsonKeysetReader from a byte array. */
   public static JsonKeysetReader withBytes(final byte[] bytes) {
     return new JsonKeysetReader(new ByteArrayInputStream(bytes));
   }
 
   /**
-   * Note: the file won't be read until {@link JsonKeysetReader#read} or
-   * {@link JsonKeysetReader#readEncrypted} is called.
+   * Static method to create a JsonKeysetReader from a file.
+   *
+   * <p>Note: the file won't be read until {@link JsonKeysetReader#read} or {@link
+   * JsonKeysetReader#readEncrypted} is called.
    */
   public static JsonKeysetReader withFile(File file) throws IOException {
     return new JsonKeysetReader(new FileInputStream(file));
   }
 
   /**
-   * Note: the file path won't be read until {@link JsonKeysetReader#read} or
-   * {@link JsonKeysetReader#readEncrypted} is called.
+   * Static method to create a JsonKeysetReader from a {@link Path}.
+   *
+   * <p>Note: the file path won't be read until {@link JsonKeysetReader#read} or {@link
+   * JsonKeysetReader#readEncrypted} is called.
+   *
+   * <p>This method only works on Android API level 26 or newer.
    */
   public static JsonKeysetReader withPath(String path) throws IOException {
     return withFile(new File(path));
   }
 
   /**
-   * Note: the file path won't be read until {@link JsonKeysetReader#read} or
-   * {@link JsonKeysetReader#readEncrypted} is called.
+   * Static method to create a JsonKeysetReader from a {@link Path}.
+   *
+   * <p>Note: the file path won't be read until {@link JsonKeysetReader#read} or {@link
+   * JsonKeysetReader#readEncrypted} is called.
+   *
+   * <p>This method only works on Android API level 26 or newer.
    */
   public static JsonKeysetReader withPath(Path path) throws IOException {
     return withFile(path.toFile());

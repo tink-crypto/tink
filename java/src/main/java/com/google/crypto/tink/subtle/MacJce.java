@@ -21,7 +21,7 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 
-/** Mac implementations in JCE. */
+/** {@link Mac} implementations in JCE. */
 public final class MacJce implements Mac {
   static final int MIN_TAG_SIZE_IN_BYTES = 10;
   static final int MIN_KEY_SIZE_IN_BYTES = 16;

@@ -20,8 +20,10 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 /**
- * Poly1305 one-time MAC based on RFC 7539 This is not an implementation of the MAC interface on
- * purpose and it is not equivalent to HMAC.
+ * Poly1305 one-time MAC based on RFC 7539.
+ *
+ * <p>This is not an implementation of the MAC interface on purpose and it is not equivalent to
+ * HMAC.
  *
  * <p>The implementation is based on poly1305 implementation by Andrew Moon
  * (https://github.com/floodyberry/poly1305-donna) and released as public domain.

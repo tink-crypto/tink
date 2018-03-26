@@ -16,16 +16,15 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
 /**
- * StreamSegmentDecrypter is a helper class that decrypts individual segments of a stream. Instances
- * of this interfaces are passed to ...DecryptingChannel. Each instance must be initialized with the
- * header of the ciphertext.
+ * StreamSegmentDecrypter is a helper class that decrypts individual segments of a stream.
+ *
+ * <p>Instances of this interfaces are passed to {@link StreamingAeadDecryptingChannel}. Each
+ * instance must be initialized with the header of the ciphertext.
  */
-@Alpha
 public interface StreamSegmentDecrypter {
   void init(ByteBuffer header, byte[] aad) throws GeneralSecurityException;
 

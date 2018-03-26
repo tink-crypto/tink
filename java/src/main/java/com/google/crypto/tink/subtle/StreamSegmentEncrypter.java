@@ -16,24 +16,22 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
 /**
  * StreamSegmentEncrypter is a helper class that encrypts individual segments of a stream.
- * Instances of this interfaces are passed to ...EncryptingChannel.
- * Each instance of a segment encrypter is used to encrypt one stream.
- * Typically, constructing a new StreamSegmentEncrypter results in the generation of a new
- * symmetric key. This new symmetric key is used to encrypt the segments of the stream.
- * The key itself wrapped with or derived from the key from StreamingAead instance.
- * The wrapped key or the salt used to derive the symmetric key is part of the header.
  *
- * A StreamSegmentEncrypter has a state: it keeps the number of segments encrypted so far.
- * This state is used to encrypt each segment with different parameters, so that segments
- * in the ciphertext cannot be switched.
+ * <p>Instances of this interfaces are passed to ...EncryptingChannel. Each instance of a segment
+ * encrypter is used to encrypt one stream. Typically, constructing a new StreamSegmentEncrypter
+ * results in the generation of a new symmetric key. This new symmetric key is used to encrypt the
+ * segments of the stream. The key itself wrapped with or derived from the key from StreamingAead
+ * instance. The wrapped key or the salt used to derive the symmetric key is part of the header.
+ *
+ * <p>A StreamSegmentEncrypter has a state: it keeps the number of segments encrypted so far. This
+ * state is used to encrypt each segment with different parameters, so that segments in the
+ * ciphertext cannot be switched.
  */
-@Alpha
 public interface StreamSegmentEncrypter {
 
   /**

@@ -21,7 +21,7 @@ import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
 
 /**
- * A stream cipher based on RFC7539 (i.e., uses 96-bit random nonces).
+ * A stream cipher based on RFC7539 (i.e., uses 96-bit random nonces)
  * https://tools.ietf.org/html/rfc7539
  *
  * <p>This cipher is meant to be used to construct an AEAD with Poly1305.

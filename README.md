@@ -52,12 +52,12 @@ a replacement or successor of [Keyczar](https://github.com/google/keyczar).
 
 **Current Status**
 
-* [Tink for Java](g3doc/JAVA-HOWTO.md) is field tested and ready for production --
+* [Tink for Java](doc/JAVA-HOWTO.md) is field tested and ready for production --
   it is used in several Google products such as AdMob, Android Pay, and Google
   Android Search App.
 
-* [Tink for C++](g3doc/CPP-HOWTO.md) is catching up with
-  [Tink for Java](g3doc/JAVA-HOWTO.md) in terms of features and stability,
+* [Tink for C++](doc/CPP-HOWTO.md) is catching up with
+  [Tink for Java](doc/JAVA-HOWTO.md) in terms of features and stability,
   and the offered functionality is 100%-compatible with Java
   (cf. [cross-language tests](tools/testing/cross_language/).
   We plan to make a first C++ release soon.
@@ -70,11 +70,11 @@ a replacement or successor of [Keyczar](https://github.com/google/keyczar).
 [Bazel](https://docs.bazel.build/versions/master/install.html), then build, run
 and study the [`hello world samples`](https://github.com/google/tink/tree/master/examples/helloworld).
 
-Tink performs cryptographic tasks via so-called [primitives](g3doc/PRIMITIVES.md),
+Tink performs cryptographic tasks via so-called [primitives](doc/PRIMITIVES.md),
 each of which is defined via a corresponding interface that specifies the
 functionality of the primitive. For example, _symmetric key encryption_ is
 offered via an [_AEAD-primitive_ (Authenticated Encryption with Associated
-Data)](g3doc/PRIMITIVES.md#authenticated-encryption-with-associated-data), that
+Data)](doc/PRIMITIVES.md#authenticated-encryption-with-associated-data), that
 supports two operations:
 
 *   `encrypt(plaintext, associated_data)`, which encrypts the given `plaintext`
@@ -122,7 +122,7 @@ AEAD primitive in Java:
     byte[] ciphertext = aead.encrypt(plaintext, aad);
 ```
 
-See the [Java HOWTO](g3doc/JAVA-HOWTO.md#obtaining-and-using-a-primitive) for how
+See the [Java HOWTO](doc/JAVA-HOWTO.md#obtaining-and-using-a-primitive) for how
 to obtain and use other primitives.
 
 ## Important Warnings
@@ -134,11 +134,11 @@ testing.
 
 ## Learn More
 
-*   [Tink Primitives](g3doc/PRIMITIVES.md)
-*   [Key Management](g3doc/KEY-MANAGEMENT.md)
-*   [Java HOW-TO](g3doc/JAVA-HOWTO.md)
-*   [C++ HOW-TO](g3doc/CPP-HOWTO.md)
-*   [Tinkey](g3doc/TINKEY.md)
+*   [Tink Primitives](doc/PRIMITIVES.md)
+*   [Key Management](doc/KEY-MANAGEMENT.md)
+*   [Java HOW-TO](doc/JAVA-HOWTO.md)
+*   [C++ HOW-TO](doc/CPP-HOWTO.md)
+*   [Tinkey](doc/TINKEY.md)
 
 ## Contact and mailing list
 

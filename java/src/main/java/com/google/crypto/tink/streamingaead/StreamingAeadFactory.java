@@ -28,6 +28,7 @@ import java.util.logging.Logger;
  * Static methods for obtaining {@link StreamingAead} instances.
  *
  * <p>Usage:
+ *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
  * StreamingAead streamingAead = StreamingAeadFactory.getPrimitive(keysetHandle);
@@ -43,10 +44,9 @@ import java.util.logging.Logger;
  * encryptingChannel.close();
  * }</pre>
  *
- * <p>The returned primitive works with a keyset (rather than a single key).
- * To encrypt a plaintext, it uses the primary key in the keyset.
- * To decrypt, the primitive tries the enabled keys from the keyset to select
- * the right key for decryption.  All keys in a keyset of StreamingAead have type
+ * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a plaintext,
+ * it uses the primary key in the keyset. To decrypt, the primitive tries the enabled keys from the
+ * keyset to select the right key for decryption. All keys in a keyset of StreamingAead have type
  * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 public final class StreamingAeadFactory {

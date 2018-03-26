@@ -21,8 +21,8 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * This class implements HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
- * https://tools.ietf.org/html/rfc5869.
+ * This class implements HMAC-based Extract-and-Expand Key Derivation Function (HKDF), as described
+ * in <a href="https://tools.ietf.org/html/rfc5869">RFC 5869</a>.
  */
 public final class Hkdf {
 

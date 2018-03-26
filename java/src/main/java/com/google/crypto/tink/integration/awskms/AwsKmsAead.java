@@ -26,7 +26,10 @@ import com.google.crypto.tink.Aead;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
-/** A {@link Aead} that forwards encryption/decryption requests to a key in AWS KMS. */
+/**
+ * A {@link Aead} that forwards encryption/decryption requests to a key in <a
+ * href="https://aws.amazon.com/kms/">AWS KMS</a>.
+ */
 public final class AwsKmsAead implements Aead {
 
   /** This client knows how to talk to AWS KMS. */

@@ -22,9 +22,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
-/**
- * An instance of a ReadableByteChannel that returns the plaintext for some ciphertext.
- */
+/** An instance of {@link ReadableByteChannel} that returns the plaintext for some ciphertext. */
 class StreamingAeadDecryptingChannel implements ReadableByteChannel {
   // Each plaintext segment has 16 bytes more of memory than the actual plaintext that it contains.
   // This is a workaround for an incompatibility between Conscrypt and OpenJDK in their

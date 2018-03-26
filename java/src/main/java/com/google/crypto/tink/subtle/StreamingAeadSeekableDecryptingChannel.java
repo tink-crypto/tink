@@ -25,8 +25,8 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 /**
- * An instance of {code SeekableByteChannel} that allows random access to the plaintext of
- * some ciphertext.
+ * An instance of {@link SeekableByteChannel} that allows random access to the plaintext of some
+ * ciphertext.
  */
 class StreamingAeadSeekableDecryptingChannel implements SeekableByteChannel {
   // Each plaintext segment has 16 bytes more of memory than the actual plaintext that it contains.

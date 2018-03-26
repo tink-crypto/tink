@@ -24,9 +24,11 @@ import java.util.Arrays;
 
 /**
  * This primitive performs an encrypt-then-Mac operation on plaintext and additional authenticated
- * data (aad). The Mac is computed over (aad || ciphertext || size of aad), thus it doesn't violate
- * the <a href="https://en.wikipedia.org/wiki/Horton_Principle">Horton Principle</a>. This
- * implementation is based on <a
+ * data (aad).
+ *
+ * <p>The Mac is computed over (aad || ciphertext || size of aad), thus it doesn't violate the <a
+ * href="https://en.wikipedia.org/wiki/Horton_Principle">Horton Principle</a>. This implementation
+ * is based on <a
  * href="http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05">Authenticated Encryption
  * with AES-CBC and HMAC-SHA</a>.
  */

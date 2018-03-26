@@ -26,61 +26,79 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 
 /**
- * Pre-generated {@code KeyTemplate} for {@code PublicKeySign} and {@code PublicKeyVerify}.
- * One can use these templates to generate new {@code Keyset} with {@code KeysetHandle}.
- * To generate a new keyset that contains a single {@code EcdsaPrivateKey}, one can do:
- * <pre>
- *   Config.register(SignatureConfig.TINK_1_0_0);
- *   KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
- *   PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
- * </pre>
+ * Pre-generated {@link KeyTemplate} for {@link com.google.crypto.tink.PublicKeySign} and {@link
+ * com.google.crypto.tink.PublicKeyVerify}.
+ *
+ * <p>One can use these templates to generate new {@link com.google.crypto.tink.proto.Keyset} with
+ * {@link com.google.crypto.tink.KeysetHandle}. To generate a new keyset that contains a single
+ * {@code EcdsaPrivateKey}, one can do:
+ *
+ * <pre>{@code
+ * Config.register(SignatureConfig.TINK_1_0_0);
+ * KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+ * PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
+ * }</pre>
  */
 public final class SignatureKeyTemplates {
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code EcdsaPrivateKey} with the
-   * following parameters:
-   *   - Hash function: SHA256
-   *   - Curve: NIST P-256
-   *   - Signature encoding: DER
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.EcdsaPrivateKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Hash function: SHA256
+   *   <li>Curve: NIST P-256
+   *   <li>Signature encoding: DER (this is the encoding that Java uses).
+   * </ul>
    */
-  public static final KeyTemplate ECDSA_P256 = createEcdsaKeyTemplate(
-      HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);
+  public static final KeyTemplate ECDSA_P256 =
+      createEcdsaKeyTemplate(
+          HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code EcdsaPrivateKey} with the
-   * following parameters:
-   *   - Hash function: SHA512
-   *   - Curve: NIST P-384
-   *   - Signature encoding: DER
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.EcdsaPrivateKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Hash function: SHA512
+   *   <li>Curve: NIST P-384
+   *   <li>Signature encoding: DER (this is the encoding that Java uses).
+   * </ul>
    */
-  public static final KeyTemplate ECDSA_P384 = createEcdsaKeyTemplate(
-      HashType.SHA512, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER);
+  public static final KeyTemplate ECDSA_P384 =
+      createEcdsaKeyTemplate(
+          HashType.SHA512, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code EcdsaPrivateKey} with the
-   * following parameters:
-   *   - Hash function: SHA512
-   *   - Curve: NIST P-521
-   *   - Signature encoding: DER
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.EcdsaPrivateKey} with the following parameters:
+   *
+   * <ul>
+   *   <li>Hash function: SHA512
+   *   <li>Curve: NIST P-384
+   *   <li>Signature encoding: DER (this is the encoding that Java uses).
+   * </ul>
    */
-  public static final KeyTemplate ECDSA_P521 = createEcdsaKeyTemplate(
-      HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER);
+  public static final KeyTemplate ECDSA_P521 =
+      createEcdsaKeyTemplate(
+          HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER);
 
   /**
-   * A {@code KeyTemplate} that generates new instances of {@code Ed25519PrivateKey}.
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.Ed25519PrivateKey}.
    */
   @Alpha
-  public static final KeyTemplate ED25519 = KeyTemplate.newBuilder()
-      .setTypeUrl(Ed25519PrivateKeyManager.TYPE_URL)
-      .setOutputPrefixType(OutputPrefixType.TINK)
-      .build();
+  public static final KeyTemplate ED25519 =
+      KeyTemplate.newBuilder()
+          .setTypeUrl(Ed25519PrivateKeyManager.TYPE_URL)
+          .setOutputPrefixType(OutputPrefixType.TINK)
+          .build();
 
   /**
-   * @return a {@code KeyTemplate} containing a {@code HmacKeyFormat} with some specified
-   * parameters.
+   * @return a {@link KeyTemplate} containing a {@link HmacKeyFormat} with some specified
+   *     parameters.
    */
-  public static KeyTemplate createEcdsaKeyTemplate(HashType hashType, EllipticCurveType curve,
-      EcdsaSignatureEncoding encoding) {
+  public static KeyTemplate createEcdsaKeyTemplate(
+      HashType hashType, EllipticCurveType curve, EcdsaSignatureEncoding encoding) {
     EcdsaParams params = EcdsaParams.newBuilder()
         .setHashType(hashType)
         .setCurve(curve)

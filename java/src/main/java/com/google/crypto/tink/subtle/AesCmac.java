@@ -27,7 +27,9 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-/** An implementation of CMAC following https://tools.ietf.org/html/rfc4493 */
+/**
+ * An implementation of CMAC following <a href="https://tools.ietf.org/html/rfc4493">RFC 4493</a>.
+ */
 @Alpha
 public final class AesCmac implements Mac {
   static final int MIN_TAG_SIZE_IN_BYTES = 10;

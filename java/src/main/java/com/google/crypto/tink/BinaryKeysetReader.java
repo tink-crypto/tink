@@ -32,20 +32,25 @@ public final class BinaryKeysetReader implements KeysetReader {
   private final InputStream inputStream;
 
   /**
-   * Note: the input stream won't be read until {@link BinaryKeysetReader#read} or
-   * {@link BinaryKeysetReader#readEncrypted} is called.
+   * Static method to create a BinaryKeysetReader from an {@link InputStream}.
+   *
+   * <p>Note: the input stream won't be read until {@link BinaryKeysetReader#read} or {@link
+   * BinaryKeysetReader#readEncrypted} is called.
    */
   public static KeysetReader withInputStream(InputStream stream) {
     return new BinaryKeysetReader(stream);
   }
 
+  /** Static method to create a BinaryKeysetReader from a byte arrary. */
   public static KeysetReader withBytes(final byte[] bytes) {
     return new BinaryKeysetReader(new ByteArrayInputStream(bytes));
   }
 
   /**
-   * Note: the input file won't be read until {@link BinaryKeysetReader#read} or
-   * {@link BinaryKeysetReader#readEncrypted} is called.
+   * Static method to create a BinaryKeysetReader from a file.
+   *
+   * <p>Note: the input file won't be read until {@link BinaryKeysetReader#read} or {@link
+   * BinaryKeysetReader#readEncrypted} is called.
    */
   public static KeysetReader withFile(File file) throws IOException {
     return new BinaryKeysetReader(new FileInputStream(file));

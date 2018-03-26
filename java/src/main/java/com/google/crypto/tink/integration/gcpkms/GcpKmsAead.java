@@ -26,7 +26,8 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * A {@link Aead} that forwards encryption/decryption requests to a key in Google Cloud KMS.
+ * A {@link Aead} that forwards encryption/decryption requests to a key in <a
+ * href="https://cloud.google.com/kms/">Google Cloud KMS</a>.
  *
  * <p>As of August 2017, Google Cloud KMS supports only AES-256-GCM keys.
  */

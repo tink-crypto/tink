@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  * for specific KeyManagers. Registry is public though, to enable configurations with custom
  * catalogues, primitives or KeyManagers.
  *
- * <p>To initialize the Registery with all key managers in Tink 1.0.0, one can do as follows:
+ * <p>To initialize the Registry with all key managers in Tink 1.0.0, one can do as follows:
  *
  * <pre>{@code
  * Config.register(TinkConfig.TINK_1_0_0);
@@ -228,7 +228,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for generating a new {@code KeyData} for the specified {@code template}.
+   * Convenience method for generating a new {@link KeyData} for the specified {@code template}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code keyTemplate.type_url}, and calls
    * {@link KeyManager#newKeyData}.
@@ -288,7 +288,7 @@ public final class Registry {
    * serializedPrivateKey}.
    *
    * <p>It looks up a {@link PrivateKeyManager} identified by {@code typeUrl}, and calls {@link
-   * KeyManager#getPublicKeyData} with {@code serializedPrivateKey} as the parameter.
+   * PrivateKeyManager#getPublicKeyData} with {@code serializedPrivateKey} as the parameter.
    *
    * @return a new key
    */

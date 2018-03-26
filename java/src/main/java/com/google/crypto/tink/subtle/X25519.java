@@ -25,8 +25,7 @@ import java.util.Arrays;
  * also known as the X25519 function.
  *
  * <p>This implementation is based on <a
- * href="https://github.com/agl/curve25519-donna/blob/master/curve25519-donna.c">curve255-donna C
- * implementation</a>.
+ * href="https://github.com/agl/curve25519-donna/blob/master/curve25519-donna.c">curve255-donna</a>.
  *
  * <p>Example Usage:
  *

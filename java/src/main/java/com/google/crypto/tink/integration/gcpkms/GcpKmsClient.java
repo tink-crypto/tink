@@ -30,7 +30,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-/** An implementation of {@code KmsClient} for Google Cloud KMS. */
+/**
+ * An implementation of {@code KmsClient} for <a href="https://cloud.google.com/kms/">Google Cloud
+ * KMS</a>.
+ */
 @AutoService(KmsClient.class)
 public final class GcpKmsClient implements KmsClient {
   /** The prefix of all keys stored in Google Cloud KMS. */

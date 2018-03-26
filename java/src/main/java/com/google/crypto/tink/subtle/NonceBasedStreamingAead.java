@@ -26,9 +26,9 @@ import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
 
 /**
- * An abstract class for StreamingAead using the nonce based online encryption scheme proposed in
- * "Online Authenticated-Encryption and its Nonce-Reuse Misuse-Resistance" by Hoang, Reyhanitabar,
- * Rogaway and Vizár https://eprint.iacr.org/2015/189.pdf
+ * An abstract class for StreamingAead using the nonce based online encryption scheme proposed in <a
+ * href="https://eprint.iacr.org/2015/189.pdf">Online Authenticated-Encryption and its Nonce-Reuse
+ * Misuse-Resistance</a> by Hoang, Reyhanitabar, Rogaway and Vizár.
  */
 abstract class NonceBasedStreamingAead implements StreamingAead {
 

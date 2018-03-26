@@ -21,15 +21,14 @@ import java.security.GeneralSecurityException;
 /**
  * A catalogue of {@link KeyManager} objects.
  *
- * <p>It is basically a map from a (key type, primitive name)-tuple to {@link
- * com.google.crypto.tink.KeyManager}-objects, that determine the implementation that handles the
- * keys of the given key type.
+ * <p>It is basically a map from a (key type, primitive name)-tuple to {@link KeyManager}-objects,
+ * that determines the implementation that handles the keys of the given key type.
  *
  * <p>Tink includes default per-primitive catalogues, but it also supports custom catalogues to
  * enable user-defined configuration of run-time environment via {@link Registry}.
  *
- * <p>The template parameter {@code P} denotes the primitive corresponding to the {@link
- * com.google.crypto.tink.KeyManager} handled by this catalogue.
+ * <p>The template parameter {@code P} denotes the primitive corresponding to the {@link KeyManager}
+ * handled by this catalogue.
  */
 public interface Catalogue<P> {
   /**

@@ -26,19 +26,15 @@ import java.security.GeneralSecurityException;
  *
  * <p>Usage:
  *
- * <pre>
+ * <pre>{@code
  * // get the publicKey from the other party.
  * Ed25519Verify verifier = new Ed25519Verify(publicKey);
  * try {
  *   verifier.verify(signature, message);
- * } catch (SignatureException se) {
- *   // handle signature check failure.
  * } catch (GeneralSecurityException e) {
  *   // all the rest of security exceptions.
  * }
- * </pre>
- *  TODO(bleichen): Actually, the implementation does not follow the above description:
- *                  an invalid signature does not throw a SignatureException.
+ * }</pre>
  */
 @Alpha
 @Immutable

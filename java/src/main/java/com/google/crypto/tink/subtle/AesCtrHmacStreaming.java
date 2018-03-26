@@ -29,21 +29,18 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Streaming encryption using AES-CTR and HMAC.
  *
- * Each ciphertext uses a new AES-CTR key and HMAC key that ared derived from the key derivation
+ * <p>Each ciphertext uses a new AES-CTR key and HMAC key that ared derived from the key derivation
  * key, a randomly chosen salt of the same size as the key and a nonce prefix using HKDF.
  *
- * The the format of a ciphertext is
- *   header || segment_0 || segment_1 || ... || segment_k.
- * The header has size this.getHeaderLength(). Its format is
- *   headerLength || salt || prefix.
- * where headerLength is 1 byte determining the size of the header, salt is a salt used in the
- * key derivation and prefix is the prefix of the nonce.
- * In principle headerLength is redundant information, since the length of the header can be
- * determined from the key size.
+ * <p>The the format of a ciphertext is header || segment_0 || segment_1 || ... || segment_k. The
+ * header has size this.getHeaderLength(). Its format is headerLength || salt || prefix. where
+ * headerLength is 1 byte determining the size of the header, salt is a salt used in the key
+ * derivation and prefix is the prefix of the nonce. In principle headerLength is redundant
+ * information, since the length of the header can be determined from the key size.
  *
- * segment_i is the i-th segment of the ciphertext. The size of segment_1 .. segment_{k-1}
- * is ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header
- * and other information of size firstSegmentOffset align with ciphertextSegmentSize.
+ * <p>segment_i is the i-th segment of the ciphertext. The size of segment_1 .. segment_{k-1} is
+ * ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header and other information
+ * of size firstSegmentOffset align with ciphertextSegmentSize.
  */
 public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   // TODO(bleichen): Some things that are not yet decided:
@@ -81,6 +78,7 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
 
   /**
    * Initializes a streaming primitive with a key derivation key and encryption parameters.
+   *
    * @param ikm input keying material used to derive sub keys.
    * @param hkdfAlg the JCE MAC algorithm name, e.g., HmacSha256, used for the HKDF key derivation.
    * @param keySizeInBytes the key size of the sub keys
@@ -88,9 +86,9 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
    * @param tagSizeInBytes the size authentication tags
    * @param ciphertextSegmentSize the size of ciphertext segments.
    * @param firstSegmentOffset the offset of the first ciphertext segment. That means the first
-   *    segment has size ciphertextSegmentSize - getHeaderLength() - firstSegmentOffset
+   *     segment has size ciphertextSegmentSize - getHeaderLength() - firstSegmentOffset
    * @throws InvalidAlgorithmParameterException if ikm is too short, the key size not supported or
-   *    ciphertextSegmentSize is to short.
+   *     ciphertextSegmentSize is to short.
    */
   public AesCtrHmacStreaming(
       byte[] ikm,
@@ -99,9 +97,15 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
       String tagAlgo,
       int tagSizeInBytes,
       int ciphertextSegmentSize,
-      int firstSegmentOffset) throws InvalidAlgorithmParameterException {
-    validateParameters(ikm.length, keySizeInBytes, tagAlgo, tagSizeInBytes, ciphertextSegmentSize,
-                       firstSegmentOffset);
+      int firstSegmentOffset)
+      throws InvalidAlgorithmParameterException {
+    validateParameters(
+        ikm.length,
+        keySizeInBytes,
+        tagAlgo,
+        tagSizeInBytes,
+        ciphertextSegmentSize,
+        firstSegmentOffset);
     this.ikm = Arrays.copyOf(ikm, ikm.length);
     this.hkdfAlgo = hkdfAlgo;
     this.keySizeInBytes = keySizeInBytes;
@@ -118,7 +122,8 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
       String tagAlgo,
       int tagSizeInBytes,
       int ciphertextSegmentSize,
-      int firstSegmentOffset) throws InvalidAlgorithmParameterException {
+      int firstSegmentOffset)
+      throws InvalidAlgorithmParameterException {
     if (ikmSize < keySizeInBytes) {
       throw new InvalidAlgorithmParameterException("ikm to short");
     }
@@ -135,8 +140,13 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
       throw new InvalidAlgorithmParameterException("tag size too big");
     }
 
-    int firstPlaintextSegment = ciphertextSegmentSize - firstSegmentOffset - tagSizeInBytes
-        - keySizeInBytes - NONCE_PREFIX_IN_BYTES - 1;
+    int firstPlaintextSegment =
+        ciphertextSegmentSize
+            - firstSegmentOffset
+            - tagSizeInBytes
+            - keySizeInBytes
+            - NONCE_PREFIX_IN_BYTES
+            - 1;
     if (firstPlaintextSegment <= 0) {
       throw new InvalidAlgorithmParameterException("ciphertextSegmentSize too small");
     }
@@ -149,8 +159,7 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   }
 
   @Override
-  public AesCtrHmacStreamDecrypter newStreamSegmentDecrypter()
-      throws GeneralSecurityException {
+  public AesCtrHmacStreamDecrypter newStreamSegmentDecrypter() throws GeneralSecurityException {
     return new AesCtrHmacStreamDecrypter();
   }
 
@@ -184,8 +193,8 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   }
 
   /**
-   * Returns the expected size of the ciphertext for a given plaintext
-   * The returned value includes the header and offset.
+   * Returns the expected size of the ciphertext for a given plaintext The returned value includes
+   * the header and offset.
    */
   public long expectedCiphertextSize(long plaintextSize) {
     long offset = getCiphertextOffset();
@@ -224,11 +233,9 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
     return Random.randBytes(NONCE_PREFIX_IN_BYTES);
   }
 
-  private byte[] deriveKeyMaterial(
-      byte[] salt,
-      byte[] aad) throws GeneralSecurityException {
+  private byte[] deriveKeyMaterial(byte[] salt, byte[] aad) throws GeneralSecurityException {
     int keyMaterialSize = keySizeInBytes + HMAC_KEY_SIZE_IN_BYTES;
-    return  Hkdf.computeHkdf(hkdfAlgo, ikm, salt, aad, keyMaterialSize);
+    return Hkdf.computeHkdf(hkdfAlgo, ikm, salt, aad, keyMaterialSize);
   }
 
   private SecretKeySpec deriveKeySpec(byte[] keyMaterial) throws GeneralSecurityException {
@@ -236,15 +243,13 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   }
 
   private SecretKeySpec deriveHmacKeySpec(byte[] keyMaterial) throws GeneralSecurityException {
-    return new SecretKeySpec(keyMaterial, keySizeInBytes, HMAC_KEY_SIZE_IN_BYTES,
-                             tagAlgo);
+    return new SecretKeySpec(keyMaterial, keySizeInBytes, HMAC_KEY_SIZE_IN_BYTES, tagAlgo);
   }
 
   /**
-   * An instance of a crypter used to encrypt a plaintext stream.
-   * The instances have state: encryptedSegments counts the number of encrypted
-   * segments. This state is used to generate the IV for each segment.
-   * By enforcing that only the method encryptSegment can increment this state,
+   * An instance of a crypter used to encrypt a plaintext stream. The instances have state:
+   * encryptedSegments counts the number of encrypted segments. This state is used to generate the
+   * IV for each segment. By enforcing that only the method encryptSegment can increment this state,
    * we can guarantee that the IV does not repeat.
    */
   class AesCtrHmacStreamEncrypter implements StreamSegmentEncrypter {
@@ -278,8 +283,8 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
     }
 
     /**
-     * Encrypts the next plaintext segment.
-     * This uses encryptedSegments as the segment number for the encryption.
+     * Encrypts the next plaintext segment. This uses encryptedSegments as the segment number for
+     * the encryption.
      */
     @Override
     public synchronized void encryptSegment(
@@ -301,9 +306,8 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
     }
 
     /**
-     * Encrypt a segment consisting of two parts.
-     * This method simplifies the case where one part of the plaintext is buffered
-     * and the other part is passed in by the caller.
+     * Encrypt a segment consisting of two parts. This method simplifies the case where one part of
+     * the plaintext is buffered and the other part is passed in by the caller.
      */
     @Override
     public synchronized void encryptSegment(
@@ -332,9 +336,7 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
     }
   }
 
-  /**
-   * An instance of a crypter used to decrypt a ciphertext stream.
-   */
+  /** An instance of a crypter used to decrypt a ciphertext stream. */
   class AesCtrHmacStreamDecrypter implements StreamSegmentDecrypter {
     private SecretKeySpec keySpec;
     private SecretKeySpec hmacKeySpec;

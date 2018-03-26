@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
 /**
- * An instance of {FilterOutputStream} that encrypts the input using a nonce based online
+ * An instance of {@link FilterOutputStream} that encrypts the input using a nonce based online
  * authentication scheme.
  */
 class StreamingAeadEncryptingStream extends FilterOutputStream {

@@ -22,12 +22,11 @@ import java.nio.channels.ReadableByteChannel;
 import javax.annotation.concurrent.GuardedBy;
 
 /**
- * A wrapper around {@link ReadableByteChannel} that provides rewinding feature:
- * it caches the read bytes so that after reading some initial part of the channel,
- * one can "rewind" the channel and again read the bytes from the beginning.
- * Once the rewinding feature is not needed any more, it can be disabled via
- * {@link disableRewinding()}: this frees the cache memory and forwadrds
- * the subsequent read()-calls directly to the wrapped channel.
+ * A wrapper around {@link ReadableByteChannel} that provides rewinding feature: it caches the read
+ * bytes so that after reading some initial part of the channel, one can "rewind" the channel and
+ * again read the bytes from the beginning. Once the rewinding feature is not needed any more, it
+ * can be disabled via {@link #disableRewinding}: this frees the cache memory and forwadrds the
+ * subsequent {@link #read}-calls directly to the wrapped channel.
  */
 public final class RewindableReadableByteChannel implements ReadableByteChannel {
   @GuardedBy("this")

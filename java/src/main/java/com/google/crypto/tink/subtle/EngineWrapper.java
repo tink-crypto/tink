@@ -27,9 +27,10 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 
 /**
- * Interface and its implentations to make JCE Engines have a common parent. There's no expected
- * reason to directly import this for users of Tink, but it might be needed to implement it (say, if
- * someone wants a new type of engine).
+ * Interface and its implentations to make JCE Engines have a common parent.
+ *
+ * <p>There's no expected reason to directly import this for users of Tink, but it might be needed
+ * to implement it (say, if someone wants a new type of engine).
  */
 public interface EngineWrapper<T> {
 

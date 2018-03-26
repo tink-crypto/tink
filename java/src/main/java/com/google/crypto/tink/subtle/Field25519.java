@@ -20,14 +20,17 @@ import com.google.crypto.tink.annotations.Alpha;
 import java.util.Arrays;
 
 /**
- * Defines field 25519 function based on curve25519-donna C implementation (mostly identical).
- * <p>See https://github.com/agl/curve25519-donna/blob/master/curve25519-donna.c
- *
- * <p>Field element mixed radix representation:
+ * Defines field 25519 function based on <a
+ * href="https://github.com/agl/curve25519-donna/blob/master/curve25519-donna.c">curve25519-donna C
+ * implementation</a> (mostly identical).
  *
  * <p>Field elements are written as an array of signed, 64-bit limbs (an array of longs), least
- * significant first. The value of the field element is: x[0] + 2^26·x[1] + 2^51·x[2] + 2^77·x[3] +
- * 2^102·x[4] + 2^128·x[5] + 2^153·x[6] + 2^179·x[7] + 2^204·x[8] + 2^230·x[9]
+ * significant first. The value of the field element is:
+ *
+ * <pre>
+ * x[0] + 2^26·x[1] + 2^51·x[2] + 2^77·x[3] + 2^102·x[4] + 2^128·x[5] + 2^153·x[6] + 2^179·x[7] +
+ * 2^204·x[8] + 2^230·x[9],
+ * </pre>
  *
  * <p>i.e. the limbs are 26, 25, 26, 25, ... bits wide.
  */

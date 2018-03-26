@@ -34,10 +34,12 @@ public final class BinaryKeysetWriter implements KeysetWriter {
     outputStream = stream;
   }
 
+  /** Static method to create a BinaryKeysetWriter that writes to an {@link OutputStream}. */
   public static KeysetWriter withOutputStream(OutputStream stream) {
     return new BinaryKeysetWriter(stream);
   }
 
+  /** Static method to create a BinaryKeysetWriter that writes to a file. */
   public static KeysetWriter withFile(File file) throws IOException {
     return new BinaryKeysetWriter(new FileOutputStream(file));
   }

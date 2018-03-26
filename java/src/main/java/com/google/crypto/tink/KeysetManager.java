@@ -26,8 +26,8 @@ import java.security.SecureRandom;
 import javax.annotation.concurrent.GuardedBy;
 
 /**
- * Manages a {@link com.google.crypto.tink.proto.Keyset} proto, with convenience methods that
- * rotate, disable, enable or destroy keys.
+ * Manages a {@link Keyset} proto, with convenience methods that rotate, disable, enable or destroy
+ * keys.
  */
 public final class KeysetManager {
   @GuardedBy("this")

@@ -33,7 +33,7 @@ import javax.crypto.KeyGenerator;
  * An implementation of {@link KmsClient} for <a
  * href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
  *
- * <p>This class requires Android M or newer.
+ * <p>This class requires Android M (API level 23) or newer.
  */
 @TargetApi(VERSION_CODES.M)
 public final class AndroidKeystoreKmsClient implements KmsClient {

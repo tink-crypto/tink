@@ -23,7 +23,7 @@ import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
 
 /**
- * An instance of {WritableByteChannel} that encrypts the input using a nonce based online
+ * An instance of {@link WritableByteChannel} that encrypts the input using a nonce based online
  * authentication scheme.
  */
 class StreamingAeadEncryptingChannel implements WritableByteChannel {

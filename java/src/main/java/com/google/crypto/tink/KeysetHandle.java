@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * A KeysetHandle provides abstracted access to {@link com.google.crypto.tink.proto.Keyset}, to
- * limit the exposure of actual protocol buffers that hold sensitive key material.
+ * A KeysetHandle provides abstracted access to {@link Keyset}, to limit the exposure of actual
+ * protocol buffers that hold sensitive key material.
  *
  * <p>This class allows reading and writing encrypted keysets. Users that want to read or write can
  * use the restricted API {@link CleartextKeysetHandle}. Users can also load keysets that don't

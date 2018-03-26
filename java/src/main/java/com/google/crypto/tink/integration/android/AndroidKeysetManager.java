@@ -32,16 +32,17 @@ import java.security.GeneralSecurityException;
 import javax.annotation.concurrent.GuardedBy;
 
 /**
- * A wrapper of {@link KeysetManager} that supports reading/writing
- * {@link com.google.crypto.tink.proto.Keyset} to/from private shared preferences on Android.
+ * A wrapper of {@link KeysetManager} that supports reading/writing {@link
+ * com.google.crypto.tink.proto.Keyset} to/from private shared preferences on Android.
  *
- * <p><b>Warning</b>:
- * This class reads and writes to shared preferences, thus is best not to run on the UI thread.
+ * <p><b>Warning</b>: This class reads and writes to shared preferences, thus is best not to run on
+ * the UI thread.
  *
- * <p>On Android M or newer, the keysets are encrypted with master keys generated and stored in
- * <a href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
+ * <p>On Android M or newer, the keysets are encrypted with master keys generated and stored in <a
+ * href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
  *
  * <p>Sample usage:
+ *
  * <pre>{@code
  * String masterKeyUri = "android-keystore://my_master_key_id";
  * AndroidKeysetManager manager = AndroidKeysetManager.Builder()
@@ -52,23 +53,23 @@ import javax.annotation.concurrent.GuardedBy;
  * PublicKeySign signer = PublicKeySignFactory.getPrimitive(manager.getKeysetHandle());
  * }</pre>
  *
- * <p>This will read a keyset stored in the
- * {@code my_keyset_name} preference of the {@code my_pref_file_name} shared preferences file. If
- * the preference file name is null, it uses the default shared preferences file.
+ * <p>This will read a keyset stored in the {@code my_keyset_name} preference of the {@code
+ * my_pref_file_name} shared preferences file. If the preference file name is null, it uses the
+ * default shared preferences file.
  *
- * <p>If the keyset is not found or invalid, and a valid {@link KeyTemplate} is set with
- * {@link AndroidKeysetManager.Builder#withKeyTemplate}, a fresh keyset is generated and is
- * written to the {@code my_keyset_name} preference of the {@code my_pref_file_name} shared
- * preferences file.
+ * <p>If the keyset is not found or invalid, and a valid {@link KeyTemplate} is set with {@link
+ * AndroidKeysetManager.Builder#withKeyTemplate}, a fresh keyset is generated and is written to the
+ * {@code my_keyset_name} preference of the {@code my_pref_file_name} shared preferences file.
  *
  * <p>If a master key URI is set with {@link AndroidKeysetManager.Builder#withKeyTemplate}, the
  * keyset will be encrypted when written to storage and decrypted when read. The master key URI must
  * start with {@code android-keystore://}. If the master key doesn't exist, a fresh one is
- * generated. Usage of Android Keystore can be disabled with
- * {@link AndroidKeysetManager.Builder#doNotUseKeyStore}.
+ * generated. Usage of Android Keystore can be disabled with {@link
+ * AndroidKeysetManager.Builder#doNotUseKeystore}.
  *
  * <p>The resulting manager supports all operations that supported by {@link KeysetManager}. For
  * example to rotate the keyset, one can do:
+ *
  * <pre>{@code
  * manager.rotate(SignatureKeyTemplates.ECDSA_P256);
  * }</pre>

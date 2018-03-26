@@ -20,8 +20,10 @@ import java.security.GeneralSecurityException;
 
 /**
  * This interface for symmetric key ciphers that are indistinguishable against chosen-plaintext
- * attacks. Said primitives do not provide authentication, thus should not be used directly, but
- * only to construct safer primitives such as Aead.
+ * attacks.
+ *
+ * <p>Said primitives do not provide authentication, thus should not be used directly, but only to
+ * construct safer primitives such as {@link com.google.crypto.tink.Aead}.
  */
 public interface IndCpaCipher {
   /**

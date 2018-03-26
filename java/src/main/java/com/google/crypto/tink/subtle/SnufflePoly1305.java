@@ -28,8 +28,8 @@ import java.security.InvalidKeyException;
 import javax.crypto.AEADBadTagException;
 
 /**
- * An {@link Aead} construction with a {@link com.google.crypto.tink.subtle.Snuffle} and {@link
- * com.google.crypto.tink.subtle.Poly1305}, following RFC 7539, section 2.8.
+ * An {@link Aead} construction with a {@link Snuffle} and {@link Poly1305}, following RFC 7539,
+ * section 2.8.
  *
  * <p>This implementation produces ciphertext with the following format: {@code nonce ||
  * actual_ciphertext || tag} and only decrypts the same format.

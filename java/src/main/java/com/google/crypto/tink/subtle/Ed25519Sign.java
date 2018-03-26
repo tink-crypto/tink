@@ -26,12 +26,12 @@ import java.util.Arrays;
  *
  * <p>Usage:
  *
- * <pre>
+ * <pre>{@code
  * Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
  * // securely store keyPair and share keyPair.getPublicKey()
  * Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
  * byte[] signature = signer.sign(message);
- * </pre>
+ * }</pre>
  */
 @Alpha
 public final class Ed25519Sign implements PublicKeySign {

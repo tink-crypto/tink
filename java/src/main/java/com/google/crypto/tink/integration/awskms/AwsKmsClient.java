@@ -28,7 +28,7 @@ import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.subtle.Validators;
 import java.security.GeneralSecurityException;
 
-/** An implementation of {@code KmsClient} for AWS KMS. */
+/** An implementation of {@link KmsClient} for <a href="https://aws.amazon.com/kms/">AWS KMS</a>. */
 @AutoService(KmsClient.class)
 public final class AwsKmsClient implements KmsClient {
   /** The prefix of all keys stored in AWS KMS. */
