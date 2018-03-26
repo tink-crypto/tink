@@ -16,9 +16,6 @@
 # Fail on any error.
 set -e
 
-# Display commands to stderr.
-set -x
-
 readonly MVN_GOAL="$1"
 readonly VERSION="$2"
 shift 2
@@ -80,7 +77,8 @@ publish_javadoc_to_github_pages() {
 
   git_url=git@github.com:google/tink.git
   if [ -n $KOKORO_ROOT ]; then
-    git_url=https://github.com/google/tink.git
+    # The account is ise-crypto and its access token is pulled from Keystore.
+    git_url=https://ise-crypto:${GITHUB_ACCESS_TOKEN}@github.com/google/tink.git
   fi
 
   rm -rf gh-pages
