@@ -1,15 +1,16 @@
 # An implementation of Google AdMob Rewarded Ads
 
-This app implements the verifier side of Server-Side Verification of
-Google AdMob Rewarded Ads.
+This app implements the verifier side of Server-Side Verification of Google
+AdMob Rewarded Ads.
 
 ## Snapshots
 
-This app has yet not been released, though you can still play with it
-using snapshot versions.
+This app has yet not been released, though you can still play with it using
+snapshot versions.
 
-Snapshots of this app built from the master branch are available through
-Maven using version `HEAD-SNAPSHOT`.
+Snapshots of this app built from the master branch are available through Maven
+using version `HEAD-SNAPSHOT`. API docs can be found
+[here](https://google.github.com/tink/javadoc/apps-rewardedads/HEAD-SNAPSHOT).
 
 To add a dependency using Maven:
 

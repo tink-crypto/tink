@@ -31,7 +31,3 @@ bash $(dirname $0)/execute-deploy.sh \
   --settings=$(dirname $0)/settings.xml
 
 echo -e "Published Maven snapshot"
-
-echo -e "Testing new Maven snapshot"
-
-mvn compile -DpomFile=examples/helloworld/java/pom.xml

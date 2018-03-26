@@ -41,18 +41,13 @@ java_binary(
 
 # Maven Jars
 
-load("//tools:javadoc.bzl", "javadoc_library")
+load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
-javadoc_library(
-    name = "libpaymentmethodtoken-javadoc",
-    srcs = [":srcs"],
+gen_maven_jar_rules(
+    name = "maven",
     doctitle = "Tink Cryptography API for Google Payment Method Token",
-    root_packages = [
-        "com.google.crypto.tink.apps.paymentmethodtoken",
-    ],
-    deps = [
-        ":paymentmethodtoken"
-    ],
+    root_packages = ["com.google.crypto.tink.apps.paymentmethodtoken"],
+    deps = [":paymentmethodtoken"],
 )
 
 # Tests

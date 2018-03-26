@@ -1,5 +1,3 @@
-# Copyright 2017 Google Inc. All Rights Reserved.
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,25 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Generates a Javadoc jar path/to/target/<name>.jar.
-
-Arguments:
-  srcs: source files to process
-  deps: targets that contain references to other types referenced in Javadoc. This can be the
-      java_library/android_library target(s) for the same sources
-  root_packages: Java packages to include in generated Javadoc. Any subpackages not listed in
-      exclude_packages will be included as well
-  exclude_packages: Java packages to exclude from generated Javadoc
-  android_api_level: If Android APIs are used, the API level to compile against to generate
-      Javadoc
-  doctitle: title for Javadoc's index.html. See javadoc -doctitle
-"""
-
-_EXTERNAL_JAVADOC_LINKS = [
-    "https://docs.oracle.com/javase/7/docs/api/",
-    "https://developer.android.com/reference/",
-]
+""" Definition of javadoc_library. """
 
 def _check_non_empty(value, name):
   if not value:
@@ -44,31 +24,21 @@ def _android_jar(android_api_level):
 def _javadoc_library(ctx):
   _check_non_empty(ctx.attr.root_packages, "root_packages")
 
-  inputs = []
-  for src_attr in ctx.attr.srcs:
-    inputs.extend(src_attr.files.to_list())
-
-  classpath = depset()
-  for dep in ctx.attr.deps:
-    for transitive_dep in dep.java.transitive_deps:
-      tmp = depset([transitive_dep])
-      classpath = depset(transitive=[classpath, tmp])
+  transitive_deps = [dep.java.transitive_deps for dep in ctx.attr.deps]
   if ctx.attr._android_jar:
-    classpath = depset(transitive=[classpath, ctx.attr._android_jar.files])
+    transitive_deps.append(ctx.attr._android_jar.files)
 
-  inputs += classpath.to_list()
+  classpath = depset([], transitive = transitive_deps).to_list()
 
-  include_packages = " ".join(ctx.attr.root_packages)
+  include_packages = ":".join(ctx.attr.root_packages)
   javadoc_command = [
       ctx.file._javadoc_binary.path,
-      '-sourcepath $(find * -type d -name "*java" -print0 | tr "\\0" :)',
-      include_packages,
+      '-sourcepath srcs',
       "-use",
       "-subpackages", include_packages,
       "-encoding UTF8",
-      "-classpath", ":".join([jar.path for jar in classpath.to_list()]),
+      "-classpath", ":".join([jar.path for jar in classpath]),
       "-notimestamp",
-      '-bottom "Copyright &copy; Google Inc. All rights reserved."',
       "-d tmp",
       "-Xdoclint:-missing",
       "-quiet",
@@ -80,14 +50,31 @@ def _javadoc_library(ctx):
   if ctx.attr.exclude_packages:
     javadoc_command.append("-exclude %s" % ":".join(ctx.attr.exclude_packages))
 
-  for link in _EXTERNAL_JAVADOC_LINKS:
+  for link in ctx.attr.external_javadoc_links:
     javadoc_command.append("-linkoffline {0} {0}".format(link))
+
+  if ctx.attr.bottom_text:
+    javadoc_command.append("-bottom '%s'" % ctx.attr.bottom_text)
+
+  srcs = depset(transitive = [src.files for src in ctx.attr.srcs]).to_list()
+  prepare_srcs_command = "mkdir srcs && "
+  path_prefixes = [x.replace(".", "/") for x in ctx.attr.root_packages]
+  for path_prefix in path_prefixes:
+    prepare_srcs_command = "mkdir -p srcs/%s && " % (path_prefix)
+
+  for src in srcs:
+    if src.path.endswith(".jar"):
+      prepare_srcs_command += "unzip -qq -B %s -d srcs && " % src.path
+    elif src.path.endswith(".java"):
+      for path_prefix in path_prefixes:
+        if path_prefix in src.path:
+          prepare_srcs_command += "cp %s srcs/%s && " % (src.path, path_prefix)
 
   jar_command = "%s cf %s -C tmp ." % (ctx.file._jar_binary.path, ctx.outputs.jar.path)
 
   ctx.actions.run_shell(
-      inputs = inputs + ctx.files._jdk,
-      command = "%s && %s" % (" ".join(javadoc_command), jar_command),
+      inputs = srcs + classpath + ctx.files._jdk,
+      command = "%s %s && %s" % (prepare_srcs_command, " ".join(javadoc_command), jar_command),
       outputs = [ctx.outputs.jar])
 
 javadoc_library = rule(
@@ -98,6 +85,8 @@ javadoc_library = rule(
         "root_packages": attr.string_list(),
         "exclude_packages": attr.string_list(),
         "android_api_level": attr.int(default = -1),
+        "bottom_text": attr.string(default = ""),
+        "external_javadoc_links": attr.string_list(),
         "_android_jar": attr.label(
             default = _android_jar,
             allow_single_file = True,
@@ -118,3 +107,20 @@ javadoc_library = rule(
     outputs = {"jar": "%{name}.jar"},
     implementation = _javadoc_library,
 )
+"""
+Generates a Javadoc jar path/to/target/<name>.jar.
+
+Arguments:
+  srcs: source files to process. This might contain .java files or gen_rule that
+      generates source jars.
+  deps: targets that contain references to other types referenced in Javadoc. This can be the
+      java_library/android_library target(s) for the same sources
+  root_packages: Java packages to include in generated Javadoc. Any subpackages not listed in
+      exclude_packages will be included as well
+  exclude_packages: Java packages to exclude from generated Javadoc
+  android_api_level: If Android APIs are used, the API level to compile against to generate
+      Javadoc
+  doctitle: title for Javadoc's index.html. See javadoc -doctitle
+  bottom_text: text passed to javadoc's `-bottom` flag
+  external_javadoc_links: a list of URLs that are passed to Javadoc's `-linkoffline` flag
+"""
