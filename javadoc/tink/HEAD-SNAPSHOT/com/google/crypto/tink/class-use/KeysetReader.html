@@ -111,8 +111,9 @@
 <tr class="rowColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></span></code>
-<div class="block">A <a href="../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink"><code>KeysetReader</code></a> that can read from source source cleartext or encrypted keysets in proto
- JSON format.</div>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink"><code>KeysetReader</code></a> that can read from source source cleartext or encrypted keysets in <a
+ href="https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/util/JsonFormat">proto
+ JSON format</a>.</div>
 </td>
 </tr>
 </tbody>
@@ -126,27 +127,26 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></code></td>
-<td class="colLast"><span class="typeNameLabel">BinaryKeysetReader.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/BinaryKeysetReader.html#withBytes-byte:A-">withBytes</a></span>(byte[]&nbsp;bytes)</code>&nbsp;</td>
+<td class="colLast"><span class="typeNameLabel">BinaryKeysetReader.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/BinaryKeysetReader.html#withBytes-byte:A-">withBytes</a></span>(byte[]&nbsp;bytes)</code>
+<div class="block">Static method to create a BinaryKeysetReader from a byte arrary.</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></code></td>
 <td class="colLast"><span class="typeNameLabel">BinaryKeysetReader.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/BinaryKeysetReader.html#withFile-java.io.File-">withFile</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/File.html?is-external=true" title="class or interface in java.io">File</a>&nbsp;file)</code>
-<div class="block">Note: the input file won't be read until <a href="../../../../../com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>BinaryKeysetReader.read()</code></a> or
- <a href="../../../../../com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>BinaryKeysetReader.readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a BinaryKeysetReader from a file.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></code></td>
 <td class="colLast"><span class="typeNameLabel">JsonKeysetReader.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/JsonKeysetReader.html#withInputStream-java.io.InputStream-">withInputStream</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)</code>
-<div class="block">Note: the input stream won't be read until <a href="../../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>JsonKeysetReader.read()</code></a> or
- <a href="../../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>JsonKeysetReader.readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io"><code>InputStream</code></a>.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></code></td>
 <td class="colLast"><span class="typeNameLabel">BinaryKeysetReader.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/BinaryKeysetReader.html#withInputStream-java.io.InputStream-">withInputStream</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;stream)</code>
-<div class="block">Note: the input stream won't be read until <a href="../../../../../com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>BinaryKeysetReader.read()</code></a> or
- <a href="../../../../../com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>BinaryKeysetReader.readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a BinaryKeysetReader from an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io"><code>InputStream</code></a>.</div>
 </td>
 </tr>
 </tbody>

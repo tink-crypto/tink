@@ -302,24 +302,25 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead"><span class="typeNameLink">AeadKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a></dt>
 <dd>
-<div class="block">Pre-generated <code>KeyTemplate</code> for <code>Aead</code> keys.</div>
+<div class="block">Pre-generated <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> for <a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> keys.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AeadKeyTemplates--">AeadKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_CTR_HMAC_SHA256">AES128_CTR_HMAC_SHA256</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the
- following parameters:
-   - AES key size: 16 bytes
-   - AES IV size: 16 bytes
-   - HMAC key size: 32 bytes
-   - HMAC tag size: 16 bytes
-   - HMAC hash function: SHA256</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKey</code></a> with the following parameters:
+
+ 
+   AES key size: 16 bytes
+   AES CTR IV size: 16 byte
+   HMAC key size: 32 bytes
+   HMAC tag size: 16 bytes
+   HMAC hash function: SHA256
+ </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_CTR_HMAC_SHA256_4KB">AES128_CTR_HMAC_SHA256_4KB</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the
- following parameters:
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacStreamingKey</code></a> with the following parameters:
 
  
    Size of the main key: 16 bytes
@@ -332,21 +333,24 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_EAX">AES128_EAX</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesEaxKey</code> with the following
- parameters:
-   - Key size: 16 bytes
-   - IV size: 16 bytes.</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <code>com.google.crypto.tink.proto.AesEaxKey</code> with the following parameters:
+
+ 
+   Key size: 16 bytes
+   IV size: 16 bytes
+ </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AES128_GCM">AES128_GCM</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following
- parameters:
-   - Key size: 16 bytes</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmKey</code></a> with the following parameters:
+
+ 
+   Key size: 16 bytes
+ </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_GCM_HKDF_4KB">AES128_GCM_HKDF_4KB</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmHkdfStreamingKey</code> with the
- following parameters:
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesGcmHkdfStreamingKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmHkdfStreamingKey</code></a> with the following parameters:
 
  
    Size of the main key: 16 bytes
@@ -361,18 +365,19 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_CTR_HMAC_SHA256">AES256_CTR_HMAC_SHA256</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacAeadKey</code> with the
- following parameters:
-   - AES key size: 32 bytes
-   - AES IV size: 16 bytes
-   - HMAC key size: 32 bytes
-   - HMAC tag size: 32 bytes
-   - HMAC hash function: SHA256</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacAeadKey</code></a> with the following parameters:
+
+ 
+   AES key size: 32 bytes
+   AES CTR IV size: 16 byte
+   HMAC key size: 32 bytes
+   HMAC tag size: 32 bytes
+   HMAC hash function: SHA256
+ </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_CTR_HMAC_SHA256_4KB">AES256_CTR_HMAC_SHA256_4KB</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the
- following parameters:
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html" title="class in com.google.crypto.tink.proto"><code>AesCtrHmacStreamingKey</code></a> with the following parameters:
 
  
    Size of the main key: 32 bytes
@@ -385,21 +390,24 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_EAX">AES256_EAX</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesEaxKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - IV size: 16 bytes</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesEaxKey.html" title="class in com.google.crypto.tink.proto"><code>AesEaxKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+   IV size: 16 bytes
+ </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#AES256_GCM">AES256_GCM</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmKey</code> with the following
- parameters:
-   - Key size: 32 bytes</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesGcmKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+ </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_GCM_HKDF_4KB">AES256_GCM_HKDF_4KB</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmHkdfStreamingKey</code> with the
- following parameters:
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/AesGcmHkdfStreamingKey.html" title="class in com.google.crypto.tink.proto"><code>AesGcmHkdfStreamingKey</code></a> with the following parameters:
 
  
    Size of the main key: 32 bytes
@@ -430,7 +438,7 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/AesCmac.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">AesCmac</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">An implementation of CMAC following https://tools.ietf.org/html/rfc4493</div>
+<div class="block">An implementation of CMAC following <a href="https://tools.ietf.org/html/rfc4493">RFC 4493</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCmac.html#AesCmac-byte:A-int-">AesCmac(byte[], int)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCmac.html" title="class in com.google.crypto.tink.subtle">AesCmac</a></dt>
 <dd>&nbsp;</dd>
@@ -588,7 +596,7 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">AesGcmHkdfStreaming</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">Streaming encryption using AES-GCM with HKDF as key derivation function.</div>
+<div class="block">Streaming encryption using <code>AES-GCM</code> with <code>HKDF</code> as key derivation function.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#AesGcmHkdfStreaming-byte:A-java.lang.String-int-int-int-">AesGcmHkdfStreaming(byte[], String, int, int, int)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html" title="class in com.google.crypto.tink.subtle">AesGcmHkdfStreaming</a></dt>
 <dd>
@@ -662,7 +670,7 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/AesSiv.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">AesSiv</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">AES-SIV per https://tools.ietf.org/html/rfc5297.</div>
+<div class="block">AES-SIV, as described in <a href="https://tools.ietf.org/html/rfc5297">RFC 5297</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesSiv.html#AesSiv-byte:A-">AesSiv(byte[])</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesSiv.html" title="class in com.google.crypto.tink.subtle">AesSiv</a></dt>
 <dd>&nbsp;</dd>
@@ -706,13 +714,14 @@
 </dd>
 <dt><a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html" title="class in com.google.crypto.tink.integration.awskms"><span class="typeNameLink">AwsKmsAead</span></a> - Class in <a href="com/google/crypto/tink/integration/awskms/package-summary.html">com.google.crypto.tink.integration.awskms</a></dt>
 <dd>
-<div class="block">A <a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> that forwards encryption/decryption requests to a key in AWS KMS.</div>
+<div class="block">A <a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> that forwards encryption/decryption requests to a key in <a
+ href="https://aws.amazon.com/kms/">AWS KMS</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html#AwsKmsAead-com.amazonaws.services.kms.AWSKMS-java.lang.String-">AwsKmsAead(AWSKMS, String)</a></span> - Constructor for class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsAead.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsAead</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms"><span class="typeNameLink">AwsKmsClient</span></a> - Class in <a href="com/google/crypto/tink/integration/awskms/package-summary.html">com.google.crypto.tink.integration.awskms</a></dt>
 <dd>
-<div class="block">An implementation of <code>KmsClient</code> for AWS KMS.</div>
+<div class="block">An implementation of <a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> for <a href="https://aws.amazon.com/kms/">AWS KMS</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html#AwsKmsClient--">AwsKmsClient()</a></span> - Constructor for class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsClient</a></dt>
 <dd>
@@ -966,7 +975,7 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#CHACHA20_POLY1305">CHACHA20_POLY1305</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>ChaCha20Poly1305Key</code>.</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/ChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto"><code>ChaCha20Poly1305Key</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#CHACHA20_POLY1305_TYPE_URL">CHACHA20_POLY1305_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -974,8 +983,8 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/ChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">ChaCha20Poly1305</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">ChaCha20-Poly1305 AEAD construction, compatible with <a
- href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC 7539, section 2.8</a>.</div>
+<div class="block">ChaCha20-Poly1305, as described in <a href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC
+ 7539, section 2.8</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/ChaCha20Poly1305.html#ChaCha20Poly1305-byte:A-">ChaCha20Poly1305(byte[])</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">ChaCha20Poly1305</a></dt>
 <dd>&nbsp;</dd>
@@ -2189,27 +2198,30 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P256">ECDSA_P256</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA256
-   - Curve: NIST P-256
-   - Signature encoding: DER</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA256
+   Curve: NIST P-256
+   Signature encoding: DER (this is the encoding that Java uses).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P384">ECDSA_P384</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA512
-   - Curve: NIST P-384
-   - Signature encoding: DER</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA512
+   Curve: NIST P-384
+   Signature encoding: DER (this is the encoding that Java uses).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P521">ECDSA_P521</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EcdsaPrivateKey</code> with the
- following parameters:
-   - Hash function: SHA512
-   - Curve: NIST P-521
-   - Signature encoding: DER</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA512
+   Curve: NIST P-384
+   Signature encoding: DER (this is the encoding that Java uses).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureConfig.html#ECDSA_PRIVATE_KEY_TYPE_URL">ECDSA_PRIVATE_KEY_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureConfig.html" title="class in com.google.crypto.tink.signature">SignatureConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -2267,13 +2279,13 @@
 </dd>
 <dt><a href="com/google/crypto/tink/subtle/EcdsaSignJce.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">EcdsaSignJce</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">Ecdsa signature's signing in JCE.</div>
+<div class="block">ECDSA signing with JCE.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EcdsaSignJce.html#EcdsaSignJce-java.security.interfaces.ECPrivateKey-java.lang.String-">EcdsaSignJce(ECPrivateKey, String)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EcdsaSignJce.html" title="class in com.google.crypto.tink.subtle">EcdsaSignJce</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/EcdsaVerifyJce.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">EcdsaVerifyJce</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">Ecdsa signature's verification in JCE.</div>
+<div class="block">ECDSA verifying with JCE.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EcdsaVerifyJce.html#EcdsaVerifyJce-java.security.interfaces.ECPublicKey-java.lang.String-">EcdsaVerifyJce(ECPublicKey, String)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EcdsaVerifyJce.html" title="class in com.google.crypto.tink.subtle">EcdsaVerifyJce</a></dt>
 <dd>&nbsp;</dd>
@@ -2283,23 +2295,29 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html#ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256">ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256</a></span> - Static variable in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html" title="class in com.google.crypto.tink.hybrid">HybridKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EciesAeadHkdfPrivateKey</code>
- with the following parameters:
-   - KEM: ECDH over NIST P-256
-   - DEM: AES128-CTR-HMAC-SHA256 with the following parameters:
-     - AES key size: 128 bits
-     - IV size: 128 bits
-     - HMAC key size: 256 bits
-     - HMAC tag size: 128 bits
-   - KDF: HKDF-HMAC-SHA256 with empty salt</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfPrivateKey</code></a> with the following parameters:
+
+ 
+   KEM: ECDH over NIST P-256
+   DEM: AES128-CTR-HMAC-SHA256 with the following parameters
+       
+         AES key size: 16 bytes
+         AES CTR IV size: 16 bytes
+         HMAC key size: 32 bytes
+         HMAC tag size: 16 bytes
+       
+   KDF: HKDF-HMAC-SHA256 with an empty salt
+ </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html#ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM">ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM</a></span> - Static variable in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html" title="class in com.google.crypto.tink.hybrid">HybridKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>EciesAeadHkdfPrivateKey</code>
- with the following parameters:
-   - KEM: ECDH over NIST P-256
-   - DEM: AES128-GCM
-   - KDF: HKDF-HMAC-SHA256 with empty salt</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EciesAeadHkdfPrivateKey</code></a> with the following parameters:
+
+ 
+   KEM: ECDH over NIST P-256
+   DEM: AES128-GCM
+   KDF: HKDF-HMAC-SHA256 with an empty salt
+ </div>
 </dd>
 <dt><a href="com/google/crypto/tink/proto/EciesAeadDemParams.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">EciesAeadDemParams</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>
@@ -2419,7 +2437,7 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#ED25519">ED25519</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>Ed25519PrivateKey</code>.</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/Ed25519PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>Ed25519PrivateKey</code></a>.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/subtle/Ed25519.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">Ed25519</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
@@ -2748,8 +2766,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCtrHmacStreaming.html#expectedCiphertextSize-long-">expectedCiphertextSize(long)</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCtrHmacStreaming.html" title="class in com.google.crypto.tink.subtle">AesCtrHmacStreaming</a></dt>
 <dd>
-<div class="block">Returns the expected size of the ciphertext for a given plaintext
- The returned value includes the header and offset.</div>
+<div class="block">Returns the expected size of the ciphertext for a given plaintext The returned value includes
+ the header and offset.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#expectedCiphertextSize-long-">expectedCiphertextSize(long)</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html" title="class in com.google.crypto.tink.subtle">AesGcmHkdfStreaming</a></dt>
 <dd>
@@ -2788,13 +2806,15 @@
 <dl>
 <dt><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html" title="class in com.google.crypto.tink.integration.gcpkms"><span class="typeNameLink">GcpKmsAead</span></a> - Class in <a href="com/google/crypto/tink/integration/gcpkms/package-summary.html">com.google.crypto.tink.integration.gcpkms</a></dt>
 <dd>
-<div class="block">A <a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> that forwards encryption/decryption requests to a key in Google Cloud KMS.</div>
+<div class="block">A <a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> that forwards encryption/decryption requests to a key in <a
+ href="https://cloud.google.com/kms/">Google Cloud KMS</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html#GcpKmsAead-com.google.api.services.cloudkms.v1.CloudKMS-java.lang.String-">GcpKmsAead(CloudKMS, String)</a></span> - Constructor for class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsAead.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsAead</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms"><span class="typeNameLink">GcpKmsClient</span></a> - Class in <a href="com/google/crypto/tink/integration/gcpkms/package-summary.html">com.google.crypto.tink.integration.gcpkms</a></dt>
 <dd>
-<div class="block">An implementation of <code>KmsClient</code> for Google Cloud KMS.</div>
+<div class="block">An implementation of <code>KmsClient</code> for <a href="https://cloud.google.com/kms/">Google Cloud
+ KMS</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#GcpKmsClient--">GcpKmsClient()</a></span> - Constructor for class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
 <dd>
@@ -7238,8 +7258,8 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/Hkdf.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">Hkdf</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">This class implements HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
- https://tools.ietf.org/html/rfc5869.</div>
+<div class="block">This class implements HMAC-based Extract-and-Expand Key Derivation Function (HKDF), as described
+ in <a href="https://tools.ietf.org/html/rfc5869">RFC 5869</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Hkdf.html#Hkdf--">Hkdf()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Hkdf.html" title="class in com.google.crypto.tink.subtle">Hkdf</a></dt>
 <dd>&nbsp;</dd>
@@ -7261,19 +7281,23 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA256_128BITTAG">HMAC_SHA256_128BITTAG</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - Tag size: 16 bytes
-   - Hash function: SHA256</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/HmacKey.html" title="class in com.google.crypto.tink.proto"><code>HmacKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+   Tag size: 16 bytes
+   Hash function: SHA256
+ </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#HMAC_SHA256_256BITTAG">HMAC_SHA256_256BITTAG</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
 <dd>
-<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>HmacKey</code> with the following
- parameters:
-   - Key size: 32 bytes
-   - Tag size: 32 bytes
-   - Hash function: SHA256</div>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/HmacKey.html" title="class in com.google.crypto.tink.proto"><code>HmacKey</code></a> with the following parameters:
+
+ 
+   Key size: 32 bytes
+   Tag size: 32 bytes
+   Hash function: SHA256
+ </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacConfig.html#HMAC_TYPE_URL">HMAC_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacConfig.html" title="class in com.google.crypto.tink.mac">MacConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -7358,8 +7382,7 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
 <dd>
-<div class="block">Pre-generated <code>KeyTemplate</code> for <code>HybridDecrypt</code> and <code>HybridEncrypt</code>
- primitives.</div>
+<div class="block">Pre-generated <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> for <code>HybridDecrypt</code> and <code>HybridEncrypt</code> primitives.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html#HybridKeyTemplates--">HybridKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html" title="class in com.google.crypto.tink.hybrid">HybridKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
@@ -7828,13 +7851,15 @@
 <dl>
 <dt><a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink"><span class="typeNameLink">JsonKeysetReader</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
-<div class="block">A <a href="com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink"><code>KeysetReader</code></a> that can read from source source cleartext or encrypted keysets in proto
- JSON format.</div>
+<div class="block">A <a href="com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink"><code>KeysetReader</code></a> that can read from source source cleartext or encrypted keysets in <a
+ href="https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/util/JsonFormat">proto
+ JSON format</a>.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/JsonKeysetWriter.html" title="class in com.google.crypto.tink"><span class="typeNameLink">JsonKeysetWriter</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
-<div class="block">A <a href="com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink"><code>KeysetWriter</code></a> that can write to some source cleartext or encrypted keysets in proto JSON
- format.</div>
+<div class="block">A <a href="com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink"><code>KeysetWriter</code></a> that can write to some source cleartext or encrypted keysets in <a
+ href="https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/util/JsonFormat">proto
+ JSON format</a>.</div>
 </dd>
 </dl>
 <a name="I:K">
@@ -7971,8 +7996,8 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeysetHandle</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
-<div class="block">A KeysetHandle provides abstracted access to <a href="com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a>, to
- limit the exposure of actual protocol buffers that hold sensitive key material.</div>
+<div class="block">A KeysetHandle provides abstracted access to <a href="com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a>, to limit the exposure of actual
+ protocol buffers that hold sensitive key material.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/proto/KeysetInfo.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">KeysetInfo</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>
@@ -8000,8 +8025,8 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeysetManager</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
-<div class="block">Manages a <a href="com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> proto, with convenience methods that
- rotate, disable, enable or destroy keys.</div>
+<div class="block">Manages a <a href="com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> proto, with convenience methods that rotate, disable, enable or destroy
+ keys.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/proto/KeysetOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">KeysetOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
@@ -8154,13 +8179,13 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/MacJce.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">MacJce</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">Mac implementations in JCE.</div>
+<div class="block"><a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink"><code>Mac</code></a> implementations in JCE.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/MacJce.html#MacJce-java.lang.String-java.security.Key-int-">MacJce(String, Key, int)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/MacJce.html" title="class in com.google.crypto.tink.subtle">MacJce</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">MacKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
 <dd>
-<div class="block">Pre-generated <code>KeyTemplate</code> for <code>Mac</code>.</div>
+<div class="block">Pre-generated <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> for <a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink"><code>Mac</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#MacKeyTemplates--">MacKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
@@ -9107,7 +9132,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#newKeyData-com.google.crypto.tink.proto.KeyTemplate-">newKeyData(KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
-<div class="block">Convenience method for generating a new <code>KeyData</code> for the specified <code>template</code>.</div>
+<div class="block">Convenience method for generating a new <a href="com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto"><code>KeyData</code></a> for the specified <code>template</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html#newKeyPair--">newKeyPair()</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html" title="class in com.google.crypto.tink.subtle">Ed25519Sign.KeyPair</a></dt>
 <dd>
@@ -10580,7 +10605,7 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/Random.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">Random</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">A simple wrapper of SecureRandom.</div>
+<div class="block">A simple wrapper of <a href="https://docs.oracle.com/javase/7/docs/api/java/security/SecureRandom.html?is-external=true" title="class or interface in java.security"><code>SecureRandom</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Random.html#Random--">Random()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Random.html" title="class in com.google.crypto.tink.subtle">Random</a></dt>
 <dd>&nbsp;</dd>
@@ -10728,7 +10753,9 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacConfig.html#registerStandardKeyTypes--">registerStandardKeyTypes()</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacConfig.html" title="class in com.google.crypto.tink.mac">MacConfig</a></dt>
 <dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/Config.html#register-com.google.crypto.tink.proto.RegistryConfig-"><code>Config.register(com.google.crypto.tink.proto.RegistryConfig)</code></a></span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/PublicKeySignConfig.html#registerStandardKeyTypes--">registerStandardKeyTypes()</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/PublicKeySignConfig.html" title="class in com.google.crypto.tink.signature">PublicKeySignConfig</a></dt>
 <dd>
@@ -10787,9 +10814,9 @@
 </dd>
 <dt><a href="com/google/crypto/tink/subtle/RewindableReadableByteChannel.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">RewindableReadableByteChannel</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">A wrapper around <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels"><code>ReadableByteChannel</code></a> that provides rewinding feature:
- it caches the read bytes so that after reading some initial part of the channel,
- one can "rewind" the channel and again read the bytes from the beginning.</div>
+<div class="block">A wrapper around <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels"><code>ReadableByteChannel</code></a> that provides rewinding feature: it caches the read
+ bytes so that after reading some initial part of the channel, one can "rewind" the channel and
+ again read the bytes from the beginning.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RewindableReadableByteChannel.html#RewindableReadableByteChannel-java.nio.channels.ReadableByteChannel-">RewindableReadableByteChannel(ReadableByteChannel)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RewindableReadableByteChannel.html" title="class in com.google.crypto.tink.subtle">RewindableReadableByteChannel</a></dt>
 <dd>
@@ -11950,7 +11977,7 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">SignatureKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></dt>
 <dd>
-<div class="block">Pre-generated <code>KeyTemplate</code> for <code>PublicKeySign</code> and <code>PublicKeyVerify</code>.</div>
+<div class="block">Pre-generated <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> for <a href="com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><code>PublicKeySign</code></a> and <a href="com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink"><code>PublicKeyVerify</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#SignatureKeyTemplates--">SignatureKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
@@ -11964,9 +11991,7 @@
 </dd>
 <dt><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html" title="class in com.google.crypto.tink.streamingaead"><span class="typeNameLink">StreamingAeadConfig</span></a> - Class in <a href="com/google/crypto/tink/streamingaead/package-summary.html">com.google.crypto.tink.streamingaead</a></dt>
 <dd>
-<div class="block">Static methods and constants for registering with the <a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances
- of <a href="com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink"><code>StreamingAead</code></a> key types supported in a particular
- release of Tink.</div>
+<div class="block">Static methods and constants for registering with the <a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink"><code>StreamingAead</code></a> key types supported in a particular release of Tink.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#StreamingAeadConfig--">StreamingAeadConfig()</a></span> - Constructor for class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -12451,9 +12476,13 @@ the order they are declared.</div>
 <h2 class="title">W</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetReader.html#withBytes-byte:A-">withBytes(byte[])</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetReader.html" title="class in com.google.crypto.tink">BinaryKeysetReader</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Static method to create a BinaryKeysetReader from a byte arrary.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withBytes-byte:A-">withBytes(byte[])</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Static method to create a JsonKeysetReader from a byte array.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html#withCredentials-java.lang.String-">withCredentials(String)</a></span> - Method in class com.google.crypto.tink.integration.awskms.<a href="com/google/crypto/tink/integration/awskms/AwsKmsClient.html" title="class in com.google.crypto.tink.integration.awskms">AwsKmsClient</a></dt>
 <dd>
 <div class="block">Loads AWS credentials from a properties file.</div>
@@ -12483,52 +12512,62 @@ the order they are declared.</div>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetReader.html#withFile-java.io.File-">withFile(File)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetReader.html" title="class in com.google.crypto.tink">BinaryKeysetReader</a></dt>
 <dd>
-<div class="block">Note: the input file won't be read until <a href="com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>BinaryKeysetReader.read()</code></a> or
- <a href="com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>BinaryKeysetReader.readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a BinaryKeysetReader from a file.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetWriter.html#withFile-java.io.File-">withFile(File)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetWriter.html" title="class in com.google.crypto.tink">BinaryKeysetWriter</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Static method to create a BinaryKeysetWriter that writes to a file.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withFile-java.io.File-">withFile(File)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
 <dd>
-<div class="block">Note: the file won't be read until <a href="com/google/crypto/tink/JsonKeysetReader.html#read--"><code>JsonKeysetReader.read()</code></a> or
- <a href="com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>JsonKeysetReader.readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from a file.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetWriter.html#withFile-java.io.File-">withFile(File)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetWriter.html" title="class in com.google.crypto.tink">JsonKeysetWriter</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Static method to create a JsonKeysetWriter that writes to a file.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetReader.html#withInputStream-java.io.InputStream-">withInputStream(InputStream)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetReader.html" title="class in com.google.crypto.tink">BinaryKeysetReader</a></dt>
 <dd>
-<div class="block">Note: the input stream won't be read until <a href="com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>BinaryKeysetReader.read()</code></a> or
- <a href="com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>BinaryKeysetReader.readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a BinaryKeysetReader from an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io"><code>InputStream</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withInputStream-java.io.InputStream-">withInputStream(InputStream)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
 <dd>
-<div class="block">Note: the input stream won't be read until <a href="com/google/crypto/tink/JsonKeysetReader.html#read--"><code>JsonKeysetReader.read()</code></a> or
- <a href="com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>JsonKeysetReader.readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io"><code>InputStream</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withJsonObject-org.json.JSONObject-">withJsonObject(JSONObject)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Static method to create a JsonKeysetReader from an <a href="https://developer.android.com/reference/org/json/JSONObject.html?is-external=true" title="class or interface in org.json"><code>JSONObject</code></a>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#withKeysetHandle-com.google.crypto.tink.KeysetHandle-">withKeysetHandle(KeysetHandle)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetWriter.html#withOutputStream-java.io.OutputStream-">withOutputStream(OutputStream)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetWriter.html" title="class in com.google.crypto.tink">BinaryKeysetWriter</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Static method to create a BinaryKeysetWriter that writes to an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io"><code>OutputStream</code></a>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetWriter.html#withOutputStream-java.io.OutputStream-">withOutputStream(OutputStream)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetWriter.html" title="class in com.google.crypto.tink">JsonKeysetWriter</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Static method to create a JsonKeysetWriter that writes to an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/OutputStream.html?is-external=true" title="class or interface in java.io"><code>OutputStream</code></a>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withPath-java.lang.String-">withPath(String)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
 <dd>
-<div class="block">Note: the file path won't be read until <a href="com/google/crypto/tink/JsonKeysetReader.html#read--"><code>JsonKeysetReader.read()</code></a> or
- <a href="com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>JsonKeysetReader.readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from a <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file"><code>Path</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withPath-java.nio.file.Path-">withPath(Path)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
 <dd>
-<div class="block">Note: the file path won't be read until <a href="com/google/crypto/tink/JsonKeysetReader.html#read--"><code>JsonKeysetReader.read()</code></a> or
- <a href="com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>JsonKeysetReader.readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from a <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file"><code>Path</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetWriter.html#withPath-java.lang.String-">withPath(String)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetWriter.html" title="class in com.google.crypto.tink">JsonKeysetWriter</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Static method to create a JsonKeysetWriter that writes to a file path.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetWriter.html#withPath-java.nio.file.Path-">withPath(Path)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetWriter.html" title="class in com.google.crypto.tink">JsonKeysetWriter</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Static method to create a JsonKeysetWriter that writes to a file path.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withString-java.lang.String-">withString(String)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Static method to create a JsonKeysetReader from a string.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withUrlSafeBase64--">withUrlSafeBase64()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetWriter.html#write-com.google.crypto.tink.proto.Keyset-">write(Keyset)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetWriter.html" title="class in com.google.crypto.tink">BinaryKeysetWriter</a></dt>
@@ -12537,7 +12576,7 @@ the order they are declared.</div>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/CleartextKeysetHandle.html#write-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeysetWriter-">write(KeysetHandle, KeysetWriter)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/CleartextKeysetHandle.html" title="class in com.google.crypto.tink">CleartextKeysetHandle</a></dt>
 <dd>
-<div class="block">Serializes and writes the keyset managed by <code>handle</code> to <code>keysetWriter</code>.</div>
+<div class="block">Serializes and writes the <a href="com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> managed by <code>handle</code> to <code>keysetWriter</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetWriter.html#write-com.google.crypto.tink.proto.Keyset-">write(Keyset)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetWriter.html" title="class in com.google.crypto.tink">JsonKeysetWriter</a></dt>
 <dd>&nbsp;</dd>

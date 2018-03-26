@@ -115,8 +115,9 @@ var activeTableTab = "activeTableTab";
 <pre>public final class <span class="typeNameLabel">JsonKeysetReader</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></pre>
-<div class="block">A <a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink"><code>KeysetReader</code></a> that can read from source source cleartext or encrypted keysets in proto
- JSON format.</div>
+<div class="block">A <a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink"><code>KeysetReader</code></a> that can read from source source cleartext or encrypted keysets in <a
+ href="https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/util/JsonFormat">proto
+ JSON format</a>.</div>
 </li>
 </ul>
 </div>
@@ -149,43 +150,45 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#withBytes-byte:A-">withBytes</a></span>(byte[]&nbsp;bytes)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#withBytes-byte:A-">withBytes</a></span>(byte[]&nbsp;bytes)</code>
+<div class="block">Static method to create a JsonKeysetReader from a byte array.</div>
+</td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#withFile-java.io.File-">withFile</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/File.html?is-external=true" title="class or interface in java.io">File</a>&nbsp;file)</code>
-<div class="block">Note: the file won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from a file.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#withInputStream-java.io.InputStream-">withInputStream</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)</code>
-<div class="block">Note: the input stream won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io"><code>InputStream</code></a>.</div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#withJsonObject-org.json.JSONObject-">withJsonObject</a></span>(<a href="https://developer.android.com/reference/org/json/JSONObject.html?is-external=true" title="class or interface in org.json">JSONObject</a>&nbsp;input)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#withJsonObject-org.json.JSONObject-">withJsonObject</a></span>(<a href="https://developer.android.com/reference/org/json/JSONObject.html?is-external=true" title="class or interface in org.json">JSONObject</a>&nbsp;input)</code>
+<div class="block">Static method to create a JsonKeysetReader from an <a href="https://developer.android.com/reference/org/json/JSONObject.html?is-external=true" title="class or interface in org.json"><code>JSONObject</code></a>.</div>
+</td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#withPath-java.nio.file.Path-">withPath</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;path)</code>
-<div class="block">Note: the file path won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from a <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file"><code>Path</code></a>.</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#withPath-java.lang.String-">withPath</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;path)</code>
-<div class="block">Note: the file path won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from a <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file"><code>Path</code></a>.</div>
 </td>
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#withString-java.lang.String-">withString</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;input)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#withString-java.lang.String-">withString</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;input)</code>
+<div class="block">Static method to create a JsonKeysetReader from a string.</div>
+</td>
 </tr>
 <tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></code></td>
@@ -221,8 +224,9 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <h4>withInputStream</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;withInputStream(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;input)
                                     throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
-<div class="block">Note: the input stream won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from an <a href="https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io"><code>InputStream</code></a>.
+
+ <p>Note: the input stream won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -236,6 +240,7 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <li class="blockList">
 <h4>withJsonObject</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a>&nbsp;withJsonObject(<a href="https://developer.android.com/reference/org/json/JSONObject.html?is-external=true" title="class or interface in org.json">JSONObject</a>&nbsp;input)</pre>
+<div class="block">Static method to create a JsonKeysetReader from an <a href="https://developer.android.com/reference/org/json/JSONObject.html?is-external=true" title="class or interface in org.json"><code>JSONObject</code></a>.</div>
 </li>
 </ul>
 <a name="withString-java.lang.String-">
@@ -245,6 +250,7 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <li class="blockList">
 <h4>withString</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a>&nbsp;withString(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;input)</pre>
+<div class="block">Static method to create a JsonKeysetReader from a string.</div>
 </li>
 </ul>
 <a name="withBytes-byte:A-">
@@ -254,6 +260,7 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <li class="blockList">
 <h4>withBytes</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a>&nbsp;withBytes(byte[]&nbsp;bytes)</pre>
+<div class="block">Static method to create a JsonKeysetReader from a byte array.</div>
 </li>
 </ul>
 <a name="withFile-java.io.File-">
@@ -264,8 +271,9 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <h4>withFile</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a>&nbsp;withFile(<a href="https://docs.oracle.com/javase/7/docs/api/java/io/File.html?is-external=true" title="class or interface in java.io">File</a>&nbsp;file)
                                  throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
-<div class="block">Note: the file won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from a file.
+
+ <p>Note: the file won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -280,8 +288,11 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <h4>withPath</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a>&nbsp;withPath(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;path)
                                  throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
-<div class="block">Note: the file path won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from a <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file"><code>Path</code></a>.
+
+ <p>Note: the file path won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.
+
+ <p>This method only works on Android API level 26 or newer.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -296,8 +307,11 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <h4>withPath</h4>
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a>&nbsp;withPath(<a href="https://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;path)
                                  throws <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
-<div class="block">Note: the file path won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or
- <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+<div class="block">Static method to create a JsonKeysetReader from a <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file"><code>Path</code></a>.
+
+ <p>Note: the file path won't be read until <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#read--"><code>read()</code></a> or <a href="../../../../com/google/crypto/tink/JsonKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.
+
+ <p>This method only works on Android API level 26 or newer.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>

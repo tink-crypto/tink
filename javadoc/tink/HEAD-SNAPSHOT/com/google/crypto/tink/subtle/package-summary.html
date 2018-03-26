@@ -126,7 +126,7 @@
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/subtle/AesCmac.html" title="class in com.google.crypto.tink.subtle">AesCmac</a></td>
 <td class="colLast">
-<div class="block">An implementation of CMAC following https://tools.ietf.org/html/rfc4493</div>
+<div class="block">An implementation of CMAC following <a href="https://tools.ietf.org/html/rfc4493">RFC 4493</a>.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -150,7 +150,7 @@
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html" title="class in com.google.crypto.tink.subtle">AesGcmHkdfStreaming</a></td>
 <td class="colLast">
-<div class="block">Streaming encryption using AES-GCM with HKDF as key derivation function.</div>
+<div class="block">Streaming encryption using <code>AES-GCM</code> with <code>HKDF</code> as key derivation function.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -162,7 +162,7 @@
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/subtle/AesSiv.html" title="class in com.google.crypto.tink.subtle">AesSiv</a></td>
 <td class="colLast">
-<div class="block">AES-SIV per https://tools.ietf.org/html/rfc5297.</div>
+<div class="block">AES-SIV, as described in <a href="https://tools.ietf.org/html/rfc5297">RFC 5297</a>.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -180,20 +180,20 @@
 <tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/subtle/ChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">ChaCha20Poly1305</a></td>
 <td class="colLast">
-<div class="block">ChaCha20-Poly1305 AEAD construction, compatible with <a
- href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC 7539, section 2.8</a>.</div>
+<div class="block">ChaCha20-Poly1305, as described in <a href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC
+ 7539, section 2.8</a>.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/subtle/EcdsaSignJce.html" title="class in com.google.crypto.tink.subtle">EcdsaSignJce</a></td>
 <td class="colLast">
-<div class="block">Ecdsa signature's signing in JCE.</div>
+<div class="block">ECDSA signing with JCE.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/subtle/EcdsaVerifyJce.html" title="class in com.google.crypto.tink.subtle">EcdsaVerifyJce</a></td>
 <td class="colLast">
-<div class="block">Ecdsa signature's verification in JCE.</div>
+<div class="block">ECDSA verifying with JCE.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -322,8 +322,8 @@
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/subtle/Hkdf.html" title="class in com.google.crypto.tink.subtle">Hkdf</a></td>
 <td class="colLast">
-<div class="block">This class implements HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
- https://tools.ietf.org/html/rfc5869.</div>
+<div class="block">This class implements HMAC-based Extract-and-Expand Key Derivation Function (HKDF), as described
+ in <a href="https://tools.ietf.org/html/rfc5869">RFC 5869</a>.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -335,21 +335,21 @@
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/subtle/MacJce.html" title="class in com.google.crypto.tink.subtle">MacJce</a></td>
 <td class="colLast">
-<div class="block">Mac implementations in JCE.</div>
+<div class="block"><a href="../../../../../com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink"><code>Mac</code></a> implementations in JCE.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/subtle/Random.html" title="class in com.google.crypto.tink.subtle">Random</a></td>
 <td class="colLast">
-<div class="block">A simple wrapper of SecureRandom.</div>
+<div class="block">A simple wrapper of <a href="https://docs.oracle.com/javase/7/docs/api/java/security/SecureRandom.html?is-external=true" title="class or interface in java.security"><code>SecureRandom</code></a>.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/subtle/RewindableReadableByteChannel.html" title="class in com.google.crypto.tink.subtle">RewindableReadableByteChannel</a></td>
 <td class="colLast">
-<div class="block">A wrapper around <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels"><code>ReadableByteChannel</code></a> that provides rewinding feature:
- it caches the read bytes so that after reading some initial part of the channel,
- one can "rewind" the channel and again read the bytes from the beginning.</div>
+<div class="block">A wrapper around <a href="https://docs.oracle.com/javase/7/docs/api/java/nio/channels/ReadableByteChannel.html?is-external=true" title="class or interface in java.nio.channels"><code>ReadableByteChannel</code></a> that provides rewinding feature: it caches the read
+ bytes so that after reading some initial part of the channel, one can "rewind" the channel and
+ again read the bytes from the beginning.</div>
 </td>
 </tr>
 <tr class="rowColor">

@@ -120,12 +120,12 @@ implements <a href="../../../../../com/google/crypto/tink/PublicKeySign.html" ti
 
  <p>Usage:
 
- <pre>
+ <pre><code>
  Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
  // securely store keyPair and share keyPair.getPublicKey()
  Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
  byte[] signature = signer.sign(message);
- </pre></div>
+ </code></pre></div>
 </li>
 </ul>
 </div>
