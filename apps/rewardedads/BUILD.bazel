@@ -46,7 +46,7 @@ java_library(
         "src/test/**/*.java",
     ]),
     deps = [
-        ":java",
+        ":rewardedads",
         "//java:testonly",
         "@com_google_http_client",
         "@junit",
