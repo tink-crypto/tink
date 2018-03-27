@@ -104,13 +104,13 @@ var activeTableTab = "activeTableTab";
 </dl>
 <hr>
 <br>
-<pre>@Alpha
-public interface <span class="typeNameLabel">DeterministicAead</span></pre>
+<pre>public interface <span class="typeNameLabel">DeterministicAead</span></pre>
 <div class="block">Interface for Deterministic Authenticated Encryption with Associated Data (Deterministic AEAD).
 
- <p><b>Warning</b>: unlike <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a>, implementations of this interface
- are not semantically secure, because encrypting the same plaintex always yields the same
- ciphertext.
+ <p><b>Warning</b>
+
+ <p>Unlike <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a>, implementations of this interface are not semantically secure, because
+ encrypting the same plaintex always yields the same ciphertext.
 
  <p>Implementations of this interface provide 128-bit security level against multi-user attacks
  with up to 2^32 keys. That means if an adversary obtains 2^32 ciphertexts of the same message
@@ -120,8 +120,8 @@ public interface <span class="typeNameLabel">DeterministicAead</span></pre>
  data has not been tampered with) of that data, but not its secrecy. (see <a
  href="https://tools.ietf.org/html/rfc5116">RFC 5116</a>)
 
- <p>For why this interface is desirable and some of its use cases, see for example RFC 5297
- section 1.3.</div>
+ <p>For why this interface is desirable and some of its use cases, see for example <a
+ href="https://tools.ietf.org/html/rfc5297#section-1.3">RFC 5297 section 1.3</a>.</div>
 </li>
 </ul>
 </div>
@@ -183,9 +183,11 @@ public interface <span class="typeNameLabel">DeterministicAead</span></pre>
 <div class="block">Deterministically encrypts <code>plaintext</code> with <code>associatedData</code> as associated
  authenticated data.
 
+ <p><b>Warning</b>
+
  <p>Encrypting the same <code>plaintext</code> multiple times protects the integrity of that
- plaintext, but confidentiality is compromised to the extent that an attacker can determine
- that the same plaintext was encrypted.
+ plaintext, but confidentiality is compromised to the extent that an attacker can determine that
+ the same plaintext was encrypted.
 
  <p>The resulting ciphertext allows for checking authenticity and integrity of associated data
  (<code>associatedData</code>), but does not guarantee its secrecy.</div>
