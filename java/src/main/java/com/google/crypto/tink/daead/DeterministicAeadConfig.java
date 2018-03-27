@@ -18,7 +18,6 @@ package com.google.crypto.tink.daead;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
@@ -36,7 +35,7 @@ import java.security.GeneralSecurityException;
  * DeterministicAeadFactory}.
  */
 public final class DeterministicAeadConfig {
-  @Alpha public static final String AES_SIV_TYPE_URL = AesSivKeyManager.TYPE_URL;
+  public static final String AES_SIV_TYPE_URL = AesSivKeyManager.TYPE_URL;
 
   private static final String CATALOGUE_NAME = "TinkDeterministicAead";
   private static final String PRIMITIVE_NAME = "DeterministicAead";

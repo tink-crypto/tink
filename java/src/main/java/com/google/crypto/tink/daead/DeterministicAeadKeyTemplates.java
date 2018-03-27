@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.daead;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -34,11 +33,9 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  */
 public final class DeterministicAeadKeyTemplates {
   /** A {@code KeyTemplate} that generates new instances of {@code AesSivKey} with a 48-byte key. */
-  @Alpha
   public static final KeyTemplate AES192_SIV = createAesSivKeyTemplate(48);
 
   /** A {@code KeyTemplate} that generates new instances of {@code AesSivKey} with a 64-byte key. */
-  @Alpha
   public static final KeyTemplate AES256_SIV = createAesSivKeyTemplate(64);
 
   /**

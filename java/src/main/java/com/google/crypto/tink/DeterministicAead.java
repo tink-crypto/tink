@@ -16,15 +16,15 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
 import java.security.GeneralSecurityException;
 
 /**
  * Interface for Deterministic Authenticated Encryption with Associated Data (Deterministic AEAD).
  *
- * <p><b>Warning</b>: unlike {@link com.google.crypto.tink.Aead}, implementations of this interface
- * are not semantically secure, because encrypting the same plaintex always yields the same
- * ciphertext.
+ * <p><b>Warning</b>
+ *
+ * <p>Unlike {@link Aead}, implementations of this interface are not semantically secure, because
+ * encrypting the same plaintex always yields the same ciphertext.
  *
  * <p>Implementations of this interface provide 128-bit security level against multi-user attacks
  * with up to 2^32 keys. That means if an adversary obtains 2^32 ciphertexts of the same message
@@ -34,18 +34,19 @@ import java.security.GeneralSecurityException;
  * data has not been tampered with) of that data, but not its secrecy. (see <a
  * href="https://tools.ietf.org/html/rfc5116">RFC 5116</a>)
  *
- * <p>For why this interface is desirable and some of its use cases, see for example RFC 5297
- * section 1.3.
+ * <p>For why this interface is desirable and some of its use cases, see for example <a
+ * href="https://tools.ietf.org/html/rfc5297#section-1.3">RFC 5297 section 1.3</a>.
  */
-@Alpha
 public interface DeterministicAead {
   /**
    * Deterministically encrypts {@code plaintext} with {@code associatedData} as associated
    * authenticated data.
    *
+   * <p><b>Warning</b>
+   *
    * <p>Encrypting the same {@code plaintext} multiple times protects the integrity of that
-   * plaintext, but confidentiality is compromised to the extent that an attacker can determine
-   * that the same plaintext was encrypted.
+   * plaintext, but confidentiality is compromised to the extent that an attacker can determine that
+   * the same plaintext was encrypted.
    *
    * <p>The resulting ciphertext allows for checking authenticity and integrity of associated data
    * ({@code associatedData}), but does not guarantee its secrecy.
