@@ -228,11 +228,9 @@ implements <a href="../../../../../com/google/crypto/tink/DeterministicAead.html
 <div class="block">Deterministically encrypts <code>plaintext</code> with <code>associatedData</code> as associated
  authenticated data.
 
- <p><b>Warning</b>
-
  <p>Encrypting the same <code>plaintext</code> multiple times protects the integrity of that
- plaintext, but confidentiality is compromised to the extent that an attacker can determine that
- the same plaintext was encrypted.
+ plaintext, but confidentiality is compromised to the extent that an attacker can determine
+ that the same plaintext was encrypted.
 
  <p>The resulting ciphertext allows for checking authenticity and integrity of associated data
  (<code>associatedData</code>), but does not guarantee its secrecy.</div>
