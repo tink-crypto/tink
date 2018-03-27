@@ -65,8 +65,6 @@ import java.util.logging.Logger;
  * Aead aead = AeadFactory.getPrimitive(keysetHandle);
  * }</pre>
  */
-// TODO(b/74249234): make the read only methods, e.g., getKeyManager, getCatalogue, etc.
-// thread-safe.
 public final class Registry {
   private static final Logger logger = Logger.getLogger(Registry.class.getName());
 
@@ -172,8 +170,8 @@ public final class Registry {
    * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
    *     class of {@code manager}
    */
-  public static <P> void registerKeyManager(String typeUrl, final KeyManager<P> manager)
-      throws GeneralSecurityException {
+  public static synchronized <P> void registerKeyManager(
+      String typeUrl, final KeyManager<P> manager) throws GeneralSecurityException {
     registerKeyManager(typeUrl, manager, /* newKeyAllowed= */ true);
   }
 
@@ -237,7 +235,8 @@ public final class Registry {
    *
    * @return a new {@link KeyData}
    */
-  public static <P> KeyData newKeyData(KeyTemplate keyTemplate) throws GeneralSecurityException {
+  public static synchronized <P> KeyData newKeyData(KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(keyTemplate.getTypeUrl());
     if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
       return manager.newKeyData(keyTemplate.getValue());
@@ -255,7 +254,8 @@ public final class Registry {
    *
    * @return a new key
    */
-  public static <P> MessageLite newKey(KeyTemplate keyTemplate) throws GeneralSecurityException {
+  public static synchronized <P> MessageLite newKey(KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(keyTemplate.getTypeUrl());
     if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
       return manager.newKey(keyTemplate.getValue());
@@ -273,7 +273,7 @@ public final class Registry {
    *
    * @return a new key
    */
-  public static <P> MessageLite newKey(String typeUrl, MessageLite format)
+  public static synchronized <P> MessageLite newKey(String typeUrl, MessageLite format)
       throws GeneralSecurityException {
     KeyManager<P> manager = getKeyManager(typeUrl);
     if (newKeyAllowedMap.get(typeUrl).booleanValue()) {
