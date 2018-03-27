@@ -61,7 +61,6 @@ EP_SUGGESTED_CHECKS = [
     "-Xep:JUnitAmbiguousTestClass:ERROR",
     "-Xep:JavaLangClash:ERROR",
     "-Xep:JavaNetIdn:ERROR",
-    "-Xep:JodaDurationFlagStrictParsing:ERROR",
     "-Xep:LiteralClassName:ERROR",
     "-Xep:LogicalAssignment:ERROR",
     "-Xep:MissingFail:ERROR",
