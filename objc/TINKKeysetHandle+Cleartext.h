@@ -24,9 +24,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * A category that
- * Creates keyset handles from cleartext keysets. This API allows loading cleartext keysets, thus
- * its usage should be restricted.
+ * A category that creates keyset handles from cleartext keysets. This API
+ * allows loading cleartext keysets, thus its usage should be restricted.
  */
 @interface TINKKeysetHandle (Cleartext)
 

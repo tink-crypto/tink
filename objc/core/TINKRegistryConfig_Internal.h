@@ -22,7 +22,8 @@
 
 @interface TINKRegistryConfig ()
 
-- (instancetype)initWithCcConfig:(google::crypto::tink::RegistryConfig)ccConfig;
+- (instancetype)initWithCcConfig:(google::crypto::tink::RegistryConfig)ccConfig
+    NS_DESIGNATED_INITIALIZER;
 - (void)setCcConfig:(google::crypto::tink::RegistryConfig)ccConfig;
 - (google::crypto::tink::RegistryConfig)ccConfig;
 

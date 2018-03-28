@@ -21,6 +21,8 @@
 #import "objc/TINKRegistryConfig.h"
 #import "objc/TINKVersion.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * Static methods for registering with the Registry all instances of Tink key types supported in a
  * particular release of Tink. To register all Tink key types provided in Tink release 1.1.0 one can
@@ -41,7 +43,9 @@
 /** Use initWithVersion:error: to get an instance of TINKAllConfig. */
 - (nullable instancetype)init NS_UNAVAILABLE;
 
-- (instancetype)initWithVersion:(TINKVersion)version
-                          error:(NSError **)error NS_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithVersion:(TINKVersion)version
+                                   error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 
 @end
+
+NS_ASSUME_NONNULL_END

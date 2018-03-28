@@ -27,6 +27,8 @@
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 @implementation TINKAeadConfig
 
 - (instancetype)initWithVersion:(TINKVersion)version error:(NSError **)error {
@@ -55,3 +57,4 @@
 }
 
 @end
+#pragma clang diagnostic pop

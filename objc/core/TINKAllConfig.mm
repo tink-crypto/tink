@@ -31,6 +31,8 @@
 #import "objc/util/TINKStrings.h"
 #import "proto/Config.pbobjc.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 @implementation TINKAllConfig
 
 - (instancetype)initWithVersion:(TINKVersion)version error:(NSError **)error {
@@ -59,3 +61,4 @@
 }
 
 @end
+#pragma clang diagnostic pop

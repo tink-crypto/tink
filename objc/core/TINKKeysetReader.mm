@@ -39,4 +39,16 @@
   _ccReader.reset();
 }
 
+- (TINKPBKeyset *)readWithError:(NSError **)error {
+  NSAssert(NO, @"Do not use TINKKeysetReader directly, instead use TINKBinaryKeysetReader or any "
+               @"other subclass.");
+  return nil;
+}
+
+- (TINKPBEncryptedKeyset *)readEncryptedWithError:(NSError **)error {
+  NSAssert(NO, @"Do not use TINKKeysetReader directly, instead use TINKBinaryKeysetReader or any "
+               @"other subclass.");
+  return nil;
+}
+
 @end
