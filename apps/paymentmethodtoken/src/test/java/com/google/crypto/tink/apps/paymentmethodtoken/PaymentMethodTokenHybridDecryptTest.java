@@ -21,6 +21,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Random;
@@ -49,8 +50,10 @@ public class PaymentMethodTokenHybridDecryptTest {
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
 
-    HybridEncrypt hybridEncrypt = new PaymentMethodTokenHybridEncrypt(recipientPublicKey);
-    HybridDecrypt hybridDecrypt = new PaymentMethodTokenHybridDecrypt(recipientPrivateKey);
+    HybridEncrypt hybridEncrypt =
+        new PaymentMethodTokenHybridEncrypt(recipientPublicKey, ProtocolVersionConfig.EC_V1);
+    HybridDecrypt hybridDecrypt =
+        new PaymentMethodTokenHybridDecrypt(recipientPrivateKey, ProtocolVersionConfig.EC_V1);
     testModifyDecrypt(hybridEncrypt, hybridDecrypt);
   }
 

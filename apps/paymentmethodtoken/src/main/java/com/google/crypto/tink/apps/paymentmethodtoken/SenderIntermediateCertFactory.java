@@ -27,15 +27,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/** Supports signing intermediate signing keys used by the sender in certain protocol versions. */
-public class SenderIntermediateSigningKeySigner {
+/**
+ * Creates a signed certificate with the intermediate signing keys used by the sender in certain
+ * protocol versions.
+ */
+public class SenderIntermediateCertFactory {
   private final List<PublicKeySign> signers;
   private final String intermediateSigningKey;
   private final String protocolVersion;
   private final String senderId;
   private final long expiration;
 
-  private SenderIntermediateSigningKeySigner(
+  private SenderIntermediateCertFactory(
       String protocolVersion,
       String senderId,
       List<ECPrivateKey> senderSigningKeys,
@@ -66,7 +69,7 @@ public class SenderIntermediateSigningKeySigner {
     this.expiration = expiration;
   }
 
-  /** Builder for {@link SenderIntermediateSigningKeySigner}. */
+  /** Builder for {@link SenderIntermediateCertFactory}. */
   public static class Builder {
     private List<ECPrivateKey> senderSigningKeys = new ArrayList<>();
     private String intermediateSigningKey;
@@ -126,14 +129,14 @@ public class SenderIntermediateSigningKeySigner {
       return this;
     }
 
-    public SenderIntermediateSigningKeySigner build() throws GeneralSecurityException {
-      return new SenderIntermediateSigningKeySigner(
+    public SenderIntermediateCertFactory build() throws GeneralSecurityException {
+      return new SenderIntermediateCertFactory(
           protocolVersion, senderId, senderSigningKeys, intermediateSigningKey, expiration);
     }
   }
 
   /**
-   * Performs the signing.
+   * Creates the certificate.
    *
    * <p>This will return a serialized JSONObject in the following format:
    *
@@ -150,7 +153,7 @@ public class SenderIntermediateSigningKeySigner {
    *   }
    * </pre>
    */
-  public String sign() throws GeneralSecurityException {
+  public String create() throws GeneralSecurityException {
     try {
       String signedKey =
           new JSONObject()

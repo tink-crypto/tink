@@ -17,6 +17,7 @@
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.crypto.tink.HybridDecrypt;
+import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
 import java.io.IOException;
@@ -68,7 +69,8 @@ public final class PaymentMethodTokenRecipient {
       List<ECPrivateKey> recipientPrivateKeys,
       String recipientId)
       throws GeneralSecurityException {
-    if (!protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
+    if (!protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
+        && !protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)) {
       throw new IllegalArgumentException("invalid version: " + protocolVersion);
     }
     this.protocolVersion = protocolVersion;
@@ -85,7 +87,9 @@ public final class PaymentMethodTokenRecipient {
           "must add at least one recipient's decrypting key using Builder.addRecipientPrivateKey");
     }
     for (ECPrivateKey privateKey : recipientPrivateKeys) {
-      hybridDecrypters.add(new PaymentMethodTokenHybridDecrypt(privateKey));
+      hybridDecrypters.add(
+          new PaymentMethodTokenHybridDecrypt(
+              privateKey, ProtocolVersionConfig.forProtocolVersion(protocolVersion)));
     }
     if (recipientId == null) {
       throw new IllegalArgumentException("must set recipient Id using Builder.recipientId");
@@ -266,6 +270,8 @@ public final class PaymentMethodTokenRecipient {
     try {
       if (protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
         return unsealV1(sealedMessage);
+      } else if (protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)) {
+        return unsealV2(sealedMessage);
       }
       throw new IllegalArgumentException("unsupported version: " + protocolVersion);
     } catch (JSONException e) {
@@ -277,20 +283,55 @@ public final class PaymentMethodTokenRecipient {
       throws GeneralSecurityException, JSONException {
     JSONObject jsonMsg = new JSONObject(sealedMessage);
     validateV1(jsonMsg);
+    String signedMessage = verifyV1(jsonMsg);
+    String decryptedMessage = decrypt(signedMessage);
+    validateDecryptedMessage(decryptedMessage);
+    return decryptedMessage;
+  }
+
+  public String unsealV2(final String sealedMessage)
+      throws GeneralSecurityException, JSONException {
+    JSONObject jsonMsg = new JSONObject(sealedMessage);
+    validateV2(jsonMsg);
+    String signedMessage = verifyV2(jsonMsg);
+    String decryptedMessage = decrypt(signedMessage);
+    validateDecryptedMessage(decryptedMessage);
+    return decryptedMessage;
+  }
+
+  private String verifyV1(final JSONObject jsonMsg) throws GeneralSecurityException, JSONException {
     byte[] signature =
         Base64.decode(jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY));
     String signedMessage = jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY);
     byte[] signedBytes =
-        PaymentMethodTokenUtil.toLengthValue(
-            // The order of the parameters matters.
-            senderId,
-            recipientId,
-            PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1,
-            signedMessage);
-    verify(signature, signedBytes);
-    String decryptedMessage = decrypt(signedMessage);
-    validateDecryptedMessage(decryptedMessage);
-    return decryptedMessage;
+        getSignedBytes(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1, signedMessage);
+    verify(
+        PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1,
+        senderVerifyingKeysProviders,
+        Collections.singletonList(signature),
+        signedBytes);
+    return signedMessage;
+  }
+
+  private String verifyV2(final JSONObject jsonMsg) throws GeneralSecurityException, JSONException {
+    byte[] signature =
+        Base64.decode(jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY));
+    String signedMessage = jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY);
+    byte[] signedBytes =
+        getSignedBytes(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2, signedMessage);
+    verify(
+        PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2,
+        verifyIntermediateSigningKey(jsonMsg),
+        Collections.singletonList(signature),
+        signedBytes);
+    return signedMessage;
+  }
+
+  private byte[] getSignedBytes(String protocolVersion, String signedMessage)
+      throws GeneralSecurityException {
+    return PaymentMethodTokenUtil.toLengthValue(
+        // The order of the parameters matters.
+        senderId, recipientId, protocolVersion, signedMessage);
   }
 
   private void validateDecryptedMessage(String decryptedMessage)
@@ -314,19 +355,25 @@ public final class PaymentMethodTokenRecipient {
     }
   }
 
-  private void verify(final byte[] signature, final byte[] message)
+  private static void verify(
+      final String protocolVersion,
+      final List<SenderVerifyingKeysProvider> senderVerifyingKeysProviders,
+      final List<byte[]> signatures,
+      final byte[] signedBytes)
       throws GeneralSecurityException {
     boolean verified = false;
     for (SenderVerifyingKeysProvider verifyingKeysProvider : senderVerifyingKeysProviders) {
       for (ECPublicKey publicKey : verifyingKeysProvider.get(protocolVersion)) {
         EcdsaVerifyJce verifier =
             new EcdsaVerifyJce(publicKey, PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO);
-        try {
-          verifier.verify(signature, message);
-          // No exception means the signature is valid.
-          verified = true;
-        } catch (GeneralSecurityException e) {
-          // ignored, try again
+        for (byte[] signature : signatures) {
+          try {
+            verifier.verify(signature, signedBytes);
+            // No exception means the signature is valid.
+            verified = true;
+          } catch (GeneralSecurityException e) {
+            // ignored, try again
+          }
         }
       }
     }
@@ -361,6 +408,88 @@ public final class PaymentMethodTokenRecipient {
     String version = jsonMsg.getString(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY);
     if (!version.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
       throw new GeneralSecurityException("invalid version: " + version);
+    }
+  }
+
+  private void validateV2(final JSONObject jsonMsg) throws GeneralSecurityException, JSONException {
+    if (!jsonMsg.has(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY)
+        || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY)
+        || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY)
+        || !jsonMsg.has(PaymentMethodTokenConstants.JSON_INTERMEDIATE_SIGNING_KEY)
+        || jsonMsg.length() != 4) {
+      throw new GeneralSecurityException(
+          "ECv2 message must contain exactly protocolVersion, intermediateSigningKey, "
+              + "signature and signedMessage");
+    }
+    String version = jsonMsg.getString(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY);
+    if (!version.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)) {
+      throw new GeneralSecurityException("invalid version: " + version);
+    }
+  }
+
+  /**
+   * Verifies the intermediate key and returns a singleton list containing of {@code
+   * SenderVerifyingKeysProvider} that provides the verified key.
+   */
+  private List<SenderVerifyingKeysProvider> verifyIntermediateSigningKey(JSONObject jsonMsg)
+      throws GeneralSecurityException, JSONException {
+    JSONObject intermediateSigningKey =
+        jsonMsg.getJSONObject(PaymentMethodTokenConstants.JSON_INTERMEDIATE_SIGNING_KEY);
+    validateIntermediateSigningKey(intermediateSigningKey);
+    ArrayList<byte[]> signatures = new ArrayList<>();
+    JSONArray signaturesJson =
+        intermediateSigningKey.getJSONArray(PaymentMethodTokenConstants.JSON_SIGNATURES_KEY);
+    for (int i = 0; i < signaturesJson.length(); i++) {
+      signatures.add(Base64.decode(signaturesJson.getString(i)));
+    }
+    String signedKeyAsString =
+        intermediateSigningKey.getString(PaymentMethodTokenConstants.JSON_SIGNED_KEY_KEY);
+    byte[] signedBytes =
+        PaymentMethodTokenUtil.toLengthValue(
+            // The order of the parameters matters.
+            senderId, protocolVersion, signedKeyAsString);
+    verify(protocolVersion, senderVerifyingKeysProviders, signatures, signedBytes);
+    JSONObject signedKey = new JSONObject(signedKeyAsString);
+    validateSignedKey(signedKey);
+    final String key = signedKey.getString(PaymentMethodTokenConstants.JSON_KEY_VALUE_KEY);
+    return Collections.singletonList(
+        new SenderVerifyingKeysProvider() {
+          @Override
+          public List<ECPublicKey> get(String protocolVersion) throws GeneralSecurityException {
+            if (PaymentMethodTokenRecipient.this.protocolVersion.equals(protocolVersion)) {
+              return Collections.singletonList(PaymentMethodTokenUtil.x509EcPublicKey(key));
+            } else {
+              return Collections.emptyList();
+            }
+          }
+        });
+  }
+
+  private JSONObject validateIntermediateSigningKey(final JSONObject intermediateSigningKey)
+      throws GeneralSecurityException {
+    if (!intermediateSigningKey.has(PaymentMethodTokenConstants.JSON_SIGNATURES_KEY)
+        || !intermediateSigningKey.has(PaymentMethodTokenConstants.JSON_SIGNED_KEY_KEY)
+        || intermediateSigningKey.length() != 2) {
+      throw new GeneralSecurityException(
+          "intermediateSigningKey must contain exactly signedKey and signatures");
+    }
+    return intermediateSigningKey;
+  }
+
+  private void validateSignedKey(final JSONObject signedKey)
+      throws GeneralSecurityException, JSONException {
+    // Note: allowing further keys to be added so we can extend the protocol if needed in the future
+    if (!signedKey.has(PaymentMethodTokenConstants.JSON_KEY_VALUE_KEY)
+        || !signedKey.has(PaymentMethodTokenConstants.JSON_KEY_EXPIRATION_KEY)) {
+      throw new GeneralSecurityException(
+          "intermediateSigningKey.signedKey must contain keyValue and keyExpiration");
+    }
+
+    // If message expiration is present, checking it.
+    Long expirationInMillis =
+        Long.parseLong(signedKey.getString(PaymentMethodTokenConstants.JSON_KEY_EXPIRATION_KEY));
+    if (expirationInMillis <= Instant.now().getMillis()) {
+      throw new GeneralSecurityException("expired intermediateSigningKey");
     }
   }
 

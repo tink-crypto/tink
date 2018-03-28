@@ -17,6 +17,7 @@
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EciesHkdfSenderKem;
 import java.nio.charset.StandardCharsets;
@@ -33,18 +34,19 @@ import org.json.JSONObject;
  */
 class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
   private final EciesHkdfSenderKem senderKem;
+  private final ProtocolVersionConfig protocolVersionConfig;
 
-  public PaymentMethodTokenHybridEncrypt(final ECPublicKey recipientPublicKey)
-      throws GeneralSecurityException {
+  public PaymentMethodTokenHybridEncrypt(
+      final ECPublicKey recipientPublicKey, final ProtocolVersionConfig protocolVersionConfig) {
     this.senderKem = new EciesHkdfSenderKem(recipientPublicKey);
+    this.protocolVersionConfig = protocolVersionConfig;
   }
 
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
       throws GeneralSecurityException {
     int symmetricKeySize =
-        PaymentMethodTokenConstants.AES_CTR_KEY_SIZE
-            + PaymentMethodTokenConstants.HMAC_SHA256_KEY_SIZE;
+        protocolVersionConfig.aesCtrKeySize + protocolVersionConfig.hmacSha256KeySize;
     EciesHkdfSenderKem.KemKey kemKey =
         senderKem.generateKey(
             PaymentMethodTokenConstants.HMAC_SHA256_ALGO,
@@ -53,14 +55,11 @@ class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
             symmetricKeySize,
             PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
     byte[] aesCtrKey =
-        Arrays.copyOfRange(
-            kemKey.getSymmetricKey(), 0, PaymentMethodTokenConstants.AES_CTR_KEY_SIZE);
+        Arrays.copyOfRange(kemKey.getSymmetricKey(), 0, protocolVersionConfig.aesCtrKeySize);
     byte[] ciphertext = PaymentMethodTokenUtil.aesCtr(aesCtrKey, plaintext);
     byte[] hmacSha256Key =
         Arrays.copyOfRange(
-            kemKey.getSymmetricKey(),
-            PaymentMethodTokenConstants.AES_CTR_KEY_SIZE,
-            symmetricKeySize);
+            kemKey.getSymmetricKey(), protocolVersionConfig.aesCtrKeySize, symmetricKeySize);
     byte[] tag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key, ciphertext);
     byte[] ephemeralPublicKey = kemKey.getKemBytes();
     try {

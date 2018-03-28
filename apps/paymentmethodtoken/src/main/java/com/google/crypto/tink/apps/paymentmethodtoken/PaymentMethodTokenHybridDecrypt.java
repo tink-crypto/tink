@@ -17,6 +17,7 @@
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.crypto.tink.HybridDecrypt;
+import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.EciesHkdfRecipientKem;
@@ -34,10 +35,13 @@ import org.json.JSONObject;
  */
 class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
   private final EciesHkdfRecipientKem recipientKem;
+  private final ProtocolVersionConfig protocolVersionConfig;
 
-  public PaymentMethodTokenHybridDecrypt(final ECPrivateKey recipientPrivateKey)
+  public PaymentMethodTokenHybridDecrypt(
+      final ECPrivateKey recipientPrivateKey, final ProtocolVersionConfig protocolVersionConfig)
       throws GeneralSecurityException {
     this.recipientKem = new EciesHkdfRecipientKem(recipientPrivateKey);
+    this.protocolVersionConfig = protocolVersionConfig;
   }
 
   @Override
@@ -49,8 +53,7 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
       byte[] kem =
           Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
       int symmetricKeySize =
-          PaymentMethodTokenConstants.AES_CTR_KEY_SIZE
-              + PaymentMethodTokenConstants.HMAC_SHA256_KEY_SIZE;
+          protocolVersionConfig.aesCtrKeySize + protocolVersionConfig.hmacSha256KeySize;
       byte[] demKey =
           recipientKem.generateKey(
               kem,
@@ -60,8 +63,7 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
               symmetricKeySize,
               PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
       byte[] hmacSha256Key =
-          Arrays.copyOfRange(
-              demKey, PaymentMethodTokenConstants.AES_CTR_KEY_SIZE, symmetricKeySize);
+          Arrays.copyOfRange(demKey, protocolVersionConfig.aesCtrKeySize, symmetricKeySize);
       byte[] encryptedMessage =
           Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
       byte[] computedTag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key, encryptedMessage);
@@ -69,8 +71,7 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
       if (!Bytes.equal(expectedTag, computedTag)) {
         throw new GeneralSecurityException("cannot decrypt; invalid MAC");
       }
-      byte[] aesCtrKey =
-          Arrays.copyOfRange(demKey, 0, PaymentMethodTokenConstants.AES_CTR_KEY_SIZE);
+      byte[] aesCtrKey = Arrays.copyOfRange(demKey, 0, protocolVersionConfig.aesCtrKeySize);
       return PaymentMethodTokenUtil.aesCtr(aesCtrKey, encryptedMessage);
     } catch (JSONException e) {
       throw new GeneralSecurityException("cannot decrypt; failed to parse JSON");

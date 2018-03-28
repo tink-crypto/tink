@@ -29,9 +29,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for {@link SenderIntermediateSigningKeySigner}. */
+/** Tests for {@link SenderIntermediateCertFactory}. */
 @RunWith(JUnit4.class)
-public class SenderIntermediateSigningKeySignerTest {
+public class SenderIntermediateCertFactoryTest {
 
   /**
    * Sample Google private signing key for the ECv2 protocolVersion.
@@ -54,15 +54,15 @@ public class SenderIntermediateSigningKeySignerTest {
           + "ydzqdg1TxodSzA96Dj4Mc1EiKroxxunavVIvdxGnJeFViTzFvzFRxyCw==";
 
   @Test
-  public void shouldProduceSignedSenderIntermediateSigningKeyJson() throws Exception {
+  public void shouldProduceSenderIntermediateCertJson() throws Exception {
     String encoded =
-        new SenderIntermediateSigningKeySigner.Builder()
+        new SenderIntermediateCertFactory.Builder()
             .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
             .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
             .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64)
             .expiration(123456)
             .build()
-            .sign();
+            .create();
 
     JSONObject decodedSignedIntermediateSigningKey = new JSONObject(encoded);
     assertTrue(decodedSignedIntermediateSigningKey.get("signedKey") instanceof String);
@@ -84,7 +84,7 @@ public class SenderIntermediateSigningKeySignerTest {
   @Test
   public void shouldThrowIfExpirationNotSet() throws Exception {
     try {
-      new SenderIntermediateSigningKeySigner.Builder()
+      new SenderIntermediateCertFactory.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
           .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
           .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64)
@@ -99,7 +99,7 @@ public class SenderIntermediateSigningKeySignerTest {
   @Test
   public void shouldThrowIfExpirationIsNegative() throws Exception {
     try {
-      new SenderIntermediateSigningKeySigner.Builder()
+      new SenderIntermediateCertFactory.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
           .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
           .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_PRIVATE_KEY_PKCS8_BASE64)
@@ -114,7 +114,7 @@ public class SenderIntermediateSigningKeySignerTest {
   @Test
   public void shouldThrowIfNoSenderSigningKeyAdded() throws Exception {
     try {
-      new SenderIntermediateSigningKeySigner.Builder()
+      new SenderIntermediateCertFactory.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
           .senderIntermediateSigningKey(GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
           // no call to addSenderSigningKey
@@ -131,7 +131,7 @@ public class SenderIntermediateSigningKeySignerTest {
   @Test
   public void shouldThrowIfInvalidProtocolVersionSet() throws Exception {
     try {
-      new SenderIntermediateSigningKeySigner.Builder()
+      new SenderIntermediateCertFactory.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
           .build();
       fail("Should have thrown!");
