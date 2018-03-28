@@ -45,7 +45,7 @@ import org.junit.runners.JUnit4;
 /** Test for AesSivKeyManager. */
 @RunWith(JUnit4.class)
 public class AesSivKeyManagerTest {
-  private Integer[] keySizeInBytes;
+  private KeyTemplate[] keyTemplates;
 
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
@@ -58,65 +58,55 @@ public class AesSivKeyManagerTest {
     if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
       System.out.println(
           "Unlimited Strength Jurisdiction Policy Files are required"
-              + " but not installed. Skip all AesSivKeyManager tests");
-      keySizeInBytes = new Integer[] {};
-    } else if (TestUtil.isAndroid()) {
-      keySizeInBytes = new Integer[] {64};
+              + " but not installed. Skip all DeterministicAeadFactory tests");
+      keyTemplates = new KeyTemplate[] {};
     } else {
-      keySizeInBytes = new Integer[] {48, 64};
+      keyTemplates = new KeyTemplate[] {DeterministicAeadKeyTemplates.AES256_SIV};
     }
   }
 
   @Test
   public void testCiphertextSize() throws Exception {
-    for (int keySize : keySizeInBytes) {
-      if (keySize == 48) {
-        testCiphertextSize(DeterministicAeadKeyTemplates.AES192_SIV);
-      } else if (keySize == 64) {
-        testCiphertextSize(DeterministicAeadKeyTemplates.AES256_SIV);
-      }
+    for (KeyTemplate template : keyTemplates) {
+      KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
+      DeterministicAead daead = DeterministicAeadFactory.getPrimitive(keysetHandle);
+      byte[] plaintext = "plaintext".getBytes("UTF-8");
+      byte[] associatedData = "associatedData".getBytes("UTF-8");
+      byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
+      assertEquals(
+          CryptoFormat.NON_RAW_PREFIX_SIZE + plaintext.length + 16 /* IV_SIZE */,
+          ciphertext.length);
     }
-  }
-
-  private static void testCiphertextSize(KeyTemplate template) throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
-    DeterministicAead daead = DeterministicAeadFactory.getPrimitive(keysetHandle);
-    byte[] plaintext = "plaintext".getBytes("UTF-8");
-    byte[] associatedData = "associatedData".getBytes("UTF-8");
-    byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
-    assertEquals(
-        CryptoFormat.NON_RAW_PREFIX_SIZE + plaintext.length + 16 /* IV_SIZE */, ciphertext.length);
   }
 
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
-    for (int keySize : keySizeInBytes) {
-      if (keySize == 48) {
-        testNewKeyMultipleTimes(DeterministicAeadKeyTemplates.AES192_SIV);
-      } else if (keySize == 64) {
-        testNewKeyMultipleTimes(DeterministicAeadKeyTemplates.AES256_SIV);
+    for (KeyTemplate keyTemplate : keyTemplates) {
+      AesSivKeyManager keyManager = new AesSivKeyManager();
+      Set<String> keys = new TreeSet<String>();
+      // Calls newKey multiple times and make sure that they generate different keys.
+      int numTests = 10;
+      for (int i = 0; i < numTests; i++) {
+        AesSivKey key = (AesSivKey) keyManager.newKey(keyTemplate.getValue());
+        keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
+
+        KeyData keyData = keyManager.newKeyData(keyTemplate.getValue());
+        key = AesSivKey.parseFrom(keyData.getValue());
+        keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
       }
+      assertEquals(numTests * 2, keys.size());
     }
-  }
-
-  private static void testNewKeyMultipleTimes(KeyTemplate keyTemplate) throws Exception {
-    AesSivKeyManager keyManager = new AesSivKeyManager();
-    Set<String> keys = new TreeSet<String>();
-    // Calls newKey multiple times and make sure that they generate different keys.
-    int numTests = 10;
-    for (int i = 0; i < numTests; i++) {
-      AesSivKey key = (AesSivKey) keyManager.newKey(keyTemplate.getValue());
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-
-      KeyData keyData = keyManager.newKeyData(keyTemplate.getValue());
-      key = AesSivKey.parseFrom(keyData.getValue());
-      keys.add(TestUtil.hexEncode(key.getKeyValue().toByteArray()));
-    }
-    assertEquals(numTests * 2, keys.size());
   }
 
   @Test
   public void testNewKeyWithInvalidKeyFormats() throws Exception {
+    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
+      System.out.println(
+          "Unlimited Strength Jurisdiction Policy Files are required"
+              + " but not installed. Skip all AesSivKeyManager tests");
+      return;
+    }
+
     AesSivKeyManager keyManager = new AesSivKeyManager();
 
     try {
@@ -127,8 +117,16 @@ public class AesSivKeyManagerTest {
       // expected.
     }
 
+    try {
+      // AesSiv doesn't accept 48-byte keys.
+      keyManager.newKey(createAesSivKeyFormat(48));
+      fail("48-byte keys should not be accepted");
+    } catch (InvalidAlgorithmParameterException ex) {
+      // expected.
+    }
+
     for (int j = 0; j < 100; j++) {
-      if (j == 48 || j == 64) {
+      if (j == 64) {
         continue;
       }
 
@@ -143,6 +141,12 @@ public class AesSivKeyManagerTest {
 
   @Test
   public void testGetPrimitiveWithInvalidKeys() throws Exception {
+    if (Cipher.getMaxAllowedKeyLength("AES") < 256) {
+      System.out.println(
+          "Unlimited Strength Jurisdiction Policy Files are required"
+              + " but not installed. Skip all AesSivKeyManager tests");
+      return;
+    }
     AesSivKeyManager keyManager = new AesSivKeyManager();
 
     try {
@@ -152,8 +156,15 @@ public class AesSivKeyManagerTest {
       // expected.
     }
 
+    try {
+      keyManager.getPrimitive(createAesSivKey(48));
+      fail("48-byte keys should not be accepted");
+    } catch (InvalidKeyException ex) {
+      // expected.
+    }
+
     for (int j = 0; j < 100; j++) {
-      if (j == 48 || j == 64) {
+      if (j == 64) {
         continue;
       }
 

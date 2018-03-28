@@ -47,10 +47,8 @@ public class AesGcmJceTest {
           "Unlimited Strength Jurisdiction Policy Files are required"
               + " but not installed. Skip tests with keys larger than 128 bits.");
       keySizeInBytes = new Integer[] {16};
-    } else if (TestUtil.isAndroid()) {
-      keySizeInBytes = new Integer[] {16, 32};
     } else {
-      keySizeInBytes = new Integer[] {16, 24, 32};
+      keySizeInBytes = new Integer[] {16, 32};
     }
   }
 

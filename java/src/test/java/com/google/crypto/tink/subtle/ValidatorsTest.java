@@ -64,11 +64,20 @@ public class ValidatorsTest {
   @Test
   public void testValidateAesKeySize() throws Exception {
     Validators.validateAesKeySize(16);
-    Validators.validateAesKeySize(24);
     Validators.validateAesKeySize(32);
+
+    try {
+      Validators.validateAesKeySize(24);
+      fail("Invalid AES key size, should have thrown exception.");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      TestUtil.assertExceptionContains(e, "invalid");
+      TestUtil.assertExceptionContains(e, "key size");
+    }
+
     int count = 0;
     for (int i = -100; i <= 100; i++) {
-      if ((i != 16) && (i != 24) && (i != 32)) {
+      if ((i != 16) && (i != 32)) {
         try {
           Validators.validateAesKeySize(i);
           fail("Invalid AES key size, should have thrown exception.");
@@ -80,7 +89,7 @@ public class ValidatorsTest {
         }
       }
     }
-    assertEquals(201 - 3, count);
+    assertEquals(201 - 2, count);
   }
 
   @Test

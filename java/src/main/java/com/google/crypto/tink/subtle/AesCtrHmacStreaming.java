@@ -124,13 +124,11 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
       int ciphertextSegmentSize,
       int firstSegmentOffset)
       throws InvalidAlgorithmParameterException {
-    if (ikmSize < keySizeInBytes) {
-      throw new InvalidAlgorithmParameterException("ikm to short");
+    if (ikmSize < 16 || ikmSize < keySizeInBytes) {
+      throw new InvalidAlgorithmParameterException(
+          "ikm too short, must be >= " + Math.max(16, keySizeInBytes));
     }
-    boolean isValidKeySize = keySizeInBytes == 16 || keySizeInBytes == 24 || keySizeInBytes == 32;
-    if (!isValidKeySize) {
-      throw new InvalidAlgorithmParameterException("invalid key size");
-    }
+    Validators.validateAesKeySize(keySizeInBytes);
     if (tagSizeInBytes < 10) {
       throw new InvalidAlgorithmParameterException("tag size too small " + tagSizeInBytes);
     }

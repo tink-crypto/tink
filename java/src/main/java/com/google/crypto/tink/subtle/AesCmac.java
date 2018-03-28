@@ -20,9 +20,7 @@ import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.annotations.Alpha;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.util.Arrays;
-import java.util.Collection;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -33,7 +31,6 @@ import javax.crypto.spec.SecretKeySpec;
 @Alpha
 public final class AesCmac implements Mac {
   static final int MIN_TAG_SIZE_IN_BYTES = 10;
-  private static final Collection<Integer> KEY_SIZES = Arrays.asList(16, 24, 32);
 
   private final SecretKey keySpec;
   private final int tagSizeInBytes;
@@ -45,9 +42,8 @@ public final class AesCmac implements Mac {
   }
 
   public AesCmac(final byte[] key, int tagSizeInBytes) throws GeneralSecurityException {
-    if (!KEY_SIZES.contains(key.length)) {
-      throw new InvalidKeyException("invalid key size: " + key.length);
-    }
+    Validators.validateAesKeySize(key.length);
+
     if (tagSizeInBytes < MIN_TAG_SIZE_IN_BYTES) {
       throw new InvalidAlgorithmParameterException(
           "tag size too small, min is " + MIN_TAG_SIZE_IN_BYTES + " bytes");

@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
@@ -47,11 +46,8 @@ public class AesSivTest {
           "Unlimited Strength Jurisdiction Policy Files are required"
               + " but not installed. Skip most AesSiv tests.");
       keySizeInBytes = new Integer[] {};
-    } else if (TestUtil.isAndroid()) {
-      // Conscrypt on Android does not support 192-bit keys.
-      keySizeInBytes = new Integer[] {64};
     } else {
-      keySizeInBytes = new Integer[] {48, 64};
+      keySizeInBytes = new Integer[] {64};
     }
   }
 

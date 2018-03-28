@@ -124,16 +124,16 @@ class AesSivKeyManager implements KeyManager<DeterministicAead> {
 
   private void validate(AesSivKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), VERSION);
-    if (key.getKeyValue().size() != 48 && key.getKeyValue().size() != 64) {
-      throw new InvalidKeyException("invalid key size: " + key.getKeyValue().size()
-          + ". Acceptable values are 48 and 64 bytes.");
+    if (key.getKeyValue().size() != 64) {
+      throw new InvalidKeyException(
+          "invalid key size: " + key.getKeyValue().size() + ". Valid keys must have 64 bytes.");
     }
   }
 
   private void validate(AesSivKeyFormat format) throws GeneralSecurityException {
-    if (format.getKeySize() != 48 && format.getKeySize() != 64) {
-      throw new InvalidAlgorithmParameterException("invalid key size: " + format.getKeySize()
-          + ". Acceptable values are 48 and 64 bytes.");
+    if (format.getKeySize() != 64) {
+      throw new InvalidAlgorithmParameterException(
+          "invalid key size: " + format.getKeySize() + ". Valid keys must have 64 bytes.");
     }
   }
 }

@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.util.regex.Pattern;
 
 /** Validation helper methods. */
@@ -37,10 +38,11 @@ public final class Validators {
     }
   }
 
-  /** @throws GeneralSecurityException if the {@code sizeInBytes} is not a valid AES key size. */
-  public static void validateAesKeySize(int sizeInBytes) throws GeneralSecurityException {
-    if (sizeInBytes != 16 && sizeInBytes != 24 && sizeInBytes != 32) {
-      throw new GeneralSecurityException("invalid AES key size");
+  /** @throws InvalidAlgorithmParameterException if {@code sizeInBytes} is not supported. */
+  public static void validateAesKeySize(int sizeInBytes) throws InvalidAlgorithmParameterException {
+    if (sizeInBytes != 16 && sizeInBytes != 32) {
+      throw new InvalidAlgorithmParameterException(
+          "invalid key size; only 128-bit and 256-bit AES keys are supported");
     }
   }
 

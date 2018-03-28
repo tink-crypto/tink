@@ -27,14 +27,11 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  *
  * <pre>
  *   Config.register(DeterministicAeadConfig.TINK_1_1_0);
- *   KeysetHandle handle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES128_GCM);
+ *   KeysetHandle handle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV);
  *   DeterministicAead daead = DeterministicAeadFactory.getPrimitive(handle);
  * </pre>
  */
 public final class DeterministicAeadKeyTemplates {
-  /** A {@code KeyTemplate} that generates new instances of {@code AesSivKey} with a 48-byte key. */
-  public static final KeyTemplate AES192_SIV = createAesSivKeyTemplate(48);
-
   /** A {@code KeyTemplate} that generates new instances of {@code AesSivKey} with a 64-byte key. */
   public static final KeyTemplate AES256_SIV = createAesSivKeyTemplate(64);
 

@@ -92,14 +92,11 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
   public AesGcmHkdfStreaming(byte[] ikm, String hkdfAlg, int keySizeInBytes,
       int ciphertextSegmentSize, int firstSegmentOffset)
       throws InvalidAlgorithmParameterException {
-    // Checks
-    if (ikm.length < 16) {
-      throw new InvalidAlgorithmParameterException("ikm to short");
+    if (ikm.length < 16 || ikm.length < keySizeInBytes) {
+      throw new InvalidAlgorithmParameterException(
+          "ikm too short, must be >= " + Math.max(16, keySizeInBytes));
     }
-    boolean isValidKeySize = keySizeInBytes == 16 || keySizeInBytes == 24 || keySizeInBytes == 32;
-    if (!isValidKeySize) {
-      throw new InvalidAlgorithmParameterException("Invalid key size");
-    }
+    Validators.validateAesKeySize(keySizeInBytes);
     if (ciphertextSegmentSize <= firstSegmentOffset + getHeaderLength() + TAG_SIZE_IN_BYTES) {
       throw new InvalidAlgorithmParameterException("ciphertextSegmentSize too small");
     }

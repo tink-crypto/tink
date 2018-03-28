@@ -62,6 +62,7 @@ public final class AesEaxJce implements Aead {
       throw new IllegalArgumentException("IV size should be either 12 or 16 bytes");
     }
     this.ivSizeInBytes = ivSizeInBytes;
+    Validators.validateAesKeySize(key.length);
     keySpec = new SecretKeySpec(key, "AES");
     Cipher ecb = Cipher.getInstance("AES/ECB/NOPADDING");
     ecb.init(Cipher.ENCRYPT_MODE, keySpec);

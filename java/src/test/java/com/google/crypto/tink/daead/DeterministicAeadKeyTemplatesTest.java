@@ -29,17 +29,6 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class DeterministicAeadKeyTemplatesTest {
   @Test
-  public void testAES192_SIV() throws Exception {
-    KeyTemplate template = DeterministicAeadKeyTemplates.AES192_SIV;
-    assertEquals(AesSivKeyManager.TYPE_URL, template.getTypeUrl());
-    assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-    AesSivKeyFormat format = AesSivKeyFormat.parseFrom(
-        template.getValue());
-
-    assertEquals(48, format.getKeySize());
-  }
-
-  @Test
   public void testAES256_SIV() throws Exception {
     KeyTemplate template = DeterministicAeadKeyTemplates.AES256_SIV;
     assertEquals(AesSivKeyManager.TYPE_URL, template.getTypeUrl());

@@ -27,7 +27,6 @@ import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.KeyStatusType;
-import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
@@ -58,15 +57,14 @@ public class DeterministicAeadFactoryTest {
           "Unlimited Strength Jurisdiction Policy Files are required"
               + " but not installed. Skip all DeterministicAeadFactory tests");
       keySizeInBytes = new Integer[] {};
-    } else if (TestUtil.isAndroid()) {
-      keySizeInBytes = new Integer[] {64};
     } else {
-      keySizeInBytes = new Integer[] {48, 64};
+      keySizeInBytes = new Integer[] {64};
     }
   }
 
-  private void testEncrytDecrypt(KeyTemplate template) throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
+  @Test
+  public void testEncrytDecrypt() throws Exception {
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV);
     DeterministicAead aead = DeterministicAeadFactory.getPrimitive(keysetHandle);
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
@@ -78,17 +76,6 @@ public class DeterministicAeadFactoryTest {
     assertArrayEquals(ciphertext, ciphertext2);
     assertArrayEquals(plaintext, decrypted);
     assertArrayEquals(plaintext, decrypted2);
-  }
-
-  @Test
-  public void testEncrytDecrypt() throws Exception {
-    for (int keySize : keySizeInBytes) {
-      if (keySize == 48) {
-        testEncrytDecrypt(DeterministicAeadKeyTemplates.AES192_SIV);
-      } else if (keySize == 64) {
-        testEncrytDecrypt(DeterministicAeadKeyTemplates.AES256_SIV);
-      }
-    }
   }
 
   @Test

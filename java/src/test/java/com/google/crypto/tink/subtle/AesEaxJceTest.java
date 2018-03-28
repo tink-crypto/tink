@@ -60,7 +60,7 @@ public class AesEaxJceTest {
               + " but not installed. Skip tests with keys larger than 128 bits.");
       keySizeInBytes = new Integer[] {16};
     } else {
-      keySizeInBytes = new Integer[] {16, 24, 32};
+      keySizeInBytes = new Integer[] {16, 32};
     }
     ivSizeInBytes = new Integer[] {12, 16};
   }

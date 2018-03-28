@@ -45,6 +45,7 @@ public final class AesCtrJceCipher implements IndCpaCipher {
   private final int blockSize;
 
   public AesCtrJceCipher(final byte[] key, int ivSize) throws GeneralSecurityException {
+    Validators.validateAesKeySize(key.length);
     this.keySpec = new SecretKeySpec(key, KEY_ALGORITHM);
     this.blockSize = EngineFactory.CIPHER.getInstance(CIPHER_ALGORITHM).getBlockSize();
     if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > blockSize) {

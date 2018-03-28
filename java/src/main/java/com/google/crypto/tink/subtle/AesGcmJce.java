@@ -32,7 +32,8 @@ public final class AesGcmJce implements Aead {
 
   private final SecretKey keySpec;
 
-  public AesGcmJce(final byte[] key) {
+  public AesGcmJce(final byte[] key) throws GeneralSecurityException {
+    Validators.validateAesKeySize(key.length);
     keySpec = new SecretKeySpec(key, "AES");
   }
 
