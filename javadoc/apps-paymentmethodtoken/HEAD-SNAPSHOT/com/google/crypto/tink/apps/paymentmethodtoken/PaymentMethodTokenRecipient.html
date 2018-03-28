@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10};
+var methods = {"i0":10,"i1":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -172,6 +172,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.html#unseal-java.lang.String-">unseal</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;sealedMessage)</code>&nbsp;</td>
 </tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.html#unsealV2-java.lang.String-">unsealV2</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;sealedMessage)</code>&nbsp;</td>
+</tr>
 </table>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -197,7 +201,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <a name="unseal-java.lang.String-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>unseal</h4>
 <pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;unseal(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;sealedMessage)
@@ -205,6 +209,22 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="unsealV2-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>unsealV2</h4>
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;unsealV2(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;sealedMessage)
+                throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                       <a href="https://developer.android.com/reference/org/json/JSONException.html?is-external=true" title="class or interface in org.json">JSONException</a></pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://developer.android.com/reference/org/json/JSONException.html?is-external=true" title="class or interface in org.json">JSONException</a></code></dd>
 </dl>
 </li>
 </ul>
