@@ -289,7 +289,7 @@ public final class PaymentMethodTokenRecipient {
     return decryptedMessage;
   }
 
-  public String unsealV2(final String sealedMessage)
+  private String unsealV2(final String sealedMessage)
       throws GeneralSecurityException, JSONException {
     JSONObject jsonMsg = new JSONObject(sealedMessage);
     validateV2(jsonMsg);
