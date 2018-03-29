@@ -44,7 +44,7 @@ import java.util.Arrays;
  *     (2008) Twisted Edwards Curves Revisited</a>
  */
 @Alpha
-public final class Ed25519 {
+final class Ed25519 {
 
   public static final int SECRET_KEY_LEN = FIELD_LEN;
   public static final int PUBLIC_KEY_LEN = FIELD_LEN;
