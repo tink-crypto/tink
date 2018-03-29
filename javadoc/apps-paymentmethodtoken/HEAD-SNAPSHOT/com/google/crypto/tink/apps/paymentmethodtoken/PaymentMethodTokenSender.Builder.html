@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -48,7 +48,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateSigningKeySigner.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../../index.html?com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" target="_top">Frames</a></li>
@@ -189,26 +189,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenSender.Builder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html#senderIntermediateCert-java.lang.String-">senderIntermediateCert</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</code>
-<div class="block">JSON containing sender intermediate signing key and a signature of it by the sender signing
- key.</div>
-</td>
-</tr>
-<tr id="i8" class="altColor">
-<td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenSender.Builder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html#senderIntermediateSigningKey-java.security.interfaces.ECPrivateKey-">senderIntermediateSigningKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)</code>&nbsp;</td>
-</tr>
-<tr id="i9" class="rowColor">
-<td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenSender.Builder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html#senderIntermediateSigningKey-java.lang.String-">senderIntermediateSigningKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</code>
-<div class="block">Sets the signing key of the sender.</div>
-</td>
-</tr>
-<tr id="i10" class="altColor">
-<td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenSender.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html#senderSigningKey-java.security.interfaces.ECPrivateKey-">senderSigningKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)</code>&nbsp;</td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenSender.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html#senderSigningKey-java.lang.String-">senderSigningKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</code>
 <div class="block">Sets the signing key of the sender.</div>
@@ -314,55 +297,6 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="senderIntermediateSigningKey-java.lang.String-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>senderIntermediateSigningKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenSender.Builder</a>&nbsp;senderIntermediateSigningKey(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
-                                                              throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Sets the signing key of the sender.
-
- <p>It must be base64 encoded PKCS8 private key.</div>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="senderIntermediateSigningKey-java.security.interfaces.ECPrivateKey-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>senderIntermediateSigningKey</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenSender.Builder</a>&nbsp;senderIntermediateSigningKey(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)
-                                                              throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="senderIntermediateCert-java.lang.String-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>senderIntermediateCert</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenSender.Builder</a>&nbsp;senderIntermediateCert(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
-                                                        throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">JSON containing sender intermediate signing key and a signature of it by the sender signing
- key.
-
- <p>This can be generated by <a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><code>SenderIntermediateCertFactory</code></a>.</div>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-</dl>
-</li>
-</ul>
 <a name="recipientPublicKey-java.lang.String-">
 <!--   -->
 </a>
@@ -456,7 +390,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateCertFactory.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/SenderIntermediateSigningKeySigner.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../../index.html?com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" target="_top">Frames</a></li>
