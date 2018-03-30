@@ -130,16 +130,23 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  PublicKeySign signer = PublicKeySignFactory.getPrimitive(manager.getKeysetHandle());
  </code></pre>
 
- <p>This will read a keyset stored in the <code>my_keyset_name</code> preference of the <code>my_pref_file_name</code> shared preferences file. If the preference file name is null, it uses the
- default shared preferences file.
+ <p>This will read a keyset stored in the <code>my_keyset_name</code> preference of the <code>my_pref_file_name</code> preferences file. If the preference file name is null, it uses the default
+ preferences file.
 
  <p>If the keyset is not found or invalid, and a valid <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withKeyTemplate-com.google.crypto.tink.proto.KeyTemplate-"><code>AndroidKeysetManager.Builder.withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate)</code></a>, a fresh keyset is generated and is written to the
  <code>my_keyset_name</code> preference of the <code>my_pref_file_name</code> shared preferences file.
 
- <p>If a master key URI is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withKeyTemplate-com.google.crypto.tink.proto.KeyTemplate-"><code>AndroidKeysetManager.Builder.withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate)</code></a>, the
- keyset will be encrypted when written to storage and decrypted when read. The master key URI must
- start with <code>android-keystore://</code>. If the master key doesn't exist, a fresh one is
- generated. Usage of Android Keystore can be disabled with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#doNotUseKeystore--"><code>AndroidKeysetManager.Builder.doNotUseKeystore()</code></a>.
+ <p>On Android M or newer and if a master key URI is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withKeyTemplate-com.google.crypto.tink.proto.KeyTemplate-"><code>AndroidKeysetManager.Builder.withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate)</code></a>, the keyset will be encrypted when written to
+ storage and decrypted when read.
+
+ <p>The master key URI must start with <code>android-keystore://</code>. If the master key doesn't
+ exist, a fresh one is generated. Usage of Android Keystore can be disabled with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#doNotUseKeystore--"><code>AndroidKeysetManager.Builder.doNotUseKeystore()</code></a>.
+
+ <p>If a master key URI is not chosen or on Android L or older, the keyset will be stored in
+ cleartext in private preferences which, thanks to the security of the Android framework, no other
+ apps can read or write.
+
+ <p>When Tink cannot decrypt some keyset it would assume that the keyset is in cleartext.
 
  <p>The resulting manager supports all operations that supported by <a href="../../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink"><code>KeysetManager</code></a>. For
  example to rotate the keyset, one can do:
@@ -234,8 +241,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html#rotate-com.google.crypto.tink.proto.KeyTemplate-">rotate</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>
-<div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as
- the primary key.</div>
+<div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as the
+ primary key.</div>
 </td>
 </tr>
 <tr id="i8" class="altColor">
@@ -290,12 +297,11 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <h4>rotate</h4>
 <pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a>&nbsp;rotate(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)
                             throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as
- the primary key.</div>
+<div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as the
+ primary key.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if cannot find any <code>KeyManager</code> that can handle
- <code>keyTemplate</code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if cannot find any <code>KeyManager</code> that can handle <code>keyTemplate</code></dd>
 </dl>
 </li>
 </ul>
@@ -310,8 +316,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if cannot find any <code>KeyManager</code> that can handle
- <code>keyTemplate</code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if cannot find any <code>KeyManager</code> that can handle <code>keyTemplate</code></dd>
 </dl>
 </li>
 </ul>

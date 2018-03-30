@@ -157,7 +157,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#doNotUseKeystore--">doNotUseKeystore</a></span>()</code>
-<div class="block">Does not use Android Keystore, which might not work well in some phones.</div>
+<div class="block">Does not use Android Keystore which might not work well in some phones.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -247,8 +247,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                      <a href="https://docs.oracle.com/javase/7/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block">Sets the master key URI.
 
- <p>Only master keys stored in Android Keystore is supported. The URI
- must start with <code>android-keystore://</code>.</div>
+ <p>Only master keys stored in Android Keystore is supported. The URI must start with <code>android-keystore://</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
@@ -273,11 +272,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>doNotUseKeystore</h4>
 <pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager.Builder</a>&nbsp;doNotUseKeystore()</pre>
-<div class="block">Does not use Android Keystore, which might not work well in some phones.
+<div class="block">Does not use Android Keystore which might not work well in some phones.
 
- <p><b>Warning:</b>
- When Android Keystore is disabled, keys are stored in cleartext. This should be safe
- because they are stored in private preferences.</div>
+ <p><b>Warning:</b> When Android Keystore is disabled, keys are stored in cleartext. This
+ should be safe because they are stored in private preferences.</div>
 </li>
 </ul>
 <a name="build--">
