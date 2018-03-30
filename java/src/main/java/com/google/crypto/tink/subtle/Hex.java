@@ -32,7 +32,7 @@ public final class Hex {
   }
 
   /** Decodes a hex string to a byte array. */
-  public static byte[] decode(String hex) throws IllegalArgumentException {
+  public static byte[] decode(String hex) {
     if (hex.length() % 2 != 0) {
       throw new IllegalArgumentException("Expected a string of even length");
     }

@@ -65,9 +65,11 @@ public final class SharedPrefKeysetReader implements KeysetReader {
             String.format("can't read keyset; the pref value %s does not exist", keysetName));
       }
       return Hex.decode(keysetHex);
-    } catch (ClassCastException e) {
+    } catch (ClassCastException | IllegalArgumentException e) {
       throw new IOException(
-        String.format("can't read keyset; the pref value %s is not a string", keysetName), e);
+          String.format(
+              "can't read keyset; the pref value %s is not a valid hex string", keysetName),
+          e);
     }
   }
 

@@ -54,18 +54,26 @@ import javax.annotation.concurrent.GuardedBy;
  * }</pre>
  *
  * <p>This will read a keyset stored in the {@code my_keyset_name} preference of the {@code
- * my_pref_file_name} shared preferences file. If the preference file name is null, it uses the
- * default shared preferences file.
+ * my_pref_file_name} preferences file. If the preference file name is null, it uses the default
+ * preferences file.
  *
  * <p>If the keyset is not found or invalid, and a valid {@link KeyTemplate} is set with {@link
  * AndroidKeysetManager.Builder#withKeyTemplate}, a fresh keyset is generated and is written to the
  * {@code my_keyset_name} preference of the {@code my_pref_file_name} shared preferences file.
  *
- * <p>If a master key URI is set with {@link AndroidKeysetManager.Builder#withKeyTemplate}, the
- * keyset will be encrypted when written to storage and decrypted when read. The master key URI must
- * start with {@code android-keystore://}. If the master key doesn't exist, a fresh one is
- * generated. Usage of Android Keystore can be disabled with {@link
+ * <p>On Android M or newer and if a master key URI is set with {@link
+ * AndroidKeysetManager.Builder#withKeyTemplate}, the keyset will be encrypted when written to
+ * storage and decrypted when read.
+ *
+ * <p>The master key URI must start with {@code android-keystore://}. If the master key doesn't
+ * exist, a fresh one is generated. Usage of Android Keystore can be disabled with {@link
  * AndroidKeysetManager.Builder#doNotUseKeystore}.
+ *
+ * <p>If a master key URI is not chosen or on Android L or older, the keyset will be stored in
+ * cleartext in private preferences which, thanks to the security of the Android framework, no other
+ * apps can read or write.
+ *
+ * <p>When Tink cannot decrypt some keyset it would assume that the keyset is in cleartext.
  *
  * <p>The resulting manager supports all operations that supported by {@link KeysetManager}. For
  * example to rotate the keyset, one can do:
@@ -112,9 +120,7 @@ public final class AndroidKeysetManager {
     keysetManager = readOrGenerateNewKeyset();
   }
 
-  /**
-   * A builder for {@link AndroidKeysetManager}.
-   */
+  /** A builder for {@link AndroidKeysetManager}. */
   public static final class Builder {
     private KeysetReader reader = null;
     private KeysetWriter writer = null;
@@ -122,12 +128,9 @@ public final class AndroidKeysetManager {
     private boolean useKeystore = true;
     private KeyTemplate keyTemplate = null;
 
-    public Builder() {
-    }
+    public Builder() {}
 
-    /**
-     * Reads and writes the keyset from shared preferences.
-     */
+    /** Reads and writes the keyset from shared preferences. */
     public Builder withSharedPref(Context context, String keysetName, String prefFileName)
         throws IOException {
       if (context == null) {
@@ -144,56 +147,49 @@ public final class AndroidKeysetManager {
     /**
      * Sets the master key URI.
      *
-     * <p>Only master keys stored in Android Keystore is supported. The URI
-     * must start with {@code android-keystore://}.
+     * <p>Only master keys stored in Android Keystore is supported. The URI must start with {@code
+     * android-keystore://}.
      */
     public Builder withMasterKeyUri(String val) throws GeneralSecurityException, IOException {
       masterKey = AndroidKeystoreKmsClient.getOrGenerateNewAeadKey(val);
       return this;
     }
 
-    /**
-     * If the keyset is not found or valid, generates a new one using {@code val}.
-     */
+    /** If the keyset is not found or valid, generates a new one using {@code val}. */
     public Builder withKeyTemplate(KeyTemplate val) {
       keyTemplate = val;
       return this;
     }
 
     /**
-     * Does not use Android Keystore, which might not work well in some phones.
+     * Does not use Android Keystore which might not work well in some phones.
      *
-     * <p><b>Warning:</b>
-     * When Android Keystore is disabled, keys are stored in cleartext. This should be safe
-     * because they are stored in private preferences.
+     * <p><b>Warning:</b> When Android Keystore is disabled, keys are stored in cleartext. This
+     * should be safe because they are stored in private preferences.
      */
     public Builder doNotUseKeystore() {
       useKeystore = false;
       return this;
     }
 
-    /**
-     * @return a {@link KeysetHandle} with the specified options.
-     */
+    /** @return a {@link KeysetHandle} with the specified options. */
     public AndroidKeysetManager build() throws GeneralSecurityException, IOException {
       return new AndroidKeysetManager(this);
     }
   }
 
-  /**
-   * @return a {@link KeysetHandle} of the managed keyset
-   */
+  /** @return a {@link KeysetHandle} of the managed keyset */
   @GuardedBy("this")
   public synchronized KeysetHandle getKeysetHandle() throws GeneralSecurityException {
     return keysetManager.getKeysetHandle();
   }
 
   /**
-   * Generates and adds a fresh key generated using {@code keyTemplate}, and sets the new key as
-   * the primary key.
+   * Generates and adds a fresh key generated using {@code keyTemplate}, and sets the new key as the
+   * primary key.
    *
-   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle
-   * {@code keyTemplate}
+   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
+   *     keyTemplate}
    */
   @GuardedBy("this")
   public synchronized AndroidKeysetManager rotate(KeyTemplate keyTemplate)
@@ -206,8 +202,8 @@ public final class AndroidKeysetManager {
   /**
    * Generates and adds a fresh key generated using {@code keyTemplate}.
    *
-   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle
-   * {@code keyTemplate}
+   * @throws GeneralSecurityException if cannot find any {@link KeyManager} that can handle {@code
+   *     keyTemplate}
    */
   @GuardedBy("this")
   public synchronized AndroidKeysetManager add(KeyTemplate keyTemplate)
@@ -289,8 +285,7 @@ public final class AndroidKeysetManager {
     return this;
   }
 
-  private KeysetManager readOrGenerateNewKeyset() throws
-      GeneralSecurityException, IOException {
+  private KeysetManager readOrGenerateNewKeyset() throws GeneralSecurityException, IOException {
     try {
       return read();
     } catch (IOException e) {
@@ -300,9 +295,7 @@ public final class AndroidKeysetManager {
 
     // Not found.
     if (keyTemplate != null) {
-      KeysetManager manager = KeysetManager
-          .withEmptyKeyset()
-          .rotate(keyTemplate);
+      KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(keyTemplate);
       write(manager);
       return manager;
     }
@@ -313,15 +306,26 @@ public final class AndroidKeysetManager {
     if (shouldUseKeystore()) {
       try {
         return KeysetManager.withKeysetHandle(KeysetHandle.read(reader, masterKey));
-      } catch (InvalidProtocolBufferException e) {
-        // This edge case happens either when
-        //   - pre-M users upgraded to M or newer, or
-        //   - keystore was disabled then reenabled.
-        // Let's log and try to read the keyset in cleartext.
+      } catch (InvalidProtocolBufferException | GeneralSecurityException e) {
+        // This edge case happens when
+        //   - the keyset was generated on a pre M phone which is then upgraded to M or newer, or
+        //   - the keyset was generated with Keystore being disabled, then Keystore is enabled.
+        // By ignoring the security failure here, an adversary with write access to private
+        // preferences can replace an encrypted keyset (that it cannot read or write) with a
+        // cleartext value that it controls. This does not introduce new security risks because to
+        // overwrite the encrypted keyset in private preferences of an app, said adversaries must
+        // have the same privilege as the app, thus they can call Android Keystore to read or write
+        // the encrypted keyset in the first place.
+        // So it's okay to ignore the failure and try to read the keyset in cleartext.
         Log.i(TAG, "cannot decrypt keyset: " + e.toString());
       }
     }
-    return KeysetManager.withKeysetHandle(CleartextKeysetHandle.read(reader));
+    KeysetHandle handle = CleartextKeysetHandle.read(reader);
+    if (shouldUseKeystore()) {
+      // Opportunistically encrypt the keyset to avoid further fallback to cleartext.
+      handle.write(writer, masterKey);
+    }
+    return KeysetManager.withKeysetHandle(handle);
   }
 
   private void write(KeysetManager manager) throws GeneralSecurityException {
@@ -337,6 +341,6 @@ public final class AndroidKeysetManager {
   }
 
   private boolean shouldUseKeystore() {
-    return useKeystore && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+    return (useKeystore && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M);
   }
 }
