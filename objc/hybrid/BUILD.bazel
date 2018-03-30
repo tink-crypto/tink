@@ -93,17 +93,15 @@ objc_library(
 #              Tests               #
 ####################################
 
-ios_unit_test(
-    name = "HybridTests",
-    size = "small",
-    minimum_os_version = "9.0",
-    deps = [
-        ":hybrid_decrypt_config_test",
-        ":hybrid_decrypt_factory_test",
-        ":hybrid_encrypt_config_test",
-        ":hybrid_encrypt_factory_test",
-    ],
-)
+# ios_unit_test(
+#     name = "HybridTests",
+#     size = "small",
+#     minimum_os_version = "9.0",
+#     deps = [
+#         ":hybrid_decrypt_factory_test",
+#         ":hybrid_encrypt_factory_test",
+#     ],
+# )
 
 objc_library(
     name = "hybrid_decrypt_factory_test",
@@ -147,52 +145,9 @@ objc_library(
     ],
 )
 
-objc_library(
-    name = "hybrid_decrypt_config_test",
-    srcs = ["Tests/TINKHybridDecryptConfigTest.m"],
-    visibility = ["//visibility:private"],
-    deps = [
-        ":ecies_aead_hkdf_private_key_manager",
-        ":hybrid_decrypt_config",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
-objc_library(
-    name = "hybrid_encrypt_config_test",
-    srcs = ["Tests/TINKHybridEncryptConfigTest.m"],
-    visibility = ["//visibility:private"],
-    deps = [
-        ":ecies_aead_hkdf_public_key_manager",
-        ":hybrid_encrypt_config",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
 ####################################
 #         Private/Internal         #
 ####################################
-
-objc_library(
-    name = "ecies_aead_hkdf_private_key_manager",
-    srcs = ["TINKEciesAeadHkdfPrivateKeyManager.mm"],
-    hdrs = ["TINKEciesAeadHkdfPrivateKeyManager.h"],
-    visibility = ["//visibility:private"],
-    deps = [
-        ":hybrid_decrypt_internal",
-        ":hybrid_decrypt_key_manager",
-        "//cc:hybrid_decrypt",
-        "//cc:key_manager",
-        "//cc/hybrid:ecies_aead_hkdf_private_key_manager",
-        "//cc/util:status",
-        "//objc:key_manager",
-        "//objc/util:errors",
-        "//objc/util:strings",
-        "//proto:all_objc_proto",
-        "@com_google_absl//absl/strings",
-        "@com_google_protobuf//:objectivec",
-    ],
-)
 
 objc_library(
     name = "ecies_aead_hkdf_public_key_manager",
