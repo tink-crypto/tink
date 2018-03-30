@@ -18,47 +18,55 @@
 
 #import "objc/hybrid/TINKHybridEncryptInternal.h"
 
+#import "objc/TINKHybridEncrypt.h"
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
 
 #include "absl/strings/string_view.h"
 #include "tink/hybrid_encrypt.h"
 
-@implementation TINKHybridEncryptInternal
+@implementation TINKHybridEncryptInternal {
+  std::unique_ptr<crypto::tink::HybridEncrypt> _ccHybridEncrypt;
+}
 
-- (instancetype)initWithPrimitive:(crypto::tink::HybridEncrypt *)primitive {
+- (instancetype)initWithCCHybridEncrypt:
+    (std::unique_ptr<crypto::tink::HybridEncrypt>)ccHybridEncrypt {
   if (self = [super init]) {
-    _primitive = primitive;
+    _ccHybridEncrypt = std::move(ccHybridEncrypt);
   }
   return self;
 }
 
 - (void)dealloc {
-  delete _primitive;
+  _ccHybridEncrypt.reset();
 }
 
 - (NSData *)encrypt:(NSData *)plaintext
     withContextInfo:(NSData *)contextInfo
               error:(NSError **)error {
-  if (error) {
-    *error = nil;
-  }
-
   absl::string_view context;
   if (contextInfo && contextInfo.length > 0) {
     context = absl::string_view(static_cast<const char *>(contextInfo.bytes),
                                             contextInfo.length);
   }
 
-  auto st = _primitive->Encrypt(
-      absl::string_view(static_cast<const char *>(plaintext.bytes), plaintext.length),
-      context);
+  auto st = _ccHybridEncrypt->Encrypt(
+      absl::string_view(static_cast<const char *>(plaintext.bytes), plaintext.length), context);
   if (!st.ok()) {
-    *error = TINKStatusToError(st.status());
+    if (error) {
+      *error = TINKStatusToError(st.status());
+    }
     return nil;
   }
 
   return TINKStringToNSData(st.ValueOrDie());
+}
+
+- (nullable crypto::tink::HybridEncrypt *)ccHybridEncrypt {
+  if (!_ccHybridEncrypt) {
+    return nil;
+  }
+  return _ccHybridEncrypt.get();
 }
 
 @end

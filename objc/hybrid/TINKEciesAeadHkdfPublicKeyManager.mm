@@ -93,9 +93,8 @@
   }
 
   // Wrap the C++ primitive into an Obj-C class and return it to the user.
-  auto ccPrimitive = st.ValueOrDie().release();
   id<TINKHybridEncrypt> primitive =
-      [[TINKHybridEncryptInternal alloc] initWithPrimitive:ccPrimitive];
+      [[TINKHybridEncryptInternal alloc] initWithCCHybridEncrypt:std::move(st.ValueOrDie())];
   return primitive;
 }
 
@@ -131,9 +130,8 @@
   }
 
   // Wrap the C++ primitive into an Obj-C class and return it to the user.
-  auto ccPrimitive = st.ValueOrDie().release();
   id<TINKHybridEncrypt> primitive =
-      [[TINKHybridEncryptInternal alloc] initWithPrimitive:ccPrimitive];
+      [[TINKHybridEncryptInternal alloc] initWithCCHybridEncrypt:std::move(st.ValueOrDie())];
   return primitive;
 }
 

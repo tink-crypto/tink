@@ -18,17 +18,42 @@
 
 #import "objc/hybrid/TINKHybridEncryptConfig.h"
 
-#include "tink/hybrid/hybrid_encrypt_config.h"
-
-#import "objc/TINKKeyManager.h"
-#import "objc/hybrid/TINKHybridEncryptKeyManager.h"
-#import "objc/hybrid/TINKHybridEncryptKeyManager_Internal.h"
+#import "objc/TINKRegistryConfig.h"
+#import "objc/TINKVersion.h"
+#import "objc/core/TINKRegistryConfig_Internal.h"
 #import "objc/util/TINKErrors.h"
 
+#include "tink/hybrid/hybrid_encrypt_config.h"
+#include "tink/util/status.h"
+#include "proto/config.pb.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 @implementation TINKHybridEncryptConfig
 
-+ (BOOL)registerStandardKeyTypes {
-  return crypto::tink::HybridEncryptConfig::RegisterStandardKeyTypes().ok();
-}
+- (instancetype)initWithVersion:(TINKVersion)version error:(NSError **)error {
+  auto st = crypto::tink::HybridEncryptConfig::Init();
+  if (!st.ok()) {
+    if (error) {
+      *error = TINKStatusToError(st);
+    }
+    return nil;
+  }
 
+  google::crypto::tink::RegistryConfig ccConfig;
+  switch (version) {
+    case TINKVersion1_1_0:
+      ccConfig = crypto::tink::HybridEncryptConfig::Tink_1_1_0();
+      break;
+    default:
+      if (error) {
+        *error = TINKStatusToError(crypto::tink::util::Status(
+            crypto::tink::util::error::INVALID_ARGUMENT, "Unsupported Tink version."));
+      }
+      return nil;
+  }
+
+  return (self = [super initWithCcConfig:ccConfig]);
+}
 @end
+#pragma clang diagnostic pop

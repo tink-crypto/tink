@@ -18,33 +18,50 @@
 
 #import <Foundation/Foundation.h>
 
-@class TINKHybridDecryptKeyManager;
 @class TINKKeysetHandle;
 @protocol TINKHybridDecrypt;
-@protocol TINKKeyManager;
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+ * TINKHybridDecryptFactory allows for obtaining a TINKHybridDecrypt primitive from a
+ * TINKKeysetHandle.
+ *
+ * TINKHybridDecryptFactory gets primitives from the Registry, which can be initialized via
+ * convenience methods from TINKHybridDecryptConfig. Here is an example how one can obtain and use a
+ * TINKHybridDecrypt primitive:
+ *
+ * NSError *error = nil;
+ * TINKHybridDecryptConfig *hybridDecryptConfig =
+ *    [[TINKHybridDecryptConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+ * if (!hybridDecryptConfig || error) {
+ *   // handle error.
+ * }
+ *
+ * if (![TINKConfig registerConfig:hybridDecryptConfig error:&error]) {
+ *   // handle error.
+ * }
+ *
+ * TINKKeysetHandle keysetHandle = ...;
+ * id<TINKHybridDecrypt> hybridDecrypt =
+ *    [TINKHybridDecryptFactory primitiveWithKeysetHandle:keysetHandle error:&error];
+ * if (!hybridDecrypt || error) {
+ *   // handle error.
+ * }
+ *
+ * NSData *plaintext = ...;
+ * NSData *contextInfo = ...;
+ * NSData *plaintext = [hybridDecrypt decrypt:ciphertext withContextInfo:contextInfo
+ *                                                                 error:&error];
+ */
 @interface TINKHybridDecryptFactory : NSObject
 
 /**
- * Returns a HybridDecrypt-primitive that uses key material from the keyset specified via @c
- * keysetHandle.
+ * Returns an object that conforms to the TINKHybridDecrypt protocol. It uses key material from the
+ * keyset specified via @c keysetHandle.
  */
 + (nullable id<TINKHybridDecrypt>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle
                                                       error:(NSError **)error;
-
-/**
- * Returns a HybridDecrypt-primitive that uses key material from the keyset specified via @c
- * keysetHandle and is instantiated by the given @c keyManager (instead of the key manager from the
- * Registry).
- *
- * If @c keyManager is nil it uses the default key manager from the Registry.
- */
-+ (nullable id<TINKHybridDecrypt>)
-    primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle
-                andKeyManager:(nullable TINKHybridDecryptKeyManager<TINKKeyManager> *)keyManager
-                        error:(NSError **)error;
 
 @end
 

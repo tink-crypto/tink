@@ -10,17 +10,12 @@ objc_library(
     hdrs = ["TINKHybridDecryptFactory.h"],
     deps = [
         ":hybrid_decrypt_internal",
-        ":hybrid_decrypt_key_manager",
-        "//cc:hybrid_decrypt",
-        "//cc:key_manager",
         "//cc:keyset_handle",
         "//cc/hybrid:hybrid_decrypt_factory",
         "//cc/util:status",
         "//objc:hybrid_decrypt",
-        "//objc:key_manager",
         "//objc:keyset_handle",
         "//objc/util:errors",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -30,17 +25,12 @@ objc_library(
     hdrs = ["TINKHybridEncryptFactory.h"],
     deps = [
         ":hybrid_encrypt_internal",
-        ":hybrid_encrypt_key_manager",
-        "//cc:hybrid_encrypt",
-        "//cc:key_manager",
         "//cc:keyset_handle",
         "//cc/hybrid:hybrid_encrypt_factory",
         "//cc/util:status",
         "//objc:hybrid_encrypt",
-        "//objc:key_manager",
         "//objc:keyset_handle",
         "//objc/util:errors",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -49,10 +39,12 @@ objc_library(
     srcs = ["TINKHybridDecryptConfig.mm"],
     hdrs = ["TINKHybridDecryptConfig.h"],
     deps = [
-        ":hybrid_decrypt_key_manager",
         "//cc/hybrid:hybrid_decrypt_config",
-        "//objc:key_manager",
+        "//objc:registry_config",
+        "//objc:version",
         "//objc/util:errors",
+        "//objc/util:strings",
+        "//proto:all_objc_proto",
     ],
 )
 
@@ -61,10 +53,13 @@ objc_library(
     srcs = ["TINKHybridEncryptConfig.mm"],
     hdrs = ["TINKHybridEncryptConfig.h"],
     deps = [
-        ":hybrid_encrypt_key_manager",
         "//cc/hybrid:hybrid_encrypt_config",
-        "//objc:key_manager",
+        "//cc/util:errors",
+        "//objc:registry_config",
+        "//objc:version",
         "//objc/util:errors",
+        "//objc/util:strings",
+        "//proto:all_objc_proto",
     ],
 )
 
@@ -121,6 +116,7 @@ objc_library(
         "//cc:crypto_format",
         "//cc/util:status",
         "//cc/util:test_util",
+        "//objc:config",
         "//objc:hybrid_decrypt",
         "//objc:hybrid_encrypt",
         "//objc:keyset_handle",
@@ -140,6 +136,7 @@ objc_library(
         ":hybrid_encrypt_factory",
         "//cc/util:status",
         "//cc/util:test_util",
+        "//objc:config",
         "//objc:hybrid_encrypt",
         "//objc:keyset_handle",
         "//objc/util:strings",

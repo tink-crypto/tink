@@ -18,47 +18,55 @@
 
 #import "objc/hybrid/TINKHybridDecryptInternal.h"
 
+#import "objc/TINKHybridDecrypt.h"
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
 
 #include "absl/strings/string_view.h"
 #include "tink/hybrid_decrypt.h"
 
-@implementation TINKHybridDecryptInternal
+@implementation TINKHybridDecryptInternal {
+  std::unique_ptr<crypto::tink::HybridDecrypt> _ccHybridDecrypt;
+}
 
-- (instancetype)initWithPrimitive:(crypto::tink::HybridDecrypt *)primitive {
+- (instancetype)initWithCCHybridDecrypt:
+    (std::unique_ptr<crypto::tink::HybridDecrypt>)ccHybridDecrypt {
   if (self = [super init]) {
-    _primitive = primitive;
+    _ccHybridDecrypt = std::move(ccHybridDecrypt);
   }
   return self;
 }
 
 - (void)dealloc {
-  delete _primitive;
+  _ccHybridDecrypt.reset();
 }
 
 - (NSData *)decrypt:(NSData *)ciphertext
     withContextInfo:(NSData *)contextInfo
               error:(NSError **)error {
-  if (error) {
-    *error = nil;
-  }
-
   absl::string_view context;
   if (contextInfo && contextInfo.length > 0) {
     context = absl::string_view(static_cast<const char *>(contextInfo.bytes),
                                             contextInfo.length);
   }
 
-  auto st = _primitive->Decrypt(
-      absl::string_view(static_cast<const char *>(ciphertext.bytes), ciphertext.length),
-      context);
+  auto st = _ccHybridDecrypt->Decrypt(
+      absl::string_view(static_cast<const char *>(ciphertext.bytes), ciphertext.length), context);
   if (!st.ok()) {
-    *error = TINKStatusToError(st.status());
+    if (error) {
+      *error = TINKStatusToError(st.status());
+    }
     return nil;
   }
 
   return TINKStringToNSData(st.ValueOrDie());
+}
+
+- (nullable crypto::tink::HybridDecrypt *)ccHybridDecrypt {
+  if (!_ccHybridDecrypt) {
+    return nil;
+  }
+  return _ccHybridDecrypt.get();
 }
 
 @end

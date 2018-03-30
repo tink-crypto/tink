@@ -26,6 +26,7 @@
 #import "proto/EciesAeadHkdf.pbobjc.h"
 #import "proto/Tink.pbobjc.h"
 
+#import "objc/TINKConfig.h"
 #import "objc/TINKHybridEncrypt.h"
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
@@ -83,9 +84,15 @@ static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
   keyset.primaryKeyId = key_id_3;
 
   // Initialize the registry.
-  [TINKHybridEncryptConfig registerStandardKeyTypes];
-
   NSError *error = nil;
+  TINKHybridEncryptConfig *hybridConfig =
+      [[TINKHybridEncryptConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  XCTAssertNotNil(hybridConfig);
+  XCTAssertNil(error);
+
+  XCTAssertTrue([TINKConfig registerConfig:hybridConfig error:&error]);
+  XCTAssertNil(error);
+
   std::string serializedKeyset = TINKPBSerializeToString(keyset, &error);
   XCTAssertNil(error);
 

@@ -16,8 +16,9 @@
  **************************************************************************
  */
 
-#import <Foundation/Foundation.h>
 #import "objc/TINKHybridEncrypt.h"
+
+#import <Foundation/Foundation.h>
 
 #include "tink/hybrid_encrypt.h"
 
@@ -27,11 +28,11 @@
  */
 @interface TINKHybridEncryptInternal : NSObject <TINKHybridEncrypt>
 
-@property(nonatomic, nonnull, readonly) crypto::tink::HybridEncrypt* primitive;
-
 - (nullable instancetype)init NS_UNAVAILABLE;
 
-- (nullable instancetype)initWithPrimitive:(nonnull crypto::tink::HybridEncrypt*)primitive
-    NS_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithCCHybridEncrypt:
+    (std::unique_ptr<crypto::tink::HybridEncrypt>)ccHybridEncrypt NS_DESIGNATED_INITIALIZER;
+
+- (nullable crypto::tink::HybridEncrypt *)ccHybridEncrypt;
 
 @end

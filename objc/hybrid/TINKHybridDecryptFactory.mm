@@ -18,70 +18,42 @@
 
 #import "objc/hybrid/TINKHybridDecryptFactory.h"
 
-#include "tink/hybrid/hybrid_decrypt_factory.h"
-#include "tink/hybrid_decrypt.h"
-#include "tink/key_manager.h"
-#include "tink/keyset_handle.h"
-#include "tink/util/status.h"
-#include "proto/tink.pb.h"
+#import <Foundation/Foundation.h>
 
 #import "objc/TINKHybridDecrypt.h"
-#import "objc/TINKKeyManager.h"
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/hybrid/TINKHybridDecryptInternal.h"
-#import "objc/hybrid/TINKHybridDecryptKeyManager.h"
-#import "objc/hybrid/TINKHybridDecryptKeyManager_Internal.h"
 #import "objc/util/TINKErrors.h"
+
+#include "tink/hybrid/hybrid_decrypt_factory.h"
+#include "tink/keyset_handle.h"
+#include "tink/util/status.h"
 
 @implementation TINKHybridDecryptFactory
 
 + (id<TINKHybridDecrypt>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle
                                              error:(NSError **)error {
-  return [TINKHybridDecryptFactory primitiveWithKeysetHandle:keysetHandle
-                                               andKeyManager:nil
-                                                       error:error];
-}
+  crypto::tink::KeysetHandle *handle = [keysetHandle ccKeysetHandle];
 
-+ (id<TINKHybridDecrypt>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle
-                                     andKeyManager:
-                                         (TINKHybridDecryptKeyManager<TINKKeyManager> *)keyManager
-                                             error:(NSError **)error {
-  if (error) {
-    *error = nil;
-  }
-
-  crypto::tink::KeysetHandle *ccHandle = [keysetHandle ccKeysetHandle];
-
-  crypto::tink::KeyManager<crypto::tink::HybridDecrypt> *ccKeyManager = nullptr;
-  if (keyManager) {
-    ccKeyManager = keyManager.ccKeyManager;
-  }
-
-  auto ccHybridDecrypt = crypto::tink::HybridDecryptFactory::GetPrimitive(*ccHandle, ccKeyManager);
-  if (!ccHybridDecrypt.ok()) {
+  auto st = crypto::tink::HybridDecryptFactory::GetPrimitive(*handle);
+  if (!st.ok()) {
     if (error) {
-      *error = TINKStatusToError(ccHybridDecrypt.status());
+      *error = TINKStatusToError(st.status());
+    }
+    return nil;
+  }
+  id<TINKHybridDecrypt> hybrid =
+      [[TINKHybridDecryptInternal alloc] initWithCCHybridDecrypt:std::move(st.ValueOrDie())];
+  if (!hybrid) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::RESOURCE_EXHAUSTED, "Cannot initialize TINKHybridDecrypt"));
     }
     return nil;
   }
 
-  auto ccPrimitive = ccHybridDecrypt.ValueOrDie().release();
-
-  // Wrap the C++ HybridDecrypt primitive into a TINKHybridDecrypt Obj-C instance.
-  id<TINKHybridDecrypt> objcHybridDecrypt =
-      [[TINKHybridDecryptInternal alloc] initWithPrimitive:ccPrimitive];
-  if (!objcHybridDecrypt) {
-    if (error) {
-      *error = TINKStatusToError(
-          crypto::tink::util::Status(
-              crypto::tink::util::error::RESOURCE_EXHAUSTED,
-              "Cannot initialize TINKHybridDecrypt"));
-    }
-    return nil;
-  }
-
-  return objcHybridDecrypt;
+  return hybrid;
 }
 
 @end

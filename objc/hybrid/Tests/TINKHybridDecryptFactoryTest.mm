@@ -25,13 +25,13 @@
 #import "proto/EciesAeadHkdf.pbobjc.h"
 #import "proto/Tink.pbobjc.h"
 
+#import "objc/TINKConfig.h"
 #import "objc/TINKHybridDecrypt.h"
 #import "objc/TINKHybridEncrypt.h"
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/hybrid/TINKEciesAeadHkdfPublicKeyManager.h"
 #import "objc/hybrid/TINKHybridDecryptConfig.h"
-#import "objc/hybrid/TINKHybridDecryptFactory.h"
 #import "objc/hybrid/TINKHybridDecryptFactory.h"
 #import "objc/util/TINKStrings.h"
 #import "objc/util/TINKTestHelpers.h"
@@ -116,7 +116,14 @@ static NSData *encrypt(id<TINKHybridEncrypt> hybridEncrypt,
 }
 
 - (void)testPrimitiveWithKeyset {
-  [TINKHybridDecryptConfig registerStandardKeyTypes];
+  NSError *error = nil;
+  TINKHybridDecryptConfig *hybridConfig =
+      [[TINKHybridDecryptConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  XCTAssertNotNil(hybridConfig);
+  XCTAssertNil(error);
+
+  XCTAssertTrue([TINKConfig registerConfig:hybridConfig error:&error]);
+  XCTAssertNil(error);
 
   // Create a test Keyset with 3 keys.
   TINKPBEciesAeadHkdfPrivateKey *eciesKey1 = getNewEciesPrivateKey();
@@ -124,7 +131,7 @@ static NSData *encrypt(id<TINKHybridEncrypt> hybridEncrypt,
   TINKPBEciesAeadHkdfPrivateKey *eciesKey3 = getNewEciesPrivateKey();
   TINKPBKeyset *keyset = createTestKeyset(eciesKey1, eciesKey2, eciesKey3);
   google::crypto::tink::Keyset ccKeyset;
-  NSError *error = nil;
+  error = nil;
   std::string serializedKeyset = TINKPBSerializeToString(keyset, &error);
   XCTAssertNil(error);
   XCTAssertTrue(ccKeyset.ParseFromString(serializedKeyset));

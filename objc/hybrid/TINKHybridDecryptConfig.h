@@ -18,23 +18,40 @@
 
 #import <Foundation/Foundation.h>
 
-@class TINKHybridDecryptKeyManager;
-@protocol TINKKeyManager;
+#import "objc/TINKRegistryConfig.h"
+#import "objc/TINKVersion.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * TINKHybridDecryptConfig offers convenience methods for initializing TINKHybridDecryptFactory and
- * the underlying Registry.INSTANCE. In particular, it allows for initializing the Registry with
- * native key types and their managers that Tink supports out of the box.
+ * This class is used for registering with the Registry all instances of HybridDecrypt key types
+ * supported in a particular release of Tink.
  *
- * For more information on how to obtain and use HybridDecrypt primitives see
+ * To register all HybridDecrypt key types provided in Tink release 1.1.0 one can do:
+ *
+ * NSError *error = nil;
+ * TINKHybridDecryptConfig *hybridConfig =
+ *    [[TINKHybridDecryptConfig alloc] initWithVersion:TINKVersion1_1_0
+ *                                               error:&error];
+ * if (!hybridConfig || error) {
+ *   // handle error.
+ * }
+ *
+ * if (![TINKConfig registerConfig:hybridConfig error:&error]) {
+ *   // handle error.
+ * }
+ *
+ * For more information on the creation and usage of TINKHybridDecrypt instances see
  * TINKHybridDecryptFactory.
  */
-@interface TINKHybridDecryptConfig : NSObject
+@interface TINKHybridDecryptConfig : TINKRegistryConfig
 
-/** Registers standard HybridDecrypt key types and their managers with the Registry. */
-+ (BOOL)registerStandardKeyTypes;
+/* Use initWithVersion:error: to get an instance of TINKHybridDecryptConfig. */
+- (nullable instancetype)init NS_UNAVAILABLE;
+
+/* Returns config of HybridDecrypt implementations supported in given @c version of Tink. */
+- (nullable instancetype)initWithVersion:(TINKVersion)version
+                                   error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 
 @end
 

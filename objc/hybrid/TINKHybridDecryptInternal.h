@@ -22,17 +22,21 @@
 
 #include "tink/hybrid_decrypt.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * This interface is internal-only. Use TINKHybridDecryptFactory to get an instance that conforms to
  * TINKHybridDecrypt.
  */
 @interface TINKHybridDecryptInternal : NSObject <TINKHybridDecrypt>
 
-@property(nonatomic, nonnull, readonly) crypto::tink::HybridDecrypt* primitive;
-
 - (nullable instancetype)init NS_UNAVAILABLE;
 
-- (nullable instancetype)initWithPrimitive:(nonnull crypto::tink::HybridDecrypt*)primitive
-    NS_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithCCHybridDecrypt:
+    (std::unique_ptr<crypto::tink::HybridDecrypt>)ccHybridDecrypt NS_DESIGNATED_INITIALIZER;
+
+- (nullable crypto::tink::HybridDecrypt *)ccHybridDecrypt;
 
 @end
+
+NS_ASSUME_NONNULL_END
