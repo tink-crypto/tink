@@ -53,8 +53,8 @@ public class EciesAeadHkdfHybridDecryptTest {
     ECPublicKey recipientPublicKey = (ECPublicKey) recipientKey.getPublic();
     ECPrivateKey recipientPrivateKey = (ECPrivateKey) recipientKey.getPrivate();
     byte[] salt = Random.randBytes(8);
-    byte[] plaintext = Random.randBytes(8);
-    byte[] context = "context info".getBytes("UTF-8");
+    byte[] plaintext = Random.randBytes(4);
+    byte[] context = Random.randBytes(4);
     String hmacAlgo = HybridUtil.toHmacAlgo(HashType.SHA256);
     HybridEncrypt hybridEncrypt =
         new EciesAeadHkdfHybridEncrypt(

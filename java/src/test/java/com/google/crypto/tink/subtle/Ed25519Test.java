@@ -47,7 +47,7 @@ public class Ed25519Test {
         Arrays.copyOfRange(hashedPrivateKey, 0, hashedPrivateKey.length);
     byte[] publicKey = Ed25519.scalarMultWithBaseToBytes(hashedPrivateKey);
     byte[] originalPublicKey = Arrays.copyOfRange(publicKey, 0, publicKey.length);
-    for (int i = 0; i < 1024; i++) {
+    for (int i = 0; i < 64; i++) {
       byte[] msg = Random.randBytes(1024);
       byte[] sig = Ed25519.sign(msg, publicKey, hashedPrivateKey);
       assertTrue(Ed25519.verify(msg, sig, publicKey));
