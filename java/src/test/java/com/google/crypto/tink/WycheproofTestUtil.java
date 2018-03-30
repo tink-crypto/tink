@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /** Wycheproof Test helpers. */
@@ -87,5 +88,18 @@ public class WycheproofTestUtil {
       default:
         throw new NoSuchAlgorithmException("Unknown curve name: " + curveName);
     }
+  }
+
+  /** @return true if the test case has one of the flags. */
+  public static boolean checkFlags(JSONObject testcase, String... flags) throws Exception {
+    JSONArray entries = testcase.getJSONArray("flags");
+    for (int i = 0; i < entries.length(); i++) {
+      for (String flag : flags) {
+        if (flag.equals(entries.get(i))) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
