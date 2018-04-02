@@ -19,7 +19,7 @@ package com.google.crypto.tink.subtle;
 import java.math.BigInteger;
 
 /** Constants used in {@link Ed25519}. */
-public final class Ed25519Constants {
+final class Ed25519Constants {
 
  // d = -121665 / 121666 mod 2^255-19
   static final long[] D;
@@ -36,8 +36,6 @@ public final class Ed25519Constants {
    */
   static final Ed25519.CachedXYT[][] B_TABLE;
   static final Ed25519.CachedXYT[] B2;
-
-
 
   private static final BigInteger P_BI =
       BigInteger.valueOf(2).pow(255).subtract(BigInteger.valueOf(19));
@@ -70,19 +68,14 @@ public final class Ed25519Constants {
 
   private static Point edwards(Point a, Point b) {
     Point o = new Point();
+    BigInteger xxyy = D_BI.multiply(a.x.multiply(b.x).multiply(a.y).multiply(b.y)).mod(P_BI);
     o.x =
         (a.x.multiply(b.y).add(b.x.multiply(a.y)))
-            .multiply(
-                BigInteger.ONE
-                    .add(D_BI.multiply(a.x.multiply(b.x).multiply(a.y).multiply(b.y)))
-                    .modInverse(P_BI))
+            .multiply(BigInteger.ONE.add(xxyy).modInverse(P_BI))
             .mod(P_BI);
     o.y =
         (a.y.multiply(b.y).add(a.x.multiply(b.x)))
-            .multiply(
-                BigInteger.ONE
-                .subtract(D_BI.multiply(a.x.multiply(b.x).multiply(a.y).multiply(b.y)))
-                    .modInverse(P_BI))
+            .multiply(BigInteger.ONE.subtract(xxyy).modInverse(P_BI))
             .mod(P_BI);
     return o;
   }
