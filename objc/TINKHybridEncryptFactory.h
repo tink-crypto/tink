@@ -16,29 +16,4 @@
  **************************************************************************
  */
 
-#import "objc/TINKConfig.h"
-
-#import <Foundation/Foundation.h>
-
-#import "objc/TINKRegistryConfig.h"
-#import "objc/core/TINKRegistryConfig_Internal.h"
-#import "objc/util/TINKErrors.h"
-
-#include "tink/config.h"
-#include "tink/util/errors.h"
-
-@implementation TINKConfig
-
-+ (BOOL)registerConfig:(TINKRegistryConfig *)config error:(NSError **)error {
-  auto st = crypto::tink::Config::Register(config.ccConfig);
-  if (!st.ok()) {
-    if (error) {
-      *error = TINKStatusToError(st);
-    }
-    return NO;
-  }
-
-  return YES;
-}
-
-@end
+#import "objc/hybrid/TINKHybridEncryptFactory.h"

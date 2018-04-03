@@ -19,7 +19,9 @@
 #import <Foundation/Foundation.h>
 
 #import "objc/TINKKeysetReader.h"
-#import "proto/Tink.pbobjc.h"
+
+@class TINKPBKeyset;
+@class TINKPBEncryptedKeyset;
 
 NS_ASSUME_NONNULL_BEGIN
 

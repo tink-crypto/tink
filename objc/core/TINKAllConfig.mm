@@ -28,8 +28,6 @@
 #import "objc/TINKVersion.h"
 #import "objc/core/TINKRegistryConfig_Internal.h"
 #import "objc/util/TINKErrors.h"
-#import "objc/util/TINKStrings.h"
-#import "proto/Config.pbobjc.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"

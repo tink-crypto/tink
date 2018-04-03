@@ -19,7 +19,8 @@
 #import <Foundation/Foundation.h>
 
 #import "objc/TINKKeysetHandle.h"
-#import "objc/TINKKeysetReader.h"
+
+@class TINKKeysetReader;
 
 NS_ASSUME_NONNULL_BEGIN
 
