@@ -65,7 +65,7 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
       absl::string_view raw_ciphertext =
           ciphertext.substr(CryptoFormat::kNonRawPrefixSize);
       for (auto& hybrid_decrypt_entry : *(primitives_result.ValueOrDie())) {
-        HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry.get_primitive();
+        HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry->get_primitive();
         auto decrypt_result =
             hybrid_decrypt.Decrypt(raw_ciphertext, context_info);
         if (decrypt_result.ok()) {
@@ -81,7 +81,7 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
   auto raw_primitives_result = hybrid_decrypt_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
     for (auto& hybrid_decrypt_entry : *(raw_primitives_result.ValueOrDie())) {
-        HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry.get_primitive();
+        HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry->get_primitive();
       auto decrypt_result = hybrid_decrypt.Decrypt(ciphertext, context_info);
       if (decrypt_result.ok()) {
         return std::move(decrypt_result.ValueOrDie());

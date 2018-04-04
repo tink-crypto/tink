@@ -358,19 +358,19 @@ TEST_F(RegistryTest, testGettingPrimitives) {
               aead_set->get_primary()->get_identifier());
 
     // Check raw.
-    auto raw = aead_set->get_raw_primitives().ValueOrDie();
-    EXPECT_EQ(2, raw->size());
+    auto& raw = *(aead_set->get_raw_primitives().ValueOrDie());
+    EXPECT_EQ(2, raw.size());
     EXPECT_EQ(plaintext + key_type_1,
-              raw->at(0).get_primitive().Encrypt(plaintext, aad).ValueOrDie());
+              raw[0]->get_primitive().Encrypt(plaintext, aad).ValueOrDie());
     EXPECT_EQ(plaintext + key_type_2,
-              raw->at(1).get_primitive().Encrypt(plaintext, aad).ValueOrDie());
+              raw[1]->get_primitive().Encrypt(plaintext, aad).ValueOrDie());
 
     // Check Tink.
-    auto tink = aead_set->get_primitives(CryptoFormat::get_output_prefix(
-        keyset.key(0)).ValueOrDie()).ValueOrDie();
-    EXPECT_EQ(1, tink->size());
+    auto& tink = *(aead_set->get_primitives(CryptoFormat::get_output_prefix(
+        keyset.key(0)).ValueOrDie()).ValueOrDie());
+    EXPECT_EQ(1, tink.size());
     EXPECT_EQ(plaintext + key_type_1,
-              tink->at(0).get_primitive().Encrypt(plaintext, aad).ValueOrDie());
+              tink[0]->get_primitive().Encrypt(plaintext, aad).ValueOrDie());
 
     // Check DISABLED.
     auto disabled = aead_set->get_primitives(

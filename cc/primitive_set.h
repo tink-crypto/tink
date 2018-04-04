@@ -23,6 +23,7 @@
 
 #include "tink/crypto_format.h"
 #include "tink/util/errors.h"
+#include "tink/util/ptr_util.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -74,7 +75,7 @@ class PrimitiveSet {
     google::crypto::tink::KeyStatusType status_;
   };
 
-  typedef std::vector<Entry<P>> Primitives;
+  typedef std::vector<std::unique_ptr<Entry<P>>> Primitives;
 
   // Constructs an empty PrimitiveSet.
   PrimitiveSet<P>() : primary_(nullptr) {}
@@ -84,11 +85,16 @@ class PrimitiveSet {
       std::unique_ptr<P> primitive, google::crypto::tink::Keyset::Key key) {
     auto identifier_result = CryptoFormat::get_output_prefix(key);
     if (!identifier_result.ok()) return identifier_result.status();
+    if (primitive == nullptr) {
+      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+                       "The primitive must be non-null.");
+    }
     std::string identifier = identifier_result.ValueOrDie();
     std::lock_guard<std::mutex> lock(primitives_mutex_);
     primitives_[identifier].push_back(
-        Entry<P>(std::move(primitive), identifier, key.status()));
-    return &(primitives_[identifier].back());
+        util::make_unique<Entry<P>>(std::move(primitive),
+                                    identifier, key.status()));
+    return primitives_[identifier].back().get();
   }
 
   // Returns the entries with primitives identifed by 'identifier'.
@@ -119,7 +125,7 @@ class PrimitiveSet {
  private:
   typedef std::unordered_map<std::string, Primitives>
       CiphertextPrefixToPrimitivesMap;
-  Entry<P>* primary_;
+  Entry<P>* primary_;  // the Entry<P> object is owned by primitives_
   std::mutex primitives_mutex_;
   CiphertextPrefixToPrimitivesMap primitives_;  // guarded by primitives_mutex_
 };

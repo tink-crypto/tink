@@ -182,6 +182,13 @@ TEST_F(PrimitiveSetTest, testBasic) {
   add_primitive_result = primitive_set.AddPrimitive(std::move(mac_6), key_6);
   EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
 
+  // Try adding a "consumed" unique_ptr as a primitive.
+  add_primitive_result = primitive_set.AddPrimitive(std::move(mac_6), key_6);
+  EXPECT_FALSE(add_primitive_result.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT,
+            add_primitive_result.status().error_code());
+
+
   std::string data = "some data";
 
   {  // Check the primary.
@@ -193,46 +200,143 @@ TEST_F(PrimitiveSetTest, testBasic) {
   }
 
   {  // Check raw primitives.
-    auto primitives = primitive_set.get_raw_primitives().ValueOrDie();
-    EXPECT_EQ(2, primitives->size());
+    auto& primitives = *(primitive_set.get_raw_primitives().ValueOrDie());
+    EXPECT_EQ(2, primitives.size());
     EXPECT_EQ(data + mac_name_4,
-              primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
-    EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
+              primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
     EXPECT_EQ(data + mac_name_5,
-              primitives->at(1).get_primitive().ComputeMac(data).ValueOrDie());
-    EXPECT_EQ(KeyStatusType::DISABLED, primitives->at(1).get_status());
+              primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::DISABLED, primitives[1]->get_status());
   }
 
   {  // Check Tink primitives.
     std::string prefix = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
-    auto primitives = primitive_set.get_primitives(prefix).ValueOrDie();
-    EXPECT_EQ(2, primitives->size());
+    auto& primitives = *(primitive_set.get_primitives(prefix).ValueOrDie());
+    EXPECT_EQ(2, primitives.size());
     EXPECT_EQ(data + mac_name_1,
-              primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
-    EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
+              primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
     EXPECT_EQ(data + mac_name_6,
-              primitives->at(1).get_primitive().ComputeMac(data).ValueOrDie());
-    EXPECT_EQ(KeyStatusType::DISABLED, primitives->at(1).get_status());
+              primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::DISABLED, primitives[1]->get_status());
   }
 
   {  // Check another Tink primitive.
     std::string prefix = CryptoFormat::get_output_prefix(key_3).ValueOrDie();
-    auto primitives = primitive_set.get_primitives(prefix).ValueOrDie();
-    EXPECT_EQ(1, primitives->size());
+    auto& primitives = *(primitive_set.get_primitives(prefix).ValueOrDie());
+    EXPECT_EQ(1, primitives.size());
     EXPECT_EQ(data + mac_name_3,
-              primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
-    EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
+              primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
   }
 
   {  // Check legacy primitive.
     std::string prefix = CryptoFormat::get_output_prefix(key_2).ValueOrDie();
-    auto primitives = primitive_set.get_primitives(prefix).ValueOrDie();
-    EXPECT_EQ(1, primitives->size());
+    auto& primitives = *(primitive_set.get_primitives(prefix).ValueOrDie());
+    EXPECT_EQ(1, primitives.size());
     EXPECT_EQ(data + mac_name_2,
-              primitives->at(0).get_primitive().ComputeMac(data).ValueOrDie());
-    EXPECT_EQ(KeyStatusType::ENABLED, primitives->at(0).get_status());
+              primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
+    EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
   }
 }
+
+TEST_F(PrimitiveSetTest, testPrimaryKeyWithIdCollisions) {
+  std::string mac_name_1 = "MAC#1";
+  std::string mac_name_2 = "MAC#2";
+
+  uint32_t key_id_1 = 1234543;
+  Keyset::Key key_1;
+  key_1.set_key_id(key_id_1);
+  key_1.set_status(KeyStatusType::ENABLED);
+
+  uint32_t key_id_2 = key_id_1;    // same id as key_2
+  Keyset::Key key_2;
+  key_2.set_key_id(key_id_2);
+  key_2.set_status(KeyStatusType::ENABLED);
+
+  {  // Test with RAW-keys.
+    std::unique_ptr<Mac> mac_1(new DummyMac(mac_name_1));
+    std::unique_ptr<Mac> mac_2(new DummyMac(mac_name_2));
+    key_1.set_output_prefix_type(OutputPrefixType::RAW);
+    key_2.set_output_prefix_type(OutputPrefixType::RAW);
+    PrimitiveSet<Mac> primitive_set;
+    EXPECT_TRUE(primitive_set.get_primary() == nullptr);
+
+    // Add the first primitive, and set it as primary.
+    auto add_primitive_result =
+        primitive_set.AddPrimitive(std::move(mac_1), key_1);
+    EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
+    primitive_set.set_primary(add_primitive_result.ValueOrDie());
+
+    std::string identifier = "";
+    const auto& primitives =
+        *(primitive_set.get_primitives(identifier).ValueOrDie());
+    EXPECT_EQ(1, primitives.size());
+    EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
+
+    //  Adding another primitive should not invalidate the primary.
+    add_primitive_result = primitive_set.AddPrimitive(std::move(mac_2), key_2);
+    EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
+    EXPECT_EQ(2, primitives.size());
+    EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
+  }
+
+  {  // Test with TINK-keys.
+    std::unique_ptr<Mac> mac_1(new DummyMac(mac_name_1));
+    std::unique_ptr<Mac> mac_2(new DummyMac(mac_name_2));
+    key_1.set_output_prefix_type(OutputPrefixType::TINK);
+    key_2.set_output_prefix_type(OutputPrefixType::TINK);
+    PrimitiveSet<Mac> primitive_set;
+    EXPECT_TRUE(primitive_set.get_primary() == nullptr);
+
+    // Add the first primitive, and set it as primary.
+    auto add_primitive_result =
+        primitive_set.AddPrimitive(std::move(mac_1), key_1);
+    EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
+    primitive_set.set_primary(add_primitive_result.ValueOrDie());
+
+    std::string identifier = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
+    const auto& primitives =
+        *(primitive_set.get_primitives(identifier).ValueOrDie());
+    EXPECT_EQ(1, primitives.size());
+    EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
+
+    //  Adding another primitive should not invalidate the primary.
+    add_primitive_result = primitive_set.AddPrimitive(std::move(mac_2), key_2);
+    EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
+    EXPECT_EQ(2, primitives.size());
+    EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
+  }
+
+  {  // Test with LEGACY-keys.
+    std::unique_ptr<Mac> mac_1(new DummyMac(mac_name_1));
+    std::unique_ptr<Mac> mac_2(new DummyMac(mac_name_2));
+    key_1.set_output_prefix_type(OutputPrefixType::LEGACY);
+    key_2.set_output_prefix_type(OutputPrefixType::LEGACY);
+    PrimitiveSet<Mac> primitive_set;
+    EXPECT_TRUE(primitive_set.get_primary() == nullptr);
+
+    // Add the first primitive, and set it as primary.
+    auto add_primitive_result =
+        primitive_set.AddPrimitive(std::move(mac_1), key_1);
+    EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
+    primitive_set.set_primary(add_primitive_result.ValueOrDie());
+
+    std::string identifier = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
+    const auto& primitives =
+        *(primitive_set.get_primitives(identifier).ValueOrDie());
+    EXPECT_EQ(1, primitives.size());
+    EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
+
+    //  Adding another primitive should not invalidate the primary.
+    add_primitive_result = primitive_set.AddPrimitive(std::move(mac_2), key_2);
+    EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
+    EXPECT_EQ(2, primitives.size());
+    EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
+  }
+}
+
 
 }  // namespace
 }  // namespace tink

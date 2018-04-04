@@ -67,7 +67,7 @@ util::Status PublicKeyVerifySetWrapper::Verify(
     absl::string_view raw_signature =
         signature.substr(CryptoFormat::kNonRawPrefixSize);
     for (auto& public_key_verify_entry : *(primitives_result.ValueOrDie())) {
-      auto& public_key_verify = public_key_verify_entry.get_primitive();
+      auto& public_key_verify = public_key_verify_entry->get_primitive();
       auto verify_result =
           public_key_verify.Verify(raw_signature, data);
       if (verify_result.ok()) {
@@ -83,7 +83,7 @@ util::Status PublicKeyVerifySetWrapper::Verify(
   if (raw_primitives_result.ok()) {
     for (auto& public_key_verify_entry :
              *(raw_primitives_result.ValueOrDie())) {
-      auto& public_key_verify = public_key_verify_entry.get_primitive();
+      auto& public_key_verify = public_key_verify_entry->get_primitive();
       auto verify_result = public_key_verify.Verify(signature, data);
       if (verify_result.ok()) {
         return util::Status::OK;

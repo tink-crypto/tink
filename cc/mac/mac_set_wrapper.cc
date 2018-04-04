@@ -71,7 +71,7 @@ util::Status MacSetWrapper::VerifyMac(
       absl::string_view raw_mac_value =
           mac_value.substr(CryptoFormat::kNonRawPrefixSize);
       for (auto& mac_entry : *(primitives_result.ValueOrDie())) {
-        Mac& mac = mac_entry.get_primitive();
+        Mac& mac = mac_entry->get_primitive();
         util::Status status = mac.VerifyMac(raw_mac_value, data);
         if (status.ok()) {
           return status;
@@ -86,7 +86,7 @@ util::Status MacSetWrapper::VerifyMac(
   auto raw_primitives_result = mac_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
     for (auto& mac_entry : *(raw_primitives_result.ValueOrDie())) {
-        Mac& mac = mac_entry.get_primitive();
+        Mac& mac = mac_entry->get_primitive();
         util::Status status = mac.VerifyMac(mac_value, data);
       if (status.ok()) {
         return status;

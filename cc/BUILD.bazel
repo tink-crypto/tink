@@ -288,6 +288,7 @@ cc_library(
     deps = [
         ":crypto_format",
         "//cc/util:errors",
+        "//cc/util:ptr_util",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
     ],

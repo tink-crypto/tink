@@ -72,7 +72,7 @@ util::StatusOr<std::string> AeadSetWrapper::Decrypt(
       absl::string_view raw_ciphertext =
           ciphertext.substr(CryptoFormat::kNonRawPrefixSize);
       for (auto& aead_entry : *(primitives_result.ValueOrDie())) {
-        Aead& aead = aead_entry.get_primitive();
+        Aead& aead = aead_entry->get_primitive();
         auto decrypt_result = aead.Decrypt(raw_ciphertext, associated_data);
         if (decrypt_result.ok()) {
           return std::move(decrypt_result.ValueOrDie());
@@ -87,7 +87,7 @@ util::StatusOr<std::string> AeadSetWrapper::Decrypt(
   auto raw_primitives_result = aead_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
     for (auto& aead_entry : *(raw_primitives_result.ValueOrDie())) {
-      Aead& aead = aead_entry.get_primitive();
+      Aead& aead = aead_entry->get_primitive();
       auto decrypt_result = aead.Decrypt(ciphertext, associated_data);
       if (decrypt_result.ok()) {
         return std::move(decrypt_result.ValueOrDie());
