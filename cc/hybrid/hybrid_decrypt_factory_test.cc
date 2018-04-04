@@ -16,13 +16,13 @@
 
 #include "tink/hybrid/hybrid_decrypt_factory.h"
 
+#include "absl/memory/memory.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/crypto_format.h"
 #include "tink/keyset_handle.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_decrypt_config.h"
-#include "tink/util/ptr_util.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "gtest/gtest.h"
@@ -95,7 +95,7 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   ASSERT_TRUE(HybridDecryptConfig::RegisterStandardKeyTypes().ok());;
 
   // Prepare HybridEncrypt-instances.
-  auto ecies_key_manager = util::make_unique<EciesAeadHkdfPublicKeyManager>();
+  auto ecies_key_manager = absl::make_unique<EciesAeadHkdfPublicKeyManager>();
   std::unique_ptr<HybridEncrypt> ecies_1 = std::move(
       ecies_key_manager->GetPrimitive(ecies_key_1.public_key()).ValueOrDie());
   std::unique_ptr<HybridEncrypt> ecies_2 = std::move(

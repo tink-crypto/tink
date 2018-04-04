@@ -16,10 +16,10 @@
 
 #include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 
+#include "absl/memory/memory.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/subtle_util_boringssl.h"
-#include "tink/util/ptr_util.h"
 #include "openssl/bn.h"
 
 namespace util = crypto::tink::util;
@@ -54,8 +54,8 @@ EciesHkdfSenderKemBoringSsl::New(
   auto status_or_ec_point =
       SubtleUtilBoringSSL::GetEcPoint(curve, pubx, puby);
   if (!status_or_ec_point.ok()) return status_or_ec_point.status();
-  auto sender_kem = util::wrap_unique(
-      new EciesHkdfSenderKemBoringSsl(curve, pubx, puby));
+  auto sender_kem =
+      absl::WrapUnique(new EciesHkdfSenderKemBoringSsl(curve, pubx, puby));
   sender_kem->peer_pub_key_.reset(status_or_ec_point.ValueOrDie());
   return std::move(sender_kem);
 }
@@ -105,7 +105,7 @@ EciesHkdfSenderKemBoringSsl::GenerateKey(
     return status_or_string_symmetric_key.status();
   }
   std::string symmetric_key(status_or_string_symmetric_key.ValueOrDie());
-  auto kem_key = util::make_unique<KemKey>(kem_bytes, symmetric_key);
+  auto kem_key = absl::make_unique<KemKey>(kem_bytes, symmetric_key);
   return std::move(kem_key);
 }
 

@@ -18,6 +18,7 @@
 #include <thread>  // NOLINT(build/c++11)
 #include <vector>
 
+#include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/catalogue.h"
@@ -25,7 +26,6 @@
 #include "tink/crypto_format.h"
 #include "tink/aead/aead_catalogue.h"
 #include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/util/ptr_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
@@ -81,7 +81,7 @@ class TestKeyFactory : public KeyFactory {
 
   util::StatusOr<std::unique_ptr<KeyData>> NewKeyData(
       absl::string_view serialized_key_format) const override {
-    auto key_data = util::make_unique<KeyData>();
+    auto key_data = absl::make_unique<KeyData>();
     key_data->set_type_url(key_type_);
     key_data->set_value(std::string(serialized_key_format));
     return std::move(key_data);

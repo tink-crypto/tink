@@ -20,8 +20,8 @@
 #include <istream>
 #include <sstream>
 
+#include "absl/memory/memory.h"
 #include "tink/util/errors.h"
-#include "tink/util/ptr_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -56,7 +56,7 @@ util::StatusOr<std::unique_ptr<BinaryKeysetReader>> BinaryKeysetReader::New(
 
 
 util::StatusOr<std::unique_ptr<Keyset>> BinaryKeysetReader::Read() {
-  auto keyset = util::make_unique<Keyset>();
+  auto keyset = absl::make_unique<Keyset>();
   if (!keyset->ParseFromIstream(keyset_stream_.get())) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Could not parse the input stream as a Keyset-proto.");
@@ -66,7 +66,7 @@ util::StatusOr<std::unique_ptr<Keyset>> BinaryKeysetReader::Read() {
 
 util::StatusOr<std::unique_ptr<EncryptedKeyset>>
 BinaryKeysetReader::ReadEncrypted() {
-  auto enc_keyset = util::make_unique<EncryptedKeyset>();
+  auto enc_keyset = absl::make_unique<EncryptedKeyset>();
   if (!enc_keyset->ParseFromIstream(keyset_stream_.get())) {
     return util::Status(util::error::INVALID_ARGUMENT,
         "Could not parse the input stream as an EncryptedKeyset-proto.");

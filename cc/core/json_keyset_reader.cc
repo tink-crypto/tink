@@ -20,8 +20,8 @@
 #include <istream>
 #include <sstream>
 
+#include "absl/memory/memory.h"
 #include "tink/util/errors.h"
-#include "tink/util/ptr_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "google/protobuf/util/json_util.h"
@@ -65,7 +65,7 @@ tinkutil::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
         std::istreambuf_iterator<char>(*keyset_stream_), {});
     serialized_keyset = &serialized_keyset_from_stream;
   }
-  auto keyset = tinkutil::make_unique<Keyset>();
+  auto keyset = absl::make_unique<Keyset>();
   auto status = google::protobuf::util::JsonStringToMessage(
       *serialized_keyset, keyset.get());
   if (!status.ok()) {
@@ -86,7 +86,7 @@ JsonKeysetReader::ReadEncrypted() {
         std::istreambuf_iterator<char>(*keyset_stream_), {});
     serialized_keyset = &serialized_keyset_from_stream;
   }
-  auto enc_keyset = tinkutil::make_unique<EncryptedKeyset>();
+  auto enc_keyset = absl::make_unique<EncryptedKeyset>();
   auto status = google::protobuf::util::JsonStringToMessage(
       *serialized_keyset, enc_keyset.get());
   if (!status.ok()) {

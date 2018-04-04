@@ -23,7 +23,6 @@
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hmac_boringssl.h"
 #include "tink/subtle/random.h"
-#include "tink/util/ptr_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"

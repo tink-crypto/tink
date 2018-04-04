@@ -16,11 +16,11 @@
 
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
+#include "absl/memory/memory.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
-#include "tink/util/ptr_util.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
 
@@ -36,8 +36,8 @@ EciesHkdfRecipientKemBoringSsl::New(
     EllipticCurveType curve, const std::string& priv_key) {
   auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
   if (!status_or_ec_group.ok()) return status_or_ec_group.status();
-  auto recipient_kem = util::wrap_unique(
-      new EciesHkdfRecipientKemBoringSsl(curve, priv_key));
+  auto recipient_kem =
+      absl::WrapUnique(new EciesHkdfRecipientKemBoringSsl(curve, priv_key));
   // TODO(przydatek): consider refactoring SubtleUtilBoringSSL,
   //     so that the saved group can be used for KEM operations.
   recipient_kem->ec_group_.reset(status_or_ec_group.ValueOrDie());

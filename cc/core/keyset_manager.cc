@@ -19,11 +19,11 @@
 #include <inttypes.h>
 #include <random>
 
+#include "absl/memory/memory.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/registry.h"
 #include "tink/util/errors.h"
-#include "tink/util/ptr_util.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::Keyset;
@@ -45,7 +45,7 @@ uint32_t NewKeyId() {
 // static
 StatusOr<std::unique_ptr<KeysetManager>> KeysetManager::New(
     const KeyTemplate& key_template) {
-  auto manager = util::make_unique<KeysetManager>();
+  auto manager = absl::make_unique<KeysetManager>();
   auto rotate_result = manager->Rotate(key_template);
   if (!rotate_result.ok()) return rotate_result.status();
   return std::move(manager);
@@ -54,7 +54,7 @@ StatusOr<std::unique_ptr<KeysetManager>> KeysetManager::New(
 // static
 StatusOr<std::unique_ptr<KeysetManager>> KeysetManager::New(
     const KeysetHandle& keyset_handle) {
-  auto manager = util::make_unique<KeysetManager>();
+  auto manager = absl::make_unique<KeysetManager>();
   manager->keyset_ = keyset_handle.get_keyset();
   return std::move(manager);
 }

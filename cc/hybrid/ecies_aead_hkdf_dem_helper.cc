@@ -16,10 +16,10 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
 
+#include "absl/memory/memory.h"
 #include "tink/aead.h"
 #include "tink/key_manager.h"
 #include "tink/registry.h"
-#include "tink/util/ptr_util.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
@@ -41,7 +41,7 @@ namespace tink {
 // static
 StatusOr<std::unique_ptr<EciesAeadHkdfDemHelper>> EciesAeadHkdfDemHelper::New(
     const KeyTemplate& dem_key_template) {
-  auto helper = util::wrap_unique(new EciesAeadHkdfDemHelper(dem_key_template));
+  auto helper = absl::WrapUnique(new EciesAeadHkdfDemHelper(dem_key_template));
   std::string dem_type_url = dem_key_template.type_url();
   if (dem_type_url == "type.googleapis.com/google.crypto.tink.AesGcmKey") {
     helper->dem_key_type_ = AES_GCM_KEY;

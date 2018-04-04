@@ -21,7 +21,6 @@
 #include <sstream>
 
 #include "tink/util/errors.h"
-#include "tink/util/ptr_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "google/protobuf/message.h"

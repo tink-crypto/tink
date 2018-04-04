@@ -21,7 +21,6 @@
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/util/errors.h"
-#include "tink/util/ptr_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"

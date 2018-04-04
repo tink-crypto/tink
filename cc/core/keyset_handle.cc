@@ -14,12 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "absl/memory/memory.h"
 #include "tink/aead.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/util/errors.h"
-#include "tink/util/ptr_util.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EncryptedKeyset;
@@ -38,7 +38,7 @@ Encrypt(const Keyset& keyset, const Aead& master_key_aead) {
   auto encrypt_result = master_key_aead.Encrypt(
           keyset.SerializeAsString(), /* associated_data= */ "");
   if (!encrypt_result.ok()) return encrypt_result.status();
-  auto enc_keyset = util::make_unique<EncryptedKeyset>();
+  auto enc_keyset = absl::make_unique<EncryptedKeyset>();
   enc_keyset->set_encrypted_keyset(encrypt_result.ValueOrDie());
   return std::move(enc_keyset);
 }
@@ -48,7 +48,7 @@ Decrypt(const EncryptedKeyset& enc_keyset, const Aead& master_key_aead) {
   auto decrypt_result = master_key_aead.Decrypt(
           enc_keyset.encrypted_keyset(), /* associated_data= */ "");
   if (!decrypt_result.ok()) return decrypt_result.status();
-  auto keyset = util::make_unique<Keyset>();
+  auto keyset = absl::make_unique<Keyset>();
   if (!keyset->ParseFromString(decrypt_result.ValueOrDie())) {
     return util::Status(util::error::INVALID_ARGUMENT,
         "Could not parse the decrypted data as a Keyset-proto.");

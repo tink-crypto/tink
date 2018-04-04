@@ -21,9 +21,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "absl/memory/memory.h"
 #include "tink/crypto_format.h"
 #include "tink/util/errors.h"
-#include "tink/util/ptr_util.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -92,7 +92,7 @@ class PrimitiveSet {
     std::string identifier = identifier_result.ValueOrDie();
     std::lock_guard<std::mutex> lock(primitives_mutex_);
     primitives_[identifier].push_back(
-        util::make_unique<Entry<P>>(std::move(primitive),
+        absl::make_unique<Entry<P>>(std::move(primitive),
                                     identifier, key.status()));
     return primitives_[identifier].back().get();
   }

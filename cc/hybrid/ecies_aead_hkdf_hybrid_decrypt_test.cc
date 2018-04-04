@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 
+#include "absl/memory/memory.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/registry.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -23,7 +24,6 @@
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
-#include "tink/util/ptr_util.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_gcm.pb.h"
@@ -125,7 +125,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
                       bad_result.status().error_message());
 
   // Register DEM key manager.
-  auto key_manager = util::make_unique<AesGcmKeyManager>();
+  auto key_manager = absl::make_unique<AesGcmKeyManager>();
   std::string dem_key_type = key_manager->get_key_type();
   ASSERT_TRUE(Registry::RegisterKeyManager(
       dem_key_type, key_manager.release()).ok());
