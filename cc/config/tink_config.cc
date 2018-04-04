@@ -19,8 +19,7 @@
 #include "tink/config.h"
 #include "tink/key_manager.h"
 #include "tink/registry.h"
-#include "tink/hybrid/hybrid_encrypt_config.h"
-#include "tink/hybrid/hybrid_decrypt_config.h"
+#include "tink/hybrid/hybrid_config.h"
 #include "tink/signature/signature_config.h"
 #include "tink/util/status.h"
 
@@ -32,10 +31,7 @@ namespace {
 google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   google::crypto::tink::RegistryConfig* config =
       new google::crypto::tink::RegistryConfig();
-  config->MergeFrom(HybridEncryptConfig::Tink_1_1_0());  // includes Mac & Aead
-  config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
-      HybridDecryptConfig::kCatalogueName, HybridDecryptConfig::kPrimitiveName,
-      "EciesAeadHkdfPrivateKey", 0, true));
+  config->MergeFrom(HybridConfig::Tink_1_1_0());  // includes Mac & Aead
   config->MergeFrom(SignatureConfig::Tink_1_1_0());
   config->set_config_name("TINK_1_1_0");
   return config;
@@ -51,9 +47,7 @@ const google::crypto::tink::RegistryConfig& TinkConfig::Tink_1_1_0() {
 
 // static
 util::Status TinkConfig::Init() {
-  auto status = HybridEncryptConfig::Init();  // includes Mac & Aead
-  if (!status.ok()) return status;
-  status = HybridDecryptConfig::Init();
+  auto status = HybridConfig::Init();  // includes Mac & Aead
   if (!status.ok()) return status;
   return SignatureConfig::Init();
 }

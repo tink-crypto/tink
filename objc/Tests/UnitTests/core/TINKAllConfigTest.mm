@@ -77,15 +77,15 @@
   XCTAssertTrue(config.entryArray[2].newKeyAllowed);
   XCTAssertEqual(config.entryArray[2].keyManagerVersion, 0);
 
-  XCTAssertTrue([config.entryArray[3].catalogueName isEqualToString:@"TinkHybridEncrypt"]);
-  XCTAssertTrue([config.entryArray[3].primitiveName isEqualToString:@"HybridEncrypt"]);
-  XCTAssertTrue([config.entryArray[3].typeURL isEqualToString:hybridEncryptKeyType]);
+  XCTAssertTrue([config.entryArray[3].catalogueName isEqualToString:@"TinkHybridDecrypt"]);
+  XCTAssertTrue([config.entryArray[3].primitiveName isEqualToString:@"HybridDecrypt"]);
+  XCTAssertTrue([config.entryArray[3].typeURL isEqualToString:hybridDecryptKeyType]);
   XCTAssertTrue(config.entryArray[3].newKeyAllowed);
   XCTAssertEqual(config.entryArray[3].keyManagerVersion, 0);
 
-  XCTAssertTrue([config.entryArray[4].catalogueName isEqualToString:@"TinkHybridDecrypt"]);
-  XCTAssertTrue([config.entryArray[4].primitiveName isEqualToString:@"HybridDecrypt"]);
-  XCTAssertTrue([config.entryArray[4].typeURL isEqualToString:hybridDecryptKeyType]);
+  XCTAssertTrue([config.entryArray[4].catalogueName isEqualToString:@"TinkHybridEncrypt"]);
+  XCTAssertTrue([config.entryArray[4].primitiveName isEqualToString:@"HybridEncrypt"]);
+  XCTAssertTrue([config.entryArray[4].typeURL isEqualToString:hybridEncryptKeyType]);
   XCTAssertTrue(config.entryArray[4].newKeyAllowed);
   XCTAssertEqual(config.entryArray[4].keyManagerVersion, 0);
 

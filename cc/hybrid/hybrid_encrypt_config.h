@@ -36,6 +36,8 @@ namespace tink {
 //
 // For more information on creation and usage of HybridEncrypt instances
 // see HybridEncryptFactory.
+//
+// DEPRECATED. Please use HybridConfig instead.
 class HybridEncryptConfig {
  public:
   static constexpr char kCatalogueName[] = "TinkHybridEncrypt";

@@ -57,10 +57,10 @@ TEST_F(TinkConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
   std::string public_key_verify_key_type =
       "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
-  std::string hybrid_encrypt_key_type =
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
   std::string hybrid_decrypt_key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  std::string hybrid_encrypt_key_type =
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
   std::string aes_ctr_hmac_aead_key_type =
       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
   std::string aes_gcm_key_type =
@@ -89,15 +89,15 @@ TEST_F(TinkConfigTest, testBasic) {
   EXPECT_EQ(true, config.entry(2).new_key_allowed());
   EXPECT_EQ(0, config.entry(2).key_manager_version());
 
-  EXPECT_EQ("TinkHybridEncrypt", config.entry(3).catalogue_name());
-  EXPECT_EQ("HybridEncrypt", config.entry(3).primitive_name());
-  EXPECT_EQ(hybrid_encrypt_key_type, config.entry(3).type_url());
+  EXPECT_EQ("TinkHybridDecrypt", config.entry(3).catalogue_name());
+  EXPECT_EQ("HybridDecrypt", config.entry(3).primitive_name());
+  EXPECT_EQ(hybrid_decrypt_key_type, config.entry(3).type_url());
   EXPECT_EQ(true, config.entry(3).new_key_allowed());
   EXPECT_EQ(0, config.entry(3).key_manager_version());
 
-  EXPECT_EQ("TinkHybridDecrypt", config.entry(4).catalogue_name());
-  EXPECT_EQ("HybridDecrypt", config.entry(4).primitive_name());
-  EXPECT_EQ(hybrid_decrypt_key_type, config.entry(4).type_url());
+  EXPECT_EQ("TinkHybridEncrypt", config.entry(4).catalogue_name());
+  EXPECT_EQ("HybridEncrypt", config.entry(4).primitive_name());
+  EXPECT_EQ(hybrid_encrypt_key_type, config.entry(4).type_url());
   EXPECT_EQ(true, config.entry(4).new_key_allowed());
   EXPECT_EQ(0, config.entry(4).key_manager_version());
 

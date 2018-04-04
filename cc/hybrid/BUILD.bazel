@@ -3,6 +3,22 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
+    name = "hybrid_config",
+    srcs = ["hybrid_config.cc"],
+    hdrs = ["hybrid_config.h"],
+    deps = [
+        ":hybrid_decrypt_catalogue",
+        ":hybrid_encrypt_catalogue",
+        "//cc:config",
+        "//cc/aead:aead_config",
+        "//cc/util:status",
+        "//proto:config_cc_proto",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
     name = "hybrid_decrypt_set_wrapper",
     srcs = ["hybrid_decrypt_set_wrapper.cc"],
     hdrs = ["hybrid_decrypt_set_wrapper.h"],
@@ -240,6 +256,21 @@ cc_library(
 )
 
 # tests
+
+cc_test(
+    name = "hybrid_config_test",
+    size = "small",
+    srcs = ["hybrid_config_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":hybrid_config",
+        "//cc:catalogue",
+        "//cc:config",
+        "//cc:registry",
+        "//cc/util:status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "hybrid_decrypt_set_wrapper_test",

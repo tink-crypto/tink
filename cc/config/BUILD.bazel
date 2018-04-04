@@ -9,8 +9,7 @@ cc_library(
     deps = [
         "//cc:config",
         "//cc:key_manager",
-        "//cc/hybrid:hybrid_decrypt_config",
-        "//cc/hybrid:hybrid_encrypt_config",
+        "//cc/hybrid:hybrid_config",
         "//cc/signature:signature_config",
         "//cc/util:status",
         "//proto:config_cc_proto",
