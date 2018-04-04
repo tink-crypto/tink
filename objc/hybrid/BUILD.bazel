@@ -35,6 +35,20 @@ objc_library(
 )
 
 objc_library(
+    name = "hybrid_config",
+    srcs = ["TINKHybridConfig.mm"],
+    hdrs = ["TINKHybridConfig.h"],
+    deps = [
+        "//cc/hybrid:hybrid_config",
+        "//objc:registry_config",
+        "//objc:version",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "//proto:all_objc_proto",
+    ],
+)
+
+objc_library(
     name = "hybrid_decrypt_config",
     srcs = ["TINKHybridDecryptConfig.mm"],
     hdrs = ["TINKHybridDecryptConfig.h"],
@@ -90,62 +104,6 @@ objc_library(
 )
 
 ####################################
-#              Tests               #
-####################################
-
-# ios_unit_test(
-#     name = "HybridTests",
-#     size = "small",
-#     minimum_os_version = "9.0",
-#     deps = [
-#         ":hybrid_decrypt_factory_test",
-#         ":hybrid_encrypt_factory_test",
-#     ],
-# )
-
-objc_library(
-    name = "hybrid_decrypt_factory_test",
-    srcs = ["Tests/TINKHybridDecryptFactoryTest.mm"],
-    visibility = ["//visibility:private"],
-    deps = [
-        ":ecies_aead_hkdf_public_key_manager",
-        ":hybrid_decrypt_config",
-        ":hybrid_decrypt_factory",
-        "//cc:crypto_format",
-        "//cc/util:status",
-        "//cc/util:test_util",
-        "//objc:config",
-        "//objc:hybrid_decrypt",
-        "//objc:hybrid_encrypt",
-        "//objc:keyset_handle",
-        "//objc/util:strings",
-        "//objc/util:test_helpers",
-        "//proto:all_objc_proto",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
-objc_library(
-    name = "hybrid_encrypt_factory_test",
-    srcs = ["Tests/TINKHybridEncryptFactoryTest.mm"],
-    visibility = ["//visibility:private"],
-    deps = [
-        ":hybrid_encrypt_config",
-        ":hybrid_encrypt_factory",
-        "//cc/util:status",
-        "//cc/util:test_util",
-        "//objc:config",
-        "//objc:hybrid_encrypt",
-        "//objc:keyset_handle",
-        "//objc/util:strings",
-        "//objc/util:test_helpers",
-        "//proto:all_objc_proto",
-        "@com_google_absl//absl/strings",
-        # TODO(candrian): Add CC proto bufs
-    ],
-)
-
-####################################
 #         Private/Internal         #
 ####################################
 
@@ -153,7 +111,6 @@ objc_library(
     name = "ecies_aead_hkdf_public_key_manager",
     srcs = ["TINKEciesAeadHkdfPublicKeyManager.mm"],
     hdrs = ["TINKEciesAeadHkdfPublicKeyManager.h"],
-    visibility = ["//visibility:private"],
     deps = [
         ":hybrid_encrypt_internal",
         ":hybrid_encrypt_key_manager",
@@ -178,7 +135,6 @@ objc_library(
     hdrs = [
         "TINKHybridDecryptInternal.h",
     ],
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:hybrid_decrypt",
         "//objc:hybrid_decrypt",
@@ -196,7 +152,6 @@ objc_library(
     hdrs = [
         "TINKHybridEncryptInternal.h",
     ],
-    visibility = ["//visibility:private"],
     deps = [
         "//cc:hybrid_encrypt",
         "//objc:hybrid_encrypt",

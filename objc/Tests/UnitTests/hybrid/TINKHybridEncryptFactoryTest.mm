@@ -30,7 +30,7 @@
 #import "objc/TINKHybridEncrypt.h"
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/hybrid/TINKHybridEncryptConfig.h"
+#import "objc/hybrid/TINKHybridConfig.h"
 #import "objc/hybrid/TINKHybridEncryptFactory.h"
 #import "objc/util/TINKStrings.h"
 #import "objc/util/TINKTestHelpers.h"
@@ -85,8 +85,8 @@ static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
 
   // Initialize the registry.
   NSError *error = nil;
-  TINKHybridEncryptConfig *hybridConfig =
-      [[TINKHybridEncryptConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  TINKHybridConfig *hybridConfig =
+      [[TINKHybridConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
   XCTAssertNotNil(hybridConfig);
   XCTAssertNil(error);
 
