@@ -31,7 +31,7 @@ import javax.crypto.spec.SecretKeySpec;
  * AES-SIV, as described in <a href="https://tools.ietf.org/html/rfc5297">RFC 5297</a>.
  *
  * <p>To meet the security requirements of {@link DeterministicAead}, this cipher can only be used
- * with 192-bit or 256-bit keys.
+ * with 256-bit keys.
  */
 @Alpha
 public final class AesSiv implements DeterministicAead {

@@ -31,12 +31,12 @@ been tampered with) of that data, but not its secrecy
 Minimal properties:
 
 - _plaintext_ and _associated data_ can have arbitrary length
-   (within the range 0..2^32^ bytes)
+   (within the range 0..2<sup>32</sup> bytes)
 - CCA2 security
 - at least 80-bit authentication strength
 - there are no secrecy or knowledge guarantees wrt. to the value of _associated data_
-- can encrypt at least 2^32^ messages with a total of 2^50^ bytes so that no
-  attack has success probability larger than 2^(-32)^
+- can encrypt at least 2<sup>32</sup> messages with a total of 2<sup>50</sup> bytes so that no
+  attack has success probability larger than 2<sup>-32</sup>
 
 ## Streaming Authenticated Encryption with Associated Data
 
@@ -59,14 +59,45 @@ Hoang, Reyhanitabar, Rogaway and Vizár](https://eprint.iacr.org/2015/189.pdf).
 
 Minimal properties:
 
-- _plaintext_ and can have arbitrary length within the range 0..2^38^
-  and _associated data_ can have arbitrary length within the range 0..2^31^-1 bytes
+- _plaintext_ and can have arbitrary length within the range 0..2<sup>38</sup>
+  and _associated data_ can have arbitrary length within the range
+  0..2<sup>31</sup>-1 bytes
 - CCA2 security
 - at least 80-bit authentication strength
 - there are no secrecy or knowledge guarantees wrt. to the value of _associated data_
-- can encrypt at least 2^32^ messages with a total of 2^68^ bytes so that no
-  attack with up to 2^32^ chosen plaintexts/chosen ciphertexts has success
-  probability larger than 2^-32^.
+- can encrypt at least 2<sup>32</sup> messages with a total of 2<sup>68</sup>
+  bytes so that no attack with up to 2<sup>32</sup> chosen plaintexts/chosen
+  ciphertexts has success probability larger than 2<sup>-32</sup>.
+
+## Deterministic Authenticated Encryption with Associated Data
+
+Deterministic AEAD primitive (Deterministic Authenticated Encryption with
+Associated Data, DAEAD) provides encryption with a _deterministic property_:
+encrypting the same data always yields the same ciphertext. Such encryption is
+useful e.g. for key wrapping or for some schemes for searching on encrypted data
+(see [RFC 5297, Section 1.3](https://tools.ietf.org/html/rfc5297#section-1.3)
+for more info).  However, because of deterministic property, implementations of
+this primitive are **not semantically secure**.
+
+
+As for (regular) [AEAD](#authenticated-encryption-with-associated-data), when
+using Deterministic AEAD to encrypt a plaintext one can optionally provide
+_associated data_ that should be authenticated but not encrypted.  That is, the
+encryption with associated data ensures authenticity (ie. who the sender is) and
+integrity (ie. data has not been tampered with) of that data, but not its
+secrecy (see [RFC 5116](https://tools.ietf.org/html/rfc5116)).
+
+
+Minimal properties:
+
+- _plaintext_ and _associated data_ can have arbitrary length
+  (within the range 0..2<sup>32</sup> bytes)
+- 128-bit security level against multi-user attacks with up to 2<sup>32</sup>
+  keys; that means if an adversary obtains 2<sup>32</sup> ciphertexts of the
+  same message encrypted under 2<sup>32</sup> keys, they need to do
+  2<sup>128</sup> computations to obtain a single key.
+- at least 80-bit authentication strength
+- there are no secrecy or knowledge guarantees wrt. to the value of _associated data_
 
 ## Message Authentication Code
 
@@ -84,7 +115,7 @@ Minimal properties:
 
 - secure against existential forgery under CPA
 - at least 128-bit security, also in multi-user scenarios (when an attacker is not
-  targeting a specific key, but any key from a set of up to 2^32^ keys)
+  targeting a specific key, but any key from a set of up to 2<sup>32</sup> keys)
 - at least 80-bit authentication strength
 
 ## Hybrid Encryption
@@ -125,7 +156,8 @@ _context info_ to the ciphertext in various ways, for example:
 
 Minimal properties:
 
-- _plaintext_ and _context info_ can have arbitrary length (within the range 0..2^32^ bytes)
+- _plaintext_ and _context info_ can have arbitrary length
+  (within the range 0..2<sup>32</sup> bytes)
 - secure against chosen ciphertext attacks
 - 128-bit security for EC based schemes,
   112-bit security for RSA based schemes (i.e. allow 2048 bit keys)

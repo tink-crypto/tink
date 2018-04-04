@@ -24,7 +24,7 @@ option objc_class_prefix = "TINKPB";
 option go_package = "github.com/google/tink/proto/aes_siv_go_proto";
 
 message AesSivKeyFormat {
-  // Only valid values: 48 and 64.
+  // Only valid value is: 64.
   uint32 key_size = 1;
 }
 
