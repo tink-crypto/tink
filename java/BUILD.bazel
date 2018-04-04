@@ -248,10 +248,6 @@ gen_java_test_rules(
         [
             "src/test/**/*Test.java",
         ],
-        exclude = [
-            # TODO(b/74209208): this test fails.
-            "src/test/java/com/google/crypto/tink/subtle/EcdsaVerifyJceTest.java",
-        ],
     ),
     deps = [
         ":generator_test",

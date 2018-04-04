@@ -42,8 +42,15 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    JSONObject jsonObj =
-        WycheproofTestUtil.readJson("testdata/wycheproof/ecdsa_test.json");
+    testWycheproofVectors("testdata/wycheproof/ecdsa_secp256r1_sha256_test.json");
+    testWycheproofVectors("testdata/wycheproof/ecdsa_secp384r1_sha384_test.json");
+    // https://b.corp.google.com/issues/74209208#comment10
+    // testWycheproofVectors("testdata/wycheproof/ecdsa_secp384r1_sha512_test.json");
+    testWycheproofVectors("testdata/wycheproof/ecdsa_secp521r1_sha512_test.json");
+  }
+
+  private static void testWycheproofVectors(String fileName) throws Exception {
+    JSONObject jsonObj = WycheproofTestUtil.readJson(fileName);
 
     int errors = 0;
     int cntSkippedTests = 0;
@@ -100,7 +107,7 @@ public class EcdsaVerifyJceTest {
     assertEquals(0, errors);
   }
 
-  private byte[] getMessage(JSONObject testcase) throws Exception {
+  private static byte[] getMessage(JSONObject testcase) throws Exception {
     // Previous version of Wycheproof test vectors uses "message" while the new one uses "msg".
     if (testcase.has("msg")) {
       return Hex.decode(testcase.getString("msg"));
@@ -111,23 +118,31 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testBasic() throws Exception {
-    ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
-    keyGen.initialize(ecParams);
-    KeyPair keyPair = keyGen.generateKeyPair();
-    ECPublicKey pub = (ECPublicKey) keyPair.getPublic();
-    ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
+    testBasic(EllipticCurves.getNistP256Params(), "SHA256WithECDSA");
+    testBasic(EllipticCurves.getNistP384Params(), "SHA384WithECDSA");
+    testBasic(EllipticCurves.getNistP384Params(), "SHA512WithECDSA");
+    testBasic(EllipticCurves.getNistP521Params(), "SHA512WithECDSA");
+  }
 
-    // Sign with JCE's Signature.
-    Signature signer = Signature.getInstance("SHA256WithECDSA");
-    signer.initSign(priv);
-    String message = "Hello";
-    signer.update(message.getBytes("UTF-8"));
-    byte[] signature = signer.sign();
+  private static void testBasic(ECParameterSpec ecParams, String algo) throws Exception {
+    for (int i = 0; i < 100; i++) {
+      KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+      keyGen.initialize(ecParams);
+      KeyPair keyPair = keyGen.generateKeyPair();
+      ECPublicKey pub = (ECPublicKey) keyPair.getPublic();
+      ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
 
-    // Verify with EcdsaVerifyJce.
-    EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, "SHA256WithECDSA");
-    verifier.verify(signature, message.getBytes("UTF-8"));
+      // Sign with JCE's Signature.
+      Signature signer = Signature.getInstance(algo);
+      signer.initSign(priv);
+      String message = "Hello";
+      signer.update(message.getBytes("UTF-8"));
+      byte[] signature = signer.sign();
+
+      // Verify with EcdsaVerifyJce.
+      EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, algo);
+      verifier.verify(signature, message.getBytes("UTF-8"));
+    }
   }
 
   @Test
