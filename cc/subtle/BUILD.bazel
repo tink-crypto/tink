@@ -429,7 +429,7 @@ cc_test(
     srcs = ["ecdsa_verify_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     data = [
-        "//testdata:wycheproof",
+        "@wycheproof//testvectors:all",
     ],
     deps = [
         ":common_enums",

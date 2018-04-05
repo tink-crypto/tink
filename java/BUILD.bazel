@@ -229,9 +229,7 @@ gen_java_test_rules(
     data = [
         "//testdata:credentials",
         "//testdata:ecies_keysets",
-        "//testdata:wycheproof",
-        "@wycheproof//testvectors:aes_gcm",
-        "@wycheproof//testvectors:ecdsa",
+        "@wycheproof//testvectors:all",
     ],
     default_test_size = "small",
     # these tests are excluded when testing with bazel test ... or on Kokoro

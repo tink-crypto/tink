@@ -42,11 +42,11 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    testWycheproofVectors("testdata/wycheproof/ecdsa_secp256r1_sha256_test.json");
-    testWycheproofVectors("testdata/wycheproof/ecdsa_secp384r1_sha384_test.json");
+    testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp256r1_sha256_test.json");
+    testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp384r1_sha384_test.json");
     // https://b.corp.google.com/issues/74209208#comment10
-    // testWycheproofVectors("testdata/wycheproof/ecdsa_secp384r1_sha512_test.json");
-    testWycheproofVectors("testdata/wycheproof/ecdsa_secp521r1_sha512_test.json");
+    // testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp384r1_sha512_test.json");
+    testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp521r1_sha512_test.json");
   }
 
   private static void testWycheproofVectors(String fileName) throws Exception {

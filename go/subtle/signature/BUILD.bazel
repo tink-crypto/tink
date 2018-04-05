@@ -23,7 +23,7 @@ go_test(
         "ecdsa_test.go",
     ],
     data = [
-        "//testdata:wycheproof",  # keep
+        "@wycheproof//testvectors:all",  # keep
     ],
     deps = [
         ":go_default_library",

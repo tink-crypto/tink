@@ -3,8 +3,8 @@
 #-----------------------------------------------------------------------------
 http_archive(
     name = "wycheproof",
-    strip_prefix = "wycheproof-f755ff0279ddd5fa26640d959d5872764b45feb7",
-    url = "https://github.com/google/wycheproof/archive/f755ff0279ddd5fa26640d959d5872764b45feb7.zip",
+    strip_prefix = "wycheproof-0569f074f3a55448fb9a5c1039337a4b114c7673",
+    url = "https://github.com/google/wycheproof/archive/0569f074f3a55448fb9a5c1039337a4b114c7673.zip",
 )
 
 #-----------------------------------------------------------------------------

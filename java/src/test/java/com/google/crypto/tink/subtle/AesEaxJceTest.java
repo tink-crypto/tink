@@ -68,7 +68,7 @@ public class AesEaxJceTest {
   @Test
   public void testWycheproofVectors() throws Exception {
     JSONObject json =
-        WycheproofTestUtil.readJson("testdata/wycheproof/aes_eax_test.json");
+        WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_eax_test.json");
     int errors = 0;
     int cntSkippedTests = 0;
     JSONArray testGroups = json.getJSONArray("testGroups");

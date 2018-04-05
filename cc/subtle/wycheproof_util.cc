@@ -35,7 +35,7 @@ std::string WycheproofUtil::GetBytes(const Json::Value &val) {
 
 std::unique_ptr<Json::Value>
 WycheproofUtil::ReadTestVectors(const std::string &filename) {
-  const std::string kTestVectors = "testdata/wycheproof/";
+  const std::string kTestVectors = "../wycheproof/testvectors/";
   std::ifstream input;
   input.open(kTestVectors + filename);
   std::unique_ptr<Json::Value> root(new Json::Value);

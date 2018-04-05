@@ -15,7 +15,7 @@ go_test(
     name = "go_default_xtest",
     srcs = ["aes_gcm_test.go"],
     data = [
-        "//testdata:wycheproof",  # keep
+        "@wycheproof//testvectors:all",  # keep
     ],
     deps = [
         ":go_default_library",
