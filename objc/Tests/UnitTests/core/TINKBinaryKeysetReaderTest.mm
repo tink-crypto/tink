@@ -61,6 +61,8 @@ static NSData *gGoodSerializedEncryptedKeyset;
   gGoodSerializedEncryptedKeyset = TINKStringToNSData(encrypted_keyset.SerializeAsString());
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
 - (void)testReaderCreation {
   // Serialized keyset is nil.
   NSError *error = nil;
@@ -83,6 +85,7 @@ static NSData *gGoodSerializedEncryptedKeyset;
   XCTAssertNotNil(reader);
   XCTAssertNil(error);
 }
+#pragma clang diagnostic pop
 
 - (void)testReadFromString {
   // Good std::string.

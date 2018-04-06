@@ -145,12 +145,15 @@ static TINKPBKeyset *gKeyset;
   XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
 - (void)testInvalidKeyTemplate {
   NSError *error = nil;
   TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithKeyTemplate:nil error:&error];
   XCTAssertNil(handle);
   XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
 }
+#pragma clang diagnostic pop
 
 - (void)testValidKeyTeamplte {
   // TODO(candrian): Implement this once the C++ method is working.
