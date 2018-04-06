@@ -61,6 +61,9 @@ public class PaymentMethodTokenSenderTest {
           + "    {\n"
           + "      \"keyValue\": \"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE/1+3HBVSbdv+j7NaArdgMyoSAM"
           + "43yRydzqdg1TxodSzA96Dj4Mc1EiKroxxunavVIvdxGnJeFViTzFvzFRxyCw==\",\n"
+          + "      \"keyExpiration\": \""
+          + Instant.now().plus(Duration.standardDays(1)).getMillis()
+          + "\",\n"
           + "      \"protocolVersion\": \"ECv2\"\n"
           + "    },\n"
           + "  ],\n"

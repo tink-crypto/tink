@@ -38,7 +38,7 @@ import org.json.JSONObject;
  * href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
  * Payment Method Token</a>.
  *
- * <p><b>Warning</b> This implementation only supports version {@code ECv1}.
+ * <p><b>Warning</b> This implementation only supports versions {@code ECv1} and {@code ECv2}.
  *
  * <p>Typical usage:
  *
@@ -266,6 +266,10 @@ public final class PaymentMethodTokenRecipient {
     }
   }
 
+  /**
+   * Unseal the given {@code sealedMessage} by performing the necessary signature verification and
+   * decryption steps based on the protocolVersion.
+   */
   public String unseal(final String sealedMessage) throws GeneralSecurityException {
     try {
       if (protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
@@ -502,6 +506,24 @@ public final class PaymentMethodTokenRecipient {
         JSONObject key = keys.getJSONObject(i);
         if (protocolVersion.equals(
             key.getString(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY))) {
+
+          if (key.has(PaymentMethodTokenConstants.JSON_KEY_EXPIRATION_KEY)) {
+            // If message expiration is present, checking it.
+            Long expirationInMillis =
+                Long.parseLong(key.getString(PaymentMethodTokenConstants.JSON_KEY_EXPIRATION_KEY));
+            if (expirationInMillis <= Instant.now().getMillis()) {
+              // Ignore expired keys
+              continue;
+            }
+          } else if (!protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
+            // keyExpiration is required in all versions except ECv1, so if it is missing we should
+            // skip using this key.
+            // In ECv1 the expiration is optional because it is assumed that the caller is
+            // respecting the HTTP cache headers and not using the trustedSigningKeysJson that are
+            // expired according to the headers.
+            continue;
+          }
+
           senderVerifyingKeys.add(
               PaymentMethodTokenUtil.x509EcPublicKey(key.getString("keyValue")));
         }

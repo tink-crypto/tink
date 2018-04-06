@@ -82,6 +82,9 @@ public class PaymentMethodTokenRecipientTest {
           + "    {\n"
           + "      \"keyValue\": \"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE/1+3HBVSbdv+j7NaArdgMyoSAM"
           + "43yRydzqdg1TxodSzA96Dj4Mc1EiKroxxunavVIvdxGnJeFViTzFvzFRxyCw==\",\n"
+          + "      \"keyExpiration\": \""
+          + Instant.now().plus(Duration.standardDays(1)).getMillis()
+          + "\",\n"
           + "      \"protocolVersion\": \"ECv2\"\n"
           + "    },\n"
           + "  ],\n"
@@ -478,6 +481,51 @@ public class PaymentMethodTokenRecipientTest {
   }
 
   @Test
+  public void testShouldFailIfTrustedKeyIsExpiredInV1() throws Exception {
+    JSONObject trustedKeysJson = new JSONObject(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON);
+    trustedKeysJson
+        .getJSONArray("keys")
+        .getJSONObject(INDEX_OF_GOOGLE_SIGNING_EC_V1)
+        .put(
+            "keyExpiration",
+            // One day in the past
+            String.valueOf(Instant.now().minus(Duration.standardDays(1)).getMillis()));
+
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(trustedKeysJson.toString())
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
+
+    try {
+      recipient.unseal(CIPHERTEXT_EC_V1);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertEquals("no trusted keys are available for this protocol version", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testShouldSucceedIfKeyExpirationIsMissingInTrustedKeyIsExpiredForV1()
+      throws Exception {
+    JSONObject trustedKeysJson = new JSONObject(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON);
+    trustedKeysJson
+        .getJSONArray("keys")
+        .getJSONObject(INDEX_OF_GOOGLE_SIGNING_EC_V1)
+        .remove("keyExpiration");
+
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(trustedKeysJson.toString())
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
+
+    assertEquals(PLAINTEXT, recipient.unseal(CIPHERTEXT_EC_V1));
+  }
+
+  @Test
   public void testUnsealV2() throws Exception {
     PaymentMethodTokenRecipient recipient =
         new PaymentMethodTokenRecipient.Builder()
@@ -551,6 +599,58 @@ public class PaymentMethodTokenRecipientTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertEquals("cannot verify signature", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testShouldFailIfTrustedKeyIsExpiredInV2() throws Exception {
+    JSONObject trustedKeysJson = new JSONObject(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON);
+    trustedKeysJson
+        .getJSONArray("keys")
+        .getJSONObject(INDEX_OF_GOOGLE_SIGNING_EC_V2)
+        .put(
+            "keyExpiration",
+            // One day in the past
+            String.valueOf(Instant.now().minus(Duration.standardDays(1)).getMillis()));
+
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
+            .senderVerifyingKeys(trustedKeysJson.toString())
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
+
+    try {
+      recipient.unseal(sealV2(PLAINTEXT));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertEquals("no trusted keys are available for this protocol version", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testShouldFailIfKeyExpirationIsMissingInTrustedKeyIsExpiredForV2() throws Exception {
+    // Key expiration is required for V2
+    JSONObject trustedKeysJson = new JSONObject(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON);
+    trustedKeysJson
+        .getJSONArray("keys")
+        .getJSONObject(INDEX_OF_GOOGLE_SIGNING_EC_V2)
+        .remove("keyExpiration");
+
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
+            .senderVerifyingKeys(trustedKeysJson.toString())
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
+
+    try {
+      recipient.unseal(sealV2(PLAINTEXT));
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertEquals("no trusted keys are available for this protocol version", e.getMessage());
     }
   }
 

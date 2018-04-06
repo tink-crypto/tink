@@ -33,7 +33,7 @@ import org.json.JSONObject;
  * href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
  * Payment Method Token</a>.
  *
- * <p><b>Warning</b> This implementation supports only version {@code ECv1}.
+ * <p><b>Warning</b> This implementation supports only versions {@code ECv1} and {@code ECv2}.
  *
  * <p>Usage:
  *
