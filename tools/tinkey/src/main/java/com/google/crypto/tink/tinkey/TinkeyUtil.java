@@ -138,7 +138,7 @@ class TinkeyUtil {
         manager = manager.destroy(keyId);
         break;
       case DISABLE_KEY:
-        manager = manager.enable(keyId);
+        manager = manager.disable(keyId);
         break;
       case ENABLE_KEY:
         manager = manager.enable(keyId);
