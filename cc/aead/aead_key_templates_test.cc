@@ -16,6 +16,8 @@
 
 #include "tink/aead/aead_key_templates.h"
 
+#include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
+#include "tink/aead/aes_gcm_key_manager.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
@@ -47,6 +49,12 @@ TEST(AeadKeyTemplatesTest, testAesGcmKeyTemplates) {
     // Check that reference to the same object is returned.
     const KeyTemplate& key_template_2 = AeadKeyTemplates::Aes128Gcm();
     EXPECT_EQ(&key_template, &key_template_2);
+
+    // Check that the template works with the key manager.
+    AesGcmKeyManager key_manager;
+    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
   {  // Test Aes256Gcm().
@@ -61,6 +69,12 @@ TEST(AeadKeyTemplatesTest, testAesGcmKeyTemplates) {
     // Check that reference to the same object is returned.
     const KeyTemplate& key_template_2 = AeadKeyTemplates::Aes256Gcm();
     EXPECT_EQ(&key_template, &key_template_2);
+
+    // Check that the template works with the key manager.
+    AesGcmKeyManager key_manager;
+    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
 
@@ -83,6 +97,12 @@ TEST(AeadKeyTemplatesTest, testAesCtrHmacAeadKeyTemplates) {
     // Check that reference to the same object is returned.
     const KeyTemplate& key_template_2 = AeadKeyTemplates::Aes128CtrHmacSha256();
     EXPECT_EQ(&key_template, &key_template_2);
+
+    // Check that the template works with the key manager.
+    AesCtrHmacAeadKeyManager key_manager;
+    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
   {  // Test Aes256CtrHmacSha256().
@@ -101,6 +121,12 @@ TEST(AeadKeyTemplatesTest, testAesCtrHmacAeadKeyTemplates) {
     // Check that reference to the same object is returned.
     const KeyTemplate& key_template_2 = AeadKeyTemplates::Aes256CtrHmacSha256();
     EXPECT_EQ(&key_template, &key_template_2);
+
+    // Check that the template works with the key manager.
+    AesCtrHmacAeadKeyManager key_manager;
+    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
 

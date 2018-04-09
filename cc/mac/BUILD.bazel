@@ -65,6 +65,19 @@ cc_library(
 )
 
 cc_library(
+    name = "mac_key_templates",
+    srcs = ["mac_key_templates.cc"],
+    hdrs = ["mac_key_templates.h"],
+    deps = [
+        "//proto:common_cc_proto",
+        "//proto:hmac_cc_proto",
+        "//proto:tink_cc_proto",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
     name = "hmac_key_manager",
     srcs = ["hmac_key_manager.cc"],
     hdrs = ["hmac_key_manager.h"],
@@ -153,6 +166,21 @@ cc_test(
         "//cc/mac:hmac_key_manager",
         "//cc/util:status",
         "//cc/util:test_util",
+        "//proto:common_cc_proto",
+        "//proto:hmac_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "mac_key_templates_test",
+    size = "small",
+    srcs = ["mac_key_templates_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":hmac_key_manager",
+        ":mac_key_templates",
         "//proto:common_cc_proto",
         "//proto:hmac_cc_proto",
         "//proto:tink_cc_proto",

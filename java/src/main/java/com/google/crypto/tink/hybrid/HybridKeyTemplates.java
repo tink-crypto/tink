@@ -38,7 +38,7 @@ import com.google.protobuf.ByteString;
  * <pre>{@code
  * Config.register(HybridConfig.TINK_1_0_0);
  * KeysetHandle handle = KeysetHandle.generateNew(
- *     HybridKeyTemplates.ECIES_P256_HKDF_AES128_GCM);
+ *     HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM);
  * PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
  * }</pre>
  */

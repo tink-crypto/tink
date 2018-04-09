@@ -71,6 +71,20 @@ cc_library(
 )
 
 cc_library(
+    name = "aead_key_templates",
+    srcs = ["aead_key_templates.cc"],
+    hdrs = ["aead_key_templates.h"],
+    deps = [
+        "//proto:aes_ctr_hmac_aead_cc_proto",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:tink_cc_proto",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
     name = "aes_gcm_key_manager",
     srcs = ["aes_gcm_key_manager.cc"],
     hdrs = ["aes_gcm_key_manager.h"],
@@ -183,6 +197,23 @@ cc_test(
         "//cc/util:status",
         "//cc/util:test_util",
         "//proto:aes_gcm_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aead_key_templates_test",
+    size = "small",
+    srcs = ["aead_key_templates_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aead_key_templates",
+        ":aes_ctr_hmac_aead_key_manager",
+        ":aes_gcm_key_manager",
+        "//proto:aes_ctr_hmac_aead_cc_proto",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],

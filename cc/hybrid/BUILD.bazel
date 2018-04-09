@@ -123,6 +123,21 @@ cc_library(
 )
 
 cc_library(
+    name = "hybrid_key_templates",
+    srcs = ["hybrid_key_templates.cc"],
+    hdrs = ["hybrid_key_templates.h"],
+    deps = [
+        "//cc/aead:aead_key_templates",
+        "//proto:common_cc_proto",
+        "//proto:ecies_aead_hkdf_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
     name = "ecies_aead_hkdf_dem_helper",
     srcs = ["ecies_aead_hkdf_dem_helper.cc"],
     hdrs = ["ecies_aead_hkdf_dem_helper.h"],
@@ -341,6 +356,22 @@ cc_test(
         "//cc:keyset_handle",
         "//cc/util:status",
         "//cc/util:test_util",
+        "//proto:ecies_aead_hkdf_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "hybrid_key_templates_test",
+    size = "small",
+    srcs = ["hybrid_key_templates_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":hybrid_key_templates",
+        ":ecies_aead_hkdf_private_key_manager",
+        "//cc/aead:aead_key_templates",
+        "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",

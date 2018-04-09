@@ -75,10 +75,22 @@ cc_library(
 )
 
 cc_library(
+    name = "signature_key_templates",
+    srcs = ["signature_key_templates.cc"],
+    hdrs = ["signature_key_templates.h"],
+    deps = [
+        "//proto:common_cc_proto",
+        "//proto:ecdsa_cc_proto",
+        "//proto:tink_cc_proto",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
     name = "ecdsa_sign_key_manager",
     srcs = ["ecdsa_sign_key_manager.cc"],
     hdrs = ["ecdsa_sign_key_manager.h"],
-    visibility = ["//objc/hybrid:__pkg__"],
     deps = [
         ":ecdsa_verify_key_manager",
         "//cc:key_manager",
@@ -102,7 +114,6 @@ cc_library(
     name = "ecdsa_verify_key_manager",
     srcs = ["ecdsa_verify_key_manager.cc"],
     hdrs = ["ecdsa_verify_key_manager.h"],
-    visibility = ["//objc/hybrid:__pkg__"],
     deps = [
         "//cc:key_manager",
         "//cc:public_key_verify",
@@ -330,6 +341,21 @@ cc_test(
         "//cc:public_key_verify",
         "//cc:registry",
         "//cc/util:status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "signature_key_templates_test",
+    size = "small",
+    srcs = ["signature_key_templates_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":ecdsa_sign_key_manager",
+        ":signature_key_templates",
+        "//proto:common_cc_proto",
+        "//proto:ecdsa_cc_proto",
+        "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
