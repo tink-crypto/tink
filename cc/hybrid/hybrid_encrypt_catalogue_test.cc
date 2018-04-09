@@ -17,7 +17,6 @@
 #include "tink/hybrid/hybrid_encrypt_catalogue.h"
 
 #include "tink/catalogue.h"
-#include "tink/hybrid/hybrid_encrypt_config.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "gtest/gtest.h"

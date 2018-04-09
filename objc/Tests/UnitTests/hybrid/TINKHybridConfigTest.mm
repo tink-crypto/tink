@@ -24,7 +24,7 @@
 #import "objc/TINKRegistryConfig.h"
 #import "objc/core/TINKRegistryConfig_Internal.h"
 
-#include "tink/hybrid/hybrid_decrypt_config.h"
+#include "tink/hybrid/hybrid_config.h"
 #include "proto/config.pb.h"
 
 @interface TINKHybridConfigTest : XCTestCase

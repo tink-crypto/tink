@@ -71,20 +71,6 @@ cc_library(
 )
 
 cc_library(
-    name = "hybrid_decrypt_config",
-    srcs = ["hybrid_decrypt_config.cc"],
-    hdrs = ["hybrid_decrypt_config.h"],
-    deps = [
-        ":hybrid_decrypt_catalogue",
-        "//cc:hybrid_decrypt",
-        "//cc/aead:aead_config",
-        "//cc/util:status",
-    ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
-)
-
-cc_library(
     name = "hybrid_decrypt_factory",
     srcs = ["hybrid_decrypt_factory.cc"],
     hdrs = ["hybrid_decrypt_factory.h"],
@@ -113,20 +99,6 @@ cc_library(
         "//cc:key_manager",
         "//cc/util:status",
         "//cc/util:statusor",
-    ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
-)
-
-cc_library(
-    name = "hybrid_encrypt_config",
-    srcs = ["hybrid_encrypt_config.cc"],
-    hdrs = ["hybrid_encrypt_config.h"],
-    deps = [
-        ":hybrid_encrypt_catalogue",
-        "//cc:hybrid_encrypt",
-        "//cc/aead:aead_config",
-        "//cc/util:status",
     ],
     strip_include_prefix = "/cc",
     include_prefix = "tink",
@@ -311,27 +283,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":hybrid_decrypt_catalogue",
-        ":hybrid_decrypt_config",
         "//cc:catalogue",
         "//cc:hybrid_decrypt",
         "//cc/util:status",
         "//cc/util:statusor",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "hybrid_decrypt_config_test",
-    size = "small",
-    srcs = ["hybrid_decrypt_config_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    deps = [
-        ":hybrid_decrypt_config",
-        "//cc:catalogue",
-        "//cc:config",
-        "//cc:hybrid_decrypt",
-        "//cc:registry",
-        "//cc/util:status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -343,8 +298,9 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":ecies_aead_hkdf_public_key_manager",
-        ":hybrid_decrypt_config",
+        ":hybrid_config",
         ":hybrid_decrypt_factory",
+        "//cc:config",
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",
         "//cc:keyset_handle",
@@ -364,27 +320,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":hybrid_encrypt_catalogue",
-        ":hybrid_encrypt_config",
         "//cc:catalogue",
         "//cc:hybrid_encrypt",
         "//cc/util:status",
         "//cc/util:statusor",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "hybrid_encrypt_config_test",
-    size = "small",
-    srcs = ["hybrid_encrypt_config_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    deps = [
-        ":hybrid_encrypt_config",
-        "//cc:catalogue",
-        "//cc:config",
-        "//cc:hybrid_encrypt",
-        "//cc:registry",
-        "//cc/util:status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -395,8 +334,9 @@ cc_test(
     srcs = ["hybrid_encrypt_factory_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        ":hybrid_encrypt_config",
+        ":hybrid_config",
         ":hybrid_encrypt_factory",
+        "//cc:config",
         "//cc:hybrid_encrypt",
         "//cc:keyset_handle",
         "//cc/util:status",

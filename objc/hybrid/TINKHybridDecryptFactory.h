@@ -28,17 +28,17 @@ NS_ASSUME_NONNULL_BEGIN
  * TINKKeysetHandle.
  *
  * TINKHybridDecryptFactory gets primitives from the Registry, which can be initialized via
- * convenience methods from TINKHybridDecryptConfig. Here is an example how one can obtain and use a
+ * convenience methods from TINKHybridConfig. Here is an example how one can obtain and use a
  * TINKHybridDecrypt primitive:
  *
  * NSError *error = nil;
- * TINKHybridDecryptConfig *hybridDecryptConfig =
- *    [[TINKHybridDecryptConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
- * if (!hybridDecryptConfig || error) {
+ * TINKHybridConfig *hybridConfig =
+ *    [[TINKHybridConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+ * if (!hybridConfig || error) {
  *   // handle error.
  * }
  *
- * if (![TINKConfig registerConfig:hybridDecryptConfig error:&error]) {
+ * if (![TINKConfig registerConfig:hybridConfig error:&error]) {
  *   // handle error.
  * }
  *

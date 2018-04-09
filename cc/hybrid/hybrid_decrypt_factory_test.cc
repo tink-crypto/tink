@@ -17,12 +17,13 @@
 #include "tink/hybrid/hybrid_decrypt_factory.h"
 
 #include "absl/memory/memory.h"
+#include "tink/config.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/crypto_format.h"
 #include "tink/keyset_handle.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
-#include "tink/hybrid/hybrid_decrypt_config.h"
+#include "tink/hybrid/hybrid_config.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "gtest/gtest.h"
@@ -92,7 +93,8 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   keyset.set_primary_key_id(key_id_3);
 
   // Initialize the registry.
-  ASSERT_TRUE(HybridDecryptConfig::RegisterStandardKeyTypes().ok());;
+  ASSERT_TRUE(HybridConfig::Init().ok());
+  ASSERT_TRUE(Config::Register(HybridConfig::Tink_1_1_0()).ok());
 
   // Prepare HybridEncrypt-instances.
   auto ecies_key_manager = absl::make_unique<EciesAeadHkdfPublicKeyManager>();
