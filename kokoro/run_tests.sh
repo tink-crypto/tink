@@ -63,8 +63,8 @@ run_linux_tests() {
 
 run_macos_tests() {
   # Default values for iOS SDK and Xcode. Can be overriden by another script.
-  : "${IOS_SDK_VERSION:=11.1}"
-  : "${XCODE_VERSION:=9.1}"
+  : "${IOS_SDK_VERSION:=11.2}"
+  : "${XCODE_VERSION:=9.2}"
 
   time bazel fetch ...
 
@@ -79,6 +79,18 @@ run_macos_tests() {
   --xcode_version="${XCODE_VERSION}" \
   --verbose_failures \
   //objc/... || ( ls -l ; df -h / ; exit 1 )
+
+  # Run the iOS tests.
+  time bazel test $DISABLE_SANDBOX \
+  --compilation_mode=dbg \
+  --dynamic_mode=off \
+  --cpu=ios_x86_64 \
+  --ios_cpu=x86_64 \
+  --experimental_enable_objc_cc_deps \
+  --ios_sdk_version="${IOS_SDK_VERSION}" \
+  --xcode_version="${XCODE_VERSION}" \
+  --verbose_failures \
+  //objc:TinkTests || ( ls -l ; df -h / ; exit 1 )
 }
 
 if [[ $PLATFORM == 'darwin' ]]; then
