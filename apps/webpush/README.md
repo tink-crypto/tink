@@ -5,7 +5,7 @@ Push](https://tools.ietf.org/html/rfc8291).
 
 ## Installation
 
-To add a dependency using Maven, use the following:
+To add a dependency using Maven:
 
 ```xml
 <dependency>

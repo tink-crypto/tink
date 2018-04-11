@@ -78,7 +78,7 @@ import javax.crypto.spec.SecretKeySpec;
  * byte[] plaintext = hybridDecrypt.decrypt(ciphertext, null);
  * }</pre>
  */
-class WebPushHybridEncrypt implements HybridEncrypt {
+public final class WebPushHybridEncrypt implements HybridEncrypt {
   private final byte[] recipientPublicKey;
   private final byte[] authSecret;
   private final ECPoint recipientPublicPoint;
@@ -114,7 +114,7 @@ class WebPushHybridEncrypt implements HybridEncrypt {
   }
 
   /** Builder for WebPushHybridEncrypt. */
-  public static class Builder {
+  public static final class Builder {
     private byte[] recipientPublicKey = null;
     private ECPoint recipientPublicPoint = null;
     private byte[] authSecret = null;

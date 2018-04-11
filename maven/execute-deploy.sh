@@ -132,3 +132,10 @@ deploy_library \
   apps/rewardedads/maven-src.jar \
   apps/rewardedads/maven-javadoc.jar \
   $(dirname $0)/apps-rewardedads.pom.xml
+
+deploy_library \
+  apps-webpush \
+  apps/webpush/maven.jar \
+  apps/webpush/maven-src.jar \
+  apps/webpush/maven-javadoc.jar \
+  $(dirname $0)/apps-webpush.pom.xml
