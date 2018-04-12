@@ -218,5 +218,10 @@ Status KeysetManager::SetPrimary(uint32_t key_id) {
                    key_id);
 }
 
+int KeysetManager::KeyCount() const {
+  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
+  return keyset_.key_size();
+}
+
 }  // namespace tink
 }  // namespace crypto

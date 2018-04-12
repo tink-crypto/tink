@@ -85,11 +85,14 @@ class KeysetManager {
   // Succeeds only if the specified key is 'ENABLED'.
   crypto::tink::util::Status SetPrimary(uint32_t key_id);
 
+  // Returns the count of all keys in the keyset.
+  int KeyCount() const;
+
   // Returns a handle with a copy of the managed keyset.
   std::unique_ptr<KeysetHandle> GetKeysetHandle();
 
  private:
-  std::recursive_mutex keyset_mutex_;
+  mutable std::recursive_mutex keyset_mutex_;
   google::crypto::tink::Keyset keyset_;  // guarded by keyset_mutex_
 
   // Generates a new key_id avoiding collisions in the managed keyset.

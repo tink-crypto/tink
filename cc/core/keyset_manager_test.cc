@@ -58,6 +58,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   auto new_result = KeysetManager::New(key_template);
   EXPECT_TRUE(new_result.ok()) << new_result.status();
   auto keyset_manager = std::move(new_result.ValueOrDie());
+  EXPECT_EQ(1, keyset_manager->KeyCount());
 
   // Verify the keyset.
   auto keyset = keyset_manager->GetKeysetHandle()->get_keyset();
@@ -73,6 +74,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   key_template.set_output_prefix_type(OutputPrefixType::RAW);
   auto add_result = keyset_manager->Add(key_template);
   EXPECT_TRUE(add_result.ok()) << add_result.status();
+  EXPECT_EQ(2, keyset_manager->KeyCount());
   auto key_id_1 = add_result.ValueOrDie();
   keyset = keyset_manager->GetKeysetHandle()->get_keyset();
   EXPECT_EQ(2, keyset.key().size());
@@ -88,6 +90,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   key_template.set_output_prefix_type(OutputPrefixType::LEGACY);
   auto rotate_result = keyset_manager->Rotate(key_template);
   EXPECT_TRUE(rotate_result.ok()) << add_result.status();
+  EXPECT_EQ(3, keyset_manager->KeyCount());
   auto key_id_2 = rotate_result.ValueOrDie();
   keyset = keyset_manager->GetKeysetHandle()->get_keyset();
   EXPECT_EQ(3, keyset.key().size());
@@ -106,6 +109,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   EXPECT_TRUE(status.ok()) << status;
   keyset = keyset_manager->GetKeysetHandle()->get_keyset();
   EXPECT_EQ(3, keyset.key().size());
+  EXPECT_EQ(3, keyset_manager->KeyCount());
   EXPECT_EQ(key_id_1, keyset.primary_key_id());
 
   // Clone a keyset via the manager, and check equality.
@@ -118,6 +122,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   EXPECT_EQ(KeyStatusType::ENABLED, keyset.key(2).status());
   status = keyset_manager->Disable(key_id_2);
   EXPECT_TRUE(status.ok()) << status;
+  EXPECT_EQ(3, keyset_manager->KeyCount());
   keyset = keyset_manager->GetKeysetHandle()->get_keyset();
   EXPECT_EQ(KeyStatusType::DISABLED, keyset.key(2).status());
 
@@ -152,6 +157,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
 
   status = keyset_manager->Destroy(key_id_2);
   EXPECT_TRUE(status.ok()) << status;
+  EXPECT_EQ(3, keyset_manager->KeyCount());
   keyset = keyset_manager->GetKeysetHandle()->get_keyset();
   EXPECT_EQ(KeyStatusType::DESTROYED, keyset.key(2).status());
   EXPECT_FALSE(keyset.key(2).has_key_data());
@@ -168,6 +174,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   // Delete the destroyed key, then try to destroy and delete it again.
   status = keyset_manager->Delete(key_id_2);
   EXPECT_TRUE(status.ok()) << status;
+  EXPECT_EQ(2, keyset_manager->KeyCount());
   keyset = keyset_manager->GetKeysetHandle()->get_keyset();
   EXPECT_EQ(2, keyset.key().size());
 
@@ -215,6 +222,7 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "No key with key_id",
                       status.error_message());
+  EXPECT_EQ(1, keyset_manager->KeyCount());
 }
 
 }  // namespace
