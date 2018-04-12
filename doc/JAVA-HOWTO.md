@@ -363,8 +363,8 @@ to encrypt or decrypt data streams:
 
 ### Message Authentication Code
 
-The following snippets shows how to compute or verify a [MAC (Message Authentication
-Code)](RIMITIVES.md#message-authentication-code):
+The following snippets shows how to compute or verify a [MAC (Message
+Authentication Code)](PRIMITIVES.md#message-authentication-code):
 
 ```java
     import com.google.crypto.tink.KeysetHandle;

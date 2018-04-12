@@ -45,10 +45,6 @@ Available commands:
 To obtain info about arguments available/required for a command, run `tinkey
 <command>` without further arguments.
 
-The key templates in the following examples can be found at
-https://github.com/google/tink/tree/master/examples/keytemplates. You can also
-generate your own templates with `tinkey create-key-template`.
-
 -   Generate a keyset, and write it to `private-keyset.cfg`
 
 ```shell
