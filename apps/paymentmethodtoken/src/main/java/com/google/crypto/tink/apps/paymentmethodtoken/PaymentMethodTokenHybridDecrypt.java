@@ -20,27 +20,48 @@ import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Bytes;
-import com.google.crypto.tink.subtle.EciesHkdfRecipientKem;
+import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.Hkdf;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * A {@link HybridDecrypt} implementation for the hybrid encryption used in <a
- * href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
- * Payment Method Token</a>.
+ * href="https://developers.google.com/pay/api/payment-data-cryptography">Google Payment Method
+ * Token</a>.
  */
 class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
-  private final EciesHkdfRecipientKem recipientKem;
+  private final PaymentMethodTokenRecipientKem recipientKem;
   private final ProtocolVersionConfig protocolVersionConfig;
 
-  public PaymentMethodTokenHybridDecrypt(
-      final ECPrivateKey recipientPrivateKey, final ProtocolVersionConfig protocolVersionConfig)
+  PaymentMethodTokenHybridDecrypt(
+      final ECPrivateKey recipientPrivateKey, ProtocolVersionConfig protocolVersionConfig)
       throws GeneralSecurityException {
-    this.recipientKem = new EciesHkdfRecipientKem(recipientPrivateKey);
+    this(
+        new PaymentMethodTokenRecipientKem() {
+          @Override
+          public byte[] computeSharedSecret(final byte[] ephemeralPublicKey)
+              throws GeneralSecurityException {
+            ECPublicKey publicKey =
+                EllipticCurves.getEcPublicKey(
+                    recipientPrivateKey.getParams(),
+                    PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT,
+                    ephemeralPublicKey);
+            return EllipticCurves.computeSharedSecret(recipientPrivateKey, publicKey);
+          }
+        },
+        protocolVersionConfig);
+  }
+
+  PaymentMethodTokenHybridDecrypt(
+      final PaymentMethodTokenRecipientKem recipientKem,
+      ProtocolVersionConfig protocolVersionConfig) {
+    this.recipientKem = recipientKem;
     this.protocolVersionConfig = protocolVersionConfig;
   }
 
@@ -50,35 +71,44 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
     try {
       JSONObject json = new JSONObject(new String(ciphertext, StandardCharsets.UTF_8));
       validate(json);
-      byte[] kem =
-          Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
-      int symmetricKeySize =
-          protocolVersionConfig.aesCtrKeySize + protocolVersionConfig.hmacSha256KeySize;
-      byte[] demKey =
-          recipientKem.generateKey(
-              kem,
-              PaymentMethodTokenConstants.HMAC_SHA256_ALGO,
-              PaymentMethodTokenConstants.HKDF_EMPTY_SALT,
-              contextInfo,
-              symmetricKeySize,
-              PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
-      byte[] hmacSha256Key =
-          Arrays.copyOfRange(demKey, protocolVersionConfig.aesCtrKeySize, symmetricKeySize);
-      byte[] encryptedMessage =
-          Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
-      byte[] computedTag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key, encryptedMessage);
-      byte[] expectedTag = Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_TAG_KEY));
-      if (!Bytes.equal(expectedTag, computedTag)) {
-        throw new GeneralSecurityException("cannot decrypt; invalid MAC");
-      }
-      byte[] aesCtrKey = Arrays.copyOfRange(demKey, 0, protocolVersionConfig.aesCtrKeySize);
-      return PaymentMethodTokenUtil.aesCtr(aesCtrKey, encryptedMessage);
+      byte[] demKey = kem(json, contextInfo);
+      return dem(json, demKey);
     } catch (JSONException e) {
       throw new GeneralSecurityException("cannot decrypt; failed to parse JSON");
     }
   }
 
-  private void validate(final JSONObject payload) throws GeneralSecurityException {
+  private byte[] kem(JSONObject json, final byte[] contextInfo)
+      throws GeneralSecurityException, JSONException {
+    int demKeySize = protocolVersionConfig.aesCtrKeySize + protocolVersionConfig.hmacSha256KeySize;
+    byte[] ephemeralPublicKey =
+        Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
+    byte[] sharedSecret = recipientKem.computeSharedSecret(ephemeralPublicKey);
+    return Hkdf.computeEciesHkdfSymmetricKey(
+        ephemeralPublicKey,
+        sharedSecret,
+        PaymentMethodTokenConstants.HMAC_SHA256_ALGO,
+        PaymentMethodTokenConstants.HKDF_EMPTY_SALT,
+        contextInfo,
+        demKeySize);
+  }
+
+  private byte[] dem(JSONObject json, final byte[] demKey)
+      throws GeneralSecurityException, JSONException {
+    byte[] hmacSha256Key =
+        Arrays.copyOfRange(demKey, protocolVersionConfig.aesCtrKeySize, demKey.length);
+    byte[] encryptedMessage =
+        Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
+    byte[] computedTag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key, encryptedMessage);
+    byte[] expectedTag = Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_TAG_KEY));
+    if (!Bytes.equal(expectedTag, computedTag)) {
+      throw new GeneralSecurityException("cannot decrypt; invalid MAC");
+    }
+    byte[] aesCtrKey = Arrays.copyOf(demKey, protocolVersionConfig.aesCtrKeySize);
+    return PaymentMethodTokenUtil.aesCtr(aesCtrKey, encryptedMessage);
+  }
+
+  private void validate(JSONObject payload) throws GeneralSecurityException {
     if (!payload.has(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY)
         || !payload.has(PaymentMethodTokenConstants.JSON_TAG_KEY)
         || !payload.has(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY)

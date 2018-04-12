@@ -1,4 +1,4 @@
-# An implementation of [Google Payment Method Token](https://developers.google.com/android-pay/integration/payment-token-cryptography).
+# An implementation of [Google Payment Method Token](https://developers.google.com/pay/api/payment-data-cryptography).
 
 ## Latest release
 

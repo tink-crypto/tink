@@ -30,8 +30,8 @@ import org.json.JSONObject;
 
 /**
  * An implementation of the sender side of <a
- * href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
- * Payment Method Token</a>.
+ * href="https://developers.google.com/pay/api/payment-data-cryptography">Google Payment Method
+ * Token</a>.
  *
  * <p><b>Warning</b> This implementation supports only versions {@code ECv1} and {@code ECv2}.
  *

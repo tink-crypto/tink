@@ -22,7 +22,10 @@ import static org.junit.Assert.fail;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.crypto.tink.subtle.Base64;
+import com.google.crypto.tink.subtle.EllipticCurves;
 import java.security.GeneralSecurityException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.json.JSONArray;
@@ -166,6 +169,27 @@ public class PaymentMethodTokenRecipientTest {
       "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEU8E6JppGKFG40r5dDU1idHRN52NuwsemFzXZh1oUqh3bGUPgPioH+RoW"
           + "nmVSUQz1WfM2426w9f0GADuXzpUkcw==";
 
+  private static final class MyPaymentMethodTokenRecipientKem
+      implements PaymentMethodTokenRecipientKem {
+    private final ECPrivateKey privateKey;
+
+    public MyPaymentMethodTokenRecipientKem(String recipientPrivateKey)
+        throws GeneralSecurityException {
+      privateKey = PaymentMethodTokenUtil.pkcs8EcPrivateKey(recipientPrivateKey);
+    }
+
+    @Override
+    public byte[] computeSharedSecret(final byte[] ephemeralPublicKey)
+        throws GeneralSecurityException {
+      ECPublicKey publicKey =
+          EllipticCurves.getEcPublicKey(
+              privateKey.getParams(),
+              PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT,
+              ephemeralPublicKey);
+      return EllipticCurves.computeSharedSecret(privateKey, publicKey);
+    }
+  }
+
   @Test
   public void testShouldDecryptV1() throws Exception {
     PaymentMethodTokenRecipient recipient =
@@ -173,6 +197,19 @@ public class PaymentMethodTokenRecipientTest {
             .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
             .recipientId(RECIPIENT_ID)
             .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
+
+    assertEquals(PLAINTEXT, recipient.unseal(CIPHERTEXT_EC_V1));
+  }
+
+  @Test
+  public void testShouldDecryptV1WhenUsingCustomKem() throws Exception {
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientKem(
+                new MyPaymentMethodTokenRecipientKem(MERCHANT_PRIVATE_KEY_PKCS8_BASE64))
             .build();
 
     assertEquals(PLAINTEXT, recipient.unseal(CIPHERTEXT_EC_V1));
@@ -212,12 +249,45 @@ public class PaymentMethodTokenRecipientTest {
   }
 
   @Test
+  public void testShouldTryAllCustomKemsToDecryptV1() throws Exception {
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientKem(
+                new MyPaymentMethodTokenRecipientKem(ALTERNATE_MERCHANT_PRIVATE_KEY_PKCS8_BASE64))
+            .addRecipientKem(
+                new MyPaymentMethodTokenRecipientKem(MERCHANT_PRIVATE_KEY_PKCS8_BASE64))
+            .build();
+
+    assertEquals(PLAINTEXT, recipient.unseal(CIPHERTEXT_EC_V1));
+  }
+
+  @Test
   public void testShouldFailIfDecryptingWithDifferentKeyV1() throws Exception {
     PaymentMethodTokenRecipient recipient =
         new PaymentMethodTokenRecipient.Builder()
             .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
             .recipientId(RECIPIENT_ID)
             .addRecipientPrivateKey(ALTERNATE_MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
+
+    try {
+      recipient.unseal(CIPHERTEXT_EC_V1);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertEquals("cannot decrypt", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testShouldFailIfDecryptingWithDifferentCustomKemV1() throws Exception {
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientKem(
+                new MyPaymentMethodTokenRecipientKem(ALTERNATE_MERCHANT_PRIVATE_KEY_PKCS8_BASE64))
             .build();
 
     try {
@@ -533,6 +603,20 @@ public class PaymentMethodTokenRecipientTest {
             .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
             .recipientId(RECIPIENT_ID)
             .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
+
+    assertEquals(PLAINTEXT, recipient.unseal(sealV2(PLAINTEXT)));
+  }
+
+  @Test
+  public void testUnsealV2WithCustomKem() throws Exception {
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientKem(
+                new MyPaymentMethodTokenRecipientKem(MERCHANT_PRIVATE_KEY_PKCS8_BASE64))
             .build();
 
     assertEquals(PLAINTEXT, recipient.unseal(sealV2(PLAINTEXT)));

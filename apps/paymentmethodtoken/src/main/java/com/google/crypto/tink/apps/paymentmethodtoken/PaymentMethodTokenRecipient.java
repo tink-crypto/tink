@@ -35,8 +35,8 @@ import org.json.JSONObject;
 
 /**
  * An implementation of the recipient side of <a
- * href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
- * Payment Method Token</a>.
+ * href="https://developers.google.com/pay/api/payment-data-cryptography">Google Payment Method
+ * Token</a>.
  *
  * <p><b>Warning</b> This implementation only supports versions {@code ECv1} and {@code ECv2}.
  *
@@ -54,6 +54,28 @@ import org.json.JSONObject;
  * String ciphertext = ...;
  * String plaintext = recipient.unseal(ciphertext);
  * }</pre>
+ *
+ * <p>Custom decryption: recipients that store private keys in HSM can provide implementations of
+ * {@link PaymentMethodTokenRecipientKem} and configure Tink to use their custom code with {@link
+ * #addRecipientKem}.
+ *
+ * <pre>{@code
+ * class MyPaymentMethodTokenRecipientKem implements PaymentMethodTokenRecipientKem {
+ *   @Override
+ *   byte[] computeSharedSecret(final byte[] ephemeralPublicKey) throws GeneralSecurityException {
+ *     ...
+ *   }
+ * }
+ *
+ * PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
+ *     .fetchSenderVerifyingKeysWith(
+ *         GooglePaymentsPublicKeysManager.INSTANCE_PRODUCTION)
+ *     .recipientId(recipientId)
+ *     .addRecipientKem(new MyPaymentMethodTokenRecipientKem())
+ *     .build();
+ * String ciphertext = ...;
+ * String plaintext = recipient.unseal(ciphertext);
+ * }</pre>
  */
 public final class PaymentMethodTokenRecipient {
   private final String protocolVersion;
@@ -67,6 +89,7 @@ public final class PaymentMethodTokenRecipient {
       List<SenderVerifyingKeysProvider> senderVerifyingKeysProviders,
       String senderId,
       List<ECPrivateKey> recipientPrivateKeys,
+      List<PaymentMethodTokenRecipientKem> recipientKems,
       String recipientId)
       throws GeneralSecurityException {
     if (!protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
@@ -82,15 +105,22 @@ public final class PaymentMethodTokenRecipient {
     this.senderVerifyingKeysProviders = senderVerifyingKeysProviders;
     this.senderId = senderId;
 
-    if (recipientPrivateKeys == null || recipientPrivateKeys.isEmpty()) {
+    if (recipientPrivateKeys.isEmpty() && recipientKems.isEmpty()) {
       throw new IllegalArgumentException(
-          "must add at least one recipient's decrypting key using Builder.addRecipientPrivateKey");
+          "must add at least one recipient's decrypting key using Builder.addRecipientPrivateKey "
+              + "or Builder.addRecipientDecrypter");
     }
     for (ECPrivateKey privateKey : recipientPrivateKeys) {
       hybridDecrypters.add(
           new PaymentMethodTokenHybridDecrypt(
               privateKey, ProtocolVersionConfig.forProtocolVersion(protocolVersion)));
     }
+    for (PaymentMethodTokenRecipientKem kem : recipientKems) {
+      hybridDecrypters.add(
+          new PaymentMethodTokenHybridDecrypt(
+              kem, ProtocolVersionConfig.forProtocolVersion(protocolVersion)));
+    }
+
     if (recipientId == null) {
       throw new IllegalArgumentException("must set recipient Id using Builder.recipientId");
     }
@@ -103,6 +133,7 @@ public final class PaymentMethodTokenRecipient {
         builder.senderVerifyingKeysProviders,
         builder.senderId,
         builder.recipientPrivateKeys,
+        builder.recipientKems,
         builder.recipientId);
   }
 
@@ -114,6 +145,7 @@ public final class PaymentMethodTokenRecipient {
     private final List<SenderVerifyingKeysProvider> senderVerifyingKeysProviders =
         new ArrayList<SenderVerifyingKeysProvider>();
     private final List<ECPrivateKey> recipientPrivateKeys = new ArrayList<ECPrivateKey>();
+    private final List<PaymentMethodTokenRecipientKem> recipientKems = new ArrayList<>();
 
     public Builder() {}
 
@@ -247,17 +279,28 @@ public final class PaymentMethodTokenRecipient {
     }
 
     /**
-     * Sets the decryption private key of the recipient.
+     * Adds the decryption private key of the recipient.
      *
      * <p>It must be base64 encoded PKCS8 private key.
      */
     public Builder addRecipientPrivateKey(String val) throws GeneralSecurityException {
-      recipientPrivateKeys.add(PaymentMethodTokenUtil.pkcs8EcPrivateKey(val));
-      return this;
+      return addRecipientPrivateKey(PaymentMethodTokenUtil.pkcs8EcPrivateKey(val));
     }
 
     public Builder addRecipientPrivateKey(ECPrivateKey val) throws GeneralSecurityException {
       recipientPrivateKeys.add(val);
+      return this;
+    }
+
+    /**
+     * Adds a custom {@link PaymentMethodTokenRecipientKem}.
+     *
+     * <p>This is useful for clients that store keys in an HSM and need a more control on how the
+     * key is used. If you are not using an HSM, you probably should just use {@link
+     * #addRecipientKey}.
+     */
+    public Builder addRecipientKem(PaymentMethodTokenRecipientKem kem) {
+      recipientKems.add(kem);
       return this;
     }
 
