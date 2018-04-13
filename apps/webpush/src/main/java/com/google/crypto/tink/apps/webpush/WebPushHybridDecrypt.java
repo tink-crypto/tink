@@ -176,8 +176,8 @@ public final class WebPushHybridDecrypt implements HybridDecrypt {
     /**
      * Sets the private key of the recipient.
      *
-     * <p>The private key is in PKCS8 encoding. In Java, this is the return value of {@link
-     * ECPrivateKey#getEncoded()}.
+     * <p>The private key is the serialized bytes of the BigInteger returned by
+     * {@link ECPrivateKey#getS()}.
      */
     public Builder withRecipientPrivateKey(final byte[] val) throws GeneralSecurityException {
       recipientPrivateKey =
