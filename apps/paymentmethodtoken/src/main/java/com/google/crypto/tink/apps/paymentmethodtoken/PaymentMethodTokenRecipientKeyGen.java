@@ -30,7 +30,7 @@ import java.security.interfaces.ECPublicKey;
  * href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
  * Payment Method Token</a>.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  *
  * <pre>
  * bazel build apps/paymentmethodtoken/...
@@ -39,8 +39,8 @@ import java.security.interfaces.ECPublicKey;
  *
  * <p>Running that command will generate a fresh key pair. The private/public key can be found in
  * private_key.bin/public_key.bin. The content of private_key.bin can be passed to {@link
- * PaymentMethodTokenRecipient#addRecipientPrivateKey} and the content of public_key.bin can be
- * passed to {@link PaymentMethodTokenSender#rawUncompressedRecipientPublicKey}.
+ * PaymentMethodTokenRecipient.Builder#addRecipientPrivateKey} and the content of public_key.bin can
+ * be passed to {@link PaymentMethodTokenSender.Builder#rawUncompressedRecipientPublicKey}.
  */
 public final class PaymentMethodTokenRecipientKeyGen {
   private static final String PRIVATE_KEY_FILE = "private_key.bin";

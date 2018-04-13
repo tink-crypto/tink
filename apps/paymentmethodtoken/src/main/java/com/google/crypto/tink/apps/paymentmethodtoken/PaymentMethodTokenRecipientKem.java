@@ -31,7 +31,7 @@ import java.security.GeneralSecurityException;
  * ephemeral public key, and from that derive the DEM key using HKDF. If the recipient keeps the
  * private key in a HSM, they cannot load the private key in Tink, but they can implement this
  * interface and configure Tink to use their custom KEM implementation with {@link
- * PaymentMethodTokenRecipient#addRecipientKem}.
+ * PaymentMethodTokenRecipient.Builder#addRecipientKem}.
  *
  * @see <a href="https://developers.google.com/pay/api/payment-data-cryptography">Google Payment
  *     Method Token standard</a>

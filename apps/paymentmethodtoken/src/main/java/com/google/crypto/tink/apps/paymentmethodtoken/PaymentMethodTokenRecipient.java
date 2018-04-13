@@ -38,9 +38,11 @@ import org.json.JSONObject;
  * href="https://developers.google.com/pay/api/payment-data-cryptography">Google Payment Method
  * Token</a>.
  *
- * <p><b>Warning</b> This implementation only supports versions {@code ECv1} and {@code ECv2}.
+ * <h3>Warning</h3>
  *
- * <p>Typical usage:
+ * <p>This implementation only supports versions {@code ECv1} and {@code ECv2}.
+ *
+ * <h3>Typical usage</h3>
  *
  * <pre>{@code
  * PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
@@ -55,18 +57,13 @@ import org.json.JSONObject;
  * String plaintext = recipient.unseal(ciphertext);
  * }</pre>
  *
- * <p>Custom decryption: recipients that store private keys in HSM can provide implementations of
- * {@link PaymentMethodTokenRecipientKem} and configure Tink to use their custom code with {@link
- * #addRecipientKem}.
+ * <h3>Custom decryption</h3>
+ *
+ * <p>Recipients that store private keys in HSM can provide implementations of {@link
+ * PaymentMethodTokenRecipientKem} and configure Tink to use their custom code with {@link
+ * PaymentMethodTokenRecipient.Builder#addRecipientKem}.
  *
  * <pre>{@code
- * class MyPaymentMethodTokenRecipientKem implements PaymentMethodTokenRecipientKem {
- *   @Override
- *   byte[] computeSharedSecret(final byte[] ephemeralPublicKey) throws GeneralSecurityException {
- *     ...
- *   }
- * }
- *
  * PaymentMethodTokenRecipient recipient = new PaymentMethodTokenRecipient.Builder()
  *     .fetchSenderVerifyingKeysWith(
  *         GooglePaymentsPublicKeysManager.INSTANCE_PRODUCTION)
@@ -137,7 +134,7 @@ public final class PaymentMethodTokenRecipient {
         builder.recipientId);
   }
 
-  /** Builder for PaymentMethodTokenRecipient. */
+  /** Builder for {@link PaymentMethodTokenRecipient}. */
   public static class Builder {
     private String protocolVersion = PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1;
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
@@ -297,7 +294,7 @@ public final class PaymentMethodTokenRecipient {
      *
      * <p>This is useful for clients that store keys in an HSM and need a more control on how the
      * key is used. If you are not using an HSM, you probably should just use {@link
-     * #addRecipientKey}.
+     * #addRecipientPrivateKey}.
      */
     public Builder addRecipientKem(PaymentMethodTokenRecipientKem kem) {
       recipientKems.add(kem);

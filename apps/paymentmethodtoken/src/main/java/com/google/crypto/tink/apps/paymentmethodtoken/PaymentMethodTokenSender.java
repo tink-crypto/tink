@@ -33,9 +33,11 @@ import org.json.JSONObject;
  * href="https://developers.google.com/pay/api/payment-data-cryptography">Google Payment Method
  * Token</a>.
  *
- * <p><b>Warning</b> This implementation supports only versions {@code ECv1} and {@code ECv2}.
+ * <h3>Warning</h3>
  *
- * <p>Usage:
+ * <p>This implementation supports only versions {@code ECv1} and {@code ECv2}.
+ *
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * PaymentMethodTokenSender sender = new PaymentMethodTokenSender.Builder()
@@ -135,7 +137,7 @@ public final class PaymentMethodTokenSender {
         builder.recipientId);
   }
 
-  /** Builder for PaymentMethodTokenSender. */
+  /** Builder for {@link PaymentMethodTokenSender}. */
   public static class Builder {
     private String protocolVersion = PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1;
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
