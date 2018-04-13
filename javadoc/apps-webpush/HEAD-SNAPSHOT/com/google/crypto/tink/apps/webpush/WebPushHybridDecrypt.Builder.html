@@ -305,7 +305,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
                                                      throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Sets the private key of the recipient.
 
- <p>The private key is in PKCS8 encoding. In Java, this is the return value of <a href="https://docs.oracle.com/javase/7/docs/api/java/security/Key.html?is-external=true#getEncoded--" title="class or interface in java.security"><code>Key.getEncoded()</code></a>.</div>
+ <p>The private key is the serialized bytes of the BigInteger returned by
+ <a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true#getS--" title="class or interface in java.security.interfaces"><code>ECPrivateKey.getS()</code></a>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
