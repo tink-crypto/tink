@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -48,7 +48,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKem.html" title="interface in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKeyGen.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../../index.html?com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" target="_top">Frames</a></li>
@@ -113,7 +113,7 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public static class <span class="typeNameLabel">PaymentMethodTokenRecipient.Builder</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">Builder for <a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><code>PaymentMethodTokenRecipient</code></a>.</div>
+<div class="block">Builder for PaymentMethodTokenRecipient.</div>
 </li>
 </ul>
 </div>
@@ -151,61 +151,55 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#addRecipientKem-com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenRecipientKem-">addRecipientKem</a></span>(<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKem.html" title="interface in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipientKem</a>&nbsp;kem)</code>
-<div class="block">Adds a custom <a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKem.html" title="interface in com.google.crypto.tink.apps.paymentmethodtoken"><code>PaymentMethodTokenRecipientKem</code></a>.</div>
-</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#addRecipientPrivateKey-java.security.interfaces.ECPrivateKey-">addRecipientPrivateKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#addRecipientPrivateKey-java.security.interfaces.ECPrivateKey-">addRecipientPrivateKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;val)</code>&nbsp;</td>
-</tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#addRecipientPrivateKey-java.lang.String-">addRecipientPrivateKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</code>
-<div class="block">Adds the decryption private key of the recipient.</div>
+<div class="block">Sets the decryption private key of the recipient.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#addSenderVerifyingKey-java.security.interfaces.ECPublicKey-">addSenderVerifyingKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a>&nbsp;val)</code>
 <div class="block">Adds a verifying public key of the sender.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#addSenderVerifyingKey-java.lang.String-">addSenderVerifyingKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</code>
 <div class="block">Adds a verifying public key of the sender.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#build--">build</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#fetchSenderVerifyingKeysWith-com.google.crypto.tink.apps.paymentmethodtoken.GooglePaymentsPublicKeysManager-">fetchSenderVerifyingKeysWith</a></span>(<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/GooglePaymentsPublicKeysManager.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">GooglePaymentsPublicKeysManager</a>&nbsp;googlePaymentsPublicKeysManager)</code>
 <div class="block">Fetches verifying public keys of the sender using <a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/GooglePaymentsPublicKeysManager.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><code>GooglePaymentsPublicKeysManager</code></a>.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#protocolVersion-java.lang.String-">protocolVersion</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</code>
 <div class="block">Sets the protocolVersion.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#recipientId-java.lang.String-">recipientId</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</code>
 <div class="block">Sets the recipient Id.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#senderId-java.lang.String-">senderId</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)</code>
 <div class="block">Sets the sender Id.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#senderVerifyingKeys-java.lang.String-">senderVerifyingKeys</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;trustedSigningKeysJson)</code>
 <div class="block">Sets the trusted verifying public keys of the sender.</div>
@@ -392,7 +386,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <h4>addRecipientPrivateKey</h4>
 <pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addRecipientPrivateKey(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;val)
                                                            throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Adds the decryption private key of the recipient.
+<div class="block">Sets the decryption private key of the recipient.
 
  <p>It must be base64 encoded PKCS8 private key.</div>
 <dl>
@@ -413,19 +407,6 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
-</li>
-</ul>
-<a name="addRecipientKem-com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenRecipientKem-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>addRecipientKem</h4>
-<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipient.Builder</a>&nbsp;addRecipientKem(<a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKem.html" title="interface in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenRecipientKem</a>&nbsp;kem)</pre>
-<div class="block">Adds a custom <a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKem.html" title="interface in com.google.crypto.tink.apps.paymentmethodtoken"><code>PaymentMethodTokenRecipientKem</code></a>.
-
- <p>This is useful for clients that store keys in an HSM and need a more control on how the
- key is used. If you are not using an HSM, you probably should just use <a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#addRecipientPrivateKey-java.lang.String-"><code>addRecipientPrivateKey(java.lang.String)</code></a>.</div>
 </li>
 </ul>
 <a name="build--">
@@ -470,7 +451,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKem.html" title="interface in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipientKeyGen.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../../index.html?com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html" target="_top">Frames</a></li>

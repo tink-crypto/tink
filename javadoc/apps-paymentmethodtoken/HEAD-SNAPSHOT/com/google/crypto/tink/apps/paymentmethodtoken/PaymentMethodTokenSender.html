@@ -110,14 +110,12 @@ var activeTableTab = "activeTableTab";
 <pre>public final class <span class="typeNameLabel">PaymentMethodTokenSender</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">An implementation of the sender side of <a
- href="https://developers.google.com/pay/api/payment-data-cryptography">Google Payment Method
- Token</a>.
+ href="https://developers.google.com/android-pay/integration/payment-token-cryptography">Google
+ Payment Method Token</a>.
 
- <h3>Warning</h3>
+ <p><b>Warning</b> This implementation supports only versions <code>ECv1</code> and <code>ECv2</code>.
 
- <p>This implementation supports only versions <code>ECv1</code> and <code>ECv2</code>.
-
- <h3>Usage</h3>
+ <p>Usage:
 
  <pre><code>
  PaymentMethodTokenSender sender = new PaymentMethodTokenSender.Builder()
@@ -150,7 +148,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.Builder.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken">PaymentMethodTokenSender.Builder</a></span></code>
-<div class="block">Builder for <a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenSender.html" title="class in com.google.crypto.tink.apps.paymentmethodtoken"><code>PaymentMethodTokenSender</code></a>.</div>
+<div class="block">Builder for PaymentMethodTokenSender.</div>
 </td>
 </tr>
 </table>
