@@ -113,7 +113,7 @@ var activeTableTab = "activeTableTab";
  <p>To decrypt, the recipient must use their private key to compute an ECDH shared secret from the
  ephemeral public key, and from that derive the DEM key using HKDF. If the recipient keeps the
  private key in a HSM, they cannot load the private key in Tink, but they can implement this
- interface and configure Tink to use their custom KEM implementation with <code>PaymentMethodTokenRecipient#addRecipientKem</code>.</div>
+ interface and configure Tink to use their custom KEM implementation with <a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.Builder.html#addRecipientKem-com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenRecipientKem-"><code>PaymentMethodTokenRecipient.Builder.addRecipientKem(com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenRecipientKem)</code></a>.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="https://developers.google.com/pay/api/payment-data-cryptography">Google Payment
