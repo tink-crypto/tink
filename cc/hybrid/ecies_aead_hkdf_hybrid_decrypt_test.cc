@@ -37,7 +37,6 @@ using google::crypto::tink::EcPointFormat;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

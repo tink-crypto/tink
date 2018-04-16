@@ -23,7 +23,6 @@
 #include "openssl/evp.h"
 #include "openssl/hkdf.h"
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

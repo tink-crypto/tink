@@ -25,10 +25,10 @@
 #include "tink/subtle/random.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
-#include "google/protobuf/message.h"
 #include "proto/common.pb.h"
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
@@ -39,11 +39,10 @@ using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::HmacParams;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
-using google::protobuf::Message;
+using portable_proto::Message;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
@@ -54,13 +53,13 @@ class HmacKeyFactory : public KeyFactory {
 
   // Generates a new random HmacKey, based on the specified 'key_format',
   // which must contain HmacKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
-  NewKey(const google::protobuf::Message& key_format) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  NewKey(const portable_proto::Message& key_format) const override;
 
 
   // Generates a new random HmacKey, based on the specified
   // 'serialized_key_format', which must contain HmacKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
   NewKey(absl::string_view serialized_key_format) const override;
 
   // Generates a new random HmacKey, based on the specified
@@ -71,7 +70,7 @@ class HmacKeyFactory : public KeyFactory {
 };
 
 StatusOr<std::unique_ptr<Message>> HmacKeyFactory::NewKey(
-    const google::protobuf::Message& key_format) const {
+    const portable_proto::Message& key_format) const {
   std::string key_format_url = std::string(HmacKeyManager::kKeyTypePrefix)
       + key_format.GetDescriptor()->full_name();
   if (key_format_url != HmacKeyManager::kKeyFormatUrl) {

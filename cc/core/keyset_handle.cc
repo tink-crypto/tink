@@ -26,7 +26,6 @@ using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyTemplate;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

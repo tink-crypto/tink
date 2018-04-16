@@ -19,8 +19,8 @@
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
 #include "tink/keyset_handle.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/test_util.h"
-#include "google/protobuf/util/json_util.h"
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 
@@ -119,11 +119,11 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Json) {
         keyset.SerializeAsString(), /* associated_data= */ "").ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
-    google::protobuf::util::JsonPrintOptions json_options;
+    portable_proto::util::JsonPrintOptions json_options;
     json_options.add_whitespace = true;
     json_options.always_print_primitive_fields = true;
     std::string json_serialized_encrypted_keyset;
-    auto status = google::protobuf::util::MessageToJsonString(
+    auto status = portable_proto::util::MessageToJsonString(
         encrypted_keyset, &json_serialized_encrypted_keyset, json_options);
     EXPECT_TRUE(status.ok()) << status;
     auto reader = std::move(JsonKeysetReader::New(
@@ -200,7 +200,7 @@ TEST_F(KeysetHandleTest, testWriteEncryptedKeyset_Json) {
   auto status = keyset_handle->WriteEncrypted(aead, writer.get());
   EXPECT_TRUE(status.ok()) << status;
   EncryptedKeyset encrypted_keyset;
-  auto json_status = google::protobuf::util::JsonStringToMessage(
+  auto json_status = portable_proto::util::JsonStringToMessage(
       buffer.str(), &encrypted_keyset);
   EXPECT_TRUE(json_status.ok())
       << "Could not parse JSON from string:\n" << buffer.str() << "\n"

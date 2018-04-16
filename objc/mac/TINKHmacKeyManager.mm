@@ -30,7 +30,6 @@
 
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/util/status.h"
-#include "google/protobuf/message.h"
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 

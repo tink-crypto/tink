@@ -24,9 +24,9 @@
 #include "tink/mac.h"
 #include "tink/key_manager.h"
 #include "tink/util/errors.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "google/protobuf/message.h"
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
@@ -49,7 +49,7 @@ class HmacKeyManager : public KeyManager<Mac> {
   // Constructs an instance of HMAC-Mac for the given 'key',
   // which must be HmacKey-proto.
   crypto::tink::util::StatusOr<std::unique_ptr<Mac>>
-  GetPrimitive(const google::protobuf::Message& key) const override;
+  GetPrimitive(const portable_proto::Message& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;

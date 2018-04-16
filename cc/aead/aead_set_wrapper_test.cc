@@ -21,7 +21,6 @@
 #include "tink/util/test_util.h"
 #include "gtest/gtest.h"
 
-namespace util = crypto::tink::util;
 
 using crypto::tink::test::DummyAead;
 using google::crypto::tink::OutputPrefixType;

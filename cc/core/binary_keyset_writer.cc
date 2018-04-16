@@ -20,8 +20,8 @@
 #include <istream>
 #include <sstream>
 
-#include "google/protobuf/message.h"
 #include "tink/util/errors.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -29,14 +29,13 @@
 using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::Keyset;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
 
 namespace {
 
-util::Status WriteProto(const google::protobuf::Message& proto,
+util::Status WriteProto(const portable_proto::Message& proto,
                         std::ostream* destination) {
   std::string serialized_proto;
   (*destination) << proto.SerializeAsString();

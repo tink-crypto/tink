@@ -27,10 +27,10 @@
 #include "tink/subtle/hmac_boringssl.h"
 #include "tink/subtle/random.h"
 #include "tink/util/errors.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
-#include "google/protobuf/message.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/tink.pb.h"
 
@@ -41,9 +41,8 @@ using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
-using google::protobuf::Message;
+using portable_proto::Message;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
@@ -52,12 +51,12 @@ class AesCtrHmacAeadKeyFactory : public KeyFactory {
  public:
   // Generates a new random AesCtrHmacAeadKey, based on the specified
   // 'key_format', which must contain AesCtrHmacAeadKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
-  NewKey(const google::protobuf::Message& key_format) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  NewKey(const portable_proto::Message& key_format) const override;
 
   // Generates a new random AesCtrHmacAeadKey, based on the specified
   // 'serialized_key_format', which must contain AesCtrHmacAeadKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
   NewKey(absl::string_view serialized_key_format) const override;
 
   // Generates a new random AesCtrHmacAeadKey, based on the specified
@@ -68,7 +67,7 @@ class AesCtrHmacAeadKeyFactory : public KeyFactory {
 };
 
 StatusOr<std::unique_ptr<Message>> AesCtrHmacAeadKeyFactory::NewKey(
-    const google::protobuf::Message& key_format) const {
+    const portable_proto::Message& key_format) const {
   std::string key_format_url =
       std::string(AesCtrHmacAeadKeyManager::kKeyTypePrefix)
       + key_format.GetDescriptor()->full_name();

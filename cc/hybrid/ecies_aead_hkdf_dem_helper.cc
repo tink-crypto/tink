@@ -20,6 +20,7 @@
 #include "tink/aead.h"
 #include "tink/key_manager.h"
 #include "tink/registry.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
@@ -33,7 +34,6 @@ using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyTemplate;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
@@ -93,7 +93,7 @@ StatusOr<std::unique_ptr<Aead>> EciesAeadHkdfDemHelper::GetAead(
 }
 
 bool EciesAeadHkdfDemHelper::ReplaceKeyBytes(
-    const std::string& key_bytes, google::protobuf::Message* proto) const {
+    const std::string& key_bytes, portable_proto::Message* proto) const {
   if (dem_key_type_ == AES_GCM_KEY) {
     AesGcmKey* key = reinterpret_cast<AesGcmKey*>(proto);
     key->set_key_value(key_bytes);

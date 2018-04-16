@@ -65,6 +65,7 @@ cc_library(
     hdrs = ["test_util.h"],
     deps = [
         ":enums",
+        ":protobuf_helper",
         ":status",
         ":statusor",
         "//cc:aead",
@@ -84,6 +85,16 @@ cc_library(
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
+    name = "protobuf_helper",
+    hdrs = ["protobuf_helper.h"],
+    deps = [
+        "@com_google_protobuf//:protobuf_lite",
     ],
     strip_include_prefix = "/cc",
     include_prefix = "tink",

@@ -22,9 +22,9 @@
 
 #include "absl/memory/memory.h"
 #include "tink/util/errors.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "google/protobuf/util/json_util.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EncryptedKeyset;
@@ -66,7 +66,7 @@ tinkutil::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
     serialized_keyset = &serialized_keyset_from_stream;
   }
   auto keyset = absl::make_unique<Keyset>();
-  auto status = google::protobuf::util::JsonStringToMessage(
+  auto status = portable_proto::util::JsonStringToMessage(
       *serialized_keyset, keyset.get());
   if (!status.ok()) {
     return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
@@ -87,7 +87,7 @@ JsonKeysetReader::ReadEncrypted() {
     serialized_keyset = &serialized_keyset_from_stream;
   }
   auto enc_keyset = absl::make_unique<EncryptedKeyset>();
-  auto status = google::protobuf::util::JsonStringToMessage(
+  auto status = portable_proto::util::JsonStringToMessage(
       *serialized_keyset, enc_keyset.get());
   if (!status.ok()) {
     return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,

@@ -24,9 +24,9 @@
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"
 #include "tink/util/errors.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "google/protobuf/message.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
@@ -49,7 +49,7 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
   // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
   // for the given 'key', which must be EciesAeadHkdfPrivateKey-proto.
   crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
-  GetPrimitive(const google::protobuf::Message& key) const override;
+  GetPrimitive(const portable_proto::Message& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;

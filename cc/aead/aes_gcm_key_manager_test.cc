@@ -32,7 +32,6 @@ using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

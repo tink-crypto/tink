@@ -20,6 +20,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/key_manager.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -57,7 +58,7 @@ class EciesAeadHkdfDemHelper {
       : dem_key_template_(dem_key_template) {}
 
   bool ReplaceKeyBytes(const std::string& key_bytes,
-                       google::protobuf::Message* key) const;
+                       portable_proto::Message* key) const;
 
   google::crypto::tink::KeyTemplate dem_key_template_;
   DemKeyType dem_key_type_;

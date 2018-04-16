@@ -37,7 +37,6 @@ using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

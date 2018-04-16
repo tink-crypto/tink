@@ -25,7 +25,6 @@ using crypto::tink::test::DummyHybridDecrypt;
 using google::crypto::tink::OutputPrefixType;
 using google::crypto::tink::Keyset;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

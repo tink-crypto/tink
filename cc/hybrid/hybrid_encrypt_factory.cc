@@ -24,7 +24,6 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

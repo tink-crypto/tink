@@ -19,7 +19,6 @@
 #include "openssl/ec.h"
 #include "openssl/err.h"
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

@@ -28,7 +28,6 @@ using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::OutputPrefixType;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

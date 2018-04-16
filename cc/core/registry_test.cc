@@ -26,6 +26,7 @@
 #include "tink/crypto_format.h"
 #include "tink/aead/aead_catalogue.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
@@ -46,10 +47,9 @@ using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
-using google::protobuf::Message;
+using portable_proto::Message;
 using crypto::tink::util::Status;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
@@ -69,12 +69,12 @@ class TestKeyFactory : public KeyFactory {
   TestKeyFactory(const std::string& key_type) : key_type_(key_type) {
   }
 
-  util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+  util::StatusOr<std::unique_ptr<portable_proto::Message>> NewKey(
       const Message& key_format) const override {
     return util::Status::UNKNOWN;
   }
 
-  util::StatusOr<std::unique_ptr<google::protobuf::Message>> NewKey(
+  util::StatusOr<std::unique_ptr<portable_proto::Message>> NewKey(
       absl::string_view serialized_key_format) const override {
     return util::Status::UNKNOWN;
   }

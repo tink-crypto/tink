@@ -26,6 +26,7 @@
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_gcm.pb.h"
@@ -44,7 +45,6 @@ using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::error::Code;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
@@ -95,7 +95,7 @@ std::unique_ptr<KeysetHandle> GetKeysetHandle(const Keyset& keyset) {
 void AddKey(
     const std::string& key_type,
     uint32_t key_id,
-    const google::protobuf::Message& new_key,
+    const portable_proto::Message& new_key,
     google::crypto::tink::OutputPrefixType output_prefix,
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
@@ -112,7 +112,7 @@ void AddKey(
 void AddTinkKey(
     const std::string& key_type,
     uint32_t key_id,
-    const google::protobuf::Message& key,
+    const portable_proto::Message& key,
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset) {
@@ -123,7 +123,7 @@ void AddTinkKey(
 void AddLegacyKey(
     const std::string& key_type,
     uint32_t key_id,
-    const google::protobuf::Message& key,
+    const portable_proto::Message& key,
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset) {
@@ -134,7 +134,7 @@ void AddLegacyKey(
 void AddRawKey(
     const std::string& key_type,
     uint32_t key_id,
-    const google::protobuf::Message& key,
+    const portable_proto::Message& key,
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset) {

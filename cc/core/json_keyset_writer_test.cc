@@ -19,8 +19,8 @@
 #include <ostream>
 #include <sstream>
 
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/test_util.h"
-#include "google/protobuf/util/json_util.h"
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 
@@ -39,7 +39,7 @@ namespace {
 class JsonKeysetWriterTest : public ::testing::Test {
  protected:
   void SetUp() {
-    google::protobuf::util::JsonPrintOptions json_options;
+    portable_proto::util::JsonPrintOptions json_options;
     json_options.add_whitespace = true;
     json_options.always_print_primitive_fields = true;
 
@@ -49,7 +49,7 @@ class JsonKeysetWriterTest : public ::testing::Test {
     AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
                KeyData::SYMMETRIC, &keyset_);
     keyset_.set_primary_key_id(42);
-    auto status = google::protobuf::util::MessageToJsonString(
+    auto status = portable_proto::util::MessageToJsonString(
         keyset_, &json_keyset_, json_options);
     ASSERT_TRUE(status.ok()) << status;
 
@@ -60,7 +60,7 @@ class JsonKeysetWriterTest : public ::testing::Test {
     auto key_info = keyset_info->add_key_info();
     key_info->set_type_url("some type_url");
     key_info->set_key_id(42);
-    status = google::protobuf::util::MessageToJsonString(
+    status = portable_proto::util::MessageToJsonString(
         encrypted_keyset_, &json_encrypted_keyset_, json_options);
     ASSERT_TRUE(status.ok()) << status;
   }

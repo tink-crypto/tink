@@ -21,10 +21,9 @@
 #include <sstream>
 
 #include "tink/util/errors.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "google/protobuf/message.h"
-#include "google/protobuf/util/json_util.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EncryptedKeyset;
@@ -37,13 +36,13 @@ namespace tink {
 
 namespace {
 
-tinkutil::Status WriteProto(const google::protobuf::Message& proto,
+tinkutil::Status WriteProto(const portable_proto::Message& proto,
                         std::ostream* destination) {
-  google::protobuf::util::JsonPrintOptions json_options;
+  portable_proto::util::JsonPrintOptions json_options;
   json_options.add_whitespace = true;
   json_options.always_print_primitive_fields = true;
   std::string serialized_proto;
-  auto status = google::protobuf::util::MessageToJsonString(
+  auto status = portable_proto::util::MessageToJsonString(
       proto, &serialized_proto, json_options);
   if (!status.ok()) {
     return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,

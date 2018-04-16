@@ -24,7 +24,6 @@
 #include "openssl/bn.h"
 #include "openssl/ec.h"
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

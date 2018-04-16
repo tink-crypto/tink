@@ -22,9 +22,9 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/util/errors.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "google/protobuf/message.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -37,12 +37,12 @@ class KeyFactory {
  public:
   // Generates a new random key, based on the specified 'key_format'.
   virtual
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
-  NewKey(const google::protobuf::Message& key_format) const = 0;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  NewKey(const portable_proto::Message& key_format) const = 0;
 
   // Generates a new random key, based on the specified 'serialized_key_format'.
   virtual
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
   NewKey(absl::string_view serialized_key_format) const = 0;
 
   // Generates a new random key, based on the specified 'serialized_key_format',
@@ -72,7 +72,7 @@ class KeyManager {
 
   // Constructs an instance of P for the given 'key'.
   virtual crypto::tink::util::StatusOr<std::unique_ptr<P>>
-  GetPrimitive(const google::protobuf::Message& key) const = 0;
+  GetPrimitive(const portable_proto::Message& key) const = 0;
 
   // Returns the type_url identifying the key type handled by this manager.
   virtual const std::string& get_key_type() const = 0;

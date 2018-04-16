@@ -24,9 +24,9 @@
 #include "tink/aead.h"
 #include "tink/key_manager.h"
 #include "tink/util/errors.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "google/protobuf/message.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/tink.pb.h"
 
@@ -51,7 +51,7 @@ class AesCtrHmacAeadKeyManager : public KeyManager<Aead> {
   // Constructs an instance of AES-CTR-HMAC-AEAD Aead for the given 'key',
   // which must be AesCtrHmacAeadKey-proto.
   crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
-      const google::protobuf::Message& key) const override;
+      const portable_proto::Message& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;

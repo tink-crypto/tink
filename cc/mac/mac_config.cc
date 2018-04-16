@@ -20,7 +20,6 @@
 #include "tink/mac/mac_catalogue.h"
 #include "tink/util/status.h"
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

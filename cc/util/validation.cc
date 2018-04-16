@@ -20,7 +20,6 @@
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

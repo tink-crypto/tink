@@ -32,7 +32,6 @@ using google::crypto::tink::EciesAeadHkdfPublicKey;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

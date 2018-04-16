@@ -28,6 +28,7 @@
 #include "tink/subtle/common_enums.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/common.pb.h"
@@ -64,7 +65,7 @@ std::unique_ptr<KeysetHandle> GetKeysetHandle(
 void AddTinkKey(
     const std::string& key_type,
     uint32_t key_id,
-    const google::protobuf::Message& key,
+    const portable_proto::Message& key,
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset);
@@ -74,7 +75,7 @@ void AddTinkKey(
 void AddLegacyKey(
     const std::string& key_type,
     uint32_t key_id,
-    const google::protobuf::Message& key,
+    const portable_proto::Message& key,
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset);
@@ -84,7 +85,7 @@ void AddLegacyKey(
 void AddRawKey(
     const std::string& key_type,
     uint32_t key_id,
-    const google::protobuf::Message& key,
+    const portable_proto::Message& key,
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset);

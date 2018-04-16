@@ -25,10 +25,10 @@
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
-#include "google/protobuf/message.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
@@ -39,7 +39,7 @@ using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
-using google::protobuf::Message;
+using portable_proto::Message;
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
@@ -52,11 +52,11 @@ class EcdsaPublicKeyFactory : public KeyFactory {
   EcdsaPublicKeyFactory() {}
 
   // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
-  NewKey(const google::protobuf::Message& key_format) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  NewKey(const portable_proto::Message& key_format) const override;
 
   // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::protobuf::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
   NewKey(absl::string_view serialized_key_format) const override;
 
   // Not implemented for public keys.
@@ -65,7 +65,7 @@ class EcdsaPublicKeyFactory : public KeyFactory {
 };
 
 StatusOr<std::unique_ptr<Message>> EcdsaPublicKeyFactory::NewKey(
-    const google::protobuf::Message& key_format) const {
+    const portable_proto::Message& key_format) const {
   return util::Status(util::error::UNIMPLEMENTED,
                       "Operation not supported for public keys, "
                       "please use the EcdsaSignKeyManager.");

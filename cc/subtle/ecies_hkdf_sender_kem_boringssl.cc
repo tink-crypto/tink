@@ -22,7 +22,6 @@
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "openssl/bn.h"
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {

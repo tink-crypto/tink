@@ -29,7 +29,6 @@
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
 
-namespace util = crypto::tink::util;
 
 namespace crypto {
 namespace tink {
