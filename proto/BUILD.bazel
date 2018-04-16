@@ -1,6 +1,9 @@
 # gazelle:ignore
 
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(
+    allow_proto_library_in_java_rules = 0,
+    default_visibility = ["//tools/build_defs:internal_pkg"],
+)
 
 licenses(["notice"])  # Apache 2.0
 
