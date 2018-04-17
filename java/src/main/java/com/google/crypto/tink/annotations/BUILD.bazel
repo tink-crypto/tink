@@ -2,12 +2,12 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 java_library(
     name = "annotations",
     srcs = glob([
         "*.java",
     ]),
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
 )

@@ -2,7 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 filegroup(
     name = "srcs",
@@ -16,7 +16,7 @@ filegroup(
 java_library(
     name = "paymentmethodtoken",
     srcs = [":srcs"],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         "//java",
         "//java/src/main/java/com/google/crypto/tink/annotations",
@@ -31,7 +31,7 @@ java_binary(
     srcs = glob([
         "src/main/**/PaymentMethodTokenRecipientKeyGen.java",
     ]),
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenRecipientKeyGen",
     deps = [
         ":paymentmethodtoken",

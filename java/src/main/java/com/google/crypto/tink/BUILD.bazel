@@ -2,7 +2,7 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 full_protos = [
     "//proto:common_java_proto",
@@ -30,7 +30,7 @@ java_library(
         "PublicKeyVerify.java",
         "StreamingAead.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         "//java/src/main/java/com/google/crypto/tink/annotations",
     ],
@@ -66,7 +66,7 @@ filegroup(
 java_library(
     name = "tink",
     srcs = [":srcs"],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = full_protos + [
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
@@ -94,7 +94,7 @@ filegroup(
 java_library(
     name = "android",
     srcs = [":android_srcs"],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = lite_protos + [
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
@@ -110,7 +110,7 @@ java_library(
     srcs = [
         ":cleartext_keyset_handle_srcs",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = full_protos + [
         ":tink",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
@@ -122,7 +122,7 @@ java_library(
     srcs = [
         ":cleartext_keyset_handle_srcs",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = lite_protos + [
         ":android",
         "@com_google_protobuf_javalite//:protobuf_java_lite",

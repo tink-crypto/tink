@@ -2,7 +2,7 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 java_library(
     name = "cli_util",
@@ -10,7 +10,7 @@ java_library(
     srcs = [
         "java/com/google/crypto/tink/testing/CliUtil.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
         "//java:testonly",
@@ -23,7 +23,7 @@ java_binary(
     srcs = [
         "java/com/google/crypto/tink/testing/AeadCli.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.AeadCli",
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
@@ -38,7 +38,7 @@ java_binary(
     srcs = [
         "java/com/google/crypto/tink/testing/HybridEncryptCli.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.HybridEncryptCli",
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
@@ -53,7 +53,7 @@ java_binary(
     srcs = [
         "java/com/google/crypto/tink/testing/HybridDecryptCli.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.HybridDecryptCli",
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
@@ -68,7 +68,7 @@ java_binary(
     srcs = [
         "java/com/google/crypto/tink/testing/PublicKeySignCli.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.PublicKeySignCli",
     visibility = ["//tools/testing:__subpackages__"],
     deps = [
@@ -83,7 +83,7 @@ java_binary(
     srcs = [
         "java/com/google/crypto/tink/testing/PublicKeyVerifyCli.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.PublicKeyVerifyCli",
     visibility = ["//tools/testing:__subpackages__"],
     deps = [

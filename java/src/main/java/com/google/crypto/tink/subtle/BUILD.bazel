@@ -2,7 +2,7 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 filegroup(
     name = "srcs",
@@ -29,7 +29,7 @@ java_library(
         "SubtleUtil.java",
         "Validators.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         "@com_google_errorprone_error_prone_annotations",
     ],
@@ -51,7 +51,7 @@ java_library(
         "Snuffle.java",
         "SnufflePoly1305.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
@@ -66,7 +66,7 @@ java_library(
     srcs = [
         "AesSiv.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         ":mac",
         ":subtle",
@@ -84,7 +84,7 @@ java_library(
         "AesUtil.java",
         "MacJce.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
@@ -104,7 +104,7 @@ java_library(
         "Ed25519Sign.java",
         "Ed25519Verify.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
         ":x25519",
@@ -126,13 +126,12 @@ java_library(
         "EciesHkdfSenderKem.java",
         "Hkdf.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         ":aead",
         ":subtle",
         ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/annotations",
         "@com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -155,11 +154,10 @@ java_library(
         "StreamingAeadEncryptingStream.java",
         "StreamingAeadSeekableDecryptingChannel.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/annotations",
         "@com_google_code_findbugs_jsr305",
         "@com_google_errorprone_error_prone_annotations",
     ],
@@ -174,7 +172,7 @@ java_library(
         "Field25519.java",
         "X25519.java",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink/annotations",

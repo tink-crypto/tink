@@ -2,7 +2,7 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 filegroup(
     name = "srcs",
@@ -16,7 +16,7 @@ filegroup(
 java_library(
     name = "config",
     srcs = [":srcs"],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         "//java/src/main/java/com/google/crypto/tink/daead",
         "//java/src/main/java/com/google/crypto/tink/hybrid",
@@ -29,7 +29,7 @@ java_library(
 java_library(
     name = "android",
     srcs = [":srcs"],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         "//java/src/main/java/com/google/crypto/tink/daead:android",
         "//java/src/main/java/com/google/crypto/tink/hybrid:android",

@@ -2,7 +2,7 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 filegroup(
     name = "srcs",
@@ -20,7 +20,7 @@ java_library(
     srcs = [
         ":srcs",
     ],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     plugins = [
         ":auto_service_plugin",
     ],

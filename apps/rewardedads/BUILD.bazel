@@ -2,7 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 filegroup(
     name = "srcs",
@@ -16,7 +16,7 @@ filegroup(
 java_library(
     name = "rewardedads",
     srcs = [":srcs"],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = [
         "//java",
         "@com_google_http_client",

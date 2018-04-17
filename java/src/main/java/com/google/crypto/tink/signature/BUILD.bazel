@@ -2,7 +2,7 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("//tools/build_defs:javac.bzl", "JAVACOPTS")
+load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
 
 filegroup(
     name = "srcs",
@@ -32,7 +32,7 @@ lite_protos = [
 java_library(
     name = "signature",
     srcs = [":srcs"],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = full_protos + [
         "//java/src/main/java/com/google/crypto/tink",
         "//java/src/main/java/com/google/crypto/tink/annotations",
@@ -45,7 +45,7 @@ java_library(
 java_library(
     name = "android",
     srcs = [":srcs"],
-    javacopts = JAVACOPTS,
+    javacopts = JAVACOPTS_OSS,
     deps = lite_protos + [
         "//java/src/main/java/com/google/crypto/tink:android",
         "//java/src/main/java/com/google/crypto/tink/annotations",
