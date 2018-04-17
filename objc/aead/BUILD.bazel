@@ -3,13 +3,22 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 licenses(["notice"])  # Apache 2.0
 
 objc_library(
+    name = "aead_key_templates",
+    srcs = ["TINKAeadKeyTemplates.mm"],
+    hdrs = ["TINKAeadKeyTemplates.h"],
+    deps = [
+        "//proto:all_objc_proto",
+    ],
+)
+
+objc_library(
     name = "aead_factory",
     srcs = ["TINKAeadFactory.mm"],
     hdrs = ["TINKAeadFactory.h"],
     deps = [
         ":aead_internal",
-        "//cc/aead:aead_factory",
         "//cc:keyset_handle",
+        "//cc/aead:aead_factory",
         "//cc/util:status",
         "//cc/util:statusor",
         "//objc:aead",
