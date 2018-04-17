@@ -17,7 +17,6 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 
@@ -36,7 +35,6 @@ import java.security.GeneralSecurityException;
  * }
  * }</pre>
  */
-@Alpha
 @Immutable
 public final class Ed25519Verify implements PublicKeyVerify {
 

@@ -17,7 +17,6 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.annotations.Alpha;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -33,7 +32,6 @@ import java.util.Arrays;
  * byte[] signature = signer.sign(message);
  * }</pre>
  */
-@Alpha
 public final class Ed25519Sign implements PublicKeySign {
 
   public static final int SECRET_KEY_LEN = Field25519.FIELD_LEN;

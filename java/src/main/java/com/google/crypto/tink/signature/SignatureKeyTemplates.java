@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
@@ -86,7 +85,6 @@ public final class SignatureKeyTemplates {
    * A {@link KeyTemplate} that generates new instances of {@link
    * com.google.crypto.tink.proto.Ed25519PrivateKey}.
    */
-  @Alpha
   public static final KeyTemplate ED25519 =
       KeyTemplate.newBuilder()
           .setTypeUrl(Ed25519PrivateKeyManager.TYPE_URL)
