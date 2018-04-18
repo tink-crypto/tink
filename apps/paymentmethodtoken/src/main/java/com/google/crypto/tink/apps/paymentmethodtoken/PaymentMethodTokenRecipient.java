@@ -496,7 +496,7 @@ public final class PaymentMethodTokenRecipient {
     JSONObject signedKey = new JSONObject(signedKeyAsString);
     validateSignedKey(signedKey);
     final String key = signedKey.getString(PaymentMethodTokenConstants.JSON_KEY_VALUE_KEY);
-    return Collections.singletonList(
+    SenderVerifyingKeysProvider provider =
         new SenderVerifyingKeysProvider() {
           @Override
           public List<ECPublicKey> get(String protocolVersion) throws GeneralSecurityException {
@@ -506,7 +506,8 @@ public final class PaymentMethodTokenRecipient {
               return Collections.emptyList();
             }
           }
-        });
+        };
+    return Collections.singletonList(provider);
   }
 
   private JSONObject validateIntermediateSigningKey(final JSONObject intermediateSigningKey)
