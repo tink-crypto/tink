@@ -281,9 +281,8 @@ factory offers corresponding `getPrimitive(...)` methods.
 ### Symmetric Key Encryption
 
 Here is how you can obtain and use an [AEAD (Authenticated Encryption with
-Associated
-Data](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive
-to encrypt or decrypt data:
+Associated Data](PRIMITIVES.md#authenticated-encryption-with-associated-data)
+primitive to encrypt or decrypt data:
 
 ```java
     import com.google.crypto.tink.Aead;
@@ -303,6 +302,34 @@ to encrypt or decrypt data:
 
     // ... or to decrypt a ciphertext.
     byte[] decrypted = aead.decrypt(ciphertext, aad);
+```
+
+### Deterministic Symmetric Key Encryption
+
+Here is how you can obtain and use an [DeterministicAEAD (Deterministic
+Authenticated Encryption with Associated
+Data](PRIMITIVES.md#deterministic-authenticated-encryption-with-associated-data)
+primitive to encrypt or decrypt data:
+
+```java
+    import com.google.crypto.tink.DeterministicAead;
+    import com.google.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.daead.DeterministicAeadFactory;
+    import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
+
+    // 1. Generate the key material.
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(
+        DeterministicAeadKeyTemplates.AES256_SIV);
+
+    // 2. Get the primitive.
+    DeterministicAead daead =
+        DeterministicAeadFactory.getPrimitive(keysetHandle);
+
+    // 3. Use the primitive to deterministically encrypt a plaintext,
+    byte[] ciphertext = daead.encryptDeterministically(plaintext, aad);
+
+    // ... or to deterministically decrypt a ciphertext.
+    byte[] decrypted = daead.decryptDeterministically(ciphertext, aad);
 ```
 
 ### Symmetric Key Encryption of Streaming Data
