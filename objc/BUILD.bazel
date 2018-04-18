@@ -20,7 +20,6 @@ PUBLIC_APIS = [
     "TINKHybridEncrypt.h",
     "TINKHybridEncryptFactory.h",
     "TINKKeyManager.h",
-    "TINKKeysetHandle+Cleartext.h",
     "TINKKeysetHandle.h",
     "TINKKeysetReader.h",
     "TINKMac.h",
@@ -61,6 +60,18 @@ objc_library(
     hdrs = PUBLIC_APIS,
     visibility = ["//visibility:public"],
     deps = PUBLIC_API_DEPS,
+)
+
+objc_library(
+    name = "testonly",
+    testonly = 1,
+    hdrs = PUBLIC_APIS + [
+        "TINKKeysetHandle+Cleartext.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = PUBLIC_API_DEPS + [
+        ":cleartext_keyset_handle",
+    ],
 )
 
 # private libraries
@@ -258,8 +269,7 @@ objc_library(
         "Tests/UnitTests/**/*.h",
     ]),
     deps = [
-        ":cleartext_keyset_handle",
-        ":objc",
+        ":testonly",
         "//cc:aead",
         "//cc:crypto_format",
         "//cc:keyset_handle",
