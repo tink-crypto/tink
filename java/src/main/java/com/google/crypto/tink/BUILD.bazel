@@ -31,9 +31,6 @@ java_library(
         "StreamingAead.java",
     ],
     javacopts = JAVACOPTS_OSS,
-    deps = [
-        "//java/src/main/java/com/google/crypto/tink/annotations",
-    ],
 )
 
 # restricted APIs
@@ -71,7 +68,6 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "@com_google_code_findbugs_jsr305",
-        "@com_google_errorprone_error_prone_annotations",
         "@com_google_protobuf//:protobuf_java",
         "@org_json",
     ],
@@ -99,7 +95,6 @@ java_library(
         "//java/src/main/java/com/google/crypto/tink/annotations",
         "//java/src/main/java/com/google/crypto/tink/subtle",
         "@com_google_code_findbugs_jsr305",
-        "@com_google_errorprone_error_prone_annotations",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
         "@org_json",
     ],

@@ -24,7 +24,6 @@ import static com.google.crypto.tink.subtle.Ed25519Constants.SQRTM1;
 import static com.google.crypto.tink.subtle.Field25519.FIELD_LEN;
 import static com.google.crypto.tink.subtle.Field25519.LIMB_CNT;
 
-import com.google.crypto.tink.annotations.Alpha;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -43,7 +42,6 @@ import java.util.Arrays;
  * @see <a href="https://eprint.iacr.org/2008/522.pdf">Hisil H., Wong K.KH., Carter G., Dawson E.
  *     (2008) Twisted Edwards Curves Revisited</a>
  */
-@Alpha
 final class Ed25519 {
 
   public static final int SECRET_KEY_LEN = FIELD_LEN;

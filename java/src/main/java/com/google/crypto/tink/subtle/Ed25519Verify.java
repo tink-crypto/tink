@@ -17,13 +17,12 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 
 /**
  * Ed25519 verifying.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * // get the publicKey from the other party.
@@ -34,8 +33,9 @@ import java.security.GeneralSecurityException;
  *   // all the rest of security exceptions.
  * }
  * }</pre>
+ *
+ * @since 1.1.0
  */
-@Immutable
 public final class Ed25519Verify implements PublicKeyVerify {
 
   public static final int PUBLIC_KEY_LEN = Field25519.FIELD_LEN;

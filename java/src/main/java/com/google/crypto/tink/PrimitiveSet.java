@@ -19,7 +19,6 @@ package com.google.crypto.tink;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.errorprone.annotations.Immutable;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -45,6 +44,8 @@ import java.util.concurrent.ConcurrentMap;
  * set.
  *
  * <p>PrimitiveSet is a public class to allow its use in implementations of custom primitives.
+ *
+ * @since 1.0.0
  */
 public final class PrimitiveSet<P> {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -52,13 +53,11 @@ public final class PrimitiveSet<P> {
    * A single entry in the set. In addition to the actual primitive it holds also some extra
    * information about the primitive.
    */
-  @Immutable(containerOf = {"P"})
   public static final class Entry<P> {
     // The actual primitive.
     private final P primitive;
     // Identifies the primitive within the set.
     // It is the ciphertext prefix of the correponding key.
-    @SuppressWarnings("Immutable")
     private final byte[] identifier;
     // The status of the key represented by the primitive.
     private final KeyStatusType status;

@@ -64,7 +64,6 @@
     <java.version>1.7</java.version>
 
     <!-- library versions -->
-    <error-prone-annotations.version>2.0.19</error-prone-annotations.version>
     <protobuf-lite.version>3.0.1</protobuf-lite.version>
   </properties>
 
@@ -73,12 +72,6 @@
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-lite</artifactId>
       <version>${protobuf-lite.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.errorprone</groupId>
-      <artifactId>error_prone_annotations</artifactId>
-      <version>${error-prone-annotations.version}</version>
     </dependency>
   </dependencies>
 </project>

@@ -30,9 +30,6 @@ java_library(
         "Validators.java",
     ],
     javacopts = JAVACOPTS_OSS,
-    deps = [
-        "@com_google_errorprone_error_prone_annotations",
-    ],
 )
 
 # aead subtle
@@ -107,8 +104,6 @@ java_library(
         ":subtle",
         ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
-        "//java/src/main/java/com/google/crypto/tink/annotations",
-        "@com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -126,11 +121,8 @@ java_library(
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [
-        ":aead",
         ":subtle",
-        ":x25519",
         "//java/src/main/java/com/google/crypto/tink:primitives",
-        "@com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -157,7 +149,6 @@ java_library(
         ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
         "@com_google_code_findbugs_jsr305",
-        "@com_google_errorprone_error_prone_annotations",
     ],
 )
 

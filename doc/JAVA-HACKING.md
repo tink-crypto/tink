@@ -30,7 +30,6 @@ bazel test java/...
 
     *   internal dependencies: none
     *   external dependencies
-        *   com.google.errorprone.annotations.Immutable
         *   com.google.protobuf.ByteString
         *   com.google.protobuf.MessageLite
         *   javax.annotation.concurrent.GuardedBy
@@ -48,7 +47,6 @@ bazel test java/...
         *   com.google.crypto.tink.subtle
         *   com.google.crypto.tink.proto
     *   external dependencies
-        *   com.google.errorprone.annotations.Immutable
         *   com.google.protobuf.ByteString
         *   com.google.protobuf.MessageLite
         *   javax.annotation.concurrent.GuardedBy
@@ -113,7 +111,6 @@ bazel test java/...
         *   com.google.crypto.tink.PublicKeySign
         *   com.google.crypto.tink.PublicKeyVerify
     *   external dependencies
-        *   com.google.errorprone.annotations.Immutable
         *   javax.annotation.concurrent.GuardedBy
     *   API backward-compatibility guarantee: no
 

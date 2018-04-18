@@ -16,16 +16,14 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.errorprone.annotations.Immutable;
-
 /**
  * Immutable Wrapper around a byte array.
  *
  * <p>Wrap a bytearray so it prevents callers from modifying its contents. It does this by making a
  * copy upon initialization, and also makes a copy if the underlying bytes are requested.
+ *
+ * @since 1.0.0
  */
-@Immutable
-@SuppressWarnings("Immutable")
 public final class ImmutableByteArray {
 
   /**

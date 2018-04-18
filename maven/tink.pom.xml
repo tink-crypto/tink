@@ -65,7 +65,6 @@
 
     <aws-java-sdk-core.version>1.11.166</aws-java-sdk-core.version>
     <aws-java-sdk-kms.version>1.11.166</aws-java-sdk-kms.version>
-    <error-prone-annotations.version>2.0.19</error-prone-annotations.version>
     <google-api-client.version>1.22.0</google-api-client.version>
     <google-api-services-cloudkms.version>v1-rev9-1.22.0</google-api-services-cloudkms.version>
     <google-auto-service.version>1.0-rc4</google-auto-service.version>
@@ -147,12 +146,6 @@
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
       <version>${protobuf.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.errorprone</groupId>
-      <artifactId>error_prone_annotations</artifactId>
-      <version>${error-prone-annotations.version}</version>
     </dependency>
 
     <dependency>
