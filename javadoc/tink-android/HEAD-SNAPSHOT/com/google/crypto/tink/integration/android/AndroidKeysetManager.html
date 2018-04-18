@@ -112,13 +112,14 @@ var activeTableTab = "activeTableTab";
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">A wrapper of <a href="../../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink"><code>KeysetManager</code></a> that supports reading/writing <a href="../../../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> to/from private shared preferences on Android.
 
- <p><b>Warning</b>: This class reads and writes to shared preferences, thus is best not to run on
- the UI thread.
+ <h3>Warning</h3>
+
+ <p>This class reads and writes to shared preferences, thus is best not to run on the UI thread.
 
  <p>On Android M or newer, the keysets are encrypted with master keys generated and stored in <a
  href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
 
- <p>Sample usage:
+ <h3>Usage</h3>
 
  <pre><code>
  String masterKeyUri = "android-keystore://my_master_key_id";
@@ -157,6 +158,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 
  <p>All operations that manipulate the keyset would automatically persist the new keyset to
  permanent storage.</div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>1.0.0</dd>
+</dl>
 </li>
 </ul>
 </div>

@@ -1288,7 +1288,9 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#computeSharedSecret-java.security.interfaces.ECPrivateKey-java.security.interfaces.ECPublicKey-">computeSharedSecret(ECPrivateKey, ECPublicKey)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#computeSharedSecret-java.security.interfaces.ECPrivateKey-java.security.spec.ECPoint-">computeSharedSecret(ECPrivateKey, ECPoint)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Generates the DH shared secret using <code>myPrivateKey</code> and <code>publicPoint</code></div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/X25519.html#computeSharedSecret-byte:A-byte:A-">computeSharedSecret(byte[], byte[])</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/X25519.html" title="class in com.google.crypto.tink.subtle">X25519</a></dt>
 <dd>
 <div class="block">Returns the 32-byte shared key (i.e., privateKey·peersPublicValue on the curve).</div>
@@ -1765,8 +1767,8 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridEncrypt.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">EciesAeadHkdfHybridEncrypt</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
-<div class="block">ECIES encryption with HKDF-KEM (key encapsulation mechanism) and AEAD-DEM (data encapsulation
- mechanism).</div>
+<div class="block">ECIES encryption with HKDF-KEM (key encapsulation mechanism) and AEAD-DEM (data
+ encapsulation mechanism).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridEncrypt.html#EciesAeadHkdfHybridEncrypt-java.security.interfaces.ECPublicKey-byte:A-java.lang.String-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper-">EciesAeadHkdfHybridEncrypt(ECPublicKey, byte[], String, EllipticCurves.PointFormatType, EciesAeadHkdfDemHelper)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridEncrypt.html" title="class in com.google.crypto.tink.subtle">EciesAeadHkdfHybridEncrypt</a></dt>
 <dd>&nbsp;</dd>
@@ -7286,7 +7288,7 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">PublicKeyVerify</span></a> - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
-<div class="block">Interface for verification of public key signatures.</div>
+<div class="block">Interface for public key signing.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/signature/PublicKeyVerifyConfig.html" title="class in com.google.crypto.tink.signature"><span class="typeNameLink">PublicKeyVerifyConfig</span></a> - Class in <a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a></dt>
 <dd>
