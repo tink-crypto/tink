@@ -20,7 +20,6 @@ import static com.google.crypto.tink.subtle.Poly1305.MAC_KEY_SIZE_IN_BYTES;
 import static com.google.crypto.tink.subtle.Poly1305.MAC_TAG_SIZE_IN_BYTES;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
@@ -34,7 +33,6 @@ import javax.crypto.AEADBadTagException;
  * <p>This implementation produces ciphertext with the following format: {@code nonce ||
  * actual_ciphertext || tag} and only decrypts the same format.
  */
-@Alpha
 abstract class SnufflePoly1305 implements Aead {
   private final byte[] key;
   private final Snuffle snuffle;

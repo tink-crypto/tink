@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.annotations.Alpha;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -24,22 +23,21 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 
 /**
- * Abstract base class for class of XSalsa20, ChaCha20, XChaCha20 and their variants.
+ * Abstract base class for class of ChaCha20 and its variants.
  *
  * <p>Variants of Snuffle have two differences: the size of the nonce and the block function that
  * produces a key stream block from a key, a nonce, and a counter. Subclasses of this class
- * specifying these two information by overriding {@link #nonceSizeInBytes} and
- * {@link #getKeyStreamBlock}.
+ * specifying these two information by overriding {@link #nonceSizeInBytes} and {@link
+ * #getKeyStreamBlock}.
  *
- * <p>Concrete implementations of this class are meant to be used to construct an
- * {@link com.google.crypto.tink.Aead} with {@link com.google.crypto.tink.subtle.Poly1305}. The
- * base class of these Aead constructions is {@link com.google.crypto.tink.subtle.SnufflePoly1305}.
- * For example, {@link com.google.crypto.tink.subtle.XSalsa20} is a subclass of this class and a
- * concrete Snuffle implementation, and {@link com.google.crypto.tink.subtle.XSalsa20Poly1305} is
- * a subclass of {@link com.google.crypto.tink.subtle.SnufflePoly1305} and a concrete Aead
+ * <p>Concrete implementations of this class are meant to be used to construct an {@link
+ * com.google.crypto.tink.Aead} with {@link com.google.crypto.tink.subtle.Poly1305}. The base class
+ * of these Aead constructions is {@link com.google.crypto.tink.subtle.SnufflePoly1305}. For
+ * example, {@link com.google.crypto.tink.subtle.ChaCha20} is a subclass of this class and a
+ * concrete Snuffle implementation, and {@link com.google.crypto.tink.subtle.ChaCha20Poly1305} is a
+ * subclass of {@link com.google.crypto.tink.subtle.SnufflePoly1305} and a concrete Aead
  * construction.
  */
-@Alpha
 abstract class Snuffle implements IndCpaCipher {
   public static final int BLOCK_SIZE_IN_INTS = 16;
   public static final int BLOCK_SIZE_IN_BYTES = BLOCK_SIZE_IN_INTS * 4;
