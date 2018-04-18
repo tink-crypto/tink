@@ -20,7 +20,11 @@ import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 
-/** HKDF-based KEM (key encapsulation mechanism) for ECIES recipient. */
+/**
+ * HKDF-based KEM (key encapsulation mechanism) for ECIES recipient.
+ *
+ * @since 1.0.0
+ */
 public final class EciesHkdfRecipientKem {
   private ECPrivateKey recipientPrivateKey;
 

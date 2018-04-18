@@ -23,6 +23,8 @@ import java.io.IOException;
 /**
  * A KeysetWriter knows how to write a {@link Keyset} or an {@link EncryptedKeyset} to some storage
  * system.
+ *
+ * @since 1.0.0
  */
 public interface KeysetWriter {
   /** Tries to write a {@link Keyset} to some storage system. */

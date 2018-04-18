@@ -24,6 +24,8 @@ import java.security.GeneralSecurityException;
  *
  * <p>Instances of this interfaces are passed to {@link StreamingAeadDecryptingChannel}. Each
  * instance must be initialized with the header of the ciphertext.
+ *
+ * @since 1.1.0
  */
 public interface StreamSegmentDecrypter {
   void init(ByteBuffer header, byte[] aad) throws GeneralSecurityException;

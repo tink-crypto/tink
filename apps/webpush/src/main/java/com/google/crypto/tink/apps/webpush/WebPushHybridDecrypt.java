@@ -33,6 +33,8 @@ import javax.crypto.spec.SecretKeySpec;
  * A {@link HybridDecrypt} implementation for the hybrid encryption used in <a
  * href="https://tools.ietf.org/html/rfc8291">RFC 8291 - Web Push Message Encryption</a>.
  *
+ * <h3>Ciphertext format</h3>
+ *
  * <p>When used with <a href="https://tools.ietf.org/html/rfc8291#section-4">AES128-GCM content
  * encoding</a>, which is the only content encoding supported in this implementation, the ciphertext
  * is formatted according to RFC 8188 section 2, and looks as follows
@@ -49,7 +51,7 @@ import javax.crypto.spec.SecretKeySpec;
  * of 4096 bytes. {@code aes128-gcm-ciphertext} is the encryption of the message padded with a
  * single byte of value {@code 0x02} (which indicates that this is the last and only record).
  *
- * <p>Sample usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * import com.google.crypto.tink.HybridDecrypt;
@@ -76,6 +78,8 @@ import javax.crypto.spec.SecretKeySpec;
  *      .build();
  * byte[] plaintext = hybridDecrypt.decrypt(ciphertext, null);
  * }</pre>
+ *
+ * @since 1.1.0
  */
 public final class WebPushHybridDecrypt implements HybridDecrypt {
   private final ECPrivateKey recipientPrivateKey;
@@ -118,7 +122,11 @@ public final class WebPushHybridDecrypt implements HybridDecrypt {
     this.recordSize = builder.recordSize;
   }
 
-  /** Builder for WebPushHybridDecrypt. */
+  /**
+   * Builder for {@link WebPushHybridDecrypt}.
+   *
+   * @since 1.1.0
+   */
   public static final class Builder {
     private ECPrivateKey recipientPrivateKey = null;
     private byte[] recipientPublicKey = null;

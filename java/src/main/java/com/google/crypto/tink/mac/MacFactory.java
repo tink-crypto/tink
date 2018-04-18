@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 /**
  * Static methods for obtaining {@link Mac} instances.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
@@ -47,6 +47,8 @@ import java.util.logging.Logger;
  * the primary key. To verify a tag, the primitive uses the prefix of the tag to efficiently select
  * the right key in the set. If the keys associated with the prefix do not validate the tag, the
  * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
+ *
+ * @since 1.0.0
  */
 public final class MacFactory {
   private static final Logger logger = Logger.getLogger(MacFactory.class.getName());

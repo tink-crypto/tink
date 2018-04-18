@@ -41,6 +41,8 @@ import com.google.protobuf.ByteString;
  *     HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM);
  * PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
  * }</pre>
+ *
+ * @since 1.0.0
  */
 public final class HybridKeyTemplates {
   private static final byte[] EMPTY_SALT = new byte[0];

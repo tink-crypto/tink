@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 /**
  * Static methods for obtaining {@link HybridDecrypt} instances.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
@@ -43,6 +43,8 @@ import java.util.logging.Logger;
  * primitive uses the prefix of the ciphertext to efficiently select the right key in the set. If
  * the keys associated with the prefix do not work, the primitive tries all keys with {@link
  * com.google.crypto.tink.proto.OutputPrefixType#RAW}.
+ *
+ * @since 1.0.0
  */
 public final class HybridDecryptFactory {
   private static final Logger logger = Logger.getLogger(HybridDecryptFactory.class.getName());

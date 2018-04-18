@@ -24,6 +24,8 @@ import java.security.GeneralSecurityException;
  *
  * <p>Said primitives do not provide authentication, thus should not be used directly, but only to
  * construct safer primitives such as {@link com.google.crypto.tink.Aead}.
+ *
+ * @since 1.0.0
  */
 public interface IndCpaCipher {
   /**

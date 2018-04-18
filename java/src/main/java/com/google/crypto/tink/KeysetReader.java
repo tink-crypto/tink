@@ -22,6 +22,8 @@ import java.io.IOException;
 
 /**
  * A KeysetReader knows how to read a {@link Keyset} or an {@link EncryptedKeyset} from some source.
+ *
+ * @since 1.0.0
  */
 public interface KeysetReader {
   /**

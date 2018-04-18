@@ -27,13 +27,15 @@ import java.security.GeneralSecurityException;
  * symmetric key only, and the final ciphertext consists of the symmetric ciphertext and the
  * encrypted symmetric key.
  *
- * <p><b>WARNING</b>
+ * <h3>WARNING</h3>
  *
  * <p>Hybrid Encryption does not provide authenticity, that is the recipient of an encrypted message
  * does not know the identity of the sender. Similar to general public-key encryption schemes the
  * security goal of Hybrid Encryption is to provide privacy only. In other words, Hybrid Encryption
  * is secure if and only if the recipient can accept anonymous messages or can rely on other
  * mechanisms to authenticate the sender.
+ *
+ * <h3>Security guarantees</h3>
  *
  * <p>The functionality of Hybrid Encryption is represented as a pair of primitives (interfaces):
  * {@link HybridEncrypt} for encryption of data, and {@link HybridDecrypt} for decryption.
@@ -56,6 +58,8 @@ import java.security.GeneralSecurityException;
  *   <li>use {@code contextInfo} as "CtxInfo"-input for HKDF (if the implementation uses HKDF as key
  *       derivation function, cf. https://tools.ietf.org/html/rfc5869).
  * </ul>
+ *
+ * @since 1.0.0
  */
 public interface HybridEncrypt {
   /**

@@ -31,6 +31,8 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * <p>To meet the security requirements of {@link DeterministicAead}, this cipher can only be used
  * with 256-bit keys.
+ *
+ * @since 1.1.0
  */
 public final class AesSiv implements DeterministicAead {
   // Do not support 128-bit keys because it might not provide 128-bit security level in

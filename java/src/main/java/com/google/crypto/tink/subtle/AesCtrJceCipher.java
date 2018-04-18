@@ -24,8 +24,12 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * The primitive implements AES counter mode with random IVs, using JCE.
  *
+ * <h3>Warning</h3>
+ *
  * <p>It is safe against chosen-plaintext attacks, but does not provide ciphertext integrity, thus
  * is unsafe against chosen-ciphertext attacks.
+ *
+ * @since 1.0.0
  */
 public final class AesCtrJceCipher implements IndCpaCipher {
   private static final String KEY_ALGORITHM = "AES";

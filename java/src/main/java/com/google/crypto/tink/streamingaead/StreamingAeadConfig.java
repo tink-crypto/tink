@@ -33,6 +33,8 @@ import java.security.GeneralSecurityException;
  *
  * <p>For more information on how to obtain and use instances of StreamingAead, see {@link
  * StreamingAeadFactory}.
+ *
+ * @since 1.1.0
  */
 public final class StreamingAeadConfig {
   public static final String AES_CTR_HMAC_STREAMINGAEAD_TYPE_URL =

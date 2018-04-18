@@ -23,19 +23,21 @@ import java.security.GeneralSecurityException;
 /**
  * Static methods for handling of Tink configurations.
  *
- * <p>Configurations, i.e., a collection of key types and their corresponding key managers
- * supported by a specific run-time environment enable control of Tink setup via
- * JSON-formatted config files that determine which key types are supported, and provide
- * a mechanism for deprecation of obsolete/outdated cryptographic schemes (see
- * <a href="https://github.com/google/tink/blob/master/proto/config.proto">config.proto</a>
- * for more info).
+ * <p>Configurations, i.e., a collection of key types and their corresponding key managers supported
+ * by a specific run-time environment enable control of Tink setup via JSON-formatted config files
+ * that determine which key types are supported, and provide a mechanism for deprecation of
+ * obsolete/outdated cryptographic schemes (see <a
+ * href="https://github.com/google/tink/blob/master/proto/config.proto">config.proto</a> for more
+ * info).
  *
- * <p><b>Usage:</b>
+ * <h3>Usage</h3>
  *
  * <pre>{@code
- * RegistryConfig registryConfig = ...; // AeadConfig.TINK_1_0_0
+ * RegistryConfig registryConfig = ...; // AeadConfig.TINK_1_1_0
  * Config.register(registryConfig);
  * }</pre>
+ *
+ * @since 1.0.0
  */
 public final class Config {
   /** Returns a {@link KeyTypeEntry} for Tink key types with the specified properties. */

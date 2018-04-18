@@ -27,6 +27,12 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * An implementation of CMAC following <a href="https://tools.ietf.org/html/rfc4493">RFC 4493</a>.
+ *
+ * <h3>Warning</h3>
+ *
+ * <p>Do not use this API or any other APIs including fields and methods marked with the @Alpha
+ * annotation. They can be modified in any way, or even removed, at any time. They are in the
+ * package, but not for official, production release, but only for testing.
  */
 @Alpha
 public final class AesCmac implements Mac {

@@ -30,6 +30,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * <p>This class consists exclusively of static methods that register and load {@link
  * KmsClient}-objects.
+ *
+ * @since 1.0.0
  */
 public final class KmsClients {
   // The list of KmsClients loaded automatically using ServiceLoader.

@@ -20,7 +20,11 @@ import com.google.crypto.tink.proto.Keyset.Key;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
-/** Constants and convenience methods that deal with crypto format. */
+/**
+ * Constants and convenience methods that deal with crypto format.
+ *
+ * @since 1.0.0
+ */
 public final class CryptoFormat {
 
   /** Prefix size of Tink and Legacy key types. */

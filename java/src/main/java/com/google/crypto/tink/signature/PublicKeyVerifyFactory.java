@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 /**
  * Static methods for obtaining {@link PublicKeyVerify} instances.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
@@ -44,6 +44,8 @@ import java.util.logging.Logger;
  * the primitive uses the prefix of the signature to efficiently select the right key in the set. If
  * there is no key associated with the prefix or if the keys associated with the prefix do not work,
  * the primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
+ *
+ * @since 1.0.0
  */
 public final class PublicKeyVerifyFactory {
   private static final Logger logger = Logger.getLogger(PublicKeyVerifyFactory.class.getName());

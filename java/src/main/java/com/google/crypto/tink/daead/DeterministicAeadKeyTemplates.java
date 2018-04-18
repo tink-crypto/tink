@@ -30,6 +30,8 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  *   KeysetHandle handle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV);
  *   DeterministicAead daead = DeterministicAeadFactory.getPrimitive(handle);
  * </pre>
+ *
+ * @since 1.1.0
  */
 public final class DeterministicAeadKeyTemplates {
   /** A {@code KeyTemplate} that generates new instances of {@code AesSivKey} with a 64-byte key. */

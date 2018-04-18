@@ -42,6 +42,8 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
  * Aead aead = AeadFactory.getPrimitive(handle);
  * }</pre>
+ *
+ * @since 1.0.0
  */
 public final class AeadKeyTemplates {
   /**
@@ -127,6 +129,8 @@ public final class AeadKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link
    * com.google.crypto.tink.proto.ChaCha20Poly1305Key}.
+   *
+   * @since 1.1.0
    */
   public static final KeyTemplate CHACHA20_POLY1305 =
       KeyTemplate.newBuilder()

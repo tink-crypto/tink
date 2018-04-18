@@ -22,7 +22,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-/** Static methods for reading cleartext keysets that don't contain any secret key material. */
+/**
+ * Static methods for reading cleartext keysets that don't contain any secret key material.
+ *
+ * @since 1.0.0
+ */
 public final class NoSecretKeysetHandle {
   /**
    * @return a new keyset handle from {@code serialized} which is a serialized {@link Keyset}.

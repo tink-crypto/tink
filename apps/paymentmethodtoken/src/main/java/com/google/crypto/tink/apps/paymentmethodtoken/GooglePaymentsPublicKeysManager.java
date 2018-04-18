@@ -37,6 +37,8 @@ import java.util.concurrent.Executors;
  *
  * <p>When initializing your server, we also recommend that you call {@link #refreshInBackground()}
  * to proactively fetch the keys.
+ *
+ * @since 1.0.0
  */
 public class GooglePaymentsPublicKeysManager {
   /** Default HTTP transport used by this class. */
@@ -100,7 +102,11 @@ public class GooglePaymentsPublicKeysManager {
     downloader.refreshInBackground();
   }
 
-  /** Builder for {@link GooglePaymentsPublicKeysManager}. */
+  /**
+   * Builder for {@link GooglePaymentsPublicKeysManager}.
+   *
+   * @since 1.0.0
+   */
   public static class Builder {
     private HttpTransport httpTransport = DEFAULT_HTTP_TRANSPORT;
     private String keysUrl = KEYS_URL_PRODUCTION;

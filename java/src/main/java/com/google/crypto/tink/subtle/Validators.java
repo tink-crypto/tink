@@ -22,7 +22,11 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.regex.Pattern;
 
-/** Validation helper methods. */
+/**
+ * Validation helper methods.
+ *
+ * @since 1.0.0
+ */
 public final class Validators {
   private static final String TYPE_URL_PREFIX = "type.googleapis.com/";
   /** @throws GeneralSecurityException if {@code typeUrl} is in invalid format. */

@@ -27,6 +27,8 @@ import javax.annotation.concurrent.GuardedBy;
  * again read the bytes from the beginning. Once the rewinding feature is not needed any more, it
  * can be disabled via {@link #disableRewinding}: this frees the cache memory and forwadrds the
  * subsequent {@link #read}-calls directly to the wrapped channel.
+ *
+ * @since 1.1.0
  */
 public final class RewindableReadableByteChannel implements ReadableByteChannel {
   @GuardedBy("this")

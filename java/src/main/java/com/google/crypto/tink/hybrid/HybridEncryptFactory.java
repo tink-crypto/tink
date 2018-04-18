@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 /**
  * Static methods for obtaining {@link HybridEncrypt} instances.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
@@ -40,6 +40,8 @@ import java.util.logging.Logger;
  * <p>The returned primitive works with a keyset (rather than a single key). To encrypt a plaintext,
  * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix associated
  * with the primary key.
+ *
+ * @since 1.0.0
  */
 public final class HybridEncryptFactory {
   private static final Logger logger = Logger.getLogger(HybridEncryptFactory.class.getName());

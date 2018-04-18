@@ -31,6 +31,8 @@ import javax.crypto.Mac;
  *
  * <p>There's no expected reason to directly import this for users of Tink, but it might be needed
  * to implement it (say, if someone wants a new type of engine).
+ *
+ * @since 1.0.0
  */
 public interface EngineWrapper<T> {
 

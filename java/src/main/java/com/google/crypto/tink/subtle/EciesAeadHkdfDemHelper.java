@@ -19,7 +19,11 @@ package com.google.crypto.tink.subtle;
 import com.google.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
 
-/** A helper for DEM (data encapsulation mechanism) of ECIES-AEAD-HKDF. */
+/**
+ * A helper for DEM (data encapsulation mechanism) of ECIES-AEAD-HKDF.
+ *
+ * @since 1.0.0
+ */
 public interface EciesAeadHkdfDemHelper {
   /** @return the size of the DEM-key in bytes. */
   public int getSymmetricKeySizeInBytes();

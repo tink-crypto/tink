@@ -37,7 +37,11 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import javax.crypto.KeyAgreement;
 
-/** Utility functions and enums for elliptic curve crypto, used in ECDSA and ECDH. */
+/**
+ * Utility functions and enums for elliptic curve crypto, used in ECDSA and ECDH.
+ *
+ * @since 1.0.0
+ */
 public final class EllipticCurves {
 
   /** Point formats. */
@@ -136,11 +140,13 @@ public final class EllipticCurves {
   /**
    * Checks that the point of the public key is on the curve of the public key.
    *
+   * <h3>Warning</h3>
+   *
+   * <p>Please use {@link #validatePublicKey} if you want to validate a public key to avoid invalid
+   * curve attacks or small subgroup attacks in ECDH.
+   *
    * <p>This is a sanity check, because the curve of the public key might be under control of the
    * adversary.
-   *
-   * <p><b>Warning:</b> Please use {@link #validatePublicKey} if you want to validate a public key
-   * to avoid invalid curve attacks or small subgroup attacks in ECDH.
    *
    * @param key must be a key defined over a curve using a prime order field.
    * @throws GeneralSecurityException if the key is not valid.
@@ -152,6 +158,8 @@ public final class EllipticCurves {
   /**
    * Checks that the public key's params is the same as the private key's params, and the public key
    * is a valid point on the private key's curve.
+   *
+   * @since 1.1.0
    */
   public static void validatePublicKey(ECPublicKey publicKey, ECPrivateKey privateKey)
       throws GeneralSecurityException {
@@ -397,6 +405,7 @@ public final class EllipticCurves {
    * @return the point
    * @throws GeneralSecurityException if the encoded point is invalid or if the curve or format are
    *     not supported.
+   * @since 1.1.0
    */
   public static ECPoint pointDecode(CurveType curveType, PointFormatType format, byte[] encoded)
       throws GeneralSecurityException {
@@ -413,6 +422,7 @@ public final class EllipticCurves {
    * @return the point
    * @throws GeneralSecurityException if the encoded point is invalid or if the curve or format are
    *     not supported.
+   * @since 1.1.0
    */
   public static ECPoint pointDecode(EllipticCurve curve, PointFormatType format, byte[] encoded)
       throws GeneralSecurityException {
@@ -468,6 +478,7 @@ public final class EllipticCurves {
    * @return the encoded key exchange
    * @throws GeneralSecurityException if the point is not on the curve or if the format is not
    *     supported.
+   * @since 1.1.0
    */
   public static byte[] pointEncode(CurveType curveType, PointFormatType format, ECPoint point)
       throws GeneralSecurityException {
@@ -483,6 +494,7 @@ public final class EllipticCurves {
    * @return the encoded key exchange
    * @throws GeneralSecurityException if the point is not on the curve or if the format is not
    *     supported.
+   * @since 1.1.0
    */
   public static byte[] pointEncode(EllipticCurve curve, PointFormatType format, ECPoint point)
       throws GeneralSecurityException {
@@ -640,7 +652,11 @@ public final class EllipticCurves {
     return computeSharedSecret(myPrivateKey, peerPublicKey.getW());
   }
 
-  /* Generates the DH shared secret using {@code myPrivateKey} and {@code publicPoint} */
+  /**
+   * Generates the DH shared secret using {@code myPrivateKey} and {@code publicPoint}
+   *
+   * @since 1.1.0
+   */
   public static byte[] computeSharedSecret(ECPrivateKey myPrivateKey, ECPoint publicPoint)
       throws GeneralSecurityException {
     checkPointOnCurve(publicPoint, myPrivateKey.getParams().getCurve());

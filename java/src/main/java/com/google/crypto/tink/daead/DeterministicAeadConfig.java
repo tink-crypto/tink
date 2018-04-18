@@ -33,6 +33,8 @@ import java.security.GeneralSecurityException;
  *
  * <p>For more information on how to obtain and use instances of DeterministicAead, see {@link
  * DeterministicAeadFactory}.
+ *
+ * @since 1.1.0
  */
 public final class DeterministicAeadConfig {
   public static final String AES_SIV_TYPE_URL = AesSivKeyManager.TYPE_URL;

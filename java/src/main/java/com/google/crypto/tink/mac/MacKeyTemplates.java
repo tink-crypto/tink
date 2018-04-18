@@ -34,6 +34,8 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
  * Mac mac = MacFactory.getPrimitive(handle);
  * }</pre>
+ *
+ * @since 1.0.0
  */
 public final class MacKeyTemplates {
   /**

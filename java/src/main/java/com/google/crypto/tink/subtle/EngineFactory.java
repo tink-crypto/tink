@@ -35,7 +35,10 @@ import javax.crypto.Mac;
  *
  * <p>This class contains a lot of static factories and static functions returning factories: these
  * allow customization and hide the typing complexity in this class. To use this class, import it,
- * and replace your `Cipher.getInstance(...` with `EngineFactory.CIPHER.getInstance(...`.
+ * and replace your <code>Cipher.getInstance(...)</code> with <code>
+ * EngineFactory.CIPHER.getInstance(...)</code>.
+ *
+ * @since 1.0.0
  */
 public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_ENGINE> {
   private static final Logger logger = Logger.getLogger(EngineFactory.class.getName());

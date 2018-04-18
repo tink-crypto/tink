@@ -31,6 +31,8 @@ import javax.crypto.spec.GCMParameterSpec;
  * href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
  *
  * <p>This class requires Android M (API level 23) or newer.
+ *
+ * @since 1.0.0
  */
 @TargetApi(VERSION_CODES.M)
 public final class AndroidKeystoreAesGcm implements Aead {

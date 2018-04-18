@@ -27,6 +27,8 @@ import java.io.IOException;
 
 /**
  * A {@link KeysetReader} that can read keysets from private shared preferences on Android.
+ *
+ * @since 1.0.0
  */
 public final class SharedPrefKeysetReader implements KeysetReader {
   private final SharedPreferences sharedPreferences;

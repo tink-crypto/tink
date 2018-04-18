@@ -42,6 +42,8 @@ import org.json.JSONObject;
  * A {@link KeysetReader} that can read from source source cleartext or encrypted keysets in <a
  * href="https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/util/JsonFormat">proto
  * JSON format</a>.
+ *
+ * @since 1.0.0
  */
 public final class JsonKeysetReader implements KeysetReader {
   private static final Charset UTF_8 = Charset.forName("UTF-8");

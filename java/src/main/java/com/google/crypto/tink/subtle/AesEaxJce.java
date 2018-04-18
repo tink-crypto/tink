@@ -44,6 +44,8 @@ import javax.crypto.spec.SecretKeySpec;
  * <p>Plans: The current implementation is slow since it uses JCA and only assumes that the
  * encryption modes "AES/ECB/NOPADDING" and "AES/CTR/NOPADDING" are implemented. Our plan is to
  * implement a native version of EAX.
+ *
+ * @since 1.0.0
  */
 public final class AesEaxJce implements Aead {
   static final int BLOCK_SIZE_IN_BYTES = 16;

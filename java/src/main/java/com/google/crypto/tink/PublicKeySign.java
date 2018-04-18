@@ -23,12 +23,15 @@ import java.security.GeneralSecurityException;
  *
  * <p>Digital Signatures provide functionality of signing data and verification of the signatures.
  *
+ * <h3>Security guarantees</h3>
+ *
  * <p>The functionality of Digital Signatures is represented a pair of primitives (interfaces)
  * {@link PublicKeySign} for signing of data, and {@link PublicKeyVerify} for verification of
- * signatures.
+ * signatures. Implementations of these interfaces are secure against adaptive chosen-message
+ * attacks. Signing data ensures the authenticity and the integrity of that data, but not its
+ * secrecy.
  *
- * <p>Implementations of these interfaces are secure against adaptive chosen-message attacks.
- * Signing data ensures the authenticity and the integrity of that data, but not its secrecy.
+ * @since 1.0.0
  */
 public interface PublicKeySign {
   /**

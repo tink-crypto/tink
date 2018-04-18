@@ -29,6 +29,8 @@ import java.security.GeneralSecurityException;
  *
  * <p>The template parameter {@code P} denotes the primitive corresponding to the {@link KeyManager}
  * handled by this catalogue.
+ *
+ * @since 1.0.0
  */
 public interface Catalogue<P> {
   /**

@@ -23,7 +23,7 @@ import java.util.Arrays;
 /**
  * Ed25519 signing.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
@@ -31,6 +31,8 @@ import java.util.Arrays;
  * Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
  * byte[] signature = signer.sign(message);
  * }</pre>
+ *
+ * @since 1.1.0
  */
 public final class Ed25519Sign implements PublicKeySign {
 

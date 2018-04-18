@@ -29,7 +29,7 @@ import java.security.GeneralSecurityException;
 /**
  * Static methods for obtaining {@link PublicKeySign} instances.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
@@ -41,6 +41,8 @@ import java.security.GeneralSecurityException;
  * <p>The returned primitive works with a keyset (rather than a single key). To sign a message, it
  * uses the primary key in the keyset, and prepends to the signature a certain prefix associated
  * with the primary key.
+ *
+ * @since 1.0.0
  */
 public final class PublicKeySignFactory {
   /**

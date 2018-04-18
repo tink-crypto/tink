@@ -20,7 +20,11 @@ import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
-/** Helper methods that deal with byte arrays. */
+/**
+ * Helper methods that deal with byte arrays.
+ *
+ * @since 1.0.0
+ */
 public final class Bytes {
   /**
    * Best effort fix-timing array comparison.

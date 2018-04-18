@@ -35,6 +35,7 @@ import java.security.GeneralSecurityException;
  *
  * @see <a href="https://developers.google.com/pay/api/payment-data-cryptography">Google Payment
  *     Method Token standard</a>
+ * @since 1.1.0
  */
 public interface PaymentMethodTokenRecipientKem {
   /**

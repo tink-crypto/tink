@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 /**
  * Static methods for obtaining {@link StreamingAead} instances.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
@@ -48,6 +48,8 @@ import java.util.logging.Logger;
  * it uses the primary key in the keyset. To decrypt, the primitive tries the enabled keys from the
  * keyset to select the right key for decryption. All keys in a keyset of StreamingAead have type
  * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
+ *
+ * @since 1.1.0
  */
 public final class StreamingAeadFactory {
   private static final Logger logger = Logger.getLogger(StreamingAeadFactory.class.getName());

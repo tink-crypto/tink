@@ -64,6 +64,8 @@ import java.util.logging.Logger;
  * KeysetHandle keysetHandle = ...;
  * Aead aead = AeadFactory.getPrimitive(keysetHandle);
  * }</pre>
+ *
+ * @since 1.0.0
  */
 public final class Registry {
   private static final Logger logger = Logger.getLogger(Registry.class.getName());

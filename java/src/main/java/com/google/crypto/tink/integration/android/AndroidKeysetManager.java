@@ -35,13 +35,14 @@ import javax.annotation.concurrent.GuardedBy;
  * A wrapper of {@link KeysetManager} that supports reading/writing {@link
  * com.google.crypto.tink.proto.Keyset} to/from private shared preferences on Android.
  *
- * <p><b>Warning</b>: This class reads and writes to shared preferences, thus is best not to run on
- * the UI thread.
+ * <h3>Warning</h3>
+ *
+ * <p>This class reads and writes to shared preferences, thus is best not to run on the UI thread.
  *
  * <p>On Android M or newer, the keysets are encrypted with master keys generated and stored in <a
  * href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
  *
- * <p>Sample usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * String masterKeyUri = "android-keystore://my_master_key_id";
@@ -84,6 +85,8 @@ import javax.annotation.concurrent.GuardedBy;
  *
  * <p>All operations that manipulate the keyset would automatically persist the new keyset to
  * permanent storage.
+ *
+ * @since 1.0.0
  */
 public final class AndroidKeysetManager {
   private static final String TAG = AndroidKeysetManager.class.getName();

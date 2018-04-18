@@ -37,6 +37,8 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * KeysetHandle handle = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB);
  * StreamingAead ags = StreamingAeadFactory.getPrimitive(handle);
  * }</pre>
+ *
+ * @since 1.1.0
  */
 public final class StreamingAeadKeyTemplates {
   /**

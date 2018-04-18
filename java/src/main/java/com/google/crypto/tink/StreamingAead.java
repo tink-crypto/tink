@@ -33,13 +33,13 @@ import java.security.GeneralSecurityException;
  * authentication. The underlying encryption modes are selected so that partial plaintext can be
  * obtained fast by decrypting and authenticating just a part of the ciphertext.
  *
- * <h1>Security</h1>
+ * <h3>Security guarantees</h3>
  *
  * <p>Instances of StreamingAead must follow the OAE2 definition as proposed in the paper "Online
  * Authenticated-Encryption and its Nonce-Reuse Misuse-Resistance" by Hoang, Reyhanitabar, Rogaway
  * and Vizár https://eprint.iacr.org/2015/189.pdf
  *
- * <h1>Restrictions</h1>
+ * <h3>Restrictions</h3>
  *
  * <p>Encryption must be done in one session. There is no possibility to modify an existing
  * ciphertext or append to it (other than reencrypt the whole file again). One reason for this
@@ -49,7 +49,7 @@ import java.security.GeneralSecurityException;
  * against roll-back attacks: an attacker can always try to restore a previous version of the file
  * without detection.
  *
- * <h1>Blocking vs non-blocking I/O</h1>
+ * <h3>Blocking vs non-blocking I/O</h3>
  *
  * <p>A channel can be in a blocking mode (i.e. always waits until the requested number of bytes
  * have been processed) or non-blocking mode (i.e. I/O operation will never block and may transfer
@@ -67,7 +67,7 @@ import java.security.GeneralSecurityException;
  * possible that for example a call attempting to read() returns no plaintext at all even if partial
  * ciphertext was read from the underlying channel.
  *
- * <h1>Sample encryption</h1>
+ * <h3>Sample encryption</h3>
  *
  * <pre>{@code
  * StreamingAead s = ...
@@ -82,7 +82,7 @@ import java.security.GeneralSecurityException;
  * encryptingChannel.close();
  * }</pre>
  *
- * <h1>Sample full decryption</h1>
+ * <h3>Sample full decryption</h3>
  *
  * <pre>{@code
  * StreamingAead s = ...
@@ -105,6 +105,8 @@ import java.security.GeneralSecurityException;
  *   }
  * }
  * }</pre>
+ *
+ * @since 1.1.0
  */
 public interface StreamingAead {
 

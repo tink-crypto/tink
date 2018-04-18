@@ -23,8 +23,10 @@ import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 
 /**
- * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and AEAD-DEM (data encapsulation
- * mechanism).
+ * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and AEAD-DEM (data
+ * encapsulation mechanism).
+ *
+ * @since 1.0.0
  */
 public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
   private static final byte[] EMPTY_AAD = new byte[0];

@@ -25,7 +25,11 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Hex;
 import java.io.IOException;
 
-/** A {@link KeysetWriter} that can write keysets to private shared preferences on Android. */
+/**
+ * A {@link KeysetWriter} that can write keysets to private shared preferences on Android.
+ *
+ * @since 1.0.0
+ */
 public final class SharedPrefKeysetWriter implements KeysetWriter {
   private final SharedPreferences.Editor editor;
   private final String keysetName;

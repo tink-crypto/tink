@@ -41,6 +41,8 @@ import javax.crypto.spec.SecretKeySpec;
  * <p>segment_i is the i-th segment of the ciphertext. The size of segment_1 .. segment_{k-1} is
  * ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header and other information
  * of size firstSegmentOffset align with ciphertextSegmentSize.
+ *
+ * @since 1.1.0
  */
 public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   // TODO(bleichen): Some things that are not yet decided:

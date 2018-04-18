@@ -32,6 +32,8 @@ import java.security.GeneralSecurityException;
  * <pre>{@code
  * Config.register(TinkConfig.TINK_1_1_0);
  * }</pre>
+ *
+ * @since 1.0.0
  */
 public final class TinkConfig {
   public static final RegistryConfig TINK_1_0_0 =
@@ -42,6 +44,7 @@ public final class TinkConfig {
           .setConfigName("TINK_1_0_0")
           .build();
 
+  /** @since 1.1.0 */
   public static final RegistryConfig TINK_1_1_0 =
       RegistryConfig.newBuilder()
           .mergeFrom(

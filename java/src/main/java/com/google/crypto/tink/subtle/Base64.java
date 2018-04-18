@@ -27,6 +27,8 @@ import java.nio.charset.Charset;
  *
  * <p>This is a copy of android.util.Base64, with minor modifications to to fix style and ErrorProne
  * errors.
+ *
+ * @since 1.0.0
  */
 public final class Base64 {
   private static final Charset UTF_8 = Charset.forName("UTF-8");

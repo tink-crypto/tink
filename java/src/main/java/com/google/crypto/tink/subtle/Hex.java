@@ -16,7 +16,11 @@
 
 package com.google.crypto.tink.subtle;
 
-/** Helper methods for encode/decode hex strings. */
+/**
+ * Helper methods for encode/decode hex strings.
+ *
+ * @since 1.0.0
+ */
 public final class Hex {
   /** Encodes a byte array to hex. */
   public static String encode(final byte[] bytes) {

@@ -26,6 +26,8 @@ import java.util.Arrays;
 /**
  * ECIES encryption with HKDF-KEM (key encapsulation mechanism) and AEAD-DEM (data encapsulation
  * mechanism).
+ *
+ * @since 1.0.0
  */
 public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   private static final byte[] EMPTY_AAD = new byte[0];

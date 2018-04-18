@@ -30,6 +30,8 @@ import org.json.JSONObject;
 /**
  * Creates a signed certificate with the intermediate signing keys used by the sender in certain
  * protocol versions.
+ *
+ * @since 1.1.0
  */
 public class SenderIntermediateCertFactory {
   private final List<PublicKeySign> signers;
@@ -69,7 +71,11 @@ public class SenderIntermediateCertFactory {
     this.expiration = expiration;
   }
 
-  /** Builder for {@link SenderIntermediateCertFactory}. */
+  /**
+   * Builder for {@link SenderIntermediateCertFactory}.
+   *
+   * @since 1.1.0
+   */
   public static class Builder {
     private List<ECPrivateKey> senderSigningKeys = new ArrayList<>();
     private String intermediateSigningKey;

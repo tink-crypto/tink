@@ -24,10 +24,12 @@ import java.security.GeneralSecurityException;
 /**
  * Static methods for reading or writing cleartext keysets.
  *
- * <p><b>Warning</b>
+ * <h3>WARNING</h3>
  *
  * <p>Reading or writing cleartext keysets is a bad practice, usage of this API should be
  * restricted. Users can read encrypted keysets using {@link KeysetHandle#read}.
+ *
+ * @since 1.0.0
  */
 public final class CleartextKeysetHandle {
   /**

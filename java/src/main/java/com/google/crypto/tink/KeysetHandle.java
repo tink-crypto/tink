@@ -33,6 +33,8 @@ import java.security.GeneralSecurityException;
  * <p>This class allows reading and writing encrypted keysets. Users that want to read or write can
  * use the restricted API {@link CleartextKeysetHandle}. Users can also load keysets that don't
  * contain any secret key material with {@link NoSecretKeysetHandle}.
+ *
+ * @since 1.0.0
  */
 public final class KeysetHandle {
   private Keyset keyset;

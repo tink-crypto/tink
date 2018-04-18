@@ -35,6 +35,8 @@ import java.security.GeneralSecurityException;
  *
  * <p>For more information on how to obtain and use instances of PublicKeySign or PublicKeyVerify,
  * see {@link PublicKeySignFactory} or {@link PublicKeyVerifyFactory}.
+ *
+ * @since 1.0.0
  */
 public final class SignatureConfig {
   public static final String ECDSA_PUBLIC_KEY_TYPE_URL = EcdsaVerifyKeyManager.TYPE_URL;
@@ -61,7 +63,7 @@ public final class SignatureConfig {
                   PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "Ed25519PublicKey", 0, true))
           .build();
 
-
+  /** @since 1.1.0 */
   public static final RegistryConfig TINK_1_1_0 =
       RegistryConfig.newBuilder()
           .mergeFrom(TINK_1_0_0)

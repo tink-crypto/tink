@@ -28,6 +28,8 @@ import javax.annotation.concurrent.GuardedBy;
 /**
  * Manages a {@link Keyset} proto, with convenience methods that rotate, disable, enable or destroy
  * keys.
+ *
+ * @since 1.0.0
  */
 public final class KeysetManager {
   @GuardedBy("this")

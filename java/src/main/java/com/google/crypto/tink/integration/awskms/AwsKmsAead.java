@@ -29,6 +29,8 @@ import java.security.GeneralSecurityException;
 /**
  * A {@link Aead} that forwards encryption/decryption requests to a key in <a
  * href="https://aws.amazon.com/kms/">AWS KMS</a>.
+ *
+ * @since 1.0.0
  */
 public final class AwsKmsAead implements Aead {
 

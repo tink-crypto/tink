@@ -33,6 +33,8 @@ import java.security.GeneralSecurityException;
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of Aead, see {@link AeadFactory}.
+ *
+ * @since 1.0.0
  */
 public final class AeadConfig {
   public static final String AES_CTR_HMAC_AEAD_TYPE_URL = AesCtrHmacAeadKeyManager.TYPE_URL;
@@ -62,10 +64,9 @@ public final class AeadConfig {
       .setConfigName("TINK_AEAD_1_0_0")
       .build();
 
-  public static final RegistryConfig TINK_1_1_0 = RegistryConfig.newBuilder()
-      .mergeFrom(TINK_1_0_0)
-      .setConfigName("TINK_AEAD_1_1_0")
-      .build();
+  /** @since 1.1.0 */
+  public static final RegistryConfig TINK_1_1_0 =
+      RegistryConfig.newBuilder().mergeFrom(TINK_1_0_0).setConfigName("TINK_AEAD_1_1_0").build();
 
   static {
     try {

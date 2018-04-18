@@ -21,6 +21,8 @@ import java.security.InvalidKeyException;
 /**
  * ChaCha20-Poly1305, as described in <a href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC
  * 7539, section 2.8</a>.
+ *
+ * @since 1.1.0
  */
 public final class ChaCha20Poly1305 extends SnufflePoly1305 {
   public ChaCha20Poly1305(final byte[] key) throws InvalidKeyException {

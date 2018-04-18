@@ -30,6 +30,8 @@ import java.security.GeneralSecurityException;
  * href="https://cloud.google.com/kms/">Google Cloud KMS</a>.
  *
  * <p>As of August 2017, Google Cloud KMS supports only AES-256-GCM keys.
+ *
+ * @since 1.0.0
  */
 public final class GcpKmsAead implements Aead {
 

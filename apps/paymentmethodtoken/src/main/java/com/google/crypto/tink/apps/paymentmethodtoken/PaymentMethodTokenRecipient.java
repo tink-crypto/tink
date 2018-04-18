@@ -73,6 +73,10 @@ import org.json.JSONObject;
  * String ciphertext = ...;
  * String plaintext = recipient.unseal(ciphertext);
  * }</pre>
+ *
+ * @see <a href="https://developers.google.com/pay/api/payment-data-cryptography">Google Payment
+ *     Method Token standard</a>
+ * @since 1.0.0
  */
 public final class PaymentMethodTokenRecipient {
   private final String protocolVersion;
@@ -134,7 +138,11 @@ public final class PaymentMethodTokenRecipient {
         builder.recipientId);
   }
 
-  /** Builder for {@link PaymentMethodTokenRecipient}. */
+  /**
+   * Builder for {@link PaymentMethodTokenRecipient}.
+   *
+   * @since 1.0.0
+   */
   public static class Builder {
     private String protocolVersion = PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1;
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
@@ -284,6 +292,7 @@ public final class PaymentMethodTokenRecipient {
       return addRecipientPrivateKey(PaymentMethodTokenUtil.pkcs8EcPrivateKey(val));
     }
 
+    /** Adds the decryption private key of the recipient. */
     public Builder addRecipientPrivateKey(ECPrivateKey val) throws GeneralSecurityException {
       recipientPrivateKeys.add(val);
       return this;
@@ -295,6 +304,8 @@ public final class PaymentMethodTokenRecipient {
      * <p>This is useful for clients that store keys in an HSM and need a more control on how the
      * key is used. If you are not using an HSM, you probably should just use {@link
      * #addRecipientPrivateKey}.
+     *
+     * @since 1.1.0
      */
     public Builder addRecipientKem(PaymentMethodTokenRecipientKem kem) {
       recipientKems.add(kem);

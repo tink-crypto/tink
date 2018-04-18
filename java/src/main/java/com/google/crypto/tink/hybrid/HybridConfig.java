@@ -36,6 +36,8 @@ import java.security.GeneralSecurityException;
  *
  * <p>For more information on how to obtain and use instances of HybridEncrypt or HybridDecrypt, see
  * {@link HybridEncryptFactory} or {@link HybridDecryptFactory}.
+ *
+ * @since 1.0.0
  */
 public final class HybridConfig {
   public static final String ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE_URL =
@@ -65,11 +67,9 @@ public final class HybridConfig {
           .setConfigName("TINK_HYBRID_1_0_0")
           .build();
 
+  /** @since 1.1.0 */
   public static final RegistryConfig TINK_1_1_0 =
-      RegistryConfig.newBuilder()
-          .mergeFrom(TINK_1_0_0)
-          .setConfigName("TINK_HYBRID_1_1_0")
-          .build();
+      RegistryConfig.newBuilder().mergeFrom(TINK_1_0_0).setConfigName("TINK_HYBRID_1_1_0").build();
 
   static {
     try {

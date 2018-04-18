@@ -42,6 +42,8 @@ import javax.crypto.spec.SecretKeySpec;
  * of size firstSegmentOffset align with ciphertextSegmentSize.
  *
  * <p>This class does not work on Android KitKat (API level 19) or older.
+ *
+ * @since 1.1.0
  */
 public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
   // TODO(bleichen): Some things that are not yet decided:

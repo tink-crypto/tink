@@ -32,6 +32,8 @@ import java.security.GeneralSecurityException;
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of Mac, see {@link MacFactory}.
+ *
+ * @since 1.0.0
  */
 public final class MacConfig {
   public static final String HMAC_TYPE_URL = HmacKeyManager.TYPE_URL;
@@ -45,11 +47,9 @@ public final class MacConfig {
           .addEntry(Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "HmacKey", 0, true))
           .build();
 
+  /** @since 1.1.0 */
   public static final RegistryConfig TINK_1_1_0 =
-      RegistryConfig.newBuilder()
-          .mergeFrom(TINK_1_0_0)
-          .setConfigName("TINK_MAC_1_1_0")
-          .build();
+      RegistryConfig.newBuilder().mergeFrom(TINK_1_0_0).setConfigName("TINK_MAC_1_1_0").build();
 
   static {
     try {

@@ -31,6 +31,8 @@ import java.util.Arrays;
  * is based on <a
  * href="http://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05">Authenticated Encryption
  * with AES-CBC and HMAC-SHA</a>.
+ *
+ * @since 1.0.0
  */
 public final class EncryptThenAuthenticate implements Aead {
   private final IndCpaCipher cipher;

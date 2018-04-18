@@ -33,6 +33,8 @@ import java.security.GeneralSecurityException;
 /**
  * An implementation of {@code KmsClient} for <a href="https://cloud.google.com/kms/">Google Cloud
  * KMS</a>.
+ *
+ * @since 1.0.0
  */
 @AutoService(KmsClient.class)
 public final class GcpKmsClient implements KmsClient {

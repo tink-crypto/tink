@@ -18,7 +18,11 @@ package com.google.crypto.tink.subtle;
 
 import java.security.SecureRandom;
 
-/** A simple wrapper of {@link SecureRandom}. */
+/**
+ * A simple wrapper of {@link SecureRandom}.
+ *
+ * @since 1.0.0
+ */
 public final class Random {
   private static final ThreadLocal<SecureRandom> localRandom = new ThreadLocal<SecureRandom>() {
     @Override

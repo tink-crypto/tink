@@ -21,7 +21,11 @@ import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.interfaces.ECPublicKey;
 
-/** ECDSA verifying with JCE. */
+/**
+ * ECDSA verifying with JCE.
+ *
+ * @since 1.0.0
+ */
 public final class EcdsaVerifyJce implements PublicKeyVerify {
   private final ECPublicKey publicKey;
   private final String signatureAlgorithm;

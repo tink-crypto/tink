@@ -43,11 +43,15 @@ import org.joda.time.Instant;
  *
  * <p>This class can be used to download keys from a remote HTTPS server.
  *
- * <p>Usage: using {@link KeysDownloader.Builder} to construct an instance and keep it as a
- * singleton in a static final variable across requests.
+ * <h3>Usage</h3>
+ *
+ * <p>Use {@link KeysDownloader.Builder} to construct an instance and keep it as a singleton in a
+ * static final variable across requests.
  *
  * <p>When initializing your server, we also recommend that you call {@link #refreshInBackground()}
  * to proactively fetch the data.
+ *
+ * @since 1.1.0
  */
 public class KeysDownloader {
   private static final Charset UTF_8 = Charset.forName("UTF-8");

@@ -33,10 +33,12 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * {@code EcdsaPrivateKey}, one can do:
  *
  * <pre>{@code
- * Config.register(SignatureConfig.TINK_1_0_0);
+ * Config.register(SignatureConfig.TINK_1_1_0);
  * KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
  * PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
  * }</pre>
+ *
+ * @since 1.0.0
  */
 public final class SignatureKeyTemplates {
   /**
@@ -84,6 +86,8 @@ public final class SignatureKeyTemplates {
   /**
    * A {@link KeyTemplate} that generates new instances of {@link
    * com.google.crypto.tink.proto.Ed25519PrivateKey}.
+   *
+   * @since 1.1.0
    */
   public static final KeyTemplate ED25519 =
       KeyTemplate.newBuilder()

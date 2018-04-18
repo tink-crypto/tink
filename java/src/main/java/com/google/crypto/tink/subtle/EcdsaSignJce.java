@@ -21,7 +21,11 @@ import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
 
-/** ECDSA signing with JCE. */
+/**
+ * ECDSA signing with JCE.
+ *
+ * @since 1.0.0
+ */
 public final class EcdsaSignJce implements PublicKeySign {
   private final ECPrivateKey privateKey;
   private final String signatureAlgorithm;

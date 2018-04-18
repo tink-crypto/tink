@@ -18,7 +18,11 @@ package com.google.crypto.tink;
 
 import java.security.GeneralSecurityException;
 
-/** A KmsClient knows how to produce primitives backed by keys stored in remote KMS services. */
+/**
+ * A KmsClient knows how to produce primitives backed by keys stored in remote KMS services.
+ *
+ * @since 1.0.0
+ */
 public interface KmsClient {
   /** @return true if this client does support {@code keyUri} */
   public boolean doesSupport(String keyUri);

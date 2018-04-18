@@ -21,10 +21,15 @@ import java.security.GeneralSecurityException;
 /**
  * Interface for Deterministic Authenticated Encryption with Associated Data (Deterministic AEAD).
  *
- * <p><b>Warning</b>
+ * <p>For why this interface is desirable and some of its use cases, see for example <a
+ * href="https://tools.ietf.org/html/rfc5297#section-1.3">RFC 5297 section 1.3</a>.
+ *
+ * <h3>Warning</h3>
  *
  * <p>Unlike {@link Aead}, implementations of this interface are not semantically secure, because
  * encrypting the same plaintex always yields the same ciphertext.
+ *
+ * <h3>Security guarantees</h3>
  *
  * <p>Implementations of this interface provide 128-bit security level against multi-user attacks
  * with up to 2^32 keys. That means if an adversary obtains 2^32 ciphertexts of the same message
@@ -34,8 +39,7 @@ import java.security.GeneralSecurityException;
  * data has not been tampered with) of that data, but not its secrecy. (see <a
  * href="https://tools.ietf.org/html/rfc5116">RFC 5116</a>)
  *
- * <p>For why this interface is desirable and some of its use cases, see for example <a
- * href="https://tools.ietf.org/html/rfc5297#section-1.3">RFC 5297 section 1.3</a>.
+ * @since 1.1.0
  */
 public interface DeterministicAead {
   /**

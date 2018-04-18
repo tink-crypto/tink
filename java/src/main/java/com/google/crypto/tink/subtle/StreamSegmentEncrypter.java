@@ -31,6 +31,8 @@ import java.security.GeneralSecurityException;
  * <p>A StreamSegmentEncrypter has a state: it keeps the number of segments encrypted so far. This
  * state is used to encrypt each segment with different parameters, so that segments in the
  * ciphertext cannot be switched.
+ *
+ * @since 1.1.0
  */
 public interface StreamSegmentEncrypter {
 

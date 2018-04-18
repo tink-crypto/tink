@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 /**
  * Static methods for obtaining {@link Aead} instances.
  *
- * <p>Usage:
+ * <h3>Usage</h3>
  *
  * <pre>{@code
  * KeysetHandle keysetHandle = ...;
@@ -46,6 +46,8 @@ import java.util.logging.Logger;
  * with the primary key. To decrypt, the primitive uses the prefix of the ciphertext to efficiently
  * select the right key in the set. If the keys associated with the prefix do not work, the
  * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
+ *
+ * @since 1.0.0
  */
 public final class AeadFactory {
   private static final Logger logger = Logger.getLogger(AeadFactory.class.getName());

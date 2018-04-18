@@ -23,7 +23,11 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-/** This primitive implements AesGcm using JCE. */
+/**
+ * This primitive implements AesGcm using JCE.
+ *
+ * @since 1.0.0
+ */
 public final class AesGcmJce implements Aead {
 
   // All instances of this class use a 12 byte IV and a 16 byte tag.
