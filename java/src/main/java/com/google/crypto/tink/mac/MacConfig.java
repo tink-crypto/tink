@@ -25,10 +25,10 @@ import java.security.GeneralSecurityException;
  * Static methods and constants for registering with the {@link Registry} all instances of {@link
  * com.google.crypto.tink.Mac} key types supported in a particular release of Tink.
  *
- * <p>To register all Mac key types provided in Tink release 1.0.0 one can do:
+ * <p>To register all Mac key types provided in Tink release 1.1.0 one can do:
  *
  * <pre>{@code
- * Config.register(MacConfig.TINK_1_0_0);
+ * Config.register(MacConfig.TINK_1_1_0);
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of Mac, see {@link MacFactory}.

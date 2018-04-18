@@ -26,11 +26,11 @@ import java.security.GeneralSecurityException;
  * com.google.crypto.tink.PublicKeySign} and {@link com.google.crypto.tink.PublicKeyVerify} key
  * types supported in a particular release of Tink.
  *
- * <p>To register all PublicKeySign and PublicKeyVerify key types provided in Tink release 1.0.0 one
+ * <p>To register all PublicKeySign and PublicKeyVerify key types provided in Tink release 1.1.0 one
  * can do:
  *
  * <pre>{@code
- * Config.register(HybridConfig.TINK_1_0_0);
+ * Config.register(HybridConfig.TINK_1_1_0);
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of PublicKeySign or PublicKeyVerify,

@@ -27,10 +27,10 @@ import java.security.GeneralSecurityException;
  * Static methods and constants for registering with the {@link com.google.crypto.tink.Registry} all
  * instances of all key types supported in a particular release of Tink.
  *
- * <p>To register all key types provided in Tink release 1.0.0 one can do:
+ * <p>To register all key types provided in Tink release 1.1.0 one can do:
  *
  * <pre>{@code
- * Config.register(TinkConfig.TINK_1_0_0);
+ * Config.register(TinkConfig.TINK_1_1_0);
  * }</pre>
  */
 public final class TinkConfig {
@@ -45,8 +45,8 @@ public final class TinkConfig {
   public static final RegistryConfig TINK_1_1_0 =
       RegistryConfig.newBuilder()
           .mergeFrom(
-              HybridConfig.TINK_1_0_0) // include AeadConfig.TINK_1_0_0 and MacConfig.TINK_1_0_0
-          .mergeFrom(SignatureConfig.TINK_1_0_0)
+              HybridConfig.TINK_1_1_0) // include AeadConfig.TINK_1_0_0 and MacConfig.TINK_1_0_0
+          .mergeFrom(SignatureConfig.TINK_1_1_0)
           .mergeFrom(DeterministicAeadConfig.TINK_1_1_0)
           .mergeFrom(StreamingAeadConfig.TINK_1_1_0)
           .setConfigName("TINK_1_1_0")

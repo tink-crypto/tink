@@ -3,6 +3,8 @@
 The following subsections present instructions and/or Java-snippets for some
 common tasks in [Tink](https://github.com/google/tink).
 
+If you want to contribute, please read [Java hacking guide](JAVA-HACKING.md).
+
 ## Installation
 
 Tink for Java comes in two flavors:
@@ -14,29 +16,24 @@ Tink can be installed with Maven or Gradle. The Maven group ID is
 `com.google.crypto.tink`, and the artifact ID is `tink`.
 
 The most recent release is
-[1.0.0](https://github.com/google/tink/releases/tag/v1.0.0), released
-2017-09-08.
+[1.1.0](https://github.com/google/tink/releases/tag/v1.1.0), released
+2018-04-18.
 
-To add a dependency using Maven:
+Java developers can add Tink using Maven:
 
 ```xml
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>tink</artifactId>
-  <version>1.0.0</version>
-  <!-- or, for Android: -->
-  <artifactId>tink-android</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
-To add a dependency using Gradle:
+Android developers can add Tink using Gradle:
 
 ```
 dependencies {
-  compile 'com.google.crypto.tink:tink:1.0.0'
-  // or, for Android:
-  compile 'com.google.crypto.tink:tink-android:1.0.0'
+  compile 'com.google.crypto.tink:tink-android:1.1.0'
 }
 ```
 
@@ -66,8 +63,6 @@ To add a dependency using Maven:
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>tink</artifactId>
-  <!-- or, for Android: -->
-  <artifactId>tink-android</artifactId>
   <version>HEAD-SNAPSHOT</version>
 </dependency>
 ```
@@ -80,8 +75,6 @@ repositories {
 }
 
 dependencies {
-  compile 'com.google.crypto.tink:tink:HEAD-SNAPSHOT'
-  // or, for Android:
   compile 'com.google.crypto.tink:tink-android:HEAD-SNAPSHOT'
 }
 ```
@@ -89,17 +82,22 @@ dependencies {
 ## API docs
 
 *   Java:
-    *   [1.0.0](https://google.github.com/tink/javadoc/tink/1.0.0)
+    *   [1.1.0](https://google.github.com/tink/javadoc/tink/1.1.0)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.0.0](https://google.github.com/tink/javadoc/tink-android/1.0.0)
+    *   [1.1.0](https://google.github.com/tink/javadoc/tink-android/1.1.0)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important Warnings
 
-Do not use APIs including fields and methods marked with the `@Alpha` annotation.
-They can be modified in any way, or even removed, at any time. They are in the
-package, but not for official, production release, but only for testing.
+Do not use APIs including fields and methods marked with the `@Alpha`
+annotation. They can be modified in any way, or even removed, at any time. They
+are in the package, but not for official, production release, but only for
+testing.
+
+Do not use APIs in the `com.google.crypto.tink.subtle`. While they're generally
+safe to use, they're not meant for public consumption and can be modified in any
+way, or even removed, at any time.
 
 ## Initializing Tink
 
@@ -114,7 +112,7 @@ For example, if you want to use all implementations of all primitives in Tink
     import com.google.crypto.tink.Config;
     import com.google.crypto.tink.config.TinkConfig;
 
-    Config.register(TinkConfig.TINK_1_0_0);
+    Config.register(TinkConfig.TINK_1_1_0);
 ```
 
 To use only implementations of the AEAD primitive:
@@ -123,7 +121,7 @@ To use only implementations of the AEAD primitive:
     import com.google.crypto.tink.Config;
     import com.google.crypto.tink.aead.AeadConfig;
 
-    Config.register(AeadConfig.TINK_1_0_0);
+    Config.register(AeadConfig.TINK_1_1_0);
 ```
 
 For custom initialization the registration proceeds directly via
@@ -263,14 +261,15 @@ section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
 The following table summarizes Java implementations of primitives that are
 currently available or planned (the latter are listed in brackets).
 
-| Primitive          | Implementations                                                 |
-| ------------------ | --------------------------------------------------------------- |
-| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, ChaCha20-Poly1305 |
-| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING                  |
-| Deterministic AEAD | AES-SIV                                                         |
-| MAC                | HMAC-SHA2                                                       |
-| Digital Signatures | ECDSA over NIST curves, Ed25519                                 |
-| Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)                      |
+| Primitive          | Implementations                                |
+| ------------------ | ---------------------------------------------- |
+| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope,  |
+:                    : CHACHA20-POLY1305                              :
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING |
+| Deterministic AEAD | AES-SIV                                        |
+| MAC                | HMAC-SHA2                                      |
+| Digital Signatures | ECDSA over NIST curves, ED25519                |
+| Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)     |
 
 Exact listings of primitives and their implementations available in a release _x.y.z_ of Tink
 are given in a corresponding [`TinkConfig.TINK_x_y_z`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config/TinkConfig.java)-variable.

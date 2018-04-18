@@ -31,7 +31,7 @@ import java.security.GeneralSecurityException;
  * can do:
  *
  * <pre>{@code
- * Config.register(HybridConfig.TINK_1_0_0);
+ * Config.register(HybridConfig.TINK_1_1_0);
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of HybridEncrypt or HybridDecrypt, see

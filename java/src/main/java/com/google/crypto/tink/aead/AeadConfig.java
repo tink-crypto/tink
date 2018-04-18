@@ -23,12 +23,13 @@ import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
 /**
- * Static methods and constants for registering with the {@link Registry} all instances of
- * {@link com.google.crypto.tink.Aead} key types supported in a particular release of Tink.
+ * Static methods and constants for registering with the {@link Registry} all instances of {@link
+ * com.google.crypto.tink.Aead} key types supported in a particular release of Tink.
  *
- * <p>To register all Aead key types provided in Tink release 1.0.0 one can do:
+ * <p>To register all Aead key types provided in Tink release 1.1.0 one can do:
+ *
  * <pre>{@code
- * Config.register(AeadConfig.TINK_1_0_0);
+ * Config.register(AeadConfig.TINK_1_1_0);
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of Aead, see {@link AeadFactory}.
