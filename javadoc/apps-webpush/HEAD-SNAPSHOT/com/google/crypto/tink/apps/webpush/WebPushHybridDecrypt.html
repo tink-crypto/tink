@@ -117,6 +117,8 @@ implements com.google.crypto.tink.HybridDecrypt</pre>
 <div class="block">A <code>HybridDecrypt</code> implementation for the hybrid encryption used in <a
  href="https://tools.ietf.org/html/rfc8291">RFC 8291 - Web Push Message Encryption</a>.
 
+ <h3>Ciphertext format</h3>
+
  <p>When used with <a href="https://tools.ietf.org/html/rfc8291#section-4">AES128-GCM content
  encoding</a>, which is the only content encoding supported in this implementation, the ciphertext
  is formatted according to RFC 8188 section 2, and looks as follows
@@ -133,7 +135,7 @@ implements com.google.crypto.tink.HybridDecrypt</pre>
  of 4096 bytes. <code>aes128-gcm-ciphertext</code> is the encryption of the message padded with a
  single byte of value <code>0x02</code> (which indicates that this is the last and only record).
 
- <p>Sample usage:
+ <h3>Usage</h3>
 
  <pre><code>
  import com.google.crypto.tink.HybridDecrypt;
@@ -160,6 +162,10 @@ implements com.google.crypto.tink.HybridDecrypt</pre>
       .build();
  byte[] plaintext = hybridDecrypt.decrypt(ciphertext, null);
  </code></pre></div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>1.1.0</dd>
+</dl>
 </li>
 </ul>
 </div>
@@ -181,7 +187,7 @@ implements com.google.crypto.tink.HybridDecrypt</pre>
 <tr class="altColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridDecrypt.Builder</a></span></code>
-<div class="block">Builder for WebPushHybridDecrypt.</div>
+<div class="block">Builder for <a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridDecrypt.html" title="class in com.google.crypto.tink.apps.webpush"><code>WebPushHybridDecrypt</code></a>.</div>
 </td>
 </tr>
 </table>
