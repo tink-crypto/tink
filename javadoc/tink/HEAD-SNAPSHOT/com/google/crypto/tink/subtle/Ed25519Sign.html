@@ -117,7 +117,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 implements <a href="../../../../../com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink">PublicKeySign</a></pre>
 <div class="block">Ed25519 signing.
 
- <h3>Usage</h3>
+ <p>Usage:
 
  <pre><code>
  Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
@@ -125,10 +125,6 @@ implements <a href="../../../../../com/google/crypto/tink/PublicKeySign.html" ti
  Ed25519Sign signer = new Ed25519Sign(keyPair.getPrivateKey());
  byte[] signature = signer.sign(message);
  </code></pre></div>
-<dl>
-<dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>1.1.0</dd>
-</dl>
 </li>
 </ul>
 </div>

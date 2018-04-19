@@ -111,10 +111,6 @@ var activeTableTab = "activeTableTab";
 <pre>public final class <span class="typeNameLabel">EllipticCurves</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">Utility functions and enums for elliptic curve crypto, used in ECDSA and ECDH.</div>
-<dl>
-<dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>1.0.0</dd>
-</dl>
 </li>
 </ul>
 </div>
@@ -180,9 +176,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#computeSharedSecret-java.security.interfaces.ECPrivateKey-java.security.spec.ECPoint-">computeSharedSecret</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;myPrivateKey,
-                   <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECPoint.html?is-external=true" title="class or interface in java.security.spec">ECPoint</a>&nbsp;publicPoint)</code>
-<div class="block">Generates the DH shared secret using <code>myPrivateKey</code> and <code>publicPoint</code></div>
-</td>
+                   <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECPoint.html?is-external=true" title="class or interface in java.security.spec">ECPoint</a>&nbsp;publicPoint)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static byte[]</code></td>
@@ -430,8 +424,6 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-<dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>1.1.0</dd>
 </dl>
 </li>
 </ul>
@@ -592,8 +584,6 @@ public static&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/secur
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the encoded point is invalid or if the curve or format are
      not supported.</dd>
-<dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>1.1.0</dd>
 </dl>
 </li>
 </ul>
@@ -619,8 +609,6 @@ public static&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/secur
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the encoded point is invalid or if the curve or format are
      not supported.</dd>
-<dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>1.1.0</dd>
 </dl>
 </li>
 </ul>
@@ -645,8 +633,6 @@ public static&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/secur
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the point is not on the curve or if the format is not
      supported.</dd>
-<dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>1.1.0</dd>
 </dl>
 </li>
 </ul>
@@ -671,8 +657,6 @@ public static&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/secur
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the point is not on the curve or if the format is not
      supported.</dd>
-<dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>1.1.0</dd>
 </dl>
 </li>
 </ul>
@@ -856,12 +840,9 @@ public static&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/secur
 <pre>public static&nbsp;byte[]&nbsp;computeSharedSecret(<a href="https://docs.oracle.com/javase/7/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;myPrivateKey,
                                          <a href="https://docs.oracle.com/javase/7/docs/api/java/security/spec/ECPoint.html?is-external=true" title="class or interface in java.security.spec">ECPoint</a>&nbsp;publicPoint)
                                   throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Generates the DH shared secret using <code>myPrivateKey</code> and <code>publicPoint</code></div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-<dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>1.1.0</dd>
 </dl>
 </li>
 </ul>
