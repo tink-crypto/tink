@@ -75,10 +75,10 @@ publish_javadoc_to_github_pages() {
   library_name=$1
   javadoc=$(library_output_file $2)
 
-  git_url=git@github.com:google/tink.git
-  if [ -n $KOKORO_ROOT ]; then
-    # The account is ise-crypto and its access token is pulled from Keystore.
-    git_url=https://ise-crypto:${GITHUB_ACCESS_TOKEN}@github.com/google/tink.git
+  # The account is ise-crypto and its access token is pulled from Keystore.
+  git_url=https://ise-crypto:${GITHUB_ACCESS_TOKEN}@github.com/google/tink.git
+  if [ -z "${KOKORO_ROOT}" ]; then
+    git_url=git@github.com:google/tink.git
   fi
 
   rm -rf gh-pages

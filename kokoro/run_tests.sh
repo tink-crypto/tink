@@ -21,9 +21,6 @@ set -e
 # Display commands to stderr.
 set -x
 
-# Workaround b/73748835#comment5.
-rm -f ~/.bazelrc
-
 PLATFORM=`uname | tr '[:upper:]' '[:lower:]'`
 
 DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
@@ -31,8 +28,16 @@ DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
 --strategy=GenProto=standalone --strategy=GenProtoDescriptorSet=standalone \
 --sandbox_tmpfs_path=${TMP}"
 
-# Install the latest version of Bazel.
-use_bazel.sh latest
+# Workaround b/73748835#comment5 on Kokoro.
+if ! [ -z "${KOKORO_ROOT}" ]; then
+  rm -f ~/.bazelrc
+  # Install the latest version of Bazel.
+  use_bazel.sh latest
+  if [[ $PLATFORM == 'darwin' ]]; then
+    export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+    export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+  fi
+fi
 
 echo "using bazel binary: `which bazel`"
 bazel version
@@ -93,10 +98,9 @@ run_macos_tests() {
   //objc:TinkTests || ( ls -l ; df -h / ; exit 1 )
 }
 
+run_linux_tests
+
 if [[ $PLATFORM == 'darwin' ]]; then
-  export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-  export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
   run_macos_tests
 fi
 
-run_linux_tests

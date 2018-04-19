@@ -11,6 +11,7 @@
   <artifactId>apps-paymentmethodtoken</artifactId>
   <version>VERSION_PLACEHOLDER</version>
   <packaging>jar</packaging>
+  <url>http://github.com/google/tink</url>
 
   <licenses>
     <license>
