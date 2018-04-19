@@ -105,16 +105,21 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">PublicKeyVerify</span></pre>
-<div class="block">Interface for verification of public key signatures.
+<div class="block">Interface for public key signing.
 
  <p>Digital Signatures provide functionality of signing data and verification of the signatures.
 
+ <h3>Security guarantees</h3>
+
  <p>The functionality of Digital Signatures is represented a pair of primitives (interfaces)
  <a href="../../../../com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><code>PublicKeySign</code></a> for signing of data, and <a href="../../../../com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink"><code>PublicKeyVerify</code></a> for verification of
- signatures.
-
- <p>Implementations of these interfaces are secure against adaptive chosen-message attacks.
- Signing data ensures the authenticity and the integrity of that data, but not its secrecy.</div>
+ signatures. Implementations of these interfaces are secure against adaptive chosen-message
+ attacks. Signing data ensures the authenticity and the integrity of that data, but not its
+ secrecy.</div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>1.0.0</dd>
+</dl>
 </li>
 </ul>
 </div>

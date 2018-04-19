@@ -117,10 +117,14 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  <code>EcdsaPrivateKey</code>, one can do:
 
  <pre><code>
- Config.register(SignatureConfig.TINK_1_0_0);
+ Config.register(SignatureConfig.TINK_1_1_0);
  KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
  PublicKeySign signer = PublicKeySignFactory.getPrimitive(handle);
  </code></pre></div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>1.0.0</dd>
+</dl>
 </li>
 </ul>
 </div>
@@ -294,6 +298,10 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <h4>ED25519</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> ED25519</pre>
 <div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>Ed25519PrivateKey</code></a>.</div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>1.1.0</dd>
+</dl>
 </li>
 </ul>
 </li>
