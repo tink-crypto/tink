@@ -54,7 +54,7 @@ subtle_deps = [
     "//java/src/main/java/com/google/crypto/tink/subtle:x25519",
 ]
 
-java_deps = subtle_deps + [
+java_deps = [
     "//java/src/main/java/com/google/crypto/tink",
     "//java/src/main/java/com/google/crypto/tink/aead",
     "//java/src/main/java/com/google/crypto/tink/config",
@@ -68,7 +68,7 @@ java_deps = subtle_deps + [
     "//java/src/main/java/com/google/crypto/tink/util",
 ]
 
-android_deps = subtle_deps + [
+android_deps = [
     "//java/src/main/java/com/google/crypto/tink:android",
     "//java/src/main/java/com/google/crypto/tink/aead:android",
     "//java/src/main/java/com/google/crypto/tink/config:android",
@@ -103,12 +103,6 @@ android_library(
     exports = android_deps,
 )
 
-java_library(
-    name = "subtle",
-    visibility = ["//visibility:public"],
-    exports = subtle_deps,
-)
-
 # RESTRICTED
 
 java_library(
@@ -131,8 +125,13 @@ java_library(
     exports = cleartext_android_deps
 )
 
+java_library(
+    name = "subtle",
+    exports =
+
 # Maven jars
 
+    ":subtle",
 load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
 gen_maven_jar_rules(
@@ -159,6 +158,7 @@ java_library(
         ":cleartext_keyset_handle",
         ":java",
         ":protos",
+        ":subtle",
     ],
 )
 
@@ -170,6 +170,7 @@ android_library(
         ":android",
         ":cleartext_keyset_handle_android",
         ":protos_android",
+        ":subtle",
     ],
 )
 

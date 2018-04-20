@@ -19,6 +19,7 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         "//java",
+        "//java:subtle",
         "@com_google_http_client",
         "@org_json//jar",
     ],

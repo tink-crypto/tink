@@ -19,6 +19,7 @@ java_library(
         "//java",
         "//java:cleartext_keyset_handle",
         "//java:protos",
+        "//java:subtle",
         "@args4j//jar",
         "@com_google_protobuf_javalite//:protobuf_java_lite",
     ],

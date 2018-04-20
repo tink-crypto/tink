@@ -12,6 +12,7 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         "//java",
+        "//java:subtle",
     ],
 )
 
