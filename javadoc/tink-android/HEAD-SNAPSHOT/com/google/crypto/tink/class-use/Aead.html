@@ -93,10 +93,6 @@
 <td class="colFirst"><a href="#com.google.crypto.tink.integration.android">com.google.crypto.tink.integration.android</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><a href="#com.google.crypto.tink.subtle">com.google.crypto.tink.subtle</a></td>
-<td class="colLast">&nbsp;</td>
-</tr>
 </tbody>
 </table>
 </li>
@@ -245,62 +241,6 @@
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AndroidKeystoreKmsClient.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html#getOrGenerateNewAeadKey-java.lang.String-">getOrGenerateNewAeadKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;keyUri)</code>
 <div class="block">Generates a new key in Android Keystore, if it doesn't exist.</div>
-</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li class="blockList"><a name="com.google.crypto.tink.subtle">
-<!--   -->
-</a>
-<h3>Uses of <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a> in <a href="../../../../../com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></h3>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
-<caption><span>Classes in <a href="../../../../../com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a> that implement <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Class and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesEaxJce.html" title="class in com.google.crypto.tink.subtle">AesEaxJce</a></span></code>
-<div class="block">This class implements the EAX mode using AES.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/AesGcmJce.html" title="class in com.google.crypto.tink.subtle">AesGcmJce</a></span></code>
-<div class="block">This primitive implements AesGcm using JCE.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/ChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">ChaCha20Poly1305</a></span></code>
-<div class="block">ChaCha20-Poly1305, as described in <a href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC
- 7539, section 2.8</a>.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EncryptThenAuthenticate.html" title="class in com.google.crypto.tink.subtle">EncryptThenAuthenticate</a></span></code>
-<div class="block">This primitive performs an encrypt-then-Mac operation on plaintext and additional authenticated
- data (aad).</div>
-</td>
-</tr>
-</tbody>
-</table>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
-<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a> that return <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Method and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
-<td class="colLast"><span class="typeNameLabel">EciesAeadHkdfDemHelper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html#getAead-byte:A-">getAead</a></span>(byte[]&nbsp;symmetricKeyValue)</code>
-<div class="block">Creates a new <code>Aead</code>-primitive that uses the key material given in 'symmetric_key', which
- must be of length dem_key_size_in_bytes().</div>
 </td>
 </tr>
 </tbody>
