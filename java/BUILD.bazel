@@ -117,21 +117,21 @@ java_library(
 
 java_library(
     name = "cleartext_keyset_handle",
-    exports = cleartext_deps
+    exports = cleartext_deps,
 )
 
 java_library(
     name = "cleartext_keyset_handle_android",
-    exports = cleartext_android_deps
+    exports = cleartext_android_deps,
 )
 
 java_library(
     name = "subtle",
-    exports =
+    exports = subtle_deps,
+)
 
 # Maven jars
 
-    ":subtle",
 load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
 gen_maven_jar_rules(

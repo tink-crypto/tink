@@ -36,6 +36,7 @@ java_binary(
     deps = [
         ":paymentmethodtoken",
         "//java",
+        "//java:subtle",
     ],
 )
 
