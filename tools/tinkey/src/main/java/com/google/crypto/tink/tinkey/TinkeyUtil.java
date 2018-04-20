@@ -33,6 +33,7 @@ import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
+import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -65,6 +66,7 @@ class TinkeyUtil {
         HybridKeyTemplates.class,
         MacKeyTemplates.class,
         SignatureKeyTemplates.class,
+        StreamingAeadKeyTemplates.class,
       };
 
   /** Creates a {@code KeysetReader} that can read the keyset in the right {@code inFormat}. */
