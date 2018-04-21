@@ -127,7 +127,7 @@ TEST_F(EcdsaVerifyKeyManagerTest, testKeyMessageErrors) {
   {  // Bad elliptic curve.
     EcdsaPublicKey key;
     key.mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
-    key.mutable_params()->set_curve(EllipticCurveType::NIST_P224);
+    key.mutable_params()->set_curve(EllipticCurveType::UNKNOWN_CURVE);
     auto result = key_manager.GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());

@@ -32,8 +32,6 @@ class EnumsTest : public ::testing::Test {
 };
 
 TEST_F(EnumsTest, testEllipticCurveType) {
-  EXPECT_EQ(pb::EllipticCurveType::NIST_P224,
-            Enums::SubtleToProto(subtle::EllipticCurveType::NIST_P224));
   EXPECT_EQ(pb::EllipticCurveType::NIST_P256,
             Enums::SubtleToProto(subtle::EllipticCurveType::NIST_P256));
   EXPECT_EQ(pb::EllipticCurveType::NIST_P384,
@@ -45,8 +43,6 @@ TEST_F(EnumsTest, testEllipticCurveType) {
   EXPECT_EQ(pb::EllipticCurveType::UNKNOWN_CURVE,
             Enums::SubtleToProto((subtle::EllipticCurveType)42));
 
-  EXPECT_EQ(subtle::EllipticCurveType::NIST_P224,
-            Enums::ProtoToSubtle(pb::EllipticCurveType::NIST_P224));
   EXPECT_EQ(subtle::EllipticCurveType::NIST_P256,
             Enums::ProtoToSubtle(pb::EllipticCurveType::NIST_P256));
   EXPECT_EQ(subtle::EllipticCurveType::NIST_P384,
@@ -70,14 +66,12 @@ TEST_F(EnumsTest, testEllipticCurveType) {
       count++;
     }
   }
-  EXPECT_EQ(5, count);
+  EXPECT_EQ(4, count);
 }
 
 TEST_F(EnumsTest, testHashType) {
   EXPECT_EQ(pb::HashType::SHA1,
             Enums::SubtleToProto(subtle::HashType::SHA1));
-  EXPECT_EQ(pb::HashType::SHA224,
-            Enums::SubtleToProto(subtle::HashType::SHA224));
   EXPECT_EQ(pb::HashType::SHA256,
             Enums::SubtleToProto(subtle::HashType::SHA256));
   EXPECT_EQ(pb::HashType::SHA512,
@@ -89,8 +83,6 @@ TEST_F(EnumsTest, testHashType) {
 
   EXPECT_EQ(subtle::HashType::SHA1,
             Enums::ProtoToSubtle(pb::HashType::SHA1));
-  EXPECT_EQ(subtle::HashType::SHA224,
-            Enums::ProtoToSubtle(pb::HashType::SHA224));
   EXPECT_EQ(subtle::HashType::SHA256,
             Enums::ProtoToSubtle(pb::HashType::SHA256));
   EXPECT_EQ(subtle::HashType::SHA512,
@@ -112,7 +104,7 @@ TEST_F(EnumsTest, testHashType) {
       count++;
     }
   }
-  EXPECT_EQ(5, count);
+  EXPECT_EQ(4, count);
 }
 
 TEST_F(EnumsTest, testEcPointFormat) {

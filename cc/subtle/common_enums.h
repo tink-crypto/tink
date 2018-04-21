@@ -26,7 +26,6 @@ namespace subtle {
 // Common enums used by classes in subtle.
 enum EllipticCurveType {
   UNKNOWN_CURVE = 0,
-  NIST_P224 = 1,
   NIST_P256 = 2,
   NIST_P384 = 3,
   NIST_P521 = 4,
@@ -41,7 +40,6 @@ enum EcPointFormat {
 enum HashType {
   UNKNOWN_HASH = 0,
   SHA1 = 1,  // SHA1 for digital signature is deprecated but HMAC-SHA1 is fine.
-  SHA224 = 2,
   SHA256 = 3,
   SHA512 = 4,
 };

@@ -149,7 +149,7 @@ public class AeadKeyTemplatesTest {
     int ivSize = 72;
     int hmacKeySize = 24;
     int tagSize = 27;
-    HashType hashType = HashType.SHA224;
+    HashType hashType = HashType.UNKNOWN_HASH;
     KeyTemplate template = AeadKeyTemplates.createAesCtrHmacAeadKeyTemplate(
         aesKeySize, ivSize, hmacKeySize, tagSize, hashType);
     assertEquals(AesCtrHmacAeadKeyManager.TYPE_URL, template.getTypeUrl());

@@ -99,7 +99,7 @@ public class StreamingAeadKeyTemplatesTest {
     int tagSize = 45;
     int ciphertextSegmentSize = 12345;
     HashType hkdfHashType = HashType.SHA512;
-    HashType macHashType = HashType.SHA224;
+    HashType macHashType = HashType.UNKNOWN_HASH;
     KeyTemplate template = StreamingAeadKeyTemplates.createAesCtrHmacStreamingKeyTemplate(
         mainKeySize, hkdfHashType, derivedKeySize,
         macHashType, tagSize, ciphertextSegmentSize);

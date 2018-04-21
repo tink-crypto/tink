@@ -126,13 +126,11 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testBasic) {
   // Generate and test many keys with various parameters.
   std::string plaintext = "some plaintext";
   std::string context_info = "some context info";
-  for (auto curve :
-      {EllipticCurveType::NIST_P224, EllipticCurveType::NIST_P256,
-       EllipticCurveType::NIST_P384, EllipticCurveType::NIST_P521}) {
+  for (auto curve : {EllipticCurveType::NIST_P256, EllipticCurveType::NIST_P384,
+                     EllipticCurveType::NIST_P521}) {
     for (auto ec_point_format :
         {EcPointFormat::UNCOMPRESSED, EcPointFormat::COMPRESSED}) {
-      for (auto hash_type :
-          {HashType::SHA224, HashType::SHA256, HashType::SHA512}) {
+      for (auto hash_type : {HashType::SHA256, HashType::SHA512}) {
         for (uint32_t aes_gcm_key_size : {16, 24, 32}) {
           ecies_key = test::GetEciesAesGcmHkdfTestKey(
               curve, ec_point_format, hash_type, aes_gcm_key_size);

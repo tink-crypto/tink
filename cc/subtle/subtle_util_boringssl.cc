@@ -50,8 +50,6 @@ size_t FieldElementSizeInBytes(const EC_GROUP* group) {
 util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
     EllipticCurveType curve_type) {
   switch (curve_type) {
-    case EllipticCurveType::NIST_P224:
-      return EC_GROUP_new_by_curve_name(NID_secp224r1);
     case EllipticCurveType::NIST_P256:
       return EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
     case EllipticCurveType::NIST_P384:
@@ -136,8 +134,6 @@ util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
   switch (hash_type) {
     case HashType::SHA1:
       return EVP_sha1();
-    case HashType::SHA224:
-      return EVP_sha224();
     case HashType::SHA256:
       return EVP_sha256();
     case HashType::SHA512:

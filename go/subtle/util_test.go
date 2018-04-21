@@ -67,9 +67,6 @@ func TestComputeHash(t *testing.T) {
 }
 
 func TestGetCurve(t *testing.T) {
-	if subtle.GetCurve("NIST_P224").Params().Name != "P-224" {
-		t.Errorf("incorrect result for NIST_P224")
-	}
 	if subtle.GetCurve("NIST_P256").Params().Name != "P-256" {
 		t.Errorf("incorrect result for NIST_P256")
 	}

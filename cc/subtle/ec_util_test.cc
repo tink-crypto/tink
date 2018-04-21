@@ -39,12 +39,7 @@ struct TestVector {
 };
 
 static const std::vector<TestVector> test_vector(
-    {{"af33cd0629bc7e996320a3f40368f74de8704fa37b8fab69abaae280",
-      "882092ccbba7930f419a8a4f9bb16978bbc3838729992559a6f2e2d7",
-      "8346a60fc6f293ca5a0d2af68ba71d1dd389e5e40837942df3e43cbd",
-      "7d96f9a3bd3c05cf5cc37feb8b9d5209d5c2597464dec3e9983743e8",
-      EllipticCurveType::NIST_P224},
-     {"700c48f77f56584c5cc632ca65640db91b6bacce3a4df6b42ce7cc838833d287",
+    {{"700c48f77f56584c5cc632ca65640db91b6bacce3a4df6b42ce7cc838833d287",
       "db71e509e3fd9b060ddb20ba5c51dcc5948d46fbf640dfe0441782cab85fa4ac",
       "7d7dc5f71eb29ddaf80d6214632eeae03d9058af1fb6d22ed80badb62bc1a534",
       "46fc62106420ff012e54a434fbdd2d25ccc5852060561e68040dd7778997bd7b",

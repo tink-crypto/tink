@@ -47,8 +47,6 @@ HashType WycheproofUtil::GetHashType(const Json::Value &val) {
   std::string md = val.asString();
   if (md == "SHA-1") {
     return HashType::SHA1;
-  } else if (md == "SHA-224") {
-    return HashType::SHA224;
   } else if (md == "SHA-256") {
     return HashType::SHA256;
   } else if (md == "SHA-384") {
@@ -63,9 +61,7 @@ HashType WycheproofUtil::GetHashType(const Json::Value &val) {
 EllipticCurveType
 WycheproofUtil::GetEllipticCurveType(const Json::Value &val) {
   std::string curve = val.asString();
-  if (curve == "secp224r1") {
-    return EllipticCurveType::NIST_P224;
-  } else if (curve == "secp256r1") {
+  if (curve == "secp256r1") {
     return EllipticCurveType::NIST_P256;
   } else if (curve == "secp384r1") {
     return EllipticCurveType::NIST_P384;

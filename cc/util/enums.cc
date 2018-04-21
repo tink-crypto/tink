@@ -26,8 +26,6 @@ namespace util {
 // static
 pb::EllipticCurveType Enums::SubtleToProto(subtle::EllipticCurveType type) {
   switch (type) {
-  case subtle::EllipticCurveType::NIST_P224:
-    return pb::EllipticCurveType::NIST_P224;
   case subtle::EllipticCurveType::NIST_P256:
     return pb::EllipticCurveType::NIST_P256;
   case subtle::EllipticCurveType::NIST_P384:
@@ -42,8 +40,6 @@ pb::EllipticCurveType Enums::SubtleToProto(subtle::EllipticCurveType type) {
 // static
 subtle::EllipticCurveType Enums::ProtoToSubtle(pb::EllipticCurveType type) {
   switch (type) {
-  case pb::EllipticCurveType::NIST_P224:
-    return subtle::EllipticCurveType::NIST_P224;
   case pb::EllipticCurveType::NIST_P256:
     return subtle::EllipticCurveType::NIST_P256;
   case pb::EllipticCurveType::NIST_P384:
@@ -84,8 +80,6 @@ pb::HashType Enums::SubtleToProto(subtle::HashType type) {
   switch (type) {
   case subtle::HashType::SHA1:
     return pb::HashType::SHA1;
-  case subtle::HashType::SHA224:
-    return pb::HashType::SHA224;
   case subtle::HashType::SHA256:
     return pb::HashType::SHA256;
   case subtle::HashType::SHA512:
@@ -100,8 +94,6 @@ subtle::HashType Enums::ProtoToSubtle(pb::HashType type) {
   switch (type) {
   case pb::HashType::SHA1:
     return subtle::HashType::SHA1;
-  case pb::HashType::SHA224:
-    return subtle::HashType::SHA224;
   case pb::HashType::SHA256:
     return subtle::HashType::SHA256;
   case pb::HashType::SHA512:

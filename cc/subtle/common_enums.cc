@@ -24,8 +24,6 @@ namespace subtle {
 
 std::string EnumToString(EllipticCurveType type) {
   switch (type) {
-  case EllipticCurveType::NIST_P224:
-    return "NIST_P224";
   case EllipticCurveType::NIST_P256:
     return "NIST_P256";
   case EllipticCurveType::NIST_P384:
@@ -56,8 +54,6 @@ std::string EnumToString(HashType type) {
   switch (type) {
   case HashType::SHA1:
     return "SHA1";
-  case HashType::SHA224:
-    return "SHA224";
   case HashType::SHA256:
     return "SHA256";
   case HashType::SHA512:

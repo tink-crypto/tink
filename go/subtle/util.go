@@ -73,8 +73,6 @@ func GetHashFunc(hash string) func() hash.Hash {
 // It returns null if the curve type is not supported.
 func GetCurve(curve string) elliptic.Curve {
 	switch curve {
-	case "NIST_P224":
-		return elliptic.P224()
 	case "NIST_P256":
 		return elliptic.P256()
 	case "NIST_P384":

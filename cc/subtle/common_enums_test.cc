@@ -25,7 +25,6 @@ namespace {
 class CommonEnumsTest : public ::testing::Test {};
 
 TEST_F(CommonEnumsTest, testEllipticCurveTypeToString) {
-  EXPECT_EQ("NIST_P224", EnumToString(EllipticCurveType::NIST_P224));
   EXPECT_EQ("NIST_P256", EnumToString(EllipticCurveType::NIST_P256));
   EXPECT_EQ("NIST_P384", EnumToString(EllipticCurveType::NIST_P384));
   EXPECT_EQ("NIST_P521", EnumToString(EllipticCurveType::NIST_P521));
@@ -35,7 +34,6 @@ TEST_F(CommonEnumsTest, testEllipticCurveTypeToString) {
 
 TEST_F(CommonEnumsTest, testHashTypeToString) {
   EXPECT_EQ("SHA1", EnumToString(HashType::SHA1));
-  EXPECT_EQ("SHA224", EnumToString(HashType::SHA224));
   EXPECT_EQ("SHA256", EnumToString(HashType::SHA256));
   EXPECT_EQ("SHA512", EnumToString(HashType::SHA512));
   EXPECT_EQ("UNKNOWN_HASH", EnumToString(HashType::UNKNOWN_HASH));

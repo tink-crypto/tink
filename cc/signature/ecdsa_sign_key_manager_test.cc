@@ -127,7 +127,7 @@ TEST_F(EcdsaSignKeyManagerTest, testKeyMessageErrors) {
     EcdsaPrivateKey key;
     auto public_key = key.mutable_public_key();
     public_key->mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
-    public_key->mutable_params()->set_curve(EllipticCurveType::NIST_P224);
+    public_key->mutable_params()->set_curve(EllipticCurveType::UNKNOWN_CURVE);
     auto result = key_manager.GetPrimitive(key);
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());

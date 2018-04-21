@@ -76,7 +76,7 @@ public class SignatureKeyTemplatesTest {
     // Intentionally using "weird" or invalid values for parameters,
     // to test that the function correctly puts them in the resulting template.
     HashType hashType = HashType.SHA512;
-    EllipticCurveType curve = EllipticCurveType.NIST_P224;
+    EllipticCurveType curve = EllipticCurveType.UNKNOWN_CURVE;
     EcdsaSignatureEncoding encoding = EcdsaSignatureEncoding.IEEE_P1363;
     KeyTemplate template = SignatureKeyTemplates.createEcdsaKeyTemplate(hashType, curve, encoding);
     assertEquals(EcdsaSignKeyManager.TYPE_URL, template.getTypeUrl());
