@@ -173,9 +173,9 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_EN
   private boolean tryProvider(String algorithm, Provider provider) {
     try {
       this.instanceBuilder.getInstance(algorithm, provider);
-      ;
       return true;
     } catch (Exception e) { // Don't care which one specifically.
+      e.printStackTrace();
       return false;
     }
   }

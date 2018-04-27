@@ -18,9 +18,11 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Aead;
 import java.security.GeneralSecurityException;
+import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -61,13 +63,23 @@ public final class AesGcmJce implements Aead {
     System.arraycopy(iv, 0, ciphertext, 0, IV_SIZE_IN_BYTES);
 
     Cipher cipher = instance();
-    GCMParameterSpec params = new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, iv);
+    AlgorithmParameterSpec params = getParams(iv);
     cipher.init(Cipher.ENCRYPT_MODE, keySpec, params);
     if (associatedData != null && associatedData.length != 0) {
       cipher.updateAAD(associatedData);
     }
-    int unusedWritten =
-        cipher.doFinal(plaintext, 0, plaintext.length, ciphertext, IV_SIZE_IN_BYTES);
+    int written = cipher.doFinal(plaintext, 0, plaintext.length, ciphertext, IV_SIZE_IN_BYTES);
+    // For security reasons, AES-GCM encryption must always use tag of TAG_SIZE_IN_BYTES bytes. If
+    // so, written must be equal to plaintext.length + TAG_SIZE_IN_BYTES.
+
+    if (written != plaintext.length + TAG_SIZE_IN_BYTES) {
+      // The tag is shorter than expected.
+      int actualTagSize = written - plaintext.length;
+      throw new GeneralSecurityException(
+          String.format(
+              "encryption failed; GCM tag must be %s bytes, but got only %s bytes",
+              TAG_SIZE_IN_BYTES, actualTagSize));
+    }
     return ciphertext;
   }
 
@@ -81,13 +93,35 @@ public final class AesGcmJce implements Aead {
     if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("ciphertext too short");
     }
-    GCMParameterSpec params =
-        new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, ciphertext, 0, IV_SIZE_IN_BYTES);
+
+    AlgorithmParameterSpec params = getParams(ciphertext, 0, IV_SIZE_IN_BYTES);
     Cipher cipher = instance();
     cipher.init(Cipher.DECRYPT_MODE, keySpec, params);
     if (associatedData != null && associatedData.length != 0) {
       cipher.updateAAD(associatedData);
     }
     return cipher.doFinal(ciphertext, IV_SIZE_IN_BYTES, ciphertext.length - IV_SIZE_IN_BYTES);
+  }
+
+  private static AlgorithmParameterSpec getParams(final byte[] iv) throws GeneralSecurityException {
+    return getParams(iv, 0, iv.length);
+  }
+
+  private static AlgorithmParameterSpec getParams(final byte[] buf, int offset, int len)
+      throws GeneralSecurityException {
+    try {
+      Class.forName("javax.crypto.spec.GCMParameterSpec");
+      return new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, buf, offset, len);
+    } catch (ClassNotFoundException e) {
+      if (SubtleUtil.isAndroid()) {
+        // GCMParameterSpec should always be present in Java 7 or newer, but it's missing on Android
+        // devices with API level < 19. Fortunately, with a modern copy of Conscrypt (either through
+        // GMS or bundled with the app) we can initialize the cipher with just an IvParameterSpec.
+        // It will use a tag size of 128 bits. We'd double check the tag size in encrypt().
+        return new IvParameterSpec(buf, offset, len);
+      }
+    }
+    throw new GeneralSecurityException(
+        "cannot use AES-GCM: javax.crypto.spec.GCMParameterSpec not found");
   }
 };
