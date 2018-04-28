@@ -115,7 +115,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 
  <h3>Warning</h3>
 
- <p>This implementation only supports versions <code>ECv1</code> and <code>ECv2</code>.
+ <p>This implementation only supports versions <code>ECv1</code>, <code>ECv2</code> and <code>ECv2SigningOnly</code>.
 
  <h3>Typical usage</h3>
 
@@ -196,7 +196,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/paymentmethodtoken/PaymentMethodTokenRecipient.html#unseal-java.lang.String-">unseal</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;sealedMessage)</code>
 <div class="block">Unseal the given <code>sealedMessage</code> by performing the necessary signature verification and
- decryption steps based on the protocolVersion.</div>
+ decryption (if required) steps based on the protocolVersion.</div>
 </td>
 </tr>
 </table>
@@ -230,7 +230,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <pre>public&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;unseal(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;sealedMessage)
               throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Unseal the given <code>sealedMessage</code> by performing the necessary signature verification and
- decryption steps based on the protocolVersion.</div>
+ decryption (if required) steps based on the protocolVersion.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
