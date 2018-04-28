@@ -66,6 +66,14 @@ public class PaymentMethodTokenSenderTest {
           + "\",\n"
           + "      \"protocolVersion\": \"ECv2\"\n"
           + "    },\n"
+          + "    {\n"
+          + "      \"keyValue\": \"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENXvYqxD5WayKYhuXQevdGdLA8i"
+          + "fV4LsRS2uKvFo8wwyiwgQHB9DiKzG6T/P1Fu9Bl7zWy/se5Dy4wk1mJoPuxg==\",\n"
+          + "      \"keyExpiration\": \""
+          + Instant.now().plus(Duration.standardDays(1)).getMillis()
+          + "\",\n"
+          + "      \"protocolVersion\": \"ECv2SigningOnly\"\n"
+          + "    },\n"
           + "  ],\n"
           + "}";
 
@@ -114,10 +122,49 @@ public class PaymentMethodTokenSenderTest {
           + "aKXIzfNC5b4A104gJWI9TsLIMqhRANCAAT/X7ccFVJt2/6Ps1oCt2AzKhIAz"
           + "jfJHJ3Op2DVPGh1LMD3oOPgxzUSIqujHG6dq9Ui93Eacl4VWJPMW/MVHHIL";
 
+  /**
+   * Sample Google private signing key for the ECV2SigningOnly protocolVersion.
+   *
+   * <p>Corresponds to ECV2SigningOnly private key of the key in {@link
+   * #GOOGLE_VERIFYING_PUBLIC_KEYS_JSON}.
+   */
+  private static final String GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_PRIVATE_KEY_PKCS8_BASE64 =
+      "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgRi9hSdY+knJ08odnY"
+          + "tZFMRi7ZYeMoasAijLhD4GiQ1yhRANCAAQ1e9irEPlZrIpiG5dB690Z0sDy"
+          + "J9XguxFLa4q8WjzDDKLCBAcH0OIrMbpP8/UW70GXvNbL+x7kPLjCTWYmg+7G";
+
+  /**
+   * Sample Google intermediate public signing key for the ECV2SigningOnly protocolVersion.
+   *
+   * <p>Base64 version of the public key encoded in ASN.1 type SubjectPublicKeyInfo defined in the
+   * X.509 standard.
+   *
+   * <p>The intermediate public key will be signed by {@link
+   * #GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_PRIVATE_KEY_PKCS8_BASE64}.
+   */
+  private static final String
+      GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PUBLIC_KEY_X509_BASE64 =
+          "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE8OaurwvbyYm8JWDgFPRTIDg0/"
+              + "kcQTFAQ4txi5IP0AyM1QiagwRhDUfjpqZkpw8xt/DXwyWYM0DdHqoeV"
+              + "TKqmYQ==";
+
+  /**
+   * Sample Google intermediate private signing key for the ECV2SigningOnly protocolVersion.
+   *
+   * <p>Corresponds to private key of the key in {@link
+   * #GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PUBLIC_KEY_X509_BASE64}.
+   */
+  private static final String
+      GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PRIVATE_KEY_PKCS8_BASE64 =
+          "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg+Jvpkq26tpZ0s"
+              + "TTZVh4teEI41SnJdmkBzM8VZ5ZirE2hRANCAATw5q6vC9vJibwlYOAU"
+              + "9FMgODT+RxBMUBDi3GLkg/QDIzVCJqDBGENR+OmpmSnDzG38NfDJZgz"
+              + "QN0eqh5VMqqZh";
+
   private static final String RECIPIENT_ID = "someRecipient";
 
   @Test
-  public void testV1WithPrecomputedKeys() throws Exception {
+  public void testECV1WithPrecomputedKeys() throws Exception {
     PaymentMethodTokenSender sender =
         new PaymentMethodTokenSender.Builder()
             .senderSigningKey(GOOGLE_SIGNING_EC_V1_PRIVATE_KEY_PKCS8_BASE64)
@@ -137,7 +184,7 @@ public class PaymentMethodTokenSenderTest {
   }
 
   @Test
-  public void testV2WithPrecomputedKeys() throws Exception {
+  public void testECV2WithPrecomputedKeys() throws Exception {
     PaymentMethodTokenSender sender =
         new PaymentMethodTokenSender.Builder()
             .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
@@ -169,6 +216,37 @@ public class PaymentMethodTokenSenderTest {
   }
 
   @Test
+  public void testECV2SigningOnlyWithPrecomputedKeys() throws Exception {
+    PaymentMethodTokenSender sender =
+        new PaymentMethodTokenSender.Builder()
+            .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)
+            .senderIntermediateSigningKey(
+                GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PRIVATE_KEY_PKCS8_BASE64)
+            .senderIntermediateCert(
+                new SenderIntermediateCertFactory.Builder()
+                    .protocolVersion(
+                        PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)
+                    .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_PRIVATE_KEY_PKCS8_BASE64)
+                    .senderIntermediateSigningKey(
+                        GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
+                    .expiration(Instant.now().plus(Duration.standardDays(1)).getMillis())
+                    .build()
+                    .create())
+            .recipientId(RECIPIENT_ID)
+            .build();
+
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .build();
+
+    String plaintext = "blah";
+    assertEquals(plaintext, recipient.unseal(sender.seal(plaintext)));
+  }
+
+  @Test
   public void testShouldThrowWithUnsupportedProtocolVersion() throws Exception {
     try {
       new PaymentMethodTokenSender.Builder().protocolVersion("ECv99").build();
@@ -179,7 +257,7 @@ public class PaymentMethodTokenSenderTest {
   }
 
   @Test
-  public void testShouldThrowIfSignedIntermediateSigningKeyIsSetForV1() throws Exception {
+  public void testShouldThrowIfSignedIntermediateSigningKeyIsSetForECV1() throws Exception {
     try {
       new PaymentMethodTokenSender.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
@@ -196,7 +274,7 @@ public class PaymentMethodTokenSenderTest {
   }
 
   @Test
-  public void testShouldThrowIfIntermediateSigningKeyIsSetForV1() throws Exception {
+  public void testShouldThrowIfIntermediateSigningKeyIsSetForECV1() throws Exception {
     try {
       new PaymentMethodTokenSender.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
@@ -213,7 +291,7 @@ public class PaymentMethodTokenSenderTest {
   }
 
   @Test
-  public void testShouldThrowIfSenderSigningKeyIsSetForV2() throws Exception {
+  public void testShouldThrowIfSenderSigningKeyIsSetForECV2() throws Exception {
     try {
       new PaymentMethodTokenSender.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
@@ -228,7 +306,7 @@ public class PaymentMethodTokenSenderTest {
   }
 
   @Test
-  public void testShouldThrowIfSignedIntermediateSigningKeyIsNotSetForV2() throws Exception {
+  public void testShouldThrowIfSignedIntermediateSigningKeyIsNotSetForECV2() throws Exception {
     try {
       new PaymentMethodTokenSender.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
@@ -245,7 +323,7 @@ public class PaymentMethodTokenSenderTest {
   }
 
   @Test
-  public void testShouldThrowIfIntermediateSigningKeyIsNotSetForV2() throws Exception {
+  public void testShouldThrowIfIntermediateSigningKeyIsNotSetForECV2() throws Exception {
     try {
       new PaymentMethodTokenSender.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
@@ -260,7 +338,7 @@ public class PaymentMethodTokenSenderTest {
   }
 
   @Test
-  public void testShouldThrowIfSenderSigningKeyIsNotSetForV1() throws Exception {
+  public void testShouldThrowIfSenderSigningKeyIsNotSetForECV1() throws Exception {
     try {
       new PaymentMethodTokenSender.Builder()
           .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
@@ -270,6 +348,83 @@ public class PaymentMethodTokenSenderTest {
     } catch (IllegalArgumentException expected) {
       assertEquals(
           "must set sender's signing key using Builder.senderSigningKey", expected.getMessage());
+    }
+  }
+
+  @Test
+  public void testShouldThrowIfSenderSigningKeyIsSetForECV2SigningOnly() throws Exception {
+    try {
+      new PaymentMethodTokenSender.Builder()
+          .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)
+          .senderSigningKey(GOOGLE_SIGNING_EC_V1_PRIVATE_KEY_PKCS8_BASE64)
+          .build();
+      fail("Should have thrown!");
+    } catch (IllegalArgumentException expected) {
+      assertEquals(
+          "must not set sender's signing key using Builder.senderSigningKey",
+          expected.getMessage());
+    }
+  }
+
+  @Test
+  public void testShouldThrowIfSignedIntermediateSigningKeyIsNotSetForECV2SigningOnly()
+      throws Exception {
+    try {
+      new PaymentMethodTokenSender.Builder()
+          .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)
+          // no calls to senderIntermediateCert
+          .senderIntermediateSigningKey(
+              GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PRIVATE_KEY_PKCS8_BASE64)
+          .build();
+      fail("Should have thrown!");
+    } catch (IllegalArgumentException expected) {
+      assertEquals(
+          "must set signed sender's intermediate signing key using "
+              + "Builder.senderIntermediateCert",
+          expected.getMessage());
+    }
+  }
+
+  @Test
+  public void testShouldThrowIfRecipientPublicKeyIsSetForECV2SigningOnly() throws Exception {
+    try {
+      new PaymentMethodTokenSender.Builder()
+          .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)
+          // no calls to senderIntermediateCert
+          .senderIntermediateSigningKey(
+              GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PRIVATE_KEY_PKCS8_BASE64)
+          .rawUncompressedRecipientPublicKey(MERCHANT_PUBLIC_KEY_BASE64)
+          .senderIntermediateCert(
+              new SenderIntermediateCertFactory.Builder()
+                  .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)
+                  .addSenderSigningKey(GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_PRIVATE_KEY_PKCS8_BASE64)
+                  .senderIntermediateSigningKey(
+                      GOOGLE_SIGNING_EC_V2_SIGNING_ONLY_INTERMEDIATE_PUBLIC_KEY_X509_BASE64)
+                  .expiration(Instant.now().plus(Duration.standardDays(1)).getMillis())
+                  .build()
+                  .create())
+          .recipientId(RECIPIENT_ID)
+          .build();
+      fail("Should have thrown!");
+    } catch (IllegalArgumentException expected) {
+      assertEquals(
+          "must not set recipient's public key using Builder.recipientPublicKey",
+          expected.getMessage());
+    }
+  }
+
+  @Test
+  public void testShouldThrowIfIntermediateSigningKeyIsNotSetForECV2SigningOnly() throws Exception {
+    try {
+      new PaymentMethodTokenSender.Builder()
+          .protocolVersion(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)
+          // no calls to senderIntermediateSigningKey
+          .build();
+      fail("Should have thrown!");
+    } catch (IllegalArgumentException expected) {
+      assertEquals(
+          "must set sender's intermediate signing key using Builder.senderIntermediateSigningKey",
+          expected.getMessage());
     }
   }
 

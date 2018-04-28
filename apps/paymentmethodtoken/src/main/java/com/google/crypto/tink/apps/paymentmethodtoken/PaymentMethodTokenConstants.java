@@ -28,12 +28,12 @@ class PaymentMethodTokenConstants {
   public static final String AES_CTR_ALGO = "AES/CTR/NoPadding";
   // Zero IV is fine here because each encryption uses a unique key.
   public static final byte[] AES_CTR_ZERO_IV = new byte[16];
-  public static final EllipticCurves.CurveType P256_CURVE_TYPE =
-      EllipticCurves.CurveType.NIST_P256;
+  public static final EllipticCurves.CurveType P256_CURVE_TYPE = EllipticCurves.CurveType.NIST_P256;
   public static final EllipticCurves.PointFormatType UNCOMPRESSED_POINT_FORMAT =
       EllipticCurves.PointFormatType.UNCOMPRESSED;
   public static final String PROTOCOL_VERSION_EC_V1 = "ECv1";
   public static final String PROTOCOL_VERSION_EC_V2 = "ECv2";
+  public static final String PROTOCOL_VERSION_EC_V2_SIGNING_ONLY = "ECv2SigningOnly";
   public static final String ECDSA_SHA256_SIGNING_ALGO = "SHA256WithECDSA";
 
   public static final String JSON_ENCRYPTED_MESSAGE_KEY = "encryptedMessage";
@@ -54,20 +54,39 @@ class PaymentMethodTokenConstants {
     EC_V1(
         /* protocolVersion= */ PROTOCOL_VERSION_EC_V1,
         /* aesCtrKeySize= */ 128 / 8,
-        /* hmacSha256KeySize= */ 128 / 8),
+        /* hmacSha256KeySize= */ 128 / 8,
+        /* isEncryptionRequired= */ true,
+        /* supportsIntermediateSigningKeys= */ false),
     EC_V2(
         /* protocolVersion= */ PROTOCOL_VERSION_EC_V2,
         /* aesCtrKeySize= */ 256 / 8,
-        /* hmacSha256KeySize= */ 256 / 8);
+        /* hmacSha256KeySize= */ 256 / 8,
+        /* isEncryptionRequired= */ true,
+        /* supportsIntermediateSigningKeys= */ true),
+    EC_V2_SIGNING_ONLY(
+        /* protocolVersion= */ PROTOCOL_VERSION_EC_V2_SIGNING_ONLY,
+        /* aesCtrKeySize= */ 256 / 8,
+        /* hmacSha256KeySize= */ 256 / 8,
+        /* isEncryptionRequired= */ false,
+        /* supportsIntermediateSigningKeys= */ true);
 
     public final String protocolVersion;
     public final int aesCtrKeySize;
     public final int hmacSha256KeySize;
+    public final boolean isEncryptionRequired;
+    public final boolean supportsIntermediateSigningKeys;
 
-    ProtocolVersionConfig(String protocolVersion, int aesCtrKeySize, int hmacSha256KeySize) {
+    ProtocolVersionConfig(
+        String protocolVersion,
+        int aesCtrKeySize,
+        int hmacSha256KeySize,
+        boolean isEncryptionRequired,
+        boolean supportsIntermediateSigningKeys) {
       this.protocolVersion = protocolVersion;
       this.aesCtrKeySize = aesCtrKeySize;
       this.hmacSha256KeySize = hmacSha256KeySize;
+      this.isEncryptionRequired = isEncryptionRequired;
+      this.supportsIntermediateSigningKeys = supportsIntermediateSigningKeys;
     }
 
     public static ProtocolVersionConfig forProtocolVersion(String protocolVersion) {

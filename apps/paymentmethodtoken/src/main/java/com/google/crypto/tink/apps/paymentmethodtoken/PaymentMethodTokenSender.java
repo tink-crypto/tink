@@ -56,89 +56,47 @@ import org.json.JSONObject;
  */
 public final class PaymentMethodTokenSender {
   private final String protocolVersion;
+  private final ProtocolVersionConfig protocolVersionConfig;
   private final PublicKeySign signer;
-  private final HybridEncrypt hybridEncrypter;
   private final String senderIntermediateCert;
   private final String senderId;
   private final String recipientId;
 
-  PaymentMethodTokenSender(
-      final String protocolVersion,
-      final ECPrivateKey senderSigningKey,
-      final ECPrivateKey senderIntermediateSigningKey,
-      final String senderIntermediateCert,
-      String senderId,
-      final ECPublicKey recipientPublicKey,
-      String recipientId)
-      throws GeneralSecurityException {
-    if (!protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
-        && !protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)) {
-      throw new IllegalArgumentException("invalid version: " + protocolVersion);
-    }
-    // Intermediate vs direct signing keys
-    if (protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
-      // ECv1 signed payloads directly.
-      if (senderSigningKey == null) {
-        throw new IllegalArgumentException(
-            "must set sender's signing key using Builder.senderSigningKey");
-      }
-      if (senderIntermediateSigningKey != null) {
-        throw new IllegalArgumentException(
-            "must not set sender's intermediate signing key using "
-                + "Builder.senderIntermediateSigningKey");
-      }
-      if (senderIntermediateCert != null) {
-        throw new IllegalArgumentException(
-            "must not set signed sender's intermediate signing key using "
-                + "Builder.senderIntermediateCert");
-      }
-    } else {
-      // ECv2 and newer protocols use an intermediate signing key.
-      if (senderSigningKey != null) {
-        throw new IllegalArgumentException(
-            "must not set sender's signing key using Builder.senderSigningKey");
-      }
-      if (senderIntermediateSigningKey == null) {
-        throw new IllegalArgumentException(
-            "must set sender's intermediate signing key using "
-                + "Builder.senderIntermediateSigningKey");
-      }
-      if (senderIntermediateCert == null) {
-        throw new IllegalArgumentException(
-            "must set signed sender's intermediate signing key using "
-                + "Builder.senderIntermediateCert");
-      }
+  private HybridEncrypt hybridEncrypter;
+
+  PaymentMethodTokenSender(Builder builder) throws GeneralSecurityException {
+    switch (builder.protocolVersion) {
+      case PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1:
+        validateV1(builder);
+        break;
+      case PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2:
+        validateV2(builder);
+        break;
+      case PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY:
+        validateV2SigningOnly(builder);
+        break;
+      default:
+        throw new IllegalArgumentException("invalid version: " + builder.protocolVersion);
     }
 
-    this.protocolVersion = protocolVersion;
+    this.protocolVersion = builder.protocolVersion;
+    this.protocolVersionConfig = ProtocolVersionConfig.forProtocolVersion(protocolVersion);
     this.signer =
         new EcdsaSignJce(
-            senderIntermediateSigningKey != null ? senderIntermediateSigningKey : senderSigningKey,
+            builder.senderIntermediateSigningKey != null
+                ? builder.senderIntermediateSigningKey
+                : builder.senderSigningKey,
             PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO);
-    this.senderId = senderId;
-    if (recipientPublicKey == null) {
-      throw new IllegalArgumentException(
-          "must set recipient's public key using Builder.recipientPublicKey");
+    this.senderId = builder.senderId;
+    if (protocolVersionConfig.isEncryptionRequired) {
+      this.hybridEncrypter =
+          new PaymentMethodTokenHybridEncrypt(builder.recipientPublicKey, protocolVersionConfig);
     }
-    this.hybridEncrypter =
-        new PaymentMethodTokenHybridEncrypt(
-            recipientPublicKey, ProtocolVersionConfig.forProtocolVersion(protocolVersion));
-    if (recipientId == null) {
+    if (builder.recipientId == null) {
       throw new IllegalArgumentException("must set recipient Id using Builder.recipientId");
     }
-    this.recipientId = recipientId;
-    this.senderIntermediateCert = senderIntermediateCert;
-  }
-
-  private PaymentMethodTokenSender(Builder builder) throws GeneralSecurityException {
-    this(
-        builder.protocolVersion,
-        builder.senderSigningKey,
-        builder.senderIntermediateSigningKey,
-        builder.senderIntermediateCert,
-        builder.senderId,
-        builder.recipientPublicKey,
-        builder.recipientId);
+    this.recipientId = builder.recipientId;
+    this.senderIntermediateCert = builder.senderIntermediateCert;
   }
 
   /**
@@ -260,7 +218,9 @@ public final class PaymentMethodTokenSender {
   /** Seals the input message according to the Payment Method Token specification. */
   public String seal(final String message) throws GeneralSecurityException {
     if (protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
-        || protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)) {
+        || protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
+        || protocolVersion.equals(
+            PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)) {
       return sealV1OrV2(message);
     }
     throw new GeneralSecurityException("Unsupported version: " + protocolVersion);
@@ -268,20 +228,26 @@ public final class PaymentMethodTokenSender {
 
   private String sealV1OrV2(final String message) throws GeneralSecurityException {
     String signedMessage =
-        new String(
-            hybridEncrypter.encrypt(
-                message.getBytes(StandardCharsets.UTF_8),
-                PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1),
-            StandardCharsets.UTF_8);
+        protocolVersionConfig.isEncryptionRequired
+            ? new String(
+                hybridEncrypter.encrypt(
+                    message.getBytes(StandardCharsets.UTF_8),
+                    PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1),
+                StandardCharsets.UTF_8)
+            : message;
+    return signV1OrV2(signedMessage);
+  }
+
+  private String signV1OrV2(String message) throws GeneralSecurityException {
     byte[] toSignBytes =
         PaymentMethodTokenUtil.toLengthValue(
             // The order of the parameters matters.
-            senderId, recipientId, protocolVersion, signedMessage);
+            senderId, recipientId, protocolVersion, message);
     byte[] signature = signer.sign(toSignBytes);
     try {
       JSONObject result =
           new JSONObject()
-              .put(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY, signedMessage)
+              .put(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY, message)
               .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, protocolVersion)
               .put(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY, Base64.encode(signature));
       if (senderIntermediateCert != null) {
@@ -292,6 +258,62 @@ public final class PaymentMethodTokenSender {
       return result.toString();
     } catch (JSONException e) {
       throw new GeneralSecurityException("cannot seal; JSON error");
+    }
+  }
+
+  private static void validateV1(Builder builder) {
+    // ECv1 signed payloads directly.
+    if (builder.senderSigningKey == null) {
+      throw new IllegalArgumentException(
+          "must set sender's signing key using Builder.senderSigningKey");
+    }
+    if (builder.senderIntermediateSigningKey != null) {
+      throw new IllegalArgumentException(
+          "must not set sender's intermediate signing key using "
+              + "Builder.senderIntermediateSigningKey");
+    }
+    if (builder.senderIntermediateCert != null) {
+      throw new IllegalArgumentException(
+          "must not set signed sender's intermediate signing key using "
+              + "Builder.senderIntermediateCert");
+    }
+    if (builder.recipientPublicKey == null) {
+      throw new IllegalArgumentException(
+          "must set recipient's public key using Builder.recipientPublicKey");
+    }
+  }
+
+  private static void validateV2(Builder builder) {
+    validateIntermediateSigningKeys(builder);
+    if (builder.recipientPublicKey == null) {
+      throw new IllegalArgumentException(
+          "must set recipient's public key using Builder.recipientPublicKey");
+    }
+  }
+
+  private static void validateV2SigningOnly(Builder builder) {
+    validateIntermediateSigningKeys(builder);
+    if (builder.recipientPublicKey != null) {
+      throw new IllegalArgumentException(
+          "must not set recipient's public key using Builder.recipientPublicKey");
+    }
+  }
+
+  private static void validateIntermediateSigningKeys(Builder builder) {
+    // ECv2 and newer protocols use an intermediate signing key.
+    if (builder.senderSigningKey != null) {
+      throw new IllegalArgumentException(
+          "must not set sender's signing key using Builder.senderSigningKey");
+    }
+    if (builder.senderIntermediateSigningKey == null) {
+      throw new IllegalArgumentException(
+          "must set sender's intermediate signing key using "
+              + "Builder.senderIntermediateSigningKey");
+    }
+    if (builder.senderIntermediateCert == null) {
+      throw new IllegalArgumentException(
+          "must set signed sender's intermediate signing key using "
+              + "Builder.senderIntermediateCert");
     }
   }
 }

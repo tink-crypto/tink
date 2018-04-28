@@ -40,7 +40,8 @@ import org.json.JSONObject;
  *
  * <h3>Warning</h3>
  *
- * <p>This implementation only supports versions {@code ECv1} and {@code ECv2}.
+ * <p>This implementation only supports versions {@code ECv1}, {@code ECv2} and {@code
+ * ECv2SigningOnly}.
  *
  * <h3>Typical usage</h3>
  *
@@ -94,7 +95,9 @@ public final class PaymentMethodTokenRecipient {
       String recipientId)
       throws GeneralSecurityException {
     if (!protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
-        && !protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)) {
+        && !protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
+        && !protocolVersion.equals(
+            PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)) {
       throw new IllegalArgumentException("invalid version: " + protocolVersion);
     }
     this.protocolVersion = protocolVersion;
@@ -106,20 +109,27 @@ public final class PaymentMethodTokenRecipient {
     this.senderVerifyingKeysProviders = senderVerifyingKeysProviders;
     this.senderId = senderId;
 
-    if (recipientPrivateKeys.isEmpty() && recipientKems.isEmpty()) {
-      throw new IllegalArgumentException(
-          "must add at least one recipient's decrypting key using Builder.addRecipientPrivateKey "
-              + "or Builder.addRecipientDecrypter");
-    }
-    for (ECPrivateKey privateKey : recipientPrivateKeys) {
-      hybridDecrypters.add(
-          new PaymentMethodTokenHybridDecrypt(
-              privateKey, ProtocolVersionConfig.forProtocolVersion(protocolVersion)));
-    }
-    for (PaymentMethodTokenRecipientKem kem : recipientKems) {
-      hybridDecrypters.add(
-          new PaymentMethodTokenHybridDecrypt(
-              kem, ProtocolVersionConfig.forProtocolVersion(protocolVersion)));
+    ProtocolVersionConfig protocolVersionConfig =
+        ProtocolVersionConfig.forProtocolVersion(protocolVersion);
+    if (protocolVersionConfig.isEncryptionRequired) {
+      if (recipientPrivateKeys.isEmpty() && recipientKems.isEmpty()) {
+        throw new IllegalArgumentException(
+            "must add at least one recipient's decrypting key using Builder.addRecipientPrivateKey "
+                + "or Builder.addRecipientKem");
+      }
+      for (ECPrivateKey privateKey : recipientPrivateKeys) {
+        hybridDecrypters.add(
+            new PaymentMethodTokenHybridDecrypt(privateKey, protocolVersionConfig));
+      }
+      for (PaymentMethodTokenRecipientKem kem : recipientKems) {
+        hybridDecrypters.add(new PaymentMethodTokenHybridDecrypt(kem, protocolVersionConfig));
+      }
+    } else {
+      if (!recipientPrivateKeys.isEmpty() || !recipientKems.isEmpty()) {
+        throw new IllegalArgumentException(
+            "must not set private decrypting key using Builder.addRecipientPrivateKey "
+                + "or Builder.addRecipientDecrypter");
+      }
     }
 
     if (recipientId == null) {
@@ -319,14 +329,17 @@ public final class PaymentMethodTokenRecipient {
 
   /**
    * Unseal the given {@code sealedMessage} by performing the necessary signature verification and
-   * decryption steps based on the protocolVersion.
+   * decryption (if required) steps based on the protocolVersion.
    */
   public String unseal(final String sealedMessage) throws GeneralSecurityException {
     try {
       if (protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
-        return unsealV1(sealedMessage);
+        return unsealECV1(sealedMessage);
       } else if (protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)) {
-        return unsealV2(sealedMessage);
+        return unsealECV2(sealedMessage);
+      } else if (protocolVersion.equals(
+          PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2_SIGNING_ONLY)) {
+        return unsealECV2SigningOnly(sealedMessage);
       }
       throw new IllegalArgumentException("unsupported version: " + protocolVersion);
     } catch (JSONException e) {
@@ -334,48 +347,55 @@ public final class PaymentMethodTokenRecipient {
     }
   }
 
-  private String unsealV1(final String sealedMessage)
-      throws GeneralSecurityException, JSONException {
+  private String unsealECV1(String sealedMessage) throws JSONException, GeneralSecurityException {
     JSONObject jsonMsg = new JSONObject(sealedMessage);
-    validateV1(jsonMsg);
-    String signedMessage = verifyV1(jsonMsg);
+    validateECV1(jsonMsg);
+    String signedMessage = verifyECV1(jsonMsg);
     String decryptedMessage = decrypt(signedMessage);
-    validateDecryptedMessage(decryptedMessage);
+    validateMessage(decryptedMessage);
     return decryptedMessage;
   }
 
-  private String unsealV2(final String sealedMessage)
-      throws GeneralSecurityException, JSONException {
+  private String unsealECV2(String sealedMessage) throws JSONException, GeneralSecurityException {
     JSONObject jsonMsg = new JSONObject(sealedMessage);
-    validateV2(jsonMsg);
-    String signedMessage = verifyV2(jsonMsg);
+    validateECV2(jsonMsg);
+    String signedMessage = verifyECV2(jsonMsg);
     String decryptedMessage = decrypt(signedMessage);
-    validateDecryptedMessage(decryptedMessage);
+    validateMessage(decryptedMessage);
     return decryptedMessage;
   }
 
-  private String verifyV1(final JSONObject jsonMsg) throws GeneralSecurityException, JSONException {
+  private String unsealECV2SigningOnly(String sealedMessage)
+      throws JSONException, GeneralSecurityException {
+    JSONObject jsonMsg = new JSONObject(sealedMessage);
+    validateECV2(jsonMsg);
+    String message = verifyECV2(jsonMsg);
+    validateMessage(message);
+    return message;
+  }
+
+  private String verifyECV1(final JSONObject jsonMsg)
+      throws GeneralSecurityException, JSONException {
     byte[] signature =
         Base64.decode(jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY));
     String signedMessage = jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY);
-    byte[] signedBytes =
-        getSignedBytes(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1, signedMessage);
+    byte[] signedBytes = getSignedBytes(protocolVersion, signedMessage);
     verify(
-        PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1,
+        protocolVersion,
         senderVerifyingKeysProviders,
         Collections.singletonList(signature),
         signedBytes);
     return signedMessage;
   }
 
-  private String verifyV2(final JSONObject jsonMsg) throws GeneralSecurityException, JSONException {
+  private String verifyECV2(final JSONObject jsonMsg)
+      throws GeneralSecurityException, JSONException {
     byte[] signature =
         Base64.decode(jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY));
     String signedMessage = jsonMsg.getString(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY);
-    byte[] signedBytes =
-        getSignedBytes(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2, signedMessage);
+    byte[] signedBytes = getSignedBytes(protocolVersion, signedMessage);
     verify(
-        PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2,
+        protocolVersion,
         verifyIntermediateSigningKey(jsonMsg),
         Collections.singletonList(signature),
         signedBytes);
@@ -389,7 +409,7 @@ public final class PaymentMethodTokenRecipient {
         senderId, recipientId, protocolVersion, signedMessage);
   }
 
-  private void validateDecryptedMessage(String decryptedMessage)
+  private void validateMessage(String decryptedMessage)
       throws GeneralSecurityException, JSONException {
     JSONObject decodedMessage;
     try {
@@ -452,7 +472,8 @@ public final class PaymentMethodTokenRecipient {
     throw new GeneralSecurityException("cannot decrypt");
   }
 
-  private void validateV1(final JSONObject jsonMsg) throws GeneralSecurityException, JSONException {
+  private void validateECV1(final JSONObject jsonMsg)
+      throws GeneralSecurityException, JSONException {
     if (!jsonMsg.has(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY)
@@ -461,23 +482,25 @@ public final class PaymentMethodTokenRecipient {
           "ECv1 message must contain exactly protocolVersion, signature and signedMessage");
     }
     String version = jsonMsg.getString(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY);
-    if (!version.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)) {
+    if (!version.equals(protocolVersion)) {
       throw new GeneralSecurityException("invalid version: " + version);
     }
   }
 
-  private void validateV2(final JSONObject jsonMsg) throws GeneralSecurityException, JSONException {
+  private void validateECV2(final JSONObject jsonMsg)
+      throws GeneralSecurityException, JSONException {
     if (!jsonMsg.has(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_INTERMEDIATE_SIGNING_KEY)
         || jsonMsg.length() != 4) {
       throw new GeneralSecurityException(
-          "ECv2 message must contain exactly protocolVersion, intermediateSigningKey, "
+          protocolVersion
+              + " message must contain exactly protocolVersion, intermediateSigningKey, "
               + "signature and signedMessage");
     }
     String version = jsonMsg.getString(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY);
-    if (!version.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)) {
+    if (!version.equals(protocolVersion)) {
       throw new GeneralSecurityException("invalid version: " + version);
     }
   }

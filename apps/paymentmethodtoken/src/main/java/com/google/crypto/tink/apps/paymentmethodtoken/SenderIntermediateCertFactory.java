@@ -17,6 +17,7 @@
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import java.security.GeneralSecurityException;
@@ -46,7 +47,8 @@ public class SenderIntermediateCertFactory {
       List<ECPrivateKey> senderSigningKeys,
       String intermediateSigningKey,
       long expiration) {
-    if (!PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2.equals(protocolVersion)) {
+    if (!ProtocolVersionConfig.forProtocolVersion(protocolVersion)
+        .supportsIntermediateSigningKeys) {
       throw new IllegalArgumentException("invalid version: " + protocolVersion);
     }
     if (senderSigningKeys.isEmpty()) {
