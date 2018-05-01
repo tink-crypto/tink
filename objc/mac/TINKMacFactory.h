@@ -19,8 +19,6 @@
 #import <Foundation/Foundation.h>
 
 @class TINKKeysetHandle;
-@class TINKMacKeyManager;
-@protocol TINKKeyManager;
 @protocol TINKMac;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -31,38 +29,31 @@ NS_ASSUME_NONNULL_BEGIN
  * TINKMacFactory gets primitives from the Registry, which can be initialized via convenience
  * methods in TINKMacConfig. Here is an example how one can obtain and use a TINKMac primitive:
  *
- *   [TINKMacConfig registerStandardKeyTypes];
- *   TINKKeysetHandle *keysetHandle = [TINKKeysetHandle initWithKeyset:...];
+ * NSError *error = nil;
+ * TINKMacConfig *macConfig = [TINKMacConfig alloc] initWithVersion:TINKVersion1_1_0
+ *                                                            error:&error];
+ * if (!macConfig || error) {
+ *   // handle error.
+ * }
  *
- *   NSError *error = nil;
- *   id <TINKMac> mac = [TINKMacFactory primitiveWithKeysetHanlde:keysetHandle error:&error];
- *   if (error) {
- *     // handle error
- *   }
+ * if (![TINKConfig registerConfig:macConfig error:&error]) {
+ *   // handle error.
+ * }
  *
- *   NSData *data = ...;
- *   NSData *macValue = [mac computeMacForData:data error:&error];
- *   if (error) {
- *     // handle error
- *   }
+ * TINKKeysetHandle keysetHandle = ...;
+ * id<TINKMac> mac = [TINKMacFactory primitiveWithKeysetHandle:keysetHandle error:&error];
+ * if (!mac || error) {
+ *   // handle error.
+ * }
+ *
  */
 @interface TINKMacFactory : NSObject
 
 /**
- * Returns a TINKMac-primitive that uses key material from the keyset specified via @c keysetHandle.
+ * Returns an object that conforms to the TINKMac protocol. It uses key material from the keyset
+ * specified via @c keysetHandle.
  */
 + (nullable id<TINKMac>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle
-                                            error:(NSError **)error;
-
-/**
- * Returns a TINKMac-primitive that uses key material from the keyset specified via @c keysetHandle
- * and is instantiated by the given @c keyManager (instead of the key manager from the Registry).
- *
- * If @c keyManager is nil it uses the default key manager from the Registry.
- */
-+ (nullable id<TINKMac>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle
-                                    andKeyManager:
-                                        (nullable TINKMacKeyManager<TINKKeyManager> *)keyManager
                                             error:(NSError **)error;
 
 @end

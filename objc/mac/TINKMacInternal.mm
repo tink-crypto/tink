@@ -24,25 +24,24 @@
 #include "absl/strings/string_view.h"
 #include "tink/mac.h"
 
-@implementation TINKMacInternal
+@implementation TINKMacInternal {
+  std::unique_ptr<crypto::tink::Mac> _ccMac;
+}
 
-- (instancetype)initWithPrimitive:(crypto::tink::Mac *)primitive {
+- (instancetype)initWithCCMac:(std::unique_ptr<crypto::tink::Mac>)ccMac {
   if (self = [super init]) {
-    _primitive = primitive;
+    _ccMac = std::move(ccMac);
   }
   return self;
 }
 
 - (void)dealloc {
-  delete _primitive;
+  _ccMac.reset();
 }
 
 - (NSData *)computeMacForData:(NSData *)data error:(NSError **)error {
-  if (error) {
-    *error = nil;
-  }
-  auto st = _primitive->ComputeMac(
-      absl::string_view(static_cast<const char *>(data.bytes), data.length));
+  auto st =
+      _ccMac->ComputeMac(absl::string_view(static_cast<const char *>(data.bytes), data.length));
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st.status());
@@ -54,12 +53,9 @@
 }
 
 - (BOOL)verifyMac:(NSData *)mac forData:(NSData *)data error:(NSError **)error {
-  if (error) {
-    *error = nil;
-  }
-  auto st = _primitive->VerifyMac(
-      absl::string_view(static_cast<const char *>(mac.bytes), mac.length),
-      absl::string_view(static_cast<const char *>(data.bytes), data.length));
+  auto st =
+      _ccMac->VerifyMac(absl::string_view(static_cast<const char *>(mac.bytes), mac.length),
+                        absl::string_view(static_cast<const char *>(data.bytes), data.length));
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st);
@@ -67,6 +63,13 @@
     return NO;
   }
   return YES;
+}
+
+- (nullable crypto::tink::Mac *)ccMac {
+  if (!_ccMac) {
+    return nil;
+  }
+  return _ccMac.get();
 }
 
 @end

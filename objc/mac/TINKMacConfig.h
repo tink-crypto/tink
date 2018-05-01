@@ -18,27 +18,39 @@
 
 #import <Foundation/Foundation.h>
 
-@class TINKMacKeyManager;
-@protocol TINKKeyManager;
+#import "objc/TINKRegistryConfig.h"
+#import "objc/TINKVersion.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
- * TINKMacConfig offers convenience methods for initializing TINKMacFactory and the underlying
- * Registry.INSTANCE. In particular, it allows for initializing the Registry with native key types
- * and their managers that Tink supports out of the box. These key types are divided in two groups:
+ * This class is used for registering with the Registry all instances of Mac key types supported in
+ * a particular release of Tink.
  *
- *  - standard: secure and safe to use in new code. Over time, with new developments in
- *    cryptanalysis and computing power, some standard key types might become legacy.
+ * To register all Mac key types provided in Tink release 1.1.0 one can do:
  *
- *  - legacy: deprecated and insecure or obsolete, should not be used in new code. Existing users
- *    should upgrade to one of the standard key types.
+ * NSError *error = nil;
+ * TINKMacConfig *macConfig = [TINKMacConfig alloc] initWithVersion:TINKVersion1_1_0
+ *                                                            error:&error];
+ * if (!macConfig || error) {
+ *   // handle error.
+ * }
  *
- * This divison allows for gradual retiring insecure or obsolete key types.
+ * if (![TINKConfig registerConfig:macConfig error:&error]) {
+ *   // handle error.
+ * }
  *
- * For more information on how to obtain and use Mac primitives see TINKMacFactory.
+ * For more information on the creation and usage of TINKMac instances see TINKMacFactory.
  */
-@interface TINKMacConfig : NSObject
+@interface TINKMacConfig : TINKRegistryConfig
 
-/** Registers standard Mac key types and their managers with the Registry. */
-+ (BOOL)registerStandardKeyTypes;
+/* Use initWithVersion:error: to get an instance of TINKMacConfig. */
+- (nullable instancetype)init NS_UNAVAILABLE;
+
+/* Returns config of Mac implementations supported in given @c version of Tink. */
+- (nullable instancetype)initWithVersion:(TINKVersion)version
+                                   error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -47,8 +47,6 @@ using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 
-namespace util = crypto::tink::util;
-
 @interface TINKAeadFactoryTest : XCTestCase
 @end
 
@@ -64,7 +62,7 @@ namespace util = crypto::tink::util;
   id<TINKAead> aead = [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
   XCTAssertNil(aead);
   XCTAssertNotNil(error);
-  XCTAssertTrue(error.code == util::error::INVALID_ARGUMENT);
+  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
   XCTAssertTrue([error.localizedFailureReason containsString:@"at least one key"]);
 }
 

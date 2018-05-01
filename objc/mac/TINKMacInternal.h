@@ -16,22 +16,27 @@
  **************************************************************************
  */
 
-#import <Foundation/Foundation.h>
 #import "objc/TINKMac.h"
+
+#import <Foundation/Foundation.h>
 
 #include "tink/mac.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
- * This interface is internal-only. Use TINKMacFactory to get an instance
- * of TINKMac.
+ * This interface is internal-only. Use TINKMacFactory to get an instance that conforms to
+ * TINKMac.
  */
 @interface TINKMacInternal : NSObject <TINKMac>
 
-@property(nonatomic, nonnull, readonly) crypto::tink::Mac* primitive;
-
 - (nullable instancetype)init NS_UNAVAILABLE;
 
-- (nullable instancetype)initWithPrimitive:(nonnull crypto::tink::Mac*)primitive
+- (nullable instancetype)initWithCCMac:(std::unique_ptr<crypto::tink::Mac>)ccMac
     NS_DESIGNATED_INITIALIZER;
 
+- (nullable crypto::tink::Mac *)ccMac;
+
 @end
+
+NS_ASSUME_NONNULL_END
