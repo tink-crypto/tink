@@ -30,9 +30,9 @@
 #import "objc/TINKHybridEncrypt.h"
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/hybrid/TINKEciesAeadHkdfPublicKeyManager.h"
 #import "objc/hybrid/TINKHybridConfig.h"
 #import "objc/hybrid/TINKHybridDecryptFactory.h"
+#import "objc/hybrid/TINKHybridEncryptFactory.h"
 #import "objc/util/TINKStrings.h"
 #import "objc/util/TINKTestHelpers.h"
 
@@ -44,63 +44,60 @@ static TINKPBEciesAeadHkdfPrivateKey *getNewEciesPrivateKey() {
                                        TINKPBEcPointFormat_Uncompressed, TINKPBHashType_Sha256, 24);
 }
 
-static TINKPBKeyset *createTestKeyset(TINKPBEciesAeadHkdfPrivateKey *eciesKey1,
-                                      TINKPBEciesAeadHkdfPrivateKey *eciesKey2,
-                                      TINKPBEciesAeadHkdfPrivateKey *eciesKey3) {
-  NSString *const keyType = @"type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-  TINKPBKeyset *keyset = [[TINKPBKeyset alloc] init];
-
-  uint32_t keyID1 = 1234543;
-  TINKAddTinkKey(keyType, keyID1, eciesKey1, TINKPBKeyStatusType_Enabled,
-                 TINKPBKeyData_KeyMaterialType_AsymmetricPrivate, keyset);
-
-  uint32_t keyID2 = 726329;
-  TINKAddRawKey(keyType, keyID2, eciesKey2, TINKPBKeyStatusType_Enabled,
-                TINKPBKeyData_KeyMaterialType_AsymmetricPrivate, keyset);
-
-  uint32_t keyID3 = 7213743;
-  TINKAddTinkKey(keyType, keyID3, eciesKey3, TINKPBKeyStatusType_Enabled,
-                 TINKPBKeyData_KeyMaterialType_AsymmetricPrivate, keyset);
-
-  keyset.primaryKeyId = keyID3;
-  return keyset;
-}
-
-static id<TINKHybridEncrypt> getEncryptPrimitive(TINKPBEciesAeadHkdfPrivateKey *eciesKey) {
-  TINKEciesAeadHkdfPublicKeyManager *eciesKeyManager =
-      [[TINKEciesAeadHkdfPublicKeyManager alloc] init];
-
-  id<TINKHybridEncrypt> primitive =
-      [eciesKeyManager primitiveFromKey:[eciesKey publicKey] error:nil];
-  return primitive;
-}
-
-static NSData *encrypt(id<TINKHybridEncrypt> hybridEncrypt,
-                       TINKKeysetHandle *keysetHandle,
-                       uint32_t keyIndex,
-                       NSData *plaintext,
-                       NSData *context) {
-  // Ciphertext is the result of concatenating outputPrefix with the encrypted data.
-  NSMutableData *ciphertext = [NSMutableData data];
-
-  // Get the key prefix using the C++ CryptoFormat API.
-  // TODO(candrian): Update this to use the Obj-C API when it is implemented.
-  std::string output_prefix =
-      crypto::tink::CryptoFormat::get_output_prefix(keysetHandle.ccKeysetHandle->get_keyset().key(keyIndex))
-          .ValueOrDie();
-  NSData *outputPrefix = TINKStringToNSData(output_prefix);
-  [ciphertext appendData:outputPrefix];
-
-  NSData *result = [hybridEncrypt encrypt:plaintext withContextInfo:context error:nil];
-  [ciphertext appendData:result];
-  return ciphertext;
-}
-
 @implementation TINKHybridDecryptFactoryTest
+
+- (void)testEncryptWith:(TINKPBKeyset *)publicKeyset andDecryptWith:(TINKPBKeyset *)privateKeyset {
+  NSError *error = nil;
+  std::string serializedKeyset = TINKPBSerializeToString(privateKeyset, &error);
+  XCTAssertNil(error);
+  google::crypto::tink::Keyset ccPrivateKeyset;
+  XCTAssertTrue(ccPrivateKeyset.ParseFromString(serializedKeyset));
+  TINKKeysetHandle *privateKeysetHandle = [[TINKKeysetHandle alloc]
+      initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccPrivateKeyset)];
+
+  error = nil;
+  serializedKeyset = TINKPBSerializeToString(publicKeyset, &error);
+  XCTAssertNil(error);
+  google::crypto::tink::Keyset ccPublicKeyset;
+  XCTAssertTrue(ccPublicKeyset.ParseFromString(serializedKeyset));
+  TINKKeysetHandle *publicKeysetHandle = [[TINKKeysetHandle alloc]
+      initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccPublicKeyset)];
+
+  // Get a HybridDecrypt primitive.
+  error = nil;
+  id<TINKHybridDecrypt> hybridDecrypt =
+      [TINKHybridDecryptFactory primitiveWithKeysetHandle:privateKeysetHandle error:&error];
+  XCTAssertNotNil(hybridDecrypt);
+  XCTAssertNil(error);
+
+  // Get a HybridEncrypt primitive.
+  error = nil;
+  id<TINKHybridEncrypt> primitive =
+      [TINKHybridEncryptFactory primitiveWithKeysetHandle:publicKeysetHandle error:&error];
+  XCTAssertNotNil(primitive);
+  XCTAssertNil(error);
+
+  NSData *const plaintext = [@"some plaintext" dataUsingEncoding:NSUTF8StringEncoding];
+  NSData *const context = [@"some context info" dataUsingEncoding:NSUTF8StringEncoding];
+
+  // Encrypt.
+  error = nil;
+  NSData *ciphertext = [primitive encrypt:plaintext withContextInfo:context error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(ciphertext);
+
+  // Decrypt.
+  error = nil;
+  NSData *result = [hybridDecrypt decrypt:ciphertext withContextInfo:context error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(result);
+  XCTAssertTrue([result isEqualToData:plaintext]);
+}
 
 - (void)testPrimitiveWithEmptyKeyset {
   google::crypto::tink::Keyset keyset;
-  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(keyset)];
+  TINKKeysetHandle *keysetHandle =
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(keyset)];
   XCTAssertNotNil(keysetHandle);
 
   NSError *error = nil;
@@ -125,62 +122,59 @@ static NSData *encrypt(id<TINKHybridEncrypt> hybridEncrypt,
   XCTAssertTrue([TINKConfig registerConfig:hybridConfig error:&error]);
   XCTAssertNil(error);
 
-  // Create a test Keyset with 3 keys.
+  uint32_t keyId1 = 1;
+  uint32_t keyId2 = 2;
+  uint32_t keyId3 = 3;
   TINKPBEciesAeadHkdfPrivateKey *eciesKey1 = getNewEciesPrivateKey();
   TINKPBEciesAeadHkdfPrivateKey *eciesKey2 = getNewEciesPrivateKey();
   TINKPBEciesAeadHkdfPrivateKey *eciesKey3 = getNewEciesPrivateKey();
-  TINKPBKeyset *keyset = createTestKeyset(eciesKey1, eciesKey2, eciesKey3);
-  google::crypto::tink::Keyset ccKeyset;
-  error = nil;
-  std::string serializedKeyset = TINKPBSerializeToString(keyset, &error);
-  XCTAssertNil(error);
-  XCTAssertTrue(ccKeyset.ParseFromString(serializedKeyset));
-  TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccKeyset)];
 
-  // Get a HybridDecrypt primitive using the test Keyset.
-  error = nil;
-  id<TINKHybridDecrypt> hybridDecrypt =
-      [TINKHybridDecryptFactory primitiveWithKeysetHandle:keysetHandle error:&error];
-  XCTAssertNotNil(hybridDecrypt);
-  XCTAssertNil(error);
+  NSString *privateKeyType = @"type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  TINKPBKeyset_Key *tinkPrivateKey =
+      TINKCreateKey(privateKeyType, keyId1, eciesKey1, TINKPBOutputPrefixType_Tink,
+                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPrivate);
+  TINKPBKeyset_Key *rawPrivateKey =
+      TINKCreateKey(privateKeyType, keyId2, eciesKey2, TINKPBOutputPrefixType_Raw,
+                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPrivate);
+  TINKPBKeyset_Key *legacyPrivateKey =
+      TINKCreateKey(privateKeyType, keyId3, eciesKey3, TINKPBOutputPrefixType_Legacy,
+                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPrivate);
 
-  NSData *const plaintext = [@"some plaintext" dataUsingEncoding:NSUTF8StringEncoding];
-  NSData *const context = [@"some context info" dataUsingEncoding:NSUTF8StringEncoding];
+  NSString *publicKeyType = @"type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
+  TINKPBKeyset_Key *tinkPublicKey =
+      TINKCreateKey(publicKeyType, keyId1, eciesKey1.publicKey, TINKPBOutputPrefixType_Tink,
+                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPublic);
+  TINKPBKeyset_Key *rawPublicKey =
+      TINKCreateKey(publicKeyType, keyId2, eciesKey2.publicKey, TINKPBOutputPrefixType_Raw,
+                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPublic);
+  TINKPBKeyset_Key *legacyPublicKey =
+      TINKCreateKey(publicKeyType, keyId3, eciesKey3.publicKey, TINKPBOutputPrefixType_Legacy,
+                    TINKPBKeyStatusType_Enabled, TINKPBKeyData_KeyMaterialType_AsymmetricPublic);
 
-  // Encrypt the plaintext using the two ECIES keys.
-  id<TINKHybridEncrypt> hybridEncrypt1 = getEncryptPrimitive(eciesKey1);
-  NSData *ciphertext1 = encrypt(hybridEncrypt1, keysetHandle, 0, plaintext, context);
+  // Encrypt with tink and decrypt with tink.
+  TINKPBKeyset *privateKeyset = TINKCreateKeyset(tinkPrivateKey, rawPrivateKey, legacyPrivateKey);
+  TINKPBKeyset *publicKeyset = TINKCreateKeyset(tinkPublicKey, rawPublicKey, legacyPublicKey);
+  [self testEncryptWith:publicKeyset andDecryptWith:privateKeyset];
 
-  id<TINKHybridEncrypt> hybridEncrypt2 = getEncryptPrimitive(eciesKey2);
-  NSData *ciphertext2 = encrypt(hybridEncrypt2, keysetHandle, 1, plaintext, context);
+  // Encrypt with raw and decrypt with raw.
+  privateKeyset = TINKCreateKeyset(rawPrivateKey, tinkPrivateKey, legacyPrivateKey);
+  publicKeyset = TINKCreateKeyset(rawPublicKey, tinkPublicKey, legacyPublicKey);
+  [self testEncryptWith:publicKeyset andDecryptWith:privateKeyset];
 
-  // Decrypt ciphertext1.
-  error = nil;
-  NSData *result = [hybridDecrypt decrypt:ciphertext1 withContextInfo:context error:&error];
-  XCTAssertNil(error);
-  XCTAssertNotNil(result);
-  XCTAssertTrue([result isEqualToData:plaintext]);
+  // Encrypt with legacy and decrypt with legacy
+  privateKeyset = TINKCreateKeyset(legacyPrivateKey, tinkPrivateKey, rawPrivateKey);
+  publicKeyset = TINKCreateKeyset(legacyPublicKey, tinkPublicKey, rawPublicKey);
+  [self testEncryptWith:publicKeyset andDecryptWith:privateKeyset];
 
-  // Decrypt ciphertext2.
-  error = nil;
-  result = [hybridDecrypt decrypt:ciphertext2 withContextInfo:context error:&error];
-  XCTAssertNil(error);
-  XCTAssertNotNil(result);
-  XCTAssertTrue([result isEqualToData:plaintext]);
+  // Encrypt with tink as primary, decrypt with raw as primary.
+  publicKeyset = TINKCreateKeyset(tinkPublicKey, legacyPublicKey, rawPublicKey);
+  privateKeyset = TINKCreateKeyset(rawPrivateKey, tinkPrivateKey, legacyPrivateKey);
+  [self testEncryptWith:publicKeyset andDecryptWith:privateKeyset];
 
-  // Decrypt ciphertext1 with bad context.
-  error = nil;
-  NSData *const badContext = [@"bad context" dataUsingEncoding:NSUTF8StringEncoding];
-  result = [hybridDecrypt decrypt:ciphertext1 withContextInfo:badContext error:&error];
-  XCTAssertNil(result);
-  XCTAssertNotNil(error);
-  XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
-
-  NSDictionary *userInfo = [error userInfo];
-  XCTAssertNotNil(userInfo);
-
-  NSString *errorString = [userInfo objectForKey:NSLocalizedFailureReasonErrorKey];
-  XCTAssertTrue([errorString containsString:@"decryption failed"]);
+  // Encrypt with raw as primary, decrypt with tink as primary.
+  publicKeyset = TINKCreateKeyset(rawPublicKey, tinkPublicKey, legacyPublicKey);
+  privateKeyset = TINKCreateKeyset(tinkPrivateKey, rawPrivateKey, legacyPrivateKey);
+  [self testEncryptWith:publicKeyset andDecryptWith:privateKeyset];
 }
 
 @end

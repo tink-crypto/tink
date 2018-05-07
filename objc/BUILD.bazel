@@ -76,6 +76,16 @@ objc_library(
 
 # private libraries
 
+# C++ protocol buffers.
+# We need to convert them to cc_library so we can add them as a dependency of objc_library targets.
+
+cc_library(
+    name = "config_pb",
+    deps = [
+        "//proto:config_cc_proto",
+    ],
+)
+
 objc_library(
     name = "aead",
     hdrs = ["TINKAead.h"],
@@ -88,7 +98,6 @@ objc_library(
         "TINKAllConfig.h",
     ],
     deps = [
-        ":config_pb",
         ":registry_config",
         ":version",
         "//cc/config:tink_config",
@@ -226,20 +235,6 @@ objc_library(
 # We need to convert them to cc_library so we can add them as a dependency of objc_library targets.
 
 cc_library(
-    name = "aes_gcm_pb",
-    deps = [
-        "//proto:aes_gcm_cc_proto",
-    ],
-)
-
-cc_library(
-    name = "config_pb",
-    deps = [
-        "//proto:config_cc_proto",
-    ],
-)
-
-cc_library(
     name = "tink_pb",
     deps = [
         "//proto:tink_cc_proto",
@@ -275,11 +270,9 @@ objc_library(
         "//cc:keyset_handle",
         "//cc/aead:aead_config",
         "//cc/aead:aead_factory",
-        "//cc/aead:aes_gcm_key_manager",
         "//cc/util:status",
         "//cc/util:test_util",
         "//objc/aead:aead_internal",
-        "//objc/hybrid:ecies_aead_hkdf_public_key_manager",
         "//objc/util:test_helpers",
         "//proto:all_objc_proto",
     ],

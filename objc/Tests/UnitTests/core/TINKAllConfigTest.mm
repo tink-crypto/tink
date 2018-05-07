@@ -27,79 +27,72 @@
 #import "objc/TINKVersion.h"
 #import "objc/core/TINKRegistryConfig_Internal.h"
 #import "objc/util/TINKStrings.h"
-#import "proto/Config.pbobjc.h"
 
 @interface TINKAllConfigTest : XCTestCase
 @end
 
 @implementation TINKAllConfigTest
 
-- (void)testConfigContents {
-  NSString *publicKeySignKeyType = @"type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
-  NSString *publicKeyVerifyKeyType = @"type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
-  NSString *hybridEncryptKeyType = @"type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
-  NSString *hybridDecryptKeyType =
-      @"type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-  NSString *aesCtrHmacAeadKeyType = @"type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-  NSString *aesGcmKeyType = @"type.googleapis.com/google.crypto.tink.AesGcmKey";
-  NSString *hmacKeyType = @"type.googleapis.com/google.crypto.tink.HmacKey";
-
+- (void)test110Config {
   NSError *error = nil;
   TINKAllConfig *allConfig = [[TINKAllConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
   XCTAssertNotNil(allConfig);
   XCTAssertNil(error);
+  google::crypto::tink::RegistryConfig config = allConfig.ccConfig;
 
-  google::crypto::tink::RegistryConfig ccConfig = allConfig.ccConfig;
-  std::string serializedConfig;
-  XCTAssertTrue(ccConfig.SerializeToString(&serializedConfig));
+  XCTAssertTrue(config.entry_size() == 7);
 
-  NSError *parseError = nil;
-  TINKPBRegistryConfig *config =
-      [TINKPBRegistryConfig parseFromData:TINKStringToNSData(serializedConfig) error:&parseError];
-  XCTAssertNil(parseError);
-  XCTAssertNotNil(config);
+  std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
+  XCTAssertTrue("TinkMac" == config.entry(0).catalogue_name());
+  XCTAssertTrue("Mac" == config.entry(0).primitive_name());
+  XCTAssertTrue(hmac_key_type == config.entry(0).type_url());
+  XCTAssertTrue(config.entry(0).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(0).key_manager_version());
 
-  XCTAssertTrue([config.entryArray[0].catalogueName isEqualToString:@"TinkMac"]);
-  XCTAssertTrue([config.entryArray[0].primitiveName isEqualToString:@"Mac"]);
-  XCTAssertTrue([config.entryArray[0].typeURL isEqualToString:hmacKeyType]);
-  XCTAssertTrue(config.entryArray[0].newKeyAllowed);
-  XCTAssertEqual(config.entryArray[0].keyManagerVersion, 0);
+  std::string aes_ctr_hmac_aead_key_type =
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
+  XCTAssertTrue("TinkAead" == config.entry(1).catalogue_name());
+  XCTAssertTrue("Aead" == config.entry(1).primitive_name());
+  XCTAssertTrue(aes_ctr_hmac_aead_key_type == config.entry(1).type_url());
+  XCTAssertTrue(config.entry(1).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(1).key_manager_version());
 
-  XCTAssertTrue([config.entryArray[1].catalogueName isEqualToString:@"TinkAead"]);
-  XCTAssertTrue([config.entryArray[1].primitiveName isEqualToString:@"Aead"]);
-  XCTAssertTrue([config.entryArray[1].typeURL isEqualToString:aesCtrHmacAeadKeyType]);
-  XCTAssertTrue(config.entryArray[1].newKeyAllowed);
-  XCTAssertEqual(config.entryArray[1].keyManagerVersion, 0);
+  std::string aes_gcm_key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  XCTAssertTrue("TinkAead" == config.entry(2).catalogue_name());
+  XCTAssertTrue("Aead" == config.entry(2).primitive_name());
+  XCTAssertTrue(aes_gcm_key_type == config.entry(2).type_url());
+  XCTAssertTrue(config.entry(2).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(2).key_manager_version());
 
-  XCTAssertTrue([config.entryArray[2].catalogueName isEqualToString:@"TinkAead"]);
-  XCTAssertTrue([config.entryArray[2].primitiveName isEqualToString:@"Aead"]);
-  XCTAssertTrue([config.entryArray[2].typeURL isEqualToString:aesGcmKeyType]);
-  XCTAssertTrue(config.entryArray[2].newKeyAllowed);
-  XCTAssertEqual(config.entryArray[2].keyManagerVersion, 0);
+  std::string ecies_hybrid_decrypt_key_type =
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  XCTAssertTrue("TinkHybridDecrypt" == config.entry(3).catalogue_name());
+  XCTAssertTrue("HybridDecrypt" == config.entry(3).primitive_name());
+  XCTAssertTrue(ecies_hybrid_decrypt_key_type == config.entry(3).type_url());
+  XCTAssertTrue(config.entry(3).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(3).key_manager_version());
 
-  XCTAssertTrue([config.entryArray[3].catalogueName isEqualToString:@"TinkHybridDecrypt"]);
-  XCTAssertTrue([config.entryArray[3].primitiveName isEqualToString:@"HybridDecrypt"]);
-  XCTAssertTrue([config.entryArray[3].typeURL isEqualToString:hybridDecryptKeyType]);
-  XCTAssertTrue(config.entryArray[3].newKeyAllowed);
-  XCTAssertEqual(config.entryArray[3].keyManagerVersion, 0);
+  std::string ecies_hybrid_encrypt_key_type =
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
+  XCTAssertTrue("TinkHybridEncrypt" == config.entry(4).catalogue_name());
+  XCTAssertTrue("HybridEncrypt" == config.entry(4).primitive_name());
+  XCTAssertTrue(ecies_hybrid_encrypt_key_type == config.entry(4).type_url());
+  XCTAssertTrue(config.entry(4).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(4).key_manager_version());
 
-  XCTAssertTrue([config.entryArray[4].catalogueName isEqualToString:@"TinkHybridEncrypt"]);
-  XCTAssertTrue([config.entryArray[4].primitiveName isEqualToString:@"HybridEncrypt"]);
-  XCTAssertTrue([config.entryArray[4].typeURL isEqualToString:hybridEncryptKeyType]);
-  XCTAssertTrue(config.entryArray[4].newKeyAllowed);
-  XCTAssertEqual(config.entryArray[4].keyManagerVersion, 0);
+  std::string ecdsa_sign_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+  XCTAssertTrue("TinkPublicKeySign" == config.entry(5).catalogue_name());
+  XCTAssertTrue("PublicKeySign" == config.entry(5).primitive_name());
+  XCTAssertTrue(ecdsa_sign_key_type == config.entry(5).type_url());
+  XCTAssertTrue(config.entry(5).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(5).key_manager_version());
 
-  XCTAssertTrue([config.entryArray[5].catalogueName isEqualToString:@"TinkPublicKeySign"]);
-  XCTAssertTrue([config.entryArray[5].primitiveName isEqualToString:@"PublicKeySign"]);
-  XCTAssertTrue([config.entryArray[5].typeURL isEqualToString:publicKeySignKeyType]);
-  XCTAssertTrue(config.entryArray[5].newKeyAllowed);
-  XCTAssertEqual(config.entryArray[5].keyManagerVersion, 0);
-
-  XCTAssertTrue([config.entryArray[6].catalogueName isEqualToString:@"TinkPublicKeyVerify"]);
-  XCTAssertTrue([config.entryArray[6].primitiveName isEqualToString:@"PublicKeyVerify"]);
-  XCTAssertTrue([config.entryArray[6].typeURL isEqualToString:publicKeyVerifyKeyType]);
-  XCTAssertTrue(config.entryArray[6].newKeyAllowed);
-  XCTAssertEqual(config.entryArray[6].keyManagerVersion, 0);
+  std::string ecdsa_verify_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
+  XCTAssertTrue("TinkPublicKeyVerify" == config.entry(6).catalogue_name());
+  XCTAssertTrue("PublicKeyVerify" == config.entry(6).primitive_name());
+  XCTAssertTrue(ecdsa_verify_key_type == config.entry(6).type_url());
+  XCTAssertTrue(config.entry(6).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(6).key_manager_version());
 }
 
 - (void)testConfigRegistration {

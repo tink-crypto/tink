@@ -21,6 +21,11 @@
 #import "proto/EciesAeadHkdf.pbobjc.h"
 #import "proto/Tink.pbobjc.h"
 
+TINKPBKeyset *TINKCreateKeyset(TINKPBKeyset_Key *primaryKey, TINKPBKeyset_Key *key1,
+                               TINKPBKeyset_Key *key2);
+
+void TINKAddKey(TINKPBKeyset_Key *key, TINKPBKeyset *keyset);
+
 void TINKAddKey(NSString *keyType, NSUInteger keyId, TINKPBKeyset *keyset);
 
 void TINKAddTinkKey(NSString *keyType,
@@ -48,3 +53,10 @@ TINKPBEciesAeadHkdfPrivateKey *TINKGetEciesAesGcmHkdfTestKey(TINKPBEllipticCurve
                                                              TINKPBEcPointFormat ecPointFormat,
                                                              TINKPBHashType hashType,
                                                              uint32_t aesGcmKeySize);
+
+TINKPBKeyset_Key *TINKCreateKey(NSString *keyType, uint32_t keyID, GPBMessage *newKey,
+                                TINKPBOutputPrefixType outputPrefix, TINKPBKeyStatusType keyStatus,
+                                TINKPBKeyData_KeyMaterialType materialType);
+
+TINKPBKeyset *TINKCreateKeyset(TINKPBKeyset_Key *primaryKey, TINKPBKeyset_Key *key1,
+                               TINKPBKeyset_Key *key2);

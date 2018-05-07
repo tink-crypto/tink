@@ -30,19 +30,21 @@
 #import "proto/EciesAeadHkdf.pbobjc.h"
 #import "proto/Tink.pbobjc.h"
 
-void TINKAddKey(NSString *keyType,
-                uint32_t keyID,
-                GPBMessage *newKey,
-                TINKPBOutputPrefixType outputPrefix,
-                TINKPBKeyStatusType keyStatus,
-                TINKPBKeyData_KeyMaterialType materialType,
-                TINKPBKeyset *keyset) {
-  if (!keyset.keyArray) {
-    keyset.keyArray = [[NSMutableArray alloc] init];
-  }
+TINKPBKeyset *TINKCreateKeyset(TINKPBKeyset_Key *primaryKey, TINKPBKeyset_Key *key1,
+                               TINKPBKeyset_Key *key2) {
+  TINKPBKeyset *keyset = [[TINKPBKeyset alloc] init];
 
-  NSMutableArray<TINKPBKeyset_Key *> *keyArray = [keyset keyArray];
+  TINKAddKey(primaryKey, keyset);
+  TINKAddKey(key1, keyset);
+  TINKAddKey(key2, keyset);
 
+  keyset.primaryKeyId = [primaryKey keyId];
+  return keyset;
+}
+
+TINKPBKeyset_Key *TINKCreateKey(NSString *keyType, uint32_t keyID, GPBMessage *newKey,
+                                TINKPBOutputPrefixType outputPrefix, TINKPBKeyStatusType keyStatus,
+                                TINKPBKeyData_KeyMaterialType materialType) {
   TINKPBKeyset_Key *key = [[TINKPBKeyset_Key alloc] init];
   key.outputPrefixType = outputPrefix;
   key.keyId = keyID;
@@ -55,6 +57,24 @@ void TINKAddKey(NSString *keyType,
   key.keyData.typeURL = keyType;
   key.keyData.keyMaterialType = materialType;
   key.keyData.value = [newKey data];
+  return key;
+}
+
+void TINKAddKey(NSString *keyType, uint32_t keyId, GPBMessage *keyMaterial,
+                TINKPBOutputPrefixType outputPrefix, TINKPBKeyStatusType keyStatus,
+                TINKPBKeyData_KeyMaterialType materialType, TINKPBKeyset *keyset) {
+  TINKPBKeyset_Key *key =
+      TINKCreateKey(keyType, keyId, keyMaterial, outputPrefix, keyStatus, materialType);
+
+  TINKAddKey(key, keyset);
+}
+
+void TINKAddKey(TINKPBKeyset_Key *key, TINKPBKeyset *keyset) {
+  if (!keyset.keyArray) {
+    keyset.keyArray = [[NSMutableArray alloc] init];
+  }
+
+  NSMutableArray<TINKPBKeyset_Key *> *keyArray = [keyset keyArray];
 
   [keyArray addObject:key];
 }
