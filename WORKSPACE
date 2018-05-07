@@ -511,9 +511,9 @@ java_import_external(
 
 http_archive(
     name = "build_bazel_rules_apple",
-    strip_prefix = "rules_apple-0.3.0",
-    url = "https://github.com/bazelbuild/rules_apple/archive/0.3.0.zip",
-    sha256 = "0c2f7b903c2334a3e7e0b565f0f80a854047ac36202978318f853cb762bf33f3",
+    strip_prefix = "rules_apple-0.4.0",
+    url = "https://github.com/bazelbuild/rules_apple/archive/0.4.0.zip",
+    sha256 = "917ed6cf98b0fa686d89025c4e0871cf72524ed88e70d92c2ea28e0aa0e2e123",
 )
 
 http_archive(
