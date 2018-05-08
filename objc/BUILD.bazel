@@ -19,6 +19,7 @@ PUBLIC_APIS = [
     "TINKHybridDecryptFactory.h",
     "TINKHybridEncrypt.h",
     "TINKHybridEncryptFactory.h",
+    "TINKJSONKeysetReader.h",
     "TINKKeyManager.h",
     "TINKKeysetHandle.h",
     "TINKKeysetReader.h",
@@ -36,6 +37,7 @@ PUBLIC_API_DEPS = [
     ":config",
     ":hybrid_decrypt",
     ":hybrid_encrypt",
+    ":json_keyset_reader",
     ":key_manager",
     ":keyset_handle",
     ":keyset_reader",
@@ -165,6 +167,23 @@ objc_library(
 )
 
 objc_library(
+    name = "json_keyset_reader",
+    srcs = ["core/TINKJSONKeysetReader.mm"],
+    hdrs = [
+        "TINKJSONKeysetReader.h",
+    ],
+    deps = [
+        ":keyset_reader",
+        ":tink_pb",
+        "//cc:json_keyset_reader",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "//proto:all_objc_proto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+objc_library(
     name = "key_manager",
     hdrs = [
         "TINKKeyManager.h",
@@ -265,6 +284,7 @@ objc_library(
     ]),
     deps = [
         ":testonly",
+        "@com_google_protobuf//:protobuf_lite",
         "//cc:aead",
         "//cc:crypto_format",
         "//cc:keyset_handle",
