@@ -13,9 +13,9 @@ For example, if you want to use all implementations of all primitives in Tink
 1.1.0, the initialization would look as follows:
 
 ```objc
-   #import "third_party/tink/objc/TINKAllConfig.h"
-   #import "third_party/tink/objc/TINKConfig.h"
-   #import "third_party/tink/objc/TINKVersion.h"
+   #import "objc/TINKAllConfig.h"
+   #import "objc/TINKConfig.h"
+   #import "objc/TINKVersion.h"
 
    NSError *error = nil;
    TINKAllConfig *config = [[TINKAllConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
@@ -31,9 +31,9 @@ For example, if you want to use all implementations of all primitives in Tink
 To use only implementations of the AEAD primitive:
 
 ```objc
-   #import "third_party/tink/objc/aead/TINKAeadConfig.h"
-   #import "third_party/tink/objc/TINKConfig.h"
-   #import "third_party/tink/objc/TINKVersion.h"
+   #import "objc/aead/TINKAeadConfig.h"
+   #import "objc/TINKConfig.h"
+   #import "objc/TINKVersion.h"
 
    NSError *error = nil;
    TINKAeadConfig *aeadConfig = [TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
@@ -81,8 +81,8 @@ depending on the wire format of the stored keyset, for example a
 [`TINKBinaryKeysetReader`](https://github.com/google/tink/blob/master/objc/TINKBinaryKeysetReader.h).
 
 ```objc
-    #import "third_party/tink/objc/TINKBinaryKeysetReader.h"
-    #import "third_party/tink/objc/TINKKeysetHandle+Cleartext.h"
+    #import "objc/TINKBinaryKeysetReader.h"
+    #import "objc/TINKKeysetHandle+Cleartext.h"
 
     NSError *error = nil;
     NSData *binaryKeyset = ...;
@@ -127,9 +127,9 @@ Associated Data](PRIMITIVES.md#authenticated-encryption-with-associated-data)
 primitive to encrypt or decrypt data:
 
 ```objc
-    #import "third_party/tink/objc/TINKAead.h"
-    #import "third_party/tink/objc/TINKKeysetHandle.h"
-    #import "third_party/tink/objc/aead/TINKAeadFactory.h"
+    #import "objc/TINKAead.h"
+    #import "objc/TINKKeysetHandle.h"
+    #import "objc/aead/TINKAeadFactory.h"
 
     // 1. Get a handle to the key material.
     TINKKeysetHandle *keysetHandle = ...;
@@ -154,9 +154,9 @@ To decrypt using [a combination of public key encryption and symmetric key
 encryption](PRIMITIVES.md#hybrid-encryption):
 
 ```objc
-    #import "third_party/tink/objc/TINKHybridDecrypt.h"
-    #import "third_party/tink/objc/TINKKeysetHandle.h"
-    #import "third_party/tink/objc/hybrid/TINKHybridDecryptFactory.h"
+    #import "objc/TINKHybridDecrypt.h"
+    #import "objc/TINKKeysetHandle.h"
+    #import "objc/hybrid/TINKHybridDecryptFactory.h"
 
     // 1. Get a handle to the key material.
     TINKKeysetHandle *keysetHandle = ...;
