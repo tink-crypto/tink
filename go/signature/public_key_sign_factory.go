@@ -16,38 +16,21 @@ package signature
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// PublicKeySignFactory allows obtaining a PublicKeySign primitive from a
-// KeysetHandle.
-var publicKeySignFactoryInstance *publicKeySignFactory
-var publicKeySignFactoryOnce sync.Once
-
-type publicKeySignFactory struct{}
-
-// PublicKeySignFactory creates an instance of publicKeySignFactory if there isn't
-// and returns the instance.
-func PublicKeySignFactory() *publicKeySignFactory {
-	publicKeySignFactoryOnce.Do(func() {
-		publicKeySignFactoryInstance = new(publicKeySignFactory)
-	})
-	return publicKeySignFactoryInstance
+// GetPublicKeySignPrimitive returns a PublicKeySign primitive from the given keyset handle.
+func GetPublicKeySignPrimitive(handle *tink.KeysetHandle) (tink.PublicKeySign, error) {
+	return GetPublicKeySignPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
 }
 
-// GetPrimitive returns a PublicKeySign primitive from the given keyset handle.
-func (f *publicKeySignFactory) GetPrimitive(handle *tink.KeysetHandle) (tink.PublicKeySign, error) {
-	return f.GetPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
-}
-
-// GetPrimitiveWithCustomerManager returns a PublicKeySign primitive from the given
+// GetPublicKeySignPrimitiveWithCustomerManager returns a PublicKeySign primitive from the given
 // keyset handle and custom key manager.
-func (f *publicKeySignFactory) GetPrimitiveWithCustomerManager(
+func GetPublicKeySignPrimitiveWithCustomerManager(
 	handle *tink.KeysetHandle, manager tink.KeyManager) (tink.PublicKeySign, error) {
-	ps, err := tink.Registry().GetPrimitivesWithCustomManager(handle, manager)
+	ps, err := tink.GetPrimitivesWithCustomManager(handle, manager)
 	if err != nil {
 		return nil, fmt.Errorf("public_key_sign_factory: cannot obtain primitive set: %s", err)
 	}

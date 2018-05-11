@@ -22,11 +22,11 @@ import (
 )
 
 func TestRegistration(t *testing.T) {
-	success, err := mac.Config().RegisterStandardKeyTypes()
+	success, err := mac.RegisterStandardKeyTypes()
 	if !success || err != nil {
 		t.Errorf("cannot register standard key types")
 	}
-	keyManager, err := tink.Registry().GetKeyManager(mac.HmacTypeURL)
+	keyManager, err := tink.GetKeyManager(mac.HmacTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

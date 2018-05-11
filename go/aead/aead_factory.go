@@ -16,44 +16,20 @@ package aead
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/google/tink/go/tink"
 )
 
-// Factory offers methods for obtaining a primitive from a KeysetHandle.
-// They gets primitives from the Registry, which can be initialized
-// via convenience methods from aead.Config.
-//
-// The returned primitive works with a keyset (rather than a single key).
-// To encrypt a plaintext, it uses the primary key in the keyset, and prepends
-// to the ciphertext a certain prefix associated with the primary key.
-// To decrypt, the primitive uses the prefix of the ciphertext to efficiently
-// select the right key in the set. If the keys associated with the prefix do not
-// work, the primitive tries all keys with OutputPrefixType_RAW.
-var factoryInstance *factory
-var factoryOnce sync.Once
-
-type factory struct{}
-
-// Factory creates an instance of factory if there isn't and returns the instance.
-func Factory() *factory {
-	factoryOnce.Do(func() {
-		factoryInstance = new(factory)
-	})
-	return factoryInstance
-}
-
 // GetPrimitive returns a Aead primitive from the given keyset handle.
-func (f *factory) GetPrimitive(handle *tink.KeysetHandle) (tink.Aead, error) {
-	return f.GetPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
+func GetPrimitive(handle *tink.KeysetHandle) (tink.Aead, error) {
+	return GetPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
 }
 
 // GetPrimitiveWithCustomerManager returns a Aead primitive from the given
 // keyset handle and custom key manager.
-func (f *factory) GetPrimitiveWithCustomerManager(
+func GetPrimitiveWithCustomerManager(
 	handle *tink.KeysetHandle, manager tink.KeyManager) (tink.Aead, error) {
-	ps, err := tink.Registry().GetPrimitivesWithCustomManager(handle, manager)
+	ps, err := tink.GetPrimitivesWithCustomManager(handle, manager)
 	if err != nil {
 		return nil, fmt.Errorf("aead_factory: cannot obtain primitive set: %s", err)
 	}

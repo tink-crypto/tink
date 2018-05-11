@@ -16,43 +16,20 @@ package mac
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/google/tink/go/tink"
 )
 
-// Factory provides methods that allow obtaining a Mac primitive from a KeysetHandle.
-// They get primitives from the Registry.
-//
-// The returned primitive works with a keyset (rather than a single key).
-// To compute a MAC tag, it uses the primary key in the keyset, and prepends
-// to the tag a certain prefix associated with the primary key. To verify a tag,
-// the primitive uses the prefix of the tag to efficiently select the
-// right key in the set. If the keys associated with the prefix do not validate the tag,
-// the primitive tries all keys with OutputPrefixType_RAW.
-var factoryInstance *factory
-var factoryOnce sync.Once
-
-type factory struct{}
-
-// Factory creates an instance of factory if there isn't and returns the instance.
-func Factory() *factory {
-	factoryOnce.Do(func() {
-		factoryInstance = new(factory)
-	})
-	return factoryInstance
-}
-
 // GetPrimitive creates a Mac primitive from the given keyset handle.
-func (f *factory) GetPrimitive(handle *tink.KeysetHandle) (tink.Mac, error) {
-	return f.GetPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
+func GetPrimitive(handle *tink.KeysetHandle) (tink.Mac, error) {
+	return GetPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
 }
 
 // GetPrimitiveWithCustomerManager creates a Mac primitive from the given
 // keyset handle and a custom key manager.
-func (f *factory) GetPrimitiveWithCustomerManager(
+func GetPrimitiveWithCustomerManager(
 	handle *tink.KeysetHandle, manager tink.KeyManager) (tink.Mac, error) {
-	ps, err := tink.Registry().GetPrimitivesWithCustomManager(handle, manager)
+	ps, err := tink.GetPrimitivesWithCustomManager(handle, manager)
 	if err != nil {
 		return nil, fmt.Errorf("mac_factory: cannot obtain primitive set: %s", err)
 	}

@@ -26,16 +26,8 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func TestPublicKeySignFactoryInstance(t *testing.T) {
-	f := signature.PublicKeySignFactory()
-	if f == nil {
-		t.Errorf("PublicKeySignFactory() returns nil")
-	}
-}
-
 func TestPublicKeySignVerifyFactory(t *testing.T) {
-	signature.PublicKeyVerifyConfig().RegisterStandardKeyTypes()
-	signature.PublicKeySignConfig().RegisterStandardKeyTypes()
+	signature.RegisterStandardKeyTypes()
 	tinkPriv, tinkPub := newEcdsaKeysetKeypair(commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P521,
 		tinkpb.OutputPrefixType_TINK,
@@ -53,14 +45,14 @@ func TestPublicKeySignVerifyFactory(t *testing.T) {
 		tinkpb.OutputPrefixType_CRUNCHY,
 		4)
 	privKeys := []*tinkpb.Keyset_Key{tinkPriv, legacyPriv, rawPriv, crunchyPriv}
-	privKeyset := tink.NewKeyset(privKeys[0].KeyId, privKeys)
+	privKeyset := tink.CreateKeyset(privKeys[0].KeyId, privKeys)
 	privKeysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(privKeyset)
 	pubKeys := []*tinkpb.Keyset_Key{tinkPub, legacyPub, rawPub, crunchyPub}
-	pubKeyset := tink.NewKeyset(pubKeys[0].KeyId, pubKeys)
+	pubKeyset := tink.CreateKeyset(pubKeys[0].KeyId, pubKeys)
 	pubKeysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(pubKeyset)
 
 	// sign some random data
-	signer, err := signature.PublicKeySignFactory().GetPrimitive(privKeysetHandle)
+	signer, err := signature.GetPublicKeySignPrimitive(privKeysetHandle)
 	if err != nil {
 		t.Errorf("getting sign primitive failed: %s", err)
 	}
@@ -70,7 +62,7 @@ func TestPublicKeySignVerifyFactory(t *testing.T) {
 		t.Errorf("signing failed: %s", err)
 	}
 	// verify with the same set of public keys should work
-	verifier, err := signature.PublicKeyVerifyFactory().GetPrimitive(pubKeysetHandle)
+	verifier, err := signature.GetPublicKeyVerifyPrimitive(pubKeysetHandle)
 	if err != nil {
 		t.Errorf("getting verify primitive failed: %s", err)
 	}
@@ -83,9 +75,9 @@ func TestPublicKeySignVerifyFactory(t *testing.T) {
 		tinkpb.OutputPrefixType_TINK,
 		1)
 	pubKeys = []*tinkpb.Keyset_Key{randomPub}
-	pubKeyset = tink.NewKeyset(pubKeys[0].KeyId, pubKeys)
+	pubKeyset = tink.CreateKeyset(pubKeys[0].KeyId, pubKeys)
 	pubKeysetHandle, _ = tink.CleartextKeysetHandle().ParseKeyset(pubKeyset)
-	verifier, err = signature.PublicKeyVerifyFactory().GetPrimitive(pubKeysetHandle)
+	verifier, err = signature.GetPublicKeyVerifyPrimitive(pubKeysetHandle)
 	if err != nil {
 		t.Errorf("getting verify primitive failed: %s", err)
 	}
@@ -100,15 +92,15 @@ func newEcdsaKeysetKeypair(hashType commonpb.HashType,
 	keyID uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
 	key := testutil.NewEcdsaPrivateKey(hashType, curve)
 	serializedKey, _ := proto.Marshal(key)
-	keyData := tink.NewKeyData(signature.EcdsaSignTypeURL,
+	keyData := tink.CreateKeyData(signature.EcdsaSignTypeURL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PRIVATE)
-	privKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
+	privKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
 
 	serializedKey, _ = proto.Marshal(key.PublicKey)
-	keyData = tink.NewKeyData(signature.EcdsaVerifyTypeURL,
+	keyData = tink.CreateKeyData(signature.EcdsaVerifyTypeURL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PUBLIC)
-	pubKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
+	pubKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
 	return privKey, pubKey
 }

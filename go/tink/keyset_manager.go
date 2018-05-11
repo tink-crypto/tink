@@ -59,7 +59,7 @@ func (km *KeysetManager) RotateWithTemplate(keyTemplate *tinkpb.KeyTemplate) err
 	if keyTemplate == nil {
 		return fmt.Errorf("keyset_manager: cannot rotate, need key template")
 	}
-	keyData, err := Registry().NewKeyData(keyTemplate)
+	keyData, err := NewKeyData(keyTemplate)
 	if err != nil {
 		return fmt.Errorf("keyset_manager: cannot create KeyData: %s", err)
 	}
@@ -68,7 +68,12 @@ func (km *KeysetManager) RotateWithTemplate(keyTemplate *tinkpb.KeyTemplate) err
 	if outputPrefixType == tinkpb.OutputPrefixType_UNKNOWN_PREFIX {
 		outputPrefixType = tinkpb.OutputPrefixType_TINK
 	}
-	key := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
+	key := &tinkpb.Keyset_Key{
+		KeyData:          keyData,
+		Status:           tinkpb.KeyStatusType_ENABLED,
+		KeyId:            keyID,
+		OutputPrefixType: outputPrefixType,
+	}
 	// Set the new key as the primary key
 	km.keyset.Key = append(km.keyset.Key, key)
 	km.keyset.PrimaryKeyId = keyID
@@ -160,7 +165,10 @@ func EncryptKeyset(keyset *tinkpb.Keyset,
 	if err != nil {
 		return nil, fmt.Errorf("keyset_manager: cannot get keyset info: %s", err)
 	}
-	encryptedKeyset := NewEncryptedKeyset(encrypted, info)
+	encryptedKeyset := &tinkpb.EncryptedKeyset{
+		EncryptedKeyset: encrypted,
+		KeysetInfo:      info,
+	}
 	return encryptedKeyset, nil
 }
 

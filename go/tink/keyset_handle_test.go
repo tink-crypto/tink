@@ -21,11 +21,11 @@ import (
 )
 
 func TestNewKeysetHandleBasic(t *testing.T) {
-	keyData := NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
-	key := NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := NewKeyset(1, []*tinkpb.Keyset_Key{key})
+	keyData := CreateKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keyset := CreateKeyset(1, []*tinkpb.Keyset_Key{key})
 	keysetInfo, _ := GetKeysetInfo(keyset)
-	encryptedKeyset := NewEncryptedKeyset([]byte{1}, keysetInfo)
+	encryptedKeyset := CreateEncryptedKeyset([]byte{1}, keysetInfo)
 	h, err := newKeysetHandle(keyset, encryptedKeyset)
 	if err != nil {
 		t.Errorf("unexpected error when creating new KeysetHandle")

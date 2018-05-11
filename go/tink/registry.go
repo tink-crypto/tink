@@ -22,6 +22,10 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
+var (
+	keyManagers = newKeyManagerMap()
+)
+
 // Mapping between typeURL and KeyManager.
 // Using mutex for concurrency read and write
 type keyManagerMap struct {
@@ -30,7 +34,7 @@ type keyManagerMap struct {
 }
 
 // NewKeyManagerMap creates a new instance of keyManagerMap.
-func NewKeyManagerMap() *keyManagerMap {
+func newKeyManagerMap() *keyManagerMap {
 	kmMap := new(keyManagerMap)
 	kmMap.m = make(map[string]KeyManager)
 	return kmMap
@@ -52,67 +56,27 @@ func (kmMap *keyManagerMap) Put(typeURL string, keyManager KeyManager) {
 	kmMap.m[typeURL] = keyManager
 }
 
-// Registry for KeyMangers. <p>
-// It is essentially a big container (map) that for each supported key type holds
-// a corresponding KeyManager object, which "understands" the key type (i.e. the KeyManager
-// can instantiate the primitive corresponding to given key, or can generate new keys
-// of the supported key type).  Registry is initialized at startup, and is later
-// used to instantiate primitives for given keys or keysets.  Keeping KeyManagers for all
-// primitives in a single Registry (rather than having a separate KeyManager per primitive)
-// enables modular construction of compound primitives from "simple" ones, e.g.,
-// AES-CTR-HMAC AEAD encryption uses IND-CPA encryption and a MAC. <p>
-//
-// Note that regular users will usually not work directly with Registry, but rather
-// via primitive factories, which in the background query the Registry for specific
-// KeyManagers. Registry is public though, to enable configurations with custom
-// primitives and KeyManagers.
-type registry struct {
-	// Thread-safe mapping between typeURL and KeyManager.
-	keyManagers *keyManagerMap
-}
-
-// newRegistry creates a new instance of registry.
-func newRegistry() *registry {
-	reg := new(registry)
-	reg.keyManagers = NewKeyManagerMap()
-	return reg
-}
-
-// registryInstance is a shared instance of registry. It is initialized only once
-// via function Registry().
-var registryInstance *registry
-var once sync.Once
-
-// Registry creates an instance of registry if there isn't and returns the instance.
-func Registry() *registry {
-	// only create the registry instance once
-	once.Do(func() {
-		registryInstance = newRegistry()
-	})
-	return registryInstance
-}
-
 // RegisterKeyManager registers the given key manager.
 // It does nothing if there already exists a key manager with the same type url.
 // It returns true if the key manager is registered; false otherwise.
-func (reg *registry) RegisterKeyManager(manager KeyManager) (bool, error) {
+func RegisterKeyManager(manager KeyManager) (bool, error) {
 	if manager == nil {
 		return false, fmt.Errorf("registry: invalid key manager")
 	}
 	typeURL := manager.GetKeyType()
 	// try to get the key manager with the given typeURL, return false if there is
-	_, existed := reg.keyManagers.Get(typeURL)
+	_, existed := keyManagers.Get(typeURL)
 	if existed {
 		return false, nil
 	}
 	// add the manager
-	reg.keyManagers.Put(typeURL, manager)
+	keyManagers.Put(typeURL, manager)
 	return true, nil
 }
 
 // GetKeyManager returns the key manager for the given type url if existed.
-func (reg *registry) GetKeyManager(typeURL string) (KeyManager, error) {
-	manager, existed := reg.keyManagers.Get(typeURL)
+func GetKeyManager(typeURL string) (KeyManager, error) {
+	manager, existed := keyManagers.Get(typeURL)
 	if !existed {
 		return nil, fmt.Errorf("registry: unsupported key type: %s", typeURL)
 	}
@@ -120,11 +84,11 @@ func (reg *registry) GetKeyManager(typeURL string) (KeyManager, error) {
 }
 
 // NewKeyData generates a new KeyData for the given KeyTemplate.
-func (reg *registry) NewKeyData(template *tinkpb.KeyTemplate) (*tinkpb.KeyData, error) {
+func NewKeyData(template *tinkpb.KeyTemplate) (*tinkpb.KeyData, error) {
 	if template == nil {
 		return nil, fmt.Errorf("registry: invalid key template")
 	}
-	manager, err := reg.GetKeyManager(template.TypeUrl)
+	manager, err := GetKeyManager(template.TypeUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -132,11 +96,11 @@ func (reg *registry) NewKeyData(template *tinkpb.KeyTemplate) (*tinkpb.KeyData, 
 }
 
 // NewKeyFromKeyTemplate generates a new key for the given KeyTemplate.
-func (reg *registry) NewKeyFromKeyTemplate(template *tinkpb.KeyTemplate) (proto.Message, error) {
+func NewKeyFromKeyTemplate(template *tinkpb.KeyTemplate) (proto.Message, error) {
 	if template == nil {
 		return nil, fmt.Errorf("registry: invalid key template")
 	}
-	manager, err := reg.GetKeyManager(template.TypeUrl)
+	manager, err := GetKeyManager(template.TypeUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -145,9 +109,9 @@ func (reg *registry) NewKeyFromKeyTemplate(template *tinkpb.KeyTemplate) (proto.
 
 // NewKeyFromKeyFormat generates a new key for the given KeyFormat using the
 // KeyManager identified by the given typeURL.
-func (reg *registry) NewKeyFromKeyFormat(typeURL string,
+func NewKeyFromKeyFormat(typeURL string,
 	format proto.Message) (proto.Message, error) {
-	manager, err := reg.GetKeyManager(typeURL)
+	manager, err := GetKeyManager(typeURL)
 	if err != nil {
 		return nil, err
 	}
@@ -156,9 +120,9 @@ func (reg *registry) NewKeyFromKeyFormat(typeURL string,
 
 // GetPrimitiveFromKey creates a new primitive for the given key using the KeyManager
 // identified by the given typeURL.
-func (reg *registry) GetPrimitiveFromKey(typeURL string,
+func GetPrimitiveFromKey(typeURL string,
 	key proto.Message) (interface{}, error) {
-	manager, err := reg.GetKeyManager(typeURL)
+	manager, err := GetKeyManager(typeURL)
 	if err != nil {
 		return nil, err
 	}
@@ -166,21 +130,21 @@ func (reg *registry) GetPrimitiveFromKey(typeURL string,
 }
 
 // GetPrimitiveFromKeyData creates a new primitive for the key given in the given KeyData.
-func (reg *registry) GetPrimitiveFromKeyData(keyData *tinkpb.KeyData) (interface{}, error) {
+func GetPrimitiveFromKeyData(keyData *tinkpb.KeyData) (interface{}, error) {
 	if keyData == nil {
 		return nil, fmt.Errorf("registry: invalid key data")
 	}
-	return reg.GetPrimitiveFromSerializedKey(keyData.TypeUrl, keyData.Value)
+	return GetPrimitiveFromSerializedKey(keyData.TypeUrl, keyData.Value)
 }
 
 // GetPrimitiveFromSerializedKey creates a new primitive for the given serialized key
 // using the KeyManager identified by the given typeURL.
-func (reg *registry) GetPrimitiveFromSerializedKey(typeURL string,
+func GetPrimitiveFromSerializedKey(typeURL string,
 	serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, fmt.Errorf("registry: invalid serialized key")
 	}
-	manager, err := reg.GetKeyManager(typeURL)
+	manager, err := GetKeyManager(typeURL)
 	if err != nil {
 		return nil, err
 	}
@@ -193,8 +157,8 @@ func (reg *registry) GetPrimitiveFromSerializedKey(typeURL string,
 //
 // The returned set is usually later "wrapped" into a class that implements
 // the corresponding Primitive-interface.
-func (reg *registry) GetPrimitives(keysetHandle *KeysetHandle) (*PrimitiveSet, error) {
-	return reg.GetPrimitivesWithCustomManager(keysetHandle, nil)
+func GetPrimitives(keysetHandle *KeysetHandle) (*PrimitiveSet, error) {
+	return GetPrimitivesWithCustomManager(keysetHandle, nil)
 }
 
 // GetPrimitivesWithCustomManager creates a set of primitives corresponding to
@@ -209,7 +173,7 @@ func (reg *registry) GetPrimitives(keysetHandle *KeysetHandle) (*PrimitiveSet, e
 //
 // The returned set is usually later "wrapped" into a class that implements
 // the corresponding Primitive-interface.
-func (reg *registry) GetPrimitivesWithCustomManager(
+func GetPrimitivesWithCustomManager(
 	keysetHandle *KeysetHandle, customManager KeyManager) (*PrimitiveSet, error) {
 	// TODO(thaidn): check that all keys are of the same primitive
 	if keysetHandle == nil {
@@ -229,7 +193,7 @@ func (reg *registry) GetPrimitivesWithCustomManager(
 		if customManager != nil && customManager.DoesSupport(key.KeyData.TypeUrl) {
 			primitive, err = customManager.GetPrimitiveFromSerializedKey(key.KeyData.Value)
 		} else {
-			primitive, err = reg.GetPrimitiveFromKeyData(key.KeyData)
+			primitive, err = GetPrimitiveFromKeyData(key.KeyData)
 		}
 		if err != nil {
 			return nil, fmt.Errorf("registry: cannot get primitive from key: %s", err)
@@ -245,12 +209,12 @@ func (reg *registry) GetPrimitivesWithCustomManager(
 	return primitiveSet, nil
 }
 
-// GetPublicKeyData is Convenience method for extracting the public key data
+// getPublicKeyData is Convenience method for extracting the public key data
 // from the given serialized private key. It looks up a PrivateKeyManager
 // identified by the given typeURL, and calls the manager's GetPublicKeyData() method.
-func (reg *registry) GetPublicKeyData(typeURL string,
+func getPublicKeyData(typeURL string,
 	serializedPrivKey []byte) (*tinkpb.KeyData, error) {
-	keyManager, err := reg.GetKeyManager(typeURL)
+	keyManager, err := GetKeyManager(typeURL)
 	if err != nil {
 		return nil, err
 	}

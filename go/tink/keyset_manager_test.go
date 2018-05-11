@@ -27,11 +27,11 @@ import (
 )
 
 func setupKeysetManagerTest() {
-	_, err := mac.Config().RegisterStandardKeyTypes()
+	_, err := mac.RegisterStandardKeyTypes()
 	if err != nil {
 		panic(fmt.Sprintf("cannot register mac key types: %s", err))
 	}
-	_, err = aead.Config().RegisterStandardKeyTypes()
+	_, err = aead.RegisterStandardKeyTypes()
 	if err != nil {
 		panic(fmt.Sprintf("cannot register aead key types: %s", err))
 	}
@@ -68,11 +68,11 @@ func TestEncryptedKeyset(t *testing.T) {
 	setupKeysetManagerTest()
 	macTemplate := mac.HmacSha256Tag128KeyTemplate()
 	aesTemplate := aead.Aes128GcmKeyTemplate()
-	keyData, err := tink.Registry().NewKeyData(aesTemplate)
+	keyData, err := tink.NewKeyData(aesTemplate)
 	if err != nil {
 		t.Errorf("cannot create new key data: %s", err)
 	}
-	p, err := tink.Registry().GetPrimitiveFromKeyData(keyData)
+	p, err := tink.GetPrimitiveFromKeyData(keyData)
 	if p == nil || err != nil {
 		t.Errorf("cannot get primitive from key data: %s", err)
 	}

@@ -21,20 +21,13 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-func TestConfigInstance(t *testing.T) {
-	c := aead.Config()
-	if c == nil {
-		t.Errorf("Config() returns nil")
-	}
-}
-
 func TestConfigRegistration(t *testing.T) {
-	success, err := aead.Config().RegisterStandardKeyTypes()
+	success, err := aead.RegisterStandardKeyTypes()
 	if !success || err != nil {
 		t.Errorf("cannot register standard key types")
 	}
 	// check for AES-GCM key manager
-	keyManager, err := tink.Registry().GetKeyManager(aead.AesGcmTypeURL)
+	keyManager, err := tink.GetKeyManager(aead.AesGcmTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

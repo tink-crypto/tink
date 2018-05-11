@@ -21,20 +21,20 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-func TestPublicKeyVerifyConfigInstance(t *testing.T) {
-	config := signature.PublicKeyVerifyConfig()
-	if config == nil {
-		t.Errorf("instance of publicKeyVerifyConfig is nil")
-	}
-}
-
-func TestPublicKeyVerifyConfigRegistration(t *testing.T) {
-	_, err := signature.PublicKeyVerifyConfig().RegisterStandardKeyTypes()
+func TestSignatureConfigRegistration(t *testing.T) {
+	_, err := signature.RegisterStandardKeyTypes()
 	if err != nil {
 		t.Errorf("cannot register standard key types")
 	}
+	// check for EcdsaSignKeyManager
+	keyManager, err := tink.GetKeyManager(signature.EcdsaSignTypeURL)
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+	}
+	var _ = keyManager.(*signature.EcdsaSignKeyManager)
+
 	// check for EcdsaVerifyKeyManager
-	keyManager, err := tink.Registry().GetKeyManager(signature.EcdsaVerifyTypeURL)
+	keyManager, err = tink.GetKeyManager(signature.EcdsaVerifyTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}

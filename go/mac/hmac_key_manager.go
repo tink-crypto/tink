@@ -115,7 +115,12 @@ func (km *HmacKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyDat
 	if err != nil {
 		return nil, errInvalidHmacKeyFormat
 	}
-	return tink.NewKeyData(HmacTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC), nil
+
+	return &tinkpb.KeyData{
+		TypeUrl:         HmacTypeURL,
+		Value:           serializedKey,
+		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+	}, nil
 }
 
 // DoesSupport checks whether this KeyManager supports the given key type.

@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package aead provides implementations of the Aead primitive.
-package aead
+// Package signature provides implementations of the PublicKeySign and PublicKeyVerify primitives.
+package signature
 
 import (
 	"github.com/google/tink/go/tink"
@@ -22,7 +22,11 @@ import (
 // RegisterStandardKeyTypes registers standard Aead key types and their managers
 // with the Registry.
 func RegisterStandardKeyTypes() (bool, error) {
-	return RegisterKeyManager(NewAesGcmKeyManager())
+	result, err := RegisterKeyManager(NewEcdsaSignKeyManager())
+	if err != nil {
+		return result, err
+	}
+	return RegisterKeyManager(NewEcdsaVerifyKeyManager())
 }
 
 // RegisterKeyManager registers the given keyManager for the key type given in

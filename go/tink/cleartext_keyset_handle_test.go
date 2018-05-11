@@ -25,7 +25,7 @@ import (
 )
 
 func setupCleartextKeysetHandleTest() {
-	if _, err := mac.Config().RegisterStandardKeyTypes(); err != nil {
+	if _, err := mac.RegisterStandardKeyTypes(); err != nil {
 		panic(fmt.Sprintf("cannot register mac key types: %s", err))
 	}
 }
@@ -111,7 +111,7 @@ func TestCleartextKeysetHandleGenerateNewBasic(t *testing.T) {
 	if key.KeyData.TypeUrl != macTemplate.TypeUrl {
 		t.Errorf("incorrect type url, expect %s, got %s", macTemplate.TypeUrl, key.KeyData.TypeUrl)
 	}
-	if _, err = mac.Factory().GetPrimitive(handle); err != nil {
+	if _, err = mac.GetPrimitive(handle); err != nil {
 		t.Errorf("cannot get primitive from generated keyset handle: %s", err)
 	}
 }

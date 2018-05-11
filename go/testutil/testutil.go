@@ -124,13 +124,13 @@ func NewTestHmacKeyset(tagSize uint32,
 // NewTestKeyset creates a new test Keyset.
 func NewTestKeyset(keyData *tinkpb.KeyData,
 	primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
-	primaryKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 42, primaryOutputPrefixType)
-	rawKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 43, tinkpb.OutputPrefixType_RAW)
-	legacyKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 44, tinkpb.OutputPrefixType_LEGACY)
-	tinkKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 45, tinkpb.OutputPrefixType_TINK)
-	crunchyKey := tink.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 46, tinkpb.OutputPrefixType_CRUNCHY)
+	primaryKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 42, primaryOutputPrefixType)
+	rawKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 43, tinkpb.OutputPrefixType_RAW)
+	legacyKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 44, tinkpb.OutputPrefixType_LEGACY)
+	tinkKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 45, tinkpb.OutputPrefixType_TINK)
+	crunchyKey := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 46, tinkpb.OutputPrefixType_CRUNCHY)
 	keys := []*tinkpb.Keyset_Key{primaryKey, rawKey, legacyKey, tinkKey, crunchyKey}
-	return tink.NewKeyset(primaryKey.KeyId, keys)
+	return tink.CreateKeyset(primaryKey.KeyId, keys)
 }
 
 // NewDummyKey returns a dummy key that doesn't contain actual key material.
@@ -183,7 +183,7 @@ func NewAesGcmKeyData(keySize uint32) *tinkpb.KeyData {
 	keyValue := random.GetRandomBytes(keySize)
 	key := aead.NewAesGcmKey(aead.AesGcmKeyVersion, keyValue)
 	serializedKey, _ := proto.Marshal(key)
-	return tink.NewKeyData(aead.AesGcmTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
+	return tink.CreateKeyData(aead.AesGcmTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
 }
 
 // NewSerializedAesGcmKey creates a AesGcmKey with randomly generated key material.

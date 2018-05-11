@@ -16,38 +16,21 @@ package signature
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// publicKeyVerifyFactory allows obtaining a PublicKeySign primitive from a
-// KeysetHandle.
-var publicKeyVerifyFactoryInstance *publicKeyVerifyFactory
-var publicKeyVerifyFactoryOnce sync.Once
-
-type publicKeyVerifyFactory struct{}
-
-// PublicKeyVerifyFactory creates an instance of publicKeyVerifyFactory if there isn't
-// and returns the instance.
-func PublicKeyVerifyFactory() *publicKeyVerifyFactory {
-	publicKeyVerifyFactoryOnce.Do(func() {
-		publicKeyVerifyFactoryInstance = new(publicKeyVerifyFactory)
-	})
-	return publicKeyVerifyFactoryInstance
+// GetPublicKeyVerifyPrimitive returns a PublicKeyVerify primitive from the given keyset handle.
+func GetPublicKeyVerifyPrimitive(handle *tink.KeysetHandle) (tink.PublicKeyVerify, error) {
+	return GetPublicKeyVerifyPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
 }
 
-// GetPrimitive returns a PublicKeyVerify primitive from the given keyset handle.
-func (f *publicKeyVerifyFactory) GetPrimitive(handle *tink.KeysetHandle) (tink.PublicKeyVerify, error) {
-	return f.GetPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
-}
-
-// GetPrimitiveWithCustomerManager returns a PublicKeyVerify primitive from the given
+// GetPublicKeyVerifyPrimitiveWithCustomerManager returns a PublicKeyVerify primitive from the given
 // keyset handle and custom key manager.
-func (f *publicKeyVerifyFactory) GetPrimitiveWithCustomerManager(
+func GetPublicKeyVerifyPrimitiveWithCustomerManager(
 	handle *tink.KeysetHandle, manager tink.KeyManager) (tink.PublicKeyVerify, error) {
-	ps, err := tink.Registry().GetPrimitivesWithCustomManager(handle, manager)
+	ps, err := tink.GetPrimitivesWithCustomManager(handle, manager)
 	if err != nil {
 		return nil, fmt.Errorf("public_key_verify_factory: cannot obtain primitive set: %s", err)
 	}

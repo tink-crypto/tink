@@ -29,14 +29,7 @@ import (
 )
 
 func setupFactoryTest() {
-	aead.Config().RegisterStandardKeyTypes()
-}
-
-func TestFactoryInstance(t *testing.T) {
-	f := aead.Factory()
-	if f == nil {
-		t.Errorf("Factory() returns nil")
-	}
+	aead.RegisterStandardKeyTypes()
 }
 
 func TestFactoryMultipleKeys(t *testing.T) {
@@ -48,7 +41,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 		t.Errorf("expect a non-raw key")
 	}
 	keysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset)
-	a, err := aead.Factory().GetPrimitive(keysetHandle)
+	a, err := aead.GetPrimitive(keysetHandle)
 	if err != nil {
 		t.Errorf("GetPrimitive failed: %s", err)
 	}
@@ -62,9 +55,9 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if rawKey.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("expect a raw key")
 	}
-	keyset2 := tink.NewKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
+	keyset2 := tink.CreateKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
 	keysetHandle2, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset2)
-	a2, err := aead.Factory().GetPrimitive(keysetHandle2)
+	a2, err := aead.GetPrimitive(keysetHandle2)
 	if err != nil {
 		t.Errorf("GetPrimitive failed: %s", err)
 	}
@@ -77,7 +70,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	primaryKey = keyset2.Key[0]
 	expectedPrefix, _ = tink.GetOutputPrefix(primaryKey)
 	keysetHandle2, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset2)
-	a2, err = aead.Factory().GetPrimitive(keysetHandle2)
+	a2, err = aead.GetPrimitive(keysetHandle2)
 	if err != nil {
 		t.Errorf("GetPrimitive failed: %s", err)
 	}
@@ -95,7 +88,7 @@ func TestFactoryRawKeyAsPrimary(t *testing.T) {
 	}
 	keysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset)
 
-	a, err := aead.Factory().GetPrimitive(keysetHandle)
+	a, err := aead.GetPrimitive(keysetHandle)
 	if err != nil {
 		t.Errorf("cannot get primitive from keyset handle: %s", err)
 	}
