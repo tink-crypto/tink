@@ -14,13 +14,15 @@
 
 goog.module('tink.subtle.Bytes');
 
+const crypt = goog.require('goog.crypt');
+
 /**
  * Does near constant time byte array comparison.
  * @param {!Uint8Array} ba1 The first bytearray to check.
  * @param {!Uint8Array} ba2 The second bytearray to check.
  * @return {boolean} If the array are equal.
  */
-const compareByteArray = function(ba1, ba2) {
+const compare = function(ba1, ba2) {
   if (ba1.length !== ba2.length) {
     return false;
   }
@@ -31,4 +33,32 @@ const compareByteArray = function(ba1, ba2) {
   return yes == 1;
 };
 
-exports = {compareByteArray};
+/**
+ * Converts the hex string to a byte array.
+ *
+ * @param {string} hex the input
+ * @return {!Uint8Array} the byte array output
+ * @static
+ */
+const fromHex = function(hex) {
+  return new Uint8Array(crypt.hexToByteArray(hex));
+};
+
+
+/**
+ * Converts a byte array to hex.
+ *
+ * @param {!Uint8Array} bytes the byte array input
+ * @return {string} hex the output
+ * @static
+ */
+const toHex = function(bytes) {
+  return crypt.byteArrayToHex(bytes);
+};
+
+
+exports = {
+  compare,
+  fromHex,
+  toHex,
+};

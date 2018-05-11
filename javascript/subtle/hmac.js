@@ -22,20 +22,7 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 const Sha1 = goog.require('goog.crypt.Sha1');
 const Sha256 = goog.require('goog.crypt.Sha256');
 const Sha512 = goog.require('goog.crypt.Sha512');
-
-/**
- * The minimize tag size.
- *
- * @const {int}
- */
-const MIN_TAG_SIZE_IN_BYTES = 10;
-
-/**
- * The minimize key size.
- *
- * @const {int}
- */
-const MIN_KEY_SIZE_IN_BYTES = 16;
+const array = goog.require('goog.array');
 
 /**
  * Implementation of HMAC.
@@ -49,9 +36,10 @@ class Hmac {
    * @param {string} algoName accepted names are HMACSHA1, HMACSHA256 and
    *     HMACSHA512
    * @param {!Uint8Array} key must be longer than
-   *     {@link MIN_KEY_SIZE_IN_BYTES}
+   *     {@link Mac.MIN_KEY_SIZE_IN_BYTES}
    * @param {int} tagSize the size of the tag, must be larger than or equal to
-   *     {@link MIN_TAG_SIZE_IN_BYTES}
+   *     {@link Mac.MIN_TAG_SIZE_IN_BYTES}
+   * @throws {InvalidArgumentException}
    */
   constructor(algoName, key, tagSize) {
     /** @const @private {int} */
@@ -60,14 +48,14 @@ class Hmac {
     /** @const @private {GoogHmac} */
     this.hmac_;
 
-    if (tagSize < MIN_TAG_SIZE_IN_BYTES) {
-      throw new SecurityException(
-          'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES);
+    if (tagSize < Mac.MIN_TAG_SIZE_IN_BYTES) {
+      throw new InvalidArgumentsException(
+          'tag too short, must be at least ' + Mac.MIN_TAG_SIZE_IN_BYTES);
     }
 
-    if (key.length < MIN_KEY_SIZE_IN_BYTES) {
+    if (key.length < Mac.MIN_KEY_SIZE_IN_BYTES) {
       throw new InvalidArgumentsException(
-          'key too short, must be at least ' + MIN_KEY_SIZE_IN_BYTES);
+          'key too short, must be at least ' + Mac.MIN_KEY_SIZE_IN_BYTES);
     }
 
     switch (algoName) {
@@ -93,7 +81,7 @@ class Hmac {
         this.hmac_ = new GoogHmac(new Sha512(), key);
         break;
       default:
-        throw new UnsupportedException(algoName + ' is not supported');
+        throw new InvalidArgumentException(algoName + ' is not supported');
     }
   }
 
@@ -101,7 +89,8 @@ class Hmac {
    * @override
    */
   computeMac(data) {
-    return new Uint8Array(this.hmac_.getHmac(data), 0, this.tagSize_);
+    return new Uint8Array(
+        array.slice(this.hmac_.getHmac(data), 0, this.tagSize_));
   }
 
   /**
@@ -109,8 +98,8 @@ class Hmac {
    */
   verifyMac(tag, data) {
     const computedTag = this.computeMac(data);
-    if (!Bytes.compareByteArray(tag, computedTag)) {
-      throw new SecurityError('invalid tag');
+    if (!Bytes.compare(tag, computedTag)) {
+      throw new SecurityException('invalid tag');
     }
   }
 }

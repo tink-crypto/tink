@@ -14,6 +14,22 @@
 
 goog.module('tink.Mac');
 
+const SecurityException = goog.require('tink.exception.SecurityException');
+
+/**
+ * The minimize tag size.
+ *
+ * @const {int}
+ */
+const MIN_TAG_SIZE_IN_BYTES = 10;
+
+/**
+ * The minimize key size.
+ *
+ * @const {int}
+ */
+const MIN_KEY_SIZE_IN_BYTES = 16;
+
 /**
  * Interface for Message Authentication Codes (MAC).
  *
@@ -31,6 +47,7 @@ class Mac {
    *
    * @param {!Uint8Array} data the data to compute MAC
    * @return {!Uint8Array} the MAC tag
+   * @throws {SecurityException}
    */
   computeMac(data) {}
 
@@ -40,6 +57,13 @@ class Mac {
    *
    * @param {!Uint8Array} tag  the MAC tag
    * @param {!Uint8Array} data the data to compute MAC
+   * @throws {SecurityException}
    */
   verifyMac(tag, data) {}
 }
+
+exports = {
+  Mac,
+  MIN_TAG_SIZE_IN_BYTES,
+  MIN_KEY_SIZE_IN_BYTES
+};
