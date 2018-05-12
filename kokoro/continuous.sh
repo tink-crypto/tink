@@ -37,4 +37,5 @@ time bazel test \
 # On Linux, run all Maven tests and upload snapshot jars
 if [[ $PLATFORM == 'linux' ]]; then
   ./maven/publish-snapshot.sh
+  ./maven/test-snapshot.sh
 fi
