@@ -31,6 +31,39 @@ testSuite({
     });
   },
 
+  testConstructor: function() {
+    assertThrows(function() {
+      new Hmac('blah', Random.randbytes(16), 16);  // invalid HMAC algo name
+    });
+    assertThrows(function() {
+      new Hmac('HMACSHA1', Random.randbytes(15), 16);  // invalid key size
+    });
+    assertThrows(function() {
+      new Hmac('HMACSHA1', Random.randbytes(16), 9);  // tag size too short
+    });
+    assertThrows(function() {
+      new Hmac('HMACSHA1', Random.randbytes(16), 21);  // tag size too long
+    });
+    assertThrows(function() {
+      new Hmac('HMACSHA256', Random.randbytes(15), 16);  // invalid key size
+    });
+    assertThrows(function() {
+      new Hmac('HMACSHA256', Random.randbytes(16), 9);  // tag size too short
+    });
+    assertThrows(function() {
+      new Hmac('HMACSHA256', Random.randbytes(16), 33);  // tag size too long
+    });
+    assertThrows(function() {
+      new Hmac('HMACSHA512', Random.randbytes(15), 16);  // invalid key size
+    });
+    assertThrows(function() {
+      new Hmac('HMACSHA512', Random.randbytes(16), 9);  // tag size too short
+    });
+    assertThrows(function() {
+      new Hmac('HMACSHA512', Random.randbytes(16), 65);  // tag size too long
+    });
+  },
+
   testModify: function() {
     const key = Random.randBytes(16);
     const msg = Random.randBytes(4);
