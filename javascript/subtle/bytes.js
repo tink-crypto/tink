@@ -33,6 +33,27 @@ const compare = function(ba1, ba2) {
   return yes == 1;
 };
 
+
+/**
+ * Returns a new array that is the result of joining the arguments.
+ * @param {...!Uint8Array} var_args
+ * @return {!Uint8Array}
+ * @private
+ */
+const concat = function(var_args) {
+  var length = 0;
+  for (var i = 0; i < arguments.length; i++) {
+    length += arguments[i].length;
+  }
+  var result = new Uint8Array(length);
+  var curOffset = 0;
+  for (var i = 0; i < arguments.length; i++) {
+    result.set(arguments[i], curOffset);
+    curOffset += arguments[i].length;
+  }
+  return result;
+};
+
 /**
  * Converts the hex string to a byte array.
  *
@@ -43,7 +64,6 @@ const compare = function(ba1, ba2) {
 const fromHex = function(hex) {
   return new Uint8Array(crypt.hexToByteArray(hex));
 };
-
 
 /**
  * Converts a byte array to hex.
@@ -56,9 +76,9 @@ const toHex = function(bytes) {
   return crypt.byteArrayToHex(bytes);
 };
 
-
 exports = {
   compare,
+  concat,
   fromHex,
   toHex,
 };
