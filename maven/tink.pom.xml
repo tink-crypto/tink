@@ -69,6 +69,7 @@
     <google-api-client.version>1.22.0</google-api-client.version>
     <google-api-services-cloudkms.version>v1-rev9-1.22.0</google-api-services-cloudkms.version>
     <google-auto-service.version>1.0-rc4</google-auto-service.version>
+    <google-guava.version>25.0-jre</google-guava.version>
     <json.version>20170516</json.version>
     <protobuf.version>3.3.0</protobuf.version>
     <protobuf-lite.version>3.0.1</protobuf-lite.version>
@@ -97,8 +98,11 @@
           <groupId>commons-logging</groupId>
           <artifactId>commons-logging</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
       </exclusions>
-
     </dependency>
 
     <dependency>
@@ -109,6 +113,10 @@
         <exclusion>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -122,6 +130,10 @@
           <groupId>com.google.guava</groupId>
           <artifactId>guava-jdk5</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
@@ -129,12 +141,30 @@
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-cloudkms</artifactId>
       <version>${google-api-services-cloudkms.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${google-guava.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.google.auto.service</groupId>
       <artifactId>auto-service</artifactId>
       <version>${google-auto-service.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

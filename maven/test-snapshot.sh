@@ -22,7 +22,7 @@ set -e
 set -x
 
 test_java_snapshot() {
-  local test_tmpdir="/tmp/tink_maven_snapshot_test"
+  local test_tmpdir="/tmp/tink"
   mkdir -p $test_tmpdir
 
   local test_util="tools/testing/cross_language/test_util.sh"
@@ -36,14 +36,13 @@ test_java_snapshot() {
   local decrypted="$test_tmpdir/decrypted.bin"
   local keyset="$test_tmpdir/keyset.cfg"
 
-  openssl rand 128 -out $plaintext
+  openssl rand 128 > $plaintext
   mvn exec:java -f $pom_file \
     -Dexec.args="encrypt --keyset ${keyset} --in ${plaintext} --out ${encrypted}"
   mvn exec:java -f $pom_file \
     -Dexec.args="decrypt --keyset ${keyset} --in ${encrypted} --out ${decrypted}"
 
   assert_files_equal $plaintext $decrypted
-
   rm -rf $test_tmpdir
 }
 
