@@ -24,9 +24,11 @@
 #import "objc/TINKAead.h"
 #import "objc/TINKBinaryKeysetReader.h"
 #import "objc/aead/TINKAeadInternal.h"
+#import "objc/hybrid/TINKHybridKeyTemplate.h"
 #import "objc/util/TINKStrings.h"
 #import "proto/Tink.pbobjc.h"
 
+#include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
@@ -147,16 +149,30 @@ static TINKPBKeyset *gKeyset;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
-- (void)testInvalidKeyTemplate {
+- (void)testInvalidKeyTemplateProto {
   NSError *error = nil;
-  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithKeyTemplate:nil error:&error];
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithKeyTemplateProto:nil error:&error];
   XCTAssertNil(handle);
   XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
 }
 #pragma clang diagnostic pop
 
-- (void)testValidKeyTeamplte {
-  // TODO(candrian): Implement this once the C++ method is working.
+- (void)testValidKeyTemplate {
+  NSError *error = nil;
+  TINKHybridKeyTemplate *keyTemplate =
+      [[TINKHybridKeyTemplate alloc] initWithKeyTemplate:TINKEciesP256HkdfHmacSha256Aes128Gcm
+                                                   error:&error];
+  XCTAssertNotNil(keyTemplate);
+  XCTAssertNil(error);
+
+  // TODO(candrian): Update this test once C++ adds support for key templates.
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initWithKeyTemplate:keyTemplate error:&error];
+  XCTAssertNil(handle);
+  XCTAssertNotNil(error);
+  XCTAssertTrue(error.code == crypto::tink::util::error::UNIMPLEMENTED);
+  XCTAssertTrue([error.localizedFailureReason
+      containsString:@"Generation of new keysets from templates is not implemented yet"]);
 }
 
 @end

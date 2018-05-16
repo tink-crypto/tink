@@ -19,8 +19,10 @@
 #import "objc/TINKKeysetHandle.h"
 
 #import "objc/TINKAead.h"
+#import "objc/TINKKeyTemplate.h"
 #import "objc/TINKKeysetReader.h"
 #import "objc/aead/TINKAeadInternal.h"
+#import "objc/core/TINKKeyTemplate_Internal.h"
 #import "objc/core/TINKKeysetReader_Internal.h"
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
@@ -80,7 +82,7 @@
   return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
 }
 
-- (instancetype)initWithKeyTemplate:(TINKPBKeyTemplate *)keyTemplate error:(NSError **)error {
+- (instancetype)initWithKeyTemplateProto:(TINKPBKeyTemplate *)keyTemplate error:(NSError **)error {
   // Serialize the Obj-C protocol buffer.
   std::string serializedKeyTemplate = TINKPBSerializeToString(keyTemplate, error);
   if (serializedKeyTemplate.empty()) {
@@ -98,6 +100,18 @@
   }
 
   auto st = crypto::tink::KeysetHandle::GenerateNew(ccKeyTemplate);
+  if (!st.ok()) {
+    if (error) {
+      *error = TINKStatusToError(st.status());
+    }
+    return nil;
+  }
+
+  return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
+}
+
+- (instancetype)initWithKeyTemplate:(TINKKeyTemplate *)keyTemplate error:(NSError **)error {
+  auto st = crypto::tink::KeysetHandle::GenerateNew(*(keyTemplate.ccKeyTemplate));
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st.status());

@@ -19,8 +19,10 @@ PUBLIC_APIS = [
     "TINKHybridDecryptFactory.h",
     "TINKHybridEncrypt.h",
     "TINKHybridEncryptFactory.h",
+    "TINKHybridKeyTemplate.h",
     "TINKJSONKeysetReader.h",
     "TINKKeyManager.h",
+    "TINKKeyTemplate.h",
     "TINKKeysetHandle.h",
     "TINKKeysetReader.h",
     "TINKMac.h",
@@ -39,6 +41,7 @@ PUBLIC_API_DEPS = [
     ":hybrid_encrypt",
     ":json_keyset_reader",
     ":key_manager",
+    ":key_template",
     ":keyset_handle",
     ":keyset_reader",
     ":mac",
@@ -50,6 +53,7 @@ PUBLIC_API_DEPS = [
     "//objc/hybrid:hybrid_config",
     "//objc/hybrid:hybrid_decrypt_factory",
     "//objc/hybrid:hybrid_encrypt_factory",
+    "//objc/hybrid:hybrid_key_template",
     "//objc/mac:mac_config",
     "//objc/mac:mac_factory",
     "//objc/util:errors",
@@ -77,16 +81,6 @@ objc_library(
 )
 
 # private libraries
-
-# C++ protocol buffers.
-# We need to convert them to cc_library so we can add them as a dependency of objc_library targets.
-
-cc_library(
-    name = "config_pb",
-    deps = [
-        "//proto:config_cc_proto",
-    ],
-)
 
 objc_library(
     name = "aead",
@@ -116,7 +110,7 @@ objc_library(
     ],
     deps = [
         ":keyset_reader",
-        ":tink_pb",
+        ":tink_cc_pb",
         "//cc:binary_keyset_reader",
         "//objc/util:errors",
         "//objc/util:strings",
@@ -174,7 +168,7 @@ objc_library(
     ],
     deps = [
         ":keyset_reader",
-        ":tink_pb",
+        ":tink_cc_pb",
         "//cc:json_keyset_reader",
         "//objc/util:errors",
         "//objc/util:strings",
@@ -191,6 +185,20 @@ objc_library(
 )
 
 objc_library(
+    name = "key_template",
+    srcs = ["core/TINKKeyTemplate.mm"],
+    hdrs = [
+        "TINKKeyTemplate.h",
+        "core/TINKKeyTemplate_Internal.h",
+    ],
+    deps = [
+        ":tink_cc_pb",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+objc_library(
     name = "keyset_handle",
     srcs = ["core/TINKKeysetHandle.mm"],
     hdrs = [
@@ -200,8 +208,9 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":aead",
+        ":key_template",
         ":keyset_reader",
-        ":tink_pb",
+        ":tink_cc_pb",
         "//cc:keyset_handle",
         "//cc/util:status",
         "//objc/aead:aead_internal",
@@ -238,7 +247,7 @@ objc_library(
         "core/TINKRegistryConfig_Internal.h",
     ],
     deps = [
-        ":config_pb",
+        ":config_cc_pb",
         ":version",
     ],
 )
@@ -254,7 +263,14 @@ objc_library(
 # We need to convert them to cc_library so we can add them as a dependency of objc_library targets.
 
 cc_library(
-    name = "tink_pb",
+    name = "config_cc_pb",
+    deps = [
+        "//proto:config_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "tink_cc_pb",
     deps = [
         "//proto:tink_cc_proto",
     ],
@@ -284,7 +300,6 @@ objc_library(
     ]),
     deps = [
         ":testonly",
-        "@com_google_protobuf//:protobuf_lite",
         "//cc:aead",
         "//cc:crypto_format",
         "//cc:keyset_handle",
@@ -293,7 +308,9 @@ objc_library(
         "//cc/util:status",
         "//cc/util:test_util",
         "//objc/aead:aead_internal",
+        "//objc/util:proto_helpers",
         "//objc/util:test_helpers",
         "//proto:all_objc_proto",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )

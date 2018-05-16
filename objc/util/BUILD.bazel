@@ -34,3 +34,25 @@ objc_library(
         "@com_google_protobuf//:objectivec",
     ],
 )
+
+objc_library(
+    name = "proto_helpers",
+    testonly = 1,
+    srcs = ["TINKProtoHelpers.mm"],
+    hdrs = ["TINKProtoHelpers.h"],
+    deps = [
+        ":errors",
+        ":strings",
+        ":tink_cc_pb",
+        "//cc/util:status",
+        "//proto:all_objc_proto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "tink_cc_pb",
+    deps = [
+        "//proto:tink_cc_proto",
+    ],
+)

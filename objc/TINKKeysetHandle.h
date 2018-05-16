@@ -18,6 +18,7 @@
 
 #import <Foundation/Foundation.h>
 
+@class TINKKeyTemplate;
 @class TINKKeysetReader;
 @class TINKPBKeyTemplate;
 @protocol TINKAead;
@@ -51,14 +52,28 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Returns a new TINKKeysetHandle that contains a single fresh key generated according to
- * @c keyTemplate.
+ * @c keyTemplate. @c keyTemplate can be obtained by using one of the subclasses such as
+ * TINKAeadKeyTemplate, TINKHybridKeyTemplate etc.
  *
- * @param keyTemplate A TINKPBKeyTemplate protocol buffer that describes the key to be generated.
+ * @param keyTemplate An instance of TINKKeyTemplate that describes the key to be generated.
+ *                    To get an instance of TINKKeyTemplate use one of the primitive-specific
+ *                    subclasses such as: TINKAeadKeyTemplate, TINKHybridKeyTemplate etc.
  * @param error       If non-nil it will be populated with a descriptive error message.
  * @return            A TINKKeysetHandle, or nil in case of error.
  */
-- (nullable instancetype)initWithKeyTemplate:(TINKPBKeyTemplate *)keyTemplate
-                                       error:(NSError **)error;
+- (nullable instancetype)initWithKeyTemplate:(TINKKeyTemplate *)keyTemplate error:(NSError **)error;
+
+/**
+ * Returns a new TINKKeysetHandle that contains a single fresh key generated according to
+ * the protocol buffer @c keyTemplateProto.
+ *
+ * @param keyTemplateProto A TINKPBKeyTemplate protocol buffer that describes the key to be
+ *                         generated.
+ * @param error            If non-nil it will be populated with a descriptive error message.
+ * @return                 A TINKKeysetHandle, or nil in case of error.
+ */
+- (nullable instancetype)initWithKeyTemplateProto:(TINKPBKeyTemplate *)keyTemplateProto
+                                            error:(NSError **)error;
 
 @end
 

@@ -48,6 +48,26 @@ objc_library(
     ],
 )
 
+objc_library(
+    name = "hybrid_key_template",
+    srcs = ["TINKHybridKeyTemplate.mm"],
+    hdrs = ["TINKHybridKeyTemplate.h"],
+    deps = [
+        ":tink_cc_pb",
+        "//cc/hybrid:hybrid_key_templates",
+        "//cc/util:status",
+        "//objc:key_template",
+        "//objc/util:errors",
+    ],
+)
+
+cc_library(
+    name = "tink_cc_pb",
+    deps = [
+        "//proto:tink_cc_proto",
+    ],
+)
+
 ####################################
 #         Private/Internal         #
 ####################################
