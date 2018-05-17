@@ -16,4 +16,4 @@
  **************************************************************************
  */
 
-#import "objc/aead/TINKAeadKeyTemplates.h"
+#import "objc/aead/TINKAeadKeyTemplate.h"

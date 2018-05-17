@@ -22,8 +22,7 @@
 
 @interface TINKKeyTemplate ()
 
-- (instancetype)initWithCcKeyTemplate:(google::crypto::tink::KeyTemplate *)ccKeyTemplate
-    NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithCcKeyTemplate:(google::crypto::tink::KeyTemplate *)ccKeyTemplate;
 - (void)setCcKeyTemplate:(google::crypto::tink::KeyTemplate *)ccKeyTemplate;
 - (google::crypto::tink::KeyTemplate *)ccKeyTemplate;
 

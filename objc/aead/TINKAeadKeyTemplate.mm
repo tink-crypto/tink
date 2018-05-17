@@ -16,34 +16,42 @@
  **************************************************************************
  */
 
-#import "objc/hybrid/TINKHybridKeyTemplate.h"
+#import "objc/aead/TINKAeadKeyTemplate.h"
 
 #import "objc/TINKKeyTemplate.h"
 #import "objc/core/TINKKeyTemplate_Internal.h"
 #import "objc/util/TINKErrors.h"
 
-#include "tink/hybrid/hybrid_key_templates.h"
+#include "tink/aead/aead_key_templates.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
-@implementation TINKHybridKeyTemplate
+@implementation TINKAeadKeyTemplate
 
-- (nullable instancetype)initWithKeyTemplate:(TINKHybridKeyTemplates)keyTemplate
+- (nullable instancetype)initWithKeyTemplate:(TINKAeadKeyTemplates)keyTemplate
                                        error:(NSError **)error {
   google::crypto::tink::KeyTemplate *ccKeyTemplate = NULL;
   switch (keyTemplate) {
-    case TINKEciesP256HkdfHmacSha256Aes128Gcm:
+    case TINKAes128Gcm:
       ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
-          &crypto::tink::HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm());
+          &crypto::tink::AeadKeyTemplates::Aes128Gcm());
       break;
-    case TINKEciesP256HkdfHmacSha256Aes128CtrHmacSha256:
+    case TINKAes256Gcm:
       ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
-          &crypto::tink::HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128CtrHmacSha256());
+          &crypto::tink::AeadKeyTemplates::Aes256Gcm());
+      break;
+    case TINKAes128CtrHmacSha256:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::AeadKeyTemplates::Aes128CtrHmacSha256());
+      break;
+    case TINKAes256CtrHmacSha256:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::AeadKeyTemplates::Aes256CtrHmacSha256());
       break;
     default:
       if (error) {
         *error = TINKStatusToError(crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT, "Invalid TINKHybridKeyTemplate"));
+            crypto::tink::util::error::INVALID_ARGUMENT, "Invalid TINKAeadKeyTemplate"));
       }
       return nil;
   }

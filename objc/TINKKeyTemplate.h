@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable instancetype)init NS_UNAVAILABLE;
 
-- (nullable instancetype)initWithKeyTemplate:(id)keyTemplate error:(NSError **)error;
+- (nullable instancetype)initWithKeyTemplate:(id)keyTemplate error:(NSError **)error NS_UNAVAILABLE;
 
 @end
 

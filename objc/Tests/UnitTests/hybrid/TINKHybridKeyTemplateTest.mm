@@ -21,7 +21,7 @@
 #import <XCTest/XCTest.h>
 
 #import "objc/TINKKeyTemplate.h"
-#import "objc/aead/TINKAeadKeyTemplates.h"
+#import "objc/aead/TINKAeadKeyTemplate.h"
 #import "objc/core/TINKKeyTemplate_Internal.h"
 #import "objc/hybrid/TINKHybridKeyTemplate.h"
 #import "objc/util/TINKProtoHelpers.h"
@@ -78,8 +78,17 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.Ecies
   // Verify DEM params.
   XCTAssertTrue(keyFormat.params.hasDemParams);
   TINKPBEciesAeadDemParams *demParams = keyFormat.params.demParams;
-  TINKPBKeyTemplate *expectedDem = [TINKAeadKeyTemplates keyTemplateForAes128Gcm];
+  error = nil;
+  TINKAeadKeyTemplate *expectedDemTpl =
+      [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes128Gcm error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(expectedDemTpl);
+
+  error = nil;
+  TINKPBKeyTemplate *expectedDem = TINKKeyTemplateToObjc(expectedDemTpl.ccKeyTemplate, &error);
+  XCTAssertNil(error);
   XCTAssertNotNil(expectedDem);
+
   XCTAssertTrue(demParams.hasAeadDem);
   XCTAssertEqual(expectedDem.outputPrefixType, demParams.aeadDem.outputPrefixType);
   XCTAssertTrue([expectedDem.typeURL isEqualToString:demParams.aeadDem.typeURL]);
@@ -120,8 +129,18 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.Ecies
   // Verify DEM params.
   XCTAssertTrue(keyFormat.params.hasDemParams);
   TINKPBEciesAeadDemParams *demParams = keyFormat.params.demParams;
-  TINKPBKeyTemplate *expectedDem = [TINKAeadKeyTemplates keyTemplateForAes128CtrHmacSha256];
+
+  error = nil;
+  TINKAeadKeyTemplate *tpl =
+      [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes128CtrHmacSha256 error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(tpl);
+
+  error = nil;
+  TINKPBKeyTemplate *expectedDem = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
+  XCTAssertNil(error);
   XCTAssertNotNil(expectedDem);
+
   XCTAssertTrue(demParams.hasAeadDem);
   XCTAssertEqual(expectedDem.outputPrefixType, demParams.aeadDem.outputPrefixType);
   XCTAssertTrue([expectedDem.typeURL isEqualToString:demParams.aeadDem.typeURL]);

@@ -79,6 +79,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKHybridKeyTemplate : TINKKeyTemplate
 
+- (nullable instancetype)init
+    __attribute__((unavailable("Use -initWithKeyTemplate:error: instead.")));
+
 /**
  * Creates a TINKHybridKeyTemplate that can be used to generate hybrid keysets.
  *
