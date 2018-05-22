@@ -8,10 +8,8 @@ features like encryption, decryption and signing to your application with Tink;
 the same library AdMob, Google Pay, the Android Search App and several Google
 products also use to secure their applications.
 
-Please visit [our developer site] (https://github.com/google/tink/blob/master/README.md)
-for more information.
+Please visit [our developer site](../README.md) for more information.
 
 ## Getting Started
 
-Please check the [Obj-C HOWTO] (https://github.com/google/tink/blob/master/doc/OBJC-HOWTO.md)
-to get started with Tink.
+Please check the [Obj-C HOWTO](../g3doc/OBJC-HOWTO.md) to get started with Tink.

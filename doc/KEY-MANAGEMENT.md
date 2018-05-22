@@ -4,13 +4,13 @@ In addition to cryptographic operations Tink provides support for key management
 features like key versioning, key rotation, and storing keysets or encrypting
 with master keys in remote key management systems (KMS).
 
-[Tinkey](doc/TINKEY.md) is a command-line tool that allows managing Tink's key
+[Tinkey](TINKEY.md) is a command-line tool that allows managing Tink's key
 material. Tink also provides a rich key management API (e.g., see
 [KeysetManager](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeysetManager.java)).
 
 ## Key, Keyset, and KeysetHandle
 
-Tink performs cryptographic tasks via so-called [primitives](doc/PRIMITIVES.md),
+Tink performs cryptographic tasks via so-called [primitives](PRIMITIVES.md),
 each of which is defined via a corresponding interface that specifies the
 functionality of the primitive.
 

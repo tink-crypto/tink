@@ -25,7 +25,7 @@ bazel test java/...
 *   **com.google.crypto.tink** This package consists only the core of Tink,
     including the primitive interfaces and key management APIs. Users that
     [develop their own primitives or key
-    types](https://github.com/google/tink/blob/master/doc/JAVA-HOWTO.md#custom-implementation-of-a-primitive)
+    types](JAVA-HOWTO.md#custom-implementation-of-a-primitive)
     can depend only on this package and exclude the rest.
 
     *   internal dependencies: none

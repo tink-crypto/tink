@@ -29,11 +29,11 @@ applications.
 and play with the [`hello world
 examples`](https://github.com/google/tink/tree/master/examples/helloworld).
 
-Tink performs cryptographic tasks via so-called [primitives](doc/PRIMITIVES.md),
+Tink performs cryptographic tasks via so-called [primitives](docs/PRIMITIVES.md),
 each of which is defined via a corresponding interface that specifies the
 functionality of the primitive. For example, _symmetric key encryption_ is
 offered via an [_AEAD-primitive_ (Authenticated Encryption with Associated
-Data)](doc/PRIMITIVES.md#authenticated-encryption-with-associated-data), that
+Data)](docs/PRIMITIVES.md#authenticated-encryption-with-associated-data), that
 supports two operations:
 
 *   `encrypt(plaintext, associated_data)`, which encrypts the given `plaintext`
@@ -83,13 +83,13 @@ AEAD primitive in Java:
 
 ## Current Status
 
-*   [Tink for Java and Android](doc/JAVA-HOWTO.md) are field tested and ready
+*   [Tink for Java and Android](docs/JAVA-HOWTO.md) are field tested and ready
     for production. Latest version is
     [1.1.0](https://github.com/google/tink/releases/tag/v1.1.0), released on
     04/18/2018.
 
-*   [Tink for C++](doc/CPP-HOWTO.md) and [Tink for Obj-C](doc/OBJC-HOWTO.md)
-    are catching up with [Tink for Java](doc/JAVA-HOWTO.md) in terms of
+*   [Tink for C++](docs/CPP-HOWTO.md) and [Tink for Obj-C](docs/OBJC-HOWTO.md)
+    are catching up with [Tink for Java](docs/JAVA-HOWTO.md) in terms of
     features and stability, and the offered functionality is 100%-compatible
     with Java (cf. [cross-language tests](tools/testing/cross_language/). We
     plan to make a first release in June 2018.
@@ -100,15 +100,15 @@ AEAD primitive in Java:
 
 ## Learn More
 
-*   [Java HOW-TO](doc/JAVA-HOWTO.md)
-*   [C++ HOW-TO](doc/CPP-HOWTO.md)
-*   [Security and Usability Design Goals](doc/SECURITY-USABILITY.md)
-*   [Supported Crypto Primitives](doc/PRIMITIVES.md)
-*   [Key Management](doc/KEY-MANAGEMENT.md)
-*   [Tinkey](doc/TINKEY.md)
-*   [Known Issues](doc/KNOWN-ISSUES.md)
-*   [Feature Roadmap](doc/ROADMAP.md)
-*   [Java Hacking Guide](doc/JAVA-HACKING.md)
+*   [Java HOW-TO](docs/JAVA-HOWTO.md)
+*   [C++ HOW-TO](docs/CPP-HOWTO.md)
+*   [Security and Usability Design Goals](docs/SECURITY-USABILITY.md)
+*   [Supported Crypto Primitives](docs/PRIMITIVES.md)
+*   [Key Management](docs/KEY-MANAGEMENT.md)
+*   [Tinkey](docs/TINKEY.md)
+*   [Known Issues](docs/KNOWN-ISSUES.md)
+*   [Feature Roadmap](docs/ROADMAP.md)
+*   [Java Hacking Guide](docs/JAVA-HACKING.md)
 
 ## Contact and mailing list
 
