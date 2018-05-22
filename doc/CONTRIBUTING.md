@@ -25,4 +25,4 @@ information on using pull requests.
 
 ## Hacking guides
 
-* [Java and Android](docs/JAVA-HACKING.md)
+* [Java and Android](JAVA-HACKING.md)

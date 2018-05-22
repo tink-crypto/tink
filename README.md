@@ -112,8 +112,8 @@ AEAD primitive in Java:
 
 ## Contact and mailing list
 
-If you want to contribute, please read [CONTRIBUTING](CONTRIBUTING.md) and send
-us pull requests. You can also report bugs or file feature requests.
+If you want to contribute, please read [CONTRIBUTING](docs/CONTRIBUTING.md)
+and send us pull requests. You can also report bugs or file feature requests.
 
 If you'd like to talk to the developers or get notified about major new tests,
 you may want to subscribe to our [mailing
