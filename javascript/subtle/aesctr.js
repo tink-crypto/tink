@@ -24,16 +24,16 @@ const Validators = goog.require('tink.subtle.Validators');
 const array = goog.require('goog.array');
 
 /**
- * The minimize IV size.
+ * The minimum IV size.
  *
- * @const {int}
+ * @const {number}
  */
 const MIN_IV_SIZE_IN_BYTES = 12;
 
 /**
  * AES block size.
  *
- * @const {int}
+ * @const {number}
  */
 const AES_BLOCK_SIZE_IN_BYTES = 16;
 
@@ -47,7 +47,7 @@ const AES_BLOCK_SIZE_IN_BYTES = 16;
 class AesCtr {
   /**
    * @param {!Uint8Array} key
-   * @param {int} ivSize the size of the IV, must be larger than or equal to
+   * @param {number} ivSize the size of the IV, must be larger than or equal to
    *     {@link MIN_IV_SIZE_IN_BYTES}
    * @throws {InvalidArgumentsException}
    */
@@ -57,12 +57,12 @@ class AesCtr {
           'invaid IV length, must be at least ' + MIN_IV_SIZE_IN_BYTES +
           ' and at most ' + AES_BLOCK_SIZE_IN_BYTES);
     }
-    /** @const @private {int} */
+    /** @const @private {number} */
     this.ivSize_ = ivSize;
 
     Validators.validateAesKeySize(key.length);
     /** @const @private {Ctr} */
-    this.ctr_ = new Ctr(new Aes(key));
+    this.ctr_ = new Ctr(new Aes(Array.from(key)));
   }
 
   /**
@@ -72,7 +72,8 @@ class AesCtr {
     const iv = Random.randBytes(this.ivSize_);
     const counter = new Uint8Array(AES_BLOCK_SIZE_IN_BYTES);
     counter.set(iv);
-    return Bytes.concat(iv, this.ctr_.encrypt(plaintext, counter));
+    return Bytes.concat(
+        iv, new Uint8Array(this.ctr_.encrypt(plaintext, counter)));
   }
 
   /**

@@ -70,3 +70,5 @@ class HybridEncrypt {
    */
   encrypt(plaintext, opt_contextInfo) {}
 }
+
+exports = HybridEncrypt;

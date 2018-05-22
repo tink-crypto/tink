@@ -25,10 +25,10 @@ testSuite({
   testBasic: function() {
     const key = Random.randBytes(16);
     const results = new Set();
-    for (var i = 0; i < 100; i++) {
+    for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(20);
       const aesctr = new AesCtr(key, 16);
-      var ciphertext = aesctr.encrypt(msg);
+      let ciphertext = aesctr.encrypt(msg);
       assertEquals(Bytes.toHex(msg), Bytes.toHex(aesctr.decrypt(ciphertext)));
       results.add(Bytes.toHex(ciphertext));
     }

@@ -21,10 +21,10 @@ const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
   testConcat: function() {
-    var ba1 = new Uint8Array();
-    var ba2 = new Uint8Array();
-    var ba3 = new Uint8Array();
-    var result = Bytes.concat(ba1, ba2, ba3);
+    let ba1 = new Uint8Array();
+    let ba2 = new Uint8Array();
+    let ba3 = new Uint8Array();
+    let result = Bytes.concat(ba1, ba2, ba3);
     assertEquals(0, result.length);
 
     ba1 = Random.randBytes(10);
@@ -62,7 +62,7 @@ testSuite({
   },
 
   testFromNumber: function() {
-    var number = 0;
+    let number = 0;
     assertArrayEquals(
         [0, 0, 0, 0, 0, 0, 0, 0], Array.from(Bytes.fromNumber(number)));
     number = 1;

@@ -22,13 +22,15 @@ goog.module('tink.subtle.Random');
 /**
  * Randomly generates `n` bytes.
  *
- * @param {int} n number of bytes to generate
+ * @param {number} n number of bytes to generate
  * @return {!Uint8Array} the random bytes
  * @static
  */
 const randBytes = function(n) {
   const crypto = window.crypto || window.msCrypto;
-  return crypto.getRandomValues(new Uint8Array(n));
+  const result = new Uint8Array(n);
+  crypto.getRandomValues(result);
+  return result;
 };
 
 exports = {randBytes};

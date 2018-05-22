@@ -48,3 +48,5 @@ class IndCpaCipher {
    */
   decrypt(ciphertext) {}
 }
+
+exports = IndCpaCipher;

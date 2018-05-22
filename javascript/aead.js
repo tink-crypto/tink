@@ -57,3 +57,5 @@ class Aead {
    */
   decrypt(ciphertext, opt_associatedData) {}
 }
+
+exports = Aead;

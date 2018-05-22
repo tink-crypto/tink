@@ -40,7 +40,7 @@ class EncryptThenAuthenticate {
   /**
    * @param {!IndCpaCipher} cipher
    * @param {!Mac} mac
-   * @param {int} tagSize the MAC tag size
+   * @param {number} tagSize the MAC tag size
    * @throws {InvalidArgumentsException}
    */
   constructor(cipher, mac, tagSize) {
@@ -50,7 +50,7 @@ class EncryptThenAuthenticate {
     /** @const @private {Mac} */
     this.mac_ = mac;
 
-    /** @const @private {int} */
+    /** @const @private {number} */
     this.tagSize_ = tagSize;
   }
 
@@ -64,7 +64,7 @@ class EncryptThenAuthenticate {
    */
   encrypt(plaintext, opt_associatedData) {
     const payload = this.cipher_.encrypt(plaintext);
-    var aad = new Uint8Array();
+    let aad = new Uint8Array(0);
     if (goog.isDefAndNotNull(opt_associatedData)) {
       aad = opt_associatedData;
     }
@@ -88,14 +88,14 @@ class EncryptThenAuthenticate {
     const payload = new Uint8Array(
         array.slice(ciphertext, 0, ciphertext.length - this.tagSize_));
     const providedMac = new Uint8Array(array.slice(ciphertext, payload.length));
-    var aad = new Uint8Array();
+    let aad = new Uint8Array(0);
     if (goog.isDefAndNotNull(opt_associatedData)) {
       aad = opt_associatedData;
     }
     const aadLength = Bytes.fromNumber(aad.length * 8);
     const input = Bytes.concat(aad, payload, aadLength);
     const expectedMac = this.mac_.computeMac(input);
-    if (!Bytes.compare(expectedMac, providedMac)) {
+    if (!Bytes.isEqual(expectedMac, providedMac)) {
       throw new SecurityException('invalid MAC');
     }
     return this.cipher_.decrypt(payload);

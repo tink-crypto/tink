@@ -14,19 +14,24 @@
 
 goog.module('tink.subtle.Validators');
 
+const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+
+/**
+ * @const @public {Array.<number>}
+ */
 const SUPPORTED_AES_KEY_SIZES = [16, 32];
 
 /**
  * Validate AES key sizes, at the moment only 128-bit and 256-bit keys are
  * supported.
  *
- * @param {int} n the key size in bytes
- * @throws {InvalidArgumentException}
+ * @param {number} n the key size in bytes
+ * @throws {InvalidArgumentsException}
  * @static
  */
 const validateAesKeySize = function(n) {
   if (!SUPPORTED_AES_KEY_SIZES.includes(n)) {
-    throw new InvalidArgumentException('unsupported AES key size: ' + n);
+    throw new InvalidArgumentsException('unsupported AES key size: ' + n);
   }
 };
 

@@ -30,11 +30,11 @@ testSuite({
     const mac = new Hmac('HMACSHA256', Random.randBytes(16), tagSize);
     const aead = new EncryptThenAuthenticate(cipher, mac, tagSize);
     const results = new Set();
-    for (var i = 0; i < 100; i++) {
+    for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(20);
-      var ciphertext = aead.encrypt(msg);
+      let ciphertext = aead.encrypt(msg);
       assertEquals(Bytes.toHex(msg), Bytes.toHex(aead.decrypt(ciphertext)));
-      var aad = null;
+      let aad = null;
       ciphertext = aead.encrypt(msg, aad);
       assertEquals(
           Bytes.toHex(msg), Bytes.toHex(aead.decrypt(ciphertext, aad)));
@@ -55,8 +55,8 @@ testSuite({
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
     const ciphertext = aead.encrypt(plaintext, aad);
-    for (var i = 0; i < ciphertext.length; i++) {
-      for (var j = 0; j < 8; j++) {
+    for (let i = 0; i < ciphertext.length; i++) {
+      for (let j = 0; j < 8; j++) {
         const c1 = new Uint8Array(ciphertext);
         c1[i] = (c1[i] ^ (1 << j));
         assertThrows(function() {
@@ -74,8 +74,8 @@ testSuite({
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
     const ciphertext = aead.encrypt(plaintext, aad);
-    for (var i = 0; i < aad.length; i++) {
-      for (var j = 0; j < 8; j++) {
+    for (let i = 0; i < aad.length; i++) {
+      for (let j = 0; j < 8; j++) {
         const aad1 = new Uint8Array(aad);
         aad1[i] = (aad1[i] ^ (1 << j));
         assertThrows(function() {
@@ -93,7 +93,7 @@ testSuite({
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
     const ciphertext = aead.encrypt(plaintext, aad);
-    for (var i = 1; i <= ciphertext.length; i++) {
+    for (let i = 1; i <= ciphertext.length; i++) {
       const c1 = new Uint8Array(ciphertext.buffer, 0, ciphertext.length - i);
       assertThrows(function() {
         aead.decrypt(c1, aad);

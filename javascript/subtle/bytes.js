@@ -23,15 +23,15 @@ const crypt = goog.require('goog.crypt');
  * @param {!Uint8Array} ba2 The second bytearray to check.
  * @return {boolean} If the array are equal.
  */
-const compare = function(ba1, ba2) {
+const isEqual = function(ba1, ba2) {
   if (ba1.length !== ba2.length) {
     return false;
   }
-  var yes = 1;
-  for (var i = 0; i < ba1.length; i++) {
-    yes &= !(ba1[i] ^ ba2[i]) | 0;
+  let result = 0;
+  for (let i = 0; i < ba1.length; i++) {
+    result |= ba1[i] ^ ba2[i];
   }
-  return yes == 1;
+  return result == 0;
 };
 
 
@@ -39,16 +39,15 @@ const compare = function(ba1, ba2) {
  * Returns a new array that is the result of joining the arguments.
  * @param {...!Uint8Array} var_args
  * @return {!Uint8Array}
- * @private
  */
 const concat = function(var_args) {
-  var length = 0;
-  for (var i = 0; i < arguments.length; i++) {
+  let length = 0;
+  for (let i = 0; i < arguments.length; i++) {
     length += arguments[i].length;
   }
-  var result = new Uint8Array(length);
-  var curOffset = 0;
-  for (var i = 0; i < arguments.length; i++) {
+  let result = new Uint8Array(length);
+  let curOffset = 0;
+  for (let i = 0; i < arguments.length; i++) {
     result.set(arguments[i], curOffset);
     curOffset += arguments[i].length;
   }
@@ -85,14 +84,14 @@ const fromNumber = function(value) {
         'cannot convert number larger than ' + Number.MAX_SAFE_INTEGER);
   }
   const two_power_32 = 2**32;
-  var low = value % two_power_32;
-  var high = value / two_power_32;
+  let low = value % two_power_32;
+  let high = value / two_power_32;
   const result = new Uint8Array(8);
-  for (var i = 7; i >= 4; i--) {
+  for (let i = 7; i >= 4; i--) {
     result[i] = low & 0xff;
     low >>>= 8;
   }
-  for (var i = 3; i >= 0; i--) {
+  for (let i = 3; i >= 0; i--) {
     result[i] = high & 0xff;
     high >>>= 8;
   }
@@ -111,9 +110,9 @@ const toHex = function(bytes) {
 };
 
 exports = {
-  compare,
   concat,
   fromHex,
   fromNumber,
+  isEqual,
   toHex,
 };

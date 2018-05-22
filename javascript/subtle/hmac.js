@@ -25,6 +25,20 @@ const Sha512 = goog.require('goog.crypt.Sha512');
 const array = goog.require('goog.array');
 
 /**
+ * The minimum tag size.
+ *
+ * @const {number}
+ */
+const MIN_TAG_SIZE_IN_BYTES = 10;
+
+/**
+ * The minimum key size.
+ *
+ * @const {number}
+ */
+const MIN_KEY_SIZE_IN_BYTES = 16;
+
+/**
  * Implementation of HMAC.
  *
  * @implements {Mac}
@@ -36,26 +50,26 @@ class Hmac {
    * @param {string} algoName accepted names are HMACSHA1, HMACSHA256 and
    *     HMACSHA512
    * @param {!Uint8Array} key must be longer than
-   *     {@link Mac.MIN_KEY_SIZE_IN_BYTES}
-   * @param {int} tagSize the size of the tag, must be larger than or equal to
-   *     {@link Mac.MIN_TAG_SIZE_IN_BYTES}
-   * @throws {InvalidArgumentException}
+   *     {@link MIN_KEY_SIZE_IN_BYTES}
+   * @param {number} tagSize the size of the tag, must be larger than or equal to
+   *     {@link MIN_TAG_SIZE_IN_BYTES}
+   * @throws {InvalidArgumentsException}
    */
   constructor(algoName, key, tagSize) {
-    /** @const @private {int} */
+    /** @const @private {number} */
     this.tagSize_ = tagSize;
 
-    /** @const @private {GoogHmac} */
+    /** @private {GoogHmac} */
     this.hmac_;
 
-    if (tagSize < Mac.MIN_TAG_SIZE_IN_BYTES) {
+    if (tagSize < MIN_TAG_SIZE_IN_BYTES) {
       throw new InvalidArgumentsException(
-          'tag too short, must be at least ' + Mac.MIN_TAG_SIZE_IN_BYTES);
+          'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES);
     }
 
-    if (key.length < Mac.MIN_KEY_SIZE_IN_BYTES) {
+    if (key.length < MIN_KEY_SIZE_IN_BYTES) {
       throw new InvalidArgumentsException(
-          'key too short, must be at least ' + Mac.MIN_KEY_SIZE_IN_BYTES);
+          'key too short, must be at least ' + MIN_KEY_SIZE_IN_BYTES);
     }
 
     switch (algoName) {
@@ -64,24 +78,24 @@ class Hmac {
           throw new InvalidArgumentsException(
               'tag too long, must not be larger than 20');
         }
-        this.hmac_ = new GoogHmac(new Sha1(), key);
+        this.hmac_ = new GoogHmac(new Sha1(), Array.from(key));
         break;
       case 'HMACSHA256':
         if (tagSize > 32) {
           throw new InvalidArgumentsException(
               'tag too long, must not be larger than 32');
         }
-        this.hmac_ = new GoogHmac(new Sha256(), key);
+        this.hmac_ = new GoogHmac(new Sha256(), Array.from(key));
         break;
       case 'HMACSHA512':
         if (tagSize > 64) {
           throw new InvalidArgumentsException(
               'tag too long, must not be larger than 64');
         }
-        this.hmac_ = new GoogHmac(new Sha512(), key);
+        this.hmac_ = new GoogHmac(new Sha512(), Array.from(key));
         break;
       default:
-        throw new InvalidArgumentException(algoName + ' is not supported');
+        throw new InvalidArgumentsException(algoName + ' is not supported');
     }
   }
 
@@ -98,7 +112,7 @@ class Hmac {
    */
   verifyMac(tag, data) {
     const computedTag = this.computeMac(data);
-    if (!Bytes.compare(tag, computedTag)) {
+    if (!Bytes.isEqual(tag, computedTag)) {
       throw new SecurityException('invalid tag');
     }
   }
