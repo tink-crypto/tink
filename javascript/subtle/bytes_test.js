@@ -60,4 +60,36 @@ testSuite({
         Bytes.toHex(ba1) + Bytes.toHex(ba2) + Bytes.toHex(ba3),
         Bytes.toHex(result));
   },
+
+  testFromNumber: function() {
+    var number = 0;
+    assertArrayEquals(
+        [0, 0, 0, 0, 0, 0, 0, 0], Array.from(Bytes.fromNumber(number)));
+    number = 1;
+    assertArrayEquals(
+        [0, 0, 0, 0, 0, 0, 0, 1], Array.from(Bytes.fromNumber(number)));
+    number = 4294967296;  // 2^32
+    assertArrayEquals(
+        [0, 0, 0, 1, 0, 0, 0, 0], Array.from(Bytes.fromNumber(number)));
+    number = 4294967297;  // 2^32 + 1
+    assertArrayEquals(
+        [0, 0, 0, 1, 0, 0, 0, 1], Array.from(Bytes.fromNumber(number)));
+    number = Number.MAX_SAFE_INTEGER; // 2^53 - 1
+    assertArrayEquals(
+        [0, 31, 255, 255, 255, 255, 255, 255],
+        Array.from(Bytes.fromNumber(number)));
+
+    assertThrows(function() {
+      Bytes.fromNumber('blah');  // not a number
+    });
+    assertThrows(function() {
+      Bytes.fromNumber(3.14);
+    });
+    assertThrows(function() {
+      Bytes.fromNumber(-1);
+    });
+    assertThrows(function() {
+      Bytes.fromNumber(Number.MAX_SAFE_INTEGER + 1);
+    });
+  }
 });

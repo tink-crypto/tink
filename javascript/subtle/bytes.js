@@ -14,6 +14,7 @@
 
 goog.module('tink.subtle.Bytes');
 
+const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const crypt = goog.require('goog.crypt');
 
 /**
@@ -66,6 +67,39 @@ const fromHex = function(hex) {
 };
 
 /**
+ * Converts a non-negative integer number to a 64-bit big-endian byte array.
+ * @param {number} value The number to convert.
+ * @return {!Uint8Array} The number as a big-endian byte array.
+ * @throws {InvalidArgumentsException}
+ * @static
+ */
+const fromNumber = function(value) {
+  if (isNaN(value) || value % 1 !== 0) {
+    throw new InvalidArgumentsException('cannot convert non-integer value');
+  }
+  if (value < 0) {
+    throw new InvalidArgumentsException('cannot convert negative number');
+  }
+  if (value > Number.MAX_SAFE_INTEGER) {
+    throw new InvalidArgumentsException(
+        'cannot convert number larger than ' + Number.MAX_SAFE_INTEGER);
+  }
+  const two_power_32 = 2**32;
+  var low = value % two_power_32;
+  var high = value / two_power_32;
+  const result = new Uint8Array(8);
+  for (var i = 7; i >= 4; i--) {
+    result[i] = low & 0xff;
+    low >>>= 8;
+  }
+  for (var i = 3; i >= 0; i--) {
+    result[i] = high & 0xff;
+    high >>>= 8;
+  }
+  return result;
+};
+
+/**
  * Converts a byte array to hex.
  *
  * @param {!Uint8Array} bytes the byte array input
@@ -80,5 +114,6 @@ exports = {
   compare,
   concat,
   fromHex,
+  fromNumber,
   toHex,
 };
