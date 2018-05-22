@@ -192,6 +192,15 @@ TEST(AesGcmBoringSslTest, testModification) {
   }
 }
 
+TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
+  const std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
+  const std::string message = "Some data to encrypt.";
+  const absl::string_view aad;
+  const std::string ct = cipher->Encrypt(message, aad).ValueOrDie();
+  EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
+}
+
 }  // namespace
 }  // namespace subtle
 }  // namespace tink

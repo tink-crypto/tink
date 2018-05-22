@@ -156,6 +156,11 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
     return util::Status(util::error::INTERNAL, "Could not initialize key");
   }
 
+  // EVP_DecryptUpdate expects a non-null pointer for additional_data,
+  // regardless of whether the size is 0.
+  if (additional_data.data() == nullptr) {
+    additional_data = absl::string_view("");
+  }
   int len;
   ret = EVP_DecryptUpdate(
       ctx.get(), nullptr, &len,
