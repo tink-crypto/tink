@@ -12,4 +12,5 @@ Please visit [our developer site](../README.md) for more information.
 
 ## Getting Started
 
-Please check the [Obj-C HOWTO](../g3doc/OBJC-HOWTO.md) to get started with Tink.
+Please check the [Objective-C HOWTO](../docs/OBJC-HOWTO.md) to get started
+with Tink.
