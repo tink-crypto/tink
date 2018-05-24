@@ -57,7 +57,7 @@
       [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
 
   XCTAssertNotNil(handle);
-  XCTAssertTrue(handle.ccKeysetHandle->get_keyset().SerializeAsString() ==
+  XCTAssertTrue(crypto::tink::TestUtil::GetKeyset(*handle.ccKeysetHandle).SerializeAsString() ==
                 keyset.SerializeAsString());
 }
 

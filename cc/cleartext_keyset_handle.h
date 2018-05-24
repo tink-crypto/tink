@@ -36,6 +36,10 @@ class CleartextKeysetHandle {
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> Read(
       std::unique_ptr<KeysetReader> reader);
 
+  // Returns a Keyset-proto from the given 'keyset_handle'.
+  static const google::crypto::tink::Keyset& GetKeyset(
+      const KeysetHandle& keyset_handle);
+
  private:
   CleartextKeysetHandle() {}
 };

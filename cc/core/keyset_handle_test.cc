@@ -24,6 +24,7 @@
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 
+using crypto::tink::TestUtil;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::DummyAead;
@@ -61,7 +62,7 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Binary) {
     EXPECT_TRUE(result.ok()) << result.status();
     auto handle = std::move(result.ValueOrDie());
     EXPECT_EQ(keyset.SerializeAsString(),
-              handle->get_keyset().SerializeAsString());
+              TestUtil::GetKeyset(*handle).SerializeAsString());
   }
 
   {  // AEAD does not match the ciphertext
@@ -132,7 +133,7 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Json) {
     EXPECT_TRUE(result.ok()) << result.status();
     auto handle = std::move(result.ValueOrDie());
     EXPECT_EQ(keyset.SerializeAsString(),
-              handle->get_keyset().SerializeAsString());
+              TestUtil::GetKeyset(*handle).SerializeAsString());
   }
 
   {  // AEAD does not match the ciphertext

@@ -268,7 +268,8 @@ cc_library(
     hdrs = ["wycheproof_util.h"],
     deps = [
         ":common_enums",
-        "//cc/util:test_util",
+        "//cc/util:status",
+        "//cc/util:statusor",
         "@com_google_absl//absl/strings",
         "@jsoncpp//:jsoncpp",
     ],

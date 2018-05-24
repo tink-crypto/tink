@@ -36,6 +36,8 @@
 #import "objc/util/TINKStrings.h"
 #import "objc/util/TINKTestHelpers.h"
 
+using crypto::tink::TestUtil;
+
 @interface TINKHybridDecryptFactoryTest : XCTestCase
 @end
 
@@ -53,7 +55,7 @@ static TINKPBEciesAeadHkdfPrivateKey *getNewEciesPrivateKey() {
   google::crypto::tink::Keyset ccPrivateKeyset;
   XCTAssertTrue(ccPrivateKeyset.ParseFromString(serializedKeyset));
   TINKKeysetHandle *privateKeysetHandle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccPrivateKeyset)];
+      initWithCCKeysetHandle:TestUtil::GetKeysetHandle(ccPrivateKeyset)];
 
   error = nil;
   serializedKeyset = TINKPBSerializeToString(publicKeyset, &error);
@@ -61,7 +63,7 @@ static TINKPBEciesAeadHkdfPrivateKey *getNewEciesPrivateKey() {
   google::crypto::tink::Keyset ccPublicKeyset;
   XCTAssertTrue(ccPublicKeyset.ParseFromString(serializedKeyset));
   TINKKeysetHandle *publicKeysetHandle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(ccPublicKeyset)];
+      initWithCCKeysetHandle:TestUtil::GetKeysetHandle(ccPublicKeyset)];
 
   // Get a HybridDecrypt primitive.
   error = nil;
@@ -97,7 +99,7 @@ static TINKPBEciesAeadHkdfPrivateKey *getNewEciesPrivateKey() {
 - (void)testPrimitiveWithEmptyKeyset {
   google::crypto::tink::Keyset keyset;
   TINKKeysetHandle *keysetHandle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:crypto::tink::test::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(keyset)];
   XCTAssertNotNil(keysetHandle);
 
   NSError *error = nil;
