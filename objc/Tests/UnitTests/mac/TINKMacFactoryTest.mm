@@ -39,9 +39,9 @@
 
 using crypto::tink::HmacKeyManager;
 using crypto::tink::KeyFactory;
-using crypto::tink::TestUtil;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
+using crypto::tink::test::GetKeysetHandle;
 using google::crypto::tink::HashType;
 using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::KeyData;
@@ -56,7 +56,7 @@ using google::crypto::tink::KeyStatusType;
 - (void)testEmptyKeyset {
   Keyset keyset;
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   NSError *error = nil;
@@ -100,7 +100,7 @@ using google::crypto::tink::KeyStatusType;
   XCTAssertNil(error);
 
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   id<TINKMac> mac = [TINKMacFactory primitiveWithKeysetHandle:handle error:&error];

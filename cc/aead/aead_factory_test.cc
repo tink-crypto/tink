@@ -26,9 +26,9 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::TestUtil;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
+using crypto::tink::test::GetKeysetHandle;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
@@ -44,8 +44,7 @@ class AeadFactoryTest : public ::testing::Test {
 
 TEST_F(AeadFactoryTest, testBasic) {
   Keyset keyset;
-  auto aead_result =
-      AeadFactory::GetPrimitive(*TestUtil::GetKeysetHandle(keyset));
+  auto aead_result = AeadFactory::GetPrimitive(*GetKeysetHandle(keyset));
   EXPECT_FALSE(aead_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, aead_result.status().error_code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
@@ -84,8 +83,7 @@ TEST_F(AeadFactoryTest, testPrimitive) {
   ASSERT_TRUE(AeadConfig::RegisterStandardKeyTypes().ok());;
 
   // Create a KeysetHandle and use it with the factory.
-  auto aead_result =
-      AeadFactory::GetPrimitive(*TestUtil::GetKeysetHandle(keyset));
+  auto aead_result = AeadFactory::GetPrimitive(*GetKeysetHandle(keyset));
   EXPECT_TRUE(aead_result.ok()) << aead_result.status();
   auto aead = std::move(aead_result.ValueOrDie());
 

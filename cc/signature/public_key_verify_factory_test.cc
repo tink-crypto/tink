@@ -29,8 +29,8 @@
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::TestUtil;
 using crypto::tink::test::AddTinkKey;
+using crypto::tink::test::GetKeysetHandle;
 using google::crypto::tink::EcdsaPublicKey;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
@@ -61,7 +61,7 @@ EcdsaPublicKey GetNewEcdsaPublicKey() {
 TEST_F(PublicKeyVerifyFactoryTest, testBasic) {
   Keyset keyset;
   auto public_key_verify_result =
-      PublicKeyVerifyFactory::GetPrimitive(*TestUtil::GetKeysetHandle(keyset));
+      PublicKeyVerifyFactory::GetPrimitive(*GetKeysetHandle(keyset));
   EXPECT_FALSE(public_key_verify_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
       public_key_verify_result.status().error_code());
@@ -91,7 +91,7 @@ TEST_F(PublicKeyVerifyFactoryTest, testPrimitive) {
 
   // Create a KeysetHandle and use it with the factory.
   auto public_key_verify_result =
-      PublicKeyVerifyFactory::GetPrimitive(*TestUtil::GetKeysetHandle(keyset));
+      PublicKeyVerifyFactory::GetPrimitive(*GetKeysetHandle(keyset));
   EXPECT_TRUE(public_key_verify_result.ok())
       << public_key_verify_result.status();
   auto public_key_verify = std::move(public_key_verify_result.ValueOrDie());

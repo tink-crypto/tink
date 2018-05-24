@@ -61,7 +61,6 @@ cc_library(
 
 cc_library(
     name = "test_util",
-    testonly = 1,
     srcs = ["test_util.cc"],
     hdrs = ["test_util.h"],
     deps = [
@@ -70,6 +69,7 @@ cc_library(
         ":status",
         ":statusor",
         "//cc:aead",
+        "//cc:binary_keyset_reader",
         "//cc:cleartext_keyset_handle",
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",
@@ -84,7 +84,6 @@ cc_library(
         "//proto:ecdsa_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
-        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
     strip_include_prefix = "/cc",

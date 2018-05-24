@@ -30,6 +30,9 @@ namespace tink {
 // key material.
 class KeysetHandle {
  public:
+  // TODO(b/74409123): refactor to ensure that creation KeysetHandle-objects
+  //   can be controlled (as in Java).
+
   // Creates a KeysetHandle from an encrypted keyset obtained via |reader|
   // using |master_key_aead| to decrypt the keyset.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> Read(
@@ -46,19 +49,15 @@ class KeysetHandle {
   crypto::tink::util::Status  WriteEncrypted(const Aead& master_key_aead,
                                              KeysetWriter* writer);
 
- private:
-  // The classes below need access to get_keyset();
-  friend class CleartextKeysetHandle;
-  friend class KeysetManager;
-  friend class Registry;
-
-  // TestUtil::GetKeyset() provides access to get_keyset() for tests.
-  friend class TestUtil;
-
   // Returns keyset held by this handle.
+  // For internal use only, do not use outside Tink-code as it will be
+  // deprecated/hidden soon.
   const google::crypto::tink::Keyset& get_keyset() const;
 
-  // Creates a handle that contains and owns the given keyset.
+ private:
+  friend class CleartextKeysetHandle;
+  friend class KeysetManager;
+
   KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset);
   std::unique_ptr<google::crypto::tink::Keyset> keyset_;
 };

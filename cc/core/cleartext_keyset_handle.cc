@@ -45,12 +45,6 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
   return std::move(handle);
 }
 
-// static
-const Keyset& CleartextKeysetHandle::GetKeyset(
-    const KeysetHandle& keyset_handle) {
-  return keyset_handle.get_keyset();
-}
-
 
 }  // namespace tink
 }  // namespace crypto
