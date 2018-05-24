@@ -80,7 +80,7 @@ static TINKPBKeyset *gKeyset;
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:nil];
   XCTAssertNotNil(handle);
   std::string output;
-  handle.ccKeysetHandle->get_keyset().SerializeToString(&output);
+  crypto::tink::TestUtil::GetKeyset(*handle.ccKeysetHandle).SerializeToString(&output);
 
   XCTAssertTrue(
       [gKeyset.data isEqualToData:[NSData dataWithBytes:output.data() length:output.size()]]);

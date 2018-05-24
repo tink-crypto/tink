@@ -39,9 +39,9 @@
 
 using crypto::tink::AesGcmKeyManager;
 using crypto::tink::KeyFactory;
+using crypto::tink::TestUtil;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
-using crypto::tink::test::GetKeysetHandle;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
@@ -55,7 +55,7 @@ using google::crypto::tink::KeyStatusType;
 - (void)testEmptyKeyset {
   Keyset keyset;
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   NSError *error = nil;
@@ -98,7 +98,7 @@ using google::crypto::tink::KeyStatusType;
   XCTAssertNil(error);
 
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   id<TINKAead> aead = [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];

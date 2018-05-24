@@ -24,6 +24,7 @@
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 
+using crypto::tink::TestUtil;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 
@@ -37,6 +38,7 @@ namespace tink {
 namespace {
 
 class CleartextKeysetHandleTest : public ::testing::Test {
+ protected:
 };
 
 TEST_F(CleartextKeysetHandleTest, testRead) {
@@ -54,7 +56,7 @@ TEST_F(CleartextKeysetHandleTest, testRead) {
     EXPECT_TRUE(result.ok()) << result.status();
     auto handle = std::move(result.ValueOrDie());
     EXPECT_EQ(keyset.SerializeAsString(),
-              handle->get_keyset().SerializeAsString());
+              TestUtil::GetKeyset(*handle).SerializeAsString());
   }
 
   {  // Reader that fails upon read.

@@ -19,8 +19,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include "absl/memory/memory.h"
 #include "tink/keyset_handle.h"
-#include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/subtle/common_enums.h"
@@ -48,6 +48,20 @@ using crypto::tink::util::error::Code;
 
 namespace crypto {
 namespace tink {
+
+// static
+std::unique_ptr<KeysetHandle> TestUtil::GetKeysetHandle(const Keyset& keyset) {
+  auto unique_keyset = absl::make_unique<Keyset>(keyset);
+  std::unique_ptr<KeysetHandle> handle =
+      absl::WrapUnique(new KeysetHandle(std::move(unique_keyset)));
+  return handle;
+}
+
+// static
+const Keyset& TestUtil::GetKeyset(const KeysetHandle& keyset_handle) {
+  return keyset_handle.get_keyset();
+}
+
 namespace test {
 
 util::StatusOr<std::string> HexDecode(absl::string_view hex) {
@@ -84,12 +98,6 @@ std::string HexEncode(absl::string_view bytes) {
     res[2 * i + 1] = hexchars[c % 16];
   }
   return res;
-}
-
-std::unique_ptr<KeysetHandle> GetKeysetHandle(const Keyset& keyset) {
-  auto reader = std::move(
-      BinaryKeysetReader::New(keyset.SerializeAsString()).ValueOrDie());
-  return std::move(CleartextKeysetHandle::Read(std::move(reader)).ValueOrDie());
 }
 
 void AddKey(

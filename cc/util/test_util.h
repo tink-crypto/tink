@@ -38,6 +38,20 @@
 
 namespace crypto {
 namespace tink {
+
+// The helpers below are "packed" in a class to allow for an easier
+// addition of them as a "friend class".
+class TestUtil {
+ public:
+  // Creates a KeysetHandle object for the given 'keyset'.
+  static std::unique_ptr<KeysetHandle> GetKeysetHandle(
+    const google::crypto::tink::Keyset& keyset);
+
+  // Returns a Keyset-proto from the given 'keyset_handle'.
+  static const google::crypto::tink::Keyset& GetKeyset(
+      const KeysetHandle& keyset_handle);
+};
+
 namespace test {
 
 // Various utilities for testing.
@@ -55,10 +69,6 @@ std::string HexDecodeOrDie(absl::string_view hex);
 
 // Converts a std::string of bytes into a hexadecimal std::string.
 std::string HexEncode(absl::string_view bytes);
-
-// Creates a KeysetHandle object for the given 'keyset'.
-std::unique_ptr<KeysetHandle> GetKeysetHandle(
-    const google::crypto::tink::Keyset& keyset);
 
 // Adds the given 'key' with specified parameters and output_prefix_type=TINK
 // to the specified 'keyset'.
