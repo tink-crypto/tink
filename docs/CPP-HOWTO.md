@@ -59,15 +59,17 @@ To install Tink from the source code, the following prerequisites must be instal
 
    ```sh
    bazel build cc:libtink.so
-   bazel build tink_headers tink_deps_headers
+   bazel build cc:tink_headers cc:tink_deps_headers
    TARGET_DIR="/usr/local"
-   cp bazel-bin/cc/libtink.so $TARGET_DIR/lib/
-   tar xfv bazel-genfiles/cc/tink_headers.tar -C $TARGET_DIR/include/
-   tar xfv bazel-genfiles/cc/tink_deps_headers.tar -C $TARGET_DIR/include/
+   mkdir -p $TARGET_DIR/lib
+   mkdir -p $TARGET_DIR/include
+   sudo cp bazel-bin/cc/libtink.so $TARGET_DIR/lib/
+   sudo tar xfv bazel-genfiles/cc/tink_headers.tar -C $TARGET_DIR/include/
+   sudo tar xfv bazel-genfiles/cc/tink_deps_headers.tar -C $TARGET_DIR/include/
    ```
 
-3. If in Step 2 you specified a system directory (for example, `/usr/local`) as the `TARGET_DIR`,
-   then run ldconfig to configure the linker. For example:
+3. If in Step 2 you specified a system directory (for example, `/usr/local`)
+   as the `TARGET_DIR`, then run ldconfig to configure the linker. For example:
 
    ```sh
    sudo ldconfig
@@ -78,8 +80,8 @@ To install Tink from the source code, the following prerequisites must be instal
     `~/mydir/lib`) to two environment variables:
 
    ```sh
-   export LIBRARY_PATH=$LIBRARY_PATH:~/mydir/lib
-   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/mydir/lib
+   export LIBRARY_PATH=$LIBRARY_PATH:$TARGET_DIR/lib
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TARGET_DIR/lib
    ```
 
 #### Validate your installation
@@ -92,7 +94,7 @@ To validate the installation compile and run [`hello_world.cc`](https://github.c
    cd /tmp
    wget https://raw.githubusercontent.com/google/tink/master/examples/helloworld/cc/hello_world.cc
    wget https://raw.githubusercontent.com/google/tink/master/examples/helloworld/cc/aes128_gcm_test_keyset_json.txt
-   cat "some message to be encrypted" > plaintext.txt
+   echo "some message to be encrypted" > plaintext.txt
    ```
 
 2. Compile the source code.
