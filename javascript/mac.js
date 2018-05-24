@@ -14,8 +14,6 @@
 
 goog.module('tink.Mac');
 
-const SecurityException = goog.require('tink.exception.SecurityException');
-
 /**
  * Interface for Message Authentication Codes (MAC).
  *
@@ -32,18 +30,16 @@ class Mac {
    * Computes message authentication code (MAC) for `data`.
    *
    * @param {!Uint8Array} data the data to compute MAC
-   * @return {!Uint8Array} the MAC tag
-   * @throws {SecurityException}
+   * @return {!Promise.<!Uint8Array>} the MAC tag
    */
   computeMac(data) {}
 
   /**
-   * Verifies whether `tag` is a correct authentication code for `data` and
-   * throws an exception if it is not.
+   * Verifies whether `tag` is a correct authentication code for `data`.
    *
    * @param {!Uint8Array} tag  the MAC tag
    * @param {!Uint8Array} data the data to compute MAC
-   * @throws {SecurityException}
+   * @return {!Promise.<boolean>}
    */
   verifyMac(tag, data) {}
 }

@@ -15,7 +15,9 @@
 goog.module('tink.subtle.EncryptThenAuthenticate');
 
 const Aead = goog.require('tink.Aead');
+const AesCtr = goog.require('tink.subtle.AesCtr');
 const Bytes = goog.require('tink.subtle.Bytes');
+const Hmac = goog.require('tink.subtle.Hmac');
 const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const Mac = goog.require('tink.Mac');
@@ -55,6 +57,22 @@ class EncryptThenAuthenticate {
   }
 
   /**
+   * @param {!Uint8Array} aesKey
+   * @param {number} ivSize the size of the IV
+   * @param {string} hmacHashAlgo accepted names are SHA-1, SHA-256 and SHA-512
+   * @param {!Uint8Array} hmacKey
+   * @param {number} tagSize the size of the tag
+   * @return {!Promise.<!EncryptThenAuthenticate>}
+   * @throws {InvalidArgumentsException}
+   * @static
+   */
+  static async newAesCtrHmac(aesKey, ivSize, hmacHashAlgo, hmacKey, tagSize) {
+    const cipher = await AesCtr.new(aesKey, ivSize);
+    const mac = await Hmac.new(hmacHashAlgo, hmacKey, tagSize);
+    return new EncryptThenAuthenticate(cipher, mac, tagSize);
+  }
+
+  /**
    * The plaintext is encrypted with an {@link IndCpaCipher}, then MAC
    * is computed over `aad || ciphertext || t` where t is aad's length in bits
    * represented as 64-bit bigendian unsigned integer. The final ciphertext
@@ -62,14 +80,15 @@ class EncryptThenAuthenticate {
    *
    * @override
    */
-  encrypt(plaintext, opt_associatedData) {
-    const payload = this.cipher_.encrypt(plaintext);
+  async encrypt(plaintext, opt_associatedData) {
+    const payload = new Uint8Array(await this.cipher_.encrypt(plaintext));
     let aad = new Uint8Array(0);
     if (goog.isDefAndNotNull(opt_associatedData)) {
       aad = opt_associatedData;
     }
     const aadLength = Bytes.fromNumber(aad.length * 8);
-    const mac = this.mac_.computeMac(Bytes.concat(aad, payload, aadLength));
+    const mac =
+        await this.mac_.computeMac(Bytes.concat(aad, payload, aadLength));
     if (this.tagSize_ != mac.length) {
       throw new SecurityException(
           'invalid tag size, expected ' + this.tagSize_ + ' but got ' +
@@ -81,24 +100,24 @@ class EncryptThenAuthenticate {
   /**
    * @override
    */
-  decrypt(ciphertext, opt_associatedData) {
+  async decrypt(ciphertext, opt_associatedData) {
     if (ciphertext.length < this.tagSize_) {
       throw new SecurityException('ciphertext too short');
     }
     const payload = new Uint8Array(
         array.slice(ciphertext, 0, ciphertext.length - this.tagSize_));
-    const providedMac = new Uint8Array(array.slice(ciphertext, payload.length));
     let aad = new Uint8Array(0);
     if (goog.isDefAndNotNull(opt_associatedData)) {
       aad = opt_associatedData;
     }
     const aadLength = Bytes.fromNumber(aad.length * 8);
     const input = Bytes.concat(aad, payload, aadLength);
-    const expectedMac = this.mac_.computeMac(input);
-    if (!Bytes.isEqual(expectedMac, providedMac)) {
+    const tag = new Uint8Array(array.slice(ciphertext, payload.length));
+    const isValidMac = await this.mac_.verifyMac(tag, input);
+    if (!isValidMac) {
       throw new SecurityException('invalid MAC');
     }
-    return this.cipher_.decrypt(payload);
+    return new Uint8Array(await this.cipher_.decrypt(payload));
   }
 }
 

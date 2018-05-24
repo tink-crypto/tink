@@ -18,80 +18,125 @@ goog.setTestOnly('tink.subtle.HmacTest');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Hmac = goog.require('tink.subtle.Hmac');
 const Random = goog.require('tink.subtle.Random');
-const array = goog.require('goog.array');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
-  testBasic: function() {
+  async testBasic() {
     const key = Random.randBytes(16);
     const msg = Random.randBytes(4);
-    const hmac = new Hmac('HMACSHA1', key, 20);
-    assertNotThrows(function() {
-      hmac.verifyMac(hmac.computeMac(msg), msg);
-    });
+    const hmac = await Hmac.new('SHA-1', key, 10);
+    const tag = await hmac.computeMac(msg);
+    assertEquals(10, tag.length);
+    assertTrue(await hmac.verifyMac(tag, msg));
   },
 
-  testConstructor: function() {
-    assertThrows(function() {
-      new Hmac('blah', Random.randbytes(16), 16);  // invalid HMAC algo name
-    });
-    assertThrows(function() {
-      new Hmac('HMACSHA1', Random.randbytes(15), 16);  // invalid key size
-    });
-    assertThrows(function() {
-      new Hmac('HMACSHA1', Random.randbytes(16), 9);  // tag size too short
-    });
-    assertThrows(function() {
-      new Hmac('HMACSHA1', Random.randbytes(16), 21);  // tag size too long
-    });
-    assertThrows(function() {
-      new Hmac('HMACSHA256', Random.randbytes(15), 16);  // invalid key size
-    });
-    assertThrows(function() {
-      new Hmac('HMACSHA256', Random.randbytes(16), 9);  // tag size too short
-    });
-    assertThrows(function() {
-      new Hmac('HMACSHA256', Random.randbytes(16), 33);  // tag size too long
-    });
-    assertThrows(function() {
-      new Hmac('HMACSHA512', Random.randbytes(15), 16);  // invalid key size
-    });
-    assertThrows(function() {
-      new Hmac('HMACSHA512', Random.randbytes(16), 9);  // tag size too short
-    });
-    assertThrows(function() {
-      new Hmac('HMACSHA512', Random.randbytes(16), 65);  // tag size too long
-    });
+  async testConstructor() {
+    try {
+      await Hmac.new(
+          'blah', Random.randBytes(16), 16);  // invalid HMAC algo name
+    } catch (e) {
+      assertEquals('CustomError: blah is not supported', e.toString());
+    }
+
+    try {
+      await Hmac.new('SHA-1', Random.randBytes(15), 16);  // invalid key size
+    } catch (e) {
+      assertEquals(
+          'CustomError: key too short, must be at least 16 bytes',
+          e.toString());
+    }
+
+    try {
+      await Hmac.new('SHA-1', Random.randBytes(16), 9);  // tag size too short
+    } catch (e) {
+      assertEquals(
+          'CustomError: tag too short, must be at least 10 bytes',
+          e.toString());
+    }
+    try {
+      await Hmac.new('SHA-1', Random.randBytes(16), 21);  // tag size too long
+    } catch (e) {
+      assertEquals(
+          'CustomError: tag too long, must not be larger than 20 bytes',
+          e.toString());
+    }
+
+    try {
+      await Hmac.new('SHA-256', Random.randBytes(15), 16);  // invalid key size
+    } catch (e) {
+      assertEquals(
+          'CustomError: key too short, must be at least 16 bytes',
+          e.toString());
+    }
+
+    try {
+      await Hmac.new('SHA-256', Random.randBytes(16), 9);  // tag size too short
+    } catch (e) {
+      assertEquals(
+          'CustomError: tag too short, must be at least 10 bytes',
+          e.toString());
+    }
+
+    try {
+      await Hmac.new('SHA-256', Random.randBytes(16), 33);  // tag size too long
+    } catch (e) {
+      assertEquals(
+          'CustomError: tag too long, must not be larger than 32 bytes',
+          e.toString());
+    }
+
+    try {
+      await Hmac.new('SHA-512', Random.randBytes(15), 16);  // invalid key size
+    } catch (e) {
+      assertEquals(
+          'CustomError: key too short, must be at least 16 bytes',
+          e.toString());
+    }
+
+    try {
+      await Hmac.new('SHA-512', Random.randBytes(16), 9);  // tag size too short
+    } catch (e) {
+      assertEquals(
+          'CustomError: tag too short, must be at least 10 bytes',
+          e.toString());
+    }
+
+    try {
+      await Hmac.new('SHA-512', Random.randBytes(16), 65);  // tag size too long
+    } catch (e) {
+      assertEquals(
+          'CustomError: tag too long, must not be larger than 64 bytes',
+          e.toString());
+    }
   },
 
-  testModify: function() {
+  async testModify() {
     const key = Random.randBytes(16);
-    const msg = Random.randBytes(4);
-    const hmac = new Hmac('HMACSHA1', key, 20);
-    const tag = hmac.computeMac(msg);
+    const msg = Random.randBytes(8);
+    const hmac = await Hmac.new('SHA-1', key, 20);
+    const tag = await hmac.computeMac(msg);
 
     // Modify tag.
     for (let i = 0; i < tag.length; i++) {
       let v = tag[i] ^ 0xff;
-      assertThrows(function() {
-        hmac.verifyMac(new Uint8Array(tag).fill(v, i, i + 1), msg);
-      });
+      assertFalse(
+          await hmac.verifyMac(new Uint8Array(tag).fill(v, i, i + 1), msg));
     }
 
     // Modify msg.
     for (let i = 0; i < msg.length; i++) {
       let v = msg[i] ^ 0xff;
-      assertThrows(function() {
-        hmac.verifyMac(tag, new Uint8Array(msg).fill(v, i, i + 1));
-      });
+      assertFalse(
+          await hmac.verifyMac(tag, new Uint8Array(msg).fill(v, i, i + 1)));
     }
   },
-  testWithTestVectors: function() {
+
+  async testWithTestVectors() {
     // Test data from
     // http://csrc.nist.gov/groups/STM/cavp/message-authentication.html#testing.
     const NIST_TEST_VECTORS = [
       {
-        'algo': 'HMACSHA1',
+        'algo': 'SHA-1',
         'key':
             '816aa4c3ee066310ac1e6666cf830c375355c3c8ba18cfe1f50a48c988b46272',
         'message':
@@ -102,7 +147,7 @@ testSuite({
         'tag': '17cb2e9e98b748b5ae0f7078ea5519e5'
       },
       {
-        'algo': 'HMACSHA256',
+        'algo': 'SHA-256',
         'key':
             '6f35628d65813435534b5d67fbdb54cb33403d04e843103e6399f806cb5df95' +
             'febbdd61236f33245',
@@ -114,7 +159,7 @@ testSuite({
         'tag': '05d1243e6465ed9620c9aec1c351a186'
       },
       {
-        'algo': 'HMACSHA512',
+        'algo': 'SHA-512',
         'key':
             '726374c4b8df517510db9159b730f93431e0cd468d4f3821eab0edb93abd0fba' +
             '46ab4f1ef35d54fec3d85fa89ef72ff3d35f22cf5ab69e205c10afcdf4aaf113' +
@@ -130,14 +175,13 @@ testSuite({
             'bd3d2df6f9d284b421a43e5f9cb94bc4ff88a88243f1f0133bad0fb1791f6569'
       },
     ];
-    array.forEach(NIST_TEST_VECTORS, function(testVector) {
-      const key = Bytes.fromHex(testVector.key);
-      const message = Bytes.fromHex(testVector.message);
-      const tag = Bytes.fromHex(testVector.tag);
-      const hmac = new Hmac(testVector.algo, key, tag.length);
-      assertNotThrows(function() {
-        hmac.verifyMac(tag, message);
-      });
-    });
+    for (let i = 0; i < NIST_TEST_VECTORS.length; i++) {
+      const testVector = NIST_TEST_VECTORS[i];
+      const key = Bytes.fromHex(testVector['key']);
+      const message = Bytes.fromHex(testVector['message']);
+      const tag = Bytes.fromHex(testVector['tag']);
+      const hmac = await Hmac.new(testVector['algo'], key, tag.length);
+      assertTrue(await hmac.verifyMac(tag, message));
+    }
   },
 });

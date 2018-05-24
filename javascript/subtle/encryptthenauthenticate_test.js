@@ -15,93 +15,97 @@
 goog.module('tink.subtle.EncryptThenAuthenticateTest');
 goog.setTestOnly('tink.subtle.EncryptThenAuthenticateTest');
 
-const AesCtr = goog.require('tink.subtle.AesCtr');
 const Bytes = goog.require('tink.subtle.Bytes');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
-const Hmac = goog.require('tink.subtle.Hmac');
 const Random = goog.require('tink.subtle.Random');
-const array = goog.require('goog.array');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
-  testBasic: function() {
-    const cipher = new AesCtr(Random.randBytes(16), 12);
-    const tagSize = 10;
-    const mac = new Hmac('HMACSHA256', Random.randBytes(16), tagSize);
-    const aead = new EncryptThenAuthenticate(cipher, mac, tagSize);
+  async testBasic() {
+    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+        Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
+        Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
     const results = new Set();
     for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(20);
-      let ciphertext = aead.encrypt(msg);
-      assertEquals(Bytes.toHex(msg), Bytes.toHex(aead.decrypt(ciphertext)));
+      let ciphertext = await aead.encrypt(msg);
+      let plaintext = await aead.decrypt(ciphertext);
+      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
       let aad = null;
-      ciphertext = aead.encrypt(msg, aad);
-      assertEquals(
-          Bytes.toHex(msg), Bytes.toHex(aead.decrypt(ciphertext, aad)));
+      ciphertext = await aead.encrypt(msg, aad);
+      plaintext = await aead.decrypt(ciphertext, aad);
+      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
       aad = Random.randBytes(20);
-      ciphertext = aead.encrypt(msg, aad);
-      assertEquals(
-          Bytes.toHex(msg), Bytes.toHex(aead.decrypt(ciphertext, aad)));
+      ciphertext = await aead.encrypt(msg, aad);
+      plaintext = await aead.decrypt(ciphertext, aad);
+      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
       results.add(Bytes.toHex(ciphertext));
     }
     assertEquals(100, results.size);
   },
 
-  testBitFlipCiphertext: function() {
-    const cipher = new AesCtr(Random.randBytes(16), 16);
-    const tagSize = 16;
-    const mac = new Hmac('HMACSHA256', Random.randBytes(16), tagSize);
-    const aead = new EncryptThenAuthenticate(cipher, mac, tagSize);
+  async testBitFlipCiphertext() {
+    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+        Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
+        Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
-    const ciphertext = aead.encrypt(plaintext, aad);
+    const ciphertext = await aead.encrypt(plaintext, aad);
     for (let i = 0; i < ciphertext.length; i++) {
       for (let j = 0; j < 8; j++) {
         const c1 = new Uint8Array(ciphertext);
         c1[i] = (c1[i] ^ (1 << j));
-        assertThrows(function() {
-          aead.decrypt(c1, aad);
-        });
+        try {
+          await aead.decrypt(c1, aad);
+        } catch (e) {
+          assertEquals('CustomError: invalid MAC', e.toString());
+        }
       }
     }
   },
 
-  testBitFlipAad: function() {
-    const cipher = new AesCtr(Random.randBytes(16), 16);
-    const tagSize = 16;
-    const mac = new Hmac('HMACSHA256', Random.randBytes(16), tagSize);
-    const aead = new EncryptThenAuthenticate(cipher, mac, tagSize);
+  async testBitFlipAad() {
+    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+        Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
+        Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
-    const ciphertext = aead.encrypt(plaintext, aad);
+    const ciphertext = await aead.encrypt(plaintext, aad);
     for (let i = 0; i < aad.length; i++) {
       for (let j = 0; j < 8; j++) {
         const aad1 = new Uint8Array(aad);
         aad1[i] = (aad1[i] ^ (1 << j));
-        assertThrows(function() {
-          aead.decrypt(ciphertext, aad1);
-        });
+        try {
+          await aead.decrypt(ciphertext, aad1);
+        } catch (e) {
+          assertEquals('CustomError: invalid MAC', e.toString());
+        }
       }
     }
   },
 
-  testTruncation: function() {
-    const cipher = new AesCtr(Random.randBytes(16), 16);
-    const tagSize = 16;
-    const mac = new Hmac('HMACSHA256', Random.randBytes(16), tagSize);
-    const aead = new EncryptThenAuthenticate(cipher, mac, tagSize);
+  async testTruncation() {
+    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+        Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
+        Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
-    const ciphertext = aead.encrypt(plaintext, aad);
+    const ciphertext = await aead.encrypt(plaintext, aad);
     for (let i = 1; i <= ciphertext.length; i++) {
       const c1 = new Uint8Array(ciphertext.buffer, 0, ciphertext.length - i);
-      assertThrows(function() {
-        aead.decrypt(c1, aad);
-      });
+      try {
+        await aead.decrypt(c1, aad);
+      } catch (e) {
+        if (c1.length < 16) {
+          assertEquals('CustomError: ciphertext too short', e.toString());
+        } else {
+          assertEquals('CustomError: invalid MAC', e.toString());
+        }
+      }
     }
   },
 
-  testWithRfcTestVectors: function() {
+  async testWithRfcTestVectors() {
     // Test data from
     // https://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05. As we
     // use CTR while RFC uses CBC mode, it's not possible to compare plaintexts.
@@ -125,7 +129,7 @@ testSuite({
         'aad': '546865207365636f6e64207072696e63' +
             '69706c65206f66204175677573746520' +
             '4b6572636b686f666673',
-        'hmacAlgo': 'HMACSHA256',
+        'hashAlgoName': 'SHA-256',
         'ivSize': 16,
         'tagSize': 16
       },
@@ -148,24 +152,24 @@ testSuite({
             '2e6269a8c56a816dbc1b267761955bc5',
         'aad':
             '546865207365636f6e64207072696e6369706c65206f662041756775737465204b6572636b686f666673',
-        'hmacAlgo': 'HMACSHA512',
+        'hashAlgoName': 'SHA-512',
         'ivSize': 16,
         'tagSize': 32
       },
     ];
-    array.forEach(RFC_TEST_VECTORS, function(testVector) {
-      const hmac = new Hmac(
-          testVector.hmacAlgo, Bytes.fromHex(testVector.macKey),
-          testVector.tagSize);
-      const aesCtr = new AesCtr(
-          Bytes.fromHex(testVector.encryptionKey), testVector.ivSize);
-      const aead =
-          new EncryptThenAuthenticate(aesCtr, hmac, testVector.tagSize);
-      const ciphertext = Bytes.fromHex(testVector.ciphertext);
-      const aad = Bytes.fromHex(testVector.aad);
-      assertNotThrows(function() {
-        aead.decrypt(ciphertext, aad);
-      });
-    });
+    for (let i = 0; i < RFC_TEST_VECTORS.length; i++) {
+      const testVector = RFC_TEST_VECTORS[i];
+      const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+          Bytes.fromHex(testVector['encryptionKey']), testVector['ivSize'],
+          testVector['hashAlgoName'], Bytes.fromHex(testVector['macKey']),
+          testVector['tagSize']);
+      const ciphertext = Bytes.fromHex(testVector['ciphertext']);
+      const aad = Bytes.fromHex(testVector['aad']);
+      try {
+        await aead.decrypt(ciphertext, aad);
+      } catch (e) {
+        fail(e);
+      }
+    }
   },
 });

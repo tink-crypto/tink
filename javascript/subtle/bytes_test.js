@@ -21,9 +21,9 @@ const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
   testConcat: function() {
-    let ba1 = new Uint8Array();
-    let ba2 = new Uint8Array();
-    let ba3 = new Uint8Array();
+    let ba1 = new Uint8Array(0);
+    let ba2 = new Uint8Array(0);
+    let ba3 = new Uint8Array(0);
     let result = Bytes.concat(ba1, ba2, ba3);
     assertEquals(0, result.length);
 

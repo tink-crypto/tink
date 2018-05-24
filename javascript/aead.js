@@ -37,7 +37,7 @@ class Aead {
    *     authenticated, but not encrypted. A null value is equivalent to an
    *     empty (zero-length) byte array. For successful decryption the same
    *     associated data must be provided along with the ciphertext.
-   * @return {!Uint8Array} resulting ciphertext
+   * @return {!Promise.<!Uint8Array>} resulting ciphertext
    *
    */
   encrypt(plaintext, opt_associatedData) {}
@@ -53,7 +53,7 @@ class Aead {
    *     authenticated. A null value is equivalent to an empty (zero-length)
    *     byte array. For successful decryption the same associated data must be
    *     provided along with the ciphertext.
-   * @return {!Uint8Array} resulting plaintext
+   * @return {!Promise.<!Uint8Array>} resulting plaintext
    */
   decrypt(ciphertext, opt_associatedData) {}
 }

@@ -14,9 +14,7 @@
 
 goog.module('tink.subtle.AesCtr');
 
-const Aes = goog.require('goog.crypt.Aes');
 const Bytes = goog.require('tink.subtle.Bytes');
-const Ctr = goog.require('goog.crypt.Ctr');
 const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const Random = goog.require('tink.subtle.Random');
@@ -46,44 +44,62 @@ const AES_BLOCK_SIZE_IN_BYTES = 16;
  */
 class AesCtr {
   /**
+   * @param {!webCrypto.CryptoKey} key
+   * @param {number} ivSize the size of the IV, must be larger than or equal to
+   *     {@link MIN_IV_SIZE_IN_BYTES}
+   */
+  constructor(key, ivSize) {
+    /** @const @private {!webCrypto.CryptoKey} */
+    this.key_ = key;
+
+    /** @const @private {number} */
+    this.ivSize_ = ivSize;
+  }
+
+  /**
    * @param {!Uint8Array} key
    * @param {number} ivSize the size of the IV, must be larger than or equal to
    *     {@link MIN_IV_SIZE_IN_BYTES}
+   * @return {!Promise.<!AesCtr>}
    * @throws {InvalidArgumentsException}
+   * @static
    */
-  constructor(key, ivSize) {
+  static async new(key, ivSize) {
     if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > AES_BLOCK_SIZE_IN_BYTES) {
       throw new InvalidArgumentsException(
           'invaid IV length, must be at least ' + MIN_IV_SIZE_IN_BYTES +
           ' and at most ' + AES_BLOCK_SIZE_IN_BYTES);
     }
-    /** @const @private {number} */
-    this.ivSize_ = ivSize;
-
     Validators.validateAesKeySize(key.length);
-    /** @const @private {Ctr} */
-    this.ctr_ = new Ctr(new Aes(Array.from(key)));
+
+    const cryptoKey = await window.crypto.subtle.importKey(
+        'raw', key, {'name': 'AES-CTR', 'length': key.length}, false,
+        ['encrypt', 'decrypt']);
+    return new AesCtr(cryptoKey, ivSize);
   }
 
   /**
    * @override
    */
-  encrypt(plaintext) {
+  async encrypt(plaintext) {
     const iv = Random.randBytes(this.ivSize_);
     const counter = new Uint8Array(AES_BLOCK_SIZE_IN_BYTES);
     counter.set(iv);
-    return Bytes.concat(
-        iv, new Uint8Array(this.ctr_.encrypt(plaintext, counter)));
+    const alg = {'name': 'AES-CTR', 'counter': counter, 'length': 128};
+    const ciphertext =
+        await window.crypto.subtle.encrypt(alg, this.key_, plaintext);
+    return Bytes.concat(iv, new Uint8Array(ciphertext));
   }
 
   /**
    * @override
    */
-  decrypt(ciphertext) {
+  async decrypt(ciphertext) {
     const counter = new Uint8Array(AES_BLOCK_SIZE_IN_BYTES);
     counter.set(array.slice(ciphertext, 0, this.ivSize_));
-    return new Uint8Array(
-        this.ctr_.decrypt(array.slice(ciphertext, this.ivSize_), counter));
+    const alg = {'name': 'AES-CTR', 'counter': counter, 'length': 128};
+    return new Uint8Array(await window.crypto.subtle.decrypt(
+        alg, this.key_, new Uint8Array(array.slice(ciphertext, this.ivSize_))));
   }
 }
 

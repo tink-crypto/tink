@@ -33,7 +33,7 @@ class IndCpaCipher {
    *
    * @param {!Uint8Array} plaintext the plaintext to be encrypted. It must be
    *     non-null, but can also be an empty (zero-length) byte array.
-   * @return {!Uint8Array} resulting ciphertext
+   * @return {!Promise.<!Uint8Array>} resulting ciphertext
    * @throws {SecurityException}
    */
   encrypt(plaintext) {}
@@ -43,7 +43,7 @@ class IndCpaCipher {
    *
    * @param {!Uint8Array} ciphertext the ciphertext to be decrypted, must be
    *     non-null.
-   * @return {!Uint8Array} resulting plaintext
+   * @return {!Promise.<!Uint8Array>} resulting plaintext
    * @throws {SecurityException}
    */
   decrypt(ciphertext) {}

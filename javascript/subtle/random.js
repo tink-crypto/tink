@@ -27,9 +27,8 @@ goog.module('tink.subtle.Random');
  * @static
  */
 const randBytes = function(n) {
-  const crypto = window.crypto || window.msCrypto;
   const result = new Uint8Array(n);
-  crypto.getRandomValues(result);
+  window.crypto.getRandomValues(result);
   return result;
 };
 

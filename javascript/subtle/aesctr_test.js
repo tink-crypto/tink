@@ -18,36 +18,46 @@ goog.setTestOnly('tink.subtle.AesCtrTest');
 const AesCtr = goog.require('tink.subtle.AesCtr');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Random = goog.require('tink.subtle.Random');
-const array = goog.require('goog.array');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
-  testBasic: function() {
+  async testBasic() {
     const key = Random.randBytes(16);
     const results = new Set();
     for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(20);
-      const aesctr = new AesCtr(key, 16);
-      let ciphertext = aesctr.encrypt(msg);
-      assertEquals(Bytes.toHex(msg), Bytes.toHex(aesctr.decrypt(ciphertext)));
+      const aesctr = await AesCtr.new(key, 16);
+      let ciphertext = await aesctr.encrypt(msg);
+      let plaintext = await aesctr.decrypt(ciphertext);
+      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
       results.add(Bytes.toHex(ciphertext));
     }
     assertEquals(100, results.size);
   },
 
-  testConstructor: function() {
-    assertThrows(function() {
-      new AesCtr(Random.randBytes(16), 11);  // IV size too short
-    });
-    assertThrows(function() {
-      new AesCtr(Random.randBytes(16), 17);  // IV size too long
-    });
-    assertThrows(function() {
-      new AesCtr(Random.randBytes(24), 12);  // 192-bit keys not supported
-    });
+  async testConstructor() {
+    try {
+      await AesCtr.new(Random.randBytes(16), 11);  // IV size too short
+    } catch (e) {
+      assertEquals(
+          'CustomError: invaid IV length, must be at least 12 and at most 16',
+          e.toString());
+    }
+    try {
+      await AesCtr.new(Random.randBytes(16), 17);  // IV size too long
+    } catch (e) {
+      assertEquals(
+          'CustomError: invaid IV length, must be at least 12 and at most 16',
+          e.toString());
+    }
+    try {
+      await AesCtr.new(Random.randBytes(24), 12);  // 192-bit keys not supported
+    } catch (e) {
+      assertEquals('CustomError: unsupported AES key size: 24', e.toString());
+    }
   },
 
-  testWithTestVectors: function() {
+  async testWithTestVectors() {
     // Test data from NIST SP 800-38A pp 55.
     const NIST_TEST_VECTORS = [
       {
@@ -61,15 +71,15 @@ testSuite({
         'iv': 'f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff'
       },
     ];
-    array.forEach(NIST_TEST_VECTORS, function(testVector) {
-      const key = Bytes.fromHex(testVector.key);
-      const iv = Bytes.fromHex(testVector.iv);
-      const plaintext = Bytes.fromHex(testVector.message);
-      const ciphertext = Bytes.fromHex(testVector.ciphertext);
-      const aesctr = new AesCtr(key, iv.length);
-      assertEquals(
-          Bytes.toHex(plaintext),
-          Bytes.toHex(aesctr.decrypt(Bytes.concat(iv, ciphertext))));
-    });
+    for (let i = 0; i < NIST_TEST_VECTORS.length; i++) {
+      const testVector = NIST_TEST_VECTORS[i];
+      const key = Bytes.fromHex(testVector['key']);
+      const iv = Bytes.fromHex(testVector['iv']);
+      const msg = Bytes.fromHex(testVector['message']);
+      const ciphertext = Bytes.fromHex(testVector['ciphertext']);
+      const aesctr = await AesCtr.new(key, iv.length);
+      const plaintext = await aesctr.decrypt(Bytes.concat(iv, ciphertext));
+      assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+    }
   },
 });

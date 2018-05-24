@@ -15,14 +15,8 @@
 goog.module('tink.subtle.Hmac');
 
 const Bytes = goog.require('tink.subtle.Bytes');
-const GoogHmac = goog.require('goog.crypt.Hmac');
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const Mac = goog.require('tink.Mac');
-const SecurityException = goog.require('tink.exception.SecurityException');
-const Sha1 = goog.require('goog.crypt.Sha1');
-const Sha256 = goog.require('goog.crypt.Sha256');
-const Sha512 = goog.require('goog.crypt.Sha512');
-const array = goog.require('goog.array');
 
 /**
  * The minimum tag size.
@@ -47,74 +41,89 @@ const MIN_KEY_SIZE_IN_BYTES = 16;
  */
 class Hmac {
   /**
-   * @param {string} algoName accepted names are HMACSHA1, HMACSHA256 and
-   *     HMACSHA512
-   * @param {!Uint8Array} key must be longer than
-   *     {@link MIN_KEY_SIZE_IN_BYTES}
+   * @param {!webCrypto.CryptoKey} key
    * @param {number} tagSize the size of the tag, must be larger than or equal to
    *     {@link MIN_TAG_SIZE_IN_BYTES}
    * @throws {InvalidArgumentsException}
    */
-  constructor(algoName, key, tagSize) {
+  constructor(key, tagSize) {
     /** @const @private {number} */
     this.tagSize_ = tagSize;
 
-    /** @private {GoogHmac} */
-    this.hmac_;
+    /** @const @private {!webCrypto.CryptoKey} */
+    this.key_ = key;
+  }
 
+  /**
+   * @param {string} hashAlgoName accepted names are SHA-1, SHA-256 and SHA-512
+   * @param {!Uint8Array} key must be longer than {@link MIN_KEY_SIZE_IN_BYTES}
+   * @param {number} tagSize the size of the tag, must be larger than or equal
+   *     to {@link MIN_TAG_SIZE_IN_BYTES}
+   * @return {!Promise.<!Mac>}
+   * @throws {InvalidArgumentsException}
+   * @static
+   */
+  static async new(hashAlgoName, key, tagSize) {
     if (tagSize < MIN_TAG_SIZE_IN_BYTES) {
       throw new InvalidArgumentsException(
-          'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES);
+          'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES +
+          ' bytes');
     }
 
     if (key.length < MIN_KEY_SIZE_IN_BYTES) {
       throw new InvalidArgumentsException(
-          'key too short, must be at least ' + MIN_KEY_SIZE_IN_BYTES);
+          'key too short, must be at least ' + MIN_KEY_SIZE_IN_BYTES +
+          ' bytes');
     }
 
-    switch (algoName) {
-      case 'HMACSHA1':
+    switch (hashAlgoName) {
+      case 'SHA-1':
         if (tagSize > 20) {
           throw new InvalidArgumentsException(
-              'tag too long, must not be larger than 20');
+              'tag too long, must not be larger than 20 bytes');
         }
-        this.hmac_ = new GoogHmac(new Sha1(), Array.from(key));
         break;
-      case 'HMACSHA256':
+      case 'SHA-256':
         if (tagSize > 32) {
           throw new InvalidArgumentsException(
-              'tag too long, must not be larger than 32');
+              'tag too long, must not be larger than 32 bytes');
         }
-        this.hmac_ = new GoogHmac(new Sha256(), Array.from(key));
         break;
-      case 'HMACSHA512':
+      case 'SHA-512':
         if (tagSize > 64) {
           throw new InvalidArgumentsException(
-              'tag too long, must not be larger than 64');
+              'tag too long, must not be larger than 64 bytes');
         }
-        this.hmac_ = new GoogHmac(new Sha512(), Array.from(key));
         break;
       default:
-        throw new InvalidArgumentsException(algoName + ' is not supported');
+        throw new InvalidArgumentsException(hashAlgoName + ' is not supported');
     }
+
+    const cryptoKey = await window.crypto.subtle.importKey(
+        'raw', key, {
+          'name': 'HMAC',
+          'hash': {'name': hashAlgoName},
+          'length': key.length * 8
+        },
+        false, ['sign', 'verify']);
+    return new Hmac(cryptoKey, tagSize);
   }
 
   /**
    * @override
    */
-  computeMac(data) {
-    return new Uint8Array(
-        array.slice(this.hmac_.getHmac(data), 0, this.tagSize_));
+  async computeMac(data) {
+    const tag =
+        await window.crypto.subtle.sign({'name': 'HMAC'}, this.key_, data);
+    return new Uint8Array(tag.slice(0, this.tagSize_));
   }
 
   /**
    * @override
    */
-  verifyMac(tag, data) {
-    const computedTag = this.computeMac(data);
-    if (!Bytes.isEqual(tag, computedTag)) {
-      throw new SecurityException('invalid tag');
-    }
+  async verifyMac(tag, data) {
+    const computedTag = await this.computeMac(data);
+    return Bytes.isEqual(tag, computedTag);
   }
 }
 
