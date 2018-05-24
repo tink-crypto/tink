@@ -1,0 +1,53 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])  # Apache 2.0
+
+filegroup(
+    name = "hello_world_files",
+    srcs = [
+        "aes128_gcm_test_keyset_json.txt",
+        "hello_world.cc",
+    ],
+)
+
+cc_binary(
+    name = "hello_world",
+    srcs = ["hello_world.cc"],
+    deps = [
+        "//cc",
+        "//cc:cleartext_keyset_handle",
+        "//cc/aead:aead_factory",
+        "//cc/config:tink_config",
+        "//cc/util:status",
+    ],
+)
+
+sh_test(
+    name = "hello_world_test",
+    size = "small",
+    srcs = [
+        "hello_world_test.sh",
+    ],
+    data = [
+        ":hello_world",
+        ":hello_world_files",
+    ],
+)
+
+sh_test(
+    name = "non_bazel_build_test",
+    size = "small",
+    srcs = [
+        "non_bazel_build_test.sh",
+    ],
+    tags = [
+        "local",   # This tests needs g++.
+        "manual",  # Does not run on OSX yet.  TODO(b/78299422)
+    ],
+    data = [
+        ":hello_world_files",
+        "//cc:libtink.so",
+        "//cc:tink_headers",
+        "//cc:tink_deps_headers",
+    ],
+)

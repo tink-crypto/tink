@@ -4,77 +4,89 @@ licenses(["notice"])  # Apache 2.0
 
 # public libraries
 
+PUBLIC_APIS = [
+    "aead.h",
+    "aead_config.h",
+    "aead_factory.h",
+    "aead_key_templates.h",
+    "binary_keyset_reader.h",
+    "binary_keyset_writer.h",
+    "catalogue.h",
+    "config.h",
+    "hybrid_config.h",
+    "hybrid_decrypt.h",
+    "hybrid_decrypt_factory.h",
+    "hybrid_encrypt.h",
+    "hybrid_encrypt_factory.h",
+    "hybrid_key_templates.h",
+    "json_keyset_reader.h",
+    "json_keyset_writer.h",
+    "key_manager.h",
+    "keyset_handle.h",
+    "keyset_manager.h",
+    "keyset_reader.h",
+    "keyset_writer.h",
+    "mac.h",
+    "mac_config.h",
+    "mac_factory.h",
+    "mac_key_templates.h",
+    "public_key_sign.h",
+    "public_key_sign_factory.h",
+    "public_key_verify.h",
+    "public_key_verify_factory.h",
+    "registry.h",
+    "signature_config.h",
+    "signature_key_templates.h",
+    "tink_config.h",
+]
+
+PUBLIC_API_DEPS = [
+    ":aead",
+    ":binary_keyset_reader",
+    ":binary_keyset_writer",
+    ":hybrid_decrypt",
+    ":hybrid_encrypt",
+    ":json_keyset_reader",
+    ":json_keyset_writer",
+    ":key_manager",
+    ":keyset_handle",
+    ":keyset_manager",
+    ":public_key_sign",
+    ":public_key_verify",
+    ":keyset_reader",
+    ":keyset_writer",
+    ":mac",
+    ":primitive_set",
+    ":registry",
+    "//cc/aead:aead_config",
+    "//cc/aead:aead_factory",
+    "//cc/aead:aead_key_templates",
+    "//cc/config:tink_config",
+    "//cc/hybrid:hybrid_config",
+    "//cc/hybrid:hybrid_decrypt_factory",
+    "//cc/hybrid:hybrid_encrypt_factory",
+    "//cc/hybrid:hybrid_key_templates",
+    "//cc/mac:mac_config",
+    "//cc/mac:mac_factory",
+    "//cc/mac:mac_key_templates",
+    "//cc/signature:public_key_sign_factory",
+    "//cc/signature:public_key_verify_factory",
+    "//cc/signature:signature_config",
+    "//cc/signature:signature_key_templates",
+    "//cc/util:errors",
+    "//cc/util:protobuf_helper",
+    "//cc/util:status",
+    "//cc/util:statusor",
+    "//cc/util:validation",
+    "@com_google_absl//absl/memory",
+    "@com_google_absl//absl/strings",
+]
+
 cc_library(
     name = "cc",
-    hdrs = [
-        "aead.h",
-        "aead_config.h",
-        "aead_factory.h",
-        "binary_keyset_reader.h",
-        "binary_keyset_writer.h",
-        "catalogue.h",
-        "config.h",
-        "hybrid_config.h",
-        "hybrid_decrypt.h",
-        "hybrid_decrypt_factory.h",
-        "hybrid_encrypt.h",
-        "hybrid_encrypt_factory.h",
-        "json_keyset_reader.h",
-        "json_keyset_writer.h",
-        "key_manager.h",
-        "keyset_handle.h",
-        "keyset_manager.h",
-        "keyset_reader.h",
-        "keyset_writer.h",
-        "mac.h",
-        "mac_config.h",
-        "mac_factory.h",
-        "public_key_sign.h",
-        "public_key_sign_factory.h",
-        "public_key_verify.h",
-        "public_key_verify_factory.h",
-        "registry.h",
-        "signature_config.h",
-        "tink_config.h",
-    ],
-    deps = [
-        ":aead",
-        ":binary_keyset_reader",
-        ":binary_keyset_writer",
-        ":hybrid_decrypt",
-        ":hybrid_encrypt",
-        ":json_keyset_reader",
-        ":json_keyset_writer",
-        ":key_manager",
-        ":keyset_handle",
-        ":keyset_manager",
-        ":keyset_reader",
-        ":mac",
-        ":primitive_set",
-        ":public_key_sign",
-        ":public_key_verify",
-        ":registry",
-        "//cc/aead:aead_config",
-        "//cc/aead:aead_factory",
-        "//cc/config:tink_config",
-        "//cc/hybrid:hybrid_config",
-        "//cc/hybrid:hybrid_decrypt_factory",
-        "//cc/hybrid:hybrid_encrypt_factory",
-        "//cc/mac:mac_config",
-        "//cc/mac:mac_factory",
-        "//cc/signature:public_key_sign_factory",
-        "//cc/signature:public_key_verify_factory",
-        "//cc/signature:signature_config",
-        "//cc/util:errors",
-        "//cc/util:protobuf_helper",
-        "//cc/util:status",
-        "//cc/util:statusor",
-        "//cc/util:validation",
-        "//proto:config_cc_proto",
-        "//proto:tink_cc_proto",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
-    ],
+    hdrs = PUBLIC_APIS,
+    visibility = ["//visibility:public"],
+    deps = PUBLIC_API_DEPS,
 )
 
 cc_library(
@@ -382,6 +394,62 @@ cc_library(
     ],
     strip_include_prefix = "/cc",
     include_prefix = "tink",
+)
+
+# Library for projects that don't use Bazel but would like to use Tink.
+# cc_library() doesn't support linkshared so we're using cc_binary.
+# To get dead code elimination run Bazel with option --nolegacy_whole_archive.
+cc_binary(
+    name = "libtink.so",
+    linkshared = 1,
+    linkstatic = 1,
+    visibility = ["//visibility:public"],
+    deps = PUBLIC_API_DEPS + [":cleartext_keyset_handle"],
+)
+
+# Header files needed for building without Bazel with the above libtink.so
+genrule(
+    name = "tink_headers",
+    srcs = [
+        "//cc",
+        "//proto:public_cc_protos",
+    ],
+    local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
+    tags = [
+        "manual",  # Does not run on OSX yet.  TODO(b/78299422)
+    ],
+    outs = [
+        "tink_headers.tar",
+    ],
+    # The command below collects all Tink headers in two steps:
+    #  * First a tar-archive with all "regular" .h-files is created.
+    #  * Then .h-files generated for Tink protos are added to the tar-archive.
+    cmd = "tar -cv -f $@ --dereference --transform \"s/^cc/tink/\" " +
+          "    --show-transformed-names `find cc/ -name \"*.h\"`; " +
+          "tar -rv -f $@ -C $(GENDIR) --dereference " +
+          "    `cd $(GENDIR); find proto/ -name \"*.pb.h\"`",
+)
+
+genrule(
+    name = "tink_deps_headers",
+    srcs = [
+        "@com_google_absl//absl/strings",
+        "@com_google_protobuf//:cc_wkt_protos",
+    ],
+    local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
+    tags = [
+        "manual",  # Does not run on OSX yet.  TODO(b/78299422)
+    ],
+    outs = [
+        "tink_deps_headers.tar",
+    ],
+    # The command below collects headers of Tink dependencies in two steps:
+    #  * First a tar-archive with all Abseil .h-files is created.
+    #  * Then .h-files of Protobuf library are added to the tar-archive.
+    cmd = "tar -cv -f $@ -C external/com_google_absl --dereference " +
+          "    `cd external/com_google_absl; find absl/ -name \"*.h\"`; " +
+          "tar -rv -f $@ -C external/com_google_protobuf/src --dereference " +
+          "    `cd external/com_google_protobuf/src/; find google/ -name \"*.h\"`",
 )
 
 # tests

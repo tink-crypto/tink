@@ -86,6 +86,14 @@ objc_proto_compile(
     tags = ["manual"],
 )
 
+filegroup(
+    name = "public_cc_protos",
+    srcs = [
+        ":tink_cc_proto",
+        ":config_cc_proto",
+    ],
+)
+
 # -----------------------------------------------
 # config
 # -----------------------------------------------

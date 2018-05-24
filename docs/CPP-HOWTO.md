@@ -3,6 +3,115 @@
 The following subsections present instructions and/or C++ snippets for some
 common tasks in [Tink](https://github.com/google/tink).
 
+
+## Installing Tink
+
+Tink is built with [Bazel](https://www.bazel.build), so it is quite easy to use
+Tink in a project built with Bazel, and this is the recommended way.  See for
+example [tink-examples repo](https://github.com/thaidn/tink-examples) on how to
+import Tink using Bazel's WORKSPACE file.
+
+Still, there are definitely projects for which using Bazel is not an option, and
+for such situations we offer a library that can be used with other build
+tools.  Currently only we offer support for Linux machines, but are working on
+supporting other operating systems as well.
+
+**Warning:** In any case, the use of Tink without Bazel is at experimental stage,
+so the instructions given below might not work in some environments.
+
+#### Supported Platforms
+
+ * Linux
+ * mac OS X (coming soon)
+
+#### Caveats
+
+Tink depends on [Abseil](https://github.com/abseil/abseil-cpp) and [Protocol
+Buffers](https://developers.google.com/protocol-buffers/), so any project that
+wants to use Tink should either depend on the same versions of these libraries
+(cf. versions in the corresponding entries in
+[WORKSPACE](https://github.com/google/tink/blob/master/WORKSPACE) file), or not
+depend directly on these libraries at all (i.e. have only the indirect
+dependence via Tink).
+
+### Installing pre-build binaries (TODO)
+
+
+### Installing from the source
+
+#### Prerequisites
+
+To install Tink from the source code, the following prerequisites must be installed:
+
+ * [git](https://git-scm.com/) - to download the source of Tink
+ * [Bazel](https://www.bazel.build) - to build the Tink library
+
+#### Step-by-step instructions to build and use `libtink.so`
+
+1. clone Tink from GitHub:
+
+   ```sh
+   git clone https://github.com/google/tink/
+   ```
+
+2. build the library and header-file bundles, and install them in appropriate
+   directories of the target project (`TARGET_DIR`):
+
+   ```sh
+   bazel build cc:libtink.so
+   bazel build tink_headers tink_deps_headers
+   TARGET_DIR="/usr/local"
+   cp bazel-bin/cc/libtink.so $TARGET_DIR/lib/
+   tar xfv bazel-genfiles/cc/tink_headers.tar -C $TARGET_DIR/include/
+   tar xfv bazel-genfiles/cc/tink_deps_headers.tar -C $TARGET_DIR/include/
+   ```
+
+3. If in Step 2 you specified a system directory (for example, `/usr/local`) as the `TARGET_DIR`,
+   then run ldconfig to configure the linker. For example:
+
+   ```sh
+   sudo ldconfig
+   ```
+
+    If you assigned a `TARGET_DIR` other than a system directory (for example,
+    `~/mydir`), then you must append the extraction directory (for example,
+    `~/mydir/lib`) to two environment variables:
+
+   ```sh
+   export LIBRARY_PATH=$LIBRARY_PATH:~/mydir/lib
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/mydir/lib
+   ```
+
+#### Validate your installation
+
+To validate the installation compile and run [`hello_world.cc`](https://github.com/google/tink/tree/master/examples/helloworld/cc/hello_world.cc).
+
+1. Copy the source code and a test cryptographic key, create some plaintext to encrypt.
+
+   ```sh
+   cd /tmp
+   wget https://raw.githubusercontent.com/google/tink/master/examples/helloworld/cc/hello_world.cc
+   wget https://raw.githubusercontent.com/google/tink/master/examples/helloworld/cc/aes128_gcm_test_keyset_json.txt
+   cat "some message to be encrypted" > plaintext.txt
+   ```
+
+2. Compile the source code.
+
+   ```sh
+    g++ -I$TARGET_DIR/include/ -L$TARGET_DIR/lib/ hello_world.cc -ltink -o hello_world
+   ```
+
+3. Run `hello_world` application to encrypt and decrypt some data.
+
+   ```sh
+   ./hello_world aes128_gcm_test_keyset_json.txt encrypt plaintext.txt "associated data" ciphertext.bin
+   ./hello_world aes128_gcm_test_keyset_json.txt decrypt ciphertext.bin "associated data" decrypted.txt
+   cat decrypted.txt
+   ```
+
+   (additionally `export LD_RUN_PATH=$LD_RUN_PATH:$TARGET_DIR/lib/` might be needed
+   to ensure that the resulting binary can find `libtink.so` upon startup)
+
 ## Initializing Tink
 
 Tink provides customizable initialization, which allows for choosing specific
