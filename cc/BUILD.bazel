@@ -87,6 +87,8 @@ cc_library(
     hdrs = PUBLIC_APIS,
     visibility = ["//visibility:public"],
     deps = PUBLIC_API_DEPS,
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
 )
 
 cc_library(
@@ -315,7 +317,7 @@ cc_library(
     deps = [
         ":catalogue",
         ":key_manager",
-        ":keyset_handle",
+        ":keyset_handle_hdr",
         ":primitive_set",
         "//cc/util:errors",
         "//cc/util:protobuf_helper",
@@ -330,11 +332,28 @@ cc_library(
 )
 
 cc_library(
+    name = "keyset_handle_hdr",
+    srcs = ["keyset_handle.h"],
+    hdrs = ["keyset_handle.h"],
+    deps = [
+        ":aead",
+        ":keyset_reader",
+        ":keyset_writer",
+        "//cc/util:errors",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
     name = "keyset_handle",
     srcs = ["core/keyset_handle.cc"],
     hdrs = ["keyset_handle.h"],
     deps = [
         ":aead",
+        ":keyset_manager",
         ":keyset_reader",
         ":keyset_writer",
         "//cc/util:errors",
@@ -350,7 +369,7 @@ cc_library(
     srcs = ["core/cleartext_keyset_handle.cc"],
     hdrs = ["cleartext_keyset_handle.h"],
     deps = [
-        ":keyset_handle",
+        ":keyset_handle_hdr",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -382,7 +401,7 @@ cc_library(
     hdrs = ["keyset_manager.h"],
     visibility = ["//visibility:public"],
     deps = [
-        ":keyset_handle",
+        ":keyset_handle_hdr",
         ":keyset_reader",
         ":registry",
         "//cc/util:errors",
@@ -565,9 +584,13 @@ cc_test(
     deps = [
         ":binary_keyset_reader",
         ":cleartext_keyset_handle",
+        ":config",
         ":json_keyset_reader",
         ":json_keyset_writer",
         ":keyset_handle",
+        "//cc",
+        "//cc/aead:aead_config",
+        "//cc/aead:aead_key_templates",
         "//cc/util:protobuf_helper",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",

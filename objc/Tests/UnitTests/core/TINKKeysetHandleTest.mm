@@ -165,14 +165,11 @@ static TINKPBKeyset *gKeyset;
   XCTAssertNotNil(keyTemplate);
   XCTAssertNil(error);
 
-  // TODO(candrian): Update this test once C++ adds support for key templates.
+  // TODO(candrian): Update this test as now C++ does support key templates.
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeyTemplate:keyTemplate error:&error];
   XCTAssertNil(handle);
   XCTAssertNotNil(error);
-  XCTAssertTrue(error.code == crypto::tink::util::error::UNIMPLEMENTED);
-  XCTAssertTrue([error.localizedFailureReason
-      containsString:@"Generation of new keysets from templates is not implemented yet"]);
 }
 
 @end

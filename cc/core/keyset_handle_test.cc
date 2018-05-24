@@ -14,11 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "tink/config.h"
+#include "tink/aead_key_templates.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
 #include "tink/keyset_handle.h"
+#include "tink/aead/aead_config.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/test_util.h"
 #include "gtest/gtest.h"
@@ -33,12 +36,20 @@ using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
+using google::crypto::tink::KeyTemplate;
 
 namespace crypto {
 namespace tink {
 namespace {
 
 class KeysetHandleTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    auto status = AeadConfig::Init();
+    ASSERT_TRUE(status.ok()) << status;
+    status = Config::Register(AeadConfig::Tink_1_1_0());
+    ASSERT_TRUE(status.ok()) << status;
+  }
 };
 
 TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Binary) {
@@ -216,6 +227,30 @@ TEST_F(KeysetHandleTest, testWriteEncryptedKeyset_Json) {
   status = keyset_handle->WriteEncrypted(aead, nullptr);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+}
+
+TEST_F(KeysetHandleTest, testGenerateNewKeysetHandle) {
+  const google::crypto::tink::KeyTemplate* key_templates[] = {
+    &AeadKeyTemplates::Aes128Gcm(),
+    &AeadKeyTemplates::Aes256Gcm(),
+    &AeadKeyTemplates::Aes128CtrHmacSha256(),
+    &AeadKeyTemplates::Aes256CtrHmacSha256(),
+  };
+  for (auto templ : key_templates) {
+    auto handle_result = KeysetHandle::GenerateNew(*templ);
+    EXPECT_TRUE(handle_result.ok())
+        << "Failed for template:\n " << templ->DebugString()
+        << "\n with status: "<< handle_result.status();
+  }
+}
+
+TEST_F(KeysetHandleTest, testGenerateNewKeysetHandleErrors) {
+  KeyTemplate templ;
+  templ.set_type_url("type.googleapis.com/some.unknown.KeyType");
+
+  auto handle_result = KeysetHandle::GenerateNew(templ);
+  EXPECT_FALSE(handle_result.ok());
+  EXPECT_EQ(util::error::NOT_FOUND, handle_result.status().error_code());
 }
 
 }  // namespace

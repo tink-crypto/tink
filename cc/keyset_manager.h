@@ -19,13 +19,14 @@
 
 #include <mutex>  // NOLINT(build/c++11)
 
-#include "tink/keyset_handle.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
+
+class KeysetHandle;
 
 // KeysetManager provides convenience methods for creation of Keysets, and for
 // rotating, disabling, enabling, or destroing keys.

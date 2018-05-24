@@ -17,6 +17,7 @@
 #include "absl/memory/memory.h"
 #include "tink/aead.h"
 #include "tink/keyset_handle.h"
+#include "tink/keyset_manager.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/util/errors.h"
@@ -98,8 +99,11 @@ util::Status KeysetHandle::WriteEncrypted(const Aead& master_key_aead,
 // static
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
     const KeyTemplate& key_template) {
-  return util::Status(util::error::UNIMPLEMENTED,
-      "Generation of new keysets from templates is not implemented yet.");
+  auto manager_result = KeysetManager::New(key_template);
+  if (!manager_result.ok()) {
+    return manager_result.status();
+  }
+  return manager_result.ValueOrDie()->GetKeysetHandle();
 }
 
 KeysetHandle::KeysetHandle(std::unique_ptr<Keyset> keyset)
