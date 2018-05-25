@@ -1,1 +1,1 @@
-Moved to https://github.com/google/tink/blob/master/doc/TINKEY.md.
+Moved to [TINKEY.md](../../docs/TINKEY.md).

@@ -1,18 +1,18 @@
 # C++ Hello World
 
-This is a command-line tool that can encrypt and decrypt small files using _authenticated
-encryption with associated data_ ([AEAD](https://github.com/google/tink/blob/master/doc/PRIMITIVES.md#authenticated-encryption-with-associated-data)).
+This is a command-line tool that can encrypt and decrypt small files using [AEAD
+(Authenticated Encryption with Associated
+Data)](../../../docs/PRIMITIVES.md#authenticated-encryption-with-associated-data).
 
 It demonstrates the basic steps of using Tink, namely loading key material,
 obtaining a primitive, and using the primitive to do crypto.
 
-Moreoever, since this app shares the same Bazel's WORKSPACE with Tink, its
-BUILD file can directly depend on Tink.
+Moreover, since this app shares the same Bazel WORKSPACE with Tink, its BUILD
+file can directly depend on Tink.
 
+## Build and Run
 
-## Build and run
-
-**Bazel**
+### Bazel
 
 ```shell
 git clone https://github.com/google/tink

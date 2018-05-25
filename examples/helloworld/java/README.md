@@ -9,15 +9,15 @@ key material, obtaining a primitive, and using the primitive to do crypto.
 It also shows how to add a dependency on Tink using Maven. Please checkout
 the pom.xml file.
 
-Moreoever, since this app shares the same Bazel's WORKSPACE with Tink, its
-BUILD file can directly depend on Tink. Note that [a copy of this app]
-(https://github.com/thaidn/tink-examples/tree/master/helloworld/java) is
+Moreover, since this app shares the same Bazel's WORKSPACE with Tink, its
+BUILD file can directly depend on Tink. Note that [a copy of this
+app](https://github.com/thaidn/tink-examples/tree/master/helloworld/java) is
 hosted in the tink-examples repo, which uses its own Bazel's WORKSAPCE,
-and has to add Tink as a dependency using Bazel's maven_jar rule.
+and has to add Tink as a dependency using Bazel's maven\_jar rule.
 
-## Build and run
+## Build and Run
 
-**Maven**
+### Maven
 
 ```shell
 git clone https://github.com/google/tink
@@ -29,7 +29,7 @@ mvn exec:java -Dexec.args="decrypt --keyset test.cfg --in bar.encrypted --out fo
 cat foo2.txt
 ```
 
-**Bazel**
+### Bazel
 
 ```shell
 git clone https://github.com/google/tink

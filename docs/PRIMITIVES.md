@@ -13,6 +13,7 @@ via the corresponding primitives:
 This document describes the main properties of Tink’s primitives.
 
 General properties of all primitives:
+
 - stateless (hence thread-safe)
 - copy-safe (for the parameters)
 - at least 128-bit security (with an exception for RSA)
@@ -34,9 +35,10 @@ Minimal properties:
    (within the range 0..2<sup>32</sup> bytes)
 - CCA2 security
 - at least 80-bit authentication strength
-- there are no secrecy or knowledge guarantees wrt. to the value of _associated data_
-- can encrypt at least 2<sup>32</sup> messages with a total of 2<sup>50</sup> bytes so that no
-  attack has success probability larger than 2<sup>-32</sup>
+- there are no secrecy or knowledge guarantees wrt. to the value of _associated
+  data_
+- can encrypt at least 2<sup>32</sup> messages with a total of 2<sup>50</sup>
+  bytes so that no attack has success probability larger than 2<sup>-32</sup>
 
 ## Streaming Authenticated Encryption with Associated Data
 
@@ -51,11 +53,13 @@ can be obtained fast by decrypting and authenticating just a part of the
 ciphertext, without need of processing the entire ciphertext.
 
 Encryption must be done in one session. There is no possibility to modify an
-existing ciphertext or to append to it (other than to reencrypt the entire file again).
+existing ciphertext or to append to it (other than to reencrypt the entire file
+again).
 
 Instances of _Streaming AEAD_ follow the OAE2 definition proposed in the
-paper ["_Online Authenticated-Encryption and its Nonce-Reuse Misuse-Resistance_" by
-Hoang, Reyhanitabar, Rogaway and Vizár](https://eprint.iacr.org/2015/189.pdf).
+paper [_"Online Authenticated-Encryption and its Nonce-Reuse Misuse-Resistance"_
+by Hoang, Reyhanitabar, Rogaway and
+Vizár](https://eprint.iacr.org/2015/189.pdf).
 
 Minimal properties:
 
@@ -64,7 +68,8 @@ Minimal properties:
   0..2<sup>31</sup>-1 bytes
 - CCA2 security
 - at least 80-bit authentication strength
-- there are no secrecy or knowledge guarantees wrt. to the value of _associated data_
+- there are no secrecy or knowledge guarantees wrt. to the value of _associated
+  data_
 - can encrypt at least 2<sup>32</sup> messages with a total of 2<sup>68</sup>
   bytes so that no attack with up to 2<sup>32</sup> chosen plaintexts/chosen
   ciphertexts has success probability larger than 2<sup>-32</sup>.
@@ -97,13 +102,14 @@ Minimal properties:
   same message encrypted under 2<sup>32</sup> keys, they need to do
   2<sup>128</sup> computations to obtain a single key.
 - at least 80-bit authentication strength
-- there are no secrecy or knowledge guarantees wrt. to the value of _associated data_
+- there are no secrecy or knowledge guarantees wrt. to the value of _associated
+  data_
 
 ## Message Authentication Code
 
 MAC primitive (Message Authentication Code) provides symmetric message
-authentication. A sender sharing a _symmetric key_ with a recipient can compute an
-_authentication tag_ for a given message, that allows for verifying that the
+authentication. A sender sharing a _symmetric key_ with a recipient can compute
+an _authentication tag_ for a given message, that allows for verifying that the
 message comes from the sender and that it has not been modified. Instances of
 MAC primitive are secure against existential forgery under chosen plaintext
 attack, and can be deterministic or randomized. This interface should be used
@@ -114,8 +120,9 @@ pseudorandom bytes.
 Minimal properties:
 
 - secure against existential forgery under CPA
-- at least 128-bit security, also in multi-user scenarios (when an attacker is not
-  targeting a specific key, but any key from a set of up to 2<sup>32</sup> keys)
+- at least 128-bit security, also in multi-user scenarios (when an attacker is
+  not targeting a specific key, but any key from a set of up to 2<sup>32</sup>
+  keys)
 - at least 80-bit authentication strength
 
 ## Hybrid Encryption
@@ -149,10 +156,12 @@ must be provided for decryption operation.
 
 A concrete implementation of hybrid encryption can implement the binding of
 _context info_ to the ciphertext in various ways, for example:
-- use context_info as "associated data"-input for the employed AEAD symmetric
+
+- use context\_info as "associated data"-input for the employed AEAD symmetric
   encryption (cf. [RFC 5116](https://tools.ietf.org/html/rfc5116)).
-- use context_info as "CtxInfo"-input for HKDF (if the implementation uses HKDF
-  as key derivation function, cf. [RFC 5869](https://tools.ietf.org/html/rfc5869)).
+- use context\_info as "CtxInfo"-input for HKDF (if the implementation uses HKDF
+  as key derivation function, cf.
+  [RFC 5869](https://tools.ietf.org/html/rfc5869)).
 
 Minimal properties:
 
@@ -176,5 +185,5 @@ against adaptive chosen-message attacks.
 Minimal properties:
 
 - data to be signed can have arbitrary length
-- 128-bit security for EC based schemes,
-  112-bit security for RSA based schemes (i.e. allow 2048 bit keys)
+- 128-bit security for EC based schemes
+- 112-bit security for RSA based schemes (i.e. allow 2048 bit keys)
