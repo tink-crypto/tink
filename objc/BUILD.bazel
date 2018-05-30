@@ -34,28 +34,28 @@ PUBLIC_APIS = [
 
 PUBLIC_API_DEPS = [
     ":aead",
+    ":aead_config",
+    ":aead_factory",
+    ":aead_key_template",
     ":all_config",
     ":binary_keyset_reader",
     ":config",
+    ":hybrid_config",
     ":hybrid_decrypt",
+    ":hybrid_decrypt_factory",
     ":hybrid_encrypt",
+    ":hybrid_encrypt_factory",
+    ":hybrid_key_template",
     ":json_keyset_reader",
     ":key_manager",
     ":key_template",
     ":keyset_handle",
     ":keyset_reader",
     ":mac",
+    ":mac_config",
+    ":mac_factory",
     ":registry_config",
     ":version",
-    "//objc/aead:aead_config",
-    "//objc/aead:aead_factory",
-    "//objc/aead:aead_key_template",
-    "//objc/hybrid:hybrid_config",
-    "//objc/hybrid:hybrid_decrypt_factory",
-    "//objc/hybrid:hybrid_encrypt_factory",
-    "//objc/hybrid:hybrid_key_template",
-    "//objc/mac:mac_config",
-    "//objc/mac:mac_factory",
     "//objc/util:errors",
     "//objc/util:strings",
     "//proto:all_objc_proto",
@@ -80,12 +80,9 @@ objc_library(
     ],
 )
 
-# private libraries
-
-objc_library(
-    name = "aead",
-    hdrs = ["TINKAead.h"],
-)
+############################
+#          Core            #
+############################
 
 objc_library(
     name = "all_config",
@@ -147,20 +144,6 @@ objc_library(
 )
 
 objc_library(
-    name = "hybrid_decrypt",
-    hdrs = [
-        "TINKHybridDecrypt.h",
-    ],
-)
-
-objc_library(
-    name = "hybrid_encrypt",
-    hdrs = [
-        "TINKHybridEncrypt.h",
-    ],
-)
-
-objc_library(
     name = "json_keyset_reader",
     srcs = ["core/TINKJSONKeysetReader.mm"],
     hdrs = [
@@ -208,12 +191,12 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":aead",
+        ":aead_internal",
         ":key_template",
         ":keyset_reader",
         ":tink_cc_pb",
         "//cc:keyset_handle",
         "//cc/util:status",
-        "//objc/aead:aead_internal",
         "//objc/util:errors",
         "//objc/util:strings",
         "//proto:all_objc_proto",
@@ -229,13 +212,6 @@ objc_library(
     ],
     deps = [
         "//cc:keyset_reader",
-    ],
-)
-
-objc_library(
-    name = "mac",
-    hdrs = [
-        "TINKMac.h",
     ],
 )
 
@@ -256,6 +232,224 @@ objc_library(
     name = "version",
     hdrs = [
         "TINKVersion.h",
+    ],
+)
+
+############################
+#         Aead             #
+############################
+
+objc_library(
+    name = "aead",
+    hdrs = ["TINKAead.h"],
+)
+
+objc_library(
+    name = "aead_internal",
+    srcs = ["aead/TINKAeadInternal.mm"],
+    hdrs = ["aead/TINKAeadInternal.h"],
+    deps = [
+        ":aead",
+        "//cc:aead",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+objc_library(
+    name = "aead_config",
+    srcs = ["aead/TINKAeadConfig.mm"],
+    hdrs = ["TINKAeadConfig.h"],
+    deps = [
+        ":registry_config",
+        ":version",
+        "//cc/aead:aead_config",
+        "//cc/util:errors",
+        "//objc/util:errors",
+        "//objc/util:strings",
+    ],
+)
+
+objc_library(
+    name = "aead_factory",
+    srcs = ["aead/TINKAeadFactory.mm"],
+    hdrs = ["TINKAeadFactory.h"],
+    deps = [
+        ":aead",
+        ":aead_internal",
+        ":keyset_handle",
+        "//cc:keyset_handle",
+        "//cc/aead:aead_factory",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+objc_library(
+    name = "aead_key_template",
+    srcs = ["aead/TINKAeadKeyTemplate.mm"],
+    hdrs = ["TINKAeadKeyTemplate.h"],
+    deps = [
+        ":key_template",
+        ":tink_cc_pb",
+        "//cc/aead:aead_key_templates",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+############################
+#         Hybrid           #
+############################
+
+objc_library(
+    name = "hybrid_decrypt",
+    hdrs = [
+        "TINKHybridDecrypt.h",
+    ],
+)
+
+objc_library(
+    name = "hybrid_encrypt",
+    hdrs = [
+        "TINKHybridEncrypt.h",
+    ],
+)
+
+objc_library(
+    name = "hybrid_decrypt_factory",
+    srcs = ["hybrid/TINKHybridDecryptFactory.mm"],
+    hdrs = ["TINKHybridDecryptFactory.h"],
+    deps = [
+        ":hybrid_decrypt",
+        ":hybrid_decrypt_internal",
+        ":keyset_handle",
+        "//cc:keyset_handle",
+        "//cc/hybrid:hybrid_decrypt_factory",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+objc_library(
+    name = "hybrid_decrypt_internal",
+    srcs = ["hybrid/TINKHybridDecryptInternal.mm"],
+    hdrs = ["hybrid/TINKHybridDecryptInternal.h"],
+    deps = [
+        ":hybrid_decrypt",
+        "//cc:hybrid_decrypt",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+objc_library(
+    name = "hybrid_encrypt_factory",
+    srcs = ["hybrid/TINKHybridEncryptFactory.mm"],
+    hdrs = ["TINKHybridEncryptFactory.h"],
+    deps = [
+        ":hybrid_encrypt",
+        ":hybrid_encrypt_internal",
+        ":keyset_handle",
+        "//cc:keyset_handle",
+        "//cc/hybrid:hybrid_encrypt_factory",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+objc_library(
+    name = "hybrid_encrypt_internal",
+    srcs = ["hybrid/TINKHybridEncryptInternal.mm"],
+    hdrs = ["hybrid/TINKHybridEncryptInternal.h"],
+    deps = [
+        ":hybrid_encrypt",
+        "//cc:hybrid_encrypt",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+objc_library(
+    name = "hybrid_config",
+    srcs = ["hybrid/TINKHybridConfig.mm"],
+    hdrs = ["TINKHybridConfig.h"],
+    deps = [
+        ":registry_config",
+        ":version",
+        "//cc/hybrid:hybrid_config",
+        "//cc/util:errors",
+        "//objc/util:errors",
+        "//objc/util:strings",
+    ],
+)
+
+objc_library(
+    name = "hybrid_key_template",
+    srcs = ["hybrid/TINKHybridKeyTemplate.mm"],
+    hdrs = ["TINKHybridKeyTemplate.h"],
+    deps = [
+        ":key_template",
+        ":tink_cc_pb",
+        "//cc/hybrid:hybrid_key_templates",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+############################
+#           Mac            #
+############################
+
+objc_library(
+    name = "mac",
+    hdrs = [
+        "TINKMac.h",
+    ],
+)
+
+objc_library(
+    name = "mac_config",
+    srcs = ["mac/TINKMacConfig.mm"],
+    hdrs = ["TINKMacConfig.h"],
+    deps = [
+        ":registry_config",
+        ":version",
+        "//cc/mac:mac_config",
+        "//cc/util:errors",
+        "//objc/util:errors",
+        "//objc/util:strings",
+    ],
+)
+
+objc_library(
+    name = "mac_factory",
+    srcs = ["mac/TINKMacFactory.mm"],
+    hdrs = ["TINKMacFactory.h"],
+    deps = [
+        ":keyset_handle",
+        ":mac",
+        ":mac_internal",
+        "//cc:keyset_handle",
+        "//cc/mac:mac_factory",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+objc_library(
+    name = "mac_internal",
+    srcs = ["mac/TINKMacInternal.mm"],
+    hdrs = ["mac/TINKMacInternal.h"],
+    deps = [
+        ":mac",
+        "//cc:mac",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -299,6 +493,7 @@ objc_library(
         "Tests/UnitTests/**/*.h",
     ]),
     deps = [
+        ":aead_internal",
         ":testonly",
         "//cc:aead",
         "//cc:crypto_format",
@@ -307,7 +502,6 @@ objc_library(
         "//cc/aead:aead_factory",
         "//cc/util:status",
         "//cc/util:test_util",
-        "//objc/aead:aead_internal",
         "//objc/util:proto_helpers",
         "//objc/util:test_helpers",
         "//proto:all_objc_proto",

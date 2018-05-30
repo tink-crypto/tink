@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/hybrid/TINKHybridConfig.h"
+#import "objc/TINKHybridConfig.h"
 
 #import "objc/TINKRegistryConfig.h"
 #import "objc/TINKVersion.h"

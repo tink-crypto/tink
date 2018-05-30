@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/hybrid/TINKHybridEncryptFactory.h"
+#import "objc/TINKHybridEncryptFactory.h"
 
 #import <Foundation/Foundation.h>
 

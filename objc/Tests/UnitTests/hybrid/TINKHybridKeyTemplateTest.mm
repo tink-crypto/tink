@@ -16,14 +16,13 @@
  **************************************************************************
  */
 
-#import "objc/hybrid/TINKHybridKeyTemplate.h"
+#import "objc/TINKHybridKeyTemplate.h"
 
 #import <XCTest/XCTest.h>
 
+#import "objc/TINKAeadKeyTemplate.h"
 #import "objc/TINKKeyTemplate.h"
-#import "objc/aead/TINKAeadKeyTemplate.h"
 #import "objc/core/TINKKeyTemplate_Internal.h"
-#import "objc/hybrid/TINKHybridKeyTemplate.h"
 #import "objc/util/TINKProtoHelpers.h"
 #import "proto/Common.pbobjc.h"
 #import "proto/EciesAeadHkdf.pbobjc.h"

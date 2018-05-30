@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/aead/TINKAeadFactory.h"
+#import "objc/TINKAeadFactory.h"
 
 #import <Foundation/Foundation.h>
 

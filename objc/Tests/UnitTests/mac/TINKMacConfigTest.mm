@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/mac/TINKMacConfig.h"
+#import "objc/TINKMacConfig.h"
 
 #import <XCTest/XCTest.h>
 

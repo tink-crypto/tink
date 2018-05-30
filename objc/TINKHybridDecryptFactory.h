@@ -16,4 +16,53 @@
  **************************************************************************
  */
 
-#import "objc/hybrid/TINKHybridDecryptFactory.h"
+#import <Foundation/Foundation.h>
+
+@class TINKKeysetHandle;
+@protocol TINKHybridDecrypt;
+
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ * TINKHybridDecryptFactory allows for obtaining a TINKHybridDecrypt primitive from a
+ * TINKKeysetHandle.
+ *
+ * TINKHybridDecryptFactory gets primitives from the Registry, which can be initialized via
+ * convenience methods from TINKHybridConfig. Here is an example how one can obtain and use a
+ * TINKHybridDecrypt primitive:
+ *
+ * NSError *error = nil;
+ * TINKHybridConfig *hybridConfig =
+ *    [[TINKHybridConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+ * if (!hybridConfig || error) {
+ *   // handle error.
+ * }
+ *
+ * if (![TINKConfig registerConfig:hybridConfig error:&error]) {
+ *   // handle error.
+ * }
+ *
+ * TINKKeysetHandle keysetHandle = ...;
+ * id<TINKHybridDecrypt> hybridDecrypt =
+ *    [TINKHybridDecryptFactory primitiveWithKeysetHandle:keysetHandle error:&error];
+ * if (!hybridDecrypt || error) {
+ *   // handle error.
+ * }
+ *
+ * NSData *plaintext = ...;
+ * NSData *contextInfo = ...;
+ * NSData *plaintext = [hybridDecrypt decrypt:ciphertext withContextInfo:contextInfo
+ *                                                                 error:&error];
+ */
+@interface TINKHybridDecryptFactory : NSObject
+
+/**
+ * Returns an object that conforms to the TINKHybridDecrypt protocol. It uses key material from the
+ * keyset specified via @c keysetHandle.
+ */
++ (nullable id<TINKHybridDecrypt>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle
+                                                      error:(NSError **)error;
+
+@end
+
+NS_ASSUME_NONNULL_END

@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/hybrid/TINKHybridConfig.h"
+#import "objc/TINKHybridConfig.h"
 
 #import <XCTest/XCTest.h>
 
