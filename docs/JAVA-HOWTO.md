@@ -82,10 +82,10 @@ dependencies {
 ## API docs
 
 *   Java:
-    *   [1.1.0](https://google.github.com/tink/javadoc/tink/1.1.0)
+    *   [1.1.1](https://google.github.com/tink/javadoc/tink/1.1.1)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.1.0](https://google.github.com/tink/javadoc/tink-android/1.1.0)
+    *   [1.1.1](https://google.github.com/tink/javadoc/tink-android/1.1.1)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important Warnings
