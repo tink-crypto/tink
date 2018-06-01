@@ -23,13 +23,16 @@
 namespace crypto {
 namespace tink {
 
-// KeysetReader
+// KeysetReader knows how to read a Keyset or an EncryptedKeyset
+// from some source.
 class KeysetReader {
  public:
+  // Reads and returns a (cleartext) Keyset object from the underlying source.
   virtual crypto::tink::util::StatusOr<
    std::unique_ptr<google::crypto::tink::Keyset>>
   Read() = 0;
 
+  // Reads and returns an EncryptedKeyset object from the underlying source.
   virtual crypto::tink::util::StatusOr<
     std::unique_ptr<google::crypto::tink::EncryptedKeyset>>
   ReadEncrypted() = 0;

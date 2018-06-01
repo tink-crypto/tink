@@ -23,12 +23,15 @@
 namespace crypto {
 namespace tink {
 
-// KeysetWriter
+// KeysetWriter knows how to write a Keyset or an EncryptedKeyset
+// to some storage system.
 class KeysetWriter {
  public:
+  // Writes 'keyset' to the underlying storage system.
   virtual crypto::tink::util::Status
       Write(const google::crypto::tink::Keyset& keyset) = 0;
 
+  // Writes 'encrypted_keyset' to the underlying storage system.
   virtual crypto::tink::util::Status
       Write(const google::crypto::tink::EncryptedKeyset& encrypted_keyset) = 0;
 
