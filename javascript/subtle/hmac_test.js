@@ -24,7 +24,7 @@ testSuite({
   async testBasic() {
     const key = Random.randBytes(16);
     const msg = Random.randBytes(4);
-    const hmac = await Hmac.new('SHA-1', key, 10);
+    const hmac = await Hmac.create('SHA-1', key, 10);
     const tag = await hmac.computeMac(msg);
     assertEquals(10, tag.length);
     assertTrue(await hmac.verifyMac(tag, msg));
@@ -32,14 +32,14 @@ testSuite({
 
   async testConstructor() {
     try {
-      await Hmac.new(
+      await Hmac.create(
           'blah', Random.randBytes(16), 16);  // invalid HMAC algo name
     } catch (e) {
       assertEquals('CustomError: blah is not supported', e.toString());
     }
 
     try {
-      await Hmac.new('SHA-1', Random.randBytes(15), 16);  // invalid key size
+      await Hmac.create('SHA-1', Random.randBytes(15), 16);  // invalid key size
     } catch (e) {
       assertEquals(
           'CustomError: key too short, must be at least 16 bytes',
@@ -47,14 +47,16 @@ testSuite({
     }
 
     try {
-      await Hmac.new('SHA-1', Random.randBytes(16), 9);  // tag size too short
+      await Hmac.create(
+          'SHA-1', Random.randBytes(16), 9);  // tag size too short
     } catch (e) {
       assertEquals(
           'CustomError: tag too short, must be at least 10 bytes',
           e.toString());
     }
     try {
-      await Hmac.new('SHA-1', Random.randBytes(16), 21);  // tag size too long
+      await Hmac.create(
+          'SHA-1', Random.randBytes(16), 21);  // tag size too long
     } catch (e) {
       assertEquals(
           'CustomError: tag too long, must not be larger than 20 bytes',
@@ -62,7 +64,8 @@ testSuite({
     }
 
     try {
-      await Hmac.new('SHA-256', Random.randBytes(15), 16);  // invalid key size
+      await Hmac.create(
+          'SHA-256', Random.randBytes(15), 16);  // invalid key size
     } catch (e) {
       assertEquals(
           'CustomError: key too short, must be at least 16 bytes',
@@ -70,7 +73,8 @@ testSuite({
     }
 
     try {
-      await Hmac.new('SHA-256', Random.randBytes(16), 9);  // tag size too short
+      await Hmac.create(
+          'SHA-256', Random.randBytes(16), 9);  // tag size too short
     } catch (e) {
       assertEquals(
           'CustomError: tag too short, must be at least 10 bytes',
@@ -78,7 +82,8 @@ testSuite({
     }
 
     try {
-      await Hmac.new('SHA-256', Random.randBytes(16), 33);  // tag size too long
+      await Hmac.create(
+          'SHA-256', Random.randBytes(16), 33);  // tag size too long
     } catch (e) {
       assertEquals(
           'CustomError: tag too long, must not be larger than 32 bytes',
@@ -86,7 +91,8 @@ testSuite({
     }
 
     try {
-      await Hmac.new('SHA-512', Random.randBytes(15), 16);  // invalid key size
+      await Hmac.create(
+          'SHA-512', Random.randBytes(15), 16);  // invalid key size
     } catch (e) {
       assertEquals(
           'CustomError: key too short, must be at least 16 bytes',
@@ -94,7 +100,8 @@ testSuite({
     }
 
     try {
-      await Hmac.new('SHA-512', Random.randBytes(16), 9);  // tag size too short
+      await Hmac.create(
+          'SHA-512', Random.randBytes(16), 9);  // tag size too short
     } catch (e) {
       assertEquals(
           'CustomError: tag too short, must be at least 10 bytes',
@@ -102,7 +109,8 @@ testSuite({
     }
 
     try {
-      await Hmac.new('SHA-512', Random.randBytes(16), 65);  // tag size too long
+      await Hmac.create(
+          'SHA-512', Random.randBytes(16), 65);  // tag size too long
     } catch (e) {
       assertEquals(
           'CustomError: tag too long, must not be larger than 64 bytes',
@@ -113,21 +121,21 @@ testSuite({
   async testModify() {
     const key = Random.randBytes(16);
     const msg = Random.randBytes(8);
-    const hmac = await Hmac.new('SHA-1', key, 20);
+    const hmac = await Hmac.create('SHA-1', key, 20);
     const tag = await hmac.computeMac(msg);
 
     // Modify tag.
     for (let i = 0; i < tag.length; i++) {
-      let v = tag[i] ^ 0xff;
-      assertFalse(
-          await hmac.verifyMac(new Uint8Array(tag).fill(v, i, i + 1), msg));
+      const tag1 = new Uint8Array(tag);
+      tag1[i] = tag[i] ^ 0xff;
+      assertFalse(await hmac.verifyMac(tag1, msg));
     }
 
     // Modify msg.
     for (let i = 0; i < msg.length; i++) {
-      let v = msg[i] ^ 0xff;
-      assertFalse(
-          await hmac.verifyMac(tag, new Uint8Array(msg).fill(v, i, i + 1)));
+      const msg1 = new Uint8Array(msg);
+      msg1[i] = msg1[i] ^ 0xff;
+      assertFalse(await hmac.verifyMac(tag, msg1));
     }
   },
 
@@ -180,7 +188,7 @@ testSuite({
       const key = Bytes.fromHex(testVector['key']);
       const message = Bytes.fromHex(testVector['message']);
       const tag = Bytes.fromHex(testVector['tag']);
-      const hmac = await Hmac.new(testVector['algo'], key, tag.length);
+      const hmac = await Hmac.create(testVector['algo'], key, tag.length);
       assertTrue(await hmac.verifyMac(tag, message));
     }
   },

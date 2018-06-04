@@ -67,8 +67,8 @@ class EncryptThenAuthenticate {
    * @static
    */
   static async newAesCtrHmac(aesKey, ivSize, hmacHashAlgo, hmacKey, tagSize) {
-    const cipher = await AesCtr.new(aesKey, ivSize);
-    const mac = await Hmac.new(hmacHashAlgo, hmacKey, tagSize);
+    const cipher = await AesCtr.create(aesKey, ivSize);
+    const mac = await Hmac.create(hmacHashAlgo, hmacKey, tagSize);
     return new EncryptThenAuthenticate(cipher, mac, tagSize);
   }
 

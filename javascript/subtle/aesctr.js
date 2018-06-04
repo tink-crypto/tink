@@ -14,12 +14,12 @@
 
 goog.module('tink.subtle.AesCtr');
 
-const Bytes = goog.require('tink.subtle.Bytes');
+const AesCtrPureJs = goog.require('tink.subtle.purejs.AesCtr');
+const AesCtrWebCrypto = goog.require('tink.subtle.webcrypto.AesCtr');
+const Environment = goog.require('tink.subtle.Environment');
 const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
-const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
-const Random = goog.require('tink.subtle.Random');
+const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
-const array = goog.require('goog.array');
 
 /**
  * The minimum IV size.
@@ -36,71 +36,27 @@ const MIN_IV_SIZE_IN_BYTES = 12;
 const AES_BLOCK_SIZE_IN_BYTES = 16;
 
 /**
- * Implementation of AES-CTR.
- *
- * @implements {IndCpaCipher}
- * @protected
- * @final
+ * @param {!Uint8Array} key
+ * @param {number} ivSize the size of the IV, must be larger than or equal to
+ *     {@link MIN_IV_SIZE_IN_BYTES}
+ * @return {!Promise.<!IndCpaCipher>}
+ * @static
  */
-class AesCtr {
-  /**
-   * @param {!webCrypto.CryptoKey} key
-   * @param {number} ivSize the size of the IV, must be larger than or equal to
-   *     {@link MIN_IV_SIZE_IN_BYTES}
-   */
-  constructor(key, ivSize) {
-    /** @const @private {!webCrypto.CryptoKey} */
-    this.key_ = key;
-
-    /** @const @private {number} */
-    this.ivSize_ = ivSize;
+const create = async function(key, ivSize) {
+  if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > AES_BLOCK_SIZE_IN_BYTES) {
+    throw new SecurityException(
+        'invaid IV length, must be at least ' + MIN_IV_SIZE_IN_BYTES +
+        ' and at most ' + AES_BLOCK_SIZE_IN_BYTES);
   }
+  Validators.validateAesKeySize(key.length);
 
-  /**
-   * @param {!Uint8Array} key
-   * @param {number} ivSize the size of the IV, must be larger than or equal to
-   *     {@link MIN_IV_SIZE_IN_BYTES}
-   * @return {!Promise.<!AesCtr>}
-   * @throws {InvalidArgumentsException}
-   * @static
-   */
-  static async new(key, ivSize) {
-    if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > AES_BLOCK_SIZE_IN_BYTES) {
-      throw new InvalidArgumentsException(
-          'invaid IV length, must be at least ' + MIN_IV_SIZE_IN_BYTES +
-          ' and at most ' + AES_BLOCK_SIZE_IN_BYTES);
-    }
-    Validators.validateAesKeySize(key.length);
-
+  if (Environment.IS_WEBCRYPTO_AVAILABLE) {
     const cryptoKey = await window.crypto.subtle.importKey(
         'raw', key, {'name': 'AES-CTR', 'length': key.length}, false,
         ['encrypt', 'decrypt']);
-    return new AesCtr(cryptoKey, ivSize);
+    return new AesCtrWebCrypto(cryptoKey, ivSize);
   }
+  return new AesCtrPureJs(key, ivSize);
+};
 
-  /**
-   * @override
-   */
-  async encrypt(plaintext) {
-    const iv = Random.randBytes(this.ivSize_);
-    const counter = new Uint8Array(AES_BLOCK_SIZE_IN_BYTES);
-    counter.set(iv);
-    const alg = {'name': 'AES-CTR', 'counter': counter, 'length': 128};
-    const ciphertext =
-        await window.crypto.subtle.encrypt(alg, this.key_, plaintext);
-    return Bytes.concat(iv, new Uint8Array(ciphertext));
-  }
-
-  /**
-   * @override
-   */
-  async decrypt(ciphertext) {
-    const counter = new Uint8Array(AES_BLOCK_SIZE_IN_BYTES);
-    counter.set(array.slice(ciphertext, 0, this.ivSize_));
-    const alg = {'name': 'AES-CTR', 'counter': counter, 'length': 128};
-    return new Uint8Array(await window.crypto.subtle.decrypt(
-        alg, this.key_, new Uint8Array(array.slice(ciphertext, this.ivSize_))));
-  }
-}
-
-exports = AesCtr;
+exports = {create};

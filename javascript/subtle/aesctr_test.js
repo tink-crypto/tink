@@ -26,7 +26,7 @@ testSuite({
     const results = new Set();
     for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(20);
-      const aesctr = await AesCtr.new(key, 16);
+      const aesctr = await AesCtr.create(key, 16);
       let ciphertext = await aesctr.encrypt(msg);
       let plaintext = await aesctr.decrypt(ciphertext);
       assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
@@ -37,21 +37,22 @@ testSuite({
 
   async testConstructor() {
     try {
-      await AesCtr.new(Random.randBytes(16), 11);  // IV size too short
+      await AesCtr.create(Random.randBytes(16), 11);  // IV size too short
     } catch (e) {
       assertEquals(
           'CustomError: invaid IV length, must be at least 12 and at most 16',
           e.toString());
     }
     try {
-      await AesCtr.new(Random.randBytes(16), 17);  // IV size too long
+      await AesCtr.create(Random.randBytes(16), 17);  // IV size too long
     } catch (e) {
       assertEquals(
           'CustomError: invaid IV length, must be at least 12 and at most 16',
           e.toString());
     }
     try {
-      await AesCtr.new(Random.randBytes(24), 12);  // 192-bit keys not supported
+      await AesCtr.create(
+          Random.randBytes(24), 12);  // 192-bit keys not supported
     } catch (e) {
       assertEquals('CustomError: unsupported AES key size: 24', e.toString());
     }
@@ -77,7 +78,7 @@ testSuite({
       const iv = Bytes.fromHex(testVector['iv']);
       const msg = Bytes.fromHex(testVector['message']);
       const ciphertext = Bytes.fromHex(testVector['ciphertext']);
-      const aesctr = await AesCtr.new(key, iv.length);
+      const aesctr = await AesCtr.create(key, iv.length);
       const plaintext = await aesctr.decrypt(Bytes.concat(iv, ciphertext));
       assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
     }

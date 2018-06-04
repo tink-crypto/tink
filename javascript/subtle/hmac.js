@@ -14,7 +14,9 @@
 
 goog.module('tink.subtle.Hmac');
 
-const Bytes = goog.require('tink.subtle.Bytes');
+const Environment = goog.require('tink.subtle.Environment');
+const HmacPureJs = goog.require('tink.subtle.purejs.Hmac');
+const HmacWebCrypto = goog.require('tink.subtle.webcrypto.Hmac');
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const Mac = goog.require('tink.Mac');
 
@@ -33,98 +35,54 @@ const MIN_TAG_SIZE_IN_BYTES = 10;
 const MIN_KEY_SIZE_IN_BYTES = 16;
 
 /**
- * Implementation of HMAC.
- *
- * @implements {Mac}
- * @public
- * @final
+ * @param {string} hash accepted names are SHA-1, SHA-256 and SHA-512
+ * @param {!Uint8Array} key must be longer than {@link MIN_KEY_SIZE_IN_BYTES}
+ * @param {number} tagSize the size of the tag, must be larger than or equal
+ *     to {@link MIN_TAG_SIZE_IN_BYTES}
+ * @return {!Promise.<!Mac>}
  */
-class Hmac {
-  /**
-   * @param {!webCrypto.CryptoKey} key
-   * @param {number} tagSize the size of the tag, must be larger than or equal to
-   *     {@link MIN_TAG_SIZE_IN_BYTES}
-   * @throws {InvalidArgumentsException}
-   */
-  constructor(key, tagSize) {
-    /** @const @private {number} */
-    this.tagSize_ = tagSize;
-
-    /** @const @private {!webCrypto.CryptoKey} */
-    this.key_ = key;
+const create = async function(hash, key, tagSize) {
+  if (tagSize < MIN_TAG_SIZE_IN_BYTES) {
+    throw new InvalidArgumentsException(
+        'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES + ' bytes');
   }
 
-  /**
-   * @param {string} hashAlgoName accepted names are SHA-1, SHA-256 and SHA-512
-   * @param {!Uint8Array} key must be longer than {@link MIN_KEY_SIZE_IN_BYTES}
-   * @param {number} tagSize the size of the tag, must be larger than or equal
-   *     to {@link MIN_TAG_SIZE_IN_BYTES}
-   * @return {!Promise.<!Mac>}
-   * @throws {InvalidArgumentsException}
-   * @static
-   */
-  static async new(hashAlgoName, key, tagSize) {
-    if (tagSize < MIN_TAG_SIZE_IN_BYTES) {
-      throw new InvalidArgumentsException(
-          'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES +
-          ' bytes');
-    }
+  if (key.length < MIN_KEY_SIZE_IN_BYTES) {
+    throw new InvalidArgumentsException(
+        'key too short, must be at least ' + MIN_KEY_SIZE_IN_BYTES + ' bytes');
+  }
 
-    if (key.length < MIN_KEY_SIZE_IN_BYTES) {
-      throw new InvalidArgumentsException(
-          'key too short, must be at least ' + MIN_KEY_SIZE_IN_BYTES +
-          ' bytes');
-    }
+  switch (hash) {
+    case 'SHA-1':
+      if (tagSize > 20) {
+        throw new InvalidArgumentsException(
+            'tag too long, must not be larger than 20 bytes');
+      }
+      break;
+    case 'SHA-256':
+      if (tagSize > 32) {
+        throw new InvalidArgumentsException(
+            'tag too long, must not be larger than 32 bytes');
+      }
+      break;
+    case 'SHA-512':
+      if (tagSize > 64) {
+        throw new InvalidArgumentsException(
+            'tag too long, must not be larger than 64 bytes');
+      }
+      break;
+    default:
+      throw new InvalidArgumentsException(hash + ' is not supported');
+  }
 
-    switch (hashAlgoName) {
-      case 'SHA-1':
-        if (tagSize > 20) {
-          throw new InvalidArgumentsException(
-              'tag too long, must not be larger than 20 bytes');
-        }
-        break;
-      case 'SHA-256':
-        if (tagSize > 32) {
-          throw new InvalidArgumentsException(
-              'tag too long, must not be larger than 32 bytes');
-        }
-        break;
-      case 'SHA-512':
-        if (tagSize > 64) {
-          throw new InvalidArgumentsException(
-              'tag too long, must not be larger than 64 bytes');
-        }
-        break;
-      default:
-        throw new InvalidArgumentsException(hashAlgoName + ' is not supported');
-    }
-
+  if (Environment.IS_WEBCRYPTO_AVAILABLE) {
     const cryptoKey = await window.crypto.subtle.importKey(
-        'raw', key, {
-          'name': 'HMAC',
-          'hash': {'name': hashAlgoName},
-          'length': key.length * 8
-        },
+        'raw', key,
+        {'name': 'HMAC', 'hash': {'name': hash}, 'length': key.length * 8},
         false, ['sign', 'verify']);
-    return new Hmac(cryptoKey, tagSize);
+    return new HmacWebCrypto(cryptoKey, tagSize);
   }
+  return new HmacPureJs(hash, key, tagSize);
+};
 
-  /**
-   * @override
-   */
-  async computeMac(data) {
-    const tag =
-        await window.crypto.subtle.sign({'name': 'HMAC'}, this.key_, data);
-    return new Uint8Array(tag.slice(0, this.tagSize_));
-  }
-
-  /**
-   * @override
-   */
-  async verifyMac(tag, data) {
-    const computedTag = await this.computeMac(data);
-    return Bytes.isEqual(tag, computedTag);
-  }
-}
-
-exports = Hmac;
+exports = {create};

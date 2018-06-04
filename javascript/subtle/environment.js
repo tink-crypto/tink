@@ -12,25 +12,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-/**
- * @fileoverview Several simple wrappers of crypto.getRandomValues.
- * @public
- */
+goog.module('tink.subtle.Environment');
 
-goog.module('tink.subtle.Random');
+/** @const {boolean} */
+const IS_WEBCRYPTO_AVAILABLE = (typeof goog.global['crypto']) !== 'undefined';
 
-/**
- * Randomly generates `n` bytes.
- *
- * @param {number} n number of bytes to generate
- * @return {!Uint8Array} the random bytes
- * @static
- */
-const randBytes = function(n) {
-  const crypto = goog.global['crypto'] || goog.global['msCrypto'];
-  const result = new Uint8Array(n);
-  crypto.getRandomValues(result);
-  return result;
+exports = {
+  IS_WEBCRYPTO_AVAILABLE,
 };
-
-exports = {randBytes};
