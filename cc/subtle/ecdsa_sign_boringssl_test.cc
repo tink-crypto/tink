@@ -58,6 +58,13 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
 
   status = verifier->Verify(signature, "some bad message");
   EXPECT_FALSE(status.ok());
+
+  // Message is a null string_view.
+  const absl::string_view empty_message;
+  signature = signer->Sign(empty_message).ValueOrDie();
+  EXPECT_NE(signature, empty_message);
+  status = verifier->Verify(signature, empty_message);
+  EXPECT_TRUE(status.ok()) << status;
 }
 
 // TODO(bleichen): add Wycheproof tests.

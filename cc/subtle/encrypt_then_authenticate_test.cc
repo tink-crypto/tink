@@ -233,6 +233,29 @@ TEST(EncryptThenAuthenticateTest, testDecrypt_modifiedCiphertext) {
   }
 }
 
+TEST(EncryptThenAuthenticateTest, testParamsEmptyVersusNullStringView) {
+  int encryption_key_size = 16;
+  int iv_size = 12;
+  int mac_key_size = 16;
+  int tag_size = 16;
+  auto cipher = std::move(
+      createAead(encryption_key_size, iv_size, mac_key_size, tag_size,
+                 HashType::SHA1).ValueOrDie());
+
+  { // AAD null string_view.
+    const std::string message = "Some data to encrypt.";
+    const absl::string_view aad;
+    const std::string ct = cipher->Encrypt(message, "").ValueOrDie();
+    EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
+  }
+  { // Both message and AAD null string_view.
+    const absl::string_view message;
+    const absl::string_view aad;
+    const std::string ct = cipher->Encrypt(message, "").ValueOrDie();
+    EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
+  }
+}
+
 }  // namespace
 }  // namespace subtle
 }  // namespace tink
