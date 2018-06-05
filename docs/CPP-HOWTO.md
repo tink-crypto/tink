@@ -21,15 +21,16 @@ so the instructions given below might not work in some environments.
 
 #### Supported Platforms
 
- * Linux
- * mac OS X (coming soon)
+ * Linux x86-64
+ * MacOS x86-64, 10.12.6 (Sierra) or newer
 
 #### Caveats
 
-Tink depends on [Abseil](https://github.com/abseil/abseil-cpp) and [Protocol
-Buffers](https://developers.google.com/protocol-buffers/), so any project that
-wants to use Tink should either depend on the same versions of these libraries
-(cf. versions in the corresponding entries in
+Tink depends on [Abseil](https://github.com/abseil/abseil-cpp), [Protocol
+Buffers](https://developers.google.com/protocol-buffers/), and
+[BoringSSL](https://opensource.google.com/projects/boringssl), so any project
+that wants to use Tink should either depend on the same versions of these
+libraries (cf. versions in the corresponding entries in
 [WORKSPACE](https://github.com/google/tink/blob/master/WORKSPACE) file), or not
 depend directly on these libraries at all (i.e. have only the indirect
 dependence via Tink).
@@ -58,11 +59,11 @@ To install Tink from the source code, the following prerequisites must be instal
    directories of the target project (`TARGET_DIR`):
 
    ```sh
+   cd tink
+   TARGET_DIR="/usr/local"
    bazel build cc:libtink.so
    bazel build cc:tink_headers cc:tink_deps_headers
-   TARGET_DIR="/usr/local"
-   mkdir -p $TARGET_DIR/lib
-   mkdir -p $TARGET_DIR/include
+   mkdir -p $TARGET_DIR/lib $TARGET_DIR/include
    sudo cp bazel-bin/cc/libtink.so $TARGET_DIR/lib/
    sudo tar xfv bazel-genfiles/cc/tink_headers.tar -C $TARGET_DIR/include/
    sudo tar xfv bazel-genfiles/cc/tink_deps_headers.tar -C $TARGET_DIR/include/
@@ -92,15 +93,15 @@ To validate the installation compile and run [`hello_world.cc`](https://github.c
 
    ```sh
    cd /tmp
-   wget https://raw.githubusercontent.com/google/tink/master/examples/helloworld/cc/hello_world.cc
-   wget https://raw.githubusercontent.com/google/tink/master/examples/helloworld/cc/aes128_gcm_test_keyset_json.txt
+   GITHUB_DIR=https://raw.githubusercontent.com/google/tink/master/examples/helloworld/cc/
+   curl $GITHUB_DIR/hello_world.cc -O $GITHUB_DIR/aes128_gcm_test_keyset_json.txt -O
    echo "some message to be encrypted" > plaintext.txt
    ```
 
 2. Compile the source code.
 
    ```sh
-    g++ -I$TARGET_DIR/include/ -L$TARGET_DIR/lib/ hello_world.cc -ltink -o hello_world
+    g++ -std=c++11 -I$TARGET_DIR/include/ -L$TARGET_DIR/lib/ hello_world.cc -ltink -o hello_world
    ```
 
 3. Run `hello_world` application to encrypt and decrypt some data.
@@ -110,9 +111,6 @@ To validate the installation compile and run [`hello_world.cc`](https://github.c
    ./hello_world aes128_gcm_test_keyset_json.txt decrypt ciphertext.bin "associated data" decrypted.txt
    cat decrypted.txt
    ```
-
-   (additionally `export LD_RUN_PATH=$LD_RUN_PATH:$TARGET_DIR/lib/` might be needed
-   to ensure that the resulting binary can find `libtink.so` upon startup)
 
 ## Initializing Tink
 
