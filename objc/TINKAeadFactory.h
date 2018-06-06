@@ -16,4 +16,47 @@
  **************************************************************************
  */
 
-#import "objc/aead/TINKAeadFactory.h"
+#import <Foundation/Foundation.h>
+
+@class TINKKeysetHandle;
+@protocol TINKAead;
+
+NS_ASSUME_NONNULL_BEGIN;
+
+/**
+ * TINKAeadFactory allows for obtaining a TINKAead primitive from a TINKKeysetHandle.
+ *
+ * TINKAeadFactory gets primitives from the Registry, which can be initialized via convenience
+ * methods from TINKAeadConfig. Here is an example how one can obtain and use a TINKAead primitive:
+ *
+ * NSError *error = nil;
+ * TINKAeadConfig *aeadConfig = [TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
+ *                                                               error:&error];
+ * if (!aeadConfig || error) {
+ *   // handle error.
+ * }
+ *
+ * if (![TINKConfig registerConfig:aeadConfig error:&error]) {
+ *   // handle error.
+ * }
+ *
+ * TINKKeysetHandle keysetHandle = ...;
+ * id<TINKAead> aead = [TINKAeadFactory primitiveWithKeysetHandle:keysetHandle error:&error];
+ * if (!aead || error) {
+ *   // handle error.
+ * }
+ *
+ * NSData *plaintext = ...;
+ * NSData *additionalData = ...;
+ * NSData *ciphertext = [aead encrypt:plaintext withAdditionalData:additionalData error:&error];
+ */
+@interface TINKAeadFactory : NSObject
+/**
+ * Returns an object that conforms to the TINKAead protocol. It uses key material from the keyset
+ * specified via @c keysetHandle.
+ */
++ (nullable id<TINKAead>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle
+                                             error:(NSError **)error;
+@end
+
+NS_ASSUME_NONNULL_END;

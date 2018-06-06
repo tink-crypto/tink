@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/mac/TINKMacFactory.h"
+#import "objc/TINKMacFactory.h"
 
 #import <Foundation/Foundation.h>
 

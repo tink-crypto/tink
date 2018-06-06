@@ -23,7 +23,7 @@ echo "some plaintext" > foo.txt
     encrypt foo.txt "some aad" bar.encrypted
 ./bazel-bin/examples/helloworld/cc/hello_world ./examples/helloworld/cc/aes128_gcm_test_keyset_json.txt\
     decrypt bar.encrypted "some aad" foo-decrypted.txt
-cat foo2.txt
+cat foo-decrypted.txt
 ```
 
 TODO: copy this app to

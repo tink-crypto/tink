@@ -16,4 +16,46 @@
  **************************************************************************
  */
 
-#import "objc/mac/TINKMacFactory.h"
+#import <Foundation/Foundation.h>
+
+@class TINKKeysetHandle;
+@protocol TINKMac;
+
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ * TINKMacFactory allows for obtaining a TINKMac primitive from a TINKKeysetHandle.
+ *
+ * TINKMacFactory gets primitives from the Registry, which can be initialized via convenience
+ * methods in TINKMacConfig. Here is an example how one can obtain and use a TINKMac primitive:
+ *
+ * NSError *error = nil;
+ * TINKMacConfig *macConfig = [TINKMacConfig alloc] initWithVersion:TINKVersion1_1_0
+ *                                                            error:&error];
+ * if (!macConfig || error) {
+ *   // handle error.
+ * }
+ *
+ * if (![TINKConfig registerConfig:macConfig error:&error]) {
+ *   // handle error.
+ * }
+ *
+ * TINKKeysetHandle keysetHandle = ...;
+ * id<TINKMac> mac = [TINKMacFactory primitiveWithKeysetHandle:keysetHandle error:&error];
+ * if (!mac || error) {
+ *   // handle error.
+ * }
+ *
+ */
+@interface TINKMacFactory : NSObject
+
+/**
+ * Returns an object that conforms to the TINKMac protocol. It uses key material from the keyset
+ * specified via @c keysetHandle.
+ */
++ (nullable id<TINKMac>)primitiveWithKeysetHandle:(TINKKeysetHandle *)keysetHandle
+                                            error:(NSError **)error;
+
+@end
+
+NS_ASSUME_NONNULL_END

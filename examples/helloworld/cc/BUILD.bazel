@@ -42,7 +42,6 @@ sh_test(
     ],
     tags = [
         "local",   # This tests needs g++.
-        "manual",  # Does not run on OSX yet.  TODO(b/78299422)
     ],
     data = [
         ":hello_world_files",

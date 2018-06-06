@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/hybrid/TINKHybridKeyTemplate.h"
+#import "objc/TINKHybridKeyTemplate.h"
 
 #import "objc/TINKKeyTemplate.h"
 #import "objc/core/TINKKeyTemplate_Internal.h"

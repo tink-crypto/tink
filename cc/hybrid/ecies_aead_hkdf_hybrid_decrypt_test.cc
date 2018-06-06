@@ -137,7 +137,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
         {EcPointFormat::UNCOMPRESSED, EcPointFormat::COMPRESSED}) {
       for (auto hash_type : {HashType::SHA256, HashType::SHA512}) {
         for (uint32_t aes_gcm_key_size : {16, 24, 32}) {
-          for (uint32_t plaintext_size : {1, 10, 100, 1000}) {
+          for (uint32_t plaintext_size : {0, 1, 10, 100, 1000}) {
             ecies_key = test::GetEciesAesGcmHkdfTestKey(
                 curve, ec_point_format, hash_type, aes_gcm_key_size);
 
@@ -160,6 +160,25 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
                   hybrid_decrypt->Decrypt(ciphertext, context_info);
               EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
               EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+            }
+            {  // Encryption and decryption with empty context info.
+              const absl::string_view empty_context_info;
+              auto ciphertext = hybrid_encrypt->Encrypt(
+                  plaintext, empty_context_info).ValueOrDie();
+              auto decrypt_result =
+                  hybrid_decrypt->Decrypt(ciphertext, empty_context_info);
+              ASSERT_TRUE(decrypt_result.ok()) << decrypt_result.status();
+              EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+            }
+            {  // Encryption and decryption w/ empty msg & context info.
+              const absl::string_view empty_plaintext;
+              const absl::string_view empty_context_info;
+              auto ciphertext = hybrid_encrypt->Encrypt(
+                  empty_plaintext, empty_context_info).ValueOrDie();
+              auto decrypt_result =
+                  hybrid_decrypt->Decrypt(ciphertext, empty_context_info);
+              ASSERT_TRUE(decrypt_result.ok()) << decrypt_result.status();
+              EXPECT_EQ(empty_plaintext, decrypt_result.ValueOrDie());
             }
             {  // Short bad ciphertext.
               auto decrypt_result = hybrid_decrypt->Decrypt(

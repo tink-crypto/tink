@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/aead/TINKAeadConfig.h"
+#import "objc/TINKAeadConfig.h"
 
 #import <XCTest/XCTest.h>
 

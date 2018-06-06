@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/mac/TINKMacConfig.h"
+#import "objc/TINKMacConfig.h"
 
 #import "objc/TINKRegistryConfig.h"
 #import "objc/TINKVersion.h"

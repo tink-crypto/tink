@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #############################################################################
-##### Tests for hello_world binary.
+##### Tests for installing and using Tink in a non-Bazel project.
 
 ROOT_DIR="$TEST_SRCDIR/__main__"
-MY_PROJECT_DIR="$TEST_TMPDIR/my_project"
+TARGET_DIR="$TEST_TMPDIR/my_project"
 HELLO_WORLD_SRC="$ROOT_DIR/examples/helloworld/cc/hello_world.cc"
 KEYSET_FILE="$ROOT_DIR/examples/helloworld/cc/aes128_gcm_test_keyset_json.txt"
 LIBTINK_SO_FILE="cc/libtink.so"
@@ -19,22 +19,21 @@ AAD_TEXT="some associated data"
 #############################################################################
 
 ##### Create directories for "my_project".
-mkdir $MY_PROJECT_DIR
-mkdir $MY_PROJECT_DIR/include
-mkdir $MY_PROJECT_DIR/lib
+mkdir -p $TARGET_DIR $TARGET_DIR/include $TARGET_DIR/lib
 
 ##### Install libtink.so and header files.
-cp -L $LIBTINK_SO_FILE $MY_PROJECT_DIR/lib/
-tar xf $TINK_HEADERS_TAR_FILE -C $MY_PROJECT_DIR/include/
-tar xf $TINK_DEPS_HEADERS_TAR_FILE -C $MY_PROJECT_DIR/include/
+cp -L $LIBTINK_SO_FILE $TARGET_DIR/lib/
+tar xf $TINK_HEADERS_TAR_FILE -C $TARGET_DIR/include/
+tar xf $TINK_DEPS_HEADERS_TAR_FILE -C $TARGET_DIR/include/
 
 ##### Create and compile "my_project".
-cp $HELLO_WORLD_SRC $KEYSET_FILE $MY_PROJECT_DIR
-cd $MY_PROJECT_DIR
-export LD_RUN_PATH="$MY_PROJECT_DIR/lib/"
-g++ -std=c++11 -Iinclude/ -Llib/ hello_world.cc -ltink
+export LIBRARY_PATH=$LIBRARY_PATH:$TARGET_DIR/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TARGET_DIR/lib
+cp $HELLO_WORLD_SRC $KEYSET_FILE $TARGET_DIR
+cd $TARGET_DIR
+g++ -std=c++11 -I$TARGET_DIR/include/ -L$TARGET_DIR/lib/ hello_world.cc -ltink -o hello_world
 
-HELLO_WORLD_CLI="$MY_PROJECT_DIR/a.out"
+HELLO_WORLD_CLI="$TARGET_DIR/hello_world"
 
 ##### Create a plaintext.
 echo "This is some message to be encrypted." > $PLAINTEXT_FILE

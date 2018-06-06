@@ -56,14 +56,26 @@ TEST_F(HmacBoringSslTest, testBasic) {
   auto hmac_result = HmacBoringSsl::New(HashType::SHA1, tag_size, key);
   EXPECT_TRUE(hmac_result.ok()) << hmac_result.status();
   auto hmac = std::move(hmac_result.ValueOrDie());
-  std::string data = "Some data to test.";
-  auto res = hmac->ComputeMac(data);
-  EXPECT_TRUE(res.ok()) << res.status().ToString();
-  std::string tag = res.ValueOrDie();
-  EXPECT_EQ(tag_size, tag.size());
-  auto status = hmac->VerifyMac(tag, data);
-  EXPECT_TRUE(status.ok()) << "tag:" << test::HexEncode(tag)
-                           << " status:" << status.ToString();
+  { // Test with some example data.
+    std::string data = "Some data to test.";
+    auto res = hmac->ComputeMac(data);
+    EXPECT_TRUE(res.ok()) << res.status().ToString();
+    std::string tag = res.ValueOrDie();
+    EXPECT_EQ(tag_size, tag.size());
+    auto status = hmac->VerifyMac(tag, data);
+    EXPECT_TRUE(status.ok()) << "tag:" << test::HexEncode(tag)
+                             << " status:" << status.ToString();
+  }
+  { // Test with empty example data.
+    absl::string_view data;
+    auto res = hmac->ComputeMac(data);
+    EXPECT_TRUE(res.ok()) << res.status().ToString();
+    std::string tag = res.ValueOrDie();
+    EXPECT_EQ(tag_size, tag.size());
+    auto status = hmac->VerifyMac(tag, data);
+    EXPECT_TRUE(status.ok()) << "tag:" << test::HexEncode(tag)
+                             << " status:" << status.ToString();
+  }
 }
 
 TEST_F(HmacBoringSslTest, testModification) {

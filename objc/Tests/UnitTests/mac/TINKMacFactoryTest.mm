@@ -16,15 +16,15 @@
  **************************************************************************
  */
 
-#import "objc/aead/TINKAeadFactory.h"
+#import "objc/TINKAeadFactory.h"
 
 #import <XCTest/XCTest.h>
 
 #import "objc/TINKKeysetHandle.h"
 #import "objc/TINKMac.h"
+#import "objc/TINKMacConfig.h"
+#import "objc/TINKMacFactory.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/mac/TINKMacConfig.h"
-#import "objc/mac/TINKMacFactory.h"
 #import "objc/util/TINKStrings.h"
 
 #include "tink/crypto_format.h"

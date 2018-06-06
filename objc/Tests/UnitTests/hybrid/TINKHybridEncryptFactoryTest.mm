@@ -27,11 +27,11 @@
 #import "proto/Tink.pbobjc.h"
 
 #import "objc/TINKConfig.h"
+#import "objc/TINKHybridConfig.h"
 #import "objc/TINKHybridEncrypt.h"
+#import "objc/TINKHybridEncryptFactory.h"
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
-#import "objc/hybrid/TINKHybridConfig.h"
-#import "objc/hybrid/TINKHybridEncryptFactory.h"
 #import "objc/util/TINKStrings.h"
 #import "objc/util/TINKTestHelpers.h"
 

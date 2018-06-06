@@ -16,4 +16,41 @@
  **************************************************************************
  */
 
-#import "objc/mac/TINKMacConfig.h"
+#import <Foundation/Foundation.h>
+
+#import "objc/TINKRegistryConfig.h"
+#import "objc/TINKVersion.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ * This class is used for registering with the Registry all instances of Mac key types supported in
+ * a particular release of Tink.
+ *
+ * To register all Mac key types provided in Tink release 1.1.0 one can do:
+ *
+ * NSError *error = nil;
+ * TINKMacConfig *macConfig = [TINKMacConfig alloc] initWithVersion:TINKVersion1_1_0
+ *                                                            error:&error];
+ * if (!macConfig || error) {
+ *   // handle error.
+ * }
+ *
+ * if (![TINKConfig registerConfig:macConfig error:&error]) {
+ *   // handle error.
+ * }
+ *
+ * For more information on the creation and usage of TINKMac instances see TINKMacFactory.
+ */
+@interface TINKMacConfig : TINKRegistryConfig
+
+/* Use initWithVersion:error: to get an instance of TINKMacConfig. */
+- (nullable instancetype)init NS_UNAVAILABLE;
+
+/* Returns config of Mac implementations supported in given @c version of Tink. */
+- (nullable instancetype)initWithVersion:(TINKVersion)version
+                                   error:(NSError **)error NS_DESIGNATED_INITIALIZER;
+
+@end
+
+NS_ASSUME_NONNULL_END

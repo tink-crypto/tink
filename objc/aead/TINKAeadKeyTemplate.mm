@@ -16,7 +16,7 @@
  **************************************************************************
  */
 
-#import "objc/aead/TINKAeadKeyTemplate.h"
+#import "objc/TINKAeadKeyTemplate.h"
 
 #import "objc/TINKKeyTemplate.h"
 #import "objc/core/TINKKeyTemplate_Internal.h"

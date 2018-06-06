@@ -23,8 +23,8 @@
 
 #import "objc/TINKAead.h"
 #import "objc/TINKBinaryKeysetReader.h"
+#import "objc/TINKHybridKeyTemplate.h"
 #import "objc/aead/TINKAeadInternal.h"
-#import "objc/hybrid/TINKHybridKeyTemplate.h"
 #import "objc/util/TINKStrings.h"
 #import "proto/Tink.pbobjc.h"
 

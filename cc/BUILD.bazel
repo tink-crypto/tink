@@ -415,6 +415,18 @@ cc_library(
     include_prefix = "tink",
 )
 
+
+# Settings for building in various environments.
+config_setting(
+    name = "linux_x86_64",
+    values = {"cpu": "k8"},
+)
+
+config_setting(
+    name = "mac_x86_64",
+    values = {"cpu": "darwin"},
+)
+
 # Library for projects that don't use Bazel but would like to use Tink.
 # cc_library() doesn't support linkshared so we're using cc_binary.
 # To get dead code elimination run Bazel with option --nolegacy_whole_archive.
@@ -422,6 +434,10 @@ cc_binary(
     name = "libtink.so",
     linkshared = 1,
     linkstatic = 1,
+    linkopts = select({
+      ":linux_x86_64": [],
+      ":mac_x86_64": ["-Wl,-install_name,@rpath/libtink.so"],
+    }),
     visibility = ["//visibility:public"],
     deps = PUBLIC_API_DEPS + [":cleartext_keyset_handle"],
 )
@@ -434,19 +450,24 @@ genrule(
         "//proto:public_cc_protos",
     ],
     local = 1,  # To avoid sandboxing; otherwise cannot access srcs.
-    tags = [
-        "manual",  # Does not run on OSX yet.  TODO(b/78299422)
-    ],
     outs = [
         "tink_headers.tar",
     ],
-    # The command below collects all Tink headers in two steps:
+    # The commands below collect all Tink headers in two steps:
     #  * First a tar-archive with all "regular" .h-files is created.
     #  * Then .h-files generated for Tink protos are added to the tar-archive.
-    cmd = "tar -cv -f $@ --dereference --transform \"s/^cc/tink/\" " +
+    cmd = select({
+      ":linux_x86_64":
+          "tar -cv -f $@ --dereference --transform \"s/^cc/tink/\" " +
           "    --show-transformed-names `find cc/ -name \"*.h\"`; " +
           "tar -rv -f $@ -C $(GENDIR) --dereference " +
           "    `cd $(GENDIR); find proto/ -name \"*.pb.h\"`",
+      ":mac_x86_64":
+          "tar -cv -f $@ --dereference -s \"/^cc/tink/p\" " +
+          "    `find cc/ -name \"*.h\"`; " +
+          "tar -rv -f $@ -C $(GENDIR) --dereference " +
+          "    `cd $(GENDIR); find proto/ -name \"*.pb.h\"`",
+    }),
 )
 
 genrule(

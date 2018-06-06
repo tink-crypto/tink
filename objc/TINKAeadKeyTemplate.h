@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 Google Inc.
+ * Copyright 2018 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,4 +16,99 @@
  **************************************************************************
  */
 
-#import "objc/aead/TINKAeadKeyTemplate.h"
+#import <Foundation/Foundation.h>
+
+#import "objc/TINKKeyTemplate.h"
+
+typedef NS_ENUM(NSInteger, TINKAeadKeyTemplates) {
+  /**
+   * AesGcmKey with the following parameters:
+   *   Key size: 16 bytes
+   *   IV size: 12 bytes
+   *   Tag size: 16 bytes
+   *   OutputPrefixType: TINK
+   */
+  TINKAes128Gcm = 1,
+
+  /**
+   * AesGcmKey with the following parameters:
+   *   Key size: 32 bytes
+   *   IV size: 12 bytes
+   *   Tag size: 16 bytes
+   *   OutputPrefixType: TINK
+   */
+  TINKAes256Gcm = 2,
+
+  /**
+   * AesCtrHmacAeadKey with the following parameters:
+   *   AES key size: 16 bytes
+   *   AES IV size: 16 bytes
+   *   HMAC key size: 32 bytes
+   *   HMAC tag size: 16 bytes
+   *   HMAC hash function: SHA256
+   *   OutputPrefixType: TINK
+   */
+  TINKAes128CtrHmacSha256 = 3,
+
+  /**
+   * AesCtrHmacAeadKey with the following parameters:
+   *   AES key size: 32 bytes
+   *   AES IV size: 16 bytes
+   *   HMAC key size: 32 bytes
+   *   HMAC tag size: 32 bytes
+   *   HMAC hash function: SHA256
+   *   OutputPrefixType: TINK
+   */
+  TINKAes256CtrHmacSha256 = 4,
+};
+
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ * Pre-generated key templates for TINKAead key types.
+ * One can use these templates to generate new TINKKeysetHandle object with fresh keys.
+ *
+ * Example:
+ *
+ * NSError *error = nil;
+ * TINKAeadConfig *aeadConfig = [[TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
+ *                                                                error:&error];
+ * if (!aeadConfig || error) {
+ *   // handle error.
+ * }
+ *
+ * if (![TINKConfig registerConfig:aeadConfig error:&error]) {
+ *   // handle error.
+ * }
+ *
+ * TINKAeadKeyTemplate *tpl = [TINAeadKeyTemplate initWithKeyTemplate:TINKAes128Gcm error:&error];
+ * if (!tpl || error) {
+ *   // handle error.
+ * }
+ *
+ * TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithKeyTemplate:tpl error:&error];
+ * if (!handle || error) {
+ *   // handle error.
+ * }
+ *
+ */
+@interface TINKAeadKeyTemplate : TINKKeyTemplate
+
+- (nullable instancetype)init
+    __attribute__((unavailable("Use -initWithKeyTemplate:error: instead.")));
+;
+
+/**
+ * Creates a TINKAeadKeyTemplate that can be used to generate aead keysets.
+ *
+ * @param keyTemplate The aead key template to use.
+ * @param error       If non-nil it will be populated with a descriptive error when the operation
+ *                    fails.
+ * @return            A TINKAeadKeyTemplate or nil in case of error.
+ */
+- (nullable instancetype)initWithKeyTemplate:(TINKAeadKeyTemplates)keyTemplate
+                                       error:(NSError **)error NS_DESIGNATED_INITIALIZER;
+
+@end
+
+NS_ASSUME_NONNULL_END

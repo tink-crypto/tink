@@ -147,8 +147,7 @@ int main(int argc, char** argv) {
   InitTink();
 
   // Read the keyset.
-    std::unique_ptr<crypto::tink::KeysetHandle> keyset_handle =
-        ReadKeyset(keyset_filename);
+  auto keyset_handle = ReadKeyset(keyset_filename);
 
   // Get the primitive.
   auto primitive_result =
