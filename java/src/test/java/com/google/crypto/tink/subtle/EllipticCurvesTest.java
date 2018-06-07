@@ -486,8 +486,17 @@ public class EllipticCurvesTest {
         try {
           EllipticCurves.CurveType curveType = WycheproofTestUtil.getCurveType(curve);
           ECPrivateKey privKey = EllipticCurves.getEcPrivateKey(curveType, Hex.decode(hexPrivKey));
-          X509EncodedKeySpec x509keySpec = new X509EncodedKeySpec(Hex.decode(hexPubKey));
-          ECPublicKey pubKey = (ECPublicKey) kf.generatePublic(x509keySpec);
+          ECPublicKey pubKey;
+          try {
+            X509EncodedKeySpec x509keySpec = new X509EncodedKeySpec(Hex.decode(hexPubKey));
+            pubKey = (ECPublicKey) kf.generatePublic(x509keySpec);
+          } catch (java.lang.RuntimeException ex) {
+            // Some of the test vectors contain incorrectly encoded public keys.
+            // Some java providers do not properly check the encoding, which often results in
+            // RuntimeExceptions. Since the decoding is not part of tink, we can simply ignore
+            // these test vectors here.
+            continue;
+          }
           String sharedSecret = Hex.encode(EllipticCurves.computeSharedSecret(privKey, pubKey));
           if (result.equals("invalid")) {
             if (expectedSharedSecret.equals(sharedSecret)
