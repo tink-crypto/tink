@@ -36,7 +36,7 @@ TEST(MacKeyTemplatesTest, testHmacKeyTemplates) {
 
   {  // Test Hmac128BittagSha256().
     // Check that returned template is correct.
-    const KeyTemplate& key_template = MacKeyTemplates::Hmac128BittagSha256();
+    const KeyTemplate& key_template = MacKeyTemplates::HmacSha256HalfSizeTag();
     EXPECT_EQ(type_url, key_template.type_url());
     EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
     HmacKeyFormat key_format;
@@ -46,7 +46,8 @@ TEST(MacKeyTemplatesTest, testHmacKeyTemplates) {
     EXPECT_EQ(HashType::SHA256, key_format.params().hash());
 
     // Check that reference to the same object is returned.
-    const KeyTemplate& key_template_2 = MacKeyTemplates::Hmac128BittagSha256();
+    const KeyTemplate& key_template_2 =
+        MacKeyTemplates::HmacSha256HalfSizeTag();
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.
@@ -58,7 +59,7 @@ TEST(MacKeyTemplatesTest, testHmacKeyTemplates) {
 
   {  // Test Hmac256BittagSha256().
     // Check that returned template is correct.
-    const KeyTemplate& key_template = MacKeyTemplates::Hmac256BittagSha256();
+    const KeyTemplate& key_template = MacKeyTemplates::HmacSha256();
     EXPECT_EQ(type_url, key_template.type_url());
     EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
     HmacKeyFormat key_format;
@@ -68,7 +69,7 @@ TEST(MacKeyTemplatesTest, testHmacKeyTemplates) {
     EXPECT_EQ(HashType::SHA256, key_format.params().hash());
 
     // Check that reference to the same object is returned.
-    const KeyTemplate& key_template_2 = MacKeyTemplates::Hmac256BittagSha256();
+    const KeyTemplate& key_template_2 = MacKeyTemplates::HmacSha256();
     EXPECT_EQ(&key_template, &key_template_2);
 
     // Check that the template works with the key manager.

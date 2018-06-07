@@ -31,7 +31,7 @@ namespace tink {
 //   status = Config::Register(MacConfig::Tink_1_1_0());
 //   if (!status.ok()) { /* fail with error */ }
 //   auto handle_result =
-//       KeysetHandle.GenerateNew(MacKeyTemplates.HmacSha256Tag128Bit());
+//       KeysetHandle.GenerateNew(MacKeyTemplates.HmacSha256HalfSizeTag());
 //   if (!handle_result.ok()) { /* fail with error */ }
 //   auto keyset_handle = std::move(handle_result.ValueOrDie());
 class MacKeyTemplates {
@@ -42,7 +42,7 @@ class MacKeyTemplates {
   //   - tag size: 16 bytes
   //   - hash function: SHA256
   //   - OutputPrefixType: TINK
-  static const google::crypto::tink::KeyTemplate& Hmac128BittagSha256();
+  static const google::crypto::tink::KeyTemplate& HmacSha256HalfSizeTag();
 
   // Returns a KeyTemplate that generates new instances of HmacKey
   // with the following parameters:
@@ -50,7 +50,7 @@ class MacKeyTemplates {
   //   - tag size: 32 bytes
   //   - hash function: SHA256
   //   - OutputPrefixType: TINK
-  static const google::crypto::tink::KeyTemplate& Hmac256BittagSha256();
+  static const google::crypto::tink::KeyTemplate& HmacSha256();
 };
 
 }  // namespace tink

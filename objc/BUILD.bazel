@@ -28,6 +28,7 @@ PUBLIC_APIS = [
     "TINKMac.h",
     "TINKMacConfig.h",
     "TINKMacFactory.h",
+    "TINKMacKeyTemplate.h",
     "TINKRegistryConfig.h",
     "TINKVersion.h",
 ]
@@ -54,6 +55,7 @@ PUBLIC_API_DEPS = [
     ":mac",
     ":mac_config",
     ":mac_factory",
+    ":mac_key_template",
     ":registry_config",
     ":version",
     "//objc/util:errors",
@@ -450,6 +452,19 @@ objc_library(
         "//objc/util:errors",
         "//objc/util:strings",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+objc_library(
+    name = "mac_key_template",
+    srcs = ["mac/TINKMacKeyTemplate.mm"],
+    hdrs = ["TINKMacKeyTemplate.h"],
+    deps = [
+        ":key_template",
+        ":tink_cc_pb",
+        "//cc/mac:mac_key_templates",
+        "//cc/util:status",
+        "//objc/util:errors",
     ],
 )
 

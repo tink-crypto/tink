@@ -48,7 +48,7 @@ KeyTemplate* NewHmacKeyTemplate(int key_size_in_bytes,
 }  // anonymous namespace
 
 // static
-const KeyTemplate& MacKeyTemplates::Hmac128BittagSha256() {
+const KeyTemplate& MacKeyTemplates::HmacSha256HalfSizeTag() {
   static const KeyTemplate* key_template =
       NewHmacKeyTemplate(/* key_size_in_bytes= */ 32,
                          /* tag_size_in_bytes= */ 16,
@@ -57,7 +57,7 @@ const KeyTemplate& MacKeyTemplates::Hmac128BittagSha256() {
 }
 
 // static
-const KeyTemplate& MacKeyTemplates::Hmac256BittagSha256() {
+const KeyTemplate& MacKeyTemplates::HmacSha256() {
   static const KeyTemplate* key_template =
       NewHmacKeyTemplate(/* key_size_in_bytes= */ 32,
                          /* tag_size_in_bytes= */ 32,
