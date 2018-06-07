@@ -15,7 +15,8 @@
 goog.module('tink.subtle.Environment');
 
 /** @const {boolean} */
-const IS_WEBCRYPTO_AVAILABLE = (typeof goog.global['crypto']) !== 'undefined';
+const IS_WEBCRYPTO_AVAILABLE = typeof goog.global['crypto'] !== 'undefined' &&
+    typeof goog.global['crypto']['subtle'] !== 'undefined';
 
 exports = {
   IS_WEBCRYPTO_AVAILABLE,
