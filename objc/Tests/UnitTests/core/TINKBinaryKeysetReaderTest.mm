@@ -88,7 +88,7 @@ static NSData *gGoodSerializedEncryptedKeyset;
 #pragma clang diagnostic pop
 
 - (void)testReadFromString {
-  // Good std::string.
+  // Good string.
   NSError *error = nil;
   TINKBinaryKeysetReader *reader =
       [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:gGoodSerializedKeyset error:&error];
@@ -100,7 +100,7 @@ static NSData *gGoodSerializedEncryptedKeyset;
   XCTAssertNotNil(readResult);
   XCTAssertTrue([gGoodSerializedKeyset isEqualToData:readResult.data]);
 
-  // Bad std::string.
+  // Bad string.
   error = nil;
   TINKBinaryKeysetReader *badReader =
       [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:gBadSerializedKeyset error:&error];
@@ -114,7 +114,7 @@ static NSData *gGoodSerializedEncryptedKeyset;
 }
 
 - (void)testReadEncryptedFromString {
-  // Good std::string.
+  // Good string.
   NSError *error = nil;
   TINKBinaryKeysetReader *reader =
       [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:gGoodSerializedEncryptedKeyset
@@ -127,7 +127,7 @@ static NSData *gGoodSerializedEncryptedKeyset;
   XCTAssertNotNil(readResult);
   XCTAssertTrue([gGoodSerializedEncryptedKeyset isEqualToData:readResult.data]);
 
-  // Bad std::string.
+  // Bad string.
   error = nil;
   TINKBinaryKeysetReader *badReader =
       [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:gBadSerializedKeyset error:&error];

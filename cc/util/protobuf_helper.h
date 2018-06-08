@@ -17,10 +17,18 @@
 #ifndef TINK_UTIL_PROTOBUF_HELPER_H_
 #define TINK_UTIL_PROTOBUF_HELPER_H_
 
+#ifdef PROTOBUF_INTERNAL_IMPL
+
+// This space intentionally left blank. This is a placeholder for includes
+// when the code is imported into Google's version control system.
+
+#else
+
 #include "google/protobuf/message.h"
 #include "google/protobuf/util/json_util.h"
 
 namespace portable_proto = ::google::protobuf;
 
+#endif  // PROTOBUF_INTERNAL_IMP
 
 #endif  // TINK_UTIL_PROTOBUF_HELPER_H_
