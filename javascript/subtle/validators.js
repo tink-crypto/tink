@@ -35,4 +35,20 @@ const validateAesKeySize = function(n) {
   }
 };
 
-exports = {validateAesKeySize};
+/**
+ * Validate that the input is a non null Uint8Array.
+ *
+ * @param {!Uint8Array} input
+ * @throws {InvalidArgumentsException}
+ * @static
+ */
+const requireUint8Array = function(input) {
+  if (input == null || !(input instanceof Uint8Array)) {
+    throw new InvalidArgumentsException('input must be a non null Uint8Array');
+  }
+};
+
+exports = {
+  validateAesKeySize,
+  requireUint8Array
+};
