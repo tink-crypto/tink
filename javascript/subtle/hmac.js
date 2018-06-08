@@ -80,7 +80,7 @@ const create = async function(hash, key, tagSize) {
         'raw', key,
         {'name': 'HMAC', 'hash': {'name': hash}, 'length': key.length * 8},
         false, ['sign', 'verify']);
-    return new HmacWebCrypto(cryptoKey, tagSize);
+    return new HmacWebCrypto(hash, cryptoKey, tagSize);
   }
   return new HmacPureJs(hash, key, tagSize);
 };

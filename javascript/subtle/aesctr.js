@@ -51,10 +51,14 @@ const create = async function(key, ivSize) {
   Validators.validateAesKeySize(key.length);
 
   if (Environment.IS_WEBCRYPTO_AVAILABLE) {
-    const cryptoKey = await window.crypto.subtle.importKey(
-        'raw', key, {'name': 'AES-CTR', 'length': key.length}, false,
-        ['encrypt', 'decrypt']);
-    return new AesCtrWebCrypto(cryptoKey, ivSize);
+    try {
+      const cryptoKey = await window.crypto.subtle.importKey(
+          'raw', key, {'name': 'AES-CTR', 'length': key.length}, false,
+          ['encrypt', 'decrypt']);
+      return new AesCtrWebCrypto(cryptoKey, ivSize);
+    } catch (error) {
+      // CTR might be unsupported in this browser. Fall back to Pure JS.
+    }
   }
   return new AesCtrPureJs(key, ivSize);
 };

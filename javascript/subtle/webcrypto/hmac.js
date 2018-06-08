@@ -26,10 +26,14 @@ const Mac = goog.require('tink.Mac');
  */
 class Hmac {
   /**
+   * @param {string} hash accepted names are SHA-1, SHA-256 and SHA-512
    * @param {!webCrypto.CryptoKey} key
    * @param {number} tagSize the size of the tag
    */
-  constructor(key, tagSize) {
+  constructor(hash, key, tagSize) {
+    /** @const @private {string} */
+    this.hash_ = hash;
+
     /** @const @private {number} */
     this.tagSize_ = tagSize;
 
@@ -41,8 +45,8 @@ class Hmac {
    * @override
    */
   async computeMac(data) {
-    const tag =
-        await window.crypto.subtle.sign({'name': 'HMAC'}, this.key_, data);
+    const tag = await window.crypto.subtle.sign(
+        {'name': 'HMAC', 'hash': {'name': this.hash_}}, this.key_, data);
     return new Uint8Array(tag.slice(0, this.tagSize_));
   }
 
