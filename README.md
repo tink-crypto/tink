@@ -85,7 +85,7 @@ AEAD primitive in Java:
 
 *   [Tink for Java and Android](docs/JAVA-HOWTO.md) are field tested and ready
     for production. Latest version is
-    [1.1.0](https://github.com/google/tink/releases/tag/v1.1.0), released on
+    [1.1.1](https://github.com/google/tink/releases/tag/v1.1.1), released on
     04/18/2018.
 
 *   [Tink for C++](docs/CPP-HOWTO.md) and [Tink for Obj-C](docs/OBJC-HOWTO.md)
