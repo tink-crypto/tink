@@ -140,4 +140,47 @@ static NSData *gGoodSerializedEncryptedKeyset;
   XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
 }
 
+- (void)testReusingTheReader {
+  NSError *error = nil;
+  TINKBinaryKeysetReader *reader =
+      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:gGoodSerializedKeyset error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(reader);
+
+  // Reading once, must succeed.
+  TINKPBKeyset *readResult = [reader readWithError:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(readResult);
+
+  // Trying to read again from the same reader must fail.
+  readResult = [reader readWithError:&error];
+  XCTAssertNil(readResult);
+  XCTAssertNotNil(error);
+  XCTAssertEqual(error.code, crypto::tink::util::error::RESOURCE_EXHAUSTED);
+  XCTAssertTrue(
+      [error.localizedFailureReason containsString:@"A KeysetReader can be used only once."]);
+}
+
+- (void)testReusingTheReader_Encrypted {
+  NSError *error = nil;
+  TINKBinaryKeysetReader *reader =
+      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:gGoodSerializedEncryptedKeyset
+                                                         error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(reader);
+
+  // Reading once, must succeed.
+  TINKPBEncryptedKeyset *readResult = [reader readEncryptedWithError:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(readResult);
+
+  // Trying to read again from the same reader must fail.
+  readResult = [reader readEncryptedWithError:&error];
+  XCTAssertNil(readResult);
+  XCTAssertNotNil(error);
+  XCTAssertEqual(error.code, crypto::tink::util::error::RESOURCE_EXHAUSTED);
+  XCTAssertTrue(
+      [error.localizedFailureReason containsString:@"A KeysetReader can be used only once."]);
+}
+
 @end

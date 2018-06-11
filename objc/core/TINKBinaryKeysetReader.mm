@@ -49,11 +49,24 @@
       return nil;
     }
     self.ccReader = std::move(st.ValueOrDie());
+    self.used = NO;
   }
   return self;
 }
 
 - (TINKPBKeyset *)readWithError:(NSError **)error {
+  @synchronized(self) {
+    if (self.used) {
+      // A reader can only be used once.
+      if (error) {
+        *error = TINKStatusToError(
+            crypto::tink::util::Status(crypto::tink::util::error::RESOURCE_EXHAUSTED,
+                                       "A KeysetReader can be used only once."));
+      }
+      return nil;
+    }
+    self.used = YES;
+  }
   auto st = self.ccReader->Read();
   if (!st.ok()) {
     if (error) {
@@ -86,6 +99,18 @@
 }
 
 - (TINKPBEncryptedKeyset *)readEncryptedWithError:(NSError **)error {
+  @synchronized(self) {
+    if (self.used) {
+      // A reader can only be used once.
+      if (error) {
+        *error = TINKStatusToError(
+            crypto::tink::util::Status(crypto::tink::util::error::RESOURCE_EXHAUSTED,
+                                       "A KeysetReader can be used only once."));
+      }
+      return nil;
+    }
+    self.used = YES;
+  }
   auto st = self.ccReader->ReadEncrypted();
   if (!st.ok()) {
     if (error) {

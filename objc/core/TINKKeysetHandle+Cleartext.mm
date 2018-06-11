@@ -29,6 +29,18 @@
 
 - (nullable instancetype)initCleartextKeysetHandleWithKeysetReader:(TINKKeysetReader *)reader
                                                              error:(NSError **)error {
+  @synchronized(reader) {
+    if (reader.used) {
+      // A reader can only be used once.
+      if (error) {
+        *error = TINKStatusToError(
+            crypto::tink::util::Status(crypto::tink::util::error::RESOURCE_EXHAUSTED,
+                                       "A KeysetReader can be used only once."));
+      }
+      return nil;
+    }
+    reader.used = YES;
+  }
   auto st = crypto::tink::CleartextKeysetHandle::Read(reader.ccReader);
   if (!st.ok()) {
     if (error) {

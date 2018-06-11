@@ -172,5 +172,32 @@ static TINKPBKeyset *gKeyset;
   XCTAssertNotNil(error);
 }
 
+- (void)testReuseKeysetReader {
+  auto ccAead =
+      std::unique_ptr<crypto::tink::Aead>(new crypto::tink::test::DummyAead("dummy aead 42"));
+  TINKAeadInternal *aead = [[TINKAeadInternal alloc] initWithCCAead:std::move(ccAead)];
+
+  NSData *keysetCiphertext = [aead encrypt:gKeyset.data withAdditionalData:[NSData data] error:nil];
+
+  XCTAssertNotNil(keysetCiphertext);
+
+  TINKPBEncryptedKeyset *encryptedKeyset = [[TINKPBEncryptedKeyset alloc] init];
+  encryptedKeyset.encryptedKeyset = keysetCiphertext;
+
+  TINKBinaryKeysetReader *reader =
+      [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:encryptedKeyset.data error:nil];
+
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:nil];
+  XCTAssertNotNil(handle);
+
+  NSError *error = nil;
+  XCTAssertNil([[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:&error]);
+  XCTAssertNotNil(error);
+  XCTAssertEqual(error.code, crypto::tink::util::error::RESOURCE_EXHAUSTED);
+  XCTAssertTrue(
+      [error.localizedFailureReason containsString:@"A KeysetReader can be used only once."]);
+}
+
 @end
 

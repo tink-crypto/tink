@@ -59,6 +59,15 @@
   XCTAssertNotNil(handle);
   XCTAssertTrue(crypto::tink::TestUtil::GetKeyset(*handle.ccKeysetHandle).SerializeAsString() ==
                 keyset.SerializeAsString());
+
+  // Trying to use the same reader again must fail.
+  error = nil;
+  XCTAssertNil(
+      [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error]);
+  XCTAssertNotNil(error);
+  XCTAssertEqual(error.code, crypto::tink::util::error::RESOURCE_EXHAUSTED);
+  XCTAssertTrue(
+      [error.localizedFailureReason containsString:@"A KeysetReader can be used only once."]);
 }
 
 - (void)testReadInvalidKeyset {

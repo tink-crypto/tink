@@ -69,8 +69,18 @@
     return nil;
   }
 
-  // TODO(przydatek): KeysetHandle::Read takes ownership of reader.ccReader and thus will make
-  // the property invalid.
+  @synchronized(reader) {
+    if (reader.used) {
+      // A reader can only be used once.
+      if (error) {
+        *error = TINKStatusToError(
+            crypto::tink::util::Status(crypto::tink::util::error::RESOURCE_EXHAUSTED,
+                                       "A KeysetReader can be used only once."));
+      }
+      return nil;
+    }
+    reader.used = YES;
+  }
   auto st = crypto::tink::KeysetHandle::Read(reader.ccReader, *ccAead);
   if (!st.ok()) {
     if (error) {

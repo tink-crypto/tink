@@ -22,6 +22,10 @@
 
 @interface TINKKeysetReader ()
 
+// A reader can only be used once. After that it becomes invalid and shouldn't be used.
+// We use this boolean property to mark a reader as used. Any subsequent calls to read will fail.
+@property(nonatomic, assign, getter=isUsed) BOOL used;
+
 - (void)setCcReader:(std::unique_ptr<crypto::tink::KeysetReader>)ccReader;
 - (std::unique_ptr<crypto::tink::KeysetReader>)ccReader;
 
