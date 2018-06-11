@@ -63,7 +63,7 @@ Vizár](https://eprint.iacr.org/2015/189.pdf).
 
 Minimal properties:
 
-- _plaintext_ and can have arbitrary length within the range 0..2<sup>38</sup>
+- _plaintext_ can have arbitrary length within the range 0..2<sup>38</sup>
   and _associated data_ can have arbitrary length within the range
   0..2<sup>31</sup>-1 bytes
 - CCA2 security

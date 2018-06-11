@@ -170,9 +170,9 @@ directly in C++ code, one can use
 [`KeysetHandle`](https://github.com/google/tink/blob/master/cc/keyset_handle.h):
 
 ```cpp
-    auto new_keyset_result = KeysetHandle::GenerateNew(key_template);
-    if (!new_keyset_result.ok()) return new_key_result.status();
-    auto keyset = std::move(new_keyset_result.ValueOrDie());
+    auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
+    if (!new_keyset_handle_result.ok()) return new_keyset_handle_result.status();
+    auto keyset_handle = std::move(new_keyset_handle_result.ValueOrDie());
     // use the keyset...
 ```
 
@@ -248,7 +248,7 @@ factory offers corresponding `getPrimitive(...)` methods.
 
 Here is how you can obtain and use an [AEAD (Authenticated Encryption with
 Associated
-Data](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive
+Data)](PRIMITIVES.md#authenticated-encryption-with-associated-data) primitive
 to encrypt or decrypt data:
 
 ```cpp

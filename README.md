@@ -91,7 +91,7 @@ AEAD primitive in Java:
 *   [Tink for C++](docs/CPP-HOWTO.md) and [Tink for Obj-C](docs/OBJC-HOWTO.md)
     are catching up with [Tink for Java](docs/JAVA-HOWTO.md) in terms of
     features and stability, and the offered functionality is 100%-compatible
-    with Java (cf. [cross-language tests](tools/testing/cross_language/). We
+    with Java (cf. [cross-language tests](tools/testing/cross_language/)). We
     plan to make a first release in June 2018.
 
 *   Tink for Go is in active development.
