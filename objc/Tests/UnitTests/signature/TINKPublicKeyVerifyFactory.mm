@@ -76,7 +76,7 @@ static Keyset publicKeyset;
                              GetNewEcdsaPrivateKey()};
 
   // Prepare a private keyset.
-  string key_type = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+  std::string key_type = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 
   uint32_t key_id_1 = 1234543;
   AddTinkKey(key_type, key_id_1, keys[0], KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC,
@@ -93,7 +93,7 @@ static Keyset publicKeyset;
   privateKeyset.set_primary_key_id(key_id_3);
 
   // Prepare the equivalent public keyset.
-  string public_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
+  std::string public_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
 
   AddTinkKey(public_key_type, key_id_1, GetEcdsaPublicKeyFromPrivate(keys[0]),
              KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC, &publicKeyset);

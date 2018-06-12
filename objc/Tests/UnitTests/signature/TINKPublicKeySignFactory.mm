@@ -76,7 +76,7 @@ static EcdsaPrivateKey GetNewEcdsaPrivateKey() {
 - (void)testPrimitive {
   // Prepare a Keyset.
   Keyset keyset;
-  string key_type = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+  std::string key_type = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 
   uint32_t key_id_1 = 1234543;
   AddTinkKey(key_type, key_id_1, GetNewEcdsaPrivateKey(), KeyStatusType::ENABLED,
