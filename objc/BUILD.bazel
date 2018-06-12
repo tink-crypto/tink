@@ -29,7 +29,13 @@ PUBLIC_APIS = [
     "TINKMacConfig.h",
     "TINKMacFactory.h",
     "TINKMacKeyTemplate.h",
+    "TINKPublicKeySign.h",
+    "TINKPublicKeySignFactory.h",
+    "TINKPublicKeyVerify.h",
+    "TINKPublicKeyVerifyFactory.h",
     "TINKRegistryConfig.h",
+    "TINKSignatureConfig.h",
+    "TINKSignatureKeyTemplate.h",
     "TINKVersion.h",
 ]
 
@@ -56,7 +62,13 @@ PUBLIC_API_DEPS = [
     ":mac_config",
     ":mac_factory",
     ":mac_key_template",
+    ":public_key_sign",
+    ":public_key_sign_factory",
+    ":public_key_verify",
+    ":public_key_verify_factory",
     ":registry_config",
+    ":signature_config",
+    ":signature_key_template",
     ":version",
     "//objc/util:errors",
     "//objc/util:strings",
@@ -482,6 +494,106 @@ cc_library(
     name = "tink_cc_pb",
     deps = [
         "//proto:tink_cc_proto",
+    ],
+)
+
+############################
+#       Signature          #
+############################
+
+objc_library(
+    name = "public_key_sign",
+    hdrs = [
+        "TINKPublicKeySign.h",
+    ],
+)
+
+objc_library(
+    name = "public_key_verify",
+    hdrs = [
+        "TINKPublicKeyVerify.h",
+    ],
+)
+
+objc_library(
+    name = "signature_config",
+    srcs = ["signature/TINKSignatureConfig.mm"],
+    hdrs = ["TINKSignatureConfig.h"],
+    deps = [
+        ":registry_config",
+        ":version",
+        "//cc/signature:signature_config",
+        "//cc/util:errors",
+        "//objc/util:errors",
+    ],
+)
+
+objc_library(
+    name = "signature_key_template",
+    srcs = ["signature/TINKSignatureKeyTemplate.mm"],
+    hdrs = ["TINKSignatureKeyTemplate.h"],
+    deps = [
+        ":key_template",
+        ":tink_cc_pb",
+        "//cc/signature:signature_key_templates",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+objc_library(
+    name = "public_key_sign_internal",
+    srcs = ["signature/TINKPublicKeySignInternal.mm"],
+    hdrs = ["signature/TINKPublicKeySignInternal.h"],
+    deps = [
+        ":public_key_sign",
+        "//cc:public_key_sign",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+objc_library(
+    name = "public_key_verify_internal",
+    srcs = ["signature/TINKPublicKeyVerifyInternal.mm"],
+    hdrs = ["signature/TINKPublicKeyVerifyInternal.h"],
+    deps = [
+        ":public_key_verify",
+        "//cc:public_key_verify",
+        "//objc/util:errors",
+        "//objc/util:strings",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+objc_library(
+    name = "public_key_sign_factory",
+    srcs = ["signature/TINKPublicKeySignFactory.mm"],
+    hdrs = ["TINKPublicKeySignFactory.h"],
+    deps = [
+        ":keyset_handle",
+        ":public_key_sign",
+        ":public_key_sign_internal",
+        "//cc:keyset_handle",
+        "//cc/signature:public_key_sign_factory",
+        "//cc/util:status",
+        "//objc/util:errors",
+    ],
+)
+
+objc_library(
+    name = "public_key_verify_factory",
+    srcs = ["signature/TINKPublicKeyVerifyFactory.mm"],
+    hdrs = ["TINKPublicKeyVerifyFactory.h"],
+    deps = [
+        ":keyset_handle",
+        ":public_key_verify",
+        ":public_key_verify_internal",
+        "//cc:keyset_handle",
+        "//cc/signature:public_key_verify_factory",
+        "//cc/util:status",
+        "//objc/util:errors",
     ],
 )
 

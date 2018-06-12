@@ -96,7 +96,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (nullable instancetype)init
     __attribute__((unavailable("Use -initWithKeyTemplate:error: instead.")));
-;
 
 /**
  * Creates a TINKAeadKeyTemplate that can be used to generate aead keysets.
