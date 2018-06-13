@@ -1,0 +1,110 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+goog.module('tink.subtle.webcrypto.AesGcm');
+
+const Aead = goog.require('tink.Aead');
+const Bytes = goog.require('tink.subtle.Bytes');
+const Random = goog.require('tink.subtle.Random');
+const SecurityException = goog.require('tink.exception.SecurityException');
+const Validators = goog.require('tink.subtle.Validators');
+const array = goog.require('goog.array');
+
+/**
+ * The only supported IV size.
+ *
+ * @const {number}
+ */
+const IV_SIZE_IN_BYTES = 12;
+
+/**
+ * The only supported tag size.
+ *
+ * @const {number}
+ */
+const TAG_SIZE_IN_BITS = 128;
+
+/**
+ * Implementation of AES-GCM.
+ *
+ * @implements {Aead}
+ * @public
+ * @final
+ */
+class AesGcm {
+  /**
+   * @param {!webCrypto.CryptoKey} key
+   */
+  constructor(key) {
+    /** @const @private {!webCrypto.CryptoKey} */
+    this.key_ = key;
+  }
+
+  /**
+   * @override
+   */
+  async encrypt(plaintext, opt_associatedData) {
+    Validators.requireUint8Array(plaintext);
+
+    let aad = new Uint8Array(0);
+    if (goog.isDefAndNotNull(opt_associatedData)) {
+      Validators.requireUint8Array(opt_associatedData);
+      aad = opt_associatedData;
+    }
+    const iv = Random.randBytes(IV_SIZE_IN_BYTES);
+    const alg = {
+      'name': 'AES-GCM',
+      'iv': iv,
+      'additionalData': aad,
+      'tagLength': TAG_SIZE_IN_BITS,
+    };
+    const ciphertext =
+        await window.crypto.subtle.encrypt(alg, this.key_, plaintext);
+    return Bytes.concat(iv, new Uint8Array(ciphertext));
+  }
+
+  /**
+   * @override
+   */
+  async decrypt(ciphertext, opt_associatedData) {
+    Validators.requireUint8Array(ciphertext);
+
+    if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BITS / 8) {
+      throw new SecurityException('ciphertext too short');
+    }
+
+    let aad = new Uint8Array(0);
+    if (goog.isDefAndNotNull(opt_associatedData)) {
+      Validators.requireUint8Array(opt_associatedData);
+      aad = opt_associatedData;
+    }
+    const iv = new Uint8Array(IV_SIZE_IN_BYTES);
+    iv.set(array.slice(ciphertext, 0, IV_SIZE_IN_BYTES));
+    const alg = {
+      'name': 'AES-GCM',
+      'iv': iv,
+      'additionalData': aad,
+      'tagLength': TAG_SIZE_IN_BITS,
+    };
+    try {
+      return new Uint8Array(await window.crypto.subtle.decrypt(
+          alg, this.key_,
+          new Uint8Array(array.slice(ciphertext, IV_SIZE_IN_BYTES))));
+    } catch (e) {
+      throw new SecurityException(e.toString());
+    }
+  }
+}
+
+exports = AesGcm;
