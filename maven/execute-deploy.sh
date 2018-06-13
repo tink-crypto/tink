@@ -11,7 +11,7 @@
 # limitations under the License.
 ################################################################################
 
-#!/bin/sh
+#!/bin/bash
 
 # Fail on any error.
 set -e
@@ -27,76 +27,79 @@ then
   exit 1
 fi
 
-git config --global user.email "noreply@google.com"
-git config --global user.name "Tink Team"
+declare -a GIT_ARGS
+GIT_ARGS=('-c user.email=noreply@google.com' '-c user.name="Tink Team"')
 
 library_output_file() {
-  library=$1
-  library_output=bazel-bin/$library
-  if [[ ! -e $library_output ]]; then
-     library_output=bazel-genfiles/$library
+  library="$1"
+  library_output="bazel-bin/${library}"
+  if [[ ! -e "${library_output}" ]]; then
+     library_output="bazel-genfiles/${library}"
   fi
-  if [[ ! -e $library_output ]]; then
-    echo "Could not find bazel output file for $library"
+  if [[ ! -e "${library_output}" ]]; then
+    echo "Could not find bazel output file for ${library}"
     exit 1
   fi
-  echo -n $library_output
+  echo -n "${library_output}"
 }
 
 deploy_library() {
-  library_name=$1
-  library=$2
-  srcjar=$3
-  javadoc=$4
-  pomfile=$5
-  bazel build $library $srcjar $javadoc
+  library_name="$1"
+  library="$2"
+  srcjar="$3"
+  javadoc="$4"
+  pomfile="$5"
+  bazel build "${library}" "${srcjar}" "${javadoc}"
 
   # Update the version
   sed -i \
-    's/VERSION_PLACEHOLDER/'"$VERSION"'/' \
-    $pomfile
+    's/VERSION_PLACEHOLDER/'"${VERSION}"'/' \
+    "${pomfile})"
 
-  mvn $MVN_GOAL \
-    -Dfile=$(library_output_file $library) \
-    -Dsources=$(library_output_file $srcjar) \
-    -Djavadoc=$(library_output_file $javadoc) \
-    -DpomFile=$pomfile \
+  mvn "${MVN_GOAL}" \
+    -Dfile="$(library_output_file ${library})" \
+    -Dsources="$(library_output_file ${srcjar})" \
+    -Djavadoc="$(library_output_file ${javadoc})" \
+    -DpomFile="$pomfile" \
     "${EXTRA_MAVEN_ARGS[@]:+${EXTRA_MAVEN_ARGS[@]}}"
 
   # Reverse the version change
   sed -i \
-    's/'"$VERSION"'/VERSION_PLACEHOLDER/' \
-    $pomfile
+    's/'"${VERSION}"'/VERSION_PLACEHOLDER/' \
+    "${pomfile}"
 
-  publish_javadoc_to_github_pages $library_name $javadoc
+  publish_javadoc_to_github_pages "${library_name}" "${javadoc}"
 }
 
 publish_javadoc_to_github_pages() {
-  library_name=$1
-  javadoc=$(library_output_file $2)
+  library_name="$1"
+  javadoc="$(library_output_file "$2")"
 
   # The account is ise-crypto and its access token is pulled from Keystore.
-  git_url=https://ise-crypto:${GITHUB_ACCESS_TOKEN}@github.com/google/tink.git
+  local git_url
+  git_url="https://ise-crypto:${GITHUB_ACCESS_TOKEN}@github.com/google/tink.git"
   if [ -z "${KOKORO_ROOT}" ]; then
-    git_url=git@github.com:google/tink.git
+    git_url="git@github.com:google/tink.git"
   fi
 
   rm -rf gh-pages
-  git clone --quiet --branch=gh-pages $git_url gh-pages > /dev/null
+  git "${GIT_ARGS[@]}" \
+    clone --quiet --branch=gh-pages "${git_url}" gh-pages > /dev/null
 
   cd gh-pages
-  if [ -d javadoc/$library_name/$VERSION ]; then
-    git rm -rf javadoc/$library_name/$VERSION
+  if [ -d "javadoc/${library_name}/${VERSION}" ]; then
+    git "${GIT_ARGS[@]}" rm -rf "javadoc/${library_name}/${VERSION}"
   fi
-  mkdir -p javadoc/$library_name/$VERSION
+  mkdir -p "javadoc/${library_name}/${VERSION}"
 
-  unzip ../$javadoc -d javadoc/$library_name/$VERSION
-  rm -rf javadoc/$library_name/$VERSION/META-INF/
-  git add -f javadoc/$library_name/$VERSION
-  if [[ `git status --porcelain` ]]; then
+  unzip "../${javadoc}" -d "javadoc/${library_name}/${VERSION}"
+  rm -rf "javadoc/${library_name}/${VERSION}/META-INF/"
+  git "${GIT_ARGS[@]}" add -f "javadoc/${library_name}/${VERSION}"
+  if [[ "$(git "${GIT_ARGS[@]}" status --porcelain)" ]]; then
     # Changes
-    git commit -m "${library_name}-${VERSION} Javadoc auto-pushed to gh-pages"
-    git push -fq origin gh-pages > /dev/null
+    git "${GIT_ARGS[@]}" \
+      commit -m "${library_name}-${VERSION} Javadoc auto-pushed to gh-pages"
+    git "${GIT_ARGS[@]}" push -fq origin gh-pages > /dev/null
     echo -e "Published Javadoc to gh-pages.\n"
   else
     # No changes
