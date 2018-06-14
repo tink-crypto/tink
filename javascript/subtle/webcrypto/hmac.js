@@ -16,6 +16,7 @@ goog.module('tink.subtle.webcrypto.Hmac');
 
 const Bytes = goog.require('tink.subtle.Bytes');
 const Mac = goog.require('tink.Mac');
+const Validators = goog.require('tink.subtle.Validators');
 
 /**
  * Implementation of HMAC.
@@ -45,6 +46,7 @@ class Hmac {
    * @override
    */
   async computeMac(data) {
+    Validators.requireUint8Array(data);
     const tag = await window.crypto.subtle.sign(
         {'name': 'HMAC', 'hash': {'name': this.hash_}}, this.key_, data);
     return new Uint8Array(tag.slice(0, this.tagSize_));
@@ -54,6 +56,8 @@ class Hmac {
    * @override
    */
   async verifyMac(tag, data) {
+    Validators.requireUint8Array(tag);
+    Validators.requireUint8Array(data);
     const computedTag = await this.computeMac(data);
     return Bytes.isEqual(tag, computedTag);
   }

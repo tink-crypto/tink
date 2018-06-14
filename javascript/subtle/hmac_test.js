@@ -24,7 +24,7 @@ testSuite({
   async testBasic() {
     const key = Random.randBytes(16);
     const msg = Random.randBytes(4);
-    const hmac = await Hmac.create('SHA-1', key, 10);
+    const hmac = await Hmac.newInstance('SHA-1', key, 10);
     const tag = await hmac.computeMac(msg);
     assertEquals(10, tag.length);
     assertTrue(await hmac.verifyMac(tag, msg));
@@ -32,14 +32,15 @@ testSuite({
 
   async testConstructor() {
     try {
-      await Hmac.create(
+      await Hmac.newInstance(
           'blah', Random.randBytes(16), 16);  // invalid HMAC algo name
     } catch (e) {
       assertEquals('CustomError: blah is not supported', e.toString());
     }
 
     try {
-      await Hmac.create('SHA-1', Random.randBytes(15), 16);  // invalid key size
+      await Hmac.newInstance(
+          'SHA-1', Random.randBytes(15), 16);  // invalid key size
     } catch (e) {
       assertEquals(
           'CustomError: key too short, must be at least 16 bytes',
@@ -47,7 +48,7 @@ testSuite({
     }
 
     try {
-      await Hmac.create(
+      await Hmac.newInstance(
           'SHA-1', Random.randBytes(16), 9);  // tag size too short
     } catch (e) {
       assertEquals(
@@ -55,7 +56,7 @@ testSuite({
           e.toString());
     }
     try {
-      await Hmac.create(
+      await Hmac.newInstance(
           'SHA-1', Random.randBytes(16), 21);  // tag size too long
     } catch (e) {
       assertEquals(
@@ -64,7 +65,7 @@ testSuite({
     }
 
     try {
-      await Hmac.create(
+      await Hmac.newInstance(
           'SHA-256', Random.randBytes(15), 16);  // invalid key size
     } catch (e) {
       assertEquals(
@@ -73,7 +74,7 @@ testSuite({
     }
 
     try {
-      await Hmac.create(
+      await Hmac.newInstance(
           'SHA-256', Random.randBytes(16), 9);  // tag size too short
     } catch (e) {
       assertEquals(
@@ -82,7 +83,7 @@ testSuite({
     }
 
     try {
-      await Hmac.create(
+      await Hmac.newInstance(
           'SHA-256', Random.randBytes(16), 33);  // tag size too long
     } catch (e) {
       assertEquals(
@@ -91,7 +92,7 @@ testSuite({
     }
 
     try {
-      await Hmac.create(
+      await Hmac.newInstance(
           'SHA-512', Random.randBytes(15), 16);  // invalid key size
     } catch (e) {
       assertEquals(
@@ -100,7 +101,7 @@ testSuite({
     }
 
     try {
-      await Hmac.create(
+      await Hmac.newInstance(
           'SHA-512', Random.randBytes(16), 9);  // tag size too short
     } catch (e) {
       assertEquals(
@@ -109,7 +110,7 @@ testSuite({
     }
 
     try {
-      await Hmac.create(
+      await Hmac.newInstance(
           'SHA-512', Random.randBytes(16), 65);  // tag size too long
     } catch (e) {
       assertEquals(
@@ -118,10 +119,64 @@ testSuite({
     }
   },
 
+  async testType() {
+    try {
+      await Hmac.newInstance('SHA-1', 'blah', 10);
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await Hmac.newInstance('SHA-1', 123, 10);
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+
+    const hmac = await Hmac.newInstance('SHA-1', Random.randBytes(16), 10);
+    try {
+      await hmac.computeMac('blah');
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await hmac.computeMac('123');
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await hmac.verifyMac('blah', Random.randBytes(20));
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await hmac.verifyMac(123, Random.randBytes(20));
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await hmac.verifyMac(Random.randBytes(20), 'blah');
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await hmac.verifyMac(Random.randBytes(20), 123);
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+  },
+
+
   async testModify() {
     const key = Random.randBytes(16);
     const msg = Random.randBytes(8);
-    const hmac = await Hmac.create('SHA-1', key, 20);
+    const hmac = await Hmac.newInstance('SHA-1', key, 20);
     const tag = await hmac.computeMac(msg);
 
     // Modify tag.
@@ -188,7 +243,7 @@ testSuite({
       const key = Bytes.fromHex(testVector['key']);
       const message = Bytes.fromHex(testVector['message']);
       const tag = Bytes.fromHex(testVector['tag']);
-      const hmac = await Hmac.create(testVector['algo'], key, tag.length);
+      const hmac = await Hmac.newInstance(testVector['algo'], key, tag.length);
       assertTrue(await hmac.verifyMac(tag, message));
     }
   },

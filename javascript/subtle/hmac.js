@@ -19,6 +19,7 @@ const HmacPureJs = goog.require('tink.subtle.purejs.Hmac');
 const HmacWebCrypto = goog.require('tink.subtle.webcrypto.Hmac');
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const Mac = goog.require('tink.Mac');
+const Validators = goog.require('tink.subtle.Validators');
 
 /**
  * The minimum tag size.
@@ -41,7 +42,8 @@ const MIN_KEY_SIZE_IN_BYTES = 16;
  *     to {@link MIN_TAG_SIZE_IN_BYTES}
  * @return {!Promise.<!Mac>}
  */
-const create = async function(hash, key, tagSize) {
+const newInstance = async function(hash, key, tagSize) {
+  Validators.requireUint8Array(key);
   if (tagSize < MIN_TAG_SIZE_IN_BYTES) {
     throw new InvalidArgumentsException(
         'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES + ' bytes');
@@ -85,4 +87,4 @@ const create = async function(hash, key, tagSize) {
   return new HmacPureJs(hash, key, tagSize);
 };
 
-exports = {create};
+exports = {newInstance};

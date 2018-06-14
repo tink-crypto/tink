@@ -22,6 +22,7 @@ const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const Mac = goog.require('tink.Mac');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const Validators = goog.require('tink.subtle.Validators');
 const array = goog.require('goog.array');
 
 /**
@@ -41,13 +42,17 @@ const array = goog.require('goog.array');
 class EncryptThenAuthenticate {
   /**
    * @param {!IndCpaCipher} cipher
+   * @param {number} ivSize the IV size in bytes
    * @param {!Mac} mac
-   * @param {number} tagSize the MAC tag size
+   * @param {number} tagSize the MAC tag size in bytes
    * @throws {InvalidArgumentsException}
    */
-  constructor(cipher, mac, tagSize) {
+  constructor(cipher, ivSize, mac, tagSize) {
     /** @const @private {IndCpaCipher} */
     this.cipher_ = cipher;
+
+    /** @const @private {number} */
+    this.ivSize_ = ivSize;
 
     /** @const @private {Mac} */
     this.mac_ = mac;
@@ -67,9 +72,12 @@ class EncryptThenAuthenticate {
    * @static
    */
   static async newAesCtrHmac(aesKey, ivSize, hmacHashAlgo, hmacKey, tagSize) {
-    const cipher = await AesCtr.create(aesKey, ivSize);
-    const mac = await Hmac.create(hmacHashAlgo, hmacKey, tagSize);
-    return new EncryptThenAuthenticate(cipher, mac, tagSize);
+    Validators.requireUint8Array(aesKey);
+    Validators.requireUint8Array(hmacKey);
+
+    const cipher = await AesCtr.newInstance(aesKey, ivSize);
+    const mac = await Hmac.newInstance(hmacHashAlgo, hmacKey, tagSize);
+    return new EncryptThenAuthenticate(cipher, ivSize, mac, tagSize);
   }
 
   /**
@@ -81,10 +89,12 @@ class EncryptThenAuthenticate {
    * @override
    */
   async encrypt(plaintext, opt_associatedData) {
-    const payload = new Uint8Array(await this.cipher_.encrypt(plaintext));
+    Validators.requireUint8Array(plaintext);
+    const payload = await this.cipher_.encrypt(plaintext);
     let aad = new Uint8Array(0);
     if (goog.isDefAndNotNull(opt_associatedData)) {
       aad = opt_associatedData;
+      Validators.requireUint8Array(opt_associatedData);
     }
     const aadLength = Bytes.fromNumber(aad.length * 8);
     const mac =
@@ -101,7 +111,8 @@ class EncryptThenAuthenticate {
    * @override
    */
   async decrypt(ciphertext, opt_associatedData) {
-    if (ciphertext.length < this.tagSize_) {
+    Validators.requireUint8Array(ciphertext);
+    if (ciphertext.length < this.ivSize_ + this.tagSize_) {
       throw new SecurityException('ciphertext too short');
     }
     const payload = new Uint8Array(
@@ -109,6 +120,7 @@ class EncryptThenAuthenticate {
     let aad = new Uint8Array(0);
     if (goog.isDefAndNotNull(opt_associatedData)) {
       aad = opt_associatedData;
+      Validators.requireUint8Array(opt_associatedData);
     }
     const aadLength = Bytes.fromNumber(aad.length * 8);
     const input = Bytes.concat(aad, payload, aadLength);
@@ -117,7 +129,7 @@ class EncryptThenAuthenticate {
     if (!isValidMac) {
       throw new SecurityException('invalid MAC');
     }
-    return new Uint8Array(await this.cipher_.decrypt(payload));
+    return await this.cipher_.decrypt(payload);
   }
 }
 

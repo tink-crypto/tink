@@ -17,6 +17,8 @@ goog.module('tink.subtle.webcrypto.AesCtr');
 const Bytes = goog.require('tink.subtle.Bytes');
 const IndCpaCipher = goog.require('tink.subtle.IndCpaCipher');
 const Random = goog.require('tink.subtle.Random');
+const SecurityException = goog.require('tink.exception.SecurityException');
+const Validators = goog.require('tink.subtle.Validators');
 const array = goog.require('goog.array');
 
 /**
@@ -50,6 +52,7 @@ class AesCtr {
    * @override
    */
   async encrypt(plaintext) {
+    Validators.requireUint8Array(plaintext);
     const iv = Random.randBytes(this.ivSize_);
     const counter = new Uint8Array(AES_BLOCK_SIZE_IN_BYTES);
     counter.set(iv);
@@ -63,6 +66,10 @@ class AesCtr {
    * @override
    */
   async decrypt(ciphertext) {
+    Validators.requireUint8Array(ciphertext);
+    if (ciphertext.length < this.ivSize_) {
+      throw new SecurityException('ciphertext too short');
+    }
     const counter = new Uint8Array(AES_BLOCK_SIZE_IN_BYTES);
     counter.set(array.slice(ciphertext, 0, this.ivSize_));
     const alg = {'name': 'AES-CTR', 'counter': counter, 'length': 128};

@@ -23,13 +23,22 @@ const testSuite = goog.require('goog.testing.testSuite');
 testSuite({
   async testBasic() {
     const key = Random.randBytes(16);
-    const results = new Set();
     for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(20);
-      const aesctr = await AesCtr.create(key, 16);
-      let ciphertext = await aesctr.encrypt(msg);
-      let plaintext = await aesctr.decrypt(ciphertext);
+      const cipher = await AesCtr.newInstance(key, 16);
+      let ciphertext = await cipher.encrypt(msg);
+      let plaintext = await cipher.decrypt(ciphertext);
       assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+    }
+  },
+
+  async testProbabilisticEncryption() {
+    const cipher = await AesCtr.newInstance(Random.randBytes(16), 16);
+    const msg = Random.randBytes(20);
+    const aad = Random.randBytes(20);
+    const results = new Set();
+    for (let i = 0; i < 100; i++) {
+      const ciphertext = await cipher.encrypt(msg, aad);
       results.add(Bytes.toHex(ciphertext));
     }
     assertEquals(100, results.size);
@@ -37,24 +46,65 @@ testSuite({
 
   async testConstructor() {
     try {
-      await AesCtr.create(Random.randBytes(16), 11);  // IV size too short
+      await AesCtr.newInstance(123, 16);  // IV size too short
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await AesCtr.newInstance(Random.randBytes(16), 11);  // IV size too short
     } catch (e) {
       assertEquals(
           'CustomError: invaid IV length, must be at least 12 and at most 16',
           e.toString());
     }
     try {
-      await AesCtr.create(Random.randBytes(16), 17);  // IV size too long
+      await AesCtr.newInstance(Random.randBytes(16), 17);  // IV size too long
     } catch (e) {
       assertEquals(
           'CustomError: invaid IV length, must be at least 12 and at most 16',
           e.toString());
     }
     try {
-      await AesCtr.create(
+      await AesCtr.newInstance(
           Random.randBytes(24), 12);  // 192-bit keys not supported
     } catch (e) {
       assertEquals('CustomError: unsupported AES key size: 24', e.toString());
+    }
+  },
+
+  async testType() {
+    try {
+      await AesCtr.newInstance('blah');
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+
+    const cipher = await AesCtr.newInstance(Random.randBytes(16));
+    try {
+      await cipher.encrypt('blah');
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await cipher.encrypt(123);
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await cipher.decrypt('blah');
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await cipher.decrypt(123);
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
     }
   },
 
@@ -78,7 +128,7 @@ testSuite({
       const iv = Bytes.fromHex(testVector['iv']);
       const msg = Bytes.fromHex(testVector['message']);
       const ciphertext = Bytes.fromHex(testVector['ciphertext']);
-      const aesctr = await AesCtr.create(key, iv.length);
+      const aesctr = await AesCtr.newInstance(key, iv.length);
       const plaintext = await aesctr.decrypt(Bytes.concat(iv, ciphertext));
       assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
     }

@@ -25,23 +25,83 @@ testSuite({
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
-    const results = new Set();
     for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(20);
       let ciphertext = await aead.encrypt(msg);
       let plaintext = await aead.decrypt(ciphertext);
       assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+
       let aad = null;
       ciphertext = await aead.encrypt(msg, aad);
       plaintext = await aead.decrypt(ciphertext, aad);
       assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+
       aad = Random.randBytes(20);
       ciphertext = await aead.encrypt(msg, aad);
       plaintext = await aead.decrypt(ciphertext, aad);
       assertEquals(Bytes.toHex(msg), Bytes.toHex(plaintext));
+    }
+  },
+
+  async testProbabilisticEncryption() {
+    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+        Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
+        Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
+    const msg = Random.randBytes(20);
+    const aad = Random.randBytes(20);
+    const results = new Set();
+    for (let i = 0; i < 100; i++) {
+      const ciphertext = await aead.encrypt(msg, aad);
       results.add(Bytes.toHex(ciphertext));
     }
     assertEquals(100, results.size);
+  },
+
+  async testType() {
+    try {
+      await EncryptThenAuthenticate.newAesCtrHmac(
+          'blah' /* aesKey */, 12 /* ivSize */, 'SHA-256',
+          Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await EncryptThenAuthenticate.newAesCtrHmac(
+          Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
+          'blah' /* hmacKey */, 10 /* tagSize */);
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+
+    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+        Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
+        Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
+    try {
+      await aead.encrypt('blah');
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await aead.encrypt(Random.randBytes(20), 'blah');
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await aead.decrypt('blah');
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
+    try {
+      await aead.decrypt(Random.randBytes(32), 'blah');
+    } catch (e) {
+      assertEquals(
+          'CustomError: input must be a non null Uint8Array', e.toString());
+    }
   },
 
   async testBitFlipCiphertext() {
@@ -96,7 +156,7 @@ testSuite({
       try {
         await aead.decrypt(c1, aad);
       } catch (e) {
-        if (c1.length < 16) {
+        if (c1.length < 32) {
           assertEquals('CustomError: ciphertext too short', e.toString());
         } else {
           assertEquals('CustomError: invalid MAC', e.toString());
