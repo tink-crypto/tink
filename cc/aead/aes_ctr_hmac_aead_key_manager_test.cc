@@ -274,6 +274,18 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyErrors) {
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
                         result.status().error_message());
   }
+
+  {  // Bad AesCtrHmacAeadKeyFormat: small HMAC key_size.
+    AesCtrHmacAeadKeyFormat key_format;
+    key_format.mutable_hmac_key_format()->set_key_size(8);
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "key_size",
+                        result.status().error_message());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
+                        result.status().error_message());
+  }
 }
 
 TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyBasic) {

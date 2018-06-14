@@ -254,7 +254,7 @@ Status AesCtrHmacAeadKeyManager::Validate(
 
   // Validate HmacKeyFormat.
   auto hmac_key_format = key_format.hmac_key_format();
-  if (aes_ctr_key_format.key_size() < kMinKeySizeInBytes) {
+  if (hmac_key_format.key_size() < kMinKeySizeInBytes) {
     return ToStatusF(
         util::error::INVALID_ARGUMENT,
         "Invalid AesCtrHmacAeadKeyFormat: HMAC key_size is too small.");
