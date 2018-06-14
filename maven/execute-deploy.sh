@@ -28,7 +28,7 @@ then
 fi
 
 declare -a GIT_ARGS
-GIT_ARGS=('-c user.email=noreply@google.com' '-c user.name="Tink Team"')
+GIT_ARGS=(-c user.email=noreply@google.com -c user.name="Tink Team")
 
 library_output_file() {
   library="$1"
