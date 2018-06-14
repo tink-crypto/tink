@@ -54,7 +54,7 @@ deploy_library() {
   # Update the version
   sed -i \
     's/VERSION_PLACEHOLDER/'"${VERSION}"'/' \
-    "${pomfile})"
+    "${pomfile}"
 
   mvn "${MVN_GOAL}" \
     -Dfile="$(library_output_file ${library})" \
