@@ -16,7 +16,6 @@ goog.module('tink.KeyManager');
 
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const PbMessage = goog.require('jspb.Message');
-const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
  * An auxiliary container for methods that generate new keys.
@@ -32,7 +31,6 @@ class KeyFactory {
    * @param {!PbMessage|string} keyFormat is either a KeyFormat proto or a
    *     serialized KeyFormat proto
    * @return {!Promise.<!PbMessage>} the new generated key
-   * @throws {SecurityException} if the specified format is not supported
    */
   newKey(keyFormat) {}
 
@@ -42,7 +40,6 @@ class KeyFactory {
    *
    * @param {string} serializedKeyFormat
    * @return {!Promise.<!PbKeyData>}
-   * @throws {SecurityException} if the specified format is not supported
    */
   newKeyData(serializedKeyFormat) {}
 }
@@ -67,8 +64,6 @@ class KeyManager {
    * @param {!PbKeyData|!PbMessage} key is either a KeyData proto or a supported
    *     key proto
    * @return {!Promise.<!P>}
-   * @throws {SecurityExeception} if the given key is corrupted or not
-   *     supported
    */
   getPrimitive(key) {}
 
