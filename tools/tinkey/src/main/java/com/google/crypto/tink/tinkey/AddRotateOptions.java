@@ -25,13 +25,11 @@ import org.kohsuke.args4j.Option;
 class AddRotateOptions extends OutOptions {
   @Option(
       name = "--key-template",
-      metaVar = "AES128_GCM.ascii",
+      metaVar = "AES128_GCM",
       required = true,
       handler = KeyTemplateHandler.class,
       usage =
-          "The input filename to read the key template from. "
-          + "Pre-generated templates can be found at "
-          + "https://github.com/google/tink/tree/master/examples/keytemplates."
+          "The key template name. Run list-key-templates to get supported names."
   )
   KeyTemplate keyTemplate;
 }
