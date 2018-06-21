@@ -26,6 +26,7 @@ PUBLIC_APIS = [
     "keyset_manager.h",
     "keyset_reader.h",
     "keyset_writer.h",
+    "kms_client.h",
     "mac.h",
     "mac_config.h",
     "mac_factory.h",
@@ -55,6 +56,7 @@ PUBLIC_API_DEPS = [
     ":public_key_verify",
     ":keyset_reader",
     ":keyset_writer",
+    ":kms_client",
     ":mac",
     ":primitive_set",
     ":registry",
@@ -415,6 +417,18 @@ cc_library(
     include_prefix = "tink",
 )
 
+
+cc_library(
+    name = "kms_client",
+    hdrs = ["kms_client.h"],
+    deps = [
+        ":aead",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
 
 # Settings for building in various environments.
 config_setting(
