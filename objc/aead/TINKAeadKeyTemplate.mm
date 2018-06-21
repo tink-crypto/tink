@@ -48,6 +48,14 @@
       ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
           &crypto::tink::AeadKeyTemplates::Aes256CtrHmacSha256());
       break;
+    case TINKAes128Eax:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::AeadKeyTemplates::Aes128Eax());
+      break;
+    case TINKAes256Eax:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::AeadKeyTemplates::Aes256Eax());
+      break;
     default:
       if (error) {
         *error = TINKStatusToError(crypto::tink::util::Status(

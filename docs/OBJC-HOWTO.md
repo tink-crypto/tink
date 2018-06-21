@@ -110,8 +110,8 @@ The following table summarizes Obj-C implementations of primitives that are
 currently available or planned (the latter are listed in brackets).
 
 Primitive         | Implementations
------------------ | --------------------------------
-AEAD              | AES-GCM, AES-CTR-HMAC, (AES-EAX)
+----------------- | ------------------------------
+AEAD              | AES-GCM, AES-CTR-HMAC, AES-EAX
 MAC               | HMAC-SHA2
 Hybrid Encryption | ECIES with AEAD and HKDF
 

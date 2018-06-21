@@ -60,6 +60,24 @@ typedef NS_ENUM(NSInteger, TINKAeadKeyTemplates) {
    *   OutputPrefixType: TINK
    */
   TINKAes256CtrHmacSha256 = 4,
+
+  /**
+   * AesEaxKey with the following parameters:
+   *   Key size: 16 bytes
+   *   IV size: 16 bytes
+   *   Tag size: 16 bytes
+   *   OutputPrefixType: TINK
+   */
+  TINKAes128Eax = 5,
+
+  /**
+   * AesEaxKey with the following parameters:
+   *   Key size: 32 bytes
+   *   IV size: 16 bytes
+   *   Tag size: 16 bytes
+   *   OutputPrefixType: TINK
+   */
+  TINKAes256Eax = 6,
 };
 
 NS_ASSUME_NONNULL_BEGIN
