@@ -17,14 +17,17 @@
 #include "tink/aead/aead_key_templates.h"
 
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
+#include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
+#include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 #include "gtest/gtest.h"
 
 using google::crypto::tink::AesCtrHmacAeadKeyFormat;
+using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
@@ -33,6 +36,52 @@ using google::crypto::tink::OutputPrefixType;
 namespace crypto {
 namespace tink {
 namespace {
+
+TEST(AeadKeyTemplatesTest, testAesEaxKeyTemplates) {
+  std::string type_url = "type.googleapis.com/google.crypto.tink.AesEaxKey";
+
+  {  // Test Aes128Eax().
+    // Check that returned template is correct.
+    const KeyTemplate& key_template = AeadKeyTemplates::Aes128Eax();
+    EXPECT_EQ(type_url, key_template.type_url());
+    EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+    AesEaxKeyFormat key_format;
+    EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+    EXPECT_EQ(16, key_format.key_size());
+    EXPECT_EQ(16, key_format.params().iv_size());
+
+    // Check that reference to the same object is returned.
+    const KeyTemplate& key_template_2 = AeadKeyTemplates::Aes128Eax();
+    EXPECT_EQ(&key_template, &key_template_2);
+
+    // Check that the template works with the key manager.
+    AesEaxKeyManager key_manager;
+    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+  }
+
+  {  // Test Aes256Eax().
+    // Check that returned template is correct.
+    const KeyTemplate& key_template = AeadKeyTemplates::Aes256Eax();
+    EXPECT_EQ(type_url, key_template.type_url());
+    EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+    AesEaxKeyFormat key_format;
+    EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+    EXPECT_EQ(32, key_format.key_size());
+    EXPECT_EQ(16, key_format.params().iv_size());
+
+    // Check that reference to the same object is returned.
+    const KeyTemplate& key_template_2 = AeadKeyTemplates::Aes256Eax();
+    EXPECT_EQ(&key_template, &key_template_2);
+
+    // Check that the template works with the key manager.
+    AesEaxKeyManager key_manager;
+    EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+  }
+}
 
 TEST(AeadKeyTemplatesTest, testAesGcmKeyTemplates) {
   std::string type_url = "type.googleapis.com/google.crypto.tink.AesGcmKey";

@@ -36,6 +36,22 @@ namespace tink {
 //   auto keyset_handle = std::move(handle_result.ValueOrDie());
 class AeadKeyTemplates {
  public:
+  // Returns a KeyTemplate that generates new instances of AesEaxKey
+  // with the following parameters:
+  //   - key size: 16 bytes
+  //   - IV size: 16 bytes
+  //   - tag size: 16 bytes
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& Aes128Eax();
+
+  // Returns a KeyTemplate that generates new instances of AesEaxKey
+  // with the following parameters:
+  //   - key size: 32 bytes
+  //   - IV size: 16 bytes
+  //   - tag size: 16 bytes
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& Aes256Eax();
+
   // Returns a KeyTemplate that generates new instances of AesGcmKey
   // with the following parameters:
   //   - key size: 16 bytes

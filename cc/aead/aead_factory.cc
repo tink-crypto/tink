@@ -21,7 +21,6 @@
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
 #include "tink/aead/aead_set_wrapper.h"
-#include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

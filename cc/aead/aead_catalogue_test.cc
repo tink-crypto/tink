@@ -30,31 +30,42 @@ class AeadCatalogueTest : public ::testing::Test {
 };
 
 TEST_F(AeadCatalogueTest, testBasic) {
-  std::string key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  std::string key_types[] = {
+    "type.googleapis.com/google.crypto.tink.AesEaxKey",
+    "type.googleapis.com/google.crypto.tink.AesGcmKey",
+    "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey"
+  };
+
   AeadCatalogue catalogue;
-
   {
-    auto manager_result = catalogue.GetKeyManager(key_type, "Aead", 0);
-    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
-  }
-
-  {
-    auto manager_result = catalogue.GetKeyManager(key_type, "aeAD", 0);
-    EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-    EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
-  }
-
-  {
-    auto manager_result = catalogue.GetKeyManager(key_type, "Mac", 0);
+    auto manager_result = catalogue.GetKeyManager("bad.key_type", "Aead", 0);
     EXPECT_FALSE(manager_result.ok());
     EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
   }
+  for (const std::string& key_type : key_types) {
+    {
+      auto manager_result = catalogue.GetKeyManager(key_type, "Aead", 0);
+      EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+      EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
+    }
 
-  {
-    auto manager_result = catalogue.GetKeyManager(key_type, "Aead", 1);
-    EXPECT_FALSE(manager_result.ok());
-    EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+    {
+      auto manager_result = catalogue.GetKeyManager(key_type, "aeAD", 0);
+      EXPECT_TRUE(manager_result.ok()) << manager_result.status();
+      EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
+    }
+
+    {
+      auto manager_result = catalogue.GetKeyManager(key_type, "Mac", 0);
+      EXPECT_FALSE(manager_result.ok());
+      EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+    }
+
+    {
+      auto manager_result = catalogue.GetKeyManager(key_type, "Aead", 1);
+      EXPECT_FALSE(manager_result.ok());
+      EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+    }
   }
 }
 

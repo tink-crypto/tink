@@ -26,6 +26,7 @@ cc_library(
     hdrs = ["aead_catalogue.h"],
     deps = [
         ":aes_ctr_hmac_aead_key_manager",
+        ":aes_eax_key_manager",
         ":aes_gcm_key_manager",
         "//cc:aead",
         "//cc:catalogue",
@@ -57,7 +58,6 @@ cc_library(
     hdrs = ["aead_factory.h"],
     deps = [
         ":aead_set_wrapper",
-        ":aes_gcm_key_manager",
         "//cc:aead",
         "//cc:key_manager",
         "//cc:keyset_handle",
@@ -76,7 +76,30 @@ cc_library(
     hdrs = ["aead_key_templates.h"],
     deps = [
         "//proto:aes_ctr_hmac_aead_cc_proto",
+        "//proto:aes_eax_cc_proto",
         "//proto:aes_gcm_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:tink_cc_proto",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
+    name = "aes_eax_key_manager",
+    srcs = ["aes_eax_key_manager.cc"],
+    hdrs = ["aes_eax_key_manager.h"],
+    deps = [
+        "//cc:aead",
+        "//cc:key_manager",
+        "//cc/subtle:aes_eax_boringssl",
+        "//cc/subtle:random",
+        "//cc/util:errors",
+        "//cc/util:protobuf_helper",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:validation",
+        "//proto:aes_eax_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
     ],
@@ -210,8 +233,28 @@ cc_test(
     deps = [
         ":aead_key_templates",
         ":aes_ctr_hmac_aead_key_manager",
+        ":aes_eax_key_manager",
         ":aes_gcm_key_manager",
         "//proto:aes_ctr_hmac_aead_cc_proto",
+        "//proto:aes_eax_cc_proto",
+        "//proto:aes_gcm_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_eax_key_manager_test",
+    size = "small",
+    srcs = ["aes_eax_key_manager_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aes_eax_key_manager",
+        "//cc:aead",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:aes_eax_cc_proto",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",

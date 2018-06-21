@@ -63,10 +63,12 @@ class AesEaxBoringSsl : public Aead {
   static bool IsValidNonceSize(size_t nonce_size_in_bytes);
 
   // Encrypts a single block with AES.
-  void EncryptBlock(const uint8 in[BLOCK_SIZE], uint8 out[BLOCK_SIZE]) const;
+  void EncryptBlock(const uint8_t in[BLOCK_SIZE],
+                    uint8_t out[BLOCK_SIZE]) const;
 
   // Pads a partial data block of size 0 <= len <= BLOCK_SIZE.
-  void Pad(const uint8* data, int len, uint8 padded_block[BLOCK_SIZE]) const;
+  void Pad(const uint8_t* data, int len,
+           uint8_t padded_block[BLOCK_SIZE]) const;
 
   // Computes a Omac over blob.
   // tag is either 0, 1 or 2, depending over which value (nonce, aad, message)
@@ -75,11 +77,11 @@ class AesEaxBoringSsl : public Aead {
   void Omac(
       absl::string_view blob,
       int tag,
-      uint8 mac[BLOCK_SIZE]) const;
+      uint8_t mac[BLOCK_SIZE]) const;
 
   // This is the same function as above with the difference that the blob
   // is represented by a pointer and its length.
-  void Omac(const uint8* data, size_t len, int tag, uint8 mac[BLOCK_SIZE])
+  void Omac(const uint8_t* data, size_t len, int tag, uint8_t mac[BLOCK_SIZE])
       const;
 
   // Encrypts or decrypts some data using CTR mode. N are 16 bytes, which
@@ -87,16 +89,16 @@ class AesEaxBoringSsl : public Aead {
   // in are the bytes that are encrypted or decrypted. result is the
   // encrypted rsp. decrypted value. size determines the size of in and result.
   void CtrCrypt(
-      const uint8 N[BLOCK_SIZE],
-      const uint8 *in,
-      uint8 *result,
+      const uint8_t N[BLOCK_SIZE],
+      const uint8_t *in,
+      uint8_t *result,
       size_t size) const;
 
   // TODO(bleichen): This class is immutable. But it seems difficult to
   //   declare these members const, because the constructor is not trivial.
   AES_KEY aeskey_;
-  uint8 B_[BLOCK_SIZE];
-  uint8 P_[BLOCK_SIZE];
+  uint8_t B_[BLOCK_SIZE];
+  uint8_t P_[BLOCK_SIZE];
   const std::string key_;
   const size_t nonce_size_;
   // Set by the constructor to true if the initialization was successful.

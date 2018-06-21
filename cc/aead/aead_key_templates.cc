@@ -17,11 +17,13 @@
 #include "tink/aead/aead_key_templates.h"
 
 #include "proto/aes_ctr_hmac_aead.pb.h"
+#include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::AesCtrHmacAeadKeyFormat;
+using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
@@ -31,6 +33,18 @@ namespace crypto {
 namespace tink {
 
 namespace {
+
+KeyTemplate* NewAesEaxKeyTemplate(int key_size_in_bytes, int iv_size_in_bytes) {
+  KeyTemplate* key_template = new KeyTemplate;
+  key_template->set_type_url(
+      "type.googleapis.com/google.crypto.tink.AesEaxKey");
+  key_template->set_output_prefix_type(OutputPrefixType::TINK);
+  AesEaxKeyFormat key_format;
+  key_format.set_key_size(key_size_in_bytes);
+  key_format.mutable_params()->set_iv_size(iv_size_in_bytes);
+  key_format.SerializeToString(key_template->mutable_value());
+  return key_template;
+}
 
 KeyTemplate* NewAesGcmKeyTemplate(int key_size_in_bytes) {
   KeyTemplate* key_template = new KeyTemplate;
@@ -65,6 +79,22 @@ KeyTemplate* NewAesCtrHmacAeadKeyTemplate(
 
 
 }  // anonymous namespace
+
+// static
+const KeyTemplate& AeadKeyTemplates::Aes128Eax() {
+  static const KeyTemplate* key_template =
+      NewAesEaxKeyTemplate(/* key_size_in_bytes= */ 16,
+                           /* iv_size_in_bytes= */ 16);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& AeadKeyTemplates::Aes256Eax() {
+  static const KeyTemplate* key_template =
+      NewAesEaxKeyTemplate(/* key_size_in_bytes= */ 32,
+                           /* iv_size_in_bytes= */ 16);
+  return *key_template;
+}
 
 // static
 const KeyTemplate& AeadKeyTemplates::Aes128Gcm() {

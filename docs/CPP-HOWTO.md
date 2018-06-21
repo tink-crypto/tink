@@ -235,7 +235,7 @@ currently available or planned (the latter are listed in brackets).
 
 | Primitive          | Implementations                               |
 | ------------------ | --------------------------------------------- |
-| AEAD               | AES-GCM, AES-CTR-HMAC, (AES-EAX)              |
+| AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX                |
 | MAC                | HMAC-SHA2                                     |
 | Digital Signatures | ECDSA over NIST curves, (Ed25519)             |
 | Hybrid Encryption  | ECIES with AEAD and HKDF                      |

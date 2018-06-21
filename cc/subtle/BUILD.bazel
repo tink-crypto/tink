@@ -192,6 +192,23 @@ cc_library(
 )
 
 cc_library(
+    name = "aes_eax_boringssl",
+    srcs = ["aes_eax_boringssl.cc"],
+    hdrs = ["aes_eax_boringssl.h"],
+    deps = [
+        ":random",
+        "//cc:aead",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
     name = "encrypt_then_authenticate",
     srcs = ["encrypt_then_authenticate.cc"],
     hdrs = ["encrypt_then_authenticate.h"],
@@ -363,6 +380,26 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aes_gcm_boringssl",
+        "//cc:aead",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_eax_boringssl_test",
+    size = "small",
+    srcs = ["aes_eax_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    data = [
+        "@wycheproof//testvectors:aes_eax",
+    ],
+    deps = [
+        ":aes_eax_boringssl",
+        ":common_enums",
+        ":wycheproof_util",
         "//cc:aead",
         "//cc/util:status",
         "//cc/util:statusor",

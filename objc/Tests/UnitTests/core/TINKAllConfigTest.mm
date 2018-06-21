@@ -40,7 +40,7 @@
   XCTAssertNil(error);
   google::crypto::tink::RegistryConfig config = allConfig.ccConfig;
 
-  XCTAssertTrue(config.entry_size() == 7);
+  XCTAssertTrue(config.entry_size() == 8);
 
   std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
   XCTAssertTrue("TinkMac" == config.entry(0).catalogue_name());
@@ -64,35 +64,42 @@
   XCTAssertTrue(config.entry(2).new_key_allowed());
   XCTAssertTrue(0 == config.entry(2).key_manager_version());
 
-  std::string ecies_hybrid_decrypt_key_type =
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-  XCTAssertTrue("TinkHybridDecrypt" == config.entry(3).catalogue_name());
-  XCTAssertTrue("HybridDecrypt" == config.entry(3).primitive_name());
-  XCTAssertTrue(ecies_hybrid_decrypt_key_type == config.entry(3).type_url());
+  std::string aes_eax_key_type = "type.googleapis.com/google.crypto.tink.AesEaxKey";
+  XCTAssertTrue("TinkAead" == config.entry(3).catalogue_name());
+  XCTAssertTrue("Aead" == config.entry(3).primitive_name());
+  XCTAssertTrue(aes_eax_key_type == config.entry(3).type_url());
   XCTAssertTrue(config.entry(3).new_key_allowed());
   XCTAssertTrue(0 == config.entry(3).key_manager_version());
 
-  std::string ecies_hybrid_encrypt_key_type =
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
-  XCTAssertTrue("TinkHybridEncrypt" == config.entry(4).catalogue_name());
-  XCTAssertTrue("HybridEncrypt" == config.entry(4).primitive_name());
-  XCTAssertTrue(ecies_hybrid_encrypt_key_type == config.entry(4).type_url());
+  std::string ecies_hybrid_decrypt_key_type =
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  XCTAssertTrue("TinkHybridDecrypt" == config.entry(4).catalogue_name());
+  XCTAssertTrue("HybridDecrypt" == config.entry(4).primitive_name());
+  XCTAssertTrue(ecies_hybrid_decrypt_key_type == config.entry(4).type_url());
   XCTAssertTrue(config.entry(4).new_key_allowed());
   XCTAssertTrue(0 == config.entry(4).key_manager_version());
 
-  std::string ecdsa_sign_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
-  XCTAssertTrue("TinkPublicKeySign" == config.entry(5).catalogue_name());
-  XCTAssertTrue("PublicKeySign" == config.entry(5).primitive_name());
-  XCTAssertTrue(ecdsa_sign_key_type == config.entry(5).type_url());
+  std::string ecies_hybrid_encrypt_key_type =
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
+  XCTAssertTrue("TinkHybridEncrypt" == config.entry(5).catalogue_name());
+  XCTAssertTrue("HybridEncrypt" == config.entry(5).primitive_name());
+  XCTAssertTrue(ecies_hybrid_encrypt_key_type == config.entry(5).type_url());
   XCTAssertTrue(config.entry(5).new_key_allowed());
   XCTAssertTrue(0 == config.entry(5).key_manager_version());
 
-  std::string ecdsa_verify_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
-  XCTAssertTrue("TinkPublicKeyVerify" == config.entry(6).catalogue_name());
-  XCTAssertTrue("PublicKeyVerify" == config.entry(6).primitive_name());
-  XCTAssertTrue(ecdsa_verify_key_type == config.entry(6).type_url());
+  std::string ecdsa_sign_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+  XCTAssertTrue("TinkPublicKeySign" == config.entry(6).catalogue_name());
+  XCTAssertTrue("PublicKeySign" == config.entry(6).primitive_name());
+  XCTAssertTrue(ecdsa_sign_key_type == config.entry(6).type_url());
   XCTAssertTrue(config.entry(6).new_key_allowed());
   XCTAssertTrue(0 == config.entry(6).key_manager_version());
+
+  std::string ecdsa_verify_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
+  XCTAssertTrue("TinkPublicKeyVerify" == config.entry(7).catalogue_name());
+  XCTAssertTrue("PublicKeyVerify" == config.entry(7).primitive_name());
+  XCTAssertTrue(ecdsa_verify_key_type == config.entry(7).type_url());
+  XCTAssertTrue(config.entry(7).new_key_allowed());
+  XCTAssertTrue(0 == config.entry(7).key_manager_version());
 }
 
 - (void)testConfigRegistration {
