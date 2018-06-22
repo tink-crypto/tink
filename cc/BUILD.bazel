@@ -506,6 +506,39 @@ genrule(
           "    `cd external/com_google_protobuf/src/; find google/ -name \"*.h\"`",
 )
 
+# Tink binary snapshot.
+genrule(
+    name = "tink_bin_snapshot",
+    srcs = [
+        ":tink_deps_headers",
+        ":tink_headers",
+        ":libtink.so",
+    ],
+    outs = [
+        "tink_bin_snapshot.tar.gz",
+    ],
+    # The command below packages the header files and the binary library
+    # into a single compressed tar-archive.
+    cmd = select({
+      ":linux_x86_64":
+          "tar -cv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+          "    --transform \"s/^cc/tink_bin_snapshot/\"" +
+          "    -C $(GENDIR) cc/tink_headers.tar cc/tink_deps_headers.tar;" +
+          "tar -rv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+          "    --transform \"s/^cc/tink_bin_snapshot/\"" +
+          "    -C $(BINDIR) cc/libtink.so;" +
+          "gzip -c $(GENDIR)/tink_bin_snapshot.tar > $@",
+      ":mac_x86_64":
+          "tar -cv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+          "    -s  \"/^cc/tink_bin_snapshot/p\"" +
+          "    -C $(GENDIR) cc/tink_headers.tar cc/tink_deps_headers.tar;" +
+          "tar -rv -f $(GENDIR)/tink_bin_snapshot.tar --dereference" +
+          "    -s \"/^cc/tink_bin_snapshot/p\"" +
+          "    -C $(BINDIR) cc/libtink.so;" +
+          "gzip -c $(GENDIR)/tink_bin_snapshot.tar > $@",
+    }),
+)
+
 # tests
 
 cc_test(

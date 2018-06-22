@@ -35,7 +35,42 @@ libraries (cf. versions in the corresponding entries in
 depend directly on these libraries at all (i.e. have only the indirect
 dependence via Tink).
 
-### Installing pre-build binaries (TODO)
+### Installing pre-build binaries
+
+1. Download and unpack a tar-archive with pre-built binary and relevant headers.
+
+   ```sh
+   cd /tmp
+   curl https://some.repository/tar_bin_snapshot.tar.gz -O (TODO)
+   tar xfvz tar_bin_snapshot.tar.gz
+   ```
+
+2. Install the binary and the headers in appropriate
+   directories of the target project (`TARGET_DIR`):
+
+   ```sh
+   TARGET_DIR="/usr/local"
+   mkdir -p $TARGET_DIR/lib $TARGET_DIR/include
+   sudo cp tink_bin_snapshot/libtink.so $TARGET_DIR/lib/
+   sudo tar xfv tink_bin_snapshot/tink_headers.tar -C $TARGET_DIR/include/
+   sudo tar xfv tink_bin_snapshot/tink_deps_headers.tar -C $TARGET_DIR/include/
+   ```
+
+3. If in Step 2 you specified a system directory (for example, `/usr/local`)
+   as the `TARGET_DIR`, then run ldconfig to configure the linker. For example:
+
+   ```sh
+   sudo ldconfig
+   ```
+
+    If you assigned a `TARGET_DIR` other than a system directory (for example,
+    `~/mydir`), then you must append the extraction directory (for example,
+    `~/mydir/lib`) to two environment variables:
+
+   ```sh
+   export LIBRARY_PATH=$LIBRARY_PATH:$TARGET_DIR/lib
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TARGET_DIR/lib
+   ```
 
 
 ### Installing from the source
