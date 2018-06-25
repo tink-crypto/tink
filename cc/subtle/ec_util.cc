@@ -31,23 +31,6 @@ namespace tink {
 namespace subtle {
 
 // static
-crypto::tink::util::StatusOr<std::string> EcUtil::ComputeEcdhSharedSecret(
-    EllipticCurveType curve_type, absl::string_view priv,
-    absl::string_view pub_x, absl::string_view pub_y) {
-  bssl::UniquePtr<BIGNUM> priv_key(
-      BN_bin2bn(reinterpret_cast<const unsigned char *>(priv.data()),
-                priv.size(), nullptr));
-  auto status_or_ec_point =
-      SubtleUtilBoringSSL::GetEcPoint(curve_type, pub_x, pub_y);
-  if (!status_or_ec_point.ok()) {
-    return status_or_ec_point.status();
-  }
-  bssl::UniquePtr<EC_POINT> pub_key(status_or_ec_point.ValueOrDie());
-  return SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
-      curve_type, priv_key.get(), pub_key.get());
-}
-
-// static
 uint32_t EcUtil::FieldSizeInBytes(EllipticCurveType curve_type) {
   auto ec_group_result = SubtleUtilBoringSSL::GetEcGroup(curve_type);
   if (!ec_group_result.ok()) return 0;

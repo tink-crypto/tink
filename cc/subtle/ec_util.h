@@ -28,16 +28,6 @@ namespace subtle {
 
 class EcUtil {
  public:
-  // Computes and returns the ECDH shared secret, which is the x-coordinate of
-  // the shared point, from a private key and a public key.
-  // Returns an error if the public key is not a valid point on the private
-  // key's curve.
-  static crypto::tink::util::StatusOr<std::string> ComputeEcdhSharedSecret(
-      EllipticCurveType curve_type,
-      absl::string_view priv,
-      absl::string_view pub_x,
-      absl::string_view pub_y);
-
   // Returns the encoding size of a point on the specified elliptic curve
   // when the given 'point_format' is used.
   static crypto::tink::util::StatusOr<uint32_t> EncodingSizeInBytes(
