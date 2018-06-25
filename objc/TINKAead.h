@@ -34,11 +34,11 @@ NS_ASSUME_NONNULL_BEGIN
  * additional data, but does not guarantee its secrecy.
  *
  * @param plaintext       The data to encrypt.
- * @param additionalData  Additional authenticated data.
+ * @param additionalData  Additional authenticated data. (optional)
  * @return                The encrypted data on success; nil in case of error.
  */
 - (nullable NSData *)encrypt:(NSData *)plaintext
-          withAdditionalData:(NSData *)additionalData
+          withAdditionalData:(nullable NSData *)additionalData
                        error:(NSError **)error;
 
 /**
@@ -47,11 +47,11 @@ NS_ASSUME_NONNULL_BEGIN
  * data, but there are no guarantees with regards to secrecy of that data.
  *
  * @param ciphertext      The data to decrypt.
- * @param additionalData  Additional authenticated data.
+ * @param additionalData  Additional authenticated data. (optional)
  * @return                The decrypted data on success; nil in case of error.
  */
 - (nullable NSData *)decrypt:(NSData *)ciphertext
-          withAdditionalData:(NSData *)additionalData
+          withAdditionalData:(nullable NSData *)additionalData
                        error:(NSError **)error;
 
 @end
