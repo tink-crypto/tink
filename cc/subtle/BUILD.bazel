@@ -378,8 +378,12 @@ cc_test(
     size = "small",
     srcs = ["aes_gcm_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    data = [
+        "@wycheproof//testvectors:aes_gcm",
+    ],
     deps = [
         ":aes_gcm_boringssl",
+        ":wycheproof_util",
         "//cc:aead",
         "//cc/util:status",
         "//cc/util:statusor",
