@@ -155,7 +155,7 @@ bool WycheproofTest(const Json::Value &root) {
   return errors == 0;
 }
 
-TEST(AesEaxBoringSslTest, TestVectors) {
+TEST(AesGcmBoringSslTest, TestVectors) {
   std::unique_ptr<Json::Value> root =
       WycheproofUtil::ReadTestVectors("aes_gcm_test.json");
   ASSERT_TRUE(WycheproofTest(*root));
