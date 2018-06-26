@@ -18,8 +18,8 @@
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKRegistryConfig.h"
-#import "objc/TINKVersion.h"
+#import "TINKRegistryConfig.h"
+#import "TINKVersion.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

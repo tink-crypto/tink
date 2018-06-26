@@ -18,7 +18,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKKeyTemplate.h"
+#import "TINKKeyTemplate.h"
 
 typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   /**

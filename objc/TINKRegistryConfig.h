@@ -18,7 +18,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "objc/TINKVersion.h"
+#import "TINKVersion.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
