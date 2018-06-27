@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.mac;
 
+import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -25,6 +26,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -46,7 +48,7 @@ public class MacFactoryTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(MacConfig.TINK_1_0_0);
+    Config.register(TinkConfig.TINK_1_1_0);
   }
 
   @Test
@@ -160,6 +162,36 @@ public class MacFactoryTest {
       mac.verifyMac(tag, plaintext);
     } catch (GeneralSecurityException e) {
       fail("Valid MAC, should not throw exception");
+    }
+  }
+
+  @Test
+  public void testInvalidKeyMaterial() throws Exception {
+    Key valid =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData(Random.randBytes(HMAC_KEY_SIZE), 16),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
+    Key invalid =
+        TestUtil.createKey(
+            TestUtil.createAesSivKeyData(64), 43, KeyStatusType.ENABLED, OutputPrefixType.TINK);
+
+    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
+    try {
+      MacFactory.getPrimitive(keysetHandle);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "invalid MAC key material");
+    }
+
+    // invalid as the primary key.
+    keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
+    try {
+      MacFactory.getPrimitive(keysetHandle);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "invalid MAC key material");
     }
   }
 }

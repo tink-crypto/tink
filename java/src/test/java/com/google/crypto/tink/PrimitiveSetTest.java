@@ -89,6 +89,8 @@ public class PrimitiveSetTest {
             .build();
     pset.addPrimitive(new DummyMac1(), key3);
 
+    assertEquals(3, pset.getAll().size());
+
     List<PrimitiveSet.Entry<Mac>> entries = pset.getPrimitive(key1);
     assertEquals(1, entries.size());
     PrimitiveSet.Entry<Mac> entry = entries.get(0);
@@ -177,6 +179,8 @@ public class PrimitiveSetTest {
             .setOutputPrefixType(OutputPrefixType.RAW)
             .build();
     pset.addPrimitive(new DummyMac1(), key6);
+
+    assertEquals(3, pset.getAll().size()); // 3 instead of 6 because of duplicated key ids
 
     // tink keys
     List<PrimitiveSet.Entry<Mac>> entries = pset.getPrimitive(key1);

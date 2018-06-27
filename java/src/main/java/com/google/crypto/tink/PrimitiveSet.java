@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -110,6 +111,11 @@ public final class PrimitiveSet<P> {
   public List<Entry<P>> getPrimitive(final byte[] identifier) throws GeneralSecurityException {
     List<Entry<P>> found = primitives.get(new String(identifier, UTF_8));
     return found != null ? found : Collections.<Entry<P>>emptyList();
+  }
+
+  /** @return all primitives */
+  public Collection<List<Entry<P>>> getAll() throws GeneralSecurityException {
+    return primitives.values();
   }
 
   /**

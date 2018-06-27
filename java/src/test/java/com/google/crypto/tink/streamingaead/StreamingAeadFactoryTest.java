@@ -24,11 +24,13 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.StreamingTestUtil;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +45,7 @@ public class StreamingAeadFactoryTest {
   @BeforeClass
   public static void setUp() throws Exception {
     StreamingAeadConfig.init();
-    Config.register(StreamingAeadConfig.TINK_1_1_0);
+    Config.register(TinkConfig.TINK_1_1_0);
   }
 
   @Test
@@ -140,6 +142,37 @@ public class StreamingAeadFactoryTest {
       fail("No matching key, should have thrown an exception");
     } catch (IOException expected) {
       assertExceptionContains(expected, "No matching key");
+    }
+  }
+
+  @Test
+  public void testInvalidKeyMaterial() throws Exception {
+    Key valid =
+        TestUtil.createKey(
+            TestUtil.createAesGcmHkdfStreamingKeyData(
+                Random.randBytes(AES_KEY_SIZE), AES_KEY_SIZE, 128),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.RAW);
+    Key invalid =
+        TestUtil.createKey(
+            TestUtil.createAesSivKeyData(64), 43, KeyStatusType.ENABLED, OutputPrefixType.TINK);
+
+    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
+    try {
+      StreamingAeadFactory.getPrimitive(keysetHandle);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "invalid StreamingAead key material");
+    }
+
+    // invalid as the primary key.
+    keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
+    try {
+      StreamingAeadFactory.getPrimitive(keysetHandle);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "invalid StreamingAead key material");
     }
   }
 }

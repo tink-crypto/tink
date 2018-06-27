@@ -26,6 +26,7 @@ import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -45,7 +46,7 @@ public class AeadFactoryTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(AeadConfig.TINK_1_0_0);
+    Config.register(TinkConfig.TINK_1_1_0);
   }
 
   @Test
@@ -196,5 +197,40 @@ public class AeadFactoryTest {
     assertArrayEquals(plaintext, aead.decrypt(ciphertext, associatedData));
     assertEquals(
         CryptoFormat.RAW_PREFIX_SIZE + plaintext.length + ivSize + tagSize, ciphertext.length);
+  }
+
+  @Test
+  public void testInvalidKeyMaterial() throws Exception {
+    byte[] aesCtrKeyValue = Random.randBytes(AES_KEY_SIZE);
+    byte[] hmacKeyValue = Random.randBytes(HMAC_KEY_SIZE);
+    int ivSize = 12;
+    int tagSize = 16;
+
+    Key valid =
+        TestUtil.createKey(
+            TestUtil.createAesCtrHmacAeadKeyData(aesCtrKeyValue, ivSize, hmacKeyValue, tagSize),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.RAW);
+    Key invalid =
+        TestUtil.createKey(
+            TestUtil.createAesSivKeyData(64), 43, KeyStatusType.ENABLED, OutputPrefixType.TINK);
+
+    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
+    try {
+      AeadFactory.getPrimitive(keysetHandle);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "invalid AEAD key material");
+    }
+
+    // invalid as the primary key.
+    keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
+    try {
+      AeadFactory.getPrimitive(keysetHandle);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "invalid AEAD key material");
+    }
   }
 }

@@ -25,6 +25,7 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -66,14 +67,15 @@ public final class AeadFactory {
    */
   public static Aead getPrimitive(KeysetHandle keysetHandle, final KeyManager<Aead> keyManager)
       throws GeneralSecurityException {
-    final PrimitiveSet<Aead> primitives = Registry.getPrimitives(keysetHandle, keyManager);
+    final PrimitiveSet<Aead> pset = Registry.getPrimitives(keysetHandle, keyManager);
+    validate(pset);
     return new Aead() {
       @Override
       public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
           throws GeneralSecurityException {
         return Bytes.concat(
-            primitives.getPrimary().getIdentifier(),
-            primitives.getPrimary().getPrimitive().encrypt(plaintext, associatedData));
+            pset.getPrimary().getIdentifier(),
+            pset.getPrimary().getPrimitive().encrypt(plaintext, associatedData));
       }
 
       @Override
@@ -83,7 +85,7 @@ public final class AeadFactory {
           byte[] prefix = Arrays.copyOfRange(ciphertext, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
           byte[] ciphertextNoPrefix =
               Arrays.copyOfRange(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
-          List<PrimitiveSet.Entry<Aead>> entries = primitives.getPrimitive(prefix);
+          List<PrimitiveSet.Entry<Aead>> entries = pset.getPrimitive(prefix);
           for (PrimitiveSet.Entry<Aead> entry : entries) {
             try {
               return entry.getPrimitive().decrypt(ciphertextNoPrefix, associatedData);
@@ -95,7 +97,7 @@ public final class AeadFactory {
         }
 
         // Let's try all RAW keys.
-        List<PrimitiveSet.Entry<Aead>> entries = primitives.getRawPrimitives();
+        List<PrimitiveSet.Entry<Aead>> entries = pset.getRawPrimitives();
         for (PrimitiveSet.Entry<Aead> entry : entries) {
           try {
             return entry.getPrimitive().decrypt(ciphertext, associatedData);
@@ -107,5 +109,16 @@ public final class AeadFactory {
         throw new GeneralSecurityException("decryption failed");
       }
     };
+  }
+
+  // Check that all primitives in <code>pset</code> are Aead instances.
+  private static void validate(final PrimitiveSet<Aead> pset) throws GeneralSecurityException {
+    for (Collection<PrimitiveSet.Entry<Aead>> entries : pset.getAll()) {
+      for (PrimitiveSet.Entry<Aead> entry : entries) {
+        if (!(entry.getPrimitive() instanceof Aead)) {
+          throw new GeneralSecurityException("invalid AEAD key material");
+        }
+      }
+    }
   }
 }

@@ -26,6 +26,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -69,6 +70,7 @@ public final class PublicKeyVerifyFactory {
       throws GeneralSecurityException {
     final PrimitiveSet<PublicKeyVerify> primitives =
         Registry.getPrimitives(keysetHandle, keyManager);
+    validate(primitives);
     return new PublicKeyVerify() {
       @Override
       public void verify(final byte[] signature, final byte[] data)
@@ -114,5 +116,17 @@ public final class PublicKeyVerifyFactory {
         throw new GeneralSecurityException("invalid signature");
       }
     };
+  }
+
+  // Check that all primitives in <code>pset</code> are PublicKeyVerify instances.
+  private static void validate(final PrimitiveSet<PublicKeyVerify> pset)
+      throws GeneralSecurityException {
+    for (Collection<PrimitiveSet.Entry<PublicKeyVerify>> entries : pset.getAll()) {
+      for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
+        if (!(entry.getPrimitive() instanceof PublicKeyVerify)) {
+          throw new GeneralSecurityException("invalid PublicKeyVerify key material");
+        }
+      }
+    }
   }
 }

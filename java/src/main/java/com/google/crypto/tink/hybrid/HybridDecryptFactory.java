@@ -23,6 +23,7 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -65,6 +66,7 @@ public final class HybridDecryptFactory {
       KeysetHandle keysetHandle, final KeyManager<HybridDecrypt> keyManager)
       throws GeneralSecurityException {
     final PrimitiveSet<HybridDecrypt> primitives = Registry.getPrimitives(keysetHandle, keyManager);
+    validate(primitives);
     return new HybridDecrypt() {
       @Override
       public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
@@ -96,5 +98,17 @@ public final class HybridDecryptFactory {
         throw new GeneralSecurityException("decryption failed");
       }
     };
+  }
+
+  // Check that all primitives in <code>pset</code> are HybridDecrypt instances.
+  private static void validate(final PrimitiveSet<HybridDecrypt> pset)
+      throws GeneralSecurityException {
+    for (Collection<PrimitiveSet.Entry<HybridDecrypt>> entries : pset.getAll()) {
+      for (PrimitiveSet.Entry<HybridDecrypt> entry : entries) {
+        if (!(entry.getPrimitive() instanceof HybridDecrypt)) {
+          throw new GeneralSecurityException("invalid HybridDecrypt key material");
+        }
+      }
+    }
   }
 }

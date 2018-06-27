@@ -26,6 +26,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -46,8 +47,7 @@ public class DeterministicAeadFactoryTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    DeterministicAeadConfig.init();
-    Config.register(DeterministicAeadConfig.TINK_1_1_0);
+    Config.register(TinkConfig.TINK_1_1_0);
   }
 
   @Before
@@ -196,5 +196,36 @@ public class DeterministicAeadFactoryTest {
 
     assertArrayEquals(plaintext, daead.decryptDeterministically(ciphertext, associatedData));
     assertEquals(CryptoFormat.RAW_PREFIX_SIZE + plaintext.length + 16, ciphertext.length);
+  }
+
+  @Test
+  public void testInvalidKeyMaterial() throws Exception {
+    Key valid =
+        TestUtil.createKey(
+            TestUtil.createAesSivKeyData(64), 42, KeyStatusType.ENABLED, OutputPrefixType.TINK);
+    Key invalid =
+        TestUtil.createKey(
+            TestUtil.createAesCtrHmacAeadKeyData(
+                Random.randBytes(16), 12, Random.randBytes(16), 16),
+            43,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.RAW);
+
+    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
+    try {
+      DeterministicAeadFactory.getPrimitive(keysetHandle);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "invalid Deterministic AEAD key material");
+    }
+
+    // invalid as the primary key.
+    keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
+    try {
+      DeterministicAeadFactory.getPrimitive(keysetHandle);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e, "invalid Deterministic AEAD key material");
+    }
   }
 }

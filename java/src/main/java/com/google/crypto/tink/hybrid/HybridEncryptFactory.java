@@ -22,6 +22,7 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
@@ -63,6 +64,7 @@ public final class HybridEncryptFactory {
       KeysetHandle keysetHandle, final KeyManager<HybridEncrypt> keyManager)
       throws GeneralSecurityException {
     final PrimitiveSet<HybridEncrypt> primitives = Registry.getPrimitives(keysetHandle, keyManager);
+    validate(primitives);
     return new HybridEncrypt() {
       @Override
       public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
@@ -72,5 +74,17 @@ public final class HybridEncryptFactory {
             primitives.getPrimary().getPrimitive().encrypt(plaintext, contextInfo));
       }
     };
+  }
+
+  // Check that all primitives in <code>pset</code> are HybridEncrypt instances.
+  private static void validate(final PrimitiveSet<HybridEncrypt> pset)
+      throws GeneralSecurityException {
+    for (Collection<PrimitiveSet.Entry<HybridEncrypt>> entries : pset.getAll()) {
+      for (PrimitiveSet.Entry<HybridEncrypt> entry : entries) {
+        if (!(entry.getPrimitive() instanceof HybridEncrypt)) {
+          throw new GeneralSecurityException("invalid HybridEncrypt key material");
+        }
+      }
+    }
   }
 }
