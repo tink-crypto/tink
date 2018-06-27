@@ -62,7 +62,12 @@ std::string HexDecodeOrDie(absl::string_view hex) {
 }  // namespace
 
 std::string WycheproofUtil::GetBytes(const Json::Value &val) {
-  return HexDecodeOrDie(val.asString());
+  std::string s = val.asString();
+  if (s.size() % 2 != 0) {
+    // ECDH private key may have odd length.
+    s = "0" + s;
+  }
+  return HexDecodeOrDie(s);
 }
 
 std::unique_ptr<Json::Value>

@@ -518,8 +518,13 @@ cc_test(
     srcs = ["subtle_util_boringssl_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     linkopts = ["-pthread"],
+    data = [
+        "@wycheproof//testvectors:ecdh",
+    ],
     deps = [
+        ":ec_util",
         ":subtle_util_boringssl",
+        ":wycheproof_util",
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
