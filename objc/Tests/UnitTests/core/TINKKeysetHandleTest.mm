@@ -147,16 +147,6 @@ static TINKPBKeyset *gKeyset;
   XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wnonnull"
-- (void)testInvalidKeyTemplateProto {
-  NSError *error = nil;
-  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithKeyTemplateProto:nil error:&error];
-  XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
-}
-#pragma clang diagnostic pop
-
 - (void)testValidKeyTemplate {
   NSError *error = nil;
   TINKHybridKeyTemplate *keyTemplate =

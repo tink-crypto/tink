@@ -16,6 +16,8 @@
  **************************************************************************
  */
 
+#include "absl/strings/string_view.h"
+
 #import "GPBMessage.h"
 #import "proto/Common.pbobjc.h"
 #import "proto/EciesAeadHkdf.pbobjc.h"
@@ -60,3 +62,6 @@ TINKPBKeyset_Key *TINKCreateKey(NSString *keyType, uint32_t keyID, GPBMessage *n
 
 TINKPBKeyset *TINKCreateKeyset(TINKPBKeyset_Key *primaryKey, TINKPBKeyset_Key *key1,
                                TINKPBKeyset_Key *key2);
+
+/** Serializes an Obj-C protocol buffer to a C++ std::string. */
+std::string TINKPBSerializeToString(GPBMessage *message, NSError **error);

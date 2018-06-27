@@ -22,7 +22,6 @@
 #import "objc/core/TINKKeysetReader_Internal.h"
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
-#import "proto/Tink.pbobjc.h"
 
 #include "absl/strings/string_view.h"
 #include "tink/json_keyset_reader.h"
@@ -52,94 +51,6 @@
     self.used = NO;
   }
   return self;
-}
-
-- (TINKPBKeyset *)readWithError:(NSError **)error {
-  @synchronized(self) {
-    if (self.used) {
-      // A reader can only be used once.
-      if (error) {
-        *error = TINKStatusToError(
-            crypto::tink::util::Status(crypto::tink::util::error::RESOURCE_EXHAUSTED,
-                                       "A KeysetReader can be used only once."));
-      }
-      return nil;
-    }
-    self.used = YES;
-  }
-  auto st = self.ccReader->Read();
-  if (!st.ok()) {
-    if (error) {
-      *error = TINKStatusToError(st.status());
-    }
-    return nil;
-  }
-  std::unique_ptr<google::crypto::tink::Keyset> ccKeyset = std::move(st.ValueOrDie());
-
-  std::string serializedKeyset;
-  if (!ccKeyset.get()->SerializeToString(&serializedKeyset)) {
-    if (error) {
-      *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "Could not serialize message."));
-    }
-    return nil;
-  }
-
-  NSError *parseError = nil;
-  TINKPBKeyset *keyset =
-      [TINKPBKeyset parseFromData:TINKStringToNSData(serializedKeyset) error:&parseError];
-  if (parseError) {
-    if (error) {
-      *error = parseError;
-    }
-    return nil;
-  }
-
-  return keyset;
-}
-
-- (TINKPBEncryptedKeyset *)readEncryptedWithError:(NSError **)error {
-  @synchronized(self) {
-    if (self.used) {
-      // A reader can only be used once.
-      if (error) {
-        *error = TINKStatusToError(
-            crypto::tink::util::Status(crypto::tink::util::error::RESOURCE_EXHAUSTED,
-                                       "A KeysetReader can be used only once."));
-      }
-      return nil;
-    }
-    self.used = YES;
-  }
-  auto st = self.ccReader->ReadEncrypted();
-  if (!st.ok()) {
-    if (error) {
-      *error = TINKStatusToError(st.status());
-    }
-    return nil;
-  }
-  std::unique_ptr<google::crypto::tink::EncryptedKeyset> ccKeyset = std::move(st.ValueOrDie());
-
-  std::string serializedKeyset;
-  if (!ccKeyset.get()->SerializeToString(&serializedKeyset)) {
-    if (error) {
-      *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "Could not serialize message."));
-    }
-    return nil;
-  }
-
-  NSError *parseError = nil;
-  TINKPBEncryptedKeyset *keyset =
-      [TINKPBEncryptedKeyset parseFromData:TINKStringToNSData(serializedKeyset) error:&parseError];
-  if (parseError) {
-    if (error) {
-      *error = parseError;
-    }
-    return nil;
-  }
-
-  return keyset;
 }
 
 @end

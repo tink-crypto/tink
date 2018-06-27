@@ -26,7 +26,6 @@
 #import "objc/core/TINKKeysetReader_Internal.h"
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
-#import "proto/Tink.pbobjc.h"
 
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
@@ -87,34 +86,6 @@
       *error = TINKStatusToError(st.status());
       return nil;
     }
-  }
-
-  return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
-}
-
-- (instancetype)initWithKeyTemplateProto:(TINKPBKeyTemplate *)keyTemplate error:(NSError **)error {
-  // Serialize the Obj-C protocol buffer.
-  std::string serializedKeyTemplate = TINKPBSerializeToString(keyTemplate, error);
-  if (serializedKeyTemplate.empty()) {
-    return nil;
-  }
-
-  // Deserialize it to a C++ protocol buffer.
-  google::crypto::tink::KeyTemplate ccKeyTemplate;
-  if (!ccKeyTemplate.ParseFromString(serializedKeyTemplate)) {
-    if (error) {
-      *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "Could not parse keyTemplate."));
-    }
-    return nil;
-  }
-
-  auto st = crypto::tink::KeysetHandle::GenerateNew(ccKeyTemplate);
-  if (!st.ok()) {
-    if (error) {
-      *error = TINKStatusToError(st.status());
-    }
-    return nil;
   }
 
   return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];

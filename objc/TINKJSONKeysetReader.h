@@ -20,9 +20,6 @@
 
 #import "TINKKeysetReader.h"
 
-@class TINKPBKeyset;
-@class TINKPBEncryptedKeyset;
-
 NS_ASSUME_NONNULL_BEGIN
 
 @interface TINKJSONKeysetReader : TINKKeysetReader
@@ -35,12 +32,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable instancetype)initWithSerializedKeyset:(NSData *)keyset
                                             error:(NSError **)error NS_DESIGNATED_INITIALIZER;
-
-/* Reads a Keyset. Returns nil in case of error and sets error to a descriptive value. */
-- (nullable TINKPBKeyset *)readWithError:(NSError **)error;
-
-/* Reads an EncryptedKeyset. Returns nil in case of error and sets error to a descriptive value. */
-- (nullable TINKPBEncryptedKeyset *)readEncryptedWithError:(NSError **)error;
 
 @end
 

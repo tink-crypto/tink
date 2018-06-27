@@ -18,8 +18,6 @@
 
 #import <Foundation/Foundation.h>
 
-#import "GPBProtocolBuffers.h"
-
 #include "absl/strings/string_view.h"
 
 /** Converts a absl::string_view to NSString. */
@@ -30,9 +28,6 @@ NSString* TINKStringToNSString(std::string s);
 
 /** Converts a C++ std::string to NSData. */
 NSData* TINKStringToNSData(std::string s);
-
-/** Serializes an Obj-C protocol buffer to a C++ std::string. */
-std::string TINKPBSerializeToString(GPBMessage* message, NSError** error);
 
 /** Converts a absl::string_view to NSData. */
 NSData* TINKStringViewToNSData(absl::string_view s);

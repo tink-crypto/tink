@@ -19,18 +19,20 @@ objc_library(
         ":errors",
         "//cc/util:status",
         "@com_google_absl//absl/strings",
-        "@com_google_protobuf//:objectivec",
     ],
 )
 
 objc_library(
     name = "test_helpers",
+    testonly = 1,
     srcs = ["TINKTestHelpers.mm"],
     hdrs = ["TINKTestHelpers.h"],
     deps = [
+        ":errors",
         ":strings",
         "//cc/subtle:subtle_util_boringssl",
         "//proto:all_objc_proto",
+        "@com_google_absl//absl/strings",
         "@com_google_protobuf//:objectivec",
     ],
 )

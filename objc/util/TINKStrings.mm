@@ -20,7 +20,6 @@
 
 #import <Foundation/Foundation.h>
 
-#import "GPBProtocolBuffers.h"
 #import "objc/util/TINKErrors.h"
 
 #include "absl/strings/string_view.h"
@@ -41,14 +40,3 @@ NSData* TINKStringViewToNSData(absl::string_view s) {
   return [NSData dataWithBytes:s.data() length:s.size()];
 }
 
-std::string TINKPBSerializeToString(GPBMessage* message, NSError** error) {
-  NSData* serializedPB = [message data];
-  if (!serializedPB) {
-    if (error) {
-      *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "Could not serialize message."));
-    }
-    return std::string("");
-  }
-  return std::string(static_cast<const char*>(serializedPB.bytes), serializedPB.length);
-}

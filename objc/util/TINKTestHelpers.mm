@@ -24,6 +24,8 @@
 #import <Foundation/Foundation.h>
 
 #import "GPBMessage.h"
+#import "GPBProtocolBuffers.h"
+#import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
 #import "proto/AesGcm.pbobjc.h"
 #import "proto/Common.pbobjc.h"
@@ -160,4 +162,16 @@ TINKPBEciesAeadHkdfPrivateKey *TINKGetEciesAesGcmHkdfTestKey(TINKPBEllipticCurve
   aeadDem.value = [keyFormat data];
 
   return eciesKey;
+}
+
+std::string TINKPBSerializeToString(GPBMessage *message, NSError **error) {
+  NSData *serializedPB = [message data];
+  if (!serializedPB) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "Could not serialize message."));
+    }
+    return std::string("");
+  }
+  return std::string(static_cast<const char *>(serializedPB.bytes), serializedPB.length);
 }

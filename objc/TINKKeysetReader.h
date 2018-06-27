@@ -18,21 +18,15 @@
 
 #import <Foundation/Foundation.h>
 
-@class TINKPBKeyset;
-@class TINKPBEncryptedKeyset;
-
 NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Parent class for keyset readers.
+ *
+ * Not to be used directly, instead use one of the subclasses: TINKBinaryKeysetReader,
+ * TINKJSONKeysetReader etc.
  */
 @interface TINKKeysetReader : NSObject
-
-/* Reads a Keyset. Returns nil in case of error and sets error to a descriptive value. */
-- (nullable TINKPBKeyset *)readWithError:(NSError **)error;
-
-/* Reads an EncryptedKeyset. Returns nil in case of error and sets error to a descriptive value. */
-- (nullable TINKPBEncryptedKeyset *)readEncryptedWithError:(NSError **)error;
 
 @end
 

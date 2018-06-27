@@ -20,7 +20,6 @@
 
 @class TINKKeyTemplate;
 @class TINKKeysetReader;
-@class TINKPBKeyTemplate;
 @protocol TINKAead;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -62,18 +61,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @return            A TINKKeysetHandle, or nil in case of error.
  */
 - (nullable instancetype)initWithKeyTemplate:(TINKKeyTemplate *)keyTemplate error:(NSError **)error;
-
-/**
- * Returns a new TINKKeysetHandle that contains a single fresh key generated according to
- * the protocol buffer @c keyTemplateProto.
- *
- * @param keyTemplateProto A TINKPBKeyTemplate protocol buffer that describes the key to be
- *                         generated.
- * @param error            If non-nil it will be populated with a descriptive error message.
- * @return                 A TINKKeysetHandle, or nil in case of error.
- */
-- (nullable instancetype)initWithKeyTemplateProto:(TINKPBKeyTemplate *)keyTemplateProto
-                                            error:(NSError **)error;
 
 @end
 
