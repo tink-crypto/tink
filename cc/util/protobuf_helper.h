@@ -17,15 +17,18 @@
 #ifndef TINK_UTIL_PROTOBUF_HELPER_H_
 #define TINK_UTIL_PROTOBUF_HELPER_H_
 
+// copybara:replace_start
+// Keep synchronized with google3/third_party/tink/copybara/cc.bara.sky
 #ifdef PROTOBUF_INTERNAL_IMPL
 
-// This space intentionally left blank. This is a placeholder for includes
-// when the code is imported into Google's version control system.
+#include "net/proto2/public/message.h"
+
+namespace portable_proto = ::proto2;
 
 #else
+// copybara:replace_end
 
 #include "google/protobuf/message.h"
-#include "google/protobuf/util/json_util.h"
 
 namespace portable_proto = ::google::protobuf;
 
