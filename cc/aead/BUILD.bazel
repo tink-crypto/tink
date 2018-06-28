@@ -142,6 +142,7 @@ cc_library(
         "//cc/subtle:encrypt_then_authenticate",
         "//cc/subtle:hmac_boringssl",
         "//cc/subtle:random",
+        "//cc/util:enums",
         "//cc/util:errors",
         "//cc/util:protobuf_helper",
         "//cc/util:status",

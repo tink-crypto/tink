@@ -47,7 +47,7 @@ using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
-using portable_proto::Message;
+using portable_proto::MessageLite;
 using crypto::tink::util::Status;
 
 
@@ -69,12 +69,12 @@ class TestKeyFactory : public KeyFactory {
   TestKeyFactory(const std::string& key_type) : key_type_(key_type) {
   }
 
-  util::StatusOr<std::unique_ptr<portable_proto::Message>> NewKey(
-      const Message& key_format) const override {
+  util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> NewKey(
+      const MessageLite& key_format) const override {
     return util::Status::UNKNOWN;
   }
 
-  util::StatusOr<std::unique_ptr<portable_proto::Message>> NewKey(
+  util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> NewKey(
       absl::string_view serialized_key_format) const override {
     return util::Status::UNKNOWN;
   }
@@ -104,7 +104,7 @@ class TestAeadKeyManager : public KeyManager<Aead> {
   }
 
   util::StatusOr<std::unique_ptr<Aead>>
-  GetPrimitive(const Message& key) const override {
+  GetPrimitive(const MessageLite& key) const override {
     return util::Status::UNKNOWN;
   }
 
@@ -196,8 +196,8 @@ TEST_F(RegistryTest, testConcurrentRegistration) {
 }
 
 TEST_F(RegistryTest, testBasic) {
-  std::string key_type_1 = AesCtrHmacAeadKey::descriptor()->full_name();
-  std::string key_type_2 = AesGcmKey::descriptor()->full_name();
+  std::string key_type_1 = "google.crypto.tink.AesCtrHmacAeadKey";
+  std::string key_type_2 = "google.crypto.tink.AesGcmKey";
   auto manager_result = Registry::get_key_manager<Aead>(key_type_1);
   EXPECT_FALSE(manager_result.ok());
   EXPECT_EQ(util::error::NOT_FOUND,
@@ -284,8 +284,8 @@ TEST_F(RegistryTest, testAddCatalogue) {
 }
 
 TEST_F(RegistryTest, testGettingPrimitives) {
-  std::string key_type_1 = AesCtrHmacAeadKey::descriptor()->full_name();
-  std::string key_type_2 = AesGcmKey::descriptor()->full_name();
+  std::string key_type_1 = "google.crypto.tink.AesCtrHmacAeadKey";
+  std::string key_type_2 = "google.crypto.tink.AesGcmKey";
   AesCtrHmacAeadKey dummy_key_1;
   AesGcmKey dummy_key_2;
 
@@ -383,8 +383,8 @@ TEST_F(RegistryTest, testGettingPrimitives) {
 }
 
 TEST_F(RegistryTest, testNewKeyData) {
-  std::string key_type_1 = AesCtrHmacAeadKey::descriptor()->full_name();
-  std::string key_type_2 = AesGcmKey::descriptor()->full_name();
+  std::string key_type_1 = "google.crypto.tink.AesCtrHmacAeadKey";
+  std::string key_type_2 = "google.crypto.tink.AesGcmKey";
   std::string key_type_3 = "yet/another/keytype";
 
   // Register key managers.

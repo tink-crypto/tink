@@ -75,7 +75,7 @@ std::string HexEncode(absl::string_view bytes);
 void AddTinkKey(
     const std::string& key_type,
     uint32_t key_id,
-    const portable_proto::Message& key,
+    const portable_proto::MessageLite& key,
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset);
@@ -85,7 +85,7 @@ void AddTinkKey(
 void AddLegacyKey(
     const std::string& key_type,
     uint32_t key_id,
-    const portable_proto::Message& key,
+    const portable_proto::MessageLite& key,
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset);
@@ -95,7 +95,7 @@ void AddLegacyKey(
 void AddRawKey(
     const std::string& key_type,
     uint32_t key_id,
-    const portable_proto::Message& key,
+    const portable_proto::MessageLite& key,
     google::crypto::tink::KeyStatusType key_status,
     google::crypto::tink::KeyData::KeyMaterialType material_type,
     google::crypto::tink::Keyset* keyset);

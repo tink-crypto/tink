@@ -26,12 +26,11 @@
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
-using google::crypto::tink::EncryptedKeyset;
-using google::crypto::tink::Keyset;
-
-
 namespace crypto {
 namespace tink {
+
+using google::crypto::tink::EncryptedKeyset;
+using google::crypto::tink::Keyset;
 
 //  static
 util::StatusOr<std::unique_ptr<BinaryKeysetReader>> BinaryKeysetReader::New(
@@ -40,23 +39,23 @@ util::StatusOr<std::unique_ptr<BinaryKeysetReader>> BinaryKeysetReader::New(
     return util::Status(util::error::INVALID_ARGUMENT,
                         "keyset_stream must be non-null.");
   }
-  std::unique_ptr<BinaryKeysetReader> reader(
-      new BinaryKeysetReader(std::move(keyset_stream)));
-  return std::move(reader);
+  std::stringstream buffer;
+  buffer << keyset_stream->rdbuf();
+  return New(buffer.str());
 }
 
 //  static
 util::StatusOr<std::unique_ptr<BinaryKeysetReader>> BinaryKeysetReader::New(
     absl::string_view serialized_keyset) {
-  std::unique_ptr<std::istream> keyset_stream(
-      new std::stringstream(std::string(serialized_keyset), std::ios_base::in));
-  return New(std::move(keyset_stream));
+  std::unique_ptr<BinaryKeysetReader> reader(
+      new BinaryKeysetReader(serialized_keyset));
+  return std::move(reader);
 }
 
 
 util::StatusOr<std::unique_ptr<Keyset>> BinaryKeysetReader::Read() {
   auto keyset = absl::make_unique<Keyset>();
-  if (!keyset->ParseFromIstream(keyset_stream_.get())) {
+  if (!keyset->ParseFromString(serialized_keyset_)) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Could not parse the input stream as a Keyset-proto.");
   }
@@ -66,7 +65,7 @@ util::StatusOr<std::unique_ptr<Keyset>> BinaryKeysetReader::Read() {
 util::StatusOr<std::unique_ptr<EncryptedKeyset>>
 BinaryKeysetReader::ReadEncrypted() {
   auto enc_keyset = absl::make_unique<EncryptedKeyset>();
-  if (!enc_keyset->ParseFromIstream(keyset_stream_.get())) {
+  if (!enc_keyset->ParseFromString(serialized_keyset_)) {
     return util::Status(util::error::INVALID_ARGUMENT,
         "Could not parse the input stream as an EncryptedKeyset-proto.");
   }

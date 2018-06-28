@@ -25,6 +25,9 @@
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+
 using google::crypto::tink::AesEaxKey;
 using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::AesGcmKey;
@@ -32,9 +35,6 @@ using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 
-
-namespace crypto {
-namespace tink {
 namespace {
 
 class AesGcmKeyManagerTest : public ::testing::Test {
@@ -85,7 +85,7 @@ TEST_F(AesGcmKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     AesGcmKey key;
     key.set_version(1);
-    key_data.set_type_url(key_type_prefix + key.GetDescriptor()->full_name());
+    key_data.set_type_url(aes_gcm_key_type);
     key_data.set_value(key.SerializeAsString());
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
@@ -100,7 +100,7 @@ TEST_F(AesGcmKeyManagerTest, testKeyDataErrors) {
       key.set_version(0);
       key.set_key_value(std::string(len, 'a'));
       KeyData key_data;
-      key_data.set_type_url(key_type_prefix + key.GetDescriptor()->full_name());
+      key_data.set_type_url(aes_gcm_key_type);
       key_data.set_value(key.SerializeAsString());
       auto result = key_manager.GetPrimitive(key_data);
       if (len == 16 || len == 24 || len == 32) {
@@ -193,7 +193,7 @@ TEST_F(AesGcmKeyManagerTest, testPrimitives) {
 
   {  // Using KeyData proto.
     KeyData key_data;
-    key_data.set_type_url(key_type_prefix + key.GetDescriptor()->full_name());
+    key_data.set_type_url(aes_gcm_key_type);
     key_data.set_value(key.SerializeAsString());
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();
@@ -252,8 +252,7 @@ TEST_F(AesGcmKeyManagerTest, testNewKeyBasic) {
     auto result = key_factory.NewKey(key_format);
     EXPECT_TRUE(result.ok()) << result.status();
     auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix + key->GetDescriptor()->full_name(),
-              aes_gcm_key_type);
+    EXPECT_EQ(key_type_prefix + key->GetTypeName(), aes_gcm_key_type);
     std::unique_ptr<AesGcmKey> aes_gcm_key(
         reinterpret_cast<AesGcmKey*>(key.release()));
     EXPECT_EQ(0, aes_gcm_key->version());
@@ -264,8 +263,7 @@ TEST_F(AesGcmKeyManagerTest, testNewKeyBasic) {
     auto result = key_factory.NewKey(key_format.SerializeAsString());
     EXPECT_TRUE(result.ok()) << result.status();
     auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix + key->GetDescriptor()->full_name(),
-              aes_gcm_key_type);
+    EXPECT_EQ(key_type_prefix + key->GetTypeName(), aes_gcm_key_type);
     std::unique_ptr<AesGcmKey> aes_gcm_key(
         reinterpret_cast<AesGcmKey*>(key.release()));
     EXPECT_EQ(0, aes_gcm_key->version());

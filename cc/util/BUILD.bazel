@@ -20,6 +20,8 @@ cc_library(
     deps = [
         "//cc/subtle:common_enums",
         "//proto:common_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
     ],
     strip_include_prefix = "/cc",
     include_prefix = "tink",

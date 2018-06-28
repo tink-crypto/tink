@@ -23,17 +23,21 @@
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/registry.h"
+#include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "proto/tink.pb.h"
+
+namespace crypto {
+namespace tink {
 
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
+using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
-namespace crypto {
-namespace tink {
+namespace {
 
 uint32_t NewKeyId() {
   std::random_device rd;
@@ -41,6 +45,8 @@ uint32_t NewKeyId() {
   std::uniform_int_distribution<uint32_t> dist;
   return dist(gen);
 }
+
+}  // namespace
 
 // static
 StatusOr<std::unique_ptr<KeysetManager>> KeysetManager::New(
@@ -106,6 +112,7 @@ StatusOr<uint32_t> KeysetManager::Rotate(const KeyTemplate& key_template) {
   return key_id;
 }
 
+
 Status KeysetManager::Enable(uint32_t key_id) {
   std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
   for (auto& key : *(keyset_.mutable_key())) {
@@ -115,7 +122,7 @@ Status KeysetManager::Enable(uint32_t key_id) {
         return ToStatusF(util::error::INVALID_ARGUMENT,
                          "Cannot enable key with key_id %" PRIu32
                          " and status %s.",
-                         key_id, KeyStatusType_Name(key.status()).c_str());
+                         key_id, Enums::KeyStatusName(key.status()));
       }
       key.set_status(KeyStatusType::ENABLED);
       return Status::OK;
@@ -140,7 +147,7 @@ Status KeysetManager::Disable(uint32_t key_id) {
         return ToStatusF(util::error::INVALID_ARGUMENT,
                          "Cannot disable key with key_id %" PRIu32
                          " and status %s.",
-                         key_id, KeyStatusType_Name(key.status()).c_str());
+                         key_id, Enums::KeyStatusName(key.status()));
       }
       key.set_status(KeyStatusType::DISABLED);
       return Status::OK;
@@ -188,7 +195,7 @@ Status KeysetManager::Destroy(uint32_t key_id) {
         return ToStatusF(util::error::INVALID_ARGUMENT,
                          "Cannot destroy key with key_id %" PRIu32
                          " and status %s.",
-                         key_id, KeyStatusType_Name(key.status()).c_str());
+                         key_id, Enums::KeyStatusName(key.status()));
       }
       key.clear_key_data();
       key.set_status(KeyStatusType::DESTROYED);

@@ -37,12 +37,12 @@ class KeyFactory {
  public:
   // Generates a new random key, based on the specified 'key_format'.
   virtual
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
-  NewKey(const portable_proto::Message& key_format) const = 0;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
+  NewKey(const portable_proto::MessageLite& key_format) const = 0;
 
   // Generates a new random key, based on the specified 'serialized_key_format'.
   virtual
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const = 0;
 
   // Generates a new random key, based on the specified 'serialized_key_format',
@@ -72,7 +72,7 @@ class KeyManager {
 
   // Constructs an instance of P for the given 'key'.
   virtual crypto::tink::util::StatusOr<std::unique_ptr<P>>
-  GetPrimitive(const portable_proto::Message& key) const = 0;
+  GetPrimitive(const portable_proto::MessageLite& key) const = 0;
 
   // Returns the type_url identifying the key type handled by this manager.
   virtual const std::string& get_key_type() const = 0;

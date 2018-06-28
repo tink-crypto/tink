@@ -599,10 +599,13 @@ ios_unit_test(
 objc_library(
     name = "UnitTestLib",
     testonly = 1,
-    srcs = glob([
-        "Tests/UnitTests/**/*.m",
-        "Tests/UnitTests/**/*.mm",
-    ]),
+    srcs = glob(
+        [
+            "Tests/UnitTests/**/*.m",
+            "Tests/UnitTests/**/*.mm",
+        ],
+        exclude = ["Tests/UnitTests/core/TINKJSONKeysetReaderTest.mm"],
+    ),
     hdrs = glob([
         "Tests/UnitTests/**/*.h",
     ]),

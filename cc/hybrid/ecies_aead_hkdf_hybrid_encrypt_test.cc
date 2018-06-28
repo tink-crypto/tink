@@ -136,7 +136,7 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testBasic) {
               curve, ec_point_format, hash_type, aes_gcm_key_size);
           auto result(EciesAeadHkdfHybridEncrypt::New(ecies_key.public_key()));
           ASSERT_TRUE(result.ok()) << result.status()
-                                   << ecies_key.DebugString();
+                                   << ecies_key.SerializeAsString();
           std::unique_ptr<HybridEncrypt> hybrid_encrypt(
               std::move(result.ValueOrDie()));
 

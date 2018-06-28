@@ -27,6 +27,9 @@
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+
 using crypto::tink::TestUtil;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
@@ -37,9 +40,8 @@ using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
+using google::crypto::tink::OutputPrefixType;
 
-namespace crypto {
-namespace tink {
 namespace {
 
 class KeysetHandleTest : public ::testing::Test {
@@ -131,12 +133,20 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Json) {
         keyset.SerializeAsString(), /* associated_data= */ "").ValueOrDie();
     EncryptedKeyset encrypted_keyset;
     encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
-    portable_proto::util::JsonPrintOptions json_options;
-    json_options.add_whitespace = true;
-    json_options.always_print_primitive_fields = true;
-    std::string json_serialized_encrypted_keyset;
-    auto status = portable_proto::util::MessageToJsonString(
-        encrypted_keyset, &json_serialized_encrypted_keyset, json_options);
+    auto* keyset_info = encrypted_keyset.mutable_keyset_info();
+    keyset_info->set_primary_key_id(42);
+    auto* key_info = keyset_info->add_key_info();
+    key_info->set_key_id(42);
+    key_info->set_type_url("dummy key type");
+    key_info->set_output_prefix_type(OutputPrefixType::TINK);
+    key_info->set_status(KeyStatusType::ENABLED);
+    std::stringbuf buffer;
+    std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
+    auto writer_result = JsonKeysetWriter::New(std::move(destination_stream));
+    ASSERT_TRUE(writer_result.ok()) << writer_result.status();
+    auto status = writer_result.ValueOrDie()->Write(encrypted_keyset);
+    EXPECT_TRUE(status.ok()) << status;
+    std::string json_serialized_encrypted_keyset = buffer.str();
     EXPECT_TRUE(status.ok()) << status;
     auto reader = std::move(JsonKeysetReader::New(
         json_serialized_encrypted_keyset).ValueOrDie());
@@ -211,13 +221,12 @@ TEST_F(KeysetHandleTest, testWriteEncryptedKeyset_Json) {
   // Write the keyset handle and check the result.
   auto status = keyset_handle->WriteEncrypted(aead, writer.get());
   EXPECT_TRUE(status.ok()) << status;
-  EncryptedKeyset encrypted_keyset;
-  auto json_status = portable_proto::util::JsonStringToMessage(
-      buffer.str(), &encrypted_keyset);
-  EXPECT_TRUE(json_status.ok())
-      << "Could not parse JSON from string:\n" << buffer.str() << "\n"
-      << json_status;
-  auto decrypt_result = aead.Decrypt(encrypted_keyset.encrypted_keyset(),
+  auto reader_result = JsonKeysetReader::New(buffer.str());
+  EXPECT_TRUE(reader_result.ok()) << reader_result.status();
+  auto read_encrypted_result = reader_result.ValueOrDie()->ReadEncrypted();
+  EXPECT_TRUE(read_encrypted_result.ok()) << read_encrypted_result.status();
+  auto encrypted_keyset = std::move(read_encrypted_result.ValueOrDie());
+  auto decrypt_result = aead.Decrypt(encrypted_keyset->encrypted_keyset(),
                                      /* associated_data= */ "");
   EXPECT_TRUE(decrypt_result.status().ok()) << decrypt_result.status();
   auto decrypted = decrypt_result.ValueOrDie();
@@ -239,7 +248,7 @@ TEST_F(KeysetHandleTest, testGenerateNewKeysetHandle) {
   for (auto templ : key_templates) {
     auto handle_result = KeysetHandle::GenerateNew(*templ);
     EXPECT_TRUE(handle_result.ok())
-        << "Failed for template:\n " << templ->DebugString()
+        << "Failed for template:\n " << templ->SerializeAsString()
         << "\n with status: "<< handle_result.status();
   }
 }

@@ -21,8 +21,8 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
-#include "include/json/reader.h"
-#include "include/json/value.h"
+#include "include/rapidjson/document.h"
+#include "include/rapidjson/istreamwrapper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/subtle/common_enums.h"
@@ -61,8 +61,8 @@ std::string HexDecodeOrDie(absl::string_view hex) {
 
 }  // namespace
 
-std::string WycheproofUtil::GetBytes(const Json::Value &val) {
-  std::string s = val.asString();
+std::string WycheproofUtil::GetBytes(const rapidjson::Value &val) {
+  std::string s(val.GetString());
   if (s.size() % 2 != 0) {
     // ECDH private key may have odd length.
     s = "0" + s;
@@ -70,18 +70,24 @@ std::string WycheproofUtil::GetBytes(const Json::Value &val) {
   return HexDecodeOrDie(s);
 }
 
-std::unique_ptr<Json::Value>
+std::unique_ptr<rapidjson::Document>
 WycheproofUtil::ReadTestVectors(const std::string &filename) {
   const std::string kTestVectors = "../wycheproof/testvectors/";
-  std::ifstream input;
-  input.open(kTestVectors + filename);
-  std::unique_ptr<Json::Value> root(new Json::Value);
-  input >> (*root);
+  std::ifstream input_stream;
+  input_stream.open(kTestVectors + filename);
+  rapidjson::IStreamWrapper input(input_stream);
+  std::unique_ptr<rapidjson::Document> root(
+      new rapidjson::Document(rapidjson::kObjectType));
+  if (root->ParseStream(input).HasParseError()) {
+    std::cerr << "Failure parsing of test vectors from "
+              << kTestVectors + filename << "\n";
+    exit(1);
+  }
   return root;
 }
 
-HashType WycheproofUtil::GetHashType(const Json::Value &val) {
-  std::string md = val.asString();
+HashType WycheproofUtil::GetHashType(const rapidjson::Value &val) {
+  std::string md(val.GetString());
   if (md == "SHA-1") {
     return HashType::SHA1;
   } else if (md == "SHA-256") {
@@ -96,8 +102,8 @@ HashType WycheproofUtil::GetHashType(const Json::Value &val) {
 }
 
 EllipticCurveType
-WycheproofUtil::GetEllipticCurveType(const Json::Value &val) {
-  std::string curve = val.asString();
+WycheproofUtil::GetEllipticCurveType(const rapidjson::Value &val) {
+  std::string curve(val.GetString());
   if (curve == "secp256r1") {
     return EllipticCurveType::NIST_P256;
   } else if (curve == "secp384r1") {

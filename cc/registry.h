@@ -112,7 +112,7 @@ class Registry {
   // and calls manager's GetPrimitive(key)-method.
   template <class P>
   static crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      const std::string& type_url, const portable_proto::Message& key);
+      const std::string& type_url, const portable_proto::MessageLite& key);
 
   // Creates a set of primitives corresponding to the keys with
   // (status == ENABLED) in the keyset given in 'keyset_handle',
@@ -298,7 +298,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
 // static
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> Registry::GetPrimitive(
-    const std::string& type_url, const portable_proto::Message& key) {
+    const std::string& type_url, const portable_proto::MessageLite& key) {
   auto key_manager_result = get_key_manager<P>(type_url);
   if (key_manager_result.ok()) {
     return key_manager_result.ValueOrDie()->GetPrimitive(key);

@@ -19,6 +19,8 @@
 #include <string>
 #include <vector>
 
+#include "absl/strings/str_cat.h"
+#include "include/rapidjson/document.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -105,27 +107,27 @@ static std::string GetError() {
 
 
 // Test with test vectors from Wycheproof project.
-bool WycheproofTest(const Json::Value &root) {
+bool WycheproofTest(const rapidjson::Document &root) {
   int errors = 0;
-  for (const Json::Value& test_group : root["testGroups"]) {
-    const size_t iv_size = test_group["ivSize"].asInt();
-    const size_t key_size = test_group["keySize"].asInt();
-    const size_t tag_size = test_group["tagSize"].asInt();
+  for (const rapidjson::Value& test_group : root["testGroups"].GetArray()) {
+    const size_t iv_size = test_group["ivSize"].GetInt();
+    const size_t key_size = test_group["keySize"].GetInt();
+    const size_t tag_size = test_group["tagSize"].GetInt();
     // AesGcmBoringSsl only supports 12-byte IVs and 16-byte authentication tag.
     if (iv_size != 96 || tag_size != 128) {
       // Not supported
       continue;
     }
-    for (const Json::Value& test : test_group["tests"]) {
-      std::string comment = test["comment"].asString();
+    for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
+      std::string comment = test["comment"].GetString();
       std::string key = WycheproofUtil::GetBytes(test["key"]);
       std::string iv = WycheproofUtil::GetBytes(test["iv"]);
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);
       std::string ct = WycheproofUtil::GetBytes(test["ct"]);
       std::string aad = WycheproofUtil::GetBytes(test["aad"]);
       std::string tag = WycheproofUtil::GetBytes(test["tag"]);
-      std::string id = test["tcId"].asString();
-      std::string expected = test["result"].asString();
+      std::string id = absl::StrCat(test["tcId"].GetInt());
+      std::string expected = test["result"].GetString();
       auto cipher =
          std::move(AesGcmBoringSsl::New(key).ValueOrDie());
       auto result = cipher->Decrypt(iv + ct + tag, aad);
@@ -156,7 +158,7 @@ bool WycheproofTest(const Json::Value &root) {
 }
 
 TEST(AesGcmBoringSslTest, TestVectors) {
-  std::unique_ptr<Json::Value> root =
+  std::unique_ptr<rapidjson::Document> root =
       WycheproofUtil::ReadTestVectors("aes_gcm_test.json");
   ASSERT_TRUE(WycheproofTest(*root));
 }

@@ -33,19 +33,19 @@
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+
 using google::crypto::tink::HashType;
 using google::crypto::tink::HmacKey;
 using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::HmacParams;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
-using portable_proto::Message;
+using portable_proto::MessageLite;
+using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-
-
-namespace crypto {
-namespace tink {
 
 class HmacKeyFactory : public KeyFactory {
  public:
@@ -53,13 +53,13 @@ class HmacKeyFactory : public KeyFactory {
 
   // Generates a new random HmacKey, based on the specified 'key_format',
   // which must contain HmacKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
-  NewKey(const portable_proto::Message& key_format) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
+  NewKey(const portable_proto::MessageLite& key_format) const override;
 
 
   // Generates a new random HmacKey, based on the specified
   // 'serialized_key_format', which must contain HmacKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const override;
 
   // Generates a new random HmacKey, based on the specified
@@ -69,10 +69,10 @@ class HmacKeyFactory : public KeyFactory {
   NewKeyData(absl::string_view serialized_key_format) const override;
 };
 
-StatusOr<std::unique_ptr<Message>> HmacKeyFactory::NewKey(
-    const portable_proto::Message& key_format) const {
-  std::string key_format_url = std::string(HmacKeyManager::kKeyTypePrefix)
-      + key_format.GetDescriptor()->full_name();
+StatusOr<std::unique_ptr<MessageLite>> HmacKeyFactory::NewKey(
+    const portable_proto::MessageLite& key_format) const {
+  std::string key_format_url =
+      std::string(HmacKeyManager::kKeyTypePrefix) + key_format.GetTypeName();
   if (key_format_url != HmacKeyManager::kKeyFormatUrl) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Key format proto '%s' is not supported by this manager.",
@@ -89,11 +89,11 @@ StatusOr<std::unique_ptr<Message>> HmacKeyFactory::NewKey(
   *(hmac_key->mutable_params()) = hmac_key_format.params();
   hmac_key->set_key_value(
       subtle::Random::GetRandomBytes(hmac_key_format.key_size()));
-  std::unique_ptr<Message> key = std::move(hmac_key);
+  std::unique_ptr<MessageLite> key = std::move(hmac_key);
   return std::move(key);
 }
 
-StatusOr<std::unique_ptr<Message>> HmacKeyFactory::NewKey(
+StatusOr<std::unique_ptr<MessageLite>> HmacKeyFactory::NewKey(
     absl::string_view serialized_key_format) const {
   HmacKeyFormat key_format;
   if (!key_format.ParseFromString(std::string(serialized_key_format))) {
@@ -158,9 +158,8 @@ HmacKeyManager::GetPrimitive(const KeyData& key_data) const {
 }
 
 StatusOr<std::unique_ptr<Mac>>
-HmacKeyManager::GetPrimitive(const Message& key) const {
-  std::string key_type =
-      std::string(kKeyTypePrefix) + key.GetDescriptor()->full_name();
+HmacKeyManager::GetPrimitive(const MessageLite& key) const {
+  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
   if (DoesSupport(key_type)) {
     const HmacKey& hmac_key = reinterpret_cast<const HmacKey&>(key);
     return GetPrimitiveImpl(hmac_key);
@@ -196,12 +195,12 @@ Status HmacKeyManager::Validate(const HmacParams& params) {
   if (max_tag_size.find(params.hash()) == max_tag_size.end()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid HmacParams: HashType '%s' not supported.",
-                     HashType_Name(params.hash()).c_str());
+                     Enums::HashName(params.hash()));
   } else {
     if (params.tag_size() > max_tag_size[params.hash()]) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
           "Invalid HmacParams: tag_size %d is too big for HashType '%s'.",
-          params.tag_size(), HashType_Name(params.hash()).c_str());
+          params.tag_size(), Enums::HashName(params.hash()));
     }
   }
   return Status::OK;

@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "absl/strings/str_cat.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -215,12 +216,12 @@ static std::string GetError() {
 // Currently AesEaxBoringSsl is restricted to encryption with 12 byte
 // IVs and 16 byte tags. Therefore it is necessary to skip tests with
 // other parameter sizes.
-bool WycheproofTest(const Json::Value &root) {
+bool WycheproofTest(const rapidjson::Document &root) {
   int errors = 0;
-  for (const Json::Value& test_group : root["testGroups"]) {
-    const size_t iv_size = test_group["ivSize"].asInt();
-    const size_t key_size = test_group["keySize"].asInt();
-    const size_t tag_size = test_group["tagSize"].asInt();
+  for (const rapidjson::Value& test_group : root["testGroups"].GetArray()) {
+    const size_t iv_size = test_group["ivSize"].GetInt();
+    const size_t key_size = test_group["keySize"].GetInt();
+    const size_t tag_size = test_group["tagSize"].GetInt();
     if (key_size != 128 && key_size != 256) {
       // Not supported
       continue;
@@ -233,16 +234,16 @@ bool WycheproofTest(const Json::Value &root) {
       // Not supported
       continue;
     }
-    for (const Json::Value& test : test_group["tests"]) {
-      std::string comment = test["comment"].asString();
+    for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
+      std::string comment = test["comment"].GetString();
       std::string key = WycheproofUtil::GetBytes(test["key"]);
       std::string iv = WycheproofUtil::GetBytes(test["iv"]);
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);
       std::string ct = WycheproofUtil::GetBytes(test["ct"]);
       std::string aad = WycheproofUtil::GetBytes(test["aad"]);
       std::string tag = WycheproofUtil::GetBytes(test["tag"]);
-      std::string id = test["tcId"].asString();
-      std::string expected = test["result"].asString();
+      std::string id = absl::StrCat(test["tcId"].GetInt());
+      std::string expected = test["result"].GetString();
       auto cipher =
          std::move(AesEaxBoringSsl::New(key, iv_size / 8).ValueOrDie());
       auto result = cipher->Decrypt(iv + ct + tag, aad);
@@ -273,7 +274,7 @@ bool WycheproofTest(const Json::Value &root) {
 }
 
 TEST(AesEaxBoringSslTest, TestVectors) {
-  std::unique_ptr<Json::Value> root =
+  std::unique_ptr<rapidjson::Document> root =
       WycheproofUtil::ReadTestVectors("aes_eax_test.json");
   ASSERT_TRUE(WycheproofTest(*root));
 }

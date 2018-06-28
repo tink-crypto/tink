@@ -16,8 +16,6 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 
-#include <map>
-
 #include "absl/strings/string_view.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"
@@ -30,18 +28,17 @@
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
 using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfParams;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
-using portable_proto::Message;
+using portable_proto::MessageLite;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-
-
-namespace crypto {
-namespace tink {
 
 class EciesAeadHkdfPrivateKeyFactory : public KeyFactory {
  public:
@@ -49,13 +46,13 @@ class EciesAeadHkdfPrivateKeyFactory : public KeyFactory {
 
   // Generates a new random EciesAeadHkdfPrivateKey, based on
   // the given 'key_format', which must contain EciesAeadHkdfKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
-  NewKey(const portable_proto::Message& key_format) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
+  NewKey(const portable_proto::MessageLite& key_format) const override;
 
   // Generates a new random EciesAeadHkdfPrivateKey, based on
   // the given 'serialized_key_format', which must contain
   // EciesAeadHkdfKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const override;
 
   // Generates a new random EciesAeadHkdfPrivateKey based on
@@ -65,12 +62,12 @@ class EciesAeadHkdfPrivateKeyFactory : public KeyFactory {
   NewKeyData(absl::string_view serialized_key_format) const override;
 };
 
-StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPrivateKeyFactory::NewKey(
-    const portable_proto::Message& key_format) const {
+StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPrivateKeyFactory::NewKey(
+    const portable_proto::MessageLite& key_format) const {
   return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
 }
 
-StatusOr<std::unique_ptr<Message>> EciesAeadHkdfPrivateKeyFactory::NewKey(
+StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPrivateKeyFactory::NewKey(
     absl::string_view serialized_key_format) const {
   return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
 }
@@ -118,9 +115,8 @@ EciesAeadHkdfPrivateKeyManager::GetPrimitive(const KeyData& key_data) const {
 }
 
 StatusOr<std::unique_ptr<HybridDecrypt>>
-EciesAeadHkdfPrivateKeyManager::GetPrimitive(const Message& key) const {
-  std::string key_type =
-      std::string(kKeyTypePrefix) + key.GetDescriptor()->full_name();
+EciesAeadHkdfPrivateKeyManager::GetPrimitive(const MessageLite& key) const {
+  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
   if (DoesSupport(key_type)) {
     const EciesAeadHkdfPrivateKey& ecies_private_key =
         reinterpret_cast<const EciesAeadHkdfPrivateKey&>(key);

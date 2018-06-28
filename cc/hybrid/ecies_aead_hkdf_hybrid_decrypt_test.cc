@@ -143,7 +143,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
 
             auto result(EciesAeadHkdfHybridDecrypt::New(ecies_key));
             ASSERT_TRUE(result.ok()) << result.status()
-                                     << ecies_key.DebugString();
+                                     << ecies_key.SerializeAsString();
             std::unique_ptr<HybridDecrypt> hybrid_decrypt(
                 std::move(result.ValueOrDie()));
 

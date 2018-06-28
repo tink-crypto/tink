@@ -18,7 +18,7 @@
 #define TINK_SUBTLE_WYCHEPROOF_UTIL_H_
 
 #include <memory>
-#include "include/json/value.h"
+#include "include/rapidjson/document.h"
 #include "tink/subtle/common_enums.h"
 
 namespace crypto {
@@ -32,15 +32,16 @@ class WycheproofUtil {
  public:
   // Converts a JSON value into a byte array.
   // Byte arrays are always hexadecimal representation.
-  static std::string GetBytes(const Json::Value &val);
+  static std::string GetBytes(const rapidjson::Value &val);
 
   // Reads test vector from a file.
   // The filename is relative to the directory with the test vectors.
-  static std::unique_ptr<Json::Value> ReadTestVectors(const std::string &filename);
+  static std::unique_ptr<rapidjson::Document> ReadTestVectors(
+      const std::string &filename);
 
-  static HashType GetHashType(const Json::Value &val);
+  static HashType GetHashType(const rapidjson::Value &val);
 
-  static EllipticCurveType GetEllipticCurveType(const Json::Value &val);
+  static EllipticCurveType GetEllipticCurveType(const rapidjson::Value &val);
 };
 
 }  // namespace subtle

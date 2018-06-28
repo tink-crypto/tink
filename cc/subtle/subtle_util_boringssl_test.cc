@@ -19,6 +19,8 @@
 #include <string>
 #include <vector>
 
+#include "absl/strings/str_cat.h"
+#include "include/rapidjson/document.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ec_util.h"
 #include "tink/subtle/wycheproof_util.h"
@@ -129,10 +131,10 @@ static std::string GetError() {
 }
 
 // Test with test vectors from Wycheproof project.
-bool WycheproofTest(const Json::Value &root) {
+bool WycheproofTest(const rapidjson::Value &root) {
   int errors = 0;
-  for (const Json::Value& test_group : root["testGroups"]) {
-    std::string curve_str = test_group["curve"].asString();
+  for (const rapidjson::Value& test_group : root["testGroups"].GetArray()) {
+    std::string curve_str = test_group["curve"].GetString();
     // Tink only supports secp256r1, secp384r1 or secp521r1.
     if (!(curve_str == "secp256r1" || curve_str == "secp384r1"
           || curve_str == "secp521r1")) {
@@ -140,16 +142,16 @@ bool WycheproofTest(const Json::Value &root) {
     }
     EllipticCurveType curve = WycheproofUtil::GetEllipticCurveType(
         test_group["curve"]);
-    for (const Json::Value& test : test_group["tests"]) {
-      std::string id = test["tcId"].asString();
-      std::string comment = test["comment"].asString();
+    for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
+      std::string id = absl::StrCat(test["tcId"].GetInt());
+      std::string comment = test["comment"].GetString();
       std::string pub_bytes = WycheproofUtil::GetBytes(test["public"]);
       std::string priv_bytes = WycheproofUtil::GetBytes(test["private"]);
       std::string expected_shared_bytes = WycheproofUtil::GetBytes(test["shared"]);
-      std::string result = test["result"].asString();
+      std::string result = test["result"].GetString();
       EcPointFormat format = EcPointFormat::UNCOMPRESSED;
-      for (const Json::Value& flag : test["flags"]) {
-        if (flag.asString() == "CompressedPoint") {
+      for (const rapidjson::Value& flag : test["flags"].GetArray()) {
+        if (std::string(flag.GetString()) == "CompressedPoint") {
           format = EcPointFormat::COMPRESSED;
         }
       }
@@ -161,8 +163,8 @@ bool WycheproofTest(const Json::Value &root) {
       //  + The suffix of ASN encoding is X9.62 format point encoding.
       // TODO(quannguyen): Use X9.62 test vectors once it's available.
       bool skip = false;
-      for (const Json::Value& flag : test["flags"]) {
-        if (flag.asString() == "UnnamedCurve") {
+      for (const rapidjson::Value& flag : test["flags"].GetArray()) {
+        if (std::string(flag.GetString()) == "UnnamedCurve") {
           skip = true;
           break;
         }

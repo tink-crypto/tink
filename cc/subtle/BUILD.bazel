@@ -288,7 +288,7 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "@com_google_absl//absl/strings",
-        "@jsoncpp//:jsoncpp",
+        "@rapidjson//:rapidjson",
     ],
     strip_include_prefix = "/cc",
     include_prefix = "tink",
@@ -388,7 +388,9 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+        "@rapidjson//:rapidjson",
     ],
 )
 
@@ -408,7 +410,9 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+        "@rapidjson//:rapidjson",
     ],
 )
 
@@ -483,8 +487,9 @@ cc_test(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:test_util",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@jsoncpp//:jsoncpp",
+        "@rapidjson//:rapidjson",
     ],
 )
 
@@ -529,6 +534,8 @@ cc_test(
         "//cc/util:statusor",
         "//cc/util:test_util",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+        "@rapidjson//:rapidjson",
     ],
 )

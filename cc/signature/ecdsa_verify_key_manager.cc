@@ -16,8 +16,6 @@
 
 #include "tink/signature/ecdsa_verify_key_manager.h"
 
-#include <map>
-
 #include "absl/strings/string_view.h"
 #include "tink/public_key_verify.h"
 #include "tink/key_manager.h"
@@ -32,6 +30,9 @@
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+
 using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaParams;
 using google::crypto::tink::EcdsaPublicKey;
@@ -39,24 +40,21 @@ using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
-using portable_proto::Message;
+using portable_proto::MessageLite;
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-
-namespace crypto {
-namespace tink {
 
 class EcdsaPublicKeyFactory : public KeyFactory {
  public:
   EcdsaPublicKeyFactory() {}
 
   // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
-  NewKey(const portable_proto::Message& key_format) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
+  NewKey(const portable_proto::MessageLite& key_format) const override;
 
   // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const override;
 
   // Not implemented for public keys.
@@ -64,14 +62,14 @@ class EcdsaPublicKeyFactory : public KeyFactory {
   NewKeyData(absl::string_view serialized_key_format) const override;
 };
 
-StatusOr<std::unique_ptr<Message>> EcdsaPublicKeyFactory::NewKey(
-    const portable_proto::Message& key_format) const {
+StatusOr<std::unique_ptr<MessageLite>> EcdsaPublicKeyFactory::NewKey(
+    const portable_proto::MessageLite& key_format) const {
   return util::Status(util::error::UNIMPLEMENTED,
                       "Operation not supported for public keys, "
                       "please use the EcdsaSignKeyManager.");
 }
 
-StatusOr<std::unique_ptr<Message>> EcdsaPublicKeyFactory::NewKey(
+StatusOr<std::unique_ptr<MessageLite>> EcdsaPublicKeyFactory::NewKey(
     absl::string_view serialized_key_format) const {
   return util::Status(util::error::UNIMPLEMENTED,
                       "Operation not supported for public keys, "
@@ -123,9 +121,8 @@ EcdsaVerifyKeyManager::GetPrimitive(const KeyData& key_data) const {
 }
 
 StatusOr<std::unique_ptr<PublicKeyVerify>>
-EcdsaVerifyKeyManager::GetPrimitive(const Message& key) const {
-  std::string key_type =
-      std::string(kKeyTypePrefix) + key.GetDescriptor()->full_name();
+EcdsaVerifyKeyManager::GetPrimitive(const MessageLite& key) const {
+  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
   if (DoesSupport(key_type)) {
     const EcdsaPublicKey& ecdsa_public_key =
         reinterpret_cast<const EcdsaPublicKey&>(key);

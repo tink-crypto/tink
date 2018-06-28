@@ -93,7 +93,7 @@ StatusOr<std::unique_ptr<Aead>> EciesAeadHkdfDemHelper::GetAead(
 }
 
 bool EciesAeadHkdfDemHelper::ReplaceKeyBytes(
-    const std::string& key_bytes, portable_proto::Message* proto) const {
+    const std::string& key_bytes, portable_proto::MessageLite* proto) const {
   if (dem_key_type_ == AES_GCM_KEY) {
     AesGcmKey* key = reinterpret_cast<AesGcmKey*>(proto);
     key->set_key_value(key_bytes);

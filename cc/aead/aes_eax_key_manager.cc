@@ -34,7 +34,7 @@ using google::crypto::tink::AesEaxKey;
 using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
-using portable_proto::Message;
+using portable_proto::MessageLite;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
@@ -44,12 +44,12 @@ class AesEaxKeyFactory : public KeyFactory {
 
   // Generates a new random AesEaxKey, based on the specified 'key_format',
   // which must contain AesEaxKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
-  NewKey(const portable_proto::Message& key_format) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
+  NewKey(const portable_proto::MessageLite& key_format) const override;
 
   // Generates a new random AesEaxKey, based on the specified
   // 'serialized_key_format', which must contain AesEaxKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const override;
 
   // Generates a new random AesEaxKey, based on the specified
@@ -59,8 +59,8 @@ class AesEaxKeyFactory : public KeyFactory {
   NewKeyData(absl::string_view serialized_key_format) const override;
 };
 
-StatusOr<std::unique_ptr<Message>> AesEaxKeyFactory::NewKey(
-    const portable_proto::Message& key_format) const {
+StatusOr<std::unique_ptr<MessageLite>> AesEaxKeyFactory::NewKey(
+    const portable_proto::MessageLite& key_format) const {
   std::string key_format_url =
       std::string(AesEaxKeyManager::kKeyTypePrefix) + key_format.GetTypeName();
   if (key_format_url != AesEaxKeyManager::kKeyFormatUrl) {
@@ -80,11 +80,11 @@ StatusOr<std::unique_ptr<Message>> AesEaxKeyFactory::NewKey(
       subtle::Random::GetRandomBytes(aes_eax_key_format.key_size()));
   aes_eax_key->mutable_params()
       ->set_iv_size(aes_eax_key_format.params().iv_size());
-  std::unique_ptr<Message> key = std::move(aes_eax_key);
+  std::unique_ptr<MessageLite> key = std::move(aes_eax_key);
   return std::move(key);
 }
 
-StatusOr<std::unique_ptr<Message>> AesEaxKeyFactory::NewKey(
+StatusOr<std::unique_ptr<MessageLite>> AesEaxKeyFactory::NewKey(
     absl::string_view serialized_key_format) const {
   AesEaxKeyFormat key_format;
   if (!key_format.ParseFromString(std::string(serialized_key_format))) {
@@ -146,9 +146,8 @@ AesEaxKeyManager::GetPrimitive(const KeyData& key_data) const {
 }
 
 StatusOr<std::unique_ptr<Aead>>
-AesEaxKeyManager::GetPrimitive(const Message& key) const {
-  std::string key_type =
-      std::string(kKeyTypePrefix) + key.GetDescriptor()->full_name();
+AesEaxKeyManager::GetPrimitive(const MessageLite& key) const {
+  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
   if (DoesSupport(key_type)) {
     const AesEaxKey& aes_eax_key = reinterpret_cast<const AesEaxKey&>(key);
     return GetPrimitiveImpl(aes_eax_key);

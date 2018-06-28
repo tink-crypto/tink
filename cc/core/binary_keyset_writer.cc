@@ -35,7 +35,7 @@ namespace tink {
 
 namespace {
 
-util::Status WriteProto(const portable_proto::Message& proto,
+util::Status WriteProto(const portable_proto::MessageLite& proto,
                         std::ostream* destination) {
   std::string serialized_proto;
   (*destination) << proto.SerializeAsString();

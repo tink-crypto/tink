@@ -49,7 +49,7 @@ class HmacKeyManager : public KeyManager<Mac> {
   // Constructs an instance of HMAC-Mac for the given 'key',
   // which must be HmacKey-proto.
   crypto::tink::util::StatusOr<std::unique_ptr<Mac>>
-  GetPrimitive(const portable_proto::Message& key) const override;
+  GetPrimitive(const portable_proto::MessageLite& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;

@@ -17,16 +17,18 @@
 #ifndef TINK_UTIL_ENUMS_H_
 #define TINK_UTIL_ENUMS_H_
 
+#include "absl/strings/string_view.h"
 #include "tink/subtle/common_enums.h"
 #include "proto/common.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 namespace util {
 
 
-// Helpers for translation between protocol buffer enums and
-// common enums used in subtle.
+// Helpers for translation of common enums between protocol buffer enums,
+// their std::string representation, and common enums used in subtle.
 class Enums {
  public:
   // EllipticCurveType.
@@ -49,6 +51,22 @@ class Enums {
 
   static crypto::tink::subtle::HashType ProtoToSubtle(
       google::crypto::tink::HashType type);
+
+  // Printable names for common enums.
+  static const char* KeyStatusName(
+      google::crypto::tink::KeyStatusType key_status_type);
+  static const char* HashName(google::crypto::tink::HashType hash_type);
+  static const char* KeyMaterialName(
+      google::crypto::tink::KeyData::KeyMaterialType key_material_type);
+  static const char* OutputPrefixName(
+      google::crypto::tink::OutputPrefixType output_prefix_type);
+
+  static google::crypto::tink::KeyStatusType KeyStatus(absl::string_view name);
+  static google::crypto::tink::HashType Hash(absl::string_view name);
+  static google::crypto::tink::KeyData::KeyMaterialType KeyMaterial(
+      absl::string_view name);
+  static google::crypto::tink::OutputPrefixType OutputPrefix(
+      absl::string_view name);
 };
 
 }  // namespace util

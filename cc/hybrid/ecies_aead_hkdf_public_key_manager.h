@@ -49,7 +49,7 @@ class EciesAeadHkdfPublicKeyManager : public KeyManager<HybridEncrypt> {
   // Constructs an instance of ECIES-AEAD-HKDF HybridEncrypt
   // for the given 'key', which must be EciesAeadHkdfPublicKey-proto.
   crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>>
-  GetPrimitive(const portable_proto::Message& key) const override;
+  GetPrimitive(const portable_proto::MessageLite& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;

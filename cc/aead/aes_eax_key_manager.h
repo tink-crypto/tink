@@ -47,7 +47,7 @@ class AesEaxKeyManager : public KeyManager<Aead> {
   // Constructs an instance of AES-EAX Aead for the given 'key',
   // which must be AesEaxKey-proto.
   crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
-  GetPrimitive(const portable_proto::Message& key) const override;
+  GetPrimitive(const portable_proto::MessageLite& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;

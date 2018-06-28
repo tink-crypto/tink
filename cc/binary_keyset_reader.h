@@ -37,7 +37,6 @@ class BinaryKeysetReader : public KeysetReader {
   static crypto::tink::util::StatusOr<std::unique_ptr<BinaryKeysetReader>> New(
       absl::string_view serialized_keyset);
 
-
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::Keyset>>
   Read() override;
 
@@ -46,10 +45,10 @@ class BinaryKeysetReader : public KeysetReader {
   ReadEncrypted() override;
 
  private:
-  BinaryKeysetReader(std::unique_ptr<std::istream> keyset_stream)
-      : keyset_stream_(std::move(keyset_stream)) {}
+  BinaryKeysetReader(absl::string_view serialized_keyset)
+      : serialized_keyset_(serialized_keyset) {}
 
-  std::unique_ptr<std::istream> keyset_stream_;
+  std::string serialized_keyset_;
 };
 
 }  // namespace tink

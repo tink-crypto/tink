@@ -29,6 +29,9 @@
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+
 using google::crypto::tink::AesEaxKey;
 using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
@@ -38,9 +41,6 @@ using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 
-
-namespace crypto {
-namespace tink {
 namespace {
 
 class EciesAeadHkdfPrivateKeyManagerTest : public ::testing::Test {
@@ -52,7 +52,7 @@ class EciesAeadHkdfPrivateKeyManagerTest : public ::testing::Test {
   }
 
   std::string key_type_prefix = "type.googleapis.com/";
-  std::string aes_gcm_key_type =
+  std::string ecies_private_key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
 };
 
@@ -84,7 +84,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyDataErrors) {
 
   {  // Bad key value.
     KeyData key_data;
-    key_data.set_type_url(aes_gcm_key_type);
+    key_data.set_type_url(ecies_private_key_type);
     key_data.set_value("some bad serialized proto");
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
@@ -97,7 +97,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     EciesAeadHkdfPrivateKey key;
     key.set_version(1);
-    key_data.set_type_url(key_type_prefix + key.GetDescriptor()->full_name());
+    key_data.set_type_url(ecies_private_key_type);
     key_data.set_value(key.SerializeAsString());
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
@@ -145,7 +145,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPrimitives) {
 
   {  // Using KeyData proto.
     KeyData key_data;
-    key_data.set_type_url(key_type_prefix + key.GetDescriptor()->full_name());
+    key_data.set_type_url(ecies_private_key_type);
     key_data.set_value(key.SerializeAsString());
     auto result = private_key_manager.GetPrimitive(key_data);
     EXPECT_TRUE(result.ok()) << result.status();

@@ -16,8 +16,6 @@
 
 #include "tink/aead/aes_gcm_key_manager.h"
 
-#include <map>
-
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/key_manager.h"
@@ -31,17 +29,16 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
-using portable_proto::Message;
+using portable_proto::MessageLite;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-
-
-namespace crypto {
-namespace tink {
 
 class AesGcmKeyFactory : public KeyFactory {
  public:
@@ -49,12 +46,12 @@ class AesGcmKeyFactory : public KeyFactory {
 
   // Generates a new random AesGcmKey, based on the specified 'key_format',
   // which must contain AesGcmKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
-  NewKey(const portable_proto::Message& key_format) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
+  NewKey(const portable_proto::MessageLite& key_format) const override;
 
   // Generates a new random AesGcmKey, based on the specified
   // 'serialized_key_format', which must contain AesGcmKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const override;
 
   // Generates a new random AesGcmKey, based on the specified
@@ -64,10 +61,10 @@ class AesGcmKeyFactory : public KeyFactory {
   NewKeyData(absl::string_view serialized_key_format) const override;
 };
 
-StatusOr<std::unique_ptr<Message>> AesGcmKeyFactory::NewKey(
-    const portable_proto::Message& key_format) const {
-  std::string key_format_url = std::string(AesGcmKeyManager::kKeyTypePrefix)
-      + key_format.GetDescriptor()->full_name();
+StatusOr<std::unique_ptr<MessageLite>> AesGcmKeyFactory::NewKey(
+    const portable_proto::MessageLite& key_format) const {
+  std::string key_format_url =
+      std::string(AesGcmKeyManager::kKeyTypePrefix) + key_format.GetTypeName();
   if (key_format_url != AesGcmKeyManager::kKeyFormatUrl) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Key format proto '%s' is not supported by this manager.",
@@ -83,11 +80,11 @@ StatusOr<std::unique_ptr<Message>> AesGcmKeyFactory::NewKey(
   aes_gcm_key->set_version(AesGcmKeyManager::kVersion);
   aes_gcm_key->set_key_value(
       subtle::Random::GetRandomBytes(aes_gcm_key_format.key_size()));
-  std::unique_ptr<Message> key = std::move(aes_gcm_key);
+  std::unique_ptr<MessageLite> key = std::move(aes_gcm_key);
   return std::move(key);
 }
 
-StatusOr<std::unique_ptr<Message>> AesGcmKeyFactory::NewKey(
+StatusOr<std::unique_ptr<MessageLite>> AesGcmKeyFactory::NewKey(
     absl::string_view serialized_key_format) const {
   AesGcmKeyFormat key_format;
   if (!key_format.ParseFromString(std::string(serialized_key_format))) {
@@ -151,9 +148,8 @@ AesGcmKeyManager::GetPrimitive(const KeyData& key_data) const {
 }
 
 StatusOr<std::unique_ptr<Aead>>
-AesGcmKeyManager::GetPrimitive(const Message& key) const {
-  std::string key_type =
-      std::string(kKeyTypePrefix) + key.GetDescriptor()->full_name();
+AesGcmKeyManager::GetPrimitive(const MessageLite& key) const {
+  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
   if (DoesSupport(key_type)) {
     const AesGcmKey& aes_gcm_key = reinterpret_cast<const AesGcmKey&>(key);
     return GetPrimitiveImpl(aes_gcm_key);

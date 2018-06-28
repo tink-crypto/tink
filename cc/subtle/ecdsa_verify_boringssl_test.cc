@@ -18,7 +18,8 @@
 
 #include <string>
 
-#include "include/json/reader.h"
+#include "absl/strings/str_cat.h"
+#include "include/rapidjson/document.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ecdsa_sign_boringssl.h"
@@ -39,8 +40,11 @@ class EcdsaSignBoringSslTest : public ::testing::Test {
 };
 
 TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
-  auto ec_key = SubtleUtilBoringSSL::GetNewEcKey(
-      EllipticCurveType::NIST_P256).ValueOrDie();
+  auto ec_key_result = SubtleUtilBoringSSL::GetNewEcKey(
+      EllipticCurveType::NIST_P256);
+  ASSERT_TRUE(ec_key_result.ok()) << ec_key_result.status();
+  auto ec_key = std::move(ec_key_result.ValueOrDie());
+
   auto signer_result = EcdsaSignBoringSsl::New(ec_key, HashType::SHA256);
   ASSERT_TRUE(signer_result.ok()) << signer_result.status();
   auto signer = std::move(signer_result.ValueOrDie());
@@ -50,7 +54,9 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
   auto verifier = std::move(verifier_result.ValueOrDie());
 
   std::string message = "some data to be signed";
-  std::string signature = signer->Sign(message).ValueOrDie();
+  auto sign_result = signer->Sign(message);
+  ASSERT_TRUE(sign_result.ok()) << sign_result.status();
+  std::string signature = sign_result.ValueOrDie();
   EXPECT_NE(signature, message);
   auto status = verifier->Verify(signature, message);
   EXPECT_TRUE(status.ok()) << status;
@@ -73,8 +79,8 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
 // they are values from the key: a convention in Wycheproof is that parameters
 // in the test group are valid, only values in the test vector itself may
 // be invalid.
-static std::string GetInteger(const Json::Value &val) {
-  std::string hex = val.asString();
+static std::string GetInteger(const rapidjson::Value &val) {
+  std::string hex(val.GetString());
   // Since val is a hexadecimal integer it can have an odd length.
   if (hex.size() % 2 == 1) {
     // Avoid a leading 0 byte.
@@ -88,13 +94,17 @@ static std::string GetInteger(const Json::Value &val) {
 }
 
 static util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>>
-GetVerifier(const Json::Value &test_group) {
-  SubtleUtilBoringSSL::EcKey *key = new SubtleUtilBoringSSL::EcKey();
-  key->pub_x = GetInteger(test_group["key"]["wx"]);
-  key->pub_y = GetInteger(test_group["key"]["wy"]);
-  key->curve = WycheproofUtil::GetEllipticCurveType(test_group["key"]["curve"]);
+GetVerifier(const rapidjson::Value &test_group) {
+  SubtleUtilBoringSSL::EcKey key;
+  key.pub_x = GetInteger(test_group["key"]["wx"]);
+  key.pub_y = GetInteger(test_group["key"]["wy"]);
+  key.curve = WycheproofUtil::GetEllipticCurveType(test_group["key"]["curve"]);
   HashType md = WycheproofUtil::GetHashType(test_group["sha"]);
-  return EcdsaVerifyBoringSsl::New(*key, md);
+  auto result = EcdsaVerifyBoringSsl::New(key, md);
+  if (!result.ok()) {
+    std::cout << "Failed: " << result.status() << "\n";
+  }
+  return result;
 }
 
 // Tests signature verification using the test vectors in the specified file.
@@ -103,31 +113,37 @@ GetVerifier(const Json::Value &test_group) {
 // if a file contains test vectors that are not necessarily supported
 // by tink.
 bool TestSignatures(const std::string& filename, bool allow_skipping) {
-  std::unique_ptr<Json::Value> root =
+  std::unique_ptr<rapidjson::Document> root =
       WycheproofUtil::ReadTestVectors(filename);
-  std::cout << (*root)["algorithm"].asString();
-  std::cout << "generator version " << (*root)["generatorVersion"].asString();
+  std::cout << (*root)["algorithm"].GetString();
+  std::cout << "generator version " << (*root)["generatorVersion"].GetString();
   std::cout << "expected version 0.2.5";
   int passed_tests = 0;
   int failed_tests = 0;
-  for (const Json::Value& test_group : (*root)["testGroups"]) {
+    std::cout << "here0\n";
+  for (const rapidjson::Value& test_group : (*root)["testGroups"].GetArray()) {
+    std::cout << "here1\n";
     auto verifier_result = GetVerifier(test_group);
+    std::cout << "here2\n";
     if (!verifier_result.ok()) {
-      std::string curve = test_group["key"]["curve"].asString();
+      std::string curve = test_group["key"]["curve"].GetString();
       if (allow_skipping) {
         std::cout << "Could not construct verifier for curve " << curve;
       } else {
         ADD_FAILURE() << "Could not construct verifier for curve " << curve;
-        failed_tests += test_group["tests"].size();
+        failed_tests += test_group["tests"].GetArray().Size();
       }
       continue;
     }
+    std::cout << "here3\n";
     auto verifier = std::move(verifier_result.ValueOrDie());
-    for (const Json::Value& test : test_group["tests"]) {
-      std::string expected = test["result"].asString();
+    std::cout << "here4\n";
+    for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
+      std::string expected = test["result"].GetString();
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);
       std::string sig = WycheproofUtil::GetBytes(test["sig"]);
-      std::string id = test["tcId"].asString() + " " + test["comment"].asString();
+      std::string id = absl::StrCat(test["tcId"].GetInt(), " ",
+                               test["comment"].GetString());
       auto status = verifier->Verify(sig, msg);
       if (expected == "valid") {
         if (status.ok()) {
@@ -156,7 +172,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
       }
     }
   }
-  int num_tests = (*root)["numberOfTests"].asInt();
+  int num_tests = (*root)["numberOfTests"].GetInt();
   std::cout << "total number of tests: " << num_tests;
   std::cout << "number of tests passed:" << passed_tests;
   std::cout << "number of tests failed:" << failed_tests;

@@ -26,6 +26,7 @@
 #include "tink/subtle/encrypt_then_authenticate.h"
 #include "tink/subtle/hmac_boringssl.h"
 #include "tink/subtle/random.h"
+#include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -34,6 +35,10 @@
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+
+using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::AesCtrHmacAeadKey;
@@ -41,22 +46,18 @@ using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
-using portable_proto::Message;
-
-
-namespace crypto {
-namespace tink {
+using portable_proto::MessageLite;
 
 class AesCtrHmacAeadKeyFactory : public KeyFactory {
  public:
   // Generates a new random AesCtrHmacAeadKey, based on the specified
   // 'key_format', which must contain AesCtrHmacAeadKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
-  NewKey(const portable_proto::Message& key_format) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
+  NewKey(const portable_proto::MessageLite& key_format) const override;
 
   // Generates a new random AesCtrHmacAeadKey, based on the specified
   // 'serialized_key_format', which must contain AesCtrHmacAeadKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::Message>>
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const override;
 
   // Generates a new random AesCtrHmacAeadKey, based on the specified
@@ -66,11 +67,10 @@ class AesCtrHmacAeadKeyFactory : public KeyFactory {
   NewKeyData(absl::string_view serialized_key_format) const override;
 };
 
-StatusOr<std::unique_ptr<Message>> AesCtrHmacAeadKeyFactory::NewKey(
-    const portable_proto::Message& key_format) const {
-  std::string key_format_url =
-      std::string(AesCtrHmacAeadKeyManager::kKeyTypePrefix)
-      + key_format.GetDescriptor()->full_name();
+StatusOr<std::unique_ptr<MessageLite>> AesCtrHmacAeadKeyFactory::NewKey(
+    const portable_proto::MessageLite& key_format) const {
+  std::string key_format_url = std::string(AesCtrHmacAeadKeyManager::kKeyTypePrefix)
+      + key_format.GetTypeName();
   if (key_format_url != AesCtrHmacAeadKeyManager::kKeyFormatUrl) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Key format proto '%s' is not supported by this manager.",
@@ -102,11 +102,11 @@ StatusOr<std::unique_ptr<Message>> AesCtrHmacAeadKeyFactory::NewKey(
   hmac_key->set_key_value(subtle::Random::GetRandomBytes(
       aes_ctr_hmac_aead_key_format.hmac_key_format().key_size()));
 
-  std::unique_ptr<Message> key = std::move(aes_ctr_hmac_aead_key);
+  std::unique_ptr<MessageLite> key = std::move(aes_ctr_hmac_aead_key);
   return std::move(key);
 }
 
-StatusOr<std::unique_ptr<Message>> AesCtrHmacAeadKeyFactory::NewKey(
+StatusOr<std::unique_ptr<MessageLite>> AesCtrHmacAeadKeyFactory::NewKey(
     absl::string_view serialized_key_format) const {
   AesCtrHmacAeadKeyFormat key_format;
   if (!key_format.ParseFromString(std::string(serialized_key_format))) {
@@ -173,9 +173,8 @@ StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitive(
 }
 
 StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitive(
-    const Message& key) const {
-  std::string key_type =
-      std::string(kKeyTypePrefix) + key.GetDescriptor()->full_name();
+    const MessageLite& key) const {
+  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
   if (DoesSupport(key_type)) {
     const AesCtrHmacAeadKey& aes_ctr_hmac_aead_key =
         reinterpret_cast<const AesCtrHmacAeadKey&>(key);
@@ -270,13 +269,13 @@ Status AesCtrHmacAeadKeyManager::Validate(
   if (max_tag_size.find(params.hash()) == max_tag_size.end()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid HmacParams: HashType '%s' not supported.",
-                     HashType_Name(params.hash()).c_str());
+                     Enums::HashName(params.hash()));
   } else {
     if (params.tag_size() > max_tag_size[params.hash()]) {
       return ToStatusF(
           util::error::INVALID_ARGUMENT,
           "Invalid HmacParams: tag_size %d is too big for HashType '%s'.",
-          params.tag_size(), HashType_Name(params.hash()).c_str());
+          params.tag_size(), Enums::HashName(params.hash()));
     }
   }
 

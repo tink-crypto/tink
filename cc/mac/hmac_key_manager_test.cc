@@ -25,6 +25,9 @@
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+
 using google::crypto::tink::AesCtrKey;
 using google::crypto::tink::AesCtrKeyFormat;
 using google::crypto::tink::HashType;
@@ -33,9 +36,6 @@ using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 
-
-namespace crypto {
-namespace tink {
 namespace {
 
 class HmacKeyManagerTest : public ::testing::Test {
@@ -86,7 +86,7 @@ TEST_F(HmacKeyManagerTest, testKeyDataErrors) {
     KeyData key_data;
     HmacKey key;
     key.set_version(1);
-    key_data.set_type_url(key_type_prefix + key.GetDescriptor()->full_name());
+    key_data.set_type_url(hmac_key_type);
     key_data.set_value(key.SerializeAsString());
     auto result = key_manager.GetPrimitive(key_data);
     EXPECT_FALSE(result.ok());
@@ -131,7 +131,7 @@ TEST_F(HmacKeyManagerTest, testPrimitives) {
 
   {  // Using KeyData proto.
     KeyData key_data;
-    key_data.set_type_url(key_type_prefix + key.GetDescriptor()->full_name());
+    key_data.set_type_url(hmac_key_type);
     key_data.set_value(key.SerializeAsString());
     auto result = key_manager.GetPrimitive(key);
     EXPECT_TRUE(result.ok()) << result.status();
@@ -230,8 +230,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyBasic) {
     auto result = key_factory.NewKey(key_format);
     EXPECT_TRUE(result.ok()) << result.status();
     auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix + key->GetDescriptor()->full_name(),
-              hmac_key_type);
+    EXPECT_EQ(key_type_prefix + key->GetTypeName(), hmac_key_type);
     std::unique_ptr<HmacKey> hmac_key(
         reinterpret_cast<HmacKey*>(key.release()));
     EXPECT_EQ(0, hmac_key->version());
@@ -244,8 +243,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyBasic) {
     auto result = key_factory.NewKey(key_format.SerializeAsString());
     EXPECT_TRUE(result.ok()) << result.status();
     auto key = std::move(result.ValueOrDie());
-    EXPECT_EQ(key_type_prefix + key->GetDescriptor()->full_name(),
-              hmac_key_type);
+    EXPECT_EQ(key_type_prefix + key->GetTypeName(), hmac_key_type);
     std::unique_ptr<HmacKey> hmac_key(
         reinterpret_cast<HmacKey*>(key.release()));
     EXPECT_EQ(0, hmac_key->version());

@@ -52,14 +52,13 @@ http_archive(
 )
 
 new_http_archive(
-    name = "jsoncpp",
+    name = "rapidjson",
     urls = [
-        "https://mirror.bazel.build/github.com/open-source-parsers/jsoncpp/archive/11086dd6a7eba04289944367ca82cea71299ed70.tar.gz",
-        "https://github.com/open-source-parsers/jsoncpp/archive/11086dd6a7eba04289944367ca82cea71299ed70.tar.gz",
+        "https://github.com/Tencent/rapidjson/archive/v1.1.0.tar.gz",
     ],
-    sha256 = "07d34db40593d257324ec5fb9debc4dc33f29f8fb44e33a2eeb35503e61d0fe2",
-    strip_prefix = "jsoncpp-11086dd6a7eba04289944367ca82cea71299ed70",
-    build_file = "third_party/jsoncpp.BUILD.bazel",
+    sha256 = "bf7ced29704a1e696fbccf2a2b4ea068e7774fa37f6d7dd4039d0787f8bed98e",
+    strip_prefix = "rapidjson-1.1.0",
+    build_file = "third_party/rapidjson.BUILD.bazel",
 )
 
 #-----------------------------------------------------------------------------

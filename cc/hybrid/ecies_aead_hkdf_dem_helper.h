@@ -58,7 +58,7 @@ class EciesAeadHkdfDemHelper {
       : dem_key_template_(dem_key_template) {}
 
   bool ReplaceKeyBytes(const std::string& key_bytes,
-                       portable_proto::Message* key) const;
+                       portable_proto::MessageLite* key) const;
 
   google::crypto::tink::KeyTemplate dem_key_template_;
   DemKeyType dem_key_type_;
