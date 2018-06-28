@@ -24,7 +24,8 @@ milestone. The convention for the priorities are:
 
 ### 1.2.0
 
-Tentative release date: June 2018.
+Tentative release date: July 2018 (it was June 2018, but we need more time to
+prepare the Obj-C release).
 
 *   Java
 
