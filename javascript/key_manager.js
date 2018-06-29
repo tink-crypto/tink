@@ -28,8 +28,8 @@ class KeyFactory {
   /**
    * Generates a new random key according to 'keyFormat'.
    *
-   * @param {!PbMessage|string} keyFormat is either a KeyFormat proto or a
-   *     serialized KeyFormat proto
+   * @param {!PbMessage|!Uint8Array} keyFormat is either a KeyFormat
+   *     proto or a serialized KeyFormat proto
    * @return {!Promise.<!PbMessage>} the new generated key
    */
   newKey(keyFormat) {}
@@ -38,7 +38,7 @@ class KeyFactory {
    * Generates a new random key based on the "serialized_key_format" and returns
    * it as a KeyData proto.
    *
-   * @param {string} serializedKeyFormat
+   * @param {!Uint8Array} serializedKeyFormat
    * @return {!Promise.<!PbKeyData>}
    */
   newKeyData(serializedKeyFormat) {}

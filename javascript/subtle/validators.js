@@ -15,6 +15,7 @@
 goog.module('tink.subtle.Validators');
 
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
  * @const @public {Array.<number>}
@@ -22,7 +23,7 @@ const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsE
 const SUPPORTED_AES_KEY_SIZES = [16, 32];
 
 /**
- * Validate AES key sizes, at the moment only 128-bit and 256-bit keys are
+ * Validates AES key sizes, at the moment only 128-bit and 256-bit keys are
  * supported.
  *
  * @param {number} n the key size in bytes
@@ -36,7 +37,7 @@ const validateAesKeySize = function(n) {
 };
 
 /**
- * Validate that the input is a non null Uint8Array.
+ * Validates that the input is a non null Uint8Array.
  *
  * @param {!Uint8Array} input
  * @throws {InvalidArgumentsException}
@@ -48,7 +49,25 @@ const requireUint8Array = function(input) {
   }
 };
 
+/**
+ * Validates version, throws exception if candidate version is negative or bigger
+ * than expected.
+ *
+ * @param {number} candidate - version to be validated
+ * @param {number} maxVersion - upper bound on version
+ * @throws {GeneralSecurityException}
+ * @static
+ */
+const validateVersion = function(candidate, maxVersion) {
+  if (candidate < 0 || candidate > maxVersion) {
+    throw new SecurityException(
+        'Version is out of bound, must be ' +
+        'between 0 and ' + maxVersion + '.');
+  }
+};
+
 exports = {
   validateAesKeySize,
-  requireUint8Array
+  requireUint8Array,
+  validateVersion
 };

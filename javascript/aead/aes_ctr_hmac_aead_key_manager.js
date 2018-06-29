@@ -15,6 +15,7 @@
 goog.module('tink.aead.AesCtrHmacAeadKeyManager');
 
 const Aead = goog.require('tink.Aead');
+const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
 const KeyManager = goog.require('tink.KeyManager');
 const Map = goog.require('goog.structs.Map');
 const PbAesCtrHmacAeadKey = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKey');
@@ -24,7 +25,7 @@ const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat
 const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbHmacKey = goog.require('proto.google.crypto.tink.HmacKey');
 const PbHmacKeyFormat = goog.require('proto.google.crypto.tink.HmacKeyFormat');
-const PbMessage = goog.require('jspb.Message');
+const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const Random = goog.require('tink.subtle.Random');
 const SecurityException = goog.require('tink.exception.SecurityException');
 const Validators = goog.require('tink.subtle.Validators');
@@ -74,13 +75,18 @@ class AesCtrHmacAeadKeyFactory {
    */
   async newKey(keyFormat) {
     var /** PbAesCtrHmacAeadKeyFormat */ keyFormatProto;
-    if (!(keyFormat instanceof PbMessage)) {
+    if (keyFormat instanceof Uint8Array) {
       try {
-        keyFormatProto = new PbAesCtrHmacAeadKeyFormat(
-            /** @type{Array}*/ (JSON.parse(keyFormat)));
+        keyFormatProto = PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyFormat);
       } catch (e) {
         throw new SecurityException(
-            'Could not parse the given string as a serialized proto of ' +
+            'Could not parse the given Uint8Array as a serialized proto of ' +
+            this.KEY_TYPE_);
+      }
+      if (!keyFormatProto || !keyFormatProto.getAesCtrKeyFormat() ||
+          !keyFormatProto.getHmacKeyFormat()) {
+        throw new SecurityException(
+            'Could not parse the given Uint8Array as a serialized proto of ' +
             this.KEY_TYPE_);
       }
     } else {
@@ -90,14 +96,15 @@ class AesCtrHmacAeadKeyFactory {
         throw new SecurityException('Expected AesCtrHmacAeadKeyFormat-proto');
       }
     }
-    this.validateAesCtrKeyFormat_((keyFormatProto.getAesCtrKeyFormat()));
+
+    this.validateAesCtrKeyFormat(keyFormatProto.getAesCtrKeyFormat());
     let /** PbAesCtrKey */ aesCtrKey = new PbAesCtrKey();
     aesCtrKey.setVersion(this.VERSION_);
     aesCtrKey.setParams(keyFormatProto.getAesCtrKeyFormat().getParams());
     aesCtrKey.setKeyValue(
         Random.randBytes(keyFormatProto.getAesCtrKeyFormat().getKeySize()));
 
-    this.validateHmacKeyFormat_(keyFormatProto.getHmacKeyFormat());
+    this.validateHmacKeyFormat(keyFormatProto.getHmacKeyFormat());
     let /** PbHmacKey */ hmacKey = new PbHmacKey();
     hmacKey.setVersion(this.VERSION_);
     hmacKey.setParams(keyFormatProto.getHmacKeyFormat().getParams());
@@ -116,9 +123,16 @@ class AesCtrHmacAeadKeyFactory {
   /**
    * @override
    */
-  // TODO
   async newKeyData(serializedKeyFormat) {
-    throw new SecurityException('Not implemented yet');
+    const /** PbAesCtrHmacAeadKeyFormat */ key =
+        await this.newKey(serializedKeyFormat);
+    let /** PbKeyData */ keyData = new PbKeyData();
+
+    keyData.setTypeUrl(this.KEY_TYPE_);
+    keyData.setValue(key.serializeBinary());
+    keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
+
+    return keyData;
   }
 
   // helper functions
@@ -126,10 +140,9 @@ class AesCtrHmacAeadKeyFactory {
    * Checks the parameters and size of a given keyFormat.
    *
    * @param {null|!PbAesCtrKeyFormat} keyFormat
-   * @private
    */
-  validateAesCtrKeyFormat_(keyFormat) {
-    if (keyFormat == null) {
+  validateAesCtrKeyFormat(keyFormat) {
+    if (!keyFormat) {
       throw new SecurityException(
           'Invalid AES CTR HMAC key format: key format undefined');
     }
@@ -146,10 +159,9 @@ class AesCtrHmacAeadKeyFactory {
    * Checks the parameters and size of a given keyFormat.
    *
    * @param {null|!PbHmacKeyFormat} keyFormat
-   * @private
    */
-  validateHmacKeyFormat_(keyFormat) {
-    if (keyFormat == null) {
+  validateHmacKeyFormat(keyFormat) {
+    if (!keyFormat) {
       throw new SecurityException(
           'Invalid AES CTR HMAC key format: key format undefined');
     }
@@ -200,9 +212,60 @@ class AesCtrHmacAeadKeyManager {
   /**
    * @override
    */
-  // TODO
   async getPrimitive(key) {
-    throw new SecurityException('Not implemented yet');
+    let /** PbAesCtrHmacAeadKey */ deserializedKey;
+    if (key instanceof PbKeyData) {
+      if (!this.doesSupport(key.getTypeUrl())) {
+        throw new SecurityException('Key type ' + key.getTypeUrl() +
+            ' is not supported. This key manager supports ' +
+            this.getKeyType() + '.');
+      }
+      try {
+        deserializedKey = PbAesCtrHmacAeadKey.deserializeBinary(key.getValue());
+      } catch (e) {
+        throw new SecurityException(
+            'Could not parse the key in key data as a serialized proto of ' +
+            this.KEY_TYPE_);
+      }
+      if (deserializedKey === null || deserializedKey === undefined) {
+        throw new SecurityException(
+            'Could not parse the key in key data as a serialized proto of ' +
+            this.KEY_TYPE_);
+      }
+    } else {
+      if (key instanceof PbAesCtrHmacAeadKey) {
+        deserializedKey = key;
+      } else {
+        throw new SecurityException('Given key type is not supported. ' +
+          'This key manager supports ' + this.getKeyType() + '.');
+      }
+    }
+
+    const aesCtrKey = deserializedKey.getAesCtrKey();
+    this.validateAesCtrKey_(aesCtrKey);
+    const hmacKey = deserializedKey.getHmacKey();
+    this.validateHmacKey_(hmacKey);
+
+    let /** string */ hashType;
+    switch (hmacKey.getParams().getHash()) {
+      case PbHashType.SHA1:
+        hashType = 'SHA-1';
+        break;
+      case PbHashType.SHA256:
+        hashType = 'SHA-256';
+        break;
+      case PbHashType.SHA512:
+        hashType = 'SHA-512';
+        break;
+      default:
+        hashType = 'UNKNOWN HASH';
+    }
+
+    const aead = await EncryptThenAuthenticate.newAesCtrHmac(
+        aesCtrKey.getKeyValue_asU8(), aesCtrKey.getParams().getIvSize(),
+        hashType, hmacKey.getKeyValue_asU8(), hmacKey.getParams().getTagSize());
+
+    return aead;
   }
 
   /**
@@ -232,8 +295,48 @@ class AesCtrHmacAeadKeyManager {
   getKeyFactory() {
     return this.keyFactory_;
   }
+
+  // helper functions
+  /**
+   * Checks the parameters and size of a given AES-CTR key.
+   *
+   * @param {null|!PbAesCtrKey} key
+   * @private
+   */
+  validateAesCtrKey_(key) {
+    if (!key) {
+      throw new SecurityException(
+          'Invalid AES CTR HMAC key format: key undefined');
+    }
+
+    Validators.validateVersion(key.getVersion(), this.getVersion());
+
+    let keyFormat = new PbAesCtrKeyFormat();
+    keyFormat.setParams(key.getParams());
+    keyFormat.setKeySize(key.getKeyValue_asU8().length);
+    this.keyFactory_.validateAesCtrKeyFormat(keyFormat);
+  }
+
+
+  /**
+   * Checks the parameters and size of a given HMAC key.
+   *
+   * @param {null|!PbHmacKey} key
+   * @private
+   */
+  validateHmacKey_(key) {
+    if (!key) {
+      throw new SecurityException(
+          'Invalid AES CTR HMAC key format: key undefined');
+    }
+
+    Validators.validateVersion(key.getVersion(), this.getVersion());
+
+    let keyFormat = new PbHmacKeyFormat();
+    keyFormat.setParams(key.getParams());
+    keyFormat.setKeySize(key.getKeyValue_asU8().length);
+    this.keyFactory_.validateHmacKeyFormat(keyFormat);
+  }
 }
 
-exports = {
-  AesCtrHmacAeadKeyManager
-};
+exports = AesCtrHmacAeadKeyManager;
