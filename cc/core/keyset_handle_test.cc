@@ -219,7 +219,7 @@ TEST_F(KeysetHandleTest, testWriteEncryptedKeyset_Json) {
       JsonKeysetWriter::New(std::move(destination_stream)).ValueOrDie());
 
   // Write the keyset handle and check the result.
-  auto status = keyset_handle->WriteEncrypted(aead, writer.get());
+  auto status = keyset_handle->Write(writer.get(), aead);
   EXPECT_TRUE(status.ok()) << status;
   auto reader_result = JsonKeysetReader::New(buffer.str());
   EXPECT_TRUE(reader_result.ok()) << reader_result.status();
@@ -233,7 +233,7 @@ TEST_F(KeysetHandleTest, testWriteEncryptedKeyset_Json) {
   EXPECT_EQ(decrypted, keyset.SerializeAsString());
 
   // Try writing to a null-writer.
-  status = keyset_handle->WriteEncrypted(aead, nullptr);
+  status = keyset_handle->Write(nullptr, aead);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
 }
