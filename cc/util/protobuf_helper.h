@@ -17,21 +17,8 @@
 #ifndef TINK_UTIL_PROTOBUF_HELPER_H_
 #define TINK_UTIL_PROTOBUF_HELPER_H_
 
-// copybara:replace_start
-// Keep synchronized with google3/third_party/tink/copybara/cc.bara.sky
-#ifdef PROTOBUF_INTERNAL_IMPL
-
-#include "net/proto2/public/message.h"
-
-namespace portable_proto = ::proto2;
-
-#else
-// copybara:replace_end
-
-#include "google/protobuf/message.h"
+#include "google/protobuf/message_lite.h"
 
 namespace portable_proto = ::google::protobuf;
-
-#endif  // PROTOBUF_INTERNAL_IMP
 
 #endif  // TINK_UTIL_PROTOBUF_HELPER_H_
