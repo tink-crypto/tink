@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('android.support.test.test.espresso:espresso-core:2.2.2', {
+    androidTestCompile('android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
         // This is already included in protobuf-lite that Tink depends on.
         exclude group: 'com.google.code.findbugs'
