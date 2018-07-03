@@ -13,9 +13,9 @@ For example, if you want to use all implementations of all primitives in Tink
 1.1.0, the initialization would look as follows:
 
 ```objc
-   #import "objc/TINKAllConfig.h"
-   #import "objc/TINKConfig.h"
-   #import "objc/TINKVersion.h"
+   #import "Tink/TINKAllConfig.h"
+   #import "Tink/TINKConfig.h"
+   #import "Tink/TINKVersion.h"
 
    NSError *error = nil;
    TINKAllConfig *config = [[TINKAllConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
@@ -31,41 +31,45 @@ For example, if you want to use all implementations of all primitives in Tink
 To use only implementations of the AEAD primitive:
 
 ```objc
-   #import "objc/aead/TINKAeadConfig.h"
-   #import "objc/TINKConfig.h"
-   #import "objc/TINKVersion.h"
+    #import "Tink/TINKAeadConfig.h"
+    #import "Tink/TINKConfig.h"
+    #import "Tink/TINKVersion.h"
 
-   NSError *error = nil;
-   TINKAeadConfig *aeadConfig = [TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
-                                                                 error:&error];
-   if (!aeadConfig || error) {
-     // handle error.
-   }
+    NSError *error = nil;
+    TINKAeadConfig *aeadConfig = [[TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
+                                                                   error:&error];
+    if (!aeadConfig || error) {
+      // handle error.
+    }
 
-   if (![TINKConfig registerConfig:aeadConfig error:&error]) {
-     // handle error.
-   }
+    if (![TINKConfig registerConfig:aeadConfig error:&error]) {
+      // handle error.
+    }
 ```
 
 ## Generating New Key(set)s
 
-Each `TINKKeyManager`-implementation provides `newKeyFromTemplate:error:`-method
-that generates new keys of the corresponding key type. However to avoid
-accidental leakage of sensitive key material one should be careful with mixing
-key(set) generation with key(set) usage in code. To support the separation
+To avoid accidental leakage of sensitive key material one should be careful
+mixing keyset generation and usage in code. To support the separation
 between these activities the Tink package provides a command-line tool called
 [Tinkey](TINKEY.md), which can be used for common key management tasks.
 
 Still, if there is a need to generate a KeysetHandle with fresh key material
 directly in Obj-C code, one can use
 [`TINKKeysetHandle`](https://github.com/google/tink/blob/master/objc/TINKKeysetHandle.h)
-with one of the available KeyTemplates (AeadKeyTemplates, HybridKeyTemplates
-etc):
+with one of the available KeyTemplates (AeadKeyTemplate, HybridKeyTemplate etc):
 
 ```objc
+    #import "Tink/TINKAeadKeyTemplate.h"
+    #import "Tink/TINKKeysetHandle.h"
+
     NSError *error = nil;
-    TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithKeyTemplate:[TINKAeadKeyTemplates keyTemplateForAes128Gcm]
-                                                                       error:&error];
+    TINKAeadKeyTemplate *tpl = [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes128Gcm error:&error];
+    if (!tpl || error) {
+      // handle error.
+    }
+
+    TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithKeyTemplate:tpl error:&error];
     if (!handle || error) {
       // handle error.
     }
@@ -81,17 +85,19 @@ depending on the wire format of the stored keyset, for example a
 [`TINKBinaryKeysetReader`](https://github.com/google/tink/blob/master/objc/TINKBinaryKeysetReader.h).
 
 ```objc
-    #import "objc/TINKBinaryKeysetReader.h"
-    #import "objc/TINKKeysetHandle+Cleartext.h"
+    #import "Tink/TINKBinaryKeysetReader.h"
+    #import "Tink/TINKKeysetHandle+Cleartext.h"
 
     NSError *error = nil;
     NSData *binaryKeyset = ...;
-    TINKBinaryKeysetReader *reader = [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:binaryKeyset error:&error];
+    TINKBinaryKeysetReader *reader = [[TINKBinaryKeysetReader alloc] initWithSerializedKeyset:binaryKeyset
+                                                                                        error:&error];
     if (!reader || error) {
       // handle error.
     }
 
-    TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
+    TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader
+                                                                                             error:&error];
     if (!handle || error) {
       // handle error.
     }
@@ -109,11 +115,12 @@ section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
 The following table summarizes Obj-C implementations of primitives that are
 currently available or planned (the latter are listed in brackets).
 
-Primitive         | Implementations
------------------ | ------------------------------
-AEAD              | AES-GCM, AES-CTR-HMAC, AES-EAX
-MAC               | HMAC-SHA2
-Hybrid Encryption | ECIES with AEAD and HKDF
+Primitive          | Implementations
+------------------ | ---------------------------------
+AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX
+MAC                | HMAC-SHA2
+Digital Signatures | ECDSA over NIST curves, (Ed25519)
+Hybrid Encryption  | ECIES with AEAD and HKDF
 
 Tink user accesses implementations of a primitive via a factory that corresponds
 to the primitive: AEAD via `TINKAeadFactory`, MAC via `TINKMacFactory`, etc.
@@ -127,9 +134,9 @@ Associated Data](PRIMITIVES.md#authenticated-encryption-with-associated-data)
 primitive to encrypt or decrypt data:
 
 ```objc
-    #import "objc/TINKAead.h"
-    #import "objc/TINKKeysetHandle.h"
-    #import "objc/aead/TINKAeadFactory.h"
+    #import "Tink/TINKAead.h"
+    #import "Tink/TINKKeysetHandle.h"
+    #import "Tink/TINKAeadFactory.h"
 
     // 1. Get a handle to the key material.
     TINKKeysetHandle *keysetHandle = ...;
@@ -154,9 +161,9 @@ To decrypt using [a combination of public key encryption and symmetric key
 encryption](PRIMITIVES.md#hybrid-encryption):
 
 ```objc
-    #import "objc/TINKHybridDecrypt.h"
-    #import "objc/TINKKeysetHandle.h"
-    #import "objc/hybrid/TINKHybridDecryptFactory.h"
+    #import "Tink/TINKHybridDecrypt.h"
+    #import "Tink/TINKKeysetHandle.h"
+    #import "Tink/TINKHybridDecryptFactory.h"
 
     // 1. Get a handle to the key material.
     TINKKeysetHandle *keysetHandle = ...;
