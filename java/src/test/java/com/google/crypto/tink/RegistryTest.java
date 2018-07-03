@@ -50,7 +50,11 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class RegistryTest {
   private static class CustomAeadKeyManager implements KeyManager<Aead> {
-    public CustomAeadKeyManager() {}
+    public CustomAeadKeyManager(String typeUrl) {
+      this.typeUrl = typeUrl;
+    }
+
+    private final String typeUrl;
 
     @Override
     public Aead getPrimitive(ByteString proto) throws GeneralSecurityException {
@@ -78,13 +82,13 @@ public class RegistryTest {
     }
 
     @Override
-    public boolean doesSupport(String typeUrl) { // supports same keys as AesEaxKey
-      return typeUrl.equals(AeadConfig.AES_EAX_TYPE_URL);
+    public boolean doesSupport(String typeUrl) {
+      return typeUrl.equals(this.typeUrl);
     }
 
     @Override
     public String getKeyType() {
-      return AeadConfig.AES_EAX_TYPE_URL;
+      return this.typeUrl;
     }
 
     @Override
@@ -148,12 +152,27 @@ public class RegistryTest {
   }
 
   @Test
+  public void testRegisterKeyManager_WithKeyTypeNotSupported_shouldThrowException() 
+      throws Exception {
+    String typeUrl = "someTypeUrl";
+    String differentTypeUrl = "differentTypeUrl";
+    try {
+      Registry.registerKeyManager(differentTypeUrl, new CustomAeadKeyManager(typeUrl));
+    } catch (GeneralSecurityException e) {
+      assertExceptionContains(e,
+          "Manager does not support key type " + differentTypeUrl);
+      return;
+    }
+    fail("Should throw an exception.");
+  }
+
+  @Test
   public void testRegisterKeyManager_MoreRestrictedNewKeyAllowed_shouldWork() throws Exception {
     String typeUrl = "typeUrl";
-    Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager());
+    Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl));
 
     try {
-      Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(), false);
+      Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl), false);
     } catch (GeneralSecurityException e) {
       fail("repeated registrations of the same key manager should work");
     }
@@ -163,10 +182,10 @@ public class RegistryTest {
   public void testRegisterKeyManager_LessRestrictedNewKeyAllowed_shouldThrowException()
       throws Exception {
     String typeUrl = "typeUrl";
-    Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(), false);
+    Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl), false);
 
     try {
-      Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(), true);
+      Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl), true);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       // expected
@@ -178,8 +197,8 @@ public class RegistryTest {
       throws Exception {
     // This should not overwrite the existing manager.
     try {
-      Registry.registerKeyManager(
-          AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, new CustomAeadKeyManager());
+      Registry.registerKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL,
+          new CustomAeadKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL));
       fail("Expected GeneralSecurityException.");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("already registered");
@@ -324,7 +343,7 @@ public class RegistryTest {
                 .build());
 
     // Get a PrimitiveSet using a custom key manager for key1.
-    KeyManager<Aead> customManager = new CustomAeadKeyManager();
+    KeyManager<Aead> customManager = new CustomAeadKeyManager(AeadConfig.AES_EAX_TYPE_URL);
     PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, customManager);
     List<PrimitiveSet.Entry<Aead>> aead1List =
         aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(0));

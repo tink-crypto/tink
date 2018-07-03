@@ -194,6 +194,11 @@ public final class Registry {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
+    if (!manager.doesSupport(typeUrl)) {
+      throw new GeneralSecurityException(
+          "Manager does not support key type "
+          + typeUrl + ".");
+    }
     if (keyManagerMap.containsKey(typeUrl)) {
       KeyManager<P> existingManager = getKeyManager(typeUrl);
       boolean existingNewKeyAllowed = newKeyAllowedMap.get(typeUrl).booleanValue();
