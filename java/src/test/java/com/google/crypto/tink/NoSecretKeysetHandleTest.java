@@ -34,7 +34,7 @@ import org.junit.runners.JUnit4;
 public class NoSecretKeysetHandleTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
-    Config.register(TinkConfig.TINK_1_0_0);
+    TinkConfig.register();
   }
 
   @Test

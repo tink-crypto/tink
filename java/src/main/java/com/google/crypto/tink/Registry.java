@@ -46,13 +46,13 @@ import java.util.logging.Logger;
  * <p>To initialize the Registry with all key managers in Tink 1.0.0, one can do as follows:
  *
  * <pre>{@code
- * Config.register(TinkConfig.TINK_1_0_0);
+ * TinkConfig.register();
  * }</pre>
  *
  * <p>Here's how to register only {@link Aead} key managers:
  *
  * <pre>{@code
- * Config.register(AeadConfig.TINK_1_0_0);
+ * AeadConfig.register();
  * }</pre>
  *
  * <p>After the Registry has been initialized, one can use {@link
@@ -84,7 +84,7 @@ public final class Registry {
    * Resets the registry.
    *
    * <p>After reset the registry is empty, i.e. it contains no key managers. Thus one might need to
-   * call {@code XyzConfig.init()} to re-install the catalogues.
+   * call {@code XyzConfig.register()} to re-install the catalogues.
    *
    * <p>This method is intended for testing.
    */
@@ -140,22 +140,22 @@ public final class Registry {
     if (catalogue == null) {
       String error = String.format("no catalogue found for %s. ", catalogueName);
       if (catalogueName.toLowerCase().startsWith("tinkaead")) {
-        error += "Maybe call AeadConfig.init().";
+        error += "Maybe call AeadConfig.register().";
       }
       if (catalogueName.toLowerCase().startsWith("tinkdeterministicaead")) {
-        error += "Maybe call DeterministicAeadConfig.init().";
+        error += "Maybe call DeterministicAeadConfig.register().";
       } else if (catalogueName.toLowerCase().startsWith("tinkstreamingaead")) {
-        error += "Maybe call StreamingAeadConfig.init().";
+        error += "Maybe call StreamingAeadConfig.register().";
       } else if (catalogueName.toLowerCase().startsWith("tinkhybriddecrypt")
           || catalogueName.toLowerCase().startsWith("tinkhybridencrypt")) {
-        error += "Maybe call HybridConfig.init().";
+        error += "Maybe call HybridConfig.register().";
       } else if (catalogueName.toLowerCase().startsWith("tinkmac")) {
-        error += "Maybe call MacConfig.init().";
+        error += "Maybe call MacConfig.register().";
       } else if (catalogueName.toLowerCase().startsWith("tinkpublickeysign")
           || catalogueName.toLowerCase().startsWith("tinkpublickeyverify")) {
-        error += "Maybe call SignatureConfig.init().";
+        error += "Maybe call SignatureConfig.register().";
       } else if (catalogueName.toLowerCase().startsWith("tink")) {
-        error += "Maybe call TinkConfig.init().";
+        error += "Maybe call TinkConfig.register().";
       }
       throw new GeneralSecurityException(error);
     }

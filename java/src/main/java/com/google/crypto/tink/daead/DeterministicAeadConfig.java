@@ -25,10 +25,10 @@ import java.security.GeneralSecurityException;
  * Static methods and constants for registering with the {@link Registry} all instances of {@link
  * com.google.crypto.tink.DeterministicAead} key types supported in a particular release of Tink.
  *
- * <p>To register all DeterministicAead key types provided in Tink release 1.1.0 one can do:
+ * <p>To register all DeterministicAead key types provided in the latest Tink version one can do:
  *
  * <pre>{@code
- * Config.register(DeterministicAeadConfig.TINK_1_1_0);
+ * DeterministicAeadConfig.register();
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of DeterministicAead, see {@link
@@ -42,11 +42,20 @@ public final class DeterministicAeadConfig {
   private static final String CATALOGUE_NAME = "TinkDeterministicAead";
   private static final String PRIMITIVE_NAME = "DeterministicAead";
 
+  /** @deprecated */
+  @Deprecated
   public static final RegistryConfig TINK_1_1_0 =
       RegistryConfig.newBuilder()
           .addEntry(
               Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "AesSivKey", 0, true))
           .setConfigName("TINK_DETERMINISTIC_AEAD_1_1_0")
+          .build();
+
+  public static final RegistryConfig LATEST =
+      RegistryConfig.newBuilder()
+          .addEntry(
+              Config.getTinkKeyTypeEntry(CATALOGUE_NAME, PRIMITIVE_NAME, "AesSivKey", 0, true))
+          .setConfigName("TINK_DETERMINISTIC_AEAD")
           .build();
 
   static {
@@ -64,8 +73,24 @@ public final class DeterministicAeadConfig {
    *
    * <p>Because DeterministicAead key types depend on {@link com.google.crypto.tink.Mac} key types,
    * this method also registers all Mac catalogues.
+   *
+   * @deprecated use {@link #register}
    */
+  @Deprecated
   public static void init() throws GeneralSecurityException {
+    register();
+  }
+
+  /**
+   * Tries to register with the {@link Registry} all instances of {@link
+   * com.google.crypto.tink.Catalogue} needed to handle DeterministicAead key types supported in
+   * Tink.
+   *
+   * <p>Because DeterministicAead key types depend on {@link com.google.crypto.tink.Mac} key types,
+   * this method also registers all Mac catalogues.
+   */
+  public static void register() throws GeneralSecurityException {
     Registry.addCatalogue(CATALOGUE_NAME, new DeterministicAeadCatalogue());
+    Config.register(LATEST);
   }
 }

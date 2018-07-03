@@ -14,7 +14,6 @@
 
 package com.helloworld;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.aead.AeadConfig;
 import java.security.GeneralSecurityException;
 import org.kohsuke.args4j.CmdLineException;
@@ -28,7 +27,7 @@ import org.kohsuke.args4j.CmdLineParser;
 public final class HelloWorld {
   public static void main(String[] args) throws Exception {
     // Register all AEAD key types with the Tink runtime.
-    Config.register(AeadConfig.TINK_1_0_0);
+    AeadConfig.register();
 
     Commands commands = new Commands();
     CmdLineParser parser = new CmdLineParser(commands);

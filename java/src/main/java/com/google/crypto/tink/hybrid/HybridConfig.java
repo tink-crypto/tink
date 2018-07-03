@@ -27,11 +27,11 @@ import java.security.GeneralSecurityException;
  * com.google.crypto.tink.HybridEncrypt} and {@link com.google.crypto.tink.HybridDecrypt} key types
  * supported in a particular release of Tink.
  *
- * <p>To register all HybridEncrypt and HybridDecrypt key types provided in Tink release 1.0.0 one
- * can do:
+ * <p>To register all HybridEncrypt and HybridDecrypt key types provided in the latest Tink version
+ * one can do:
  *
  * <pre>{@code
- * Config.register(HybridConfig.TINK_1_1_0);
+ * HybridConfig.register();
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of HybridEncrypt or HybridDecrypt, see
@@ -47,6 +47,8 @@ public final class HybridConfig {
   private static final String HYBRID_ENCRYPT_CATALOGUE_NAME = "TinkHybridEncrypt";
   private static final String HYBRID_DECRYPT_CATALOGUE_NAME = "TinkHybridDecrypt";
 
+  /** @deprecated */
+  @Deprecated
   public static final RegistryConfig TINK_1_0_0 =
       RegistryConfig.newBuilder()
           .mergeFrom(AeadConfig.TINK_1_0_0)
@@ -67,9 +69,33 @@ public final class HybridConfig {
           .setConfigName("TINK_HYBRID_1_0_0")
           .build();
 
-  /** @since 1.1.0 */
+  /**
+   * @deprecated
+   * @since 1.1.0
+   */
+  @Deprecated
   public static final RegistryConfig TINK_1_1_0 =
       RegistryConfig.newBuilder().mergeFrom(TINK_1_0_0).setConfigName("TINK_HYBRID_1_1_0").build();
+
+  public static final RegistryConfig LATEST =
+      RegistryConfig.newBuilder()
+          .mergeFrom(AeadConfig.LATEST)
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  HYBRID_DECRYPT_CATALOGUE_NAME,
+                  "HybridDecrypt",
+                  "EciesAeadHkdfPrivateKey",
+                  0,
+                  true))
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  HYBRID_ENCRYPT_CATALOGUE_NAME,
+                  "HybridEncrypt",
+                  "EciesAeadHkdfPublicKey",
+                  0,
+                  true))
+          .setConfigName("TINK_HYBRID")
+          .build();
 
   static {
     try {
@@ -87,10 +113,28 @@ public final class HybridConfig {
    * <p>Because HybridDecrypt and HybridEncrypt key types depend on {@link
    * com.google.crypto.tink.Aead} and {@link com.google.crypto.tink.Mac} key types, this method also
    * registers all Aead and Mac catalogues.
+   *
+   * @deprecated use {@link #register}
    */
+  @Deprecated
   public static void init() throws GeneralSecurityException {
+    register();
+  }
+
+  /**
+   * Tries to register with the {@link Registry} all instances of {@link
+   * com.google.crypto.tink.Catalogue} needed to handle HybridDecrypt and HybridEncrypt key types
+   * supported in Tink.
+   *
+   * <p>Because HybridDecrypt and HybridEncrypt key types depend on {@link
+   * com.google.crypto.tink.Aead} and {@link com.google.crypto.tink.Mac} key types, this method also
+   * registers all Aead and Mac catalogues.
+   */
+  public static void register() throws GeneralSecurityException {
+    // The order of these calls matters.
+    AeadConfig.register(); // includes Mac
     Registry.addCatalogue(HYBRID_ENCRYPT_CATALOGUE_NAME, new HybridEncryptCatalogue());
     Registry.addCatalogue(HYBRID_DECRYPT_CATALOGUE_NAME, new HybridDecryptCatalogue());
-    AeadConfig.init(); // includes Mac
+    Config.register(LATEST);
   }
 }

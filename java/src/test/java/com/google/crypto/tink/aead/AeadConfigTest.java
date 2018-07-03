@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.RegistryConfig;
@@ -47,23 +46,37 @@ public class AeadConfigTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("MacConfig.init()");
+      assertThat(e.toString()).contains("MacConfig.register()");
     }
     try {
       Registry.getCatalogue("tinkaead");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("AeadConfig.init()");
+      assertThat(e.toString()).contains("AeadConfig.register()");
     }
-    // Get the config proto, now the catalogues should be present,
-    // as init() was triggered by a static block.
-    RegistryConfig unused = AeadConfig.TINK_1_1_0;
+
+    // Before registration, key manager should be absent.
+    String typeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
+    try {
+      Registry.getKeyManager(typeUrl);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("No key manager found");
+    }
+
+    // Initialize the config.
+    AeadConfig.register();
+
+    // Now the catalogues should be present.
     Registry.getCatalogue("tinkmac");
     Registry.getCatalogue("tinkaead");
 
+    // After registration the key manager should be present.
+    Registry.getKeyManager(typeUrl);
+
     // Running init() manually again should succeed.
-    AeadConfig.init();
+    AeadConfig.register();
   }
 
   @Test
@@ -181,16 +194,59 @@ public class AeadConfigTest {
   }
 
   @Test
-  public void testRegistration() throws Exception {
-    String typeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-    try {
-      Registry.getKeyManager(typeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
-    // After registration the key manager should be present.
-    Config.register(AeadConfig.TINK_1_1_0);
-    Registry.getKeyManager(typeUrl);
+  public void testConfigContents_LATEST() throws Exception {
+    RegistryConfig config = AeadConfig.LATEST;
+    assertEquals(7, config.getEntryCount());
+    assertEquals("TINK_AEAD", config.getConfigName());
+
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkMac",
+        "Mac",
+        "type.googleapis.com/google.crypto.tink.HmacKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(1),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(2),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesEaxKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(3),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesGcmKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(4),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(5),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.KmsAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(6),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey",
+        true,
+        0);
   }
 }

@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
@@ -34,7 +33,7 @@ public class KmsAeadKeyManagerTest {
   public void setUp() throws Exception {
     KmsClient kmsClient = new GcpKmsClient().withCredentials(TestUtil.SERVICE_ACCOUNT_FILE);
     KmsClients.add(kmsClient);
-    Config.register(AeadConfig.TINK_1_0_0);
+    AeadConfig.register();
   }
 
   @Test

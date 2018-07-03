@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.RegistryConfig;
@@ -47,19 +46,34 @@ public class DeterministicAeadConfigTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("DeterministicAeadConfig.init()");
+      assertThat(e.toString()).contains("DeterministicAeadConfig.register()");
     }
-    // Get the config proto, now the catalogues should be present,
-    // as init() was triggered by a static block.
+
+    // Before registration, the key manager should be absent.
+    String typeUrl = "type.googleapis.com/google.crypto.tink.AesSivKey";
+    try {
+      Registry.getKeyManager(typeUrl);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("No key manager found");
+    }
+
+    // Initialize the config.
+    DeterministicAeadConfig.register();
+
+    // Now the catalogues should be present.
     RegistryConfig unused = DeterministicAeadConfig.TINK_1_1_0;
     Registry.getCatalogue("tinkdeterministicaead");
 
+    // After registration, the key manager should be present.
+    Registry.getKeyManager(typeUrl);
+
     // Running init() manually again should succeed.
-    DeterministicAeadConfig.init();
+    DeterministicAeadConfig.register();
   }
 
   @Test
-  public void testConfigContents() throws Exception {
+  public void testConfigContents_1_1_0() throws Exception {
     RegistryConfig config = DeterministicAeadConfig.TINK_1_1_0;
     assertEquals(1, config.getEntryCount());
     assertEquals("TINK_DETERMINISTIC_AEAD_1_1_0", config.getConfigName());
@@ -74,16 +88,17 @@ public class DeterministicAeadConfigTest {
   }
 
   @Test
-  public void testRegistration() throws Exception {
-    String typeUrl = "type.googleapis.com/google.crypto.tink.AesSivKey";
-    try {
-      Registry.getKeyManager(typeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
-    // After registration the key manager should be present.
-    Config.register(DeterministicAeadConfig.TINK_1_1_0);
-    Registry.getKeyManager(typeUrl);
+  public void testConfigContents_LATEST() throws Exception {
+    RegistryConfig config = DeterministicAeadConfig.LATEST;
+    assertEquals(1, config.getEntryCount());
+    assertEquals("TINK_DETERMINISTIC_AEAD", config.getConfigName());
+
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkDeterministicAead",
+        "DeterministicAead",
+        "type.googleapis.com/google.crypto.tink.AesSivKey",
+        true,
+        0);
   }
 }

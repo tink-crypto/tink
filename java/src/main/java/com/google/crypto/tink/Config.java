@@ -33,7 +33,7 @@ import java.security.GeneralSecurityException;
  * <h3>Usage</h3>
  *
  * <pre>{@code
- * RegistryConfig registryConfig = ...; // AeadConfig.TINK_1_1_0
+ * RegistryConfig registryConfig = ...;
  * Config.register(registryConfig);
  * }</pre>
  *

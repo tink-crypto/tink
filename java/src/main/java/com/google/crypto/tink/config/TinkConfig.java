@@ -27,15 +27,17 @@ import java.security.GeneralSecurityException;
  * Static methods and constants for registering with the {@link com.google.crypto.tink.Registry} all
  * instances of all key types supported in a particular release of Tink.
  *
- * <p>To register all key types provided in Tink release 1.1.0 one can do:
+ * <p>To register all key types provided in the latest Tink version one can do:
  *
  * <pre>{@code
- * Config.register(TinkConfig.TINK_1_1_0);
+ * TinkConfig.register();
  * }</pre>
  *
  * @since 1.0.0
  */
 public final class TinkConfig {
+  /** @deprecated */
+  @Deprecated
   public static final RegistryConfig TINK_1_0_0 =
       RegistryConfig.newBuilder()
           .mergeFrom(
@@ -44,7 +46,11 @@ public final class TinkConfig {
           .setConfigName("TINK_1_0_0")
           .build();
 
-  /** @since 1.1.0 */
+  /**
+   * @deprecated
+   * @since 1.1.0
+   */
+  @Deprecated
   public static final RegistryConfig TINK_1_1_0 =
       RegistryConfig.newBuilder()
           .mergeFrom(
@@ -55,13 +61,35 @@ public final class TinkConfig {
           .setConfigName("TINK_1_1_0")
           .build();
 
+  public static final RegistryConfig LATEST =
+      RegistryConfig.newBuilder()
+          .mergeFrom(HybridConfig.LATEST) // include AeadConfig.TINK_1_0_0 and MacConfig.TINK_1_0_0
+          .mergeFrom(SignatureConfig.LATEST)
+          .mergeFrom(DeterministicAeadConfig.LATEST)
+          .mergeFrom(StreamingAeadConfig.LATEST)
+          .setConfigName("TINK")
+          .build();
+
   /**
-   * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
-   * com.google.crypto.tink.Catalogue} needed to handle all key types supported in Tink.
+   * Tries to register with the {@link Registry} all instances of {@link
+   * com.google.crypto.tink.Catalogue} and {@link com.google.crypto.tink.KeyManager} needed to
+   * handle all key types supported in Tink.
+   *
+   * @deprecated use {@link #register}
    */
+  @Deprecated
   public static void init() throws GeneralSecurityException {
-    DeterministicAeadConfig.init();
-    HybridConfig.init(); // includes Aead and Mac
-    SignatureConfig.init();
+    register();
+  }
+
+  /**
+   * Tries to register with the {@link Registry} all instances of {@link
+   * com.google.crypto.tink.Catalogue} and {@link com.google.crypto.tink.KeyManager} needed to
+   * handle all key types supported in Tink.
+   */
+  public static void register() throws GeneralSecurityException {
+    DeterministicAeadConfig.register();
+    HybridConfig.register(); // includes Aead and Mac
+    SignatureConfig.register();
   }
 }

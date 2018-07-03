@@ -18,7 +18,6 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.config.TinkConfig;
 import java.io.ByteArrayOutputStream;
@@ -53,7 +52,7 @@ public class CliUtil {
    * In case of errors throws an exception.
    */
   public static void initTink() throws GeneralSecurityException {
-    Config.register(TinkConfig.TINK_1_1_0);
+    TinkConfig.register();
   }
 
   /**

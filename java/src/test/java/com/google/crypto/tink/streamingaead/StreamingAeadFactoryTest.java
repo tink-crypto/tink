@@ -19,12 +19,11 @@ package com.google.crypto.tink.streamingaead;
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.StreamingTestUtil;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -44,8 +43,8 @@ public class StreamingAeadFactoryTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    StreamingAeadConfig.init();
-    Config.register(TinkConfig.TINK_1_1_0);
+    StreamingAeadConfig.register();
+    DeterministicAeadConfig.register(); // need this for testInvalidKeyMaterial.
   }
 
   @Test

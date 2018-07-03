@@ -109,19 +109,17 @@ For example, if you want to use all implementations of all primitives in Tink
 1.0.0, the initialization would look as follows:
 
 ```java
-    import com.google.crypto.tink.Config;
     import com.google.crypto.tink.config.TinkConfig;
 
-    Config.register(TinkConfig.TINK_1_1_0);
+    TinkConfig.register();
 ```
 
 To use only implementations of the AEAD primitive:
 
 ```java
-    import com.google.crypto.tink.Config;
     import com.google.crypto.tink.aead.AeadConfig;
 
-    Config.register(AeadConfig.TINK_1_1_0);
+    AeadConfig.register();
 ```
 
 For custom initialization the registration proceeds directly via

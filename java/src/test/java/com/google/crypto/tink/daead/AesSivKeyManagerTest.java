@@ -19,7 +19,6 @@ package com.google.crypto.tink.daead;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeysetHandle;
@@ -49,8 +48,7 @@ public class AesSivKeyManagerTest {
 
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
-    DeterministicAeadConfig.init();
-    Config.register(DeterministicAeadConfig.TINK_1_1_0);
+    DeterministicAeadConfig.register();
   }
 
   @Before

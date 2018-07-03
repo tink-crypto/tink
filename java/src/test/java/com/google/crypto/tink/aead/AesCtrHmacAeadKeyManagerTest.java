@@ -19,7 +19,6 @@ package com.google.crypto.tink.aead;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
@@ -38,7 +37,7 @@ import org.junit.runners.JUnit4;
 public class AesCtrHmacAeadKeyManagerTest {
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(AeadConfig.TINK_1_0_0);
+    AeadConfig.register();
   }
 
   @Test

@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.proto.RegistryConfig;
@@ -47,31 +46,43 @@ public class HybridConfigTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("MacConfig.init()");
+      assertThat(e.toString()).contains("MacConfig.register()");
     }
     try {
       Registry.getCatalogue("tinkhybridencrypt");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("HybridConfig.init()");
+      assertThat(e.toString()).contains("HybridConfig.register()");
     }
     try {
       Registry.getCatalogue("tinkhybriddecrypt");
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("HybridConfig.init()");
+      assertThat(e.toString()).contains("HybridConfig.register()");
     }
-    // Get the config proto, now the catalogues should be present,
-    // as init() was triggered by a static block.
-    RegistryConfig unused = HybridConfig.TINK_1_1_0;
+
+    String typeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+    try {
+      Registry.getKeyManager(typeUrl);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("No key manager found");
+    }
+
+    // Initialize the config.
+    HybridConfig.register();
+
+    // Now the catalogues should be present.
     Registry.getCatalogue("tinkmac");
     Registry.getCatalogue("tinkhybriddecrypt");
     Registry.getCatalogue("tinkhybridencrypt");
 
+    Registry.getKeyManager(typeUrl);
+
     // Running init() manually again should succeed.
-    HybridConfig.init();
+    HybridConfig.register();
   }
 
   @Test
@@ -217,16 +228,73 @@ public class HybridConfigTest {
   }
 
   @Test
-  public void testRegistration() throws Exception {
-    String typeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-    try {
-      Registry.getKeyManager(typeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
-    // After registration the key manager should be present.
-    Config.register(HybridConfig.TINK_1_1_0);
-    Registry.getKeyManager(typeUrl);
+  public void testConfigContents_LATEST() throws Exception {
+    RegistryConfig config = HybridConfig.LATEST;
+    assertEquals(9, config.getEntryCount());
+    assertEquals("TINK_HYBRID", config.getConfigName());
+
+    TestUtil.verifyConfigEntry(
+        config.getEntry(0),
+        "TinkMac",
+        "Mac",
+        "type.googleapis.com/google.crypto.tink.HmacKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(1),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(2),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesEaxKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(3),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.AesGcmKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(4),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(5),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.KmsAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(6),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(7),
+        "TinkHybridDecrypt",
+        "HybridDecrypt",
+        "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(8),
+        "TinkHybridEncrypt",
+        "HybridEncrypt",
+        "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+        true,
+        0);
   }
 }

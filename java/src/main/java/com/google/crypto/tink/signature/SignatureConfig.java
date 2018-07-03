@@ -26,11 +26,11 @@ import java.security.GeneralSecurityException;
  * com.google.crypto.tink.PublicKeySign} and {@link com.google.crypto.tink.PublicKeyVerify} key
  * types supported in a particular release of Tink.
  *
- * <p>To register all PublicKeySign and PublicKeyVerify key types provided in Tink release 1.1.0 one
- * can do:
+ * <p>To register all PublicKeySign and PublicKeyVerify key types provided in the latest Tink
+ * version one can do:
  *
  * <pre>{@code
- * Config.register(HybridConfig.TINK_1_1_0);
+ * SignatureConfig.init();
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of PublicKeySign or PublicKeyVerify,
@@ -46,6 +46,8 @@ public final class SignatureConfig {
   private static final String PUBLIC_KEY_SIGN_CATALOGUE_NAME = "TinkPublicKeySign";
   private static final String PUBLIC_KEY_VERIFY_CATALOGUE_NAME = "TinkPublicKeyVerify";
 
+  /** @deprecated */
+  @Deprecated
   public static final RegistryConfig TINK_1_0_0 =
       RegistryConfig.newBuilder()
           .setConfigName("TINK_SIGNATURE_1_0_0")
@@ -63,11 +65,32 @@ public final class SignatureConfig {
                   PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "Ed25519PublicKey", 0, true))
           .build();
 
-  /** @since 1.1.0 */
+  /**
+   * @deprecated
+   * @since 1.1.0
+   */
+  @Deprecated
   public static final RegistryConfig TINK_1_1_0 =
       RegistryConfig.newBuilder()
           .mergeFrom(TINK_1_0_0)
           .setConfigName("TINK_SIGNATURE_1_1_0")
+          .build();
+
+  public static final RegistryConfig LATEST =
+      RegistryConfig.newBuilder()
+          .setConfigName("TINK_SIGNATURE")
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  PUBLIC_KEY_SIGN_CATALOGUE_NAME, "PublicKeySign", "EcdsaPrivateKey", 0, true))
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  PUBLIC_KEY_SIGN_CATALOGUE_NAME, "PublicKeySign", "Ed25519PrivateKey", 0, true))
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "EcdsaPublicKey", 0, true))
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "Ed25519PublicKey", 0, true))
           .build();
 
   static {
@@ -82,9 +105,22 @@ public final class SignatureConfig {
    * Tries to register with the {@link Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle PublicKeySign and PublicKeyVerify key types
    * supported in Tink.
+   *
+   * @deprecated use {@link #register}
    */
+  @Deprecated
   public static void init() throws GeneralSecurityException {
+    register();
+  }
+
+  /**
+   * Tries to register with the {@link Registry} all instances of {@link
+   * com.google.crypto.tink.Catalogue} needed to handle PublicKeySign and PublicKeyVerify key types
+   * supported in Tink.
+   */
+  public static void register() throws GeneralSecurityException {
     Registry.addCatalogue(PUBLIC_KEY_SIGN_CATALOGUE_NAME, new PublicKeySignCatalogue());
     Registry.addCatalogue(PUBLIC_KEY_VERIFY_CATALOGUE_NAME, new PublicKeyVerifyCatalogue());
+    Config.register(LATEST);
   }
 }

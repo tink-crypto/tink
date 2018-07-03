@@ -19,7 +19,6 @@ package com.google.crypto.tink.aead;
 import static org.junit.Assert.assertEquals;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
@@ -39,7 +38,7 @@ import org.junit.runners.JUnit4;
 public class ChaCha20Poly1305KeyManagerTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
-    Config.register(AeadConfig.TINK_1_0_0);
+    AeadConfig.register();
   }
 
   @Test

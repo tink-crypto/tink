@@ -22,11 +22,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TestUtil;
-import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -46,7 +45,8 @@ public class AeadFactoryTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(TinkConfig.TINK_1_1_0);
+    AeadConfig.register();
+    DeterministicAeadConfig.register(); // need this for testInvalidKeyMaterial.
   }
 
   @Test

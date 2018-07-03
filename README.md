@@ -48,10 +48,9 @@ runtime with Tink, so that Tink "knows" the desired implementations. Here's how
 you can register all implementations of all primitives in Tink for Java 1.1.0:
 
 ```java
-    import com.google.crypto.tink.Config;
     import com.google.crypto.tink.config.TinkConfig;
 
-    Config.register(TinkConfig.TINK_1_1_0);
+    TinkConfig.register();
 ```
 
 After implementations of primitives have been registered, the basic use of Tink

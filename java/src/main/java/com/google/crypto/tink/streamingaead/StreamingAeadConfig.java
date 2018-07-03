@@ -25,10 +25,10 @@ import java.security.GeneralSecurityException;
  * Static methods and constants for registering with the {@link Registry} all instances of {@link
  * com.google.crypto.tink.StreamingAead} key types supported in a particular release of Tink.
  *
- * <p>To register all StreamingAead key types provided in Tink release 1.1.0 one can do:
+ * <p>To register all StreamingAead key types provided in the latest Tink version one can do:
  *
  * <pre>{@code
- * Config.register(StreamingAeadConfig.TINK_1_1_0);
+ * StreamingAeadConfig.init();
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of StreamingAead, see {@link
@@ -45,13 +45,29 @@ public final class StreamingAeadConfig {
   private static final String CATALOGUE_NAME = "TinkStreamingAead";
   private static final String PRIMITIVE_NAME = "StreamingAead";
 
-  public static final RegistryConfig TINK_1_1_0 = RegistryConfig.newBuilder()
-      .addEntry(Config.getTinkKeyTypeEntry(
-          CATALOGUE_NAME, PRIMITIVE_NAME, "AesCtrHmacStreamingKey", 0, true))
-      .addEntry(Config.getTinkKeyTypeEntry(
-          CATALOGUE_NAME, PRIMITIVE_NAME, "AesGcmHkdfStreamingKey", 0, true))
-      .setConfigName("TINK_STREAMINGAEAD_1_1_0")
-      .build();
+  /** @deprecated */
+  @Deprecated
+  public static final RegistryConfig TINK_1_1_0 =
+      RegistryConfig.newBuilder()
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  CATALOGUE_NAME, PRIMITIVE_NAME, "AesCtrHmacStreamingKey", 0, true))
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  CATALOGUE_NAME, PRIMITIVE_NAME, "AesGcmHkdfStreamingKey", 0, true))
+          .setConfigName("TINK_STREAMINGAEAD_1_1_0")
+          .build();
+
+  public static final RegistryConfig LATEST =
+      RegistryConfig.newBuilder()
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  CATALOGUE_NAME, PRIMITIVE_NAME, "AesCtrHmacStreamingKey", 0, true))
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  CATALOGUE_NAME, PRIMITIVE_NAME, "AesGcmHkdfStreamingKey", 0, true))
+          .setConfigName("TINK_STREAMINGAEAD")
+          .build();
 
   static {
     try {
@@ -62,11 +78,22 @@ public final class StreamingAeadConfig {
   }
 
   /**
-   * Tries to register with the {@link Registry} all instances of
-   * {@link com.google.crypto.tink.Catalogue} needed to handle StreamingAead key types
-   * supported in Tink.
+   * Tries to register with the {@link Registry} all instances of {@link
+   * com.google.crypto.tink.Catalogue} needed to handle StreamingAead key types supported in Tink.
+   *
+   * @deprecated use {@link #register}
    */
+  @Deprecated
   public static void init() throws GeneralSecurityException {
+    register();
+  }
+
+  /**
+   * Tries to register with the {@link Registry} all instances of {@link
+   * com.google.crypto.tink.Catalogue} needed to handle StreamingAead key types supported in Tink.
+   */
+  public static void register() throws GeneralSecurityException {
     Registry.addCatalogue(CATALOGUE_NAME, new StreamingAeadCatalogue());
+    Config.register(LATEST);
   }
 }
