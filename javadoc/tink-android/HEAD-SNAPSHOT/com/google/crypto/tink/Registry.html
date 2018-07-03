@@ -128,13 +128,13 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  <p>To initialize the Registry with all key managers in Tink 1.0.0, one can do as follows:
 
  <pre><code>
- Config.register(TinkConfig.TINK_1_0_0);
+ TinkConfig.register();
  </code></pre>
 
  <p>Here's how to register only <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><code>Aead</code></a> key managers:
 
  <pre><code>
- Config.register(AeadConfig.TINK_1_0_0);
+ AeadConfig.register();
  </code></pre>
 
  <p>After the Registry has been initialized, one can use <a href="../../../../com/google/crypto/tink/aead/AeadFactory.html" title="class in com.google.crypto.tink.aead"><code>AeadFactory</code></a>, <a href="../../../../com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac"><code>MacFactory</code></a>, etc., to
