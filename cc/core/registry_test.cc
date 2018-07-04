@@ -161,6 +161,66 @@ void verify_test_managers(const std::string& key_type_prefix,
   }
 }
 
+TEST_F(RegistryTest, testRegisterKeyManagerMoreRestrictiveNewKeyAllowed) {
+  std::string key_type = "some_key_type";
+  KeyTemplate key_template;
+  key_template.set_type_url(key_type);
+
+  // Register the key manager with new_key_allowed == true and verify that
+  // new key data can be created.
+  util::Status status = Registry::RegisterKeyManager(
+      key_type, new TestAeadKeyManager(key_type), /* new_key_allowed= */ true);
+  EXPECT_TRUE(status.ok()) << status;
+
+  auto result_before = Registry::NewKeyData(key_template);
+  EXPECT_TRUE(result_before.ok());
+
+  // Re-register the key manager with new_key_allowed == false and check the
+  // restriction (i.e. new key data cannot be created).
+  status = Registry::RegisterKeyManager(
+      key_type, new TestAeadKeyManager(key_type), /* new_key_allowed= */ false);
+  EXPECT_TRUE(status.ok()) << status;
+
+  auto result_after = Registry::NewKeyData(key_template);
+  EXPECT_FALSE(result_after.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, result_after.status().error_code());
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type,
+                      result_after.status().error_message());
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "does not allow",
+                      result_after.status().error_message());
+}
+
+TEST_F(RegistryTest, testRegisterKeyManagerLessRestrictiveNewKeyAllowed) {
+  std::string key_type = "some_key_type";
+  KeyTemplate key_template;
+  key_template.set_type_url(key_type);
+
+  // Register the key manager with new_key_allowed == false.
+  util::Status status = Registry::RegisterKeyManager(
+      key_type, new TestAeadKeyManager(key_type), /* new_key_allowed= */ false);
+  EXPECT_TRUE(status.ok()) << status;
+
+  // Verify that re-registering the key manager with new_key_allowed == true is
+  // not possible and that the restriction still holds after that operation
+  // (i.e. new key data cannot be created).
+  status = Registry::RegisterKeyManager(key_type,
+      new TestAeadKeyManager(key_type), /* new_key_allowed= */ true);
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type,
+                      status.error_message()) << status;
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "forbidden new key operation" ,
+                      status.error_message()) << status;
+
+  auto result_after = Registry::NewKeyData(key_template);
+  EXPECT_FALSE(result_after.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, result_after.status().error_code());
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type,
+                      result_after.status().error_message());
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "does not allow",
+                      result_after.status().error_message());
+}
+
 TEST_F(RegistryTest, testConcurrentRegistration) {
   std::string key_type_prefix_a = "key_type_a_";
   std::string key_type_prefix_b = "key_type_b_";

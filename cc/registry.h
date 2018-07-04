@@ -249,6 +249,16 @@ crypto::tink::util::Status Registry::RegisterKeyManager(
       return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                        "A manager for type '%s' has been already registered.",
                        type_url.c_str());
+    } else {
+      auto curr_new_key_allowed = type_to_new_key_allowed_map_.find(type_url);
+      if (!curr_new_key_allowed->second && new_key_allowed) {
+        return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
+                         "A manager for type '%s' has been already registered "
+                         "with forbidden new key operation.",
+                         type_url.c_str());
+      } else {
+        curr_new_key_allowed->second = new_key_allowed;
+      }
     }
   } else {
     type_to_manager_map_.insert(
