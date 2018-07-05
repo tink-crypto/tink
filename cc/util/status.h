@@ -22,6 +22,8 @@
 
 #include <string>
 
+// placeholder_forward_declaration, please ignore
+
 namespace crypto {
 namespace tink {
 namespace util {
@@ -134,7 +136,6 @@ class Status {
   Status(::crypto::tink::util::error::Code error,
          const std::string& error_message);
 
-  Status(const Status& other);
   Status& operator=(const Status& other);
 
   // Some pre-defined Status objects
@@ -164,6 +165,8 @@ class Status {
   }
 
   std::string ToString() const;
+
+  // placeholder_implicit_type_conversion, please ignore
 
  private:
   ::crypto::tink::util::error::Code code_;

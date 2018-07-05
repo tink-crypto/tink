@@ -17,6 +17,7 @@
 #include <sstream>
 
 #include "tink/util/status.h"
+// placeholder_google3_status_header, please ignore"
 
 using ::std::ostream;
 
@@ -40,6 +41,7 @@ const Status& GetUnknown() {
 
 }  // namespace
 
+// placeholder_implicit_type_conversion, please ignore
 
 Status::Status() : code_(::crypto::tink::util::error::OK), message_("") {
 }
@@ -50,10 +52,6 @@ Status::Status(::crypto::tink::util::error::Code error,
   if (code_ == ::crypto::tink::util::error::OK) {
     message_.clear();
   }
-}
-
-Status::Status(const Status& other)
-    : code_(other.code_), message_(other.message_) {
 }
 
 Status& Status::operator=(const Status& other) {
