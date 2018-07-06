@@ -17,7 +17,7 @@
 """
 
 def get_android_test_size(android_version):
-  if android_version == "26" or android_version == "27":
-    # somehow the emulators for these versions are very slow.
-    return "enormous" # not running on TAP presubmit
-  return "large"
+    if android_version == "26" or android_version == "27":
+        # somehow the emulators for these versions are very slow.
+        return "enormous"  # not running on TAP presubmit
+    return "large"

@@ -13,69 +13,72 @@
 """ Definition of javadoc_library. """
 
 def _check_non_empty(value, name):
-  if not value:
-    fail("%s must be non-empty" % name)
+    if not value:
+        fail("%s must be non-empty" % name)
 
 def _android_jar(android_api_level):
-  if android_api_level == -1:
-    return None
-  return Label("@androidsdk//:platforms/android-%s/android.jar" % android_api_level)
+    if android_api_level == -1:
+        return None
+    return Label("@androidsdk//:platforms/android-%s/android.jar" % android_api_level)
 
 def _javadoc_library(ctx):
-  _check_non_empty(ctx.attr.root_packages, "root_packages")
+    _check_non_empty(ctx.attr.root_packages, "root_packages")
 
-  transitive_deps = [dep.java.transitive_deps for dep in ctx.attr.deps]
-  if ctx.attr._android_jar:
-    transitive_deps.append(ctx.attr._android_jar.files)
+    transitive_deps = [dep.java.transitive_deps for dep in ctx.attr.deps]
+    if ctx.attr._android_jar:
+        transitive_deps.append(ctx.attr._android_jar.files)
 
-  classpath = depset([], transitive = transitive_deps).to_list()
+    classpath = depset([], transitive = transitive_deps).to_list()
 
-  include_packages = ":".join(ctx.attr.root_packages)
-  javadoc_command = [
-      ctx.file._javadoc_binary.path,
-      '-sourcepath srcs',
-      "-use",
-      "-subpackages", include_packages,
-      "-encoding UTF8",
-      "-classpath", ":".join([jar.path for jar in classpath]),
-      "-notimestamp",
-      "-d tmp",
-      "-Xdoclint:-missing",
-      "-quiet",
-  ]
+    include_packages = ":".join(ctx.attr.root_packages)
+    javadoc_command = [
+        ctx.file._javadoc_binary.path,
+        "-sourcepath srcs",
+        "-use",
+        "-subpackages",
+        include_packages,
+        "-encoding UTF8",
+        "-classpath",
+        ":".join([jar.path for jar in classpath]),
+        "-notimestamp",
+        "-d tmp",
+        "-Xdoclint:-missing",
+        "-quiet",
+    ]
 
-  if ctx.attr.doctitle:
-    javadoc_command.append('-doctitle "%s"' % ctx.attr.doctitle)
+    if ctx.attr.doctitle:
+        javadoc_command.append('-doctitle "%s"' % ctx.attr.doctitle)
 
-  if ctx.attr.exclude_packages:
-    javadoc_command.append("-exclude %s" % ":".join(ctx.attr.exclude_packages))
+    if ctx.attr.exclude_packages:
+        javadoc_command.append("-exclude %s" % ":".join(ctx.attr.exclude_packages))
 
-  for link in ctx.attr.external_javadoc_links:
-    javadoc_command.append("-linkoffline {0} {0}".format(link))
+    for link in ctx.attr.external_javadoc_links:
+        javadoc_command.append("-linkoffline {0} {0}".format(link))
 
-  if ctx.attr.bottom_text:
-    javadoc_command.append("-bottom '%s'" % ctx.attr.bottom_text)
+    if ctx.attr.bottom_text:
+        javadoc_command.append("-bottom '%s'" % ctx.attr.bottom_text)
 
-  srcs = depset(transitive = [src.files for src in ctx.attr.srcs]).to_list()
-  prepare_srcs_command = "mkdir srcs && "
-  path_prefixes = [x.replace(".", "/") for x in ctx.attr.root_packages]
-  for path_prefix in path_prefixes:
-    prepare_srcs_command = "mkdir -p srcs/%s && " % (path_prefix)
+    srcs = depset(transitive = [src.files for src in ctx.attr.srcs]).to_list()
+    prepare_srcs_command = "mkdir srcs && "
+    path_prefixes = [x.replace(".", "/") for x in ctx.attr.root_packages]
+    for path_prefix in path_prefixes:
+        prepare_srcs_command = "mkdir -p srcs/%s && " % (path_prefix)
 
-  for src in srcs:
-    if src.path.endswith(".jar"):
-      prepare_srcs_command += "unzip -qq -B %s -d srcs && " % src.path
-    elif src.path.endswith(".java"):
-      for path_prefix in path_prefixes:
-        if path_prefix in src.path:
-          prepare_srcs_command += "cp %s srcs/%s && " % (src.path, path_prefix)
+    for src in srcs:
+        if src.path.endswith(".jar"):
+            prepare_srcs_command += "unzip -qq -B %s -d srcs && " % src.path
+        elif src.path.endswith(".java"):
+            for path_prefix in path_prefixes:
+                if path_prefix in src.path:
+                    prepare_srcs_command += "cp %s srcs/%s && " % (src.path, path_prefix)
 
-  jar_command = "%s cf %s -C tmp ." % (ctx.file._jar_binary.path, ctx.outputs.jar.path)
+    jar_command = "%s cf %s -C tmp ." % (ctx.file._jar_binary.path, ctx.outputs.jar.path)
 
-  ctx.actions.run_shell(
-      inputs = srcs + classpath + ctx.files._jdk,
-      command = "%s %s && %s" % (prepare_srcs_command, " ".join(javadoc_command), jar_command),
-      outputs = [ctx.outputs.jar])
+    ctx.actions.run_shell(
+        inputs = srcs + classpath + ctx.files._jdk,
+        command = "%s %s && %s" % (prepare_srcs_command, " ".join(javadoc_command), jar_command),
+        outputs = [ctx.outputs.jar],
+    )
 
 javadoc_library = rule(
     attrs = {

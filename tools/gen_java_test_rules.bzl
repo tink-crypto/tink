@@ -22,92 +22,92 @@ files.
 
 """
 
-def gen_java_test_rules(test_files,
-                        deps,
-                        data=[],
-                        exclude_tests=[],
-                        default_test_size="small",
-                        small_tests=[],
-                        medium_tests=[],
-                        large_tests=[],
-                        enormous_tests=[],
-                        flaky_tests=[],
-                        manual_tests=[],
-                        notsan_tests=[],
-                        resources=[],
-                        tags=[],
-                        prefix="",
-                        jvm_flags=[],
-                        args=[],
-                        visibility=None,
-                        shard_count=1):
-  for test in _get_test_names(test_files):
-    if test in exclude_tests:
-      continue
-    test_size = default_test_size
-    if test in small_tests:
-      test_size = "small"
-    if test in medium_tests:
-      test_size = "medium"
-    if test in large_tests:
-      test_size = "large"
-    if test in enormous_tests:
-      test_size = "enormous"
-    manual = []
-    if test in manual_tests:
-      manual = ["manual"]
-    notsan = []
-    if test in notsan_tests:
-      notsan = ["notsan"]
-    flaky = 0
-    if (test in flaky_tests) or ("flaky" in tags):
-      flaky = 1
-    java_class = _package_from_path(
-        native.package_name() + "/" + _strip_right(test, ".java"))
-    native.java_test(name = prefix + test,
-                     runtime_deps = deps,
-                     data = data,
-                     resources = resources,
-                     size = test_size,
-                     jvm_flags = jvm_flags,
-                     args = args,
-                     flaky = flaky,
-                     tags = tags + manual + notsan,
-                     test_class = java_class,
-                     visibility = visibility,
-                     shard_count = shard_count)
-
+def gen_java_test_rules(
+        test_files,
+        deps,
+        data = [],
+        exclude_tests = [],
+        default_test_size = "small",
+        small_tests = [],
+        medium_tests = [],
+        large_tests = [],
+        enormous_tests = [],
+        flaky_tests = [],
+        manual_tests = [],
+        notsan_tests = [],
+        resources = [],
+        tags = [],
+        prefix = "",
+        jvm_flags = [],
+        args = [],
+        visibility = None,
+        shard_count = 1):
+    for test in _get_test_names(test_files):
+        if test in exclude_tests:
+            continue
+        test_size = default_test_size
+        if test in small_tests:
+            test_size = "small"
+        if test in medium_tests:
+            test_size = "medium"
+        if test in large_tests:
+            test_size = "large"
+        if test in enormous_tests:
+            test_size = "enormous"
+        manual = []
+        if test in manual_tests:
+            manual = ["manual"]
+        notsan = []
+        if test in notsan_tests:
+            notsan = ["notsan"]
+        flaky = 0
+        if (test in flaky_tests) or ("flaky" in tags):
+            flaky = 1
+        java_class = _package_from_path(
+            native.package_name() + "/" + _strip_right(test, ".java"),
+        )
+        native.java_test(
+            name = prefix + test,
+            runtime_deps = deps,
+            data = data,
+            resources = resources,
+            size = test_size,
+            jvm_flags = jvm_flags,
+            args = args,
+            flaky = flaky,
+            tags = tags + manual + notsan,
+            test_class = java_class,
+            visibility = visibility,
+            shard_count = shard_count,
+        )
 
 def _get_test_names(test_files):
-  test_names = []
-  for test_file in test_files:
-    if not test_file.endswith("Test.java"):
-      continue
-    test_names += [test_file[:-5]]
-  return test_names
+    test_names = []
+    for test_file in test_files:
+        if not test_file.endswith("Test.java"):
+            continue
+        test_names += [test_file[:-5]]
+    return test_names
 
-
-def _package_from_path(package_path, src_impls=None):
-  src_impls = src_impls or ["src/test/java/", "javatests/", "java/"]
-  for src_impl in src_impls:
-    if not src_impl.endswith("/"):
-      src_impl += "/"
-    index = _index_of_end(package_path, src_impl)
-    if index >= 0:
-      package_path = package_path[index:]
-      break
-  return package_path.replace("/", ".")
-
+def _package_from_path(package_path, src_impls = None):
+    src_impls = src_impls or ["src/test/java/", "javatests/", "java/"]
+    for src_impl in src_impls:
+        if not src_impl.endswith("/"):
+            src_impl += "/"
+        index = _index_of_end(package_path, src_impl)
+        if index >= 0:
+            package_path = package_path[index:]
+            break
+    return package_path.replace("/", ".")
 
 def _strip_right(s, suffix):
-  if s.endswith(suffix):
-    return s[0: len(s) - len(suffix)]
-  else:
-    return s
-
+    if s.endswith(suffix):
+        return s[0:len(s) - len(suffix)]
+    else:
+        return s
 
 def _index_of_end(s, part):
-  index = s.find(part)
-  if index >= 0:
-    return index + len(part)
-  return -1
+    index = s.find(part)
+    if index >= 0:
+        return index + len(part)
+    return -1
