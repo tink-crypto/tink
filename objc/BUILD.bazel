@@ -595,26 +595,9 @@ objc_library(
 ios_unit_test(
     name = "TinkTests",
     minimum_os_version = "9.0",
-    test_host = ":TinkUnitTestsHost",
     deps = [
         ":UnitTestLib",
     ],
-)
-
-ios_application(
-    name = "TinkUnitTestsHost",
-    bundle_id = "com.google.TinkUnitTests",
-    families = ["iphone"],
-    infoplists = ["Tests/Info.plist"],
-    minimum_os_version = "9.0",
-    deps = [":TinkUnitTestsHostLib"],
-)
-
-objc_library(
-    name = "TinkUnitTestsHostLib",
-    srcs = glob(["Tests/Host/*.m"]),
-    hdrs = glob(["Tests/Host/*.h"]),
-    sdk_frameworks = ["UIKit"],
 )
 
 objc_library(
