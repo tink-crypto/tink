@@ -163,48 +163,47 @@ public final class Registry {
   }
 
   /**
-   * Tries to registers {@code manager} for the given {@code typeUrl}. Users can generate new keys
+   * Tries to register {@code manager} for {@code manager.getKeyType()}. Users can generate new keys
    * with this manager using the {@link Registry#newKey} methods.
    *
-   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing key
-   * manager aren't instances of the same class, and do nothing if they are.
+   * <p>If there is an existing key manager, throws an exception if {@code manager} and the existing
+   * key manager aren't instances of the same class, or the existing key manager could not create
+   * new keys. Otherwise registration succeeds.
    *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
-   *     class of {@code manager}
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance
+   *     of the class of {@code manager}, or the registration tries to re-enable the generation
+   *     of new keys.
    */
-  public static synchronized <P> void registerKeyManager(
-      String typeUrl, final KeyManager<P> manager) throws GeneralSecurityException {
-    registerKeyManager(typeUrl, manager, /* newKeyAllowed= */ true);
+  public static synchronized <P> void registerKeyManager(final KeyManager<P> manager)
+      throws GeneralSecurityException {
+    registerKeyManager(manager, /* newKeyAllowed= */ true);
   }
 
   /**
-   * Tries to registers {@code manager} for the given {@code typeUrl}. If {@code newKeyAllowed} is
+   * Tries to register {@code manager} for {@code manager.getKeyType()}. If {@code newKeyAllowed} is
    * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
    *
-   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing key
-   * manager aren't instances of the same class, and do nothing if they are.
+   * <p>If there is an existing key manager, throws an exception if {@code manager} and the existing
+   * key manager aren't instances of the same class, or if {@code newKeyAllowed} is true while the
+   * existing key manager could not create new keys.  Otherwise registration succeeds.
    *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
-   *     class of {@code manager}
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance
+   *     of the class of {@code manager}, or the registration tries to re-enable the generation
+   *     of new keys.
    */
   @SuppressWarnings("unchecked")
   public static synchronized <P> void registerKeyManager(
-      String typeUrl, final KeyManager<P> manager, boolean newKeyAllowed)
-      throws GeneralSecurityException {
+      final KeyManager<P> manager, boolean newKeyAllowed) throws GeneralSecurityException {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
-    if (!manager.doesSupport(typeUrl)) {
-      throw new GeneralSecurityException(
-          "Manager does not support key type "
-          + typeUrl + ".");
-    }
+    String typeUrl = manager.getKeyType();
     if (keyManagerMap.containsKey(typeUrl)) {
       KeyManager<P> existingManager = getKeyManager(typeUrl);
       boolean existingNewKeyAllowed = newKeyAllowedMap.get(typeUrl).booleanValue();
       if (!manager.getClass().equals(existingManager.getClass())
-          // Disallow changing newKeyAllow from false to true.
-          || (!existingNewKeyAllowed && newKeyAllowed)) {
+          // Disallow changing newKeyAllowed from false to true.
+          || ((!existingNewKeyAllowed) && newKeyAllowed)) {
         logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
         throw new GeneralSecurityException(
             String.format(
@@ -214,6 +213,48 @@ public final class Registry {
     }
     keyManagerMap.put(typeUrl, manager);
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
+  }
+
+  /**
+   * Tries to register {@code manager} for the given {@code typeUrl}. Users can generate new keys
+   * with this manager using the {@link Registry#newKey} methods.
+   *
+   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing
+   * key manager aren't instances of the same class, and do nothing if they are.
+   *
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
+   *     class of {@code manager}
+   * @deprecated use {@link #registerKeyManager(KeyManager<P>)}
+   */
+  @Deprecated
+  public static synchronized <P> void registerKeyManager(
+      String typeUrl, final KeyManager<P> manager) throws GeneralSecurityException {
+    registerKeyManager(typeUrl, manager, /* newKeyAllowed= */ true);
+  }
+
+  /**
+   * Tries to register {@code manager} for the given {@code typeUrl}. If {@code newKeyAllowed} is
+   * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
+   *
+   * <p>If there is an existing key manager, throw exception if {@code manager} and the existing
+   * key manager aren't instances of the same class, and do nothing if they are.
+   *
+   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
+   *     class of {@code manager}
+   * @deprecated use {@link #registerKeyManager(KeyManager<P>, boolean)}
+   */
+  @Deprecated
+  public static synchronized <P> void registerKeyManager(
+      String typeUrl, final KeyManager<P> manager, boolean newKeyAllowed)
+      throws GeneralSecurityException {
+    if (manager == null) {
+      throw new IllegalArgumentException("key manager must be non-null.");
+    }
+    if (!typeUrl.equals(manager.getKeyType())) {
+      throw new GeneralSecurityException("Manager does not support key type "
+          + typeUrl + ".");
+    }
+    registerKeyManager(manager, newKeyAllowed);
   }
 
   /**

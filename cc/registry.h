@@ -77,17 +77,15 @@ class Registry {
   static crypto::tink::util::Status AddCatalogue(
       const std::string& catalogue_name, Catalogue<P>* catalogue);
 
-  // Registers the given 'manager' for the key type identified by 'type_url'.
+  // Registers the given 'manager' for the key type 'manager->get_key_type()'.
   // Takes ownership of 'manager', which must be non-nullptr.
   template <class P>
   static crypto::tink::util::Status RegisterKeyManager(
-      const std::string& type_url, KeyManager<P>* manager,
-      bool new_key_allowed);
+      KeyManager<P>* manager, bool new_key_allowed);
 
   template <class P>
-  static crypto::tink::util::Status RegisterKeyManager(
-      const std::string& type_url, KeyManager<P>* manager) {
-    return RegisterKeyManager(type_url, manager, /* new_key_allowed= */ true);
+  static crypto::tink::util::Status RegisterKeyManager(KeyManager<P>* manager) {
+    return RegisterKeyManager(manager, /* new_key_allowed= */ true);
   }
 
   // Returns a key manager for the given type_url (if any found).
@@ -229,12 +227,13 @@ crypto::tink::util::StatusOr<const Catalogue<P>*> Registry::get_catalogue(
 // static
 template <class P>
 crypto::tink::util::Status Registry::RegisterKeyManager(
-    const std::string& type_url, KeyManager<P>* manager, bool new_key_allowed) {
+    KeyManager<P>* manager, bool new_key_allowed) {
   if (manager == nullptr) {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,
         "Parameter 'manager' must be non-null.");
   }
+  std::string type_url = manager->get_key_type();
   std::unique_ptr<void, void (*)(void*)> entry(manager, delete_manager<P>);
   if (!manager->DoesSupport(type_url)) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,

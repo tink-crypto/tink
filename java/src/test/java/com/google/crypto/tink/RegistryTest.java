@@ -144,6 +144,72 @@ public class RegistryTest {
   @Test
   public void testRegisterKeyManager_keyManagerIsNull_shouldThrowException() throws Exception {
     try {
+      Registry.registerKeyManager(null);
+      fail("Expected IllegalArgumentException.");
+    } catch (IllegalArgumentException e) {
+      assertThat(e.toString()).contains("must be non-null");
+    }
+  }
+
+  @Test
+  public void testRegisterKeyManager_MoreRestrictedNewKeyAllowed_shouldWork() throws Exception {
+    String typeUrl = "someTypeUrl";
+    Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl));
+
+    try {
+      Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), false);
+    } catch (GeneralSecurityException e) {
+      throw new AssertionError(
+          "repeated registrations of the same key manager should work", e);
+    }
+  }
+
+  @Test
+  public void testRegisterKeyManager_SameNewKeyAllowed_shouldWork() throws Exception {
+    String typeUrl = "someOtherTypeUrl";
+    Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl));
+
+    try {
+      Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), true);
+    } catch (GeneralSecurityException e) {
+      throw new AssertionError(
+          "repeated registrations of the same key manager should work", e);
+    }
+  }
+
+  @Test
+  public void testRegisterKeyManager_LessRestrictedNewKeyAllowed_shouldThrowException()
+      throws Exception {
+    String typeUrl = "yetAnotherTypeUrl";
+    Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), false);
+
+    try {
+      Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), true);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testRegisterKeyManager_keyManagerFromAnotherClass_shouldThrowException()
+      throws Exception {
+    // This should not overwrite the existing manager.
+    try {
+      Registry.registerKeyManager(new CustomAeadKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL));
+      fail("Expected GeneralSecurityException.");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("already registered");
+    }
+
+    KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
+    assertThat(manager.getClass().toString()).contains("AesCtrHmacAeadKeyManager");
+  }
+
+  @Test
+  public void testRegisterKeyManager_deprecated_keyManagerIsNull_shouldThrowException()
+      throws Exception {
+    try {
       Registry.registerKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, null);
       fail("Expected IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
@@ -152,9 +218,9 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyManager_WithKeyTypeNotSupported_shouldThrowException() 
+  public void testRegisterKeyManager_deprecated_WithKeyTypeNotSupported_shouldThrowException()
       throws Exception {
-    String typeUrl = "someTypeUrl";
+    String typeUrl = "yetSomeOtherTypeUrl";
     String differentTypeUrl = "differentTypeUrl";
     try {
       Registry.registerKeyManager(differentTypeUrl, new CustomAeadKeyManager(typeUrl));
@@ -167,7 +233,8 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyManager_MoreRestrictedNewKeyAllowed_shouldWork() throws Exception {
+  public void testRegisterKeyManager_deprecated_MoreRestrictedNewKeyAllowed_shouldWork()
+      throws Exception {
     String typeUrl = "typeUrl";
     Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl));
 
@@ -179,9 +246,9 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyManager_LessRestrictedNewKeyAllowed_shouldThrowException()
+  public void testRegisterKeyManager_deprecated_LessRestrictedNewKeyAllowed_shouldThrowException()
       throws Exception {
-    String typeUrl = "typeUrl";
+    String typeUrl = "totallyDifferentTypeUrl";
     Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl), false);
 
     try {
@@ -193,7 +260,7 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyManager_keyManagerFromAnotherClass_shouldThrowException()
+  public void testRegisterKeyManager_deprecated_keyManagerFromAnotherClass_shouldThrowException()
       throws Exception {
     // This should not overwrite the existing manager.
     try {

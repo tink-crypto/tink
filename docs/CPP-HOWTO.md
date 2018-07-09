@@ -186,8 +186,7 @@ For custom initialization the registration proceeds directly via
    #include "custom_project/custom_aead_key_manager.h"
 
    // ...
-   auto status = Registry::RegisterKeyManager(
-       CustomAeadKeyManager.kKeyType, new CustomAeadKeyManager());
+   auto status = Registry::RegisterKeyManager(new CustomAeadKeyManager());
    if (!status.ok()) /* ... handle failure */;
 ```
 

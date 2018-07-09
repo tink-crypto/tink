@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  */
 class AesCtrHmacAeadKeyManager implements KeyManager<Aead> {
   AesCtrHmacAeadKeyManager() throws GeneralSecurityException {
-    Registry.registerKeyManager(AesCtrKeyManager.TYPE_URL, new AesCtrKeyManager());
+    Registry.registerKeyManager(new AesCtrKeyManager());
   }
 
   private static final Logger logger =

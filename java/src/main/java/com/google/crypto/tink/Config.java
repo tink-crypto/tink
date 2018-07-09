@@ -86,7 +86,7 @@ public final class Config {
     KeyManager keyManager =
         catalogue.getKeyManager(
             entry.getTypeUrl(), entry.getPrimitiveName(), entry.getKeyManagerVersion());
-    Registry.registerKeyManager(entry.getTypeUrl(), keyManager, entry.getNewKeyAllowed());
+    Registry.registerKeyManager(keyManager, entry.getNewKeyAllowed());
   }
 
   private static void validate(KeyTypeEntry entry) throws GeneralSecurityException {

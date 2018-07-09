@@ -145,7 +145,7 @@ void register_test_managers(const std::string& key_type_prefix,
   for (int i = 0; i < manager_count; i++) {
     std::string key_type = key_type_prefix + std::to_string(i);
     util::Status status = Registry::RegisterKeyManager(
-        key_type, new TestAeadKeyManager(key_type));
+        new TestAeadKeyManager(key_type));
     EXPECT_TRUE(status.ok()) << status;
   }
 }
@@ -169,7 +169,7 @@ TEST_F(RegistryTest, testRegisterKeyManagerMoreRestrictiveNewKeyAllowed) {
   // Register the key manager with new_key_allowed == true and verify that
   // new key data can be created.
   util::Status status = Registry::RegisterKeyManager(
-      key_type, new TestAeadKeyManager(key_type), /* new_key_allowed= */ true);
+      new TestAeadKeyManager(key_type), /* new_key_allowed= */ true);
   EXPECT_TRUE(status.ok()) << status;
 
   auto result_before = Registry::NewKeyData(key_template);
@@ -178,7 +178,7 @@ TEST_F(RegistryTest, testRegisterKeyManagerMoreRestrictiveNewKeyAllowed) {
   // Re-register the key manager with new_key_allowed == false and check the
   // restriction (i.e. new key data cannot be created).
   status = Registry::RegisterKeyManager(
-      key_type, new TestAeadKeyManager(key_type), /* new_key_allowed= */ false);
+      new TestAeadKeyManager(key_type), /* new_key_allowed= */ false);
   EXPECT_TRUE(status.ok()) << status;
 
   auto result_after = Registry::NewKeyData(key_template);
@@ -197,13 +197,13 @@ TEST_F(RegistryTest, testRegisterKeyManagerLessRestrictiveNewKeyAllowed) {
 
   // Register the key manager with new_key_allowed == false.
   util::Status status = Registry::RegisterKeyManager(
-      key_type, new TestAeadKeyManager(key_type), /* new_key_allowed= */ false);
+      new TestAeadKeyManager(key_type), /* new_key_allowed= */ false);
   EXPECT_TRUE(status.ok()) << status;
 
   // Verify that re-registering the key manager with new_key_allowed == true is
   // not possible and that the restriction still holds after that operation
   // (i.e. new key data cannot be created).
-  status = Registry::RegisterKeyManager(key_type,
+  status = Registry::RegisterKeyManager(
       new TestAeadKeyManager(key_type), /* new_key_allowed= */ true);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
@@ -263,11 +263,11 @@ TEST_F(RegistryTest, testBasic) {
   EXPECT_EQ(util::error::NOT_FOUND,
             manager_result.status().error_code());
 
-  auto status = Registry::RegisterKeyManager(key_type_1,
+  auto status = Registry::RegisterKeyManager(
       new TestAeadKeyManager(key_type_1));
   EXPECT_TRUE(status.ok()) << status;
 
-  status = Registry::RegisterKeyManager(key_type_2,
+  status = Registry::RegisterKeyManager(
       new TestAeadKeyManager(key_type_2));
   EXPECT_TRUE(status.ok()) << status;
 
@@ -288,20 +288,19 @@ TEST_F(RegistryTest, testRegisterKeyManager) {
   std::string key_type_1 = AesGcmKeyManager::kKeyType;
 
   TestAeadKeyManager* null_key_manager = nullptr;
-  auto status = Registry::RegisterKeyManager(key_type_1, null_key_manager);
+  auto status = Registry::RegisterKeyManager(null_key_manager);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code()) << status;
 
   // Register a key manager.
-  status = Registry::RegisterKeyManager(key_type_1,
-      new TestAeadKeyManager(key_type_1));
+  status = Registry::RegisterKeyManager(new TestAeadKeyManager(key_type_1));
   EXPECT_TRUE(status.ok()) << status;
 
   // Register the same key manager again, it should work (idempotence).
   EXPECT_TRUE(status.ok()) << status;
 
   // Try overriding a key manager.
-  status = Registry::RegisterKeyManager(key_type_1, new AesGcmKeyManager());
+  status = Registry::RegisterKeyManager(new AesGcmKeyManager());
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
 
@@ -376,11 +375,9 @@ TEST_F(RegistryTest, testGettingPrimitives) {
 
   // Register key managers.
   util::Status status;
-  status = Registry::RegisterKeyManager(key_type_1,
-                                        new TestAeadKeyManager(key_type_1));
+  status = Registry::RegisterKeyManager(new TestAeadKeyManager(key_type_1));
   EXPECT_TRUE(status.ok()) << status;
-  status = Registry::RegisterKeyManager(key_type_2,
-                                        new TestAeadKeyManager(key_type_2));
+  status = Registry::RegisterKeyManager(new TestAeadKeyManager(key_type_2));
   EXPECT_TRUE(status.ok()) << status;
 
   // Get and use primitives.
@@ -449,14 +446,11 @@ TEST_F(RegistryTest, testNewKeyData) {
 
   // Register key managers.
   util::Status status;
-  status = Registry::RegisterKeyManager(key_type_1,
-                                        new TestAeadKeyManager(key_type_1));
+  status = Registry::RegisterKeyManager(new TestAeadKeyManager(key_type_1));
   EXPECT_TRUE(status.ok()) << status;
-  status = Registry::RegisterKeyManager(key_type_2,
-                                        new TestAeadKeyManager(key_type_2));
+  status = Registry::RegisterKeyManager(new TestAeadKeyManager(key_type_2));
   EXPECT_TRUE(status.ok()) << status;
-  status = Registry::RegisterKeyManager(key_type_3,
-                                        new TestAeadKeyManager(key_type_3),
+  status = Registry::RegisterKeyManager(new TestAeadKeyManager(key_type_3),
                                         /* new_key_allowed= */ false);
   EXPECT_TRUE(status.ok()) << status;
 

@@ -46,8 +46,7 @@ class EciesAeadHkdfPublicKeyManagerTest : public ::testing::Test {
  protected:
   static void SetUpTestCase() {
     auto aes_gcm_key_manager = new AesGcmKeyManager();
-    ASSERT_TRUE(Registry::RegisterKeyManager(
-        aes_gcm_key_manager->get_key_type(), aes_gcm_key_manager).ok());
+    ASSERT_TRUE(Registry::RegisterKeyManager(aes_gcm_key_manager).ok());
   }
 
   std::string key_type_prefix = "type.googleapis.com/";

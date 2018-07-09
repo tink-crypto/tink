@@ -130,8 +130,7 @@ For custom initialization the registration proceeds directly via
     import my.custom.package.aead.MyAeadKeyManager;
 
     // Register a custom implementation of AEAD.
-    Registry.registerKeyManager(
-        MyAeadKeyManager.TYPE_URL, new MyAeadKeyManager());
+    Registry.registerKeyManager(new MyAeadKeyManager());
 
 ```
 
@@ -608,7 +607,7 @@ the custom `KeyManager`-implementation (from step #3 above) for the custom key
 type (from step #2 above):
 
 ```java
-    Registry.registerKeyManager(keyType, keyManager);
+    Registry.registerKeyManager(keyManager);
 ```
 
 Afterwards the implementation will be accessed automatically by the `Factory`
