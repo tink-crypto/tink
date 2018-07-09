@@ -28,9 +28,22 @@
 #import "objc/util/TINKStrings.h"
 #import "proto/Tink.pbobjc.h"
 
+#include "tink/binary_keyset_reader.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
+
+// Variables used to hold the serialized keyset data.
+static NSData *gBadSerializedKeyset;
+static NSData *gGoodSerializedKeyset;
+
+// Verbatim copy of the service constant defined in TINKKeychainKeysetReader.
+static NSString *const kTinkService = @"com.google.crypto.tink";
+
+// Keyset names used in the tests below.
+static NSString *const kGoodKeysetName = @"com.google.crypto.tink.goodKeyset";
+static NSString *const kBadKeysetName = @"com.google.crypto.tink.badKeyset";
+static NSString *const kNonExistentKeysetName = @"com.google.crypto.tink.noSuchKeyset";
 
 static TINKPBKeyset *gKeyset;
 
@@ -52,6 +65,7 @@ static TINKPBKeyset *gKeyset;
   ccKeyset.set_primary_key_id(42);
 
   std::string serializedKeyset = ccKeyset.SerializeAsString();
+  gGoodSerializedKeyset = TINKStringToNSData(serializedKeyset);
 
   NSError *error = nil;
   gKeyset = [TINKPBKeyset
@@ -59,6 +73,36 @@ static TINKPBKeyset *gKeyset;
               error:&error];
   XCTAssertNotNil(gKeyset);
   XCTAssertNil(error);
+
+  gBadSerializedKeyset = TINKStringToNSData("some weird string");
+}
+
+- (void)setUp {
+  // Add the two keysets in the keychain. We do this here because we can use XCTAssert to test that
+  // SecItemAdd succeeds. It would be better in +setUp but XCTAssert isn't available.
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    NSDictionary *attr = @{
+      (__bridge id)kSecClass : (__bridge id)kSecClassGenericPassword,
+      (__bridge id)
+      kSecAttrAccessible : (__bridge id)kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+      (__bridge id)kSecAttrService : kTinkService,
+      (__bridge id)kSecAttrSynchronizable : (__bridge id)kCFBooleanFalse,
+    };
+    NSMutableDictionary *attributes = [attr mutableCopy];
+
+    // Store the keyset.
+    [attributes setObject:kGoodKeysetName forKey:(__bridge id)kSecAttrAccount];
+    [attributes setObject:gGoodSerializedKeyset forKey:(__bridge id)kSecValueData];
+    OSStatus status = SecItemAdd((__bridge CFDictionaryRef)attributes, NULL);
+    XCTAssertTrue(status == errSecSuccess || status == errSecDuplicateItem);
+
+    // Store the bad keyset.
+    [attributes setObject:kBadKeysetName forKey:(__bridge id)kSecAttrAccount];
+    [attributes setObject:gBadSerializedKeyset forKey:(__bridge id)kSecValueData];
+    status = SecItemAdd((__bridge CFDictionaryRef)attributes, NULL);
+    XCTAssertTrue(status == errSecSuccess || status == errSecDuplicateItem);
+  });
 }
 
 - (void)testGoodEncryptedKeyset_Binary {
@@ -187,6 +231,44 @@ static TINKPBKeyset *gKeyset;
   XCTAssertEqual(error.code, crypto::tink::util::error::RESOURCE_EXHAUSTED);
   XCTAssertTrue(
       [error.localizedFailureReason containsString:@"A KeysetReader can be used only once."]);
+}
+
+- (void)testGoodKeysetFromKeychain {
+  NSError *error = nil;
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initFromKeychainWithName:kGoodKeysetName error:&error];
+  XCTAssertNotNil(handle);
+  XCTAssertNil(error);
+
+  // Verify the contents of the keyset.
+  auto ccKeyset = crypto::tink::TestUtil::GetKeyset(*handle.ccKeysetHandle);
+  std::string serializedCCKeyset;
+  XCTAssertTrue(ccKeyset.SerializeToString(&serializedCCKeyset));
+  XCTAssertTrue(
+      [gGoodSerializedKeyset isEqualToData:[NSData dataWithBytes:serializedCCKeyset.data()
+                                                          length:serializedCCKeyset.length()]]);
+}
+
+- (void)testBadKeysetFromKeychain {
+  NSError *error = nil;
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initFromKeychainWithName:kBadKeysetName error:&error];
+  XCTAssertNil(handle);
+  XCTAssertNotNil(error);
+  XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertTrue([error.localizedFailureReason
+      containsString:@"Could not parse the input stream as a Keyset-proto."]);
+}
+
+- (void)testUnknownKeysetFromKeychain {
+  NSError *error = nil;
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initFromKeychainWithName:kNonExistentKeysetName error:&error];
+  XCTAssertNil(handle);
+  XCTAssertNotNil(error);
+  XCTAssertEqual(error.code, crypto::tink::util::error::NOT_FOUND);
+  XCTAssertTrue([error.localizedFailureReason
+      containsString:@"A keyset with the given name wasn't found in the keychain."]);
 }
 
 @end

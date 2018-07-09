@@ -62,6 +62,28 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable instancetype)initWithKeyTemplate:(TINKKeyTemplate *)keyTemplate error:(NSError **)error;
 
+/**
+ * Creates a TINKKeysetHandle from a keyset obtained from the iOS keychain.
+ *
+ * @param keysetName  The keyset name that was used to store the keyset to the iOS keychain.
+ * @param error       If non-nil it will be populated with a descriptive error message.
+ * @return            A TINKKeysetHandle, or nil in case of error.
+ */
+- (nullable instancetype)initFromKeychainWithName:(NSString *)keysetName error:(NSError **)error;
+
+/**
+ * Writes the underlying keyset to the iOS keychain under the name specified by @c keysetName.
+ * The keyset can be retrieved from the keychain by using -initFromKeychainWithName:error:.
+ *
+ * @param keysetName  A unique keyset name that's used to store and retrieve the keyset from the iOS
+ *                    keychain. If an item with the same name exists in the keychain an error will
+ *                    be returned.
+ * @param error       If non-nill it will be populated with a descriptive error message.
+ * @return            YES if the keyset was successfully written in the keychain.
+ *                    Otherwise, returns NO and sets @c error.
+ */
+- (BOOL)writeToKeychainWithName:(NSString *)keysetName error:(NSError **)error;
+
 @end
 
 NS_ASSUME_NONNULL_END

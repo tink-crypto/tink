@@ -27,9 +27,19 @@
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
 
+#include <iosfwd>
+#include <iostream>
+#include <sstream>
+#include <string>
+
+#include "absl/strings/string_view.h"
+#include "tink/binary_keyset_reader.h"
+#include "tink/cleartext_keyset_handle.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
+
+static NSString *const kTinkService = @"com.google.crypto.tink";
 
 @implementation TINKKeysetHandle {
   std::unique_ptr<crypto::tink::KeysetHandle> _ccKeysetHandle;
@@ -89,6 +99,81 @@
   }
 
   return [self initWithCCKeysetHandle:std::move(st.ValueOrDie())];
+}
+
+- (nullable instancetype)initFromKeychainWithName:(NSString *)keysetName error:(NSError **)error {
+  if (keysetName == nil) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "keysetName must be non-nil."));
+    }
+    return nil;
+  }
+
+  if (self = [super init]) {
+    NSDictionary *getQuery = @{
+      (__bridge id)kSecClass : (__bridge id)kSecClassGenericPassword,
+      (__bridge id)kSecAttrAccount : keysetName,
+      (__bridge id)kSecAttrService : kTinkService,
+      (__bridge id)kSecReturnData : (__bridge id)kCFBooleanTrue,
+    };
+
+    crypto::tink::util::error::Code errorCode = crypto::tink::util::error::OK;
+    std::string errorMessage = "";
+    CFTypeRef dataTypeRef = NULL;
+    OSStatus status = SecItemCopyMatching((CFDictionaryRef)getQuery, &dataTypeRef);
+    switch (status) {
+      case errSecSuccess:
+        // Success, nothing to do.
+        break;
+      case errSecItemNotFound:
+        errorMessage = "A keyset with the given name wasn't found in the keychain.";
+        errorCode = crypto::tink::util::error::NOT_FOUND;
+        break;
+      default:
+        std::ostringstream oss;
+        oss << "An error occured while trying to retrieve the keyset from the keychain.";
+        oss << " Error code: " << status;
+        errorMessage = oss.str();
+        errorCode = crypto::tink::util::error::UNKNOWN;
+    }
+
+    if (errorCode != crypto::tink::util::error::OK) {
+      if (error) {
+        *error = TINKStatusToError(crypto::tink::util::Status(errorCode, errorMessage));
+      }
+      return nil;
+    }
+
+    NSData *keyset = (__bridge NSData *)dataTypeRef;
+    auto reader = crypto::tink::BinaryKeysetReader::New(absl::string_view(
+        reinterpret_cast<const char *>(keyset.bytes), static_cast<size_t>(keyset.length)));
+    if (!reader.ok()) {
+      if (error) {
+        *error = TINKStatusToError(reader.status());
+      }
+      return nil;
+    }
+
+    auto read_result = crypto::tink::CleartextKeysetHandle::Read(std::move(reader.ValueOrDie()));
+    if (!read_result.ok()) {
+      if (error) {
+        *error = TINKStatusToError(read_result.status());
+        return nil;
+      }
+    }
+
+    return [self initWithCCKeysetHandle:std::move(read_result.ValueOrDie())];
+  }
+  return nil;
+}
+
+- (BOOL)writeToKeychainWithName:(NSString *)keysetName error:(NSError **)error {
+  if (error) {
+    *error = TINKStatusToError(
+        crypto::tink::util::Status(crypto::tink::util::error::UNIMPLEMENTED, "Not implemented."));
+  }
+  return NO;
 }
 
 - (instancetype)initWithKeyTemplate:(TINKKeyTemplate *)keyTemplate error:(NSError **)error {
