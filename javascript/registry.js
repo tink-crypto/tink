@@ -17,6 +17,7 @@ goog.module('tink.Registry');
 const Catalogue = goog.require('tink.Catalogue');
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
+const Map = goog.require('goog.structs.Map');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbMessage = goog.require('jspb.Message');
@@ -53,8 +54,12 @@ class Registry {
    * @return {!Promise.<!Catalogue<P>>}
    */
   static async getCatalogue(catalogueName) {
-    // TODO implement
-    throw new SecurityException('Not implemented yet.');
+    const catalogue = Registry.nameToCatalogueMap_.get(catalogueName);
+    if (!catalogue) {
+      throw new SecurityException(
+          'Catalogue with name ' + catalogueName + ' has not been added.');
+    }
+    return catalogue;
   }
 
   /**
@@ -70,10 +75,22 @@ class Registry {
    * @param {string} catalogueName
    * @param {!Catalogue<P>} catalogue
    */
-  static async addCatalogue(catalogueName, catalogue) {
-    // TODO implement
-    throw new SecurityException('Not implemented yet.');
+  // This function could be async and there would be no problem with concurency
+  // as it does not use await at all. But without async it is more consistent
+  // with Java version.
+  static addCatalogue(catalogueName, catalogue) {
+    if (!catalogueName) {
+      throw new SecurityException('Catalogue must have name.');
+    }
+    if (!catalogue) {
+      throw new SecurityException('Catalogue cannot be null.');
+    }
+    if (Registry.nameToCatalogueMap_.containsKey(catalogueName)) {
+      throw new SecurityException('Catalogue name already exists.');
+    }
+    Registry.nameToCatalogueMap_.set(catalogueName, catalogue);
   }
+
 
   /**
    * Register the given manager for the given key type. Manager must be
@@ -84,11 +101,45 @@ class Registry {
    *
    * @param {string} typeUrl -- key type
    * @param {!KeyManager.KeyManager<P>} manager
-   * @param {?boolean=} opt_newKeyAllowed
+   * @param {boolean=} opt_newKeyAllowed
    */
-  static async registerKeyManager(typeUrl, manager, opt_newKeyAllowed = true) {
-    // TODO implement
-    throw new SecurityException('Not implemented yet.');
+  // TODO add check that registered key manager provides primitives which are
+  // consistent with user's expecatation.
+  static registerKeyManager(typeUrl, manager, opt_newKeyAllowed) {
+    if (opt_newKeyAllowed === undefined) {
+      opt_newKeyAllowed = true;
+    }
+
+    if (!typeUrl) {
+      throw new SecurityException('Key type has to be defined.');
+    }
+    if (!manager) {
+      throw new SecurityException('Key manager cannot be null.');
+    }
+    if (!manager.doesSupport(typeUrl)) {
+      throw new SecurityException('The provided key manager does not support '
+          + 'key type ' + typeUrl + '.');
+    }
+
+    if (Registry.typeToManagerMap_.containsKey(typeUrl)) {
+      // Cannot overwrite the existing key manager by a new one.
+      if (!(Registry.typeToManagerMap_.get(typeUrl) instanceof
+            manager.constructor)) {
+        throw new SecurityException('Key manager for key type ' + typeUrl +
+            ' has already been registered and cannot be overwritten.');
+      }
+
+      // It is forbidden to change new_key_allowed from false to true.
+      if (!(Registry.typeToNewKeyAllowedMap_.get(typeUrl)) &&
+          opt_newKeyAllowed) {
+        throw new SecurityException('Key manager for key type ' + typeUrl +
+            ' has already been registered with forbidden new key operation.');
+      }
+      Registry.typeToNewKeyAllowedMap_.set(typeUrl, opt_newKeyAllowed);
+    }
+
+    Registry.typeToManagerMap_.set(typeUrl, manager);
+    Registry.typeToNewKeyAllowedMap_.set(typeUrl, opt_newKeyAllowed);
   }
 
   /**
@@ -103,8 +154,12 @@ class Registry {
    * @return {!Promise.<!KeyManager.KeyManager<P>>}
    */
   static async getKeyManager(typeUrl) {
-    // TODO implement
-    throw new SecurityException('Not implemented yet.');
+    const res = Registry.typeToManagerMap_.get(typeUrl);
+    if (!res) {
+      throw new SecurityException(
+          'Key manager for key type ' + typeUrl + ' has not been registered.');
+    }
+    return res;
   }
 
   /**
@@ -121,11 +176,28 @@ class Registry {
    *     (serialized) proto of some key or key data.
    * @param {?string=} opt_typeUrl -- key type
    *
-   * @return {!Promise.<!KeyManager.KeyManager<P>>}
+   * @return {!Promise.<!P>}
    */
   static async getPrimitive(key, opt_typeUrl) {
-    // TODO implement
-    throw new SecurityException('Not implemented yet.');
+    if (key instanceof PbKeyData) {
+      if (opt_typeUrl && key.getTypeUrl() != opt_typeUrl) {
+        throw new SecurityException(
+            'Key type is ' + opt_typeUrl + ', but it is expected to be ' +
+            key.getTypeUrl() + ' or undefined.');
+      }
+      opt_typeUrl = key.getTypeUrl();
+    }
+
+    if (!opt_typeUrl) {
+      throw new SecurityException('Key type has to be specified.');
+    }
+
+    if (key instanceof Uint8Array) {
+      throw new SecurityException('Not implemented yet.');
+    }
+
+    const manager = await Registry.getKeyManager(opt_typeUrl);
+    return manager.getPrimitive(key);
   }
 
   /**
@@ -149,24 +221,6 @@ class Registry {
   }
 
   /**
-   * Generates a new key for specified keyDescription, which is either
-   * KeyTemplate proto or key format proto for some key.
-   *
-   * If keyDescription is key format proto, opt_typeUrl has to be provided
-   *
-   * @static
-   *
-   * @param {!PbKeyTemplate|!PbMessage} keyDescription
-   * @param {?string=} opt_typeUrl
-   *
-   * @return {!Promise.<!PbMessage>}
-   */
-  static async newKey(keyDescription, opt_typeUrl) {
-    // TODO implement
-    throw new SecurityException('Not implemented yet.');
-  }
-
-  /**
    * Generates a new PbKeyData for the specified keyTemplate. It finds a
    * KeyManager given by keyTemplate.typeUrl and calls the newKeyData method of
    * that manager.
@@ -178,8 +232,13 @@ class Registry {
    * @return {!Promise.<!PbKeyData>}
    */
   static async newKeyData(keyTemplate) {
-    // TODO implement
-    throw new SecurityException('Not implemented yet.');
+    const keyType = keyTemplate.getTypeUrl();
+    const manager = await Registry.getKeyManager(keyType);
+    if (!Registry.typeToNewKeyAllowedMap_.get(keyType)) {
+      throw new SecurityException('New key operation is forbidden for ' +
+          'key type: ' + keyType + '.');
+    }
+    return manager.getKeyFactory().newKeyData(keyTemplate.getValue());
   }
 
   /**
@@ -191,25 +250,27 @@ class Registry {
    *
    * @static
    */
-  static async reset() {
-    // TODO implement
-    throw new SecurityException('Not implemented yet.');
-  }
-
-  /**
-   * Returns a KeyFactory handling the given keyType.
-   *
-   * @static
-   * @private
-   *
-   * @param {string} keyType
-   *
-   * @return {!Promise.<!KeyManager.KeyFactory>}
-   */
-  static async getKeyFactory_(keyType) {
-    // TODO implement
-    throw new SecurityException('Not implemented yet.');
+  static reset() {
+    Registry.typeToManagerMap_.clear();
+    Registry.typeToNewKeyAllowedMap_.clear();
+    Registry.nameToCatalogueMap_.clear();
   }
 }
+// key managers maps
+/**
+ * @static @private {Map<string,KeyManager.KeyManager>}
+ *
+ */
+Registry.typeToManagerMap_ = new Map();
+/**
+ * @static @private {Map<string,boolean>}
+ */
+Registry.typeToNewKeyAllowedMap_ = new Map();
+
+// catalogues maps
+/**
+ * @static @private {Map<string,Catalogue>}
+ */
+Registry.nameToCatalogueMap_ = new Map();
 
 exports = Registry;
