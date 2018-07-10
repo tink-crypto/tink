@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
+// placeholder_google3_status_header, please ignore
 
 namespace crypto {
 namespace tink {
@@ -47,6 +48,8 @@ TEST_F(ErrorsTest, ToStatusFTest) {
   EXPECT_EQ(expected_msg2, status.error_message());
   EXPECT_EQ(crypto::tink::util::error::UNKNOWN, status.error_code());
 }
+
+// placeholder_status_conversion_test, please ignore
 
 }  // namespace
 }  // namespace tink
