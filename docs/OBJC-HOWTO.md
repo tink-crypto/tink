@@ -3,6 +3,69 @@
 The following subsections present instructions and/or Obj-C snippets for some
 common tasks in [Tink](https://github.com/google/tink).
 
+## Installing Tink
+
+Tink is released as a [Cocoapod](https://cocoapods.org/). It can be installed by
+using the pod command as described below.
+
+#### Supported Platforms
+
+ * iOS 9.0 or newer
+ * Xcode 9.2 or newer
+
+### Installing via Cocoapods
+
+1. Change into the directory that contains your Xcode project.
+
+   ```sh
+   cd /path/to/your/Xcode project/
+   ```
+
+2. Initialize Cocoapods.
+
+   ```sh
+   pod init
+   ```
+   This command creates a file called Podfile.
+
+3. Edit the Podfile.
+
+   For a stable release, add the following line:
+
+   ```
+   pod 'Tink'
+   ```
+
+   For a pre-release use the following line instead:
+
+   ```
+   pod 'Tink', '1.2.0-rc1'
+   ```
+
+   Note: Replace 1.2.0-rc1 with the pre-release version you want to install.
+
+4. Install the pod.
+
+  ```sh
+  $ pod install
+  ```
+
+5. Open the newly generated .xcworkspace and start using Tink.
+
+   You can import the umbrella header:
+
+   ```objc
+   #import "Tink/Tink.h"
+   ```
+
+   Or individual headers:
+
+   ```objc
+   #import "Tink/TINKAeadConfig.h"
+   #import "Tink/TINKAeadKeyTemplate.h"
+   #import "Tink/TINKAead.h"
+   ```
+
 ## Initializing Tink
 
 Tink provides customizable initialization, which allows for choosing specific
