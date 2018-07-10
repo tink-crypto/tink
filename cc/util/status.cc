@@ -17,7 +17,7 @@
 #include <sstream>
 
 #include "tink/util/status.h"
-// placeholder_google3_status_header, please ignore"
+// placeholder_google3_status_header, please ignore
 
 using ::std::ostream;
 
