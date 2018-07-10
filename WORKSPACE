@@ -510,16 +510,23 @@ java_import_external(
 
 http_archive(
     name = "build_bazel_rules_apple",
-    strip_prefix = "rules_apple-0.4.0",
-    url = "https://github.com/bazelbuild/rules_apple/archive/0.4.0.zip",
-    sha256 = "917ed6cf98b0fa686d89025c4e0871cf72524ed88e70d92c2ea28e0aa0e2e123",
+    strip_prefix = "rules_apple-0.6.0",
+    url = "https://github.com/bazelbuild/rules_apple/archive/0.6.0.zip",
+    sha256 = "bcc39ad59bf3439e1fd704ab553857b77a865f7e30fe612699aeb12f6882a191",
 )
 
 http_archive(
     name = "bazel_skylib",
-    strip_prefix = "bazel-skylib-0.3.1",
-    url = "https://github.com/bazelbuild/bazel-skylib/archive/0.3.1.zip",
-    sha256 = "95518adafc9a2b656667bbf517a952e54ce7f350779d0dd95133db4eb5c27fb1",
+    strip_prefix = "bazel-skylib-0.4.0",
+    url = "https://github.com/bazelbuild/bazel-skylib/archive/0.4.0.zip",
+    sha256 = "b546c142abd7524e4d60959c19b0c387fe282f309be5efb7e0abae476b7bbef9",
+)
+
+http_archive(
+    name = "build_bazel_rules_swift",
+    strip_prefix = "rules_swift-0.2.0",
+    url = "https://github.com/bazelbuild/rules_swift/archive/0.2.0.zip",
+    sha256 = "93e088c8b79a5c5eaa08fca43429fdcbeb88e71575d4fa34d2d53e3deb9e53c4",
 )
 
 http_file(

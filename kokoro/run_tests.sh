@@ -83,6 +83,7 @@ run_macos_tests() {
   --ios_sdk_version="${IOS_SDK_VERSION}" \
   --xcode_version="${XCODE_VERSION}" \
   --verbose_failures \
+  --test_output=all \
   //objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run the iOS tests.
@@ -95,6 +96,7 @@ run_macos_tests() {
   --ios_sdk_version="${IOS_SDK_VERSION}" \
   --xcode_version="${XCODE_VERSION}" \
   --verbose_failures \
+  --test_output=all \
   //objc:TinkTests || ( ls -l ; df -h / ; exit 1 )
 }
 
