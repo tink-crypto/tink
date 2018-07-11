@@ -138,7 +138,48 @@ with one of the available KeyTemplates (AeadKeyTemplate, HybridKeyTemplate etc):
     }
 ```
 
+## Storing Keysets
+
+After generating key material, you might want to persist it to a storage system.
+Tink supports storing keysets to the iOS keychain where they remain encrypted:
+
+```objc
+    #import "Tink/TINKKeysetHandle.h"
+
+    NSError *error = nil;
+    TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithKeyTemplate:tpl error:&error];
+    if (!handle || error) {
+      // handle error.
+    }
+
+    NSString *keysetName = @"com.yourcompany.yourapp.uniqueKeysetName";
+    if (![handle writeToKeychainWithName:keysetName overwrite:NO error:&error]) {
+      // handle error.
+    }
+```
+
+The keysets are stored in the keychain with the following options set:
+
+*   kSecAttrAccessible = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+*   kSecAttrSynchronizable = False
+
+These settings prevent the keysets from leaving the device and keep them
+encrypted until the device is unlocked once.
+
 ## Loading Existing Keysets
+
+To load keysets from the iOS keychain:
+
+```objc
+    #import "Tink/TINKKeysetHandle.h"
+
+    NSError *error = nil;
+    NSString *keysetName = @"com.yourcompany.yourapp.uniqueKeysetName";
+    TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initFromKeychainWithName:keysetName error:&error];
+    if (!handle || error) {
+      // handle error.
+    }
+```
 
 To load cleartext keysets, use
 [`TINKKeysetHandle+Cleartext`](https://github.com/google/tink/blob/master/objc/TINKKeysetHandle+Cleartext.h)
@@ -146,6 +187,9 @@ and an appropriate
 [`KeysetReader`](https://github.com/google/tink/blob/master/objc/TINKKeysetReader.h),
 depending on the wire format of the stored keyset, for example a
 [`TINKBinaryKeysetReader`](https://github.com/google/tink/blob/master/objc/TINKBinaryKeysetReader.h).
+
+Note: We don't recommend storing keysets in cleartext in the filesystem.
+Instead, use the iOS keychain as demonstrated above.
 
 ```objc
     #import "Tink/TINKBinaryKeysetReader.h"

@@ -36,6 +36,7 @@
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/keyset_handle.h"
+#include "tink/util/keyset_util.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
@@ -168,12 +169,101 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
   return nil;
 }
 
-- (BOOL)writeToKeychainWithName:(NSString *)keysetName error:(NSError **)error {
-  if (error) {
-    *error = TINKStatusToError(
-        crypto::tink::util::Status(crypto::tink::util::error::UNIMPLEMENTED, "Not implemented."));
++ (BOOL)deleteFromKeychainWithName:(NSString *)keysetName error:(NSError **)error {
+  if (keysetName == nil) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "keysetName must be non-nil."));
+    }
+    return NO;
   }
-  return NO;
+
+  NSDictionary *attributes = @{
+    (__bridge id)kSecClass : (__bridge id)kSecClassGenericPassword,
+    (__bridge id)kSecAttrAccount : keysetName,
+    (__bridge id)kSecAttrService : kTinkService,
+  };
+
+  OSStatus status = SecItemDelete((CFDictionaryRef)attributes);
+  if (status != errSecSuccess && status != errSecItemNotFound) {
+    if (error) {
+      std::ostringstream oss;
+      oss << "An error occured while trying to delete the keyset from the keychain.";
+      oss << " Keychain error code: " << status;
+      std::string errorMessage = oss.str();
+      *error = TINKStatusToError(
+          crypto::tink::util::Status(crypto::tink::util::error::UNKNOWN, errorMessage));
+    }
+    return NO;
+  }
+
+  return YES;
+}
+
+- (BOOL)writeToKeychainWithName:(NSString *)keysetName
+                      overwrite:(BOOL)overwrite
+                          error:(NSError **)error {
+  if (keysetName == nil) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT, "keysetName must be non-nil."));
+    }
+    return NO;
+  }
+
+  auto keyset = crypto::tink::KeysetUtil::GetKeyset(*self.ccKeysetHandle);
+
+  std::string serializedKeyset;
+  if (!keyset.SerializeToString(&serializedKeyset)) {
+    if (error) {
+      *error = TINKStatusToError(crypto::tink::util::Status(
+          crypto::tink::util::error::INTERNAL, "Could not serialize C++ KeyTemplate."));
+    }
+    return NO;
+  }
+
+  if (overwrite) {
+    if (![TINKKeysetHandle deleteFromKeychainWithName:keysetName error:error]) {
+      return NO;
+    }
+  }
+
+  NSData *keysetData = TINKStringToNSData(serializedKeyset);
+  NSDictionary *attributes = @{
+    (__bridge id)kSecClass : (__bridge id)kSecClassGenericPassword,
+    (__bridge id)kSecAttrAccount : keysetName,
+    (__bridge id)kSecAttrAccessible : (__bridge id)kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+    (__bridge id)kSecAttrService : kTinkService,
+    (__bridge id)kSecAttrSynchronizable : (__bridge id)kCFBooleanFalse,
+    (__bridge id)kSecReturnData : (__bridge id)kCFBooleanTrue,
+    (__bridge id)kSecValueData : keysetData,
+  };
+
+  OSStatus status = SecItemAdd((__bridge CFDictionaryRef)attributes, NULL);
+  switch (status) {
+    case errSecSuccess:
+      return YES;
+    case errSecDuplicateItem:
+      if (error) {
+        std::ostringstream oss;
+        oss << "A keyset with the same keysetName already exists in the keychain.";
+        oss << " Please delete it and try again. Keychain error code: " << status;
+        std::string errorMessage = oss.str();
+        *error = TINKStatusToError(
+            crypto::tink::util::Status(crypto::tink::util::error::UNKNOWN, errorMessage));
+      }
+      return NO;
+    default:
+      if (error) {
+        std::ostringstream oss;
+        oss << "An error occured while trying to store the keyset in the keychain.";
+        oss << " Error code: " << status;
+        std::string errorMessage = oss.str();
+        *error = TINKStatusToError(
+            crypto::tink::util::Status(crypto::tink::util::error::UNKNOWN, errorMessage));
+      }
+      return NO;
+  }
 }
 
 - (instancetype)initWithKeyTemplate:(TINKKeyTemplate *)keyTemplate error:(NSError **)error {

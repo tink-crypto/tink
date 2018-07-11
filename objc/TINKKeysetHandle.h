@@ -78,11 +78,25 @@ NS_ASSUME_NONNULL_BEGIN
  * @param keysetName  A unique keyset name that's used to store and retrieve the keyset from the iOS
  *                    keychain. If an item with the same name exists in the keychain an error will
  *                    be returned.
+ * @param overwrite   If a keyset with the same name exists in the keychain it will be overwritten
+ *                    when this property is set to YES.
  * @param error       If non-nill it will be populated with a descriptive error message.
  * @return            YES if the keyset was successfully written in the keychain.
  *                    Otherwise, returns NO and sets @c error.
  */
-- (BOOL)writeToKeychainWithName:(NSString *)keysetName error:(NSError **)error;
+- (BOOL)writeToKeychainWithName:(NSString *)keysetName
+                      overwrite:(BOOL)overwrite
+                          error:(NSError **)error;
+
+/**
+ * Deletes a keyset from the iOS keychain.
+ *
+ * @param keysetName The name of the keyset to be deleted.
+ * @param error      If non-nil it will be populated with a descriptive error message.
+ * @return           YES if the keyset was successfully deleted or if there was no keyset
+ *                   with that name in the keychain. Otherwise, returns NO and sets @c error.
+ */
++ (BOOL)deleteFromKeychainWithName:(NSString *)keysetName error:(NSError **)error;
 
 @end
 

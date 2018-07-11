@@ -19,10 +19,14 @@
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
 
+#import <Security/Security.h>
 #import <XCTest/XCTest.h>
 
 #import "objc/TINKAead.h"
+#import "objc/TINKAeadConfig.h"
+#import "objc/TINKAeadKeyTemplate.h"
 #import "objc/TINKBinaryKeysetReader.h"
+#import "objc/TINKConfig.h"
 #import "objc/TINKHybridKeyTemplate.h"
 #import "objc/aead/TINKAeadInternal.h"
 #import "objc/util/TINKStrings.h"
@@ -270,6 +274,96 @@ static TINKPBKeyset *gKeyset;
   XCTAssertEqual(error.code, crypto::tink::util::error::NOT_FOUND);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"A keyset with the given name wasn't found in the keychain."]);
+}
+
+- (void)testWriteKeysetToKeychain {
+  static NSString *const kKeysetName = @"com.google.crypto.tink.randomaeadkeyset";
+
+  NSError *error = nil;
+  TINKAeadConfig *aeadConfig =
+      [[TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  XCTAssertNotNil(aeadConfig);
+  XCTAssertNil(error);
+
+  XCTAssertTrue([TINKConfig registerConfig:aeadConfig error:&error]);
+  XCTAssertNil(error);
+
+  // Generate a new fresh keyset for Aead.
+  TINKAeadKeyTemplate *tpl =
+      [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes128Gcm error:&error];
+  XCTAssertNotNil(tpl);
+  XCTAssertNil(error);
+
+  TINKKeysetHandle *handle1 = [[TINKKeysetHandle alloc] initWithKeyTemplate:tpl error:&error];
+  XCTAssertNotNil(handle1);
+  XCTAssertNil(error);
+
+  // Delete any previous keychain items with the same name.
+  NSDictionary *attr = @{
+    (__bridge id)kSecClass : (__bridge id)kSecClassGenericPassword,
+    (__bridge id)kSecAttrAccessible : (__bridge id)kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+    (__bridge id)kSecAttrService : kTinkService,
+    (__bridge id)kSecAttrSynchronizable : (__bridge id)kCFBooleanFalse,
+    (__bridge id)kSecAttrAccount : kKeysetName,
+  };
+  OSStatus deleteStatus = SecItemDelete((__bridge CFDictionaryRef)attr);
+  XCTAssertTrue(deleteStatus == errSecSuccess || deleteStatus == errSecItemNotFound);
+
+  // Store the keyset in the iOS keychain.
+  XCTAssertTrue([handle1 writeToKeychainWithName:kKeysetName overwrite:NO error:&error]);
+  XCTAssertNil(error);
+
+  // Generate a new handle using the stored keyset.
+  TINKKeysetHandle *handle2 =
+      [[TINKKeysetHandle alloc] initFromKeychainWithName:kKeysetName error:&error];
+  XCTAssertNotNil(handle2);
+  XCTAssertNil(error);
+
+  // Compare the two keysets, verify that they are identical.
+  auto keyset1 = crypto::tink::KeysetUtil::GetKeyset(*handle1.ccKeysetHandle);
+  std::string serializedKeyset1;
+  XCTAssertTrue(keyset1.SerializeToString(&serializedKeyset1));
+
+  auto keyset2 = crypto::tink::KeysetUtil::GetKeyset(*handle2.ccKeysetHandle);
+  std::string serializedKeyset2;
+  XCTAssertTrue(keyset2.SerializeToString(&serializedKeyset2));
+
+  XCTAssertTrue(serializedKeyset1 == serializedKeyset2);
+}
+
+- (void)testDeleteKeysetFromKeychain {
+  static NSString *const kKeysetName = @"com.google.crypto.tink.somekeyset";
+
+  NSError *error = nil;
+  TINKAeadConfig *aeadConfig =
+      [[TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  XCTAssertNotNil(aeadConfig);
+  XCTAssertNil(error);
+
+  XCTAssertTrue([TINKConfig registerConfig:aeadConfig error:&error]);
+  XCTAssertNil(error);
+
+  // Generate a new fresh keyset for Aead.
+  TINKAeadKeyTemplate *tpl =
+      [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes128Gcm error:&error];
+  XCTAssertNotNil(tpl);
+  XCTAssertNil(error);
+
+  TINKKeysetHandle *handle1 = [[TINKKeysetHandle alloc] initWithKeyTemplate:tpl error:&error];
+  XCTAssertNotNil(handle1);
+  XCTAssertNil(error);
+
+  // Store the keyset in the iOS keychain.
+  XCTAssertTrue([handle1 writeToKeychainWithName:kKeysetName overwrite:NO error:&error]);
+  XCTAssertNil(error);
+
+  // Delete it.
+  XCTAssertTrue([TINKKeysetHandle deleteFromKeychainWithName:kKeysetName error:&error]);
+  XCTAssertNil(error);
+
+  // Try again. Should succeed with ItemNotFound.
+  XCTAssertTrue([TINKKeysetHandle deleteFromKeychainWithName:kKeysetName error:&error]);
+  XCTAssertNil(error);
 }
 
 @end

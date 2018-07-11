@@ -201,6 +201,7 @@ objc_library(
         "//cc:binary_keyset_reader",
         "//cc:cleartext_keyset_handle",
         "//cc:keyset_handle",
+        "//cc/util:keyset_util",
         "//cc/util:status",
         "//objc/util:errors",
         "//objc/util:strings",
