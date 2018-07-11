@@ -33,13 +33,14 @@
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/mac/mac_config.h"
 #include "tink/util/status.h"
+#include "tink/util/keyset_util.h"
 #include "tink/util/test_util.h"
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
 using crypto::tink::HmacKeyManager;
 using crypto::tink::KeyFactory;
-using crypto::tink::TestUtil;
+using crypto::tink::KeysetUtil;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::HashType;
@@ -56,7 +57,7 @@ using google::crypto::tink::KeyStatusType;
 - (void)testEmptyKeyset {
   Keyset keyset;
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   NSError *error = nil;
@@ -100,7 +101,7 @@ using google::crypto::tink::KeyStatusType;
   XCTAssertNil(error);
 
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   id<TINKMac> mac = [TINKMacFactory primitiveWithKeysetHandle:handle error:&error];

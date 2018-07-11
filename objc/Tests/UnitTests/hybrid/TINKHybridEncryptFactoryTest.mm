@@ -19,7 +19,7 @@
 #import <XCTest/XCTest.h>
 
 #include "tink/util/status.h"
-#include "tink/util/test_util.h"
+#include "tink/util/keyset_util.h"
 #include "proto/tink.pb.h"
 
 #import "proto/Common.pbobjc.h"
@@ -35,7 +35,7 @@
 #import "objc/util/TINKStrings.h"
 #import "objc/util/TINKTestHelpers.h"
 
-using crypto::tink::TestUtil;
+using crypto::tink::KeysetUtil;
 
 @interface TINKHybridEncryptFactoryTest : XCTestCase
 @end
@@ -52,7 +52,7 @@ static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
 - (void)testPrimitiveWithEmptyKeyset {
   google::crypto::tink::Keyset keyset;
   TINKKeysetHandle *keysetHandle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(keyset)];
 
   NSError *error = nil;
   id<TINKHybridEncrypt> primitive =
@@ -104,7 +104,7 @@ static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
 
   // Create a KeysetHandle and use it with the factory.
   TINKKeysetHandle *keysetHandle = [[TINKKeysetHandle alloc]
-      initWithCCKeysetHandle:TestUtil::GetKeysetHandle(ccKeyset)];
+      initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(ccKeyset)];
   XCTAssertNotNil(keysetHandle);
 
   // Get a HybridEncrypt primitive.

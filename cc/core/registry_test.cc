@@ -18,28 +18,30 @@
 #include <thread>  // NOLINT(build/c++11)
 #include <vector>
 
+#include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
-#include "tink/catalogue.h"
-#include "tink/registry.h"
-#include "tink/crypto_format.h"
 #include "tink/aead/aead_catalogue.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/catalogue.h"
+#include "tink/crypto_format.h"
+#include "tink/registry.h"
+#include "tink/util/keyset_util.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
-using crypto::tink::TestUtil;
+using crypto::tink::KeysetUtil;
 using crypto::tink::test::AddLegacyKey;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::DummyAead;
+using crypto::tink::util::Status;
 using google::crypto::tink::AesCtrHmacAeadKey;
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
@@ -48,8 +50,6 @@ using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 using portable_proto::MessageLite;
-using crypto::tink::util::Status;
-
 
 namespace crypto {
 namespace tink {
@@ -405,7 +405,7 @@ TEST_F(RegistryTest, testGettingPrimitives) {
   // Keyset without custom key manager.
   {
     auto result = Registry::GetPrimitives<Aead>(
-        *TestUtil::GetKeysetHandle(keyset), nullptr);
+        *KeysetUtil::GetKeysetHandle(keyset), nullptr);
     EXPECT_TRUE(result.ok()) << result.status();
     auto aead_set = std::move(result.ValueOrDie());
 

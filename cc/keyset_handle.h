@@ -52,8 +52,8 @@ class KeysetHandle {
   friend class KeysetManager;
   friend class Registry;
 
-  // TestUtil::GetKeyset() provides access to get_keyset() for tests.
-  friend class TestUtil;
+  // KeysetUtil::GetKeyset() provides access to get_keyset().
+  friend class KeysetUtil;
 
   // Returns keyset held by this handle.
   const google::crypto::tink::Keyset& get_keyset() const;

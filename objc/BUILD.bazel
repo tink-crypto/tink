@@ -624,6 +624,7 @@ objc_library(
         "//cc:keyset_handle",
         "//cc/aead:aead_config",
         "//cc/aead:aead_factory",
+        "//cc/util:keyset_util",
         "//cc/util:status",
         "//cc/util:test_util",
         "//objc/util:proto_helpers",

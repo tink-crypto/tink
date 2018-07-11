@@ -6,6 +6,8 @@ cc_library(
     name = "public_key_verify_set_wrapper",
     srcs = ["public_key_verify_set_wrapper.cc"],
     hdrs = ["public_key_verify_set_wrapper.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
@@ -16,14 +18,14 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "public_key_verify_factory",
     srcs = ["public_key_verify_factory.cc"],
     hdrs = ["public_key_verify_factory.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":public_key_verify_set_wrapper",
         "//cc:key_manager",
@@ -34,14 +36,14 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "public_key_sign_set_wrapper",
     srcs = ["public_key_sign_set_wrapper.cc"],
     hdrs = ["public_key_sign_set_wrapper.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
@@ -52,14 +54,14 @@ cc_library(
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "public_key_sign_factory",
     srcs = ["public_key_sign_factory.cc"],
     hdrs = ["public_key_sign_factory.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":public_key_sign_set_wrapper",
         "//cc:key_manager",
@@ -70,27 +72,27 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "signature_key_templates",
     srcs = ["signature_key_templates.cc"],
     hdrs = ["signature_key_templates.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         "//proto:common_cc_proto",
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "ecdsa_sign_key_manager",
     srcs = ["ecdsa_sign_key_manager.cc"],
     hdrs = ["ecdsa_sign_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":ecdsa_verify_key_manager",
         "//cc:key_manager",
@@ -107,14 +109,14 @@ cc_library(
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "ecdsa_verify_key_manager",
     srcs = ["ecdsa_verify_key_manager.cc"],
     hdrs = ["ecdsa_verify_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         "//cc:key_manager",
         "//cc:public_key_verify",
@@ -130,14 +132,14 @@ cc_library(
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "public_key_sign_catalogue",
     srcs = ["public_key_sign_catalogue.cc"],
     hdrs = ["public_key_sign_catalogue.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":ecdsa_sign_key_manager",
         "//cc:catalogue",
@@ -146,14 +148,14 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "public_key_verify_catalogue",
     srcs = ["public_key_verify_catalogue.cc"],
     hdrs = ["public_key_verify_catalogue.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":ecdsa_verify_key_manager",
         "//cc:catalogue",
@@ -162,14 +164,14 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "signature_config",
     srcs = ["signature_config.cc"],
     hdrs = ["signature_config.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":public_key_sign_catalogue",
         ":public_key_verify_catalogue",
@@ -178,8 +180,6 @@ cc_library(
         "//cc/util:status",
         "//proto:config_cc_proto",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 # tests
@@ -214,6 +214,7 @@ cc_test(
         "//cc:keyset_handle",
         "//cc:public_key_verify",
         "//cc:registry",
+        "//cc/util:keyset_util",
         "//cc/util:status",
         "//cc/util:test_util",
         "//proto:ecdsa_cc_proto",
@@ -252,6 +253,7 @@ cc_test(
         "//cc:keyset_handle",
         "//cc:public_key_sign",
         "//cc:registry",
+        "//cc/util:keyset_util",
         "//cc/util:status",
         "//cc/util:test_util",
         "//proto:ecdsa_cc_proto",

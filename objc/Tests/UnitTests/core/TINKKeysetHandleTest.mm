@@ -30,6 +30,7 @@
 
 #include "tink/binary_keyset_reader.h"
 #include "tink/util/status.h"
+#include "tink/util/keyset_util.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
@@ -124,7 +125,7 @@ static TINKPBKeyset *gKeyset;
       [[TINKKeysetHandle alloc] initWithKeysetReader:reader andKey:aead error:nil];
   XCTAssertNotNil(handle);
   std::string output;
-  crypto::tink::TestUtil::GetKeyset(*handle.ccKeysetHandle).SerializeToString(&output);
+  crypto::tink::KeysetUtil::GetKeyset(*handle.ccKeysetHandle).SerializeToString(&output);
 
   XCTAssertTrue(
       [gKeyset.data isEqualToData:[NSData dataWithBytes:output.data() length:output.size()]]);
@@ -241,7 +242,7 @@ static TINKPBKeyset *gKeyset;
   XCTAssertNil(error);
 
   // Verify the contents of the keyset.
-  auto ccKeyset = crypto::tink::TestUtil::GetKeyset(*handle.ccKeysetHandle);
+  auto ccKeyset = crypto::tink::KeysetUtil::GetKeyset(*handle.ccKeysetHandle);
   std::string serializedCCKeyset;
   XCTAssertTrue(ccKeyset.SerializeToString(&serializedCCKeyset));
   XCTAssertTrue(

@@ -36,13 +36,14 @@
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/signature_config.h"
 #include "tink/util/status.h"
+#include "tink/util/keyset_util.h"
 #include "tink/util/test_util.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
 using crypto::tink::EcdsaSignKeyManager;
 using crypto::tink::KeyFactory;
-using crypto::tink::TestUtil;
+using crypto::tink::KeysetUtil;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::EcdsaPublicKey;
@@ -110,7 +111,7 @@ static Keyset publicKeyset;
 - (void)testEmptyKeyset {
   Keyset keyset;
   TINKKeysetHandle *handle =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(keyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
   NSError *error = nil;
@@ -130,11 +131,11 @@ static Keyset publicKeyset;
   XCTAssertNil(error);
 
   TINKKeysetHandle *handlePrivate =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(privateKeyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(privateKeyset)];
   XCTAssertNotNil(handlePrivate);
 
   TINKKeysetHandle *handlePublic =
-      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestUtil::GetKeysetHandle(publicKeyset)];
+      [[TINKKeysetHandle alloc] initWithCCKeysetHandle:KeysetUtil::GetKeysetHandle(publicKeyset)];
   XCTAssertNotNil(handlePublic);
 
   id<TINKPublicKeySign> publicKeySign =

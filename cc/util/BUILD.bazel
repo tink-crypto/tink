@@ -6,59 +6,59 @@ cc_library(
     name = "errors",
     srcs = ["errors.cc"],
     hdrs = ["errors.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":status",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "enums",
     srcs = ["enums.cc"],
     hdrs = ["enums.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         "//cc/subtle:common_enums",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "status",
     srcs = ["status.cc"],
     hdrs = ["status.h"],
-    visibility = ["//visibility:public"],
-    strip_include_prefix = "/cc",
     include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
     name = "statusor",
     srcs = ["statusor.h"],
     hdrs = ["statusor.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     visibility = ["//visibility:public"],
     deps = [
         ":status",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "validation",
     srcs = ["validation.cc"],
     hdrs = ["validation.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":errors",
         ":status",
         "//proto:tink_cc_proto",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
@@ -66,6 +66,8 @@ cc_library(
     testonly = 1,
     srcs = ["test_util.cc"],
     hdrs = ["test_util.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":enums",
         ":protobuf_helper",
@@ -89,18 +91,29 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
-    strip_include_prefix = "/cc",
+)
+
+cc_library(
+    name = "keyset_util",
+    srcs = ["keyset_util.cc"],
+    hdrs = ["keyset_util.h"],
     include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:keyset_handle",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
+    ],
 )
 
 cc_library(
     name = "protobuf_helper",
     hdrs = ["protobuf_helper.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         "@com_google_protobuf//:protobuf_lite",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 # tests

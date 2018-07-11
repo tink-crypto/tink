@@ -6,6 +6,8 @@ cc_library(
     name = "mac_set_wrapper",
     srcs = ["mac_set_wrapper.cc"],
     hdrs = ["mac_set_wrapper.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     visibility = ["//visibility:private"],
     deps = [
         "//cc:crypto_format",
@@ -15,41 +17,41 @@ cc_library(
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "mac_config",
     srcs = ["mac_config.cc"],
     hdrs = ["mac_config.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":mac_catalogue",
         "//cc:config",
         "//cc/util:status",
         "//proto:config_cc_proto",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "mac_catalogue",
     srcs = ["mac_catalogue.cc"],
     hdrs = ["mac_catalogue.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":hmac_key_manager",
         "//cc:catalogue",
         "//cc/util:status",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "mac_factory",
     srcs = ["mac_factory.cc"],
     hdrs = ["mac_factory.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":mac_set_wrapper",
         "//cc:key_manager",
@@ -60,27 +62,27 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "mac_key_templates",
     srcs = ["mac_key_templates.cc"],
     hdrs = ["mac_key_templates.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         "//proto:common_cc_proto",
         "//proto:hmac_cc_proto",
         "//proto:tink_cc_proto",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 cc_library(
     name = "hmac_key_manager",
     srcs = ["hmac_key_manager.cc"],
     hdrs = ["hmac_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         "//cc:key_manager",
         "//cc:mac",
@@ -96,8 +98,6 @@ cc_library(
         "//proto:hmac_cc_proto",
         "//proto:tink_cc_proto",
     ],
-    strip_include_prefix = "/cc",
-    include_prefix = "tink",
 )
 
 # tests
@@ -164,6 +164,7 @@ cc_test(
         "//cc:keyset_handle",
         "//cc:mac",
         "//cc/mac:hmac_key_manager",
+        "//cc/util:keyset_util",
         "//cc/util:status",
         "//cc/util:test_util",
         "//proto:common_cc_proto",
