@@ -61,9 +61,10 @@ public final class TinkConfig {
           .setConfigName("TINK_1_1_0")
           .build();
 
+  /** @since 1.2.0 */
   public static final RegistryConfig LATEST =
       RegistryConfig.newBuilder()
-          .mergeFrom(HybridConfig.LATEST) // include AeadConfig.TINK_1_0_0 and MacConfig.TINK_1_0_0
+          .mergeFrom(HybridConfig.LATEST) // include AeadConfig.LATEST and MacConfig.LATEST
           .mergeFrom(SignatureConfig.LATEST)
           .mergeFrom(DeterministicAeadConfig.LATEST)
           .mergeFrom(StreamingAeadConfig.LATEST)
@@ -86,6 +87,8 @@ public final class TinkConfig {
    * Tries to register with the {@link Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} and {@link com.google.crypto.tink.KeyManager} needed to
    * handle all key types supported in Tink.
+   *
+   * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
     DeterministicAeadConfig.register();

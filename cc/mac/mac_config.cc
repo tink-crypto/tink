@@ -32,7 +32,7 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       MacConfig::kCatalogueName, MacConfig::kPrimitiveName,
       "HmacKey", 0, true));
-  config->set_config_name("TINK_MAC_1_2_0");
+  config->set_config_name("TINK_MAC");
   return config;
 }
 

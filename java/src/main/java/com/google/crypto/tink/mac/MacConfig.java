@@ -57,6 +57,7 @@ public final class MacConfig {
   public static final RegistryConfig TINK_1_1_0 =
       RegistryConfig.newBuilder().mergeFrom(TINK_1_0_0).setConfigName("TINK_MAC_1_1_0").build();
 
+  /** @since 1.2.0 */
   public static final RegistryConfig LATEST =
       RegistryConfig.newBuilder().mergeFrom(TINK_1_0_0).setConfigName("TINK_MAC").build();
 
@@ -84,6 +85,8 @@ public final class MacConfig {
    * Tries to register with the {@link Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} and {@link com.google.crypto.tink.KeyManager} needed to
    * handle Mac key types supported in Tink.
+   *
+   * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
     Registry.addCatalogue(CATALOGUE_NAME, new MacCatalogue());

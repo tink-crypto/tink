@@ -41,7 +41,7 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
       HybridConfig::kHybridEncryptCatalogueName,
       HybridConfig::kHybridEncryptPrimitiveName,
       "EciesAeadHkdfPublicKey", 0, true));
-  config->set_config_name("TINK_HYBRID_1_2_0");
+  config->set_config_name("TINK_HYBRID");
   return config;
 }
 

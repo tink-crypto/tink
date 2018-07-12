@@ -39,7 +39,7 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
       SignatureConfig::kPublicKeyVerifyCatalogueName,
       SignatureConfig::kPublicKeyVerifyPrimitiveName,
       "EcdsaPublicKey", 0, true));
-  config->set_config_name("TINK_SIGNATURE_1_2_0");
+  config->set_config_name("TINK_SIGNATURE");
   return config;
 }
 

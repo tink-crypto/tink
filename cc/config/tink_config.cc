@@ -33,7 +33,7 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
       new google::crypto::tink::RegistryConfig();
   config->MergeFrom(HybridConfig::Latest());  // includes Mac & Aead
   config->MergeFrom(SignatureConfig::Latest());
-  config->set_config_name("TINK_1_2_0");
+  config->set_config_name("TINK");
   return config;
 }
 

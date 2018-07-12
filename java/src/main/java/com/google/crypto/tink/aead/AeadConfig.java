@@ -78,6 +78,7 @@ public final class AeadConfig {
   public static final RegistryConfig TINK_1_1_0 =
       RegistryConfig.newBuilder().mergeFrom(TINK_1_0_0).setConfigName("TINK_AEAD_1_1_0").build();
 
+  /** @since 1.2.0 */
   public static final RegistryConfig LATEST =
       RegistryConfig.newBuilder()
           .mergeFrom(MacConfig.LATEST)
@@ -129,6 +130,8 @@ public final class AeadConfig {
    *
    * <p>Because Aead key types depend on {@link com.google.crypto.tink.Mac} key types, this method
    * also registers all Mac catalogues and key managers.
+   *
+   * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
     // The order of these calls matters.

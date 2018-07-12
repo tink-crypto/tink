@@ -77,6 +77,7 @@ public final class HybridConfig {
   public static final RegistryConfig TINK_1_1_0 =
       RegistryConfig.newBuilder().mergeFrom(TINK_1_0_0).setConfigName("TINK_HYBRID_1_1_0").build();
 
+  /** @since 1.2.0 */
   public static final RegistryConfig LATEST =
       RegistryConfig.newBuilder()
           .mergeFrom(AeadConfig.LATEST)
@@ -129,6 +130,8 @@ public final class HybridConfig {
    * <p>Because HybridDecrypt and HybridEncrypt key types depend on {@link
    * com.google.crypto.tink.Aead} and {@link com.google.crypto.tink.Mac} key types, this method also
    * registers all Aead and Mac catalogues.
+   *
+   * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
     // The order of these calls matters.

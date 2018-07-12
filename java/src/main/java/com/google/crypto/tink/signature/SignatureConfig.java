@@ -76,6 +76,7 @@ public final class SignatureConfig {
           .setConfigName("TINK_SIGNATURE_1_1_0")
           .build();
 
+  /** @since 1.2.0 */
   public static final RegistryConfig LATEST =
       RegistryConfig.newBuilder()
           .setConfigName("TINK_SIGNATURE")
@@ -117,6 +118,8 @@ public final class SignatureConfig {
    * Tries to register with the {@link Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle PublicKeySign and PublicKeyVerify key types
    * supported in Tink.
+   *
+   * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
     Registry.addCatalogue(PUBLIC_KEY_SIGN_CATALOGUE_NAME, new PublicKeySignCatalogue());

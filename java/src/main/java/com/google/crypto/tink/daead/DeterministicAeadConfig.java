@@ -51,6 +51,7 @@ public final class DeterministicAeadConfig {
           .setConfigName("TINK_DETERMINISTIC_AEAD_1_1_0")
           .build();
 
+  /** @since 1.2.0 */
   public static final RegistryConfig LATEST =
       RegistryConfig.newBuilder()
           .addEntry(
@@ -86,8 +87,7 @@ public final class DeterministicAeadConfig {
    * com.google.crypto.tink.Catalogue} needed to handle DeterministicAead key types supported in
    * Tink.
    *
-   * <p>Because DeterministicAead key types depend on {@link com.google.crypto.tink.Mac} key types,
-   * this method also registers all Mac catalogues.
+   * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
     Registry.addCatalogue(CATALOGUE_NAME, new DeterministicAeadCatalogue());

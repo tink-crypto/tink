@@ -44,7 +44,7 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "AesEaxKey", 0, true));
-  config->set_config_name("TINK_AEAD_1_2_0");
+  config->set_config_name("TINK_AEAD");
   return config;
 }
 
