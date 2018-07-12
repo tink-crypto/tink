@@ -26,12 +26,11 @@ namespace tink {
 // Pre-generated KeyTemplate for Aead key types. One can use these templates
 // to generate new KeysetHandle object with fresh keys.
 // To generate a new keyset that contains a single AesGcmKey, one can do:
-//   auto status = AeadConfig::Init();
-//   if (!status.ok()) { /* fail with error */ }
-//   status = Config::Register(AeadConfig::Tink_1_1_0());
+//
+//   auto status = AeadConfig::Register();
 //   if (!status.ok()) { /* fail with error */ }
 //   auto handle_result =
-//       KeysetHandle.GenerateNew(AeadKeyTemplates.Aes128Gcm());
+//       KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
 //   if (!handle_result.ok()) { /* fail with error */ }
 //   auto keyset_handle = std::move(handle_result.ValueOrDie());
 class AeadKeyTemplates {

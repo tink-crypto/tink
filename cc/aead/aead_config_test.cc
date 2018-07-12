@@ -45,6 +45,11 @@ class AeadConfigTest : public ::testing::Test {
   void SetUp() override { Registry::Reset(); }
 };
 
+TEST_F(AeadConfigTest, testVersions) {
+  EXPECT_EQ(AeadConfig::Latest().SerializeAsString(),
+            AeadConfig::Tink_1_1_0().SerializeAsString());
+}
+
 TEST_F(AeadConfigTest, testBasic) {
   std::string aes_ctr_hmac_aead_key_type =
       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
@@ -53,9 +58,9 @@ TEST_F(AeadConfigTest, testBasic) {
   std::string aes_gcm_key_type =
       "type.googleapis.com/google.crypto.tink.AesGcmKey";
   std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
-  auto& config = AeadConfig::Tink_1_1_0();
+  auto& config = AeadConfig::Latest();
 
-  EXPECT_EQ(4, AeadConfig::Tink_1_1_0().entry_size());
+  EXPECT_EQ(4, AeadConfig::Latest().entry_size());
 
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
@@ -87,49 +92,40 @@ TEST_F(AeadConfigTest, testBasic) {
   EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
 
   // Registration of standard key types works.
-  auto status = AeadConfig::Init();
-  EXPECT_TRUE(status.ok()) << status;
-  status = Config::Register(AeadConfig::Tink_1_1_0());
+  auto status = AeadConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
   manager_result = Registry::get_key_manager<Aead>(aes_gcm_key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(aes_gcm_key_type));
 }
 
-TEST_F(AeadConfigTest, testInit) {
+TEST_F(AeadConfigTest, testRegister) {
+  std::string key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+
   // Try on empty registry.
-  auto status = Config::Register(AeadConfig::Tink_1_1_0());
+  auto status = Config::Register(AeadConfig::Latest());
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
+  auto manager_result = Registry::get_key_manager<Aead>(key_type);
+  EXPECT_FALSE(manager_result.ok());
 
-  // Initialize with a catalogue.
-  status = AeadConfig::Init();
+  // Register and try again.
+  status = AeadConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
-  status = Config::Register(AeadConfig::Tink_1_1_0());
-  EXPECT_TRUE(status.ok()) << status;
+  manager_result = Registry::get_key_manager<Aead>(key_type);
+  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
 
-  // Try Init() again, should succeed (idempotence).
-  status = AeadConfig::Init();
+  // Try Register() again, should succeed (idempotence).
+  status = AeadConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
 
   // Reset the registry, and try overriding a catalogue with a different one.
   Registry::Reset();
   status = Registry::AddCatalogue("TinkAead", new DummyAeadCatalogue());
   EXPECT_TRUE(status.ok()) << status;
-  status = AeadConfig::Init();
+  status = AeadConfig::Register();
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
-}
-
-TEST_F(AeadConfigTest, testDeprecated) {
-  std::string key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
-
-  // Registration of standard key types works.
-  auto status = AeadConfig::RegisterStandardKeyTypes();
-  EXPECT_TRUE(status.ok()) << status;
-  auto manager_result = Registry::get_key_manager<Aead>(key_type);
-  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-  EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
 }
 
 }  // namespace

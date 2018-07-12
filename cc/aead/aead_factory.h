@@ -29,13 +29,14 @@ namespace tink {
 // AeadFactory allows for obtaining an Aead primitive from a KeysetHandle.
 //
 // AeadFactory gets primitives from the Registry, which can be initialized
-// via convenience methods from AeadConfig-class. Here is an example
+// via a convenience method from AeadConfig-class. Here is an example
 // how one can obtain and use a Aead primitive:
 //
-//   AeadConfig.RegisterStandardKeyTypes();
+//   auto status = AeadConfig::Register();
+//   if (!status.ok()) { /* fail with error */ }
 //   KeysetHandle keyset_handle = ...;
 //   std::unique_ptr<Aead> aead =
-//       std::move(AeadFactory.GetPrimitive(keyset_handle).ValueOrDie());
+//       std::move(AeadFactory::GetPrimitive(keyset_handle).ValueOrDie());
 //   std::string plaintext = ...;
 //   std::string aad = ...;
 //   std::string ciphertext = aead.Encrypt(plaintext, aad).ValueOrDie();

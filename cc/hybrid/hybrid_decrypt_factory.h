@@ -31,13 +31,14 @@ namespace tink {
 // from a KeysetHandle.
 //
 // HybridDecryptFactory gets primitives from the Registry, which can
-// be initialized via convenience methods from HybridDecryptConfig-class.
+// be initialized via a convenience method from HybridConfig-class.
 //  Here is an example how one can obtain and use a HybridDecrypt primitive:
 //
-//   HybridDecryptConfig.RegisterStandardKeyTypes();
+//   auto status = HybridConfig::Register();
+//   if (!status.ok()) { /* fail with error */ }
 //   KeysetHandle keyset_handle = ...;
 //   std::unique_ptr<HybridDecrypt> hybrid_decrypt = std::move(
-//           HybridDecryptFactory.GetPrimitive(keyset_handle).ValueOrDie());
+//           HybridDecryptFactory::GetPrimitive(keyset_handle).ValueOrDie());
 //   std::string ciphertext = ...;
 //   std::string context_info = ...;
 //   std::string plaintext =

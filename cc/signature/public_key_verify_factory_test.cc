@@ -46,9 +46,7 @@ namespace {
 class PublicKeyVerifyFactoryTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    auto status = SignatureConfig::Init();
-    ASSERT_TRUE(status.ok()) << status;
-    status = Config::Register(SignatureConfig::Tink_1_1_0());
+    auto status = SignatureConfig::Register();
     ASSERT_TRUE(status.ok()) << status;
   }
 };

@@ -27,12 +27,11 @@ namespace tink {
 // to generate a new KeysetHandle object with fresh keys.
 // To generate a new keyset that contains a single EciesAeadHkdfPrivateKey,
 // one can do:
-//   auto status = HybridConfig::Init();
+//
+//   auto status = HybridConfig::Register();
 //   if (!status.ok()) { /* fail with error */ }
-//   status = Config::Register(HybridConfig::Tink_1_1_0());
-//   if (!status.ok()) { /* fail with error */ }
-//   auto handle_result = KeysetHandle.GenerateNew(
-//        HybridKeyTemplates.EciesP256HkdfHmacSha256Aes128Gcm());
+//   auto handle_result = KeysetHandle::GenerateNew(
+//        HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm());
 //   if (!handle_result.ok()) { /* fail with error */ }
 //   auto keyset_handle = std::move(handle_result.ValueOrDie());
 class HybridKeyTemplates {

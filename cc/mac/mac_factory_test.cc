@@ -87,7 +87,7 @@ TEST_F(MacFactoryTest, testPrimitive) {
   keyset.set_primary_key_id(key_id_3);
 
   // Initialize the registry.
-  ASSERT_TRUE(MacConfig::RegisterStandardKeyTypes().ok());;
+  ASSERT_TRUE(MacConfig::Register().ok());;
 
   // Create a KeysetHandle and use it with the factory.
   auto mac_result =

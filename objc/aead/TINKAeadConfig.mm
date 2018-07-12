@@ -32,7 +32,7 @@
 @implementation TINKAeadConfig
 
 - (instancetype)initWithVersion:(TINKVersion)version error:(NSError **)error {
-  auto st = crypto::tink::AeadConfig::Init();
+  auto st = crypto::tink::AeadConfig::Register();
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st);
@@ -43,7 +43,7 @@
   google::crypto::tink::RegistryConfig ccConfig;
   switch (version) {
     case TINKVersion1_1_0:
-      ccConfig = crypto::tink::AeadConfig::Tink_1_1_0();
+      ccConfig = crypto::tink::AeadConfig::Latest();  // TODO(b/111321554)
       break;
     default:
       if (error) {

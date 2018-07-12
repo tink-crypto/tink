@@ -26,12 +26,11 @@ namespace tink {
 // Pre-generated KeyTemplate for Mac key types. One can use these templates
 // to generate a new KeysetHandle object with fresh keys.
 // To generate a new keyset that contains a single HmacKey, one can do:
-//   auto status = MacConfig::Init();
-//   if (!status.ok()) { /* fail with error */ }
-//   status = Config::Register(MacConfig::Tink_1_1_0());
+//
+//   auto status = MacConfig::Register();
 //   if (!status.ok()) { /* fail with error */ }
 //   auto handle_result =
-//       KeysetHandle.GenerateNew(MacKeyTemplates.HmacSha256HalfSizeTag());
+//       KeysetHandle::GenerateNew(MacKeyTemplates::HmacSha256HalfSizeTag());
 //   if (!handle_result.ok()) { /* fail with error */ }
 //   auto keyset_handle = std::move(handle_result.ValueOrDie());
 class MacKeyTemplates {

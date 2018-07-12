@@ -29,10 +29,10 @@ namespace tink {
 // release of Tink, i.e. key types that correspond to primitives
 // PublicKeySign and PublicKeyVerify.
 //
-// To register all signature key types provided in Tink release 1.1.0
+// To register all signature key types from the current Tink release
 // one can do:
 //
-//   auto status = Config::Register(SignatureConfig::Tink_1_1_0());
+//   auto status = SignatureConfig::Register();
 //
 // For more information on creation and usage of instances of PublicKeySign
 // and PublicKeyVerify see PublicKeySignFactory resp. PublicKeyVerifyFactory.
@@ -43,12 +43,13 @@ class SignatureConfig {
   static constexpr char kPublicKeySignPrimitiveName[] = "PublicKeySign";
   static constexpr char kPublicKeyVerifyPrimitiveName[] = "PublicKeyVerify";
 
-  // Returns config of signature implementations supported in Tink 1.1.0.
-  static const google::crypto::tink::RegistryConfig& Tink_1_1_0();
+  // Returns config with implementations of PublicKeySign and PublicKeyVerify
+  // supported in the current Tink release.
+  static const google::crypto::tink::RegistryConfig& Latest();
 
-  // Initialization:
-  // registers the catalogue of Tink signature implementations.
-  static crypto::tink::util::Status Init();
+  // Registers key managers for all implementations of PublicKeySign
+  // and PublicKeyVerify from the current Tink release.
+  static crypto::tink::util::Status Register();
 
  private:
   SignatureConfig() {}

@@ -31,25 +31,25 @@ namespace {
 google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   google::crypto::tink::RegistryConfig* config =
       new google::crypto::tink::RegistryConfig();
-  config->MergeFrom(HybridConfig::Tink_1_1_0());  // includes Mac & Aead
-  config->MergeFrom(SignatureConfig::Tink_1_1_0());
-  config->set_config_name("TINK_1_1_0");
+  config->MergeFrom(HybridConfig::Latest());  // includes Mac & Aead
+  config->MergeFrom(SignatureConfig::Latest());
+  config->set_config_name("TINK_1_2_0");
   return config;
 }
 
 }  // anonymous namespace
 
 // static
-const google::crypto::tink::RegistryConfig& TinkConfig::Tink_1_1_0() {
+const google::crypto::tink::RegistryConfig& TinkConfig::Latest() {
   static auto config = GenerateRegistryConfig();
   return *config;
 }
 
 // static
-util::Status TinkConfig::Init() {
-  auto status = HybridConfig::Init();  // includes Mac & Aead
+util::Status TinkConfig::Register() {
+  auto status = HybridConfig::Register();  // includes Mac & Aead
   if (!status.ok()) return status;
-  return SignatureConfig::Init();
+  return SignatureConfig::Register();
 }
 
 }  // namespace tink

@@ -26,12 +26,11 @@ namespace tink {
 // Pre-generated KeyTemplate for signature key types. One can use these
 // templates to generate new KeysetHandle object with fresh keys.
 // To generate a new keyset that contains a single EcdsaPrivateKey, one can do:
-//   auto status = SignatureConfig::Init();
-//   if (!status.ok()) { /* fail with error */ }
-//   status = Config::Register(SignatureConfig::Tink_1_1_0());
+//
+//   auto status = SignatureConfig::Register();
 //   if (!status.ok()) { /* fail with error */ }
 //   auto handle_result =
-//       KeysetHandle.GenerateNew(SignatureKeyTemplates.EcdsaP256());
+//       KeysetHandle::GenerateNew(SignatureKeyTemplates::EcdsaP256());
 //   if (!handle_result.ok()) { /* fail with error */ }
 //   auto keyset_handle = std::move(handle_result.ValueOrDie());
 class SignatureKeyTemplates {

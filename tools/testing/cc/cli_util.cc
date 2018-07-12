@@ -118,16 +118,10 @@ std::unique_ptr<KeysetHandle> CliUtil::ReadKeyset(const std::string& filename) {
 
 // static
 void CliUtil::InitTink() {
-  std::clog << "Initializing the factory...\n";
-  auto status = TinkConfig::Init();
+  std::clog << "Initializing Tink...\n";
+  auto status = TinkConfig::Register();
   if (!status.ok()) {
-    std::clog << "Factory initialization failed: "
-              << status.error_message() << std::endl;
-    exit(1);
-  }
-  status = Config::Register(TinkConfig::Tink_1_1_0());
-  if (!status.ok()) {
-    std::clog << "Registration of standard Tink key managers failed: "
+    std::clog << "Initialization of Tink failed: "
               << status.error_message() << std::endl;
     exit(1);
   }

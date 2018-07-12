@@ -29,10 +29,10 @@ namespace tink {
 // release of Tink, i.e. key types that correspond to primitives
 // HybridEncrypt and HybridDecrypt.
 //
-// To register all hybrid encryption key types provided in Tink release 1.1.0
+// To register all hybrid encryption key types from the current Tink release
 // one can do:
 //
-//   auto status = Config::Register(HybridConfig::Tink_1_1_0());
+//   auto status = HybridConfig::Register();
 //
 // For more information on creation and usage of instances of HybridDecrypt
 // and HybridDecrypt see HybridEncryptFactory resp. HybridDecryptFactory.
@@ -43,11 +43,22 @@ class HybridConfig {
   static constexpr char kHybridEncryptCatalogueName[] = "TinkHybridEncrypt";
   static constexpr char kHybridEncryptPrimitiveName[] = "HybridEncrypt";
 
-  // Returns config of HybridDecrypt implementations supported in Tink 1.1.0.
+  // Returns config with implementations of HybridEncrypt and HybridDecrypt
+  // supported in Tink 1.1.0.
+  // DEPRECATED
   static const google::crypto::tink::RegistryConfig& Tink_1_1_0();
 
-  // Initialization:
-  // registers the catalogue of Tink HybridDecrypt-implementations.
+  // Returns config with implementations of HybridEncrypt and HybridDecrypt
+  // supported in the current Tink release.
+  static const google::crypto::tink::RegistryConfig& Latest();
+
+  // Registers key managers for all implementations of HybridEncrypt
+  // and HybridDecrypt from the current Tink release.
+  static crypto::tink::util::Status Register();
+
+  // Registers key managers for all implementations of HybridEncrypt
+  // and HybridDecrypt from the current Tink release.
+  // DEPRECATED
   static crypto::tink::util::Status Init();
 
  private:

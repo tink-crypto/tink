@@ -30,16 +30,14 @@ namespace tink {
 // from a KeysetHandle.
 //
 // PublicKeyVerifyFactory gets primitives from the Registry, which can
-// be initialized via convenience methods from SignatureConfig-class.
+// be initialized via a convenience method from SignatureConfig-class.
 // Here is an example how one can obtain and use a PublicKeyVerify primitive:
 //
-//   auto status = SignatureConfig::Init();
-//   if (!status.ok()) { ... };
-//   status = Config::Register(SignatureConfig::Tink_1_1_0());
-//   if (!status.ok()) { ... };
+//   auto status = SignatureConfig::Register();
+//   if (!status.ok()) { /* fail with error */ }
 //   KeysetHandle keyset_handle = ...;
 //   std::unique_ptr<PublicKeyVerify> public_key_verify = std::move(
-//           PublicKeyVerifyFactory.GetPrimitive(keyset_handle).ValueOrDie());
+//           PublicKeyVerifyFactory::GetPrimitive(keyset_handle).ValueOrDie());
 //   std::string data = ...;
 //   std::string signature = ...;
 //   status = public_key_verify.Verify(signature, data);

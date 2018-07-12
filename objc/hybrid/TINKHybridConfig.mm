@@ -32,7 +32,7 @@
 @implementation TINKHybridConfig
 
 - (instancetype)initWithVersion:(TINKVersion)version error:(NSError **)error {
-  auto st = crypto::tink::HybridConfig::Init();
+  auto st = crypto::tink::HybridConfig::Register();
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st);
@@ -43,7 +43,7 @@
   google::crypto::tink::RegistryConfig ccConfig;
   switch (version) {
     case TINKVersion1_1_0:
-      ccConfig = crypto::tink::HybridConfig::Tink_1_1_0();
+      ccConfig = crypto::tink::HybridConfig::Latest();  // TODO(b/111321554)
       break;
     default:
       if (error) {

@@ -42,7 +42,7 @@ namespace tink {
 //
 // Example usage:
 //
-// RegistryConfig registry_config = ...; // e.g. AeadConfig::Tink_1_1_0()
+// RegistryConfig registry_config = ...;
 // auto status = Config::Register(registry_config);
 //
 class Config {

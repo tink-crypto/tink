@@ -32,7 +32,7 @@ namespace {
 google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   google::crypto::tink::RegistryConfig* config =
       new google::crypto::tink::RegistryConfig();
-  config->MergeFrom(AeadConfig::Tink_1_1_0());
+  config->MergeFrom(AeadConfig::Latest());
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       HybridConfig::kHybridDecryptCatalogueName,
       HybridConfig::kHybridDecryptPrimitiveName,
@@ -41,7 +41,7 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
       HybridConfig::kHybridEncryptCatalogueName,
       HybridConfig::kHybridEncryptPrimitiveName,
       "EciesAeadHkdfPublicKey", 0, true));
-  config->set_config_name("TINK_HYBRID_1_1_0");
+  config->set_config_name("TINK_HYBRID_1_2_0");
   return config;
 }
 
@@ -53,19 +53,32 @@ constexpr char HybridConfig::kHybridEncryptCatalogueName[];
 constexpr char HybridConfig::kHybridEncryptPrimitiveName[];
 
 // static
-const google::crypto::tink::RegistryConfig& HybridConfig::Tink_1_1_0() {
+const google::crypto::tink::RegistryConfig& HybridConfig::Latest() {
   static const auto config = GenerateRegistryConfig();
   return *config;
 }
 
 // static
-util::Status HybridConfig::Init() {
-  AeadConfig::Init();
-  auto status = Registry::AddCatalogue(
+const google::crypto::tink::RegistryConfig& HybridConfig::Tink_1_1_0() {
+  return Latest();
+}
+
+// static
+util::Status HybridConfig::Register() {
+  auto status = AeadConfig::Register();
+  if (!status.ok()) return status;
+  status = Registry::AddCatalogue(
       kHybridDecryptCatalogueName, new HybridDecryptCatalogue());
   if (!status.ok()) return status;
-  return Registry::AddCatalogue(
+  status = Registry::AddCatalogue(
       kHybridEncryptCatalogueName, new HybridEncryptCatalogue());
+  if (!status.ok()) return status;
+  return Config::Register(Latest());
+}
+
+// static
+util::Status HybridConfig::Init() {
+  return Register();
 }
 
 }  // namespace tink

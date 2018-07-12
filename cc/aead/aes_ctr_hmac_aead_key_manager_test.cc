@@ -47,14 +47,9 @@ class AesCtrHmacAeadKeyManagerTest : public ::testing::Test {
 
   void SetUp() override {
     // Initialize Tink.
-    auto status = MacConfig::Init();
+    auto status = MacConfig::Register();
     if (!status.ok()) {
       std::clog << "Tink initialization failed: " << status << std::endl;
-      exit(1);
-    }
-    status = crypto::tink::Config::Register(MacConfig::Tink_1_1_0());
-    if (!status.ok()) {
-      std::clog << "Key registration failed: " << status << std::endl;
       exit(1);
     }
   }

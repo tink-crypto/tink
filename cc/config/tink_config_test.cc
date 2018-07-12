@@ -69,9 +69,9 @@ TEST_F(TinkConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.AesGcmKey";
   std::string hmac_key_type =
       "type.googleapis.com/google.crypto.tink.HmacKey";
-  auto& config = TinkConfig::Tink_1_1_0();
+  auto& config = TinkConfig::Latest();
 
-  EXPECT_EQ(8, TinkConfig::Tink_1_1_0().entry_size());
+  EXPECT_EQ(8, TinkConfig::Latest().entry_size());
 
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
@@ -158,9 +158,7 @@ TEST_F(TinkConfigTest, testBasic) {
   }
 
   // Registration of standard key types works.
-  auto status = TinkConfig::Init();
-  EXPECT_TRUE(status.ok()) << status;
-  status = Config::Register(TinkConfig::Tink_1_1_0());
+  auto status = TinkConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
   {
     auto manager_result = Registry::get_key_manager<Aead>(aes_gcm_key_type);
@@ -202,20 +200,24 @@ TEST_F(TinkConfigTest, testBasic) {
   }
 }
 
-TEST_F(TinkConfigTest, testInit) {
+TEST_F(TinkConfigTest, testRegister) {
+  std::string key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+
   // Try on empty registry.
-  auto status = Config::Register(TinkConfig::Tink_1_1_0());
+  auto status = Config::Register(TinkConfig::Latest());
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
+  auto manager_result = Registry::get_key_manager<Aead>(key_type);
+  EXPECT_FALSE(manager_result.ok());
 
-  // Initialize config.
-  status = TinkConfig::Init();
+  // Register and try again.
+  status = TinkConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
-  status = Config::Register(TinkConfig::Tink_1_1_0());
-  EXPECT_TRUE(status.ok()) << status;
+  manager_result = Registry::get_key_manager<Aead>(key_type);
+  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
 
-  // Try Init() again, should succeed (idempotence).
-  status = TinkConfig::Init();
+  // Try Register() again, should succeed (idempotence).
+  status = TinkConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
 
   // Reset the registry, and try overriding a catalogue with a different one.
@@ -223,7 +225,7 @@ TEST_F(TinkConfigTest, testInit) {
   status = Registry::AddCatalogue("TinkHybridDecrypt",
                                   new DummyHybridDecryptCatalogue());
   EXPECT_TRUE(status.ok()) << status;
-  status = TinkConfig::Init();
+  status = TinkConfig::Register();
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
 }

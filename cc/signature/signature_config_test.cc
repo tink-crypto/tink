@@ -52,9 +52,9 @@ TEST_F(SignatureConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
   std::string verify_key_type =
       "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
-  auto& config = SignatureConfig::Tink_1_1_0();
+  auto& config = SignatureConfig::Latest();
 
-  EXPECT_EQ(2, SignatureConfig::Tink_1_1_0().entry_size());
+  EXPECT_EQ(2, SignatureConfig::Latest().entry_size());
 
   EXPECT_EQ("TinkPublicKeySign", config.entry(0).catalogue_name());
   EXPECT_EQ("PublicKeySign", config.entry(0).primitive_name());
@@ -75,9 +75,7 @@ TEST_F(SignatureConfigTest, testBasic) {
   EXPECT_EQ(util::error::NOT_FOUND, sign_manager_result.status().error_code());
 
   // Registration of standard key types works.
-  auto status = SignatureConfig::Init();
-  EXPECT_TRUE(status.ok()) << status;
-  status = Config::Register(SignatureConfig::Tink_1_1_0());
+  auto status = SignatureConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
 
   sign_manager_result = Registry::get_key_manager<PublicKeySign>(sign_key_type);
@@ -90,20 +88,24 @@ TEST_F(SignatureConfigTest, testBasic) {
   EXPECT_TRUE(verify_manager_result.ValueOrDie()->DoesSupport(verify_key_type));
 }
 
-TEST_F(SignatureConfigTest, testInit) {
+TEST_F(SignatureConfigTest, testRegister) {
+  std::string key_type = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
+
   // Try on empty registry.
-  auto status = Config::Register(SignatureConfig::Tink_1_1_0());
+  auto status = Config::Register(SignatureConfig::Latest());
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
+  auto manager_result = Registry::get_key_manager<PublicKeySign>(key_type);
+  EXPECT_FALSE(manager_result.ok());
 
-  // Initialize with a catalogue.
-  status = SignatureConfig::Init();
+  // Register and try again.
+  status = SignatureConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
-  status = Config::Register(SignatureConfig::Tink_1_1_0());
-  EXPECT_TRUE(status.ok()) << status;
+  manager_result = Registry::get_key_manager<PublicKeySign>(key_type);
+  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
 
-  // Try Init() again, should succeed (idempotence).
-  status = SignatureConfig::Init();
+  // Try Register() again, should succeed (idempotence).
+  status = SignatureConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
 
   // Reset the registry, and try overriding a catalogue with a different one.
@@ -111,7 +113,7 @@ TEST_F(SignatureConfigTest, testInit) {
   status = Registry::AddCatalogue("TinkPublicKeySign",
                                   new DummySignCatalogue());
   EXPECT_TRUE(status.ok()) << status;
-  status = SignatureConfig::Init();
+  status = SignatureConfig::Register();
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
 }

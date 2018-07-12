@@ -32,7 +32,7 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       MacConfig::kCatalogueName, MacConfig::kPrimitiveName,
       "HmacKey", 0, true));
-  config->set_config_name("TINK_MAC_1_1_0");
+  config->set_config_name("TINK_MAC_1_2_0");
   return config;
 }
 
@@ -42,21 +42,16 @@ constexpr char MacConfig::kCatalogueName[];
 constexpr char MacConfig::kPrimitiveName[];
 
 // static
-const google::crypto::tink::RegistryConfig& MacConfig::Tink_1_1_0() {
+const google::crypto::tink::RegistryConfig& MacConfig::Latest() {
   static auto config = GenerateRegistryConfig();
   return *config;
 }
 
 // static
-util::Status MacConfig::Init() {
-  return Registry::AddCatalogue(kCatalogueName, new MacCatalogue());
-}
-
-// static
-util::Status MacConfig::RegisterStandardKeyTypes() {
-  auto status = Init();
+util::Status MacConfig::Register() {
+  auto status = Registry::AddCatalogue(kCatalogueName, new MacCatalogue());
   if (!status.ok()) return status;
-  return Config::Register(Tink_1_1_0());
+  return Config::Register(Latest());
 }
 
 }  // namespace tink

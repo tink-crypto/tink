@@ -32,7 +32,7 @@
 @implementation TINKMacConfig
 
 - (instancetype)initWithVersion:(TINKVersion)version error:(NSError **)error {
-  auto st = crypto::tink::MacConfig::Init();
+  auto st = crypto::tink::MacConfig::Register();
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st);
@@ -43,7 +43,7 @@
   google::crypto::tink::RegistryConfig ccConfig;
   switch (version) {
     case TINKVersion1_1_0:
-      ccConfig = crypto::tink::MacConfig::Tink_1_1_0();
+      ccConfig = crypto::tink::MacConfig::Latest();  // TODO(b/111321554)
       break;
     default:
       if (error) {

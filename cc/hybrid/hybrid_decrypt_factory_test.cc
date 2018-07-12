@@ -93,8 +93,7 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   keyset.set_primary_key_id(key_id_3);
 
   // Initialize the registry.
-  ASSERT_TRUE(HybridConfig::Init().ok());
-  ASSERT_TRUE(Config::Register(HybridConfig::Tink_1_1_0()).ok());
+  ASSERT_TRUE(HybridConfig::Register().ok());
 
   // Prepare HybridEncrypt-instances.
   auto ecies_key_manager = absl::make_unique<EciesAeadHkdfPublicKeyManager>();

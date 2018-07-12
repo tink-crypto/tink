@@ -82,7 +82,7 @@ TEST_F(AeadFactoryTest, testPrimitive) {
   keyset.set_primary_key_id(key_id_3);
 
   // Initialize the registry.
-  ASSERT_TRUE(AeadConfig::RegisterStandardKeyTypes().ok());;
+  ASSERT_TRUE(AeadConfig::Register().ok());;
 
   // Create a KeysetHandle and use it with the factory.
   auto aead_result =

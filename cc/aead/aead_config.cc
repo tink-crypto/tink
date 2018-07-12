@@ -34,7 +34,7 @@ namespace {
 google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   google::crypto::tink::RegistryConfig* config =
       new google::crypto::tink::RegistryConfig();
-  config->MergeFrom(MacConfig::Tink_1_1_0());
+  config->MergeFrom(MacConfig::Latest());
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "AesCtrHmacAeadKey", 0, true));
@@ -44,7 +44,7 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
   config->add_entry()->MergeFrom(*Config::GetTinkKeyTypeEntry(
       AeadConfig::kCatalogueName, AeadConfig::kPrimitiveName,
       "AesEaxKey", 0, true));
-  config->set_config_name("TINK_AEAD_1_1_0");
+  config->set_config_name("TINK_AEAD_1_2_0");
   return config;
 }
 
@@ -54,23 +54,28 @@ constexpr char AeadConfig::kCatalogueName[];
 constexpr char AeadConfig::kPrimitiveName[];
 
 // static
-const google::crypto::tink::RegistryConfig& AeadConfig::Tink_1_1_0() {
+const google::crypto::tink::RegistryConfig& AeadConfig::Latest() {
   static const auto config = GenerateRegistryConfig();
   return *config;
 }
 
 // static
-util::Status AeadConfig::RegisterStandardKeyTypes() {
-  auto status = Init();
+const google::crypto::tink::RegistryConfig& AeadConfig::Tink_1_1_0() {
+  return Latest();
+}
+
+// static
+util::Status AeadConfig::Register() {
+  auto status = MacConfig::Register();
   if (!status.ok()) return status;
-  return Config::Register(Tink_1_1_0());
+  status = Registry::AddCatalogue(kCatalogueName, new AeadCatalogue());
+  if (!status.ok()) return status;
+  return Config::Register(Latest());
 }
 
 // static
 util::Status AeadConfig::Init() {
-  auto status = MacConfig::Init();
-  if (!status.ok()) return status;
-  return Registry::AddCatalogue(kCatalogueName, new AeadCatalogue());
+  return Register();
 }
 
 }  // namespace tink

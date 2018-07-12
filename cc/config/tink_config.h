@@ -27,17 +27,19 @@ namespace tink {
 // Static methods and constants for registering with the Registry
 // all instances of Tink key types supported in a particular release of Tink.
 //
-// To register all Tink key types provided in Tink release 1.1.0 one can do:
+// To register all Tink key types from the current Tink release one can do:
 //
-//   auto status = Config::Register(TinkConfig::Tink_1_1_0());
+//   auto status = TinkConfig::Register();
 //
 class TinkConfig {
  public:
-  // Returns config of implementations of all primitives in Tink 1.1.0.
-  static const google::crypto::tink::RegistryConfig& Tink_1_1_0();
+  // Returns config of implementations of all primitives supported
+  // in the current Tink release.
+  static const google::crypto::tink::RegistryConfig& Latest();
 
-  // Initialization: registers the catalogues of all Tink primitives.
-  static crypto::tink::util::Status Init();
+  // Registers all key managers for all primitives supported
+  // in the current Tink release.
+  static crypto::tink::util::Status Register();
 
  private:
   TinkConfig() {}

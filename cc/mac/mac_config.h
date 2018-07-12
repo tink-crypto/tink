@@ -27,9 +27,9 @@ namespace tink {
 // Static methods and constants for registering with the Registry
 // all instances of Mac key types supported in a particular release of Tink.
 //
-// To register all Mac key types provided in Tink release 1.1.0 one can do:
+// To register all Mac key types from the current Tink release one can do:
 //
-//   auto status = Config::Register(MacConfig::Tink_1_1_0());
+//   auto status = MacConfig::Register();
 //
 // For more information on creation and usage of Mac instances see MacFactory.
 class MacConfig {
@@ -37,15 +37,13 @@ class MacConfig {
   static constexpr char kCatalogueName[] = "TinkMac";
   static constexpr char kPrimitiveName[] = "Mac";
 
-  // Returns config of Mac implementations supported in Tink 1.1.0.
-  static const google::crypto::tink::RegistryConfig& Tink_1_1_0();
+  // Returns config of Mac implementations supported
+  // in the current Tink release.
+  static const google::crypto::tink::RegistryConfig& Latest();
 
-  // Initialization: registers the catalogue of Tink Mac-implementations.
-  static crypto::tink::util::Status Init();
-
-  // Registers standard Mac key types and their managers with the Registry.
-  // DEPRECATED.
-  static crypto::tink::util::Status RegisterStandardKeyTypes();
+  // Registers key managers for all Mac key types
+  // from the current Tink release.
+  static crypto::tink::util::Status Register();
 
  private:
   MacConfig() {}

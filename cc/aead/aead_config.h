@@ -28,9 +28,9 @@ namespace tink {
 // Static methods and constants for registering with the Registry
 // all instances of Aead key types supported in a particular release of Tink.
 //
-// To register all Aead key types provided in Tink release 1.1.0 one can do:
+// To register all Aead key types from the current Tink release one can do:
 //
-//   auto status = Config::Register(AeadConfig::Tink_1_1_0());
+//   auto status = AeadConfig::Register();
 //
 // For more information on creation and usage of Aead instances see AeadFactory.
 class AeadConfig {
@@ -39,14 +39,20 @@ class AeadConfig {
   static constexpr char kPrimitiveName[] = "Aead";
 
   // Returns config of Aead implementations supported in Tink 1.1.0.
+  // DEPRECATED
   static const google::crypto::tink::RegistryConfig& Tink_1_1_0();
 
-  // Initialization: registers the catalogue of Tink Aead-implementations.
-  static crypto::tink::util::Status Init();
+  // Returns config of Aead implementations supported
+  // in the current Tink release.
+  static const google::crypto::tink::RegistryConfig& Latest();
 
-  // Registers standard Aead key types and their managers with the Registry.
-  // DEPRECATED.
-  static crypto::tink::util::Status RegisterStandardKeyTypes();
+  // Registers key managers for all Aead key types
+  // from the current Tink release.
+  static crypto::tink::util::Status Register();
+
+  // Registers key managers for all Aead key types.
+  // DEPRECATED
+  static crypto::tink::util::Status Init();
 
  private:
   AeadConfig() {}

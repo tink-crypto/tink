@@ -30,13 +30,14 @@ namespace tink {
 // MacFactory allows for obtaining a Mac primitive from a KeysetHandle.
 //
 // MacFactory gets primitives from the Registry, which can be initialized
-// via convenience methods from MacConfig-class. Here is an example
+// via a convenience method from MacConfig-class. Here is an example
 // how one can obtain and use a Mac primitive:
 //
-//   MacConfig.RegisterStandardKeyTypes();
+//   auto status = MacConfig::Register();
+//   if (!status.ok()) { /* fail with error */ }
 //   KeysetHandle keyset_handle = ...;
 //   std::unique_ptr<Mac> mac =
-//       std::move(MacFactory.GetPrimitive(keyset_handle).ValueOrDie());
+//       std::move(MacFactory::GetPrimitive(keyset_handle).ValueOrDie());
 //   std::string data = ...;
 //   std::string mac_value = mac.ComputeMac(data).ValueOrDie();
 //

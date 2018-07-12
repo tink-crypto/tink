@@ -151,34 +151,32 @@ To validate the installation compile and run [`hello_world.cc`](https://github.c
 
 Tink provides customizable initialization, which allows for choosing specific
 implementations (identified by _key types_) of desired primitives. This
-initialization happens via _registration_ of the implementations.  Registration
+initialization happens via _registration_ of the implementations.
 
-For example, if you want to use all implementations of all primitives in Tink
-1.1.0, the initialization would look as follows:
+For example, if you want to use all standard implementations of all primitives
+in the current release of Tink, the initialization would look as follows:
 
 ```cpp
    #include "tink/config/tink_config.h"
 
    // ...
-   auto status = TinkConfig::Init();
+   auto status = TinkConfig::Register();
    if (!status.ok()) /* ... handle failure */;
-   status = Config::Register(TinkConfig::Tink_1_1_0());
    // ...
 ```
 
-To use only implementations of the AEAD primitive:
+To use standard implementations of only one primitive, say AEAD, proceed as follows:
 
 ```cpp
    #include "tink/aead/aead_config.h"
 
    // ...
-   auto status = AeadConfig::Init();
+   auto status = AeadConfig::Register();
    if (!status.ok()) /* ... handle failure */;
-   status = Config::Register(AeadConfig::Tink_1_1_0());
    // ...
 ```
 
-For custom initialization the registration proceeds directly via
+The registration of custom key managers can proceed directly via
 `Registry`-class:
 
 ```cpp
@@ -189,6 +187,16 @@ For custom initialization the registration proceeds directly via
    auto status = Registry::RegisterKeyManager(new CustomAeadKeyManager());
    if (!status.ok()) /* ... handle failure */;
 ```
+
+A more complex custom initialization (especially when registering a mix of
+standard and custom key managers) can take advantage of
+[`Config`](https://github.com/google/tink/blob/master/cc/config.h)-class, which
+enables use of human-readable configuration files for Tink initialization.
+Please note however that to use such configurations one must first add to the
+Registry so-called _catalogues_, which provide a bridge between text
+descriptions of key managers and their implementations (see
+e.g. [`AeadConfig::Register()`](https://github.com/google/tink/blob/master/cc/aead/aead_config.cc)-method).
+
 
 ## Generating New Key(set)s
 

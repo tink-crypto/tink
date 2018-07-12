@@ -39,7 +39,7 @@ google::crypto::tink::RegistryConfig* GenerateRegistryConfig() {
       SignatureConfig::kPublicKeyVerifyCatalogueName,
       SignatureConfig::kPublicKeyVerifyPrimitiveName,
       "EcdsaPublicKey", 0, true));
-  config->set_config_name("TINK_SIGNATURE_1_1_0");
+  config->set_config_name("TINK_SIGNATURE_1_2_0");
   return config;
 }
 
@@ -51,18 +51,20 @@ constexpr char SignatureConfig::kPublicKeySignPrimitiveName[];
 constexpr char SignatureConfig::kPublicKeyVerifyPrimitiveName[];
 
 // static
-const google::crypto::tink::RegistryConfig& SignatureConfig::Tink_1_1_0() {
+const google::crypto::tink::RegistryConfig& SignatureConfig::Latest() {
   static const auto config = GenerateRegistryConfig();
   return *config;
 }
 
 // static
-util::Status SignatureConfig::Init() {
+util::Status SignatureConfig::Register() {
   auto status = Registry::AddCatalogue(
       kPublicKeySignCatalogueName, new PublicKeySignCatalogue());
   if (!status.ok()) return status;
-  return Registry::AddCatalogue(
+  status = Registry::AddCatalogue(
       kPublicKeyVerifyCatalogueName, new PublicKeyVerifyCatalogue());
+  if (!status.ok()) return status;
+  return Config::Register(Latest());
 }
 
 }  // namespace tink

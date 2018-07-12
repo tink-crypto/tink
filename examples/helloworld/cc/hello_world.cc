@@ -43,16 +43,9 @@ namespace {
 // Initializes Tink.
 void InitTink() {
   std::clog << "Initializing Tink...\n";
-  auto status = crypto::tink::TinkConfig::Init();
+  auto status = crypto::tink::TinkConfig::Register();
   if (!status.ok()) {
-    std::clog << "Tink initialization failed: "
-              << status.error_message() << std::endl;
-    exit(1);
-  }
-  status =
-      crypto::tink::Config::Register(crypto::tink::TinkConfig::Tink_1_1_0());
-  if (!status.ok()) {
-    std::clog << "Registration of standard Tink key managers failed: "
+    std::clog << "Initialization of Tink failed: "
               << status.error_message() << std::endl;
     exit(1);
   }

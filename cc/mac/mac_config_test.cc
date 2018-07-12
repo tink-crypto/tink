@@ -50,9 +50,9 @@ class MacConfigTest : public ::testing::Test {
 
 TEST_F(MacConfigTest, testBasic) {
   std::string key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
-  auto& config = MacConfig::Tink_1_1_0();
+  auto& config = MacConfig::Latest();
 
-  EXPECT_EQ(1, MacConfig::Tink_1_1_0().entry_size());
+  EXPECT_EQ(1, MacConfig::Latest().entry_size());
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
   EXPECT_EQ(key_type, config.entry(0).type_url());
@@ -65,49 +65,40 @@ TEST_F(MacConfigTest, testBasic) {
   EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
 
   // Registration of standard key types works.
-  auto status = MacConfig::Init();
-  EXPECT_TRUE(status.ok()) << status;
-  status = Config::Register(MacConfig::Tink_1_1_0());
+  auto status = MacConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
   manager_result = Registry::get_key_manager<Mac>(key_type);
   EXPECT_TRUE(manager_result.ok()) << manager_result.status();
   EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
 }
 
-TEST_F(MacConfigTest, testInit) {
+TEST_F(MacConfigTest, testRegister) {
+  std::string key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
+
   // Try on empty registry.
-  auto status = Config::Register(MacConfig::Tink_1_1_0());
+  auto status = Config::Register(MacConfig::Latest());
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
+  auto manager_result = Registry::get_key_manager<Mac>(key_type);
+  EXPECT_FALSE(manager_result.ok());
 
-  // Initialize with a catalogue.
-  status = MacConfig::Init();
+  // Register and try again.
+  status = MacConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
-  status = Config::Register(MacConfig::Tink_1_1_0());
-  EXPECT_TRUE(status.ok()) << status;
+  manager_result = Registry::get_key_manager<Mac>(key_type);
+  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
 
-  // Try Init() again, should succeed (idempotence).
-  status = MacConfig::Init();
+  // Try Register() again, should succeed (idempotence).
+  status = MacConfig::Register();
   EXPECT_TRUE(status.ok()) << status;
 
   // Reset the registry, and try overriding a catalogue with a different one.
   Registry::Reset();
   status = Registry::AddCatalogue("TinkMac", new DummyMacCatalogue());
   EXPECT_TRUE(status.ok()) << status;
-  status = MacConfig::Init();
+  status = MacConfig::Register();
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code());
-}
-
-TEST_F(MacConfigTest, testDeprecated) {
-  std::string key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
-
-  // Registration of standard key types works.
-  auto status = MacConfig::RegisterStandardKeyTypes();
-  EXPECT_TRUE(status.ok()) << status;
-  auto manager_result = Registry::get_key_manager<Mac>(key_type);
-  EXPECT_TRUE(manager_result.ok()) << manager_result.status();
-  EXPECT_TRUE(manager_result.ValueOrDie()->DoesSupport(key_type));
 }
 
 }  // namespace
