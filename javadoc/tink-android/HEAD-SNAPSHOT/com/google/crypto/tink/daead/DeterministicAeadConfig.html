@@ -255,10 +255,6 @@ public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/Re
 <li class="blockList">
 <h4>LATEST</h4>
 <pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/RegistryConfig.html" title="class in com.google.crypto.tink.proto">RegistryConfig</a> LATEST</pre>
-<dl>
-<dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>1.2.0</dd>
-</dl>
 </li>
 </ul>
 </li>
@@ -316,12 +312,13 @@ public static&nbsp;void&nbsp;init()
 <pre>public static&nbsp;void&nbsp;register()
                      throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Tries to register with the <a href="../../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="../../../../../com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><code>Catalogue</code></a> needed to handle DeterministicAead key types supported in
- Tink.</div>
+ Tink.
+
+ <p>Because DeterministicAead key types depend on <a href="../../../../../com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink"><code>Mac</code></a> key types,
+ this method also registers all Mac catalogues.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
-<dt><span class="simpleTagLabel">Since:</span></dt>
-<dd>1.2.0</dd>
 </dl>
 </li>
 </ul>
