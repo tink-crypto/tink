@@ -169,6 +169,48 @@ objc_proto_compile(
 )
 
 # -----------------------------------------------
+# rsa_signature
+# -----------------------------------------------
+proto_library(
+    name = "rsa_signature_proto",
+    srcs = [
+        "rsa_signature.proto",
+    ],
+    deps = [
+        ":common_proto",
+    ],
+)
+
+cc_proto_library(
+    name = "rsa_signature_cc_proto",
+    deps = [":rsa_signature_proto"],
+)
+
+java_proto_library(
+    name = "rsa_signature_java_proto",
+    deps = [":rsa_signature_proto"],
+)
+
+java_lite_proto_library(
+    name = "rsa_signature_java_proto_lite",
+    deps = [":rsa_signature_proto"],
+)
+
+go_proto_library(
+    name = "rsa_signature_go_proto",
+    importpath = "github.com/google/tink/proto/rsa_signature_go_proto",
+    proto = ":rsa_signature_proto",
+    deps = [":common_go_proto"],
+)
+
+objc_proto_compile(
+    name = "rsa_signature_objc_pb",
+    protos = ["rsa_signature.proto"],
+    tags = ["manual"],
+    deps = [":common_objc_pb"],
+)
+
+# -----------------------------------------------
 # ecdsa
 # -----------------------------------------------
 proto_library(

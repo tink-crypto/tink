@@ -1,0 +1,74 @@
+// Copyright 2018 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// Definitions for RSA Signature.
+syntax = "proto3";
+
+package google.crypto.tink;
+import "proto/common.proto";
+
+option java_package = "com.google.crypto.tink.proto";
+option java_multiple_files = true;
+option objc_class_prefix = "TINKPB";
+option go_package = "github.com/google/tink/proto/rsa_signature_go_proto";
+
+
+enum RsaSignatureEncoding {
+  UNKNOWN_ENCODING = 0;
+  // https://tools.ietf.org/html/rfc8017#section-8.2.
+  PKCS1_ENCODING = 1;
+  // https://tools.ietf.org/html/rfc8017#section-8.1.
+  PSS_ENCODING = 2;
+}
+
+message RsaSignatureParams {
+  // Required.
+  HashType hash_type = 1;
+  // Required.
+  RsaSignatureEncoding encoding = 2;
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.RsaSignaturePublicKey
+message RsaSignaturePublicKey {
+  // Required.
+  uint32 version = 1;
+  // Required.
+  RsaSignatureParams params = 2;
+  // Modulus.
+  bytes n = 3;
+  // Public exponent.
+  bytes e = 4;
+}
+
+// key_type: type.googleapis.com/google.crypto.tink.RsaSignaturePrivateKey
+message RsaSignaturePrivateKey {
+  // Required.
+  uint32 version = 1;
+  // Required.
+  RsaSignaturePublicKey public_key = 2;
+  // Private exponent.
+  // Unsigned big integer in bigendian representation.
+  // Required.
+  bytes d = 3;
+}
+
+message RsaSignatureKeyFormat {
+  // Required.
+  RsaSignatureParams params = 1;
+  // Required.
+  uint32 modulus_size_in_bits = 2;
+}
+
