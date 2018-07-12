@@ -65,6 +65,19 @@ std::string EnumToString(HashType type) {
   }
 }
 
+std::string EnumToString(RsaSignatureEncoding encoding) {
+  switch (encoding) {
+    case RsaSignatureEncoding::PKCS1_ENCODING:
+      return "PKCS1_ENCODING";
+    case RsaSignatureEncoding::PSS_ENCODING:
+      return "PSS_ENCODING";
+    case RsaSignatureEncoding::UNKNOWN_ENCODING:
+      return "UNKNOWN_ENCODING";
+    default:
+      return "UNKNOWN_ENCODING" + std::to_string(encoding);
+  }
+}
+
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

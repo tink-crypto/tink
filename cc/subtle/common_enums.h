@@ -44,9 +44,16 @@ enum HashType {
   SHA512 = 4,
 };
 
+enum RsaSignatureEncoding {
+  UNKNOWN_ENCODING = 0,
+  PKCS1_ENCODING = 1,
+  PSS_ENCODING = 2,
+};
+
 std::string EnumToString(EllipticCurveType type);
 std::string EnumToString(EcPointFormat format);
 std::string EnumToString(HashType type);
+std::string EnumToString(RsaSignatureEncoding encoding);
 
 }  // namespace subtle
 }  // namespace tink

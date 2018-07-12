@@ -47,6 +47,15 @@ TEST_F(CommonEnumsTest, testEcPointFormatToString) {
   EXPECT_EQ("UNKNOWN_FORMAT: 42", EnumToString((EcPointFormat)42));
 }
 
+TEST_F(CommonEnumsTest, testRsaSignatureEncodingToString) {
+  EXPECT_EQ("UNKNOWN_ENCODING",
+            EnumToString(RsaSignatureEncoding::UNKNOWN_ENCODING));
+  EXPECT_EQ("PKCS1_ENCODING",
+            EnumToString(RsaSignatureEncoding::PKCS1_ENCODING));
+  EXPECT_EQ("PSS_ENCODING",
+            EnumToString(RsaSignatureEncoding::PSS_ENCODING));
+}
+
 }  // namespace
 }  // namespace subtle
 }  // namespace tink
