@@ -39,10 +39,10 @@ using the pod command as described below.
    For a pre-release use the following line instead:
 
    ```
-   pod 'Tink', '1.2.0-rc1'
+   pod 'Tink', '1.2.0-rc2'
    ```
 
-   Note: Replace 1.2.0-rc1 with the pre-release version you want to install.
+   Note: Replace 1.2.0-rc2 with the pre-release version you want to install.
 
 4. Install the pod.
 
