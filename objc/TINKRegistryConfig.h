@@ -37,6 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable instancetype)init NS_UNAVAILABLE;
 
+- (nullable instancetype)initWithError:(NSError **)error NS_DESIGNATED_INITIALIZER;
+
 - (nullable instancetype)initWithVersion:(TINKVersion)version
                                    error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 

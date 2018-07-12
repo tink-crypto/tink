@@ -20,4 +20,5 @@
 
 typedef NS_ENUM(NSInteger, TINKVersion) {
   TINKVersion1_1_0 = 0x110,
+  TINKVersionLatest = 0xfff,
 };

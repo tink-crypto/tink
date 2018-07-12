@@ -42,8 +42,7 @@
   std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
 
   NSError *error = nil;
-  TINKHybridConfig *hybridConfig =
-      [[TINKHybridConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  TINKHybridConfig *hybridConfig = [[TINKHybridConfig alloc] initWithError:&error];
   XCTAssertNotNil(hybridConfig);
   XCTAssertNil(error);
 

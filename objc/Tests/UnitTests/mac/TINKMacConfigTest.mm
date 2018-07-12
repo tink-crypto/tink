@@ -36,7 +36,7 @@
   std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
 
   NSError *error = nil;
-  TINKMacConfig *macConfig = [[TINKMacConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  TINKMacConfig *macConfig = [[TINKMacConfig alloc] initWithError:&error];
   XCTAssertNotNil(macConfig);
   XCTAssertNil(error);
 

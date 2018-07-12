@@ -27,11 +27,10 @@ NS_ASSUME_NONNULL_BEGIN
  * This class is used for registering with the Registry all instances of Mac key types supported in
  * a particular release of Tink.
  *
- * To register all Mac key types provided in Tink release 1.1.0 one can do:
+ * To register all Mac key types provided in the latest release of Tink one can do:
  *
  * NSError *error = nil;
- * TINKMacConfig *macConfig = [TINKMacConfig alloc] initWithVersion:TINKVersion1_1_0
- *                                                            error:&error];
+ * TINKMacConfig *macConfig = [[TINKMacConfig alloc] initWithError:&error];
  * if (!macConfig || error) {
  *   // handle error.
  * }
@@ -44,10 +43,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKMacConfig : TINKRegistryConfig
 
-/* Use initWithVersion:error: to get an instance of TINKMacConfig. */
+/* Use -initWithError: to get an instance of TINKMacConfig. */
 - (nullable instancetype)init NS_UNAVAILABLE;
 
-/* Returns config of Mac implementations supported in given @c version of Tink. */
+/* Returns config of Mac implementations supported in the latest version of Tink. */
+- (nullable instancetype)initWithError:(NSError **)error NS_DESIGNATED_INITIALIZER;
+
+/**
+ * Returns config of Mac implementations supported in given @c version of Tink.
+ *
+ * @warning DEPRECATED: Please use -initWithError:.
+ */
 - (nullable instancetype)initWithVersion:(TINKVersion)version
                                    error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 

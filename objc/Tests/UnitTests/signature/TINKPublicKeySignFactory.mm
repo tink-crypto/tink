@@ -94,8 +94,7 @@ static EcdsaPrivateKey GetNewEcdsaPrivateKey() {
   keyset.set_primary_key_id(key_id_3);
 
   NSError *error = nil;
-  TINKSignatureConfig *signatureConfig =
-      [[TINKSignatureConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  TINKSignatureConfig *signatureConfig = [[TINKSignatureConfig alloc] initWithError:&error];
   XCTAssertNotNil(signatureConfig);
   XCTAssertNil(error);
 

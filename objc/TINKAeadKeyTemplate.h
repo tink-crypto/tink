@@ -89,8 +89,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Example:
  *
  * NSError *error = nil;
- * TINKAeadConfig *aeadConfig = [[TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
- *                                                                error:&error];
+ * TINKAeadConfig *aeadConfig = [[TINKAeadConfig alloc] initWithError:&error];
  * if (!aeadConfig || error) {
  *   // handle error.
  * }
@@ -99,7 +98,8 @@ NS_ASSUME_NONNULL_BEGIN
  *   // handle error.
  * }
  *
- * TINKAeadKeyTemplate *tpl = [TINAeadKeyTemplate initWithKeyTemplate:TINKAes128Gcm error:&error];
+ * TINKAeadKeyTemplate *tpl = [[TINAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes128Gcm
+ *                                                                      error:&error];
  * if (!tpl || error) {
  *   // handle error.
  * }

@@ -58,8 +58,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Example:
  *
  * NSError *error = nil;
- * TINKSignatureConfig *config = [[TINKSignatureConfig alloc] initWithVersion:TINKVersion1_1_0
- *                                                                      error:&error];
+ * TINKSignatureConfig *config = [[TINKSignatureConfig alloc] initWithError:&error];
  * if (!config || error) {
  *   // handle error.
  * }

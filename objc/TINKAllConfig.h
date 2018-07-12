@@ -24,12 +24,12 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * Static methods for registering with the Registry all instances of Tink key types supported in a
- * particular release of Tink. To register all Tink key types provided in Tink release 1.1.0 one can
- * do:
+ * Methods for registering with the Registry all instances of Tink key types supported in a
+ * particular release of Tink. To register all Tink key types provided in the latest release of Tink
+ * one can do:
  *
  * NSError *error = nil;
- * TINKAllConfig *allConfig = [[TINKAllConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+ * TINKAllConfig *allConfig = [[TINKAllConfig alloc] initWithError:&error];
  * if (error || !allConfig) {
  *   // handle error.
  * }
@@ -40,9 +40,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKAllConfig : TINKRegistryConfig
 
-/** Use initWithVersion:error: to get an instance of TINKAllConfig. */
+/** Use -initWithError: to get an instance of TINKAllConfig. */
 - (nullable instancetype)init NS_UNAVAILABLE;
 
+/** Returns config of all implementations supported in the latest version of Tink. */
+- (nullable instancetype)initWithError:(NSError **)error NS_DESIGNATED_INITIALIZER;
+
+/**
+ * Returns config of all implementations supported in a given @c version of Tink.
+ *
+ * @warning DEPRECATED: Please use -initWithError:.
+ */
 - (nullable instancetype)initWithVersion:(TINKVersion)version
                                    error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 

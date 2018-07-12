@@ -96,7 +96,7 @@ using google::crypto::tink::KeyStatusType;
   keyset.set_primary_key_id(key_id_3);
 
   NSError *error = nil;
-  TINKMacConfig *macConfig = [[TINKMacConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  TINKMacConfig *macConfig = [[TINKMacConfig alloc] initWithError:&error];
   XCTAssertNotNil(macConfig);
   XCTAssertNil(error);
 

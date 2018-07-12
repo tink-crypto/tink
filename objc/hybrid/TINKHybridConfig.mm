@@ -43,7 +43,9 @@
   google::crypto::tink::RegistryConfig ccConfig;
   switch (version) {
     case TINKVersion1_1_0:
-      ccConfig = crypto::tink::HybridConfig::Latest();  // TODO(b/111321554)
+      // Fallthrough!
+    case TINKVersionLatest:
+      ccConfig = crypto::tink::HybridConfig::Latest();
       break;
     default:
       if (error) {
@@ -55,5 +57,10 @@
 
   return (self = [super initWithCcConfig:ccConfig]);
 }
+
+- (nullable instancetype)initWithError:(NSError **)error {
+  return [self initWithVersion:TINKVersionLatest error:error];
+}
+
 @end
 #pragma clang diagnostic pop

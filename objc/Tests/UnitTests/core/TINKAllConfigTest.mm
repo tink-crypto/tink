@@ -35,7 +35,7 @@
 
 - (void)test110Config {
   NSError *error = nil;
-  TINKAllConfig *allConfig = [[TINKAllConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  TINKAllConfig *allConfig = [[TINKAllConfig alloc] initWithError:&error];
   XCTAssertNotNil(allConfig);
   XCTAssertNil(error);
   google::crypto::tink::RegistryConfig config = allConfig.ccConfig;
@@ -104,7 +104,7 @@
 
 - (void)testConfigRegistration {
   NSError *error = nil;
-  TINKAllConfig *config = [[TINKAllConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  TINKAllConfig *config = [[TINKAllConfig alloc] initWithError:&error];
   XCTAssertNotNil(config);
   XCTAssertNil(error);
 

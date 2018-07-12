@@ -32,9 +32,7 @@ NS_ASSUME_NONNULL_BEGIN;
  * use a TINKPublicKeySign primitive:
  *
  * NSError *error = nil;
- * TINKSignatureConfig *signatureConfig = [TINKSignatureConfig alloc]
- *                                            initWithVersion:TINKVersion1_1_0
- *                                                      error:&error];
+ * TINKSignatureConfig *signatureConfig = [[TINKSignatureConfig alloc] initWithError:&error];
  * if (!signatureConfig || error) {
  *   // handle error.
  * }

@@ -27,11 +27,10 @@ NS_ASSUME_NONNULL_BEGIN
  * This class is used for registering with the Registry all instances of Aead key types supported in
  * a particular release of Tink.
  *
- * To register all Aead key types provided in Tink release 1.1.0 one can do:
+ * To register all Aead key types provided in the latest release of Tink one can do:
  *
  * NSError *error = nil;
- * TINKAeadConfig *aeadConfig = [TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
- *                                                               error:&error];
+ * TINKAeadConfig *aeadConfig = [[TINKAeadConfig alloc] initWithError:&error];
  * if (!aeadConfig || error) {
  *   // handle error.
  * }
@@ -44,10 +43,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKAeadConfig : TINKRegistryConfig
 
-/* Use initWithVersion:error: to get an instance of TINKAeadConfig. */
+/* Use -initWithError: to get an instance of TINKAeadConfig. */
 - (nullable instancetype)init NS_UNAVAILABLE;
 
-/* Returns config of Aead implementations supported in given @c version of Tink. */
+/* Returns config of Aead implementations supported in the latest version of Tink. */
+- (nullable instancetype)initWithError:(NSError **)error NS_DESIGNATED_INITIALIZER;
+
+/**
+ * Returns config of Aead implementations supported in given @c version of Tink.
+ *
+ * @warning DEPRECATED: Please use -initWithError:.
+ */
 - (nullable instancetype)initWithVersion:(TINKVersion)version
                                    error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 

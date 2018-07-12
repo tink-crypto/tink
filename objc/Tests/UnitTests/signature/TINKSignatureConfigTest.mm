@@ -37,8 +37,7 @@
   std::string verify_key_type = "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
 
   NSError *error = nil;
-  TINKSignatureConfig *signatureConfig =
-      [[TINKSignatureConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+  TINKSignatureConfig *signatureConfig = [[TINKSignatureConfig alloc] initWithError:&error];
   XCTAssertNotNil(signatureConfig);
   XCTAssertNil(error);
 

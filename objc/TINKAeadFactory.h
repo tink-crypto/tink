@@ -30,8 +30,7 @@ NS_ASSUME_NONNULL_BEGIN;
  * methods from TINKAeadConfig. Here is an example how one can obtain and use a TINKAead primitive:
  *
  * NSError *error = nil;
- * TINKAeadConfig *aeadConfig = [TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
- *                                                               error:&error];
+ * TINKAeadConfig *aeadConfig = [[TINKAeadConfig alloc] initWithError:&error];
  * if (!aeadConfig || error) {
  *   // handle error.
  * }

@@ -53,8 +53,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Example:
  *
  * NSError *error = nil;
- * TINKHybridConfig *hybridConfig = [[TINKHybridConfig alloc] initWithVersion:TINKVersion1_1_0
- *                                                                      error:&error];
+ * TINKHybridConfig *hybridConfig = [[TINKHybridConfig alloc] initWithError:&error];
  * if (!hybridConfig || error) {
  *   // handle error.
  * }

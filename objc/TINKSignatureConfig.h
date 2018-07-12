@@ -27,11 +27,10 @@ NS_ASSUME_NONNULL_BEGIN
  * This class is used for registering with the Registry all instances of Signautre key types
  * supported in a particular release of Tink.
  *
- * To register all Signature key types provided in Tink release 1.1.0 one can do:
+ * To register all Signature key types provided in the latest release of Tink one can do:
  *
  * NSError *error = nil;
- * TINKSignatureConfig *config = [TINKSignatureConfig alloc] initWithVersion:TINKVersion1_1_0
- *                                                                     error:&error];
+ * TINKSignatureConfig *config = [[TINKSignatureConfig alloc] initWithError:&error];
  * if (!config || error) {
  *   // handle error.
  * }
@@ -45,12 +44,19 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKSignatureConfig : TINKRegistryConfig
 
-/* Use initWithVersion:error: to get an instance of TINKSignatureConfig. */
+/* Use -initWithError: to get an instance of TINKSignatureConfig. */
 - (nullable instancetype)init NS_UNAVAILABLE;
 
-/* Returns config of Signature implementations supported in given @c version of Tink. */
+/**
+ * Returns config of Signature implementations supported in given @c version of Tink.
+ *
+ * @warning DEPRECATED: Please use -initWithError:.
+ */
 - (nullable instancetype)initWithVersion:(TINKVersion)version
                                    error:(NSError **)error NS_DESIGNATED_INITIALIZER;
+
+/* Returns config of Signature implementations supported in the latest version of Tink. */
+- (nullable instancetype)initWithError:(NSError **)error NS_DESIGNATED_INITIALIZER;
 
 @end
 

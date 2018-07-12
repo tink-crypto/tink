@@ -27,12 +27,10 @@ NS_ASSUME_NONNULL_BEGIN
  * This class is used for registering with the Registry all instances of Hybrid key types
  * supported in a particular release of Tink.
  *
- * To register all Hybrid key types provided in Tink release 1.1.0 one can do:
+ * To register all Hybrid key types provided in the latest release of Tink one can do:
  *
  * NSError *error = nil;
- * TINKHybridConfig *hybridConfig =
- *    [[TINKHybridConfig alloc] initWithVersion:TINKVersion1_1_0
- *                                        error:&error];
+ * TINKHybridConfig *hybridConfig = [[TINKHybridConfig alloc] initWithError:&error];
  * if (!hybridConfig || error) {
  *   // handle error.
  * }
@@ -49,7 +47,14 @@ NS_ASSUME_NONNULL_BEGIN
 /* Use initWithVersion:error: to get an instance of TINKHybridConfig. */
 - (nullable instancetype)init NS_UNAVAILABLE;
 
-/* Returns config of Hybrid implementations supported in given @c version of Tink. */
+/* Returns config of Hybrid implementations supported in the latest version of Tink. */
+- (nullable instancetype)initWithError:(NSError **)error NS_DESIGNATED_INITIALIZER;
+
+/**
+ * Returns config of Hybrid implementations supported in given @c version of Tink.
+ *
+ * @warning DEPRECATED: Please use -initWithError:.
+ */
 - (nullable instancetype)initWithVersion:(TINKVersion)version
                                    error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 

@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Example usage:
  *
  * NSError *error = nil;
- * TINKAllConfig *config = [[TINKAllConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+ * TINKAllConfig *config = [[TINKAllConfig alloc] initWithError:&error];
  * if (!config || error) {
  *   // handle error.
  * }

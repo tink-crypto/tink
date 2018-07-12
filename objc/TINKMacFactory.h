@@ -30,8 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  * methods in TINKMacConfig. Here is an example how one can obtain and use a TINKMac primitive:
  *
  * NSError *error = nil;
- * TINKMacConfig *macConfig = [TINKMacConfig alloc] initWithVersion:TINKVersion1_1_0
- *                                                            error:&error];
+ * TINKMacConfig *macConfig = [[TINKMacConfig alloc] initWithError:&error];
  * if (!macConfig || error) {
  *   // handle error.
  * }

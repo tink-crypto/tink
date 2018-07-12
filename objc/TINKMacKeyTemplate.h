@@ -49,8 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Example:
  *
  * NSError *error = nil;
- * TINKMacConfig *macConfig = [[TINMacConfig alloc] initWithVersion:TINKVersion1_1_0
- *                                                            error:&error];
+ * TINKMacConfig *macConfig = [[TINMacConfig alloc] initWithError:&error];
  * if (!macConfig || error) {
  *   // handle error.
  * }
