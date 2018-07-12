@@ -72,16 +72,15 @@ Tink provides customizable initialization, which allows for choosing specific
 implementations (identified by _key types_) of desired primitives. This
 initialization happens via _registration_ of the implementations.
 
-For example, if you want to use all implementations of all primitives in Tink
-1.1.0, the initialization would look as follows:
+For example, if you want to use all implementations of all primitives in the
+current version of Tink, the initialization would look as follows:
 
 ```objc
    #import "Tink/TINKAllConfig.h"
    #import "Tink/TINKConfig.h"
-   #import "Tink/TINKVersion.h"
 
    NSError *error = nil;
-   TINKAllConfig *config = [[TINKAllConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+   TINKAllConfig *config = [[TINKAllConfig alloc] initWithError:&error];
    if (!config || error) {
      // handle error.
    }
@@ -96,11 +95,9 @@ To use only implementations of the AEAD primitive:
 ```objc
     #import "Tink/TINKAeadConfig.h"
     #import "Tink/TINKConfig.h"
-    #import "Tink/TINKVersion.h"
 
     NSError *error = nil;
-    TINKAeadConfig *aeadConfig = [[TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0
-                                                                   error:&error];
+    TINKAeadConfig *aeadConfig = [[TINKAeadConfig alloc] initWithError:&error];
     if (!aeadConfig || error) {
       // handle error.
     }
