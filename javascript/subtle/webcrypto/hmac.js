@@ -42,6 +42,22 @@ class Hmac {
     this.key_ = key;
   }
 
+   /**
+   * @param {string} hash accepted names are SHA-1, SHA-256 and SHA-512
+   * @param {!Uint8Array} key
+   * @param {number} tagSize the size of the tag
+   * @return {!Promise.<!Mac>}
+   * @static
+   */
+  static async newInstance(hash, key, tagSize) {
+    let cryptoKey = await window.crypto.subtle.importKey(
+      'raw', key,
+      {'name': 'HMAC', 'hash': {'name': hash}, 'length': key.length * 8},
+      false, ['sign', 'verify']);
+
+    return new Hmac(hash, cryptoKey, tagSize);
+  }
+
   /**
    * @override
    */

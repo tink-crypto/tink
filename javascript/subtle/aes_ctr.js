@@ -45,7 +45,7 @@ const AES_BLOCK_SIZE_IN_BYTES = 16;
 const newInstance = async function(key, ivSize) {
   if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > AES_BLOCK_SIZE_IN_BYTES) {
     throw new SecurityException(
-        'invaid IV length, must be at least ' + MIN_IV_SIZE_IN_BYTES +
+        'invalid IV length, must be at least ' + MIN_IV_SIZE_IN_BYTES +
         ' and at most ' + AES_BLOCK_SIZE_IN_BYTES);
   }
   Validators.requireUint8Array(key);
@@ -53,10 +53,7 @@ const newInstance = async function(key, ivSize) {
 
   if (Environment.IS_WEBCRYPTO_AVAILABLE) {
     try {
-      const cryptoKey = await window.crypto.subtle.importKey(
-          'raw', key, {'name': 'AES-CTR', 'length': key.length}, false,
-          ['encrypt', 'decrypt']);
-      return new AesCtrWebCrypto(cryptoKey, ivSize);
+      return await AesCtrWebCrypto.newInstance(key, ivSize);
     } catch (error) {
       // CTR might be unsupported in this browser. Fall back to Pure JS.
     }

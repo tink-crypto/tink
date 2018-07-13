@@ -55,14 +55,14 @@ testSuite({
       await AesCtr.newInstance(Random.randBytes(16), 11);  // IV size too short
     } catch (e) {
       assertEquals(
-          'CustomError: invaid IV length, must be at least 12 and at most 16',
+          'CustomError: invalid IV length, must be at least 12 and at most 16',
           e.toString());
     }
     try {
       await AesCtr.newInstance(Random.randBytes(16), 17);  // IV size too long
     } catch (e) {
       assertEquals(
-          'CustomError: invaid IV length, must be at least 12 and at most 16',
+          'CustomError: invalid IV length, must be at least 12 and at most 16',
           e.toString());
     }
     try {

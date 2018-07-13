@@ -78,12 +78,9 @@ const newInstance = async function(hash, key, tagSize) {
   }
 
   if (Environment.IS_WEBCRYPTO_AVAILABLE) {
-    const cryptoKey = await window.crypto.subtle.importKey(
-        'raw', key,
-        {'name': 'HMAC', 'hash': {'name': hash}, 'length': key.length * 8},
-        false, ['sign', 'verify']);
-    return new HmacWebCrypto(hash, cryptoKey, tagSize);
+    return await HmacWebCrypto.newInstance(hash, key, tagSize);
   }
+
   return new HmacPureJs(hash, key, tagSize);
 };
 

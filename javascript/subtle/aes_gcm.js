@@ -30,11 +30,7 @@ const newInstance = async function(key) {
   Validators.validateAesKeySize(key.length);
 
   if (Environment.IS_WEBCRYPTO_AVAILABLE) {
-    const cryptoKey = await window.crypto.subtle.importKey(
-        'raw' /* format */, key /* keyData */,
-        {'name': 'AES-GCM', 'length': key.length} /* algo */,
-        false /* extractable*/, ['encrypt', 'decrypt'] /* usage */);
-    return new AesGcmWebCrypto(cryptoKey);
+    return await AesGcmWebCrypto.newInstance(key);
   }
 
   throw new UnsupportedException(

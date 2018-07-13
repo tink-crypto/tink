@@ -48,6 +48,20 @@ class AesCtr {
     this.ivSize_ = ivSize;
   }
 
+   /**
+   * @param {!Uint8Array} key
+   * @param {number} ivSize the size of the IV
+   * @return {!Promise.<!IndCpaCipher>}
+   * @static
+   */
+  static async newInstance(key, ivSize) {
+    const cryptoKey = await window.crypto.subtle.importKey(
+      'raw', key, {'name': 'AES-CTR', 'length': key.length}, false,
+      ['encrypt', 'decrypt']);
+
+    return new AesCtr(cryptoKey, ivSize);
+  }
+
   /**
    * @override
    */

@@ -52,6 +52,20 @@ class AesGcm {
   }
 
   /**
+   * @param {!Uint8Array} key
+   * @return {!Promise.<!Aead>}
+   * @static
+   */
+  static async newInstance(key) {
+    let webCryptoKey = await window.crypto.subtle.importKey(
+      'raw' /* format */, key /* keyData */,
+      {'name': 'AES-GCM', 'length': key.length} /* algo */,
+      false /* extractable*/, ['encrypt', 'decrypt'] /* usage */);
+
+    return new AesGcm(webCryptoKey);
+  }
+
+  /**
    * @override
    */
   async encrypt(plaintext, opt_associatedData) {
