@@ -45,7 +45,7 @@ supports two operations:
 
 Before implementations of primitives can be used, they must be registered at
 runtime with Tink, so that Tink "knows" the desired implementations. Here's how
-you can register all implementations of all primitives in Tink for Java 1.1.0:
+you can register all implementations of all primitives in Tink:
 
 ```java
     import com.google.crypto.tink.config.TinkConfig;
@@ -83,9 +83,9 @@ AEAD primitive in Java:
 ## Current Status
 
 *   [Tink for Java and Android](docs/JAVA-HOWTO.md) are field tested and ready
-    for production. Latest version is
-    [1.1.1](https://github.com/google/tink/releases/tag/v1.1.1), released on
-    04/18/2018.
+    for production. The latest version is
+    [1.2.0-rc2](https://github.com/google/tink/releases/tag/v1.2.0-rc2),
+    released on 2018-07-13.
 
 *   [Tink for C++](docs/CPP-HOWTO.md) and [Tink for Obj-C](docs/OBJC-HOWTO.md)
     are catching up with [Tink for Java](docs/JAVA-HOWTO.md) in terms of

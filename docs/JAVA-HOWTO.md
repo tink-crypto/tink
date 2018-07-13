@@ -16,8 +16,8 @@ Tink can be installed with Maven or Gradle. The Maven group ID is
 `com.google.crypto.tink`, and the artifact ID is `tink`.
 
 The most recent release is
-[1.1.1](https://github.com/google/tink/releases/tag/v1.1.1), released
-2018-04-18.
+[1.2.0-rc2](https://github.com/google/tink/releases/tag/v1.2.0-rc2), released
+2018-07-13.
 
 Java developers can add Tink using Maven:
 
@@ -25,7 +25,7 @@ Java developers can add Tink using Maven:
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>tink</artifactId>
-  <version>1.1.1</version>
+  <version>1.2.0-rc2</version>
 </dependency>
 ```
 
@@ -33,7 +33,7 @@ Android developers can add Tink using Gradle:
 
 ```
 dependencies {
-  compile 'com.google.crypto.tink:tink-android:1.1.1'
+  compile 'com.google.crypto.tink:tink-android:1.2.0-rc2'
 }
 ```
 
@@ -82,10 +82,10 @@ dependencies {
 ## API docs
 
 *   Java:
-    *   [1.1.1](https://google.github.com/tink/javadoc/tink/1.1.1)
+    *   [1.2.0-rc2](https://google.github.com/tink/javadoc/tink/1.2.0-rc2)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.1.1](https://google.github.com/tink/javadoc/tink-android/1.1.1)
+    *   [1.2.0-rc2](https://google.github.com/tink/javadoc/tink-android/1.2.0-rc2)
     *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important Warnings
@@ -105,8 +105,8 @@ Tink provides customizable initialization, which allows for choosing specific
 implementations (identified by _key types_) of desired primitives. This
 initialization happens via _registration_ of the implementations.
 
-For example, if you want to use all implementations of all primitives in Tink
-1.0.0, the initialization would look as follows:
+For example, if you want to use all implementations of all primitives in Tink,
+the initialization would look as follows:
 
 ```java
     import com.google.crypto.tink.config.TinkConfig;
