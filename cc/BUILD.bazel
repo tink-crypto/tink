@@ -460,10 +460,6 @@ exports_files(
 # To get dead code elimination run Bazel with option --nolegacy_whole_archive.
 cc_binary(
     name = "libtink.so",
-    linkopts = select({
-        ":linux_x86_64": [],
-        ":mac_x86_64": ["-Wl,-install_name,@rpath/libtink.so"],
-    }),
     linkshared = 1,
     linkstatic = 1,
     linkopts = select({
