@@ -120,7 +120,7 @@ To install Tink from the source code, the following prerequisites must be instal
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TARGET_DIR/lib
     ```
 
-#### Validate your installation
+### Validate your installation
 
 To validate the installation compile and run [`hello_world.cc`](https://github.com/google/tink/tree/master/examples/helloworld/cc/hello_world.cc).
 
