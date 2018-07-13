@@ -88,19 +88,17 @@ AEAD primitive in Java:
     released on 2018-07-13.
 
 *   [Tink for C++](docs/CPP-HOWTO.md) and [Tink for Obj-C](docs/OBJC-HOWTO.md)
-    are catching up with [Tink for Java](docs/JAVA-HOWTO.md) in terms of
-    features and stability, and the offered functionality is 100%-compatible
-    with Java (cf. [cross-language tests](tools/testing/cross_language/)). We
-    plan to make a first release in June 2018.
+    are almost ready for production. The latest version is
+    [1.2.0-rc2](https://github.com/google/tink/releases/tag/v1.2.0-rc2),
+    released on 2018-07-13.
 
-*   Tink for Go is in active development.
-
-*   Tink for Javascript and C# are in planning.
+*   Tink for Go and Javascript are in active development.
 
 ## Learn More
 
 *   [Java HOW-TO](docs/JAVA-HOWTO.md)
 *   [C++ HOW-TO](docs/CPP-HOWTO.md)
+*   [Obj-C HOW-TO](docs/OBJC-HOWTO.md)
 *   [Security and Usability Design Goals](docs/SECURITY-USABILITY.md)
 *   [Supported Crypto Primitives](docs/PRIMITIVES.md)
 *   [Key Management](docs/KEY-MANAGEMENT.md)
@@ -121,9 +119,11 @@ an empty email to tink-users+subscribe@googlegroups.com.
 
 ## Maintainers
 
-Tink is maintained by:
+Tink is maintained by (A-Z):
 
+-   Haris Andrianakis
 -   Daniel Bleichenbacher
 -   Thai Duong
+-   Charles Lee
 -   Quan Nguyen
 -   Bartosz Przydatek
