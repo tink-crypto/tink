@@ -18,8 +18,8 @@ http_archive(
 
 http_archive(
     name = "boringssl",
-    strip_prefix = "boringssl-e06766691547514e5bf756e4a0d926e8ca680e5a",
-    url = "https://github.com/google/boringssl/archive/e06766691547514e5bf756e4a0d926e8ca680e5a.zip",
+    strip_prefix = "boringssl-bdd6c7c9d1b94f7010fb471b91bb490ccacafb98",
+    url = "https://github.com/google/boringssl/archive/bdd6c7c9d1b94f7010fb471b91bb490ccacafb98.zip",
 )
 
 # GoogleTest/GoogleMock framework. Used by most C++ unit-tests.
