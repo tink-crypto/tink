@@ -8,6 +8,9 @@ common tasks in [Tink](https://github.com/google/tink).
 Tink is released as a [Cocoapod](https://cocoapods.org/). It can be installed by
 using the pod command as described below.
 
+We also provide step-by-step instructions on how to build and use Tink from
+source. However, Cocoapods is the recommended way to use Tink.
+
 #### Supported Platforms
 
  * iOS 9.0 or newer
@@ -65,6 +68,71 @@ using the pod command as described below.
    #import "Tink/TINKAeadKeyTemplate.h"
    #import "Tink/TINKAead.h"
    ```
+
+### Installing from the source
+
+#### Prerequisites
+
+To install Tink from the source code, the following prerequisites must be
+installed:
+
+*   [git](https://git-scm.com/) - to download the source of Tink
+*   [Bazel](https://www.bazel.build) v0.15.0 or newer - to build Tink
+
+#### Step-by-step instructions
+
+1.  Clone Tink from GitHub:
+
+    ```sh
+    git clone https://github.com/google/tink/
+    ```
+
+2.  Build the library and generate a static iOS framework:
+
+    ```sh
+    cd tink
+    export XCODE_VERSION=9.2
+    export IOS_SDK=11.2
+    bazel build -c opt --ios_multi_cpus=i386,x86_64,armv7,arm64 --xcode_version="${XCODE_VERSION}" --ios_sdk_version="${IOS_SDK}" //objc:Tink_framework
+    ```
+
+    Adjust the following options according to your build environment:
+
+    *   Set `XCODE_VERSION` to the Xcode version you are using to build your
+        application.
+
+    *   Set `IOS_SDK` to the version of the iOS SDK you are using in your
+        application.
+
+    *   The option `ios_multi_cpus` is used to generate a fat library that
+        includes multiple architectures. Before submitting your application to
+        the App Store you should generate a framework that includes only the ARM
+        architectures and link it to your binary.
+
+3.  Unzip Tink\_framework.zip into your Xcode project folder:
+
+    ```sh
+    unzip bazel-bin/objc/Tink_framework.zip -d /path/to/your/project/folder/
+    ```
+
+4.  Add the static framework to your Xcode project options:
+
+    *   Open your Xcode project
+
+    *   Navigate to your project's folder and drag Tink.framework into your
+        Xcode's left pane.
+
+    *   In the following dialog select `Copy items if needed` and the target of
+        your application that will use Tink. Click `Finish`.
+
+    *   Select your project on the left pane and click on "Build Settings"
+
+    *   Find `Other Linker Flags` and add `-lc++`
+
+5.  Start using Tink in your code:
+
+    Add `#import "Tink/Tink.h"` in your code and start using
+    Tink.
 
 ## Initializing Tink
 

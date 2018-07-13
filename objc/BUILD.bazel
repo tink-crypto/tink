@@ -2,7 +2,7 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_unit_test")
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_static_framework", "ios_unit_test")
 
 # public libraries
 
@@ -88,6 +88,19 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = PUBLIC_API_DEPS + [
         ":cleartext_keyset_handle",
+    ],
+)
+
+ios_static_framework(
+    name = "Tink_framework",
+    hdrs = PUBLIC_APIS + [
+        "TINKKeysetHandle+Cleartext.h",
+    ],
+    bundle_name = "Tink",
+    minimum_os_version = "9.0",
+    deps = [
+        ":cleartext_keyset_handle",
+        ":objc",
     ],
 )
 
