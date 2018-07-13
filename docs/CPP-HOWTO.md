@@ -21,8 +21,8 @@ so the instructions given below might not work in some environments.
 
 #### Supported Platforms
 
- * Linux x86-64
- * MacOS x86-64, 10.12.6 (Sierra) or newer
+*   Linux x86_64
+*   macOS x86_64, 10.12.6 (Sierra) or newer
 
 #### Caveats
 
@@ -37,41 +37,40 @@ dependence via Tink).
 
 ### Installing pre-build binaries
 
-1. Download and unpack a tar-archive with pre-built binary and relevant headers.
+1.  Download and extract the Tink library into `/usr/local/lib` by invoking the
+    following shell commands:
 
-   ```sh
-   cd /tmp
-   curl https://some.repository/tar_bin_snapshot.tar.gz -O (TODO)
-   tar xfvz tar_bin_snapshot.tar.gz
-   ```
+    ```sh
+    OS="linux" # Change to "darwin" for macOS
+    TARGET_DIR="/usr/local"
+    curl -L \
+    "https://storage.googleapis.com/tink/releases/libtink-${OS}-x86_64-1.2.0-rc2.tar.gz" |
+    sudo tar -xz -C $TARGET_DIR
+    ```
 
-2. Install the binary and the headers in appropriate
-   directories of the target project (`TARGET_DIR`):
+The tar command extracts the Tink library into the `lib` subdirectory of
+`TARGET_DIR`. For example, specifying `/usr/local` as `TARGET_DIR` causes tar to
+extract the Tink library into `/usr/local/lib`.
 
-   ```sh
-   TARGET_DIR="/usr/local"
-   mkdir -p $TARGET_DIR/lib $TARGET_DIR/include
-   sudo cp tink_bin_snapshot/libtink.so $TARGET_DIR/lib/
-   sudo tar xfv tink_bin_snapshot/tink_headers.tar -C $TARGET_DIR/include/
-   sudo tar xfv tink_bin_snapshot/tink_deps_headers.tar -C $TARGET_DIR/include/
-   ```
+If you'd prefer to extract the library into a different directory, adjust
+`TARGET_DIR` accordingly.
 
-3. If in Step 2 you specified a system directory (for example, `/usr/local`)
-   as the `TARGET_DIR`, then run ldconfig to configure the linker. For example:
+1.  On Linux, if in Step 2 you specified a system directory (for example,
+    `/usr/local`) as the `TARGET_DIR`, then run ldconfig to configure the
+    linker. For example:
 
-   ```sh
-   sudo ldconfig
-   ```
+    ```sh
+    sudo ldconfig
+    ```
 
     If you assigned a `TARGET_DIR` other than a system directory (for example,
     `~/mydir`), then you must append the extraction directory (for example,
     `~/mydir/lib`) to two environment variables:
 
-   ```sh
-   export LIBRARY_PATH=$LIBRARY_PATH:$TARGET_DIR/lib
-   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TARGET_DIR/lib
-   ```
-
+    ```sh
+    export LIBRARY_PATH=$LIBRARY_PATH:$TARGET_DIR/lib
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TARGET_DIR/lib
+    ```
 
 ### Installing from the source
 
@@ -84,41 +83,42 @@ To install Tink from the source code, the following prerequisites must be instal
 
 #### Step-by-step instructions to build and use `libtink.so`
 
-1. clone Tink from GitHub:
+1.  clone Tink from GitHub:
 
-   ```sh
-   git clone https://github.com/google/tink/
-   ```
+    ```sh
+    git clone https://github.com/google/tink/
+    ```
 
-2. build the library and header-file bundles, and install them in appropriate
-   directories of the target project (`TARGET_DIR`):
+2.  build the library and header-file bundles, and install them in appropriate
+    directories of the target project (`TARGET_DIR`):
 
-   ```sh
-   cd tink
-   TARGET_DIR="/usr/local"
-   bazel build cc:libtink.so
-   bazel build cc:tink_headers cc:tink_deps_headers
-   mkdir -p $TARGET_DIR/lib $TARGET_DIR/include
-   sudo cp bazel-bin/cc/libtink.so $TARGET_DIR/lib/
-   sudo tar xfv bazel-genfiles/cc/tink_headers.tar -C $TARGET_DIR/include/
-   sudo tar xfv bazel-genfiles/cc/tink_deps_headers.tar -C $TARGET_DIR/include/
-   ```
+    ```sh
+    cd tink
+    TARGET_DIR="/usr/local"
+    bazel build cc:libtink.so
+    bazel build cc:tink_headers cc:tink_deps_headers
+    mkdir -p $TARGET_DIR/lib $TARGET_DIR/include
+    sudo cp bazel-bin/cc/libtink.so $TARGET_DIR/lib/
+    sudo tar xfv bazel-genfiles/cc/tink_headers.tar -C $TARGET_DIR/include/
+    sudo tar xfv bazel-genfiles/cc/tink_deps_headers.tar -C $TARGET_DIR/include/
+    ```
 
-3. If in Step 2 you specified a system directory (for example, `/usr/local`)
-   as the `TARGET_DIR`, then run ldconfig to configure the linker. For example:
+3.  On Linux, if in Step 2 you specified a system directory (for example,
+    `/usr/local`) as the `TARGET_DIR`, then run ldconfig to configure the
+    linker. For example:
 
-   ```sh
-   sudo ldconfig
-   ```
+    ```sh
+    sudo ldconfig
+    ```
 
     If you assigned a `TARGET_DIR` other than a system directory (for example,
     `~/mydir`), then you must append the extraction directory (for example,
     `~/mydir/lib`) to two environment variables:
 
-   ```sh
-   export LIBRARY_PATH=$LIBRARY_PATH:$TARGET_DIR/lib
-   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TARGET_DIR/lib
-   ```
+    ```sh
+    export LIBRARY_PATH=$LIBRARY_PATH:$TARGET_DIR/lib
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TARGET_DIR/lib
+    ```
 
 #### Validate your installation
 
