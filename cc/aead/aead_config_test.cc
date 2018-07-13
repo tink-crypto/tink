@@ -45,11 +45,6 @@ class AeadConfigTest : public ::testing::Test {
   void SetUp() override { Registry::Reset(); }
 };
 
-TEST_F(AeadConfigTest, testVersions) {
-  EXPECT_EQ(AeadConfig::Latest().SerializeAsString(),
-            AeadConfig::Tink_1_1_0().SerializeAsString());
-}
-
 TEST_F(AeadConfigTest, testBasic) {
   std::string aes_ctr_hmac_aead_key_type =
       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";

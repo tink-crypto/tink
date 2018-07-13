@@ -44,22 +44,12 @@ class HybridConfig {
   static constexpr char kHybridEncryptPrimitiveName[] = "HybridEncrypt";
 
   // Returns config with implementations of HybridEncrypt and HybridDecrypt
-  // supported in Tink 1.1.0.
-  // DEPRECATED
-  static const google::crypto::tink::RegistryConfig& Tink_1_1_0();
-
-  // Returns config with implementations of HybridEncrypt and HybridDecrypt
   // supported in the current Tink release.
   static const google::crypto::tink::RegistryConfig& Latest();
 
   // Registers key managers for all implementations of HybridEncrypt
   // and HybridDecrypt from the current Tink release.
   static crypto::tink::util::Status Register();
-
-  // Registers key managers for all implementations of HybridEncrypt
-  // and HybridDecrypt from the current Tink release.
-  // DEPRECATED
-  static crypto::tink::util::Status Init();
 
  private:
   HybridConfig() {}

@@ -60,22 +60,12 @@ const google::crypto::tink::RegistryConfig& AeadConfig::Latest() {
 }
 
 // static
-const google::crypto::tink::RegistryConfig& AeadConfig::Tink_1_1_0() {
-  return Latest();
-}
-
-// static
 util::Status AeadConfig::Register() {
   auto status = MacConfig::Register();
   if (!status.ok()) return status;
   status = Registry::AddCatalogue(kCatalogueName, new AeadCatalogue());
   if (!status.ok()) return status;
   return Config::Register(Latest());
-}
-
-// static
-util::Status AeadConfig::Init() {
-  return Register();
 }
 
 }  // namespace tink

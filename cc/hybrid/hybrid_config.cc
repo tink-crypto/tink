@@ -59,11 +59,6 @@ const google::crypto::tink::RegistryConfig& HybridConfig::Latest() {
 }
 
 // static
-const google::crypto::tink::RegistryConfig& HybridConfig::Tink_1_1_0() {
-  return Latest();
-}
-
-// static
 util::Status HybridConfig::Register() {
   auto status = AeadConfig::Register();
   if (!status.ok()) return status;
@@ -74,11 +69,6 @@ util::Status HybridConfig::Register() {
       kHybridEncryptCatalogueName, new HybridEncryptCatalogue());
   if (!status.ok()) return status;
   return Config::Register(Latest());
-}
-
-// static
-util::Status HybridConfig::Init() {
-  return Register();
 }
 
 }  // namespace tink

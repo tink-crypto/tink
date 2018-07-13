@@ -38,10 +38,6 @@ class AeadConfig {
   static constexpr char kCatalogueName[] = "TinkAead";
   static constexpr char kPrimitiveName[] = "Aead";
 
-  // Returns config of Aead implementations supported in Tink 1.1.0.
-  // DEPRECATED
-  static const google::crypto::tink::RegistryConfig& Tink_1_1_0();
-
   // Returns config of Aead implementations supported
   // in the current Tink release.
   static const google::crypto::tink::RegistryConfig& Latest();
@@ -49,10 +45,6 @@ class AeadConfig {
   // Registers key managers for all Aead key types
   // from the current Tink release.
   static crypto::tink::util::Status Register();
-
-  // Registers key managers for all Aead key types.
-  // DEPRECATED
-  static crypto::tink::util::Status Init();
 
  private:
   AeadConfig() {}

@@ -47,11 +47,6 @@ class HybridConfigTest : public ::testing::Test {
   }
 };
 
-TEST_F(HybridConfigTest, testVersions) {
-  EXPECT_EQ(HybridConfig::Latest().SerializeAsString(),
-            HybridConfig::Tink_1_1_0().SerializeAsString());
-}
-
 TEST_F(HybridConfigTest, testBasic) {
   std::string decrypt_key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";

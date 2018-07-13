@@ -49,9 +49,7 @@ namespace {
 class KeysetHandleTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    auto status = AeadConfig::Init();
-    ASSERT_TRUE(status.ok()) << status;
-    status = Config::Register(AeadConfig::Tink_1_1_0());
+    auto status = AeadConfig::Register();
     ASSERT_TRUE(status.ok()) << status;
   }
 };
