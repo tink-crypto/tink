@@ -79,7 +79,7 @@ public class WycheproofTestUtil {
   public static EllipticCurves.CurveType getCurveType(String curveName)
       throws NoSuchAlgorithmException {
     switch (curveName) {
-      case "sepcp256r1":
+      case "secp256r1":
         return EllipticCurves.CurveType.NIST_P256;
       case "secp384r1":
         return EllipticCurves.CurveType.NIST_P384;

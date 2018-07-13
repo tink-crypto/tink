@@ -490,11 +490,15 @@ public class EllipticCurvesTest {
           try {
             X509EncodedKeySpec x509keySpec = new X509EncodedKeySpec(Hex.decode(hexPubKey));
             pubKey = (ECPublicKey) kf.generatePublic(x509keySpec);
+            System.out.println("Wycheproof encoded public key spec: " + hexPubKey);
+            System.out.println(
+                "Android encoded public key spec: " + Hex.encode(pubKey.getEncoded()));
           } catch (java.lang.RuntimeException ex) {
             // Some of the test vectors contain incorrectly encoded public keys.
             // Some java providers do not properly check the encoding, which often results in
             // RuntimeExceptions. Since the decoding is not part of tink, we can simply ignore
             // these test vectors here.
+            System.out.println("Got runtime exception: " + ex);
             continue;
           }
           String sharedSecret = Hex.encode(EllipticCurves.computeSharedSecret(privKey, pubKey));
@@ -520,11 +524,13 @@ public class EllipticCurvesTest {
             errors++;
           }
         } catch (NoSuchAlgorithmException ex) {
+          System.out.println(tcId + " threw exception: " + ex);
           if (result.equals("valid")) {
             // When the curve is not implemented, this is the expected exception.
             continue;
           }
         } catch (GeneralSecurityException ex) {
+          System.out.println(tcId + " threw exception: " + ex.toString());
           if (result.equals("valid")) {
             System.out.println("FAIL " + tcId + " exception: " + ex.toString());
             ex.printStackTrace();
