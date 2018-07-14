@@ -39,7 +39,7 @@ class SignatureKeyTemplates {
   // with the following parameters:
   //   - EC curve: NIST P-256
   //   - hash function: SHA256
-  //   - signature endocding: DER
+  //   - signature encoding: DER
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& EcdsaP256();
 
@@ -47,7 +47,7 @@ class SignatureKeyTemplates {
   // with the following parameters:
   //   - EC curve: NIST P-384
   //   - hash function: SHA512
-  //   - signature endocding: DER
+  //   - signature encoding: DER
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& EcdsaP384();
 
@@ -55,7 +55,7 @@ class SignatureKeyTemplates {
   // with the following parameters:
   //   - EC curve: NIST P-521
   //   - hash function: SHA512
-  //   - signature endocding: DER
+  //   - signature encoding: DER
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& EcdsaP521();
 };
