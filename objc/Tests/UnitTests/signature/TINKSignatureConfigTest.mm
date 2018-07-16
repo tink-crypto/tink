@@ -62,14 +62,4 @@
   XCTAssertNil(error);
 }
 
-- (void)testConfigInvalidVersion {
-  NSError *error = nil;
-  TINKSignatureConfig *signatureConfig =
-      [[TINKSignatureConfig alloc] initWithVersion:(TINKVersion)-1 error:&error];
-  XCTAssertNil(signatureConfig);
-  XCTAssertNotNil(error);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
-  XCTAssertTrue([error.localizedFailureReason containsString:@"Unsupported Tink version."]);
-}
-
 @end

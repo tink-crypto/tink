@@ -281,7 +281,7 @@ static TINKPBKeyset *gKeyset;
 
   NSError *error = nil;
   TINKAeadConfig *aeadConfig =
-      [[TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+      [[TINKAeadConfig alloc] initWithError:&error];
   XCTAssertNotNil(aeadConfig);
   XCTAssertNil(error);
 
@@ -336,7 +336,7 @@ static TINKPBKeyset *gKeyset;
 
   NSError *error = nil;
   TINKAeadConfig *aeadConfig =
-      [[TINKAeadConfig alloc] initWithVersion:TINKVersion1_1_0 error:&error];
+      [[TINKAeadConfig alloc] initWithError:&error];
   XCTAssertNotNil(aeadConfig);
   XCTAssertNil(error);
 

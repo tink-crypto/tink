@@ -19,7 +19,6 @@
 #import <Foundation/Foundation.h>
 
 #import "TINKRegistryConfig.h"
-#import "TINKVersion.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -46,14 +45,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /* Use -initWithError: to get an instance of TINKSignatureConfig. */
 - (nullable instancetype)init NS_UNAVAILABLE;
-
-/**
- * Returns config of Signature implementations supported in given @c version of Tink.
- *
- * @warning DEPRECATED: Please use -initWithError:.
- */
-- (nullable instancetype)initWithVersion:(TINKVersion)version
-                                   error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 
 /* Returns config of Signature implementations supported in the latest version of Tink. */
 - (nullable instancetype)initWithError:(NSError **)error NS_DESIGNATED_INITIALIZER;

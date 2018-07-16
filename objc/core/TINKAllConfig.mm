@@ -25,7 +25,6 @@
 #import <Foundation/Foundation.h>
 
 #import "objc/TINKRegistryConfig.h"
-#import "objc/TINKVersion.h"
 #import "objc/core/TINKRegistryConfig_Internal.h"
 #import "objc/util/TINKErrors.h"
 
@@ -33,7 +32,7 @@
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 @implementation TINKAllConfig
 
-- (instancetype)initWithVersion:(TINKVersion)version error:(NSError **)error {
+- (nullable instancetype)initWithError:(NSError **)error {
   auto st = crypto::tink::TinkConfig::Register();
   if (!st.ok()) {
     if (error) {
@@ -42,26 +41,9 @@
     return nil;
   }
 
-  google::crypto::tink::RegistryConfig ccConfig;
-  switch (version) {
-    case TINKVersion1_1_0:
-      // Fallthrough!
-    case TINKVersionLatest:
-      ccConfig = crypto::tink::TinkConfig::Latest();
-      break;
-    default:
-      if (error) {
-        *error = TINKStatusToError(crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT, "Unsupported Tink version."));
-      }
-      return nil;
-  }
+  google::crypto::tink::RegistryConfig ccConfig = crypto::tink::TinkConfig::Latest();
 
   return (self = [super initWithCcConfig:ccConfig]);
-}
-
-- (nullable instancetype)initWithError:(NSError **)error {
-  return [self initWithVersion:TINKVersionLatest error:error];
 }
 
 @end

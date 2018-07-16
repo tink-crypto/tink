@@ -35,7 +35,6 @@ PUBLIC_APIS = [
     "TINKRegistryConfig.h",
     "TINKSignatureConfig.h",
     "TINKSignatureKeyTemplate.h",
-    "TINKVersion.h",
 ]
 
 PUBLIC_API_DEPS = [
@@ -67,7 +66,6 @@ PUBLIC_API_DEPS = [
     ":registry_config",
     ":signature_config",
     ":signature_key_template",
-    ":version",
     "//objc/util:errors",
     "//objc/util:strings",
 ]
@@ -116,7 +114,6 @@ objc_library(
     ],
     deps = [
         ":registry_config",
-        ":version",
         "//cc/config:tink_config",
         "//cc/util:errors",
         "//objc/util:errors",
@@ -243,14 +240,6 @@ objc_library(
     ],
     deps = [
         ":config_cc_pb",
-        ":version",
-    ],
-)
-
-objc_library(
-    name = "version",
-    hdrs = [
-        "TINKVersion.h",
     ],
 )
 
@@ -282,7 +271,6 @@ objc_library(
     hdrs = ["TINKAeadConfig.h"],
     deps = [
         ":registry_config",
-        ":version",
         "//cc/aead:aead_config",
         "//cc/util:errors",
         "//objc/util:errors",
@@ -398,7 +386,6 @@ objc_library(
     hdrs = ["TINKHybridConfig.h"],
     deps = [
         ":registry_config",
-        ":version",
         "//cc/hybrid:hybrid_config",
         "//cc/util:errors",
         "//objc/util:errors",
@@ -436,7 +423,6 @@ objc_library(
     hdrs = ["TINKMacConfig.h"],
     deps = [
         ":registry_config",
-        ":version",
         "//cc/mac:mac_config",
         "//cc/util:errors",
         "//objc/util:errors",
@@ -526,7 +512,6 @@ objc_library(
     hdrs = ["TINKSignatureConfig.h"],
     deps = [
         ":registry_config",
-        ":version",
         "//cc/signature:signature_config",
         "//cc/util:errors",
         "//objc/util:errors",

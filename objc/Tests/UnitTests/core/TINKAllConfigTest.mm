@@ -24,7 +24,6 @@
 
 #import "objc/TINKConfig.h"
 #import "objc/TINKRegistryConfig.h"
-#import "objc/TINKVersion.h"
 #import "objc/core/TINKRegistryConfig_Internal.h"
 #import "objc/util/TINKStrings.h"
 

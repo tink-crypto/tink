@@ -40,12 +40,6 @@
   return _ccConfig;
 }
 
-- (instancetype)initWithVersion:(TINKVersion)version error:(NSError **)error {
-  NSAssert(![self isMemberOfClass:[TINKRegistryConfig class]],
-           @"Only instantiate from derived classes!");
-  return nil;
-}
-
 - (nullable instancetype)initWithError:(NSError **)error {
   NSAssert(![self isMemberOfClass:[TINKRegistryConfig class]],
            @"Only instantiate from derived classes!");
