@@ -27,6 +27,22 @@ namespace crypto {
 namespace tink {
 namespace {
 
+// static
+
+void testNonRawPrefix(const Keyset::Key& key, int prefix_size,
+                      uint8_t prefix_first_byte) {
+  auto prefix_result = CryptoFormat::get_output_prefix(key);
+  EXPECT_TRUE(prefix_result.ok()) << prefix_result.status();
+  auto prefix = prefix_result.ValueOrDie();
+  EXPECT_EQ(prefix_size, prefix.length());
+  EXPECT_EQ(prefix_first_byte, prefix[0]);
+  // key_id should follow in BigEndian order
+  for (int i = 1; i <= 4; i++) {
+    EXPECT_EQ(0xff & (key.key_id() >> ((4 - i) * 8)), 0xff & prefix[i])
+        << "Failed at byte " << i << ".";
+  }
+}
+
 class CryptoFormatTest : public ::testing::Test {
 };
 
@@ -41,43 +57,36 @@ TEST_F(CryptoFormatTest, testConstants) {
 TEST_F(CryptoFormatTest, testTinkPrefix) {
   uint32_t key_id = 263829;
   Keyset::Key key;
-
   key.set_output_prefix_type(OutputPrefixType::TINK);
   key.set_key_id(key_id);
-  auto prefix_result = CryptoFormat::get_output_prefix(key);
-  EXPECT_TRUE(prefix_result.ok()) << prefix_result.status();
-  auto prefix = prefix_result.ValueOrDie();
-  EXPECT_EQ(CryptoFormat::kNonRawPrefixSize, prefix.length());
-  EXPECT_EQ(CryptoFormat::kTinkStartByte, prefix[0]);
-  // key_id should follow in BigEndian order
-  for (int i = 1; i <= 4; i++) {
-    EXPECT_EQ(0xff & (key_id >> ((4-i)*8)), 0xff & prefix[i])
-        << "Failed at byte " << i << ".";
-  }
+
+  testNonRawPrefix(key, CryptoFormat::kNonRawPrefixSize,
+                   CryptoFormat::kTinkStartByte);
 }
 
 TEST_F(CryptoFormatTest, testLegacyPrefix) {
   uint32_t key_id = 8327256;
   Keyset::Key key;
-
   key.set_output_prefix_type(OutputPrefixType::LEGACY);
   key.set_key_id(key_id);
-  auto prefix_result = CryptoFormat::get_output_prefix(key);
-  EXPECT_TRUE(prefix_result.ok()) << prefix_result.status();
-  auto prefix = prefix_result.ValueOrDie();
-  EXPECT_EQ(CryptoFormat::kNonRawPrefixSize, prefix.length());
-  EXPECT_EQ(CryptoFormat::kLegacyStartByte, prefix[0]);
-  // key_id should follow in BigEndian order
-  for (int i = 1; i <= 4; i++) {
-    EXPECT_EQ(0xff & (key_id >> ((4-i)*8)), 0xff & prefix[i])
-        << "Failed at byte " << i << ".";
-  }
+
+  testNonRawPrefix(key, CryptoFormat::kNonRawPrefixSize,
+                   CryptoFormat::kLegacyStartByte);
+}
+
+TEST_F(CryptoFormatTest, testCrunchyPrefix) {
+  uint32_t key_id = 1223345;
+  Keyset::Key key;
+  key.set_output_prefix_type(OutputPrefixType::CRUNCHY);
+  key.set_key_id(key_id);
+
+  testNonRawPrefix(key, CryptoFormat::kNonRawPrefixSize,
+                   CryptoFormat::kLegacyStartByte);
 }
 
 TEST_F(CryptoFormatTest, testRawPrefix) {
   uint32_t key_id = 7662387;
   Keyset::Key key;
-
   key.set_output_prefix_type(OutputPrefixType::RAW);
   key.set_key_id(key_id);
   auto prefix_result = CryptoFormat::get_output_prefix(key);

@@ -59,6 +59,8 @@ crypto::tink::util::StatusOr<std::string> CryptoFormat::get_output_prefix(
       prefix.append(key_id_buf, 4);
       return prefix;
     }
+    case OutputPrefixType::CRUNCHY:
+      // FALLTHROUGH
     case OutputPrefixType::LEGACY: {
       std::string prefix;
       prefix.assign(reinterpret_cast<const char*>(&kLegacyStartByte), 1);
