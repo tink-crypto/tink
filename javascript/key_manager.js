@@ -93,7 +93,7 @@ class KeyManager {
    * Returns a factory that generates keys of the key type handled by this
    * manager.
    *
-   * @return {KeyFactory}
+   * @return {!KeyFactory}
    */
   getKeyFactory() {}
 }

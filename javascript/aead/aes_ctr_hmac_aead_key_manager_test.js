@@ -118,10 +118,10 @@ testSuite({
   // newKey method -- key formats
   async testNewKeyBadKeyFormat() {
     const keyFormat = new PbAesCtrKeyFormat();
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
     try {
-      await aesCtrHmacAeadKeyManager.getKeyFactory().newKey(keyFormat);
+      await manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
           'CustomError: Expected AesCtrHmacAeadKeyFormat-proto', e.toString());
@@ -132,11 +132,11 @@ testSuite({
 
   async testNewKeyBadSerializedKey() {
     // this is not a serialized key format
-    const /** @type{string} */ serializedKeyFormat = new Uint8Array(4);
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const serializedKeyFormat = new Uint8Array(4);
+    const manager = new AesCtrHmacAeadKeyManager();
 
     try {
-      await aesCtrHmacAeadKeyManager.getKeyFactory().newKey(
+      await manager.getKeyFactory().newKey(
           serializedKeyFormat);
     } catch (e) {
       assertEquals(
@@ -151,13 +151,13 @@ testSuite({
   // newKey method -- bad parametrs of AES CTR KEY format
   async testNewKeyNotSupportedAesCtrKeySize() {
     const /** number */ keySize = 11;
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
     let keyFormat = createTestKeyFormat();
     keyFormat.getAesCtrKeyFormat().setKeySize(keySize);
 
     try {
-      await aesCtrHmacAeadKeyManager.getKeyFactory().newKey(keyFormat);
+      await manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
           'CustomError: unsupported AES key size: ' + keySize, e.toString());
@@ -168,14 +168,15 @@ testSuite({
 
   async testNewKeyIvSizeOutOfRange() {
     const /** Array<number> */ ivSizeOutOfRange = [10, 18];
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
     let keyFormat = createTestKeyFormat();
 
-    for (let i = 0; i < ivSizeOutOfRange.length; i++) {
+    const ivSizeOutOfRangeLength = ivSizeOutOfRange.length;
+    for (let i = 0; i < ivSizeOutOfRangeLength; i++) {
       keyFormat.getAesCtrKeyFormat().getParams().setIvSize(ivSizeOutOfRange[i]);
       try {
-        await aesCtrHmacAeadKeyManager.getKeyFactory().newKey(keyFormat);
+        await manager.getKeyFactory().newKey(keyFormat);
       } catch (e) {
         assertEquals(
             'CustomError: Invalid AES CTR HMAC key format: IV size is ' +
@@ -191,13 +192,13 @@ testSuite({
   // newKey method -- bad parametrs of HMAC KEY format
   async testNewKeySmallHmacKeySize() {
     const /** number */ keySize = 11;
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
     let keyFormat = createTestKeyFormat();
     keyFormat.getHmacKeyFormat().setKeySize(keySize);
 
     try {
-      await aesCtrHmacAeadKeyManager.getKeyFactory().newKey(keyFormat);
+      await manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
           'CustomError: Invalid AES CTR HMAC key format: HMAC key is' +
@@ -209,13 +210,13 @@ testSuite({
   },
 
   async testNewKeyHashTypeUnsupported() {
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
     let keyFormat = createTestKeyFormat();
     keyFormat.getHmacKeyFormat().getParams().setHash(PbHashType.UNKNOWN_HASH);
 
     try {
-      await aesCtrHmacAeadKeyManager.getKeyFactory().newKey(keyFormat);
+      await manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals('CustomError: Unknown hash type.', e.toString());
       return;
@@ -225,13 +226,13 @@ testSuite({
 
   async testNewKeySmallTagSize() {
     const SMALL_TAG_SIZE = 8;
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
     let keyFormat = createTestKeyFormat();
     keyFormat.getHmacKeyFormat().getParams().setTagSize(SMALL_TAG_SIZE);
 
     try {
-      await aesCtrHmacAeadKeyManager.getKeyFactory().newKey(keyFormat);
+      await manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
           'CustomError: Invalid HMAC params: tag size ' + SMALL_TAG_SIZE +
@@ -248,16 +249,17 @@ testSuite({
       {'hashType': PbHashType.SHA256, 'tagSize': 34},
       {'hashType': PbHashType.SHA512, 'tagSize': 66},
     ];
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
     let keyFormat = createTestKeyFormat();
 
-    for (let i = 0; i < tagSizes.length; i++) {
+    const tagSizesLength = tagSizes.length;
+    for (let i = 0; i < tagSizesLength; i++) {
       keyFormat.getHmacKeyFormat().getParams().setHash(tagSizes[i]['hashType']);
       keyFormat.getHmacKeyFormat().getParams().setTagSize(
           tagSizes[i]['tagSize']);
       try {
-        await aesCtrHmacAeadKeyManager.getKeyFactory().newKey(keyFormat);
+        await manager.getKeyFactory().newKey(keyFormat);
       } catch (e) {
         assertEquals(
             'CustomError: Invalid HMAC params: tag size ' +
@@ -270,17 +272,11 @@ testSuite({
   },
 
   async testNewKeyViaFormatProto() {
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
-    let /** @type {!PbAesCtrHmacAeadKeyFormat} */ keyFormat = createTestKeyFormat();
+    const keyFormat = createTestKeyFormat();
 
-    let /** @type {PbAesCtrHmacAeadKey} */ key;
-    try {
-      key = await aesCtrHmacAeadKeyManager.getKeyFactory().newKey(keyFormat);
-    } catch (e) {
-      fail('Unexpected exception: ' + e.toString());
-      return;
-    }
+    const key = await manager.getKeyFactory().newKey(keyFormat);
 
     // testing AES CTR key
     assertEquals(
@@ -306,18 +302,12 @@ testSuite({
   },
 
   async testNewKeyViaSerializedFormatProto() {
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
-    let keyFormat = createTestKeyFormat();
+    const keyFormat = createTestKeyFormat();
+    const serializedKeyFormat = keyFormat.serializeBinary();
 
-    let /** @type {PbAesCtrHmacAeadKey} */ key;
-    try {
-      key = await aesCtrHmacAeadKeyManager.getKeyFactory().newKey(
-          keyFormat.serializeBinary());
-    } catch (e) {
-      fail('Unexpected exception: ' + e.toString());
-      return;
-    }
+    const key = await manager.getKeyFactory().newKey(serializedKeyFormat);
 
     // testing AES CTR key
     assertEquals(
@@ -351,7 +341,8 @@ testSuite({
     const serializedKeyFormats = [new Uint8Array(1), new Uint8Array(0)];
     const aeadKeyManager = new AesCtrHmacAeadKeyManager();
 
-    for (let i = 0; i < serializedKeyFormats.length; i++) {
+    const serializedKeyFormatsLength = serializedKeyFormats.length;
+    for (let i = 0; i < serializedKeyFormatsLength; i++) {
       try {
         await aeadKeyManager.getKeyFactory().newKeyData(
             serializedKeyFormats[i]);
@@ -371,26 +362,17 @@ testSuite({
   async testNewKeyDataFromValidKey() {
     const keyFormat = createTestKeyFormat();
     const serializedKeyFormat = keyFormat.serializeBinary();
-    const aeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
-    let /** PbKeyData */ keyData;
-    try {
-      keyData =
-          await aeadKeyManager.getKeyFactory().newKeyData(serializedKeyFormat);
-    } catch (e) {
-      fail('Unexpected exception: ' + e.toString());
-    }
+    const keyData =
+        await manager.getKeyFactory().newKeyData(serializedKeyFormat);
 
     assertEquals(KEY_TYPE, keyData.getTypeUrl());
     assertEquals(
         PbKeyData.KeyMaterialType.SYMMETRIC, keyData.getKeyMaterialType());
 
-    let /** PbAesCtrHmacAeadKey */ key;
-    try {
-      key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
-    } catch (e) {
-      fail('Unable to parse created serialized key.');
-    }
+    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
+
     assertEquals(
         keyFormat.getAesCtrKeyFormat().getKeySize(),
         key.getAesCtrKey().getKeyValue().length);
@@ -472,13 +454,14 @@ testSuite({
 
   async testGetPrimitiveAesCtrKeySmallIvSize() {
     const /** Array<number> */ ivSizeOutOfRange = [9, 19];
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
     let /** PbAesCtrHmacAeadKey */ key = createTestKey();
 
-    for (let i = 0; i < ivSizeOutOfRange.length; i++) {
+    const ivSizeOutOfRangeLength = ivSizeOutOfRange.length;
+    for (let i = 0; i < ivSizeOutOfRangeLength; i++) {
       key.getAesCtrKey().getParams().setIvSize(ivSizeOutOfRange[i]);
       try {
-        await aesCtrHmacAeadKeyManager.getPrimitive(key);
+        await manager.getPrimitive(key);
       } catch (e) {
         assertEquals(
             'CustomError: Invalid AES CTR HMAC key format: IV size is ' +
@@ -549,15 +532,16 @@ testSuite({
       {'hashType': PbHashType.SHA256, 'tagSize': 34},
       {'hashType': PbHashType.SHA512, 'tagSize': 66},
     ];
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
+    const manager = new AesCtrHmacAeadKeyManager();
 
     let /** PbAesCtrHmacAeadKey */ key = createTestKey();
 
-    for (let i = 0; i < tagSizes.length; i++) {
+    const tagSizesLength = tagSizes.length;
+    for (let i = 0; i < tagSizesLength; i++) {
       key.getHmacKey().getParams().setHash(tagSizes[i]['hashType']);
       key.getHmacKey().getParams().setTagSize(tagSizes[i]['tagSize']);
       try {
-        await aesCtrHmacAeadKeyManager.getPrimitive(key);
+        await manager.getPrimitive(key);
       } catch (e) {
         assertEquals(
             'CustomError: Invalid HMAC params: tag size ' +
@@ -576,27 +560,9 @@ testSuite({
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
 
-    let /** Aead */ primitive;
-    let /** Uint8Array */ ciphertext;
-    let /** Uint8Array */ decryptedCiphertext;
-    try {
-      primitive = await aeadKeyManager.getPrimitive(key);
-    } catch (e) {
-      fail('Unexpected exception, when creating primitive: ' + e.toString());
-      return;
-    }
-    try {
-      ciphertext = await primitive.encrypt(plaintext, aad);
-    } catch (e) {
-      fail('Unexpected exception, when encrypting plaintext: ' + e.toString());
-      return;
-    }
-    try {
-      decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
-    } catch (e) {
-      fail('Unexpected exception, when decrypting ciphertext: ' + e.toString());
-      return;
-    }
+    let /** Aead */ primitive = await aeadKeyManager.getPrimitive(key);
+    let ciphertext = await primitive.encrypt(plaintext, aad);
+    let decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
 
     assertObjectEquals(plaintext, decryptedCiphertext);
   },
@@ -607,27 +573,9 @@ testSuite({
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
 
-    let /** Aead */ primitive;
-    let /** Uint8Array */ ciphertext;
-    let /** Uint8Array */ decryptedCiphertext;
-    try {
-      primitive = await aeadKeyManager.getPrimitive(keyData);
-    } catch (e) {
-      fail('Unexpected exception, when creating primitive: ' + e.toString());
-      return;
-    }
-    try {
-      ciphertext = await primitive.encrypt(plaintext, aad);
-    } catch (e) {
-      fail('Unexpected exception, when encrypting plaintext: ' + e.toString());
-      return;
-    }
-    try {
-      decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
-    } catch (e) {
-      fail('Unexpected exception, when decrypting ciphertext: ' + e.toString());
-      return;
-    }
+    let /** Aead */ primitive = await aeadKeyManager.getPrimitive(keyData);
+    let ciphertext = await primitive.encrypt(plaintext, aad);
+    let decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
 
     assertObjectEquals(plaintext, decryptedCiphertext);
   },
@@ -636,17 +584,17 @@ testSuite({
   // tests for getVersion, getKeyType and doesSupport methods
 
   async testGetVersionShouldBeZero() {
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
-    assertEquals(0, aesCtrHmacAeadKeyManager.getVersion());
+    const manager = new AesCtrHmacAeadKeyManager();
+    assertEquals(0, manager.getVersion());
   },
 
   async testGetKeyTypeShouldBeAesCtrHmacAeadKey() {
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
-    assertEquals(KEY_TYPE, aesCtrHmacAeadKeyManager.getKeyType());
+    const manager = new AesCtrHmacAeadKeyManager();
+    assertEquals(KEY_TYPE, manager.getKeyType());
   },
 
   async testDoesSupportShouldSupportAesCtrHmacAeadKey() {
-    const aesCtrHmacAeadKeyManager = new AesCtrHmacAeadKeyManager();
-    assertTrue(aesCtrHmacAeadKeyManager.doesSupport(KEY_TYPE));
+    const manager = new AesCtrHmacAeadKeyManager();
+    assertTrue(manager.doesSupport(KEY_TYPE));
   },
 });

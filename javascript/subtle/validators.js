@@ -50,12 +50,12 @@ const requireUint8Array = function(input) {
 };
 
 /**
- * Validates version, throws exception if candidate version is negative or bigger
- * than expected.
+ * Validates version, throws exception if candidate version is negative or
+ * bigger than expected.
  *
  * @param {number} candidate - version to be validated
  * @param {number} maxVersion - upper bound on version
- * @throws {GeneralSecurityException}
+ * @throws {SecurityException}
  * @static
  */
 const validateVersion = function(candidate, maxVersion) {

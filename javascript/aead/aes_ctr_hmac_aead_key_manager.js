@@ -17,7 +17,6 @@ goog.module('tink.aead.AesCtrHmacAeadKeyManager');
 const Aead = goog.require('tink.Aead');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
 const KeyManager = goog.require('tink.KeyManager');
-const Map = goog.require('goog.structs.Map');
 const PbAesCtrHmacAeadKey = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKey');
 const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
 const PbAesCtrKey = goog.require('proto.google.crypto.tink.AesCtrKey');
@@ -64,10 +63,10 @@ class AesCtrHmacAeadKeyFactory {
     /**
      * @const @private {Map<PbHashType, number>}
      */
-    this.MAX_TAG_SIZE_ = new Map(
-        PbHashType.SHA1, 20,
-        PbHashType.SHA256, 32,
-        PbHashType.SHA512, 64);
+    this.MAX_TAG_SIZE_ = new Map([
+        [PbHashType.SHA1, 20],
+        [PbHashType.SHA256, 32],
+        [PbHashType.SHA512, 64]]);
   }
 
   /**
@@ -176,7 +175,7 @@ class AesCtrHmacAeadKeyFactory {
           'Invalid HMAC params: tag size ' + hmacParams.getTagSize() +
           ' is too small.');
     }
-    if (!this.MAX_TAG_SIZE_.containsKey(hmacParams.getHash())) {
+    if (!this.MAX_TAG_SIZE_.has(hmacParams.getHash())) {
       throw new SecurityException('Unknown hash type.');
     } else {
       if (hmacParams.getTagSize() >
@@ -204,7 +203,7 @@ class AesCtrHmacAeadKeyManager {
      */
     this.VERSION_ = 0;
     /**
-     * @const @private {AesCtrHmacAeadKeyFactory}
+     * @const @private {!AesCtrHmacAeadKeyFactory}
      */
     this.keyFactory_ = new AesCtrHmacAeadKeyFactory();
   }
