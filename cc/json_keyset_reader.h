@@ -32,10 +32,11 @@ namespace tink {
 // https://developers.google.com/protocol-buffers/docs/encoding
 class JsonKeysetReader : public KeysetReader {
  public:
-  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetReader>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<JsonKeysetReader>> New(
       std::unique_ptr<std::istream> keyset_stream);
-  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetReader>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<JsonKeysetReader>> New(
       absl::string_view serialized_keyset);
+
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::Keyset>>
   Read() override;

@@ -33,7 +33,7 @@ using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::Keyset;
 
 //  static
-util::StatusOr<std::unique_ptr<KeysetReader>> BinaryKeysetReader::New(
+util::StatusOr<std::unique_ptr<BinaryKeysetReader>> BinaryKeysetReader::New(
     std::unique_ptr<std::istream> keyset_stream) {
   if (keyset_stream == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,
@@ -45,12 +45,13 @@ util::StatusOr<std::unique_ptr<KeysetReader>> BinaryKeysetReader::New(
 }
 
 //  static
-util::StatusOr<std::unique_ptr<KeysetReader>> BinaryKeysetReader::New(
+util::StatusOr<std::unique_ptr<BinaryKeysetReader>> BinaryKeysetReader::New(
     absl::string_view serialized_keyset) {
-  std::unique_ptr<KeysetReader> reader(
+  std::unique_ptr<BinaryKeysetReader> reader(
       new BinaryKeysetReader(serialized_keyset));
   return std::move(reader);
 }
+
 
 util::StatusOr<std::unique_ptr<Keyset>> BinaryKeysetReader::Read() {
   auto keyset = absl::make_unique<Keyset>();

@@ -228,21 +228,22 @@ KeysetFromJson(const rapidjson::Document& json_doc) {
 
 
 //  static
-tinkutil::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(
+tinkutil::StatusOr<std::unique_ptr<JsonKeysetReader>> JsonKeysetReader::New(
     std::unique_ptr<std::istream> keyset_stream) {
   if (keyset_stream == nullptr) {
     return tinkutil::Status(tinkutil::error::INVALID_ARGUMENT,
                             "keyset_stream must be non-null.");
   }
-  std::unique_ptr<KeysetReader> reader(
+  std::unique_ptr<JsonKeysetReader> reader(
       new JsonKeysetReader(std::move(keyset_stream)));
   return std::move(reader);
 }
 
 //  static
-tinkutil::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(
+tinkutil::StatusOr<std::unique_ptr<JsonKeysetReader>> JsonKeysetReader::New(
     absl::string_view serialized_keyset) {
-  std::unique_ptr<KeysetReader> reader(new JsonKeysetReader(serialized_keyset));
+  std::unique_ptr<JsonKeysetReader>
+      reader(new JsonKeysetReader(serialized_keyset));
   return std::move(reader);
 }
 
