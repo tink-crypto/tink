@@ -18,7 +18,6 @@
 
 #include "tink/hybrid_decrypt.h"
 #include "tink/registry.h"
-#include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
@@ -277,18 +276,8 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyErrors) {
                         result.status().error_message());
   }
 
-  // Unsupported AEAD DEM (i.e. not present in the registry).
-  *(dem_params->mutable_aead_dem()) = AeadKeyTemplates::Aes128Eax();
-  {
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::NOT_FOUND, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "No manager",
-                        result.status().error_message());
-  }
-
   // Invalid EC point format.
-  *(dem_params->mutable_aead_dem()) = AeadKeyTemplates::Aes128Gcm();
+  dem_params->mutable_aead_dem()->set_type_url("some type_url");
   {
     auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());

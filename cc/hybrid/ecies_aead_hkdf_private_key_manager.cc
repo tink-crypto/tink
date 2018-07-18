@@ -19,7 +19,6 @@
 #include "absl/strings/string_view.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"
-#include "tink/registry.h"
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
@@ -213,8 +212,6 @@ Status EciesAeadHkdfPrivateKeyManager::Validate(
   if (!params.dem_params().has_aead_dem()) {
     return Status(util::error::INVALID_ARGUMENT, "Invalid dem_params.");
   }
-  auto result = Registry::NewKeyData(params.dem_params().aead_dem());
-  if (!result.ok()) return result.status();
 
   // Validate EC point format.
   if (params.ec_point_format() == EcPointFormat::UNKNOWN_FORMAT) {
