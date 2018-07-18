@@ -14,8 +14,10 @@
 
 goog.module('tink.PrimitiveSet');
 
+const CryptoFormat = goog.require('tink.CryptoFormat');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
+const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
@@ -30,14 +32,17 @@ class Entry {
    * @param {!P} primitive
    * @param {!Uint8Array} identifier
    * @param {!PbKeyStatusType} keyStatus
+   * @param {!PbOutputPrefixType} outputPrefixType
    */
-  constructor(primitive, identifier, keyStatus) {
+  constructor(primitive, identifier, keyStatus, outputPrefixType) {
     /** @const @private {!P} */
     this.primitive_ = primitive;
     /** @const @private {!Uint8Array} */
     this.identifier_ = identifier;
     /** @const @private {!PbKeyStatusType} */
     this.status_ = keyStatus;
+    /** @const @private {!PbOutputPrefixType} */
+    this.outputPrefixType_ = outputPrefixType;
   }
 
   /**
@@ -59,6 +64,13 @@ class Entry {
    */
   getKeyStatus() {
     return this.status_;
+  }
+
+  /**
+   * @return {!PbOutputPrefixType}
+   */
+  getOutputPrefixType() {
+    return this.outputPrefixType_;
   }
 }
 
@@ -86,9 +98,15 @@ class Entry {
 class PrimitiveSet {
   constructor() {
     /**
-     * @const @private
+     * @private {Entry<P>}
      */
     this.primary_ = null;
+    // Keys have to be stored as strings as two Uint8Arrays holding the same
+    // digits are still different objects.
+    /**
+     * @private {Map<string, !Array<!Entry<P>>>}
+     */
+    this.identifierToPrimitivesMap_ = new Map();
   }
 
   /**
@@ -100,31 +118,67 @@ class PrimitiveSet {
    * @return {!Promise<!Entry<P>>}
    */
   async addPrimitive(primitive, key) {
-    // TODO implement
-    throw new SecurityException(
-        'PrimitiveSet -- addPrimitive: Not implemented yet.');
+    if (!primitive) {
+      throw new SecurityException('Primitive has to be non null.');
+    }
+    if (!key) {
+      throw new SecurityException('Key has to be non null.');
+    }
+
+    const identifier = CryptoFormat.getOutputPrefix(key);
+    const entry = new Entry(primitive, identifier, key.getStatus(),
+        key.getOutputPrefixType());
+
+    this.addPrimitiveToMap_(entry);
+
+    return entry;
   }
 
   /**
    * Returns the entry with the primary primitive.
    *
-   * @return {!Promise<!Entry<P>>}
+   * @return {Entry<P>}
    */
-  async getPrimary() {
-    // TODO implement
-    throw new SecurityException(
-        'PrimitiveSet -- getPrimary: Not implemented yet.');
+  getPrimary() {
+    return this.primary_;
   }
 
   /**
    * Sets given Entry as the primary one.
    *
-   * @param {!Promise<!Entry<P>>} primitive
+   * @param {!Entry<P>} primitive
    */
   async setPrimary(primitive) {
-    // TODO implement
-    throw new SecurityException(
-        'PrimitiveSet -- setPrimary: Not implemented yet.');
+    if (!primitive) {
+      throw new SecurityException('Primary cannot be set to null.');
+    }
+
+    if (primitive.getKeyStatus() != PbKeyStatusType.ENABLED) {
+      throw new SecurityException('Primary has to be enabled.');
+    }
+
+    // There has to be exactly one key enabled with this identifier.
+    const entries =
+        await this.getPrimitives(primitive.getIdentifier());
+    let entryFound = false;
+    const entriesLength = entries.length;
+    for (let i = 0; i < entriesLength; i++) {
+      if (entries[i].getKeyStatus() === PbKeyStatusType.ENABLED) {
+        if (entryFound) {
+          throw new SecurityException(
+              'Primary cannot be set to an entry which identifier ' +
+              'corresponds to more than one enabled keys.');
+        }
+        entryFound = true;
+      }
+    }
+    if (!entryFound) {
+      throw new SecurityException(
+          'Primary cannot be set to an entry which is ' +
+          'not held by this primitive set.');
+    }
+
+    this.primary_ = primitive;
   }
 
   /**
@@ -133,9 +187,7 @@ class PrimitiveSet {
    * @return {!Promise<!Array<Entry<P>>>}
    */
   async getRawPrimitives() {
-    // TODO implement
-    throw new SecurityException(
-        'PrimitiveSet -- getRawPrimitives: Not implemented yet.');
+    return this.getPrimitives(CryptoFormat.RAW_PREFIX);
   }
 
   /**
@@ -146,9 +198,48 @@ class PrimitiveSet {
    * @return {!Promise<!Array<Entry<P>>>}
    */
   async getPrimitives(identifier) {
-    // TODO implement
-    throw new SecurityException(
-        'PrimitiveSet -- getPrimitives: Not implemented yet.');
+    const result = this.getPrimitivesFromMap_(identifier);
+
+    if (!result) {
+      return [];
+    } else {
+      return result;
+    }
+  }
+
+  /**
+   * Returns a set of primitives which corresponds to the given identifier.
+   *
+   * @private
+   * @param {!Uint8Array|string} identifier
+   *
+   * @return {!Array<Entry<P>>|undefined}
+   */
+  getPrimitivesFromMap_(identifier) {
+    if (identifier instanceof Uint8Array) {
+      identifier = [...identifier].toString();
+    }
+    return this.identifierToPrimitivesMap_.get(identifier);
+  }
+
+  /**
+   * Add primitive to map.
+   *
+   * @private
+   * @param {!Entry<P>} entry
+   */
+  addPrimitiveToMap_(entry) {
+    const identifier = entry.getIdentifier();
+    const id = [...identifier].toString();
+
+    let existing = this.getPrimitivesFromMap_(id);
+
+    if (!existing) {
+      this.identifierToPrimitivesMap_.set(id, [entry]);
+    } else {
+      existing.push(entry);
+      this.identifierToPrimitivesMap_.set(id, existing);
+    }
   }
 }
 
