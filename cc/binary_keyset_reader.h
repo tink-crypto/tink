@@ -32,9 +32,9 @@ namespace tink {
 // https://developers.google.com/protocol-buffers/docs/encoding
 class BinaryKeysetReader : public KeysetReader {
  public:
-  static crypto::tink::util::StatusOr<std::unique_ptr<BinaryKeysetReader>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetReader>> New(
       std::unique_ptr<std::istream> keyset_stream);
-  static crypto::tink::util::StatusOr<std::unique_ptr<BinaryKeysetReader>> New(
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetReader>> New(
       absl::string_view serialized_keyset);
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::Keyset>>
