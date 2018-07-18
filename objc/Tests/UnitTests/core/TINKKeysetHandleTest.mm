@@ -207,8 +207,8 @@ static TINKPBKeyset *gKeyset;
   // TODO(candrian): Update this test as now C++ does support key templates.
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithKeyTemplate:keyTemplate error:&error];
-  XCTAssertNil(handle);
-  XCTAssertNotNil(error);
+  XCTAssertNotNil(handle);
+  XCTAssertNil(error);
 }
 
 - (void)testReuseKeysetReader {

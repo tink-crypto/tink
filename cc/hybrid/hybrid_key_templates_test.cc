@@ -18,6 +18,7 @@
 
 #include "tink/aead/aead_key_templates.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
+#include "tink/hybrid/hybrid_config.h"
 #include "proto/common.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
@@ -34,7 +35,15 @@ using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
 
-TEST(HybridKeyTemplatesTest, testEciesAeadHkdf) {
+class HybridKeyTemplatesTest : public ::testing::Test {
+ protected:
+  static void SetUpTestCase() {
+    // Initialize the registry, so that the templates can be tested.
+    HybridConfig::Register();
+  }
+};
+
+TEST_F(HybridKeyTemplatesTest, testEciesAeadHkdf) {
   std::string type_url =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
 
@@ -70,9 +79,7 @@ TEST(HybridKeyTemplatesTest, testEciesAeadHkdf) {
     EciesAeadHkdfPrivateKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
     auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
-    EXPECT_FALSE(new_key_result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED,
-              new_key_result.status().error_code());
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
   {  // Test EciesP256HkdfHmacSha256Aes128CtrHmacSha256().
@@ -107,9 +114,7 @@ TEST(HybridKeyTemplatesTest, testEciesAeadHkdf) {
     EciesAeadHkdfPrivateKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
     auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
-    EXPECT_FALSE(new_key_result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED,
-              new_key_result.status().error_code());
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
 

@@ -19,13 +19,17 @@
 #include "absl/strings/string_view.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"
+#include "tink/registry.h"
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/ecies_aead_hkdf.pb.h"
+#include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -34,6 +38,11 @@ namespace tink {
 using google::crypto::tink::EciesAeadHkdfPrivateKey;
 using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfParams;
+using google::crypto::tink::EciesAeadDemParams;
+using google::crypto::tink::EciesHkdfKemParams;
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 using portable_proto::MessageLite;
@@ -64,19 +73,66 @@ class EciesAeadHkdfPrivateKeyFactory : public KeyFactory {
 
 StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPrivateKeyFactory::NewKey(
     const portable_proto::MessageLite& key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
+  std::string key_format_url =
+      std::string(EciesAeadHkdfPrivateKeyManager::kKeyTypePrefix) +
+      key_format.GetTypeName();
+  if (key_format_url != EciesAeadHkdfPrivateKeyManager::kKeyFormatUrl) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Key format proto '%s' is not supported by this manager.",
+                     key_format_url.c_str());
+  }
+  const EciesAeadHkdfKeyFormat& ecies_key_format =
+        reinterpret_cast<const EciesAeadHkdfKeyFormat&>(key_format);
+  Status status = EciesAeadHkdfPrivateKeyManager::Validate(ecies_key_format);
+  if (!status.ok()) return status;
+
+  // Generate new EC key.
+  const EciesHkdfKemParams& kem_params = ecies_key_format.params().kem_params();
+  auto ec_key_result = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+      util::Enums::ProtoToSubtle(kem_params.curve_type()));
+  if (!ec_key_result.ok()) return ec_key_result.status();
+  auto ec_key = ec_key_result.ValueOrDie();
+
+  // Build EciesAeadHkdfPrivateKey.
+  std::unique_ptr<EciesAeadHkdfPrivateKey> ecies_private_key(
+      new EciesAeadHkdfPrivateKey());
+  ecies_private_key->set_version(EciesAeadHkdfPrivateKeyManager::kVersion);
+  ecies_private_key->set_key_value(ec_key.priv);
+  auto ecies_public_key = ecies_private_key->mutable_public_key();
+  ecies_public_key->set_version(EciesAeadHkdfPrivateKeyManager::kVersion);
+  ecies_public_key->set_x(ec_key.pub_x);
+  ecies_public_key->set_y(ec_key.pub_y);
+  *(ecies_public_key->mutable_params()) = ecies_key_format.params();
+
+  std::unique_ptr<MessageLite> key = std::move(ecies_private_key);
+  return std::move(key);
 }
 
 StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPrivateKeyFactory::NewKey(
     absl::string_view serialized_key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
+  EciesAeadHkdfKeyFormat key_format;
+  if (!key_format.ParseFromString(std::string(serialized_key_format))) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Could not parse the passed string as proto '%s'.",
+                     EciesAeadHkdfPrivateKeyManager::kKeyFormatUrl);
+  }
+  return NewKey(key_format);
 }
 
 StatusOr<std::unique_ptr<KeyData>> EciesAeadHkdfPrivateKeyFactory::NewKeyData(
     absl::string_view serialized_key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
+  auto new_key_result = NewKey(serialized_key_format);
+  if (!new_key_result.ok()) return new_key_result.status();
+  auto new_key = reinterpret_cast<const EciesAeadHkdfPrivateKey&>(
+      *(new_key_result.ValueOrDie()));
+  std::unique_ptr<KeyData> key_data(new KeyData());
+  key_data->set_type_url(EciesAeadHkdfPrivateKeyManager::kKeyType);
+  key_data->set_value(new_key.SerializeAsString());
+  key_data->set_key_material_type(KeyData::ASYMMETRIC_PRIVATE);
+  return std::move(key_data);
 }
 
+constexpr char EciesAeadHkdfPrivateKeyManager::kKeyFormatUrl[];
 constexpr char EciesAeadHkdfPrivateKeyManager::kKeyTypePrefix[];
 constexpr char EciesAeadHkdfPrivateKeyManager::kKeyType[];
 constexpr uint32_t EciesAeadHkdfPrivateKeyManager::kVersion;
@@ -141,6 +197,29 @@ EciesAeadHkdfPrivateKeyManager::GetPrimitiveImpl(
 // static
 Status EciesAeadHkdfPrivateKeyManager::Validate(
     const EciesAeadHkdfParams& params) {
+  // Validate KEM params.
+  if (!params.has_kem_params()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing kem_params.");
+  }
+  if (params.kem_params().curve_type() == EllipticCurveType::UNKNOWN_CURVE ||
+      params.kem_params().hkdf_hash_type() == HashType::UNKNOWN_HASH) {
+    return Status(util::error::INVALID_ARGUMENT, "Invalid kem_params.");
+  }
+
+  // Validate DEM params.
+  if (!params.has_dem_params()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing dem_params.");
+  }
+  if (!params.dem_params().has_aead_dem()) {
+    return Status(util::error::INVALID_ARGUMENT, "Invalid dem_params.");
+  }
+  auto result = Registry::NewKeyData(params.dem_params().aead_dem());
+  if (!result.ok()) return result.status();
+
+  // Validate EC point format.
+  if (params.ec_point_format() == EcPointFormat::UNKNOWN_FORMAT) {
+    return Status(util::error::INVALID_ARGUMENT, "Unknown EC point format.");
+  }
   return Status::OK;
 }
 
@@ -155,7 +234,10 @@ Status EciesAeadHkdfPrivateKeyManager::Validate(
 // static
 Status EciesAeadHkdfPrivateKeyManager::Validate(
     const EciesAeadHkdfKeyFormat& key_format) {
-  return Status::OK;
+  if (!key_format.has_params()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+  }
+  return Validate(key_format.params());
 }
 
 }  // namespace tink

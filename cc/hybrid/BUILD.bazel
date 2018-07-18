@@ -215,6 +215,9 @@ cc_library(
         "//cc:hybrid_decrypt",
         "//cc:key_manager",
         "//cc:registry",
+        "//cc/subtle:subtle_util_boringssl",
+        "//cc/util:enums",
+        "//cc/util:errors",
         "//cc/util:protobuf_helper",
         "//cc/util:status",
         "//cc/util:statusor",
@@ -374,6 +377,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":ecies_aead_hkdf_private_key_manager",
+        ":hybrid_config",
         ":hybrid_key_templates",
         "//cc/aead:aead_key_templates",
         "//proto:common_cc_proto",
@@ -437,7 +441,10 @@ cc_test(
     deps = [
         ":ecies_aead_hkdf_private_key_manager",
         ":ecies_aead_hkdf_public_key_manager",
+        ":hybrid_key_templates",
         "//cc:hybrid_decrypt",
+        "//cc/aead:aead_key_templates",
+        "//cc/aead:aes_ctr_hmac_aead_key_manager",
         "//cc/aead:aes_gcm_key_manager",
         "//cc/util:status",
         "//cc/util:statusor",

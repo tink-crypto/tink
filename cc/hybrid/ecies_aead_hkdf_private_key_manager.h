@@ -64,6 +64,8 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
   virtual ~EciesAeadHkdfPrivateKeyManager() {}
 
  private:
+  friend class EciesAeadHkdfPrivateKeyFactory;
+
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
   static constexpr char kKeyFormatUrl[] =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfKeyFormat";

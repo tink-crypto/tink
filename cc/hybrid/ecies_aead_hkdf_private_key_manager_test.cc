@@ -18,8 +18,11 @@
 
 #include "tink/hybrid_decrypt.h"
 #include "tink/registry.h"
+#include "tink/aead/aead_key_templates.h"
+#include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
+#include "tink/hybrid/hybrid_key_templates.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
@@ -48,12 +51,30 @@ class EciesAeadHkdfPrivateKeyManagerTest : public ::testing::Test {
   static void SetUpTestCase() {
     auto aes_gcm_key_manager = new AesGcmKeyManager();
     ASSERT_TRUE(Registry::RegisterKeyManager(aes_gcm_key_manager).ok());
+    auto aes_ctr_hmac_key_manager = new AesCtrHmacAeadKeyManager();
+    ASSERT_TRUE(Registry::RegisterKeyManager(aes_ctr_hmac_key_manager).ok());
   }
 
   std::string key_type_prefix = "type.googleapis.com/";
   std::string ecies_private_key_type =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
 };
+
+// Checks whether given key is compatible with the given format.
+void CheckNewKey(const EciesAeadHkdfPrivateKey& ecies_key,
+                 const EciesAeadHkdfKeyFormat& key_format) {
+  EciesAeadHkdfPrivateKeyManager key_manager;
+  EXPECT_EQ(0, ecies_key.version());
+  EXPECT_TRUE(ecies_key.has_public_key());
+  EXPECT_GT(ecies_key.key_value().length(), 0);
+  EXPECT_EQ(0, ecies_key.public_key().version());
+  EXPECT_GT(ecies_key.public_key().x().length(), 0);
+  EXPECT_GT(ecies_key.public_key().y().length(), 0);
+  EXPECT_EQ(ecies_key.public_key().params().SerializeAsString(),
+            key_format.params().SerializeAsString());
+  auto primitive_result = key_manager.GetPrimitive(ecies_key);
+  EXPECT_TRUE(primitive_result.ok()) << primitive_result.status();
+}
 
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testBasic) {
   EciesAeadHkdfPrivateKeyManager key_manager;
@@ -154,34 +175,125 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPrimitives) {
   }
 }
 
-TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyError) {
+TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyCreation) {
   EciesAeadHkdfPrivateKeyManager key_manager;
   const KeyFactory& key_factory = key_manager.get_key_factory();
 
   { // Via NewKey(format_proto).
     EciesAeadHkdfKeyFormat key_format;
+    ASSERT_TRUE(key_format.ParseFromString(
+        HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm().value()));
     auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented yet",
-                        result.status().error_message());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key = std::move(result.ValueOrDie());
+    ASSERT_EQ(ecies_private_key_type, key_type_prefix + key->GetTypeName());
+    std::unique_ptr<EciesAeadHkdfPrivateKey> ecies_key(
+        reinterpret_cast<EciesAeadHkdfPrivateKey*>(key.release()));
+    CheckNewKey(*ecies_key, key_format);
   }
 
   { // Via NewKey(serialized_format_proto).
     EciesAeadHkdfKeyFormat key_format;
+    ASSERT_TRUE(key_format.ParseFromString(
+        HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128CtrHmacSha256()
+        .value()));
     auto result = key_factory.NewKey(key_format.SerializeAsString());
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented yet",
-                        result.status().error_message());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key = std::move(result.ValueOrDie());
+    ASSERT_EQ(ecies_private_key_type, key_type_prefix + key->GetTypeName());
+    std::unique_ptr<EciesAeadHkdfPrivateKey> ecies_key(
+        reinterpret_cast<EciesAeadHkdfPrivateKey*>(key.release()));
+    CheckNewKey(*ecies_key, key_format);
   }
 
   { // Via NewKeyData(serialized_format_proto).
     EciesAeadHkdfKeyFormat key_format;
+    ASSERT_TRUE(key_format.ParseFromString(
+        HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128CtrHmacSha256()
+        .value()));
     auto result = key_factory.NewKeyData(key_format.SerializeAsString());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key_data = std::move(result.ValueOrDie());
+    EXPECT_EQ(ecies_private_key_type, key_data->type_url());
+    EXPECT_EQ(KeyData::ASYMMETRIC_PRIVATE, key_data->key_material_type());
+    EciesAeadHkdfPrivateKey ecies_key;
+    ASSERT_TRUE(ecies_key.ParseFromString(key_data->value()));
+    CheckNewKey(ecies_key, key_format);
+  }
+}
+
+TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyErrors) {
+  EciesAeadHkdfPrivateKeyManager key_manager;
+  const KeyFactory& key_factory = key_manager.get_key_factory();
+
+  // Empty key format.
+  EciesAeadHkdfKeyFormat key_format;
+  {
+    auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented yet",
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Missing params",
+                        result.status().error_message());
+  }
+
+  // Missing kem_params.
+  auto params = key_format.mutable_params();
+  {
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Missing kem_params",
+                        result.status().error_message());
+  }
+
+  // Invalid kem_params.
+  auto kem_params = params->mutable_kem_params();
+  {
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Invalid kem_params",
+                        result.status().error_message());
+  }
+
+  // Missing dem_params.
+  kem_params->set_curve_type(EllipticCurveType::NIST_P256);
+  kem_params->set_hkdf_hash_type(HashType::SHA256);
+  {
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Missing dem_params",
+                        result.status().error_message());
+  }
+
+  // Invalid dem_params.
+  auto dem_params = params->mutable_dem_params();
+  {
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Invalid dem_params",
+                        result.status().error_message());
+  }
+
+  // Unsupported AEAD DEM (i.e. not present in the registry).
+  *(dem_params->mutable_aead_dem()) = AeadKeyTemplates::Aes128Eax();
+  {
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::NOT_FOUND, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "No manager",
+                        result.status().error_message());
+  }
+
+  // Invalid EC point format.
+  *(dem_params->mutable_aead_dem()) = AeadKeyTemplates::Aes128Gcm();
+  {
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unknown EC point format",
                         result.status().error_message());
   }
 }
