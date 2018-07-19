@@ -38,8 +38,8 @@ import org.junit.runners.JUnit4;
 /** Tests for StreamingAeadFactory. */
 @RunWith(JUnit4.class)
 public class StreamingAeadFactoryTest {
+  private static final int KDF_KEY_SIZE = 16;
   private static final int AES_KEY_SIZE = 16;
-  //  private static final int HMAC_KEY_SIZE = 20;
 
   @BeforeClass
   public static void setUp() throws Exception {
@@ -49,7 +49,7 @@ public class StreamingAeadFactoryTest {
 
   @Test
   public void testBasicAesCtrHmacStreamingAead() throws Exception {
-    byte[] keyValue = Random.randBytes(AES_KEY_SIZE);
+    byte[] keyValue = Random.randBytes(KDF_KEY_SIZE);
     int derivedKeySize = AES_KEY_SIZE;
     int ciphertextSegmentSize = 128;
     KeysetHandle keysetHandle =
@@ -67,7 +67,7 @@ public class StreamingAeadFactoryTest {
 
   @Test
   public void testBasicAesGcmHkdfStreamingAead() throws Exception {
-    byte[] keyValue = Random.randBytes(AES_KEY_SIZE);
+    byte[] keyValue = Random.randBytes(KDF_KEY_SIZE);
     int derivedKeySize = AES_KEY_SIZE;
     int ciphertextSegmentSize = 128;
     KeysetHandle keysetHandle =
@@ -86,27 +86,28 @@ public class StreamingAeadFactoryTest {
 
   @Test
   public void testMultipleKeys() throws Exception {
-    byte[] primaryKeyValue = Random.randBytes(AES_KEY_SIZE);
-    byte[] otherKeyValue = Random.randBytes(AES_KEY_SIZE);
-    byte[] anotherKeyValue = Random.randBytes(AES_KEY_SIZE);
+    byte[] primaryKeyValue = Random.randBytes(KDF_KEY_SIZE);
+    byte[] otherKeyValue = Random.randBytes(KDF_KEY_SIZE);
+    byte[] anotherKeyValue = Random.randBytes(KDF_KEY_SIZE);
     int derivedKeySize = AES_KEY_SIZE;
-    int ciphertextSegmentSize = 128;
 
     Key primaryKey = TestUtil.createKey(
         TestUtil.createAesGcmHkdfStreamingKeyData(
-            primaryKeyValue, derivedKeySize, ciphertextSegmentSize),
+            primaryKeyValue, derivedKeySize, 512),
         42,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
+    // Another key with a smaller segment size than the primary key
     Key otherKey = TestUtil.createKey(
         TestUtil.createAesCtrHmacStreamingKeyData(
-            otherKeyValue, derivedKeySize, ciphertextSegmentSize),
+            otherKeyValue, derivedKeySize, 256),
         43,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
+    // Another key with a larger segment size than the primary key
     Key anotherKey = TestUtil.createKey(
         TestUtil.createAesGcmHkdfStreamingKeyData(
-            anotherKeyValue, derivedKeySize, ciphertextSegmentSize),
+            anotherKeyValue, derivedKeySize, 1024),
         72,
         KeyStatusType.ENABLED,
         OutputPrefixType.RAW);
@@ -149,7 +150,7 @@ public class StreamingAeadFactoryTest {
     Key valid =
         TestUtil.createKey(
             TestUtil.createAesGcmHkdfStreamingKeyData(
-                Random.randBytes(AES_KEY_SIZE), AES_KEY_SIZE, 128),
+                Random.randBytes(KDF_KEY_SIZE), AES_KEY_SIZE, 128),
             42,
             KeyStatusType.ENABLED,
             OutputPrefixType.RAW);

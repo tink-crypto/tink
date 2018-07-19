@@ -281,6 +281,18 @@ public class StreamingTestUtil {
     byte[] longPlaintext = Random.randBytes(1100);
     testEncryptionAndDecryption(
         encryptionStreamingAead, decryptionStreamingAead, longPlaintext, aad);
+
+    // Even longer plaintext. A typical cache size for data types such as BufferedInputStream
+    // is 8 kB. Hence, testing with inputs longer than this makes sense.
+    byte[] evenLongerPlaintext = Random.randBytes(16000);
+    testEncryptionAndDecryption(
+        encryptionStreamingAead, decryptionStreamingAead, evenLongerPlaintext, aad);
+
+    // Empty plaintext.
+    byte[] empty = new byte[0];
+    testEncryptionAndDecryption(
+        encryptionStreamingAead, decryptionStreamingAead, empty, aad);
+
   }
 
   /** Tests encryption and decryption functionalities of {@code streamingAead}. */
@@ -331,6 +343,39 @@ public class StreamingTestUtil {
       // Compare results;
       TestUtil.assertByteArrayEquals(plaintext, decrypted.array());
     }
+
+    // Decrypt ciphertext via InputStream.
+    {
+      InputStream ctStream = new ByteArrayInputStream(ciphertext.toByteArray());
+      InputStream decStream = decryptionStreamingAead.newDecryptingStream(ctStream, aad);
+      byte[] decrypted = new byte[plaintext.length];
+      int decryptedLength = decStream.read(decrypted);
+
+      // Compare results;
+      assertEquals("Decrypted length should be equal to plaintext length", decryptedLength,
+          plaintext.length);
+      TestUtil.assertByteArrayEquals(plaintext, decrypted);
+    }
+
+    // Encrypt with an OutputStream.
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    OutputStream encStream = encryptionStreamingAead.newEncryptingStream(bos, aad);
+    encStream.write(plaintext);
+    encStream.close();
+    byte[] ciphertext2 = bos.toByteArray();
+
+    // Check that the stream encrypted ciphertext is correct.
+    {
+      ByteBufferChannel ciphertextChannel = new ByteBufferChannel(ciphertext2);
+      ReadableByteChannel decChannel =
+          decryptionStreamingAead.newDecryptingChannel(ciphertextChannel, aad);
+      ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
+      int unused = decChannel.read(decrypted);
+
+      // Compare results;
+      TestUtil.assertByteArrayEquals(plaintext, decrypted.array());
+    }
+
   }
 
   // Methods for testEncryptDecrypt.

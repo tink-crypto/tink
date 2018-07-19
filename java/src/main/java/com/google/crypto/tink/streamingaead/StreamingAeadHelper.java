@@ -73,13 +73,14 @@ final class StreamingAeadHelper implements StreamingAead {
       InputStream ciphertextStream,
       byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    throw new UnsupportedOperationException();
+    return new InputStreamDecrypter(primitives, ciphertextStream, associatedData);
   }
 
   @Override
   public OutputStream newEncryptingStream(
       OutputStream ciphertext, byte[] associatedData)
       throws GeneralSecurityException, IOException {
-    throw new UnsupportedOperationException();
+    return primitives.getPrimary().getPrimitive()
+        .newEncryptingStream(ciphertext, associatedData);
   }
 }
