@@ -50,6 +50,8 @@ crypto::tink::util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
   switch (point_format) {
   case EcPointFormat::UNCOMPRESSED:
     return 2 * coordinate_size + 1;
+  case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+    return 2 * coordinate_size;
   case EcPointFormat::COMPRESSED:
     return coordinate_size + 1;
   default:

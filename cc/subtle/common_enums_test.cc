@@ -43,6 +43,9 @@ TEST_F(CommonEnumsTest, testHashTypeToString) {
 TEST_F(CommonEnumsTest, testEcPointFormatToString) {
   EXPECT_EQ("UNCOMPRESSED", EnumToString(EcPointFormat::UNCOMPRESSED));
   EXPECT_EQ("COMPRESSED", EnumToString(EcPointFormat::COMPRESSED));
+  EXPECT_EQ("DO_NOT_USE_CRUNCHY_UNCOMPRESSED",
+            EnumToString(EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
+
   EXPECT_EQ("UNKNOWN_FORMAT", EnumToString(EcPointFormat::UNKNOWN_FORMAT));
   EXPECT_EQ("UNKNOWN_FORMAT: 42", EnumToString((EcPointFormat)42));
 }

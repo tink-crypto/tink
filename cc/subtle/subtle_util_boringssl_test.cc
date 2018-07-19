@@ -56,6 +56,16 @@ static const std::vector<EncodingTestVector> encoding_test_vector(
       "00aa3fb2448335f694e3cda4ae0cc71b1b2f2a206fa802d7262f19983c44674fe15327ac"
       "aac1fa40424c395a6556cb8167312527fae5865ecffc14bbdc17da78cdcf",
       EllipticCurveType::NIST_P521},
+     {EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
+      "00093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918ec66"
+      "19b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a",
+      "00aa3fb2448335f694e3cda4ae0cc71b1b2f2a206fa802d7262f19983c44674fe15327ac"
+      "aac1fa40424c395a6556cb8167312527fae5865ecffc14bbdc17da78cdcf",
+      "00093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918ec"
+      "6619b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a"
+      "00aa3fb2448335f694e3cda4ae0cc71b1b2f2a206fa802d7262f19983c44674fe15327ac"
+      "aac1fa40424c395a6556cb8167312527fae5865ecffc14bbdc17da78cdcf",
+      EllipticCurveType::NIST_P521},
      {EcPointFormat::COMPRESSED,
       "00093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918ec66"
       "19b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a",

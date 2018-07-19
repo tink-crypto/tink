@@ -43,6 +43,8 @@ std::string EnumToString(EcPointFormat format) {
     return "UNCOMPRESSED";
   case EcPointFormat::COMPRESSED:
     return "COMPRESSED";
+  case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+    return "DO_NOT_USE_CRUNCHY_UNCOMPRESSED";
   case EcPointFormat::UNKNOWN_FORMAT:
     return "UNKNOWN_FORMAT";
   default:

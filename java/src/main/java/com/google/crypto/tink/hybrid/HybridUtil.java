@@ -82,6 +82,8 @@ class HybridUtil {
     switch (format) {
       case UNCOMPRESSED:
         return EllipticCurves.PointFormatType.UNCOMPRESSED;
+      case DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+        return EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
       case COMPRESSED:
         return EllipticCurves.PointFormatType.COMPRESSED;
       default:

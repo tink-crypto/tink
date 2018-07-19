@@ -35,6 +35,9 @@ enum EcPointFormat {
   UNKNOWN_FORMAT = 0,
   UNCOMPRESSED = 1,
   COMPRESSED = 2,
+  // Like UNCOMPRESSED but without the \x04 prefix. Crunchy uses this format.
+  // DO NOT USE unless you are a Crunchy user moving to Tink.
+  DO_NOT_USE_CRUNCHY_UNCOMPRESSED = 3,
 };
 
 enum HashType {

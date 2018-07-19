@@ -15,10 +15,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/subtle_util_boringssl.h"
-#include "tink/subtle/common_enums.h"
+#include "absl/strings/substitute.h"
+#include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/err.h"
-
+#include "tink/subtle/common_enums.h"
 
 namespace crypto {
 namespace tink {
@@ -187,12 +188,19 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
   }
   bssl::UniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
   bssl::UniquePtr<EC_POINT> point(EC_POINT_new(group.get()));
+  unsigned curve_size_in_bytes = (EC_GROUP_get_degree(group.get()) + 7) / 8;
   switch (format) {
-    case EcPointFormat::UNCOMPRESSED:
+    case EcPointFormat::UNCOMPRESSED: {
       if (static_cast<int>(encoded[0]) != 0x04) {
         return util::Status(
             util::error::INTERNAL,
             "Uncompressed point should start with 0x04, but input doesn't");
+      }
+      if (encoded.size() != 1 + 2 * curve_size_in_bytes) {
+        return util::Status(
+            util::error::INTERNAL,
+            absl::Substitute("point has is $0 bytes, expected $1",
+                             encoded.size(), 1 + 2 * curve_size_in_bytes));
       }
       if (1 !=
           EC_POINT_oct2point(group.get(), point.get(),
@@ -201,7 +209,41 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
         return util::Status(util::error::INTERNAL, "EC_POINT_toc2point failed");
       }
       break;
-    case EcPointFormat::COMPRESSED:
+    }
+    case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED: {
+      if (encoded.size() != 2 * curve_size_in_bytes) {
+        return util::Status(
+            util::error::INTERNAL,
+            absl::Substitute("point has is $0 bytes, expected $1",
+                             encoded.size(), 2 * curve_size_in_bytes));
+      }
+      bssl::UniquePtr<BIGNUM> x(BN_new());
+      bssl::UniquePtr<BIGNUM> y(BN_new());
+      if (nullptr == x.get() || nullptr == y.get()) {
+        return util::Status(
+            util::error::INTERNAL,
+            "Openssl internal error allocating memory for coordinates");
+      }
+      if (nullptr ==
+          BN_bin2bn(reinterpret_cast<const uint8_t *>(encoded.data()),
+                    curve_size_in_bytes, x.get())) {
+        return util::Status(util::error::INTERNAL,
+                            "Openssl internal error extracting x coordinate");
+      }
+      if (nullptr == BN_bin2bn(reinterpret_cast<const uint8_t *>(
+                                   encoded.data() + curve_size_in_bytes),
+                               curve_size_in_bytes, y.get())) {
+        return util::Status(util::error::INTERNAL,
+                            "Openssl internal error extracting y coordinate");
+      }
+      if (1 != EC_POINT_set_affine_coordinates_GFp(group.get(), point.get(),
+                                                   x.get(), y.get(), nullptr)) {
+        return util::Status(util::error::INTERNAL,
+                            "Openssl internal error setting coordinates");
+      }
+      break;
+    }
+    case EcPointFormat::COMPRESSED: {
       if (static_cast<int>(encoded[0]) != 0x03 &&
           static_cast<int>(encoded[0]) != 0x02) {
         return util::Status(util::error::INTERNAL,
@@ -215,6 +257,7 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::EcPointDecode(
         return util::Status(util::error::INTERNAL, "EC_POINT_oct2point failed");
       }
       break;
+    }
     default:
       return util::Status(util::error::INTERNAL, "Unsupported format");
   }
@@ -247,7 +290,36 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
       return std::string(reinterpret_cast<const char *>(encoded.get()),
-                         1 + 2 * curve_size_in_bytes);
+                    1 + 2 * curve_size_in_bytes);
+    }
+    case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED: {
+      bssl::UniquePtr<BIGNUM> x(BN_new());
+      bssl::UniquePtr<BIGNUM> y(BN_new());
+      if (nullptr == x.get() || nullptr == y.get()) {
+        return util::Status(
+            util::error::INTERNAL,
+            "Openssl internal error allocating memory for coordinates");
+      }
+      std::unique_ptr<uint8_t[]> encoded(new uint8_t[2 * curve_size_in_bytes]);
+
+      if (1 != EC_POINT_get_affine_coordinates_GFp(group.get(), point, x.get(),
+                                                   y.get(), nullptr)) {
+        return util::Status(util::error::INTERNAL,
+                            "Openssl internal error getting coordinates");
+      }
+      if (1 != BN_bn2bin_padded(reinterpret_cast<uint8_t *>(encoded.get()),
+                                curve_size_in_bytes, x.get())) {
+        return util::Status(util::error::INTERNAL,
+                            "Openssl internal error serializing x coordinate");
+      }
+      if (1 != BN_bn2bin_padded(reinterpret_cast<uint8_t *>(
+                                    encoded.get() + curve_size_in_bytes),
+                                curve_size_in_bytes, y.get())) {
+        return util::Status(util::error::INTERNAL,
+                            "Openssl internal error serializing y coordinate");
+      }
+      return std::string(reinterpret_cast<const char *>(encoded.get()),
+                    2 * curve_size_in_bytes);
     }
     case EcPointFormat::COMPRESSED: {
       std::unique_ptr<uint8_t[]> encoded(new uint8_t[1 + curve_size_in_bytes]);

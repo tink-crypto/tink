@@ -48,6 +48,9 @@ public final class EllipticCurves {
   public enum PointFormatType {
     UNCOMPRESSED,
     COMPRESSED,
+    // Like UNCOMPRESSED but without the \x04 prefix. Crunchy uses this format.
+    // DO NOT USE unless you are a Crunchy user moving to Tink.
+    DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
   }
 
   /** Elliptic curve types. */
@@ -607,11 +610,12 @@ public final class EllipticCurves {
     switch (format) {
       case UNCOMPRESSED:
         return 2 * coordinateSize + 1;
+      case DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+        return 2 * coordinateSize;
       case COMPRESSED:
         return coordinateSize + 1;
-      default:
-        throw new GeneralSecurityException("unknown EC point format");
     }
+    throw new GeneralSecurityException("unknown EC point format");
   }
 
   /**
@@ -680,6 +684,18 @@ public final class EllipticCurves {
           checkPointOnCurve(point, curve);
           return point;
         }
+      case DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+        {
+          if (encoded.length != 2 * coordinateSize) {
+            throw new GeneralSecurityException("invalid point size");
+          }
+          BigInteger x = new BigInteger(1, Arrays.copyOfRange(encoded, 0, coordinateSize));
+          BigInteger y =
+              new BigInteger(1, Arrays.copyOfRange(encoded, coordinateSize, encoded.length));
+          ECPoint point = new ECPoint(x, y);
+          checkPointOnCurve(point, curve);
+          return point;
+        }
       case COMPRESSED:
         {
           BigInteger p = getModulus(curve);
@@ -701,9 +717,8 @@ public final class EllipticCurves {
           BigInteger y = getY(x, lsb, curve);
           return new ECPoint(x, y);
         }
-      default:
-        throw new GeneralSecurityException("invalid format:" + format);
     }
+    throw new GeneralSecurityException("invalid format:" + format);
   }
 
   /**
@@ -749,6 +764,23 @@ public final class EllipticCurves {
           encoded[0] = 4;
           return encoded;
         }
+      case DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+        {
+          byte[] encoded = new byte[2 * coordinateSize];
+          byte[] x = point.getAffineX().toByteArray();
+          if (x.length > coordinateSize) {
+            // x has leading 0's, strip them.
+            x = Arrays.copyOfRange(x, x.length - coordinateSize, x.length);
+          }
+          byte[] y = point.getAffineY().toByteArray();
+          if (y.length > coordinateSize) {
+            // y has leading 0's, strip them.
+            y = Arrays.copyOfRange(y, y.length - coordinateSize, y.length);
+          }
+          System.arraycopy(y, 0, encoded, 2 * coordinateSize - y.length, y.length);
+          System.arraycopy(x, 0, encoded, coordinateSize - x.length, x.length);
+          return encoded;
+        }
       case COMPRESSED:
         {
           byte[] encoded = new byte[coordinateSize + 1];
@@ -757,9 +789,8 @@ public final class EllipticCurves {
           encoded[0] = (byte) (point.getAffineY().testBit(0) ? 3 : 2);
           return encoded;
         }
-      default:
-        throw new GeneralSecurityException("invalid format:" + format);
     }
+    throw new GeneralSecurityException("invalid format:" + format);
   }
 
   /**
@@ -776,9 +807,8 @@ public final class EllipticCurves {
         return getNistP384Params();
       case NIST_P521:
         return getNistP521Params();
-      default:
-        throw new NoSuchAlgorithmException("curve not implemented:" + curve);
     }
+    throw new NoSuchAlgorithmException("curve not implemented:" + curve);
   }
 
   /**

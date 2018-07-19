@@ -57,6 +57,8 @@ pb::EcPointFormat Enums::SubtleToProto(subtle::EcPointFormat format) {
   switch (format) {
   case subtle::EcPointFormat::UNCOMPRESSED:
     return pb::EcPointFormat::UNCOMPRESSED;
+  case subtle::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+    return pb::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
   case subtle::EcPointFormat::COMPRESSED:
     return pb::EcPointFormat::COMPRESSED;
   default:
@@ -69,6 +71,8 @@ subtle::EcPointFormat Enums::ProtoToSubtle(pb::EcPointFormat format) {
   switch (format) {
   case pb::EcPointFormat::UNCOMPRESSED:
     return subtle::EcPointFormat::UNCOMPRESSED;
+  case pb::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+    return subtle::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
   case pb::EcPointFormat::COMPRESSED:
     return subtle::EcPointFormat::COMPRESSED;
   default:

@@ -110,6 +110,9 @@ TEST_F(EnumsTest, testHashType) {
 TEST_F(EnumsTest, testEcPointFormat) {
   EXPECT_EQ(pb::EcPointFormat::UNCOMPRESSED,
             Enums::SubtleToProto(subtle::EcPointFormat::UNCOMPRESSED));
+  EXPECT_EQ(pb::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
+            Enums::SubtleToProto(
+                subtle::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
   EXPECT_EQ(pb::EcPointFormat::COMPRESSED,
             Enums::SubtleToProto(subtle::EcPointFormat::COMPRESSED));
   EXPECT_EQ(pb::EcPointFormat::UNKNOWN_FORMAT,
@@ -119,6 +122,9 @@ TEST_F(EnumsTest, testEcPointFormat) {
 
   EXPECT_EQ(subtle::EcPointFormat::UNCOMPRESSED,
             Enums::ProtoToSubtle(pb::EcPointFormat::UNCOMPRESSED));
+  EXPECT_EQ(
+      subtle::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
+      Enums::ProtoToSubtle(pb::EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
   EXPECT_EQ(subtle::EcPointFormat::COMPRESSED,
             Enums::ProtoToSubtle(pb::EcPointFormat::COMPRESSED));
   EXPECT_EQ(subtle::EcPointFormat::UNKNOWN_FORMAT,
@@ -138,7 +144,7 @@ TEST_F(EnumsTest, testEcPointFormat) {
       count++;
     }
   }
-  EXPECT_EQ(3, count);
+  EXPECT_EQ(4, count);
 }
 
 TEST_F(EnumsTest, testKeyStatusName) {
