@@ -16,7 +16,9 @@
 
 package com.google.crypto.tink.subtle;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
@@ -452,6 +454,75 @@ public class EllipticCurvesTest {
       ECPoint p = new ECPoint(test.x, test.y);
       byte[] encoded = EllipticCurves.pointEncode(curve, test.format, p);
       assertEquals(TestUtil.hexEncode(encoded), TestUtil.hexEncode(test.encoded));
+    }
+  }
+
+  /** A class to store a pair of valid Ecdsa signature in IEEE_P1363 and DER format. */
+  protected static class EcdsaIeeeDer {
+    public String hexIeee;
+    public String hexDer;
+
+    protected EcdsaIeeeDer(String hexIeee, String hexDer) {
+      this.hexIeee = hexIeee;
+      this.hexDer = hexDer;
+    }
+  };
+
+  protected static EcdsaIeeeDer[] ieeeDerTestVector =
+      new EcdsaIeeeDer[] {
+        new EcdsaIeeeDer( // normal case, short-form length
+            "0102030405060708090a0b0c0d0e0f100102030405060708090a0b0c0d0e0f10",
+            "302402100102030405060708090a0b0c0d0e0f1002100102030405060708090a0b0c0d0e0f10"),
+        new EcdsaIeeeDer( // normal case, long-form length
+            "010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000203010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000203",
+            "30818802420100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000002030242010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000203"),
+        new EcdsaIeeeDer( // zero prefix.
+            "0002030405060708090a0b0c0d0e0f100002030405060708090a0b0c0d0e0f10",
+            "3022020f02030405060708090a0b0c0d0e0f10020f02030405060708090a0b0c0d0e0f10"),
+        new EcdsaIeeeDer( // highest bit is set.
+            "00ff030405060708090a0b0c0d0e0f1000ff030405060708090a0b0c0d0e0f10",
+            "3024021000ff030405060708090a0b0c0d0e0f10021000ff030405060708090a0b0c0d0e0f10"),
+        new EcdsaIeeeDer( // highest bit is set, full length.
+            "ff02030405060708090a0b0c0d0e0f10ff02030405060708090a0b0c0d0e0f10",
+            "3026021100ff02030405060708090a0b0c0d0e0f10021100ff02030405060708090a0b0c0d0e0f10"),
+        new EcdsaIeeeDer( // all zeros.
+            "0000000000000000000000000000000000000000000000000000000000000000", "3006020100020100"),
+      };
+
+  @Test
+  public void testEcdsaIeee2Der() throws Exception {
+    for (EcdsaIeeeDer test : ieeeDerTestVector) {
+      assertArrayEquals(
+          Hex.decode(test.hexDer), EllipticCurves.ecdsaIeee2Der(Hex.decode(test.hexIeee)));
+    }
+  }
+
+  @Test
+  public void testEcdsaDer2Ieee() throws Exception {
+    for (EcdsaIeeeDer test : ieeeDerTestVector) {
+      assertArrayEquals(
+          Hex.decode(test.hexIeee),
+          EllipticCurves.ecdsaDer2Ieee(Hex.decode(test.hexDer), test.hexIeee.length() / 2));
+    }
+  }
+
+  protected static String[] invalidEcdsaDers =
+      new String[] {
+        "2006020101020101", // 1st byte is not 0x30 (SEQUENCE tag)
+        "3006050101020101", // 3rd byte is not 0x02 (INTEGER tag)
+        "3006020101050101", // 6th byte is not 0x02 (INTEGER tag)
+        "308206020101020101", // long form length is not 0x81
+        "30ff020101020101", // invalid total length
+        "3006020201020101", // invalid rLength
+        "3006020101020201", // invalid sLength
+        "30060201ff020101", // no extra zero when highest bit of r is set
+        "30060201010201ff", // no extra zero when highest bit of s is set
+      };
+
+  @Test
+  public void testIsValidDerEncoding() throws Exception {
+    for (String der : invalidEcdsaDers) {
+      assertFalse(EllipticCurves.isValidDerEncoding(Hex.decode(der)));
     }
   }
 

@@ -356,6 +356,243 @@ public final class EllipticCurves {
   }
 
   /**
+   * Transforms a big integer to its minimal signed form, i.e., no extra zero byte at the beginning
+   * except single one when the highest bit is set.
+   */
+  private static byte[] toMinimalSignedNumber(byte[] bs) {
+    // Remove zero prefixes.
+    int start = 0;
+    while (start < bs.length && bs[start] == 0) {
+      start++;
+    }
+    if (start == bs.length) {
+      start = bs.length - 1;
+    }
+
+    int extraZero = 0;
+    // If the 1st bit is not zero, add 1 zero byte.
+    if ((bs[start] & 0x80) == 0x80) {
+      // Add extra zero.
+      extraZero = 1;
+    }
+    byte[] res = new byte[bs.length - start + extraZero];
+    System.arraycopy(bs, start, res, extraZero, bs.length - start);
+    return res;
+  }
+
+  /**
+   * Transforms ECDSA IEEE_P1363 signature encoding to DER encoding.
+   *
+   * <p>The IEEE_P1363 signature's format is r || s, where r and s are zero-padded and have the same
+   * size in bytes as the order of the curve. For example, for NIST P-256 curve, r and s are
+   * zero-padded to 32 bytes.
+   *
+   * <p>The DER signature is encoded using ASN.1 (https://tools.ietf.org/html/rfc5480#appendix-A):
+   * ECDSA-Sig-Value :: = SEQUENCE { r INTEGER, s INTEGER }. In particular, the encoding is: 0x30 ||
+   * totalLength || 0x02 || r's length || r || 0x02 || s's length || s.
+   *
+   * @param ieee ECDSA's signature in IEEE_P1363 format.
+   * @return ECDSA's signature in DER format.
+   * @throws GeneralSecurityException if ieee's length is zero, greater than 132-byte (corresponding
+   *     to NIST P521) or not divisible by 2.
+   */
+  public static byte[] ecdsaIeee2Der(byte[] ieee) throws GeneralSecurityException {
+    if (ieee.length % 2 != 0 || ieee.length == 0 || ieee.length > 132) {
+      throw new GeneralSecurityException("Invalid IEEE_P1363 encoding");
+    }
+    byte[] r = toMinimalSignedNumber(Arrays.copyOf(ieee, ieee.length / 2));
+    byte[] s = toMinimalSignedNumber(Arrays.copyOfRange(ieee, ieee.length / 2, ieee.length));
+
+    int offset = 0;
+    int length = 1 + 1 + r.length + 1 + 1 + s.length;
+    byte[] der;
+    if (length >= 128) {
+      der = new byte[length + 3];
+      der[offset++] = (byte) 0x30;
+      der[offset++] = (byte) (0x80 + 0x01);
+      der[offset++] = (byte) length;
+    } else {
+      der = new byte[length + 2];
+      der[offset++] = (byte) 0x30;
+      der[offset++] = (byte) length;
+    }
+    der[offset++] = (byte) 0x02;
+    der[offset++] = (byte) r.length;
+    System.arraycopy(r, 0, der, offset, r.length);
+    offset += r.length;
+    der[offset++] = (byte) 0x02;
+    der[offset++] = (byte) s.length;
+    System.arraycopy(s, 0, der, offset, s.length);
+    return der;
+  }
+
+  /**
+   * Transforms ECDSA DER signature encoding to IEEE_P1363 encoding.
+   *
+   * <p>The IEEE_P1363 signature's format is r || s, where r and s are zero-padded and have the same
+   * size in bytes as the order of the curve. For example, for NIST P-256 curve, r and s are
+   * zero-padded to 32 bytes.
+   *
+   * <p>The DER signature is encoded using ASN.1 (https://tools.ietf.org/html/rfc5480#appendix-A):
+   * ECDSA-Sig-Value :: = SEQUENCE { r INTEGER, s INTEGER }. In particular, the encoding is: 0x30 ||
+   * totalLength || 0x02 || r's length || r || 0x02 || s's length || s.
+   *
+   * @param der ECDSA's signature in DER encoding.
+   * @param ieeeLength length of ECDSA signature's in IEEE_P1363's format which equals to 2 * (size
+   *     of elliptic curve's field in bytes).
+   * @return ECDSA's signature in IEEE_P1363 format.
+   * @throws GeneralSecurityException if the signature is not valid DER encoding.
+   */
+  public static byte[] ecdsaDer2Ieee(byte[] der, int ieeeLength) throws GeneralSecurityException {
+    if (!isValidDerEncoding(der)) {
+      throw new GeneralSecurityException("Invalid DER encoding");
+    }
+    byte[] ieee = new byte[ieeeLength];
+    int length = der[1] & 0xff;
+    int offset = 1 /* 0x30 */ + 1 /* totalLength */;
+    if (length >= 128) {
+      offset++; // Long form length
+    }
+    offset++; // 0x02
+    int rLength = der[offset++];
+    int extraZero = 0;
+    if (der[offset] == 0) {
+      extraZero = 1;
+    }
+    System.arraycopy(
+        der, offset + extraZero, ieee, ieeeLength / 2 - rLength + extraZero, rLength - extraZero);
+    offset += rLength /* r byte array */ + 1 /* 0x02 */;
+    int sLength = der[offset++];
+    extraZero = 0;
+    if (der[offset] == 0) {
+      extraZero = 1;
+    }
+    System.arraycopy(
+        der, offset + extraZero, ieee, ieeeLength - sLength + extraZero, sLength - extraZero);
+    return ieee;
+  }
+
+  // Validates that the signature is in DER encoding, based on
+  // https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki.
+  public static boolean isValidDerEncoding(final byte[] sig) {
+    // Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
+    // * total-length: 1-byte or 2-byte length descriptor of everything that follows.
+    // * R-length: 1-byte length descriptor of the R value that follows.
+    // * R: arbitrary-length big-endian encoded R value. It must use the shortest
+    //   possible encoding for a positive integers (which means no null bytes at
+    //   the start, except a single one when the next byte has its highest bit set).
+    // * S-length: 1-byte length descriptor of the S value that follows.
+    // * S: arbitrary-length big-endian encoded S value. The same rules apply.
+
+    if (sig.length
+        < 1 /* 0x30 */
+            + 1 /* total-length */
+            + 1 /* 0x02 */
+            + 1 /* R-length */
+            + 1 /* R */
+            + 1 /* 0x02 */
+            + 1 /* S-length */
+            + 1 /* S */) {
+      // Signature is too short.
+      return false;
+    }
+
+    // Checking bytes from left to right.
+
+    // byte #1: a signature is of type 0x30 (compound).
+    if (sig[0] != 0x30) {
+      return false;
+    }
+
+    // byte #2 and maybe #3: the total length of the signature.
+    int totalLen = sig[1] & 0xff;
+    int totalLenLen = 1; // the length of the total length field, could be 2-byte.
+    if (totalLen == 129) {
+      // The signature is >= 128 bytes thus total length field is in long-form encoding and occupies
+      // 2 bytes.
+      totalLenLen = 2;
+      // byte #3 is the total length.
+      totalLen = sig[2] & 0xff;
+      if (totalLen < 128) {
+        // Length in long-form encoding must be >= 128.
+        return false;
+      }
+    } else if (totalLen == 128 || totalLen > 129) {
+      // Impossible values for the second byte.
+      return false;
+    }
+
+    // Make sure the length covers the entire sig.
+    if (totalLen != sig.length - 1 - totalLenLen) {
+      return false;
+    }
+
+    // Start checking R.
+    // Check whether the R element is an integer.
+    if (sig[1 + totalLenLen] != 0x02) {
+      return false;
+    }
+    // Extract the length of the R element.
+    int rLen = sig[1 /* 0x30 */ + totalLenLen + 1 /* 0x02 */] & 0xff;
+    // Make sure the length of the S element is still inside the signature.
+    if (1 /* 0x30 */ + totalLenLen + 1 /* 0x02 */ + 1 /* rLen */ + rLen + 1 /* 0x02 */
+        >= sig.length) {
+      return false;
+    }
+    // Zero-length integers are not allowed for R.
+    if (rLen == 0) {
+      return false;
+    }
+    // Negative numbers are not allowed for R.
+    if ((sig[3 + totalLenLen] & 0xff) >= 128) {
+      return false;
+    }
+    // Null bytes at the start of R are not allowed, unless R would
+    // otherwise be interpreted as a negative number.
+    if (rLen > 1 && (sig[3 + totalLenLen] == 0x00) && ((sig[4 + totalLenLen] & 0xff) < 128)) {
+      return false;
+    }
+
+    // Start checking S.
+    // Check whether the S element is an integer.
+    if (sig[3 + totalLenLen + rLen] != 0x02) {
+      return false;
+    }
+    // Extract the length of the S element.
+    int sLen =
+        sig[1 /* 0x30 */ + totalLenLen + 1 /* 0x02 */ + 1 /* rLen */ + rLen + 1 /* 0x02 */] & 0xff;
+    // Verify that the length of the signature matches the sum of the length of the elements.
+    if (1 /* 0x30 */
+            + totalLenLen
+            + 1 /* 0x02 */
+            + 1 /* rLen */
+            + rLen
+            + 1 /* 0x02 */
+            + 1 /* sLen */
+            + sLen
+        != sig.length) {
+      return false;
+    }
+    // Zero-length integers are not allowed for S.
+    if (sLen == 0) {
+      return false;
+    }
+    // Negative numbers are not allowed for S.
+    if ((sig[5 + totalLenLen + rLen] & 0xff) >= 128) {
+      return false;
+    }
+    // Null bytes at the start of S are not allowed, unless S would
+    // otherwise be interpreted as a negative number.
+    if (sLen > 1
+        && (sig[5 + totalLenLen + rLen] == 0x00)
+        && ((sig[6 + totalLenLen + rLen] & 0xff) < 128)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Returns the encoding size of a point on an elliptic curve.
    *
    * @param curve the elliptic curve
