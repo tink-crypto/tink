@@ -35,7 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable instancetype)init NS_UNAVAILABLE;
 
-- (nullable instancetype)initWithError:(NSError **)error NS_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithError:(NSError **)error NS_SWIFT_NAME(init())
+    NS_DESIGNATED_INITIALIZER;
 
 @end
 

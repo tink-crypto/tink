@@ -43,7 +43,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)init NS_UNAVAILABLE;
 
 /** Returns config of all implementations supported in the latest version of Tink. */
-- (nullable instancetype)initWithError:(NSError **)error NS_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithError:(NSError **)error NS_SWIFT_NAME(init())
+    NS_DESIGNATED_INITIALIZER;
 
 @end
 
