@@ -141,6 +141,9 @@ crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxBoringSsl::New(
   if (!IsValidKeySize(key_value.size())) {
     return util::Status(util::error::INTERNAL, "Invalid key");
   }
+  if (!IsValidNonceSize(nonce_size_in_bytes)) {
+    return util::Status(util::error::INTERNAL, "Invalid nonce size");
+  }
   std::unique_ptr<AesEaxBoringSsl> aead(
       new AesEaxBoringSsl(key_value, nonce_size_in_bytes));
   if (!aead->is_initialized_) {

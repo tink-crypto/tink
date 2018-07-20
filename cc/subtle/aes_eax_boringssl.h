@@ -34,7 +34,7 @@ class AesEaxBoringSsl : public Aead {
  public:
   // Constructs a new Aead cipher for Aes-EAX.
   // Currently supported key sizes are 128 and 256 bits.
-  // Currently supported nonce sizes are 12 an 16 bytes.
+  // Currently supported nonce sizes are 12 and 16 bytes.
   // The tag size is fixed to 16 bytes.
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
       absl::string_view key_value, size_t nonce_size_in_bytes);
