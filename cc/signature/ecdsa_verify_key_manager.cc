@@ -191,6 +191,9 @@ Status EcdsaVerifyKeyManager::Validate(
 // static
 Status EcdsaVerifyKeyManager::Validate(
     const EcdsaKeyFormat& key_format) {
+  if (!key_format.has_params()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+  }
   return Validate(key_format.params());
 }
 

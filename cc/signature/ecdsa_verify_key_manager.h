@@ -64,7 +64,10 @@ class EcdsaVerifyKeyManager : public KeyManager<PublicKeyVerify> {
   virtual ~EcdsaVerifyKeyManager() {}
 
  private:
+  // Friends that re-use proto validation helpers.
+  friend class EcdsaPrivateKeyFactory;
   friend class EcdsaSignKeyManager;
+
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
   static constexpr char kKeyFormatUrl[] =
       "type.googleapis.com/google.crypto.tink.EcdsaKeyFormat";

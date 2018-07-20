@@ -34,6 +34,7 @@
 namespace crypto {
 namespace tink {
 
+using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EcdsaPublicKey;
 using google::crypto::tink::KeyData;
@@ -66,19 +67,65 @@ class EcdsaPrivateKeyFactory : public KeyFactory {
 
 StatusOr<std::unique_ptr<MessageLite>> EcdsaPrivateKeyFactory::NewKey(
     const portable_proto::MessageLite& key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
+  std::string key_format_url =
+      std::string(EcdsaSignKeyManager::kKeyTypePrefix) +
+      key_format.GetTypeName();
+  if (key_format_url != EcdsaSignKeyManager::kKeyFormatUrl) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Key format proto '%s' is not supported by this manager.",
+                     key_format_url.c_str());
+  }
+  const EcdsaKeyFormat& ecdsa_key_format =
+        reinterpret_cast<const EcdsaKeyFormat&>(key_format);
+  Status status = EcdsaVerifyKeyManager::Validate(ecdsa_key_format);
+  if (!status.ok()) return status;
+
+  // Generate new EC key.
+  auto ec_key_result = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+      util::Enums::ProtoToSubtle(ecdsa_key_format.params().curve()));
+  if (!ec_key_result.ok()) return ec_key_result.status();
+  auto ec_key = ec_key_result.ValueOrDie();
+
+  // Build EcdsaPrivateKey.
+  std::unique_ptr<EcdsaPrivateKey> ecdsa_private_key(
+      new EcdsaPrivateKey());
+  ecdsa_private_key->set_version(EcdsaSignKeyManager::kVersion);
+  ecdsa_private_key->set_key_value(ec_key.priv);
+  auto ecdsa_public_key = ecdsa_private_key->mutable_public_key();
+  ecdsa_public_key->set_version(EcdsaSignKeyManager::kVersion);
+  ecdsa_public_key->set_x(ec_key.pub_x);
+  ecdsa_public_key->set_y(ec_key.pub_y);
+  *(ecdsa_public_key->mutable_params()) = ecdsa_key_format.params();
+
+  std::unique_ptr<MessageLite> key = std::move(ecdsa_private_key);
+  return std::move(key);
 }
 
 StatusOr<std::unique_ptr<MessageLite>> EcdsaPrivateKeyFactory::NewKey(
     absl::string_view serialized_key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
+  EcdsaKeyFormat key_format;
+  if (!key_format.ParseFromString(std::string(serialized_key_format))) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Could not parse the passed string as proto '%s'.",
+                     EcdsaSignKeyManager::kKeyFormatUrl);
+  }
+  return NewKey(key_format);
 }
 
 StatusOr<std::unique_ptr<KeyData>> EcdsaPrivateKeyFactory::NewKeyData(
     absl::string_view serialized_key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED, "not implemented yet");
+  auto new_key_result = NewKey(serialized_key_format);
+  if (!new_key_result.ok()) return new_key_result.status();
+  auto new_key = reinterpret_cast<const EcdsaPrivateKey&>(
+      *(new_key_result.ValueOrDie()));
+  std::unique_ptr<KeyData> key_data(new KeyData());
+  key_data->set_type_url(EcdsaSignKeyManager::kKeyType);
+  key_data->set_value(new_key.SerializeAsString());
+  key_data->set_key_material_type(KeyData::ASYMMETRIC_PRIVATE);
+  return std::move(key_data);
 }
 
+constexpr char EcdsaSignKeyManager::kKeyFormatUrl[];
 constexpr char EcdsaSignKeyManager::kKeyTypePrefix[];
 constexpr char EcdsaSignKeyManager::kKeyType[];
 constexpr uint32_t EcdsaSignKeyManager::kVersion;

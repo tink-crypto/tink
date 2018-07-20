@@ -291,6 +291,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":ecdsa_sign_key_manager",
+        ":signature_key_templates",
         "//cc:config",
         "//cc:public_key_sign",
         "//cc:registry",

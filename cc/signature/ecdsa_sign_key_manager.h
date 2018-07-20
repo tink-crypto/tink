@@ -64,6 +64,8 @@ class EcdsaSignKeyManager : public KeyManager<PublicKeySign> {
   virtual ~EcdsaSignKeyManager() {}
 
  private:
+  friend class EcdsaPrivateKeyFactory;
+
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
   static constexpr char kKeyFormatUrl[] =
       "type.googleapis.com/google.crypto.tink.EcdsaKeyFormat";

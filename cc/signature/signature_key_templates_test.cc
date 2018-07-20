@@ -55,9 +55,7 @@ TEST(SignatureKeyTemplatesTest, testAesGcmKeyTemplates) {
     EcdsaSignKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
     auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
-    EXPECT_FALSE(new_key_result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED,
-              new_key_result.status().error_code());
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
   {  // Test EcdsaP384().
@@ -79,9 +77,7 @@ TEST(SignatureKeyTemplatesTest, testAesGcmKeyTemplates) {
     EcdsaSignKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
     auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
-    EXPECT_FALSE(new_key_result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED,
-              new_key_result.status().error_code());
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
   {  // Test EcdsaP521().
@@ -103,9 +99,7 @@ TEST(SignatureKeyTemplatesTest, testAesGcmKeyTemplates) {
     EcdsaSignKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
     auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
-    EXPECT_FALSE(new_key_result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED,
-              new_key_result.status().error_code());
+    EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
 

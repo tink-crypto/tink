@@ -18,6 +18,7 @@
 
 #include "tink/public_key_sign.h"
 #include "tink/registry.h"
+#include "tink/signature/signature_key_templates.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
@@ -31,6 +32,7 @@ namespace crypto {
 namespace tink {
 
 using google::crypto::tink::AesEaxKey;
+using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EcdsaSignatureEncoding;
@@ -46,6 +48,22 @@ class EcdsaSignKeyManagerTest : public ::testing::Test {
   std::string ecdsa_sign_key_type_ =
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 };
+
+// Checks whether given key is compatible with the given format.
+void CheckNewKey(const EcdsaPrivateKey& ecdsa_key,
+                 const EcdsaKeyFormat& key_format) {
+  EcdsaSignKeyManager key_manager;
+  EXPECT_EQ(0, ecdsa_key.version());
+  EXPECT_TRUE(ecdsa_key.has_public_key());
+  EXPECT_GT(ecdsa_key.key_value().length(), 0);
+  EXPECT_EQ(0, ecdsa_key.public_key().version());
+  EXPECT_GT(ecdsa_key.public_key().x().length(), 0);
+  EXPECT_GT(ecdsa_key.public_key().y().length(), 0);
+  EXPECT_EQ(ecdsa_key.public_key().params().SerializeAsString(),
+            key_format.params().SerializeAsString());
+  auto primitive_result = key_manager.GetPrimitive(ecdsa_key);
+  EXPECT_TRUE(primitive_result.ok()) << primitive_result.status();
+}
 
 TEST_F(EcdsaSignKeyManagerTest, testBasic) {
   EcdsaSignKeyManager key_manager;
@@ -202,34 +220,111 @@ TEST_F(EcdsaSignKeyManagerTest, testPrimitives) {
   }
 }
 
-TEST_F(EcdsaSignKeyManagerTest, testNewKeyError) {
+TEST_F(EcdsaSignKeyManagerTest, testNewKeyCreation) {
   EcdsaSignKeyManager key_manager;
   const KeyFactory& key_factory = key_manager.get_key_factory();
 
   { // Via NewKey(format_proto).
     EcdsaKeyFormat key_format;
+    ASSERT_TRUE(key_format.ParseFromString(
+        SignatureKeyTemplates::EcdsaP256().value()));
     auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented yet",
-                        result.status().error_message());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key = std::move(result.ValueOrDie());
+    ASSERT_EQ(ecdsa_sign_key_type_, key_type_prefix_ + key->GetTypeName());
+    std::unique_ptr<EcdsaPrivateKey> ecdsa_key(
+        reinterpret_cast<EcdsaPrivateKey*>(key.release()));
+    CheckNewKey(*ecdsa_key, key_format);
   }
 
   { // Via NewKey(serialized_format_proto).
     EcdsaKeyFormat key_format;
+    ASSERT_TRUE(key_format.ParseFromString(
+        SignatureKeyTemplates::EcdsaP384().value()));
     auto result = key_factory.NewKey(key_format.SerializeAsString());
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented yet",
-                        result.status().error_message());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key = std::move(result.ValueOrDie());
+    ASSERT_EQ(ecdsa_sign_key_type_, key_type_prefix_ + key->GetTypeName());
+    std::unique_ptr<EcdsaPrivateKey> ecdsa_key(
+        reinterpret_cast<EcdsaPrivateKey*>(key.release()));
+    CheckNewKey(*ecdsa_key, key_format);
   }
 
   { // Via NewKeyData(serialized_format_proto).
     EcdsaKeyFormat key_format;
+    ASSERT_TRUE(key_format.ParseFromString(
+        SignatureKeyTemplates::EcdsaP521().value()));
     auto result = key_factory.NewKeyData(key_format.SerializeAsString());
+    EXPECT_TRUE(result.ok()) << result.status();
+    auto key_data = std::move(result.ValueOrDie());
+    EXPECT_EQ(ecdsa_sign_key_type_, key_data->type_url());
+    EXPECT_EQ(KeyData::ASYMMETRIC_PRIVATE, key_data->key_material_type());
+    EcdsaPrivateKey ecdsa_key;
+    ASSERT_TRUE(ecdsa_key.ParseFromString(key_data->value()));
+    CheckNewKey(ecdsa_key, key_format);
+  }
+}
+
+TEST_F(EcdsaSignKeyManagerTest, testNewKeyErrors) {
+  EcdsaSignKeyManager key_manager;
+  const KeyFactory& key_factory = key_manager.get_key_factory();
+
+  // Empty key format.
+  EcdsaKeyFormat key_format;
+  {
+    auto result = key_factory.NewKey(key_format);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not implemented yet",
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Missing params",
+                        result.status().error_message());
+  }
+
+  // Wrong encoding.
+  auto params = key_format.mutable_params();
+  {
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Only DER encoding",
+                        result.status().error_message());
+  }
+
+  // Wrong curve
+  params->set_encoding(EcdsaSignatureEncoding::DER);
+  {
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported elliptic curve",
+                        result.status().error_message());
+  }
+
+  // Wrong hash for the curve.
+  params->set_curve(EllipticCurveType::NIST_P521);
+  {
+    auto result = key_factory.NewKey(key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Only SHA512",
+                        result.status().error_message());
+  }
+
+  // Bad serialized format.
+  {
+    auto result = key_factory.NewKey("some bad serialization");
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Could not parse",
+                        result.status().error_message());
+  }
+
+  // Wrong format proto.
+  {
+    AesEaxKeyFormat wrong_key_format;
+    auto result = key_factory.NewKey(wrong_key_format);
+    EXPECT_FALSE(result.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "is not supported",
                         result.status().error_message());
   }
 }
