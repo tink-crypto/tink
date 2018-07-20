@@ -144,16 +144,22 @@ implements com.google.protobuf.ProtocolMessageEnum</pre>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/EcPointFormat.html#DO_NOT_USE_CRUNCHY_UNCOMPRESSED">DO_NOT_USE_CRUNCHY_UNCOMPRESSED</a></span></code>
+<div class="block">
+ Like UNCOMPRESSED but without the &#92;x04 prefix.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/EcPointFormat.html#UNCOMPRESSED">UNCOMPRESSED</a></span></code>
 <div class="block"><code>UNCOMPRESSED = 1;</code></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/EcPointFormat.html#UNKNOWN_FORMAT">UNKNOWN_FORMAT</a></span></code>
 <div class="block"><code>UNKNOWN_FORMAT = 0;</code></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/EcPointFormat.html#UNRECOGNIZED">UNRECOGNIZED</a></span></code>&nbsp;</td>
 </tr>
 </table>
@@ -179,11 +185,18 @@ implements com.google.protobuf.ProtocolMessageEnum</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/EcPointFormat.html#DO_NOT_USE_CRUNCHY_UNCOMPRESSED_VALUE">DO_NOT_USE_CRUNCHY_UNCOMPRESSED_VALUE</a></span></code>
+<div class="block">
+ Like UNCOMPRESSED but without the &#92;x04 prefix.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/EcPointFormat.html#UNCOMPRESSED_VALUE">UNCOMPRESSED_VALUE</a></span></code>
 <div class="block"><code>UNCOMPRESSED = 1;</code></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/proto/EcPointFormat.html#UNKNOWN_FORMAT_VALUE">UNKNOWN_FORMAT_VALUE</a></span></code>
 <div class="block"><code>UNKNOWN_FORMAT = 0;</code></div>
@@ -312,6 +325,21 @@ the order they are declared.</div>
 <div class="block"><code>COMPRESSED = 2;</code></div>
 </li>
 </ul>
+<a name="DO_NOT_USE_CRUNCHY_UNCOMPRESSED">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DO_NOT_USE_CRUNCHY_UNCOMPRESSED</h4>
+<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/EcPointFormat.html" title="enum in com.google.crypto.tink.proto">EcPointFormat</a> DO_NOT_USE_CRUNCHY_UNCOMPRESSED</pre>
+<div class="block"><pre>
+ Like UNCOMPRESSED but without the &#92;x04 prefix. Crunchy uses this format.
+ DO NOT USE unless you are a Crunchy user moving to Tink.
+ </pre>
+
+ <code>DO_NOT_USE_CRUNCHY_UNCOMPRESSED = 3;</code></div>
+</li>
+</ul>
 <a name="UNRECOGNIZED">
 <!--   -->
 </a>
@@ -360,7 +388,7 @@ the order they are declared.</div>
 <a name="COMPRESSED_VALUE">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>COMPRESSED_VALUE</h4>
 <pre>public static final&nbsp;int COMPRESSED_VALUE</pre>
@@ -368,6 +396,25 @@ the order they are declared.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../../constant-values.html#com.google.crypto.tink.proto.EcPointFormat.COMPRESSED_VALUE">Constant Field Values</a></dd>
+</dl>
+</li>
+</ul>
+<a name="DO_NOT_USE_CRUNCHY_UNCOMPRESSED_VALUE">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>DO_NOT_USE_CRUNCHY_UNCOMPRESSED_VALUE</h4>
+<pre>public static final&nbsp;int DO_NOT_USE_CRUNCHY_UNCOMPRESSED_VALUE</pre>
+<div class="block"><pre>
+ Like UNCOMPRESSED but without the &#92;x04 prefix. Crunchy uses this format.
+ DO NOT USE unless you are a Crunchy user moving to Tink.
+ </pre>
+
+ <code>DO_NOT_USE_CRUNCHY_UNCOMPRESSED = 3;</code></div>
+<dl>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../../constant-values.html#com.google.crypto.tink.proto.EcPointFormat.DO_NOT_USE_CRUNCHY_UNCOMPRESSED_VALUE">Constant Field Values</a></dd>
 </dl>
 </li>
 </ul>
