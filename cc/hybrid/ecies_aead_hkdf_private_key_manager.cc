@@ -20,6 +20,7 @@
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
+#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
@@ -28,7 +29,6 @@
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/ecies_aead_hkdf.pb.h"
-#include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -39,9 +39,6 @@ using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfParams;
 using google::crypto::tink::EciesAeadDemParams;
 using google::crypto::tink::EciesHkdfKemParams;
-using google::crypto::tink::EcPointFormat;
-using google::crypto::tink::EllipticCurveType;
-using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 using portable_proto::MessageLite;
@@ -82,7 +79,7 @@ StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPrivateKeyFactory::NewKey(
   }
   const EciesAeadHkdfKeyFormat& ecies_key_format =
         reinterpret_cast<const EciesAeadHkdfKeyFormat&>(key_format);
-  Status status = EciesAeadHkdfPrivateKeyManager::Validate(ecies_key_format);
+  Status status = EciesAeadHkdfPublicKeyManager::Validate(ecies_key_format);
   if (!status.ok()) return status;
 
   // Generate new EC key.
@@ -195,46 +192,13 @@ EciesAeadHkdfPrivateKeyManager::GetPrimitiveImpl(
 
 // static
 Status EciesAeadHkdfPrivateKeyManager::Validate(
-    const EciesAeadHkdfParams& params) {
-  // Validate KEM params.
-  if (!params.has_kem_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing kem_params.");
-  }
-  if (params.kem_params().curve_type() == EllipticCurveType::UNKNOWN_CURVE ||
-      params.kem_params().hkdf_hash_type() == HashType::UNKNOWN_HASH) {
-    return Status(util::error::INVALID_ARGUMENT, "Invalid kem_params.");
-  }
-
-  // Validate DEM params.
-  if (!params.has_dem_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing dem_params.");
-  }
-  if (!params.dem_params().has_aead_dem()) {
-    return Status(util::error::INVALID_ARGUMENT, "Invalid dem_params.");
-  }
-
-  // Validate EC point format.
-  if (params.ec_point_format() == EcPointFormat::UNKNOWN_FORMAT) {
-    return Status(util::error::INVALID_ARGUMENT, "Unknown EC point format.");
-  }
-  return Status::OK;
-}
-
-// static
-Status EciesAeadHkdfPrivateKeyManager::Validate(
     const EciesAeadHkdfPrivateKey& key) {
   Status status = ValidateVersion(key.version(), kVersion);
   if (!status.ok()) return status;
-  return Validate(key.public_key().params());
-}
-
-// static
-Status EciesAeadHkdfPrivateKeyManager::Validate(
-    const EciesAeadHkdfKeyFormat& key_format) {
-  if (!key_format.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+  if (!key.has_public_key()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing public_key.");
   }
-  return Validate(key_format.params());
+  return EciesAeadHkdfPublicKeyManager::Validate(key.public_key());
 }
 
 }  // namespace tink

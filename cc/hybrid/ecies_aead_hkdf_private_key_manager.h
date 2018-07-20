@@ -79,11 +79,7 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
   const google::crypto::tink::EciesAeadHkdfPrivateKey& ecies_private_key) const;
 
   static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfParams& params);
-  static crypto::tink::util::Status Validate(
       const google::crypto::tink::EciesAeadHkdfPrivateKey& key);
-  static crypto::tink::util::Status Validate(
-      const google::crypto::tink::EciesAeadHkdfKeyFormat& key_format);
 };
 
 }  // namespace tink

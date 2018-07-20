@@ -64,6 +64,10 @@ class EciesAeadHkdfPublicKeyManager : public KeyManager<HybridEncrypt> {
   virtual ~EciesAeadHkdfPublicKeyManager() {}
 
  private:
+  // Friends that re-use proto validation helpers.
+  friend class EciesAeadHkdfPrivateKeyFactory;
+  friend class EciesAeadHkdfPrivateKeyManager;
+
   static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
 
   std::string key_type_;
@@ -77,6 +81,8 @@ class EciesAeadHkdfPublicKeyManager : public KeyManager<HybridEncrypt> {
       const google::crypto::tink::EciesAeadHkdfParams& params);
   static crypto::tink::util::Status Validate(
       const google::crypto::tink::EciesAeadHkdfPublicKey& key);
+  static crypto::tink::util::Status Validate(
+      const google::crypto::tink::EciesAeadHkdfKeyFormat& key_format);
 };
 
 }  // namespace tink

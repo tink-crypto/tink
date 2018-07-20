@@ -26,6 +26,7 @@
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/ecies_aead_hkdf.pb.h"
+#include "proto/common.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -34,6 +35,9 @@ namespace tink {
 using google::crypto::tink::EciesAeadHkdfPublicKey;
 using google::crypto::tink::EciesAeadHkdfKeyFormat;
 using google::crypto::tink::EciesAeadHkdfParams;
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
 using portable_proto::MessageLite;
@@ -142,6 +146,27 @@ EciesAeadHkdfPublicKeyManager::GetPrimitiveImpl(
 // static
 Status EciesAeadHkdfPublicKeyManager::Validate(
     const EciesAeadHkdfParams& params) {
+  // Validate KEM params.
+  if (!params.has_kem_params()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing kem_params.");
+  }
+  if (params.kem_params().curve_type() == EllipticCurveType::UNKNOWN_CURVE ||
+      params.kem_params().hkdf_hash_type() == HashType::UNKNOWN_HASH) {
+    return Status(util::error::INVALID_ARGUMENT, "Invalid kem_params.");
+  }
+
+  // Validate DEM params.
+  if (!params.has_dem_params()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing dem_params.");
+  }
+  if (!params.dem_params().has_aead_dem()) {
+    return Status(util::error::INVALID_ARGUMENT, "Invalid dem_params.");
+  }
+
+  // Validate EC point format.
+  if (params.ec_point_format() == EcPointFormat::UNKNOWN_FORMAT) {
+    return Status(util::error::INVALID_ARGUMENT, "Unknown EC point format.");
+  }
   return Status::OK;
 }
 
@@ -150,7 +175,19 @@ Status EciesAeadHkdfPublicKeyManager::Validate(
     const EciesAeadHkdfPublicKey& key) {
   Status status = ValidateVersion(key.version(), kVersion);
   if (!status.ok()) return status;
+  if (!key.has_params()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+  }
   return Validate(key.params());
+}
+
+// static
+Status EciesAeadHkdfPublicKeyManager::Validate(
+    const EciesAeadHkdfKeyFormat& key_format) {
+  if (!key_format.has_params()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+  }
+  return Validate(key_format.params());
 }
 
 }  // namespace tink

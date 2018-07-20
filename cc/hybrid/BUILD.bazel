@@ -212,6 +212,7 @@ cc_library(
     visibility = ["//objc/hybrid:__pkg__"],
     deps = [
         ":ecies_aead_hkdf_hybrid_decrypt",
+        ":ecies_aead_hkdf_public_key_manager",
         "//cc:hybrid_decrypt",
         "//cc:key_manager",
         "//cc/subtle:subtle_util_boringssl",
@@ -220,7 +221,6 @@ cc_library(
         "//cc/util:protobuf_helper",
         "//cc/util:status",
         "//cc/util:statusor",
-        "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
     ],
