@@ -156,6 +156,17 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P256_IEEE_P1363">ECDSA_P256_IEEE_P1363</a></span></code>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA256
+   Curve: NIST P-256
+   Signature encoding: IEEE_P1363 (this is the encoding that JWS and WebCrypto use).</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P384">ECDSA_P384</a></span></code>
 <div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
 
@@ -165,6 +176,17 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
    Signature encoding: DER (this is the encoding that Java uses).</div>
 </td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P384_IEEE_P1363">ECDSA_P384_IEEE_P1363</a></span></code>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA512
+   Curve: NIST P-384
+   Signature encoding: IEEE_P1363 (this is the encoding that JWS and WebCrypto use).</div>
+</td>
+</tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P521">ECDSA_P521</a></span></code>
@@ -172,11 +194,22 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 
  
    Hash function: SHA512
-   Curve: NIST P-384
+   Curve: NIST P-521
    Signature encoding: DER (this is the encoding that Java uses).</div>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ECDSA_P521_IEEE_P1363">ECDSA_P521_IEEE_P1363</a></span></code>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA512
+   Curve: NIST P-521
+   Signature encoding: IEEE_P1363 (this is the encoding that JWS and WebCrypto use).</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#ED25519">ED25519</a></span></code>
 <div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/Ed25519PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>Ed25519PrivateKey</code></a>.</div>
@@ -285,8 +318,56 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 
  <ul>
    <li>Hash function: SHA512
-   <li>Curve: NIST P-384
+   <li>Curve: NIST P-521
    <li>Signature encoding: DER (this is the encoding that Java uses).
+ </ul></div>
+</li>
+</ul>
+<a name="ECDSA_P256_IEEE_P1363">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ECDSA_P256_IEEE_P1363</h4>
+<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> ECDSA_P256_IEEE_P1363</pre>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Hash function: SHA256
+   <li>Curve: NIST P-256
+   <li>Signature encoding: IEEE_P1363 (this is the encoding that JWS and WebCrypto use).
+ </ul></div>
+</li>
+</ul>
+<a name="ECDSA_P384_IEEE_P1363">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ECDSA_P384_IEEE_P1363</h4>
+<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> ECDSA_P384_IEEE_P1363</pre>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Hash function: SHA512
+   <li>Curve: NIST P-384
+   <li>Signature encoding: IEEE_P1363 (this is the encoding that JWS and WebCrypto use).
+ </ul></div>
+</li>
+</ul>
+<a name="ECDSA_P521_IEEE_P1363">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>ECDSA_P521_IEEE_P1363</h4>
+<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> ECDSA_P521_IEEE_P1363</pre>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>EcdsaPrivateKey</code></a> with the following parameters:
+
+ <ul>
+   <li>Hash function: SHA512
+   <li>Curve: NIST P-521
+   <li>Signature encoding: IEEE_P1363 (this is the encoding that JWS and WebCrypto use).
  </ul></div>
 </li>
 </ul>
