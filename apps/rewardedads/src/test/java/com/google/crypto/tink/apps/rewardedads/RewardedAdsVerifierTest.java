@@ -25,6 +25,7 @@ import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.util.KeysDownloader;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -75,7 +76,9 @@ public class RewardedAdsVerifierTest {
   private static String signUrl(String rewardUrl, String privateKey, long keyId) throws Exception {
     EcdsaSignJce signer =
         new EcdsaSignJce(
-            EllipticCurves.getEcPrivateKey(Base64.decode(privateKey)), "SHA256WithECDSA");
+            EllipticCurves.getEcPrivateKey(Base64.decode(privateKey)),
+            "SHA256WithECDSA",
+            EcdsaEncoding.DER);
     String queryString = new URI(rewardUrl).getQuery();
     return buildUrl(rewardUrl, signer.sign(queryString.getBytes(UTF_8)), keyId);
   }
@@ -126,9 +129,9 @@ public class RewardedAdsVerifierTest {
     String decodedQueryString = "foo=hello world&bar=user@gmail.com";
     EcdsaSignJce signer =
         new EcdsaSignJce(
-            EllipticCurves.getEcPrivateKey(
-                Base64.decode(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)),
-            "SHA256WithECDSA");
+            EllipticCurves.getEcPrivateKey(Base64.decode(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)),
+            "SHA256WithECDSA",
+            EcdsaEncoding.DER);
     byte[] signature = signer.sign(decodedQueryString.getBytes(UTF_8));
     String signedUrl = buildUrl(rewardUrl, signature, KEY_ID);
     verifier.verify(signedUrl);
@@ -214,7 +217,8 @@ public class RewardedAdsVerifierTest {
     EcdsaSignJce signer =
         new EcdsaSignJce(
             EllipticCurves.getEcPrivateKey(Base64.decode(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)),
-            "SHA256WithECDSA");
+            "SHA256WithECDSA",
+            EcdsaEncoding.DER);
     RewardedAdsVerifier verifier =
         new RewardedAdsVerifier.Builder()
             .setVerifyingPublicKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)

@@ -62,7 +62,10 @@ class EcdsaVerifyKeyManager implements KeyManager<PublicKeyVerify> {
             SigUtil.toCurveType(keyProto.getParams().getCurve()),
             keyProto.getX().toByteArray(),
             keyProto.getY().toByteArray());
-    return new EcdsaVerifyJce(publicKey, SigUtil.toEcdsaAlgo(keyProto.getParams().getHashType()));
+    return new EcdsaVerifyJce(
+        publicKey,
+        SigUtil.toEcdsaAlgo(keyProto.getParams().getHashType()),
+        SigUtil.toEcdsaEncoding(keyProto.getParams().getEncoding()));
   }
 
   /**

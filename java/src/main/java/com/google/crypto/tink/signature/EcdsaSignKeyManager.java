@@ -70,7 +70,9 @@ class EcdsaSignKeyManager implements PrivateKeyManager<PublicKeySign> {
             SigUtil.toCurveType(keyProto.getPublicKey().getParams().getCurve()),
             keyProto.getKeyValue().toByteArray());
     return new EcdsaSignJce(
-        privateKey, SigUtil.toEcdsaAlgo(keyProto.getPublicKey().getParams().getHashType()));
+        privateKey,
+        SigUtil.toEcdsaAlgo(keyProto.getPublicKey().getParams().getHashType()),
+        SigUtil.toEcdsaEncoding(keyProto.getPublicKey().getParams().getEncoding()));
   }
 
   /**

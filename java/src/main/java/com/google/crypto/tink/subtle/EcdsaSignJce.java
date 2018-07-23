@@ -17,9 +17,11 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
+import java.security.spec.EllipticCurve;
 
 /**
  * ECDSA signing with JCE.
@@ -29,10 +31,12 @@ import java.security.interfaces.ECPrivateKey;
 public final class EcdsaSignJce implements PublicKeySign {
   private final ECPrivateKey privateKey;
   private final String signatureAlgorithm;
+  private final EcdsaEncoding encoding;
 
-  public EcdsaSignJce(final ECPrivateKey priv, String signatureAlgorithm) {
+  public EcdsaSignJce(final ECPrivateKey priv, String signatureAlgorithm, EcdsaEncoding encoding) {
     this.privateKey = priv;
     this.signatureAlgorithm = signatureAlgorithm;
+    this.encoding = encoding;
   }
 
   @Override
@@ -40,6 +44,12 @@ public final class EcdsaSignJce implements PublicKeySign {
     Signature signer = EngineFactory.SIGNATURE.getInstance(signatureAlgorithm);
     signer.initSign(privateKey);
     signer.update(data);
-    return signer.sign();
+    byte[] signature = signer.sign();
+    if (encoding == EcdsaEncoding.IEEE_P1363) {
+      EllipticCurve curve = privateKey.getParams().getCurve();
+      signature =
+          EllipticCurves.ecdsaDer2Ieee(signature, 2 * EllipticCurves.fieldSizeInBytes(curve));
+    }
+    return signature;
   }
 }

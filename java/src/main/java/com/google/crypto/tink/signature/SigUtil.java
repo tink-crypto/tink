@@ -54,9 +54,9 @@ final class SigUtil {
     HashType hash = params.getHashType();
     EllipticCurveType curve = params.getCurve();
     switch (encoding) {
-      case DER:
+      case DER: // fall through
+      case IEEE_P1363:
         break;
-        // TODO(b/74249423): support other signature encodings.
       default:
         throw new GeneralSecurityException("unsupported signature encoding");
     }
@@ -93,6 +93,22 @@ final class SigUtil {
         return EllipticCurves.CurveType.NIST_P521;
       default:
         throw new GeneralSecurityException("unknown curve type: " + type);
+    }
+  }
+
+  /**
+   * Converts protobuf enum {@code EcdsaSignatureEncoding} to raw Java enum {code
+   * EllipticCurves.EcdsaEncoding}.
+   */
+  public static EllipticCurves.EcdsaEncoding toEcdsaEncoding(EcdsaSignatureEncoding encoding)
+      throws GeneralSecurityException {
+    switch (encoding) {
+      case IEEE_P1363:
+        return EllipticCurves.EcdsaEncoding.IEEE_P1363;
+      case DER:
+        return EllipticCurves.EcdsaEncoding.DER;
+      default:
+        throw new GeneralSecurityException("unknown ECDSA encoding: " + encoding);
     }
   }
 }

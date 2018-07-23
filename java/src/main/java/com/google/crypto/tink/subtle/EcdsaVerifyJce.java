@@ -17,9 +17,11 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.interfaces.ECPublicKey;
+import java.security.spec.EllipticCurve;
 
 /**
  * ECDSA verifying with JCE.
@@ -29,17 +31,27 @@ import java.security.interfaces.ECPublicKey;
 public final class EcdsaVerifyJce implements PublicKeyVerify {
   private final ECPublicKey publicKey;
   private final String signatureAlgorithm;
+  private final EcdsaEncoding encoding;
 
-  public EcdsaVerifyJce(final ECPublicKey pubKey, String signatureAlgorithm)
+  public EcdsaVerifyJce(final ECPublicKey pubKey, String signatureAlgorithm, EcdsaEncoding encoding)
       throws GeneralSecurityException {
     EllipticCurves.checkPublicKey(pubKey);
     this.publicKey = pubKey;
     this.signatureAlgorithm = signatureAlgorithm;
+    this.encoding = encoding;
   }
 
   @Override
   public void verify(final byte[] signature, final byte[] data) throws GeneralSecurityException {
-    if (!EllipticCurves.isValidDerEncoding(signature)) {
+    byte[] derSignature = signature;
+    if (encoding == EcdsaEncoding.IEEE_P1363) {
+      EllipticCurve curve = publicKey.getParams().getCurve();
+      if (signature.length != 2 * EllipticCurves.fieldSizeInBytes(curve)) {
+        throw new GeneralSecurityException("Invalid signature");
+      }
+      derSignature = EllipticCurves.ecdsaIeee2Der(signature);
+    }
+    if (!EllipticCurves.isValidDerEncoding(derSignature)) {
       throw new GeneralSecurityException("Invalid signature");
     }
     Signature verifier = EngineFactory.SIGNATURE.getInstance(signatureAlgorithm);
@@ -47,7 +59,7 @@ public final class EcdsaVerifyJce implements PublicKeyVerify {
     verifier.update(data);
     boolean verified = false;
     try {
-      verified = verifier.verify(signature);
+      verified = verifier.verify(derSignature);
     } catch (java.lang.RuntimeException ex) {
       verified = false;
     }

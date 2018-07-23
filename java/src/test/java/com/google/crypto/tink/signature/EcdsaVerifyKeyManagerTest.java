@@ -26,7 +26,6 @@ import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Random;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -35,7 +34,6 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
-import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -80,9 +78,7 @@ public class EcdsaVerifyKeyManagerTest {
       }
       this.pubX = TestUtil.hexDecode(pubX.toLowerCase());
       this.pubY = TestUtil.hexDecode(pubY.toLowerCase());
-      this.sig =
-          derEncodeSignature(
-              TestUtil.hexDecode(r.toLowerCase()), TestUtil.hexDecode(s.toLowerCase()));
+      this.sig = TestUtil.hexDecode((r + s).toLowerCase());
       this.hashType = hashType;
       this.curveType = curveType;
     }
@@ -219,34 +215,9 @@ public class EcdsaVerifyKeyManagerTest {
     }
   }
 
-  @Test
-  public void testGetPrimitiveWithUnsupportedEncoding() throws Exception {
-    ECParameterSpec ecParams =
-        EllipticCurves.getCurveSpec(SigUtil.toCurveType(EllipticCurveType.NIST_P256));
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
-    keyGen.initialize(ecParams);
-    KeyPair keyPair = keyGen.generateKeyPair();
-    ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
-    ECPrivateKey unusedPrivKey = (ECPrivateKey) keyPair.getPrivate();
-
-    // Create PublicKeyVerify.
-    ECPoint w = pubKey.getW();
-    try {
-      PublicKeyVerify unusedVerifier =
-          createVerifier(
-              HashType.SHA256,
-              EllipticCurveType.NIST_P256,
-              EcdsaSignatureEncoding.IEEE_P1363,
-              w.getAffineX().toByteArray(),
-              w.getAffineY().toByteArray());
-      fail("Unsupported encoding, should have thrown exception.");
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-  }
-
   private PublicKeyVerify createVerifier(RfcTestVector t) throws Exception {
-    return createVerifier(t.hashType, t.curveType, EcdsaSignatureEncoding.DER, t.pubX, t.pubY);
+    return createVerifier(
+        t.hashType, t.curveType, EcdsaSignatureEncoding.IEEE_P1363, t.pubX, t.pubY);
   }
 
   private PublicKeyVerify createVerifier(
@@ -259,43 +230,5 @@ public class EcdsaVerifyKeyManagerTest {
     EcdsaPublicKey ecdsaPubKey = TestUtil.createEcdsaPubKey(hashType, curve, encoding, pubX, pubY);
     EcdsaVerifyKeyManager verifyManager = new EcdsaVerifyKeyManager();
     return verifyManager.getPrimitive(ecdsaPubKey);
-  }
-
-  private byte[] derEncodeSignature(byte[] r, byte[] s) {
-    byte[] derR = derEncodeInteger(r);
-    byte[] derS = derEncodeInteger(s);
-    byte[] len = derEncodeLength(derR.length + derS.length);
-
-    byte[] sig = new byte[1 + len.length + derR.length + derS.length];
-    sig[0] = (byte) 0x30; // DER Sequence tag
-    System.arraycopy(len, 0, sig, 1, len.length);
-    System.arraycopy(derR, 0, sig, 1 + len.length, derR.length);
-    System.arraycopy(derS, 0, sig, 1 + len.length + derR.length, derS.length);
-    return sig;
-  }
-
-  private byte[] derEncodeInteger(byte[] x) {
-    ByteBuffer buf = ByteBuffer.allocate(x.length + 3);
-    buf.put((byte) 0x02);
-    byte[] derXLen = derEncodeLength(x.length);
-    if ((x[0] & 0x80) != 0) {
-      derXLen = derEncodeLength(x.length + 1);
-      buf.put(derXLen);
-      buf.put((byte) 0);
-    } else {
-      buf.put(derXLen);
-    }
-    buf.put(x);
-    return Arrays.copyOf(buf.array(), buf.position());
-  }
-
-  private byte[] derEncodeLength(int length) {
-    String res = "";
-    if (length >= 128) {
-      // Long form
-      int lenOfLength = Integer.toHexString(length).length() / 2;
-      res += Integer.toHexString(lenOfLength + 128);
-    }
-    return TestUtil.hexDecode(res + Integer.toHexString(length));
   }
 }

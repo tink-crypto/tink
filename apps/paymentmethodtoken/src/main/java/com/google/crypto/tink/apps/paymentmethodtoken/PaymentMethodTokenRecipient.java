@@ -20,6 +20,7 @@ import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -440,7 +441,10 @@ public final class PaymentMethodTokenRecipient {
     for (SenderVerifyingKeysProvider verifyingKeysProvider : senderVerifyingKeysProviders) {
       for (ECPublicKey publicKey : verifyingKeysProvider.get(protocolVersion)) {
         EcdsaVerifyJce verifier =
-            new EcdsaVerifyJce(publicKey, PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO);
+            new EcdsaVerifyJce(
+                publicKey,
+                PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO,
+                EcdsaEncoding.DER);
         for (byte[] signature : signatures) {
           try {
             verifier.verify(signature, signedBytes);

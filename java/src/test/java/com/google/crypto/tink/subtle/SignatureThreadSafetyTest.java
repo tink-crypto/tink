@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
@@ -217,8 +218,8 @@ public class SignatureThreadSafetyTest {
     KeyPair keyPair = keyGen.generateKeyPair();
     ECPublicKey pub = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
-    EcdsaSignJce signer = new EcdsaSignJce(priv, "SHA256WithECDSA");
-    EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, "SHA256WithECDSA");
+    EcdsaSignJce signer = new EcdsaSignJce(priv, "SHA256WithECDSA", EcdsaEncoding.DER);
+    EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, "SHA256WithECDSA", EcdsaEncoding.DER);
 
     byte[] msg = Random.randBytes(20);
     testSigningSameMessage(signer, verifier, false, msg, 5, 20);

@@ -21,6 +21,7 @@ import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
@@ -86,7 +87,8 @@ public final class PaymentMethodTokenSender {
             builder.senderIntermediateSigningKey != null
                 ? builder.senderIntermediateSigningKey
                 : builder.senderSigningKey,
-            PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO);
+            PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO,
+            EcdsaEncoding.DER);
     this.senderId = builder.senderId;
     if (protocolVersionConfig.isEncryptionRequired) {
       this.hybridEncrypter =

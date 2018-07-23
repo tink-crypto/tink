@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.WycheproofTestUtil;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -79,7 +80,7 @@ public class EcdsaVerifyJceTest {
         EcdsaVerifyJce verifier;
         try {
           ECPublicKey pubKey = (ECPublicKey) kf.generatePublic(x509keySpec);
-          verifier = new EcdsaVerifyJce(pubKey, signatureAlgorithm);
+          verifier = new EcdsaVerifyJce(pubKey, signatureAlgorithm, EcdsaEncoding.DER);
         } catch (GeneralSecurityException ignored) {
           // Invalid or unsupported public key.
           System.out.printf("Skipping %s, exception: %s", tcId, ignored);
@@ -118,13 +119,18 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testBasic() throws Exception {
-    testBasic(EllipticCurves.getNistP256Params(), "SHA256WithECDSA");
-    testBasic(EllipticCurves.getNistP384Params(), "SHA384WithECDSA");
-    testBasic(EllipticCurves.getNistP384Params(), "SHA512WithECDSA");
-    testBasic(EllipticCurves.getNistP521Params(), "SHA512WithECDSA");
+    testAgainstJceSignatureInstance(EllipticCurves.getNistP256Params(), "SHA256WithECDSA");
+    testAgainstJceSignatureInstance(EllipticCurves.getNistP384Params(), "SHA384WithECDSA");
+    testAgainstJceSignatureInstance(EllipticCurves.getNistP384Params(), "SHA512WithECDSA");
+    testAgainstJceSignatureInstance(EllipticCurves.getNistP521Params(), "SHA512WithECDSA");
+    testSignVerify(EllipticCurves.getNistP256Params(), "SHA256WithECDSA");
+    testSignVerify(EllipticCurves.getNistP384Params(), "SHA384WithECDSA");
+    testSignVerify(EllipticCurves.getNistP384Params(), "SHA512WithECDSA");
+    testSignVerify(EllipticCurves.getNistP521Params(), "SHA512WithECDSA");
   }
 
-  private static void testBasic(ECParameterSpec ecParams, String algo) throws Exception {
+  private static void testAgainstJceSignatureInstance(ECParameterSpec ecParams, String algo)
+      throws Exception {
     for (int i = 0; i < 100; i++) {
       KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
       keyGen.initialize(ecParams);
@@ -140,13 +146,36 @@ public class EcdsaVerifyJceTest {
       byte[] signature = signer.sign();
 
       // Verify with EcdsaVerifyJce.
-      EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, algo);
+      EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, algo, EcdsaEncoding.DER);
       verifier.verify(signature, message.getBytes("UTF-8"));
     }
   }
 
+  private static void testSignVerify(ECParameterSpec ecParams, String algo) throws Exception {
+    for (int i = 0; i < 100; i++) {
+      KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+      keyGen.initialize(ecParams);
+      KeyPair keyPair = keyGen.generateKeyPair();
+      ECPublicKey pub = (ECPublicKey) keyPair.getPublic();
+      ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
+
+      EcdsaEncoding[] encodings = new EcdsaEncoding[] {EcdsaEncoding.IEEE_P1363, EcdsaEncoding.DER};
+      for (EcdsaEncoding encoding : encodings) {
+        // Sign with EcdsaSignJce
+        EcdsaSignJce signer = new EcdsaSignJce(priv, algo, encoding);
+
+        byte[] message = "Hello".getBytes("UTF-8");
+        byte[] signature = signer.sign(message);
+
+        // Verify with EcdsaVerifyJce.
+        EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, algo, encoding);
+        verifier.verify(signature, message);
+      }
+    }
+  }
+
   @Test
-  public void testBitFlip() throws Exception {
+  public void testModification() throws Exception {
     ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
@@ -154,25 +183,52 @@ public class EcdsaVerifyJceTest {
     ECPublicKey pub = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
 
-    // Sign with JCE's Signature.
-    Signature signer = Signature.getInstance("SHA256WithECDSA");
-    signer.initSign(priv);
-    String message = "Hello";
-    signer.update(message.getBytes("UTF-8"));
-    byte[] signature = signer.sign();
+    EcdsaEncoding[] encodings = new EcdsaEncoding[] {EcdsaEncoding.IEEE_P1363, EcdsaEncoding.DER};
+    for (EcdsaEncoding encoding : encodings) {
+      // Sign with EcdsaSignJce
+      EcdsaSignJce signer = new EcdsaSignJce(priv, "SHA256WithECDSA", encoding);
+      byte[] message = "Hello".getBytes("UTF-8");
+      byte[] signature = signer.sign(message);
 
-    // Verify with EcdsaVerifyJce.
-    EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, "SHA256WithECDSA");
-    for (int i = 0; i < signature.length; i++) {
-      for (int j = 0; j < 8; j++) {
-        byte[] modifiedSignature = Arrays.copyOf(signature, signature.length);
-        modifiedSignature[i] = (byte) (modifiedSignature[i] ^ (1 << j));
+      // Verify with EcdsaVerifyJce.
+      EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, "SHA256WithECDSA", encoding);
+
+      // Flip bits.
+      for (int i = 0; i < signature.length; i++) {
+        for (int j = 0; j < 8; j++) {
+          byte[] modifiedSignature = Arrays.copyOf(signature, signature.length);
+          modifiedSignature[i] = (byte) (modifiedSignature[i] ^ (1 << j));
+          try {
+            verifier.verify(modifiedSignature, message);
+            fail("Invalid signature, should have thrown exception");
+          } catch (GeneralSecurityException expected) {
+            // Expected.
+          }
+        }
+      }
+
+      // Truncate the signature.
+      for (int i = 0; i < signature.length; i++) {
+        byte[] modifiedSignature = Arrays.copyOf(signature, i);
         try {
-          verifier.verify(modifiedSignature, message.getBytes("UTF-8"));
+          verifier.verify(modifiedSignature, message);
           fail("Invalid signature, should have thrown exception");
         } catch (GeneralSecurityException expected) {
           // Expected.
         }
+      }
+
+      // Encodings mismatch.
+      verifier =
+          new EcdsaVerifyJce(
+              pub,
+              "SHA256WithECDSA",
+              encoding == EcdsaEncoding.IEEE_P1363 ? EcdsaEncoding.DER : EcdsaEncoding.IEEE_P1363);
+      try {
+        verifier.verify(signature, message);
+        fail("Invalid signature, should have thrown exception");
+      } catch (GeneralSecurityException expected) {
+        // Expected.
       }
     }
   }

@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -48,7 +49,7 @@ public class EcdsaSignJceTest {
 
     // Sign with EcdsaSign.
     String message = "Hello";
-    EcdsaSignJce signer = new EcdsaSignJce(priv, "SHA256WithECDSA");
+    EcdsaSignJce signer = new EcdsaSignJce(priv, "SHA256WithECDSA", EcdsaEncoding.DER);
     byte[] signature = signer.sign(message.getBytes("UTF-8"));
 
     // Verify with JCE's Signature.
@@ -59,7 +60,7 @@ public class EcdsaSignJceTest {
   }
 
   @Test
-  public void testBitFlip() throws Exception {
+  public void testBitFlipAgainstSignatureInstance() throws Exception {
     ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
     keyGen.initialize(ecParams);
@@ -69,7 +70,7 @@ public class EcdsaSignJceTest {
 
     // Sign with EcdsaSign.
     String message = "Hello";
-    EcdsaSignJce signer = new EcdsaSignJce(priv, "SHA256WithECDSA");
+    EcdsaSignJce signer = new EcdsaSignJce(priv, "SHA256WithECDSA", EcdsaEncoding.DER);
     byte[] signature = signer.sign(message.getBytes("UTF-8"));
 
     for (int i = 0; i < signature.length; i++) {

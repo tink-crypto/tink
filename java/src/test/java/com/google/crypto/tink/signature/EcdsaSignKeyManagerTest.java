@@ -151,6 +151,9 @@ public class EcdsaSignKeyManagerTest {
     testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P256);
     testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P384);
     testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P521);
+    testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P256_IEEE_P1363);
+    testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P384_IEEE_P1363);
+    testNewKeyWithVerifier(SignatureKeyTemplates.ECDSA_P521_IEEE_P1363);
   }
 
   @Test
@@ -173,24 +176,6 @@ public class EcdsaSignKeyManagerTest {
       fail("Corrupted format, should have thrown exception");
     } catch (GeneralSecurityException expected) {
       // Expected
-    }
-  }
-
-  @Test
-  public void testNewKeyUnsupportedEncoding() throws Exception {
-    EcdsaSignKeyManager signManager = new EcdsaSignKeyManager();
-    EcdsaParams ecdsaParams =
-        EcdsaParams.newBuilder()
-            .setHashType(HashType.SHA256)
-            .setCurve(EllipticCurveType.NIST_P256)
-            .setEncoding(EcdsaSignatureEncoding.IEEE_P1363)
-            .build();
-    EcdsaKeyFormat ecdsaFormat = EcdsaKeyFormat.newBuilder().setParams(ecdsaParams).build();
-    try {
-      signManager.newKey(ecdsaFormat);
-      fail("Unsupported encoding, should have thrown exception");
-    } catch (GeneralSecurityException expecpted) {
-      // Raw encoding is not supported yet.
     }
   }
 

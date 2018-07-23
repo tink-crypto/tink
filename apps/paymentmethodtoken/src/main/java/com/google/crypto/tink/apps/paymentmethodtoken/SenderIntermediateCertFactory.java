@@ -20,6 +20,7 @@ import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.util.ArrayList;
@@ -67,7 +68,9 @@ public class SenderIntermediateCertFactory {
     for (ECPrivateKey senderSigningKey : senderSigningKeys) {
       this.signers.add(
           new EcdsaSignJce(
-              senderSigningKey, PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO));
+              senderSigningKey,
+              PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO,
+              EcdsaEncoding.DER));
     }
     this.intermediateSigningKey = intermediateSigningKey;
     this.expiration = expiration;
