@@ -648,7 +648,8 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
             testVector['IV'] + testVector['CT'] + testVector['Tag']);
         const aad = Bytes.fromHex(testVector['AAD']);
         try {
-          await aead.decrypt(ciphertext, aad);
+          const plaintext = await aead.decrypt(ciphertext, aad);
+          assertEquals(Bytes.toHex(plaintext), testVector['PT']);
         } catch (e) {
           fail(e);
         }
