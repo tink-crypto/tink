@@ -169,6 +169,48 @@ objc_proto_compile(
 )
 
 # -----------------------------------------------
+# rsa_ssa_pkcs1
+# -----------------------------------------------
+proto_library(
+    name = "rsa_ssa_pkcs1_proto",
+    srcs = [
+        "rsa_ssa_pkcs1.proto",
+    ],
+    deps = [
+        ":common_proto",
+    ],
+)
+
+cc_proto_library(
+    name = "rsa_ssa_pkcs1_cc_proto",
+    deps = [":rsa_ssa_pkcs1_proto"],
+)
+
+java_proto_library(
+    name = "rsa_ssa_pkcs1_java_proto",
+    deps = [":rsa_ssa_pkcs1_proto"],
+)
+
+java_lite_proto_library(
+    name = "rsa_ssa_pkcs1_java_proto_lite",
+    deps = [":rsa_ssa_pkcs1_proto"],
+)
+
+go_proto_library(
+    name = "rsa_ssa_pkcs1_go_proto",
+    importpath = "github.com/google/tink/proto/rsa_ssa_pkcs1_go_proto",
+    proto = ":rsa_ssa_pkcs1_proto",
+    deps = [":common_go_proto"],
+)
+
+objc_proto_compile(
+    name = "rsa_ssa_pkcs1_objc_pb",
+    protos = ["rsa_ssa_pkcs1.proto"],
+    tags = ["manual"],
+    deps = [":common_objc_pb"],
+)
+
+# -----------------------------------------------
 # rsa_ssa_pss
 # -----------------------------------------------
 proto_library(

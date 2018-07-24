@@ -14,9 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Definitions for RSA SSA (Signature Schemes with Appendix) using PSS
-// (Probabilistic Signature Scheme ) encoding
-// (https://tools.ietf.org/html/rfc8017#section-8.1).
+// Definitions for RSA SSA (Signature Schemes with Appendix) using PKCS1-v1_5
+// encoding (https://tools.ietf.org/html/rfc8017#section-8.2).
 syntax = "proto3";
 
 package google.crypto.tink;
@@ -25,28 +24,21 @@ import "proto/common.proto";
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option objc_class_prefix = "TINKPB";
-option go_package = "github.com/google/tink/proto/rsa_ssa_pss_go_proto";
+option go_package = "github.com/google/tink/proto/rsa_ssa_pkcs1_go_proto";
 
-message RsaSsaPssParams {
+message RsaSsaPkcs1Params {
   // Hash function used in computing hash of the signing message
-  // (see https://tools.ietf.org/html/rfc8017#section-9.1.1).
+  // (see https://tools.ietf.org/html/rfc8017#section-9.2).
   // Required.
-  HashType sig_hash = 1;
-  // Hash function used in MGF1 (a mask generation function based on a
-  // hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).
-  // Required.
-  HashType mgf1_hash = 2;
-  // Salt length (see https://tools.ietf.org/html/rfc8017#section-9.1.1)
-  // Required.
-  int32 salt_length = 3;
+  HashType hash_type = 1;
 }
 
-// key_type: type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey
-message RsaSsaPssPublicKey {
+// key_type: type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey
+message RsaSsaPkcs1PublicKey {
   // Required.
   uint32 version = 1;
   // Required.
-  RsaSsaPssParams params = 2;
+  RsaSsaPkcs1Params params = 2;
   // Modulus.
   // Unsigned big integer in bigendian representation.
   bytes n = 3;
@@ -55,12 +47,12 @@ message RsaSsaPssPublicKey {
   bytes e = 4;
 }
 
-// key_type: type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey
-message RsaSsaPssPrivateKey {
+// key_type: type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey
+message RsaSsaPkcs1PrivateKey {
   // Required.
   uint32 version = 1;
   // Required.
-  RsaSsaPssPublicKey public_key = 2;
+  RsaSsaPkcs1PublicKey public_key = 2;
   // Private exponent.
   // Unsigned big integer in bigendian representation.
   // Required.
@@ -89,9 +81,9 @@ message RsaSsaPssPrivateKey {
   bytes crt = 8;
 }
 
-message RsaSsaPssKeyFormat {
+message RsaSsaPkcs1KeyFormat {
   // Required.
-  RsaSsaPssParams params = 1;
+  RsaSsaPkcs1Params params = 1;
   // Required.
   uint32 modulus_size_in_bits = 2;
   // Required.
