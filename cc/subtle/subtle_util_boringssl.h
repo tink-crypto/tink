@@ -38,6 +38,33 @@ class SubtleUtilBoringSSL {
     std::string priv;    // big integer in bigendian represnetation
   };
 
+  struct RsaPublicKey {
+    // Modulus.
+    // Unsigned big integer in bigendian representation.
+    std::string n;
+    // Public exponent.
+    // Unsigned big integer in bigendian representation.
+    std::string e;
+  };
+
+  // Parameters of RSA SSA (Signature Schemes with Appendix) using  PSS
+  // (Probabilistic Signature Scheme) encoding (see
+  // https://tools.ietf.org/html/rfc8017#section-8.1).
+  struct RsaSsaPssParams {
+    // Hash function used in computing hash of the signing message
+    // (see https://tools.ietf.org/html/rfc8017#section-9.1.1).
+    HashType sig_hash;
+    // Hash function used in MGF1 (a mask generation function based on a
+    // hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).
+    HashType mgf1_hash;
+    // Salt length (see https://tools.ietf.org/html/rfc8017#section-9.1.1)
+    int salt_length;
+  };
+
+  // Returns BoringSSL's BIGNUM constructed from bigendian std::string
+  // representation.
+  static util::StatusOr<BIGNUM *> str2bn(absl::string_view s);
+
   // Returns BoringSSL error strings accumulated in the error queue,
   // thus emptying the queue.
   static std::string GetErrors();
