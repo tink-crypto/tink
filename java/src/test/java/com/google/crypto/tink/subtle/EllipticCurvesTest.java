@@ -549,6 +549,9 @@ public class EllipticCurvesTest {
 
   @Test
   public void testComputeSharedSecretWithWycheproofTestVectors() throws Exception {
+    // NOTE(bleichen): Instead of ecdh_test.json it might be easier to use the
+    //   files ecdh_<curve>_ecpoint.json, which encode the public key point just as DER
+    //   encoded bitsequence.
     JSONObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/ecdh_test.json");
     int errors = 0;
@@ -556,6 +559,14 @@ public class EllipticCurvesTest {
     for (int i = 0; i < testGroups.length(); i++) {
       JSONObject group = testGroups.getJSONObject(i);
       JSONArray tests = group.getJSONArray("tests");
+      String curve = group.getString("curve");
+      EllipticCurves.CurveType curveType;
+      try {
+        curveType = WycheproofTestUtil.getCurveType(curve);
+      } catch (NoSuchAlgorithmException ex) {
+        System.out.println("Unsupported curve:" + curve);
+        continue;
+      }
       for (int j = 0; j < tests.length(); j++) {
         JSONObject testcase = tests.getJSONObject(j);
         if (WycheproofTestUtil.checkFlags(testcase, "CVE_2017_10176")) {
@@ -569,14 +580,12 @@ public class EllipticCurvesTest {
         String result = testcase.getString("result");
         String hexPubKey = testcase.getString("public");
         String expectedSharedSecret = testcase.getString("shared");
-        String curve = testcase.getString("curve");
         String hexPrivKey = testcase.getString("private");
         if (hexPrivKey.length() % 2 == 1) {
           hexPrivKey = "0" + hexPrivKey;
         }
         KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("EC");
         try {
-          EllipticCurves.CurveType curveType = WycheproofTestUtil.getCurveType(curve);
           ECPrivateKey privKey = EllipticCurves.getEcPrivateKey(curveType, Hex.decode(hexPrivKey));
           ECPublicKey pubKey;
           try {
@@ -614,12 +623,6 @@ public class EllipticCurvesTest {
                     + " expected: "
                     + expectedSharedSecret);
             errors++;
-          }
-        } catch (NoSuchAlgorithmException ex) {
-          System.out.println(tcId + " threw exception: " + ex);
-          if (result.equals("valid")) {
-            // When the curve is not implemented, this is the expected exception.
-            continue;
           }
         } catch (GeneralSecurityException ex) {
           System.out.println(tcId + " threw exception: " + ex.toString());
