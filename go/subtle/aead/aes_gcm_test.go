@@ -237,10 +237,16 @@ func TestVectors(t *testing.T) {
 			}
 			decrypted, err := cipher.Decrypt(combinedCt, aad)
 			if err != nil {
-				t.Errorf("unexpected error in test case %d: %s", tc.TcID, err)
-			}
-			if !bytes.Equal(decrypted, msg) {
-				t.Errorf("failed in test case %d", tc.TcID)
+				if tc.Result == "valid" {
+					t.Errorf("unexpected error in test case %d: %s", tc.TcID, err)
+				}
+			} else {
+				if tc.Result == "invalid" {
+					t.Errorf("decrypted invalid test case %d", tc.TcID)
+				}
+				if !bytes.Equal(decrypted, msg) {
+					t.Errorf("incorrect decryption in test case %d", tc.TcID)
+				}
 			}
 		}
 	}
