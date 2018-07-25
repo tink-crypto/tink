@@ -21,6 +21,24 @@ set -e
 # Display commands to stderr.
 set -x
 
+# Verify required environment variables.
+
+if [[ -z "${JAVA_HOME}" ]]; then
+  echo "The JAVA_HOME environment variable must be set."
+  exit 4
+fi
+
+# Required for building Java binaries.
+if [[ -z "${ANDROID_HOME}" ]]; then
+  echo "The ANDROID_HOME environment variable must be set."
+  exit 4
+fi
+
+if [[ -z "${TMP}" ]]; then
+  echo "The TMP environment variable must be set."
+  exit 4
+fi
+
 PLATFORM=`uname | tr '[:upper:]' '[:lower:]'`
 
 DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
@@ -33,31 +51,31 @@ if ! [ -z "${KOKORO_ROOT}" ]; then
   rm -f ~/.bazelrc
   # Install the latest version of Bazel.
   use_bazel.sh latest
-  if [[ $PLATFORM == 'darwin' ]]; then
+  if [[ "$PLATFORM" == 'darwin' ]]; then
     export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
     export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
   fi
 fi
 
-echo "using bazel binary: `which bazel`"
+echo "using bazel binary: $(which bazel)"
 bazel version
 
-echo "using java binary: " `which java`
+echo "using java binary: $(which java)"
 java -version
 
-echo "using go: " `which go`
+echo "using go: $(which go)"
 go version
 
 run_linux_tests() {
   time bazel fetch ...
 
   # Build all targets, except objc.
-  time bazel build $DISABLE_SANDBOX \
+  time bazel build "${DISABLE_SANDBOX}" \
   -- //... \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run all tests, except manual and objc tests.
-  time bazel --host_javabase="$JAVA_HOME" test \
+  time bazel --host_javabase="${JAVA_HOME}" test \
   --strategy=TestRunner=standalone --test_output=all \
   -- //... \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
@@ -74,7 +92,7 @@ run_macos_tests() {
   time bazel fetch ...
 
   # Build all the iOS targets.
-  time bazel build $DISABLE_SANDBOX \
+  time bazel build "${DISABLE_SANDBOX}" \
   --compilation_mode=dbg \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \
@@ -87,7 +105,7 @@ run_macos_tests() {
   //objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run the iOS tests.
-  time bazel test $DISABLE_SANDBOX \
+  time bazel test "${DISABLE_SANDBOX}" \
   --compilation_mode=dbg \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \
@@ -102,7 +120,7 @@ run_macos_tests() {
 
 run_linux_tests
 
-if [[ $PLATFORM == 'darwin' ]]; then
+if [[ "${PLATFORM}" == 'darwin' ]]; then
   run_macos_tests
 fi
 
