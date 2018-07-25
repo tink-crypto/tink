@@ -67,8 +67,8 @@ public class WycheproofTestUtil {
     int numTests = result.getInt("numberOfTests");
     System.out.println(
         String.format(
-            "Total %d test cases for algorithm %s with generator version %s",
-            numTests, algorithm, generatorVersion));
+            "Read from %s total %d test cases for algorithm %s with generator version %s",
+            path, numTests, algorithm, generatorVersion));
     return result;
   }
   /**

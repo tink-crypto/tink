@@ -44,9 +44,7 @@ public class EcdsaVerifyJceTest {
   @Test
   public void testWycheproofVectors() throws Exception {
     testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp256r1_sha256_test.json");
-    testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp384r1_sha384_test.json");
-    // https://b.corp.google.com/issues/74209208#comment10
-    // testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp384r1_sha512_test.json");
+    testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp384r1_sha512_test.json");
     testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp521r1_sha512_test.json");
   }
 
@@ -73,7 +71,7 @@ public class EcdsaVerifyJceTest {
                 "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
 
         if (signatureAlgorithm.isEmpty()) {
-          System.out.printf("Skipping %s because signature algorithm is empty", tcId);
+          System.out.printf("Skipping %s because signature algorithm is empty\n", tcId);
           cntSkippedTests++;
           continue;
         }
@@ -83,7 +81,7 @@ public class EcdsaVerifyJceTest {
           verifier = new EcdsaVerifyJce(pubKey, signatureAlgorithm, EcdsaEncoding.DER);
         } catch (GeneralSecurityException ignored) {
           // Invalid or unsupported public key.
-          System.out.printf("Skipping %s, exception: %s", tcId, ignored);
+          System.out.printf("Skipping %s, exception: %s\n", tcId, ignored);
           cntSkippedTests++;
           continue;
         }
@@ -93,18 +91,18 @@ public class EcdsaVerifyJceTest {
         try {
           verifier.verify(sig, msg);
           if (result.equals("invalid")) {
-            System.out.printf("FAIL %s: accepting invalid signature%n", tcId);
+            System.out.printf("FAIL %s: accepting invalid signature\n", tcId);
             errors++;
           }
         } catch (GeneralSecurityException ex) {
           if (result.equals("valid")) {
-            System.out.printf("FAIL %s: rejecting valid signature, exception: %s%n", tcId, ex);
+            System.out.printf("FAIL %s: rejecting valid signature, exception: %s\n", tcId, ex);
             errors++;
           }
         }
       }
     }
-    System.out.printf("Number of tests skipped: %d", cntSkippedTests);
+    System.out.printf("Number of tests skipped: %d\n", cntSkippedTests);
     assertEquals(0, errors);
   }
 
