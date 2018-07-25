@@ -29,15 +29,8 @@ const Validators = goog.require('tink.subtle.Validators');
 const MIN_TAG_SIZE_IN_BYTES = 10;
 
 /**
- * The minimum key size.
- *
- * @const {number}
- */
-const MIN_KEY_SIZE_IN_BYTES = 16;
-
-/**
  * @param {string} hash accepted names are SHA-1, SHA-256 and SHA-512
- * @param {!Uint8Array} key must be longer than {@link MIN_KEY_SIZE_IN_BYTES}
+ * @param {!Uint8Array} key the HMAC key, should not be shorter than 128 bits.
  * @param {number} tagSize the size of the tag, must be larger than or equal
  *     to {@link MIN_TAG_SIZE_IN_BYTES}
  * @return {!Promise.<!Mac>}
@@ -48,12 +41,6 @@ const newInstance = async function(hash, key, tagSize) {
     throw new InvalidArgumentsException(
         'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES + ' bytes');
   }
-
-  if (key.length < MIN_KEY_SIZE_IN_BYTES) {
-    throw new InvalidArgumentsException(
-        'key too short, must be at least ' + MIN_KEY_SIZE_IN_BYTES + ' bytes');
-  }
-
   switch (hash) {
     case 'SHA-1':
       if (tagSize > 20) {
