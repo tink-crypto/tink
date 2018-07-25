@@ -128,6 +128,16 @@ TEST(SubtleUtilBoringSSLTest, testEcPointDecode) {
   }
 }
 
+TEST(SubtleUtilBoringSSLTest, testValidateSignatureHash) {
+  EXPECT_TRUE(
+      SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA256).ok());
+  EXPECT_TRUE(
+      SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA512).ok());
+  EXPECT_FALSE(SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA1).ok());
+  EXPECT_FALSE(
+      SubtleUtilBoringSSL::ValidateSignatureHash(HashType::UNKNOWN_HASH).ok());
+}
+
 static std::string GetError() {
   auto err = ERR_peek_last_error();
   // Sometimes there is no error message on the stack.

@@ -47,16 +47,10 @@ RsaSsaPssVerifyBoringSsl::New(
     const SubtleUtilBoringSSL::RsaPublicKey& pub_key,
     const SubtleUtilBoringSSL::RsaSsaPssParams& params) {
   // Check hash.
-  switch (params.sig_hash) {
-    case HashType::SHA256: /* fall through */
-    case HashType::SHA512:
-      break;
-    case HashType::SHA1:
-      return util::Status(util::error::INVALID_ARGUMENT,
-                          "SHA1 is not safe for digital signature");
-    default:
-      return util::Status(util::error::INVALID_ARGUMENT,
-                          "Unsupported hash function");
+  auto hash_status =
+      SubtleUtilBoringSSL::ValidateSignatureHash(params.sig_hash);
+  if (!hash_status.ok()) {
+    return hash_status;
   }
   auto sig_hash_result = SubtleUtilBoringSSL::EvpHash(params.sig_hash);
   if (!sig_hash_result.ok()) return sig_hash_result.status();

@@ -67,6 +67,13 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
   EXPECT_TRUE(status.ok()) << status;
 }
 
+TEST_F(EcdsaSignBoringSslTest, testNewErrors) {
+  auto ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256)
+                    .ValueOrDie();
+  auto signer_result = EcdsaSignBoringSsl::New(ec_key, HashType::SHA1);
+  EXPECT_FALSE(signer_result.ok()) << signer_result.status();
+}
+
 // TODO(bleichen): add Wycheproof tests.
 
 }  // namespace

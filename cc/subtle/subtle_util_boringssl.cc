@@ -347,6 +347,20 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
   }
 }
 
+// static
+util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
+  switch (sig_hash) {
+    case HashType::SHA256: /* fall through */
+    case HashType::SHA512:
+      return util::Status::OK;
+    case HashType::SHA1:
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "SHA1 is not safe for digital signature");
+    default:
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "Unsupported hash function");
+  }
+}
 
 // static
 std::string SubtleUtilBoringSSL::GetErrors() {

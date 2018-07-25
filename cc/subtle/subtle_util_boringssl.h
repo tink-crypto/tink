@@ -117,6 +117,10 @@ class SubtleUtilBoringSSL {
   // The EVP_MD instances are sigletons owned by BoringSSL.
   static crypto::tink::util::StatusOr<const EVP_MD *> EvpHash(
       HashType hash_type);
+
+  // Validates whether 'sig_hash' is safe to use for digital signature.
+  static crypto::tink::util::Status ValidateSignatureHash(
+      subtle::HashType sig_hash);
 };
 
 }  // namespace subtle

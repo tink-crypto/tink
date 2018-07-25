@@ -36,6 +36,10 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>>
 EcdsaSignBoringSsl::New(const SubtleUtilBoringSSL::EcKey& ec_key,
                         HashType hash_type) {
   // Check hash.
+  auto hash_status = SubtleUtilBoringSSL::ValidateSignatureHash(hash_type);
+  if (!hash_status.ok()) {
+    return hash_status;
+  }
   auto hash_result = SubtleUtilBoringSSL::EvpHash(hash_type);
   if (!hash_result.ok()) return hash_result.status();
   const EVP_MD* hash = hash_result.ValueOrDie();

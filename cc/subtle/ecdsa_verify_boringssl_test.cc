@@ -36,10 +36,9 @@ namespace tink {
 namespace subtle {
 namespace {
 
-class EcdsaSignBoringSslTest : public ::testing::Test {
-};
+class EcdsaVerifyBoringSslTest : public ::testing::Test {};
 
-TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
+TEST_F(EcdsaVerifyBoringSslTest, testBasicSigning) {
   auto ec_key_result = SubtleUtilBoringSSL::GetNewEcKey(
       EllipticCurveType::NIST_P256);
   ASSERT_TRUE(ec_key_result.ok()) << ec_key_result.status();
@@ -69,6 +68,13 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
 
   status = verifier->Verify(signature, "some bad message");
   EXPECT_FALSE(status.ok());
+}
+
+TEST_F(EcdsaVerifyBoringSslTest, testNewErrors) {
+  auto ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256)
+                    .ValueOrDie();
+  auto verifier_result = EcdsaVerifyBoringSsl::New(ec_key, HashType::SHA1);
+  EXPECT_FALSE(verifier_result.ok()) << verifier_result.status();
 }
 
 // Integers in Wycheproof are represented as signed bigendian hexadecimal
@@ -179,15 +185,15 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
   return failed_tests == 0;
 }
 
-TEST_F(EcdsaSignBoringSslTest, testVectorsNistP256) {
+TEST_F(EcdsaVerifyBoringSslTest, testVectorsNistP256) {
   ASSERT_TRUE(TestSignatures("ecdsa_secp256r1_sha256_test.json", false));
 }
 
-TEST_F(EcdsaSignBoringSslTest, testVectorsNistP384) {
+TEST_F(EcdsaVerifyBoringSslTest, testVectorsNistP384) {
   ASSERT_TRUE(TestSignatures("ecdsa_secp384r1_sha512_test.json", false));
 }
 
-TEST_F(EcdsaSignBoringSslTest, testVectorsNistP521) {
+TEST_F(EcdsaVerifyBoringSslTest, testVectorsNistP521) {
   ASSERT_TRUE(TestSignatures("ecdsa_secp521r1_sha512_test.json", false));
 }
 
