@@ -64,6 +64,30 @@ public final class Validators {
     }
   }
 
+  /**
+   * Validates whether hash in {@code signatureAlgorithm} is safe to use for digital signature.
+   *
+   * @throws GeneralSecurityException if {@code signatureAlgorithm} is invalid or is not safe to use
+   *     for digital signature.
+   */
+  public static void validateSignatureHash(String signatureAlgorithm)
+      throws GeneralSecurityException {
+    String[] parts = signatureAlgorithm.split("with|With|WITH", -1);
+    if (parts.length == 0) {
+      throw new GeneralSecurityException("Invalid signature algorithm");
+    }
+    String hash = parts[0];
+    switch (hash) {
+      case "SHA256": // fall through
+      case "SHA512":
+        return;
+      case "SHA1":
+        throw new GeneralSecurityException("SHA1 is not safe for digital signature");
+      default:
+        throw new GeneralSecurityException(String.format("Unsupported hash: %s", hash));
+    }
+  }
+
   /*
    * @throws IOException if {@code f} exists.
    */

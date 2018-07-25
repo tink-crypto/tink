@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.WycheproofTestUtil;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import java.security.GeneralSecurityException;
@@ -116,13 +117,35 @@ public class EcdsaVerifyJceTest {
   }
 
   @Test
+  public void testConstrutorExceptions() throws Exception {
+    ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+    keyGen.initialize(ecParams);
+    KeyPair keyPair = keyGen.generateKeyPair();
+    ECPublicKey pub = (ECPublicKey) keyPair.getPublic();
+    // Verify with EcdsaVerifyJce.
+    try {
+      new EcdsaVerifyJce(pub, "SHA1withECDSA", EcdsaEncoding.DER);
+      fail("Unsafe hash, should have thrown exception.");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      TestUtil.assertExceptionContains(e, "SHA1 is not safe");
+    }
+    try {
+      new EcdsaVerifyJce(pub, "NoneWithECDSA", EcdsaEncoding.DER);
+      fail("Invalid hash, should have thrown exception.");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      TestUtil.assertExceptionContains(e, "Unsupported");
+    }
+  }
+
+  @Test
   public void testBasic() throws Exception {
     testAgainstJceSignatureInstance(EllipticCurves.getNistP256Params(), "SHA256WithECDSA");
-    testAgainstJceSignatureInstance(EllipticCurves.getNistP384Params(), "SHA384WithECDSA");
     testAgainstJceSignatureInstance(EllipticCurves.getNistP384Params(), "SHA512WithECDSA");
     testAgainstJceSignatureInstance(EllipticCurves.getNistP521Params(), "SHA512WithECDSA");
     testSignVerify(EllipticCurves.getNistP256Params(), "SHA256WithECDSA");
-    testSignVerify(EllipticCurves.getNistP384Params(), "SHA384WithECDSA");
     testSignVerify(EllipticCurves.getNistP384Params(), "SHA512WithECDSA");
     testSignVerify(EllipticCurves.getNistP521Params(), "SHA512WithECDSA");
   }

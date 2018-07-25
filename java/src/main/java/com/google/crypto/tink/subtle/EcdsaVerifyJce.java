@@ -36,6 +36,7 @@ public final class EcdsaVerifyJce implements PublicKeyVerify {
   public EcdsaVerifyJce(final ECPublicKey pubKey, String signatureAlgorithm, EcdsaEncoding encoding)
       throws GeneralSecurityException {
     EllipticCurves.checkPublicKey(pubKey);
+    Validators.validateSignatureHash(signatureAlgorithm);
     this.publicKey = pubKey;
     this.signatureAlgorithm = signatureAlgorithm;
     this.encoding = encoding;

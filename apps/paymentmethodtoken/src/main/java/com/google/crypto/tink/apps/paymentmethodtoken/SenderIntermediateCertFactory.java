@@ -47,7 +47,8 @@ public class SenderIntermediateCertFactory {
       String senderId,
       List<ECPrivateKey> senderSigningKeys,
       String intermediateSigningKey,
-      long expiration) {
+      long expiration)
+      throws GeneralSecurityException {
     if (!ProtocolVersionConfig.forProtocolVersion(protocolVersion)
         .supportsIntermediateSigningKeys) {
       throw new IllegalArgumentException("invalid version: " + protocolVersion);

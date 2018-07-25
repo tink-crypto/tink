@@ -130,6 +130,51 @@ public class ValidatorsTest {
   }
 
   @Test
+  public void testValidateSignatureHash() throws Exception {
+    try {
+      Validators.validateSignatureHash("SHA256WithECDSA");
+      Validators.validateSignatureHash("SHA512withECDSA");
+      Validators.validateSignatureHash("SHA256WITHRSA");
+      Validators.validateSignatureHash("SHA512WithRSA");
+    } catch (GeneralSecurityException e) {
+      fail("Valid signature algorithm should work " + e);
+    }
+    try {
+      Validators.validateSignatureHash("SHA1withECDSA");
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      TestUtil.assertExceptionContains(e, "SHA1 is not safe");
+    }
+    try {
+      Validators.validateSignatureHash("SHA1withRSA");
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      TestUtil.assertExceptionContains(e, "SHA1 is not safe");
+    }
+    try {
+      Validators.validateSignatureHash("InvalidSignatureAlgorithm");
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      TestUtil.assertExceptionContains(e, "Invalid");
+    }
+    try {
+      Validators.validateSignatureHash("NONEWithECDSA");
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      TestUtil.assertExceptionContains(e, "Unsupported");
+    }
+    try {
+      Validators.validateSignatureHash("SHA384WithECDSA");
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      TestUtil.assertExceptionContains(e, "Unsupported");
+    }
+  }
+
+  @Test
   public void testValidateFileExistence() throws Exception {
     // In Before, Test, or After:
     File tmpDir = tmpFolder.getRoot();

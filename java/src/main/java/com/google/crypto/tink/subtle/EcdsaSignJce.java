@@ -33,7 +33,9 @@ public final class EcdsaSignJce implements PublicKeySign {
   private final String signatureAlgorithm;
   private final EcdsaEncoding encoding;
 
-  public EcdsaSignJce(final ECPrivateKey priv, String signatureAlgorithm, EcdsaEncoding encoding) {
+  public EcdsaSignJce(final ECPrivateKey priv, String signatureAlgorithm, EcdsaEncoding encoding)
+      throws GeneralSecurityException {
+    Validators.validateSignatureHash(signatureAlgorithm);
     this.privateKey = priv;
     this.signatureAlgorithm = signatureAlgorithm;
     this.encoding = encoding;

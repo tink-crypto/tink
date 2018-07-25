@@ -18,7 +18,9 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -57,6 +59,31 @@ public class EcdsaSignJceTest {
     verifier.initVerify(pub);
     verifier.update(message.getBytes("UTF-8"));
     assertTrue(verifier.verify(signature));
+  }
+
+  @Test
+  public void testConstructorExceptions() throws Exception {
+    ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+    keyGen.initialize(ecParams);
+    KeyPair keyPair = keyGen.generateKeyPair();
+    ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
+
+    try {
+      new EcdsaSignJce(priv, "SHA1WithECDSA", EcdsaEncoding.DER);
+      fail("Unsafe hash, should have thrown exception.");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      TestUtil.assertExceptionContains(e, "SHA1 is not safe");
+    }
+
+    try {
+      new EcdsaSignJce(priv, "NoneWithECDSA", EcdsaEncoding.DER);
+      fail("Invalid hash, should have thrown exception.");
+    } catch (GeneralSecurityException e) {
+      // Expected.
+      TestUtil.assertExceptionContains(e, "Unsupported");
+    }
   }
 
   @Test
