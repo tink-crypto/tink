@@ -41,10 +41,17 @@ fi
 
 PLATFORM=`uname | tr '[:upper:]' '[:lower:]'`
 
-DISABLE_SANDBOX="--strategy=GenRule=standalone --strategy=Turbine=standalone \
---strategy=CppCompile=standalone --strategy=ProtoCompile=standalone \
---strategy=GenProto=standalone --strategy=GenProtoDescriptorSet=standalone \
---sandbox_tmpfs_path=${TMP}"
+declare -a DISABLE_SANDBOX_ARGS
+DISABLE_SANDBOX_ARGS=(
+  --strategy=GenRule=standalone
+  --strategy=Turbine=standalone
+  --strategy=CppCompile=standalone
+  --strategy=ProtoCompile=standalone
+  --strategy=GenProto=standalone
+  --strategy=GenProtoDescriptorSet=standalone
+  --sandbox_tmpfs_path=${TMP}
+)
+readonly DISABLE_SANDBOX_ARGS
 
 # Workaround b/73748835#comment5 on Kokoro.
 if ! [ -z "${KOKORO_ROOT}" ]; then
@@ -70,7 +77,7 @@ run_linux_tests() {
   time bazel fetch ...
 
   # Build all targets, except objc.
-  time bazel build "${DISABLE_SANDBOX}" \
+  time bazel build "${DISABLE_SANDBOX_ARGS[@]}" \
   -- //... \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
 
@@ -92,7 +99,7 @@ run_macos_tests() {
   time bazel fetch ...
 
   # Build all the iOS targets.
-  time bazel build "${DISABLE_SANDBOX}" \
+  time bazel build "${DISABLE_SANDBOX_ARGS[@]}" \
   --compilation_mode=dbg \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \
@@ -105,7 +112,7 @@ run_macos_tests() {
   //objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run the iOS tests.
-  time bazel test "${DISABLE_SANDBOX}" \
+  time bazel test "${DISABLE_SANDBOX_ARGS[@]}" \
   --compilation_mode=dbg \
   --dynamic_mode=off \
   --cpu=ios_x86_64 \
