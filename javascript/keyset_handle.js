@@ -18,7 +18,9 @@ const Aead = goog.require('tink.Aead');
 const KeysetReader = goog.require('tink.KeysetReader');
 const KeysetWriter = goog.require('tink.KeysetWriter');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
+const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const Util = goog.require('tink.Util');
 
 /**
  * Keyset handle provide abstracted access to Keysets, to limit the exposure of
@@ -28,6 +30,16 @@ const SecurityException = goog.require('tink.exception.SecurityException');
  */
 class KeysetHandle {
   /**
+   * @param {!PbKeyset} keyset
+   */
+  constructor(keyset) {
+    Util.validateKeyset(keyset);
+
+    /** @const @private {!PbKeyset} */
+    this.keyset_ = keyset;
+  }
+
+  /**
    * Creates a KeysetHandle from an encrypted keyset obtained via reader, using
    * masterKeyAead to decrypt the keyset.
    *
@@ -36,7 +48,7 @@ class KeysetHandle {
    *
    * @return {!Promise<!KeysetHandle>}
    */
-  async read(reader, masterKeyAead) {
+  static async read(reader, masterKeyAead) {
     // TODO implement
     throw new SecurityException('KeysetHandle -- read: Not implemented yet.');
   }
@@ -49,7 +61,7 @@ class KeysetHandle {
    *
    * @return {!Promise<!KeysetHandle>}
    */
-  async generateNew(keyTemplate) {
+  static async generateNew(keyTemplate) {
     // TODO implement
     throw new SecurityException(
         'KeysetHandle -- generateNew: Not implemented yet.');
@@ -63,10 +75,19 @@ class KeysetHandle {
    * @param {!Aead} masterKeyAead
    *
    */
-  async writeEncrypted(writer, masterKeyAead) {
+  async write(writer, masterKeyAead) {
     // TODO implement
-    throw new SecurityException(
-        'KeysetHandle -- writeEncrypted: Not implemented yet.');
+    throw new SecurityException('KeysetHandle -- write: Not implemented yet.');
+  }
+
+  /**
+   * Returns the keyset held by this KeysetHandle.
+   *
+   * @package
+   * @return {!PbKeyset}
+   */
+  getKeyset() {
+    return this.keyset_;
   }
 }
 
