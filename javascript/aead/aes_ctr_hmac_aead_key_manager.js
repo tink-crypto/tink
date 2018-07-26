@@ -34,41 +34,6 @@ const Validators = goog.require('tink.subtle.Validators');
  * @implements {KeyManager.KeyFactory}
  */
 class AesCtrHmacAeadKeyFactory {
-  constructor() {
-    /**
-     * @const @private {string}
-     */
-    this.KEY_TYPE_ = 'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey';
-    /**
-     * @const @private {number}
-     */
-    this.VERSION_ = 0;
-
-    /**
-     * @const @private {number}
-     */
-    this.MIN_KEY_SIZE_ = 16;
-    /**
-     * @const @private {number}
-     */
-    this.MIN_IV_SIZE_ = 12;
-    /**
-     * @const @private {number}
-     */
-    this.MAX_IV_SIZE_ = 16;
-    /**
-     * @const @private {number}
-     */
-    this.MIN_TAG_SIZE_ = 10;
-    /**
-     * @const @private {Map<PbHashType, number>}
-     */
-    this.MAX_TAG_SIZE_ = new Map([
-        [PbHashType.SHA1, 20],
-        [PbHashType.SHA256, 32],
-        [PbHashType.SHA512, 64]]);
-  }
-
   /**
    * @override
    */
@@ -80,13 +45,13 @@ class AesCtrHmacAeadKeyFactory {
       } catch (e) {
         throw new SecurityException(
             'Could not parse the given Uint8Array as a serialized proto of ' +
-            this.KEY_TYPE_);
+            AesCtrHmacAeadKeyManager.KEY_TYPE);
       }
       if (!keyFormatProto || !keyFormatProto.getAesCtrKeyFormat() ||
           !keyFormatProto.getHmacKeyFormat()) {
         throw new SecurityException(
             'Could not parse the given Uint8Array as a serialized proto of ' +
-            this.KEY_TYPE_);
+            AesCtrHmacAeadKeyManager.KEY_TYPE);
       }
     } else {
       if (keyFormat instanceof PbAesCtrHmacAeadKeyFormat) {
@@ -98,14 +63,14 @@ class AesCtrHmacAeadKeyFactory {
 
     this.validateAesCtrKeyFormat(keyFormatProto.getAesCtrKeyFormat());
     let /** PbAesCtrKey */ aesCtrKey = new PbAesCtrKey();
-    aesCtrKey.setVersion(this.VERSION_);
+    aesCtrKey.setVersion(AesCtrHmacAeadKeyFactory.VERSION_);
     aesCtrKey.setParams(keyFormatProto.getAesCtrKeyFormat().getParams());
     aesCtrKey.setKeyValue(
         Random.randBytes(keyFormatProto.getAesCtrKeyFormat().getKeySize()));
 
     this.validateHmacKeyFormat(keyFormatProto.getHmacKeyFormat());
     let /** PbHmacKey */ hmacKey = new PbHmacKey();
-    hmacKey.setVersion(this.VERSION_);
+    hmacKey.setVersion(AesCtrHmacAeadKeyFactory.VERSION_);
     hmacKey.setParams(keyFormatProto.getHmacKeyFormat().getParams());
     hmacKey.setKeyValue(
         Random.randBytes(keyFormatProto.getHmacKeyFormat().getKeySize()));
@@ -127,7 +92,7 @@ class AesCtrHmacAeadKeyFactory {
         await this.newKey(serializedKeyFormat);
     let /** PbKeyData */ keyData = new PbKeyData();
 
-    keyData.setTypeUrl(this.KEY_TYPE_);
+    keyData.setTypeUrl(AesCtrHmacAeadKeyManager.KEY_TYPE);
     keyData.setValue(key.serializeBinary());
     keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
 
@@ -147,7 +112,8 @@ class AesCtrHmacAeadKeyFactory {
     }
     Validators.validateAesKeySize(keyFormat.getKeySize());
     const ivSize = keyFormat.getParams().getIvSize();
-    if (ivSize < this.MIN_IV_SIZE_ || ivSize > this.MAX_IV_SIZE_) {
+    if (ivSize < AesCtrHmacAeadKeyFactory.MIN_IV_SIZE_ ||
+        ivSize > AesCtrHmacAeadKeyFactory.MAX_IV_SIZE_) {
       throw new SecurityException(
           'Invalid AES CTR HMAC key format: IV size is out of range: ' +
           ivSize);
@@ -164,22 +130,22 @@ class AesCtrHmacAeadKeyFactory {
       throw new SecurityException(
           'Invalid AES CTR HMAC key format: key format undefined');
     }
-    if (keyFormat.getKeySize() < this.MIN_KEY_SIZE_) {
+    if (keyFormat.getKeySize() < AesCtrHmacAeadKeyFactory.MIN_KEY_SIZE_) {
       throw new SecurityException(
           'Invalid AES CTR HMAC key format: HMAC key is too small: ' +
           keyFormat.getKeySize());
     }
     const hmacParams = keyFormat.getParams();
-    if (hmacParams.getTagSize() < this.MIN_TAG_SIZE_) {
+    if (hmacParams.getTagSize() < AesCtrHmacAeadKeyFactory.MIN_TAG_SIZE_) {
       throw new SecurityException(
           'Invalid HMAC params: tag size ' + hmacParams.getTagSize() +
           ' is too small.');
     }
-    if (!this.MAX_TAG_SIZE_.has(hmacParams.getHash())) {
+    if (!AesCtrHmacAeadKeyFactory.MAX_TAG_SIZE_.has(hmacParams.getHash())) {
       throw new SecurityException('Unknown hash type.');
     } else {
       if (hmacParams.getTagSize() >
-          this.MAX_TAG_SIZE_.get(hmacParams.getHash())) {
+          AesCtrHmacAeadKeyFactory.MAX_TAG_SIZE_.get(hmacParams.getHash())) {
         throw new SecurityException(
             'Invalid HMAC params: tag size ' + hmacParams.getTagSize() +
             ' is out of range.');
@@ -187,6 +153,32 @@ class AesCtrHmacAeadKeyFactory {
     }
   }
 }
+/**
+ * @const @private {number}
+ */
+AesCtrHmacAeadKeyFactory.VERSION_ = 0;
+
+/**
+ * @const @private {number}
+ */
+AesCtrHmacAeadKeyFactory.MIN_KEY_SIZE_ = 16;
+/**
+ * @const @private {number}
+ */
+AesCtrHmacAeadKeyFactory.MIN_IV_SIZE_ = 12;
+/**
+ * @const @private {number}
+ */
+AesCtrHmacAeadKeyFactory.MAX_IV_SIZE_ = 16;
+/**
+ * @const @private {number}
+ */
+AesCtrHmacAeadKeyFactory.MIN_TAG_SIZE_ = 10;
+/**
+ * @const @private {!Map<!PbHashType, number>}
+ */
+AesCtrHmacAeadKeyFactory.MAX_TAG_SIZE_ = new Map(
+    [[PbHashType.SHA1, 20], [PbHashType.SHA256, 32], [PbHashType.SHA512, 64]]);
 
 /**
  * @implements {KeyManager.KeyManager<Aead>}
@@ -194,14 +186,6 @@ class AesCtrHmacAeadKeyFactory {
  */
 class AesCtrHmacAeadKeyManager {
   constructor() {
-    /**
-     * @const @private {string}
-     */
-    this.KEY_TYPE_ = 'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey';
-    /**
-     * @const @private {number}
-     */
-    this.VERSION_ = 0;
     /**
      * @const @private {!AesCtrHmacAeadKeyFactory}
      */
@@ -224,12 +208,12 @@ class AesCtrHmacAeadKeyManager {
       } catch (e) {
         throw new SecurityException(
             'Could not parse the key in key data as a serialized proto of ' +
-            this.KEY_TYPE_);
+            AesCtrHmacAeadKeyManager.KEY_TYPE);
       }
       if (deserializedKey === null || deserializedKey === undefined) {
         throw new SecurityException(
             'Could not parse the key in key data as a serialized proto of ' +
-            this.KEY_TYPE_);
+            AesCtrHmacAeadKeyManager.KEY_TYPE);
       }
     } else {
       if (key instanceof PbAesCtrHmacAeadKey) {
@@ -278,14 +262,14 @@ class AesCtrHmacAeadKeyManager {
    * @override
    */
   getKeyType() {
-    return this.KEY_TYPE_;
+    return AesCtrHmacAeadKeyManager.KEY_TYPE;
   }
 
   /**
    * @override
    */
   getVersion() {
-    return this.VERSION_;
+    return AesCtrHmacAeadKeyManager.VERSION_;
   }
 
   /**
@@ -337,5 +321,14 @@ class AesCtrHmacAeadKeyManager {
     this.keyFactory_.validateHmacKeyFormat(keyFormat);
   }
 }
+/**
+ * @const @public {string}
+ */
+AesCtrHmacAeadKeyManager.KEY_TYPE =
+    'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey';
+/**
+ * @const @private {number}
+ */
+AesCtrHmacAeadKeyManager.VERSION_ = 0;
 
 exports = AesCtrHmacAeadKeyManager;
