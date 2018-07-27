@@ -64,7 +64,7 @@ RsaSsaPssVerifyBoringSsl::New(
   if (!status_or_n.ok()) return status_or_n.status();
   auto status_or_e = SubtleUtilBoringSSL::str2bn(pub_key.e);
   if (!status_or_e.ok()) return status_or_e.status();
-  size_t modulus_size = BN_num_bits(status_or_n.ValueOrDie());
+  size_t modulus_size = BN_num_bits(status_or_n.ValueOrDie().get());
   if (modulus_size < kMinModulusSizeInBits) {
     return ToStatusF(
         util::error::INVALID_ARGUMENT,
@@ -77,10 +77,12 @@ RsaSsaPssVerifyBoringSsl::New(
                         "BoringSsl RSA allocation error");
   }
   // Set RSA public key and hence d is nullptr.
-  if (1 != RSA_set0_key(rsa.get(), status_or_n.ValueOrDie(),
-                        status_or_e.ValueOrDie(), nullptr /* d */)) {
+  if (1 != RSA_set0_key(rsa.get(), status_or_n.ValueOrDie().get(),
+                        status_or_e.ValueOrDie().get(), nullptr /* d */)) {
     return util::Status(util::error::INTERNAL, "Could not set RSA key.");
   }
+  status_or_n.ValueOrDie().release();
+  status_or_e.ValueOrDie().release();
   std::unique_ptr<RsaSsaPssVerifyBoringSsl> verify(new RsaSsaPssVerifyBoringSsl(
       std::move(rsa), sig_hash_result.ValueOrDie(),
       mgf1_hash_result.ValueOrDie(), params.salt_length));

@@ -63,7 +63,7 @@ class SubtleUtilBoringSSL {
 
   // Returns BoringSSL's BIGNUM constructed from bigendian std::string
   // representation.
-  static util::StatusOr<BIGNUM *> str2bn(absl::string_view s);
+  static util::StatusOr<bssl::UniquePtr<BIGNUM>> str2bn(absl::string_view s);
 
   // Returns BoringSSL error strings accumulated in the error queue,
   // thus emptying the queue.

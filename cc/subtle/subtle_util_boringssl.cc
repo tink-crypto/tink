@@ -47,14 +47,15 @@ size_t FieldElementSizeInBytes(const EC_GROUP* group) {
 }  // namespace
 
 // static
-util::StatusOr<BIGNUM *> SubtleUtilBoringSSL::str2bn(absl::string_view s) {
+util::StatusOr<bssl::UniquePtr<BIGNUM>> SubtleUtilBoringSSL::str2bn(
+    absl::string_view s) {
   bssl::UniquePtr<BIGNUM> bn(
       BN_bin2bn(reinterpret_cast<const unsigned char *>(s.data()), s.length(),
                 nullptr /* ret */));
   if (bn.get() == nullptr) {
     return util::Status(util::error::INTERNAL, "BIGNUM allocation failed");
   }
-  return bn.release();
+  return std::move(bn);
 }
 
 // static
