@@ -15,6 +15,7 @@
 goog.module('tink.subtle.Bytes');
 
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+const base64 = goog.require('goog.crypt.base64');
 const crypt = goog.require('goog.crypt');
 
 /**
@@ -109,10 +110,37 @@ const toHex = function(bytes) {
   return crypt.byteArrayToHex(bytes);
 };
 
+/**
+ * Converts the Base64 string to a byte array.
+ *
+ * @param {string} input the base64 string
+ * @return {!Uint8Array} the byte array output
+ * @static
+ */
+const fromBase64 = function(input) {
+  return new Uint8Array(base64.decodeStringToByteArray(input));
+};
+
+/**
+ * Base64 encode a byte array.
+ *
+ * @param {!Uint8Array} bytes the byte array input
+ * @param {boolean=} opt_webSafe True indicates we should use the alternative
+ *     alphabet, which does not require escaping for use in URLs.
+ * @return {string} base64 output
+ * @static
+ */
+const toBase64 = function(bytes, opt_webSafe) {
+  return base64.encodeByteArray(bytes, opt_webSafe)
+      .replace('.', '') /* padding */;
+};
+
 exports = {
   concat,
+  fromBase64,
   fromHex,
   fromNumber,
   isEqual,
+  toBase64,
   toHex,
 };

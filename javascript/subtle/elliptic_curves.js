@@ -18,9 +18,9 @@
 
 goog.module('tink.subtle.EllipticCurves');
 
+const Bytes = goog.require('tink.subtle.Bytes');
 const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
 const array = goog.require('goog.array');
-const base64 = goog.require('goog.crypt.base64');
 
 /**
  * Supported elliptic curves.
@@ -77,30 +77,31 @@ const curveFromString = function(curve) {
 };
 
 /**
- * @param {!webCrypto.JsonWebKey} point
+ * @param {string} curve
  * @param {PointFormatType} format
+ * @param {!webCrypto.JsonWebKey} point
  * @return {!Uint8Array}
  */
-const encodePoint = function(point, format) {
-  const fieldSize = fieldSizeInBytes(curveFromString(point.crv));
+const pointEncode = function(curve, format, point) {
+  const fieldSize = fieldSizeInBytes(curveFromString(curve));
   switch (format) {
     case PointFormatType.UNCOMPRESSED:
       let result = new Uint8Array(1 + 2 * fieldSize);
       result[0] = 0x04;
-      result.set(base64.decodeStringToByteArray(point.x), 1);
-      result.set(base64.decodeStringToByteArray(point.y), 1 + fieldSize);
+      result.set(Bytes.fromBase64(point.x), 1);
+      result.set(Bytes.fromBase64(point.y), 1 + fieldSize);
       return result;
   }
-  throw new InvalidArgumentsException('invalid point');
+  throw new InvalidArgumentsException('invalid format');
 };
 
 /**
- * @param {!Uint8Array} point
- * @param {PointFormatType} format
  * @param {string} curve
+ * @param {PointFormatType} format
+ * @param {!Uint8Array} point
  * @return {!webCrypto.JsonWebKey}
  */
-const decodePoint = function(point, format, curve) {
+const pointDecode = function(curve, format, point) {
   const fieldSize = fieldSizeInBytes(curveFromString(curve));
   switch (format) {
     case PointFormatType.UNCOMPRESSED:
@@ -110,11 +111,13 @@ const decodePoint = function(point, format, curve) {
       let result = /** @type {!webCrypto.JsonWebKey} */ ({
         'kty': 'EC',
         'crv': curve,
-        'x': base64.encodeByteArray(array.slice(point, 1, 1 + fieldSize)),
-        'y': base64.encodeByteArray(
-            array.slice(point, 1 + fieldSize, point.length)),
+        'x': Bytes.toBase64(
+            new Uint8Array(array.slice(point, 1, 1 + fieldSize)),
+            true /* websafe */),
+        'y': Bytes.toBase64(
+            new Uint8Array(array.slice(point, 1 + fieldSize, point.length)),
+            true /* websafe */),
         'ext': true,
-        'key_ops': ['deriveKey', 'deriveBits']
       });
       return result;
   }
@@ -142,7 +145,7 @@ exports = {
   PointFormatType,
   curveToString,
   curveFromString,
-  decodePoint,
-  encodePoint,
+  pointDecode,
+  pointEncode,
   fieldSizeInBytes,
 };
