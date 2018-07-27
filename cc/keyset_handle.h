@@ -46,6 +46,13 @@ class KeysetHandle {
   crypto::tink::util::Status  Write(KeysetWriter* writer,
       const Aead& master_key_aead);
 
+  // Returns a new KeysetHandle that contains public keys corresponding
+  // to the private keys from this handle.
+  // Returns an error if this handle contains keys that are not private keys.
+  crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+  GetPublicKeysetHandle();
+
+
  private:
   // The classes below need access to get_keyset();
   friend class CleartextKeysetHandle;

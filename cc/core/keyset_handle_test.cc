@@ -17,13 +17,15 @@
 #include "tink/keyset_handle.h"
 
 #include "gtest/gtest.h"
-#include "tink/aead/aead_config.h"
 #include "tink/aead_key_templates.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
-#include "tink/config.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
+#include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/config/tink_config.h"
+#include "tink/signature/ecdsa_sign_key_manager.h"
+#include "tink/signature/signature_key_templates.h"
 #include "tink/util/keyset_util.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/test_util.h"
@@ -33,6 +35,7 @@ namespace crypto {
 namespace tink {
 
 using crypto::tink::KeysetUtil;
+using crypto::tink::test::AddLegacyKey;
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using crypto::tink::test::DummyAead;
@@ -49,7 +52,7 @@ namespace {
 class KeysetHandleTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    auto status = AeadConfig::Register();
+    auto status = TinkConfig::Register();
     ASSERT_TRUE(status.ok()) << status;
   }
 };
@@ -260,6 +263,116 @@ TEST_F(KeysetHandleTest, testGenerateNewKeysetHandleErrors) {
   auto handle_result = KeysetHandle::GenerateNew(templ);
   EXPECT_FALSE(handle_result.ok());
   EXPECT_EQ(util::error::NOT_FOUND, handle_result.status().error_code());
+}
+
+
+void CompareKeyMetadata(const Keyset::Key& expected,
+                        const Keyset::Key& actual) {
+  EXPECT_EQ(expected.status(), actual.status());
+  EXPECT_EQ(expected.key_id(), actual.key_id());
+  EXPECT_EQ(expected.output_prefix_type(), actual.output_prefix_type());
+}
+
+TEST_F(KeysetHandleTest, testGetPublicKeysetHandle) {
+  { // A keyset with a single key.
+    auto handle_result = KeysetHandle::GenerateNew(
+        SignatureKeyTemplates::EcdsaP256());
+    ASSERT_TRUE(handle_result.ok()) << handle_result.status();
+    auto handle = std::move(handle_result.ValueOrDie());
+    auto public_handle_result = handle->GetPublicKeysetHandle();
+    ASSERT_TRUE(public_handle_result.ok()) << public_handle_result.status();
+    auto keyset = KeysetUtil::GetKeyset(*handle);
+    auto public_keyset = KeysetUtil::GetKeyset(
+        *(public_handle_result.ValueOrDie()));
+    EXPECT_EQ(keyset.primary_key_id(), public_keyset.primary_key_id());
+    EXPECT_EQ(keyset.key_size(), public_keyset.key_size());
+    CompareKeyMetadata(keyset.key(0), public_keyset.key(0));
+    EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC,
+              public_keyset.key(0).key_data().key_material_type());
+  }
+  { // A keyset with multiple keys.
+    EcdsaSignKeyManager key_manager;
+    const KeyFactory& key_factory = key_manager.get_key_factory();
+    Keyset keyset;
+    int key_count = 3;
+
+    AddTinkKey(EcdsaSignKeyManager::kKeyType,
+               /* key_id= */ 623628,
+               *(key_factory.NewKey(
+                   SignatureKeyTemplates::EcdsaP256().value()).ValueOrDie()),
+               KeyStatusType::ENABLED,
+               KeyData::ASYMMETRIC_PRIVATE,
+               &keyset);
+    AddLegacyKey(EcdsaSignKeyManager::kKeyType,
+                 /* key_id= */ 36285,
+                 *(key_factory.NewKey(
+                     SignatureKeyTemplates::EcdsaP384().value()).ValueOrDie()),
+                 KeyStatusType::DISABLED,
+                 KeyData::ASYMMETRIC_PRIVATE,
+                 &keyset);
+    AddRawKey(EcdsaSignKeyManager::kKeyType,
+              /* key_id= */ 42,
+              *(key_factory.NewKey(
+                  SignatureKeyTemplates::EcdsaP384().value()).ValueOrDie()),
+              KeyStatusType::ENABLED,
+              KeyData::ASYMMETRIC_PRIVATE,
+              &keyset);
+    keyset.set_primary_key_id(42);
+    auto handle = KeysetUtil::GetKeysetHandle(keyset);
+    auto public_handle_result = handle->GetPublicKeysetHandle();
+    ASSERT_TRUE(public_handle_result.ok()) << public_handle_result.status();
+    auto public_keyset = KeysetUtil::GetKeyset(
+        *(public_handle_result.ValueOrDie()));
+    EXPECT_EQ(keyset.primary_key_id(), public_keyset.primary_key_id());
+    EXPECT_EQ(keyset.key_size(), public_keyset.key_size());
+    for (int i = 0; i < key_count; i++) {
+      CompareKeyMetadata(keyset.key(i), public_keyset.key(i));
+      EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC,
+                public_keyset.key(i).key_data().key_material_type());
+    }
+  }
+}
+
+
+TEST_F(KeysetHandleTest, testGetPublicKeysetHandleErrors) {
+  { // A keyset with a single key.
+    auto handle_result = KeysetHandle::GenerateNew(
+        AeadKeyTemplates::Aes128Eax());
+    ASSERT_TRUE(handle_result.ok()) << handle_result.status();
+    auto handle = std::move(handle_result.ValueOrDie());
+    auto public_handle_result = handle->GetPublicKeysetHandle();
+    ASSERT_FALSE(public_handle_result.ok());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "ASYMMETRIC_PRIVATE",
+                        public_handle_result.status().error_message());
+  }
+  { // A keyset with multiple keys.
+    EcdsaSignKeyManager key_manager;
+    const KeyFactory& key_factory = key_manager.get_key_factory();
+    AesGcmKeyManager aead_key_manager;
+    const KeyFactory& aead_key_factory = aead_key_manager.get_key_factory();
+    Keyset keyset;
+
+    AddTinkKey(EcdsaSignKeyManager::kKeyType,
+               /* key_id= */ 623628,
+               *(key_factory.NewKey(
+                   SignatureKeyTemplates::EcdsaP256().value()).ValueOrDie()),
+               KeyStatusType::ENABLED,
+               KeyData::ASYMMETRIC_PRIVATE,
+               &keyset);
+    AddLegacyKey(AesGcmKeyManager::kKeyType,
+                 /* key_id= */ 42,
+                 *(aead_key_factory.NewKey(
+                     AeadKeyTemplates::Aes128Gcm().value()).ValueOrDie()),
+                 KeyStatusType::ENABLED,
+                 KeyData::ASYMMETRIC_PRIVATE,  // Intentionally wrong setting.
+                 &keyset);
+    keyset.set_primary_key_id(42);
+    auto handle = KeysetUtil::GetKeysetHandle(keyset);
+    auto public_handle_result = handle->GetPublicKeysetHandle();
+    ASSERT_FALSE(public_handle_result.ok());
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, "PrivateKeyFactory",
+                        public_handle_result.status().error_message());
+  }
 }
 
 }  // namespace

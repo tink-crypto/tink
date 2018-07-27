@@ -18,6 +18,7 @@
 
 #include "tink/hybrid_decrypt.h"
 #include "tink/registry.h"
+#include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
@@ -219,6 +220,50 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyCreation) {
     ASSERT_TRUE(ecies_key.ParseFromString(key_data->value()));
     CheckNewKey(ecies_key, key_format);
   }
+}
+
+TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPublicKeyExtraction) {
+  EciesAeadHkdfPrivateKeyManager key_manager;
+  auto private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
+      &(key_manager.get_key_factory()));
+  ASSERT_NE(private_key_factory, nullptr);
+
+  auto new_key_result = private_key_factory->NewKey(
+      HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128CtrHmacSha256().value());
+  std::unique_ptr<EciesAeadHkdfPrivateKey> new_key(
+      reinterpret_cast<EciesAeadHkdfPrivateKey*>(
+          new_key_result.ValueOrDie().release()));
+  auto public_key_data_result = private_key_factory->GetPublicKeyData(
+      new_key->SerializeAsString());
+  EXPECT_TRUE(public_key_data_result.ok()) << public_key_data_result.status();
+  auto public_key_data = std::move(public_key_data_result.ValueOrDie());
+  EXPECT_EQ(EciesAeadHkdfPublicKeyManager::kKeyType,
+            public_key_data->type_url());
+  EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC, public_key_data->key_material_type());
+  EXPECT_EQ(new_key->public_key().SerializeAsString(),
+            public_key_data->value());
+}
+
+TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPublicKeyExtractionErrors) {
+  EciesAeadHkdfPrivateKeyManager key_manager;
+  auto private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
+      &(key_manager.get_key_factory()));
+  ASSERT_NE(private_key_factory, nullptr);
+
+  AesCtrHmacAeadKeyManager aead_key_manager;
+  auto aead_private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
+      &(aead_key_manager.get_key_factory()));
+  ASSERT_EQ(nullptr, aead_private_key_factory);
+
+  auto aead_key_result = aead_key_manager.get_key_factory().NewKey(
+      AeadKeyTemplates::Aes128CtrHmacSha256().value());
+  ASSERT_TRUE(aead_key_result.ok()) << aead_key_result.status();
+  auto aead_key = std::move(aead_key_result.ValueOrDie());
+  auto public_key_data_result = private_key_factory->GetPublicKeyData(
+      aead_key->SerializeAsString());
+  EXPECT_FALSE(public_key_data_result.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT,
+            public_key_data_result.status().error_code());
 }
 
 TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testNewKeyErrors) {

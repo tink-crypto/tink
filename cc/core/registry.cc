@@ -63,7 +63,7 @@ StatusOr<const KeyFactory*> Registry::get_key_factory(
 }
 
 // static
-crypto::tink::util::StatusOr<std::unique_ptr<KeyData>> Registry::NewKeyData(
+StatusOr<std::unique_ptr<KeyData>> Registry::NewKeyData(
     const KeyTemplate& key_template) {
   std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
 
@@ -83,6 +83,25 @@ crypto::tink::util::StatusOr<std::unique_ptr<KeyData>> Registry::NewKeyData(
   }
   auto factory = key_factory_result.ValueOrDie();
   auto result = factory->NewKeyData(key_template.value());
+  return result;
+}
+
+// static
+StatusOr<std::unique_ptr<KeyData>> Registry::GetPublicKeyData(
+    const std::string& type_url, const std::string& serialized_private_key) {
+  std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
+  auto key_factory_result = get_key_factory(type_url);
+  if (!key_factory_result.ok()) {
+    return key_factory_result.status();
+  }
+  auto factory =
+      dynamic_cast<const PrivateKeyFactory*>(key_factory_result.ValueOrDie());
+  if (factory == nullptr) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "KeyManager for type '%s' does not have "
+                     "a PrivateKeyFactory.", type_url.c_str());
+  }
+  auto result = factory->GetPublicKeyData(serialized_private_key);
   return result;
 }
 

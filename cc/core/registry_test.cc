@@ -24,6 +24,8 @@
 #include "tink/aead.h"
 #include "tink/aead/aead_catalogue.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
+#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/catalogue.h"
 #include "tink/crypto_format.h"
 #include "tink/registry.h"
@@ -34,7 +36,12 @@
 #include "tink/util/test_util.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
+#include "proto/common.pb.h"
 #include "proto/tink.pb.h"
+
+namespace crypto {
+namespace tink {
+namespace {
 
 using crypto::tink::KeysetUtil;
 using crypto::tink::test::AddLegacyKey;
@@ -45,15 +52,14 @@ using crypto::tink::util::Status;
 using google::crypto::tink::AesCtrHmacAeadKey;
 using google::crypto::tink::AesGcmKey;
 using google::crypto::tink::AesGcmKeyFormat;
+using google::crypto::tink::EcPointFormat;
+using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 using portable_proto::MessageLite;
-
-namespace crypto {
-namespace tink {
-namespace {
 
 class RegistryTest : public ::testing::Test {
  protected:
@@ -297,6 +303,7 @@ TEST_F(RegistryTest, testRegisterKeyManager) {
   EXPECT_TRUE(status.ok()) << status;
 
   // Register the same key manager again, it should work (idempotence).
+  status = Registry::RegisterKeyManager(new TestAeadKeyManager(key_type_1));
   EXPECT_TRUE(status.ok()) << status;
 
   // Try overriding a key manager.
@@ -500,6 +507,50 @@ TEST_F(RegistryTest, testNewKeyData) {
     EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_type_url,
                         new_key_data_result.status().error_message());
   }
+}
+
+TEST_F(RegistryTest, testGetPublicKeyData) {
+  // Setup the registry.
+  Registry::Reset();
+  auto status =
+      Registry::RegisterKeyManager(new EciesAeadHkdfPrivateKeyManager());
+  ASSERT_TRUE(status.ok()) << status;
+  status = Registry::RegisterKeyManager(new AesGcmKeyManager());
+  ASSERT_TRUE(status.ok()) << status;
+
+  // Get a test private key.
+  auto ecies_key = test::GetEciesAesGcmHkdfTestKey(
+      EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
+      HashType::SHA256, /* aes_gcm_key_size= */ 24);
+
+  // Extract public key data and check.
+  auto public_key_data_result = Registry::GetPublicKeyData(
+      EciesAeadHkdfPrivateKeyManager::kKeyType, ecies_key.SerializeAsString());
+  EXPECT_TRUE(public_key_data_result.ok()) << public_key_data_result.status();
+  auto public_key_data = std::move(public_key_data_result.ValueOrDie());
+  EXPECT_EQ(EciesAeadHkdfPublicKeyManager::kKeyType,
+            public_key_data->type_url());
+  EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC, public_key_data->key_material_type());
+  EXPECT_EQ(ecies_key.public_key().SerializeAsString(),
+            public_key_data->value());
+
+  // Try with a wrong key type.
+  auto wrong_key_type_result = Registry::GetPublicKeyData(
+      AesGcmKeyManager::kKeyType, ecies_key.SerializeAsString());
+  EXPECT_FALSE(wrong_key_type_result.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT,
+            wrong_key_type_result.status().error_code());
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "PrivateKeyFactory",
+                      wrong_key_type_result.status().error_message());
+
+  // Try with a bad serialized key.
+  auto bad_key_result = Registry::GetPublicKeyData(
+      EciesAeadHkdfPrivateKeyManager::kKeyType, "some bad serialized key");
+  EXPECT_FALSE(bad_key_result.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT,
+            bad_key_result.status().error_code());
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "Could not parse",
+                      bad_key_result.status().error_message());
 }
 
 }  // namespace

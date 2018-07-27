@@ -108,6 +108,8 @@ cc_library(
         "//proto:common_cc_proto",
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -291,10 +293,13 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":ecdsa_sign_key_manager",
+        ":ecdsa_verify_key_manager",
         ":signature_key_templates",
         "//cc:config",
         "//cc:public_key_sign",
         "//cc:registry",
+        "//cc/aead:aead_key_templates",
+        "//cc/aead:aes_gcm_key_manager",
         "//cc/util:status",
         "//cc/util:test_util",
         "//proto:aes_eax_cc_proto",

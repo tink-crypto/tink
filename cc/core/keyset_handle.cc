@@ -20,10 +20,12 @@
 #include "tink/keyset_manager.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
+#include "tink/registry.h"
 #include "tink/util/errors.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EncryptedKeyset;
+using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyTemplate;
 
@@ -104,6 +106,35 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
     return manager_result.status();
   }
   return manager_result.ValueOrDie()->GetKeysetHandle();
+}
+
+
+util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
+    const Keyset::Key& key) {
+  if (key.key_data().key_material_type() != KeyData::ASYMMETRIC_PRIVATE) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+        "Key material is not of type KeyData::ASYMMETRIC_PRIVATE");
+  }
+  auto key_data_result = Registry::GetPublicKeyData(key.key_data().type_url(),
+                                                    key.key_data().value());
+  if (!key_data_result.ok()) return key_data_result.status();
+  auto public_key = absl::make_unique<Keyset::Key>(key);
+  public_key->mutable_key_data()->Swap(key_data_result.ValueOrDie().get());
+  return std::move(public_key);
+}
+
+util::StatusOr<std::unique_ptr<KeysetHandle>>
+KeysetHandle::GetPublicKeysetHandle() {
+  std::unique_ptr<Keyset> public_keyset(new Keyset());
+  for (const Keyset::Key& key : get_keyset().key()) {
+    auto public_key_result = ExtractPublicKey(key);
+    if (!public_key_result.ok()) return public_key_result.status();
+    public_keyset->add_key()->Swap(public_key_result.ValueOrDie().get());
+  }
+  public_keyset->set_primary_key_id(get_keyset().primary_key_id());
+  std::unique_ptr<KeysetHandle> handle(
+      new KeysetHandle(std::move(public_keyset)));
+  return std::move(handle);
 }
 
 KeysetHandle::KeysetHandle(std::unique_ptr<Keyset> keyset)

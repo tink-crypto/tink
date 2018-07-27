@@ -17,6 +17,7 @@
 #include "tink/signature/ecdsa_sign_key_manager.h"
 
 #include "absl/strings/string_view.h"
+#include "absl/memory/memory.h"
 #include "tink/public_key_sign.h"
 #include "tink/key_manager.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
@@ -43,7 +44,7 @@ using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
-class EcdsaPrivateKeyFactory : public KeyFactory {
+class EcdsaPrivateKeyFactory : public PrivateKeyFactory {
  public:
   EcdsaPrivateKeyFactory() {}
 
@@ -63,6 +64,12 @@ class EcdsaPrivateKeyFactory : public KeyFactory {
   // EcdsaKeyFormat-proto), and wraps it in a KeyData-proto.
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   NewKeyData(absl::string_view serialized_key_format) const override;
+
+  // Returns KeyData proto that contains EcdsaPublicKey
+  // extracted from the given serialized_private_key, which must contain
+  // EcdsaPrivateKey-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
+  GetPublicKeyData(absl::string_view serialized_private_key) const override;
 };
 
 StatusOr<std::unique_ptr<MessageLite>> EcdsaPrivateKeyFactory::NewKey(
@@ -122,6 +129,24 @@ StatusOr<std::unique_ptr<KeyData>> EcdsaPrivateKeyFactory::NewKeyData(
   key_data->set_type_url(EcdsaSignKeyManager::kKeyType);
   key_data->set_value(new_key.SerializeAsString());
   key_data->set_key_material_type(KeyData::ASYMMETRIC_PRIVATE);
+  return std::move(key_data);
+}
+
+StatusOr<std::unique_ptr<KeyData>>
+EcdsaPrivateKeyFactory::GetPublicKeyData(
+    absl::string_view serialized_private_key) const {
+  EcdsaPrivateKey private_key;
+  if (!private_key.ParseFromString(std::string(serialized_private_key))) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Could not parse the passed string as proto '%s'.",
+                     EcdsaVerifyKeyManager::kKeyType);
+  }
+  auto status = EcdsaSignKeyManager::Validate(private_key);
+  if (!status.ok()) return status;
+  auto key_data = absl::make_unique<KeyData>();
+  key_data->set_type_url(EcdsaVerifyKeyManager::kKeyType);
+  key_data->set_value(private_key.public_key().SerializeAsString());
+  key_data->set_key_material_type(KeyData:: ASYMMETRIC_PUBLIC);
   return std::move(key_data);
 }
 

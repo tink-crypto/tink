@@ -209,7 +209,10 @@ cc_library(
     hdrs = ["ecies_aead_hkdf_private_key_manager.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//objc/hybrid:__pkg__"],
+    visibility = [
+        "//cc:__subpackages__",
+        "//objc:__subpackages__",
+    ],
     deps = [
         ":ecies_aead_hkdf_hybrid_decrypt",
         ":ecies_aead_hkdf_public_key_manager",
@@ -223,6 +226,8 @@ cc_library(
         "//cc/util:statusor",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -232,7 +237,10 @@ cc_library(
     hdrs = ["ecies_aead_hkdf_public_key_manager.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
-    visibility = ["//objc/hybrid:__pkg__"],
+    visibility = [
+        "//cc:__subpackages__",
+        "//objc:__subpackages__",
+    ],
     deps = [
         ":ecies_aead_hkdf_hybrid_encrypt",
         "//cc:hybrid_encrypt",
@@ -442,6 +450,7 @@ cc_test(
         ":ecies_aead_hkdf_public_key_manager",
         ":hybrid_key_templates",
         "//cc:hybrid_decrypt",
+        "//cc/aead:aead_key_templates",
         "//cc/aead:aes_ctr_hmac_aead_key_manager",
         "//cc/aead:aes_gcm_key_manager",
         "//cc/util:status",

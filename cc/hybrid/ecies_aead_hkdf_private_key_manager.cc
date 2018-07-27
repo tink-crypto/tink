@@ -17,6 +17,7 @@
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 
 #include "absl/strings/string_view.h"
+#include "absl/memory/memory.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
@@ -45,7 +46,7 @@ using portable_proto::MessageLite;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
-class EciesAeadHkdfPrivateKeyFactory : public KeyFactory {
+class EciesAeadHkdfPrivateKeyFactory : public PrivateKeyFactory {
  public:
   EciesAeadHkdfPrivateKeyFactory() {}
 
@@ -65,6 +66,12 @@ class EciesAeadHkdfPrivateKeyFactory : public KeyFactory {
   // EciesAeadHkdfKeyFormat-proto), and wraps it in a KeyData-proto.
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   NewKeyData(absl::string_view serialized_key_format) const override;
+
+  // Returns KeyData proto that contains EciesAeadHkdfPublicKey
+  // extracted from the given serialized_private_key, which must contain
+  // EciesAeadHkdfPrivateKey-proto.
+  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
+  GetPublicKeyData(absl::string_view serialized_private_key) const override;
 };
 
 StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPrivateKeyFactory::NewKey(
@@ -125,6 +132,24 @@ StatusOr<std::unique_ptr<KeyData>> EciesAeadHkdfPrivateKeyFactory::NewKeyData(
   key_data->set_type_url(EciesAeadHkdfPrivateKeyManager::kKeyType);
   key_data->set_value(new_key.SerializeAsString());
   key_data->set_key_material_type(KeyData::ASYMMETRIC_PRIVATE);
+  return std::move(key_data);
+}
+
+StatusOr<std::unique_ptr<KeyData>>
+EciesAeadHkdfPrivateKeyFactory::GetPublicKeyData(
+    absl::string_view serialized_private_key) const {
+  EciesAeadHkdfPrivateKey private_key;
+  if (!private_key.ParseFromString(std::string(serialized_private_key))) {
+    return ToStatusF(util::error::INVALID_ARGUMENT,
+                     "Could not parse the passed string as proto '%s'.",
+                     EciesAeadHkdfPrivateKeyManager::kKeyType);
+  }
+  auto status = EciesAeadHkdfPrivateKeyManager::Validate(private_key);
+  if (!status.ok()) return status;
+  auto key_data = absl::make_unique<KeyData>();
+  key_data->set_type_url(EciesAeadHkdfPublicKeyManager::kKeyType);
+  key_data->set_value(private_key.public_key().SerializeAsString());
+  key_data->set_key_material_type(KeyData:: ASYMMETRIC_PUBLIC);
   return std::move(key_data);
 }
 

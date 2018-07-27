@@ -30,7 +30,7 @@
 namespace crypto {
 namespace tink {
 
-// An auxiliary container for methods that generate new key material.
+// Auxiliary containers for methods that generate or extract key material.
 // These methods are grouped separately, as their functionality
 // is independent of the primitive of the corresponding KeyManager.
 class KeyFactory {
@@ -52,6 +52,16 @@ class KeyFactory {
   NewKeyData(absl::string_view serialized_key_format) const = 0;
 
   virtual ~KeyFactory() {}
+};
+
+class PrivateKeyFactory : public KeyFactory {
+ public:
+  // Returns public key data extracted from the given serialized_private_key.
+  virtual
+  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
+  GetPublicKeyData(absl::string_view serialized_private_key) const = 0;
+
+  virtual ~PrivateKeyFactory() {}
 };
 
 /**

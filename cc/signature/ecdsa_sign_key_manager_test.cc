@@ -18,7 +18,10 @@
 
 #include "tink/public_key_sign.h"
 #include "tink/registry.h"
+#include "tink/aead/aead_key_templates.h"
+#include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
+#include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
@@ -263,6 +266,50 @@ TEST_F(EcdsaSignKeyManagerTest, testNewKeyCreation) {
     ASSERT_TRUE(ecdsa_key.ParseFromString(key_data->value()));
     CheckNewKey(ecdsa_key, key_format);
   }
+}
+
+TEST_F(EcdsaSignKeyManagerTest, testPublicKeyExtraction) {
+  EcdsaSignKeyManager key_manager;
+  auto private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
+      &(key_manager.get_key_factory()));
+  ASSERT_NE(private_key_factory, nullptr);
+
+  auto new_key_result = private_key_factory->NewKey(
+      SignatureKeyTemplates::EcdsaP256().value());
+  std::unique_ptr<EcdsaPrivateKey> new_key(
+      reinterpret_cast<EcdsaPrivateKey*>(
+          new_key_result.ValueOrDie().release()));
+  auto public_key_data_result = private_key_factory->GetPublicKeyData(
+      new_key->SerializeAsString());
+  EXPECT_TRUE(public_key_data_result.ok()) << public_key_data_result.status();
+  auto public_key_data = std::move(public_key_data_result.ValueOrDie());
+  EXPECT_EQ(EcdsaVerifyKeyManager::kKeyType,
+            public_key_data->type_url());
+  EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC, public_key_data->key_material_type());
+  EXPECT_EQ(new_key->public_key().SerializeAsString(),
+            public_key_data->value());
+}
+
+TEST_F(EcdsaSignKeyManagerTest, testPublicKeyExtractionErrors) {
+  EcdsaSignKeyManager key_manager;
+  auto private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
+      &(key_manager.get_key_factory()));
+  ASSERT_NE(private_key_factory, nullptr);
+
+  AesGcmKeyManager aead_key_manager;
+  auto aead_private_key_factory = dynamic_cast<const PrivateKeyFactory*>(
+      &(aead_key_manager.get_key_factory()));
+  ASSERT_EQ(nullptr, aead_private_key_factory);
+
+  auto aead_key_result = aead_key_manager.get_key_factory().NewKey(
+      AeadKeyTemplates::Aes128Gcm().value());
+  ASSERT_TRUE(aead_key_result.ok()) << aead_key_result.status();
+  auto aead_key = std::move(aead_key_result.ValueOrDie());
+  auto public_key_data_result = private_key_factory->GetPublicKeyData(
+      aead_key->SerializeAsString());
+  EXPECT_FALSE(public_key_data_result.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT,
+            public_key_data_result.status().error_code());
 }
 
 TEST_F(EcdsaSignKeyManagerTest, testNewKeyErrors) {
