@@ -72,6 +72,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initFromKeychainWithName:(NSString *)keysetName error:(NSError **)error;
 
 /**
+ * Returns a new TINKKeysetHandle that contains the public keys corresponding to the private keys
+ * from @c aHandle.
+ *
+ * @param aHandle   A handle that contains private keys.
+ * @param error     If non-nil it will be populated with a descriptive error message.
+ * return           An instance of TINKKeysetHandle that contains the corresponding public keys or
+ *                  nil in case of error.
+ */
++ (nullable instancetype)publicKeysetHandleWithHandle:(TINKKeysetHandle *)aHandle
+                                                error:(NSError **)error;
+
+/**
  * Writes the underlying keyset to the iOS keychain under the name specified by @c keysetName.
  * The keyset can be retrieved from the keychain by using -initFromKeychainWithName:error:.
  *

@@ -23,11 +23,12 @@
 #import <XCTest/XCTest.h>
 
 #import "objc/TINKAead.h"
-#import "objc/TINKAeadConfig.h"
 #import "objc/TINKAeadKeyTemplate.h"
+#import "objc/TINKAllConfig.h"
 #import "objc/TINKBinaryKeysetReader.h"
 #import "objc/TINKConfig.h"
 #import "objc/TINKHybridKeyTemplate.h"
+#import "objc/TINKSignatureKeyTemplate.h"
 #import "objc/aead/TINKAeadInternal.h"
 #import "objc/util/TINKStrings.h"
 #import "proto/Tink.pbobjc.h"
@@ -80,6 +81,14 @@ static TINKPBKeyset *gKeyset;
   XCTAssertNil(error);
 
   gBadSerializedKeyset = TINKStringToNSData("some weird string");
+
+  error = nil;
+  TINKAllConfig *allConfig = [[TINKAllConfig alloc] initWithError:&error];
+  XCTAssertNotNil(allConfig);
+  XCTAssertNil(error);
+
+  XCTAssertTrue([TINKConfig registerConfig:allConfig error:&error]);
+  XCTAssertNil(error);
 }
 
 - (void)setUp {
@@ -280,14 +289,6 @@ static TINKPBKeyset *gKeyset;
   static NSString *const kKeysetName = @"com.google.crypto.tink.randomaeadkeyset";
 
   NSError *error = nil;
-  TINKAeadConfig *aeadConfig =
-      [[TINKAeadConfig alloc] initWithError:&error];
-  XCTAssertNotNil(aeadConfig);
-  XCTAssertNil(error);
-
-  XCTAssertTrue([TINKConfig registerConfig:aeadConfig error:&error]);
-  XCTAssertNil(error);
-
   // Generate a new fresh keyset for Aead.
   TINKAeadKeyTemplate *tpl =
       [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes128Gcm error:&error];
@@ -335,14 +336,6 @@ static TINKPBKeyset *gKeyset;
   static NSString *const kKeysetName = @"com.google.crypto.tink.somekeyset";
 
   NSError *error = nil;
-  TINKAeadConfig *aeadConfig =
-      [[TINKAeadConfig alloc] initWithError:&error];
-  XCTAssertNotNil(aeadConfig);
-  XCTAssertNil(error);
-
-  XCTAssertTrue([TINKConfig registerConfig:aeadConfig error:&error]);
-  XCTAssertNil(error);
-
   // Generate a new fresh keyset for Aead.
   TINKAeadKeyTemplate *tpl =
       [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes128Gcm error:&error];
@@ -364,6 +357,53 @@ static TINKPBKeyset *gKeyset;
   // Try again. Should succeed with ItemNotFound.
   XCTAssertTrue([TINKKeysetHandle deleteFromKeychainWithName:kKeysetName error:&error]);
   XCTAssertNil(error);
+}
+
+- (void)testPublicKeysetHandleWithHandle {
+  NSError *error = nil;
+  TINKSignatureKeyTemplate *tpl =
+      [[TINKSignatureKeyTemplate alloc] initWithKeyTemplate:TINKEcdsaP256 error:&error];
+  XCTAssertNotNil(tpl);
+  XCTAssertNil(error);
+
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithKeyTemplate:tpl error:&error];
+  XCTAssertNotNil(handle);
+  XCTAssertNil(error);
+
+  TINKKeysetHandle *publicHandle = [TINKKeysetHandle publicKeysetHandleWithHandle:handle
+                                                                            error:&error];
+  XCTAssertNotNil(publicHandle);
+  XCTAssertNil(error);
+
+  auto keyset = crypto::tink::KeysetUtil::GetKeyset(*handle.ccKeysetHandle);
+  auto public_keyset = crypto::tink::KeysetUtil::GetKeyset(*publicHandle.ccKeysetHandle);
+  XCTAssertEqual(keyset.primary_key_id(), public_keyset.primary_key_id());
+  XCTAssertEqual(keyset.key_size(), public_keyset.key_size());
+  XCTAssertEqual(keyset.key(0).status(), public_keyset.key(0).status());
+  XCTAssertEqual(keyset.key(0).key_id(), public_keyset.key(0).key_id());
+  XCTAssertEqual(keyset.key(0).output_prefix_type(), public_keyset.key(0).output_prefix_type());
+  XCTAssertEqual(google::crypto::tink::KeyData::ASYMMETRIC_PUBLIC,
+                 public_keyset.key(0).key_data().key_material_type());
+}
+
+- (void)testPublicKeysetHandleWithHandleFailedNotAsymmetric {
+  NSError *error = nil;
+  TINKAeadKeyTemplate *tpl = [[TINKAeadKeyTemplate alloc] initWithKeyTemplate:TINKAes128Eax
+                                                                        error:&error];
+  XCTAssertNotNil(tpl);
+  XCTAssertNil(error);
+
+  TINKKeysetHandle *handle = [[TINKKeysetHandle alloc] initWithKeyTemplate:tpl error:&error];
+  XCTAssertNotNil(handle);
+  XCTAssertNil(error);
+
+  TINKKeysetHandle *publicHandle = [TINKKeysetHandle publicKeysetHandleWithHandle:handle
+                                                                            error:&error];
+  XCTAssertNil(publicHandle);
+  XCTAssertNotNil(error);
+  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertTrue([error.localizedFailureReason
+      containsString:@"Key material is not of type KeyData::ASYMMETRIC_PRIVATE"]);
 }
 
 @end

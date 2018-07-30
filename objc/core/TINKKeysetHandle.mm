@@ -286,4 +286,17 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
   _ccKeysetHandle = std::move(handle);
 }
 
++ (nullable instancetype)publicKeysetHandleWithHandle:(TINKKeysetHandle *)aHandle
+                                                error:(NSError **)error {
+  crypto::tink::KeysetHandle *ccKeysetHandle = aHandle.ccKeysetHandle;
+  auto status = ccKeysetHandle->GetPublicKeysetHandle();
+  if (!status.ok()) {
+    if (error) {
+      *error = TINKStatusToError(status.status());
+    }
+    return nil;
+  }
+  return [[TINKKeysetHandle alloc] initWithCCKeysetHandle:std::move(status.ValueOrDie())];
+}
+
 @end
