@@ -15,10 +15,13 @@
 goog.module('tink.RegistryTest');
 goog.setTestOnly('tink.RegistryTest');
 
+const Aead = goog.require('tink.Aead');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const Catalogue = goog.require('tink.Catalogue');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
 const KeyManager = goog.require('tink.KeyManager');
+const KeysetHandle = goog.require('tink.KeysetHandle');
+const Mac = goog.require('tink.Mac');
 const PbAesCtrHmacAeadKey = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKey');
 const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
 const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat');
@@ -27,8 +30,11 @@ const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbHmacKeyFormat = goog.require('proto.google.crypto.tink.HmacKeyFormat');
 const PbHmacParams = goog.require('proto.google.crypto.tink.HmacParams');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
+const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
+const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 const PbMessage = goog.require('jspb.Message');
+const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const Registry = goog.require('tink.Registry');
 const SecurityException = goog.require('tink.exception.SecurityException');
 
@@ -67,8 +73,8 @@ testSuite({
 
   async testAddCatalogueOverwritingAttempt() {
     try {
-        await Registry.addCatalogue('some catalogue', new DummyCatalogue1());
-        await Registry.addCatalogue('some catalogue', new DummyCatalogue2());
+      await Registry.addCatalogue('some catalogue', new DummyCatalogue1());
+      await Registry.addCatalogue('some catalogue', new DummyCatalogue2());
     } catch (e) {
       assertEquals(ExceptionText.overwrittingCatalogueAttempt(), e.toString());
       return;
@@ -314,12 +320,13 @@ testSuite({
       keyTypes.push('someKeyType' + i.toString());
     }
 
-    for (let i = 0; i < keyTypes.length; i++) {
+    const keyTypesLength = keyTypes.length;
+    for (let i = 0; i < keyTypesLength; i++) {
       await Registry.registerKeyManager(
           keyTypes[i], new DummyKeyManager1(keyTypes[i]), true);
     }
 
-    for (let i = 0; i < keyTypes.length; i++) {
+    for (let i = 0; i < keyTypesLength; i++) {
       const keyTemplate = new PbKeyTemplate();
       keyTemplate.setTypeUrl(keyTypes[i]);
       const result = await Registry.newKeyData(keyTemplate);
@@ -333,12 +340,13 @@ testSuite({
       keyTypes.push('someKeyType' + i.toString());
     }
 
-    for (let i = 0; i < keyTypes.length; i++) {
+    const keyTypesLength = keyTypes.length;
+    for (let i = 0; i < keyTypesLength; i++) {
       await Registry.registerKeyManager(
           keyTypes[i], new DummyKeyManager1(keyTypes[i]));
     }
 
-    for (let i = 0; i < keyTypes.length; i++) {
+    for (let i = 0; i < keyTypesLength; i++) {
       const keyTemplate = new PbKeyTemplate();
       keyTemplate.setTypeUrl(keyTypes[i]);
       const result = await Registry.newKeyData(keyTemplate);
@@ -374,13 +382,13 @@ testSuite({
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitive method
   async testGetPrimitiveDifferentKeyTypes() {
-    const keyDataType = 'key_data_type';
-    const anotherType = 'another_type';
+    const keyDataType = 'key_data_key_type_url';
+    const anotherType = 'another_key_type_url';
     const keyData = new PbKeyData();
     keyData.setTypeUrl(keyDataType);
 
     try {
-      await Registry.getPrimitive(keyData, anotherType);
+      await Registry.getPrimitive(null, keyData, anotherType);
     } catch (e) {
       assertEquals(
           ExceptionText.keyTypesAreNotMatching(keyDataType, anotherType),
@@ -393,28 +401,19 @@ testSuite({
   async testGetPrimitiveWithoutDefiningKeyType() {
     // Get primitive from key proto without key type.
     try {
-      await Registry.getPrimitive(new PbMessage);
+      await Registry.getPrimitive(null, new PbMessage);
     } catch (e) {
       assertEquals(ExceptionText.keyTypeNotDefined(), e.toString());
     }
-
-    // Get primitive from serialized key proto without key type.
-    try {
-      await Registry.getPrimitive(new Uint8Array(10));
-    } catch (e) {
-      assertEquals(ExceptionText.keyTypeNotDefined(), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
   },
 
   async testGetPrimitiveMissingKeyManager() {
-    const keyDataType = 'key_data_type';
+    const keyDataType = 'key_data_key_type_url';
     const keyData = new PbKeyData();
     keyData.setTypeUrl(keyDataType);
 
     try {
-      await Registry.getPrimitive(keyData);
+      await Registry.getPrimitive(null, keyData);
     } catch (e) {
       assertEquals(
           ExceptionText.notRegisteredKeyType(keyDataType), e.toString());
@@ -429,7 +428,8 @@ testSuite({
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
     const keyData = await Registry.newKeyData(keyTemplate);
 
-    const primitive = await Registry.getPrimitive(keyData);
+    const primitive =
+        await Registry.getPrimitive(manager.getPrimitiveType(), keyData);
     assertTrue(primitive instanceof EncryptThenAuthenticate);
   },
 
@@ -440,38 +440,171 @@ testSuite({
     const keyData = await Registry.newKeyData(keyTemplate);
     const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
 
-    const primitive = await Registry.getPrimitive(key, keyData.getTypeUrl());
+    const primitive = await Registry.getPrimitive(
+        manager.getPrimitiveType(), key, keyData.getTypeUrl());
     assertTrue(primitive instanceof EncryptThenAuthenticate);
   },
 
-  // TODO implement getPrimitive for serialized key proto and then unable
-  async testGetPrimitiveFromSerializedAesCtrHmacAeadKey() {
+  async testGetPrimitiveMacFromAesCtrHmacAeadKey() {
     const manager = new AesCtrHmacAeadKeyManager();
     await Registry.registerKeyManager(manager.getKeyType(), manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
     const keyData = await Registry.newKeyData(keyTemplate);
-    const serializedKey = keyData.getValue();
+    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
 
-//    const primitive = await Registry.getPrimitive(
-//        serializedKey, keyData.getTypeUrl());
     try {
-      await Registry.getPrimitive(serializedKey, keyData.getTypeUrl());
+      await Registry.getPrimitive(Mac, key, keyData.getTypeUrl());
     } catch (e) {
-      assertEquals(ExceptionText.notImplemented(), e.toString());
+      assertTrue(
+          e.toString().includes(ExceptionText.getPrimitiveBadPrimitive()));
+      return;
     }
-    // assertTrue(primitive instanceof EncryptThenAuthenticate);
+    fail('An exception should be thrown.');
   },
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitives method
-  async testGetPrimitives() {
+  async testGetPrimitivesNullKeysetHandle() {
     try {
-      await Registry.getPrimitives();
+      await Registry.getPrimitives(DEFAULT_PRIMITIVE_TYPE, null);
     } catch (e) {
-      assertEquals(ExceptionText.notImplemented(), e.toString());
+      assertEquals(ExceptionText.nullKeysetHandle(), e.toString());
       return;
     }
     fail('An exception should be thrown.');
+  },
+
+  async testGetPrimitivesPrimaryIsTheEnabledKeyWithGivenId() {
+    const id = 1;
+    const primaryUrl = 'key_type_url_for_primary_key';
+    const disabledUrl = 'key_type_url_for_disabled_key';
+
+    const keyset = new PbKeyset();
+    keyset.addKey(createKey(
+        id, PbOutputPrefixType.TINK, disabledUrl, /* enabled = */ false));
+    keyset.addKey(createKey(
+        id, PbOutputPrefixType.LEGACY, disabledUrl, /* enabled = */ false));
+    keyset.addKey(createKey(
+        id, PbOutputPrefixType.RAW, disabledUrl, /* enabled = */ false));
+    keyset.addKey(createKey(
+        id, PbOutputPrefixType.TINK, primaryUrl, /* enabled = */ true));
+    keyset.setPrimaryKeyId(id);
+
+    const keysetHandle = new KeysetHandle(keyset);
+
+    Registry.registerKeyManager(primaryUrl, new DummyKeyManager1(primaryUrl));
+    Registry.registerKeyManager(disabledUrl, new DummyKeyManager1(disabledUrl));
+
+    const primitiveSet =
+        await Registry.getPrimitives(DEFAULT_PRIMITIVE_TYPE, keysetHandle);
+    const primary = await primitiveSet.getPrimary();
+
+    // Result of getPrimitive is string, which is the same to typeUrl (see
+    // DummyKeyManager1 and registryInitForGetPrimitivesTests).
+    assertEquals(primaryUrl, primary.getPrimitive());
+  },
+
+  async testGetPrimitivesDisabledKeysShouldBeIgnored() {
+    const enabledRawKeysCount = 10;
+    const enabledUrl = 'enabled_key_type_url';
+    const disabledUrl = 'disabled_key_type_url';
+
+    // Create keyset with both enabled and disabled RAW keys.
+    const keyset = new PbKeyset();
+    // Add RAW keys with different ids from [1, ENABLED_RAW_KEYS_COUNT].
+    for (let i = 0; i < enabledRawKeysCount; i++) {
+      keyset.addKey(createKey(
+          1 + i, PbOutputPrefixType.RAW, enabledUrl, /* enabled = */ true));
+      keyset.addKey(createKey(
+          1 + i, PbOutputPrefixType.RAW, disabledUrl, /* enabled = */ false));
+    }
+    keyset.setPrimaryKeyId(1);
+    const keysetHandle = new KeysetHandle(keyset);
+
+    // Register KeyManager (the key manager for enabled keys should be enough).
+    await Registry.registerKeyManager(
+        enabledUrl, new DummyKeyManager1(enabledUrl));
+
+    // Get primitives and get all raw primitives.
+    const primitiveSet =
+        await Registry.getPrimitives(DEFAULT_PRIMITIVE_TYPE, keysetHandle);
+    const rawPrimitives = await primitiveSet.getRawPrimitives();
+
+    // Should return all enabled RAW primitives and nothing else (disabled
+    // primitives should not be added into primitive set).
+    assertEquals(enabledRawKeysCount, rawPrimitives.length);
+
+    // Test that it returns the correct RAW primitives by using getPrimitive
+    // which is set to the string same as typeUrl (see DummyKeyManager1 and
+    // registryInitForGetPrimitivesTests).
+    for (let i = 0; i < enabledRawKeysCount; ++i) {
+      assertEquals(enabledUrl, await rawPrimitives[i].getPrimitive());
+    }
+  },
+
+  async testGetPrimitivesWithCustomKeyManager() {
+    // Create keyset handle.
+    const keyTypeUrl = 'some_key_type_url';
+    const keyId = 1;
+    const key = createKey(keyId, PbOutputPrefixType.TINK, keyTypeUrl);
+
+    const keyset = new PbKeyset();
+    keyset.addKey(key);
+    keyset.setPrimaryKeyId(keyId);
+
+    const keysetHandle = new KeysetHandle(keyset);
+
+    // Register key manager for the given keyType.
+    await Registry.registerKeyManager(
+        keyTypeUrl, new DummyKeyManager1(keyTypeUrl));
+
+    // Use getPrimitives with custom key manager for the keyType.
+    const customPrimitive = 'type_url_corresponding_to_custom_key_manager';
+    const customKeyManager = new DummyKeyManager2(keyTypeUrl, customPrimitive);
+    const primitiveSet = await Registry.getPrimitives(
+        DEFAULT_PRIMITIVE_TYPE, keysetHandle, customKeyManager);
+
+    // Primary should be the entry corresponding to the keyTypeUrl and thus
+    // getPrimitive should return customPrimitive.
+    const primary = await primitiveSet.getPrimary();
+    assertEquals(customPrimitive, primary.getPrimitive());
+  },
+
+  async testGetPrimitivesKeyWrongPrimitiveType() {
+    const goodKeysCount = 10;
+    const goodPrimitiveType = Aead;
+    const badPrimitiveType = Mac;
+
+    const keyset = new PbKeyset();
+
+    // Add good keys with different KeyTypeUrl and register key manager
+    // which provides goodPrimitiveType primitives for each good key.
+    for (let i = 0; i < goodKeysCount; i++) {
+      const typeUrl = 'good_key_type_url_' + i.toString();
+      keyset.addKey(createKey(
+          1 + i, PbOutputPrefixType.RAW, typeUrl, /* enabled = */ true));
+      await Registry.registerKeyManager(
+          typeUrl, new DummyKeyManager1(typeUrl, typeUrl, goodPrimitiveType));
+    }
+
+    // Add key and corresponding keyManager providing badPrimitiveType.
+    const typeUrl = 'bad_key_type_url';
+    keyset.addKey(createKey(
+        /* id = */ goodKeysCount + 2, PbOutputPrefixType.RAW, typeUrl,
+        /* enabled = */ true));
+    await Registry.registerKeyManager(
+        typeUrl, new DummyKeyManager1(typeUrl, typeUrl, badPrimitiveType));
+
+    // Create keyset handle and try to getPrimitives from it. Should throw
+    // an exception because KeysetHandle contains key of wrong type.
+    keyset.setPrimaryKeyId(1);
+    const keysetHandle = new KeysetHandle(keyset);
+    try {
+      await Registry.getPrimitives(goodPrimitiveType, keysetHandle);
+    } catch (e) {
+      assertTrue(
+          e.toString().includes(ExceptionText.getPrimitiveBadPrimitive()));
+    }
   },
 });
 
@@ -593,6 +726,19 @@ class ExceptionText {
   static keyTypeNotDefined() {
     return 'CustomError: Key type has to be specified.';
   }
+
+  /** @return {string} */
+  static nullKeysetHandle() {
+    return 'CustomError: Keyset handle has to be non-null.';
+  }
+
+  /**
+   * @return {string}
+   */
+  static getPrimitiveBadPrimitive() {
+    return 'Requested primitive type which is not supported by this ' +
+        'key manager.';
+  }
 }
 
 /**
@@ -705,28 +851,53 @@ class DummyKeyFactory {
   }
 }
 
+const DEFAULT_PRIMITIVE_TYPE = Aead;
+
 /**
  * @final
- * @implements {KeyManager.KeyManager}
+ * @implements {KeyManager.KeyManager<string>}
  */
 class DummyKeyManager1 {
   /**
    * @param {string} keyType
+   * @param {?string=} opt_primitive
+   * @param {?Object=} opt_primitiveType
    */
-  constructor(keyType) {
+  constructor(keyType, opt_primitive, opt_primitiveType) {
     /**
-     * @private @const
+     * @private @const {string}
      */
     this.KEY_TYPE_ = keyType;
+
+    if (!opt_primitive) {
+      opt_primitive = keyType;
+    }
     /**
-     * @private @const
+     * @private @const {string}
+     */
+    this.PRIMITIVE_ = opt_primitive;
+    /**
+     * @private @const {!KeyManager.KeyFactory}
      */
     this.KEY_FACTORY_ = new DummyKeyFactory(keyType);
+
+    if (!opt_primitiveType) {
+      opt_primitiveType = DEFAULT_PRIMITIVE_TYPE;
+    }
+    /**
+     * @private @const {!Object}
+     */
+    this.PRIMITIVE_TYPE_ = opt_primitiveType;
   }
 
   /** @override */
-  getPrimitive(key) {
-    throw new SecurityException('Not implemented, only for testing purposes.');
+  async getPrimitive(primitiveType, key) {
+    if (primitiveType !== this.PRIMITIVE_TYPE_) {
+      throw new SecurityException(
+          'Requested primitive type which is not ' +
+          'supported by this key manager.');
+    }
+    return this.PRIMITIVE_;
   }
 
   /** @override */
@@ -737,6 +908,11 @@ class DummyKeyManager1 {
   /** @override */
   getKeyType() {
     return this.KEY_TYPE_;
+  }
+
+  /** @override */
+  getPrimitiveType() {
+    return this.PRIMITIVE_TYPE_;
   }
 
   /** @override */
@@ -752,22 +928,49 @@ class DummyKeyManager1 {
 
 /**
  * @final
- * @implements {KeyManager.KeyManager}
+ * @implements {KeyManager.KeyManager<string>}
  */
 class DummyKeyManager2 {
   /**
    * @param {string} keyType
+   * @param {string=} opt_primitive
+   * @param {?Object=} opt_primitiveType
    */
-  constructor(keyType) {
+  constructor(keyType, opt_primitive, opt_primitiveType) {
     /**
-     * @private @const
+     * @private @const {string}
      */
     this.KEY_TYPE_ = keyType;
+
+    if (!opt_primitive) {
+      opt_primitive = keyType;
+    }
+    /**
+     * @private @const {string}
+     */
+    this.PRIMITIVE_ = opt_primitive;
+    /**
+     * @private @const {!KeyManager.KeyFactory}
+     */
+    this.KEY_FACTORY_ = new DummyKeyFactory(keyType);
+
+    if (!opt_primitiveType) {
+      opt_primitiveType = DEFAULT_PRIMITIVE_TYPE;
+    }
+    /**
+     * @private @const {!Object}
+     */
+    this.PRIMITIVE_TYPE_ = opt_primitiveType;
   }
 
   /** @override */
-  getPrimitive(key) {
-    throw new SecurityException('Not implemented, only for testing purposes.');
+  async getPrimitive(primitiveType, key) {
+    if (primitiveType !== this.PRIMITIVE_TYPE_) {
+      throw new SecurityException(
+          'Requested primitive type which is not ' +
+          'supported by this key manager.');
+    }
+    return this.PRIMITIVE_;
   }
 
   /** @override */
@@ -781,6 +984,11 @@ class DummyKeyManager2 {
   }
 
   /** @override */
+  getPrimitiveType() {
+    return this.PRIMITIVE_TYPE_;
+  }
+
+  /** @override */
   getVersion() {
     throw new SecurityException('Not implemented, only for testing purposes.');
   }
@@ -790,3 +998,34 @@ class DummyKeyManager2 {
     return this.KEY_FACTORY_;
   }
 }
+
+
+/**
+ * Creates a key with the given parameters.
+ * The key status is enabled by default.
+ *
+ * @param {number} id
+ * @param {!PbOutputPrefixType} prefixType
+ * @param {string} keyTypeUrl
+ * @param {boolean=} opt_enabled
+ *
+ * @return {!PbKeyset.Key}
+ */
+const createKey = function(id, prefixType, keyTypeUrl, opt_enabled = true) {
+  let keyData = new PbKeyData();
+  keyData.setTypeUrl(keyTypeUrl);
+  keyData.setValue(new Uint8Array(10));
+  keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
+
+  let key = new PbKeyset.Key();
+  key.setKeyData(keyData);
+  if (opt_enabled) {
+    key.setStatus(PbKeyStatusType.ENABLED);
+  } else {
+    key.setStatus(PbKeyStatusType.DISABLED);
+  }
+  key.setKeyId(id);
+  key.setOutputPrefixType(prefixType);
+
+  return key;
+};

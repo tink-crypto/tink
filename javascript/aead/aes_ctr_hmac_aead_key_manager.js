@@ -195,7 +195,13 @@ class AesCtrHmacAeadKeyManager {
   /**
    * @override
    */
-  async getPrimitive(key) {
+  async getPrimitive(primitiveType, key) {
+    if (primitiveType != this.getPrimitiveType()) {
+      throw new SecurityException(
+          'Requested primitive type which is not ' +
+          'supported by this key manager.');
+    }
+
     let /** PbAesCtrHmacAeadKey */ deserializedKey;
     if (key instanceof PbKeyData) {
       if (!this.doesSupport(key.getTypeUrl())) {
@@ -268,6 +274,13 @@ class AesCtrHmacAeadKeyManager {
   /**
    * @override
    */
+  getPrimitiveType() {
+    return AesCtrHmacAeadKeyManager.SUPPORTED_PRIMITIVE_;
+  }
+
+  /**
+   * @override
+   */
   getVersion() {
     return AesCtrHmacAeadKeyManager.VERSION_;
   }
@@ -321,6 +334,12 @@ class AesCtrHmacAeadKeyManager {
     this.keyFactory_.validateHmacKeyFormat(keyFormat);
   }
 }
+
+/**
+ * @const @private {!Object}
+ */
+AesCtrHmacAeadKeyManager.SUPPORTED_PRIMITIVE_ = Aead;
+
 /**
  * @const @public {string}
  */

@@ -17,6 +17,7 @@ goog.setTestOnly('tink.aead.AesCtrHmacAeadKeyManagerTest');
 
 const Aead = goog.require('tink.Aead');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
+const Mac = goog.require('tink.Mac');
 const PbAesCtrHmacAeadKey = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKey');
 const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
 const PbAesCtrKey = goog.require('proto.google.crypto.tink.AesCtrKey');
@@ -390,7 +391,7 @@ testSuite({
     keyData.setTypeUrl('bad type url');
 
     try {
-      await aeadKeyManager.getPrimitive(keyData);
+      await aeadKeyManager.getPrimitive(Aead, keyData);
     } catch (e) {
       assertEquals(
           'CustomError: Key type ' + keyData.getTypeUrl() +
@@ -406,7 +407,7 @@ testSuite({
     let key = new PbAesCtrKey();
 
     try {
-      await aeadKeyManager.getPrimitive(key);
+      await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals(
           'CustomError: Given key type is not supported. ' +
@@ -424,7 +425,7 @@ testSuite({
     key.getAesCtrKey().setVersion(version);
 
     try {
-      await aeadKeyManager.getPrimitive(key);
+      await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals(
           'CustomError: Version is out of bound, must be between 0 ' +
@@ -443,7 +444,7 @@ testSuite({
     key.getAesCtrKey().setKeyValue(new Uint8Array(keySize));
 
     try {
-      await aeadKeyManager.getPrimitive(key);
+      await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals(
           'CustomError: unsupported AES key size: ' + keySize, e.toString());
@@ -461,7 +462,7 @@ testSuite({
     for (let i = 0; i < ivSizeOutOfRangeLength; i++) {
       key.getAesCtrKey().getParams().setIvSize(ivSizeOutOfRange[i]);
       try {
-        await manager.getPrimitive(key);
+        await manager.getPrimitive(Aead, key);
       } catch (e) {
         assertEquals(
             'CustomError: Invalid AES CTR HMAC key format: IV size is ' +
@@ -481,7 +482,7 @@ testSuite({
     key.getHmacKey().setKeyValue(new Uint8Array(keySize));
 
     try {
-      await aeadKeyManager.getPrimitive(key);
+      await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals(
           'CustomError: Invalid AES CTR HMAC key format: HMAC key is' +
@@ -499,7 +500,7 @@ testSuite({
     key.getHmacKey().getParams().setHash(PbHashType.UNKNOWN_HASH);
 
     try {
-      await aeadKeyManager.getPrimitive(key);
+      await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals('CustomError: Unknown hash type.', e.toString());
       return;
@@ -515,7 +516,7 @@ testSuite({
     key.getHmacKey().getParams().setTagSize(SMALL_TAG_SIZE);
 
     try {
-      await aeadKeyManager.getPrimitive(key);
+      await aeadKeyManager.getPrimitive(Aead, key);
     } catch (e) {
       assertEquals(
           'CustomError: Invalid HMAC params: tag size ' + SMALL_TAG_SIZE +
@@ -541,7 +542,7 @@ testSuite({
       key.getHmacKey().getParams().setHash(tagSizes[i]['hashType']);
       key.getHmacKey().getParams().setTagSize(tagSizes[i]['tagSize']);
       try {
-        await manager.getPrimitive(key);
+        await manager.getPrimitive(Aead, key);
       } catch (e) {
         assertEquals(
             'CustomError: Invalid HMAC params: tag size ' +
@@ -560,9 +561,9 @@ testSuite({
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
 
-    let /** Aead */ primitive = await aeadKeyManager.getPrimitive(key);
-    let ciphertext = await primitive.encrypt(plaintext, aad);
-    let decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
+    const /** Aead */ primitive = await aeadKeyManager.getPrimitive(Aead, key);
+    const ciphertext = await primitive.encrypt(plaintext, aad);
+    const decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
 
     assertObjectEquals(plaintext, decryptedCiphertext);
   },
@@ -573,11 +574,28 @@ testSuite({
     const plaintext = Random.randBytes(8);
     const aad = Random.randBytes(8);
 
-    let /** Aead */ primitive = await aeadKeyManager.getPrimitive(keyData);
-    let ciphertext = await primitive.encrypt(plaintext, aad);
-    let decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
+    const /** Aead */ primitive =
+        await aeadKeyManager.getPrimitive(Aead, keyData);
+    const ciphertext = await primitive.encrypt(plaintext, aad);
+    const decryptedCiphertext = await primitive.decrypt(ciphertext, aad);
 
     assertObjectEquals(plaintext, decryptedCiphertext);
+  },
+
+  async testGetPrimitiveUnsupportedPrimitive() {
+    const manager = new AesCtrHmacAeadKeyManager();
+    const keyData = createTestKeyData();
+
+    try {
+      await manager.getPrimitive(Mac, keyData);
+    } catch (e) {
+      assertEquals(
+          'CustomError: Requested primitive type which is not ' +
+              'supported by this key manager.',
+          e.toString());
+      return;
+    }
+    fail('An exception should be thrown.');
   },
 
   /////////////////////////////////////////////////////////////////////////////
@@ -596,5 +614,10 @@ testSuite({
   async testDoesSupportShouldSupportAesCtrHmacAeadKey() {
     const manager = new AesCtrHmacAeadKeyManager();
     assertTrue(manager.doesSupport(KEY_TYPE));
+  },
+
+  async testGetPrimitiveTypeShouldBeAead() {
+    const manager = new AesCtrHmacAeadKeyManager();
+    assertEquals(Aead, manager.getPrimitiveType());
   },
 });

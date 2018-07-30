@@ -17,12 +17,13 @@ goog.module('tink.Registry');
 const Catalogue = goog.require('tink.Catalogue');
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
-const Map = goog.require('goog.structs.Map');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
+const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbMessage = goog.require('jspb.Message');
 const PrimitiveSet = goog.require('tink.PrimitiveSet');
 const SecurityException = goog.require('tink.exception.SecurityException');
+const Util = goog.require('tink.Util');
 
 /**
  * Registry for KeyManagers.
@@ -85,7 +86,7 @@ class Registry {
     if (!catalogue) {
       throw new SecurityException('Catalogue cannot be null.');
     }
-    if (Registry.nameToCatalogueMap_.containsKey(catalogueName)) {
+    if (Registry.nameToCatalogueMap_.has(catalogueName)) {
       throw new SecurityException('Catalogue name already exists.');
     }
     Registry.nameToCatalogueMap_.set(catalogueName, catalogue);
@@ -121,7 +122,7 @@ class Registry {
           + 'key type ' + typeUrl + '.');
     }
 
-    if (Registry.typeToManagerMap_.containsKey(typeUrl)) {
+    if (Registry.typeToManagerMap_.has(typeUrl)) {
       // Cannot overwrite the existing key manager by a new one.
       if (!(Registry.typeToManagerMap_.get(typeUrl) instanceof
             manager.constructor)) {
@@ -172,13 +173,14 @@ class Registry {
    * @template P
    * @static
    *
-   * @param {!PbKeyData|!PbMessage|Uint8Array} key -- key is either a
-   *     (serialized) proto of some key or key data.
+   * @param {!Object} primitiveType
+   * @param {!PbKeyData|!PbMessage} key -- key is either a proto of some key
+   *     or key data.
    * @param {?string=} opt_typeUrl -- key type
    *
    * @return {!Promise.<!P>}
    */
-  static async getPrimitive(key, opt_typeUrl) {
+  static async getPrimitive(primitiveType, key, opt_typeUrl) {
     if (key instanceof PbKeyData) {
       if (opt_typeUrl && key.getTypeUrl() != opt_typeUrl) {
         throw new SecurityException(
@@ -197,7 +199,7 @@ class Registry {
     }
 
     const manager = await Registry.getKeyManager(opt_typeUrl);
-    return manager.getPrimitive(key);
+    return manager.getPrimitive(primitiveType, key);
   }
 
   /**
@@ -210,14 +212,44 @@ class Registry {
    * @template P
    * @static
    *
+   * @param {!Object} primitiveType
    * @param {!KeysetHandle} keysetHandle
    * @param {KeyManager.KeyManager<P>=} opt_customKeyManager
    *
    * @return {!Promise.<!PrimitiveSet.PrimitiveSet<P>>}
    */
-  static async getPrimitives(keysetHandle, opt_customKeyManager) {
-    // TODO implement
-    throw new SecurityException('Not implemented yet.');
+  static async getPrimitives(
+      primitiveType, keysetHandle, opt_customKeyManager) {
+    if (!keysetHandle) {
+      throw new SecurityException('Keyset handle has to be non-null.');
+    }
+    Util.validateKeyset(keysetHandle.getKeyset());
+    const primitives = new PrimitiveSet.PrimitiveSet();
+
+    const keys = keysetHandle.getKeyset().getKeyList();
+    const keysLength = keys.length;
+    for (let i = 0; i < keysLength; i++) {
+      const key = keys[i];
+      if (key.getStatus() === PbKeyStatusType.ENABLED) {
+        const keyData = key.getKeyData();
+        if (!keyData) {
+          throw new SecurityException('Key data has to be non null.');
+        }
+        let primitive;
+        if (opt_customKeyManager &&
+            opt_customKeyManager.getKeyType() === keyData.getTypeUrl()) {
+          primitive =
+              await opt_customKeyManager.getPrimitive(primitiveType, keyData);
+        } else {
+          primitive = await Registry.getPrimitive(primitiveType, keyData);
+        }
+        const entry = await primitives.addPrimitive(primitive, key);
+        if (key.getKeyId() === keysetHandle.getKeyset().getPrimaryKeyId()) {
+          await primitives.setPrimary(entry);
+        }
+      }
+    }
+    return primitives;
   }
 
   /**
