@@ -23,11 +23,6 @@ set -x
 
 # Verify required environment variables.
 
-if [[ -z "${JAVA_HOME}" ]]; then
-  echo "The JAVA_HOME environment variable must be set."
-  exit 4
-fi
-
 # Required for building Java binaries.
 if [[ -z "${ANDROID_HOME}" ]]; then
   echo "The ANDROID_HOME environment variable must be set."
@@ -82,7 +77,7 @@ run_linux_tests() {
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
 
   # Run all tests, except manual and objc tests.
-  time bazel --host_javabase="${JAVA_HOME}" test \
+  time bazel test \
   --strategy=TestRunner=standalone --test_output=all \
   -- //... \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
