@@ -31,7 +31,7 @@ message AesCtrHmacAeadKeyFormat {
   HmacKeyFormat hmac_key_format = 2;
 }
 
-// key_type: type.googleapis.com/google.crypto.tink.AesCtrKey
+// key_type: type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey
 message AesCtrHmacAeadKey {
   uint32 version = 1;
   AesCtrKey aes_ctr_key = 2;
