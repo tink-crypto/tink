@@ -35,7 +35,7 @@ testSuite({
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
 
     try {
-      await primitiveSet.addPrimitive(primitive, key);
+      primitiveSet.addPrimitive(primitive, key);
     } catch (e) {
       assertEquals(ExceptionText.unknownPrefixType(), e.toString());
       return;
@@ -49,7 +49,7 @@ testSuite({
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
 
     try {
-      await primitiveSet.addPrimitive(primitive, key);
+      primitiveSet.addPrimitive(primitive, key);
     } catch (e) {
       assertEquals(ExceptionText.addingNullPrimitive(), e.toString());
       return;
@@ -63,7 +63,7 @@ testSuite({
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
 
     try {
-      await primitiveSet.addPrimitive(primitive, key);
+      primitiveSet.addPrimitive(primitive, key);
     } catch (e) {
       assertEquals(ExceptionText.addingNullKey(), e.toString());
       return;
@@ -82,7 +82,7 @@ testSuite({
       } else {
         primitive = new DummyAead2();
       }
-      const result = await primitiveSet.addPrimitive(primitive, key);
+      const result = primitiveSet.addPrimitive(primitive, key);
 
       assertObjectEquals(primitive, result.getPrimitive());
       assertEquals(key.getStatus(), result.getKeyStatus());
@@ -97,11 +97,11 @@ testSuite({
   async testGetPrimitivesWhichWereNotAdded() {
     // Fill in the structure with some primitives.
     const numberOfAddedPrimitives = 12;
-    const primitiveSet = await initPrimitiveSet(numberOfAddedPrimitives);
+    const primitiveSet = initPrimitiveSet(numberOfAddedPrimitives);
 
     const key = createKey(/* opt_keyId = */ numberOfAddedPrimitives + 1);
     const identifier = CryptoFormat.getOutputPrefix(key);
-    const result = await primitiveSet.getPrimitives(identifier);
+    const result = primitiveSet.getPrimitives(identifier);
 
     assertObjectEquals([], result);
   },
@@ -124,7 +124,7 @@ testSuite({
         primitive = new DummyAead2();
       }
 
-      const res = await primitiveSet.addPrimitive(primitive, key);
+      const res = primitiveSet.addPrimitive(primitive, key);
       added.push({key: key, entry: res});
     }
 
@@ -135,7 +135,7 @@ testSuite({
       // Should return a set containing only one primitive as each added
       // primitive has different identifier.
       const expectedResult = [added[i].entry];
-      const result = await primitiveSet.getPrimitives(identifier);
+      const result = primitiveSet.getPrimitives(identifier);
 
       assertObjectEquals(expectedResult, result);
     }
@@ -144,7 +144,7 @@ testSuite({
   async testGetPrimitivesSameIdentifiers() {
     // Fill in the structure with some primitives.
     const numberOfAddedPrimitives = 50;
-    const primitiveSet = await initPrimitiveSet(numberOfAddedPrimitives);
+    const primitiveSet = initPrimitiveSet(numberOfAddedPrimitives);
 
     // Add a group of primitives with same identifier.
     const n = 12;
@@ -163,13 +163,13 @@ testSuite({
         primitive = new DummyAead2();
       }
 
-      const res = await primitiveSet.addPrimitive(primitive, key);
+      const res = primitiveSet.addPrimitive(primitive, key);
       expectedResult.push(res);
     }
 
     const identifier =
         CryptoFormat.getOutputPrefix(createKey(keyId, legacyKeyType));
-    const result = await primitiveSet.getPrimitives(identifier);
+    const result = primitiveSet.getPrimitives(identifier);
 
     assertObjectEquals(expectedResult, result);
   },
@@ -178,26 +178,26 @@ testSuite({
   // tests for getRawPrimitives method
   async testGetRawPrimitives() {
     const numberOfAddedPrimitives = 20;
-    const primitiveSet = await initPrimitiveSet(numberOfAddedPrimitives);
+    const primitiveSet = initPrimitiveSet(numberOfAddedPrimitives);
 
     // No RAW primitives were added.
     let expectedResult = [];
-    let result = await primitiveSet.getRawPrimitives();
+    let result = primitiveSet.getRawPrimitives();
     assertObjectEquals(expectedResult, result);
 
     // Add RAW primitives and check the result again after each adding.
     let key = createKey();
     key.setOutputPrefixType(PbOutputPrefixType.RAW);
 
-    let addResult = await primitiveSet.addPrimitive(new DummyAead1(), key);
+    let addResult = primitiveSet.addPrimitive(new DummyAead1(), key);
     expectedResult.push(addResult);
-    result = await primitiveSet.getRawPrimitives();
+    result = primitiveSet.getRawPrimitives();
     assertObjectEquals(expectedResult, result);
 
     key.setStatus(PbKeyStatusType.DISABLED);
-    addResult = await primitiveSet.addPrimitive(new DummyAead2(), key);
+    addResult = primitiveSet.addPrimitive(new DummyAead2(), key);
     expectedResult.push(addResult);
-    result = await primitiveSet.getRawPrimitives();
+    result = primitiveSet.getRawPrimitives();
     assertObjectEquals(expectedResult, result);
   },
 
@@ -206,7 +206,7 @@ testSuite({
   async testSetPrimaryToNull() {
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
     try {
-      await primitiveSet.setPrimary(null);
+      primitiveSet.setPrimary(null);
     } catch (e) {
       assertEquals(ExceptionText.setPrimaryToNull(), e.toString());
       return;
@@ -221,7 +221,7 @@ testSuite({
         PbOutputPrefixType.TINK);
 
     try {
-      await primitiveSet.setPrimary(entry);
+      primitiveSet.setPrimary(entry);
     } catch (e) {
       assertEquals(ExceptionText.setPrimaryToMissingEntry(), e.toString());
       return;
@@ -240,15 +240,15 @@ testSuite({
       } else {
         primitive = new DummyAead2();
       }
-      await primitiveSet.addPrimitive(primitive, key);
+      primitiveSet.addPrimitive(primitive, key);
     }
 
     const identifier = CryptoFormat.getOutputPrefix(key);
-    const primitives = await primitiveSet.getPrimitives(identifier);
+    const primitives = primitiveSet.getPrimitives(identifier);
     const primary = primitives[0];
 
     try {
-      await primitiveSet.setPrimary(primary);
+      primitiveSet.setPrimary(primary);
     } catch (e) {
       assertEquals(ExceptionText.setPrimaryToCollidingEntry(), e.toString());
       return;
@@ -261,10 +261,10 @@ testSuite({
         /* opt_legacy = */ false, /* opt_enabled = */ false);
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
 
-    const primary = await primitiveSet.addPrimitive(new DummyAead1(), key);
+    const primary = primitiveSet.addPrimitive(new DummyAead1(), key);
 
     try {
-      await primitiveSet.setPrimary(primary);
+      primitiveSet.setPrimary(primary);
     } catch (e) {
       assertEquals(ExceptionText.setPrimaryToDisabled(), e.toString());
       return;
@@ -278,20 +278,20 @@ testSuite({
 
     const key1 = createKey(/* opt_keyId = */ 0xBBBCCC);
 
-    const result = await primitiveSet.addPrimitive(new DummyAead1(), key1);
+    const result = primitiveSet.addPrimitive(new DummyAead1(), key1);
     // Check that primary remains unset, set it to newly added and verify that
     // it was set.
     assertEquals(null, primitiveSet.getPrimary());
-    await primitiveSet.setPrimary(result);
+    primitiveSet.setPrimary(result);
     assertObjectEquals(result, primitiveSet.getPrimary());
 
     const key2 = createKey(/* opt_keyId = */ 0xAAABBB);
     // Add new primitive, check that it does not change primary.
-    const result2 = await primitiveSet.addPrimitive(new DummyAead2(), key2);
+    const result2 = primitiveSet.addPrimitive(new DummyAead2(), key2);
     assertObjectEquals(result, primitiveSet.getPrimary());
 
     // Change the primary and verify the change.
-    await primitiveSet.setPrimary(result2);
+    primitiveSet.setPrimary(result2);
     assertObjectEquals(result2, primitiveSet.getPrimary());
   },
 });
@@ -385,15 +385,15 @@ class DummyAead2 {
  *    and key types (legacy, tink).
  *
  * @param {number} n
- * @return {!Promise<!PrimitiveSet.PrimitiveSet>}
+ * @return {!PrimitiveSet.PrimitiveSet}
  */
-const initPrimitiveSet = async function(n) {
+const initPrimitiveSet = function(n) {
   let primitiveSet = new PrimitiveSet.PrimitiveSet();
 
   // Set primary.
   const primaryKey = createKey(/* opt_id = */ 0, /* opt_legacy = */ false,
       /* opt_enabled = */ true);
-  const primary = await primitiveSet.addPrimitive(new DummyAead1(), primaryKey);
+  const primary = primitiveSet.addPrimitive(new DummyAead1(), primaryKey);
   primitiveSet.setPrimary(primary);
 
   // Add n-1 other keys to primitive set.
@@ -409,7 +409,7 @@ const initPrimitiveSet = async function(n) {
       primitive = new DummyAead2();
     }
 
-    await primitiveSet.addPrimitive(primitive, key);
+    primitiveSet.addPrimitive(primitive, key);
   }
 
   return primitiveSet;

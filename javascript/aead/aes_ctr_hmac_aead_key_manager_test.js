@@ -122,7 +122,7 @@ testSuite({
     const manager = new AesCtrHmacAeadKeyManager();
 
     try {
-      await manager.getKeyFactory().newKey(keyFormat);
+      manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
           'CustomError: Expected AesCtrHmacAeadKeyFormat-proto', e.toString());
@@ -137,8 +137,7 @@ testSuite({
     const manager = new AesCtrHmacAeadKeyManager();
 
     try {
-      await manager.getKeyFactory().newKey(
-          serializedKeyFormat);
+      manager.getKeyFactory().newKey(serializedKeyFormat);
     } catch (e) {
       assertEquals(
           'CustomError: Could not parse the given Uint8Array as a serialized' +
@@ -158,7 +157,7 @@ testSuite({
     keyFormat.getAesCtrKeyFormat().setKeySize(keySize);
 
     try {
-      await manager.getKeyFactory().newKey(keyFormat);
+      manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
           'CustomError: unsupported AES key size: ' + keySize, e.toString());
@@ -177,7 +176,7 @@ testSuite({
     for (let i = 0; i < ivSizeOutOfRangeLength; i++) {
       keyFormat.getAesCtrKeyFormat().getParams().setIvSize(ivSizeOutOfRange[i]);
       try {
-        await manager.getKeyFactory().newKey(keyFormat);
+        manager.getKeyFactory().newKey(keyFormat);
       } catch (e) {
         assertEquals(
             'CustomError: Invalid AES CTR HMAC key format: IV size is ' +
@@ -199,7 +198,7 @@ testSuite({
     keyFormat.getHmacKeyFormat().setKeySize(keySize);
 
     try {
-      await manager.getKeyFactory().newKey(keyFormat);
+      manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
           'CustomError: Invalid AES CTR HMAC key format: HMAC key is' +
@@ -217,7 +216,7 @@ testSuite({
     keyFormat.getHmacKeyFormat().getParams().setHash(PbHashType.UNKNOWN_HASH);
 
     try {
-      await manager.getKeyFactory().newKey(keyFormat);
+      manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals('CustomError: Unknown hash type.', e.toString());
       return;
@@ -233,7 +232,7 @@ testSuite({
     keyFormat.getHmacKeyFormat().getParams().setTagSize(SMALL_TAG_SIZE);
 
     try {
-      await manager.getKeyFactory().newKey(keyFormat);
+      manager.getKeyFactory().newKey(keyFormat);
     } catch (e) {
       assertEquals(
           'CustomError: Invalid HMAC params: tag size ' + SMALL_TAG_SIZE +
@@ -260,7 +259,7 @@ testSuite({
       keyFormat.getHmacKeyFormat().getParams().setTagSize(
           tagSizes[i]['tagSize']);
       try {
-        await manager.getKeyFactory().newKey(keyFormat);
+        manager.getKeyFactory().newKey(keyFormat);
       } catch (e) {
         assertEquals(
             'CustomError: Invalid HMAC params: tag size ' +
@@ -277,7 +276,8 @@ testSuite({
 
     const keyFormat = createTestKeyFormat();
 
-    const key = await manager.getKeyFactory().newKey(keyFormat);
+    const key = /** @type {!PbAesCtrHmacAeadKey}*/ (
+        manager.getKeyFactory().newKey(keyFormat));
 
     // testing AES CTR key
     assertEquals(
@@ -308,7 +308,8 @@ testSuite({
     const keyFormat = createTestKeyFormat();
     const serializedKeyFormat = keyFormat.serializeBinary();
 
-    const key = await manager.getKeyFactory().newKey(serializedKeyFormat);
+    const key = /** @type {!PbAesCtrHmacAeadKey} */ (
+        manager.getKeyFactory().newKey(serializedKeyFormat));
 
     // testing AES CTR key
     assertEquals(
@@ -345,8 +346,7 @@ testSuite({
     const serializedKeyFormatsLength = serializedKeyFormats.length;
     for (let i = 0; i < serializedKeyFormatsLength; i++) {
       try {
-        await aeadKeyManager.getKeyFactory().newKeyData(
-            serializedKeyFormats[i]);
+        aeadKeyManager.getKeyFactory().newKeyData(serializedKeyFormats[i]);
       } catch (e) {
         assertEquals(
             'CustomError: Could not parse the given Uint8Array as a ' +
@@ -365,8 +365,7 @@ testSuite({
     const serializedKeyFormat = keyFormat.serializeBinary();
     const manager = new AesCtrHmacAeadKeyManager();
 
-    const keyData =
-        await manager.getKeyFactory().newKeyData(serializedKeyFormat);
+    const keyData = manager.getKeyFactory().newKeyData(serializedKeyFormat);
 
     assertEquals(KEY_TYPE, keyData.getTypeUrl());
     assertEquals(

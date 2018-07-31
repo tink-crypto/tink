@@ -28,7 +28,7 @@ testSuite({
 
     const catalogue = new AeadCatalogue();
     try {
-      await catalogue.getKeyManager(
+      catalogue.getKeyManager(
           AesCtrHmacAeadKeyManager.KEY_TYPE, anotherPrimitiveName,
           /* minVersion = */ 0);
     } catch (e) {
@@ -47,7 +47,7 @@ testSuite({
 
     const catalogue = new AeadCatalogue();
     try {
-      await catalogue.getKeyManager(
+      catalogue.getKeyManager(
           manager.getKeyType(), SUPPORTED_PRIMITIVE_NAME, version);
     } catch (e) {
       assertEquals(ExceptionText.badVersion(), e.toString());
@@ -62,7 +62,7 @@ testSuite({
 
     const catalogue = new AeadCatalogue();
     try {
-      await catalogue.getKeyManager(keyType, SUPPORTED_PRIMITIVE_NAME, version);
+      catalogue.getKeyManager(keyType, SUPPORTED_PRIMITIVE_NAME, version);
     } catch (e) {
       assertEquals(ExceptionText.unknownKeyType(keyType), e.toString());
       return;
@@ -74,7 +74,7 @@ testSuite({
     const catalogue = new AeadCatalogue();
     const version = 0;
 
-    const manager = await catalogue.getKeyManager(
+    const manager = catalogue.getKeyManager(
         AesCtrHmacAeadKeyManager.KEY_TYPE, SUPPORTED_PRIMITIVE_NAME, version);
 
     assertTrue(manager instanceof AesCtrHmacAeadKeyManager);
@@ -86,9 +86,9 @@ testSuite({
     const version = 0;
     const keyType = AesCtrHmacAeadKeyManager.KEY_TYPE;
 
-    await catalogue.getKeyManager(keyType, 'Aead', version);
-    await catalogue.getKeyManager(keyType, 'aead', version);
-    await catalogue.getKeyManager(keyType, 'AEAD', version);
+    catalogue.getKeyManager(keyType, 'Aead', version);
+    catalogue.getKeyManager(keyType, 'aead', version);
+    catalogue.getKeyManager(keyType, 'AEAD', version);
   },
 });
 

@@ -43,7 +43,7 @@ class Catalogue {
    * @param {string} primitiveName
    * @param {number} minVersion
    *
-   * @return {!Promise.<!KeyManager.KeyManager<P>>}
+   * @return {!KeyManager.KeyManager<P>}
    */
   getKeyManager(typeUrl, primitiveName, minVersion) {}
 }

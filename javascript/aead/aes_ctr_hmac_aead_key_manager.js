@@ -37,8 +37,8 @@ class AesCtrHmacAeadKeyFactory {
   /**
    * @override
    */
-  async newKey(keyFormat) {
-    var /** PbAesCtrHmacAeadKeyFormat */ keyFormatProto;
+  newKey(keyFormat) {
+    let /** PbAesCtrHmacAeadKeyFormat */ keyFormatProto;
     if (keyFormat instanceof Uint8Array) {
       try {
         keyFormatProto = PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyFormat);
@@ -87,10 +87,10 @@ class AesCtrHmacAeadKeyFactory {
   /**
    * @override
    */
-  async newKeyData(serializedKeyFormat) {
-    const /** PbAesCtrHmacAeadKeyFormat */ key =
-        await this.newKey(serializedKeyFormat);
-    let /** PbKeyData */ keyData = new PbKeyData();
+  newKeyData(serializedKeyFormat) {
+    const key =
+        /** @type {!PbAesCtrHmacAeadKey} */ (this.newKey(serializedKeyFormat));
+    let /** !PbKeyData */ keyData = new PbKeyData();
 
     keyData.setTypeUrl(AesCtrHmacAeadKeyManager.KEY_TYPE);
     keyData.setValue(key.serializeBinary());

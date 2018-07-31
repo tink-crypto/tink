@@ -46,14 +46,14 @@ const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
   async tearDown() {
-    await Registry.reset();
+    Registry.reset();
   },
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for addCatalogue method
   async testAddCatalogueNullCatalogue() {
     try {
-      await Registry.addCatalogue('some catalogue', null);
+      Registry.addCatalogue('some catalogue', null);
     } catch (e) {
       assertEquals(ExceptionText.nullCatalogue(), e.toString());
       return;
@@ -63,7 +63,7 @@ testSuite({
 
   async testAddCatalogueEmptyName() {
     try {
-      await Registry.addCatalogue('', new DummyCatalogue1());
+      Registry.addCatalogue('', new DummyCatalogue1());
     } catch (e) {
       assertEquals(ExceptionText.missingCatalogueName(), e.toString());
       return;
@@ -73,8 +73,8 @@ testSuite({
 
   async testAddCatalogueOverwritingAttempt() {
     try {
-      await Registry.addCatalogue('some catalogue', new DummyCatalogue1());
-      await Registry.addCatalogue('some catalogue', new DummyCatalogue2());
+      Registry.addCatalogue('some catalogue', new DummyCatalogue1());
+      Registry.addCatalogue('some catalogue', new DummyCatalogue2());
     } catch (e) {
       assertEquals(ExceptionText.overwrittingCatalogueAttempt(), e.toString());
       return;
@@ -84,9 +84,9 @@ testSuite({
 
   async testAddFewCatalogues() {
     for (let i = 0; i < 10; i++) {
-      await Registry.addCatalogue('first'+i.toString(), new DummyCatalogue1());
-      await Registry.addCatalogue('second'+i.toString(), new DummyCatalogue2());
-      await Registry.addCatalogue('third'+i.toString(), new DummyCatalogue3());
+      Registry.addCatalogue('first' + i.toString(), new DummyCatalogue1());
+      Registry.addCatalogue('second' + i.toString(), new DummyCatalogue2());
+      Registry.addCatalogue('third' + i.toString(), new DummyCatalogue3());
     }
   },
 
@@ -96,7 +96,7 @@ testSuite({
     const name = 'first';
 
     try {
-      await Registry.getCatalogue(name);
+      Registry.getCatalogue(name);
     } catch (e) {
       assertEquals(ExceptionText.catalogueMissing(name), e.toString());
       return;
@@ -114,7 +114,7 @@ testSuite({
     }
 
     for (let i = 0; i < numberOfCatalogues; i++) {
-      const result = await Registry.getCatalogue(catalogueNames[i]);
+      const result = Registry.getCatalogue(catalogueNames[i]);
       assertTrue(result instanceof DummyCatalogue1);
     }
   },
@@ -125,7 +125,7 @@ testSuite({
   // tests for registerKeyManager  method
   async testRegisterKeyManagerEmptyManager() {
     try {
-      await Registry.registerKeyManager('some key type', null);
+      Registry.registerKeyManager('some key type', null);
     } catch (e) {
       assertEquals(ExceptionText.nullKeyManager(), e.toString());
       return;
@@ -135,8 +135,7 @@ testSuite({
 
   async testRegisterKeyManagerUndefinedKeyType() {
     try {
-      await Registry.registerKeyManager(
-          '', new DummyKeyManager1('some_key_type'));
+      Registry.registerKeyManager('', new DummyKeyManager1('some_key_type'));
     } catch (e) {
       assertEquals(ExceptionText.undefinedKeyType(), e.toString());
       return;
@@ -148,8 +147,8 @@ testSuite({
     const keyType = 'someKeyType';
 
     try {
-      await Registry.registerKeyManager(keyType, new DummyKeyManager1(keyType));
-      await Registry.registerKeyManager(keyType, new DummyKeyManager2(keyType));
+      Registry.registerKeyManager(keyType, new DummyKeyManager1(keyType));
+      Registry.registerKeyManager(keyType, new DummyKeyManager2(keyType));
     } catch (e) {
       assertEquals(
           ExceptionText.keyManagerOverwrittingAttempt(keyType), e.toString());
@@ -163,7 +162,7 @@ testSuite({
     const differentKeyType = 'differentKeyType';
 
     try {
-      await Registry.registerKeyManager(
+      Registry.registerKeyManager(
           differentKeyType, new DummyKeyManager1(keyType));
     } catch (e) {
       assertEquals(
@@ -178,9 +177,8 @@ testSuite({
     const keyManager1 = new DummyKeyManager1('someKeyType');
     const keyManager2 = new DummyKeyManager2('otherKeyType');
 
-    await Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1);
-    await Registry.registerKeyManager(
-        keyManager2.getKeyType(), keyManager2, false);
+    Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1);
+    Registry.registerKeyManager(keyManager2.getKeyType(), keyManager2, false);
   },
 
   // Testing newKeyAllowed behavior -- should hold the most restrictive setting.
@@ -192,14 +190,13 @@ testSuite({
 
     //Register the key manager with new_key_allowed and test that it is possible
     //to create a new key data.
-    await Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1);
-    await Registry.newKeyData(keyTemplate);
+    Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1);
+    Registry.newKeyData(keyTemplate);
 
     //Restrict the key manager and test that new key data cannot be created.
-    await Registry.registerKeyManager(
-        keyManager1.getKeyType(), keyManager1, false);
+    Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1, false);
     try {
-      await Registry.newKeyData(keyTemplate);
+      Registry.newKeyData(keyTemplate);
     } catch (e) {
       assertEquals(ExceptionText.newKeyForbidden(keyType), e.toString());
       return;
@@ -213,14 +210,13 @@ testSuite({
     const keyTemplate = new PbKeyTemplate();
     keyTemplate.setTypeUrl(keyType);
 
-    await Registry.registerKeyManager(
-        keyManager1.getKeyType(), keyManager1, false);
+    Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1, false);
 
     // Re-registering key manager with less restrictive setting should not be
     // possible and the restriction has to be still true (i.e. new key data
     // cannot be created).
     try {
-      await Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1);
+      Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1);
     } catch (e) {
       assertEquals(
           ExceptionText.prohibitedChangeToLessRestricted(
@@ -228,7 +224,7 @@ testSuite({
           e.toString());
     }
     try {
-      await Registry.newKeyData(keyTemplate);
+      Registry.newKeyData(keyTemplate);
     } catch (e) {
       assertEquals(ExceptionText.newKeyForbidden(keyType), e.toString());
       return;
@@ -247,18 +243,18 @@ testSuite({
       keyManagers1.push(new DummyKeyManager1('someKeyType' + i.toString()));
       keyManagers2.push(new DummyKeyManager2('otherKeyType' + i.toString()));
 
-      await Registry.registerKeyManager(
+      Registry.registerKeyManager(
           keyManagers1[i].getKeyType(), keyManagers1[i]);
-      await Registry.registerKeyManager(
+      Registry.registerKeyManager(
           keyManagers2[i].getKeyType(), keyManagers2[i]);
     }
 
     let result;
     for (let i = 0; i < numberOfKeyManagers; i++) {
-      result = await Registry.getKeyManager(keyManagers1[i].getKeyType());
+      result = Registry.getKeyManager(keyManagers1[i].getKeyType());
       assertObjectEquals(keyManagers1[i], result);
 
-      result = await Registry.getKeyManager(keyManagers2[i].getKeyType());
+      result = Registry.getKeyManager(keyManagers2[i].getKeyType());
       assertObjectEquals(keyManagers2[i], result);
     }
   },
@@ -267,7 +263,7 @@ testSuite({
     const keyType = 'some_key_type';
 
     try {
-      await Registry.getKeyManager(keyType);
+      Registry.getKeyManager(keyType);
     } catch (e) {
       assertEquals(
           ExceptionText.notRegisteredKeyType(keyType), e.toString());
@@ -284,9 +280,9 @@ testSuite({
     const keyTemplate = new PbKeyTemplate();
     keyTemplate.setTypeUrl(differentKeyType);
 
-    await Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1);
+    Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1);
     try {
-      await Registry.newKeyData(keyTemplate);
+      Registry.newKeyData(keyTemplate);
     } catch (e) {
       assertEquals(
           ExceptionText.notRegisteredKeyType(differentKeyType),
@@ -301,10 +297,9 @@ testSuite({
     const keyTemplate = new PbKeyTemplate();
     keyTemplate.setTypeUrl(keyManager1.getKeyType());
 
-    await Registry.registerKeyManager(
-        keyManager1.getKeyType(), keyManager1, false);
+    Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1, false);
     try {
-      await Registry.newKeyData(keyTemplate);
+      Registry.newKeyData(keyTemplate);
     } catch (e) {
       assertEquals(
           ExceptionText.newKeyForbidden(keyManager1.getKeyType()),
@@ -322,14 +317,14 @@ testSuite({
 
     const keyTypesLength = keyTypes.length;
     for (let i = 0; i < keyTypesLength; i++) {
-      await Registry.registerKeyManager(
+      Registry.registerKeyManager(
           keyTypes[i], new DummyKeyManager1(keyTypes[i]), true);
     }
 
     for (let i = 0; i < keyTypesLength; i++) {
       const keyTemplate = new PbKeyTemplate();
       keyTemplate.setTypeUrl(keyTypes[i]);
-      const result = await Registry.newKeyData(keyTemplate);
+      const result = Registry.newKeyData(keyTemplate);
       assertEquals(keyTypes[i], result.getTypeUrl());
     }
   },
@@ -342,23 +337,23 @@ testSuite({
 
     const keyTypesLength = keyTypes.length;
     for (let i = 0; i < keyTypesLength; i++) {
-      await Registry.registerKeyManager(
+      Registry.registerKeyManager(
           keyTypes[i], new DummyKeyManager1(keyTypes[i]));
     }
 
     for (let i = 0; i < keyTypesLength; i++) {
       const keyTemplate = new PbKeyTemplate();
       keyTemplate.setTypeUrl(keyTypes[i]);
-      const result = await Registry.newKeyData(keyTemplate);
+      const result = Registry.newKeyData(keyTemplate);
       assertEquals(keyTypes[i], result.getTypeUrl());
     }
   },
 
   async testNewKeyDataWithAesCtrHmacAeadKey() {
     const manager = new AesCtrHmacAeadKeyManager();
-    await Registry.registerKeyManager(manager.getKeyType(), manager);
+    Registry.registerKeyManager(manager.getKeyType(), manager);
     const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
-    const keyData = await Registry.newKeyData(keyTemplate);
+    const keyData = Registry.newKeyData(keyTemplate);
 
     // Checks that correct AES CTR HMAC AEAD key was returned.
     const keyFormat =
@@ -424,9 +419,9 @@ testSuite({
 
   async testGetPrimitiveFromAesCtrHmacAeadKeyData() {
     const manager = new AesCtrHmacAeadKeyManager();
-    await Registry.registerKeyManager(manager.getKeyType(), manager);
+    Registry.registerKeyManager(manager.getKeyType(), manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
-    const keyData = await Registry.newKeyData(keyTemplate);
+    const keyData = Registry.newKeyData(keyTemplate);
 
     const primitive =
         await Registry.getPrimitive(manager.getPrimitiveType(), keyData);
@@ -435,9 +430,9 @@ testSuite({
 
   async testGetPrimitiveFromAesCtrHmacAeadKey() {
     const manager = new AesCtrHmacAeadKeyManager();
-    await Registry.registerKeyManager(manager.getKeyType(), manager);
+    Registry.registerKeyManager(manager.getKeyType(), manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
-    const keyData = await Registry.newKeyData(keyTemplate);
+    const keyData = Registry.newKeyData(keyTemplate);
     const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
 
     const primitive = await Registry.getPrimitive(
@@ -447,9 +442,9 @@ testSuite({
 
   async testGetPrimitiveMacFromAesCtrHmacAeadKey() {
     const manager = new AesCtrHmacAeadKeyManager();
-    await Registry.registerKeyManager(manager.getKeyType(), manager);
+    Registry.registerKeyManager(manager.getKeyType(), manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
-    const keyData = await Registry.newKeyData(keyTemplate);
+    const keyData = Registry.newKeyData(keyTemplate);
     const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
 
     try {
@@ -497,7 +492,7 @@ testSuite({
 
     const primitiveSet =
         await Registry.getPrimitives(DEFAULT_PRIMITIVE_TYPE, keysetHandle);
-    const primary = await primitiveSet.getPrimary();
+    const primary = primitiveSet.getPrimary();
 
     // Result of getPrimitive is string, which is the same to typeUrl (see
     // DummyKeyManager1 and registryInitForGetPrimitivesTests).
@@ -522,13 +517,12 @@ testSuite({
     const keysetHandle = new KeysetHandle(keyset);
 
     // Register KeyManager (the key manager for enabled keys should be enough).
-    await Registry.registerKeyManager(
-        enabledUrl, new DummyKeyManager1(enabledUrl));
+    Registry.registerKeyManager(enabledUrl, new DummyKeyManager1(enabledUrl));
 
     // Get primitives and get all raw primitives.
     const primitiveSet =
         await Registry.getPrimitives(DEFAULT_PRIMITIVE_TYPE, keysetHandle);
-    const rawPrimitives = await primitiveSet.getRawPrimitives();
+    const rawPrimitives = primitiveSet.getRawPrimitives();
 
     // Should return all enabled RAW primitives and nothing else (disabled
     // primitives should not be added into primitive set).
@@ -538,7 +532,7 @@ testSuite({
     // which is set to the string same as typeUrl (see DummyKeyManager1 and
     // registryInitForGetPrimitivesTests).
     for (let i = 0; i < enabledRawKeysCount; ++i) {
-      assertEquals(enabledUrl, await rawPrimitives[i].getPrimitive());
+      assertEquals(enabledUrl, rawPrimitives[i].getPrimitive());
     }
   },
 
@@ -555,8 +549,7 @@ testSuite({
     const keysetHandle = new KeysetHandle(keyset);
 
     // Register key manager for the given keyType.
-    await Registry.registerKeyManager(
-        keyTypeUrl, new DummyKeyManager1(keyTypeUrl));
+    Registry.registerKeyManager(keyTypeUrl, new DummyKeyManager1(keyTypeUrl));
 
     // Use getPrimitives with custom key manager for the keyType.
     const customPrimitive = 'type_url_corresponding_to_custom_key_manager';
@@ -566,7 +559,7 @@ testSuite({
 
     // Primary should be the entry corresponding to the keyTypeUrl and thus
     // getPrimitive should return customPrimitive.
-    const primary = await primitiveSet.getPrimary();
+    const primary = primitiveSet.getPrimary();
     assertEquals(customPrimitive, primary.getPrimitive());
   },
 
@@ -583,7 +576,7 @@ testSuite({
       const typeUrl = 'good_key_type_url_' + i.toString();
       keyset.addKey(createKey(
           1 + i, PbOutputPrefixType.RAW, typeUrl, /* enabled = */ true));
-      await Registry.registerKeyManager(
+      Registry.registerKeyManager(
           typeUrl, new DummyKeyManager1(typeUrl, typeUrl, goodPrimitiveType));
     }
 
@@ -592,7 +585,7 @@ testSuite({
     keyset.addKey(createKey(
         /* id = */ goodKeysCount + 2, PbOutputPrefixType.RAW, typeUrl,
         /* enabled = */ true));
-    await Registry.registerKeyManager(
+    Registry.registerKeyManager(
         typeUrl, new DummyKeyManager1(typeUrl, typeUrl, badPrimitiveType));
 
     // Create keyset handle and try to getPrimitives from it. Should throw
@@ -833,14 +826,14 @@ class DummyKeyFactory {
   /**
    * @override
    */
-  async newKey(keyFormat) {
+  newKey(keyFormat) {
     throw new SecurityException('Not implemented, only for testing purposes.');
   }
 
   /**
    * @override
    */
-  async newKeyData(serializedKeyFormat) {
+  newKeyData(serializedKeyFormat) {
     let /** PbKeyData */ keyData = new PbKeyData();
 
     keyData.setTypeUrl(this.KEY_TYPE_);

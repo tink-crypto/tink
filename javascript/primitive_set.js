@@ -115,9 +115,9 @@ class PrimitiveSet {
    * @param {!P} primitive
    * @param {!PbKeyset.Key} key
    *
-   * @return {!Promise<!Entry<P>>}
+   * @return {!Entry<P>}
    */
-  async addPrimitive(primitive, key) {
+  addPrimitive(primitive, key) {
     if (!primitive) {
       throw new SecurityException('Primitive has to be non null.');
     }
@@ -148,7 +148,7 @@ class PrimitiveSet {
    *
    * @param {!Entry<P>} primitive
    */
-  async setPrimary(primitive) {
+  setPrimary(primitive) {
     if (!primitive) {
       throw new SecurityException('Primary cannot be set to null.');
     }
@@ -158,8 +158,7 @@ class PrimitiveSet {
     }
 
     // There has to be exactly one key enabled with this identifier.
-    const entries =
-        await this.getPrimitives(primitive.getIdentifier());
+    const entries = this.getPrimitives(primitive.getIdentifier());
     let entryFound = false;
     const entriesLength = entries.length;
     for (let i = 0; i < entriesLength; i++) {
@@ -184,9 +183,9 @@ class PrimitiveSet {
   /**
    * Returns all primitives using RAW prefix.
    *
-   * @return {!Promise<!Array<Entry<P>>>}
+   * @return {!Array<!Entry<P>>}
    */
-  async getRawPrimitives() {
+  getRawPrimitives() {
     return this.getPrimitives(CryptoFormat.RAW_PREFIX);
   }
 
@@ -195,9 +194,9 @@ class PrimitiveSet {
    *
    * @param {!Uint8Array} identifier
    *
-   * @return {!Promise<!Array<Entry<P>>>}
+   * @return {!Array<!Entry<P>>}
    */
-  async getPrimitives(identifier) {
+  getPrimitives(identifier) {
     const result = this.getPrimitivesFromMap_(identifier);
 
     if (!result) {

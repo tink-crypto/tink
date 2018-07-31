@@ -38,9 +38,9 @@ class AeadSetWrapper {
   /**
    * @param {!PrimitiveSet.PrimitiveSet} aeadSet
    *
-   * @return {!Promise<!AeadSetWrapper>}
+   * @return {!AeadSetWrapper}
    */
-  static async newAead(aeadSet) {
+  static newAead(aeadSet) {
     if (!aeadSet) {
       throw new SecurityException('Primitive set has to be non-null.');
     }

@@ -52,9 +52,9 @@ class Registry {
    *
    * @param {string} catalogueName
    *
-   * @return {!Promise.<!Catalogue<P>>}
+   * @return {!Catalogue<P>}
    */
-  static async getCatalogue(catalogueName) {
+  static getCatalogue(catalogueName) {
     const catalogue = Registry.nameToCatalogueMap_.get(catalogueName);
     if (!catalogue) {
       throw new SecurityException(
@@ -152,9 +152,9 @@ class Registry {
    *
    * @param {string} typeUrl -- key type
    *
-   * @return {!Promise.<!KeyManager.KeyManager<P>>}
+   * @return {!KeyManager.KeyManager<P>}
    */
-  static async getKeyManager(typeUrl) {
+  static getKeyManager(typeUrl) {
     const res = Registry.typeToManagerMap_.get(typeUrl);
     if (!res) {
       throw new SecurityException(
@@ -261,16 +261,16 @@ class Registry {
    *
    * @param {!PbKeyTemplate} keyTemplate
    *
-   * @return {!Promise.<!PbKeyData>}
+   * @return {!PbKeyData}
    */
-  static async newKeyData(keyTemplate) {
+  static newKeyData(keyTemplate) {
     const keyType = keyTemplate.getTypeUrl();
-    const manager = await Registry.getKeyManager(keyType);
+    const manager = Registry.getKeyManager(keyType);
     if (!Registry.typeToNewKeyAllowedMap_.get(keyType)) {
       throw new SecurityException('New key operation is forbidden for ' +
           'key type: ' + keyType + '.');
     }
-    return manager.getKeyFactory().newKeyData(keyTemplate.getValue());
+    return manager.getKeyFactory().newKeyData(keyTemplate.getValue_asU8());
   }
 
   /**

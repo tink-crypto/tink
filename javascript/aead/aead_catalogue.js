@@ -29,7 +29,7 @@ class AeadCatalogue {
   /**
    * @override
    */
-  async getKeyManager(typeUrl, primitiveName, minVersion) {
+  getKeyManager(typeUrl, primitiveName, minVersion) {
     if (primitiveName.toLowerCase() !=
         AeadCatalogue.SUPPORTED_PRIMITIVE_NAME_.toLowerCase()) {
       throw new SecurityException(

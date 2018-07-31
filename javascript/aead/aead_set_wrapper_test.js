@@ -29,7 +29,7 @@ const testSuite = goog.require('goog.testing.testSuite');
 testSuite({
   async testNewAeadNullPrimitiveSet(aeadSet) {
     try {
-      await AeadSetWrapper.newAead(null);
+      AeadSetWrapper.newAead(null);
     } catch (e) {
       assertEquals(ExceptionText.nullPrimitiveSet(), e.toString());
       return;
@@ -38,10 +38,9 @@ testSuite({
   },
 
   async testNewAeadPrimitiveSetWithoutPrimary(aeadSet) {
-    const primitiveSet =
-        await createPrimitiveSet(/* opt_withPrimary = */ false);
+    const primitiveSet = createPrimitiveSet(/* opt_withPrimary = */ false);
     try {
-      await AeadSetWrapper.newAead(primitiveSet);
+      AeadSetWrapper.newAead(primitiveSet);
     } catch (e) {
       assertEquals(ExceptionText.primitiveSetWithoutPrimary(), e.toString());
       return;
@@ -50,14 +49,14 @@ testSuite({
   },
 
   async testNewAeadPrimitiveShouldWork(aeadSet) {
-    const primitiveSet = await createPrimitiveSet();
-    const aead = await AeadSetWrapper.newAead(primitiveSet);
+    const primitiveSet = createPrimitiveSet();
+    const aead = AeadSetWrapper.newAead(primitiveSet);
     assertTrue(aead != null && aead != undefined);
   },
 
   async testEncrypt() {
-    const primitiveSet = await createPrimitiveSet();
-    const aead = await AeadSetWrapper.newAead(primitiveSet);
+    const primitiveSet = createPrimitiveSet();
+    const aead = AeadSetWrapper.newAead(primitiveSet);
 
     const plaintext = new Uint8Array([0, 1, 2, 3]);
 
@@ -71,8 +70,8 @@ testSuite({
   },
 
   async testDecryptBadCiphertext() {
-    const primitiveSet = await createPrimitiveSet();
-    const aead = await AeadSetWrapper.newAead(primitiveSet);
+    const primitiveSet = createPrimitiveSet();
+    const aead = AeadSetWrapper.newAead(primitiveSet);
 
     const ciphertext = new Uint8Array([9, 8, 7, 6, 5, 4, 3]);
 
@@ -86,8 +85,8 @@ testSuite({
   },
 
   async testDecryptWithCiphertextEncryptedByPrimaryKey() {
-    const primitiveSet = await createPrimitiveSet();
-    const aead = await AeadSetWrapper.newAead(primitiveSet);
+    const primitiveSet = createPrimitiveSet();
+    const aead = AeadSetWrapper.newAead(primitiveSet);
 
     const plaintext = new Uint8Array([12, 51, 45, 200, 120, 111]);
 
@@ -98,8 +97,8 @@ testSuite({
   },
 
   async testDecryptCiphertextEncryptedByNonPrimaryKey() {
-    const primitiveSet = await createPrimitiveSet();
-    const aead = await AeadSetWrapper.newAead(primitiveSet);
+    const primitiveSet = createPrimitiveSet();
+    const aead = AeadSetWrapper.newAead(primitiveSet);
 
     // Encrypt the plaintext with primary.
     const plaintext = new Uint8Array([0xAA, 0xBB, 0xAB, 0xBA, 0xFF]);
@@ -111,9 +110,9 @@ testSuite({
     const key =
         createKey(keyId, PbOutputPrefixType.LEGACY, /* enabled = */ true);
     const entry =
-        await primitiveSet.addPrimitive(new DummyAead(Uint8Array[0xFF]), key);
-    await primitiveSet.setPrimary(entry);
-    const aead2 = await AeadSetWrapper.newAead(primitiveSet);
+        primitiveSet.addPrimitive(new DummyAead(Uint8Array[0xFF]), key);
+    primitiveSet.setPrimary(entry);
+    const aead2 = AeadSetWrapper.newAead(primitiveSet);
 
     // Check that the ciphertext can be decrypted by the setWrapper with new
     // primary and that the decryption corresponds to the plaintext.
@@ -123,20 +122,20 @@ testSuite({
   },
 
   async testDecryptCiphertextRawPrimitive() {
-    const primitiveSet = await createPrimitiveSet();
+    const primitiveSet = createPrimitiveSet();
     // Create a RAW primitive and add it to primitiveSet.
     const keyId = 0xFFFFFFFF;
     const rawKey =
         createKey(keyId, PbOutputPrefixType.RAW, /* enabled = */ true);
     const rawKeyAead = new DummyAead(new Uint8Array([0xFF]));
-    await primitiveSet.addPrimitive(rawKeyAead, rawKey);
+    primitiveSet.addPrimitive(rawKeyAead, rawKey);
 
     // Encrypt the plaintext by aead corresponding to the rawKey.
     const plaintext = new Uint8Array([0x11, 0x15, 0xAA, 0x54]);
     const ciphertext = await rawKeyAead.encrypt(plaintext);
 
     // Create aead which should be able to decrypt the ciphertext.
-    const aead = await AeadSetWrapper.newAead(primitiveSet);
+    const aead = AeadSetWrapper.newAead(primitiveSet);
 
     // Try to decrypt the ciphertext by aead and check that the result
     // corresponds to the plaintext.
@@ -145,20 +144,20 @@ testSuite({
   },
 
   async testDecryptCiphertextDisabledPrimitive() {
-    const primitiveSet = await createPrimitiveSet();
+    const primitiveSet = createPrimitiveSet();
 
     // Create a primitive with disabled key and add it to primitiveSet.
     const keyId = 0xFFFFFFFF;
     const key = createKey(keyId, PbOutputPrefixType.RAW, /* enabled = */ false);
     const disabledKeyAead = new DummyAead(new Uint8Array([0xFF]));
-    await primitiveSet.addPrimitive(disabledKeyAead, key);
+    primitiveSet.addPrimitive(disabledKeyAead, key);
 
     // Encrypt the plaintext by a primitive with disabled key.
     const plaintext = new Uint8Array([0, 1, 2, 3]);
     const ciphertext = await disabledKeyAead.encrypt(plaintext);
 
     // Create aead containing the primitive with disabled key.
-    const aead = await AeadSetWrapper.newAead(primitiveSet);
+    const aead = AeadSetWrapper.newAead(primitiveSet);
 
     // Check that the ciphertext cannot be decrypted as disabled keys cannot be
     // used to neither encryption nor decryption.
@@ -226,9 +225,9 @@ const createKey = function(keyId, outputPrefix, enabled) {
  *
  * @param {boolean=} opt_withPrimary
  *
- * @return {!Promise<!PrimitiveSet.PrimitiveSet>}
+ * @return {!PrimitiveSet.PrimitiveSet}
  */
-const createPrimitiveSet = async function(opt_withPrimary = true) {
+const createPrimitiveSet = function(opt_withPrimary = true) {
   const numberOfPrimitives = 5;
 
   const primitiveSet = new PrimitiveSet.PrimitiveSet();
@@ -245,15 +244,15 @@ const createPrimitiveSet = async function(opt_withPrimary = true) {
         outputPrefix = PbOutputPrefixType.RAW;
     }
     const key = createKey(i, outputPrefix, /* enabled = */ i % 4 < 2);
-    await primitiveSet.addPrimitive(new DummyAead(new Uint8Array([i])), key);
+    primitiveSet.addPrimitive(new DummyAead(new Uint8Array([i])), key);
   }
 
   const key = createKey(
       numberOfPrimitives, PbOutputPrefixType.TINK, /* enabled = */ true);
   const aead = new DummyAead(new Uint8Array([numberOfPrimitives]));
-  const entry = await primitiveSet.addPrimitive(aead, key);
+  const entry = primitiveSet.addPrimitive(aead, key);
   if (opt_withPrimary) {
-    await primitiveSet.setPrimary(entry);
+    primitiveSet.setPrimary(entry);
   }
 
   return primitiveSet;
