@@ -221,10 +221,10 @@ Status AesCtrHmacAeadKeyManager::Validate(const AesCtrHmacAeadKey& key) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid AesCtrHmacAeadKey: AES key_value is too short.");
   }
-  if (aes_key_size != 16 && aes_key_size != 24 && aes_key_size != 32) {
+  if (aes_key_size != 16 && aes_key_size != 32) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Invalid AesCtrHmacAeadKey: AES key_value has %d bytes; "
-                     "supported sizes: 16, 24, or 32 bytes.",
+                     "supported sizes: 16 or 32 bytes.",
                      aes_key_size);
   }
   if (aes_ctr_key.params().iv_size() < kMinIvSizeInBytes ||

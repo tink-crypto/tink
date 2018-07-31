@@ -129,7 +129,7 @@ TEST(AesEaxAesniTest, testModification) {
 TEST(AesEaxAesniTest, testInvalidKeySizes) {
   size_t nonce_size = 12;
   for (int keysize = 0; keysize < 65; keysize++) {
-    if (keysize == 16 || keysize == 24 || keysize == 32) {
+    if (keysize == 16 || keysize == 32) {
       continue;
     }
     std::string key(keysize, 'x');
