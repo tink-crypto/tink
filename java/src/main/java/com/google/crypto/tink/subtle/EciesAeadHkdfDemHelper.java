@@ -32,7 +32,7 @@ public interface EciesAeadHkdfDemHelper {
    * Creates a new {@code Aead}-primitive that uses the key material given in 'symmetric_key', which
    * must be of length dem_key_size_in_bytes().
    *
-   * @return the newly created {@codee Aead}-primitive.
+   * @return the newly created {@code Aead}-primitive.
    */
   public Aead getAead(final byte[] symmetricKeyValue) throws GeneralSecurityException;
 }

@@ -69,7 +69,7 @@ class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
         this.symmetricKeySize = aesCtrKeySize + hmacKeySize;
       } catch (InvalidProtocolBufferException e) {
         throw new GeneralSecurityException(
-            "invalid KeyFormat protobuf, expected AesGcmKeyFormat", e);
+            "invalid KeyFormat protobuf, expected AesCtrHmacAeadKeyFormat", e);
       }
     } else {
       throw new GeneralSecurityException("unsupported AEAD DEM key type: " + demKeyTypeUrl);
