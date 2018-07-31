@@ -42,6 +42,7 @@
 #include "proto/tink.pb.h"
 
 using crypto::tink::EcdsaSignKeyManager;
+using google::crypto::tink::EcdsaSignatureEncoding;
 using crypto::tink::KeyFactory;
 using crypto::tink::KeysetUtil;
 using crypto::tink::test::AddRawKey;
@@ -55,7 +56,8 @@ using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 
 static EcdsaPrivateKey GetNewEcdsaPrivateKey() {
-  return crypto::tink::test::GetEcdsaTestPrivateKey(EllipticCurveType::NIST_P256, HashType::SHA256);
+  return crypto::tink::test::GetEcdsaTestPrivateKey(EllipticCurveType::NIST_P256, HashType::SHA256,
+                                                    EcdsaSignatureEncoding::DER);
 }
 
 static EcdsaPublicKey GetEcdsaPublicKeyFromPrivate(EcdsaPrivateKey &privateKey) {

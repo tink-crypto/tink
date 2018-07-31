@@ -22,6 +22,7 @@ cc_library(
     deps = [
         "//cc/subtle:common_enums",
         "//proto:common_cc_proto",
+        "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/strings",
     ],

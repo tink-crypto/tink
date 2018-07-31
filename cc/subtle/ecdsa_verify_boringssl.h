@@ -35,7 +35,8 @@ namespace subtle {
 class EcdsaVerifyBoringSsl : public PublicKeyVerify {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>>
-      New(const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type);
+  New(const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type,
+      EcdsaSignatureEncoding encoding);
 
   // Verifies that 'signature' is a digital signature for 'data'.
   crypto::tink::util::Status Verify(
@@ -45,10 +46,12 @@ class EcdsaVerifyBoringSsl : public PublicKeyVerify {
   virtual ~EcdsaVerifyBoringSsl() {}
 
  private:
-  EcdsaVerifyBoringSsl(EC_KEY* key, const EVP_MD* hash);
+  EcdsaVerifyBoringSsl(EC_KEY* key, const EVP_MD* hash,
+                       EcdsaSignatureEncoding encoding);
 
   bssl::UniquePtr<EC_KEY> key_;
   const EVP_MD* hash_;  // Owned by BoringSSL.
+  EcdsaSignatureEncoding encoding_;
 };
 
 }  // namespace subtle

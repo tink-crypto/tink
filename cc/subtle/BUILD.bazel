@@ -476,6 +476,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":common_enums",
+        ":ec_util",
         ":ecdsa_sign_boringssl",
         ":ecdsa_verify_boringssl",
         "//cc:public_key_sign",

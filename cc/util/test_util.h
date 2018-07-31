@@ -103,17 +103,18 @@ google::crypto::tink::EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
     google::crypto::tink::HashType hash_type,
     uint32_t aes_gcm_key_size);
 
-// Generates a fresh test key for EC DSA for the given 'curve_type'
-// and 'hash_type'.  The resulting signatures will use DER-encoding.
+// Generates a fresh test key for EC DSA for the given 'curve_type', 'hash_type'
+// and 'encoding'.
 google::crypto::tink::EcdsaPrivateKey GetEcdsaTestPrivateKey(
-    subtle::EllipticCurveType curve_type,
-    subtle::HashType hash_type);
+    subtle::EllipticCurveType curve_type, subtle::HashType hash_type,
+    subtle::EcdsaSignatureEncoding encoding);
 
-// Generates a fresh test key for EC DSA for the given 'curve_type'
-// and 'hash_type'.  The resulting signatures will use DER-encoding.
+// Generates a fresh test key for EC DSA for the given 'curve_type', 'hash_type'
+// and 'encoding'.
 google::crypto::tink::EcdsaPrivateKey GetEcdsaTestPrivateKey(
     google::crypto::tink::EllipticCurveType curve_type,
-    google::crypto::tink::HashType hash_type);
+    google::crypto::tink::HashType hash_type,
+    google::crypto::tink::EcdsaSignatureEncoding encoding);
 
 // A dummy implementation of Aead-interface.
 // An instance of DummyAead can be identified by a name specified

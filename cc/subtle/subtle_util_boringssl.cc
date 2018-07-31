@@ -27,14 +27,6 @@ namespace subtle {
 
 namespace {
 
-util::StatusOr<std::string> bn2str(const BIGNUM* bn, size_t len) {
-  std::unique_ptr<uint8_t[]> res(new uint8_t[len]);
-  if (1 != BN_bn2bin_padded(res.get(), len, bn)) {
-    return util::Status(util::error::INTERNAL, "Value too large");
-  }
-  return std::string(reinterpret_cast<const char*>(res.get()), len);
-}
-
 size_t ScalarSizeInBytes(const EC_GROUP* group) {
   return BN_num_bytes(EC_GROUP_get0_order(group));
 }
@@ -45,6 +37,16 @@ size_t FieldElementSizeInBytes(const EC_GROUP* group) {
 }
 
 }  // namespace
+
+// static
+util::StatusOr<std::string> SubtleUtilBoringSSL::bn2str(const BIGNUM *bn,
+                                                   size_t len) {
+  std::unique_ptr<uint8_t[]> res(new uint8_t[len]);
+  if (1 != BN_bn2bin_padded(res.get(), len, bn)) {
+    return util::Status(util::error::INTERNAL, "Value too large");
+  }
+  return std::string(reinterpret_cast<const char *>(res.get()), len);
+}
 
 // static
 util::StatusOr<bssl::UniquePtr<BIGNUM>> SubtleUtilBoringSSL::str2bn(

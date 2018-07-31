@@ -65,6 +65,9 @@ class SubtleUtilBoringSSL {
   // representation.
   static util::StatusOr<bssl::UniquePtr<BIGNUM>> str2bn(absl::string_view s);
 
+  // Returns a std::string of size 'len' that holds BIGNUM 'bn'.
+  static util::StatusOr<std::string> bn2str(const BIGNUM *bn, size_t len);
+
   // Returns BoringSSL error strings accumulated in the error queue,
   // thus emptying the queue.
   static std::string GetErrors();

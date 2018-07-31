@@ -47,6 +47,12 @@ enum HashType {
   SHA512 = 4,
 };
 
+enum EcdsaSignatureEncoding {
+  UNKNOWN_ENCODING = 0,
+  IEEE_P1363 = 1,
+  DER = 2,
+};
+
 std::string EnumToString(EllipticCurveType type);
 std::string EnumToString(EcPointFormat format);
 std::string EnumToString(HashType type);

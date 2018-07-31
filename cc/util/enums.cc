@@ -16,6 +16,7 @@
 
 #include "tink/util/enums.h"
 #include "proto/common.pb.h"
+#include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
 namespace pb = google::crypto::tink;
@@ -105,6 +106,32 @@ subtle::HashType Enums::ProtoToSubtle(pb::HashType type) {
     return subtle::HashType::SHA512;
   default:
     return subtle::HashType::UNKNOWN_HASH;
+  }
+}
+
+// static
+subtle::EcdsaSignatureEncoding Enums::ProtoToSubtle(
+    pb::EcdsaSignatureEncoding encoding) {
+  switch (encoding) {
+    case pb::EcdsaSignatureEncoding::DER:
+      return subtle::EcdsaSignatureEncoding::DER;
+    case pb::EcdsaSignatureEncoding::IEEE_P1363:
+      return subtle::EcdsaSignatureEncoding::IEEE_P1363;
+    default:
+      return subtle::EcdsaSignatureEncoding::UNKNOWN_ENCODING;
+  }
+}
+
+// static
+pb::EcdsaSignatureEncoding Enums::SubtleToProto(
+    subtle::EcdsaSignatureEncoding encoding) {
+  switch (encoding) {
+    case subtle::EcdsaSignatureEncoding::DER:
+      return pb::EcdsaSignatureEncoding::DER;
+    case subtle::EcdsaSignatureEncoding::IEEE_P1363:
+      return pb::EcdsaSignatureEncoding::IEEE_P1363;
+    default:
+      return pb::EcdsaSignatureEncoding::UNKNOWN_ENCODING;
   }
 }
 

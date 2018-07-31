@@ -214,7 +214,8 @@ EcdsaSignKeyManager::GetPrimitiveImpl(
   ec_key.pub_y = public_key.y();
   ec_key.priv = ecdsa_private_key.key_value();
   auto ecdsa_result = subtle::EcdsaSignBoringSsl::New(
-      ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()));
+      ec_key, Enums::ProtoToSubtle(public_key.params().hash_type()),
+      Enums::ProtoToSubtle(public_key.params().encoding()));
   if (!ecdsa_result.ok()) return ecdsa_result.status();
   std::unique_ptr<PublicKeySign> ecdsa(ecdsa_result.ValueOrDie().release());
   return std::move(ecdsa);

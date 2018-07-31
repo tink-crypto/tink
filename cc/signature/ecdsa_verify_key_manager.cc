@@ -144,7 +144,8 @@ EcdsaVerifyKeyManager::GetPrimitiveImpl(
   ec_key.pub_x = ecdsa_public_key.x();
   ec_key.pub_y = ecdsa_public_key.y();
   auto ecdsa_result = subtle::EcdsaVerifyBoringSsl::New(
-      ec_key, Enums::ProtoToSubtle(ecdsa_public_key.params().hash_type()));
+      ec_key, Enums::ProtoToSubtle(ecdsa_public_key.params().hash_type()),
+      Enums::ProtoToSubtle(ecdsa_public_key.params().encoding()));
   if (!ecdsa_result.ok()) return ecdsa_result.status();
   std::unique_ptr<PublicKeyVerify> ecdsa(ecdsa_result.ValueOrDie().release());
   return std::move(ecdsa);
@@ -152,9 +153,13 @@ EcdsaVerifyKeyManager::GetPrimitiveImpl(
 
 // static
 Status EcdsaVerifyKeyManager::Validate(const EcdsaParams& params) {
-  if (params.encoding() != EcdsaSignatureEncoding::DER) {
-    return Status(util::error::INVALID_ARGUMENT,
-                  "Only DER encoding is supported.");
+  switch (params.encoding()) {
+    case EcdsaSignatureEncoding::DER:  // fall through
+    case EcdsaSignatureEncoding::IEEE_P1363:
+      break;
+    default:
+      return ToStatusF(util::error::INVALID_ARGUMENT,
+                       "Unsupported signature encoding: %d", params.encoding());
   }
   switch (params.curve()) {
     case EllipticCurveType::NIST_P256:

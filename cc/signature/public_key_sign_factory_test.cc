@@ -33,6 +33,7 @@
 using crypto::tink::KeysetUtil;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::EcdsaPrivateKey;
+using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
@@ -52,8 +53,9 @@ class PublicKeySignFactoryTest : public ::testing::Test {
 };
 
 EcdsaPrivateKey GetNewEcdsaPrivateKey() {
-  return test::GetEcdsaTestPrivateKey(
-      EllipticCurveType::NIST_P256, HashType::SHA256);
+  return test::GetEcdsaTestPrivateKey(EllipticCurveType::NIST_P256,
+                                      HashType::SHA256,
+                                      EcdsaSignatureEncoding::DER);
 }
 
 TEST_F(PublicKeySignFactoryTest, testBasic) {

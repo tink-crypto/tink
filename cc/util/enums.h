@@ -20,6 +20,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/subtle/common_enums.h"
 #include "proto/common.pb.h"
+#include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -51,6 +52,13 @@ class Enums {
 
   static crypto::tink::subtle::HashType ProtoToSubtle(
       google::crypto::tink::HashType type);
+
+  // EcdsaSignatureEncoding.
+  static google::crypto::tink::EcdsaSignatureEncoding SubtleToProto(
+      crypto::tink::subtle::EcdsaSignatureEncoding encoding);
+
+  static crypto::tink::subtle::EcdsaSignatureEncoding ProtoToSubtle(
+      google::crypto::tink::EcdsaSignatureEncoding encoding);
 
   // Printable names for common enums.
   static const char* KeyStatusName(

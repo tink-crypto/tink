@@ -147,6 +147,34 @@ TEST_F(EnumsTest, testEcPointFormat) {
   EXPECT_EQ(4, count);
 }
 
+TEST_F(EnumsTest, testEcdsaSignatureEncoding) {
+  EXPECT_EQ(
+      pb::EcdsaSignatureEncoding::UNKNOWN_ENCODING,
+      Enums::SubtleToProto(subtle::EcdsaSignatureEncoding::UNKNOWN_ENCODING));
+  EXPECT_EQ(pb::EcdsaSignatureEncoding::IEEE_P1363,
+            Enums::SubtleToProto(subtle::EcdsaSignatureEncoding::IEEE_P1363));
+  EXPECT_EQ(pb::EcdsaSignatureEncoding::DER,
+            Enums::SubtleToProto(subtle::EcdsaSignatureEncoding::DER));
+  EXPECT_EQ(subtle::EcdsaSignatureEncoding::UNKNOWN_ENCODING,
+            Enums::ProtoToSubtle(pb::EcdsaSignatureEncoding::UNKNOWN_ENCODING));
+  EXPECT_EQ(subtle::EcdsaSignatureEncoding::IEEE_P1363,
+            Enums::ProtoToSubtle(pb::EcdsaSignatureEncoding::IEEE_P1363));
+  EXPECT_EQ(subtle::EcdsaSignatureEncoding::DER,
+            Enums::ProtoToSubtle(pb::EcdsaSignatureEncoding::DER));
+  // Check that enum conversion covers the entire range of the proto-enum.
+  int count = 0;
+  for (int int_encoding = (int)pb::EcdsaSignatureEncoding_MIN;
+       int_encoding <= (int)pb::EcdsaSignatureEncoding_MAX; int_encoding++) {
+    if (pb::EcdsaSignatureEncoding_IsValid(int_encoding)) {
+      pb::EcdsaSignatureEncoding encoding =
+          (pb::EcdsaSignatureEncoding)int_encoding;
+      EXPECT_EQ(encoding, Enums::SubtleToProto(Enums::ProtoToSubtle(encoding)));
+      count++;
+    }
+  }
+  EXPECT_EQ(3, count);
+}
+
 TEST_F(EnumsTest, testKeyStatusName) {
   EXPECT_EQ("ENABLED",
             std::string(Enums::KeyStatusName(pb::KeyStatusType::ENABLED)));

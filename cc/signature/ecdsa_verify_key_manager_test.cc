@@ -115,16 +115,6 @@ TEST_F(EcdsaVerifyKeyManagerTest, testKeyMessageErrors) {
                         result.status().error_message());
   }
 
-  {  // Bad encoding.
-    EcdsaPublicKey key;
-    key.mutable_params()->set_encoding(EcdsaSignatureEncoding::IEEE_P1363);
-    auto result = key_manager.GetPrimitive(key);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "Only DER encoding",
-                        result.status().error_message());
-  }
-
   {  // Bad elliptic curve.
     EcdsaPublicKey key;
     key.mutable_params()->set_encoding(EcdsaSignatureEncoding::DER);
@@ -174,33 +164,49 @@ TEST_F(EcdsaVerifyKeyManagerTest, testKeyMessageErrors) {
 }
 
 TEST_F(EcdsaVerifyKeyManagerTest, testPrimitives) {
-  std::string message = "some message to sign";
-  EcdsaSignKeyManager sign_key_manager;
-  EcdsaVerifyKeyManager verify_key_manager;
-  EcdsaPrivateKey private_key = test::GetEcdsaTestPrivateKey(
-      EllipticCurveType::NIST_P256, HashType::SHA256);
-  EcdsaPublicKey key = private_key.public_key();
-  auto sign = std::move(
-      sign_key_manager.GetPrimitive(private_key).ValueOrDie());
-  std::string signature = sign->Sign(message).ValueOrDie();
+  EcdsaSignatureEncoding encodings[2] = {EcdsaSignatureEncoding::DER,
+                                         EcdsaSignatureEncoding::IEEE_P1363};
+  for (EcdsaSignatureEncoding encoding : encodings) {
+    std::string message = "some message to sign";
+    EcdsaSignKeyManager sign_key_manager;
+    EcdsaVerifyKeyManager verify_key_manager;
+    EcdsaPrivateKey private_key = test::GetEcdsaTestPrivateKey(
+        EllipticCurveType::NIST_P256, HashType::SHA256, encoding);
+    EcdsaPublicKey key = private_key.public_key();
+    auto sign =
+        std::move(sign_key_manager.GetPrimitive(private_key).ValueOrDie());
+    std::string signature = sign->Sign(message).ValueOrDie();
 
-  {  // Using Key proto.
-    auto result = verify_key_manager.GetPrimitive(key);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto verify = std::move(result.ValueOrDie());
-    auto verify_status = verify->Verify(signature, message);
-    EXPECT_TRUE(verify_status.ok()) << verify_status;
-  }
+    {  // Using Key proto.
+      auto result = verify_key_manager.GetPrimitive(key);
+      EXPECT_TRUE(result.ok()) << result.status();
+      auto verify = std::move(result.ValueOrDie());
+      auto verify_status = verify->Verify(signature, message);
+      EXPECT_TRUE(verify_status.ok()) << verify_status;
+    }
 
-  {  // Using KeyData proto.
-    KeyData key_data;
-    key_data.set_type_url(ecdsa_verify_key_type_);
-    key_data.set_value(key.SerializeAsString());
-    auto result = verify_key_manager.GetPrimitive(key_data);
-    EXPECT_TRUE(result.ok()) << result.status();
-    auto verify = std::move(result.ValueOrDie());
-    auto verify_status = verify->Verify(signature, message);
-    EXPECT_TRUE(verify_status.ok()) << verify_status;
+    {  // Using KeyData proto.
+      KeyData key_data;
+      key_data.set_type_url(ecdsa_verify_key_type_);
+      key_data.set_value(key.SerializeAsString());
+      auto result = verify_key_manager.GetPrimitive(key_data);
+      EXPECT_TRUE(result.ok()) << result.status();
+      auto verify = std::move(result.ValueOrDie());
+      auto verify_status = verify->Verify(signature, message);
+      EXPECT_TRUE(verify_status.ok()) << verify_status;
+    }
+
+    {  // Using Key proto with wrong encoding.
+      auto params = key.mutable_params();
+      params->set_encoding(encoding == EcdsaSignatureEncoding::DER
+                               ? EcdsaSignatureEncoding::IEEE_P1363
+                               : EcdsaSignatureEncoding::DER);
+      auto result = verify_key_manager.GetPrimitive(key);
+      EXPECT_TRUE(result.ok()) << result.status();
+      auto verify = std::move(result.ValueOrDie());
+      auto verify_status = verify->Verify(signature, message);
+      EXPECT_FALSE(verify_status.ok()) << verify_status;
+    }
   }
 }
 

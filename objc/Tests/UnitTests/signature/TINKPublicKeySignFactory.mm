@@ -45,13 +45,15 @@ using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EllipticCurveType;
+using google::crypto::tink::EcdsaSignatureEncoding;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 
 static EcdsaPrivateKey GetNewEcdsaPrivateKey() {
-  return crypto::tink::test::GetEcdsaTestPrivateKey(EllipticCurveType::NIST_P256, HashType::SHA256);
+  return crypto::tink::test::GetEcdsaTestPrivateKey(EllipticCurveType::NIST_P256, HashType::SHA256,
+                                                    EcdsaSignatureEncoding::DER);
 }
 
 @interface TINKPublicKeySignFactoryTest : XCTestCase

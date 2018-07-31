@@ -178,16 +178,17 @@ EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
 }
 
 EcdsaPrivateKey GetEcdsaTestPrivateKey(
-    subtle::EllipticCurveType curve_type,
-    subtle::HashType hash_type) {
-  return GetEcdsaTestPrivateKey(
-      Enums::SubtleToProto(curve_type),
-      Enums::SubtleToProto(hash_type));
+    subtle::EllipticCurveType curve_type, subtle::HashType hash_type,
+    subtle::EcdsaSignatureEncoding encoding) {
+  return GetEcdsaTestPrivateKey(Enums::SubtleToProto(curve_type),
+                                Enums::SubtleToProto(hash_type),
+                                Enums::SubtleToProto(encoding));
 }
 
 EcdsaPrivateKey GetEcdsaTestPrivateKey(
     google::crypto::tink::EllipticCurveType curve_type,
-    google::crypto::tink::HashType hash_type) {
+    google::crypto::tink::HashType hash_type,
+    google::crypto::tink::EcdsaSignatureEncoding encoding) {
   auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
       Enums::ProtoToSubtle(curve_type)).ValueOrDie();
   EcdsaPrivateKey ecdsa_key;
@@ -200,7 +201,7 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
   auto params = public_key->mutable_params();
   params->set_hash_type(hash_type);
   params->set_curve(curve_type);
-  params->set_encoding(EcdsaSignatureEncoding::DER);
+  params->set_encoding(encoding);
   return ecdsa_key;
 }
 

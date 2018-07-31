@@ -31,10 +31,45 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
+namespace {
+
+// Transforms ECDSA DER signature encoding to IEEE_P1363 encoding.
+//
+// The IEEE_P1363 signature's format is r || s, where r and s are zero-padded
+// and have the same size in bytes as the order of the curve. For example, for
+// NIST P-256 curve, r and s are zero-padded to 32 bytes.
+//
+// The DER signature is encoded using ASN.1
+// (https://tools.ietf.org/html/rfc5480#appendix-A): ECDSA-Sig-Value :: =
+// SEQUENCE { r INTEGER, s INTEGER }. In particular, the encoding is: 0x30 ||
+// totalLength || 0x02 || r's length || r || 0x02 || s's length || s.
+crypto::tink::util::StatusOr<std::string> DerToIeee(absl::string_view der,
+                                               const EC_KEY* key) {
+  size_t field_size_in_bytes =
+      (EC_GROUP_get_degree(EC_KEY_get0_group(key)) + 7) / 8;
+  bssl::UniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_from_bytes(
+      reinterpret_cast<const uint8_t*>(der.data()), der.size()));
+  if (ecdsa.get() == nullptr) {
+    return util::Status(util::error::INTERNAL,
+                        "Internal BoringSSL ECDSA_SIG_from_bytes's error");
+  }
+  auto status_or_r = SubtleUtilBoringSSL::bn2str(ecdsa->r, field_size_in_bytes);
+  if (!status_or_r.ok()) {
+    return status_or_r.status();
+  }
+  auto status_or_s = SubtleUtilBoringSSL::bn2str(ecdsa->s, field_size_in_bytes);
+  if (!status_or_s.ok()) {
+    return status_or_s.status();
+  }
+  return status_or_r.ValueOrDie() + status_or_s.ValueOrDie();
+}
+
+}  // namespace
+
 // static
-util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>>
-EcdsaSignBoringSsl::New(const SubtleUtilBoringSSL::EcKey& ec_key,
-                        HashType hash_type) {
+util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
+    const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type,
+    EcdsaSignatureEncoding encoding) {
   // Check hash.
   auto hash_status = SubtleUtilBoringSSL::ValidateSignatureHash(hash_type);
   if (!hash_status.ok()) {
@@ -74,12 +109,13 @@ EcdsaSignBoringSsl::New(const SubtleUtilBoringSSL::EcKey& ec_key,
 
   // Sign.
   std::unique_ptr<EcdsaSignBoringSsl> sign(
-      new EcdsaSignBoringSsl(key.release(), hash));
+      new EcdsaSignBoringSsl(key.release(), hash, encoding));
   return std::move(sign);
 }
 
-EcdsaSignBoringSsl::EcdsaSignBoringSsl(EC_KEY* key, const EVP_MD* hash)
-    : key_(key), hash_(hash) {}
+EcdsaSignBoringSsl::EcdsaSignBoringSsl(EC_KEY* key, const EVP_MD* hash,
+                                       EcdsaSignatureEncoding encoding)
+    : key_(key), hash_(hash), encoding_(encoding) {}
 
 util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
     absl::string_view data) const {
@@ -97,6 +133,15 @@ util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
   if (1 != ECDSA_sign(0 /* unused */, digest, digest_size, buffer.data(),
                   &sig_length, key_.get())) {
     return util::Status(util::error::INTERNAL, "Signing failed.");
+  }
+
+  if (encoding_ == subtle::EcdsaSignatureEncoding::IEEE_P1363) {
+    auto status_or_sig = DerToIeee(
+        std::string(reinterpret_cast<char*>(buffer.data()), sig_length), key_.get());
+    if (!status_or_sig.ok()) {
+      return status_or_sig.status();
+    }
+    return status_or_sig.ValueOrDie();
   }
 
   return std::string(reinterpret_cast<char*>(buffer.data()), sig_length);

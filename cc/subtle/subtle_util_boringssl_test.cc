@@ -128,6 +128,21 @@ TEST(SubtleUtilBoringSSLTest, testEcPointDecode) {
   }
 }
 
+TEST(SubtleUtilBoringSSLTest, testBn2strAndStr2bn) {
+  int len = 8;
+  std::string bn_str[6] = {"0000000000000000", "0000000000000001",
+                      "1000000000000000", "ffffffffffffffff",
+                      "0fffffffffffffff", "00ffffffffffffff"};
+  for (const std::string& s : bn_str) {
+    auto status_or_bn = SubtleUtilBoringSSL::str2bn(test::HexDecodeOrDie(s));
+    EXPECT_TRUE(status_or_bn.ok());
+    auto status_or_str =
+        SubtleUtilBoringSSL::bn2str(status_or_bn.ValueOrDie().get(), len);
+    EXPECT_TRUE(status_or_str.ok());
+    EXPECT_EQ(test::HexDecodeOrDie(s), status_or_str.ValueOrDie());
+  }
+}
+
 TEST(SubtleUtilBoringSSLTest, testValidateSignatureHash) {
   EXPECT_TRUE(
       SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA256).ok());

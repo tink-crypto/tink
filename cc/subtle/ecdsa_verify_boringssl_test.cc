@@ -39,41 +39,80 @@ namespace {
 class EcdsaVerifyBoringSslTest : public ::testing::Test {};
 
 TEST_F(EcdsaVerifyBoringSslTest, testBasicSigning) {
-  auto ec_key_result = SubtleUtilBoringSSL::GetNewEcKey(
-      EllipticCurveType::NIST_P256);
-  ASSERT_TRUE(ec_key_result.ok()) << ec_key_result.status();
-  auto ec_key = std::move(ec_key_result.ValueOrDie());
+  subtle::EcdsaSignatureEncoding encodings[2] = {
+      EcdsaSignatureEncoding::DER, EcdsaSignatureEncoding::IEEE_P1363};
+  for (EcdsaSignatureEncoding encoding : encodings) {
+    auto ec_key_result =
+        SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256);
+    ASSERT_TRUE(ec_key_result.ok()) << ec_key_result.status();
+    auto ec_key = std::move(ec_key_result.ValueOrDie());
 
-  auto signer_result = EcdsaSignBoringSsl::New(ec_key, HashType::SHA256);
-  ASSERT_TRUE(signer_result.ok()) << signer_result.status();
-  auto signer = std::move(signer_result.ValueOrDie());
+    auto signer_result =
+        EcdsaSignBoringSsl::New(ec_key, HashType::SHA256, encoding);
+    ASSERT_TRUE(signer_result.ok()) << signer_result.status();
+    auto signer = std::move(signer_result.ValueOrDie());
 
-  auto verifier_result = EcdsaVerifyBoringSsl::New(ec_key, HashType::SHA256);
-  ASSERT_TRUE(verifier_result.ok()) << verifier_result.status();
-  auto verifier = std::move(verifier_result.ValueOrDie());
+    auto verifier_result =
+        EcdsaVerifyBoringSsl::New(ec_key, HashType::SHA256, encoding);
+    ASSERT_TRUE(verifier_result.ok()) << verifier_result.status();
+    auto verifier = std::move(verifier_result.ValueOrDie());
 
-  std::string message = "some data to be signed";
-  auto sign_result = signer->Sign(message);
-  ASSERT_TRUE(sign_result.ok()) << sign_result.status();
-  std::string signature = sign_result.ValueOrDie();
-  EXPECT_NE(signature, message);
-  auto status = verifier->Verify(signature, message);
-  EXPECT_TRUE(status.ok()) << status;
+    std::string message = "some data to be signed";
+    auto sign_result = signer->Sign(message);
+    ASSERT_TRUE(sign_result.ok()) << sign_result.status();
+    std::string signature = sign_result.ValueOrDie();
+    EXPECT_NE(signature, message);
+    auto status = verifier->Verify(signature, message);
+    EXPECT_TRUE(status.ok()) << status;
 
-  status = verifier->Verify(signature + "some trailing data", message);
-  EXPECT_FALSE(status.ok()) << status;
+    status = verifier->Verify(signature + "some trailing data", message);
+    EXPECT_FALSE(status.ok()) << status;
 
-  status = verifier->Verify("some bad signature", message);
-  EXPECT_FALSE(status.ok());
+    status = verifier->Verify("some bad signature", message);
+    EXPECT_FALSE(status.ok());
 
-  status = verifier->Verify(signature, "some bad message");
-  EXPECT_FALSE(status.ok());
+    status = verifier->Verify(signature, "some bad message");
+    EXPECT_FALSE(status.ok());
+  }
+}
+
+TEST_F(EcdsaVerifyBoringSslTest, testEncodingsMismatch) {
+  subtle::EcdsaSignatureEncoding encodings[2] = {
+      EcdsaSignatureEncoding::DER, EcdsaSignatureEncoding::IEEE_P1363};
+  for (EcdsaSignatureEncoding encoding : encodings) {
+    auto ec_key_result =
+        SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256);
+    ASSERT_TRUE(ec_key_result.ok()) << ec_key_result.status();
+    auto ec_key = std::move(ec_key_result.ValueOrDie());
+
+    auto signer_result =
+        EcdsaSignBoringSsl::New(ec_key, HashType::SHA256, encoding);
+    ASSERT_TRUE(signer_result.ok()) << signer_result.status();
+    auto signer = std::move(signer_result.ValueOrDie());
+
+    auto verifier_result =
+        EcdsaVerifyBoringSsl::New(ec_key, HashType::SHA256,
+                                  encoding == EcdsaSignatureEncoding::DER
+                                      ? EcdsaSignatureEncoding::IEEE_P1363
+                                      : EcdsaSignatureEncoding::DER);
+    ASSERT_TRUE(verifier_result.ok()) << verifier_result.status();
+    auto verifier = std::move(verifier_result.ValueOrDie());
+
+    std::string message = "some data to be signed";
+    auto sign_result = signer->Sign(message);
+    ASSERT_TRUE(sign_result.ok()) << sign_result.status();
+    std::string signature = sign_result.ValueOrDie();
+    EXPECT_NE(signature, message);
+    auto status = verifier->Verify(signature, message);
+    EXPECT_FALSE(status.ok()) << status;
+  }
 }
 
 TEST_F(EcdsaVerifyBoringSslTest, testNewErrors) {
   auto ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256)
                     .ValueOrDie();
-  auto verifier_result = EcdsaVerifyBoringSsl::New(ec_key, HashType::SHA1);
+  auto verifier_result = EcdsaVerifyBoringSsl::New(
+      ec_key, HashType::SHA1, EcdsaSignatureEncoding::IEEE_P1363);
   EXPECT_FALSE(verifier_result.ok()) << verifier_result.status();
 }
 
@@ -106,7 +145,8 @@ GetVerifier(const rapidjson::Value &test_group) {
   key.pub_y = GetInteger(test_group["key"]["wy"]);
   key.curve = WycheproofUtil::GetEllipticCurveType(test_group["key"]["curve"]);
   HashType md = WycheproofUtil::GetHashType(test_group["sha"]);
-  auto result = EcdsaVerifyBoringSsl::New(key, md);
+  auto result =
+      EcdsaVerifyBoringSsl::New(key, md, subtle::EcdsaSignatureEncoding::DER);
   if (!result.ok()) {
     std::cout << "Failed: " << result.status() << "\n";
   }

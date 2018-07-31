@@ -35,8 +35,9 @@ namespace subtle {
 class EcdsaSignBoringSsl : public PublicKeySign {
  public:
  public:
-  static crypto::tink::util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>>
-      New(const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type);
+  static crypto::tink::util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> New(
+      const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type,
+      EcdsaSignatureEncoding encoding);
 
   // Computes the signature for 'data'.
   crypto::tink::util::StatusOr<std::string> Sign(
@@ -45,10 +46,12 @@ class EcdsaSignBoringSsl : public PublicKeySign {
   virtual ~EcdsaSignBoringSsl() {}
 
  private:
-  EcdsaSignBoringSsl(EC_KEY* key, const EVP_MD* hash);
+  EcdsaSignBoringSsl(EC_KEY* key, const EVP_MD* hash,
+                     EcdsaSignatureEncoding encoding);
 
   bssl::UniquePtr<EC_KEY> key_;
   const EVP_MD* hash_;  // Owned by BoringSSL.
+  EcdsaSignatureEncoding encoding_;
 };
 
 }  // namespace subtle
