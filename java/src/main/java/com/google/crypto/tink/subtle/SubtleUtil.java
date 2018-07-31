@@ -16,8 +16,39 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.subtle.Enums.HashType;
+import java.security.GeneralSecurityException;
+
 /** Helper methods. */
-class SubtleUtil {
+public class SubtleUtil {
+
+  /**
+   * Returns the Ecdsa algorithm name corresponding to a hash type.
+   *
+   * @param hash the hash type
+   * @return the JCE's Ecdsa algorithm name for the hash.
+   * @throw GeneralSecurityExceptio if {@code hash} is not supported or is not safe for digital
+   *     signature.
+   */
+  public static String toEcdsaAlgo(HashType hash) throws GeneralSecurityException {
+    Validators.validateSignatureHash(hash);
+    return hash + "withECDSA";
+  }
+
+  /**
+   * Returns the RSA SSA (Signature with Appendix) PKCS1 algorithm name corresponding to a hash
+   * type.
+   *
+   * @param hash the hash type
+   * @return the JCE's RSA SSA PKCS1 algorithm name for the hash.
+   * @throw GeneralSecurityException if {@code hash} is not supported or is not safe for digital
+   *     signature.
+   */
+  public static String toRsaSsaPkcs1Algo(HashType hash) throws GeneralSecurityException {
+    Validators.validateSignatureHash(hash);
+    return hash + "withRSA";
+  }
+
   /**
    * Best-effort checks that this is Android.
    *

@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.subtle.Enums.HashType;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -65,26 +66,20 @@ public final class Validators {
   }
 
   /**
-   * Validates whether hash in {@code signatureAlgorithm} is safe to use for digital signature.
+   * Validates whether {@code hash} is safe to use for digital signature.
    *
-   * @throws GeneralSecurityException if {@code signatureAlgorithm} is invalid or is not safe to use
-   *     for digital signature.
+   * @throws GeneralSecurityException if {@code hash} is invalid or is not safe to use for digital
+   *     signature.
    */
-  public static void validateSignatureHash(String signatureAlgorithm)
-      throws GeneralSecurityException {
-    String[] parts = signatureAlgorithm.split("with|With|WITH", -1);
-    if (parts.length == 0) {
-      throw new GeneralSecurityException("Invalid signature algorithm");
-    }
-    String hash = parts[0];
+  public static void validateSignatureHash(HashType hash) throws GeneralSecurityException {
     switch (hash) {
-      case "SHA256": // fall through
-      case "SHA512":
+      case SHA256: // fall through
+      case SHA512:
         return;
-      case "SHA1":
-        throw new GeneralSecurityException("SHA1 is not safe for digital signature");
+      case SHA1:
+        throw new GeneralSecurityException("SHA1 is not safe for signature");
       default:
-        throw new GeneralSecurityException(String.format("Unsupported hash: %s", hash));
+        throw new GeneralSecurityException("Unsupported hash " + hash);
     }
   }
 

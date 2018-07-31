@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
+import com.google.crypto.tink.subtle.Enums.HashType;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
@@ -33,11 +34,10 @@ public final class EcdsaSignJce implements PublicKeySign {
   private final String signatureAlgorithm;
   private final EcdsaEncoding encoding;
 
-  public EcdsaSignJce(final ECPrivateKey priv, String signatureAlgorithm, EcdsaEncoding encoding)
+  public EcdsaSignJce(final ECPrivateKey priv, HashType hash, EcdsaEncoding encoding)
       throws GeneralSecurityException {
-    Validators.validateSignatureHash(signatureAlgorithm);
     this.privateKey = priv;
-    this.signatureAlgorithm = signatureAlgorithm;
+    this.signatureAlgorithm = SubtleUtil.toEcdsaAlgo(hash);
     this.encoding = encoding;
   }
 

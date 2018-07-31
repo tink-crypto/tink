@@ -442,9 +442,7 @@ public final class PaymentMethodTokenRecipient {
       for (ECPublicKey publicKey : verifyingKeysProvider.get(protocolVersion)) {
         EcdsaVerifyJce verifier =
             new EcdsaVerifyJce(
-                publicKey,
-                PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO,
-                EcdsaEncoding.DER);
+                publicKey, PaymentMethodTokenConstants.ECDSA_HASH_SHA256, EcdsaEncoding.DER);
         for (byte[] signature : signatures) {
           try {
             verifier.verify(signature, signedBytes);

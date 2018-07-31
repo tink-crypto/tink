@@ -69,9 +69,7 @@ public class SenderIntermediateCertFactory {
     for (ECPrivateKey senderSigningKey : senderSigningKeys) {
       this.signers.add(
           new EcdsaSignJce(
-              senderSigningKey,
-              PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO,
-              EcdsaEncoding.DER));
+              senderSigningKey, PaymentMethodTokenConstants.ECDSA_HASH_SHA256, EcdsaEncoding.DER));
     }
     this.intermediateSigningKey = intermediateSigningKey;
     this.expiration = expiration;

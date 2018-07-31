@@ -17,6 +17,7 @@
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.Enums.HashType;
 import java.nio.charset.StandardCharsets;
 
 /** Various constants. */
@@ -34,7 +35,7 @@ class PaymentMethodTokenConstants {
   public static final String PROTOCOL_VERSION_EC_V1 = "ECv1";
   public static final String PROTOCOL_VERSION_EC_V2 = "ECv2";
   public static final String PROTOCOL_VERSION_EC_V2_SIGNING_ONLY = "ECv2SigningOnly";
-  public static final String ECDSA_SHA256_SIGNING_ALGO = "SHA256WithECDSA";
+  public static final HashType ECDSA_HASH_SHA256 = HashType.SHA256;
 
   public static final String JSON_ENCRYPTED_MESSAGE_KEY = "encryptedMessage";
   public static final String JSON_EPHEMERAL_PUBLIC_KEY = "ephemeralPublicKey";

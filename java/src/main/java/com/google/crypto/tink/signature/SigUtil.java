@@ -21,27 +21,11 @@ import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.Enums;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
 
 final class SigUtil {
   static final String INVALID_PARAMS = "Invalid ECDSA parameters";
-  /**
-   * Returns the Ecdsa algorithm name corresponding to a hash type.
-   *
-   * @param hash the hash type
-   * @return the JCE's Ecdsa algorithm name for the hash.
-   */
-  public static String toEcdsaAlgo(HashType hash) throws NoSuchAlgorithmException {
-    switch (hash) {
-      case SHA256:
-        return "SHA256WithECDSA";
-      case SHA512:
-        return "SHA512WithECDSA";
-      default:
-        throw new NoSuchAlgorithmException("hash unsupported for signature: " + hash);
-    }
-  }
 
   /**
    * Validates Ecdsa's parameters. The hash's strength must not be weaker than the curve's strength.
@@ -78,6 +62,20 @@ final class SigUtil {
         break;
       default:
         throw new GeneralSecurityException(INVALID_PARAMS);
+    }
+  }
+
+  /** Converts protobuf enum {@code HashType} to raw Java enum {@code Enums.HashType}. */
+  public static Enums.HashType toHashType(HashType hash) throws GeneralSecurityException {
+    switch (hash) {
+      case SHA1:
+        return Enums.HashType.SHA1;
+      case SHA256:
+        return Enums.HashType.SHA256;
+      case SHA512:
+        return Enums.HashType.SHA512;
+      default:
+        throw new GeneralSecurityException("unknown hash type: " + hash);
     }
   }
 

@@ -21,6 +21,7 @@ import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
+import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.util.KeysDownloader;
 import java.io.IOException;
 import java.net.URI;
@@ -152,8 +153,7 @@ public final class RewardedAdsVerifier {
       if (publicKeys.containsKey(keyId)) {
         foundKeyId = true;
         ECPublicKey publicKey = publicKeys.get(keyId);
-        EcdsaVerifyJce verifier =
-            new EcdsaVerifyJce(publicKey, "SHA256WithECDSA", EcdsaEncoding.DER);
+        EcdsaVerifyJce verifier = new EcdsaVerifyJce(publicKey, HashType.SHA256, EcdsaEncoding.DER);
         verifier.verify(signature, tbs);
       }
     }

@@ -23,6 +23,7 @@ java_library(
         "EllipticCurves.java",
         "EngineFactory.java",
         "EngineWrapper.java",
+        "Enums.java",
         "Hex.java",
         "ImmutableByteArray.java",
         "Random.java",

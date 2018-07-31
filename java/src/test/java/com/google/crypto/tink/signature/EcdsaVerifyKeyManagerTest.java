@@ -26,6 +26,7 @@ import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -155,7 +156,8 @@ public class EcdsaVerifyKeyManagerTest {
       ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
 
       // Sign with JCE's Signature.
-      Signature signer = Signature.getInstance(SigUtil.toEcdsaAlgo(hashType));
+      Signature signer =
+          Signature.getInstance(SubtleUtil.toEcdsaAlgo(SigUtil.toHashType(hashType)));
       signer.initSign(privKey);
       byte[] msg = Random.randBytes(1231);
       signer.update(msg);

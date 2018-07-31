@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
+import com.google.crypto.tink.subtle.Enums.HashType;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -51,7 +52,7 @@ public class EcdsaSignJceTest {
 
     // Sign with EcdsaSign.
     String message = "Hello";
-    EcdsaSignJce signer = new EcdsaSignJce(priv, "SHA256WithECDSA", EcdsaEncoding.DER);
+    EcdsaSignJce signer = new EcdsaSignJce(priv, HashType.SHA256, EcdsaEncoding.DER);
     byte[] signature = signer.sign(message.getBytes("UTF-8"));
 
     // Verify with JCE's Signature.
@@ -70,19 +71,11 @@ public class EcdsaSignJceTest {
     ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
 
     try {
-      new EcdsaSignJce(priv, "SHA1WithECDSA", EcdsaEncoding.DER);
+      new EcdsaSignJce(priv, HashType.SHA1, EcdsaEncoding.DER);
       fail("Unsafe hash, should have thrown exception.");
     } catch (GeneralSecurityException e) {
       // Expected.
       TestUtil.assertExceptionContains(e, "SHA1 is not safe");
-    }
-
-    try {
-      new EcdsaSignJce(priv, "NoneWithECDSA", EcdsaEncoding.DER);
-      fail("Invalid hash, should have thrown exception.");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "Unsupported");
     }
   }
 
@@ -97,7 +90,7 @@ public class EcdsaSignJceTest {
 
     // Sign with EcdsaSign.
     String message = "Hello";
-    EcdsaSignJce signer = new EcdsaSignJce(priv, "SHA256WithECDSA", EcdsaEncoding.DER);
+    EcdsaSignJce signer = new EcdsaSignJce(priv, HashType.SHA256, EcdsaEncoding.DER);
     byte[] signature = signer.sign(message.getBytes("UTF-8"));
 
     for (int i = 0; i < signature.length; i++) {

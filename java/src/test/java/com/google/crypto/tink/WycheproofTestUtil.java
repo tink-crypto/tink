@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.Enums.HashType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.Charset;
@@ -28,6 +29,26 @@ import org.json.JSONObject;
 /** Wycheproof Test helpers. */
 public class WycheproofTestUtil {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
+
+  /**
+   * Gets hash type from hash name.
+   *
+   * @param md the name of the message digest (e.g. "SHA-256").
+   * @return the hash type.
+   * @throws NoSuchAlgorithmException iff the hash name is unknown.
+   */
+  public static HashType getHashType(String md) throws NoSuchAlgorithmException {
+    switch (md) {
+      case "SHA-256":
+        return HashType.SHA256;
+      case "SHA-512":
+        return HashType.SHA512;
+      case "SHA-1":
+        return HashType.SHA1;
+      default:
+        throw new NoSuchAlgorithmException("Unsupported hash name: " + md);
+    }
+  }
 
   /**
    * Returns the algorithm name for a digital signature algorithm with a given message digest. The

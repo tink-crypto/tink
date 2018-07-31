@@ -87,7 +87,7 @@ public final class PaymentMethodTokenSender {
             builder.senderIntermediateSigningKey != null
                 ? builder.senderIntermediateSigningKey
                 : builder.senderSigningKey,
-            PaymentMethodTokenConstants.ECDSA_SHA256_SIGNING_ALGO,
+            PaymentMethodTokenConstants.ECDSA_HASH_SHA256,
             EcdsaEncoding.DER);
     this.senderId = builder.senderId;
     if (protocolVersionConfig.isEncryptionRequired) {

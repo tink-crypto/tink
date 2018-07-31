@@ -26,6 +26,7 @@ import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
+import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.util.KeysDownloader;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -77,7 +78,7 @@ public class RewardedAdsVerifierTest {
     EcdsaSignJce signer =
         new EcdsaSignJce(
             EllipticCurves.getEcPrivateKey(Base64.decode(privateKey)),
-            "SHA256WithECDSA",
+            HashType.SHA256,
             EcdsaEncoding.DER);
     String queryString = new URI(rewardUrl).getQuery();
     return buildUrl(rewardUrl, signer.sign(queryString.getBytes(UTF_8)), keyId);
@@ -130,7 +131,7 @@ public class RewardedAdsVerifierTest {
     EcdsaSignJce signer =
         new EcdsaSignJce(
             EllipticCurves.getEcPrivateKey(Base64.decode(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)),
-            "SHA256WithECDSA",
+            HashType.SHA256,
             EcdsaEncoding.DER);
     byte[] signature = signer.sign(decodedQueryString.getBytes(UTF_8));
     String signedUrl = buildUrl(rewardUrl, signature, KEY_ID);
@@ -217,7 +218,7 @@ public class RewardedAdsVerifierTest {
     EcdsaSignJce signer =
         new EcdsaSignJce(
             EllipticCurves.getEcPrivateKey(Base64.decode(GOOGLE_SIGNING_PRIVATE_KEY_PKCS8_BASE64)),
-            "SHA256WithECDSA",
+            HashType.SHA256,
             EcdsaEncoding.DER);
     RewardedAdsVerifier verifier =
         new RewardedAdsVerifier.Builder()

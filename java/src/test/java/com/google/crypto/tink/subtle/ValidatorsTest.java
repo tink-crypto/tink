@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.subtle.Enums.HashType;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -132,45 +133,16 @@ public class ValidatorsTest {
   @Test
   public void testValidateSignatureHash() throws Exception {
     try {
-      Validators.validateSignatureHash("SHA256WithECDSA");
-      Validators.validateSignatureHash("SHA512withECDSA");
-      Validators.validateSignatureHash("SHA256WITHRSA");
-      Validators.validateSignatureHash("SHA512WithRSA");
+      Validators.validateSignatureHash(HashType.SHA256);
+      Validators.validateSignatureHash(HashType.SHA512);
     } catch (GeneralSecurityException e) {
       fail("Valid signature algorithm should work " + e);
     }
     try {
-      Validators.validateSignatureHash("SHA1withECDSA");
+      Validators.validateSignatureHash(HashType.SHA1);
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       TestUtil.assertExceptionContains(e, "SHA1 is not safe");
-    }
-    try {
-      Validators.validateSignatureHash("SHA1withRSA");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      TestUtil.assertExceptionContains(e, "SHA1 is not safe");
-    }
-    try {
-      Validators.validateSignatureHash("InvalidSignatureAlgorithm");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "Invalid");
-    }
-    try {
-      Validators.validateSignatureHash("NONEWithECDSA");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "Unsupported");
-    }
-    try {
-      Validators.validateSignatureHash("SHA384WithECDSA");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "Unsupported");
     }
   }
 
