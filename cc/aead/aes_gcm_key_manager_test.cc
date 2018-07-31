@@ -94,7 +94,7 @@ TEST_F(AesGcmKeyManagerTest, testKeyDataErrors) {
                         result.status().error_message());
   }
 
-  {  // Bad key_value size (supported sizes: 16, 24, 32).
+  {  // Bad key_value size (supported sizes: 16, 32).
     for (int len = 0; len < 42; len++) {
       AesGcmKey key;
       key.set_version(0);
@@ -103,7 +103,7 @@ TEST_F(AesGcmKeyManagerTest, testKeyDataErrors) {
       key_data.set_type_url(aes_gcm_key_type);
       key_data.set_value(key.SerializeAsString());
       auto result = key_manager.GetPrimitive(key_data);
-      if (len == 16 || len == 24 || len == 32) {
+      if (len == 16 || len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
         if (len < 16) {
@@ -141,13 +141,13 @@ TEST_F(AesGcmKeyManagerTest, testKeyMessageErrors) {
                         result.status().error_message());
   }
 
-  {  // Bad key_value size (supported sizes: 16, 24, 32).
+  {  // Bad key_value size (supported sizes: 16, 32).
     for (int len = 0; len < 42; len++) {
       AesGcmKey key;
       key.set_version(0);
       key.set_key_value(std::string(len, 'a'));
       auto result = key_manager.GetPrimitive(key);
-      if (len == 16 || len == 24 || len == 32) {
+      if (len == 16 || len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
         if (len < 16) {

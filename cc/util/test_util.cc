@@ -168,7 +168,7 @@ EciesAeadHkdfPrivateKey GetEciesAesGcmHkdfTestKey(
   params->mutable_kem_params()->set_hkdf_hash_type(hash_type);
 
   AesGcmKeyFormat key_format;
-  key_format.set_key_size(24);
+  key_format.set_key_size(aes_gcm_key_size);
   auto aead_dem = params->mutable_dem_params()->mutable_aead_dem();
   std::unique_ptr<AesGcmKeyManager> key_manager(new AesGcmKeyManager());
   std::string dem_key_type = key_manager->get_key_type();

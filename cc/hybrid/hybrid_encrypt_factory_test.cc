@@ -52,7 +52,7 @@ class HybridEncryptFactoryTest : public ::testing::Test {
 EciesAeadHkdfPublicKey GetNewEciesPublicKey() {
   auto ecies_key = test::GetEciesAesGcmHkdfTestKey(
       EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
-      HashType::SHA256, 24);
+      HashType::SHA256, 32);
   return ecies_key.public_key();
 }
 

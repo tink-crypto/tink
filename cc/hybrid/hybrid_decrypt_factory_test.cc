@@ -55,7 +55,7 @@ class HybridDecryptFactoryTest : public ::testing::Test {
 EciesAeadHkdfPrivateKey GetNewEciesPrivateKey() {
   return test::GetEciesAesGcmHkdfTestKey(
       EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
-      HashType::SHA256, 24);
+      HashType::SHA256, 32);
 }
 
 TEST_F(HybridDecryptFactoryTest, testBasic) {

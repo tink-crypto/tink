@@ -178,10 +178,10 @@ Status AesGcmKeyManager::Validate(const AesGcmKey& key) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid AesGcmKey: key_value is too short.");
   }
-  if (key_size != 16 && key_size != 24 && key_size != 32) {
+  if (key_size != 16 && key_size != 32) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Invalid AesGcmKey: key_value has %d bytes; "
-                       "supported sizes: 16, 24, or 32 bytes.", key_size);
+                       "supported sizes: 16 or 32 bytes.", key_size);
   }
   return Status::OK;
 }

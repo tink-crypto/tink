@@ -146,7 +146,7 @@ TINKPBEciesAeadHkdfPrivateKey *TINKGetEciesAesGcmHkdfTestKey(TINKPBEllipticCurve
   kemParams.hkdfHashType = hashType;
 
   TINKPBAesGcmKeyFormat *keyFormat = [[TINKPBAesGcmKeyFormat alloc] init];
-  keyFormat.keySize = 24;
+  keyFormat.keySize = 32;
 
   if (!params.hasDemParams) {
     params.demParams = [[TINKPBEciesAeadDemParams alloc] init];

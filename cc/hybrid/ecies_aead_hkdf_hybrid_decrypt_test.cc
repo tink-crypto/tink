@@ -114,7 +114,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
       EllipticCurveType::NIST_P256,
       EcPointFormat::UNCOMPRESSED,
       HashType::SHA256,
-      24);
+      32);
 
   // Try to get a HybridEncrypt primitive without DEM key manager.
   auto bad_result(EciesAeadHkdfHybridDecrypt::New(ecies_key));
@@ -135,7 +135,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testBasic) {
     for (auto ec_point_format :
         {EcPointFormat::UNCOMPRESSED, EcPointFormat::COMPRESSED}) {
       for (auto hash_type : {HashType::SHA256, HashType::SHA512}) {
-        for (uint32_t aes_gcm_key_size : {16, 24, 32}) {
+        for (uint32_t aes_gcm_key_size : {16, 32}) {
           for (uint32_t plaintext_size : {0, 1, 10, 100, 1000}) {
             ecies_key = test::GetEciesAesGcmHkdfTestKey(
                 curve, ec_point_format, hash_type, aes_gcm_key_size);

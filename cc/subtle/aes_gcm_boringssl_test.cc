@@ -93,6 +93,20 @@ TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
   }
 }
 
+TEST(AesGcmBoringSslTest, testInvalidKeySizes) {
+  for (int keysize = 0; keysize < 65; keysize++) {
+    if (keysize == 16 || keysize == 32) {
+      continue;
+    }
+    std::string key(keysize, 'x');
+    auto cipher = AesGcmBoringSsl::New(key);
+    EXPECT_FALSE(cipher.ok());
+  }
+  absl::string_view null_string_view;
+  auto nokeycipher = AesGcmBoringSsl::New(null_string_view);
+  EXPECT_FALSE(nokeycipher.ok());
+}
+
 static std::string GetError() {
   auto err = ERR_peek_last_error();
   // Sometimes there is no error message on the stack.
@@ -114,7 +128,8 @@ bool WycheproofTest(const rapidjson::Document &root) {
     const size_t key_size = test_group["keySize"].GetInt();
     const size_t tag_size = test_group["tagSize"].GetInt();
     // AesGcmBoringSsl only supports 12-byte IVs and 16-byte authentication tag.
-    if (iv_size != 96 || tag_size != 128) {
+    // Also 24-byte keys are not supported.
+    if (iv_size != 96 || tag_size != 128 || key_size == 192) {
       // Not supported
       continue;
     }

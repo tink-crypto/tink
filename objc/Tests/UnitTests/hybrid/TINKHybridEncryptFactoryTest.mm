@@ -43,7 +43,7 @@ using crypto::tink::KeysetUtil;
 static TINKPBEciesAeadHkdfPublicKey *getNewEciesPublicKey() {
   TINKPBEciesAeadHkdfPrivateKey *eciesKey =
       TINKGetEciesAesGcmHkdfTestKey(TINKPBEllipticCurveType_NistP256,
-                                    TINKPBEcPointFormat_Uncompressed, TINKPBHashType_Sha256, 24);
+                                    TINKPBEcPointFormat_Uncompressed, TINKPBHashType_Sha256, 32);
   return eciesKey.publicKey;
 }
 

@@ -126,7 +126,7 @@ TEST_F(EciesAeadHkdfPublicKeyManagerTest, testPrimitives) {
   EciesAeadHkdfPublicKeyManager key_manager;
   EciesAeadHkdfPublicKey key = test::GetEciesAesGcmHkdfTestKey(
       EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
-      HashType::SHA256, 24).public_key();
+      HashType::SHA256, 32).public_key();
 
   {  // Using Key proto.
     auto result = key_manager.GetPrimitive(key);

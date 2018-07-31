@@ -43,7 +43,7 @@ using crypto::tink::KeysetUtil;
 
 static TINKPBEciesAeadHkdfPrivateKey *getNewEciesPrivateKey() {
   return TINKGetEciesAesGcmHkdfTestKey(TINKPBEllipticCurveType_NistP256,
-                                       TINKPBEcPointFormat_Uncompressed, TINKPBHashType_Sha256, 24);
+                                       TINKPBEcPointFormat_Uncompressed, TINKPBHashType_Sha256, 32);
 }
 
 @implementation TINKHybridDecryptFactoryTest

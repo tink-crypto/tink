@@ -149,7 +149,7 @@ TEST_F(EciesAeadHkdfPrivateKeyManagerTest, testPrimitives) {
   EciesAeadHkdfPrivateKeyManager private_key_manager;
   EciesAeadHkdfPrivateKey key = test::GetEciesAesGcmHkdfTestKey(
       EllipticCurveType::NIST_P256, EcPointFormat::UNCOMPRESSED,
-      HashType::SHA256, 24);
+      HashType::SHA256, 32);
   auto hybrid_encrypt = std::move(public_key_manager.GetPrimitive(
       key.public_key()).ValueOrDie());
   std::string ciphertext =
