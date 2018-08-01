@@ -35,7 +35,7 @@ libraries (cf. versions in the corresponding entries in
 depend directly on these libraries at all (i.e. have only the indirect
 dependence via Tink).
 
-### Installing pre-build binaries
+### Installing pre-built binaries
 
 1.  Download and extract the Tink library into `/usr/local/lib` by invoking the
     following shell commands:
