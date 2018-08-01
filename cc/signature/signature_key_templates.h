@@ -58,6 +58,30 @@ class SignatureKeyTemplates {
   //   - signature encoding: DER
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& EcdsaP521();
+
+  // Returns a KeyTemplate that generates new instances of EcdsaPrivateKey
+  // with the following parameters:
+  //   - EC curve: NIST P-256
+  //   - hash function: SHA256
+  //   - signature encoding: IEEE_P1363
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& EcdsaP256Ieee();
+
+  // Returns a KeyTemplate that generates new instances of EcdsaPrivateKey
+  // with the following parameters:
+  //   - EC curve: NIST P-384
+  //   - hash function: SHA512
+  //   - signature encoding: IEEE_P1363
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& EcdsaP384Ieee();
+
+  // Returns a KeyTemplate that generates new instances of EcdsaPrivateKey
+  // with the following parameters:
+  //   - EC curve: NIST P-521
+  //   - hash function: SHA512
+  //   - signature encoding: IEEE_P1363
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& EcdsaP521Ieee();
 };
 
 }  // namespace tink

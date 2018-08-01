@@ -76,5 +76,29 @@ const KeyTemplate& SignatureKeyTemplates::EcdsaP521() {
   return *key_template;
 }
 
+// static
+const KeyTemplate& SignatureKeyTemplates::EcdsaP256Ieee() {
+  static const KeyTemplate* key_template =
+      NewEcdsaKeyTemplate(HashType::SHA256, EllipticCurveType::NIST_P256,
+                          EcdsaSignatureEncoding::IEEE_P1363);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& SignatureKeyTemplates::EcdsaP384Ieee() {
+  static const KeyTemplate* key_template =
+      NewEcdsaKeyTemplate(HashType::SHA512, EllipticCurveType::NIST_P384,
+                          EcdsaSignatureEncoding::IEEE_P1363);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& SignatureKeyTemplates::EcdsaP521Ieee() {
+  static const KeyTemplate* key_template =
+      NewEcdsaKeyTemplate(HashType::SHA512, EllipticCurveType::NIST_P521,
+                          EcdsaSignatureEncoding::IEEE_P1363);
+  return *key_template;
+}
+
 }  // namespace tink
 }  // namespace crypto
