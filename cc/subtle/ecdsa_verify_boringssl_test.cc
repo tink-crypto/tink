@@ -138,15 +138,15 @@ static std::string GetInteger(const rapidjson::Value &val) {
   return test::HexDecodeOrDie(hex);
 }
 
-static util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>>
-GetVerifier(const rapidjson::Value &test_group) {
+static util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> GetVerifier(
+    const rapidjson::Value& test_group,
+    subtle::EcdsaSignatureEncoding encoding) {
   SubtleUtilBoringSSL::EcKey key;
   key.pub_x = GetInteger(test_group["key"]["wx"]);
   key.pub_y = GetInteger(test_group["key"]["wy"]);
   key.curve = WycheproofUtil::GetEllipticCurveType(test_group["key"]["curve"]);
   HashType md = WycheproofUtil::GetHashType(test_group["sha"]);
-  auto result =
-      EcdsaVerifyBoringSsl::New(key, md, subtle::EcdsaSignatureEncoding::DER);
+  auto result = EcdsaVerifyBoringSsl::New(key, md, encoding);
   if (!result.ok()) {
     std::cout << "Failed: " << result.status() << "\n";
   }
@@ -158,7 +158,8 @@ GetVerifier(const rapidjson::Value &test_group) {
 // a verfier cannot be constructed. This option can be used for
 // if a file contains test vectors that are not necessarily supported
 // by tink.
-bool TestSignatures(const std::string& filename, bool allow_skipping) {
+bool TestSignatures(const std::string& filename, bool allow_skipping,
+                    subtle::EcdsaSignatureEncoding encoding) {
   std::unique_ptr<rapidjson::Document> root =
       WycheproofUtil::ReadTestVectors(filename);
   std::cout << (*root)["algorithm"].GetString();
@@ -169,14 +170,16 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
     std::cout << "here0\n";
   for (const rapidjson::Value& test_group : (*root)["testGroups"].GetArray()) {
     std::cout << "here1\n";
-    auto verifier_result = GetVerifier(test_group);
+    auto verifier_result = GetVerifier(test_group, encoding);
     std::cout << "here2\n";
     if (!verifier_result.ok()) {
       std::string curve = test_group["key"]["curve"].GetString();
       if (allow_skipping) {
-        std::cout << "Could not construct verifier for curve " << curve;
+        std::cout << "Could not construct verifier for curve " << curve
+                << verifier_result.status();
       } else {
-        ADD_FAILURE() << "Could not construct verifier for curve " << curve;
+        ADD_FAILURE() << "Could not construct verifier for curve " << curve
+                      << verifier_result.status();
         failed_tests += test_group["tests"].GetArray().Size();
       }
       continue;
@@ -226,15 +229,23 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
 }
 
 TEST_F(EcdsaVerifyBoringSslTest, testVectorsNistP256) {
-  ASSERT_TRUE(TestSignatures("ecdsa_secp256r1_sha256_test.json", false));
+  ASSERT_TRUE(TestSignatures("ecdsa_secp256r1_sha256_test.json", false,
+                             subtle::EcdsaSignatureEncoding::DER));
 }
 
 TEST_F(EcdsaVerifyBoringSslTest, testVectorsNistP384) {
-  ASSERT_TRUE(TestSignatures("ecdsa_secp384r1_sha512_test.json", false));
+  ASSERT_TRUE(TestSignatures("ecdsa_secp384r1_sha512_test.json", false,
+                             subtle::EcdsaSignatureEncoding::DER));
 }
 
 TEST_F(EcdsaVerifyBoringSslTest, testVectorsNistP521) {
-  ASSERT_TRUE(TestSignatures("ecdsa_secp521r1_sha512_test.json", false));
+  ASSERT_TRUE(TestSignatures("ecdsa_secp521r1_sha512_test.json", false,
+                             subtle::EcdsaSignatureEncoding::DER));
+}
+
+TEST_F(EcdsaVerifyBoringSslTest, testVectorsWithIeeeP1363Encoding) {
+  ASSERT_TRUE(TestSignatures("ecdsa_webcrypto_test.json", true,
+                             subtle::EcdsaSignatureEncoding::IEEE_P1363));
 }
 
 }  // namespace
