@@ -71,6 +71,7 @@ class StatusOr {
   inline const T& ValueOrDie() const {
     if (!ok()) {
       std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
+      std::cerr << status() << std::endl;
       exit(1);
     }
     return value_;
@@ -78,6 +79,7 @@ class StatusOr {
   inline T& ValueOrDie() {
     if (!ok()) {
       std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
+      std::cerr << status() << std::endl;
       exit(1);
     }
     return value_;
