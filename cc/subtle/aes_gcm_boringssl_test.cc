@@ -76,20 +76,124 @@ TEST(AesGcmBoringSslTest, testModification) {
   }
 }
 
+void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
+                             absl::string_view message) {
+  {  // AAD is a null string_view.
+    const absl::string_view aad;
+    auto pt_or_status = cipher->Decrypt(ct, aad);
+    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
+    auto pt = pt_or_status.ValueOrDie();
+    EXPECT_EQ(message, pt);
+  }
+  {  // AAD is a an empty std::string.
+    auto pt_or_status = cipher->Decrypt(ct, "");
+    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
+    auto pt = pt_or_status.ValueOrDie();
+    EXPECT_EQ(message, pt);
+  }
+  {  // AAD is a nullptr.
+    auto pt_or_status = cipher->Decrypt(ct, nullptr);
+    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
+    auto pt = pt_or_status.ValueOrDie();
+    EXPECT_EQ(message, pt);
+  }
+}
+
 TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
   const std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
   { // AAD is a null string_view.
     const std::string message = "Some data to encrypt.";
     const absl::string_view aad;
-    const std::string ct = cipher->Encrypt(message, aad).ValueOrDie();
-    EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
+    auto ct_or_status = cipher->Encrypt(message, aad);
+    EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
+    auto ct = ct_or_status.ValueOrDie();
+    TestDecryptWithEmptyAad(cipher.get(), ct, message);
   }
-  { // Both message and AAD are null string_view.
+  {  // AAD is a an empty std::string.
+    const std::string message = "Some data to encrypt.";
+    auto ct_or_status = cipher->Encrypt(message, "");
+    EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
+    auto ct = ct_or_status.ValueOrDie();
+    TestDecryptWithEmptyAad(cipher.get(), ct, message);
+  }
+  {  // AAD is a nullptr.
+    const std::string message = "Some data to encrypt.";
+    auto ct_or_status = cipher->Encrypt(message, nullptr);
+    EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
+    auto ct = ct_or_status.ValueOrDie();
+    TestDecryptWithEmptyAad(cipher.get(), ct, message);
+  }
+}
+
+TEST(AesGcmBoringSslTest, testMessageEmptyVersusNullStringView) {
+  const std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
+  const std::string aad = "Some data to authenticate.";
+  {  // Message is a null string_view.
+    const absl::string_view message;
+    auto ct_or_status = cipher->Encrypt(message, aad);
+    EXPECT_TRUE(ct_or_status.ok());
+    auto ct = ct_or_status.ValueOrDie();
+    auto pt_or_status = cipher->Decrypt(ct, aad);
+    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
+    auto pt = pt_or_status.ValueOrDie();
+    EXPECT_EQ("", pt);
+  }
+  {  // Message is an empty std::string.
+    const std::string message = "";
+    auto ct_or_status = cipher->Encrypt(message, aad);
+    EXPECT_TRUE(ct_or_status.ok());
+    auto ct = ct_or_status.ValueOrDie();
+    auto pt_or_status = cipher->Decrypt(ct, aad);
+    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
+    auto pt = pt_or_status.ValueOrDie();
+    EXPECT_EQ("", pt);
+  }
+  {  // Message is a nullptr.
+    auto ct_or_status = cipher->Encrypt(nullptr, aad);
+    EXPECT_TRUE(ct_or_status.ok());
+    auto ct = ct_or_status.ValueOrDie();
+    auto pt_or_status = cipher->Decrypt(ct, aad);
+    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
+    auto pt = pt_or_status.ValueOrDie();
+    EXPECT_EQ("", pt);
+  }
+}
+
+TEST(AesGcmBoringSslTest, testBothMessageAndAadEmpty) {
+  const std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
+  {  // Both are null string_view.
     const absl::string_view message;
     const absl::string_view aad;
-    const std::string ct = cipher->Encrypt(message, aad).ValueOrDie();
-    EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
+    auto ct_or_status = cipher->Encrypt(message, aad);
+    EXPECT_TRUE(ct_or_status.ok());
+    auto ct = ct_or_status.ValueOrDie();
+    auto pt_or_status = cipher->Decrypt(ct, aad);
+    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
+    auto pt = pt_or_status.ValueOrDie();
+    EXPECT_EQ("", pt);
+  }
+  {  // Both are empty std::string.
+    const std::string message = "";
+    const std::string aad = "";
+    auto ct_or_status = cipher->Encrypt(message, aad);
+    EXPECT_TRUE(ct_or_status.ok());
+    auto ct = ct_or_status.ValueOrDie();
+    auto pt_or_status = cipher->Decrypt(ct, aad);
+    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
+    auto pt = pt_or_status.ValueOrDie();
+    EXPECT_EQ("", pt);
+  }
+  {  // Both are nullptr.
+    auto ct_or_status = cipher->Encrypt(nullptr, nullptr);
+    EXPECT_TRUE(ct_or_status.ok());
+    auto ct = ct_or_status.ValueOrDie();
+    auto pt_or_status = cipher->Decrypt(ct, nullptr);
+    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
+    auto pt = pt_or_status.ValueOrDie();
+    EXPECT_EQ("", pt);
   }
 }
 

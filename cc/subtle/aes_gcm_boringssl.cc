@@ -61,6 +61,14 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
     absl::string_view plaintext,
     absl::string_view additional_data) const {
   bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
+  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+  // regardless of whether the size is 0.
+  if (plaintext.size() == 0 && plaintext.data() == nullptr) {
+    plaintext = absl::string_view("");
+  }
+  if (additional_data.size() == 0 && additional_data.data() == nullptr) {
+    additional_data = absl::string_view("");
+  }
   if (ctx.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_CIPHER_CTX");
@@ -102,22 +110,22 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
                           reinterpret_cast<const uint8_t*>(plaintext.data()),
                           plaintext.size());
   if (ret != 1) {
-    util::Status(util::error::INTERNAL, "Encryption failed");
+    return util::Status(util::error::INTERNAL, "Encryption failed");
   }
   written += len;
   ret = EVP_EncryptFinal_ex(ctx.get(), &ct[written], &len);
   written += len;
   if (ret != 1) {
-    util::Status(util::error::INTERNAL, "EVP_EncryptFinal_ex failed");
+    return util::Status(util::error::INTERNAL, "EVP_EncryptFinal_ex failed");
   }
   ret = EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_GET_TAG, TAG_SIZE_IN_BYTES,
                             &ct[written]);
   if (ret != 1) {
-    util::Status(util::error::INTERNAL, "Could not compute tag");
+    return util::Status(util::error::INTERNAL, "Could not compute tag");
   }
   written += TAG_SIZE_IN_BYTES;
   if (written != ciphertext_size) {
-    util::Status(util::error::INTERNAL, "Incorrect ciphertext size");
+    return util::Status(util::error::INTERNAL, "Incorrect ciphertext size");
   }
   return std::string(reinterpret_cast<const char*>(&ct[0]), written);
 }
@@ -125,6 +133,12 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
 util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
     absl::string_view ciphertext,
     absl::string_view additional_data) const {
+  // BoringSSL expects a non-null pointer for additional_data,
+  // regardless of whether the size is 0.
+  if (additional_data.size() == 0 && additional_data.data() == nullptr) {
+    additional_data = absl::string_view("");
+  }
+
   if (ciphertext.size() < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
     return util::Status(util::error::INTERNAL, "Ciphertext too short");
   }
@@ -179,7 +193,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
       reinterpret_cast<const uint8_t*>(&ciphertext.data()[read]),
       plaintext_size);
   if (ret != 1) {
-    util::Status(util::error::INTERNAL, "Decryption failed");
+    return util::Status(util::error::INTERNAL, "Decryption failed");
   }
   written += len;
 
