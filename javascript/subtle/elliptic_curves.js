@@ -121,7 +121,7 @@ const pointDecode = function(curve, format, point) {
       });
       return result;
   }
-  throw new InvalidArgumentsException('invalid point');
+  throw new InvalidArgumentsException('invalid format');
 };
 
 /**
