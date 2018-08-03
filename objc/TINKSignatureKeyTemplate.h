@@ -25,7 +25,7 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
    * EcdsaPrivateKey with the following parameters:
    *   - EC curve: NIST P-256
    *   - hash function: SHA256
-   *   - signature encoding: DER
+   *   - signature: DER
    *   - OutputPrefixType: TINK
    */
   TINKEcdsaP256 = 1,
@@ -34,7 +34,7 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
    * EcdsaPrivateKey with the following parameters:
    *   - EC curve: NIST P-384
    *   - hash function: SHA512
-   *   - signature encoding: DER
+   *   - signature: DER
    *   - OutputPrefixType: TINK
    */
   TINKEcdsaP384 = 2,
@@ -43,10 +43,37 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
    * EcdsaPrivateKey with the following parameters:
    *   - EC curve: NIST P-521
    *   - hash function: SHA512
-   *   - signature encoding: DER
+   *   - signature: DER
    *   - OutputPrefixType: TINK
    */
   TINKEcdsaP521 = 3,
+
+  /**
+   * EcdsaPrivateKey with the following parameters:
+   *   - EC curve: NIST P-256
+   *   - hash function: SHA256
+   *   - signature: IEEE P1363
+   *   - OutputPrefixType: TINK
+   */
+  TINKEcdsaP256Ieee = 4,
+
+  /**
+   * EcdsaPrivateKey with the following parameters:
+   *   - EC curve: NIST P-384
+   *   - hash function: SHA512
+   *   - signature: IEEE P1363
+   *   - OutputPrefixType: TINK
+   */
+  TINKEcdsaP384Ieee = 5,
+
+  /**
+   * EcdsaPrivateKey with the following parameters:
+   *   - EC curve: NIST P-521
+   *   - hash function: SHA512
+   *   - signature: IEEE P1363
+   *   - OutputPrefixType: TINK
+   */
+  TINKEcdsaP521Ieee = 6,
 };
 
 NS_ASSUME_NONNULL_BEGIN
@@ -87,7 +114,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Creates a TINKSignatureKeyTemplate that can be used to generate signature keysets.
  *
- * @param keyTemplate The signature key template to use.
+ * @param keyTemplate The signature key template.
  * @param error       If non-nil it will be populated with a descriptive error when the operation
  *                    fails.
  * @return            A TINKSignatureKeyTemplate or nil in case of error.

@@ -36,7 +36,7 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.Ecdsa
 
 @implementation TINKSignatureKeyTemplatesTest
 
-- (void)testEcdsaP256KeyTemplate {
+- (void)testEcdsaP256KeyTemplateWithDerEncoding {
   NSError *error = nil;
   TINKSignatureKeyTemplate *tpl =
       [[TINKSignatureKeyTemplate alloc] initWithKeyTemplate:TINKEcdsaP256 error:&error];
@@ -62,7 +62,33 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.Ecdsa
   XCTAssertEqual(keyFormat.params.encoding, TINKPBEcdsaSignatureEncoding_Der);
 }
 
-- (void)testEcdsaP384KeyTemplate {
+- (void)testEcdsaP256KeyTemplateWithIeeeEncoding {
+  NSError *error = nil;
+  TINKSignatureKeyTemplate *tpl =
+      [[TINKSignatureKeyTemplate alloc] initWithKeyTemplate:TINKEcdsaP256Ieee error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(tpl);
+
+  error = nil;
+  TINKPBKeyTemplate *keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyTemplate);
+
+  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
+  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
+
+  error = nil;
+  TINKPBEcdsaKeyFormat *keyFormat = [TINKPBEcdsaKeyFormat parseFromData:keyTemplate.value
+                                                                  error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyFormat);
+
+  XCTAssertEqual(keyFormat.params.hashType, TINKPBHashType_Sha256);
+  XCTAssertEqual(keyFormat.params.curve, TINKPBEllipticCurveType_NistP256);
+  XCTAssertEqual(keyFormat.params.encoding, TINKPBEcdsaSignatureEncoding_IeeeP1363);
+}
+
+- (void)testEcdsaP384KeyTemplateWithDerEncoding {
   NSError *error = nil;
   TINKSignatureKeyTemplate *tpl =
       [[TINKSignatureKeyTemplate alloc] initWithKeyTemplate:TINKEcdsaP384 error:&error];
@@ -88,7 +114,33 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.Ecdsa
   XCTAssertEqual(keyFormat.params.encoding, TINKPBEcdsaSignatureEncoding_Der);
 }
 
-- (void)testEcdsaP521KeyTemplate {
+- (void)testEcdsaP384KeyTemplateWithIeeeEncoding {
+  NSError *error = nil;
+  TINKSignatureKeyTemplate *tpl =
+      [[TINKSignatureKeyTemplate alloc] initWithKeyTemplate:TINKEcdsaP384Ieee error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(tpl);
+
+  error = nil;
+  TINKPBKeyTemplate *keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyTemplate);
+
+  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
+  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
+
+  error = nil;
+  TINKPBEcdsaKeyFormat *keyFormat = [TINKPBEcdsaKeyFormat parseFromData:keyTemplate.value
+                                                                  error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyFormat);
+
+  XCTAssertEqual(keyFormat.params.hashType, TINKPBHashType_Sha512);
+  XCTAssertEqual(keyFormat.params.curve, TINKPBEllipticCurveType_NistP384);
+  XCTAssertEqual(keyFormat.params.encoding, TINKPBEcdsaSignatureEncoding_IeeeP1363);
+}
+
+- (void)testEcdsaP521KeyTemplateWithDerEncoding {
   NSError *error = nil;
   TINKSignatureKeyTemplate *tpl =
       [[TINKSignatureKeyTemplate alloc] initWithKeyTemplate:TINKEcdsaP521 error:&error];
@@ -112,6 +164,32 @@ static NSString *const kTypeURL = @"type.googleapis.com/google.crypto.tink.Ecdsa
   XCTAssertEqual(keyFormat.params.hashType, TINKPBHashType_Sha512);
   XCTAssertEqual(keyFormat.params.curve, TINKPBEllipticCurveType_NistP521);
   XCTAssertEqual(keyFormat.params.encoding, TINKPBEcdsaSignatureEncoding_Der);
+}
+
+- (void)testEcdsaP521KeyTemplateWithIeeeEncoding {
+  NSError *error = nil;
+  TINKSignatureKeyTemplate *tpl =
+      [[TINKSignatureKeyTemplate alloc] initWithKeyTemplate:TINKEcdsaP521Ieee error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(tpl);
+
+  error = nil;
+  TINKPBKeyTemplate *keyTemplate = TINKKeyTemplateToObjc(tpl.ccKeyTemplate, &error);
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyTemplate);
+
+  XCTAssertTrue([kTypeURL isEqualToString:keyTemplate.typeURL]);
+  XCTAssertTrue(keyTemplate.outputPrefixType == TINKPBOutputPrefixType_Tink);
+
+  error = nil;
+  TINKPBEcdsaKeyFormat *keyFormat = [TINKPBEcdsaKeyFormat parseFromData:keyTemplate.value
+                                                                  error:&error];
+  XCTAssertNil(error);
+  XCTAssertNotNil(keyFormat);
+
+  XCTAssertEqual(keyFormat.params.hashType, TINKPBHashType_Sha512);
+  XCTAssertEqual(keyFormat.params.curve, TINKPBEllipticCurveType_NistP521);
+  XCTAssertEqual(keyFormat.params.encoding, TINKPBEcdsaSignatureEncoding_IeeeP1363);
 }
 
 - (void)testInvalidKeyTemplate {
