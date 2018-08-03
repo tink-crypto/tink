@@ -264,13 +264,23 @@ class Registry {
    * @return {!PbKeyData}
    */
   static newKeyData(keyTemplate) {
-    const keyType = keyTemplate.getTypeUrl();
-    const manager = Registry.getKeyManager(keyType);
-    if (!Registry.typeToNewKeyAllowedMap_.get(keyType)) {
-      throw new SecurityException('New key operation is forbidden for ' +
-          'key type: ' + keyType + '.');
-    }
+    const manager = Registry.getKeyManagerWithNewKeyAllowedCheck_(keyTemplate);
     return manager.getKeyFactory().newKeyData(keyTemplate.getValue_asU8());
+  }
+
+  /**
+   * Generates a new key for the specified keyTemplate using the
+   * KeyManager determined by typeUrl field of the keyTemplate.
+   *
+   * @static
+   *
+   * @param {!PbKeyTemplate} keyTemplate
+   *
+   * @return {!PbMessage} returns a key proto
+   */
+  static newKey(keyTemplate) {
+    const manager = Registry.getKeyManagerWithNewKeyAllowedCheck_(keyTemplate);
+    return manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
   }
 
   /**
@@ -286,6 +296,27 @@ class Registry {
     Registry.typeToManagerMap_.clear();
     Registry.typeToNewKeyAllowedMap_.clear();
     Registry.nameToCatalogueMap_.clear();
+  }
+
+  /**
+   * It finds a KeyManager given by keyTemplate.typeUrl and returns it if it
+   * allows creating new keys.
+   *
+   * @private
+   * @param {!PbKeyTemplate} keyTemplate
+   *
+   * @return {!KeyManager.KeyManager}
+   */
+  static getKeyManagerWithNewKeyAllowedCheck_(keyTemplate) {
+    const keyType = keyTemplate.getTypeUrl();
+    const manager = Registry.getKeyManager(keyType);
+    if (!Registry.typeToNewKeyAllowedMap_.get(keyType)) {
+      throw new SecurityException(
+          'New key operation is forbidden for ' +
+          'key type: ' + keyType + '.');
+    }
+
+    return manager;
   }
 }
 // key managers maps

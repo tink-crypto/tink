@@ -16,6 +16,7 @@ goog.module('tink.RegistryTest');
 goog.setTestOnly('tink.RegistryTest');
 
 const Aead = goog.require('tink.Aead');
+const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const Catalogue = goog.require('tink.Catalogue');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
@@ -24,6 +25,7 @@ const KeysetHandle = goog.require('tink.KeysetHandle');
 const Mac = goog.require('tink.Mac');
 const PbAesCtrHmacAeadKey = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKey');
 const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
+const PbAesCtrKey = goog.require('proto.google.crypto.tink.AesCtrKey');
 const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat');
 const PbAesCtrParams = goog.require('proto.google.crypto.tink.AesCtrParams');
 const PbHashType = goog.require('proto.google.crypto.tink.HashType');
@@ -373,6 +375,96 @@ testSuite({
     assertObjectEquals(
         key.getHmacKey().getParams(), keyFormat.getHmacKeyFormat().getParams());
   },
+
+  /////////////////////////////////////////////////////////////////////////////
+  // tests for newKey method
+  testNewKey_noManagerForGivenKeyType() {
+    const notRegisteredKeyType = 'not_registered_key_type';
+    const keyTemplate = new PbKeyTemplate();
+    keyTemplate.setTypeUrl(notRegisteredKeyType);
+
+    try {
+      Registry.newKey(keyTemplate);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          ExceptionText.notRegisteredKeyType(notRegisteredKeyType),
+          e.toString());
+    }
+  },
+
+  testNewKey_newKeyDisallowed() {
+    const keyManager = new DummyKeyManagerForNewKeyTests('someKeyType');
+    const keyTemplate = new PbKeyTemplate();
+    keyTemplate.setTypeUrl(keyManager.getKeyType());
+    Registry.registerKeyManager(
+        keyManager.getKeyType(), keyManager, /* opt_newKeyAllowed = */ false);
+
+    try {
+      Registry.newKey(keyTemplate);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          ExceptionText.newKeyForbidden(keyManager.getKeyType()), e.toString());
+    }
+  },
+
+  testNewKey_shouldWork() {
+    const /** Array<string> */ keyTypes = [];
+    const /** Array<Uint8Array> */ newKeyMethodResult = [];
+    const keyTypesLength = 10;
+
+    // Add some keys to Registry.
+    for (let i = 0; i < keyTypesLength; i++) {
+      keyTypes.push('someKeyType' + i.toString());
+      newKeyMethodResult.push(new Uint8Array([i + 1]));
+
+      Registry.registerKeyManager(
+          keyTypes[i],
+          new DummyKeyManagerForNewKeyTests(keyTypes[i], newKeyMethodResult[i]),
+          /* newKeyAllowed = */ true);
+    }
+
+    // For every keyType verify that it calls new key method of the
+    // corresponding KeyManager (KeyFactory).
+    for (let i = 0; i < keyTypesLength; i++) {
+      const keyTemplate = new PbKeyTemplate();
+      keyTemplate.setTypeUrl(keyTypes[i]);
+
+      const key = /** @type {!PbAesCtrKey} */ (Registry.newKey(keyTemplate));
+
+      // The new key method of DummyKeyFactory returns an AesCtrKey which
+      // KeyValue is set to corresponding value in newKeyMethodResult.
+      assertEquals(newKeyMethodResult[i], key.getKeyValue());
+    }
+  },
+
+  testNewKey_withAesCtrHmacAeadKey() {
+    const manager = new AesCtrHmacAeadKeyManager();
+    Registry.registerKeyManager(manager.getKeyType(), manager);
+    const keyTemplate = AeadKeyTemplates.aes256CtrHmacSha256();
+
+    const key =
+        /** @type{!PbAesCtrHmacAeadKey} */ (Registry.newKey(keyTemplate));
+
+    // Checks that correct AES CTR HMAC AEAD key was returned.
+    const keyFormat =
+        PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
+    // Check AES CTR key.
+    assertEquals(
+        key.getAesCtrKey().getKeyValue().length,
+        keyFormat.getAesCtrKeyFormat().getKeySize());
+    assertObjectEquals(
+        key.getAesCtrKey().getParams(),
+        keyFormat.getAesCtrKeyFormat().getParams());
+    // Check HMAC key.
+    assertEquals(
+        key.getHmacKey().getKeyValue().length,
+        keyFormat.getHmacKeyFormat().getKeySize());
+    assertObjectEquals(
+        key.getHmacKey().getParams(), keyFormat.getHmacKeyFormat().getParams());
+  },
+
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitive method
@@ -815,19 +907,32 @@ class DummyCatalogue3 {
 class DummyKeyFactory {
   /**
    * @param {string} keyType
+   * @param {?Uint8Array=} opt_newKeyMethodResult
    */
-  constructor(keyType) {
+  constructor(keyType, opt_newKeyMethodResult) {
     /**
      * @const @private {string}
      */
     this.KEY_TYPE_ = keyType;
+
+    if (!opt_newKeyMethodResult) {
+      opt_newKeyMethodResult = new Uint8Array(10);
+    }
+
+    /**
+     * @const @private {!Uint8Array}
+     */
+    this.NEW_KEY_METHOD_RESULT_ = opt_newKeyMethodResult;
   }
 
   /**
    * @override
    */
   newKey(keyFormat) {
-    throw new SecurityException('Not implemented, only for testing purposes.');
+    const key = new PbAesCtrKey();
+    key.setKeyValue(this.NEW_KEY_METHOD_RESULT_);
+
+    return key;
   }
 
   /**
@@ -837,7 +942,7 @@ class DummyKeyFactory {
     let /** PbKeyData */ keyData = new PbKeyData();
 
     keyData.setTypeUrl(this.KEY_TYPE_);
-    keyData.setValue(new Uint8Array(10));
+    keyData.setValue(this.NEW_KEY_METHOD_RESULT_);
     keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL);
 
     return keyData;
@@ -1022,3 +1127,55 @@ const createKey = function(id, prefixType, keyTypeUrl, opt_enabled = true) {
 
   return key;
 };
+
+/**
+ * @final
+ * @implements {KeyManager.KeyManager<string>}
+ */
+class DummyKeyManagerForNewKeyTests {
+  /**
+   * @param {string} keyType
+   * @param {?Uint8Array=} opt_newKeyMethodResult
+   */
+  constructor(keyType, opt_newKeyMethodResult) {
+    /**
+     * @private @const {string}
+     */
+    this.KEY_TYPE_ = keyType;
+
+    /**
+     * @private @const {!KeyManager.KeyFactory}
+     */
+    this.KEY_FACTORY_ = new DummyKeyFactory(keyType, opt_newKeyMethodResult);
+  }
+
+  /** @override */
+  async getPrimitive(primitiveType, key) {
+    throw new SecurityException('Not implemented, function is not needed.');
+  }
+
+  /** @override */
+  doesSupport(keyType) {
+    return keyType === this.getKeyType();
+  }
+
+  /** @override */
+  getKeyType() {
+    return this.KEY_TYPE_;
+  }
+
+  /** @override */
+  getPrimitiveType() {
+    throw new SecurityException('Not implemented, function is not needed.');
+  }
+
+  /** @override */
+  getVersion() {
+    throw new SecurityException('Not implemented, function is not needed.');
+  }
+
+  /** @override */
+  getKeyFactory() {
+    return this.KEY_FACTORY_;
+  }
+}
