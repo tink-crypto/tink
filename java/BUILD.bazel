@@ -136,14 +136,14 @@ load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 
 gen_maven_jar_rules(
     name = "maven",
-    deps = full_proto_deps + java_deps + cleartext_deps,
     doctitle = "Tink Cryptography API",
+    deps = full_proto_deps + java_deps + cleartext_deps,
 )
 
 gen_maven_jar_rules(
     name = "maven-android",
-    deps = lite_proto_deps + android_deps + cleartext_android_deps,
     doctitle = "Tink Cryptography API for Android",
+    deps = lite_proto_deps + android_deps + cleartext_android_deps,
 )
 
 # TEST
@@ -237,6 +237,8 @@ gen_java_test_rules(
     manual_tests = [
         "src/test/java/com/google/crypto/tink/subtle/AesGcmJceTest",
         "src/test/java/com/google/crypto/tink/subtle/AesGcmHkdfStreamingTest",
+        # b/112019120
+        "src/test/java/com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJceTest",
     ],
     medium_tests = [
         "src/test/java/com/google/crypto/tink/subtle/AesCtrHmacStreamingTest",

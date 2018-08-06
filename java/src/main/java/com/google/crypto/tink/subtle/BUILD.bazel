@@ -100,6 +100,7 @@ java_library(
         "Ed25519Sign.java",
         "Ed25519Verify.java",
         "RsaSsaPkcs1SignJce.java",
+        "RsaSsaPkcs1VerifyJce.java",
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [
