@@ -137,6 +137,29 @@ cc_library(
 )
 
 cc_library(
+    name = "rsa_ssa_pss_verify_key_manager",
+    srcs = ["rsa_ssa_pss_verify_key_manager.cc"],
+    hdrs = ["rsa_ssa_pss_verify_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:key_manager",
+        "//cc:public_key_verify",
+        "//cc:registry",
+        "//cc/subtle:rsa_ssa_pss_verify_boringssl",
+        "//cc/subtle:subtle_util_boringssl",
+        "//cc/util:enums",
+        "//cc/util:errors",
+        "//cc/util:protobuf_helper",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:common_cc_proto",
+        "//proto:rsa_ssa_pss_cc_proto",
+        "//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
     name = "public_key_sign_catalogue",
     srcs = ["public_key_sign_catalogue.cc"],
     hdrs = ["public_key_sign_catalogue.h"],
@@ -282,6 +305,28 @@ cc_test(
         "//proto:common_cc_proto",
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "rsa_ssa_pss_verify_key_manager_test",
+    size = "small",
+    srcs = ["rsa_ssa_pss_verify_key_manager_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":rsa_ssa_pss_verify_key_manager",
+        "//cc:config",
+        "//cc:public_key_sign",
+        "//cc:public_key_verify",
+        "//cc:registry",
+        "//cc/util:status",
+        "//cc/util:test_util",
+        "//proto:aes_eax_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:rsa_ssa_pss_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
