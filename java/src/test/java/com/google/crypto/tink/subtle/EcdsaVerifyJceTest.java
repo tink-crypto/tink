@@ -45,12 +45,18 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp256r1_sha256_test.json");
-    testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp384r1_sha512_test.json");
-    testWycheproofVectors("../wycheproof/testvectors/ecdsa_secp521r1_sha512_test.json");
+    testWycheproofVectors(
+        "../wycheproof/testvectors/ecdsa_secp256r1_sha256_test.json", EcdsaEncoding.DER);
+    testWycheproofVectors(
+        "../wycheproof/testvectors/ecdsa_secp384r1_sha512_test.json", EcdsaEncoding.DER);
+    testWycheproofVectors(
+        "../wycheproof/testvectors/ecdsa_secp521r1_sha512_test.json", EcdsaEncoding.DER);
+    testWycheproofVectors(
+        "../wycheproof/testvectors/ecdsa_webcrypto_test.json", EcdsaEncoding.IEEE_P1363);
   }
 
-  private static void testWycheproofVectors(String fileName) throws Exception {
+  private static void testWycheproofVectors(String fileName, EcdsaEncoding encoding)
+      throws Exception {
     JSONObject jsonObj = WycheproofTestUtil.readJson(fileName);
 
     int errors = 0;
@@ -64,7 +70,6 @@ public class EcdsaVerifyJceTest {
       X509EncodedKeySpec x509keySpec = new X509EncodedKeySpec(encodedPubKey);
       String sha = group.getString("sha");
       String signatureAlgorithm = WycheproofTestUtil.getSignatureAlgorithmName(sha, "ECDSA");
-      HashType hash = WycheproofTestUtil.getHashType(sha);
 
       JSONArray tests = group.getJSONArray("tests");
       for (int j = 0; j < tests.length(); j++) {
@@ -81,7 +86,8 @@ public class EcdsaVerifyJceTest {
         EcdsaVerifyJce verifier;
         try {
           ECPublicKey pubKey = (ECPublicKey) kf.generatePublic(x509keySpec);
-          verifier = new EcdsaVerifyJce(pubKey, hash, EcdsaEncoding.DER);
+          HashType hash = WycheproofTestUtil.getHashType(sha);
+          verifier = new EcdsaVerifyJce(pubKey, hash, encoding);
         } catch (GeneralSecurityException ignored) {
           // Invalid or unsupported public key.
           System.out.printf("Skipping %s, exception: %s\n", tcId, ignored);
