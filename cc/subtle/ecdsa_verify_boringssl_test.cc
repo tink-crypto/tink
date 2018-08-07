@@ -167,11 +167,8 @@ bool TestSignatures(const std::string& filename, bool allow_skipping,
   std::cout << "expected version 0.2.5";
   int passed_tests = 0;
   int failed_tests = 0;
-    std::cout << "here0\n";
   for (const rapidjson::Value& test_group : (*root)["testGroups"].GetArray()) {
-    std::cout << "here1\n";
     auto verifier_result = GetVerifier(test_group, encoding);
-    std::cout << "here2\n";
     if (!verifier_result.ok()) {
       std::string curve = test_group["key"]["curve"].GetString();
       if (allow_skipping) {
@@ -184,9 +181,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping,
       }
       continue;
     }
-    std::cout << "here3\n";
     auto verifier = std::move(verifier_result.ValueOrDie());
-    std::cout << "here4\n";
     for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
       std::string expected = test["result"].GetString();
       std::string msg = WycheproofUtil::GetBytes(test["msg"]);
