@@ -19,13 +19,14 @@
 #include <string>
 #include <vector>
 
+#include "openssl/err.h"
+#include "openssl/evp.h"
 #include "tink/subtle/ind_cpa_cipher.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "openssl/err.h"
-#include "openssl/evp.h"
 
 
 namespace crypto {
@@ -63,6 +64,10 @@ util::StatusOr<std::unique_ptr<IndCpaCipher>> AesCtrBoringSsl::New(
 
 util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
     absl::string_view plaintext) const {
+  // BoringSSL expects a non-null pointer for plaintext, regardless of whether
+  // the size is 0.
+  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
+
   bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {
     return util::Status(util::error::INTERNAL,

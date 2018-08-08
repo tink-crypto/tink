@@ -16,12 +16,12 @@
 
 #include "tink/hybrid/hybrid_decrypt_set_wrapper.h"
 
-#include "tink/hybrid_decrypt.h"
 #include "tink/crypto_format.h"
+#include "tink/hybrid_decrypt.h"
 #include "tink/primitive_set.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-
 
 namespace crypto {
 namespace tink {
@@ -56,6 +56,10 @@ HybridDecryptSetWrapper::NewHybridDecrypt(
 util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
     absl::string_view ciphertext,
     absl::string_view context_info) const {
+  // BoringSSL expects a non-null pointer for context_info,
+  // regardless of whether the size is 0.
+  context_info = subtle::SubtleUtilBoringSSL::EnsureNonNull(context_info);
+
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
     const std::string& key_id = std::string(ciphertext.substr(0,
         CryptoFormat::kNonRawPrefixSize));

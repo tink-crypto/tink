@@ -377,6 +377,14 @@ std::string SubtleUtilBoringSSL::GetErrors() {
   return ret;
 }
 
+// static
+absl::string_view SubtleUtilBoringSSL::EnsureNonNull(absl::string_view str) {
+  if (str.empty() && str.data() == nullptr) {
+    return absl::string_view("");
+  }
+  return str;
+}
+
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

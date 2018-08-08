@@ -19,9 +19,9 @@
 #include "tink/aead.h"
 #include "tink/crypto_format.h"
 #include "tink/primitive_set.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-
 
 namespace crypto {
 namespace tink {
@@ -53,6 +53,11 @@ util::StatusOr<std::unique_ptr<Aead>> AeadSetWrapper::NewAead(
 util::StatusOr<std::string> AeadSetWrapper::Encrypt(
     absl::string_view plaintext,
     absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+  // regardless of whether the size is 0.
+  plaintext = subtle::SubtleUtilBoringSSL::EnsureNonNull(plaintext);
+  associated_data = subtle::SubtleUtilBoringSSL::EnsureNonNull(associated_data);
+
   auto encrypt_result = aead_set_->get_primary()->get_primitive()
       .Encrypt(plaintext, associated_data);
   if (!encrypt_result.ok()) return encrypt_result.status();
@@ -63,6 +68,10 @@ util::StatusOr<std::string> AeadSetWrapper::Encrypt(
 util::StatusOr<std::string> AeadSetWrapper::Decrypt(
     absl::string_view ciphertext,
     absl::string_view associated_data) const {
+  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+  // regardless of whether the size is 0.
+  associated_data = subtle::SubtleUtilBoringSSL::EnsureNonNull(associated_data);
+
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
     const std::string& key_id = std::string(
         ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize));

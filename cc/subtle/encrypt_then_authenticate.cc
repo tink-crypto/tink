@@ -22,6 +22,7 @@
 #include "tink/aead.h"
 #include "tink/mac.h"
 #include "tink/subtle/ind_cpa_cipher.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -54,6 +55,11 @@ util::StatusOr<std::unique_ptr<Aead>> EncryptThenAuthenticate::New(
 util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
     absl::string_view plaintext,
     absl::string_view additional_data) const {
+  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+  // regardless of whether the size is 0.
+  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
+  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+
   auto ct = ind_cpa_cipher_->Encrypt(plaintext);
   if (!ct.ok()) {
     return ct.status();
@@ -76,6 +82,10 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
 util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
     absl::string_view ciphertext,
     absl::string_view additional_data) const {
+  // BoringSSL expects a non-null pointer for additional_data,
+  // regardless of whether the size is 0.
+  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+
   if (ciphertext.size() < tag_size_) {
     return util::Status(util::error::INTERNAL, "ciphertext too short");
   }

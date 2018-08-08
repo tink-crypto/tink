@@ -58,6 +58,10 @@ HmacBoringSsl::HmacBoringSsl(const EVP_MD* md, uint32_t tag_size,
 
 util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     absl::string_view data) const {
+  // BoringSSL expects a non-null pointer for data,
+  // regardless of whether the size is 0.
+  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+
   uint8_t buf[EVP_MAX_MD_SIZE];
   unsigned int out_len;
   const uint8_t* res = HMAC(md_, key_value_.data(), key_value_.size(),
@@ -76,6 +80,10 @@ util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
 util::Status HmacBoringSsl::VerifyMac(
     absl::string_view mac,
     absl::string_view data) const {
+  // BoringSSL expects a non-null pointer for data,
+  // regardless of whether the size is 0.
+  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+
   if (mac.size() != tag_size_) {
     return util::Status(util::error::INVALID_ARGUMENT, "incorrect tag size");
   }

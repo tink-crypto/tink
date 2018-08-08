@@ -16,15 +16,15 @@
 
 #include "tink/signature/public_key_verify_set_wrapper.h"
 
-#include "tink/public_key_verify.h"
 #include "tink/crypto_format.h"
 #include "tink/primitive_set.h"
+#include "tink/public_key_verify.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
-
 namespace {
 
 util::Status Validate(PrimitiveSet<PublicKeyVerify>* public_key_verify_set) {
@@ -55,6 +55,10 @@ PublicKeyVerifySetWrapper::NewPublicKeyVerify(
 util::Status PublicKeyVerifySetWrapper::Verify(
     absl::string_view signature,
     absl::string_view data) const {
+  // BoringSSL expects a non-null pointer for data,
+  // regardless of whether the size is 0.
+  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
+
   if (signature.length() <= CryptoFormat::kNonRawPrefixSize) {
     // This also rejects raw signatures with size of 4 bytes or fewer.
     // We're not aware of any schemes that output signatures that small.

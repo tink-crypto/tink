@@ -124,6 +124,9 @@ class SubtleUtilBoringSSL {
   // Validates whether 'sig_hash' is safe to use for digital signature.
   static crypto::tink::util::Status ValidateSignatureHash(
       subtle::HashType sig_hash);
+
+  // Return an empty std::string if str.data() is nullptr; otherwise return str.
+  static absl::string_view EnsureNonNull(absl::string_view str);
 };
 
 }  // namespace subtle

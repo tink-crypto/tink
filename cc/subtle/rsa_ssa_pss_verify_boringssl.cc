@@ -100,6 +100,10 @@ RsaSsaPssVerifyBoringSsl::RsaSsaPssVerifyBoringSsl(bssl::UniquePtr<RSA> rsa,
 
 util::Status RsaSsaPssVerifyBoringSsl::Verify(absl::string_view signature,
                                               absl::string_view data) const {
+  // BoringSSL expects a non-null pointer for data,
+  // regardless of whether the size is 0.
+  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+
   auto digest_result = ComputeHash(data, *sig_hash_);
   if (!digest_result.ok()) return digest_result.status();
   std::string digest = digest_result.ValueOrDie();

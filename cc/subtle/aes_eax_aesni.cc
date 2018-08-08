@@ -30,6 +30,7 @@
 #include <memory>
 
 #include "tink/subtle/random.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 
 namespace crypto {
 namespace tink {
@@ -518,6 +519,11 @@ bool AesEaxAesni::RawDecrypt(
 crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
     absl::string_view plaintext,
     absl::string_view additional_data) const {
+  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+  // regardless of whether the size is 0.
+  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
+  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+
   if (SIZE_MAX - nonce_size_ - TAG_SIZE <= plaintext.size()) {
     return util::Status(util::error::INTERNAL, "Plaintext too long");
   }
@@ -538,6 +544,10 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
 crypto::tink::util::StatusOr<std::string> AesEaxAesni::Decrypt(
     absl::string_view ciphertext,
     absl::string_view additional_data) const {
+  // BoringSSL expects a non-null pointer for additional_data,
+  // regardless of whether the size is 0.
+  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+
   size_t ct_size = ciphertext.size();
   if (ct_size < nonce_size_ + TAG_SIZE) {
     return util::Status(util::error::INTERNAL, "Ciphertext too short");

@@ -200,6 +200,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":random",
+        ":subtle_util_boringssl",
         "//cc:aead",
         "//cc/util:errors",
         "//cc/util:status",
@@ -217,6 +218,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":random",
+        ":subtle_util_boringssl",
         "//cc:aead",
         "//cc/util:errors",
         "//cc/util:status",
@@ -234,8 +236,8 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":aes_ctr_boringssl",
-        ":hmac_boringssl",
         ":ind_cpa_cipher",
+        ":subtle_util_boringssl",
         "//cc:aead",
         "//cc:mac",
         "//cc/util:errors",
@@ -254,6 +256,7 @@ cc_library(
     deps = [
         ":ind_cpa_cipher",
         ":random",
+        ":subtle_util_boringssl",
         "//cc/util:errors",
         "//cc/util:status",
         "//cc/util:statusor",

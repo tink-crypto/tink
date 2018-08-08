@@ -20,13 +20,14 @@
 #include <vector>
 #include <memory>
 
+#include "openssl/err.h"
+#include "openssl/evp.h"
 #include "tink/aead.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "openssl/err.h"
-#include "openssl/evp.h"
 
 namespace crypto {
 namespace tink {
@@ -227,6 +228,11 @@ void AesEaxBoringSsl::CtrCrypt(
 crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
     absl::string_view plaintext,
     absl::string_view additional_data) const {
+  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+  // regardless of whether the size is 0.
+  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
+  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+
   size_t ciphertext_size = plaintext.size() + nonce_size_ + TAG_SIZE;
   std::string ciphertext(ciphertext_size, '\0');
   uint8_t N[BLOCK_SIZE];
@@ -249,6 +255,10 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
 crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
     absl::string_view ciphertext,
     absl::string_view additional_data) const {
+  // BoringSSL expects a non-null pointer for additional_data,
+  // regardless of whether the size is 0.
+  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+
   size_t ct_size = ciphertext.size();
   if (ct_size < nonce_size_ + TAG_SIZE) {
     return util::Status(util::error::INTERNAL, "Ciphertext too short");

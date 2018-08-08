@@ -16,14 +16,14 @@
 
 #include "tink/signature/public_key_sign_set_wrapper.h"
 
-#include "tink/public_key_sign.h"
 #include "tink/crypto_format.h"
 #include "tink/primitive_set.h"
+#include "tink/public_key_sign.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
-
 namespace {
 
 util::Status Validate(PrimitiveSet<PublicKeySign>* public_key_sign_set) {
@@ -53,6 +53,10 @@ PublicKeySignSetWrapper::NewPublicKeySign(
 
 util::StatusOr<std::string> PublicKeySignSetWrapper::Sign(
     absl::string_view data) const {
+  // BoringSSL expects a non-null pointer for data,
+  // regardless of whether the size is 0.
+  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
+
   auto primary = public_key_sign_set_->get_primary();
   auto sign_result = primary->get_primitive().Sign(data);
   if (!sign_result.ok()) return sign_result.status();

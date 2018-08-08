@@ -119,6 +119,10 @@ EcdsaSignBoringSsl::EcdsaSignBoringSsl(EC_KEY* key, const EVP_MD* hash,
 
 util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
     absl::string_view data) const {
+  // BoringSSL expects a non-null pointer for data,
+  // regardless of whether the size is 0.
+  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+
   // Compute the digest.
   unsigned int digest_size;
   uint8_t digest[EVP_MAX_MD_SIZE];

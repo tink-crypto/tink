@@ -16,12 +16,12 @@
 
 #include "tink/mac/mac_set_wrapper.h"
 
-#include "tink/mac.h"
 #include "tink/crypto_format.h"
+#include "tink/mac.h"
 #include "tink/primitive_set.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-
 
 namespace crypto {
 namespace tink {
@@ -52,6 +52,10 @@ util::StatusOr<std::unique_ptr<Mac>> MacSetWrapper::NewMac(
 
 util::StatusOr<std::string> MacSetWrapper::ComputeMac(
     absl::string_view data) const {
+  // BoringSSL expects a non-null pointer for data,
+  // regardless of whether the size is 0.
+  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
+
   auto compute_mac_result =
       mac_set_->get_primary()->get_primitive().ComputeMac(data);
   if (!compute_mac_result.ok()) return compute_mac_result.status();

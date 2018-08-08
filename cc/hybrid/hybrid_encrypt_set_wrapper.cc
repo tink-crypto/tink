@@ -16,12 +16,12 @@
 
 #include "tink/hybrid/hybrid_encrypt_set_wrapper.h"
 
-#include "tink/hybrid_encrypt.h"
 #include "tink/crypto_format.h"
+#include "tink/hybrid_encrypt.h"
 #include "tink/primitive_set.h"
+#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-
 
 namespace crypto {
 namespace tink {
@@ -56,6 +56,11 @@ HybridEncryptSetWrapper::NewHybridEncrypt(
 util::StatusOr<std::string> HybridEncryptSetWrapper::Encrypt(
     absl::string_view plaintext,
     absl::string_view context_info) const {
+  // BoringSSL expects a non-null pointer for plaintext and context_info,
+  // regardless of whether the size is 0.
+  plaintext = subtle::SubtleUtilBoringSSL::EnsureNonNull(plaintext);
+  context_info = subtle::SubtleUtilBoringSSL::EnsureNonNull(context_info);
+
   auto primary = hybrid_encrypt_set_->get_primary();
   auto encrypt_result =
       primary->get_primitive().Encrypt(plaintext, context_info);

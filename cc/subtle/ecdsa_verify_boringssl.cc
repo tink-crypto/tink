@@ -121,6 +121,9 @@ EcdsaVerifyBoringSsl::EcdsaVerifyBoringSsl(EC_KEY* key, const EVP_MD* hash,
 util::Status EcdsaVerifyBoringSsl::Verify(
     absl::string_view signature,
     absl::string_view data) const {
+  // BoringSSL expects a non-null pointer for data,
+  // regardless of whether the size is 0.
+  data = SubtleUtilBoringSSL::EnsureNonNull(data);
 
   // Compute the digest.
   unsigned int digest_size;
