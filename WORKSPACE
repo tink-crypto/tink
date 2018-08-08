@@ -5,6 +5,7 @@ http_archive(
     name = "wycheproof",
     strip_prefix = "wycheproof-f89f4c53a8845fcefcdb9f14ee9191dbe167e3e3",
     url = "https://github.com/google/wycheproof/archive/f89f4c53a8845fcefcdb9f14ee9191dbe167e3e3.zip",
+    sha256 = "b44bb0339ad149e6cdab1337445cf52440cbfc79684203a3db1c094d9ef8daea",
 )
 
 #-----------------------------------------------------------------------------
@@ -14,12 +15,14 @@ http_archive(
     name = "com_google_absl",
     strip_prefix = "abseil-cpp-6cf9c731027f4d8aebe3c60df8e64317e6870870",
     url = "https://github.com/abseil/abseil-cpp/archive/6cf9c731027f4d8aebe3c60df8e64317e6870870.zip",
+    sha256 = "9094c76bb75bb02bafbdc7339d3a6b331bd23d76c357813ac963916f2f12ec11",
 )
 
 http_archive(
     name = "boringssl",
     strip_prefix = "boringssl-bdd6c7c9d1b94f7010fb471b91bb490ccacafb98",
     url = "https://github.com/google/boringssl/archive/bdd6c7c9d1b94f7010fb471b91bb490ccacafb98.zip",
+    sha256 = "bd9b5f5c93e81831402d2620e28e49d2e8c4ac7c5f278cec7a5476b6236d4615",
 )
 
 # GoogleTest/GoogleMock framework. Used by most C++ unit-tests.
@@ -27,6 +30,7 @@ http_archive(
     name = "com_google_googletest",
     strip_prefix = "googletest-61330388862cf011fa956f7f59082b9923e6be0e",
     url = "https://github.com/google/googletest/archive/61330388862cf011fa956f7f59082b9923e6be0e.zip",
+    sha256 = "9431adb18d26a304d864c2b05f6e5a165e73108fc89a110f5b27d65d7e51680b",
 )
 
 #-----------------------------------------------------------------------------
@@ -40,6 +44,7 @@ http_archive(
     name = "com_google_protobuf",
     strip_prefix = "protobuf-3.6.0",
     urls = ["https://github.com/google/protobuf/archive/v3.6.0.zip"],
+    sha256 = "e514c2e613dc47c062ea8df480efeec368ffbef98af0437ac00cdaadcb0d80d2",
 )
 
 # java_lite_proto_library rules implicitly depend on
@@ -49,6 +54,7 @@ http_archive(
     name = "com_google_protobuf_javalite",
     strip_prefix = "protobuf-javalite",
     urls = ["https://github.com/google/protobuf/archive/javalite.zip"],
+    sha256 = "38458deb90db61c054b708e141544c32863ab14a8747710ba3ee290d9b6dab92",
 )
 
 new_http_archive(
@@ -533,6 +539,7 @@ http_file(
     name = "xctestrunner",
     executable = 1,
     url = "https://github.com/google/xctestrunner/releases/download/0.2.1/ios_test_runner.par",
+    sha256 = "5bfbd45c5ac89305e8bf3296999d490611b88d4d828b2a39ef6037027411aa94",
 )
 
 #-----------------------------------------------------------------------------
