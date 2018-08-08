@@ -140,6 +140,25 @@ const fieldSizeInBytes = function(curve) {
   throw new InvalidArgumentsException('unknown curve: ' + curve);
 };
 
+/**
+ * @param {!CurveType} curve
+ * @param {!PointFormatType} pointFormat
+ *
+ * @return {number}
+ */
+const encodingSizeInBytes = function(curve, pointFormat) {
+  switch (pointFormat) {
+    case PointFormatType.UNCOMPRESSED:
+      return 2 * fieldSizeInBytes(curve) + 1;
+    case PointFormatType.COMPRESSED:
+      return fieldSizeInBytes(curve) + 1;
+    case PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+      return 2 * fieldSizeInBytes(curve);
+  }
+  throw new InvalidArgumentsException('invalid format');
+};
+
+
 exports = {
   CurveType,
   PointFormatType,
@@ -148,4 +167,5 @@ exports = {
   pointDecode,
   pointEncode,
   fieldSizeInBytes,
+  encodingSizeInBytes,
 };

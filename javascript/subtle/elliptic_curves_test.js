@@ -52,6 +52,60 @@ testSuite({
         EllipticCurves.fieldSizeInBytes(EllipticCurves.CurveType.P521));
   },
 
+  testEncodingSizeInBytes_uncompressedPointFormatType() {
+    assertEquals(
+        2 * (256 / 8) + 1,
+        EllipticCurves.encodingSizeInBytes(
+            EllipticCurves.CurveType.P256,
+            EllipticCurves.PointFormatType.UNCOMPRESSED));
+    assertEquals(
+        2 * (384 / 8) + 1,
+        EllipticCurves.encodingSizeInBytes(
+            EllipticCurves.CurveType.P384,
+            EllipticCurves.PointFormatType.UNCOMPRESSED));
+    assertEquals(
+        2 * ((521 + 7) / 8) + 1,
+        EllipticCurves.encodingSizeInBytes(
+            EllipticCurves.CurveType.P521,
+            EllipticCurves.PointFormatType.UNCOMPRESSED));
+  },
+
+  testEncodingSizeInBytes_compressedPointFormatType() {
+    assertEquals(
+        (256 / 8) + 1,
+        EllipticCurves.encodingSizeInBytes(
+            EllipticCurves.CurveType.P256,
+            EllipticCurves.PointFormatType.COMPRESSED));
+    assertEquals(
+        (384 / 8) + 1,
+        EllipticCurves.encodingSizeInBytes(
+            EllipticCurves.CurveType.P384,
+            EllipticCurves.PointFormatType.COMPRESSED));
+    assertEquals(
+        ((521 + 7) / 8) + 1,
+        EllipticCurves.encodingSizeInBytes(
+            EllipticCurves.CurveType.P521,
+            EllipticCurves.PointFormatType.COMPRESSED));
+  },
+
+  testEncodingSizeInBytes_crunchyUncompressedPointFormatType() {
+    assertEquals(
+        2 * (256 / 8),
+        EllipticCurves.encodingSizeInBytes(
+            EllipticCurves.CurveType.P256,
+            EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
+    assertEquals(
+        2 * (384 / 8),
+        EllipticCurves.encodingSizeInBytes(
+            EllipticCurves.CurveType.P384,
+            EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
+    assertEquals(
+        2 * ((521 + 7) / 8),
+        EllipticCurves.encodingSizeInBytes(
+            EllipticCurves.CurveType.P521,
+            EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
+  },
+
   testPointEncode_unknownPointFormat() {
     const format = 10;
 
