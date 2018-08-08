@@ -52,6 +52,7 @@ java_library(
     javacopts = JAVACOPTS_OSS,
     deps = [
         ":subtle",
+        ":mac",
         "//java/src/main/java/com/google/crypto/tink:primitives",
     ],
 )

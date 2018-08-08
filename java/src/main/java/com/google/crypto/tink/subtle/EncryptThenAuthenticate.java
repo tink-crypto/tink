@@ -21,6 +21,7 @@ import com.google.crypto.tink.Mac;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * This primitive performs an encrypt-then-Mac operation on plaintext and additional authenticated
@@ -43,6 +44,16 @@ public final class EncryptThenAuthenticate implements Aead {
     this.cipher = cipher;
     this.mac = mac;
     this.macLength = macLength;
+  }
+
+  /** Returns a new EncryptThenAuthenticate instance using AES-CTR and HMAC. */
+  public static Aead newAesCtrHmac(
+      final byte[] aesCtrKey, int ivSize, String hmacAlgorithm, final byte[] hmacKey, int tagSize)
+      throws GeneralSecurityException {
+    IndCpaCipher cipher = new AesCtrJceCipher(aesCtrKey, ivSize);
+    SecretKeySpec hmacKeySpec = new SecretKeySpec(hmacKey, "HMAC");
+    Mac hmac = new MacJce(hmacAlgorithm, hmacKeySpec, tagSize);
+    return new EncryptThenAuthenticate(cipher, hmac, tagSize);
   }
 
   /**

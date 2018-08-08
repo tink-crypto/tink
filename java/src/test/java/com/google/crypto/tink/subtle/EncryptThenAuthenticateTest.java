@@ -20,12 +20,10 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -265,9 +263,6 @@ public class EncryptThenAuthenticateTest {
 
   private Aead getAead(byte[] hmacKey, byte[] encKey, int ivSize, int tagLength, String macAlg)
       throws Exception {
-    IndCpaCipher cipher = new AesCtrJceCipher(encKey, ivSize);
-    SecretKeySpec keySpec = new SecretKeySpec(hmacKey, "HMAC");
-    Mac mac = new MacJce(macAlg, keySpec, tagLength);
-    return new EncryptThenAuthenticate(cipher, mac, tagLength);
+    return EncryptThenAuthenticate.newAesCtrHmac(encKey, ivSize, macAlg, hmacKey, tagLength);
   }
 }
