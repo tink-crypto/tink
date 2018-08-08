@@ -15,12 +15,11 @@ weaknesses in implementations](https://github.com/google/wycheproof), and
 providing simple APIs that can be used safely without needing a crypto
 background.
 
-Tink provides secure APIs that are easy to use correctly. It reduces common
-crypto pitfalls with user-centered design, careful implementation and code
-reviews, and extensive testing. You can add features like encryption, decryption
-and signing to your application with Tink - the same library AdMob, Google Pay,
-the Android Search App and several Google products also use to secure their
-applications.
+Tink provides secure APIs that are easy to use correctly and hard(er) to misuse.
+It reduces common crypto pitfalls with user-centered design, careful
+implementation and code reviews, and extensive testing. At Google, Tink is
+already being used to secure data of many products such as AdMob, Google Pay,
+Google Assistant, Firebase, the Android Search App, etc.
 
 ## Getting started
 
@@ -82,17 +81,13 @@ AEAD primitive in Java:
 
 ## Current Status
 
-*   [Tink for Java and Android](docs/JAVA-HOWTO.md) are field tested and ready
-    for production. The latest version is
+*   [Java and Android](docs/JAVA-HOWTO.md),
+    [C++](docs/CPP-HOWTO.md) and [Obj-C](docs/OBJC-HOWTO.md)
+    are field tested and ready for production. The latest version is
     [1.2.0-rc4](https://github.com/google/tink/releases/tag/v1.2.0-rc4),
     released on 2018-07-31.
 
-*   [Tink for C++](docs/CPP-HOWTO.md) and [Tink for Obj-C](docs/OBJC-HOWTO.md)
-    are almost ready for production. The latest version is
-    [1.2.0-rc4](https://github.com/google/tink/releases/tag/v1.2.0-rc4),
-    released on 2018-07-31.
-
-*   Tink for Go and Javascript are in active development.
+*   Tink for Go and JavaScript are in active development.
 
 ## Learn More
 
@@ -112,8 +107,8 @@ AEAD primitive in Java:
 If you want to contribute, please read [CONTRIBUTING](docs/CONTRIBUTING.md)
 and send us pull requests. You can also report bugs or file feature requests.
 
-If you'd like to talk to the developers or get notified about major new tests,
-you may want to subscribe to our [mailing
+If you'd like to talk to the developers or get notified about major product
+updates, you may want to subscribe to our [mailing
 list](https://groups.google.com/forum/#!forum/tink-users). To join, simply send
 an empty email to tink-users+subscribe@googlegroups.com.
 
