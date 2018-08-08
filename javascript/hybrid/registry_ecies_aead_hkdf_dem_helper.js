@@ -1,0 +1,129 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+goog.module('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
+
+const Aead = goog.require('tink.Aead');
+const AeadConfig = goog.require('tink.aead.AeadConfig');
+const EciesAeadHkdfDemHelper = goog.require('tink.subtle.EciesAeadHkdfDemHelper');
+const PbAesCtrHmacAeadKey = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKey');
+const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
+const PbAesGcmKey = goog.require('proto.google.crypto.tink.AesGcmKey');
+const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
+const Registry = goog.require('tink.Registry');
+const SecurityException = goog.require('tink.exception.SecurityException');
+
+
+/**
+ * @implements {EciesAeadHkdfDemHelper}
+ * @final
+ */
+class RegistryEciesAeadHkdfDemHelper {
+  /**
+   * @param {!PbKeyTemplate} keyTemplate
+   */
+  constructor(keyTemplate) {
+    let /** @type {!PbAesCtrHmacAeadKey|!PbAesGcmKey} */ key;
+    let /** @type {number} */ demKeySize;
+    let /** @type {number} */ aesCtrKeySize;
+
+    switch (keyTemplate.getTypeUrl()) {
+      case AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL:
+        let /** @type {!PbAesCtrHmacAeadKeyFormat} */ keyFormat;
+        try {
+          keyFormat = PbAesCtrHmacAeadKeyFormat.deserializeBinary(
+              keyTemplate.getValue());
+        } catch (e) {
+          throw new SecurityException(
+              'Could not parse the given Uint8Array ' +
+              'as a serialized proto of ' +
+              AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL + '.');
+        }
+
+        key =
+            /** @type {!PbAesCtrHmacAeadKey} */ (Registry.newKey(keyTemplate));
+        aesCtrKeySize = keyFormat.getAesCtrKeyFormat().getKeySize();
+        const hmacKeySize = keyFormat.getHmacKeyFormat().getKeySize();
+        demKeySize = aesCtrKeySize + hmacKeySize;
+        break;
+
+      case AeadConfig.AES_GCM_TYPE_URL:
+        throw new SecurityException('Not implemented yet.');
+        break;
+
+      default:
+        throw new SecurityException(
+            'Key type URL ' + keyTemplate.getTypeUrl() + ' is not supported.');
+    }
+
+    /** @const @private {string} */
+    this.demKeyTypeUrl_ = keyTemplate.getTypeUrl();
+    /** @const @private {!PbAesCtrHmacAeadKey|!PbAesGcmKey} */
+    this.key_ = key;
+    /** @const @private {number} */
+    this.demKeySize_ = demKeySize;
+    /** @const @private {number} */
+    this.aesCtrKeySize_ = aesCtrKeySize;
+  }
+
+  /**
+   * @override
+   */
+  getDemKeySizeInBytes() {
+    return this.demKeySize_;
+  }
+
+  /**
+   * @override
+   */
+  async getAead(symmetricKey) {
+    if (symmetricKey.length != this.demKeySize_) {
+      throw new SecurityException(
+          'Key is not of the correct length, expected length: ' +
+          this.demKeySize_ + ', but got key of length: ' + symmetricKey.length +
+          '.');
+    }
+
+    let /** @type {!PbAesCtrHmacAeadKey|!PbAesGcmKey} */ key;
+    if (this.demKeyTypeUrl_ === AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL) {
+      key = this.replaceAesCtrHmacKeyValue_(symmetricKey);
+    } else {
+      throw new SecurityException('Not implemented yet.');
+    }
+
+    return await Registry.getPrimitive(Aead, key, this.demKeyTypeUrl_);
+  }
+
+  /**
+   * @private
+   *
+   * @param {!Uint8Array} symmetricKey
+   *
+   * @return {!PbAesCtrHmacAeadKey}
+   */
+  replaceAesCtrHmacKeyValue_(symmetricKey) {
+    const key = /** @type {!PbAesCtrHmacAeadKey} */ (this.key_);
+
+    const aesCtrKeyValue = symmetricKey.slice(0, this.aesCtrKeySize_);
+    key.getAesCtrKey().setKeyValue(aesCtrKeyValue);
+
+    const hmacKeyValue =
+        symmetricKey.slice(this.aesCtrKeySize_, this.demKeySize_);
+    key.getHmacKey().setKeyValue(hmacKeyValue);
+
+    return key;
+  }
+}
+
+exports = RegistryEciesAeadHkdfDemHelper;
