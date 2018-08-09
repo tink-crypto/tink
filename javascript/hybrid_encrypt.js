@@ -66,7 +66,7 @@ class HybridEncrypt {
    * @param {?Uint8Array=} opt_contextInfo optional context info to be
    *     authenticated. It can be null, which is equivalent to an empty
    *     (zero-length) byte array.
-   * @return {!Uint8Array} resulting ciphertext
+   * @return {!Promise<!Uint8Array>} resulting ciphertext
    */
   encrypt(plaintext, opt_contextInfo) {}
 }
