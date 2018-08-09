@@ -577,6 +577,7 @@ cc_test(
         ":wycheproof_util",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:test_matchers",
         "//cc/util:test_util",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",

@@ -61,6 +61,32 @@ class SubtleUtilBoringSSL {
     int salt_length;
   };
 
+  // RSA private key representation.
+  struct RsaPrivateKey {
+    // Modulus.
+    std::string n;
+    // Public exponent.
+    std::string e;
+    // Private exponent.
+    // Unsigned big integer in bigendian representation.
+    std::string d;
+
+    // The prime factor p of n.
+    // Unsigned big integer in bigendian representation.
+    std::string p;
+    // The prime factor q of n.
+    // Unsigned big integer in bigendian representation.
+    std::string q;
+    // d mod (p - 1).
+    std::string dp;
+    // d mod (q - 1).
+    // Unsigned big integer in bigendian representation.
+    std::string dq;
+    // Chinese Remainder Theorem coefficient q^(-1) mod p.
+    // Unsigned big integer in bigendian representation.
+    std::string crt;
+  };
+
   // Returns BoringSSL's BIGNUM constructed from bigendian std::string
   // representation.
   static util::StatusOr<bssl::UniquePtr<BIGNUM>> str2bn(absl::string_view s);
@@ -127,6 +153,12 @@ class SubtleUtilBoringSSL {
 
   // Return an empty std::string if str.data() is nullptr; otherwise return str.
   static absl::string_view EnsureNonNull(absl::string_view str);
+
+  // Creates a new RSA public and private key pair.
+  static util::Status GetNewRsaKeyPair(int modulus_size_in_bits,
+                                       const BIGNUM *e,
+                                       RsaPrivateKey *private_key,
+                                       RsaPublicKey *public_key);
 };
 
 }  // namespace subtle

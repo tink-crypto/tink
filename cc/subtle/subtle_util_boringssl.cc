@@ -15,10 +15,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/err.h"
+#include "openssl/rsa.h"
 #include "tink/subtle/common_enums.h"
 
 namespace crypto {
@@ -343,7 +345,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
       return std::string(reinterpret_cast<const char *>(encoded.get()),
-                         1 + curve_size_in_bytes);
+                    1 + curve_size_in_bytes);
     }
     default:
       return util::Status(util::error::INTERNAL, "Unsupported point format");
@@ -383,6 +385,69 @@ absl::string_view SubtleUtilBoringSSL::EnsureNonNull(absl::string_view str) {
     return absl::string_view("");
   }
   return str;
+}
+
+util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
+    int modulus_size_in_bits, const BIGNUM *e,
+    SubtleUtilBoringSSL::RsaPrivateKey *private_key,
+    SubtleUtilBoringSSL::RsaPublicKey *public_key) {
+  bssl::UniquePtr<RSA> rsa(RSA_new());
+  if (rsa == nullptr) {
+    return util::Status(util::error::INTERNAL, "Could not initialize RSA.");
+  }
+
+  bssl::UniquePtr<BIGNUM> e_copy(BN_new());
+  if (BN_copy(e_copy.get(), e) == nullptr) {
+    return util::Status(util::error::INTERNAL, GetErrors());
+  }
+  if (RSA_generate_key_ex(rsa.get(), modulus_size_in_bits, e_copy.get(),
+                          /*cb=*/nullptr) != 1) {
+    return util::Status(
+        util::error::INTERNAL,
+        absl::StrCat("Error generating private key: ", GetErrors()));
+  }
+
+  const BIGNUM *n_bn, *e_bn, *d_bn;
+  RSA_get0_key(rsa.get(), &n_bn, &e_bn, &d_bn);
+
+  // Save exponents.
+  auto n_str = bn2str(n_bn, BN_num_bytes(n_bn));
+  auto e_str = bn2str(e_bn, BN_num_bytes(e_bn));
+  auto d_str = bn2str(d_bn, BN_num_bytes(d_bn));
+  if (!n_str.ok()) return n_str.status();
+  if (!e_str.ok()) return e_str.status();
+  if (!d_str.ok()) return d_str.status();
+  private_key->n = std::move(n_str.ValueOrDie());
+  private_key->e = std::move(e_str.ValueOrDie());
+  private_key->d = std::move(d_str.ValueOrDie());
+
+  public_key->n = private_key->n;
+  public_key->e = private_key->e;
+
+  // Save factors.
+  const BIGNUM *p_bn, *q_bn;
+  RSA_get0_factors(rsa.get(), &p_bn, &q_bn);
+  auto p_str = bn2str(p_bn, BN_num_bytes(p_bn));
+  auto q_str = bn2str(q_bn, BN_num_bytes(q_bn));
+  if (!p_str.ok()) return p_str.status();
+  if (!q_str.ok()) return q_str.status();
+  private_key->p = std::move(p_str.ValueOrDie());
+  private_key->q = std::move(q_str.ValueOrDie());
+
+  // Save CRT parameters.
+  const BIGNUM *dp_bn, *dq_bn, *crt_bn;
+  RSA_get0_crt_params(rsa.get(), &dp_bn, &dq_bn, &crt_bn);
+  auto dp_str = bn2str(dp_bn, BN_num_bytes(dp_bn));
+  auto dq_str = bn2str(dq_bn, BN_num_bytes(dq_bn));
+  auto crt_str = bn2str(crt_bn, BN_num_bytes(crt_bn));
+  if (!dp_str.ok()) return dp_str.status();
+  if (!dq_str.ok()) return dq_str.status();
+  if (!crt_str.ok()) return crt_str.status();
+  private_key->dp = std::move(dp_str.ValueOrDie());
+  private_key->dq = std::move(dq_str.ValueOrDie());
+  private_key->crt = std::move(crt_str.ValueOrDie());
+
+  return util::OkStatus();
 }
 
 }  // namespace subtle

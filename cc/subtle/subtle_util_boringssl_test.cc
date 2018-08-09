@@ -16,26 +16,32 @@
 
 #include "tink/subtle/subtle_util_boringssl.h"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
+#include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
+#include "openssl/ec.h"
+#include "openssl/evp.h"
+#include "openssl/x509.h"
 #include "include/rapidjson/document.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ec_util.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
-#include "gtest/gtest.h"
-#include "openssl/ec.h"
-#include "openssl/evp.h"
-#include "openssl/x509.h"
 
 namespace crypto {
 namespace tink {
 namespace subtle {
 namespace {
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using ::testing::IsEmpty;
+using ::testing::Not;
 
 struct EncodingTestVector {
   EcPointFormat format;
@@ -264,6 +270,125 @@ TEST(SubtleUtilBoringSSLTest, testComputeEcdhSharedSecretWithWycheproofTest) {
                              ::ReadTestVectors("ecdh_secp384r1_test.json")));
   ASSERT_TRUE(WycheproofTest(*WycheproofUtil
                              ::ReadTestVectors("ecdh_secp521r1_test.json")));
+}
+
+TEST(CreatesNewRsaKeyPairTest, BasicSanityChecks) {
+  SubtleUtilBoringSSL::RsaPublicKey public_key;
+  SubtleUtilBoringSSL::RsaPrivateKey private_key;
+
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), RSA_F4);
+  ASSERT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
+                                                    &public_key),
+              IsOk());
+  EXPECT_THAT(private_key.n, Not(IsEmpty()));
+  EXPECT_THAT(private_key.e, Not(IsEmpty()));
+  EXPECT_THAT(private_key.d, Not(IsEmpty()));
+
+  EXPECT_THAT(private_key.p, Not(IsEmpty()));
+  EXPECT_THAT(private_key.q, Not(IsEmpty()));
+  EXPECT_THAT(private_key.dp, Not(IsEmpty()));
+  EXPECT_THAT(private_key.dq, Not(IsEmpty()));
+  EXPECT_THAT(private_key.crt, Not(IsEmpty()));
+
+  EXPECT_THAT(public_key.n, Not(IsEmpty()));
+  EXPECT_THAT(public_key.e, Not(IsEmpty()));
+
+  EXPECT_EQ(public_key.n, private_key.n);
+  EXPECT_EQ(public_key.e, private_key.e);
+}
+
+TEST(CreatesNewRsaKeyPairTest, FailsOnLargeE) {
+  // OpenSSL requires the "e" value to be at most 32 bits.
+  SubtleUtilBoringSSL::RsaPublicKey public_key;
+  SubtleUtilBoringSSL::RsaPrivateKey private_key;
+
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), 1L << 33);
+  ASSERT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
+                                                    &public_key),
+              StatusIs(util::error::INTERNAL));
+}
+
+TEST(CreatesNewRsaKeyPairTest, KeyIsWellFormed) {
+  SubtleUtilBoringSSL::RsaPublicKey public_key;
+  SubtleUtilBoringSSL::RsaPrivateKey private_key;
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), RSA_F4);
+  ASSERT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
+                                                    &public_key),
+              IsOk());
+  auto n = std::move(SubtleUtilBoringSSL::str2bn(private_key.n).ValueOrDie());
+  auto d = std::move(SubtleUtilBoringSSL::str2bn(private_key.d).ValueOrDie());
+  auto p = std::move(SubtleUtilBoringSSL::str2bn(private_key.p).ValueOrDie());
+  auto q = std::move(SubtleUtilBoringSSL::str2bn(private_key.q).ValueOrDie());
+  auto dp = std::move(SubtleUtilBoringSSL::str2bn(private_key.dp).ValueOrDie());
+  auto dq = std::move(SubtleUtilBoringSSL::str2bn(private_key.dq).ValueOrDie());
+  bssl::UniquePtr<BN_CTX> ctx(BN_CTX_new());
+
+  // Check n = p * q.
+  {
+    auto n_calc = bssl::UniquePtr<BIGNUM>(BN_new());
+    ASSERT_TRUE(BN_mul(n_calc.get(), p.get(), q.get(), ctx.get()));
+    ASSERT_TRUE(BN_equal_consttime(n_calc.get(), n.get()));
+  }
+
+  // Check n size >= 2048 bit.
+  EXPECT_GE(BN_num_bits(n.get()), 2048);
+
+  // dp = d mod (p - 1)
+  {
+    auto pm1 = bssl::UniquePtr<BIGNUM>(BN_dup(p.get()));
+    ASSERT_TRUE(BN_sub_word(pm1.get(), 1));
+    auto dp_calc = bssl::UniquePtr<BIGNUM>(BN_new());
+    ASSERT_TRUE(BN_mod(dp_calc.get(), d.get(), pm1.get(), ctx.get()));
+
+    ASSERT_TRUE(BN_equal_consttime(dp_calc.get(), dp.get()));
+  }
+
+  // dq = d mod (q - 1)
+  {
+    auto qm1 = bssl::UniquePtr<BIGNUM>(BN_dup(q.get()));
+    ASSERT_TRUE(BN_sub_word(qm1.get(), 1));
+    auto dq_calc = bssl::UniquePtr<BIGNUM>(BN_new());
+    ASSERT_TRUE(BN_mod(dq_calc.get(), d.get(), qm1.get(), ctx.get()));
+
+    ASSERT_TRUE(BN_equal_consttime(dq_calc.get(), dq.get()));
+  }
+}
+
+TEST(CreatesNewRsaKeyPairTest, GeneratesDifferentKeysEveryTime) {
+  SubtleUtilBoringSSL::RsaPublicKey public_key;
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), RSA_F4);
+
+  std::vector<SubtleUtilBoringSSL::RsaPrivateKey> generated_keys;
+  std::generate_n(std::back_inserter(generated_keys), 4, [&]() {
+    SubtleUtilBoringSSL::RsaPrivateKey private_key;
+    EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
+                    2048, e.get(), &private_key, &public_key),
+                IsOk());
+    return private_key;
+  });
+
+  // Iterate through a two-element sliding windows, comparing two consecutive
+  // elements in the list.
+  for (int i = 0; i < generated_keys.size() - 1; ++i) {
+    const auto& left = generated_keys[i];
+    const auto& right = generated_keys[i + 1];
+
+    // The only fieldthat should be equal.
+    ASSERT_EQ(left.e, right.e);
+
+    ASSERT_NE(left.n, right.n);
+    ASSERT_NE(left.d, right.d);
+
+    ASSERT_NE(left.p, right.p);
+    ASSERT_NE(left.q, right.q);
+    ASSERT_NE(left.dp, right.dp);
+    ASSERT_NE(left.dq, right.dq);
+    ASSERT_NE(left.crt, right.crt);
+  }
 }
 
 }  // namespace

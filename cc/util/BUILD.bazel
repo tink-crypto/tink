@@ -95,6 +95,19 @@ cc_library(
 )
 
 cc_library(
+    name = "test_matchers",
+    testonly = 1,
+    srcs = [],
+    hdrs = ["test_matchers.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":status",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
     name = "keyset_util",
     srcs = ["keyset_util.cc"],
     hdrs = ["keyset_util.h"],
