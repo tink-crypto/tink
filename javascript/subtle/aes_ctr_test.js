@@ -18,10 +18,20 @@ goog.setTestOnly('tink.subtle.AesCtrTest');
 const AesCtr = goog.require('tink.subtle.AesCtr');
 const Bytes = goog.require('tink.subtle.Bytes');
 const Random = goog.require('tink.subtle.Random');
+const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
+
+  tearDown() {
+    // Reset the promise timeout to default value.
+    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
+  },
+
   async testBasic() {
+    // Set longer time for promiseTimout as the test sometimes takes longer than
+    // 1 second in Firefox.
+    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const key = Random.randBytes(16);
     for (let i = 0; i < 100; i++) {
       const msg = Random.randBytes(20);

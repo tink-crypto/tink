@@ -18,10 +18,20 @@ goog.setTestOnly('tink.subtle.EncryptThenAuthenticateTest');
 const Bytes = goog.require('tink.subtle.Bytes');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
 const Random = goog.require('tink.subtle.Random');
+const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
+
+  tearDown() {
+    // Reset the promise timeout to default value.
+    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
+  },
+
   async testBasic() {
+    // Set longer time for promiseTimout as the test sometimes takes longer than
+    // 1 second in Firefox.
+    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
@@ -44,6 +54,9 @@ testSuite({
   },
 
   async testProbabilisticEncryption() {
+    // Set longer time for promiseTimout as the test sometimes takes longer than
+    // 1 second in Firefox.
+    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
@@ -105,6 +118,9 @@ testSuite({
   },
 
   async testBitFlipCiphertext() {
+    // Set longer time for promiseTimout as the test sometimes takes longer than
+    // 1 second in Firefox.
+    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);

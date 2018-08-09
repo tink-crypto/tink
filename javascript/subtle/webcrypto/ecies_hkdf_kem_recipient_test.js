@@ -21,11 +21,21 @@ const EciesHkdfKemRecipient = goog.require('tink.subtle.webcrypto.EciesHkdfKemRe
 const EciesHkdfKemSender = goog.require('tink.subtle.webcrypto.EciesHkdfKemSender');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
+const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
 
 
 testSuite({
+
+  tearDown() {
+    // Reset the promise timeout to default value.
+    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
+  },
+
   async testEncapDecap() {
+    // Set longer time for promiseTimout as the test sometimes takes longer than
+    // 1 second in Firefox.
+    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const keyPair = await Ecdh.generateKeyPair('P-256');
     const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
     const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
