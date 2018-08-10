@@ -122,3 +122,5 @@ Tink is maintained by (A-Z):
 -   Charles Lee
 -   Quan Nguyen
 -   Bartosz Przydatek
+
+Disclaimer: Tink is not an officially supported Google product.
