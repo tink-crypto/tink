@@ -16,7 +16,9 @@ goog.module('tink.aead.AeadCatalogue');
 
 const Aead = goog.require('tink.Aead');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
+const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 const Catalogue = goog.require('tink.Catalogue');
+const KeyManager = goog.require('tink.KeyManager');
 const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
@@ -37,18 +39,25 @@ class AeadCatalogue {
           ' primitive, but this catalogue provides key managers for ' +
           AeadCatalogue.SUPPORTED_PRIMITIVE_NAME_ + ' primitives.');
     }
+
+    let /** !KeyManager.KeyManager */ manager;
     switch (typeUrl) {
       case AesCtrHmacAeadKeyManager.KEY_TYPE:
-        const manager = new AesCtrHmacAeadKeyManager();
-        if (manager.getVersion() < minVersion) {
-          throw new SecurityException(
-              'Requested manager with higher version than is available.');
-        }
-        return manager;
+        manager = new AesCtrHmacAeadKeyManager();
+        break;
+      case AesGcmKeyManager.KEY_TYPE:
+        manager = new AesGcmKeyManager();
+        break;
       default:
         throw new SecurityException(
             'There is no key manager for key type: ' + typeUrl + '.');
     }
+
+    if (manager.getVersion() < minVersion) {
+      throw new SecurityException(
+          'Requested manager with higher version than is available.');
+    }
+    return manager;
   }
 }
 

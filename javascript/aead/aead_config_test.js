@@ -17,6 +17,7 @@ goog.setTestOnly('tink.aead.AeadConfigTest');
 
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
+const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 const Registry = goog.require('tink.Registry');
 
 const testSuite = goog.require('goog.testing.testSuite');
@@ -46,6 +47,7 @@ testSuite({
     assertEquals(NUMBER_OF_SUPPORTED_KEY_TYPES, keyTypeEntryList.length);
 
     let containsAesCtrHmacAeadKeyType = false;
+    let containsAesGcmKeyType = false;
 
     for (let entry of keyTypeEntryList) {
       // Primitive name as well as Catalogue name should be the same for all
@@ -63,6 +65,13 @@ testSuite({
           break;
         }
 
+        case AES_GCM_KEY_TYPE: {
+          containsAesGcmKeyType = true;
+          assertEquals(AES_GCM_VERSION, entry.getKeyManagerVersion());
+          assertEquals(AES_GCM_NEW_KEY_ALLOWED, entry.getNewKeyAllowed());
+          break;
+        }
+
           // TODO add tests that contains other key types here, whenever they
           // are available in Tink.
 
@@ -72,6 +81,7 @@ testSuite({
     }
 
     assertTrue(containsAesCtrHmacAeadKeyType);
+    assertTrue(containsAesGcmKeyType);
   },
 
 
@@ -83,6 +93,9 @@ testSuite({
         Registry.getKeyManager(AES_CTR_HMAC_AEAD_KEY_TYPE);
     assertTrue(aesCtrHmacKeyManager instanceof AesCtrHmacAeadKeyManager);
 
+    const aesGcmKeyManager = Registry.getKeyManager(AES_GCM_KEY_TYPE);
+    assertTrue(aesGcmKeyManager instanceof AesGcmKeyManager);
+
     // TODO add tests for other key types here, whenever they are available in
     // Tink.
   },
@@ -93,7 +106,7 @@ const PRIMITIVE_NAME = 'Aead';
 const CATALOGUE_NAME = 'TinkAead';
 const CONFIG_NAME = 'TINK_AEAD';
 // TODO update whenever new key type is available.
-const NUMBER_OF_SUPPORTED_KEY_TYPES = 1;
+const NUMBER_OF_SUPPORTED_KEY_TYPES = 2;
 
 const AES_CTR_HMAC_AEAD_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey';
@@ -101,3 +114,5 @@ const AES_CTR_HMAC_AEAD_VERSION = 0;
 const AES_CTR_HMAC_AEAD_NEW_KEY_ALLOWED = true;
 
 const AES_GCM_KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
+const AES_GCM_VERSION = 0;
+const AES_GCM_NEW_KEY_ALLOWED = true;

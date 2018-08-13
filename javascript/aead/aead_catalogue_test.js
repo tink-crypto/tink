@@ -17,13 +17,14 @@ goog.setTestOnly('tink.aead.AeadCatalogueTest');
 
 const AeadCatalogue = goog.require('tink.aead.AeadCatalogue');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
+const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 
 const testSuite = goog.require('goog.testing.testSuite');
 
 const SUPPORTED_PRIMITIVE_NAME = 'Aead';
 
 testSuite({
-  async testGetKeyManagerWrongPrimitive() {
+  testGetKeyManager_wrongPrimitive() {
     const anotherPrimitiveName = 'Mac';
 
     const catalogue = new AeadCatalogue();
@@ -41,7 +42,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testGetKeyManagerBadVersion() {
+  testGetKeyManager_badVersion() {
     const manager = new AesCtrHmacAeadKeyManager();
     const version = manager.getVersion() + 1;
 
@@ -56,7 +57,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testGetKeyManagerUnknownKeyType() {
+  testGetKeyManager_unknownKeyType() {
     const keyType = 'unknown key type';
     const version = 0;
 
@@ -70,18 +71,27 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testGetKeyManagerAesCtrHmacAeadKeyManager() {
+  testGetKeyManager_aesCtrHmacAeadKeyManager() {
     const catalogue = new AeadCatalogue();
     const version = 0;
 
     const manager = catalogue.getKeyManager(
         AesCtrHmacAeadKeyManager.KEY_TYPE, SUPPORTED_PRIMITIVE_NAME, version);
 
-    assertTrue(manager instanceof AesCtrHmacAeadKeyManager);
     assertObjectEquals(new AesCtrHmacAeadKeyManager(), manager);
   },
 
-  async testGetKeyManagerCaseInsensitivePrimitiveName() {
+  testGetKeyManager_aesGcmKeyManager() {
+    const catalogue = new AeadCatalogue();
+    const version = 0;
+
+    const manager = catalogue.getKeyManager(
+        AesGcmKeyManager.KEY_TYPE, SUPPORTED_PRIMITIVE_NAME, version);
+
+    assertObjectEquals(new AesGcmKeyManager(), manager);
+  },
+
+  testGetKeyManager_caseInsensitivePrimitiveName() {
     const catalogue = new AeadCatalogue();
     const version = 0;
     const keyType = AesCtrHmacAeadKeyManager.KEY_TYPE;

@@ -16,6 +16,7 @@ goog.module('tink.aead.AeadConfig');
 
 const AeadCatalogue = goog.require('tink.aead.AeadCatalogue');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
+const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 const Config = goog.require('tink.Config');
 const PbKeyTypeEntry = goog.require('proto.google.crypto.tink.KeyTypeEntry');
 const PbRegistryConfig = goog.require('proto.google.crypto.tink.RegistryConfig');
@@ -46,6 +47,9 @@ class AeadConfig {
 
     config.addEntry(AeadConfig.createEntry_(
         AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, /* keyManagerVersion = */ 0));
+
+    config.addEntry(AeadConfig.createEntry_(
+        AeadConfig.AES_GCM_TYPE_URL, /* keyManagerVersion = */ 0));
 
     return config;
   }
@@ -94,10 +98,7 @@ AeadConfig.PRIMITIVE_NAME = 'Aead';
 /** @const {string} */
 AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL = AesCtrHmacAeadKeyManager.KEY_TYPE;
 
-// TODO replace the TYPE_URL with the one holded by AesGcmKeyManager, whenever
-// it is added to Tink.
 /** @const {string} */
-AeadConfig.AES_GCM_TYPE_URL =
-    'type.googleapis.com/google.crypto.tink.AesGcmKey';
+AeadConfig.AES_GCM_TYPE_URL = AesGcmKeyManager.KEY_TYPE;
 
 exports = AeadConfig;

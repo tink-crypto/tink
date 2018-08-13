@@ -14,9 +14,11 @@
 
 goog.module('tink.aead.AeadKeyTemplates');
 
+const AeadConfig = goog.require('tink.aead.AeadConfig');
 const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
 const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat');
 const PbAesCtrParams = goog.require('proto.google.crypto.tink.AesCtrParams');
+const PbAesGcmKeyFormat = goog.require('proto.google.crypto.tink.AesGcmKeyFormat');
 const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbHmacKeyFormat = goog.require('proto.google.crypto.tink.HmacKeyFormat');
 const PbHmacParams = goog.require('proto.google.crypto.tink.HmacParams');
@@ -78,6 +80,28 @@ class AeadKeyTemplates {
   }
 
   /**
+   * Returns a KeyTemplate that generates new instances of AesGcmKey
+   * with the following parameters:
+   *    key size: 16 bytes
+   *
+   * @return {!PbKeyTemplate}
+   */
+  static aes128Gcm() {
+    return AeadKeyTemplates.newAesGcmKeyTemplate_(/* keySize = */ 16);
+  }
+
+  /**
+   * Returns a KeyTemplate that generates new instances of AesGcmKey
+   * with the following parameters:
+   *    key size: 32 bytes
+   *
+   * @return {!PbKeyTemplate}
+   */
+  static aes256Gcm() {
+    return AeadKeyTemplates.newAesGcmKeyTemplate_(/* keySize = */ 32);
+  }
+
+  /**
    * @private
    *
    * @param {number} aesKeySize
@@ -109,18 +133,33 @@ class AeadKeyTemplates {
 
     // Define key template.
     const keyTemplate = new PbKeyTemplate();
-    keyTemplate.setTypeUrl(AeadKeyTemplates.AES_CTR_HMAC_AEAD_KEY_TYPE_);
+    keyTemplate.setTypeUrl(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
+    keyTemplate.setOutputPrefixType(PbOutputPrefixType.TINK);
+    keyTemplate.setValue(keyFormat.serializeBinary());
+
+    return keyTemplate;
+  }
+
+  /**
+   * @private
+   *
+   * @param {number} keySize
+   *
+   * @return {!PbKeyTemplate}
+   */
+  static newAesGcmKeyTemplate_(keySize) {
+    // Define AES GCM key format.
+    const keyFormat = new PbAesGcmKeyFormat();
+    keyFormat.setKeySize(keySize);
+
+    // Define key template.
+    const keyTemplate = new PbKeyTemplate();
+    keyTemplate.setTypeUrl(AeadConfig.AES_GCM_TYPE_URL);
     keyTemplate.setOutputPrefixType(PbOutputPrefixType.TINK);
     keyTemplate.setValue(keyFormat.serializeBinary());
 
     return keyTemplate;
   }
 }
-
-/**
- * @private @static @const {string}
- */
-AeadKeyTemplates.AES_CTR_HMAC_AEAD_KEY_TYPE_ =
-    'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey';
 
 exports = AeadKeyTemplates;
