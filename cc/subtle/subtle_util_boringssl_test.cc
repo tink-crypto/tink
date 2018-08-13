@@ -373,7 +373,7 @@ TEST(CreatesNewRsaKeyPairTest, GeneratesDifferentKeysEveryTime) {
 
   // Iterate through a two-element sliding windows, comparing two consecutive
   // elements in the list.
-  for (int i = 0; i < generated_keys.size() - 1; ++i) {
+  for (std::size_t i = 0; i < generated_keys.size() - 1; ++i) {
     const auto& left = generated_keys[i];
     const auto& right = generated_keys[i + 1];
 

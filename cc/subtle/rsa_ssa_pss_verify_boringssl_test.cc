@@ -138,7 +138,7 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, testModification) {
   ASSERT_TRUE(verifier_result.ok()) << verifier_result.status();
   auto verifier = std::move(verifier_result.ValueOrDie());
   // Modify the message.
-  for (int i = 0; i < nist_test_vector.message.length(); i++) {
+  for (std::size_t i = 0; i < nist_test_vector.message.length(); i++) {
     std::string modified_message = nist_test_vector.message;
     modified_message[i / 8] ^= 1 << (i % 8);
     auto status =
@@ -146,7 +146,7 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, testModification) {
     EXPECT_FALSE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
   }
   // Modify the signature.
-  for (int i = 0; i < nist_test_vector.signature.length(); i++) {
+  for (std::size_t i = 0; i < nist_test_vector.signature.length(); i++) {
     std::string modified_signature = nist_test_vector.signature;
     modified_signature[i / 8] ^= 1 << (i % 8);
     auto status =
@@ -154,7 +154,7 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, testModification) {
     EXPECT_FALSE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
   }
   // Truncate the signature.
-  for (int i = 0; i < nist_test_vector.signature.length(); i++) {
+  for (std::size_t i = 0; i < nist_test_vector.signature.length(); i++) {
     std::string truncated_signature(nist_test_vector.signature, 0, i);
     auto status =
         verifier->Verify(truncated_signature, nist_test_vector.message);
