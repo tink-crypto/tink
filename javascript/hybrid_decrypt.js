@@ -67,7 +67,7 @@ class HybridDecrypt {
    *     authenticated. For successful decryption it must be the same as used
    *     during encryption. It can be null, which is equivalent to an empty
    *     (zero-length) byte array.
-   * @return {!Uint8Array} resulting plaintext
+   * @return {!Promise<!Uint8Array>} resulting plaintext
    */
   decrypt(ciphertext, opt_contextInfo) {}
 }
