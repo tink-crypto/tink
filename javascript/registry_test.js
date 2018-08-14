@@ -193,12 +193,12 @@ testSuite({
     //Register the key manager with new_key_allowed and test that it is possible
     //to create a new key data.
     Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1);
-    Registry.newKeyData(keyTemplate);
+    await Registry.newKeyData(keyTemplate);
 
     //Restrict the key manager and test that new key data cannot be created.
     Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1, false);
     try {
-      Registry.newKeyData(keyTemplate);
+      await Registry.newKeyData(keyTemplate);
     } catch (e) {
       assertEquals(ExceptionText.newKeyForbidden(keyType), e.toString());
       return;
@@ -226,7 +226,7 @@ testSuite({
           e.toString());
     }
     try {
-      Registry.newKeyData(keyTemplate);
+      await Registry.newKeyData(keyTemplate);
     } catch (e) {
       assertEquals(ExceptionText.newKeyForbidden(keyType), e.toString());
       return;
@@ -284,7 +284,7 @@ testSuite({
 
     Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1);
     try {
-      Registry.newKeyData(keyTemplate);
+      await Registry.newKeyData(keyTemplate);
     } catch (e) {
       assertEquals(
           ExceptionText.notRegisteredKeyType(differentKeyType),
@@ -301,7 +301,7 @@ testSuite({
 
     Registry.registerKeyManager(keyManager1.getKeyType(), keyManager1, false);
     try {
-      Registry.newKeyData(keyTemplate);
+      await Registry.newKeyData(keyTemplate);
     } catch (e) {
       assertEquals(
           ExceptionText.newKeyForbidden(keyManager1.getKeyType()),
@@ -326,7 +326,7 @@ testSuite({
     for (let i = 0; i < keyTypesLength; i++) {
       const keyTemplate = new PbKeyTemplate();
       keyTemplate.setTypeUrl(keyTypes[i]);
-      const result = Registry.newKeyData(keyTemplate);
+      const result = await Registry.newKeyData(keyTemplate);
       assertEquals(keyTypes[i], result.getTypeUrl());
     }
   },
@@ -346,7 +346,7 @@ testSuite({
     for (let i = 0; i < keyTypesLength; i++) {
       const keyTemplate = new PbKeyTemplate();
       keyTemplate.setTypeUrl(keyTypes[i]);
-      const result = Registry.newKeyData(keyTemplate);
+      const result = await Registry.newKeyData(keyTemplate);
       assertEquals(keyTypes[i], result.getTypeUrl());
     }
   },
@@ -355,7 +355,7 @@ testSuite({
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager.getKeyType(), manager);
     const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
-    const keyData = Registry.newKeyData(keyTemplate);
+    const keyData = await Registry.newKeyData(keyTemplate);
 
     // Checks that correct AES CTR HMAC AEAD key was returned.
     const keyFormat =
@@ -378,13 +378,13 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for newKey method
-  testNewKey_noManagerForGivenKeyType() {
+  async testNewKey_noManagerForGivenKeyType() {
     const notRegisteredKeyType = 'not_registered_key_type';
     const keyTemplate = new PbKeyTemplate();
     keyTemplate.setTypeUrl(notRegisteredKeyType);
 
     try {
-      Registry.newKey(keyTemplate);
+      await Registry.newKey(keyTemplate);
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
@@ -393,7 +393,7 @@ testSuite({
     }
   },
 
-  testNewKey_newKeyDisallowed() {
+  async testNewKey_newKeyDisallowed() {
     const keyManager = new DummyKeyManagerForNewKeyTests('someKeyType');
     const keyTemplate = new PbKeyTemplate();
     keyTemplate.setTypeUrl(keyManager.getKeyType());
@@ -401,7 +401,7 @@ testSuite({
         keyManager.getKeyType(), keyManager, /* opt_newKeyAllowed = */ false);
 
     try {
-      Registry.newKey(keyTemplate);
+      await Registry.newKey(keyTemplate);
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
@@ -409,7 +409,7 @@ testSuite({
     }
   },
 
-  testNewKey_shouldWork() {
+  async testNewKey_shouldWork() {
     const /** Array<string> */ keyTypes = [];
     const /** Array<Uint8Array> */ newKeyMethodResult = [];
     const keyTypesLength = 10;
@@ -431,7 +431,8 @@ testSuite({
       const keyTemplate = new PbKeyTemplate();
       keyTemplate.setTypeUrl(keyTypes[i]);
 
-      const key = /** @type {!PbAesCtrKey} */ (Registry.newKey(keyTemplate));
+      const key =
+          /** @type {!PbAesCtrKey} */ (await Registry.newKey(keyTemplate));
 
       // The new key method of DummyKeyFactory returns an AesCtrKey which
       // KeyValue is set to corresponding value in newKeyMethodResult.
@@ -439,13 +440,13 @@ testSuite({
     }
   },
 
-  testNewKey_withAesCtrHmacAeadKey() {
+  async testNewKey_withAesCtrHmacAeadKey() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager.getKeyType(), manager);
     const keyTemplate = AeadKeyTemplates.aes256CtrHmacSha256();
 
     const key =
-        /** @type{!PbAesCtrHmacAeadKey} */ (Registry.newKey(keyTemplate));
+        /** @type{!PbAesCtrHmacAeadKey} */ (await Registry.newKey(keyTemplate));
 
     // Checks that correct AES CTR HMAC AEAD key was returned.
     const keyFormat =
@@ -513,7 +514,7 @@ testSuite({
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager.getKeyType(), manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
-    const keyData = Registry.newKeyData(keyTemplate);
+    const keyData = await Registry.newKeyData(keyTemplate);
 
     const primitive =
         await Registry.getPrimitive(manager.getPrimitiveType(), keyData);
@@ -524,7 +525,7 @@ testSuite({
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager.getKeyType(), manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
-    const keyData = Registry.newKeyData(keyTemplate);
+    const keyData = await Registry.newKeyData(keyTemplate);
     const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
 
     const primitive = await Registry.getPrimitive(
@@ -536,7 +537,7 @@ testSuite({
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager.getKeyType(), manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
-    const keyData = Registry.newKeyData(keyTemplate);
+    const keyData = await Registry.newKeyData(keyTemplate);
     const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
 
     try {

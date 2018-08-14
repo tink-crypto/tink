@@ -37,8 +37,9 @@ class RegistryEciesAeadHkdfDemHelper {
     let /** @type {!PbAesCtrHmacAeadKey|!PbAesGcmKey} */ key;
     let /** @type {number} */ demKeySize;
     let /** @type {number} */ aesCtrKeySize;
+    const keyTypeUrl = keyTemplate.getTypeUrl();
 
-    switch (keyTemplate.getTypeUrl()) {
+    switch (keyTypeUrl) {
       case AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL:
         let /** @type {!PbAesCtrHmacAeadKeyFormat} */ keyFormat;
         try {
@@ -51,8 +52,9 @@ class RegistryEciesAeadHkdfDemHelper {
               AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL + '.');
         }
 
+        const keyFactory = Registry.getKeyManager(keyTypeUrl).getKeyFactory();
         key =
-            /** @type {!PbAesCtrHmacAeadKey} */ (Registry.newKey(keyTemplate));
+            /** @type{!PbAesCtrHmacAeadKey} */ (keyFactory.newKey(keyFormat));
         aesCtrKeySize = keyFormat.getAesCtrKeyFormat().getKeySize();
         const hmacKeySize = keyFormat.getHmacKeyFormat().getKeySize();
         demKeySize = aesCtrKeySize + hmacKeySize;
@@ -64,11 +66,11 @@ class RegistryEciesAeadHkdfDemHelper {
 
       default:
         throw new SecurityException(
-            'Key type URL ' + keyTemplate.getTypeUrl() + ' is not supported.');
+            'Key type URL ' + keyTypeUrl + ' is not supported.');
     }
 
     /** @const @private {string} */
-    this.demKeyTypeUrl_ = keyTemplate.getTypeUrl();
+    this.demKeyTypeUrl_ = keyTypeUrl;
     /** @const @private {!PbAesCtrHmacAeadKey|!PbAesGcmKey} */
     this.key_ = key;
     /** @const @private {number} */

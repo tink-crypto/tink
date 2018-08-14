@@ -30,7 +30,7 @@ class KeyFactory {
    *
    * @param {!PbMessage|!Uint8Array} keyFormat is either a KeyFormat
    *     proto or a serialized KeyFormat proto
-   * @return {!PbMessage} the new generated key
+   * @return {!PbMessage|!Promise<!PbMessage>} the new generated key
    */
   newKey(keyFormat) {}
 
@@ -39,7 +39,7 @@ class KeyFactory {
    * it as a KeyData proto.
    *
    * @param {!Uint8Array} serializedKeyFormat
-   * @return {!PbKeyData}
+   * @return {!PbKeyData|!Promise<!PbKeyData>}
    */
   newKeyData(serializedKeyFormat) {}
 }

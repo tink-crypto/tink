@@ -261,11 +261,12 @@ class Registry {
    *
    * @param {!PbKeyTemplate} keyTemplate
    *
-   * @return {!PbKeyData}
+   * @return {!Promise<!PbKeyData>}
    */
-  static newKeyData(keyTemplate) {
+  static async newKeyData(keyTemplate) {
     const manager = Registry.getKeyManagerWithNewKeyAllowedCheck_(keyTemplate);
-    return manager.getKeyFactory().newKeyData(keyTemplate.getValue_asU8());
+    return await manager.getKeyFactory().newKeyData(
+        keyTemplate.getValue_asU8());
   }
 
   /**
@@ -276,11 +277,11 @@ class Registry {
    *
    * @param {!PbKeyTemplate} keyTemplate
    *
-   * @return {!PbMessage} returns a key proto
+   * @return {!Promise<!PbMessage>} returns a key proto
    */
-  static newKey(keyTemplate) {
+  static async newKey(keyTemplate) {
     const manager = Registry.getKeyManagerWithNewKeyAllowedCheck_(keyTemplate);
-    return manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+    return await manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
   }
 
   /**

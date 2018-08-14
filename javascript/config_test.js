@@ -132,7 +132,7 @@ testSuite({
     }
   },
 
-  testRegister_withKeyTypeEntryAndNewKeysAllowed() {
+  async testRegister_withKeyTypeEntryAndNewKeysAllowed() {
     const catalogueName = 'TinkAead';
     const primitiveName = 'Aead';
     const keyProtoName = 'AesCtrHmacAeadKey';
@@ -155,11 +155,11 @@ testSuite({
 
     // Test that new keys are allowed for this key manager.
     const template = AeadKeyTemplates.aes256CtrHmacSha256();
-    const key = Registry.newKeyData(template);
+    const key = await Registry.newKeyData(template);
     assertTrue(key != null);
   },
 
-  testRegister_withKeyTypeEntryAndNewKeysDisallowed() {
+  async testRegister_withKeyTypeEntryAndNewKeysDisallowed() {
     const catalogueName = 'TinkAead';
     const primitiveName = 'Aead';
     const keyProtoName = 'AesCtrHmacAeadKey';
@@ -183,7 +183,7 @@ testSuite({
     // Test that new keys are not allowed for this key manager.
     const template = AeadKeyTemplates.aes256CtrHmacSha256();
     try {
-      Registry.newKeyData(template);
+      await Registry.newKeyData(template);
       fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(ExceptionText.newKeyForbidden(typeUrl), e.toString());
