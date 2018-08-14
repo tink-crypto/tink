@@ -12,8 +12,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-goog.module('tink.subtle.EciesAeadHkdfHybridDecryptTest');
-goog.setTestOnly('tink.subtle.EciesAeadHkdfHybridDecryptTest');
+goog.module('tink.subtle.webcrypto.EciesAeadHkdfHybridDecryptTest');
+goog.setTestOnly('tink.subtle.webcrypto.EciesAeadHkdfHybridDecryptTest');
 
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
