@@ -1,0 +1,215 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+goog.module('tink.hybrid.EciesAeadHkdfUtilTest');
+goog.setTestOnly('tink.hybrid.EciesAeadHkdfUtilTest');
+
+const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
+const Bytes = goog.require('tink.subtle.Bytes');
+const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
+const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
+const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
+const PbEciesAeadDemParams = goog.require('proto.google.crypto.tink.EciesAeadDemParams');
+const PbEciesAeadHkdfParams = goog.require('proto.google.crypto.tink.EciesAeadHkdfParams');
+const PbEciesAeadHkdfPrivateKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPrivateKey');
+const PbEciesAeadHkdfPublicKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPublicKey');
+const PbEciesHkdfKemParams = goog.require('proto.google.crypto.tink.EciesHkdfKemParams');
+const PbEllipticCurveType = goog.require('proto.google.crypto.tink.EllipticCurveType');
+const PbHashType = goog.require('proto.google.crypto.tink.HashType');
+const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
+const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
+
+const testSuite = goog.require('goog.testing.testSuite');
+
+
+testSuite({
+  async testGetJsonKeyFromProto_publicKey() {
+    const curves = Object.keys(PbEllipticCurveType);
+    for (let curveId of curves) {
+      const curve = PbEllipticCurveType[curveId];
+      if (curve === PbEllipticCurveType.UNKNOWN_CURVE) {
+        continue;
+      }
+      const key = await createKey(curve);
+      const jwk = EciesAeadHkdfUtil.getJsonKeyFromProto(key.getPublicKey());
+
+      // Test the returned jwk.
+      const curveTypeSubtle = EciesAeadHkdfUtil.curveTypeProtoToSubtle(curve);
+      const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
+
+      assertEquals('EC', jwk['kty']);
+      assertEquals(curveTypeString, jwk['crv']);
+      assertObjectEquals(
+          key.getPublicKey().getX_asU8(), Bytes.fromBase64(jwk['x']));
+      assertObjectEquals(
+          key.getPublicKey().getY_asU8(), Bytes.fromBase64(jwk['y']));
+      assertObjectEquals(undefined, jwk['d']);
+      assertTrue(jwk['ext']);
+    }
+  },
+
+  async testGetJsonKeyFromProto_privateKey() {
+    const curves = Object.keys(PbEllipticCurveType);
+    for (let curveId of curves) {
+      const curve = PbEllipticCurveType[curveId];
+      if (curve === PbEllipticCurveType.UNKNOWN_CURVE) {
+        continue;
+      }
+      const key = await createKey(curve);
+      const jwk = EciesAeadHkdfUtil.getJsonKeyFromProto(key);
+
+      // Test the returned jwk.
+      const curveTypeSubtle = EciesAeadHkdfUtil.curveTypeProtoToSubtle(curve);
+      const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
+
+      assertEquals('EC', jwk['kty']);
+      assertEquals(curveTypeString, jwk['crv']);
+      assertObjectEquals(
+          key.getPublicKey().getX_asU8(), Bytes.fromBase64(jwk['x']));
+      assertObjectEquals(
+          key.getPublicKey().getY_asU8(), Bytes.fromBase64(jwk['y']));
+      assertObjectEquals(key.getKeyValue_asU8(), Bytes.fromBase64(jwk['d']));
+      assertTrue(jwk['ext']);
+    }
+  },
+
+  // tests for protoToSubtle methods
+  testCurveTypeProtoToSubtle() {
+    assertEquals(
+        EllipticCurves.CurveType.P256,
+        EciesAeadHkdfUtil.curveTypeProtoToSubtle(
+            PbEllipticCurveType.NIST_P256));
+    assertEquals(
+        EllipticCurves.CurveType.P384,
+        EciesAeadHkdfUtil.curveTypeProtoToSubtle(
+            PbEllipticCurveType.NIST_P384));
+    assertEquals(
+        EllipticCurves.CurveType.P521,
+        EciesAeadHkdfUtil.curveTypeProtoToSubtle(
+            PbEllipticCurveType.NIST_P521));
+  },
+
+  testPointFormatProtoToSubtle() {
+    assertEquals(
+        EllipticCurves.PointFormatType.UNCOMPRESSED,
+        EciesAeadHkdfUtil.pointFormatProtoToSubtle(PbPointFormat.UNCOMPRESSED));
+    assertEquals(
+        EllipticCurves.PointFormatType.COMPRESSED,
+        EciesAeadHkdfUtil.pointFormatProtoToSubtle(PbPointFormat.COMPRESSED));
+    assertEquals(
+        EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
+        EciesAeadHkdfUtil.pointFormatProtoToSubtle(
+            PbPointFormat.DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
+  },
+
+  testHashTypeProtoToString() {
+    assertEquals(
+        'SHA-1', EciesAeadHkdfUtil.hashTypeProtoToString(PbHashType.SHA1));
+    assertEquals(
+        'SHA-256', EciesAeadHkdfUtil.hashTypeProtoToString(PbHashType.SHA256));
+    assertEquals(
+        'SHA-512', EciesAeadHkdfUtil.hashTypeProtoToString(PbHashType.SHA512));
+  },
+
+
+});
+
+/**
+ * @param {PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {PbHashType=} opt_hashType (default: SHA256)
+ *
+ * @return {!PbEciesHkdfKemParams}
+ */
+const createKemParams = function(
+    opt_curveType = PbEllipticCurveType.NIST_P256,
+    opt_hashType = PbHashType.SHA256) {
+  const kemParams = new PbEciesHkdfKemParams();
+
+  kemParams.setCurveType(opt_curveType);
+  kemParams.setHkdfHashType(opt_hashType);
+
+  return kemParams;
+};
+
+/**
+ * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
+ *
+ * @return {!PbEciesAeadDemParams}
+ */
+const createDemParams = function(opt_keyTemplate) {
+  if (!opt_keyTemplate) {
+    opt_keyTemplate = AeadKeyTemplates.aes128CtrHmacSha256();
+  }
+
+  const demParams = new PbEciesAeadDemParams();
+  demParams.setAeadDem(opt_keyTemplate);
+
+  return demParams;
+};
+
+/**
+ * @param {PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
+ * @param {PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
+ *
+ * @return {!PbEciesAeadHkdfParams}
+ */
+const createKeyParams = function(
+    opt_curveType, opt_hashType, opt_keyTemplate,
+    opt_pointFormat = PbPointFormat.UNCOMPRESSED) {
+  const params = new PbEciesAeadHkdfParams();
+
+  params.setKemParams(createKemParams(opt_curveType, opt_hashType));
+  params.setDemParams(createDemParams(opt_keyTemplate));
+  params.setEcPointFormat(opt_pointFormat);
+
+  return params;
+};
+
+
+/**
+ * @param {PbEllipticCurveType=} opt_curveType (default: NIST_P256)
+ * @param {PbHashType=} opt_hashType (default: SHA256)
+ * @param {!PbKeyTemplate=} opt_keyTemplate (default: aes128CtrHmac256)
+ * @param {PbPointFormat=} opt_pointFormat (default: UNCOMPRESSED)
+ *
+ * @return {!Promise<!PbEciesAeadHkdfPrivateKey>}
+ */
+const createKey = async function(
+    opt_curveType = PbEllipticCurveType.NIST_P256, opt_hashType,
+    opt_keyTemplate, opt_pointFormat) {
+  const curveTypeSubtle = EciesAeadHkdfUtil.curveTypeProtoToSubtle(
+      /** @type {PbEllipticCurveType} */ (opt_curveType));
+  const curveName = EllipticCurves.curveToString(curveTypeSubtle);
+
+  const publicKeyProto = new PbEciesAeadHkdfPublicKey();
+  publicKeyProto.setVersion(0);
+  publicKeyProto.setParams(createKeyParams(
+      opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
+
+
+  const keyPair = await Ecdh.generateKeyPair(curveName);
+  const publicKeyJson = await Ecdh.exportCryptoKey(keyPair.publicKey);
+  publicKeyProto.setX(Bytes.fromBase64(publicKeyJson['x']));
+  publicKeyProto.setY(Bytes.fromBase64(publicKeyJson['y']));
+
+  const privateKeyProto = new PbEciesAeadHkdfPrivateKey();
+  const privateKeyJson = await Ecdh.exportCryptoKey(keyPair.privateKey);
+  privateKeyProto.setKeyValue(Bytes.fromBase64(privateKeyJson['d']));
+  privateKeyProto.setVersion(0);
+  privateKeyProto.setPublicKey(publicKeyProto);
+
+  return privateKeyProto;
+};
