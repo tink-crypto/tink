@@ -17,8 +17,6 @@ goog.setTestOnly('tink.hybrid.RegistryEciesAeadHkdfDemHelperTest');
 
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
-const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrHmacAeadKeyFormat');
-const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
@@ -52,18 +50,27 @@ testSuite({
     }
   },
 
-  testConstructor_invalidKeyFormat() {
-    const template = AeadKeyTemplates.aes128CtrHmacSha256();
-    template.setTypeUrl(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
-    template.setValue(new Uint8Array([0, 1, 2]));  // invalid key format
-    template.setOutputPrefixType(PbOutputPrefixType.RAW);
+  testConstructor_invalidKeyFormats() {
+    // Some valid AES-GCM and AES-CTR-HMAC key templates.
+    const templates =
+        [AeadKeyTemplates.aes128CtrHmacSha256(), AeadKeyTemplates.aes128Gcm()];
+    const invalidKeyFormats = [new Uint8Array(0), new Uint8Array([0, 1, 2])];
 
-    try {
-      new RegistryEciesAeadHkdfDemHelper(template);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      assertEquals(
-          ExceptionText.invalidKeyFormat(template.getTypeUrl()), e.toString());
+    // Test that if the value is changed to invalid key format than the DEM
+    // helper throws an exception.
+    for (let template of templates) {
+      for (let invalidKeyFormat of invalidKeyFormats) {
+        template.setValue(invalidKeyFormat);
+
+        try {
+          new RegistryEciesAeadHkdfDemHelper(template);
+          fail('An exception should be thrown.');
+        } catch (e) {
+          assertEquals(
+              ExceptionText.invalidKeyFormat(template.getTypeUrl()),
+              e.toString());
+        }
+      }
     }
   },
 
@@ -82,6 +89,24 @@ testSuite({
 
     // Expected size is a sum of AES CTR key length and HMAC key length.
     const expectedSize = 32 + 32;
+    assertEquals(expectedSize, helper.getDemKeySizeInBytes());
+  },
+
+  testConstructor_aes128Gcm() {
+    const template = AeadKeyTemplates.aes128Gcm();
+    const helper = new RegistryEciesAeadHkdfDemHelper(template);
+
+    // Expected size is equal to the size of key.
+    const expectedSize = 16;
+    assertEquals(expectedSize, helper.getDemKeySizeInBytes());
+  },
+
+  testConstructor_aes256Gcm() {
+    const template = AeadKeyTemplates.aes256Gcm();
+    const helper = new RegistryEciesAeadHkdfDemHelper(template);
+
+    // Expected size is equal to the size of key.
+    const expectedSize = 32;
     assertEquals(expectedSize, helper.getDemKeySizeInBytes());
   },
 
@@ -106,32 +131,31 @@ testSuite({
     }
   },
 
-  async testGetAead_aes128CtrHmacSha256() {
-    const template = AeadKeyTemplates.aes128CtrHmacSha256();
+  async testGetAead_differentTemplates() {
+    const templates = [
+      AeadKeyTemplates.aes128CtrHmacSha256(), AeadKeyTemplates.aes128Gcm(),
+      AeadKeyTemplates.aes256CtrHmacSha256(), AeadKeyTemplates.aes256Gcm()
+    ];
 
-    // Compute some demKey corresponding to template.
-    const keyFormat =
-        PbAesCtrHmacAeadKeyFormat.deserializeBinary(template.getValue_asU8());
-    const aesCtrKey =
-        Random.randBytes(keyFormat.getAesCtrKeyFormat().getKeySize());
-    const hmacKey = Random.randBytes(keyFormat.getHmacKeyFormat().getKeySize());
+    for (let template of templates) {
+      const helper = new RegistryEciesAeadHkdfDemHelper(template);
+      // Compute some demKey of size corresponding to the template.
+      // The result of getDemKeySizeInBytes is the expected one for the given
+      // templates as it was tested for these templates in previous tests.
+      const demKey = Random.randBytes(helper.getDemKeySizeInBytes());
 
-    const demKey = new Uint8Array(aesCtrKey.length + hmacKey.length);
-    demKey.set(aesCtrKey, 0);
-    demKey.set(hmacKey, aesCtrKey.length);
+      // Get Aead from helper.
+      const aead = await helper.getAead(demKey);
+      assertTrue(aead != null);
 
-    // Get Aead from helper.
-    const helper = new RegistryEciesAeadHkdfDemHelper(template);
-    const aead = await helper.getAead(demKey);
-    assertTrue(aead != null);
+      // Test the Aead instance.
+      const plaintext = Random.randBytes(10);
+      const aad = Random.randBytes(10);
+      const ciphertext = await aead.encrypt(plaintext, aad);
+      const decryptedCiphertext = await aead.decrypt(ciphertext, aad);
 
-    // Test the Aead instance.
-    const plaintext = Random.randBytes(10);
-    const aad = Random.randBytes(10);
-    const ciphertext = await aead.encrypt(plaintext, aad);
-    const decryptedCiphertext = await aead.decrypt(ciphertext, aad);
-
-    assertObjectEquals(plaintext, decryptedCiphertext);
+      assertObjectEquals(plaintext, decryptedCiphertext);
+    }
   },
 });
 
