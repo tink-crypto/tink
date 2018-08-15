@@ -55,7 +55,6 @@ testSuite({
     keyset.addKey(macKey);
     const primitiveIdentifier = new Uint8Array([0xFF]);
     Registry.registerKeyManager(
-        macKeyTypeUrl,
         new DummyKeyManager(macKeyTypeUrl, primitiveIdentifier, Mac));
 
     const keysetHandle = new KeysetHandle(keyset);
@@ -101,7 +100,6 @@ testSuite({
     const notCustomPrimitiveIdentifier =
         new Uint8Array([customKeyId, customKeyId]);
     Registry.registerKeyManager(
-        customKeyTypeUrl,
         new DummyKeyManager(customKeyTypeUrl, notCustomPrimitiveIdentifier));
 
     // Create a custom key manager and get a primitive corresponding to
@@ -204,7 +202,7 @@ const createKeysetAndInitializeRegistry = function(opt_numberOfKeys = 15) {
   for (let i = 0; i < numberOfKeyTypes; i++) {
     const typeUrl = keyTypePrefix + i.toString();
     Registry.registerKeyManager(
-        typeUrl, new DummyKeyManager(typeUrl, new Uint8Array([i])));
+        new DummyKeyManager(typeUrl, new Uint8Array([i])));
   }
 
   const keyset = new PbKeyset();

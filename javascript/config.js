@@ -100,8 +100,7 @@ class Config {
         catalogue.getKeyManager(
             entry.getTypeUrl(), entry.getPrimitiveName(),
             entry.getKeyManagerVersion());
-    Registry.registerKeyManager(
-        entry.getTypeUrl(), manager, entry.getNewKeyAllowed());
+    Registry.registerKeyManager(manager, entry.getNewKeyAllowed());
   }
 
   /**

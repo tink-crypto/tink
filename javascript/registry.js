@@ -100,27 +100,17 @@ class Registry {
    * @template P
    * @static
    *
-   * @param {string} typeUrl -- key type
    * @param {!KeyManager.KeyManager<P>} manager
    * @param {boolean=} opt_newKeyAllowed
    */
-  // TODO add check that registered key manager provides primitives which are
-  // consistent with user's expecatation.
-  static registerKeyManager(typeUrl, manager, opt_newKeyAllowed) {
+  static registerKeyManager(manager, opt_newKeyAllowed) {
     if (opt_newKeyAllowed === undefined) {
       opt_newKeyAllowed = true;
-    }
-
-    if (!typeUrl) {
-      throw new SecurityException('Key type has to be defined.');
     }
     if (!manager) {
       throw new SecurityException('Key manager cannot be null.');
     }
-    if (!manager.doesSupport(typeUrl)) {
-      throw new SecurityException('The provided key manager does not support '
-          + 'key type ' + typeUrl + '.');
-    }
+    const typeUrl = manager.getKeyType();
 
     if (Registry.typeToManagerMap_.has(typeUrl)) {
       // Cannot overwrite the existing key manager by a new one.
@@ -192,10 +182,6 @@ class Registry {
 
     if (!opt_typeUrl) {
       throw new SecurityException('Key type has to be specified.');
-    }
-
-    if (key instanceof Uint8Array) {
-      throw new SecurityException('Not implemented yet.');
     }
 
     const manager = await Registry.getKeyManager(opt_typeUrl);
