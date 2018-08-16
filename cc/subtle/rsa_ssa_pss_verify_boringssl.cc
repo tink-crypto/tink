@@ -27,20 +27,6 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-// Computes hash of 'input' using the hash function 'hasher'.
-util::StatusOr<std::string> ComputeHash(absl::string_view input,
-                                   const EVP_MD& hasher) {
-  uint32_t digest_length = EVP_MAX_MD_SIZE;
-  std::unique_ptr<uint8_t[]> digest(new uint8_t[digest_length]);
-  if (EVP_Digest(input.data(), input.length(), digest.get(), &digest_length,
-                 &hasher, nullptr /* ENGINE */) != 1) {
-    return util::Status(util::error::INTERNAL,
-                        absl::StrCat("Openssl internal error computing hash: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
-  }
-  return std::string(reinterpret_cast<const char*>(digest.get()), digest_length);
-}
-
 // static
 util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>>
 RsaSsaPssVerifyBoringSsl::New(
@@ -104,14 +90,13 @@ util::Status RsaSsaPssVerifyBoringSsl::Verify(absl::string_view signature,
   // regardless of whether the size is 0.
   data = SubtleUtilBoringSSL::EnsureNonNull(data);
 
-  auto digest_result = ComputeHash(data, *sig_hash_);
+  auto digest_result = boringssl::ComputeHash(data, *sig_hash_);
   if (!digest_result.ok()) return digest_result.status();
-  std::string digest = digest_result.ValueOrDie();
+  auto digest = std::move(digest_result.ValueOrDie());
 
   if (1 != RSA_verify_pss_mgf1(
-               rsa_.get(), reinterpret_cast<const uint8_t*>(digest.data()),
-               digest.size(), sig_hash_, mgf1_hash_, salt_length_,
-               reinterpret_cast<const uint8_t*>(signature.data()),
+               rsa_.get(), digest.data(), digest.size(), sig_hash_, mgf1_hash_,
+               salt_length_, reinterpret_cast<const uint8_t*>(signature.data()),
                signature.length())) {
     // Signature is invalid.
     return util::Status(util::error::UNKNOWN, "Signature is not valid.");

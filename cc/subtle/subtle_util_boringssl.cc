@@ -450,6 +450,25 @@ util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
   return util::OkStatus();
 }
 
+namespace boringssl {
+
+util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,
+                                                 const EVP_MD &hasher) {
+  input = SubtleUtilBoringSSL::EnsureNonNull(input);
+  std::vector<uint8_t> digest(EVP_MAX_MD_SIZE);
+  uint32_t digest_length = 0;
+  if (EVP_Digest(input.data(), input.length(), digest.data(), &digest_length,
+                 &hasher, /*impl=*/nullptr) != 1) {
+    return util::Status(util::error::INTERNAL,
+                        absl::StrCat("Openssl internal error computing hash: ",
+                                     SubtleUtilBoringSSL::GetErrors()));
+  }
+  digest.resize(digest_length);
+  return digest;
+}
+
+}  // namespace boringssl
+
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

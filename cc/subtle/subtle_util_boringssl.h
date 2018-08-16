@@ -17,13 +17,15 @@
 #ifndef TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
 #define TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
 
+#include <vector>
+
 #include "absl/strings/string_view.h"
-#include "tink/subtle/common_enums.h"
-#include "tink/util/status.h"
-#include "tink/util/statusor.h"
 #include "openssl/bn.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -160,6 +162,14 @@ class SubtleUtilBoringSSL {
                                        RsaPrivateKey *private_key,
                                        RsaPublicKey *public_key);
 };
+
+namespace boringssl {
+
+// Computes hash of 'input' using the hash function 'hasher'.
+util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,
+                                                 const EVP_MD &hasher);
+
+}  // namespace boringssl
 
 }  // namespace subtle
 }  // namespace tink
