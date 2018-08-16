@@ -45,6 +45,20 @@ class KeyFactory {
 }
 
 /**
+ * @record
+ * @extends {KeyFactory}
+ */
+class PrivateKeyFactory {
+  /**
+   * Returns a public key data extracted from the given serialized private key.
+   *
+   * @param {!Uint8Array} serializedPrivateKey
+   * @return {!PbKeyData}
+   */
+  getPublicKeyData(serializedPrivateKey) {}
+}
+
+/**
  * A KeyManager "understands" keys of a specific key type: it can generate keys
  * of the supported type and create primitives for supported keys.
  * A key type is identified by the global name of the protocol buffer that holds
@@ -112,5 +126,6 @@ class KeyManager {
 
 exports = {
   KeyManager,
-  KeyFactory
+  KeyFactory,
+  PrivateKeyFactory
 };

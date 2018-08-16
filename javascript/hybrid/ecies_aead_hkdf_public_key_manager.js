@@ -100,7 +100,7 @@ class EciesAeadHkdfPublicKeyManager {
 
   /** @override */
   getVersion() {
-    return EciesAeadHkdfPublicKeyManager.VERSION_;
+    return EciesAeadHkdfPublicKeyManager.VERSION;
   }
 
   /** @override */
@@ -159,7 +159,7 @@ EciesAeadHkdfPublicKeyManager.KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
 /** @const @private {!Object} */
 EciesAeadHkdfPublicKeyManager.SUPPORTED_PRIMITIVE_ = HybridEncrypt;
-/** @const @private {number} */
-EciesAeadHkdfPublicKeyManager.VERSION_ = 0;
+/** @const @package {number} */
+EciesAeadHkdfPublicKeyManager.VERSION = 0;
 
 exports = EciesAeadHkdfPublicKeyManager;
