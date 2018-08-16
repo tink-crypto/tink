@@ -18,6 +18,7 @@ goog.setTestOnly('tink.hybrid.EciesAeadHkdfPrivateKeyManagerTest');
 const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
+const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const HybridDecrypt = goog.require('tink.HybridDecrypt');
 const HybridEncrypt = goog.require('tink.HybridEncrypt');
 const KeyManager = goog.require('tink.KeyManager');
@@ -33,6 +34,7 @@ const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
+const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const TestCase = goog.require('goog.testing.TestCase');
 
@@ -201,7 +203,8 @@ testSuite({
 
     const privateKey = new Uint8Array([0, 1]);  // not a serialized private key
     try {
-      const factory = /** @type {!KeyManager.PrivateKeyFactory} */ (manager.getKeyFactory());
+      const factory = /** @type {!KeyManager.PrivateKeyFactory} */ (
+          manager.getKeyFactory());
       factory.getPublicKeyData(privateKey);
     } catch (e) {
       assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
@@ -214,8 +217,10 @@ testSuite({
 
     const privateKey = /** @type{!PbEciesAeadHkdfPrivateKey} */ (
         await manager.getKeyFactory().newKey(keyFormat));
-    const factory = /** @type {!KeyManager.PrivateKeyFactory} */ (manager.getKeyFactory());
-    const publicKeyData = factory.getPublicKeyData(privateKey.serializeBinary());
+    const factory =
+        /** @type {!KeyManager.PrivateKeyFactory} */ (manager.getKeyFactory());
+    const publicKeyData =
+        factory.getPublicKeyData(privateKey.serializeBinary());
 
     assertEquals(PUBLIC_KEY_TYPE, publicKeyData.getTypeUrl());
     assertEquals(PUBLIC_KEY_MATERIAL_TYPE, publicKeyData.getKeyMaterialType());
@@ -227,6 +232,168 @@ testSuite({
         privateKey.getPublicKey().getParams(), publicKey.getParams());
     assertObjectEquals(privateKey.getPublicKey().getX(), publicKey.getX());
     assertObjectEquals(privateKey.getPublicKey().getY(), publicKey.getY());
+  },
+
+  async testGetPrimitive_unsupportedPrimitiveType() {
+    const manager = new EciesAeadHkdfPrivateKeyManager();
+    const keyFormat = createKeyFormat();
+    const key = await manager.getKeyFactory().newKey(keyFormat);
+
+    try {
+      await manager.getPrimitive(HybridEncrypt, key);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(ExceptionText.unsupportedPrimitive(), e.toString());
+    }
+  },
+
+  async testGetPrimitive_unsupportedKeyDataType() {
+    const manager = new EciesAeadHkdfPrivateKeyManager();
+    const keyFormat = createKeyFormat();
+    const keyData =
+        await manager.getKeyFactory().newKeyData(keyFormat.serializeBinary());
+    keyData.setTypeUrl('unsupported_key_type_url');
+
+    try {
+      await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          ExceptionText.unsupportedKeyType(keyData.getTypeUrl()), e.toString());
+    }
+  },
+
+  async testGetPrimitive_unsupportedKeyType() {
+    const manager = new EciesAeadHkdfPrivateKeyManager();
+    let key = new PbEciesAeadHkdfPublicKey();
+
+    try {
+      await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(ExceptionText.unsupportedKeyType(), e.toString());
+    }
+  },
+
+  async testGetPrimitive_highVersion() {
+    const manager = new EciesAeadHkdfPrivateKeyManager();
+    const version = manager.getVersion() + 1;
+    const keyFormat = createKeyFormat();
+    const key = await manager.getKeyFactory().newKey(keyFormat);
+
+    key.setVersion(version);
+    try {
+      await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(ExceptionText.versionOutOfBounds(), e.toString());
+    }
+  },
+
+
+  async testGetPrimitive_invalidParams() {
+    const manager = new EciesAeadHkdfPrivateKeyManager();
+    const keyFormat = createKeyFormat();
+    const key = await manager.getKeyFactory().newKey(keyFormat);
+
+    // missing KEM params
+    key.getPublicKey().getParams().setKemParams(null);
+    try {
+      await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(ExceptionText.missingKemParams(), e.toString());
+    }
+    key.getPublicKey().getParams().setKemParams(createKemParams());
+
+    // unsupported AEAD key template type URL
+    const templateTypeUrl = 'UNSUPPORTED_KEY_TYPE_URL';
+    key.getPublicKey().getParams().getDemParams().getAeadDem().setTypeUrl(
+        templateTypeUrl);
+    try {
+      await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          ExceptionText.unsupportedKeyTemplate(templateTypeUrl), e.toString());
+    }
+  },
+
+  async testGetPrimitive_invalidSerializedKey() {
+    const manager = new EciesAeadHkdfPrivateKeyManager();
+    const keyFormat = createKeyFormat();
+    const keyData =
+        await manager.getKeyFactory().newKeyData(keyFormat.serializeBinary());
+
+
+    for (let i = 0; i < 2; ++i) {
+      // Set the value of keyData to something which is not a serialization of a
+      // proper key.
+      keyData.setValue(new Uint8Array(i));
+      try {
+        await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
+        fail('An exception should be thrown ' + i.toString());
+      } catch (e) {
+        assertEquals(ExceptionText.invalidSerializedKey(), e.toString());
+      }
+    }
+  },
+
+  async testGetPrimitive_fromKey() {
+    // Set longer time for promiseTimout as the test sometimes takes longer than
+    // 1 second in Firefox.
+    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
+    const keyFormats = createTestSetOfKeyFormats();
+    const privateKeyManager = new EciesAeadHkdfPrivateKeyManager();
+    const publicKeyManager = new EciesAeadHkdfPublicKeyManager();
+
+    for (let keyFormat of keyFormats) {
+      const key = await privateKeyManager.getKeyFactory().newKey(keyFormat);
+
+      const /** HybridEncrypt */ hybridEncrypt =
+          await publicKeyManager.getPrimitive(
+              PUBLIC_KEY_MANAGER_PRIMITIVE, key.getPublicKey());
+      const /** HybridDecrypt */ hybridDecrypt =
+          await privateKeyManager.getPrimitive(
+              PRIVATE_KEY_MANAGER_PRIMITIVE, key);
+
+      const plaintext = Random.randBytes(10);
+      const ciphertext = await hybridEncrypt.encrypt(plaintext);
+      const decryptedCiphertext = await hybridDecrypt.decrypt(ciphertext);
+
+      assertObjectEquals(plaintext, decryptedCiphertext);
+    }
+  },
+
+  async testGetPrimitive_fromKeyData() {
+    // Set longer time for promiseTimout as the test sometimes takes longer than
+    // 1 second in Firefox.
+    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
+    const keyFormats = createTestSetOfKeyFormats();
+    const privateKeyManager = new EciesAeadHkdfPrivateKeyManager();
+    const publicKeyManager = new EciesAeadHkdfPublicKeyManager();
+
+    for (let keyFormat of keyFormats) {
+      const serializedKeyFormat = keyFormat.serializeBinary();
+      const keyData = await privateKeyManager.getKeyFactory().newKeyData(
+          serializedKeyFormat);
+      const factory = /** @type {!KeyManager.PrivateKeyFactory} */ (
+          privateKeyManager.getKeyFactory());
+      const publicKeyData = factory.getPublicKeyData(keyData.getValue_asU8());
+
+      const /** HybridEncrypt */ hybridEncrypt =
+          await publicKeyManager.getPrimitive(
+              PUBLIC_KEY_MANAGER_PRIMITIVE, publicKeyData);
+      const /** HybridDecrypt */ hybridDecrypt =
+          await privateKeyManager.getPrimitive(
+              PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
+
+      const plaintext = Random.randBytes(10);
+      const ciphertext = await hybridEncrypt.encrypt(plaintext);
+      const decryptedCiphertext = await hybridDecrypt.decrypt(ciphertext);
+
+      assertObjectEquals(plaintext, decryptedCiphertext);
+    }
   },
 
   testDoesSupport() {
@@ -261,6 +428,12 @@ class ExceptionText {
   static invalidSerializedKeyFormat() {
     return 'CustomError: Input cannot be parsed as ' + PRIVATE_KEY_TYPE +
         ' key format proto.';
+  }
+
+  /** @return {string} */
+  static unsupportedPrimitive() {
+    return 'CustomError: Requested primitive type which is not supported by ' +
+        'this key manager.';
   }
 
   /** @return {string} */

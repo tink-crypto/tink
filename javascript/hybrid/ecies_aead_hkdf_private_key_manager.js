@@ -16,6 +16,7 @@ goog.module('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
 
 const Bytes = goog.require('tink.subtle.Bytes');
 const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
+const EciesAeadHkdfHybridDecrypt = goog.require('tink.subtle.EciesAeadHkdfHybridDecrypt');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const EciesAeadHkdfUtil = goog.require('tink.hybrid.EciesAeadHkdfUtil');
 const EciesAeadHkdfValidators = goog.require('tink.hybrid.EciesAeadHkdfValidators');
@@ -27,7 +28,9 @@ const PbEciesAeadHkdfParams = goog.require('proto.google.crypto.tink.EciesAeadHk
 const PbEciesAeadHkdfPrivateKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPrivateKey');
 const PbEciesAeadHkdfPublicKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPublicKey');
 const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
+const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbMessage = goog.require('jspb.Message');
+const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
 const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
@@ -174,7 +177,31 @@ class EciesAeadHkdfPrivateKeyManager {
 
   /** @override */
   async getPrimitive(primitiveType, key) {
-    throw new SecurityException('Not implemented yet.');
+    if (primitiveType !== this.getPrimitiveType()) {
+      throw new SecurityException(
+          'Requested primitive type which is not ' +
+          'supported by this key manager.');
+    }
+
+    const keyProto = EciesAeadHkdfPrivateKeyManager.getKeyProto_(key);
+    EciesAeadHkdfValidators.validatePrivateKey(
+        keyProto, EciesAeadHkdfPrivateKeyManager.VERSION_,
+        EciesAeadHkdfPublicKeyManager.VERSION);
+
+    const recepientPrivateKey = EciesAeadHkdfUtil.getJsonKeyFromProto(keyProto);
+    const params = /** @type {!PbEciesAeadHkdfParams} */ (
+        keyProto.getPublicKey().getParams());
+    const keyTemplate =
+        /** @type {!PbKeyTemplate} */ (params.getDemParams().getAeadDem());
+    const demHelper = new RegistryEciesAeadHkdfDemHelper(keyTemplate);
+    const pointFormat =
+        EciesAeadHkdfUtil.pointFormatProtoToSubtle(params.getEcPointFormat());
+    const hkdfHash = EciesAeadHkdfUtil.hashTypeProtoToString(
+        params.getKemParams().getHkdfHashType());
+    const hkdfSalt = params.getKemParams().getHkdfSalt_asU8();
+
+    return await EciesAeadHkdfHybridDecrypt.newInstance(
+        recepientPrivateKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   }
 
   /** @override */
@@ -200,6 +227,40 @@ class EciesAeadHkdfPrivateKeyManager {
   /** @override */
   getKeyFactory() {
     return this.keyFactory;
+  }
+
+  /**
+   * @private
+   * @param {!PbKeyData|!PbMessage} keyMaterial
+   * @return {!PbEciesAeadHkdfPrivateKey}
+   */
+  static getKeyProto_(keyMaterial) {
+    if (keyMaterial instanceof PbKeyData) {
+      return EciesAeadHkdfPrivateKeyManager.getKeyProtoFromKeyData_(
+          keyMaterial);
+    }
+    if (keyMaterial instanceof PbEciesAeadHkdfPrivateKey) {
+      return keyMaterial;
+    }
+    throw new SecurityException(
+        'Key type is not supported. This key ' +
+        'manager supports ' + EciesAeadHkdfPrivateKeyManager.KEY_TYPE + '.');
+  }
+
+  /**
+   * @private
+   * @param {!PbKeyData} keyData
+   * @return {!PbEciesAeadHkdfPrivateKey}
+   */
+  static getKeyProtoFromKeyData_(keyData) {
+    if (keyData.getTypeUrl() !== EciesAeadHkdfPrivateKeyManager.KEY_TYPE) {
+      throw new SecurityException(
+          'Key type ' + keyData.getTypeUrl() +
+          ' is not supported. This key manager supports ' +
+          EciesAeadHkdfPrivateKeyManager.KEY_TYPE + '.');
+    }
+    return EciesAeadHkdfPrivateKeyManager.deserializePrivateKey_(
+        keyData.getValue_asU8());
   }
 
   /**
