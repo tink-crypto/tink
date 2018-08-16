@@ -74,6 +74,7 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
     async testType() {
       try {
         await AesGcm.newInstance('blah');
+        fail('expected AesGcm.newInstance to fail');
       } catch (e) {
         assertEquals(
             'CustomError: input must be a non null Uint8Array', e.toString());
@@ -82,24 +83,28 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
       const aead = await AesGcm.newInstance(Random.randBytes(16));
       try {
         await aead.encrypt('blah');
+        fail('expected aead.encrypt to fail');
       } catch (e) {
         assertEquals(
             'CustomError: input must be a non null Uint8Array', e.toString());
       }
       try {
         await aead.encrypt(Random.randBytes(20), 'blah');
+        fail('expected aead.encrypt to fail');
       } catch (e) {
         assertEquals(
             'CustomError: input must be a non null Uint8Array', e.toString());
       }
       try {
         await aead.decrypt('blah');
+        fail('expected aead.decrypt to fail');
       } catch (e) {
         assertEquals(
             'CustomError: input must be a non null Uint8Array', e.toString());
       }
       try {
         await aead.decrypt(Random.randBytes(32), 'blah');
+        fail('expected aead.decrypt to fail');
       } catch (e) {
         assertEquals(
             'CustomError: input must be a non null Uint8Array', e.toString());
@@ -117,6 +122,7 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
           c1[i] = (c1[i] ^ (1 << j));
           try {
             await aead.decrypt(c1, aad);
+            fail('expected aead.decrypt to fail');
           } catch (e) {
             assertTrue(e.toString().startsWith('CustomError: OperationError'));
           }
@@ -135,6 +141,7 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
           aad1[i] = (aad1[i] ^ (1 << j));
           try {
             await aead.decrypt(ciphertext, aad1);
+            fail('expected aead.decrypt to fail');
           } catch (e) {
             assertTrue(e.toString().startsWith('CustomError: OperationError'));
           }
@@ -151,6 +158,7 @@ if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
         const c1 = new Uint8Array(ciphertext.buffer, 0, ciphertext.length - i);
         try {
           await aead.decrypt(c1, aad);
+          fail('expected aead.decrypt to fail');
         } catch (e) {
           if (c1.length < 12 /* iv */ + 16 /* tag */) {
             assertEquals('CustomError: ciphertext too short', e.toString());
