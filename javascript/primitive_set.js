@@ -163,12 +163,8 @@ class PrimitiveSet {
     const entriesLength = entries.length;
     for (let i = 0; i < entriesLength; i++) {
       if (entries[i].getKeyStatus() === PbKeyStatusType.ENABLED) {
-        if (entryFound) {
-          throw new SecurityException(
-              'Primary cannot be set to an entry which identifier ' +
-              'corresponds to more than one enabled keys.');
-        }
         entryFound = true;
+        break;
       }
     }
     if (!entryFound) {

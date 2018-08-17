@@ -28,7 +28,7 @@ const testSuite = goog.require('goog.testing.testSuite');
 testSuite({
   /////////////////////////////////////////////////////////////////////////////
   // tests for addPrimitive method
-  async testAddPrimitiveUnknownCryptoFormat() {
+  testAddPrimitiveUnknownCryptoFormat() {
     const primitive = new DummyAead1();
     const key = createKey();
     key.setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX);
@@ -43,7 +43,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testAddPrimitiveNullPrimitive() {
+  testAddPrimitiveNullPrimitive() {
     const primitive = null;
     const key = createKey();
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
@@ -57,13 +57,12 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testAddPrimitiveNullKey() {
+  testAddPrimitiveNullKey() {
     const primitive = new DummyAead1();
-    const key = null;
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
 
     try {
-      primitiveSet.addPrimitive(primitive, key);
+      primitiveSet.addPrimitive(primitive, null);
     } catch (e) {
       assertEquals(ExceptionText.addingNullKey(), e.toString());
       return;
@@ -71,7 +70,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testAddPrimitiveMultipleTimesShouldWork() {
+  testAddPrimitiveMultipleTimesShouldWork() {
     const key = createKey();
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
 
@@ -94,7 +93,7 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitives method
-  async testGetPrimitivesWhichWereNotAdded() {
+  testGetPrimitivesWhichWereNotAdded() {
     // Fill in the structure with some primitives.
     const numberOfAddedPrimitives = 12;
     const primitiveSet = initPrimitiveSet(numberOfAddedPrimitives);
@@ -106,7 +105,7 @@ testSuite({
     assertObjectEquals([], result);
   },
 
-  async testGetPrimitivesDifferentIdentifiers() {
+  testGetPrimitivesDifferentIdentifiers() {
     // Fill in the structure with some primitives.
     const n = 100;
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
@@ -141,7 +140,7 @@ testSuite({
     }
   },
 
-  async testGetPrimitivesSameIdentifiers() {
+  testGetPrimitivesSameIdentifiers() {
     // Fill in the structure with some primitives.
     const numberOfAddedPrimitives = 50;
     const primitiveSet = initPrimitiveSet(numberOfAddedPrimitives);
@@ -176,7 +175,7 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getRawPrimitives method
-  async testGetRawPrimitives() {
+  testGetRawPrimitives() {
     const numberOfAddedPrimitives = 20;
     const primitiveSet = initPrimitiveSet(numberOfAddedPrimitives);
 
@@ -203,7 +202,7 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for setPrimary and getPrimary methods
-  async testSetPrimaryToNull() {
+  testSetPrimaryToNull() {
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
     try {
       primitiveSet.setPrimary(null);
@@ -214,7 +213,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testSetPrimaryToNonholdedEntry() {
+  testSetPrimaryToNonholdedEntry() {
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
     const entry = new PrimitiveSet.Entry(
         new DummyAead1(), new Uint8Array(10), PbKeyStatusType.ENABLED,
@@ -229,34 +228,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testSetPrimaryToEntryWithCollidingIdentifier() {
-    const key = createKey();
-    const primitiveSet = new PrimitiveSet.PrimitiveSet();
-
-    for (let i = 0; i < 4; i++) {
-      let primitive;
-      if (i % 2 === 0) {
-        primitive = new DummyAead1();
-      } else {
-        primitive = new DummyAead2();
-      }
-      primitiveSet.addPrimitive(primitive, key);
-    }
-
-    const identifier = CryptoFormat.getOutputPrefix(key);
-    const primitives = primitiveSet.getPrimitives(identifier);
-    const primary = primitives[0];
-
-    try {
-      primitiveSet.setPrimary(primary);
-    } catch (e) {
-      assertEquals(ExceptionText.setPrimaryToCollidingEntry(), e.toString());
-      return;
-    }
-    fail('An exception should be thrown.');
-  },
-
-  async testSetPrimaryToEntryWithDisabledKeyStatus() {
+  testSetPrimaryToEntryWithDisabledKeyStatus() {
     const key = createKey(/* opt_keyId = */ 0x12345678,
         /* opt_legacy = */ false, /* opt_enabled = */ false);
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
@@ -272,7 +244,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testSetAndGetPrimary() {
+  testSetAndGetPrimary() {
     const primitiveSet = new PrimitiveSet.PrimitiveSet();
     assertEquals(null, primitiveSet.getPrimary());
 
@@ -293,6 +265,20 @@ testSuite({
     // Change the primary and verify the change.
     primitiveSet.setPrimary(result2);
     assertObjectEquals(result2, primitiveSet.getPrimary());
+  },
+
+  testSetPrimary_rawPrimitives() {
+    const primitiveSet = new PrimitiveSet.PrimitiveSet();
+    for (let i = 0; i < 3; i++) {
+      const key = createKey(/* opt_keyId = */ i);
+      key.setOutputPrefixType(PbOutputPrefixType.RAW);
+      primitiveSet.addPrimitive(new DummyAead1(), key);
+    }
+    const primaryKey = createKey(/* opt_keyId = */ 0xFF);
+    primaryKey.setOutputPrefixType(PbOutputPrefixType.RAW);
+    const primaryEntry =
+        primitiveSet.addPrimitive(new DummyAead1(), primaryKey);
+    primitiveSet.setPrimary(primaryEntry);
   },
 });
 
@@ -322,12 +308,6 @@ class ExceptionText {
   static setPrimaryToMissingEntry() {
     return 'CustomError: Primary cannot be set to an entry which is ' +
         'not held by this primitive set.';
-  }
-
-  /** @return {string} */
-  static setPrimaryToCollidingEntry() {
-    return 'CustomError: Primary cannot be set to an entry which ' +
-        'identifier corresponds to more than one enabled keys.';
   }
 
   /** @return {string} */
