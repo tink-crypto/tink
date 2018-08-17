@@ -55,7 +55,9 @@ class AeadCatalogue {
 
     if (manager.getVersion() < minVersion) {
       throw new SecurityException(
-          'Requested manager with higher version than is available.');
+          'Requested manager with higher version than is available. ' +
+          'The available manager has version ' + manager.getVersion()) +
+          '.';
     }
     return manager;
   }

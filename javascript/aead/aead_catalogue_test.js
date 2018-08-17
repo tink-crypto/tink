@@ -51,7 +51,8 @@ testSuite({
       catalogue.getKeyManager(
           manager.getKeyType(), SUPPORTED_PRIMITIVE_NAME, version);
     } catch (e) {
-      assertEquals(ExceptionText.badVersion(), e.toString());
+      assertEquals(
+          ExceptionText.badVersion(manager.getVersion()), e.toString());
       return;
     }
     fail('An exception should be thrown.');
@@ -115,10 +116,14 @@ class ExceptionText {
         'catalogue provides key managers for ' + supported + ' primitives.';
   }
 
-  /** @return {string} */
-  static badVersion() {
+  /**
+   * @param {number} availableVersion
+   * @return {string}
+   */
+  static badVersion(availableVersion) {
     return 'CustomError: Requested manager with higher version ' +
-        'than is available.';
+        'than is available. The available manager has version ' +
+        availableVersion + '.';
   }
 
   /**
