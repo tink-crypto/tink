@@ -114,6 +114,20 @@ TEST_F(HmacBoringSslTest, testTruncation) {
   }
 }
 
+TEST_F(HmacBoringSslTest, testInvalidKeySizes) {
+  size_t tag_size = 16;
+
+  for (int keysize = 0; keysize < 65; keysize++) {
+    std::string key(keysize, 'x');
+    auto hmac_result = HmacBoringSsl::New(HashType::SHA1, tag_size, key);
+    if (keysize >= 16) {
+      EXPECT_TRUE(hmac_result.ok());
+    } else {
+      EXPECT_FALSE(hmac_result.ok());
+    }
+  }
+}
+
 // TODO(bleichen): Stuff to test
 //  - Generate test vectors and share with Wycheproof.
 //  - Tag size wrong for construction

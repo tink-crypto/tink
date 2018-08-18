@@ -49,6 +49,8 @@ class HmacBoringSsl : public Mac {
   virtual ~HmacBoringSsl() {}
 
  private:
+  // Minimum HMAC key size in bytes.
+  static const size_t MIN_KEY_SIZE = 16;
   HmacBoringSsl() {}
   HmacBoringSsl(const EVP_MD* md, uint32_t tag_size,
                 const std::string& key_value);

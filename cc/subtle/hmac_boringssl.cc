@@ -48,6 +48,9 @@ util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(
     // If this fails then something is wrong with the key manager.
     return util::Status(util::error::INTERNAL, "invalid tag size");
   }
+  if (key_value.size() < MIN_KEY_SIZE) {
+    return util::Status(util::error::INTERNAL, "invalid key size");
+  }
   std::unique_ptr<Mac> hmac(new HmacBoringSsl(md, tag_size, key_value));
   return std::move(hmac);
 }
