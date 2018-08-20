@@ -204,9 +204,11 @@ TEST_F(PrimitiveSetTest, testBasic) {
     EXPECT_EQ(data + mac_name_4,
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(OutputPrefixType::RAW, primitives[0]->get_output_prefix_type());
     EXPECT_EQ(data + mac_name_5,
               primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::DISABLED, primitives[1]->get_status());
+    EXPECT_EQ(OutputPrefixType::RAW, primitives[1]->get_output_prefix_type());
   }
 
   {  // Check Tink primitives.
@@ -216,9 +218,11 @@ TEST_F(PrimitiveSetTest, testBasic) {
     EXPECT_EQ(data + mac_name_1,
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(OutputPrefixType::TINK, primitives[0]->get_output_prefix_type());
     EXPECT_EQ(data + mac_name_6,
               primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::DISABLED, primitives[1]->get_status());
+    EXPECT_EQ(OutputPrefixType::TINK, primitives[1]->get_output_prefix_type());
   }
 
   {  // Check another Tink primitive.
@@ -228,6 +232,7 @@ TEST_F(PrimitiveSetTest, testBasic) {
     EXPECT_EQ(data + mac_name_3,
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(OutputPrefixType::TINK, primitives[0]->get_output_prefix_type());
   }
 
   {  // Check legacy primitive.
@@ -237,6 +242,8 @@ TEST_F(PrimitiveSetTest, testBasic) {
     EXPECT_EQ(data + mac_name_2,
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
+    EXPECT_EQ(OutputPrefixType::LEGACY,
+              primitives[0]->get_output_prefix_type());
   }
 }
 

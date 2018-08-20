@@ -21,9 +21,13 @@
 #include "tink/public_key_sign.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
+
+using google::crypto::tink::OutputPrefixType;
+
 namespace {
 
 util::Status Validate(PrimitiveSet<PublicKeySign>* public_key_sign_set) {
@@ -58,6 +62,12 @@ util::StatusOr<std::string> PublicKeySignSetWrapper::Sign(
   data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
 
   auto primary = public_key_sign_set_->get_primary();
+  std::string local_data;
+  if (primary->get_output_prefix_type() == OutputPrefixType::LEGACY) {
+    local_data = std::string(data);
+    local_data.append(1, CryptoFormat::kLegacyStartByte);
+    data = local_data;
+  }
   auto sign_result = primary->get_primitive().Sign(data);
   if (!sign_result.ok()) return sign_result.status();
   const std::string& key_id = primary->get_identifier();

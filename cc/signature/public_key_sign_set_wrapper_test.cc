@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/signature/public_key_sign_set_wrapper.h"
+#include "tink/crypto_format.h"
 #include "tink/public_key_sign.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
@@ -66,7 +67,7 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
 
     uint32_t key_id_0 = 1234543;
     key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::RAW);
+    key->set_output_prefix_type(OutputPrefixType::TINK);
     key->set_key_id(key_id_0);
 
     uint32_t key_id_1 = 726329;
@@ -76,7 +77,7 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
 
     uint32_t key_id_2 = 7213743;
     key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::TINK);
+    key->set_output_prefix_type(OutputPrefixType::RAW);
     key->set_key_id(key_id_2);
 
     std::string signature_name_0 = "signature_0";
@@ -118,6 +119,50 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
     auto verify_status = pk_verify->Verify(signature, data);
     EXPECT_TRUE(verify_status.ok()) << verify_status;
   }
+}
+
+TEST_F(PublicKeySignSetWrapperTest, testLegacySignatures) {
+    // Prepare a set for the wrapper.
+    Keyset::Key key;
+    uint32_t key_id = 1234543;
+    key.set_output_prefix_type(OutputPrefixType::LEGACY);
+    key.set_key_id(key_id);
+    std::string signature_name = "SomeLegacySignatures";
+
+    std::unique_ptr<PrimitiveSet<PublicKeySign>> pk_sign_set(
+        new PrimitiveSet<PublicKeySign>());
+    std::string data = "Some data to sign";
+    std::unique_ptr<PublicKeySign> pk_sign(
+        new DummyPublicKeySign(signature_name));
+    auto entry_result = pk_sign_set->AddPrimitive(std::move(pk_sign), key);
+    ASSERT_TRUE(entry_result.ok());
+    pk_sign_set->set_primary(entry_result.ValueOrDie());
+
+    // Wrap pk_sign_set and test the resulting PublicKeySign.
+    auto pk_sign_result = PublicKeySignSetWrapper::NewPublicKeySign(
+        std::move(pk_sign_set));
+    EXPECT_TRUE(pk_sign_result.ok()) << pk_sign_result.status();
+    pk_sign = std::move(pk_sign_result.ValueOrDie());
+
+    // Compute the signature via wrapper.
+    auto sign_result = pk_sign->Sign(data);
+    EXPECT_TRUE(sign_result.ok()) << sign_result.status();
+    std::string signature = sign_result.ValueOrDie();
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, signature_name, signature);
+
+    // Try verifying on raw PublicKeyVerify-primitive using original data.
+    std::unique_ptr<PublicKeyVerify> raw_pk_verify(
+        new DummyPublicKeyVerify(signature_name));
+    std::string raw_signature = signature.substr(CryptoFormat::kNonRawPrefixSize);
+    auto status = raw_pk_verify->Verify(raw_signature, data);
+    EXPECT_FALSE(status.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+
+    // Verify on raw PublicKeyVerify-primitive using legacy-formatted data.
+    std::string legacy_data = data;
+    legacy_data.append(1, CryptoFormat::kLegacyStartByte);
+    status = raw_pk_verify->Verify(raw_signature, legacy_data);
+    EXPECT_TRUE(status.ok()) << status;
 }
 
 }  // namespace

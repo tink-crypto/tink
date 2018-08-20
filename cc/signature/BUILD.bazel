@@ -257,6 +257,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":public_key_sign_set_wrapper",
+        "//cc:crypto_format",
         "//cc:primitive_set",
         "//cc:public_key_sign",
         "//cc:public_key_verify",

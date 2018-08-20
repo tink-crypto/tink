@@ -30,17 +30,18 @@ source $TEST_UTIL || exit 1
 
 # Basic tests of PublicKeySign and PublicKeyVerify.
 signature_basic_test() {
-  local test_name="$1-signature-basic-test"
+  local test_name="$1-signature-basic-test-$5"
   local sign_cli="$2"
   local verify_cli="$3"
-  local key_templates=$4
+  local key_templates="$4"
+  local output_prefix="$5"
 
   echo "############ starting test $test_name for the following templates:"
   echo $key_templates
   for key_template in ${key_templates[*]}
   do
     local test_instance="${test_name}_${key_template}"
-    generate_asymmetric_keys "signature" $test_instance $key_template
+    generate_asymmetric_keys $test_instance $key_template $output_prefix
     generate_plaintext $test_instance
 
     local signature_file="$TEST_TMPDIR/${test_instance}_signature.bin"
@@ -55,9 +56,25 @@ signature_basic_test() {
 
 #############################################################################
 ##### Run the actual tests.
-signature_basic_test "CC-CC"     $CC_SIGN_CLI   $CC_VERIFY_CLI   "${KEY_TEMPLATES[*]}"
-signature_basic_test "CC-JAVA"   $CC_SIGN_CLI   $JAVA_VERIFY_CLI "${KEY_TEMPLATES[*]}"
-signature_basic_test "JAVA-CC"   $JAVA_SIGN_CLI $CC_VERIFY_CLI   "${KEY_TEMPLATES[*]}"
-signature_basic_test "JAVA-JAVA" $JAVA_SIGN_CLI $JAVA_VERIFY_CLI "${KEY_TEMPLATES[*]}"
+
+### Tests with OutputPrefixType=="TINK"
+signature_basic_test "CC-CC"     $CC_SIGN_CLI   $CC_VERIFY_CLI   \
+  "${KEY_TEMPLATES[*]}" "TINK"
+signature_basic_test "CC-JAVA"   $CC_SIGN_CLI   $JAVA_VERIFY_CLI \
+  "${KEY_TEMPLATES[*]}" "TINK"
+signature_basic_test "JAVA-CC"   $JAVA_SIGN_CLI $CC_VERIFY_CLI   \
+  "${KEY_TEMPLATES[*]}" "TINK"
+signature_basic_test "JAVA-JAVA" $JAVA_SIGN_CLI $JAVA_VERIFY_CLI \
+  "${KEY_TEMPLATES[*]}" "TINK"
+
+### Tests with OutputPrefixType=="LEGACY"
+signature_basic_test "CC-CC"     $CC_SIGN_CLI   $CC_VERIFY_CLI   \
+  "${KEY_TEMPLATES[*]}" "LEGACY"
+signature_basic_test "CC-JAVA"   $CC_SIGN_CLI   $JAVA_VERIFY_CLI \
+  "${KEY_TEMPLATES[*]}" "LEGACY"
+signature_basic_test "JAVA-CC"   $JAVA_SIGN_CLI $CC_VERIFY_CLI   \
+  "${KEY_TEMPLATES[*]}" "LEGACY"
+signature_basic_test "JAVA-JAVA" $JAVA_SIGN_CLI $JAVA_VERIFY_CLI \
+  "${KEY_TEMPLATES[*]}" "LEGACY"
 
 

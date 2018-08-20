@@ -22,9 +22,13 @@
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
+
+using google::crypto::tink::OutputPrefixType;
+
 namespace {
 
 util::Status Validate(PrimitiveSet<PublicKeyVerify>* public_key_verify_set) {
@@ -58,6 +62,7 @@ util::Status PublicKeyVerifySetWrapper::Verify(
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
   data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
+  signature = subtle::SubtleUtilBoringSSL::EnsureNonNull(signature);
 
   if (signature.length() <= CryptoFormat::kNonRawPrefixSize) {
     // This also rejects raw signatures with size of 4 bytes or fewer.
@@ -70,8 +75,14 @@ util::Status PublicKeyVerifySetWrapper::Verify(
   if (primitives_result.ok()) {
     absl::string_view raw_signature =
         signature.substr(CryptoFormat::kNonRawPrefixSize);
-    for (auto& public_key_verify_entry : *(primitives_result.ValueOrDie())) {
-      auto& public_key_verify = public_key_verify_entry->get_primitive();
+    std::string local_data;
+    for (auto& entry : *(primitives_result.ValueOrDie())) {
+      if (entry->get_output_prefix_type() == OutputPrefixType::LEGACY) {
+        local_data = std::string(data);
+        local_data.append(1, CryptoFormat::kLegacyStartByte);
+        data = local_data;
+      }
+      auto& public_key_verify = entry->get_primitive();
       auto verify_result =
           public_key_verify.Verify(raw_signature, data);
       if (verify_result.ok()) {

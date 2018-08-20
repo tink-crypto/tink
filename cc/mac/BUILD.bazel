@@ -110,6 +110,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":mac_set_wrapper",
+        "//cc:crypto_format",
         "//cc:mac",
         "//cc:primitive_set",
         "//cc/util:status",

@@ -56,10 +56,12 @@ class PrimitiveSet {
   class Entry {
    public:
     Entry(std::unique_ptr<P2> primitive, const std::string& identifier,
-          google::crypto::tink::KeyStatusType status)
+          google::crypto::tink::KeyStatusType status,
+          google::crypto::tink::OutputPrefixType output_prefix_type)
         : primitive_(std::move(primitive)),
           identifier_(identifier),
-          status_(status) {}
+          status_(status),
+          output_prefix_type_(output_prefix_type) {}
 
     P2& get_primitive() const { return *primitive_; }
 
@@ -69,10 +71,16 @@ class PrimitiveSet {
       return status_;
     }
 
+    const google::crypto::tink::OutputPrefixType get_output_prefix_type()
+        const {
+      return output_prefix_type_;
+    }
+
    private:
     std::unique_ptr<P> primitive_;
     std::string identifier_;
     google::crypto::tink::KeyStatusType status_;
+    google::crypto::tink::OutputPrefixType output_prefix_type_;
   };
 
   typedef std::vector<std::unique_ptr<Entry<P>>> Primitives;
@@ -93,7 +101,8 @@ class PrimitiveSet {
     std::lock_guard<std::mutex> lock(primitives_mutex_);
     primitives_[identifier].push_back(
         absl::make_unique<Entry<P>>(std::move(primitive),
-                                    identifier, key.status()));
+                                    identifier, key.status(),
+                                    key.output_prefix_type()));
     return primitives_[identifier].back().get();
   }
 

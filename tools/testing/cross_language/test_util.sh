@@ -20,33 +20,40 @@ TINKEY_CLI="$ROOT_DIR/tools/tinkey/tinkey"
 ##### Helper functions.
 
 # Generates private and public keys according to $key_template,
-# which should be present in a subdirectory $templates_subdir.
+# which should be supported by Tinkey.
+# If $output_prefix is specified, the generated keyset will use it
+# instead of default value "TINK".
 # Stores the keys in files $priv_key_file and $pub_key_file, respectively.
 generate_asymmetric_keys() {
-  local templates_subdir="$1"
-  local key_name="$2"
-  local key_template="$3"
+  local key_name="$1"
+  local key_template="$2"
+  local output_prefix="$3"
+  if [ "$output_prefix" == "" ]; then
+    output_prefix="TINK"
+  fi
 
+  local json_priv_key_file="$TEST_TMPDIR/${key_name}_private_key.json"
   priv_key_file="$TEST_TMPDIR/${key_name}_private_key.bin"
   pub_key_file="$TEST_TMPDIR/${key_name}_public_key.bin"
   echo "--- Using template $key_template to generate keysets"\
       "to files $priv_key_file and $pub_key_file ..."
 
-  $TINKEY_CLI create-keyset --key-template  $key_template\
-      --out-format BINARY --out $priv_key_file  || exit 1
+  $TINKEY_CLI create-keyset --key-template  $key_template --out-format JSON\
+    | sed -e "s/\"TINK\"/\"$output_prefix\"/" > $json_priv_key_file  || exit 1
+  $TINKEY_CLI convert-keyset --in-format JSON --in $json_priv_key_file\
+    --out-format BINARY --out $priv_key_file  || exit 1
   $TINKEY_CLI create-public-keyset --in-format BINARY --in $priv_key_file\
       --out-format BINARY --out $pub_key_file  || exit 1
   echo "Done generating keysets."
 }
 
 # Generates a symmetric key according to $key_template,
-# which should be present in a subdirectory $templates_subdir.
+# which should be supported by Tinkey.
 # Stores the key in file $symmetric_key_file.
 generate_symmetric_key() {
-  local templates_subdir="$1"
-  local key_name="$2"
-  local key_template="$3"
-  local output_format="$4"
+  local key_name="$1"
+  local key_template="$2"
+  local output_format="$3"
   if [ "$output_format" == "" ]; then
     output_format="BINARY"
   fi
@@ -65,8 +72,8 @@ generate_plaintext() {
   local plaintext_name="$1"
 
   plaintext_file="$TEST_TMPDIR/${plaintext_name}_plaintext.bin"
-  echo "This is some plaintext message to be encrypted"\
-      " named $plaintext_name just like that." > $plaintext_file
+  echo "This is some plaintext message to be encrypted and/or signed" \
+       " named $plaintext_name just like that." > $plaintext_file
 }
 
 

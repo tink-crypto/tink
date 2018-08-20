@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include "absl/strings/match.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/hybrid_decrypt.h"
@@ -226,9 +227,9 @@ class DummyPublicKeyVerify : public PublicKeyVerify {
   // of this DummyPublicKeyVerify with the provided 'data'.
   crypto::tink::util::Status Verify(
       absl::string_view signature, absl::string_view data) const override {
-    size_t pos = signature.rfind(signature_name_);
-    if (pos != std::string::npos &&
-        signature.length() == (unsigned)(signature_name_.length() + pos)) {
+    if (signature.length() == data.length() + signature_name_.length() &&
+        absl::StartsWith(signature, data) &&
+        absl::EndsWith(signature, signature_name_)) {
       return crypto::tink::util::Status::OK;
     }
     return crypto::tink::util::Status(

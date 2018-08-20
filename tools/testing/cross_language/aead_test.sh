@@ -37,7 +37,7 @@ aead_basic_test() {
   for key_template in ${key_templates[*]}
   do
     local test_instance="${test_name}_${key_template}"
-    generate_symmetric_key "aead" $test_instance $key_template
+    generate_symmetric_key $test_instance $key_template
     generate_plaintext $test_instance
 
     local encrypted_file="$TEST_TMPDIR/${test_instance}_encrypted.bin"

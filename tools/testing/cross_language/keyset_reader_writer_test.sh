@@ -60,17 +60,17 @@ keyset_reader_writer_basic_test() {
 ##### Run the actual tests.
 
 ### Java BINARY, C++ BINARY
-generate_symmetric_key "aead" "AEAD-test-1" "AES128_CTR_HMAC_SHA256" "BINARY"
+generate_symmetric_key "AEAD-test-1" "AES128_CTR_HMAC_SHA256" "BINARY"
 keyset_reader_writer_basic_test "BINARY" $symmetric_key_file "BINARY"
 
 ### Java BINARY, C++ JSON
-generate_symmetric_key "aead" "AEAD-test-2" "AES128_CTR_HMAC_SHA256" "BINARY"
+generate_symmetric_key "AEAD-test-2" "AES128_CTR_HMAC_SHA256" "BINARY"
 keyset_reader_writer_basic_test "BINARY" $symmetric_key_file "JSON"
 
 ### Java JSON, C++ BINARY
-generate_symmetric_key "aead" "AEAD-test-3" "AES128_CTR_HMAC_SHA256" "JSON"
+generate_symmetric_key "AEAD-test-3" "AES128_CTR_HMAC_SHA256" "JSON"
 keyset_reader_writer_basic_test "JSON" $symmetric_key_file "BINARY"
 
 ### Java JSON, C++ JSON
-generate_symmetric_key "aead" "AEAD-test-4" "AES256_CTR_HMAC_SHA256" "JSON"
+generate_symmetric_key "AEAD-test-4" "AES256_CTR_HMAC_SHA256" "JSON"
 keyset_reader_writer_basic_test "JSON" $symmetric_key_file "JSON"

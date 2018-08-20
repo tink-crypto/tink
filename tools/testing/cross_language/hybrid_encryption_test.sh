@@ -40,7 +40,7 @@ hybrid_basic_test() {
   for key_template in ${key_templates[*]}
   do
     local test_instance="${test_name}_${key_template}"
-    generate_asymmetric_keys "hybrid" $test_instance $key_template
+    generate_asymmetric_keys $test_instance $key_template
     generate_plaintext $test_instance
 
     local encrypted_file="$TEST_TMPDIR/${test_instance}_encrypted.bin"

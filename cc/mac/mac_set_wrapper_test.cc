@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/mac/mac_set_wrapper.h"
+#include "tink/crypto_format.h"
 #include "tink/mac.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
@@ -111,6 +112,48 @@ TEST_F(MacSetWrapperTest, testBasic) {
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "verification failed",
                         status.error_message());
   }
+}
+
+TEST_F(MacSetWrapperTest, testLegacyAuthentication) {
+    // Prepare a set for the wrapper.
+    Keyset::Key key;
+    uint32_t key_id = 1234543;
+    key.set_output_prefix_type(OutputPrefixType::LEGACY);
+    key.set_key_id(key_id);
+    std::string mac_name = "SomeLegacyMac";
+
+    std::unique_ptr<PrimitiveSet<Mac>> mac_set(new PrimitiveSet<Mac>());
+    std::unique_ptr<Mac> mac(new DummyMac(mac_name));
+    auto entry_result = mac_set->AddPrimitive(std::move(mac), key);
+    ASSERT_TRUE(entry_result.ok());
+    mac_set->set_primary(entry_result.ValueOrDie());
+
+    // Wrap mac_set and test the resulting Mac.
+    auto mac_result = MacSetWrapper::NewMac(std::move(mac_set));
+    EXPECT_TRUE(mac_result.ok()) << mac_result.status();
+    mac = std::move(mac_result.ValueOrDie());
+    std::string data = "Some data to authenticate";
+
+    // Compute and verify MAC via wrapper.
+    auto compute_mac_result = mac->ComputeMac(data);
+    EXPECT_TRUE(compute_mac_result.ok()) << compute_mac_result.status();
+    std::string mac_value = compute_mac_result.ValueOrDie();
+    EXPECT_PRED_FORMAT2(testing::IsSubstring, mac_name, mac_value);
+    auto status = mac->VerifyMac(mac_value, data);
+    EXPECT_TRUE(status.ok()) << status;
+
+    // Try verifying on raw Mac-primitive using original data.
+    std::unique_ptr<Mac> raw_mac(new DummyMac(mac_name));  // same as in wrapper
+    std::string raw_mac_value = mac_value.substr(CryptoFormat::kNonRawPrefixSize);
+    status = raw_mac->VerifyMac(raw_mac_value, data);
+    EXPECT_FALSE(status.ok());
+    EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+
+    // Verify on raw Mac-primitive using legacy-formatted data.
+    std::string legacy_data = data;
+    legacy_data.append(1, CryptoFormat::kLegacyStartByte);
+    status = raw_mac->VerifyMac(raw_mac_value, legacy_data);
+    EXPECT_TRUE(status.ok()) << status;
 }
 
 }  // namespace

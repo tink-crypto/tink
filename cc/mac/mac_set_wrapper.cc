@@ -22,9 +22,12 @@
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
+
+using google::crypto::tink::OutputPrefixType;
 
 namespace {
 
@@ -56,16 +59,26 @@ util::StatusOr<std::string> MacSetWrapper::ComputeMac(
   // regardless of whether the size is 0.
   data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
 
-  auto compute_mac_result =
-      mac_set_->get_primary()->get_primitive().ComputeMac(data);
+  auto primary = mac_set_->get_primary();
+  std::string local_data;
+  if (primary->get_output_prefix_type() == OutputPrefixType::LEGACY) {
+    local_data = std::string(data);
+    local_data.append(
+        reinterpret_cast<const char*>(&CryptoFormat::kLegacyStartByte), 1);
+    data = local_data;
+  }
+  auto compute_mac_result = primary->get_primitive().ComputeMac(data);
   if (!compute_mac_result.ok()) return compute_mac_result.status();
-  const std::string& key_id = mac_set_->get_primary()->get_identifier();
+  const std::string& key_id = primary->get_identifier();
   return key_id + compute_mac_result.ValueOrDie();
 }
 
 util::Status MacSetWrapper::VerifyMac(
     absl::string_view mac_value,
     absl::string_view data) const {
+  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
+  mac_value = subtle::SubtleUtilBoringSSL::EnsureNonNull(mac_value);
+
   if (mac_value.length() > CryptoFormat::kNonRawPrefixSize) {
     const std::string& key_id = std::string(mac_value.substr(0,
         CryptoFormat::kNonRawPrefixSize));
@@ -73,7 +86,13 @@ util::Status MacSetWrapper::VerifyMac(
     if (primitives_result.ok()) {
       absl::string_view raw_mac_value =
           mac_value.substr(CryptoFormat::kNonRawPrefixSize);
+      std::string local_data;
       for (auto& mac_entry : *(primitives_result.ValueOrDie())) {
+        if (mac_entry->get_output_prefix_type() == OutputPrefixType::LEGACY) {
+          local_data = std::string(data);
+          local_data.append(1, CryptoFormat::kLegacyStartByte);
+          data = local_data;
+        }
         Mac& mac = mac_entry->get_primitive();
         util::Status status = mac.VerifyMac(raw_mac_value, data);
         if (status.ok()) {
