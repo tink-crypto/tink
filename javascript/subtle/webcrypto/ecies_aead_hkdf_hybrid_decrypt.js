@@ -101,12 +101,12 @@ class EciesAeadHkdfHybridDecrypt {
   }
 
   /**
-   * Decrypts ciphertext using contextInfo as info parameter of the underlying
-   * HKDF.
+   * Decrypts ciphertext using opt_contextInfo as info parameter of the
+   * underlying HKDF.
    *
    * @override
    */
-  async decrypt(ciphertext, opt_hkdfInfo) {
+  async decrypt(ciphertext, opt_contextInfo) {
     if (ciphertext.length < this.headerSize_) {
       throw new SecurityException('Ciphertext is too short.');
     }
@@ -116,27 +116,27 @@ class EciesAeadHkdfHybridDecrypt {
     const ciphertextBody =
         ciphertext.slice(this.headerSize_, ciphertext.length);
 
-    const aead = await this.getAead_(kemToken, opt_hkdfInfo);
+    const aead = await this.getAead_(kemToken, opt_contextInfo);
     return await aead.decrypt(ciphertextBody);
   }
 
   /**
    * @private
    * @param {!Uint8Array} kemToken
-   * @param {Uint8Array=} opt_hkdfInfo
+   * @param {Uint8Array=} opt_contextInfo
    * @return {!Promise<!Aead>}
    */
-  async getAead_(kemToken, opt_hkdfInfo) {
+  async getAead_(kemToken, opt_contextInfo) {
     // Variable hkdfInfo is not optional for decapsulate method. Thus it should
     // be an empty array in case that it is not defined by the caller of decrypt
     // method.
-    if (!opt_hkdfInfo) {
-      opt_hkdfInfo = new Uint8Array(0);
+    if (!opt_contextInfo) {
+      opt_contextInfo = new Uint8Array(0);
     }
 
     const symmetricKey = await this.kemRecipient_.decapsulate(
         kemToken, this.demHelper_.getDemKeySizeInBytes(), this.pointFormat_,
-        this.hkdfHash_, opt_hkdfInfo, this.hkdfSalt_);
+        this.hkdfHash_, opt_contextInfo, this.hkdfSalt_);
     return await this.demHelper_.getAead(symmetricKey);
   }
 }

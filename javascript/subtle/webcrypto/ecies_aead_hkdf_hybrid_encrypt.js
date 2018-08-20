@@ -85,22 +85,22 @@ class EciesAeadHkdfHybridEncrypt {
   }
 
   /**
-   * Encrypts plaintext using opt_hkdfInfo as info parameter of the underlying
-   * HKDF.
+   * Encrypts plaintext using opt_contextInfo as info parameter of the
+   * underlying HKDF.
    *
    * @override
    */
-  async encrypt(plaintext, opt_hkdfInfo) {
-    // Variable opt_hkdfInfo is not optional for encapsulate method. Thus it
+  async encrypt(plaintext, opt_contextInfo) {
+    // Variable hkdfInfo is not optional for encapsulate method. Thus it
     // should be an empty array in case that it is not defined by caller of this
     // method.
-    if (!opt_hkdfInfo) {
-      opt_hkdfInfo = new Uint8Array(0);
+    if (!opt_contextInfo) {
+      opt_contextInfo = new Uint8Array(0);
     }
 
     const keySizeInBytes = this.demHelper_.getDemKeySizeInBytes();
     const kemKey = await this.kemSender_.encapsulate(
-        keySizeInBytes, this.pointFormat_, this.hkdfHash_, opt_hkdfInfo,
+        keySizeInBytes, this.pointFormat_, this.hkdfHash_, opt_contextInfo,
         this.hkdfSalt_);
     const aead = await this.demHelper_.getAead(kemKey['key']);
 

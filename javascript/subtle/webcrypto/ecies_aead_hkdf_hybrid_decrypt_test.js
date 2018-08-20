@@ -227,10 +227,11 @@ testSuite({
 
         for (let i = 0; i < repetitions; ++i) {
           const plaintext = Random.randBytes(15);
-          const hkdfInfo = Random.randBytes(i);
-          const ciphertext = await hybridEncrypt.encrypt(plaintext, hkdfInfo);
+          const contextInfo = Random.randBytes(i);
+          const ciphertext =
+              await hybridEncrypt.encrypt(plaintext, contextInfo);
           const decryptedCiphertext =
-              await hybridDecrypt.decrypt(ciphertext, hkdfInfo);
+              await hybridDecrypt.decrypt(ciphertext, contextInfo);
 
           assertObjectEquals(plaintext, decryptedCiphertext);
         }

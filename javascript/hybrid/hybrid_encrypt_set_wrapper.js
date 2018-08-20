@@ -47,13 +47,13 @@ class HybridEncryptSetWrapper {
   }
 
   /** @override */
-  async encrypt(plaintext, opt_hkdfInfo) {
+  async encrypt(plaintext, opt_contextInfo) {
     if (!plaintext) {
       throw new SecurityException('Plaintext has to be non-null.');
     }
     const primitive =
         this.hybridEncryptPrimitiveSet_.getPrimary().getPrimitive();
-    const ciphertext = await primitive.encrypt(plaintext, opt_hkdfInfo);
+    const ciphertext = await primitive.encrypt(plaintext, opt_contextInfo);
     const keyId = this.hybridEncryptPrimitiveSet_.getPrimary().getIdentifier();
 
     return Bytes.concat(keyId, ciphertext);
