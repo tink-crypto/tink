@@ -27,14 +27,14 @@ class KeysetReader {
   /**
    * Reads and returns a (cleartext) Keyset object from the underlying source.
    *
-   * @return {!Promise<!PbKeyset>}
+   * @return {!PbKeyset}
    */
   read() {}
 
   /**
    * Reads and returns an EncryptedKeyset from the underlying source.
    *
-   * @return {!Promise<!PbEncryptedKeyset>}
+   * @return {!PbEncryptedKeyset}
    */
   readEncrypted() {}
 }
