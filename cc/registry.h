@@ -134,8 +134,8 @@ class Registry {
 
   // Convenience method for extracting the public key data from the
   // private key given in serialized_private_key.
-  // It looks up a KeyManager identified by type_url, which must
-  // be a PrivateKeyManager, and calls PrivateKeyManager::GetPublicKeyData.
+  // It looks up a KeyManager identified by type_url, whose KeyFactory must be
+  // a PrivateKeyFactory, and calls PrivateKeyFactory::GetPublicKeyData.
   static crypto::tink::util::StatusOr<
     std::unique_ptr<google::crypto::tink::KeyData>>
   GetPublicKeyData(const std::string& type_url,
