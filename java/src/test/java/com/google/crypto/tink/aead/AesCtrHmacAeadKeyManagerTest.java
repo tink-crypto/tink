@@ -44,7 +44,7 @@ public class AesCtrHmacAeadKeyManagerTest {
   public void testNewKeyMultipleTimes() throws Exception {
     KeyTemplate keyTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     AesCtrHmacAeadKeyFormat aeadKeyFormat =
-        AesCtrHmacAeadKeyFormat.parseFrom(keyTemplate.getValue().toByteArray());
+        AesCtrHmacAeadKeyFormat.parseFrom(keyTemplate.getValue());
     ByteString serialized = ByteString.copyFrom(aeadKeyFormat.toByteArray());
     AesCtrHmacAeadKeyManager keyManager = new AesCtrHmacAeadKeyManager();
     Set<String> keys = new TreeSet<String>();
