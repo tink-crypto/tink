@@ -33,6 +33,21 @@ java_binary(
 )
 
 java_binary(
+    name = "mac_cli_java",
+    testonly = 1,
+    srcs = [
+        "java/com/google/crypto/tink/testing/MacCli.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    main_class = "com.google.crypto.tink.testing.MacCli",
+    visibility = ["//tools/testing:__subpackages__"],
+    deps = [
+        ":cli_util",
+        "//java:testonly",
+    ],
+)
+
+java_binary(
     name = "hybrid_encrypt_cli_java",
     testonly = 1,
     srcs = [

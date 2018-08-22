@@ -40,6 +40,16 @@ cc_binary(
 )
 
 cc_binary(
+    name = "mac_cli_cc",
+    srcs = ["mac_cli.cc"],
+    visibility = ["//tools/testing:__subpackages__"],
+    deps = [
+        ":cli_util",
+        "//cc",
+    ],
+)
+
+cc_binary(
     name = "hybrid_encrypt_cli_cc",
     srcs = ["hybrid_encrypt_cli.cc"],
     visibility = ["//tools/testing:__subpackages__"],
