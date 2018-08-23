@@ -86,6 +86,13 @@ class AeadKeyTemplates {
   //   - HMAC hash function: SHA256
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& Aes256CtrHmacSha256();
+
+  // Returns a KeyTemplate that generates new instances of XChacha20Poly1305Key
+  // with the following parameters:
+  //   - XChacha20 key size: 32 bytes
+  //   - IV size: 24 bytes
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& XChacha20Poly1305();
 };
 
 }  // namespace tink

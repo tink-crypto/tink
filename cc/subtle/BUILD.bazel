@@ -295,6 +295,25 @@ cc_library(
 )
 
 cc_library(
+    name = "xchacha20_poly1305_boringssl",
+    srcs = ["xchacha20_poly1305_boringssl.cc"],
+    hdrs = ["xchacha20_poly1305_boringssl.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":common_enums",
+        ":random",
+        ":subtle_util_boringssl",
+        "//cc:aead",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "common_enums",
     srcs = ["common_enums.cc"],
     hdrs = ["common_enums.h"],
@@ -616,5 +635,22 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "@rapidjson",
+    ],
+)
+
+cc_test(
+    name = "xchacha20_poly1305_boringssl_test",
+    size = "small",
+    srcs = ["xchacha20_poly1305_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":xchacha20_poly1305_boringssl",
+        "//cc:aead",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
     ],
 )

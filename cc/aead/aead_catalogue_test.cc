@@ -31,10 +31,10 @@ class AeadCatalogueTest : public ::testing::Test {
 
 TEST_F(AeadCatalogueTest, testBasic) {
   std::string key_types[] = {
-    "type.googleapis.com/google.crypto.tink.AesEaxKey",
-    "type.googleapis.com/google.crypto.tink.AesGcmKey",
-    "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey"
-  };
+      "type.googleapis.com/google.crypto.tink.AesEaxKey",
+      "type.googleapis.com/google.crypto.tink.AesGcmKey",
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+      "type.googleapis.com/google.crypto.tink.XChacha20Poly1305Key"};
 
   AeadCatalogue catalogue;
   {

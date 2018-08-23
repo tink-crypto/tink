@@ -784,6 +784,43 @@ objc_proto_compile(
 )
 
 # -----------------------------------------------
+# XChacha20 with Poly1305
+# -----------------------------------------------
+proto_library(
+    name = "xchacha20_poly1305_proto",
+    srcs = [
+        "xchacha20_poly1305.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "xchacha20_poly1305_cc_proto",
+    deps = [":xchacha20_poly1305_proto"],
+)
+
+java_proto_library(
+    name = "xchacha20_poly1305_java_proto",
+    deps = [":xchacha20_poly1305_proto"],
+)
+
+java_lite_proto_library(
+    name = "xchacha20_poly1305_java_proto_lite",
+    deps = [":xchacha20_poly1305_proto"],
+)
+
+go_proto_library(
+    name = "xchacha20_poly1305_go_proto",
+    importpath = "github.com/google/tink/proto/xchacha20_poly1305_go_proto",
+    proto = ":xchacha20_poly1305_proto",
+)
+
+objc_proto_compile(
+    name = "xchacha20_poly1305_objc_pb",
+    protos = ["xchacha20_poly1305.proto"],
+    tags = ["manual"],
+)
+
+# -----------------------------------------------
 # objc library
 # -----------------------------------------------
 tink_objc_proto_library(
@@ -805,6 +842,7 @@ tink_objc_proto_library(
         ":kms_aead_objc_pb",
         ":kms_envelope_objc_pb",
         ":tink_objc_pb",
+        ":xchacha20_poly1305_objc_pb",
     ],
     tags = ["manual"],
 )

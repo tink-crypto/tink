@@ -20,6 +20,7 @@
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/catalogue.h"
 #include "tink/key_manager.h"
 #include "tink/util/status.h"
@@ -40,6 +41,10 @@ CreateKeyManager(const std::string& type_url) {
     return std::move(manager);
   } else if (type_url == AesCtrHmacAeadKeyManager::kKeyType) {
     std::unique_ptr<KeyManager<Aead>> manager(new AesCtrHmacAeadKeyManager());
+    return std::move(manager);
+  } else if (type_url == XChacha20Poly1305KeyManager::kKeyType) {
+    std::unique_ptr<KeyManager<Aead>> manager(
+        new XChacha20Poly1305KeyManager());
     return std::move(manager);
   }
   return ToStatusF(crypto::tink::util::error::NOT_FOUND,

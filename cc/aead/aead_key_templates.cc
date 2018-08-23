@@ -21,6 +21,7 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"
+#include "proto/xchacha20_poly1305.pb.h"
 
 using google::crypto::tink::AesCtrHmacAeadKeyFormat;
 using google::crypto::tink::AesEaxKeyFormat;
@@ -28,6 +29,7 @@ using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
+using google::crypto::tink::XChacha20Poly1305KeyFormat;
 
 namespace crypto {
 namespace tink {
@@ -77,6 +79,16 @@ KeyTemplate* NewAesCtrHmacAeadKeyTemplate(
   return key_template;
 }
 
+KeyTemplate* NewXChacha20Poly1305KeyTemplate() {
+  KeyTemplate* key_template = new KeyTemplate;
+  key_template->set_type_url(
+      "type.googleapis.com/google.crypto.tink.XChacha20Poly1305Key");
+  key_template->set_output_prefix_type(OutputPrefixType::TINK);
+  XChacha20Poly1305KeyFormat key_format;
+  key_format.set_key_size(32);
+  key_format.SerializeToString(key_template->mutable_value());
+  return key_template;
+}
 
 }  // anonymous namespace
 
@@ -132,6 +144,11 @@ const KeyTemplate& AeadKeyTemplates::Aes256CtrHmacSha256() {
   return *key_template;
 }
 
+// static
+const KeyTemplate& AeadKeyTemplates::XChacha20Poly1305() {
+  static const KeyTemplate* key_template = NewXChacha20Poly1305KeyTemplate();
+  return *key_template;
+}
 
 }  // namespace tink
 }  // namespace crypto
