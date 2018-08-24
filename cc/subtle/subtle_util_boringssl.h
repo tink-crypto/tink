@@ -63,6 +63,15 @@ class SubtleUtilBoringSSL {
     int salt_length;
   };
 
+  // Parameters of RSA SSA (Signature Schemes with Appendix) using PKCS1
+  // (Probabilistic Signature Scheme) encoding (see
+  // https://tools.ietf.org/html/rfc8017#section-8.2).
+  struct RsaSsaPkcs1Params {
+    // Hash function used in computing hash of the signing message
+    // (see https://tools.ietf.org/html/rfc8017#section-9.2).
+    HashType sig_hash;
+  };
+
   // RSA private key representation.
   struct RsaPrivateKey {
     // Modulus.
@@ -161,6 +170,15 @@ class SubtleUtilBoringSSL {
                                        const BIGNUM *e,
                                        RsaPrivateKey *private_key,
                                        RsaPublicKey *public_key);
+
+  // Copies n, e and d into the RSA key.
+  static util::Status CopyKey(const RsaPrivateKey &key, RSA *rsa);
+
+  // Copies the prime factors (p, q) into the RSA key.
+  static util::Status CopyPrimeFactors(const RsaPrivateKey &key, RSA *rsa);
+
+  // Copies the CRT params and dp, dq into the RSA key.
+  static util::Status CopyCrtParams(const RsaPrivateKey &key, RSA *rsa);
 };
 
 namespace boringssl {

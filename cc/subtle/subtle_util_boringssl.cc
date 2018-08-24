@@ -450,6 +450,66 @@ util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
   return util::OkStatus();
 }
 
+// static
+util::Status SubtleUtilBoringSSL::CopyKey(
+    const SubtleUtilBoringSSL::RsaPrivateKey &key, RSA *rsa) {
+  auto n = SubtleUtilBoringSSL::str2bn(key.n);
+  auto e = SubtleUtilBoringSSL::str2bn(key.e);
+  auto d = SubtleUtilBoringSSL::str2bn(key.d);
+  if (!n.ok()) return n.status();
+  if (!e.ok()) return e.status();
+  if (!d.ok()) return d.status();
+  if (RSA_set0_key(rsa, n.ValueOrDie().get(), e.ValueOrDie().get(),
+                   d.ValueOrDie().get()) != 1) {
+    return util::Status(util::error::INTERNAL,
+                        absl::StrCat("Could not load RSA key: ",
+                                     SubtleUtilBoringSSL::GetErrors()));
+  }
+  // The RSA object takes ownership when you call RSA_set0_key.
+  n.ValueOrDie().release();
+  e.ValueOrDie().release();
+  d.ValueOrDie().release();
+  return util::OkStatus();
+}
+
+// static
+util::Status SubtleUtilBoringSSL::CopyPrimeFactors(
+    const SubtleUtilBoringSSL::RsaPrivateKey &key, RSA *rsa) {
+  auto p = SubtleUtilBoringSSL::str2bn(key.p);
+  auto q = SubtleUtilBoringSSL::str2bn(key.q);
+  if (!p.ok()) return p.status();
+  if (!q.ok()) return q.status();
+  if (RSA_set0_factors(rsa, p.ValueOrDie().get(), q.ValueOrDie().get()) != 1) {
+    return util::Status(util::error::INTERNAL,
+                        absl::StrCat("Could not load RSA key: ",
+                                     SubtleUtilBoringSSL::GetErrors()));
+  }
+  p.ValueOrDie().release();
+  q.ValueOrDie().release();
+  return util::OkStatus();
+}
+
+// static
+util::Status SubtleUtilBoringSSL::CopyCrtParams(
+    const SubtleUtilBoringSSL::RsaPrivateKey &key, RSA *rsa) {
+  auto dp = SubtleUtilBoringSSL::str2bn(key.dp);
+  auto dq = SubtleUtilBoringSSL::str2bn(key.dq);
+  auto crt = SubtleUtilBoringSSL::str2bn(key.crt);
+  if (!dp.ok()) return dp.status();
+  if (!dq.ok()) return dq.status();
+  if (!crt.ok()) return crt.status();
+  if (RSA_set0_crt_params(rsa, dp.ValueOrDie().get(), dq.ValueOrDie().get(),
+                          crt.ValueOrDie().get()) != 1) {
+    return util::Status(util::error::INTERNAL,
+                        absl::StrCat("Could not load RSA key: ",
+                                     SubtleUtilBoringSSL::GetErrors()));
+  }
+  dp.ValueOrDie().release();
+  dq.ValueOrDie().release();
+  crt.ValueOrDie().release();
+  return util::OkStatus();
+}
+
 namespace boringssl {
 
 util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,
