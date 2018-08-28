@@ -121,7 +121,8 @@ class AeadSetWrapper {
       const primitive = entriesArray[i].getPrimitive();
       let decryptionResult;
       try {
-        decryptionResult = await primitive.decrypt(ciphertext);
+        decryptionResult =
+            await primitive.decrypt(ciphertext, opt_associatedData);
       } catch (e) {
         continue;
       }

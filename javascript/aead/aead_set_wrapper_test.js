@@ -17,6 +17,7 @@ goog.setTestOnly('tink.aead.AeadSetWrapperTest');
 
 const Aead = goog.require('tink.Aead');
 const AeadSetWrapper = goog.require('tink.aead.AeadSetWrapper');
+const Bytes = goog.require('tink.subtle.Bytes');
 const CryptoFormat = goog.require('tink.CryptoFormat');
 const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
 const PbKeysetKey = goog.require('proto.google.crypto.tink.Keyset.Key');
@@ -169,6 +170,25 @@ testSuite({
     }
     fail('An exception should be thrown.');
   },
+
+  async testEncryptDecrypt_AssociatedDataShouldBePassed() {
+    const primitiveSet = createPrimitiveSet();
+    const aead = AeadSetWrapper.newAead(primitiveSet);
+    const plaintext = new Uint8Array([0, 1, 2, 3, 4, 5, 6]);
+    const aad = new Uint8Array([8, 9, 10, 11, 12]);
+
+    // Encrypt the plaintext with aad. The ciphertext should end with aad if
+    // it was passed correctly.
+    const ciphertext = await aead.encrypt(plaintext, aad);
+    const ciphertextAad =
+        ciphertext.slice(ciphertext.length - aad.length, ciphertext.length);
+    assertObjectEquals(aad, ciphertextAad);
+
+    // Decrypt the ciphertext with aad. It is possible only if aad was passed
+    // correctly.
+    const decryptedCiphertext = await aead.decrypt(ciphertext, aad);
+    assertObjectEquals(plaintext, decryptedCiphertext);
+  },
 });
 
 /**
@@ -273,26 +293,34 @@ class DummyAead {
 
   /** @override*/
   async encrypt(plaintext, opt_associatedData) {
-    const result =
-        new Uint8Array(plaintext.length + this.primitiveIdentifier_.length);
-    result.set(plaintext, 0);
-    result.set(this.primitiveIdentifier_, plaintext.length);
+    const result = Bytes.concat(plaintext, this.primitiveIdentifier_);
+    if (opt_associatedData) {
+      return Bytes.concat(result, opt_associatedData);
+    }
     return result;
   }
 
   /** @override*/
   async decrypt(ciphertext, opt_associatedData) {
-    const plaintext = ciphertext.subarray(
-        0, ciphertext.length - this.primitiveIdentifier_.length);
+    if (opt_associatedData) {
+      const aad = ciphertext.subarray(
+          ciphertext.length - opt_associatedData.length, ciphertext.length);
+
+      if ([...aad].toString() != [...opt_associatedData].toString()) {
+        throw new SecurityException(ExceptionText.cannotBeDecrypted());
+      }
+      ciphertext = ciphertext.subarray(0, ciphertext.length - aad.length);
+    }
+
     const primitiveIdentifier = ciphertext.subarray(
         ciphertext.length - this.primitiveIdentifier_.length,
         ciphertext.length);
-
     if ([...primitiveIdentifier].toString() !=
         [...this.primitiveIdentifier_].toString()) {
       throw new SecurityException(ExceptionText.cannotBeDecrypted());
     }
 
-    return plaintext;
+    return ciphertext.subarray(
+        0, ciphertext.length - this.primitiveIdentifier_.length);
   }
 }
