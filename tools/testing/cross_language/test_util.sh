@@ -13,7 +13,7 @@
 
 #!/bin/bash
 
-ROOT_DIR="$TEST_SRCDIR/__main__"
+ROOT_DIR="$TEST_SRCDIR/tink"
 TINKEY_CLI="$ROOT_DIR/tools/tinkey/tinkey"
 
 #############################################################################
@@ -120,4 +120,23 @@ assert_files_different() {
     exit 1
   fi
   echo "+++ Success: the files are different."
+}
+
+# Checks that a given file contains specified substrings.
+assert_file_contains() {
+  local file_to_test="$1"
+  echo "*** Checking that file $file_to_test contains substrings:"
+  cat $file_to_test
+  # Shift the first argument and iterate through the remaining ones.
+  shift
+  for s do
+  echo "... checking for string [$s]"
+  if grep -q "$s" "$file_to_test"; then
+    echo "   found"
+  else
+    echo "--- Failure: file does not contain string [$s]"
+    exit 1
+  fi
+  done
+  echo "+++ Success: file contains all expected substrings."
 }

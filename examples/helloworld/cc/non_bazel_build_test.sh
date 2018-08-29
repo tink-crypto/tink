@@ -3,7 +3,7 @@
 #############################################################################
 ##### Tests for installing and using Tink in a non-Bazel project.
 
-ROOT_DIR="$TEST_SRCDIR/__main__"
+ROOT_DIR="$TEST_SRCDIR/tink"
 TARGET_DIR="$TEST_TMPDIR/my_project"
 HELLO_WORLD_SRC="$ROOT_DIR/examples/helloworld/cc/hello_world.cc"
 KEYSET_FILE="$ROOT_DIR/examples/helloworld/cc/aes128_gcm_test_keyset_json.txt"

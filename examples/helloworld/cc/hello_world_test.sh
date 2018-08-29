@@ -3,7 +3,7 @@
 #############################################################################
 ##### Tests for hello_world binary.
 
-ROOT_DIR="$TEST_SRCDIR/__main__"
+ROOT_DIR="$TEST_SRCDIR/tink"
 HELLO_WORLD_CLI="$ROOT_DIR/examples/helloworld/cc/hello_world"
 
 KEYSET_FILE="$ROOT_DIR/examples/helloworld/cc/aes128_gcm_test_keyset_json.txt"

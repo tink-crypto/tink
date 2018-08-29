@@ -19,6 +19,27 @@ cc_library(
     ],
 )
 
+filegroup(
+    name = "aws_kms_access_files",
+    srcs = glob(["*access_key.csv"]) + [
+        "aws_key_arn.txt",
+        "bad_aws_key_arn.txt",
+    ],
+)
+
+cc_binary(
+    name = "aws_kms_aead_cli",
+    srcs = ["aws_kms_aead_cli.cc"],
+    visibility = ["//tools/testing:__subpackages__"],
+    deps = [
+        ":cli_util",
+        "//cc",
+        "//cc/integration/awskms:aws_crypto",
+        "//cc/integration/awskms:aws_kms_aead",
+        "@aws_cpp_sdk//:aws_sdk_core",
+    ],
+)
+
 cc_binary(
     name = "keyset_reader_writer_cli",
     srcs = ["keyset_reader_writer_cli.cc"],
@@ -86,5 +107,18 @@ cc_binary(
     deps = [
         ":cli_util",
         "//cc",
+    ],
+)
+
+sh_test(
+    name = "aws_kms_aead_test",
+    size = "medium",
+    srcs = [
+        "aws_kms_aead_test.sh",
+    ],
+    data = [
+        ":aws_kms_access_files",
+        ":aws_kms_aead_cli",
+        "//tools/testing/cross_language:test_lib",
     ],
 )

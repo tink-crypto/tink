@@ -13,7 +13,7 @@
 
 #!/bin/bash
 
-ROOT_DIR="$TEST_SRCDIR/__main__"
+ROOT_DIR="$TEST_SRCDIR/tink"
 CC_SIGN_CLI="$ROOT_DIR/tools/testing/cc/public_key_sign_cli_cc"
 CC_VERIFY_CLI="$ROOT_DIR/tools/testing/cc/public_key_verify_cli_cc"
 JAVA_SIGN_CLI="$ROOT_DIR/tools/testing/public_key_sign_cli_java"

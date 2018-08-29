@@ -13,7 +13,7 @@
 
 #!/bin/bash
 
-ROOT_DIR="$TEST_SRCDIR/__main__"
+ROOT_DIR="$TEST_SRCDIR/tink"
 CC_AEAD_CLI="$ROOT_DIR/tools/testing/cc/aead_cli_cc"
 JAVA_AEAD_CLI="$ROOT_DIR/tools/testing/aead_cli_java"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"

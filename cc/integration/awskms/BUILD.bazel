@@ -1,0 +1,53 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+licenses(["notice"])  # Apache 2.0
+
+
+cc_library(
+    name = "aws_crypto",
+    srcs = [
+        "aws_crypto.cc",
+    ],
+    hdrs = [
+        "aws_crypto.h",
+    ],
+    deps = [
+        "@aws_cpp_sdk//:aws_sdk_core",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/base",
+    ],
+    alwayslink = 1,
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_library(
+    name = "aws_kms_aead",
+    srcs = ["aws_kms_aead.cc"],
+    hdrs = ["aws_kms_aead.h"],
+    deps = [
+        "//cc:aead",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@aws_cpp_sdk//:aws_sdk_core",
+    ],
+    alwayslink = 1,
+    strip_include_prefix = "/cc",
+    include_prefix = "tink",
+)
+
+cc_test(
+    name = "aws_kms_aead_test",
+    size = "medium",
+    srcs = ["aws_kms_aead_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aws_kms_aead",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

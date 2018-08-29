@@ -13,7 +13,7 @@
 
 #!/bin/bash
 
-ROOT_DIR="$TEST_SRCDIR/__main__"
+ROOT_DIR="$TEST_SRCDIR/tink"
 CC_KEYSET_RW_CLI="$ROOT_DIR/tools/testing/cc/keyset_reader_writer_cli"
 JAVA_KEYSET_RW_CLI="$ROOT_DIR/tools/tinkey/tinkey"
 TEST_UTIL="$ROOT_DIR/tools/testing/cross_language/test_util.sh"
