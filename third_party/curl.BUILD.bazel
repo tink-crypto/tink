@@ -3,6 +3,17 @@
 
 licenses(["notice"])  # MIT/X derivative license
 
+# Settings for building in various environments.
+config_setting(
+    name = "linux_x86_64",
+    values = {"cpu": "k8"},
+)
+
+config_setting(
+    name = "mac_x86_64",
+    values = {"cpu": "darwin"},
+)
+
 cc_library(
     name = "curl",
     srcs = [
@@ -201,9 +212,17 @@ cc_library(
         "lib/wildcard.c",
         "lib/wildcard.h",
         "lib/x509asn1.h",
-        "lib/vtls/openssl.c",
-    ],
+    ] + select({
+        ":mac_x86_64": [
+            "lib/vtls/darwinssl.c",
+        ],
+        ":linux_x86_64": [
+            "lib/vtls/openssl.c",
+        ],
+    }),
+
     hdrs = [
+        ":configure",
         "include/curl/curl.h",
         "include/curl/curlbuild.h",
         "include/curl/curlrules.h",
@@ -223,17 +242,31 @@ cc_library(
         "-DHAVE_LIBZ",
         "-DHAVE_ZLIB_H",
         "-Wno-string-plus-int",
-        "-DCURL_MAX_WRITE_SIZE=65536",
-    ],
+    ] + select({
+        ":mac_x86_64": [
+            "-fno-constant-cfstrings",
+        ],
+        ":linux_x86_64": [
+            "-DCURL_MAX_WRITE_SIZE=65536",
+        ],
+    }),
     defines = ["CURL_STATICLIB"],
     includes = ["include"],
-    linkopts = [
-        "-lrt",
-    ],
+    linkopts = select({
+        ":mac_x86_64": [
+            "-Wl,-framework",
+            "-Wl,CoreFoundation",
+            "-Wl,-framework",
+            "-Wl,Security",
+        ],
+        ":linux_x86_64": [
+            "-lrt",
+        ],
+    }),
     visibility = ["//visibility:public"],
     deps = [
-        "@zlib_archive//:zlib",
         "@boringssl//:ssl",
+        "@zlib_archive//:zlib",
     ],
 )
 
