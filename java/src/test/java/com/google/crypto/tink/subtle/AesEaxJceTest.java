@@ -141,8 +141,7 @@ public class AesEaxJceTest {
   public void testModifyCiphertext() throws Exception {
     testModifyCiphertext(16, 16);
     testModifyCiphertext(16, 12);
-    // TODO(bleichen): Skipping test with key sizes larger than 128 bits because of
-    //   https://buganizer.corp.google.com/issues/35928521
+    // TODO(bleichen): Skipping test with key sizes larger than 128 bits because of b/35928521.
     // testModifyCiphertext(24, 16);
     // testModifyCiphertext(32, 16);
   }
