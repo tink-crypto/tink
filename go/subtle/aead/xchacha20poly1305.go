@@ -19,7 +19,7 @@ import (
 	"errors"
 	"fmt"
 
-	"google3/third_party/golang/go_crypto/chacha20poly1305/chacha20poly1305"
+	"golang.org/x/crypto/chacha20poly1305"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
