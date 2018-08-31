@@ -87,9 +87,14 @@ const getJsonKeyFromProto = function(key) {
 
   const curveType = curveTypeProtoToSubtle(
       publicKey.getParams().getKemParams().getCurveType());
-  const x = publicKey.getX_asU8();
-  const y = publicKey.getY_asU8();
-
+  let x = publicKey.getX_asU8();
+  let y = publicKey.getY_asU8();
+  if (x.length == 33 && x[0] == 0) {
+    x = x.slice(1);
+  }
+  if (y.length == 33 && y[0] == 0) {
+    y = y.slice(1);
+  }
   return getJsonKey(curveType, x, y, d);
 };
 
