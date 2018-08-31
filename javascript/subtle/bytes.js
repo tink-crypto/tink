@@ -132,7 +132,7 @@ const fromBase64 = function(input) {
  */
 const toBase64 = function(bytes, opt_webSafe) {
   return base64.encodeByteArray(bytes, opt_webSafe)
-      .replace('.', '') /* padding */;
+      .replace(/\./g, '') /* padding */;
 };
 
 exports = {

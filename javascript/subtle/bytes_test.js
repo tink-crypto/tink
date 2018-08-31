@@ -91,5 +91,23 @@ testSuite({
     assertThrows(function() {
       Bytes.fromNumber(Number.MAX_SAFE_INTEGER + 1);
     });
-  }
+  },
+
+  testToBase64_removeAllDotsPadding() {
+    for (let i = 0; i < 10; i++) {
+      const array = new Uint8Array(i);
+      const base64Representation = Bytes.toBase64(array, true);
+      assertNotEquals(
+          '.', base64Representation[base64Representation.length - 1]);
+    }
+  },
+
+  testToBase64_fromBase64() {
+    for (let i = 0; i < 10; i++) {
+      const array = Random.randBytes(i);
+      const base64Representation = Bytes.toBase64(array, true);
+      const arrayRepresentation = Bytes.fromBase64(base64Representation);
+      assertObjectEquals(array, arrayRepresentation);
+    }
+  },
 });
