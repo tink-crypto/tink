@@ -23,7 +23,7 @@
 #include "tink/aead.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "openssl/evp.h"
+#include "openssl/aead.h"
 
 namespace crypto {
 namespace tink {
@@ -49,14 +49,9 @@ class AesGcmBoringSsl : public Aead {
   static const int TAG_SIZE_IN_BYTES = 16;
 
   AesGcmBoringSsl() {}
-  AesGcmBoringSsl(absl::string_view key_value,
-                  const EVP_CIPHER *cipher);
+  crypto::tink::util::Status Init(absl::string_view key_value);
 
-  const std::string key_;
-  // cipher_ is a singleton owned by BoringSsl.
-  // Preferable would be to use the AEAD interface, but unfortunately this
-  // interface does not support 192-bit keys.
-  const EVP_CIPHER *cipher_;
+  bssl::ScopedEVP_AEAD_CTX ctx_;
 };
 
 }  // namespace subtle
