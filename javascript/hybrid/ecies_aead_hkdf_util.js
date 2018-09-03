@@ -69,6 +69,35 @@ const getJsonKey = function(curve, x, y, d) {
 };
 
 /**
+ * Either prolong or shrinks the array representing x or y coordinate to have
+ * the specified size. As webcrypto API assumes that x and y coordinates has
+ * exactly the supposed number of bytes, whereas x and y in proto might either
+ * have some leading zeros or the leading zeros might be missing.
+ *
+ * @private
+ * @param {!Uint8Array} coordinate represented in BigEndian
+ * @param {number} sizeInBytes
+ * @return {!Uint8Array}
+ */
+const coordinateToCorrectLength = function(coordinate, sizeInBytes) {
+  const coordLen = coordinate.length;
+  if (coordLen < sizeInBytes) {
+    const zeros = new Uint8Array(sizeInBytes - coordLen);
+    return Bytes.concat(zeros, coordinate);
+  }
+  if (coordLen > sizeInBytes) {
+    for (let i = 0; i < coordLen - sizeInBytes; i++) {
+      if (coordinate[i] != 0) {
+        throw new SecurityException(
+            'Number needs more bytes to be represented.');
+      }
+    }
+    return coordinate.slice(coordLen - sizeInBytes, coordLen);
+  }
+  return coordinate;
+};
+
+/**
  * WARNING: This method assumes that the given key proto is valid.
  *
  * @package
@@ -87,14 +116,9 @@ const getJsonKeyFromProto = function(key) {
 
   const curveType = curveTypeProtoToSubtle(
       publicKey.getParams().getKemParams().getCurveType());
-  let x = publicKey.getX_asU8();
-  let y = publicKey.getY_asU8();
-  if (x.length == 33 && x[0] == 0) {
-    x = x.slice(1);
-  }
-  if (y.length == 33 && y[0] == 0) {
-    y = y.slice(1);
-  }
+  const coordinateLength = EllipticCurves.fieldSizeInBytes(curveType);
+  let x = coordinateToCorrectLength(publicKey.getX_asU8(), coordinateLength);
+  let y = coordinateToCorrectLength(publicKey.getY_asU8(), coordinateLength);
   return getJsonKey(curveType, x, y, d);
 };
 

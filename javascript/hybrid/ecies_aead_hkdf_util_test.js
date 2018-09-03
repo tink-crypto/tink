@@ -59,6 +59,49 @@ testSuite({
     }
   },
 
+  async testGetJsonKeyFromProto_publicKey_withLeadingZeros() {
+    const curves = Object.keys(PbEllipticCurveType);
+    for (let curveId of curves) {
+      const curve = PbEllipticCurveType[curveId];
+      if (curve === PbEllipticCurveType.UNKNOWN_CURVE) {
+        continue;
+      }
+      const key = await createKey(curve);
+      // Add leading zeros to x and y value of key.
+      const x = key.getPublicKey().getX();
+      const y = key.getPublicKey().getY();
+      key.getPublicKey().setX(Bytes.concat(new Uint8Array([0, 0, 0, 0, 0]), x));
+      key.getPublicKey().setY(Bytes.concat(new Uint8Array([0, 0, 0]), y));
+      const jwk = EciesAeadHkdfUtil.getJsonKeyFromProto(key.getPublicKey());
+
+      // Test the returned jwk.
+      const curveTypeSubtle = EciesAeadHkdfUtil.curveTypeProtoToSubtle(curve);
+      const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
+
+      assertEquals('EC', jwk['kty']);
+      assertEquals(curveTypeString, jwk['crv']);
+      assertObjectEquals(x, Bytes.fromBase64(jwk['x']));
+      assertObjectEquals(y, Bytes.fromBase64(jwk['y']));
+      assertObjectEquals(undefined, jwk['d']);
+      assertTrue(jwk['ext']);
+    }
+  },
+
+  async testGetJsonKeyFromProto_publicKey_leadingNonzero() {
+    const curve = PbEllipticCurveType.NIST_P256;
+    const key = await createKey(curve);
+    const x = key.getPublicKey().getX();
+    key.getPublicKey().setX(Bytes.concat(new Uint8Array([1, 0]), x));
+    try {
+      EciesAeadHkdfUtil.getJsonKeyFromProto(key.getPublicKey());
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: Number needs more bytes to be represented.',
+          e.toString());
+    }
+  },
+
   async testGetJsonKeyFromProto_privateKey() {
     const curves = Object.keys(PbEllipticCurveType);
     for (let curveId of curves) {
