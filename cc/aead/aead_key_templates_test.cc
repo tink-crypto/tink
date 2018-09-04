@@ -34,7 +34,6 @@ using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
-using google::crypto::tink::XChacha20Poly1305KeyFormat;
 
 namespace crypto {
 namespace tink {
@@ -60,7 +59,8 @@ TEST(AeadKeyTemplatesTest, testAesEaxKeyTemplates) {
     // Check that the template works with the key manager.
     AesEaxKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    auto new_key_result =
+        key_manager.get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -81,7 +81,8 @@ TEST(AeadKeyTemplatesTest, testAesEaxKeyTemplates) {
     // Check that the template works with the key manager.
     AesEaxKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    auto new_key_result =
+        key_manager.get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
@@ -105,7 +106,8 @@ TEST(AeadKeyTemplatesTest, testAesGcmKeyTemplates) {
     // Check that the template works with the key manager.
     AesGcmKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    auto new_key_result =
+        key_manager.get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -125,7 +127,8 @@ TEST(AeadKeyTemplatesTest, testAesGcmKeyTemplates) {
     // Check that the template works with the key manager.
     AesGcmKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    auto new_key_result =
+        key_manager.get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
@@ -153,7 +156,8 @@ TEST(AeadKeyTemplatesTest, testAesCtrHmacAeadKeyTemplates) {
     // Check that the template works with the key manager.
     AesCtrHmacAeadKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    auto new_key_result =
+        key_manager.get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 
@@ -177,31 +181,30 @@ TEST(AeadKeyTemplatesTest, testAesCtrHmacAeadKeyTemplates) {
     // Check that the template works with the key manager.
     AesCtrHmacAeadKeyManager key_manager;
     EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-    auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+    auto new_key_result =
+        key_manager.get_key_factory().NewKey(key_template.value());
     EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
   }
 }
 
-TEST(AeadKeyTemplatesTest, testXChacha20Poly1305KeyTemplates) {
+TEST(AeadKeyTemplatesTest, testXChaCha20Poly1305KeyTemplates) {
   std::string type_url =
-      "type.googleapis.com/google.crypto.tink.XChacha20Poly1305Key";
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
 
   // Check that returned template is correct.
-  const KeyTemplate& key_template = AeadKeyTemplates::XChacha20Poly1305();
+  const KeyTemplate& key_template = AeadKeyTemplates::XChaCha20Poly1305();
   EXPECT_EQ(type_url, key_template.type_url());
   EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
-  XChacha20Poly1305KeyFormat key_format;
-  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
-  EXPECT_EQ(32, key_format.key_size());
 
   // Check that reference to the same object is returned.
-  const KeyTemplate& key_template_2 = AeadKeyTemplates::XChacha20Poly1305();
+  const KeyTemplate& key_template_2 = AeadKeyTemplates::XChaCha20Poly1305();
   EXPECT_EQ(&key_template, &key_template_2);
 
   // Check that the template works with the key manager.
-  XChacha20Poly1305KeyManager key_manager;
+  XChaCha20Poly1305KeyManager key_manager;
   EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
-  auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+  auto new_key_result =
+      key_manager.get_key_factory().NewKey(key_template.value());
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
 }
 
