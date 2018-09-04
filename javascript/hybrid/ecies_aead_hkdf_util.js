@@ -69,32 +69,33 @@ const getJsonKey = function(curve, x, y, d) {
 };
 
 /**
- * Either prolong or shrinks the array representing x or y coordinate to have
- * the specified size. As webcrypto API assumes that x and y coordinates has
- * exactly the supposed number of bytes, whereas x and y in proto might either
- * have some leading zeros or the leading zeros might be missing.
+ * Either prolong or shrinks the array representing number in BigEndian encoding
+ * to have the specified size. As webcrypto API assumes that x, y and d values
+ * has exactly the supposed number of bytes, whereas corresponding x, y and
+ * keyValue values in proto might either have some leading zeros or the leading
+ * zeros might be missing.
  *
  * @private
- * @param {!Uint8Array} coordinate represented in BigEndian
+ * @param {!Uint8Array} bigEndianNumber
  * @param {number} sizeInBytes
  * @return {!Uint8Array}
  */
-const coordinateToCorrectLength = function(coordinate, sizeInBytes) {
-  const coordLen = coordinate.length;
-  if (coordLen < sizeInBytes) {
-    const zeros = new Uint8Array(sizeInBytes - coordLen);
-    return Bytes.concat(zeros, coordinate);
+const bigEndianNumberToCorrectLength = function(bigEndianNumber, sizeInBytes) {
+  const numberLen = bigEndianNumber.length;
+  if (numberLen < sizeInBytes) {
+    const zeros = new Uint8Array(sizeInBytes - numberLen);
+    return Bytes.concat(zeros, bigEndianNumber);
   }
-  if (coordLen > sizeInBytes) {
-    for (let i = 0; i < coordLen - sizeInBytes; i++) {
-      if (coordinate[i] != 0) {
+  if (numberLen > sizeInBytes) {
+    for (let i = 0; i < numberLen - sizeInBytes; i++) {
+      if (bigEndianNumber[i] != 0) {
         throw new SecurityException(
             'Number needs more bytes to be represented.');
       }
     }
-    return coordinate.slice(coordLen - sizeInBytes, coordLen);
+    return bigEndianNumber.slice(numberLen - sizeInBytes, numberLen);
   }
-  return coordinate;
+  return bigEndianNumber;
 };
 
 /**
@@ -109,16 +110,18 @@ const getJsonKeyFromProto = function(key) {
   let /** @type {!Uint8Array} */ d;
   if (key instanceof PbEciesAeadHkdfPrivateKey) {
     publicKey = /** @type{!PbEciesAeadHkdfPublicKey} */ (key.getPublicKey());
-    d = /** @type{!Uint8Array} */ (key.getKeyValue_asU8());
   } else {
     publicKey = key;
   }
 
   const curveType = curveTypeProtoToSubtle(
       publicKey.getParams().getKemParams().getCurveType());
-  const coordinateLength = EllipticCurves.fieldSizeInBytes(curveType);
-  let x = coordinateToCorrectLength(publicKey.getX_asU8(), coordinateLength);
-  let y = coordinateToCorrectLength(publicKey.getY_asU8(), coordinateLength);
+  const expectedLength = EllipticCurves.fieldSizeInBytes(curveType);
+  let x = bigEndianNumberToCorrectLength(publicKey.getX_asU8(), expectedLength);
+  let y = bigEndianNumberToCorrectLength(publicKey.getY_asU8(), expectedLength);
+  if (key instanceof PbEciesAeadHkdfPrivateKey) {
+    d = bigEndianNumberToCorrectLength(key.getKeyValue_asU8(), expectedLength);
+  }
   return getJsonKey(curveType, x, y, d);
 };
 

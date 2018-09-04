@@ -127,6 +127,33 @@ testSuite({
     }
   },
 
+  async testGetJsonKeyFromProto_privateKey_leadingZeros() {
+    const curves = Object.keys(PbEllipticCurveType);
+    for (let curveId of curves) {
+      const curve = PbEllipticCurveType[curveId];
+      if (curve === PbEllipticCurveType.UNKNOWN_CURVE) {
+        continue;
+      }
+      const key = await createKey(curve);
+      const d = key.getKeyValue_asU8();
+      key.setKeyValue(Bytes.concat(new Uint8Array([0, 0, 0]), d));
+      const jwk = EciesAeadHkdfUtil.getJsonKeyFromProto(key);
+
+      // Test the returned jwk.
+      const curveTypeSubtle = EciesAeadHkdfUtil.curveTypeProtoToSubtle(curve);
+      const curveTypeString = EllipticCurves.curveToString(curveTypeSubtle);
+
+      assertEquals('EC', jwk['kty']);
+      assertEquals(curveTypeString, jwk['crv']);
+      assertObjectEquals(
+          key.getPublicKey().getX_asU8(), Bytes.fromBase64(jwk['x']));
+      assertObjectEquals(
+          key.getPublicKey().getY_asU8(), Bytes.fromBase64(jwk['y']));
+      assertObjectEquals(d, Bytes.fromBase64(jwk['d']));
+      assertTrue(jwk['ext']);
+    }
+  },
+
   // tests for protoToSubtle methods
   testCurveTypeProtoToSubtle() {
     assertEquals(
