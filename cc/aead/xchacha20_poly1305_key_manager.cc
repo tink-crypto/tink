@@ -35,105 +35,92 @@ namespace tink {
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::KeyData;
-using google::crypto::tink::XChacha20Poly1305Key;
-using google::crypto::tink::XChacha20Poly1305KeyFormat;
+using google::crypto::tink::XChaCha20Poly1305Key;
 using portable_proto::MessageLite;
 
-class XChacha20Poly1305KeyFactory : public KeyFactory {
- public:
-  XChacha20Poly1305KeyFactory() {}
+const int kKeySizeInBytes = 32;
 
-  // Generates a new random XChacha20Poly1305Key, based on the specified
-  // 'key_format', which must contain XChacha20Poly1305KeyFormat-proto.
+class XChaCha20Poly1305KeyFactory : public KeyFactory {
+ public:
+  XChaCha20Poly1305KeyFactory() {}
+
+  // Generates a new random XChaCha20Poly1305Key. XChaCha20Poly1305 does not
+  // need any key format, thus |key_format| is ignored.
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(const portable_proto::MessageLite& key_format) const override;
 
-  // Generates a new random XChacha20Poly1305Key, based on the specified
-  // 'serialized_key_format', which must contain
-  // XChacha20Poly1305KeyFormat-proto.
+  // Generates a new random XChaCha20Poly1305Key. XChaCha20Poly1305 does not
+  // need any key format, thus |serialized_key_format| is ignored.
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const override;
 
-  // Generates a new random XChacha20Poly1305Key, based on the specified
-  // 'serialized_key_format' (which must contain
-  // XChacha20Poly1305KeyFormat-proto), and wraps it in a KeyData-proto.
+  // Generates a new random XChaCha20Poly1305Key, and wraps it in a
+  // KeyData-proto. XChaCha20Poly1305 does not need any key format, thus
+  // |serialized_key_format| is ignored.
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   NewKeyData(absl::string_view serialized_key_format) const override;
+
+ private:
+  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
+  NewKey() const;
 };
 
-StatusOr<std::unique_ptr<MessageLite>> XChacha20Poly1305KeyFactory::NewKey(
-    const portable_proto::MessageLite& key_format) const {
-  std::string key_format_url = std::string(XChacha20Poly1305KeyManager::kKeyTypePrefix) +
-                          key_format.GetTypeName();
-  if (key_format_url != XChacha20Poly1305KeyManager::kKeyFormatUrl) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key format proto '%s' is not supported by this manager.",
-                     key_format_url.c_str());
-  }
-  const XChacha20Poly1305KeyFormat& xchacha20_poly1305_key_format =
-      reinterpret_cast<const XChacha20Poly1305KeyFormat&>(key_format);
-  Status status =
-      XChacha20Poly1305KeyManager::Validate(xchacha20_poly1305_key_format);
-  if (!status.ok()) return status;
-
-  // Generate XChacha20Poly1305Key.
-  std::unique_ptr<XChacha20Poly1305Key> xchacha20_poly1305_key(
-      new XChacha20Poly1305Key());
-  xchacha20_poly1305_key->set_version(XChacha20Poly1305KeyManager::kVersion);
+StatusOr<std::unique_ptr<MessageLite>> XChaCha20Poly1305KeyFactory::NewKey()
+    const {
+  // Generate XChaCha20Poly1305Key.
+  std::unique_ptr<XChaCha20Poly1305Key> xchacha20_poly1305_key(
+      new XChaCha20Poly1305Key());
+  xchacha20_poly1305_key->set_version(XChaCha20Poly1305KeyManager::kVersion);
   xchacha20_poly1305_key->set_key_value(
-      subtle::Random::GetRandomBytes(xchacha20_poly1305_key_format.key_size()));
+      subtle::Random::GetRandomBytes(kKeySizeInBytes));
   std::unique_ptr<MessageLite> key = std::move(xchacha20_poly1305_key);
   return std::move(key);
 }
 
-StatusOr<std::unique_ptr<MessageLite>> XChacha20Poly1305KeyFactory::NewKey(
-    absl::string_view serialized_key_format) const {
-  XChacha20Poly1305KeyFormat key_format;
-  if (!key_format.ParseFromString(std::string(serialized_key_format))) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Could not parse the passed string as proto '%s'.",
-                     XChacha20Poly1305KeyManager::kKeyFormatUrl);
-  }
-  return NewKey(key_format);
+StatusOr<std::unique_ptr<MessageLite>> XChaCha20Poly1305KeyFactory::NewKey(
+    const portable_proto::MessageLite& key_format) const {
+  return NewKey();
 }
 
-StatusOr<std::unique_ptr<KeyData>> XChacha20Poly1305KeyFactory::NewKeyData(
+StatusOr<std::unique_ptr<MessageLite>> XChaCha20Poly1305KeyFactory::NewKey(
     absl::string_view serialized_key_format) const {
-  auto new_key_result = NewKey(serialized_key_format);
+  return NewKey();
+}
+
+StatusOr<std::unique_ptr<KeyData>> XChaCha20Poly1305KeyFactory::NewKeyData(
+    absl::string_view serialized_key_format) const {
+  auto new_key_result = NewKey();
   if (!new_key_result.ok()) return new_key_result.status();
-  auto new_key = reinterpret_cast<const XChacha20Poly1305Key&>(
+  auto new_key = reinterpret_cast<const XChaCha20Poly1305Key&>(
       *(new_key_result.ValueOrDie()));
   std::unique_ptr<KeyData> key_data(new KeyData());
-  key_data->set_type_url(XChacha20Poly1305KeyManager::kKeyType);
+  key_data->set_type_url(XChaCha20Poly1305KeyManager::kKeyType);
   key_data->set_value(new_key.SerializeAsString());
   key_data->set_key_material_type(KeyData::SYMMETRIC);
   return std::move(key_data);
 }
 
-constexpr char XChacha20Poly1305KeyManager::kKeyFormatUrl[];
-constexpr char XChacha20Poly1305KeyManager::kKeyTypePrefix[];
-constexpr char XChacha20Poly1305KeyManager::kKeyType[];
-constexpr uint32_t XChacha20Poly1305KeyManager::kVersion;
+constexpr char XChaCha20Poly1305KeyManager::kKeyTypePrefix[];
+constexpr char XChaCha20Poly1305KeyManager::kKeyType[];
+constexpr uint32_t XChaCha20Poly1305KeyManager::kVersion;
 
-const int kMinKeySizeInBytes = 32;
+XChaCha20Poly1305KeyManager::XChaCha20Poly1305KeyManager()
+    : key_type_(kKeyType), key_factory_(new XChaCha20Poly1305KeyFactory()) {}
 
-XChacha20Poly1305KeyManager::XChacha20Poly1305KeyManager()
-    : key_type_(kKeyType), key_factory_(new XChacha20Poly1305KeyFactory()) {}
-
-const std::string& XChacha20Poly1305KeyManager::get_key_type() const {
+const std::string& XChaCha20Poly1305KeyManager::get_key_type() const {
   return key_type_;
 }
 
-uint32_t XChacha20Poly1305KeyManager::get_version() const { return kVersion; }
+uint32_t XChaCha20Poly1305KeyManager::get_version() const { return kVersion; }
 
-const KeyFactory& XChacha20Poly1305KeyManager::get_key_factory() const {
+const KeyFactory& XChaCha20Poly1305KeyManager::get_key_factory() const {
   return *key_factory_;
 }
 
-StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305KeyManager::GetPrimitive(
+StatusOr<std::unique_ptr<Aead>> XChaCha20Poly1305KeyManager::GetPrimitive(
     const KeyData& key_data) const {
   if (DoesSupport(key_data.type_url())) {
-    XChacha20Poly1305Key xchacha20_poly1305_key;
+    XChaCha20Poly1305Key xchacha20_poly1305_key;
     if (!xchacha20_poly1305_key.ParseFromString(key_data.value())) {
       return ToStatusF(util::error::INVALID_ARGUMENT,
                        "Could not parse key_data.value as key type '%s'.",
@@ -147,12 +134,12 @@ StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305KeyManager::GetPrimitive(
   }
 }
 
-StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305KeyManager::GetPrimitive(
+StatusOr<std::unique_ptr<Aead>> XChaCha20Poly1305KeyManager::GetPrimitive(
     const MessageLite& key) const {
   std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
   if (DoesSupport(key_type)) {
-    const XChacha20Poly1305Key& xchacha20_poly1305_key =
-        reinterpret_cast<const XChacha20Poly1305Key&>(key);
+    const XChaCha20Poly1305Key& xchacha20_poly1305_key =
+        reinterpret_cast<const XChaCha20Poly1305Key&>(key);
     return GetPrimitiveImpl(xchacha20_poly1305_key);
   } else {
     return ToStatusF(util::error::INVALID_ARGUMENT,
@@ -161,8 +148,8 @@ StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305KeyManager::GetPrimitive(
   }
 }
 
-StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305KeyManager::GetPrimitiveImpl(
-    const XChacha20Poly1305Key& xchacha20_poly1305_key) const {
+StatusOr<std::unique_ptr<Aead>> XChaCha20Poly1305KeyManager::GetPrimitiveImpl(
+    const XChaCha20Poly1305Key& xchacha20_poly1305_key) const {
   Status status = Validate(xchacha20_poly1305_key);
   if (!status.ok()) return status;
   auto xchacha20_poly1305_result = subtle::XChacha20Poly1305BoringSsl::New(
@@ -173,30 +160,15 @@ StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305KeyManager::GetPrimitiveImpl(
 }
 
 // static
-Status XChacha20Poly1305KeyManager::Validate(const XChacha20Poly1305Key& key) {
+Status XChaCha20Poly1305KeyManager::Validate(const XChaCha20Poly1305Key& key) {
   Status status = ValidateVersion(key.version(), kVersion);
   if (!status.ok()) return status;
   uint32_t key_size = key.key_value().size();
-  if (key_size < kMinKeySizeInBytes) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid XChacha20Poly1305Key: key_value is too short.");
-  }
   if (key_size != 32) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid XChacha20Poly1305Key: key_value has %d bytes; "
+                     "Invalid XChaCha20Poly1305Key: key_value has %d bytes; "
                      "supported size: 32 bytes.",
                      key_size);
-  }
-  return Status::OK;
-}
-
-// static
-Status XChacha20Poly1305KeyManager::Validate(
-    const XChacha20Poly1305KeyFormat& key_format) {
-  if (key_format.key_size() < kMinKeySizeInBytes) {
-    return ToStatusF(
-        util::error::INVALID_ARGUMENT,
-        "Invalid XChacha20Poly1305KeyFormat: key_size is too small.");
   }
   return Status::OK;
 }

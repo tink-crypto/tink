@@ -32,29 +32,28 @@ using google::crypto::tink::AesEaxKey;
 using google::crypto::tink::AesEaxKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::KeyTemplate;
-using google::crypto::tink::XChacha20Poly1305Key;
-using google::crypto::tink::XChacha20Poly1305KeyFormat;
+using google::crypto::tink::XChaCha20Poly1305Key;
 
 namespace {
 
-class XChacha20Poly1305KeyManagerTest : public ::testing::Test {
+class XChaCha20Poly1305KeyManagerTest : public ::testing::Test {
  protected:
   std::string key_type_prefix = "type.googleapis.com/";
   std::string xchaha20_poly1305_key_type =
-      "type.googleapis.com/google.crypto.tink.XChacha20Poly1305Key";
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
 };
 
-TEST_F(XChacha20Poly1305KeyManagerTest, testBasic) {
-  XChacha20Poly1305KeyManager key_manager;
+TEST_F(XChaCha20Poly1305KeyManagerTest, testBasic) {
+  XChaCha20Poly1305KeyManager key_manager;
 
   EXPECT_EQ(0, key_manager.get_version());
-  EXPECT_EQ("type.googleapis.com/google.crypto.tink.XChacha20Poly1305Key",
+  EXPECT_EQ("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
             key_manager.get_key_type());
   EXPECT_TRUE(key_manager.DoesSupport(key_manager.get_key_type()));
 }
 
-TEST_F(XChacha20Poly1305KeyManagerTest, testKeyDataErrors) {
-  XChacha20Poly1305KeyManager key_manager;
+TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyDataErrors) {
+  XChaCha20Poly1305KeyManager key_manager;
 
   {  // Bad key type.
     KeyData key_data;
@@ -83,7 +82,7 @@ TEST_F(XChacha20Poly1305KeyManagerTest, testKeyDataErrors) {
 
   {  // Bad version.
     KeyData key_data;
-    XChacha20Poly1305Key key;
+    XChaCha20Poly1305Key key;
     key.set_version(1);
     key_data.set_type_url(xchaha20_poly1305_key_type);
     key_data.set_value(key.SerializeAsString());
@@ -96,7 +95,7 @@ TEST_F(XChacha20Poly1305KeyManagerTest, testKeyDataErrors) {
 
   {  // Bad key_value size (supported size: 32).
     for (int len = 0; len < 42; len++) {
-      XChacha20Poly1305Key key;
+      XChaCha20Poly1305Key key;
       key.set_version(0);
       key.set_key_value(std::string(len, 'a'));
       KeyData key_data;
@@ -106,29 +105,20 @@ TEST_F(XChacha20Poly1305KeyManagerTest, testKeyDataErrors) {
       if (len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
-        if (len < 32) {
-          EXPECT_FALSE(result.ok());
-          EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                    result.status().error_code());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring, "too short",
-                              result.status().error_message());
-        } else {
-          EXPECT_FALSE(result.ok());
-          EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                    result.status().error_code());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                              std::to_string(len) + " bytes",
-                              result.status().error_message());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported size",
-                              result.status().error_message());
-        }
+        EXPECT_FALSE(result.ok());
+        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+        EXPECT_PRED_FORMAT2(testing::IsSubstring,
+                            std::to_string(len) + " bytes",
+                            result.status().error_message());
+        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported size",
+                            result.status().error_message());
       }
     }
   }
 }
 
-TEST_F(XChacha20Poly1305KeyManagerTest, testKeyMessageErrors) {
-  XChacha20Poly1305KeyManager key_manager;
+TEST_F(XChaCha20Poly1305KeyManagerTest, testKeyMessageErrors) {
+  XChaCha20Poly1305KeyManager key_manager;
 
   {  // Bad protobuffer.
     AesEaxKey key;
@@ -143,39 +133,30 @@ TEST_F(XChacha20Poly1305KeyManagerTest, testKeyMessageErrors) {
 
   {  // Bad key_value size (supported size: 32).
     for (int len = 0; len < 42; len++) {
-      XChacha20Poly1305Key key;
+      XChaCha20Poly1305Key key;
       key.set_version(0);
       key.set_key_value(std::string(len, 'a'));
       auto result = key_manager.GetPrimitive(key);
       if (len == 32) {
         EXPECT_TRUE(result.ok()) << result.status();
       } else {
-        if (len < 32) {
-          EXPECT_FALSE(result.ok());
-          EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                    result.status().error_code());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring, "too short",
-                              result.status().error_message());
-        } else {
-          EXPECT_FALSE(result.ok());
-          EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                    result.status().error_code());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring,
-                              std::to_string(len) + " bytes",
-                              result.status().error_message());
-          EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported size",
-                              result.status().error_message());
-        }
+        EXPECT_FALSE(result.ok());
+        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+        EXPECT_PRED_FORMAT2(testing::IsSubstring,
+                            std::to_string(len) + " bytes",
+                            result.status().error_message());
+        EXPECT_PRED_FORMAT2(testing::IsSubstring, "supported size",
+                            result.status().error_message());
       }
     }
   }
 }
 
-TEST_F(XChacha20Poly1305KeyManagerTest, testPrimitives) {
+TEST_F(XChaCha20Poly1305KeyManagerTest, testPrimitives) {
   std::string plaintext = "some plaintext";
   std::string aad = "some aad";
-  XChacha20Poly1305KeyManager key_manager;
-  XChacha20Poly1305Key key;
+  XChaCha20Poly1305KeyManager key_manager;
+  XChaCha20Poly1305Key key;
 
   key.set_version(0);
   key.set_key_value("32 bytes of key 0123456789abcdef");
@@ -208,80 +189,41 @@ TEST_F(XChacha20Poly1305KeyManagerTest, testPrimitives) {
   }
 }
 
-TEST_F(XChacha20Poly1305KeyManagerTest, testNewKeyErrors) {
-  XChacha20Poly1305KeyManager key_manager;
+TEST_F(XChaCha20Poly1305KeyManagerTest, testNewKeyBasic) {
+  XChaCha20Poly1305KeyManager key_manager;
   const KeyFactory& key_factory = key_manager.get_key_factory();
-
-  {  // Bad key format.
-    AesEaxKeyFormat key_format;
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not supported",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "AesEaxKeyFormat",
-                        result.status().error_message());
-  }
-
-  {  // Bad serialized key format.
-    auto result = key_factory.NewKey("some bad serialized proto");
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "not parse",
-                        result.status().error_message());
-  }
-
-  {  // Bad XChacha20Poly1305KeyFormat: small key_size.
-    XChacha20Poly1305KeyFormat key_format;
-    key_format.set_key_size(8);
-    auto result = key_factory.NewKey(key_format);
-    EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "key_size",
-                        result.status().error_message());
-    EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
-                        result.status().error_message());
-  }
-}
-
-TEST_F(XChacha20Poly1305KeyManagerTest, testNewKeyBasic) {
-  XChacha20Poly1305KeyManager key_manager;
-  const KeyFactory& key_factory = key_manager.get_key_factory();
-  XChacha20Poly1305KeyFormat key_format;
-  key_format.set_key_size(32);
-
   { // Via NewKey(format_proto).
-    auto result = key_factory.NewKey(key_format);
+    auto result = key_factory.NewKey(nullptr /* ignored */);
     EXPECT_TRUE(result.ok()) << result.status();
     auto key = std::move(result.ValueOrDie());
     EXPECT_EQ(key_type_prefix + key->GetTypeName(), xchaha20_poly1305_key_type);
-    std::unique_ptr<XChacha20Poly1305Key> xchaha20_poly1305_key(
-        reinterpret_cast<XChacha20Poly1305Key*>(key.release()));
+    std::unique_ptr<XChaCha20Poly1305Key> xchaha20_poly1305_key(
+        reinterpret_cast<XChaCha20Poly1305Key*>(key.release()));
     EXPECT_EQ(0, xchaha20_poly1305_key->version());
-    EXPECT_EQ(key_format.key_size(), xchaha20_poly1305_key->key_value().size());
+    EXPECT_EQ(32, xchaha20_poly1305_key->key_value().size());
   }
 
   { // Via NewKey(serialized_format_proto).
-    auto result = key_factory.NewKey(key_format.SerializeAsString());
+    auto result = key_factory.NewKey("" /* ignored */);
     EXPECT_TRUE(result.ok()) << result.status();
     auto key = std::move(result.ValueOrDie());
     EXPECT_EQ(key_type_prefix + key->GetTypeName(), xchaha20_poly1305_key_type);
-    std::unique_ptr<XChacha20Poly1305Key> xchaha20_poly1305_key(
-        reinterpret_cast<XChacha20Poly1305Key*>(key.release()));
+    std::unique_ptr<XChaCha20Poly1305Key> xchaha20_poly1305_key(
+        reinterpret_cast<XChaCha20Poly1305Key*>(key.release()));
     EXPECT_EQ(0, xchaha20_poly1305_key->version());
-    EXPECT_EQ(key_format.key_size(), xchaha20_poly1305_key->key_value().size());
+    EXPECT_EQ(32, xchaha20_poly1305_key->key_value().size());
   }
 
   { // Via NewKeyData(serialized_format_proto).
-    auto result = key_factory.NewKeyData(key_format.SerializeAsString());
+    auto result = key_factory.NewKeyData("" /* ignored */);
     EXPECT_TRUE(result.ok()) << result.status();
     auto key_data = std::move(result.ValueOrDie());
     EXPECT_EQ(xchaha20_poly1305_key_type, key_data->type_url());
     EXPECT_EQ(KeyData::SYMMETRIC, key_data->key_material_type());
-    XChacha20Poly1305Key xchaha20_poly1305_key;
+    XChaCha20Poly1305Key xchaha20_poly1305_key;
     EXPECT_TRUE(xchaha20_poly1305_key.ParseFromString(key_data->value()));
     EXPECT_EQ(0, xchaha20_poly1305_key.version());
-    EXPECT_EQ(key_format.key_size(), xchaha20_poly1305_key.key_value().size());
+    EXPECT_EQ(32, xchaha20_poly1305_key.key_value().size());
   }
 }
 
