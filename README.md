@@ -76,7 +76,7 @@ AEAD primitive in Java:
     Aead aead = AeadFactory.getPrimitive(keysetHandle);
 
     // 3. Use the primitive.
-    byte[] ciphertext = aead.encrypt(plaintext, aad);
+    byte[] ciphertext = aead.encrypt(plaintext, new byte[0] /* additionalData */);
 ```
 
 ## Current Status
