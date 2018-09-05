@@ -17,11 +17,11 @@
 #ifndef TINK_PRIMITIVE_SET_H_
 #define TINK_PRIMITIVE_SET_H_
 
-#include <mutex>  // NOLINT(build/c++11)
 #include <unordered_map>
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/synchronization/mutex.h"
 #include "tink/crypto_format.h"
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"
@@ -98,7 +98,7 @@ class PrimitiveSet {
                        "The primitive must be non-null.");
     }
     std::string identifier = identifier_result.ValueOrDie();
-    std::lock_guard<std::mutex> lock(primitives_mutex_);
+    absl::MutexLock lock(&primitives_mutex_);
     primitives_[identifier].push_back(
         absl::make_unique<Entry<P>>(std::move(primitive),
                                     identifier, key.status(),
@@ -109,7 +109,7 @@ class PrimitiveSet {
   // Returns the entries with primitives identifed by 'identifier'.
   crypto::tink::util::StatusOr<const Primitives*> get_primitives(
       const std::string& identifier) {
-    std::lock_guard<std::mutex> lock(primitives_mutex_);
+    absl::MutexLock lock(&primitives_mutex_);
     typename CiphertextPrefixToPrimitivesMap::iterator found =
         primitives_.find(identifier);
     if (found == primitives_.end()) {
@@ -135,8 +135,8 @@ class PrimitiveSet {
   typedef std::unordered_map<std::string, Primitives>
       CiphertextPrefixToPrimitivesMap;
   Entry<P>* primary_;  // the Entry<P> object is owned by primitives_
-  std::mutex primitives_mutex_;
-  CiphertextPrefixToPrimitivesMap primitives_;  // guarded by primitives_mutex_
+  absl::Mutex primitives_mutex_;
+  CiphertextPrefixToPrimitivesMap primitives_ GUARDED_BY(primitives_mutex_);
 };
 
 }  // namespace tink
