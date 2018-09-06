@@ -34,7 +34,7 @@ cat foo2.txt
 ```shell
 git clone https://github.com/google/tink
 cd tink
-bazel build ...
+bazel build //examples/helloworld/java/...
 echo foo > foo.txt
 ./bazel-bin/examples/helloworld/java/helloworld encrypt --keyset test.cfg --in foo.txt --out bar.encrypted
 ./bazel-bin/examples/helloworld/java/helloworld decrypt --keyset test.cfg --in bar.encrypted --out foo2.txt

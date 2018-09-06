@@ -42,9 +42,9 @@ CreateKeyManager(const std::string& type_url) {
   } else if (type_url == AesCtrHmacAeadKeyManager::kKeyType) {
     std::unique_ptr<KeyManager<Aead>> manager(new AesCtrHmacAeadKeyManager());
     return std::move(manager);
-  } else if (type_url == XChacha20Poly1305KeyManager::kKeyType) {
+  } else if (type_url == XChaCha20Poly1305KeyManager::kKeyType) {
     std::unique_ptr<KeyManager<Aead>> manager(
-        new XChacha20Poly1305KeyManager());
+        new XChaCha20Poly1305KeyManager());
     return std::move(manager);
   }
   return ToStatusF(crypto::tink::util::error::NOT_FOUND,
