@@ -14,7 +14,7 @@
 
 package aead_test
 
-var chacha20Poly1305Tests = []struct {
+var chaCha20Poly1305Tests = []struct {
 	plaintext, aad, key, nonce, out string
 }{
 	{

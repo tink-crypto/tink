@@ -27,17 +27,17 @@ import (
 	"github.com/google/tink/go/subtle/random"
 )
 
-func TestChacha20poly1305EncryptDecrypt(t *testing.T) {
-	for i, test := range chacha20Poly1305Tests {
+func TestChaCha20Poly1305EncryptDecrypt(t *testing.T) {
+	for i, test := range chaCha20Poly1305Tests {
 		key, _ := hex.DecodeString(test.key)
 		pt, _ := hex.DecodeString(test.plaintext)
 		aad, _ := hex.DecodeString(test.aad)
 		nonce, _ := hex.DecodeString(test.nonce)
 		out, _ := hex.DecodeString(test.out)
 
-		ca, err := aead.NewChacha20poly1305Aead(key)
+		ca, err := aead.NewChaCha20Poly1305(key)
 		if err != nil {
-			t.Errorf("#%d, cannot create new instance of Chacha20poly1305Aead: %s", i, err)
+			t.Errorf("#%d, cannot create new instance of ChaCha20Poly1305: %s", i, err)
 			continue
 		}
 
@@ -60,12 +60,12 @@ func TestChacha20poly1305EncryptDecrypt(t *testing.T) {
 	}
 }
 
-func TestChacha20poly1305EmptyAssociatedData(t *testing.T) {
+func TestChaCha20Poly1305EmptyAssociatedData(t *testing.T) {
 	key := random.GetRandomBytes(chacha20poly1305.KeySize)
 	aad := []byte{}
 	badAad := []byte{1, 2, 3}
 
-	ca, err := aead.NewChacha20poly1305Aead(key)
+	ca, err := aead.NewChaCha20Poly1305(key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,7 +110,7 @@ func TestChacha20poly1305EmptyAssociatedData(t *testing.T) {
 	}
 }
 
-func TestChacha20poly1305LongMessages(t *testing.T) {
+func TestChaCha20Poly1305LongMessages(t *testing.T) {
 	dataSize := uint32(16)
 	// Encrypts and decrypts messages of size <= 8192.
 	for dataSize <= 1<<24 {
@@ -118,7 +118,7 @@ func TestChacha20poly1305LongMessages(t *testing.T) {
 		aad := random.GetRandomBytes(dataSize / 3)
 		key := random.GetRandomBytes(chacha20poly1305.KeySize)
 
-		ca, err := aead.NewChacha20poly1305Aead(key)
+		ca, err := aead.NewChaCha20Poly1305(key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -137,13 +137,13 @@ func TestChacha20poly1305LongMessages(t *testing.T) {
 	}
 }
 
-func TestChacha20poly1305ModifyCiphertext(t *testing.T) {
-	for i, test := range chacha20Poly1305Tests {
+func TestChaCha20Poly1305ModifyCiphertext(t *testing.T) {
+	for i, test := range chaCha20Poly1305Tests {
 		key, _ := hex.DecodeString(test.key)
 		pt, _ := hex.DecodeString(test.plaintext)
 		aad, _ := hex.DecodeString(test.aad)
 
-		ca, err := aead.NewChacha20poly1305Aead(key)
+		ca, err := aead.NewChaCha20Poly1305(key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -176,9 +176,9 @@ func TestChacha20poly1305ModifyCiphertext(t *testing.T) {
 
 // This is a very simple test for the randomness of the nonce.
 // The test simply checks that the multiple ciphertexts of the same message are distinct.
-func TestChacha20poly1305RandomNonce(t *testing.T) {
+func TestChaCha20Poly1305RandomNonce(t *testing.T) {
 	key := random.GetRandomBytes(chacha20poly1305.KeySize)
-	ca, err := aead.NewChacha20poly1305Aead(key)
+	ca, err := aead.NewChaCha20Poly1305(key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func TestChacha20poly1305RandomNonce(t *testing.T) {
 	}
 }
 
-func TestChacha20poly1305WycheproofVectors(t *testing.T) {
+func TestChaCha20Poly1305WycheproofVectors(t *testing.T) {
 	f, err := os.Open("../../../../wycheproof/testvectors/chacha20_poly1305_test.json")
 	if err != nil {
 		t.Fatalf("cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath", err)
@@ -246,9 +246,9 @@ func TestChacha20poly1305WycheproofVectors(t *testing.T) {
 			combinedCt = append(combinedCt, ct...)
 			combinedCt = append(combinedCt, tag...)
 
-			ca, err := aead.NewChacha20poly1305Aead(key)
+			ca, err := aead.NewChaCha20Poly1305(key)
 			if err != nil {
-				t.Errorf("#%d, cannot create new instance of Chacha20poly1305Aead: %s", tc.TcID, err)
+				t.Errorf("#%d, cannot create new instance of ChaCha20Poly1305: %s", tc.TcID, err)
 				continue
 			}
 

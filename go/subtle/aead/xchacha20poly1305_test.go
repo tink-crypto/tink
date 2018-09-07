@@ -25,8 +25,8 @@ import (
 	"github.com/google/tink/go/subtle/random"
 )
 
-func TestXChacha20poly1305EncryptDecrypt(t *testing.T) {
-	for i, test := range xChacha20Poly1305Tests {
+func TestXChaCha20Poly1305EncryptDecrypt(t *testing.T) {
+	for i, test := range xChaCha20Poly1305Tests {
 		key, _ := hex.DecodeString(test.key)
 		pt, _ := hex.DecodeString(test.plaintext)
 		aad, _ := hex.DecodeString(test.aad)
@@ -34,9 +34,9 @@ func TestXChacha20poly1305EncryptDecrypt(t *testing.T) {
 		out, _ := hex.DecodeString(test.out)
 		tag, _ := hex.DecodeString(test.tag)
 
-		x, err := aead.NewXChacha20poly1305Aead(key)
+		x, err := aead.NewXChaCha20Poly1305(key)
 		if err != nil {
-			t.Errorf("#%d, cannot create new instance of XChacha20poly1305Aead: %s", i, err)
+			t.Errorf("#%d, cannot create new instance of XChaCha20Poly1305: %s", i, err)
 			continue
 		}
 
@@ -60,12 +60,12 @@ func TestXChacha20poly1305EncryptDecrypt(t *testing.T) {
 	}
 }
 
-func TestXChacha20poly1305EmptyAssociatedData(t *testing.T) {
+func TestXChaCha20Poly1305EmptyAssociatedData(t *testing.T) {
 	key := random.GetRandomBytes(chacha20poly1305.KeySize)
 	aad := []byte{}
 	badAad := []byte{1, 2, 3}
 
-	x, err := aead.NewXChacha20poly1305Aead(key)
+	x, err := aead.NewXChaCha20Poly1305(key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,7 +110,7 @@ func TestXChacha20poly1305EmptyAssociatedData(t *testing.T) {
 	}
 }
 
-func TestXChacha20poly1305LongMessages(t *testing.T) {
+func TestXChaCha20Poly1305LongMessages(t *testing.T) {
 	dataSize := uint32(16)
 	// Encrypts and decrypts messages of size <= 8192.
 	for dataSize <= 1<<24 {
@@ -118,7 +118,7 @@ func TestXChacha20poly1305LongMessages(t *testing.T) {
 		aad := random.GetRandomBytes(dataSize / 3)
 		key := random.GetRandomBytes(chacha20poly1305.KeySize)
 
-		x, err := aead.NewXChacha20poly1305Aead(key)
+		x, err := aead.NewXChaCha20Poly1305(key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -137,13 +137,13 @@ func TestXChacha20poly1305LongMessages(t *testing.T) {
 	}
 }
 
-func TestXChacha20poly1305ModifyCiphertext(t *testing.T) {
-	for i, test := range xChacha20Poly1305Tests {
+func TestXChaCha20Poly1305ModifyCiphertext(t *testing.T) {
+	for i, test := range xChaCha20Poly1305Tests {
 		key, _ := hex.DecodeString(test.key)
 		pt, _ := hex.DecodeString(test.plaintext)
 		aad, _ := hex.DecodeString(test.aad)
 
-		x, err := aead.NewXChacha20poly1305Aead(key)
+		x, err := aead.NewXChaCha20Poly1305(key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -176,9 +176,9 @@ func TestXChacha20poly1305ModifyCiphertext(t *testing.T) {
 
 // This is a very simple test for the randomness of the nonce.
 // The test simply checks that the multiple ciphertexts of the same message are distinct.
-func TestXChacha20poly1305RandomNonce(t *testing.T) {
+func TestXChaCha20Poly1305RandomNonce(t *testing.T) {
 	key := random.GetRandomBytes(chacha20poly1305.KeySize)
-	x, err := aead.NewXChacha20poly1305Aead(key)
+	x, err := aead.NewXChaCha20Poly1305(key)
 	if err != nil {
 		t.Fatal(err)
 	}
