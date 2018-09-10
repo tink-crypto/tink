@@ -16,10 +16,13 @@ goog.module('tink.RegistryTest');
 goog.setTestOnly('tink.RegistryTest');
 
 const Aead = goog.require('tink.Aead');
+const AeadConfig = goog.require('tink.aead.AeadConfig');
 const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const Catalogue = goog.require('tink.Catalogue');
 const EncryptThenAuthenticate = goog.require('tink.subtle.EncryptThenAuthenticate');
+const HybridConfig = goog.require('tink.hybrid.HybridConfig');
+const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
 const KeyManager = goog.require('tink.KeyManager');
 const KeysetHandle = goog.require('tink.KeysetHandle');
 const Mac = goog.require('tink.Mac');
@@ -28,6 +31,8 @@ const PbAesCtrHmacAeadKeyFormat = goog.require('proto.google.crypto.tink.AesCtrH
 const PbAesCtrKey = goog.require('proto.google.crypto.tink.AesCtrKey');
 const PbAesCtrKeyFormat = goog.require('proto.google.crypto.tink.AesCtrKeyFormat');
 const PbAesCtrParams = goog.require('proto.google.crypto.tink.AesCtrParams');
+const PbEciesAeadHkdfPrivateKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPrivateKey');
+const PbEciesAeadHkdfPublicKey = goog.require('proto.google.crypto.tink.EciesAeadHkdfPublicKey');
 const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbHmacKeyFormat = goog.require('proto.google.crypto.tink.HmacKeyFormat');
 const PbHmacParams = goog.require('proto.google.crypto.tink.HmacParams');
@@ -53,7 +58,7 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for addCatalogue method
-  async testAddCatalogueNullCatalogue() {
+  testAddCatalogue_nullCatalogue() {
     try {
       Registry.addCatalogue('some catalogue', null);
     } catch (e) {
@@ -63,7 +68,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testAddCatalogueEmptyName() {
+  testAddCatalogue_emptyName() {
     try {
       Registry.addCatalogue('', new DummyCatalogue1());
     } catch (e) {
@@ -73,7 +78,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testAddCatalogueOverwritingAttempt() {
+  testAddCatalogue_overwritingAttempt() {
     try {
       Registry.addCatalogue('some catalogue', new DummyCatalogue1());
       Registry.addCatalogue('some catalogue', new DummyCatalogue2());
@@ -84,7 +89,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testAddFewCatalogues() {
+  testAddCatalogue_shouldWork() {
     for (let i = 0; i < 10; i++) {
       Registry.addCatalogue('first' + i.toString(), new DummyCatalogue1());
       Registry.addCatalogue('second' + i.toString(), new DummyCatalogue2());
@@ -94,7 +99,7 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getCatalogue method
-  async testGetCatalogueMissingCatalogue() {
+  testGetCatalogue_missingCatalogue() {
     const name = 'first';
 
     try {
@@ -106,7 +111,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testGetCatalogueWhichWasAdded() {
+  testGetCatalogue_whichWasAdded() {
     const numberOfCatalogues = 10;
     let catalogueNames = [];
 
@@ -125,7 +130,7 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for registerKeyManager  method
-  async testRegisterKeyManagerEmptyManager() {
+  testRegisterKeyManager_emptyManager() {
     try {
       Registry.registerKeyManager(null);
     } catch (e) {
@@ -135,7 +140,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testRegisterKeyManagerOverwritingAttempt() {
+  testRegisterKeyManager_overwritingAttempt() {
     const keyType = 'someKeyType';
 
     try {
@@ -150,7 +155,7 @@ testSuite({
   },
 
   // Testing newKeyAllowed behavior -- should hold the most restrictive setting.
-  async testRegisterKeyManagerMoreRestrictiveNewKeyAllowed() {
+  async testRegisterKeyManager_moreRestrictiveNewKeyAllowed() {
     const keyType = 'someTypeUrl';
     const keyManager1 = new DummyKeyManager1(keyType);
     const keyTemplate = new PbKeyTemplate();
@@ -172,7 +177,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testRegisterKeyManagerLessRestrictiveNewKeyAllowed() {
+  async testRegisterKeyManager_lessRestrictiveNewKeyAllowed() {
     const keyType = 'someTypeUrl';
     const keyManager1 = new DummyKeyManager1(keyType);
     const keyTemplate = new PbKeyTemplate();
@@ -185,6 +190,7 @@ testSuite({
     // cannot be created).
     try {
       Registry.registerKeyManager(keyManager1);
+      fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(
           ExceptionText.prohibitedChangeToLessRestricted(
@@ -202,7 +208,7 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getKeyManager method
-  async testGetKeyManagerShouldWork() {
+  testGetKeyManager_shouldWork() {
     const numberOfKeyManagers = 10;
     let keyManagers1 = [];
     let keyManagers2 = [];
@@ -225,7 +231,7 @@ testSuite({
     }
   },
 
-  async testGetKeyManagerNotRegisteredKeyType() {
+  testGetKeyManager_notRegisteredKeyType() {
     const keyType = 'some_key_type';
 
     try {
@@ -240,7 +246,7 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for newKeyData method
-  async testNewKeyDataNoManagerForGivenKeyType() {
+  async testNewKeyData_noManagerForGivenKeyType() {
     const keyManager1 = new DummyKeyManager1('someKeyType');
     const differentKeyType = 'otherKeyType';
     const keyTemplate = new PbKeyTemplate();
@@ -258,7 +264,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testNewKeyDataNewKeyDisallowed() {
+  async testNewKeyData_newKeyDisallowed() {
     const keyManager1 = new DummyKeyManager1('someKeyType');
     const keyTemplate = new PbKeyTemplate();
     keyTemplate.setTypeUrl(keyManager1.getKeyType());
@@ -275,7 +281,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testNewKeyDataNewKeyAllowed() {
+  async testNewKeyData_newKeyAllowed() {
     const /** Array<string> */ keyTypes = [];
     for (let i = 0; i < 10; i++) {
       keyTypes.push('someKeyType' + i.toString());
@@ -294,7 +300,7 @@ testSuite({
     }
   },
 
-  async testNewKeyDataNewKeyIsAllowedAutomatically() {
+  async testNewKeyData_newKeyIsAllowedAutomatically() {
     const /** Array<string> */ keyTypes = [];
     for (let i = 0; i < 10; i++) {
       keyTypes.push('someKeyType' + i.toString());
@@ -313,7 +319,7 @@ testSuite({
     }
   },
 
-  async testNewKeyDataWithAesCtrHmacAeadKey() {
+  async testNewKeyData_withAesCtrHmacAeadKey() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
     const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
@@ -429,7 +435,7 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitive method
-  async testGetPrimitiveDifferentKeyTypes() {
+  async testGetPrimitive_differentKeyTypes() {
     const keyDataType = 'key_data_key_type_url';
     const anotherType = 'another_key_type_url';
     const keyData = new PbKeyData();
@@ -446,16 +452,17 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testGetPrimitiveWithoutDefiningKeyType() {
+  async testGetPrimitive_withoutDefiningKeyType() {
     // Get primitive from key proto without key type.
     try {
       await Registry.getPrimitive(null, new PbMessage);
+      fail('An exception should be thrown.');
     } catch (e) {
       assertEquals(ExceptionText.keyTypeNotDefined(), e.toString());
     }
   },
 
-  async testGetPrimitiveMissingKeyManager() {
+  async testGetPrimitive_missingKeyManager() {
     const keyDataType = 'key_data_key_type_url';
     const keyData = new PbKeyData();
     keyData.setTypeUrl(keyDataType);
@@ -470,7 +477,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testGetPrimitiveFromAesCtrHmacAeadKeyData() {
+  async testGetPrimitive_fromAesCtrHmacAeadKeyData() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
@@ -481,7 +488,7 @@ testSuite({
     assertTrue(primitive instanceof EncryptThenAuthenticate);
   },
 
-  async testGetPrimitiveFromAesCtrHmacAeadKey() {
+  async testGetPrimitive_fromAesCtrHmacAeadKey() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
@@ -493,7 +500,7 @@ testSuite({
     assertTrue(primitive instanceof EncryptThenAuthenticate);
   },
 
-  async testGetPrimitiveMacFromAesCtrHmacAeadKey() {
+  async testGetPrimitive_macFromAesCtrHmacAeadKey() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
     let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
@@ -512,7 +519,7 @@ testSuite({
 
   /////////////////////////////////////////////////////////////////////////////
   // tests for getPrimitives method
-  async testGetPrimitivesNullKeysetHandle() {
+  async testGetPrimitives_nullKeysetHandle() {
     try {
       await Registry.getPrimitives(DEFAULT_PRIMITIVE_TYPE, null);
     } catch (e) {
@@ -522,7 +529,7 @@ testSuite({
     fail('An exception should be thrown.');
   },
 
-  async testGetPrimitivesPrimaryIsTheEnabledKeyWithGivenId() {
+  async testGetPrimitives_primaryIsTheEnabledKeyWithGivenId() {
     const id = 1;
     const primaryUrl = 'key_type_url_for_primary_key';
     const disabledUrl = 'key_type_url_for_disabled_key';
@@ -552,7 +559,7 @@ testSuite({
     assertEquals(primaryUrl, primary.getPrimitive());
   },
 
-  async testGetPrimitivesDisabledKeysShouldBeIgnored() {
+  async testGetPrimitives_disabledKeysShouldBeIgnored() {
     const enabledRawKeysCount = 10;
     const enabledUrl = 'enabled_key_type_url';
     const disabledUrl = 'disabled_key_type_url';
@@ -589,7 +596,7 @@ testSuite({
     }
   },
 
-  async testGetPrimitivesWithCustomKeyManager() {
+  async testGetPrimitives_withCustomKeyManager() {
     // Create keyset handle.
     const keyTypeUrl = 'some_key_type_url';
     const keyId = 1;
@@ -616,7 +623,7 @@ testSuite({
     assertEquals(customPrimitive, primary.getPrimitive());
   },
 
-  async testGetPrimitivesKeyWrongPrimitiveType() {
+  async testGetPrimitives_keyWrongPrimitiveType() {
     const goodKeysCount = 10;
     const goodPrimitiveType = Aead;
     const badPrimitiveType = Mac;
@@ -647,10 +654,56 @@ testSuite({
     const keysetHandle = new KeysetHandle(keyset);
     try {
       await Registry.getPrimitives(goodPrimitiveType, keysetHandle);
+      fail('An exception should be thrown.');
     } catch (e) {
       assertTrue(
           e.toString().includes(ExceptionText.getPrimitiveBadPrimitive()));
     }
+  },
+
+  testGetPublicKeyData_notPrivateKeyFactory() {
+    AeadConfig.register();
+    const notPrivateTypeUrl = AeadConfig.AES_GCM_TYPE_URL;
+    try {
+      Registry.getPublicKeyData(notPrivateTypeUrl, new Uint8Array(8));
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          ExceptionText.notPrivateKeyFactory(notPrivateTypeUrl), e.toString());
+    }
+  },
+
+  testGetPublicKeyData_invalidPrivateKeyProtoSerialization() {
+    HybridConfig.register();
+    const typeUrl = HybridConfig.ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE;
+    try {
+      Registry.getPublicKeyData(typeUrl, new Uint8Array(10));
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(ExceptionText.couldNotParse(typeUrl), e.toString());
+    }
+  },
+
+  async testGetPublicKeyData_shouldWork() {
+    HybridConfig.register();
+    const privateKeyData = await Registry.newKeyData(
+        HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
+    const privateKey =
+        PbEciesAeadHkdfPrivateKey.deserializeBinary(privateKeyData.getValue());
+
+    const publicKeyData = Registry.getPublicKeyData(
+        privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
+    assertEquals(
+        publicKeyData.getTypeUrl(),
+        HybridConfig.ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE);
+    assertEquals(
+        publicKeyData.getKeyMaterialType(),
+        PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
+
+    const expectedPublicKey = privateKey.getPublicKey();
+    const publicKey = PbEciesAeadHkdfPublicKey.deserializeBinary(
+        publicKeyData.getValue_asU8());
+    assertObjectEquals(expectedPublicKey, publicKey);
   },
 });
 
@@ -784,6 +837,23 @@ class ExceptionText {
   static getPrimitiveBadPrimitive() {
     return 'Requested primitive type which is not supported by this ' +
         'key manager.';
+  }
+
+  /**
+   * @param {string} typeUrl
+   * @return {string}
+   */
+  static notPrivateKeyFactory(typeUrl) {
+    return 'CustomError: Key manager for key type ' + typeUrl +
+        ' does not have a private key factory.';
+  }
+
+  /**
+   * @param {string} typeUrl
+   * @return {string}
+   */
+  static couldNotParse(typeUrl) {
+    return 'CustomError: Input cannot be parsed as ' + typeUrl + ' key-proto.';
   }
 }
 

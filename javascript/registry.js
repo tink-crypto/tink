@@ -231,7 +231,7 @@ class Registry {
         }
         const entry = await primitives.addPrimitive(primitive, key);
         if (key.getKeyId() === keysetHandle.getKeyset().getPrimaryKeyId()) {
-          await primitives.setPrimary(entry);
+          primitives.setPrimary(entry);
         }
       }
     }
@@ -268,6 +268,30 @@ class Registry {
   static async newKey(keyTemplate) {
     const manager = Registry.getKeyManagerWithNewKeyAllowedCheck_(keyTemplate);
     return await manager.getKeyFactory().newKey(keyTemplate.getValue_asU8());
+  }
+
+  /**
+   * Convenience method for extracting the public key data from the private key
+   * given by serializedPrivateKey.
+   * It looks up a KeyManager identified by typeUrl, which must hold
+   * PrivateKeyFactory, and calls getPublicKeyData method of that factory.
+   *
+   * @param {string} typeUrl
+   * @param {!Uint8Array} serializedPrivateKey
+   * @return {!PbKeyData}
+   */
+  static getPublicKeyData(typeUrl, serializedPrivateKey) {
+    const manager = Registry.getKeyManager(typeUrl);
+    // This solution might cause some problems in the future due to Closure
+    // compiler optimizations, which may map factory.getPublicKeyData to
+    // concrete function.
+    const factory = /** @type{?} */ (manager.getKeyFactory());
+    if (!factory.getPublicKeyData) {
+      throw new SecurityException(
+          'Key manager for key type ' + typeUrl +
+          ' does not have a private key factory.');
+    }
+    return factory.getPublicKeyData(serializedPrivateKey);
   }
 
   /**
