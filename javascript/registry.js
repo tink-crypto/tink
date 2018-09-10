@@ -184,8 +184,8 @@ class Registry {
       throw new SecurityException('Key type has to be specified.');
     }
 
-    const manager = await Registry.getKeyManager(opt_typeUrl);
-    return manager.getPrimitive(primitiveType, key);
+    const manager = Registry.getKeyManager(opt_typeUrl);
+    return await manager.getPrimitive(primitiveType, key);
   }
 
   /**
@@ -229,7 +229,7 @@ class Registry {
         } else {
           primitive = await Registry.getPrimitive(primitiveType, keyData);
         }
-        const entry = await primitives.addPrimitive(primitive, key);
+        const entry = primitives.addPrimitive(primitive, key);
         if (key.getKeyId() === keysetHandle.getKeyset().getPrimaryKeyId()) {
           primitives.setPrimary(entry);
         }
