@@ -43,7 +43,7 @@ testSuite({
   async testConstructor_nullParameters() {
     const keyPair = await Ecdh.generateKeyPair('P-256');
     const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
-    const recipient = new EciesHkdfKemRecipient(privateKey);
+    const recipient = new EciesHkdfKemRecipient(keyPair.privateKey);
     const hkdfHash = 'SHA-256';
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const demHelper = new DemHelper(AeadKeyTemplates.aes128CtrHmacSha256());
