@@ -583,6 +583,18 @@ http_archive(
     sha256 = "4b14d8dd31c6dbaf3ff871adcd03f28c3274e42abc855cb8fb4d01233c0154dc",
 )
 
-load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
+load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains", "go_repository")
 go_rules_dependencies()
 go_register_toolchains()
+
+go_repository(
+    name = "org_golang_x_crypto",
+    commit = "0e37d006457bf46f9e6692014ba72ef82c33022c",
+    importpath = "golang.org/x/crypto",
+)
+
+go_repository(
+    name = "org_golang_x_sys",
+    commit = "d0be0721c37eeb5299f245a996a483160fc36940",
+    importpath = "golang.org/x/sys",
+)
