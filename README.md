@@ -1,8 +1,8 @@
 # Tink
 
-**`Ubuntu`**                                                                              | **`macOS`**
------------------------------------------------------------------------------------------ | -----------
-![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png) | ![Kokoro macOS](https://storage.googleapis.com/tink-kokoro-build-badges/tink-macos.png)
+**`Ubuntu`**                                                                                   | **`macOS`**
+---------------------------------------------------------------------------------------------- | -----------
+[![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png)](#) | [![Kokoro macOS](https://storage.googleapis.com/tink-kokoro-build-badges/tink-macos.png)](#)
 
 ## Introduction
 
