@@ -83,9 +83,6 @@ run_linux_tests() {
   --strategy=TestRunner=standalone --test_output=all \
   -- //... \
   -//objc/... || ( ls -l ; df -h / ; exit 1 )
-
-  # Test that Tink can be installed with the standard Go tooling.
-  go get github.com/google/tink/go/...
 }
 
 run_macos_tests() {
