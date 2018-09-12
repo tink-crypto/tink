@@ -27,23 +27,25 @@ using crypto::tink::KeysetHandle;
 // It requires 4 arguments:
 //   keyset-file:  name of the file with the keyset to be used for encryption
 //   plaintext-file:  name of the file that contains plaintext to be encrypted
-//   context-info:  a std::string to be used as "context info" during the encryption
+//   context-info-file:  name of the file that contains "context info" which
+//       will be used during the decryption
 //   output-file:  name of the output file for the resulting ciphertext
 int main(int argc, char** argv) {
   if (argc != 5) {
     std::clog << "Usage: "
               << argv[0]
-              << " keyset-file plaintext-file context-info output-file\n";
+              << " keyset-file plaintext-file context-info-file "
+              << "output-file\n";
     exit(1);
   }
   std::string keyset_filename(argv[1]);
   std::string plaintext_filename(argv[2]);
-  std::string context_info(argv[3]);
+  std::string context_info_filename(argv[3]);
   std::string output_filename(argv[4]);
   std::clog << "Using keyset from file " << keyset_filename
             << " to encrypt file " << plaintext_filename
-            << " with context info '" << context_info << "'.\n"
-            << "The resulting ciphertext will be written to file "
+            << " with context info from file " << context_info_filename
+            << ".\n" << "The resulting ciphertext will be written to file "
             << output_filename << std::endl;
 
   // Init Tink;
@@ -65,6 +67,7 @@ int main(int argc, char** argv) {
 
   // Read the plaintext.
   std::string plaintext = CliUtil::Read(plaintext_filename);
+  std::string context_info = CliUtil::Read(context_info_filename);
 
   // Compute the ciphertext.
   std::clog << "Encrypting...\n";

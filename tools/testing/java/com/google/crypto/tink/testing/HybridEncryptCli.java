@@ -23,24 +23,25 @@ import com.google.crypto.tink.hybrid.HybridEncryptFactory;
 /**
  * A command-line utility for testing HybridEncrypt-primitives.
  * It requires 4 arguments:
- *  keyset-file:  name of the file with the keyset to be used for encryption
- *  plaintext-file:  name of the file that contains plaintext to be encrypted
- *  context-info:  a string to be used as "context info" during the encryption
- *  output-file:  name of the output file for the resulting ciphertext
+ * keyset-file:  name of the file with the keyset to be used for encryption
+ * plaintext-file:  name of the file that contains plaintext to be encrypted
+ * context-info-file:  name of the file that contains "context info" which will
+ *     be used during the decryption
+ * output-file:  name of the output file for the resulting ciphertext
  */
 public class HybridEncryptCli {
   public static void main(String[] args) throws Exception {
     if (args.length != 4) {
       System.out.println(
-          "Usage: HybridEncryptCli keyset-file plaintext-file context-info output-file");
+          "Usage: HybridEncryptCli keyset-file plaintext-file context-info-file output-file");
       System.exit(1);
     }
     String keysetFilename = args[0];
     String plaintextFilename = args[1];
-    String contextInfo = args[2];
+    String contextInfoFilename = args[2];
     String outputFilename = args[3];
     System.out.println("Using keyset from file " + keysetFilename + " to encrypt file "
-        + plaintextFilename + " with context info '" + contextInfo + "'.");
+        + plaintextFilename + " with context info from file " + contextInfoFilename + ".");
     System.out.println("The resulting ciphertext will be written to file " + outputFilename);
 
     // Init Tink.
@@ -56,10 +57,11 @@ public class HybridEncryptCli {
 
     // Read the plaintext.
     byte[] plaintext = CliUtil.read(plaintextFilename);
+    byte[] contextInfo = CliUtil.read(contextInfoFilename);
 
     // Compute the ciphertext.
     System.out.println("Encrypting...");
-    byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo.getBytes(CliUtil.UTF_8));
+    byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
 
     // Write the ciphertext to the output file.
     CliUtil.write(ciphertext, outputFilename);

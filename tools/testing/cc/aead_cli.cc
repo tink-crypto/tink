@@ -32,18 +32,19 @@ using crypto::tink::KeysetHandle;
 //   operation: the actual AEAD-operation, i.e. "encrypt" or "decrypt"
 //   input-file:  name of the file with input (plaintext for encryption, or
 //                or ciphertext for decryption)
-//   associated-data:  a std::string to be used as assciated data
+//   associated-data-file:  name of the file containing associated data
 //   output-file:  name of the file for the resulting output
 int main(int argc, char** argv) {
   if (argc != 6) {
     std::clog << "Usage: " << argv[0]
-         << " keyset-file operation input-file associated-data output-file\n";
+         << " keyset-file operation input-file associated-data-file "
+         << "output-file\n";
     exit(1);
   }
   std::string keyset_filename(argv[1]);
   std::string operation(argv[2]);
   std::string input_filename(argv[3]);
-  std::string associated_data(argv[4]);
+  std::string associated_data_file(argv[4]);
   std::string output_filename(argv[5]);
   if (!(operation == "encrypt" || operation == "decrypt")) {
     std::clog << "Unknown operation '" << operation << "'.\n"
@@ -53,8 +54,8 @@ int main(int argc, char** argv) {
   std::clog << "Using keyset from file " << keyset_filename
             << " to AEAD-" << operation
             << " file "<< input_filename
-            << " with associated data '" << associated_data << "'.\n"
-            << "The resulting output will be written to file "
+            << " with associated data from from file " << associated_data_file
+            << ".\n" << "The resulting output will be written to file "
             << output_filename << std::endl;
 
   // Init Tink;
@@ -76,6 +77,7 @@ int main(int argc, char** argv) {
 
   // Read the input.
   std::string input = CliUtil::Read(input_filename);
+  std::string associated_data = CliUtil::Read(associated_data_file);
 
   // Compute the output.
   std::clog << operation << "ing...\n";

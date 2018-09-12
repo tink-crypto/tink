@@ -45,11 +45,12 @@ hybrid_basic_test() {
 
     local encrypted_file="$TEST_TMPDIR/${test_instance}_encrypted.bin"
     local decrypted_file="$TEST_TMPDIR/${test_instance}_decrypted.bin"
-    local context_info="some context info for $test_instance"
-    $encrypt_cli $pub_key_file $plaintext_file "$context_info" \
+    local context_info_file="$TEST_TMPDIR/${test_instance}_context_info.bin"
+    echo "some context info for $test_instance" > $context_info_file
+    $encrypt_cli $pub_key_file $plaintext_file $context_info_file \
         $encrypted_file || exit 1
     assert_files_different $plaintext_file $encrypted_file
-    $decrypt_cli $priv_key_file $encrypted_file "$context_info" \
+    $decrypt_cli $priv_key_file $encrypted_file $context_info_file \
         $decrypted_file || exit 1
     assert_files_equal $plaintext_file $decrypted_file
   done

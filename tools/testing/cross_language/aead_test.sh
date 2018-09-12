@@ -42,12 +42,13 @@ aead_basic_test() {
 
     local encrypted_file="$TEST_TMPDIR/${test_instance}_encrypted.bin"
     local decrypted_file="$TEST_TMPDIR/${test_instance}_decrypted.bin"
-    local associated_data="some associated data for $test_instance"
+    local associated_data_file="$TEST_TMPDIR/${test_instance}_aad.bin"
+    echo "some associated data for $test_instance" > $associated_data_file
     $encrypt_cli $symmetric_key_file "encrypt" $plaintext_file\
-        "$associated_data" $encrypted_file || exit 1
+        $associated_data_file $encrypted_file || exit 1
     assert_files_different $plaintext_file $encrypted_file
     $decrypt_cli $symmetric_key_file "decrypt" $encrypted_file\
-        "$associated_data" $decrypted_file || exit 1
+        $associated_data_file $decrypted_file || exit 1
     assert_files_equal $plaintext_file $decrypted_file
   done
 }

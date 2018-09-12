@@ -30,23 +30,24 @@ using crypto::tink::KeysetHandle;
 // It requires 4 arguments:
 //   keyset-file:  name of the file with the keyset to be used for decryption
 //   ciphertext-file:  name of the file that contains ciphertext to be decrypted
-//   context-info:  a std::string to be used as "context info" during the decryption
+//   context-info-file:  name of the file that contains "context info" which
+//       will be used during the decryption
 //   output-file:  name of the output file for the resulting plaintext
 int main(int argc, char** argv) {
   if (argc != 5) {
     std::clog << "Usage: "
               << argv[0]
-              << " keyset-file ciphertext-file context-info output-file\n";
+              << " keyset-file ciphertext-file context-info-file output-file\n";
     exit(1);
   }
   std::string keyset_filename(argv[1]);
   std::string ciphertext_filename(argv[2]);
-  std::string context_info(argv[3]);
+  std::string context_info_filename(argv[3]);
   std::string output_filename(argv[4]);
   std::clog << "Using keyset from file " << keyset_filename
             << " to decrypt file " << ciphertext_filename
-            << " with context info '" << context_info << "'.\n"
-            << "The resulting ciphertext will be written to file "
+            << " with context info from file " << context_info_filename
+            << ".\n" << "The resulting ciphertext will be written to file "
             << output_filename << std::endl;
 
   // Init Tink;
@@ -68,6 +69,7 @@ int main(int argc, char** argv) {
 
   // Read the ciphertext.
   std::string ciphertext = CliUtil::Read(ciphertext_filename);
+  std::string context_info = CliUtil::Read(context_info_filename);
 
   // Compute the plaintext.
   std::clog << "Decrypting...\n";

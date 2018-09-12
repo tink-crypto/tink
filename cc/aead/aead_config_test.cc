@@ -50,12 +50,13 @@ TEST_F(AeadConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
   std::string aes_eax_key_type =
       "type.googleapis.com/google.crypto.tink.AesEaxKey";
-  std::string aes_gcm_key_type =
-      "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  std::string aes_gcm_key_type = "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  std::string xchacha20_poly1305_key_type =
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
   std::string hmac_key_type = "type.googleapis.com/google.crypto.tink.HmacKey";
   auto& config = AeadConfig::Latest();
 
-  EXPECT_EQ(4, AeadConfig::Latest().entry_size());
+  EXPECT_EQ(5, AeadConfig::Latest().entry_size());
 
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
@@ -80,6 +81,12 @@ TEST_F(AeadConfigTest, testBasic) {
   EXPECT_EQ(aes_eax_key_type, config.entry(3).type_url());
   EXPECT_EQ(true, config.entry(3).new_key_allowed());
   EXPECT_EQ(0, config.entry(3).key_manager_version());
+
+  EXPECT_EQ("TinkAead", config.entry(4).catalogue_name());
+  EXPECT_EQ("Aead", config.entry(4).primitive_name());
+  EXPECT_EQ(xchacha20_poly1305_key_type, config.entry(4).type_url());
+  EXPECT_EQ(true, config.entry(4).new_key_allowed());
+  EXPECT_EQ(0, config.entry(4).key_manager_version());
 
   // No key manager before registration.
   auto manager_result = Registry::get_key_manager<Aead>(aes_gcm_key_type);

@@ -66,7 +66,7 @@ package aead_test
 //   return 0;
 // }
 
-var xChacha20Poly1305Tests = []struct {
+var xChaCha20Poly1305Tests = []struct {
 	key, nonce, plaintext, aad, out, tag string
 }{
 	{

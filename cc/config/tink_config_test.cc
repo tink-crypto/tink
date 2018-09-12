@@ -67,11 +67,13 @@ TEST_F(TinkConfigTest, testBasic) {
       "type.googleapis.com/google.crypto.tink.AesEaxKey";
   std::string aes_gcm_key_type =
       "type.googleapis.com/google.crypto.tink.AesGcmKey";
+  std::string xchacha20_poly1305_key_type =
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
   std::string hmac_key_type =
       "type.googleapis.com/google.crypto.tink.HmacKey";
   auto& config = TinkConfig::Latest();
 
-  EXPECT_EQ(8, TinkConfig::Latest().entry_size());
+  EXPECT_EQ(9, TinkConfig::Latest().entry_size());
 
   EXPECT_EQ("TinkMac", config.entry(0).catalogue_name());
   EXPECT_EQ("Mac", config.entry(0).primitive_name());
@@ -97,29 +99,35 @@ TEST_F(TinkConfigTest, testBasic) {
   EXPECT_EQ(true, config.entry(3).new_key_allowed());
   EXPECT_EQ(0, config.entry(3).key_manager_version());
 
-  EXPECT_EQ("TinkHybridDecrypt", config.entry(4).catalogue_name());
-  EXPECT_EQ("HybridDecrypt", config.entry(4).primitive_name());
-  EXPECT_EQ(hybrid_decrypt_key_type, config.entry(4).type_url());
+  EXPECT_EQ("TinkAead", config.entry(4).catalogue_name());
+  EXPECT_EQ("Aead", config.entry(4).primitive_name());
+  EXPECT_EQ(xchacha20_poly1305_key_type, config.entry(4).type_url());
   EXPECT_EQ(true, config.entry(4).new_key_allowed());
-  EXPECT_EQ(0, config.entry(3).key_manager_version());
+  EXPECT_EQ(0, config.entry(4).key_manager_version());
 
-  EXPECT_EQ("TinkHybridEncrypt", config.entry(5).catalogue_name());
-  EXPECT_EQ("HybridEncrypt", config.entry(5).primitive_name());
-  EXPECT_EQ(hybrid_encrypt_key_type, config.entry(5).type_url());
+  EXPECT_EQ("TinkHybridDecrypt", config.entry(5).catalogue_name());
+  EXPECT_EQ("HybridDecrypt", config.entry(5).primitive_name());
+  EXPECT_EQ(hybrid_decrypt_key_type, config.entry(5).type_url());
   EXPECT_EQ(true, config.entry(5).new_key_allowed());
   EXPECT_EQ(0, config.entry(5).key_manager_version());
 
-  EXPECT_EQ("TinkPublicKeySign", config.entry(6).catalogue_name());
-  EXPECT_EQ("PublicKeySign", config.entry(6).primitive_name());
-  EXPECT_EQ(public_key_sign_key_type, config.entry(6).type_url());
+  EXPECT_EQ("TinkHybridEncrypt", config.entry(6).catalogue_name());
+  EXPECT_EQ("HybridEncrypt", config.entry(6).primitive_name());
+  EXPECT_EQ(hybrid_encrypt_key_type, config.entry(6).type_url());
   EXPECT_EQ(true, config.entry(6).new_key_allowed());
   EXPECT_EQ(0, config.entry(6).key_manager_version());
 
-  EXPECT_EQ("TinkPublicKeyVerify", config.entry(7).catalogue_name());
-  EXPECT_EQ("PublicKeyVerify", config.entry(7).primitive_name());
-  EXPECT_EQ(public_key_verify_key_type, config.entry(7).type_url());
+  EXPECT_EQ("TinkPublicKeySign", config.entry(7).catalogue_name());
+  EXPECT_EQ("PublicKeySign", config.entry(7).primitive_name());
+  EXPECT_EQ(public_key_sign_key_type, config.entry(7).type_url());
   EXPECT_EQ(true, config.entry(7).new_key_allowed());
   EXPECT_EQ(0, config.entry(7).key_manager_version());
+
+  EXPECT_EQ("TinkPublicKeyVerify", config.entry(8).catalogue_name());
+  EXPECT_EQ("PublicKeyVerify", config.entry(8).primitive_name());
+  EXPECT_EQ(public_key_verify_key_type, config.entry(8).type_url());
+  EXPECT_EQ(true, config.entry(8).new_key_allowed());
+  EXPECT_EQ(0, config.entry(8).key_manager_version());
 
   // No key manager before registration.
   {

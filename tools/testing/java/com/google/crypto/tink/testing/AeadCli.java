@@ -27,20 +27,20 @@ import com.google.crypto.tink.aead.AeadFactory;
  *   operation: the actual AEAD-operation, i.e. "encrypt" or "decrypt"
  *   input-file:  name of the file with input (plaintext for encryption, or
  *                or ciphertext for decryption)
- *   associated-data:  a string to be used as assciated data
+ *   associated-data-file:  name of the file containing associated data
  *   output-file:  name of the file for the resulting output
  */
 public class AeadCli {
   public static void main(String[] args) throws Exception {
     if (args.length != 5) {
       System.out.println(
-          "Usage: AeadCli keyset-file operation input-file associated-data output-file");
+          "Usage: AeadCli keyset-file operation input-file associated-data-file output-file");
       System.exit(1);
     }
     String keysetFilename = args[0];
     String operation = args[1];
     String inputFilename = args[2];
-    String associatedData = args[3];
+    String associatedDataFile = args[3];
     String outputFilename = args[4];
     if (!(operation.equals("encrypt") || operation.equals("decrypt"))) {
       System.out.println(
@@ -48,7 +48,7 @@ public class AeadCli {
       System.exit(1);
     }
     System.out.println("Using keyset from file " + keysetFilename + " to AEAD-" + operation
-        + " file " + inputFilename + " with associated data '" + associatedData + "'.");
+        + " file " + inputFilename + " with associated data from file " + associatedDataFile + ".");
     System.out.println("The resulting output will be written to file " + outputFilename);
 
     // Init Tink.
@@ -64,14 +64,15 @@ public class AeadCli {
 
     // Read the input.
     byte[] input = CliUtil.read(inputFilename);
+    byte[] aad = CliUtil.read(associatedDataFile);
 
     // Compute the output.
     System.out.println(operation + "ing...");
     byte[] output;
     if (operation.equals("encrypt")) {
-      output = aead.encrypt(input, associatedData.getBytes(CliUtil.UTF_8));
+      output = aead.encrypt(input, aad);
     } else { // operation.equals("decrypt")
-      output = aead.decrypt(input, associatedData.getBytes(CliUtil.UTF_8));
+      output = aead.decrypt(input, aad);
     }
 
     // Write the output to the output file.

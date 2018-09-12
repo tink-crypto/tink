@@ -26,10 +26,17 @@ func TestConfigRegistration(t *testing.T) {
 	if !success || err != nil {
 		t.Errorf("cannot register standard key types")
 	}
-	// check for AES-GCM key manager
+	// Check for AES-GCM key manager.
 	keyManager, err := tink.GetKeyManager(aead.AesGcmTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
 	var _ = keyManager.(*aead.AesGcmKeyManager)
+
+	// Check for XChaCha20Poly1305 key manager.
+	keyManager, err = tink.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+	}
+	var _ = keyManager.(*aead.XChaCha20Poly1305KeyManager)
 }

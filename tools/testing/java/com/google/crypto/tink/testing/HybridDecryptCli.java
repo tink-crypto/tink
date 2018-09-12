@@ -23,24 +23,25 @@ import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 /**
  * A command-line utility for testing HybridDecrypt-primitives.
  * It requires 4 arguments:
- *  keyset-file:  name of the file with the keyset to be used for decryption
- *  ciphertext-file:  name of the file that contains ciphertext to be decrypted
- *  context-info:  a string to be used as "context info" during the decryption
- *  output-file:  name of the output file for the resulting ciphertext
+ * keyset-file:  name of the file with the keyset to be used for decryption
+ * ciphertext-file:  name of the file that contains ciphertext to be decrypted
+ * context-info-file:  name of the file that contains "context info" which will
+ *     be used during the decryption
+ * output-file:  name of the output file for the resulting ciphertext
  */
 public class HybridDecryptCli {
   public static void main(String[] args) throws Exception {
     if (args.length != 4) {
       System.out.println(
-          "Usage: HybridDecryptCli keyset-file ciphertext-file context-info output-file");
+          "Usage: HybridDecryptCli keyset-file ciphertext-file context-info-file output-file");
       System.exit(1);
     }
     String keysetFilename = args[0];
     String ciphertextFilename = args[1];
-    String contextInfo = args[2];
+    String contextInfoFilename = args[2];
     String outputFilename = args[3];
     System.out.println("Using keyset from file " + keysetFilename + " to decrypt file "
-        + ciphertextFilename + " with context info '" + contextInfo + "'.");
+        + ciphertextFilename + " with context info from file " + contextInfoFilename + ".");
     System.out.println("The resulting plaintext will be written to file " + outputFilename);
 
     // Init Tink.
@@ -56,10 +57,11 @@ public class HybridDecryptCli {
 
     // Read the ciphertext.
     byte[] ciphertext = CliUtil.read(ciphertextFilename);
+    byte[] contextInfo = CliUtil.read(contextInfoFilename);
 
     // Compute the plaintext.
     System.out.println("Decrypting...");
-    byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo.getBytes(CliUtil.UTF_8));
+    byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
 
     // Write the plaintext to the output file.
     CliUtil.write(plaintext, outputFilename);

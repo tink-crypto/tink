@@ -20,6 +20,7 @@ full_proto_deps = [
     "//proto:kms_aead_java_proto",
     "//proto:kms_envelope_java_proto",
     "//proto:tink_java_proto",
+    "//proto:xchacha20_poly1305_java_proto",
 ]
 
 lite_proto_deps = [
@@ -40,6 +41,7 @@ lite_proto_deps = [
     "//proto:kms_aead_java_proto_lite",
     "//proto:kms_envelope_java_proto_lite",
     "//proto:tink_java_proto_lite",
+    "//proto:xchacha20_poly1305_java_proto_lite",
 ]
 
 subtle_deps = [
@@ -137,13 +139,13 @@ load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
 gen_maven_jar_rules(
     name = "maven",
     doctitle = "Tink Cryptography API",
-    deps = full_proto_deps + java_deps + cleartext_deps,
+    deps = full_proto_deps + java_deps + cleartext_deps + subtle_deps,
 )
 
 gen_maven_jar_rules(
     name = "maven-android",
     doctitle = "Tink Cryptography API for Android",
-    deps = lite_proto_deps + android_deps + cleartext_android_deps,
+    deps = lite_proto_deps + android_deps + cleartext_android_deps + subtle_deps,
 )
 
 # TEST
