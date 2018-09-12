@@ -16,10 +16,18 @@ goog.module('tink.aead.AeadConfigTest');
 goog.setTestOnly('tink.aead.AeadConfigTest');
 
 const AeadConfig = goog.require('tink.aead.AeadConfig');
+const AeadFactory = goog.require('tink.aead.AeadFactory');
+const AeadKeyTemplates = goog.require('tink.aead.AeadKeyTemplates');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
+const KeysetHandle = goog.require('tink.KeysetHandle');
+const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
+const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
+const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
+const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
+const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
-
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
@@ -85,7 +93,7 @@ testSuite({
   },
 
 
-  testRegister() {
+  testRegister_correspondingKeyManagersWereRegistered() {
     AeadConfig.register();
 
     // Test that the corresponding key managers were registered.
@@ -98,6 +106,33 @@ testSuite({
 
     // TODO add tests for other key types here, whenever they are available in
     // Tink.
+  },
+
+  async testRegister_predefinedTemplatesShouldWork() {
+    AeadConfig.register();
+    let templates = [
+      AeadKeyTemplates.aes128Gcm(), AeadKeyTemplates.aes256Gcm(),
+      AeadKeyTemplates.aes128CtrHmacSha256(),
+      AeadKeyTemplates.aes256CtrHmacSha256()
+    ];
+    // The following function adds all templates in uncompiled tests, thus if
+    // a new template is added without updating AeadConfig or AeadCatalogue
+    // correctly then at least the uncompiled tests should fail.
+    // But the templates are included also above as the following function does
+    // not add anything to the list in compiled code.
+    templates = templates.concat(getListOfTemplatesFromAeadKeyTemplatesClass());
+    for (let template of templates) {
+      const keyData = await Registry.newKeyData(template);
+      const keysetHandle = createKeysetHandleFromKeyData(keyData);
+
+      const aead = await AeadFactory.getPrimitive(keysetHandle);
+      const plaintext = Random.randBytes(10);
+      const aad = Random.randBytes(8);
+      const ciphertext = await aead.encrypt(plaintext, aad);
+      const decryptedCiphertext = await aead.decrypt(ciphertext, aad);
+
+      assertObjectEquals(plaintext, decryptedCiphertext);
+    }
   },
 });
 
@@ -116,3 +151,54 @@ const AES_CTR_HMAC_AEAD_NEW_KEY_ALLOWED = true;
 const AES_GCM_KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
 const AES_GCM_VERSION = 0;
 const AES_GCM_NEW_KEY_ALLOWED = true;
+
+/**
+ * Creates a keyset containing only the key given by keyData and returns it
+ * wrapped in a KeysetHandle.
+ *
+ * @param {!PbKeyData} keyData
+ * @return {!KeysetHandle}
+ */
+const createKeysetHandleFromKeyData = function(keyData) {
+  const keyId = 1;
+  const key = new PbKeyset.Key();
+  key.setKeyData(keyData);
+  key.setStatus(PbKeyStatusType.ENABLED);
+  key.setKeyId(keyId);
+  key.setOutputPrefixType(PbOutputPrefixType.TINK);
+
+  const keyset = new PbKeyset();
+  keyset.addKey(key);
+  keyset.setPrimaryKeyId(keyId);
+  return new KeysetHandle(keyset);
+};
+
+/**
+ * Returns all templates from AeadKeyTemplates class.
+ *
+ * WARNING: This function works only in uncompiled code. Once the code is
+ * compiled it returns only empty set due to optimizations which are run.
+ * Namely
+ *   - after compilation the methods are no longer methods of AeadKeyTemplates
+ *       class, and
+ *   - every method which is not referenced in this file or in the code used by
+ *       these tests are considered as dead code and removed.
+ *
+ * @return {!Array<!PbKeyTemplate>}
+ */
+const getListOfTemplatesFromAeadKeyTemplatesClass = function() {
+  let templates = [];
+  for (let propertyName of Object.getOwnPropertyNames(AeadKeyTemplates)) {
+    // Only public methods (i.e. not ending with '_') without arguments (i.e.
+    // function.length == 0) generate key templates.
+    const property = AeadKeyTemplates[propertyName];
+    if (typeof property === 'function' && property.length === 0 &&
+        propertyName[propertyName.length - 1] != '_') {
+      const template = property();
+      if (template instanceof PbKeyTemplate) {
+        templates = templates.concat([template]);
+      }
+    }
+  }
+  return templates;
+};
