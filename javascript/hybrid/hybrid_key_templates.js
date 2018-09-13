@@ -26,61 +26,64 @@ const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 
-// Pre-generated KeyTemplates for keys for hybrid encryption.
-//
-// One can use these templates to generate new Keyset with
-// KeysetHandle.generateNew method. To generate a new keyset that contains a
-// single EciesAeadHkdfKey, one can do:
-//
-// HybridConfig.Register();
-// KeysetHandle handle = KeysetHandle.generateNew(
-//     HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
-
-
 /**
- * Returns a KeyTemplate that generates new instances of
- * EciesAeadHkdfPrivateKey with the following parameters:
+ * Pre-generated KeyTemplates for keys for hybrid encryption.
  *
- *   KEM: ECDH over NIST P-256
- *   DEM: AES128-GCM
- *   KDF: HKDF-HMAC-SHA256 with an empty salt
- *   OutputPrefixType: TINK
+ * One can use these templates to generate new Keyset with
+ * KeysetHandle.generateNew method. To generate a new keyset that contains a
+ * single EciesAeadHkdfKey, one can do:
  *
- * @return {!PbKeyTemplate}
+ * HybridConfig.Register();
+ * KeysetHandle handle = KeysetHandle.generateNew(
+ *     HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
+ *
+ * @final
  */
-const eciesP256HkdfHmacSha256Aes128Gcm = function() {
-  return createEciesAeadHkdfKeyTemplate_(
-      /* curveType = */ PbEllipticCurveType.NIST_P256,
-      /* hkdfHash = */ PbHashType.SHA256,
-      /* pointFormat = */ PbPointFormat.UNCOMPRESSED,
-      /* demKeyTemplate = */ AeadKeyTemplates.aes128Gcm(),
-      /* hkdfSalt = */ new Uint8Array(0));
-};
+class HybridKeyTemplates {
+  /**
+   * Returns a KeyTemplate that generates new instances of
+   * EciesAeadHkdfPrivateKey with the following parameters:
+   *
+   *   KEM: ECDH over NIST P-256
+   *   DEM: AES128-GCM
+   *   KDF: HKDF-HMAC-SHA256 with an empty salt
+   *   OutputPrefixType: TINK
+   *
+   * @return {!PbKeyTemplate}
+   */
+  static eciesP256HkdfHmacSha256Aes128Gcm() {
+    return createEciesAeadHkdfKeyTemplate_(
+        /* curveType = */ PbEllipticCurveType.NIST_P256,
+        /* hkdfHash = */ PbHashType.SHA256,
+        /* pointFormat = */ PbPointFormat.UNCOMPRESSED,
+        /* demKeyTemplate = */ AeadKeyTemplates.aes128Gcm(),
+        /* hkdfSalt = */ new Uint8Array(0));
+  }
 
-/**
- * Returns a KeyTemplate that generates new instances of
- * EciesAeadHkdfPrivateKey with the following parameters:
- *
- *   KEM: ECDH over NIST P-256
- *   DEM: AES128-CTR-HMAC-SHA256 with
- *        - AES key size: 16 bytes
- *        - AES CTR IV size: 16 bytes
- *        - HMAC key size: 32 bytes
- *        - HMAC tag size: 16 bytes
- *   KDF: HKDF-HMAC-SHA256 with an empty salt
- *   OutputPrefixType: TINK
- *
- * @return {!PbKeyTemplate}
- */
-const eciesP256HkdfHmacSha256Aes128CtrHmacSha256 = function() {
-  return createEciesAeadHkdfKeyTemplate_(
-      /* curveType = */ PbEllipticCurveType.NIST_P256,
-      /* hkdfHash = */ PbHashType.SHA256,
-      /* pointFormat = */ PbPointFormat.UNCOMPRESSED,
-      /* demKeyTemplate = */ AeadKeyTemplates.aes128CtrHmacSha256(),
-      /* hkdfSalt = */ new Uint8Array(0));
-};
-
+  /**
+   * Returns a KeyTemplate that generates new instances of
+   * EciesAeadHkdfPrivateKey with the following parameters:
+   *
+   *   KEM: ECDH over NIST P-256
+   *   DEM: AES128-CTR-HMAC-SHA256 with
+   *        - AES key size: 16 bytes
+   *        - AES CTR IV size: 16 bytes
+   *        - HMAC key size: 32 bytes
+   *        - HMAC tag size: 16 bytes
+   *   KDF: HKDF-HMAC-SHA256 with an empty salt
+   *   OutputPrefixType: TINK
+   *
+   * @return {!PbKeyTemplate}
+   */
+  static eciesP256HkdfHmacSha256Aes128CtrHmacSha256() {
+    return createEciesAeadHkdfKeyTemplate_(
+        /* curveType = */ PbEllipticCurveType.NIST_P256,
+        /* hkdfHash = */ PbHashType.SHA256,
+        /* pointFormat = */ PbPointFormat.UNCOMPRESSED,
+        /* demKeyTemplate = */ AeadKeyTemplates.aes128CtrHmacSha256(),
+        /* hkdfSalt = */ new Uint8Array(0));
+  }
+}
 
 /**
  * @param {PbEllipticCurveType} curveType
@@ -139,7 +142,4 @@ const createEciesAeadHkdfParams_ = function(
   return params;
 };
 
-exports = {
-  eciesP256HkdfHmacSha256Aes128Gcm,
-  eciesP256HkdfHmacSha256Aes128CtrHmacSha256
-};
+exports = HybridKeyTemplates;

@@ -18,6 +18,16 @@ goog.setTestOnly('tink.hybrid.HybridConfigTest');
 const EciesAeadHkdfPrivateKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPrivateKeyManager');
 const EciesAeadHkdfPublicKeyManager = goog.require('tink.hybrid.EciesAeadHkdfPublicKeyManager');
 const HybridConfig = goog.require('tink.hybrid.HybridConfig');
+const HybridDecryptFactory = goog.require('tink.hybrid.HybridDecryptFactory');
+const HybridEncryptFactory = goog.require('tink.hybrid.HybridEncryptFactory');
+const HybridKeyTemplates = goog.require('tink.hybrid.HybridKeyTemplates');
+const KeysetHandle = goog.require('tink.KeysetHandle');
+const PbKeyData = goog.require('proto.google.crypto.tink.KeyData');
+const PbKeyStatusType = goog.require('proto.google.crypto.tink.KeyStatusType');
+const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
+const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
+const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
+const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 
 const testSuite = goog.require('goog.testing.testSuite');
@@ -104,8 +114,44 @@ testSuite({
     assertTrue(privateKeyManager instanceof EciesAeadHkdfPrivateKeyManager);
   },
 
-  // TODO add a test that after HybridConfig.register() everything is working
-  // properly when HybridTemplates are in Tink.
+  // Check that everything was registered correctly and thus new keys may be
+  // generated using the predefined key templates and then they may be used for
+  // encryption and decryption.
+  async testRegister_predefinedTemplatesShouldWork() {
+    HybridConfig.register();
+    let templates = [
+      HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm(),
+      HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128CtrHmacSha256()
+    ];
+    // The following function adds all templates in uncompiled tests, thus if
+    // a new template is added without updating HybridConfig or HybridCatalogue
+    // correctly then at least the uncompiled tests should fail.
+    // But the templates are included also above as the following function does
+    // not add anything to the list in compiled code.
+    templates =
+        templates.concat(getListOfTemplatesFromHybridKeyTemplatesClass());
+
+    for (let template of templates) {
+      const privateKeyData = await Registry.newKeyData(template);
+      const privateKeysetHandle = createKeysetHandleFromKeyData(privateKeyData);
+      const hybridDecrypt =
+          await HybridDecryptFactory.getPrimitive(privateKeysetHandle);
+
+      const publicKeyData = Registry.getPublicKeyData(
+          privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());
+      const publicKeysetHandle = createKeysetHandleFromKeyData(publicKeyData);
+      const hybridEncrypt =
+          await HybridEncryptFactory.getPrimitive(publicKeysetHandle);
+
+      const plaintext = new Uint8Array(Random.randBytes(10));
+      const contextInfo = new Uint8Array(Random.randBytes(8));
+      const ciphertext = await hybridEncrypt.encrypt(plaintext, contextInfo);
+      const decryptedCiphertext =
+          await hybridDecrypt.decrypt(ciphertext, contextInfo);
+
+      assertObjectEquals(plaintext, decryptedCiphertext);
+    }
+  },
 });
 
 // Constants used in tests.
@@ -123,3 +169,54 @@ const ECIES_AEAD_HKDF_PUBLIC_KEY_MANAGER_VERSION = 0;
 const ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE =
     'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey';
 const ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_VERSION = 0;
+
+/**
+ * Creates a keyset containing only the key given by keyData and returns it
+ * wrapped in a KeysetHandle.
+ *
+ * @param {!PbKeyData} keyData
+ * @return {!KeysetHandle}
+ */
+const createKeysetHandleFromKeyData = function(keyData) {
+  const keyId = 1;
+  const key = new PbKeyset.Key();
+  key.setKeyData(keyData);
+  key.setStatus(PbKeyStatusType.ENABLED);
+  key.setKeyId(keyId);
+  key.setOutputPrefixType(PbOutputPrefixType.TINK);
+
+  const keyset = new PbKeyset();
+  keyset.addKey(key);
+  keyset.setPrimaryKeyId(keyId);
+  return new KeysetHandle(keyset);
+};
+
+/**
+ * Returns all templates from HybridKeyTemplates class.
+ *
+ * WARNING: This function works only in uncompiled code. Once the code is
+ * compiled it returns only empty set due to optimizations which are run.
+ * Namely
+ *   - after compilation the methods are no longer methods of HybridKeyTemplates
+ *       class, and
+ *   - every method which is not referenced in this file or in the code used by
+ *       these tests are considered as dead code and removed.
+ *
+ * @return {!Array<!PbKeyTemplate>}
+ */
+const getListOfTemplatesFromHybridKeyTemplatesClass = function() {
+  let templates = [];
+  for (let propertyName of Object.getOwnPropertyNames(HybridKeyTemplates)) {
+    // Only public methods (i.e. not ending with '_') without arguments (i.e.
+    // function.length == 0) generate key templates.
+    const property = HybridKeyTemplates[propertyName];
+    if (typeof property === 'function' && property.length === 0 &&
+        propertyName[propertyName.length - 1] != '_') {
+      const template = property();
+      if (template instanceof PbKeyTemplate) {
+        templates = templates.concat([template]);
+      }
+    }
+  }
+  return templates;
+};
