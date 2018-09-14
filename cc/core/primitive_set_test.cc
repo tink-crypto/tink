@@ -67,7 +67,7 @@ void access_primitives(PrimitiveSet<Mac>* primitive_set,
   }
 }
 
-TEST_F(PrimitiveSetTest, testConcurrentOperations) {
+TEST_F(PrimitiveSetTest, ConcurrentOperations) {
   PrimitiveSet<Mac> mac_set;
   int offset_a = 100;
   int offset_b = 150;
@@ -103,7 +103,7 @@ TEST_F(PrimitiveSetTest, testConcurrentOperations) {
   }
 }
 
-TEST_F(PrimitiveSetTest, testBasic) {
+TEST_F(PrimitiveSetTest, Basic) {
   std::string mac_name_1 = "MAC#1";
   std::unique_ptr<Mac> mac_1(new DummyMac(mac_name_1));
   std::string mac_name_2 = "MAC#2";
@@ -194,18 +194,18 @@ TEST_F(PrimitiveSetTest, testBasic) {
     auto primary = primitive_set.get_primary();
     EXPECT_FALSE(primary == nullptr);
     EXPECT_EQ(KeyStatusType::ENABLED, primary->get_status());
-    EXPECT_EQ(data + mac_name_3,
+    EXPECT_EQ(DummyMac(mac_name_3).ComputeMac(data).ValueOrDie(),
               primary->get_primitive().ComputeMac(data).ValueOrDie());
   }
 
   {  // Check raw primitives.
     auto& primitives = *(primitive_set.get_raw_primitives().ValueOrDie());
     EXPECT_EQ(2, primitives.size());
-    EXPECT_EQ(data + mac_name_4,
+    EXPECT_EQ(DummyMac(mac_name_4).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
     EXPECT_EQ(OutputPrefixType::RAW, primitives[0]->get_output_prefix_type());
-    EXPECT_EQ(data + mac_name_5,
+    EXPECT_EQ(DummyMac(mac_name_5).ComputeMac(data).ValueOrDie(),
               primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::DISABLED, primitives[1]->get_status());
     EXPECT_EQ(OutputPrefixType::RAW, primitives[1]->get_output_prefix_type());
@@ -215,11 +215,11 @@ TEST_F(PrimitiveSetTest, testBasic) {
     std::string prefix = CryptoFormat::get_output_prefix(key_1).ValueOrDie();
     auto& primitives = *(primitive_set.get_primitives(prefix).ValueOrDie());
     EXPECT_EQ(2, primitives.size());
-    EXPECT_EQ(data + mac_name_1,
+    EXPECT_EQ(DummyMac(mac_name_1).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
     EXPECT_EQ(OutputPrefixType::TINK, primitives[0]->get_output_prefix_type());
-    EXPECT_EQ(data + mac_name_6,
+    EXPECT_EQ(DummyMac(mac_name_6).ComputeMac(data).ValueOrDie(),
               primitives[1]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::DISABLED, primitives[1]->get_status());
     EXPECT_EQ(OutputPrefixType::TINK, primitives[1]->get_output_prefix_type());
@@ -229,7 +229,7 @@ TEST_F(PrimitiveSetTest, testBasic) {
     std::string prefix = CryptoFormat::get_output_prefix(key_3).ValueOrDie();
     auto& primitives = *(primitive_set.get_primitives(prefix).ValueOrDie());
     EXPECT_EQ(1, primitives.size());
-    EXPECT_EQ(data + mac_name_3,
+    EXPECT_EQ(DummyMac(mac_name_3).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
     EXPECT_EQ(OutputPrefixType::TINK, primitives[0]->get_output_prefix_type());
@@ -239,7 +239,7 @@ TEST_F(PrimitiveSetTest, testBasic) {
     std::string prefix = CryptoFormat::get_output_prefix(key_2).ValueOrDie();
     auto& primitives = *(primitive_set.get_primitives(prefix).ValueOrDie());
     EXPECT_EQ(1, primitives.size());
-    EXPECT_EQ(data + mac_name_2,
+    EXPECT_EQ(DummyMac(mac_name_2).ComputeMac(data).ValueOrDie(),
               primitives[0]->get_primitive().ComputeMac(data).ValueOrDie());
     EXPECT_EQ(KeyStatusType::ENABLED, primitives[0]->get_status());
     EXPECT_EQ(OutputPrefixType::LEGACY,
@@ -247,7 +247,7 @@ TEST_F(PrimitiveSetTest, testBasic) {
   }
 }
 
-TEST_F(PrimitiveSetTest, testPrimaryKeyWithIdCollisions) {
+TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
   std::string mac_name_1 = "MAC#1";
   std::string mac_name_2 = "MAC#2";
 
@@ -347,9 +347,3 @@ TEST_F(PrimitiveSetTest, testPrimaryKeyWithIdCollisions) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-
-
-int main(int ac, char* av[]) {
-  testing::InitGoogleTest(&ac, av);
-  return RUN_ALL_TESTS();
-}

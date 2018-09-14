@@ -20,15 +20,16 @@
 #include <string>
 
 #include "absl/strings/match.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
-#include "tink/subtle/common_enums.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -129,20 +130,22 @@ class DummyAead : public Aead {
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
       absl::string_view associated_data) const override {
-    return std::string(plaintext.data(), plaintext.size()).append(aead_name_);
+    return absl::StrCat(aead_name_.size(), ":", associated_data.size(), ":",
+                        aead_name_, associated_data, plaintext);
   }
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
       absl::string_view associated_data) const override {
-    std::string c(ciphertext.data(), ciphertext.size());
-    size_t pos = c.rfind(aead_name_);
-    if (pos != std::string::npos &&
-        ciphertext.length() == (unsigned)(aead_name_.length() + pos)) {
-      return c.substr(0, pos);
+    std::string prefix = absl::StrCat(aead_name_.size(), ":", associated_data.size(),
+                                 ":", aead_name_, associated_data);
+    if (!StartsWith(ciphertext, prefix)) {
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT,
+          "Dummy operation failed.");
     }
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
+    ciphertext.remove_prefix(prefix.size());
+    return std::string(ciphertext);
   }
 
  private:
@@ -155,18 +158,18 @@ class DummyAead : public Aead {
 class DummyHybridEncrypt : public HybridEncrypt {
  public:
   DummyHybridEncrypt(absl::string_view hybrid_name)
-      : hybrid_name_(hybrid_name) {}
+      : dummy_aead_(absl::StrCat("DummyHybrid:", hybrid_name))  {}
 
   // Computes a dummy ciphertext, which is concatenation of provided 'plaintext'
   // with the name of this DummyHybridEncrypt.
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
       absl::string_view context_info) const override {
-    return std::string(plaintext.data(), plaintext.size()).append(hybrid_name_);
+    return dummy_aead_.Encrypt(plaintext, context_info);
   }
 
  private:
-  std::string hybrid_name_;
+  DummyAead dummy_aead_;
 };
 
 // A dummy implementation of HybridDecrypt-interface.
@@ -175,25 +178,18 @@ class DummyHybridEncrypt : public HybridEncrypt {
 class DummyHybridDecrypt : public HybridDecrypt {
  public:
   DummyHybridDecrypt(absl::string_view hybrid_name)
-      : hybrid_name_(hybrid_name) {}
+      : dummy_aead_(absl::StrCat("DummyHybrid:", hybrid_name))  {}
 
   // Decrypts a dummy ciphertext, which should be a concatenation
   // of a plaintext with the name of this DummyHybridDecrypt.
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
       absl::string_view context_info) const override {
-    std::string c(ciphertext.data(), ciphertext.size());
-    size_t pos = c.rfind(hybrid_name_);
-    if (pos != std::string::npos &&
-        ciphertext.length() == (unsigned)(hybrid_name_.length() + pos)) {
-      return c.substr(0, pos);
-    }
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT, "Wrong ciphertext.");
+    return dummy_aead_.Decrypt(ciphertext, context_info);
   }
 
  private:
-  std::string hybrid_name_;
+  DummyAead dummy_aead_;
 };
 
 // A dummy implementation of PublicKeySign-interface.
@@ -202,17 +198,17 @@ class DummyHybridDecrypt : public HybridDecrypt {
 class DummyPublicKeySign : public PublicKeySign {
  public:
   DummyPublicKeySign(absl::string_view signature_name)
-      : signature_name_(signature_name) {}
+      : dummy_aead_(absl::StrCat("DummySign:", signature_name)) {}
 
   // Computes a dummy signature, which is a concatenation of 'data'
   // with the name of this DummyPublicKeySign.
   crypto::tink::util::StatusOr<std::string> Sign(
       absl::string_view data) const override {
-    return std::string(data.data(), data.size()).append(signature_name_);
+    return dummy_aead_.Encrypt("", data);
   }
 
  private:
-  std::string signature_name_;
+  DummyAead dummy_aead_;
 };
 
 // A dummy implementation of PublicKeyVerify-interface.
@@ -221,24 +217,17 @@ class DummyPublicKeySign : public PublicKeySign {
 class DummyPublicKeyVerify : public PublicKeyVerify {
  public:
   DummyPublicKeyVerify(absl::string_view signature_name)
-      : signature_name_(signature_name) {}
+      : dummy_aead_(absl::StrCat("DummySign:", signature_name)) {}
 
   // Verifies a dummy signature, should be a concatenation of the name
   // of this DummyPublicKeyVerify with the provided 'data'.
   crypto::tink::util::Status Verify(
       absl::string_view signature, absl::string_view data) const override {
-    if (signature.length() == data.length() + signature_name_.length() &&
-        absl::StartsWith(signature, data) &&
-        absl::EndsWith(signature, signature_name_)) {
-      return crypto::tink::util::Status::OK;
-    }
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
-        "Invalid signature.");
+    return dummy_aead_.Decrypt(signature, data).status();
   }
 
  private:
-  std::string signature_name_;
+  DummyAead dummy_aead_;
 };
 
 // A dummy implementation of Mac-interface.
@@ -246,27 +235,23 @@ class DummyPublicKeyVerify : public PublicKeyVerify {
 // as a parameter of the constructor.
 class DummyMac : public Mac {
  public:
-  DummyMac(const std::string mac_name) : mac_name_(mac_name) {}
+  DummyMac(const std::string& mac_name)
+      : dummy_aead_(absl::StrCat("DummyMac:", mac_name)) {}
 
   // Computes a dummy MAC, which is concatenation of provided 'data'
   // with the name of this DummyMac.
   crypto::tink::util::StatusOr<std::string> ComputeMac(
       absl::string_view data) const override {
-    return std::string(data.data(), data.size()).append(mac_name_);
+    return dummy_aead_.Encrypt("", data);
   }
 
   crypto::tink::util::Status VerifyMac(
       absl::string_view mac,
       absl::string_view data) const override {
-    if (mac == std::string(data.data(), data.size()).append(mac_name_)) {
-      return crypto::tink::util::Status::OK;
-    } else {
-      return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "Wrong MAC.");
-    }
+    return dummy_aead_.Decrypt(mac, data).status();
   }
  private:
-  std::string mac_name_;
+  DummyAead dummy_aead_;
 };
 
 

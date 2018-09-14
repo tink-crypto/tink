@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 
 using crypto::tink::test::DummyHybridDecrypt;
+using crypto::tink::test::DummyHybridEncrypt;
 using google::crypto::tink::OutputPrefixType;
 using google::crypto::tink::Keyset;
 
@@ -38,7 +39,7 @@ class HybridDecryptSetWrapperTest : public ::testing::Test {
   }
 };
 
-TEST_F(HybridDecryptSetWrapperTest, testBasic) {
+TEST_F(HybridDecryptSetWrapperTest, Basic) {
   { // hybrid_decrypt_set is nullptr.
     auto hybrid_decrypt_result =
         HybridDecryptSetWrapper::NewHybridDecrypt(nullptr);
@@ -111,7 +112,9 @@ TEST_F(HybridDecryptSetWrapperTest, testBasic) {
     std::string context_info = "some_context";
 
     {  // RAW key
-      std::string ciphertext = plaintext + hybrid_name_0;
+      std::string ciphertext = DummyHybridEncrypt(hybrid_name_0)
+                              .Encrypt(plaintext, context_info)
+                              .ValueOrDie();
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
       EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
@@ -128,7 +131,9 @@ TEST_F(HybridDecryptSetWrapperTest, testBasic) {
     }
 
     {  // Correct ciphertext prefix.
-      std::string ciphertext = prefix_id_1 + plaintext + hybrid_name_1;
+      std::string ciphertext =  prefix_id_1 + DummyHybridEncrypt(hybrid_name_1)
+                                       .Encrypt(plaintext, context_info)
+                                       .ValueOrDie();
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
       EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
