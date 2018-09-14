@@ -43,7 +43,7 @@ class KeysetHandle {
   // Encrypts the underlying keyset with the provided |master_key_aead|
   // and writes the resulting EncrytpedKeyset to the given |writer|,
   // which must be non-null.
-  crypto::tink::util::Status  Write(KeysetWriter* writer,
+  crypto::tink::util::Status Write(KeysetWriter* writer,
       const Aead& master_key_aead);
 
   // Returns a new KeysetHandle that contains public keys corresponding
