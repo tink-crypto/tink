@@ -146,6 +146,72 @@ testSuite({
     }
   },
 
+  async testEncapDecap_differentParams() {
+    // Set longer time for promiseTimout as the test sometimes takes longer than
+    // 1 second in Firefox.
+    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
+    const curveTypes = Object.keys(EllipticCurves.CurveType);
+    const hashTypes = ['SHA-1', 'SHA-256', 'SHA-512'];
+    for (let curve of curveTypes) {
+      const curveString =
+          EllipticCurves.curveToString(EllipticCurves.CurveType[curve]);
+      for (let hashType of hashTypes) {
+        const keyPair = await Ecdh.generateKeyPair(curveString);
+        const keySizeInBytes = 32;
+        const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
+        const hkdfInfo = Random.randBytes(8);
+        const hkdfSalt = Random.randBytes(16);
+
+        const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
+        const sender = await EciesHkdfKemSender.newInstance(publicKey);
+        const kemKeyToken = await sender.encapsulate(
+            keySizeInBytes, pointFormat, hashType, hkdfInfo, hkdfSalt);
+
+        const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
+        const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
+        const key = await recipient.decapsulate(
+            kemKeyToken['token'], keySizeInBytes, pointFormat, hashType,
+            hkdfInfo, hkdfSalt);
+
+        assertEquals(keySizeInBytes, kemKeyToken['key'].length);
+        assertEquals(Bytes.toHex(key), Bytes.toHex(kemKeyToken['key']));
+      }
+    }
+  },
+
+  async testEncapDecap_modifiedToken() {
+    // Set longer time for promiseTimout as the test sometimes takes longer than
+    // 1 second in Firefox.
+    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
+    const curveTypes = Object.keys(EllipticCurves.CurveType);
+    const hashTypes = ['SHA-1', 'SHA-256', 'SHA-512'];
+    for (let crvId of curveTypes) {
+      const curve = EllipticCurves.CurveType[crvId];
+      const curveString = EllipticCurves.curveToString(curve);
+      for (let hashType of hashTypes) {
+        const keyPair = await Ecdh.generateKeyPair(curveString);
+        const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
+        const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
+        const keySizeInBytes = 32;
+        const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
+        const hkdfInfo = Random.randBytes(8);
+        const hkdfSalt = Random.randBytes(16);
+
+        // Create invalid token (EC point), while preserving the 0x04 prefix
+        // byte.
+        const token = Random.randBytes(
+            EllipticCurves.encodingSizeInBytes(curve, pointFormat));
+        token[0] = 0x04;
+        try {
+          await recipient.decapsulate(
+              token, keySizeInBytes, pointFormat, hashType, hkdfInfo, hkdfSalt);
+          fail('Should throw an exception');
+        } catch (e) {
+        }
+      }
+    }
+  },
+
   async testDecapsulate_testVectorsGeneratedByJava() {
     for (let testVector of TEST_VECTORS) {
       const ellipticCurveString = EllipticCurves.curveToString(testVector.crv);
@@ -163,9 +229,6 @@ testSuite({
       assertEquals(testVector.expectedOutput, Bytes.toHex(output));
     }
   },
-
-  // TODO(slivova): add the following tests:
-  //  * decapsulate with modified token or other parameters.
 });
 
 
