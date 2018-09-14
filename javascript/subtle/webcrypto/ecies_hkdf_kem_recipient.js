@@ -18,6 +18,7 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Hkdf = goog.require('tink.subtle.Hkdf');
+const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
  * HKDF-based ECIES-KEM (key encapsulation mechanism) for ECIES recipient.
@@ -27,6 +28,13 @@ class EciesHkdfKemRecipient {
    * @param {!webCrypto.CryptoKey} privateKey
    */
   constructor(privateKey) {
+    if (!privateKey) {
+      throw new SecurityException('Private key has to be non-null.');
+    }
+    // CryptoKey should have the properties type and algorithm.
+    if (privateKey.type !== 'private' || !privateKey.algorithm) {
+      throw new SecurityException('Expected crypto key of type: private.');
+    }
     /** @const @private {!webCrypto.CryptoKey} */
     this.privateKey_ = privateKey;
   }
@@ -46,7 +54,7 @@ class EciesHkdfKemRecipient {
    * @param {number} keySizeInBytes The length of the generated pseudorandom
    *     string in bytes. The maximal size is 255 * DigestSize, where DigestSize
    *     is the size of the underlying HMAC.
-   * @param {EllipticCurves.PointFormatType} pointFormat The format of the
+   * @param {!EllipticCurves.PointFormatType} pointFormat The format of the
    *     public ephemeral point.
    * @param {string} hkdfHash the name of the hash function. Accepted names are
    *     SHA-1, SHA-256 and SHA-512.
@@ -54,7 +62,7 @@ class EciesHkdfKemRecipient {
    *     information (can be a zero-length array).
    * @param {!Uint8Array=} opt_hkdfSalt Salt value (a non-secret random
    *     value). If not provided, it is set to a string of hash length zeros.
-   * @return {!Promise.<Uint8Array>} The KEM key and token.
+   * @return {!Promise.<!Uint8Array>} The KEM key and token.
    */
   async decapsulate(
       kemToken, keySizeInBytes, pointFormat, hkdfHash, hkdfInfo, opt_hkdfSalt) {

@@ -59,14 +59,101 @@ testSuite({
     }
   },
 
+  async testNewInstance_invalidParameters() {
+    // Test newInstance without key.
+    try {
+      await EciesHkdfKemRecipient.newInstance(null);
+      fail('An exception should be thrown.');
+    } catch (e) {
+    }
+
+    // Test newInstance with public key instead private key.
+    const keyPair = await Ecdh.generateKeyPair('P-256');
+    const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
+    try {
+      await EciesHkdfKemRecipient.newInstance(publicKey);
+      fail('An exception should be thrown.');
+    } catch (e) {
+    }
+
+    // Test newInstance with CryptoKey instead of JSON key.
+    try {
+      await EciesHkdfKemRecipient.newInstance(keyPair.publicKey);
+      fail('An exception should be thrown.');
+    } catch (e) {
+    }
+  },
+
+  async testNewInstance_invalidPrivateKey() {
+    for (let testVector of TEST_VECTORS) {
+      const ellipticCurveString = EllipticCurves.curveToString(testVector.crv);
+      const privateJwk = EllipticCurves.pointDecode(
+          ellipticCurveString, testVector.pointFormat,
+          Bytes.fromHex(testVector.privateKeyPoint));
+      privateJwk['d'] = Bytes.toBase64(
+          Bytes.fromHex(testVector.privateKeyValue), /* opt_webSafe = */ true);
+
+      // Change the x value such that the key si no more valid. Recipient should
+      // either throw an exception or ignore the x value and compute the same
+      // output value.
+      const xLength = EllipticCurves.fieldSizeInBytes(testVector.crv);
+      privateJwk['x'] =
+          Bytes.toBase64(new Uint8Array(xLength), /* opt_webSafe = */ true);
+      let output;
+      try {
+        const recipient = await EciesHkdfKemRecipient.newInstance(privateJwk);
+        const hkdfInfo = Bytes.fromHex(testVector.hkdfInfo);
+        const salt = Bytes.fromHex(testVector.salt);
+        output = await recipient.decapsulate(
+            Bytes.fromHex(testVector.token), testVector.outputLength,
+            testVector.pointFormat, testVector.hashType, hkdfInfo, salt);
+      } catch (e) {
+        // Everything works properly if exception was thrown.
+        return;
+      }
+      // If there was no exception, the output should be still correct (x value
+      // should be ignored during the computation).
+      assertEquals(testVector.expectedOutput, Bytes.toHex(output));
+    }
+  },
+
+  async testConstructor_invalidParameters() {
+    // Test constructor without key.
+    try {
+      new EciesHkdfKemRecipient(null);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: Private key has to be non-null.', e.toString());
+    }
+
+    // Test public key instead of private key.
+    const keyPair = await Ecdh.generateKeyPair('P-256');
+    try {
+      new EciesHkdfKemRecipient(keyPair.publicKey);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: Expected crypto key of type: private.', e.toString());
+    }
+
+    // Test that JSON key cannot be used instead of CryptoKey.
+    const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
+    try {
+      new EciesHkdfKemRecipient(privateKey);
+      fail('An exception should be thrown.');
+    } catch (e) {
+    }
+  },
+
   async testDecapsulate_testVectorsGeneratedByJava() {
     for (let testVector of TEST_VECTORS) {
       const ellipticCurveString = EllipticCurves.curveToString(testVector.crv);
       const privateJwk = EllipticCurves.pointDecode(
           ellipticCurveString, testVector.pointFormat,
           Bytes.fromHex(testVector.privateKeyPoint));
-      privateJwk['d'] =
-          Bytes.toBase64(Bytes.fromHex(testVector.privateKeyValue), true);
+      privateJwk['d'] = Bytes.toBase64(
+          Bytes.fromHex(testVector.privateKeyValue), /* opt_webSafe = */ true);
       const recipient = await EciesHkdfKemRecipient.newInstance(privateJwk);
       const hkdfInfo = Bytes.fromHex(testVector.hkdfInfo);
       const salt = Bytes.fromHex(testVector.salt);
@@ -78,7 +165,6 @@ testSuite({
   },
 
   // TODO(slivova): add the following tests:
-  //  * constructor with invalid parameters.
   //  * decapsulate with modified token or other parameters.
 });
 
