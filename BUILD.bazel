@@ -19,3 +19,7 @@ gazelle(
     prefix = "github.com/google/tink",
 )
 
+filegroup(
+    name = "tink_version",
+    srcs = ["tink_version.bzl"],
+)

@@ -16,6 +16,7 @@
 
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
 
+#include <iostream>
 #include <string>
 
 #include "gtest/gtest.h"
@@ -209,7 +210,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
       std::string type = test_group["type"].GetString();
       if (allow_skipping) {
         std::cout << "Could not construct verifier for " << type << " group "
-                << group_count << ": " << verifier_result.status();
+                  << group_count << ": " << verifier_result.status();
       } else {
         ADD_FAILURE() << "Could not construct verifier for " << type
                       << " group " << group_count << ": "

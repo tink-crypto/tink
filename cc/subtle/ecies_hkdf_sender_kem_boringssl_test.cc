@@ -14,6 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
+
 #include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"

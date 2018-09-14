@@ -3,6 +3,8 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 load("//tools/build_defs:javac.bzl", "JAVACOPTS_OSS")
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("//tools:common.bzl", "template_rule")
 
 full_protos = [
     "//proto:common_java_proto",
@@ -53,11 +55,18 @@ filegroup(
 filegroup(
     name = "srcs",
     srcs = glob(
-        [
-            "*.java",
-        ],
+        ["*.java"],
         exclude = CLEARTEXT_KEYSET_HANDLE_SRCS,
-    ),
+    ) + [":version_java"],
+)
+
+template_rule(
+    name = "version_java",
+    src = "Version.java.templ",
+    out = "Version.java",
+    substitutions = {
+        "TINK_VERSION_LABEL": "%s" % TINK_VERSION_LABEL,
+    },
 )
 
 java_library(
@@ -76,15 +85,13 @@ java_library(
 filegroup(
     name = "android_srcs",
     srcs = glob(
-        [
-            "*.java",
-        ],
+        ["*.java"],
         exclude = CLEARTEXT_KEYSET_HANDLE_SRCS + [
             # TextFormat doesn't work with lite protos
             "TextFormatKeysetReaders.java",
             "TextFormatKeysetWriters.java",
         ],
-    ),
+    ) + [":version_java"],
 )
 
 java_library(

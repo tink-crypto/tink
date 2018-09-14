@@ -23,6 +23,20 @@ sh_test(
 )
 
 sh_test(
+    name = "version_test",
+    size = "medium",
+    srcs = [
+        "version_test.sh",
+    ],
+    data = [
+        ":test_lib",
+        "//:tink_version",
+        "//tools/testing:version_cli_java",
+        "//tools/testing/cc:version_cli_cc",
+    ],
+)
+
+sh_test(
     name = "aead_test",
     size = "medium",
     srcs = [

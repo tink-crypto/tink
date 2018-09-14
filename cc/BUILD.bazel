@@ -2,6 +2,9 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 licenses(["notice"])  # Apache 2.0
 
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("//tools:common.bzl", "template_rule")
+
 # public libraries
 
 PUBLIC_APIS = [
@@ -39,6 +42,7 @@ PUBLIC_APIS = [
     "signature_config.h",
     "signature_key_templates.h",
     "tink_config.h",
+    "version.h",
 ]
 
 PUBLIC_API_DEPS = [
@@ -60,6 +64,7 @@ PUBLIC_API_DEPS = [
     ":mac",
     ":primitive_set",
     ":registry",
+    ":version",
     "//cc/aead:aead_config",
     "//cc/aead:aead_factory",
     "//cc/aead:aead_key_templates",
@@ -339,6 +344,23 @@ cc_library(
     ],
 )
 
+template_rule(
+    name = "version_h",
+    src = "version.h.templ",
+    out = "version.h",
+    substitutions = {
+        "TINK_VERSION_LABEL": "%s" % TINK_VERSION_LABEL,
+    },
+)
+
+cc_library(
+    name = "version",
+    srcs = ["core/version.cc"],
+    hdrs = [":version_h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+)
+
 cc_library(
     name = "keyset_handle_hdr",
     srcs = ["keyset_handle.h"],
@@ -593,6 +615,17 @@ cc_test(
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "version_test",
+    size = "small",
+    srcs = ["core/version_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":version",
         "@com_google_googletest//:gtest_main",
     ],
 )

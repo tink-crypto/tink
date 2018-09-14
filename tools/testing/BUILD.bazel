@@ -1,4 +1,4 @@
-package(default_visibility = ["//tools/build_defs:internal_pkg"])
+package(default_visibility = ["//tools/testing:__subpackages__"])
 
 licenses(["notice"])  # Apache 2.0
 
@@ -11,7 +11,19 @@ java_library(
         "java/com/google/crypto/tink/testing/CliUtil.java",
     ],
     javacopts = JAVACOPTS_OSS,
-    visibility = ["//tools/testing:__subpackages__"],
+    deps = [
+        "//java:testonly",
+    ],
+)
+
+java_binary(
+    name = "version_cli_java",
+    testonly = 1,
+    srcs = [
+        "java/com/google/crypto/tink/testing/VersionCli.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    main_class = "com.google.crypto.tink.testing.VersionCli",
     deps = [
         "//java:testonly",
     ],
@@ -25,7 +37,6 @@ java_binary(
     ],
     javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.AeadCli",
-    visibility = ["//tools/testing:__subpackages__"],
     deps = [
         ":cli_util",
         "//java:testonly",
@@ -40,7 +51,6 @@ java_binary(
     ],
     javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.MacCli",
-    visibility = ["//tools/testing:__subpackages__"],
     deps = [
         ":cli_util",
         "//java:testonly",
@@ -55,7 +65,6 @@ java_binary(
     ],
     javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.HybridEncryptCli",
-    visibility = ["//tools/testing:__subpackages__"],
     deps = [
         ":cli_util",
         "//java:testonly",
@@ -70,7 +79,6 @@ java_binary(
     ],
     javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.HybridDecryptCli",
-    visibility = ["//tools/testing:__subpackages__"],
     deps = [
         ":cli_util",
         "//java:testonly",
@@ -85,7 +93,6 @@ java_binary(
     ],
     javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.PublicKeySignCli",
-    visibility = ["//tools/testing:__subpackages__"],
     deps = [
         ":cli_util",
         "//java:testonly",
@@ -100,7 +107,6 @@ java_binary(
     ],
     javacopts = JAVACOPTS_OSS,
     main_class = "com.google.crypto.tink.testing.PublicKeyVerifyCli",
-    visibility = ["//tools/testing:__subpackages__"],
     deps = [
         ":cli_util",
         "//java:testonly",

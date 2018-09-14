@@ -16,6 +16,7 @@
 
 #include "tink/subtle/ecdsa_verify_boringssl.h"
 
+#include <iostream>
 #include <string>
 
 #include "absl/strings/str_cat.h"
@@ -173,7 +174,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping,
       std::string curve = test_group["key"]["curve"].GetString();
       if (allow_skipping) {
         std::cout << "Could not construct verifier for curve " << curve
-                << verifier_result.status();
+                  << verifier_result.status();
       } else {
         ADD_FAILURE() << "Could not construct verifier for curve " << curve
                       << verifier_result.status();

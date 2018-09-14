@@ -77,6 +77,17 @@ generate_plaintext() {
 }
 
 
+# Checks that two values are equal.
+assert_equals() {
+  local expected="$1"
+  local actual="$2"
+  if [ "$expected" != "$actual" ]; then
+    echo "--- Failure: expected value: [$expected], actual value: [$actual]"
+    exit 1
+  fi
+  echo "    Success: got [$actual], as expected."
+}
+
 # Checks that two files are equal.
 assert_files_equal() {
   local expected_file="$1"
