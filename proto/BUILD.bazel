@@ -645,7 +645,7 @@ java_lite_proto_library(
 
 go_proto_library(
     name = "chacha20_poly1305_go_proto",
-    importpath = "github.com/google/tink/proto/chacha20_poly1305_proto",
+    importpath = "github.com/google/tink/proto/chacha20_poly1305_go_proto",
     proto = ":chacha20_poly1305_proto",
 )
 

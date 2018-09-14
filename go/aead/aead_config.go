@@ -22,8 +22,11 @@ import (
 // RegisterStandardKeyTypes registers standard Aead key types and their managers
 // with the Registry.
 func RegisterStandardKeyTypes() (bool, error) {
-	result, err := RegisterKeyManager(NewAesGcmKeyManager())
-	if err != nil {
+	if result, err := RegisterKeyManager(NewAesGcmKeyManager()); err != nil {
+		return result, err
+	}
+
+	if result, err := RegisterKeyManager(NewChaCha20Poly1305KeyManager()); err != nil {
 		return result, err
 	}
 
