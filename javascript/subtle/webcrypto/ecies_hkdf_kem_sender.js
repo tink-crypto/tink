@@ -18,6 +18,7 @@ const Bytes = goog.require('tink.subtle.Bytes');
 const Ecdh = goog.require('tink.subtle.webcrypto.Ecdh');
 const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Hkdf = goog.require('tink.subtle.Hkdf');
+const SecurityException = goog.require('tink.exception.SecurityException');
 
 /**
  * HKDF-based ECIES-KEM (key encapsulation mechanism) for ECIES sender.
@@ -27,6 +28,13 @@ class EciesHkdfKemSender {
    * @param {!webCrypto.CryptoKey} recipientPublicKey
    */
   constructor(recipientPublicKey) {
+    if (!recipientPublicKey) {
+      throw new SecurityException('Recipient public key has to be non-null.');
+    }
+    // CryptoKey should have the properties type and algorithm.
+    if (recipientPublicKey.type !== 'public' || !recipientPublicKey.algorithm) {
+      throw new SecurityException('Expected Crypto key of type: public.');
+    }
     /** @const @private {!webCrypto.CryptoKey} */
     this.publicKey_ = recipientPublicKey;
   }
