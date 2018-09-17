@@ -71,7 +71,7 @@ StatusOr<std::unique_ptr<MessageLite>> AesGcmKeyFactory::NewKey(
                      key_format_url.c_str());
   }
   const AesGcmKeyFormat& aes_gcm_key_format =
-        reinterpret_cast<const AesGcmKeyFormat&>(key_format);
+        static_cast<const AesGcmKeyFormat&>(key_format);
   Status status = AesGcmKeyManager::Validate(aes_gcm_key_format);
   if (!status.ok()) return status;
 
@@ -99,7 +99,7 @@ StatusOr<std::unique_ptr<KeyData>> AesGcmKeyFactory::NewKeyData(
     absl::string_view serialized_key_format) const {
   auto new_key_result = NewKey(serialized_key_format);
   if (!new_key_result.ok()) return new_key_result.status();
-  auto new_key = reinterpret_cast<const AesGcmKey&>(
+  auto new_key = static_cast<const AesGcmKey&>(
       *(new_key_result.ValueOrDie()));
   std::unique_ptr<KeyData> key_data(new KeyData());
   key_data->set_type_url(AesGcmKeyManager::kKeyType);
@@ -151,7 +151,7 @@ StatusOr<std::unique_ptr<Aead>>
 AesGcmKeyManager::GetPrimitive(const MessageLite& key) const {
   std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
   if (DoesSupport(key_type)) {
-    const AesGcmKey& aes_gcm_key = reinterpret_cast<const AesGcmKey&>(key);
+    const AesGcmKey& aes_gcm_key = static_cast<const AesGcmKey&>(key);
     return GetPrimitiveImpl(aes_gcm_key);
   } else {
     return ToStatusF(util::error::INVALID_ARGUMENT,

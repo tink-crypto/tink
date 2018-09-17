@@ -301,7 +301,7 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyBasic) {
     auto key = std::move(result.ValueOrDie());
     EXPECT_EQ(key_type_prefix + key->GetTypeName(), aes_ctr_hmac_aead_key_type);
     std::unique_ptr<AesCtrHmacAeadKey> aes_ctr_hmac_aead_key(
-        reinterpret_cast<AesCtrHmacAeadKey*>(key.release()));
+        static_cast<AesCtrHmacAeadKey*>(key.release()));
     EXPECT_EQ(0, aes_ctr_hmac_aead_key->version());
     EXPECT_EQ(key_format.aes_ctr_key_format().key_size(),
               aes_ctr_hmac_aead_key->aes_ctr_key().key_value().size());
@@ -319,7 +319,7 @@ TEST_F(AesCtrHmacAeadKeyManagerTest, testNewKeyBasic) {
     auto key = std::move(result.ValueOrDie());
     EXPECT_EQ(key_type_prefix + key->GetTypeName(), aes_ctr_hmac_aead_key_type);
     std::unique_ptr<AesCtrHmacAeadKey> aes_ctr_hmac_aead_key(
-        reinterpret_cast<AesCtrHmacAeadKey*>(key.release()));
+        static_cast<AesCtrHmacAeadKey*>(key.release()));
     EXPECT_EQ(0, aes_ctr_hmac_aead_key->version());
     EXPECT_EQ(key_format.aes_ctr_key_format().key_size(),
               aes_ctr_hmac_aead_key->aes_ctr_key().key_value().size());

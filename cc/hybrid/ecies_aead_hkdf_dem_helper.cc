@@ -95,11 +95,11 @@ StatusOr<std::unique_ptr<Aead>> EciesAeadHkdfDemHelper::GetAead(
 bool EciesAeadHkdfDemHelper::ReplaceKeyBytes(
     const std::string& key_bytes, portable_proto::MessageLite* proto) const {
   if (dem_key_type_ == AES_GCM_KEY) {
-    AesGcmKey* key = reinterpret_cast<AesGcmKey*>(proto);
+    AesGcmKey* key = static_cast<AesGcmKey*>(proto);
     key->set_key_value(key_bytes);
     return true;
   } else if (dem_key_type_ == AES_CTR_HMAC_AEAD_KEY) {
-    AesCtrHmacAeadKey* key = reinterpret_cast<AesCtrHmacAeadKey*>(proto);
+    AesCtrHmacAeadKey* key = static_cast<AesCtrHmacAeadKey*>(proto);
     auto aes_ctr_key = key->mutable_aes_ctr_key();
     aes_ctr_key->set_key_value(key_bytes.substr(0, aes_ctr_key_size_in_bytes_));
     auto hmac_key = key->mutable_hmac_key();

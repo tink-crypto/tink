@@ -232,7 +232,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyBasic) {
     auto key = std::move(result.ValueOrDie());
     EXPECT_EQ(key_type_prefix + key->GetTypeName(), hmac_key_type);
     std::unique_ptr<HmacKey> hmac_key(
-        reinterpret_cast<HmacKey*>(key.release()));
+        static_cast<HmacKey*>(key.release()));
     EXPECT_EQ(0, hmac_key->version());
     EXPECT_EQ(key_format.params().hash(), hmac_key->params().hash());
     EXPECT_EQ(key_format.params().tag_size(), hmac_key->params().tag_size());
@@ -245,7 +245,7 @@ TEST_F(HmacKeyManagerTest, testNewKeyBasic) {
     auto key = std::move(result.ValueOrDie());
     EXPECT_EQ(key_type_prefix + key->GetTypeName(), hmac_key_type);
     std::unique_ptr<HmacKey> hmac_key(
-        reinterpret_cast<HmacKey*>(key.release()));
+        static_cast<HmacKey*>(key.release()));
     EXPECT_EQ(0, hmac_key->version());
     EXPECT_EQ(key_format.params().hash(), hmac_key->params().hash());
     EXPECT_EQ(key_format.params().tag_size(), hmac_key->params().tag_size());

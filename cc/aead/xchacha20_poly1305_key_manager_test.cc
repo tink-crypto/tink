@@ -198,7 +198,7 @@ TEST_F(XChaCha20Poly1305KeyManagerTest, testNewKeyBasic) {
     auto key = std::move(result.ValueOrDie());
     EXPECT_EQ(key_type_prefix + key->GetTypeName(), xchaha20_poly1305_key_type);
     std::unique_ptr<XChaCha20Poly1305Key> xchaha20_poly1305_key(
-        reinterpret_cast<XChaCha20Poly1305Key*>(key.release()));
+        static_cast<XChaCha20Poly1305Key*>(key.release()));
     EXPECT_EQ(0, xchaha20_poly1305_key->version());
     EXPECT_EQ(32, xchaha20_poly1305_key->key_value().size());
   }
@@ -209,7 +209,7 @@ TEST_F(XChaCha20Poly1305KeyManagerTest, testNewKeyBasic) {
     auto key = std::move(result.ValueOrDie());
     EXPECT_EQ(key_type_prefix + key->GetTypeName(), xchaha20_poly1305_key_type);
     std::unique_ptr<XChaCha20Poly1305Key> xchaha20_poly1305_key(
-        reinterpret_cast<XChaCha20Poly1305Key*>(key.release()));
+        static_cast<XChaCha20Poly1305Key*>(key.release()));
     EXPECT_EQ(0, xchaha20_poly1305_key->version());
     EXPECT_EQ(32, xchaha20_poly1305_key->key_value().size());
   }

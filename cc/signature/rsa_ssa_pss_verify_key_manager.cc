@@ -123,7 +123,7 @@ RsaSsaPssVerifyKeyManager::GetPrimitive(const MessageLite& key) const {
   std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
   if (DoesSupport(key_type)) {
     const RsaSsaPssPublicKey& rsa_ssa_pss_public_key =
-        reinterpret_cast<const RsaSsaPssPublicKey&>(key);
+        static_cast<const RsaSsaPssPublicKey&>(key);
     return GetPrimitiveImpl(rsa_ssa_pss_public_key);
   } else {
     return ToStatusF(util::error::INVALID_ARGUMENT,

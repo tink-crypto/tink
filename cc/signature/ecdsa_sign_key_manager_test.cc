@@ -228,7 +228,7 @@ TEST_F(EcdsaSignKeyManagerTest, testNewKeyCreation) {
     auto key = std::move(result.ValueOrDie());
     ASSERT_EQ(ecdsa_sign_key_type_, key_type_prefix_ + key->GetTypeName());
     std::unique_ptr<EcdsaPrivateKey> ecdsa_key(
-        reinterpret_cast<EcdsaPrivateKey*>(key.release()));
+        static_cast<EcdsaPrivateKey*>(key.release()));
     CheckNewKey(*ecdsa_key, key_format);
   }
 
@@ -241,7 +241,7 @@ TEST_F(EcdsaSignKeyManagerTest, testNewKeyCreation) {
     auto key = std::move(result.ValueOrDie());
     ASSERT_EQ(ecdsa_sign_key_type_, key_type_prefix_ + key->GetTypeName());
     std::unique_ptr<EcdsaPrivateKey> ecdsa_key(
-        reinterpret_cast<EcdsaPrivateKey*>(key.release()));
+        static_cast<EcdsaPrivateKey*>(key.release()));
     CheckNewKey(*ecdsa_key, key_format);
   }
 
