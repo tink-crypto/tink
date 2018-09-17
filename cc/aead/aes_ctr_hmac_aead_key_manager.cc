@@ -155,38 +155,7 @@ uint32_t AesCtrHmacAeadKeyManager::get_version() const {
   return kVersion;
 }
 
-StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitive(
-    const KeyData& key_data) const {
-  if (DoesSupport(key_data.type_url())) {
-    AesCtrHmacAeadKey aes_ctr_hmac_aead_key;
-    if (!aes_ctr_hmac_aead_key.ParseFromString(key_data.value())) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Could not parse key_data.value as key type '%s'.",
-                       key_data.type_url().c_str());
-    }
-    return GetPrimitiveImpl(aes_ctr_hmac_aead_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_data.type_url().c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitive(
-    const MessageLite& key) const {
-  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
-  if (DoesSupport(key_type)) {
-    const AesCtrHmacAeadKey& aes_ctr_hmac_aead_key =
-        reinterpret_cast<const AesCtrHmacAeadKey&>(key);
-    return GetPrimitiveImpl(aes_ctr_hmac_aead_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_type.c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitiveImpl(
+StatusOr<std::unique_ptr<Aead>> AesCtrHmacAeadKeyManager::GetPrimitiveFromKey(
     const AesCtrHmacAeadKey& aes_ctr_hmac_aead_key) const {
   Status status = Validate(aes_ctr_hmac_aead_key);
   if (!status.ok()) return status;

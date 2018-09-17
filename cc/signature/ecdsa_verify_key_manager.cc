@@ -104,38 +104,7 @@ uint32_t EcdsaVerifyKeyManager::get_version() const {
 }
 
 StatusOr<std::unique_ptr<PublicKeyVerify>>
-EcdsaVerifyKeyManager::GetPrimitive(const KeyData& key_data) const {
-  if (DoesSupport(key_data.type_url())) {
-    EcdsaPublicKey ecdsa_public_key;
-    if (!ecdsa_public_key.ParseFromString(key_data.value())) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Could not parse key_data.value as key type '%s'.",
-                       key_data.type_url().c_str());
-    }
-    return GetPrimitiveImpl(ecdsa_public_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_data.type_url().c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<PublicKeyVerify>>
-EcdsaVerifyKeyManager::GetPrimitive(const MessageLite& key) const {
-  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
-  if (DoesSupport(key_type)) {
-    const EcdsaPublicKey& ecdsa_public_key =
-        reinterpret_cast<const EcdsaPublicKey&>(key);
-    return GetPrimitiveImpl(ecdsa_public_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_type.c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<PublicKeyVerify>>
-EcdsaVerifyKeyManager::GetPrimitiveImpl(
+EcdsaVerifyKeyManager::GetPrimitiveFromKey(
     const EcdsaPublicKey& ecdsa_public_key) const {
   Status status = Validate(ecdsa_public_key);
   if (!status.ok()) return status;

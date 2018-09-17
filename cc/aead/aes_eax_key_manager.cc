@@ -128,38 +128,8 @@ const KeyFactory& AesEaxKeyManager::get_key_factory() const {
   return *key_factory_;
 }
 
-StatusOr<std::unique_ptr<Aead>>
-AesEaxKeyManager::GetPrimitive(const KeyData& key_data) const {
-  if (DoesSupport(key_data.type_url())) {
-    AesEaxKey aes_eax_key;
-    if (!aes_eax_key.ParseFromString(key_data.value())) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Could not parse key_data.value as key type '%s'.",
-                       key_data.type_url().c_str());
-    }
-    return GetPrimitiveImpl(aes_eax_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_data.type_url().c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<Aead>>
-AesEaxKeyManager::GetPrimitive(const MessageLite& key) const {
-  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
-  if (DoesSupport(key_type)) {
-    const AesEaxKey& aes_eax_key = reinterpret_cast<const AesEaxKey&>(key);
-    return GetPrimitiveImpl(aes_eax_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_type.c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<Aead>>
-AesEaxKeyManager::GetPrimitiveImpl(const AesEaxKey& aes_eax_key) const {
+StatusOr<std::unique_ptr<Aead>> AesEaxKeyManager::GetPrimitiveFromKey(
+    const AesEaxKey& aes_eax_key) const {
   Status status = Validate(aes_eax_key);
   if (!status.ok()) return status;
   auto aes_eax_result = subtle::AesEaxBoringSsl::New(

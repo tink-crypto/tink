@@ -102,38 +102,7 @@ const KeyFactory& RsaSsaPssVerifyKeyManager::get_key_factory() const {
 uint32_t RsaSsaPssVerifyKeyManager::get_version() const { return kVersion; }
 
 StatusOr<std::unique_ptr<PublicKeyVerify>>
-RsaSsaPssVerifyKeyManager::GetPrimitive(const KeyData& key_data) const {
-  if (DoesSupport(key_data.type_url())) {
-    RsaSsaPssPublicKey rsa_ssa_pss_public_key;
-    if (!rsa_ssa_pss_public_key.ParseFromString(key_data.value())) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Could not parse key_data.value as key type '%s'.",
-                       key_data.type_url().c_str());
-    }
-    return GetPrimitiveImpl(rsa_ssa_pss_public_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_data.type_url().c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<PublicKeyVerify>>
-RsaSsaPssVerifyKeyManager::GetPrimitive(const MessageLite& key) const {
-  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
-  if (DoesSupport(key_type)) {
-    const RsaSsaPssPublicKey& rsa_ssa_pss_public_key =
-        static_cast<const RsaSsaPssPublicKey&>(key);
-    return GetPrimitiveImpl(rsa_ssa_pss_public_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_type.c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<PublicKeyVerify>>
-RsaSsaPssVerifyKeyManager::GetPrimitiveImpl(
+RsaSsaPssVerifyKeyManager::GetPrimitiveFromKey(
     const RsaSsaPssPublicKey& rsa_ssa_pss_public_key) const {
   Status status = Validate(rsa_ssa_pss_public_key);
   if (!status.ok()) return status;

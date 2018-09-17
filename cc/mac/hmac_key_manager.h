@@ -13,16 +13,16 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
+#ifndef TINK_MAC_HMAC_KEY_MANAGER_H_
+#define TINK_MAC_HMAC_KEY_MANAGER_H_
 
 #include <algorithm>
 #include <vector>
 
-#ifndef TINK_MAC_HMAC_KEY_MANAGER_H_
-#define TINK_MAC_HMAC_KEY_MANAGER_H_
-
 #include "absl/strings/string_view.h"
-#include "tink/mac.h"
+#include "tink/core/key_manager_base.h"
 #include "tink/key_manager.h"
+#include "tink/mac.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -33,23 +33,14 @@
 namespace crypto {
 namespace tink {
 
-class HmacKeyManager : public KeyManager<Mac> {
+class HmacKeyManager
+    : public KeyManagerBase<Mac, google::crypto::tink::HmacKey> {
  public:
   static constexpr char kKeyType[] =
       "type.googleapis.com/google.crypto.tink.HmacKey";
   static constexpr uint32_t kVersion = 0;
 
   HmacKeyManager();
-
-  // Constructs an instance of HMAC-Mac for the given 'key_data',
-  // which must contain HmacKey-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<Mac>> GetPrimitive(
-      const google::crypto::tink::KeyData& key_data) const override;
-
-  // Constructs an instance of HMAC-Mac for the given 'key',
-  // which must be HmacKey-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<Mac>>
-  GetPrimitive(const portable_proto::MessageLite& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;
@@ -63,6 +54,10 @@ class HmacKeyManager : public KeyManager<Mac> {
 
   virtual ~HmacKeyManager() {}
 
+ protected:
+  crypto::tink::util::StatusOr<std::unique_ptr<Mac>> GetPrimitiveFromKey(
+      const google::crypto::tink::HmacKey& hmac_key) const override;
+
  private:
   friend class HmacKeyFactory;
 
@@ -72,10 +67,6 @@ class HmacKeyManager : public KeyManager<Mac> {
 
   std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
-
-  // Constructs an instance of HMAC-Mac for the given 'key'.
-  crypto::tink::util::StatusOr<std::unique_ptr<Mac>>
-  GetPrimitiveImpl(const google::crypto::tink::HmacKey& key) const;
 
   static crypto::tink::util::Status Validate(
       const google::crypto::tink::HmacParams& params);

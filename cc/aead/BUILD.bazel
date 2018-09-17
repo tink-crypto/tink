@@ -97,6 +97,7 @@ cc_library(
     deps = [
         "//cc:aead",
         "//cc:key_manager",
+        "//cc:key_manager_base",
         "//cc/subtle:aes_eax_boringssl",
         "//cc/subtle:random",
         "//cc/util:errors",
@@ -119,6 +120,7 @@ cc_library(
     deps = [
         "//cc:aead",
         "//cc:key_manager",
+        "//cc:key_manager_base",
         "//cc/subtle:aes_gcm_boringssl",
         "//cc/subtle:random",
         "//cc/util:errors",
@@ -141,6 +143,7 @@ cc_library(
     deps = [
         "//cc:aead",
         "//cc:key_manager",
+        "//cc:key_manager_base",
         "//cc:mac",
         "//cc:registry",
         "//cc/subtle:aes_ctr_boringssl",
@@ -168,6 +171,7 @@ cc_library(
     deps = [
         "//cc:aead",
         "//cc:key_manager",
+        "//cc:key_manager_base",
         "//cc/subtle:random",
         "//cc/subtle:xchacha20_poly1305_boringssl",
         "//cc/util:errors",

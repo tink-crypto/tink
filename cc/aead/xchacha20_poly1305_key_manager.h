@@ -13,15 +13,15 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
+#ifndef TINK_AEAD_XCHACHA20_POLY1305_KEY_MANAGER_H_
+#define TINK_AEAD_XCHACHA20_POLY1305_KEY_MANAGER_H_
 
 #include <algorithm>
 #include <vector>
 
-#ifndef TINK_AEAD_XCHACHA20_POLY1305_KEY_MANAGER_H_
-#define TINK_AEAD_XCHACHA20_POLY1305_KEY_MANAGER_H_
-
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/core/key_manager_base.h"
 #include "tink/key_manager.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -33,23 +33,14 @@
 namespace crypto {
 namespace tink {
 
-class XChaCha20Poly1305KeyManager : public KeyManager<Aead> {
+class XChaCha20Poly1305KeyManager
+    : public KeyManagerBase<Aead, google::crypto::tink::XChaCha20Poly1305Key> {
  public:
   static constexpr char kKeyType[] =
       "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
   static constexpr uint32_t kVersion = 0;
 
   XChaCha20Poly1305KeyManager();
-
-  // Constructs an instance of XChacha20-Poly1305 Aead for the given
-  // 'key_data', which must contain XChaCha20Poly1305Key-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
-      const google::crypto::tink::KeyData& key_data) const override;
-
-  // Constructs an instance of XChacha20-Poly1305 Aead for the given 'key',
-  // which must be XChaCha20Poly1305Key-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
-      const portable_proto::MessageLite& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;
@@ -63,6 +54,10 @@ class XChaCha20Poly1305KeyManager : public KeyManager<Aead> {
 
   virtual ~XChaCha20Poly1305KeyManager() {}
 
+ protected:
+  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitiveFromKey(
+      const google::crypto::tink::XChaCha20Poly1305Key& key) const override;
+
  private:
   friend class XChaCha20Poly1305KeyFactory;
 
@@ -70,10 +65,6 @@ class XChaCha20Poly1305KeyManager : public KeyManager<Aead> {
 
   std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
-
-  // Constructs an instance of XChacha20-Poly1305 Aead for the given 'key'.
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitiveImpl(
-      const google::crypto::tink::XChaCha20Poly1305Key& key) const;
 
   static crypto::tink::util::Status Validate(
       const google::crypto::tink::XChaCha20Poly1305Key& key);

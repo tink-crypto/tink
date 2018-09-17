@@ -140,38 +140,8 @@ const KeyFactory& HmacKeyManager::get_key_factory() const {
   return *key_factory_;
 }
 
-StatusOr<std::unique_ptr<Mac>>
-HmacKeyManager::GetPrimitive(const KeyData& key_data) const {
-  if (DoesSupport(key_data.type_url())) {
-    HmacKey hmac_key;
-    if (!hmac_key.ParseFromString(key_data.value())) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Could not parse key_data.value as key type '%s'.",
-                       key_data.type_url().c_str());
-    }
-    return GetPrimitiveImpl(hmac_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_data.type_url().c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<Mac>>
-HmacKeyManager::GetPrimitive(const MessageLite& key) const {
-  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
-  if (DoesSupport(key_type)) {
-    const HmacKey& hmac_key = reinterpret_cast<const HmacKey&>(key);
-    return GetPrimitiveImpl(hmac_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_type.c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<Mac>>
-HmacKeyManager::GetPrimitiveImpl(const HmacKey& hmac_key) const {
+StatusOr<std::unique_ptr<Mac>> HmacKeyManager::GetPrimitiveFromKey(
+    const HmacKey& hmac_key) const {
   Status status = Validate(hmac_key);
   if (!status.ok()) return status;
   auto hmac_result = subtle::HmacBoringSsl::New(

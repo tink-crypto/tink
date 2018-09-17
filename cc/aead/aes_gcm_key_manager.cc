@@ -130,38 +130,8 @@ const KeyFactory& AesGcmKeyManager::get_key_factory() const {
   return *key_factory_;
 }
 
-StatusOr<std::unique_ptr<Aead>>
-AesGcmKeyManager::GetPrimitive(const KeyData& key_data) const {
-  if (DoesSupport(key_data.type_url())) {
-    AesGcmKey aes_gcm_key;
-    if (!aes_gcm_key.ParseFromString(key_data.value())) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Could not parse key_data.value as key type '%s'.",
-                       key_data.type_url().c_str());
-    }
-    return GetPrimitiveImpl(aes_gcm_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_data.type_url().c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<Aead>>
-AesGcmKeyManager::GetPrimitive(const MessageLite& key) const {
-  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
-  if (DoesSupport(key_type)) {
-    const AesGcmKey& aes_gcm_key = static_cast<const AesGcmKey&>(key);
-    return GetPrimitiveImpl(aes_gcm_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_type.c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<Aead>>
-AesGcmKeyManager::GetPrimitiveImpl(const AesGcmKey& aes_gcm_key) const {
+StatusOr<std::unique_ptr<Aead>> AesGcmKeyManager::GetPrimitiveFromKey(
+    const AesGcmKey& aes_gcm_key) const {
   Status status = Validate(aes_gcm_key);
   if (!status.ok()) return status;
   auto aes_gcm_result = subtle::AesGcmBoringSsl::New(aes_gcm_key.key_value());

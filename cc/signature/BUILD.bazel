@@ -98,6 +98,7 @@ cc_library(
     deps = [
         ":ecdsa_verify_key_manager",
         "//cc:key_manager",
+        "//cc:key_manager_base",
         "//cc:public_key_sign",
         "//cc:registry",
         "//cc/subtle:ecdsa_sign_boringssl",
@@ -123,6 +124,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         "//cc:key_manager",
+        "//cc:key_manager_base",
         "//cc:public_key_verify",
         "//cc:registry",
         "//cc/subtle:ecdsa_verify_boringssl",
@@ -146,6 +148,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         "//cc:key_manager",
+        "//cc:key_manager_base",
         "//cc:public_key_verify",
         "//cc:registry",
         "//cc/subtle:rsa_ssa_pss_verify_boringssl",

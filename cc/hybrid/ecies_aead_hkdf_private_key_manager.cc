@@ -175,38 +175,7 @@ uint32_t EciesAeadHkdfPrivateKeyManager::get_version() const {
 }
 
 StatusOr<std::unique_ptr<HybridDecrypt>>
-EciesAeadHkdfPrivateKeyManager::GetPrimitive(const KeyData& key_data) const {
-  if (DoesSupport(key_data.type_url())) {
-    EciesAeadHkdfPrivateKey ecies_private_key;
-    if (!ecies_private_key.ParseFromString(key_data.value())) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Could not parse key_data.value as key type '%s'.",
-                       key_data.type_url().c_str());
-    }
-    return GetPrimitiveImpl(ecies_private_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_data.type_url().c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<HybridDecrypt>>
-EciesAeadHkdfPrivateKeyManager::GetPrimitive(const MessageLite& key) const {
-  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
-  if (DoesSupport(key_type)) {
-    const EciesAeadHkdfPrivateKey& ecies_private_key =
-        reinterpret_cast<const EciesAeadHkdfPrivateKey&>(key);
-    return GetPrimitiveImpl(ecies_private_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_type.c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<HybridDecrypt>>
-EciesAeadHkdfPrivateKeyManager::GetPrimitiveImpl(
+EciesAeadHkdfPrivateKeyManager::GetPrimitiveFromKey(
     const EciesAeadHkdfPrivateKey& ecies_private_key) const {
   Status status = Validate(ecies_private_key);
   if (!status.ok()) return status;

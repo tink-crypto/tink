@@ -11,7 +11,6 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
 #ifndef TINK_AEAD_AES_EAX_KEY_MANAGER_H_
 #define TINK_AEAD_AES_EAX_KEY_MANAGER_H_
 
@@ -20,6 +19,7 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/core/key_manager_base.h"
 #include "tink/key_manager.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -31,23 +31,14 @@
 namespace crypto {
 namespace tink {
 
-class AesEaxKeyManager : public KeyManager<Aead> {
+class AesEaxKeyManager
+    : public KeyManagerBase<Aead, google::crypto::tink::AesEaxKey> {
  public:
   static constexpr char kKeyType[] =
       "type.googleapis.com/google.crypto.tink.AesEaxKey";
   static constexpr uint32_t kVersion = 0;
 
   AesEaxKeyManager();
-
-  // Constructs an instance of AES-EAX Aead for the given 'key_data',
-  // which must contain AesEaxKey-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitive(
-      const google::crypto::tink::KeyData& key_data) const override;
-
-  // Constructs an instance of AES-EAX Aead for the given 'key',
-  // which must be AesEaxKey-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
-  GetPrimitive(const portable_proto::MessageLite& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;
@@ -61,6 +52,10 @@ class AesEaxKeyManager : public KeyManager<Aead> {
 
   virtual ~AesEaxKeyManager() {}
 
+ protected:
+  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetPrimitiveFromKey(
+      const google::crypto::tink::AesEaxKey& aes_eax_key) const override;
+
  private:
   friend class AesEaxKeyFactory;
 
@@ -70,10 +65,6 @@ class AesEaxKeyManager : public KeyManager<Aead> {
 
   std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
-
-  // Constructs an instance of AES-EAX Aead for the given 'key'.
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>>
-  GetPrimitiveImpl(const google::crypto::tink::AesEaxKey& aes_eax_key) const;
 
   static crypto::tink::util::Status Validate(
       const google::crypto::tink::AesEaxKey& key);

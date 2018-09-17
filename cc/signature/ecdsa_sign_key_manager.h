@@ -13,16 +13,16 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
+#ifndef TINK_SIGNATURE_ECDSA_SIGN_KEY_MANAGER_H_
+#define TINK_SIGNATURE_ECDSA_SIGN_KEY_MANAGER_H_
 
 #include <algorithm>
 #include <vector>
 
-#ifndef TINK_SIGNATURE_ECDSA_SIGN_KEY_MANAGER_H_
-#define TINK_SIGNATURE_ECDSA_SIGN_KEY_MANAGER_H_
-
 #include "absl/strings/string_view.h"
-#include "tink/public_key_sign.h"
+#include "tink/core/key_manager_base.h"
 #include "tink/key_manager.h"
+#include "tink/public_key_sign.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -33,23 +33,15 @@
 namespace crypto {
 namespace tink {
 
-class EcdsaSignKeyManager : public KeyManager<PublicKeySign> {
+class EcdsaSignKeyManager
+    : public KeyManagerBase<PublicKeySign,
+                            google::crypto::tink::EcdsaPrivateKey> {
  public:
   static constexpr char kKeyType[] =
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
   static constexpr uint32_t kVersion = 0;
 
   EcdsaSignKeyManager();
-
-  // Constructs an instance of ECDSA PublicKeySign
-  // for the given 'key_data', which must contain EcdsaPrivateKey-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>> GetPrimitive(
-      const google::crypto::tink::KeyData& key_data) const override;
-
-  // Constructs an instance of ECDSA PublicKeySign
-  // for the given 'key', which must be EcdsaPrivateKey-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>>
-  GetPrimitive(const portable_proto::MessageLite& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;
@@ -63,6 +55,11 @@ class EcdsaSignKeyManager : public KeyManager<PublicKeySign> {
 
   virtual ~EcdsaSignKeyManager() {}
 
+ protected:
+  crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>>
+  GetPrimitiveFromKey(const google::crypto::tink::EcdsaPrivateKey&
+                          ecdsa_private_key) const override;
+
  private:
   friend class EcdsaPrivateKeyFactory;
 
@@ -72,11 +69,6 @@ class EcdsaSignKeyManager : public KeyManager<PublicKeySign> {
 
   std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
-
-  // Constructs an instance of ECDSA PublicKeySign
-  // for the given 'key'.
-  crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>> GetPrimitiveImpl(
-  const google::crypto::tink::EcdsaPrivateKey& ecdsa_private_key) const;
 
   static crypto::tink::util::Status Validate(
       const google::crypto::tink::EcdsaPrivateKey& key);

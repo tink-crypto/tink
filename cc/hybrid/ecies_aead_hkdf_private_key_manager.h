@@ -13,14 +13,14 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
+#ifndef TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
+#define TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
 
 #include <algorithm>
 #include <vector>
 
-#ifndef TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
-#define TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
-
 #include "absl/strings/string_view.h"
+#include "tink/core/key_manager_base.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"
 #include "tink/util/errors.h"
@@ -33,23 +33,15 @@
 namespace crypto {
 namespace tink {
 
-class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
+class EciesAeadHkdfPrivateKeyManager
+    : public KeyManagerBase<HybridDecrypt,
+                            google::crypto::tink::EciesAeadHkdfPrivateKey> {
  public:
   static constexpr char kKeyType[] =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
   static constexpr uint32_t kVersion = 0;
 
   EciesAeadHkdfPrivateKeyManager();
-
-  // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
-  // for the given 'key_data', which must contain EciesAeadHkdfPrivateKey-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitive(
-      const google::crypto::tink::KeyData& key_data) const override;
-
-  // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
-  // for the given 'key', which must be EciesAeadHkdfPrivateKey-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
-  GetPrimitive(const portable_proto::MessageLite& key) const override;
 
   // Returns the type_url identifying the key type handled by this manager.
   const std::string& get_key_type() const override;
@@ -63,6 +55,11 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
 
   virtual ~EciesAeadHkdfPrivateKeyManager() {}
 
+ protected:
+  crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>>
+  GetPrimitiveFromKey(const google::crypto::tink::EciesAeadHkdfPrivateKey&
+                          ecies_private_key) const override;
+
  private:
   friend class EciesAeadHkdfPrivateKeyFactory;
 
@@ -72,11 +69,6 @@ class EciesAeadHkdfPrivateKeyManager : public KeyManager<HybridDecrypt> {
 
   std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
-
-  // Constructs an instance of ECIES-AEAD-HKDF HybridDecrypt
-  // for the given 'key'.
-  crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> GetPrimitiveImpl(
-  const google::crypto::tink::EciesAeadHkdfPrivateKey& ecies_private_key) const;
 
   static crypto::tink::util::Status Validate(
       const google::crypto::tink::EciesAeadHkdfPrivateKey& key);

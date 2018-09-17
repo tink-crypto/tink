@@ -117,38 +117,8 @@ const KeyFactory& XChaCha20Poly1305KeyManager::get_key_factory() const {
   return *key_factory_;
 }
 
-StatusOr<std::unique_ptr<Aead>> XChaCha20Poly1305KeyManager::GetPrimitive(
-    const KeyData& key_data) const {
-  if (DoesSupport(key_data.type_url())) {
-    XChaCha20Poly1305Key xchacha20_poly1305_key;
-    if (!xchacha20_poly1305_key.ParseFromString(key_data.value())) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Could not parse key_data.value as key type '%s'.",
-                       key_data.type_url().c_str());
-    }
-    return GetPrimitiveImpl(xchacha20_poly1305_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_data.type_url().c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<Aead>> XChaCha20Poly1305KeyManager::GetPrimitive(
-    const MessageLite& key) const {
-  std::string key_type = std::string(kKeyTypePrefix) + key.GetTypeName();
-  if (DoesSupport(key_type)) {
-    const XChaCha20Poly1305Key& xchacha20_poly1305_key =
-        reinterpret_cast<const XChaCha20Poly1305Key&>(key);
-    return GetPrimitiveImpl(xchacha20_poly1305_key);
-  } else {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key type '%s' is not supported by this manager.",
-                     key_type.c_str());
-  }
-}
-
-StatusOr<std::unique_ptr<Aead>> XChaCha20Poly1305KeyManager::GetPrimitiveImpl(
+StatusOr<std::unique_ptr<Aead>>
+XChaCha20Poly1305KeyManager::GetPrimitiveFromKey(
     const XChaCha20Poly1305Key& xchacha20_poly1305_key) const {
   Status status = Validate(xchacha20_poly1305_key);
   if (!status.ok()) return status;
