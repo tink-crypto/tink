@@ -37,8 +37,9 @@ public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
 
   public RsaSsaPkcs1VerifyJce(final RSAPublicKey pubKey, HashType hash)
       throws GeneralSecurityException {
-    this.publicKey = pubKey;
     Validators.validateSignatureHash(hash);
+    Validators.validateRsaModulusSize(pubKey.getModulus());
+    this.publicKey = pubKey;
     this.hash = hash;
   }
 

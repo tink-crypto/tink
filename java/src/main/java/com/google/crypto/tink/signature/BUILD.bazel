@@ -18,6 +18,7 @@ full_protos = [
     "//proto:config_java_proto",
     "//proto:ecdsa_java_proto",
     "//proto:ed25519_java_proto",
+    "//proto:rsa_ssa_pkcs1_java_proto",
     "//proto:tink_java_proto",
 ]
 
@@ -26,6 +27,7 @@ lite_protos = [
     "//proto:config_java_proto_lite",
     "//proto:ecdsa_java_proto_lite",
     "//proto:ed25519_java_proto_lite",
+    "//proto:rsa_ssa_pkcs1_java_proto_lite",
     "//proto:tink_java_proto_lite",
 ]
 

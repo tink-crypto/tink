@@ -58,6 +58,8 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
+import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
@@ -349,6 +351,23 @@ public class TestUtil {
   }
 
   /**
+   * @return a {@code RsaSsaPkcs1PublicKey} constructed from {@code modulus}, {@code exponent} and
+   *     {@code hashType}.
+   */
+  public static RsaSsaPkcs1PublicKey createRsaSsaPkcs1PubKey(
+      byte[] modulus, byte[] exponent, HashType hashType) throws Exception {
+    final int version = 0;
+    RsaSsaPkcs1Params params = RsaSsaPkcs1Params.newBuilder().setHashType(hashType).build();
+
+    return RsaSsaPkcs1PublicKey.newBuilder()
+        .setVersion(version)
+        .setParams(params)
+        .setN(ByteString.copyFrom(modulus))
+        .setE(ByteString.copyFrom(exponent))
+        .build();
+  }
+
+  /**
    * @return a freshly generated {@code EciesAeadHkdfPrivateKey} constructed with specified
    *     parameters.
    */
@@ -590,9 +609,7 @@ public class TestUtil {
     assertEquals(keyManagerVersion, entry.getKeyManagerVersion());
   }
 
-  /**
-   * Convert an array of long to an array of int.
-   */
+  /** Convert an array of long to an array of int. */
   public static int[] twoCompInt(long[] a) {
     int[] ret = new int[a.length];
     for (int i = 0; i < a.length; i++) {
