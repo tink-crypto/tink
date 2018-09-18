@@ -278,7 +278,7 @@ testSuite({
     assertEquals(KEY_TYPE, manager.getKeyType());
   },
 
-  testGetPrimtiveType() {
+  testGetPrimitiveType() {
     const manager = new EciesAeadHkdfPublicKeyManager();
 
     assertEquals(PRIMITIVE, manager.getPrimitiveType());

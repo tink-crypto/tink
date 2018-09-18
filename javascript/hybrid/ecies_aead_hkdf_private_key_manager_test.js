@@ -406,7 +406,7 @@ testSuite({
     assertEquals(PRIVATE_KEY_TYPE, manager.getKeyType());
   },
 
-  testGetPrimtiveType() {
+  testGetPrimitiveType() {
     const manager = new EciesAeadHkdfPrivateKeyManager();
     assertEquals(PRIVATE_KEY_MANAGER_PRIMITIVE, manager.getPrimitiveType());
   },
