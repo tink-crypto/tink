@@ -151,3 +151,8 @@ assert_file_contains() {
   done
   echo "+++ Success: file contains all expected substrings."
 }
+
+# Keeps name of file while removing the path part.
+get_file_name() {
+  echo $1 | sed -e "s/.*\///"
+}
