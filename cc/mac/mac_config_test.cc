@@ -23,7 +23,6 @@
 #include "tink/util/status.h"
 #include "gtest/gtest.h"
 
-
 namespace crypto {
 namespace tink {
 namespace {
@@ -104,9 +103,3 @@ TEST_F(MacConfigTest, testRegister) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-
-
-int main(int ac, char* av[]) {
-  testing::InitGoogleTest(&ac, av);
-  return RUN_ALL_TESTS();
-}

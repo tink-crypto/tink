@@ -25,7 +25,6 @@ using crypto::tink::test::DummyHybridEncrypt;
 using google::crypto::tink::OutputPrefixType;
 using google::crypto::tink::Keyset;
 
-
 namespace crypto {
 namespace tink {
 namespace {
@@ -120,9 +119,3 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-
-
-int main(int ac, char* av[]) {
-  testing::InitGoogleTest(&ac, av);
-  return RUN_ALL_TESTS();
-}

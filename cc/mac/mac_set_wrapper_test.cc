@@ -26,7 +26,6 @@ using crypto::tink::test::DummyMac;
 using google::crypto::tink::OutputPrefixType;
 using google::crypto::tink::Keyset;
 
-
 namespace crypto {
 namespace tink {
 namespace {

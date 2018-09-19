@@ -69,8 +69,3 @@ TEST(EcUtilTest, testEncodingSizeInBytes) {
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
-
-int main(int argc, char* argv[]) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
