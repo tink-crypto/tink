@@ -175,8 +175,8 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/Validators.html#validateRsaModulusSize-java.math.BigInteger-">validateRsaModulusSize</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;modulus)</code>
-<div class="block">Validates whether <code>modulus</code> is at least 2048-bit.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/Validators.html#validateRsaModulusSize-int-">validateRsaModulusSize</a></span>(int&nbsp;modulusSize)</code>
+<div class="block">Validates whether <code>modulusSize</code> is at least 2048-bit.</div>
 </td>
 </tr>
 <tr id="i6" class="altColor">
@@ -292,22 +292,22 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="validateRsaModulusSize-java.math.BigInteger-">
+<a name="validateRsaModulusSize-int-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>validateRsaModulusSize</h4>
-<pre>public static&nbsp;void&nbsp;validateRsaModulusSize(<a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;modulus)
+<pre>public static&nbsp;void&nbsp;validateRsaModulusSize(int&nbsp;modulusSize)
                                    throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Validates whether <code>modulus</code> is at least 2048-bit.
+<div class="block">Validates whether <code>modulusSize</code> is at least 2048-bit.
 
  <p>To reach 128-bit security strength, RSA's modulus must be at least 3072-bit while 2048-bit
  RSA key only has 112-bit security. Nevertheless, a 2048-bit RSA key is considered safe by NIST
  until 2030 (see https://www.keylength.com/en/4/).</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if <code>modulus</code> is less than 2048-bit.</dd>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if <code>modulusSize</code> is less than 2048-bit.</dd>
 </dl>
 </li>
 </ul>

@@ -2170,6 +2170,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#createKmsEnvelopeAeadKeyTemplate-java.lang.String-com.google.crypto.tink.proto.KeyTemplate-">createKmsEnvelopeAeadKeyTemplate(String, KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#createRsaSsaPkcs1KeyTemplate-com.google.crypto.tink.proto.HashType-int-java.math.BigInteger-">createRsaSsaPkcs1KeyTemplate(HashType, int, BigInteger)</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Base64.html#CRLF">CRLF</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle">Base64</a></dt>
 <dd>
 <div class="block">Encoder flag bit to indicate lines should be terminated with a CRLF pair instead of just an LF.</div>
@@ -11918,6 +11920,20 @@
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as the
  primary key.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_2048_SHA256_F4">RSA_SSA_PKCS1_2048_SHA256_F4</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
+<dd>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA256.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_3072_SHA512_F4">RSA_SSA_PKCS1_3072_SHA512_F4</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
+<dd>
+<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
+
+ 
+   Hash function: SHA512.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/proto/RsaSsaPkcs1.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPkcs1</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPkcs1KeyFormat</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
@@ -13604,9 +13620,9 @@
 <div class="block">Checks that the public key's params is the same as the private key's params, and the public key
  is a valid point on the private key's curve.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Validators.html#validateRsaModulusSize-java.math.BigInteger-">validateRsaModulusSize(BigInteger)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Validators.html" title="class in com.google.crypto.tink.subtle">Validators</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Validators.html#validateRsaModulusSize-int-">validateRsaModulusSize(int)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Validators.html" title="class in com.google.crypto.tink.subtle">Validators</a></dt>
 <dd>
-<div class="block">Validates whether <code>modulus</code> is at least 2048-bit.</div>
+<div class="block">Validates whether <code>modulusSize</code> is at least 2048-bit.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Validators.html#validateSignatureHash-com.google.crypto.tink.subtle.Enums.HashType-">validateSignatureHash(Enums.HashType)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Validators.html" title="class in com.google.crypto.tink.subtle">Validators</a></dt>
 <dd>
