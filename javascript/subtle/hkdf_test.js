@@ -26,36 +26,48 @@ testSuite({
     const info = Random.randBytes(16);
     try {
       await Hkdf.compute(0, 'SHA-256', ikm, info);  // 0 output size
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals('CustomError: size must be positive', e.toString());
     }
 
     try {
       await Hkdf.compute(-1, 'SHA-256', ikm, info);  // negative output size
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals('CustomError: size must be positive', e.toString());
     }
 
     try {
-      await Hkdf.compute(255 + 20 + 1, 'SHA-1', ikm, info);  // size too large
+      await Hkdf.compute(
+          /** 255 * digestSize + 1 */ (255 * 20) + 1, 'SHA-1', ikm,
+          info);  // size too large
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals('CustomError: size too large', e.toString());
     }
 
     try {
-      await Hkdf.compute(255 + 32 + 1, 'SHA-256', ikm, info);  // size too large
+      await Hkdf.compute(
+          /** 255 * digestSize + 1 */ (255 * 32) + 1, 'SHA-256', ikm,
+          info);  // size too large
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals('CustomError: size too large', e.toString());
     }
 
     try {
-      await Hkdf.compute(255 + 64 + 1, 'SHA-512', ikm, info);  // size too large
+      await Hkdf.compute(
+          /** 255 * digestSize + 1 */ (255 * 64) + 1, 'SHA-512', ikm,
+          info);  // size too large
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals('CustomError: size too large', e.toString());
     }
 
     try {
       await Hkdf.compute(1, 'SHA-256', 'blah', info);  // wrong type
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
@@ -63,6 +75,7 @@ testSuite({
 
     try {
       await Hkdf.compute(1, 'SHA-256', ikm, 'blah');  // wrong type
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
@@ -70,6 +83,7 @@ testSuite({
 
     try {
       await Hkdf.compute(1, 'SHA-256', ikm, info, 'blah');  // size too large
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());

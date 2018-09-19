@@ -64,6 +64,8 @@ const newInstance = async function(hash, key, tagSize) {
       throw new InvalidArgumentsException(hash + ' is not supported');
   }
 
+  // TODO(b/115974209): Add check that key.length > 16.
+
   if (Environment.IS_WEBCRYPTO_AVAILABLE) {
     return await HmacWebCrypto.newInstance(hash, key, tagSize);
   }

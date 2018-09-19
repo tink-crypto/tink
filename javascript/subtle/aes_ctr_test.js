@@ -57,12 +57,14 @@ testSuite({
   async testConstructor() {
     try {
       await AesCtr.newInstance(123, 16);  // IV size too short
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await AesCtr.newInstance(Random.randBytes(16), 11);  // IV size too short
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: invalid IV length, must be at least 12 and at most 16',
@@ -70,6 +72,7 @@ testSuite({
     }
     try {
       await AesCtr.newInstance(Random.randBytes(16), 17);  // IV size too long
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: invalid IV length, must be at least 12 and at most 16',
@@ -78,6 +81,7 @@ testSuite({
     try {
       await AesCtr.newInstance(
           Random.randBytes(24), 12);  // 192-bit keys not supported
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals('CustomError: unsupported AES key size: 24', e.toString());
     }
@@ -86,6 +90,7 @@ testSuite({
   async testType() {
     try {
       await AesCtr.newInstance('blah');
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
@@ -94,24 +99,28 @@ testSuite({
     const cipher = await AesCtr.newInstance(Random.randBytes(16));
     try {
       await cipher.encrypt('blah');
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await cipher.encrypt(123);
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await cipher.decrypt('blah');
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await cipher.decrypt(123);
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());

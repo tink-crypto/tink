@@ -57,6 +57,7 @@ testSuite({
     try {
       await EciesAeadHkdfHybridEncrypt.newInstance(
           null, hkdfHash, pointFormat, demHelper);
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: Recipient public key has to be non-null.',
@@ -66,6 +67,7 @@ testSuite({
     try {
       await EciesAeadHkdfHybridEncrypt.newInstance(
           publicKey, null, pointFormat, demHelper);
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: HMAC algorithm has to be non-null.', e.toString());
@@ -74,6 +76,7 @@ testSuite({
     try {
       await EciesAeadHkdfHybridEncrypt.newInstance(
           publicKey, hkdfHash, null, demHelper);
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: Point format has to be non-null.', e.toString());
@@ -82,6 +85,7 @@ testSuite({
     try {
       await EciesAeadHkdfHybridEncrypt.newInstance(
           publicKey, hkdfHash, pointFormat, null);
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals('CustomError: DEM helper has to be non-null.', e.toString());
     }

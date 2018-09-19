@@ -75,6 +75,7 @@ testSuite({
       await EncryptThenAuthenticate.newAesCtrHmac(
           'blah' /* aesKey */, 12 /* ivSize */, 'SHA-256',
           Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
@@ -83,6 +84,7 @@ testSuite({
       await EncryptThenAuthenticate.newAesCtrHmac(
           Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
           'blah' /* hmacKey */, 10 /* tagSize */);
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
@@ -93,24 +95,28 @@ testSuite({
         Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
     try {
       await aead.encrypt('blah');
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.encrypt(Random.randBytes(20), 'blah');
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.decrypt('blah');
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
     try {
       await aead.decrypt(Random.randBytes(32), 'blah');
+      fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
@@ -133,6 +139,7 @@ testSuite({
         c1[i] = (c1[i] ^ (1 << j));
         try {
           await aead.decrypt(c1, aad);
+          fail('Should throw an exception.');
         } catch (e) {
           assertEquals('CustomError: invalid MAC', e.toString());
         }
@@ -153,6 +160,7 @@ testSuite({
         aad1[i] = (aad1[i] ^ (1 << j));
         try {
           await aead.decrypt(ciphertext, aad1);
+          fail('Should throw an exception.');
         } catch (e) {
           assertEquals('CustomError: invalid MAC', e.toString());
         }
@@ -171,6 +179,7 @@ testSuite({
       const c1 = new Uint8Array(ciphertext.buffer, 0, ciphertext.length - i);
       try {
         await aead.decrypt(c1, aad);
+        fail('Should throw an exception.');
       } catch (e) {
         if (c1.length < 32) {
           assertEquals('CustomError: ciphertext too short', e.toString());
