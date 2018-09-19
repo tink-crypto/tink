@@ -497,29 +497,29 @@ exports_files(
 # To get dead code elimination run Bazel with option --nolegacy_whole_archive.
 cc_binary(
     name = "libtink.so",
+    linkopts = select({
+        ":linux_x86_64": [
+            "-Wl,-version-script",  # The next line must be exported_symbols.lds file
+            "$(location :version_script.lds)",
+            "-Wl,--gc-sections",
+            "-Wl,--icf=all",
+            "-Wl,--strip-all",
+        ],
+        ":mac_x86_64": [
+            "-Wl,-install_name,@rpath/libtink.so",
+            "-Wl,-exported_symbols_list",  # The next line must be exported_symbols.lds file
+            "$(location :exported_symbols.lds)",
+            "-Wl,-x",
+            "-Wl,-dead_strip",
+        ],
+    }),
     linkshared = 1,
     linkstatic = 1,
-    linkopts = select({
-      ":linux_x86_64": [
-        "-Wl,-version-script",  # The next line must be exported_symbols.lds file
-        "$(location :version_script.lds)",
-        "-Wl,--gc-sections",
-        "-Wl,--icf=all",
-        "-Wl,--strip-all",
-      ],
-      ":mac_x86_64": [
-        "-Wl,-install_name,@rpath/libtink.so",
-        "-Wl,-exported_symbols_list", # The next line must be exported_symbols.lds file
-        "$(location :exported_symbols.lds)",
-        "-Wl,-x",
-        "-Wl,-dead_strip",
-      ],
-    }),
     visibility = ["//visibility:public"],
     deps = PUBLIC_API_DEPS + [
-      ":cleartext_keyset_handle",
-      ":exported_symbols.lds",
-      ":version_script.lds"
+        ":cleartext_keyset_handle",
+        ":exported_symbols.lds",
+        ":version_script.lds",
     ],
 )
 
