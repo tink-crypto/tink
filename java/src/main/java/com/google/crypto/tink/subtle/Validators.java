@@ -19,7 +19,6 @@ package com.google.crypto.tink.subtle;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.regex.Pattern;
@@ -90,16 +89,15 @@ public final class Validators {
   }
 
   /**
-   * Validates whether {@code modulus} is at least 2048-bit.
+   * Validates whether {@code modulusSize} is at least 2048-bit.
    *
    * <p>To reach 128-bit security strength, RSA's modulus must be at least 3072-bit while 2048-bit
    * RSA key only has 112-bit security. Nevertheless, a 2048-bit RSA key is considered safe by NIST
    * until 2030 (see https://www.keylength.com/en/4/).
    *
-   * @throws GeneralSecurityException if {@code modulus} is less than 2048-bit.
+   * @throws GeneralSecurityException if {@code modulusSize} is less than 2048-bit.
    */
-  public static void validateRsaModulusSize(BigInteger modulus) throws GeneralSecurityException {
-    int modulusSize = modulus.bitLength();
+  public static void validateRsaModulusSize(int modulusSize) throws GeneralSecurityException {
     if (modulusSize < MIN_RSA_MODULUS_SIZE) {
       throw new GeneralSecurityException(
           String.format(

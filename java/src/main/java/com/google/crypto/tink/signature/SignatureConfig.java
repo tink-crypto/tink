@@ -88,10 +88,24 @@ public final class SignatureConfig {
                   PUBLIC_KEY_SIGN_CATALOGUE_NAME, "PublicKeySign", "Ed25519PrivateKey", 0, true))
           .addEntry(
               Config.getTinkKeyTypeEntry(
+                  PUBLIC_KEY_SIGN_CATALOGUE_NAME,
+                  "PublicKeySign",
+                  "RsaSsaPkcs1PrivateKey",
+                  0,
+                  true))
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
                   PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "EcdsaPublicKey", 0, true))
           .addEntry(
               Config.getTinkKeyTypeEntry(
                   PUBLIC_KEY_VERIFY_CATALOGUE_NAME, "PublicKeyVerify", "Ed25519PublicKey", 0, true))
+          .addEntry(
+              Config.getTinkKeyTypeEntry(
+                  PUBLIC_KEY_VERIFY_CATALOGUE_NAME,
+                  "PublicKeyVerify",
+                  "RsaSsaPkcs1PublicKey",
+                  0,
+                  true))
           .build();
 
   static {

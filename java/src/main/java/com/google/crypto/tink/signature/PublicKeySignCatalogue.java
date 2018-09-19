@@ -56,6 +56,8 @@ class PublicKeySignCatalogue implements Catalogue<PublicKeySign> {
         return new EcdsaSignKeyManager();
       case Ed25519PrivateKeyManager.TYPE_URL:
         return new Ed25519PrivateKeyManager();
+      case RsaSsaPkcs1SignKeyManager.TYPE_URL:
+        return new RsaSsaPkcs1SignKeyManager();
       default:
         throw new GeneralSecurityException(
             String.format("No support for primitive 'PublicKeySign' with key type '%s'.", typeUrl));

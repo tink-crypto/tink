@@ -152,7 +152,7 @@ public class SignatureConfigTest {
   @Test
   public void testConfigContents_LATEST() throws Exception {
     RegistryConfig config = SignatureConfig.LATEST;
-    assertEquals(4, config.getEntryCount());
+    assertEquals(6, config.getEntryCount());
     assertEquals("TINK_SIGNATURE", config.getConfigName());
 
     TestUtil.verifyConfigEntry(
@@ -171,16 +171,30 @@ public class SignatureConfigTest {
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(2),
-        "TinkPublicKeyVerify",
-        "PublicKeyVerify",
-        "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
+        "TinkPublicKeySign",
+        "PublicKeySign",
+        "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(3),
         "TinkPublicKeyVerify",
         "PublicKeyVerify",
+        "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(4),
+        "TinkPublicKeyVerify",
+        "PublicKeyVerify",
         "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(5),
+        "TinkPublicKeyVerify",
+        "PublicKeyVerify",
+        "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey",
         true,
         0);
   }

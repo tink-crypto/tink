@@ -37,7 +37,7 @@ public final class RsaSsaPkcs1SignJce implements PublicKeySign {
   public RsaSsaPkcs1SignJce(final RSAPrivateCrtKey priv, HashType hash)
       throws GeneralSecurityException {
     Validators.validateSignatureHash(hash);
-    Validators.validateRsaModulusSize(priv.getModulus());
+    Validators.validateRsaModulusSize(priv.getModulus().bitLength());
     this.privateKey = priv;
     this.signatureAlgorithm = SubtleUtil.toRsaSsaPkcs1Algo(hash);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");

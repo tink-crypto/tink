@@ -60,7 +60,7 @@ class RsaSsaPkcs1VerifyKeyManager implements KeyManager<PublicKeyVerify> {
       throw new GeneralSecurityException("expected RsaSsaPkcs1PublicKey proto");
     }
     RsaSsaPkcs1PublicKey keyProto = (RsaSsaPkcs1PublicKey) key;
-    validate(keyProto);
+    validateKey(keyProto);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
     BigInteger modulus = new BigInteger(1, keyProto.getN().toByteArray());
     BigInteger exponent = new BigInteger(1, keyProto.getE().toByteArray());
@@ -112,8 +112,9 @@ class RsaSsaPkcs1VerifyKeyManager implements KeyManager<PublicKeyVerify> {
     return VERSION;
   }
 
-  private void validate(RsaSsaPkcs1PublicKey pubKey) throws GeneralSecurityException {
-    Validators.validateRsaModulusSize(new BigInteger(1, pubKey.getN().toByteArray()));
+  private void validateKey(RsaSsaPkcs1PublicKey pubKey) throws GeneralSecurityException {
+    Validators.validateVersion(pubKey.getVersion(), VERSION);
+    Validators.validateRsaModulusSize((new BigInteger(1, pubKey.getN().toByteArray())).bitLength());
     Validators.validateSignatureHash(SigUtil.toHashType(pubKey.getParams().getHashType()));
   }
 }
