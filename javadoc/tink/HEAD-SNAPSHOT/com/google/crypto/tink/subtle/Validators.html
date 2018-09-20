@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":9};
+var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -175,21 +175,15 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/Validators.html#validateRsaModulusSize-int-">validateRsaModulusSize</a></span>(int&nbsp;modulusSize)</code>
-<div class="block">Validates whether <code>modulusSize</code> is at least 2048-bit.</div>
-</td>
-</tr>
-<tr id="i6" class="altColor">
-<td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/Validators.html#validateSignatureHash-com.google.crypto.tink.subtle.Enums.HashType-">validateSignatureHash</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/Enums.HashType.html" title="enum in com.google.crypto.tink.subtle">Enums.HashType</a>&nbsp;hash)</code>
 <div class="block">Validates whether <code>hash</code> is safe to use for digital signature.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/Validators.html#validateTypeUrl-java.lang.String-">validateTypeUrl</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</code>&nbsp;</td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/Validators.html#validateVersion-int-int-">validateVersion</a></span>(int&nbsp;candidate,
                int&nbsp;maxExpected)</code>&nbsp;</td>
@@ -289,25 +283,6 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if <code>hash</code> is invalid or is not safe to use for digital
      signature.</dd>
-</dl>
-</li>
-</ul>
-<a name="validateRsaModulusSize-int-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>validateRsaModulusSize</h4>
-<pre>public static&nbsp;void&nbsp;validateRsaModulusSize(int&nbsp;modulusSize)
-                                   throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Validates whether <code>modulusSize</code> is at least 2048-bit.
-
- <p>To reach 128-bit security strength, RSA's modulus must be at least 3072-bit while 2048-bit
- RSA key only has 112-bit security. Nevertheless, a 2048-bit RSA key is considered safe by NIST
- until 2030 (see https://www.keylength.com/en/4/).</div>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if <code>modulusSize</code> is less than 2048-bit.</dd>
 </dl>
 </li>
 </ul>
