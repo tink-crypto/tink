@@ -34,6 +34,7 @@ PUBLIC_APIS = [
     "mac_config.h",
     "mac_factory.h",
     "mac_key_templates.h",
+    "no_secret_keyset_handle.h",
     "public_key_sign.h",
     "public_key_sign_factory.h",
     "public_key_verify.h",
@@ -62,6 +63,7 @@ PUBLIC_API_DEPS = [
     ":keyset_writer",
     ":kms_client",
     ":mac",
+    ":no_secret_keyset_handle",
     ":primitive_set",
     ":registry",
     ":version",
@@ -407,6 +409,23 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "no_secret_keyset_handle",
+    srcs = ["core/no_secret_keyset_handle.cc"],
+    hdrs = ["no_secret_keyset_handle.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":keyset_handle_hdr",
+        ":keyset_reader",
+        "//cc/util:errors",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
     ],
 )
 
@@ -788,6 +807,26 @@ cc_test(
         "//cc/util:keyset_util",
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "no_secret_keyset_handle_test",
+    size = "small",
+    srcs = ["core/no_secret_keyset_handle_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":binary_keyset_reader",
+        ":cleartext_keyset_handle",
+        ":keyset_handle",
+        ":keyset_reader",
+        ":no_secret_keyset_handle",
+        "//cc/util:keyset_util",
+        "//cc/util:test_matchers",
+        "//cc/util:test_util",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
 )

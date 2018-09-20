@@ -56,6 +56,7 @@ class KeysetHandle {
  private:
   // The classes below need access to get_keyset();
   friend class CleartextKeysetHandle;
+  friend class NoSecretKeysetHandle;
   friend class KeysetManager;
   friend class Registry;
 

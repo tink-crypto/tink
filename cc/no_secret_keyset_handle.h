@@ -14,42 +14,31 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/cleartext_keyset_handle.h"
-
-#include <istream>
+#ifndef TINK_NO_SECRET_KEYSET_HANDLE_H_
+#define TINK_NO_SECRET_KEYSET_HANDLE_H_
 
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
-#include "tink/util/errors.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
-
-using google::crypto::tink::Keyset;
-
 
 namespace crypto {
 namespace tink {
 
-// static
-util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
-    std::unique_ptr<KeysetReader> reader) {
-  auto keyset_result = reader->Read();
-  if (!keyset_result.ok()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Error reading keyset data: %s",
-                     keyset_result.status().error_message().c_str());
-  }
-  std::unique_ptr<KeysetHandle> handle(
-      new KeysetHandle(std::move(keyset_result.ValueOrDie())));
-  return std::move(handle);
-}
+// Creates a Keyset from a KeysetHandle as long as there is no secret key
+// material in the keyset.
+class NoSecretKeysetHandle {
+ public:
+  // Creates a KeysetHandle from a keyset or a failure if there is secret
+  // material in the keyset.
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> Get(
+      std::unique_ptr<google::crypto::tink::Keyset> keyset);
 
-// static
-const Keyset& CleartextKeysetHandle::GetKeyset(
-    const KeysetHandle& keyset_handle) {
-  return keyset_handle.get_keyset();
-}
+ private:
+  NoSecretKeysetHandle() = delete;
+};
 
 }  // namespace tink
 }  // namespace crypto
+
+#endif  // TINK_NO_SECRET_KEYSET_HANDLE_H_
