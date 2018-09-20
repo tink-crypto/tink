@@ -35,10 +35,17 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPkcs1SignBoringSsl::New(
     const SubtleUtilBoringSSL::RsaSsaPkcs1Params& params) {
   // Check hash.
   util::Status sig_hash_valid =
-      SubtleUtilBoringSSL::ValidateSignatureHash(params.sig_hash);
+      SubtleUtilBoringSSL::ValidateSignatureHash(params.hash_type);
   if (!sig_hash_valid.ok()) return sig_hash_valid;
-  auto sig_hash = SubtleUtilBoringSSL::EvpHash(params.sig_hash);
+  auto sig_hash = SubtleUtilBoringSSL::EvpHash(params.hash_type);
   if (!sig_hash.ok()) return sig_hash.status();
+
+  // Check RSA's modulus.
+  auto status_or_n = SubtleUtilBoringSSL::str2bn(private_key.n);
+  if (!status_or_n.ok()) return status_or_n.status();
+  auto modulus_status = SubtleUtilBoringSSL::ValidateRsaModulusSize(
+      BN_num_bits(status_or_n.ValueOrDie().get()));
+  if (!modulus_status.ok()) return modulus_status;
 
   bssl::UniquePtr<RSA> rsa(RSA_new());
   if (rsa == nullptr) {

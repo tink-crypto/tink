@@ -163,26 +163,18 @@ Status RsaSsaPssVerifyKeyManager::Validate(const RsaSsaPssPublicKey& key) {
   if (!status.ok()) return status;
   auto status_or_n = subtle::SubtleUtilBoringSSL::str2bn(key.n());
   if (!status_or_n.ok()) return status_or_n.status();
-  size_t modulus_size = BN_num_bits(status_or_n.ValueOrDie().get());
-  if (modulus_size < kMinModulusSizeInBits) {
-    return ToStatusF(
-        util::error::INVALID_ARGUMENT,
-        "Modulus size is %zu; only modulus size >= 2048-bit is supported",
-        modulus_size);
-  }
+  auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
+      BN_num_bits(status_or_n.ValueOrDie().get()));
+  if (!modulus_status.ok()) return modulus_status;
   return Validate(key.params());
 }
 
 // static
 Status RsaSsaPssVerifyKeyManager::Validate(
     const RsaSsaPssKeyFormat& key_format) {
-  size_t modulus_size = key_format.modulus_size_in_bits();
-  if (modulus_size < kMinModulusSizeInBits) {
-    return ToStatusF(
-        util::error::INTERNAL,
-        "Modulus size is %zu; only modulus size >= 2048-bit is supported",
-        modulus_size);
-  }
+  auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
+      key_format.modulus_size_in_bits());
+  if (!modulus_status.ok()) return modulus_status;
   return Validate(key_format.params());
 }
 

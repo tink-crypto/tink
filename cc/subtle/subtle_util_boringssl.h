@@ -35,9 +35,9 @@ class SubtleUtilBoringSSL {
  public:
   struct EcKey {
     EllipticCurveType curve;
-    std::string pub_x;   // affine coordinates in bigendian representation
+    std::string pub_x;  // affine coordinates in bigendian representation
     std::string pub_y;
-    std::string priv;    // big integer in bigendian represnetation
+    std::string priv;  // big integer in bigendian represnetation
   };
 
   struct RsaPublicKey {
@@ -69,7 +69,7 @@ class SubtleUtilBoringSSL {
   struct RsaSsaPkcs1Params {
     // Hash function used in computing hash of the signing message
     // (see https://tools.ietf.org/html/rfc8017#section-9.2).
-    HashType sig_hash;
+    HashType hash_type;
   };
 
   // RSA private key representation.
@@ -116,9 +116,7 @@ class SubtleUtilBoringSSL {
   // Returns BoringSSL's EC_POINT constructed from the curve type, big-endian
   // representation of public key's x-coordinate and y-coordinate.
   static crypto::tink::util::StatusOr<EC_POINT *> GetEcPoint(
-      EllipticCurveType curve,
-      absl::string_view pubx,
-      absl::string_view puby);
+      EllipticCurveType curve, absl::string_view pubx, absl::string_view puby);
 
   // Returns a new EC key for the specified curve.
   static crypto::tink::util::StatusOr<EcKey> GetNewEcKey(
@@ -131,9 +129,7 @@ class SubtleUtilBoringSSL {
   // curve_size_in_bytes big-endian byte array and if the least significant bit
   // of y is 1, the 1st byte is 0x03, otherwise it's 0x02.
   static crypto::tink::util::StatusOr<EC_POINT *> EcPointDecode(
-      EllipticCurveType curve,
-      EcPointFormat format,
-      absl::string_view encoded);
+      EllipticCurveType curve, EcPointFormat format, absl::string_view encoded);
 
   // Returns the encoded public key based on curve type, point format and
   // BoringSSL's EC_POINT public key point. The uncompressed point is encoded as
@@ -142,16 +138,12 @@ class SubtleUtilBoringSSL {
   // curve_size_in_bytes big-endian byte array and if the least significant bit
   // of y is 1, the 1st byte is 0x03, otherwise it's 0x02.
   static crypto::tink::util::StatusOr<std::string> EcPointEncode(
-      EllipticCurveType curve,
-      EcPointFormat format,
-      const EC_POINT *point);
+      EllipticCurveType curve, EcPointFormat format, const EC_POINT *point);
 
   // Returns the ECDH's shared secret based on our private key and peer's public
   // key. Returns error if the public key is not on private key's curve.
   static crypto::tink::util::StatusOr<std::string> ComputeEcdhSharedSecret(
-      EllipticCurveType curve,
-      const BIGNUM *priv_key,
-      const EC_POINT *pub_key);
+      EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key);
 
   // Returns an EVP structure for a hash function.
   // The EVP_MD instances are sigletons owned by BoringSSL.
@@ -161,6 +153,13 @@ class SubtleUtilBoringSSL {
   // Validates whether 'sig_hash' is safe to use for digital signature.
   static crypto::tink::util::Status ValidateSignatureHash(
       subtle::HashType sig_hash);
+
+  // Validates whether 'modulus_size' is at least 2048-bit.
+  // To reach 128-bit security strength, RSA's modulus must be at least 3072-bit
+  // while 2048-bit RSA key only has 112-bit security. Nevertheless, a 2048-bit
+  // RSA key is considered safe by NIST until 2030 (see
+  // https://www.keylength.com/en/4/).
+  static crypto::tink::util::Status ValidateRsaModulusSize(size_t modulus_size);
 
   // Return an empty std::string if str.data() is nullptr; otherwise return str.
   static absl::string_view EnsureNonNull(absl::string_view str);

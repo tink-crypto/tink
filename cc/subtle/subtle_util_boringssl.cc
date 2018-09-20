@@ -22,6 +22,7 @@
 #include "openssl/err.h"
 #include "openssl/rsa.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/util/errors.h"
 
 namespace crypto {
 namespace tink {
@@ -29,11 +30,11 @@ namespace subtle {
 
 namespace {
 
-size_t ScalarSizeInBytes(const EC_GROUP* group) {
+size_t ScalarSizeInBytes(const EC_GROUP *group) {
   return BN_num_bytes(EC_GROUP_get0_order(group));
 }
 
-size_t FieldElementSizeInBytes(const EC_GROUP* group) {
+size_t FieldElementSizeInBytes(const EC_GROUP *group) {
   unsigned degree_bits = EC_GROUP_get_degree(group);
   return (degree_bits + 7) / 8;
 }
@@ -105,20 +106,21 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
 }
 
 // static
-util::StatusOr<SubtleUtilBoringSSL::EcKey>
-SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType curve_type) {
+util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
+    EllipticCurveType curve_type) {
   auto status_or_group(SubtleUtilBoringSSL::GetEcGroup(curve_type));
   if (!status_or_group.ok()) return status_or_group.status();
   bssl::UniquePtr<EC_GROUP> group(status_or_group.ValueOrDie());
   bssl::UniquePtr<EC_KEY> key(EC_KEY_new());
   EC_KEY_set_group(key.get(), group.get());
   EC_KEY_generate_key(key.get());
-  const BIGNUM* priv_key = EC_KEY_get0_private_key(key.get());
-  const EC_POINT* pub_key = EC_KEY_get0_public_key(key.get());
+  const BIGNUM *priv_key = EC_KEY_get0_private_key(key.get());
+  const EC_POINT *pub_key = EC_KEY_get0_public_key(key.get());
   bssl::UniquePtr<BIGNUM> pub_key_x_bn(BN_new());
   bssl::UniquePtr<BIGNUM> pub_key_y_bn(BN_new());
   if (!EC_POINT_get_affine_coordinates_GFp(group.get(), pub_key,
-          pub_key_x_bn.get(), pub_key_y_bn.get(), nullptr)) {
+                                           pub_key_x_bn.get(),
+                                           pub_key_y_bn.get(), nullptr)) {
     return util::Status(util::error::INTERNAL,
                         "EC_POINT_get_affine_coordinates_GFp failed");
   }
@@ -186,8 +188,9 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
   }
   // Get shared point's x coordinate.
   bssl::UniquePtr<BIGNUM> shared_x(BN_new());
-  if (1 != EC_POINT_get_affine_coordinates_GFp(priv_group.get(),
-               shared_point.get(), shared_x.get(), nullptr, nullptr)) {
+  if (1 !=
+      EC_POINT_get_affine_coordinates_GFp(priv_group.get(), shared_point.get(),
+                                          shared_x.get(), nullptr, nullptr)) {
     return util::Status(util::error::INTERNAL,
                         "EC_POINT_get_affine_coordinates_GFp failed");
   }
@@ -365,6 +368,17 @@ util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "Unsupported hash function");
   }
+}
+
+// static
+util::Status SubtleUtilBoringSSL::ValidateRsaModulusSize(size_t modulus_size) {
+  if (modulus_size < 2048) {
+    return ToStatusF(
+        util::error::INVALID_ARGUMENT,
+        "Modulus size is %zu; only modulus size >= 2048-bit is supported",
+        modulus_size);
+  }
+  return util::Status::OK;
 }
 
 // static

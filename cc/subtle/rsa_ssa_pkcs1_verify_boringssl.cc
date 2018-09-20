@@ -35,11 +35,11 @@ RsaSsaPkcs1VerifyBoringSsl::New(
     const SubtleUtilBoringSSL::RsaSsaPkcs1Params& params) {
   // Check hash.
   auto hash_status =
-      SubtleUtilBoringSSL::ValidateSignatureHash(params.sig_hash);
+      SubtleUtilBoringSSL::ValidateSignatureHash(params.hash_type);
   if (!hash_status.ok()) {
     return hash_status;
   }
-  auto sig_hash_result = SubtleUtilBoringSSL::EvpHash(params.sig_hash);
+  auto sig_hash_result = SubtleUtilBoringSSL::EvpHash(params.hash_type);
   if (!sig_hash_result.ok()) return sig_hash_result.status();
 
   // Check RSA's modulus.
@@ -47,13 +47,9 @@ RsaSsaPkcs1VerifyBoringSsl::New(
   if (!status_or_n.ok()) return status_or_n.status();
   auto status_or_e = SubtleUtilBoringSSL::str2bn(pub_key.e);
   if (!status_or_e.ok()) return status_or_e.status();
-  size_t modulus_size = BN_num_bits(status_or_n.ValueOrDie().get());
-  if (modulus_size < kMinModulusSizeInBits) {
-    return ToStatusF(
-        util::error::INVALID_ARGUMENT,
-        "Modulus size is %zu; only modulus size >= %zu-bit is supported",
-        modulus_size, kMinModulusSizeInBits);
-  }
+  auto modulus_status = SubtleUtilBoringSSL::ValidateRsaModulusSize(
+      BN_num_bits(status_or_n.ValueOrDie().get()));
+  if (!modulus_status.ok()) return modulus_status;
   bssl::UniquePtr<RSA> rsa(RSA_new());
   if (rsa.get() == nullptr) {
     return util::Status(util::error::INTERNAL,

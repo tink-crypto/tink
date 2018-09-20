@@ -41,6 +41,13 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPssSignBoringSsl::New(
   auto mgf1_hash = SubtleUtilBoringSSL::EvpHash(params.mgf1_hash);
   if (!mgf1_hash.ok()) return mgf1_hash.status();
 
+  // Check RSA's modulus.
+  auto status_or_n = SubtleUtilBoringSSL::str2bn(private_key.n);
+  if (!status_or_n.ok()) return status_or_n.status();
+  auto modulus_status = SubtleUtilBoringSSL::ValidateRsaModulusSize(
+      BN_num_bits(status_or_n.ValueOrDie().get()));
+  if (!modulus_status.ok()) return modulus_status;
+
   bssl::UniquePtr<RSA> rsa(RSA_new());
   if (rsa == nullptr) {
     return util::Status(util::error::INTERNAL, "Could not initialize RSA.");

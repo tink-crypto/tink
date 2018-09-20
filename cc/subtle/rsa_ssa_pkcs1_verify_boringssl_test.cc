@@ -76,7 +76,7 @@ static const NistTestVector nist_test_vector{
         "2abca413e5e4693f4a9405"),
     HashType::SHA256};
 
-TEST_F(RsaSsaPkcs1VerifyBoringSslTest, testBasicVerify) {
+TEST_F(RsaSsaPkcs1VerifyBoringSslTest, BasicVerify) {
   SubtleUtilBoringSSL::RsaPublicKey pub_key{nist_test_vector.n,
                                             nist_test_vector.e};
   SubtleUtilBoringSSL::RsaSsaPkcs1Params params{nist_test_vector.sig_hash};
@@ -89,7 +89,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, testBasicVerify) {
   EXPECT_TRUE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
 }
 
-TEST_F(RsaSsaPkcs1VerifyBoringSslTest, testNewErrors) {
+TEST_F(RsaSsaPkcs1VerifyBoringSslTest, NewErrors) {
   SubtleUtilBoringSSL::RsaPublicKey nist_pub_key{nist_test_vector.n,
                                                  nist_test_vector.e};
   SubtleUtilBoringSSL::RsaSsaPkcs1Params nist_params{nist_test_vector.sig_hash};
@@ -117,7 +117,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, testNewErrors) {
   }
 }
 
-TEST_F(RsaSsaPkcs1VerifyBoringSslTest, testModification) {
+TEST_F(RsaSsaPkcs1VerifyBoringSslTest, Modification) {
   SubtleUtilBoringSSL::RsaPublicKey pub_key{nist_test_vector.n,
                                             nist_test_vector.e};
   SubtleUtilBoringSSL::RsaSsaPkcs1Params params{nist_test_vector.sig_hash};
@@ -180,7 +180,7 @@ static util::StatusOr<std::unique_ptr<RsaSsaPkcs1VerifyBoringSsl>> GetVerifier(
 
   HashType md = WycheproofUtil::GetHashType(test_group["sha"]);
   SubtleUtilBoringSSL::RsaSsaPkcs1Params params;
-  params.sig_hash = md;
+  params.hash_type = md;
 
   auto result = RsaSsaPkcs1VerifyBoringSsl::New(key, params);
   if (!result.ok()) {
@@ -261,22 +261,22 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
   return failed_tests == 0;
 }
 
-TEST_F(RsaSsaPkcs1VerifyBoringSslTest, testVectorsNist2048SHA256) {
+TEST_F(RsaSsaPkcs1VerifyBoringSslTest, VectorsNist2048SHA256) {
   ASSERT_TRUE(TestSignatures("rsa_signature_2048_sha256_test.json",
                              /*allow_skipping=*/false));
 }
 
-TEST_F(RsaSsaPkcs1VerifyBoringSslTest, testVectorsNist3072SHA256) {
+TEST_F(RsaSsaPkcs1VerifyBoringSslTest, VectorsNist3072SHA256) {
   ASSERT_TRUE(TestSignatures("rsa_signature_3072_sha256_test.json",
                              /*allow_skipping=*/false));
 }
 
-TEST_F(RsaSsaPkcs1VerifyBoringSslTest, testVectorsNist3072SHA512) {
+TEST_F(RsaSsaPkcs1VerifyBoringSslTest, VectorsNist3072SHA512) {
   ASSERT_TRUE(TestSignatures("rsa_signature_3072_sha512_test.json",
                              /*allow_skipping=*/false));
 }
 
-TEST_F(RsaSsaPkcs1VerifyBoringSslTest, testVectorsNist4096SHA512) {
+TEST_F(RsaSsaPkcs1VerifyBoringSslTest, VectorsNist4096SHA512) {
   ASSERT_TRUE(TestSignatures("rsa_signature_4096_sha512_test.json",
                              /*allow_skipping=*/false));
 }

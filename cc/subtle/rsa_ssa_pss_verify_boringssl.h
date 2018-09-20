@@ -48,11 +48,6 @@ class RsaSsaPssVerifyBoringSsl : public PublicKeyVerify {
   ~RsaSsaPssVerifyBoringSsl() override = default;
 
  private:
-  // To reach 128-bit security strength, RSA's modulus must be at least 3072-bit
-  // while 2048-bit RSA key only has 112-bit security. Nevertheless, a 2048-bit
-  // RSA key is considered safe by NIST until 2030 (see
-  // https://www.keylength.com/en/4/).
-  static const size_t kMinModulusSizeInBits = 2048;
   RsaSsaPssVerifyBoringSsl(bssl::UniquePtr<RSA> rsa, const EVP_MD* sig_hash,
                            const EVP_MD* mgf1_hash, int salt_length);
   const bssl::UniquePtr<RSA> rsa_;

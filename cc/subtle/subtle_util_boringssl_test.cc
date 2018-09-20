@@ -84,7 +84,7 @@ static const std::vector<EncodingTestVector> encoding_test_vector(
       "6619b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a",
       EllipticCurveType::NIST_P521}});
 
-TEST(SubtleUtilBoringSSLTest, testEcPointEncode) {
+TEST(SubtleUtilBoringSSLTest, EcPointEncode) {
   for (const EncodingTestVector& test : encoding_test_vector) {
     std::string x_str = test::HexDecodeOrDie(test.x_hex);
     std::string y_str = test::HexDecodeOrDie(test.y_hex);
@@ -97,8 +97,8 @@ TEST(SubtleUtilBoringSSLTest, testEcPointEncode) {
     auto status_or_group = SubtleUtilBoringSSL::GetEcGroup(test.curve);
     bssl::UniquePtr<EC_POINT> point(EC_POINT_new(status_or_group.ValueOrDie()));
     EXPECT_EQ(1, EC_POINT_set_affine_coordinates_GFp(
-        status_or_group.ValueOrDie(), point.get(), x.get(),
-        y.get(), nullptr));
+                     status_or_group.ValueOrDie(), point.get(), x.get(),
+                     y.get(), nullptr));
     auto status_or_string = SubtleUtilBoringSSL::EcPointEncode(
         test.curve, test.format, point.get());
     EXPECT_TRUE(status_or_string.ok());
@@ -106,7 +106,7 @@ TEST(SubtleUtilBoringSSLTest, testEcPointEncode) {
   }
 }
 
-TEST(SubtleUtilBoringSSLTest, testEcPointDecode) {
+TEST(SubtleUtilBoringSSLTest, EcPointDecode) {
   for (const EncodingTestVector& test : encoding_test_vector) {
     std::string x_str = test::HexDecodeOrDie(test.x_hex);
     std::string y_str = test::HexDecodeOrDie(test.y_hex);
@@ -120,8 +120,8 @@ TEST(SubtleUtilBoringSSLTest, testEcPointDecode) {
     auto status_or_group = SubtleUtilBoringSSL::GetEcGroup(test.curve);
     bssl::UniquePtr<EC_POINT> point(EC_POINT_new(status_or_group.ValueOrDie()));
     EXPECT_EQ(1, EC_POINT_set_affine_coordinates_GFp(
-        status_or_group.ValueOrDie(), point.get(), x.get(),
-        y.get(), nullptr));
+                     status_or_group.ValueOrDie(), point.get(), x.get(),
+                     y.get(), nullptr));
     auto status_or_ec_point = SubtleUtilBoringSSL::EcPointDecode(
         test.curve, test.format, encoded_str);
     EXPECT_TRUE(status_or_ec_point.ok());
@@ -133,11 +133,11 @@ TEST(SubtleUtilBoringSSLTest, testEcPointDecode) {
         test.curve, test.format, encoded_str);
     EXPECT_FALSE(status_or_ec_point.ok());
     EXPECT_LE(0, status_or_ec_point.status().error_message().find(
-        "point should start with"));
+                     "point should start with"));
   }
 }
 
-TEST(SubtleUtilBoringSSLTest, testBn2strAndStr2bn) {
+TEST(SubtleUtilBoringSSLTest, Bn2strAndStr2bn) {
   int len = 8;
   std::string bn_str[6] = {"0000000000000000", "0000000000000001",
                       "1000000000000000", "ffffffffffffffff",
@@ -152,7 +152,7 @@ TEST(SubtleUtilBoringSSLTest, testBn2strAndStr2bn) {
   }
 }
 
-TEST(SubtleUtilBoringSSLTest, testValidateSignatureHash) {
+TEST(SubtleUtilBoringSSLTest, ValidateSignatureHash) {
   EXPECT_TRUE(
       SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA256).ok());
   EXPECT_TRUE(
@@ -175,17 +175,17 @@ static std::string GetError() {
 }
 
 // Test with test vectors from Wycheproof project.
-bool WycheproofTest(const rapidjson::Value &root) {
+bool WycheproofTest(const rapidjson::Value& root) {
   int errors = 0;
   for (const rapidjson::Value& test_group : root["testGroups"].GetArray()) {
     std::string curve_str = test_group["curve"].GetString();
     // Tink only supports secp256r1, secp384r1 or secp521r1.
-    if (!(curve_str == "secp256r1" || curve_str == "secp384r1"
-          || curve_str == "secp521r1")) {
+    if (!(curve_str == "secp256r1" || curve_str == "secp384r1" ||
+          curve_str == "secp521r1")) {
       continue;
     }
-    EllipticCurveType curve = WycheproofUtil::GetEllipticCurveType(
-        test_group["curve"]);
+    EllipticCurveType curve =
+        WycheproofUtil::GetEllipticCurveType(test_group["curve"]);
     for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
       std::string id = absl::StrCat(test["tcId"].GetInt());
       std::string comment = test["comment"].GetString();
@@ -225,8 +225,8 @@ bool WycheproofTest(const rapidjson::Value &root) {
         continue;
       }
       pub_bytes = pub_bytes.substr(pub_bytes.size() - point_size, point_size);
-      auto status_or_ec_point = SubtleUtilBoringSSL
-          ::EcPointDecode(curve, format, pub_bytes);
+      auto status_or_ec_point =
+          SubtleUtilBoringSSL ::EcPointDecode(curve, format, pub_bytes);
       if (!status_or_ec_point.ok()) {
         if (result == "valid") {
           ADD_FAILURE() << "Could not decode public key with tcId:" << id
@@ -237,10 +237,10 @@ bool WycheproofTest(const rapidjson::Value &root) {
       }
       bssl::UniquePtr<EC_POINT> pub_key(status_or_ec_point.ValueOrDie());
       bssl::UniquePtr<BIGNUM> priv_key(
-          BN_bin2bn(reinterpret_cast<const unsigned char*>(
-              priv_bytes.data()), priv_bytes.size(), nullptr));
-      auto status_or_shared = SubtleUtilBoringSSL
-          ::ComputeEcdhSharedSecret(curve, priv_key.get(), pub_key.get());
+          BN_bin2bn(reinterpret_cast<const unsigned char*>(priv_bytes.data()),
+                    priv_bytes.size(), nullptr));
+      auto status_or_shared = SubtleUtilBoringSSL ::ComputeEcdhSharedSecret(
+          curve, priv_key.get(), pub_key.get());
       if (status_or_shared.ok()) {
         std::string shared = status_or_shared.ValueOrDie();
         if (result == "invalid") {
@@ -262,17 +262,15 @@ bool WycheproofTest(const rapidjson::Value &root) {
   return errors == 0;
 }
 
-
-
-TEST(SubtleUtilBoringSSLTest, testComputeEcdhSharedSecretWithWycheproofTest) {
-  ASSERT_TRUE(WycheproofTest(*WycheproofUtil
-                             ::ReadTestVectors("ecdh_test.json")));
-  ASSERT_TRUE(WycheproofTest(*WycheproofUtil
-                             ::ReadTestVectors("ecdh_secp256r1_test.json")));
-  ASSERT_TRUE(WycheproofTest(*WycheproofUtil
-                             ::ReadTestVectors("ecdh_secp384r1_test.json")));
-  ASSERT_TRUE(WycheproofTest(*WycheproofUtil
-                             ::ReadTestVectors("ecdh_secp521r1_test.json")));
+TEST(SubtleUtilBoringSSLTest, ComputeEcdhSharedSecretWithWycheproofTest) {
+  ASSERT_TRUE(
+      WycheproofTest(*WycheproofUtil ::ReadTestVectors("ecdh_test.json")));
+  ASSERT_TRUE(WycheproofTest(
+      *WycheproofUtil ::ReadTestVectors("ecdh_secp256r1_test.json")));
+  ASSERT_TRUE(WycheproofTest(
+      *WycheproofUtil ::ReadTestVectors("ecdh_secp384r1_test.json")));
+  ASSERT_TRUE(WycheproofTest(
+      *WycheproofUtil ::ReadTestVectors("ecdh_secp521r1_test.json")));
 }
 
 TEST(CreatesNewRsaKeyPairTest, BasicSanityChecks) {
@@ -392,6 +390,30 @@ TEST(CreatesNewRsaKeyPairTest, GeneratesDifferentKeysEveryTime) {
     ASSERT_NE(left.dq, right.dq);
     ASSERT_NE(left.crt, right.crt);
   }
+}
+
+TEST(SubtleUtilBoringSSLTest, ValidateRsaModulusSize) {
+  SubtleUtilBoringSSL::RsaPublicKey public_key;
+  SubtleUtilBoringSSL::RsaPrivateKey private_key;
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), RSA_F4);
+  ASSERT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
+                                                    &public_key),
+              IsOk());
+  auto n_2048 =
+      std::move(SubtleUtilBoringSSL::str2bn(private_key.n).ValueOrDie());
+  ASSERT_THAT(
+      SubtleUtilBoringSSL::ValidateRsaModulusSize(BN_num_bits(n_2048.get())),
+      IsOk());
+
+  ASSERT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(1024, e.get(), &private_key,
+                                                    &public_key),
+              IsOk());
+  auto n_1024 =
+      std::move(SubtleUtilBoringSSL::str2bn(private_key.n).ValueOrDie());
+  ASSERT_THAT(
+      SubtleUtilBoringSSL::ValidateRsaModulusSize(BN_num_bits(n_1024.get())),
+      Not(IsOk()));
 }
 
 TEST(ComputeHashTest, AcceptsNullStringView) {
