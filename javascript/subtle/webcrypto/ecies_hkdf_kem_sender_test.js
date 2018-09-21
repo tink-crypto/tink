@@ -45,6 +45,35 @@ testSuite({
     assertEquals(20, tokens.size);
   },
 
+  async testEncapsulate_nonIntegerKeySize() {
+    const keyPair = await Ecdh.generateKeyPair('P-256');
+    const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
+    const sender = await EciesHkdfKemSender.newInstance(publicKey);
+    const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
+    const hkdfHash = 'SHA-256';
+    const hkdfInfo = Random.randBytes(32);
+    const hkdfSalt = Random.randBytes(32);
+    try {
+      await sender.encapsulate(NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals('CustomError: size must be an integer', e.toString());
+    }
+    try {
+      await sender.encapsulate(
+          undefined, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals('CustomError: size must be an integer', e.toString());
+    }
+    try {
+      await sender.encapsulate(0, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals('CustomError: size must be positive', e.toString());
+    }
+  },
+
   async testNewInstance_invalidParameters() {
     // Test newInstance without key.
     try {

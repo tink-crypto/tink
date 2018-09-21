@@ -37,6 +37,9 @@ const MIN_TAG_SIZE_IN_BYTES = 10;
  */
 const newInstance = async function(hash, key, tagSize) {
   Validators.requireUint8Array(key);
+  if (!Number.isInteger(tagSize)) {
+    throw new InvalidArgumentsException('invalid tag size, must be an integer');
+  }
   if (tagSize < MIN_TAG_SIZE_IN_BYTES) {
     throw new InvalidArgumentsException(
         'tag too short, must be at least ' + MIN_TAG_SIZE_IN_BYTES + ' bytes');

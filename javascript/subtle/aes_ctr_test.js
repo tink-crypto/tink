@@ -87,16 +87,51 @@ testSuite({
     }
   },
 
+  async testConstructor_invalidIvSizes() {
+    try {
+      await AesCtr.newInstance(Random.randBytes(16), NaN);
+      fail('Should throw an exception.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: invalid IV length, must be an integer', e.toString());
+    }
+
+    try {
+      await AesCtr.newInstance(Random.randBytes(16), undefined);
+      fail('Should throw an exception.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: invalid IV length, must be an integer', e.toString());
+    }
+
+    try {
+      await AesCtr.newInstance(Random.randBytes(16), 12.5);
+      fail('Should throw an exception.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: invalid IV length, must be an integer', e.toString());
+    }
+
+    try {
+      await AesCtr.newInstance(Random.randBytes(16), 0);
+      fail('Should throw an exception.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: invalid IV length, must be at least 12 and at most 16',
+          e.toString());
+    }
+  },
+
   async testType() {
     try {
-      await AesCtr.newInstance('blah');
+      await AesCtr.newInstance('blah', 12);
       fail('Should throw an exception.');
     } catch (e) {
       assertEquals(
           'CustomError: input must be a non null Uint8Array', e.toString());
     }
 
-    const cipher = await AesCtr.newInstance(Random.randBytes(16));
+    const cipher = await AesCtr.newInstance(Random.randBytes(16), 12);
     try {
       await cipher.encrypt('blah');
       fail('Should throw an exception.');

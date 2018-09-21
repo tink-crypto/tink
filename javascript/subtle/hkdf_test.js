@@ -90,6 +90,31 @@ testSuite({
     }
   },
 
+  async testConstructor_nonIntegerOutputSize() {
+    const ikm = Random.randBytes(16);
+    const info = Random.randBytes(16);
+    try {
+      await Hkdf.compute(NaN, 'SHA-256', ikm, info);
+      fail('Should throw an exception.');
+    } catch (e) {
+      assertEquals('CustomError: size must be an integer', e.toString());
+    }
+
+    try {
+      await Hkdf.compute(undefined, 'SHA-256', ikm, info);
+      fail('Should throw an exception.');
+    } catch (e) {
+      assertEquals('CustomError: size must be an integer', e.toString());
+    }
+
+    try {
+      await Hkdf.compute(1.5, 'SHA-256', ikm, info);
+      fail('Should throw an exception.');
+    } catch (e) {
+      assertEquals('CustomError: size must be an integer', e.toString());
+    }
+  },
+
   async testWithTestVectors() {
     // Test cases are specified in Appendix A of RFC 5869.
     const TEST_VECTORS = [

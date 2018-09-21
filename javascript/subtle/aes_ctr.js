@@ -43,6 +43,9 @@ const AES_BLOCK_SIZE_IN_BYTES = 16;
  * @static
  */
 const newInstance = async function(key, ivSize) {
+  if (!Number.isInteger(ivSize)) {
+    throw new SecurityException('invalid IV length, must be an integer');
+  }
   if (ivSize < MIN_IV_SIZE_IN_BYTES || ivSize > AES_BLOCK_SIZE_IN_BYTES) {
     throw new SecurityException(
         'invalid IV length, must be at least ' + MIN_IV_SIZE_IN_BYTES +

@@ -40,6 +40,9 @@ const array = goog.require('goog.array');
  */
 const compute = async function(size, hash, ikm, info, opt_salt) {
   let digestSize;
+  if (!Number.isInteger(size)) {
+    throw new InvalidArgumentsException('size must be an integer');
+  }
   if (size <= 0) {
     throw new InvalidArgumentsException('size must be positive');
   }

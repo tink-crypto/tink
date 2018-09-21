@@ -129,6 +129,32 @@ testSuite({
     }
   },
 
+  async testConstructor_invalidTagSizes() {
+    try {
+      await Hmac.newInstance('SHA-512', Random.randBytes(16), NaN);
+      fail('Should throw an exception.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: invalid tag size, must be an integer', e.toString());
+    }
+
+    try {
+      await Hmac.newInstance('SHA-512', Random.randBytes(16), undefined);
+      fail('Should throw an exception.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: invalid tag size, must be an integer', e.toString());
+    }
+
+    try {
+      await Hmac.newInstance('SHA-512', Random.randBytes(16), 12.5);
+      fail('Should throw an exception.');
+    } catch (e) {
+      assertEquals(
+          'CustomError: invalid tag size, must be an integer', e.toString());
+    }
+  },
+
   async testType() {
     try {
       await Hmac.newInstance('SHA-1', 'blah', 10);

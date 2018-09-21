@@ -19,6 +19,8 @@
 
 goog.module('tink.subtle.Random');
 
+const InvalidArgumentsException = goog.require('tink.exception.InvalidArgumentsException');
+
 /**
  * Randomly generates `n` bytes.
  *
@@ -27,6 +29,9 @@ goog.module('tink.subtle.Random');
  * @static
  */
 const randBytes = function(n) {
+  if (!Number.isInteger(n)) {
+    throw new InvalidArgumentsException('n must be an integer');
+  }
   const crypto = goog.global['crypto'] || goog.global['msCrypto'];
   const result = new Uint8Array(n);
   crypto.getRandomValues(result);

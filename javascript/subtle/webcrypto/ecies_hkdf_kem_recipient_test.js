@@ -59,6 +59,47 @@ testSuite({
     }
   },
 
+  async testDecap_nonIntegerKeySize() {
+    const keyPair = await Ecdh.generateKeyPair('P-256');
+    const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
+    const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
+    const sender = await EciesHkdfKemSender.newInstance(publicKey);
+    const recipient = await EciesHkdfKemRecipient.newInstance(privateKey);
+    const keySizeInBytes = 16;
+    const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
+    const hkdfHash = 'SHA-256';
+    const hkdfInfo = Random.randBytes(16);
+    const hkdfSalt = Random.randBytes(16);
+    const kemKeyToken = await sender.encapsulate(
+        keySizeInBytes, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
+
+    try {
+      await recipient.decapsulate(
+          kemKeyToken['token'], NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals('CustomError: size must be an integer', e.toString());
+    }
+
+    try {
+      await recipient.decapsulate(
+          kemKeyToken['token'], undefined, pointFormat, hkdfHash, hkdfInfo,
+          hkdfSalt);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals('CustomError: size must be an integer', e.toString());
+    }
+
+    try {
+      await recipient.decapsulate(
+          kemKeyToken['token'], 1.8, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
+      fail('An exception should be thrown.');
+    } catch (e) {
+      assertEquals('CustomError: size must be an integer', e.toString());
+    }
+  },
+
+
   async testNewInstance_invalidParameters() {
     // Test newInstance without key.
     try {
