@@ -3,6 +3,8 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//tools/build_defs:internal_pkg"])
 
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_static_framework", "ios_unit_test")
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
+load("//tools:common.bzl", "template_rule")
 
 # public libraries
 
@@ -36,6 +38,7 @@ PUBLIC_APIS = [
     "TINKRegistryConfig.h",
     "TINKSignatureConfig.h",
     "TINKSignatureKeyTemplate.h",
+    "TINKVersion.h",
 ]
 
 PUBLIC_API_DEPS = [
@@ -68,6 +71,7 @@ PUBLIC_API_DEPS = [
     ":registry_config",
     ":signature_config",
     ":signature_key_template",
+    ":version",
     "//objc/util:errors",
     "//objc/util:strings",
 ]
@@ -257,6 +261,21 @@ objc_library(
     deps = [
         ":config_cc_pb",
     ],
+)
+
+template_rule(
+    name = "version_m",
+    src = "core/TINKVersion.m.templ",
+    out = "core/TINKVersion.m",
+    substitutions = {
+        "TINK_VERSION_LABEL": "%s" % TINK_VERSION_LABEL,
+    },
+)
+
+objc_library(
+    name = "version",
+    srcs = [":version_m"],
+    hdrs = ["TINKVersion.h"],
 )
 
 ############################
