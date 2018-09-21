@@ -68,7 +68,7 @@ class StatusOr {
   }
 
   // Returns value or crashes if ok() is false.
-  inline const T& ValueOrDie() const {
+  inline const T& ValueOrDie() const& {
     if (!ok()) {
       std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
       std::cerr << status() << std::endl;
@@ -76,13 +76,29 @@ class StatusOr {
     }
     return value_;
   }
-  inline T& ValueOrDie() {
+  inline T& ValueOrDie() & {
     if (!ok()) {
       std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
       std::cerr << status() << std::endl;
       exit(1);
     }
     return value_;
+  }
+  inline const T&& ValueOrDie() const&& {
+    if (!ok()) {
+      std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
+      std::cerr << status() << std::endl;
+      exit(1);
+    }
+    return std::move(value_);
+  }
+  inline T&& ValueOrDie() && {
+    if (!ok()) {
+      std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
+      std::cerr << status() << std::endl;
+      exit(1);
+    }
+    return std::move(value_);
   }
 
   template <typename U>
