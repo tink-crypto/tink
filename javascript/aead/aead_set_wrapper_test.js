@@ -28,7 +28,7 @@ const SecurityException = goog.require('tink.exception.SecurityException');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
-  async testNewAeadNullPrimitiveSet(aeadSet) {
+  async testNewAeadNullPrimitiveSet() {
     try {
       AeadSetWrapper.newAead(null);
     } catch (e) {
@@ -38,7 +38,7 @@ testSuite({
     fail('Should throw an exception.');
   },
 
-  async testNewAeadPrimitiveSetWithoutPrimary(aeadSet) {
+  async testNewAeadPrimitiveSetWithoutPrimary() {
     const primitiveSet = createPrimitiveSet(/* opt_withPrimary = */ false);
     try {
       AeadSetWrapper.newAead(primitiveSet);
@@ -49,7 +49,7 @@ testSuite({
     fail('Should throw an exception.');
   },
 
-  async testNewAeadPrimitiveShouldWork(aeadSet) {
+  async testNewAeadPrimitiveShouldWork() {
     const primitiveSet = createPrimitiveSet();
     const aead = AeadSetWrapper.newAead(primitiveSet);
     assertTrue(aead != null && aead != undefined);
