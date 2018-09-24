@@ -63,12 +63,15 @@ class KeysetHandle {
   // KeysetUtil::GetKeyset() provides access to get_keyset().
   friend class KeysetUtil;
 
+  // Creates a handle that contains the given keyset.
+  KeysetHandle(google::crypto::tink::Keyset keyset);
+  // Creates a handle that contains the given keyset.
+  KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset);
+
   // Returns keyset held by this handle.
   const google::crypto::tink::Keyset& get_keyset() const;
 
-  // Creates a handle that contains and owns the given keyset.
-  KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset);
-  std::unique_ptr<google::crypto::tink::Keyset> keyset_;
+  google::crypto::tink::Keyset keyset_;
 };
 
 }  // namespace tink

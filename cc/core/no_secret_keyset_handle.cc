@@ -50,8 +50,8 @@ crypto::tink::util::Status Validate(const Keyset& keyset) {
 
 // static
 util::StatusOr<std::unique_ptr<KeysetHandle>> NoSecretKeysetHandle::Get(
-    std::unique_ptr<google::crypto::tink::Keyset> keyset) {
-  util::Status validation = Validate(*keyset);
+    google::crypto::tink::Keyset keyset) {
+  util::Status validation = Validate(keyset);
   if (!validation.ok()) return validation;
   return absl::WrapUnique(new KeysetHandle(std::move(keyset)));
 }

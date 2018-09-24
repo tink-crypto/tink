@@ -137,11 +137,14 @@ KeysetHandle::GetPublicKeysetHandle() {
   return std::move(handle);
 }
 
-KeysetHandle::KeysetHandle(std::unique_ptr<Keyset> keyset)
+KeysetHandle::KeysetHandle(Keyset keyset)
     : keyset_(std::move(keyset)) {}
 
+KeysetHandle::KeysetHandle(std::unique_ptr<Keyset> keyset)
+    : keyset_(std::move(*keyset)) {}
+
 const Keyset& KeysetHandle::get_keyset() const {
-  return *(keyset_.get());
+  return keyset_;
 }
 
 }  // namespace tink

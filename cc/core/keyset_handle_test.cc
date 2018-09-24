@@ -57,7 +57,7 @@ class KeysetHandleTest : public ::testing::Test {
   }
 };
 
-TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Binary) {
+TEST_F(KeysetHandleTest, ReadEncryptedKeysetBinary) {
   Keyset keyset;
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
@@ -121,7 +121,7 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Binary) {
   }
 }
 
-TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Json) {
+TEST_F(KeysetHandleTest, ReadEncryptedKeysetJson) {
   Keyset keyset;
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
@@ -200,7 +200,7 @@ TEST_F(KeysetHandleTest, testReadEncryptedKeyset_Json) {
   }
 }
 
-TEST_F(KeysetHandleTest, testWriteEncryptedKeyset_Json) {
+TEST_F(KeysetHandleTest, WriteEncryptedKeyset_Json) {
   // Prepare a valid keyset handle
   Keyset keyset;
   Keyset::Key key;
@@ -241,7 +241,7 @@ TEST_F(KeysetHandleTest, testWriteEncryptedKeyset_Json) {
   EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
 }
 
-TEST_F(KeysetHandleTest, testGenerateNewKeysetHandle) {
+TEST_F(KeysetHandleTest, GenerateNewKeysetHandle) {
   const google::crypto::tink::KeyTemplate* key_templates[] = {
     &AeadKeyTemplates::Aes128Gcm(),
     &AeadKeyTemplates::Aes256Gcm(),
@@ -256,7 +256,7 @@ TEST_F(KeysetHandleTest, testGenerateNewKeysetHandle) {
   }
 }
 
-TEST_F(KeysetHandleTest, testGenerateNewKeysetHandleErrors) {
+TEST_F(KeysetHandleTest, GenerateNewKeysetHandleErrors) {
   KeyTemplate templ;
   templ.set_type_url("type.googleapis.com/some.unknown.KeyType");
 
@@ -273,7 +273,7 @@ void CompareKeyMetadata(const Keyset::Key& expected,
   EXPECT_EQ(expected.output_prefix_type(), actual.output_prefix_type());
 }
 
-TEST_F(KeysetHandleTest, testGetPublicKeysetHandle) {
+TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
   { // A keyset with a single key.
     auto handle_result = KeysetHandle::GenerateNew(
         SignatureKeyTemplates::EcdsaP256());
@@ -334,7 +334,7 @@ TEST_F(KeysetHandleTest, testGetPublicKeysetHandle) {
 }
 
 
-TEST_F(KeysetHandleTest, testGetPublicKeysetHandleErrors) {
+TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
   { // A keyset with a single key.
     auto handle_result = KeysetHandle::GenerateNew(
         AeadKeyTemplates::Aes128Eax());
@@ -375,12 +375,14 @@ TEST_F(KeysetHandleTest, testGetPublicKeysetHandleErrors) {
   }
 }
 
+// Compile time check: ensures that the KeysetHandle can be copied.
+TEST_F(KeysetHandleTest, Copiable) {
+  auto handle_result = KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Eax());
+  ASSERT_TRUE(handle_result.ok()) << handle_result.status();
+  std::unique_ptr<KeysetHandle> handle = std::move(handle_result.ValueOrDie());
+  KeysetHandle handle_copy = *handle;
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-
-
-int main(int ac, char* av[]) {
-  testing::InitGoogleTest(&ac, av);
-  return RUN_ALL_TESTS();
-}

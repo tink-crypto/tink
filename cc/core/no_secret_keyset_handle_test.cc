@@ -33,80 +33,83 @@ using ::crypto::tink::test::IsOk;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeyStatusType;
-using ::testing::Ref;
 
 namespace crypto {
 namespace tink {
 namespace {
 
 TEST(NoSecretKeysetHandleTest, Read) {
-  auto keyset = absl::make_unique<Keyset>();
-  Keyset* unowned_keyset = keyset.get();
+  Keyset keyset;
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
-             KeyData::ASYMMETRIC_PUBLIC, keyset.get());
+             KeyData::ASYMMETRIC_PUBLIC, &keyset);
   AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
-            KeyData::REMOTE, keyset.get());
-  keyset->set_primary_key_id(42);
-  auto keyset_result = NoSecretKeysetHandle::Get(std::move(keyset));
+            KeyData::REMOTE, &keyset);
+  keyset.set_primary_key_id(42);
+  auto keyset_result = NoSecretKeysetHandle::Get(keyset);
   ASSERT_THAT(keyset_result.status(), IsOk());
   std::unique_ptr<KeysetHandle>& keyset_handle = keyset_result.ValueOrDie();
 
   const Keyset& result = CleartextKeysetHandle::GetKeyset(*keyset_handle);
-  EXPECT_THAT(result, Ref(*unowned_keyset));
+  // We check that result equals keyset. For lack of a better method we do this
+  // by hand.
+  EXPECT_EQ(result.primary_key_id(), keyset.primary_key_id());
+  ASSERT_EQ(result.key_size(), keyset.key_size());
+  ASSERT_EQ(result.key(0).key_id(), keyset.key(0).key_id());
+  ASSERT_EQ(result.key(1).key_id(), keyset.key(1).key_id());
 }
 
 TEST(NoSecretKeysetHandleTest, FailForTypeUnknown) {
-  auto keyset = absl::make_unique<Keyset>();
+  Keyset keyset;
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
-             KeyData::UNKNOWN_KEYMATERIAL, keyset.get());
-  keyset->set_primary_key_id(42);
-  auto keyset_result = NoSecretKeysetHandle::Get(std::move(keyset));
+             KeyData::UNKNOWN_KEYMATERIAL, &keyset);
+  keyset.set_primary_key_id(42);
+  auto keyset_result = NoSecretKeysetHandle::Get(keyset);
   EXPECT_THAT(keyset_result.status(),
               StatusIs(util::error::FAILED_PRECONDITION));
 }
 
 TEST(NoSecretKeysetHandleTest, FailForTypeSymmetric) {
-  auto keyset = absl::make_unique<Keyset>();
+  Keyset keyset;
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
-             KeyData::SYMMETRIC, keyset.get());
-  keyset->set_primary_key_id(42);
-  auto keyset_result = NoSecretKeysetHandle::Get(std::move(keyset));
+             KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+  auto keyset_result = NoSecretKeysetHandle::Get(keyset);
   EXPECT_THAT(keyset_result.status(),
               StatusIs(util::error::FAILED_PRECONDITION));
 }
 
 TEST(NoSecretKeysetHandleTest, FailForTypeAssymmetricPrivate) {
-  auto keyset = absl::make_unique<Keyset>();
+  Keyset keyset;
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
-             KeyData::ASYMMETRIC_PRIVATE, keyset.get());
-  keyset->set_primary_key_id(42);
-  auto keyset_result = NoSecretKeysetHandle::Get(std::move(keyset));
+             KeyData::ASYMMETRIC_PRIVATE, &keyset);
+  keyset.set_primary_key_id(42);
+  auto keyset_result = NoSecretKeysetHandle::Get(keyset);
   EXPECT_THAT(keyset_result.status(),
               StatusIs(util::error::FAILED_PRECONDITION));
 }
 
 TEST(NoSecretKeysetHandleTest, FailForHidden) {
-  auto keyset = absl::make_unique<Keyset>();
+  Keyset keyset;
   Keyset::Key key;
   AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
-             KeyData::ASYMMETRIC_PUBLIC, keyset.get());
+             KeyData::ASYMMETRIC_PUBLIC, &keyset);
   for (int i = 0; i < 10; ++i) {
     AddTinkKey(absl::StrCat("more key type", i), i, key, KeyStatusType::ENABLED,
-               KeyData::ASYMMETRIC_PUBLIC, keyset.get());
+               KeyData::ASYMMETRIC_PUBLIC, &keyset);
   }
   AddRawKey("some other key type", 10, key, KeyStatusType::ENABLED,
-            KeyData::ASYMMETRIC_PRIVATE, keyset.get());
+            KeyData::ASYMMETRIC_PRIVATE, &keyset);
   for (int i = 0; i < 10; ++i) {
     AddRawKey(absl::StrCat("more key type", i + 100), i+100, key,
-              KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC, keyset.get());
+              KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PUBLIC, &keyset);
   }
 
-  keyset->set_primary_key_id(42);
-  auto keyset_result = NoSecretKeysetHandle::Get(std::move(keyset));
+  keyset.set_primary_key_id(42);
+  auto keyset_result = NoSecretKeysetHandle::Get(keyset);
   EXPECT_THAT(keyset_result.status(),
               StatusIs(util::error::FAILED_PRECONDITION));
 }

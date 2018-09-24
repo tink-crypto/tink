@@ -32,7 +32,7 @@ class NoSecretKeysetHandle {
   // Creates a KeysetHandle from a keyset or a failure if there is secret
   // material in the keyset.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> Get(
-      std::unique_ptr<google::crypto::tink::Keyset> keyset);
+      google::crypto::tink::Keyset keyset);
 
  private:
   NoSecretKeysetHandle() = delete;

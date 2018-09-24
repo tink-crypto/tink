@@ -50,7 +50,7 @@
     return nil;
   }
 
-  auto st = crypto::tink::NoSecretKeysetHandle::Get(std::move(read_result.ValueOrDie()));
+  auto st = crypto::tink::NoSecretKeysetHandle::Get(*std::move(read_result.ValueOrDie()));
   if (!st.ok()) {
     if (error) {
       *error = TINKStatusToError(st.status());
