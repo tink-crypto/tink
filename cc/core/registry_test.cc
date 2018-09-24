@@ -291,7 +291,7 @@ TEST_F(RegistryTest, testBasic) {
 }
 
 TEST_F(RegistryTest, testRegisterKeyManager) {
-  std::string key_type_1 = AesGcmKeyManager::kKeyType;
+  std::string key_type_1 = AesGcmKeyManager::static_key_type();
 
   TestAeadKeyManager* null_key_manager = nullptr;
   auto status = Registry::RegisterKeyManager(null_key_manager);
@@ -536,7 +536,7 @@ TEST_F(RegistryTest, testGetPublicKeyData) {
 
   // Try with a wrong key type.
   auto wrong_key_type_result = Registry::GetPublicKeyData(
-      AesGcmKeyManager::kKeyType, ecies_key.SerializeAsString());
+      AesGcmKeyManager::static_key_type(), ecies_key.SerializeAsString());
   EXPECT_FALSE(wrong_key_type_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
             wrong_key_type_result.status().error_code());

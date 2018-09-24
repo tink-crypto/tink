@@ -33,16 +33,16 @@ namespace {
 
 crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Aead>>>
 CreateKeyManager(const std::string& type_url) {
-  if (type_url == AesGcmKeyManager::kKeyType) {
+  if (type_url == AesGcmKeyManager::static_key_type()) {
     std::unique_ptr<KeyManager<Aead>> manager(new AesGcmKeyManager());
     return std::move(manager);
-  } else if (type_url == AesEaxKeyManager::kKeyType) {
+  } else if (type_url == AesEaxKeyManager::static_key_type()) {
     std::unique_ptr<KeyManager<Aead>> manager(new AesEaxKeyManager());
     return std::move(manager);
-  } else if (type_url == AesCtrHmacAeadKeyManager::kKeyType) {
+  } else if (type_url == AesCtrHmacAeadKeyManager::static_key_type()) {
     std::unique_ptr<KeyManager<Aead>> manager(new AesCtrHmacAeadKeyManager());
     return std::move(manager);
-  } else if (type_url == XChaCha20Poly1305KeyManager::kKeyType) {
+  } else if (type_url == XChaCha20Poly1305KeyManager::static_key_type()) {
     std::unique_ptr<KeyManager<Aead>> manager(
         new XChaCha20Poly1305KeyManager());
     return std::move(manager);

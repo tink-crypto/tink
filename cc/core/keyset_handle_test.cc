@@ -359,13 +359,14 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
                KeyStatusType::ENABLED,
                KeyData::ASYMMETRIC_PRIVATE,
                &keyset);
-    AddLegacyKey(AesGcmKeyManager::kKeyType,
-                 /* key_id= */ 42,
-                 *(aead_key_factory.NewKey(
-                     AeadKeyTemplates::Aes128Gcm().value()).ValueOrDie()),
-                 KeyStatusType::ENABLED,
-                 KeyData::ASYMMETRIC_PRIVATE,  // Intentionally wrong setting.
-                 &keyset);
+    AddLegacyKey(
+        AesGcmKeyManager::static_key_type(),
+        /* key_id= */ 42,
+        *(aead_key_factory.NewKey(AeadKeyTemplates::Aes128Gcm().value())
+              .ValueOrDie()),
+        KeyStatusType::ENABLED,
+        KeyData::ASYMMETRIC_PRIVATE,  // Intentionally wrong setting.
+        &keyset);
     keyset.set_primary_key_id(42);
     auto handle = KeysetUtil::GetKeysetHandle(keyset);
     auto public_handle_result = handle->GetPublicKeysetHandle();

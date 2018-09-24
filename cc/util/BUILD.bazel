@@ -3,6 +3,17 @@ package(default_visibility = ["//tools/build_defs:internal_pkg"])
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
+    name = "constants",
+    srcs = ["constants.cc"],
+    hdrs = ["constants.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "@com_google_absl//absl/base:core_headers",
+    ]
+)
+
+cc_library(
     name = "errors",
     srcs = ["errors.cc"],
     hdrs = ["errors.h"],

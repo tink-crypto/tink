@@ -452,9 +452,13 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         ":key_manager",
+        "//cc/util:constants",
         "//cc/util:errors",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 

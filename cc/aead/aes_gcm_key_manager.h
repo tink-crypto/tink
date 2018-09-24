@@ -36,14 +36,9 @@ namespace tink {
 class AesGcmKeyManager
     : public KeyManagerBase<Aead, google::crypto::tink::AesGcmKey> {
  public:
-  static constexpr char kKeyType[] =
-      "type.googleapis.com/google.crypto.tink.AesGcmKey";
   static constexpr uint32_t kVersion = 0;
 
   AesGcmKeyManager();
-
-  // Returns the type_url identifying the key type handled by this manager.
-  const std::string& get_key_type() const override;
 
   // Returns the version of this key manager.
   uint32_t get_version() const override;
@@ -61,11 +56,6 @@ class AesGcmKeyManager
  private:
   friend class AesGcmKeyFactory;
 
-  static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
-  static constexpr char kKeyFormatUrl[] =
-      "type.googleapis.com/google.crypto.tink.AesGcmKeyFormat";
-
-  std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
 
   static crypto::tink::util::Status Validate(

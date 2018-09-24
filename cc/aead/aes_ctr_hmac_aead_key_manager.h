@@ -36,16 +36,11 @@ namespace tink {
 class AesCtrHmacAeadKeyManager
     : public KeyManagerBase<Aead, google::crypto::tink::AesCtrHmacAeadKey> {
  public:
-  static constexpr char kKeyType[] =
-      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
   static constexpr char kHmacKeyType[] =
       "type.googleapis.com/google.crypto.tink.HmacKey";
   static constexpr uint32_t kVersion = 0;
 
   AesCtrHmacAeadKeyManager();
-
-  // Returns the type_url identifying the key type handled by this manager.
-  const std::string& get_key_type() const override;
 
   // Returns the version of this key manager.
   uint32_t get_version() const override;
@@ -64,11 +59,6 @@ class AesCtrHmacAeadKeyManager
  private:
   friend class AesCtrHmacAeadKeyFactory;
 
-  static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
-  static constexpr char kKeyFormatUrl[] =
-      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKeyFormat";
-
-  std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
 
   // Constructs an instance of AES-CTR-HMAC-AEAD Aead for the given 'key'.
