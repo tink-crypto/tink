@@ -37,7 +37,7 @@ class KeyFactoryBase : public KeyFactory {
   KeyFactoryBase() {}
 
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(const portable_proto::MessageLite& key_format) const {
+  NewKey(const portable_proto::MessageLite& key_format) const override {
     if (key_format.GetTypeName() != KeyFormatProto().GetTypeName()) {
       return crypto::tink::util::Status(
           util::error::INVALID_ARGUMENT,
@@ -52,7 +52,7 @@ class KeyFactoryBase : public KeyFactory {
   }
 
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(absl::string_view serialized_key_format) const {
+  NewKey(absl::string_view serialized_key_format) const override {
     KeyFormatProto key_format;
     if (!key_format.ParseFromString(std::string(serialized_key_format))) {
       return crypto::tink::util::Status(
@@ -64,7 +64,7 @@ class KeyFactoryBase : public KeyFactory {
   }
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  NewKeyData(absl::string_view serialized_key_format) const {
+  NewKeyData(absl::string_view serialized_key_format) const override {
     auto new_key_result = NewKey(serialized_key_format);
     if (!new_key_result.ok()) return new_key_result.status();
     auto new_key =
