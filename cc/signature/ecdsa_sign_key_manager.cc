@@ -18,6 +18,7 @@
 
 #include "absl/strings/string_view.h"
 #include "absl/memory/memory.h"
+#include "tink/core/key_manager_base.h"
 #include "tink/public_key_sign.h"
 #include "tink/key_manager.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
@@ -44,46 +45,30 @@ using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
-class EcdsaPrivateKeyFactory : public PrivateKeyFactory {
+class EcdsaPrivateKeyFactory
+    : public PrivateKeyFactory,
+      public KeyFactoryBase<EcdsaPrivateKey, EcdsaKeyFormat> {
  public:
   EcdsaPrivateKeyFactory() {}
 
-  // Generates a new random EcdsaPrivateKey, based on
-  // the given 'key_format', which must contain EcdsaKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(const portable_proto::MessageLite& key_format) const override;
-
-  // Generates a new random EcdsaPrivateKey, based on
-  // the given 'serialized_key_format', which must contain
-  // EcdsaKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(absl::string_view serialized_key_format) const override;
-
-  // Generates a new random EcdsaPrivateKey based on
-  // the given 'serialized_key_format' (which must contain
-  // EcdsaKeyFormat-proto), and wraps it in a KeyData-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  NewKeyData(absl::string_view serialized_key_format) const override;
+  KeyData::KeyMaterialType key_material_type() const override {
+    return KeyData::ASYMMETRIC_PRIVATE;
+  }
 
   // Returns KeyData proto that contains EcdsaPublicKey
   // extracted from the given serialized_private_key, which must contain
   // EcdsaPrivateKey-proto.
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   GetPublicKeyData(absl::string_view serialized_private_key) const override;
+
+ protected:
+  StatusOr<std::unique_ptr<EcdsaPrivateKey>> NewKeyFromFormat(
+      const EcdsaKeyFormat& ecdsa_key_format) const override;
 };
 
-StatusOr<std::unique_ptr<MessageLite>> EcdsaPrivateKeyFactory::NewKey(
-    const portable_proto::MessageLite& key_format) const {
-  std::string key_format_url =
-      std::string(EcdsaSignKeyManager::kKeyTypePrefix) +
-      key_format.GetTypeName();
-  if (key_format_url != EcdsaSignKeyManager::kKeyFormatUrl) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key format proto '%s' is not supported by this manager.",
-                     key_format_url.c_str());
-  }
-  const EcdsaKeyFormat& ecdsa_key_format =
-        reinterpret_cast<const EcdsaKeyFormat&>(key_format);
+StatusOr<std::unique_ptr<EcdsaPrivateKey>>
+EcdsaPrivateKeyFactory::NewKeyFromFormat(
+    const EcdsaKeyFormat& ecdsa_key_format) const {
   Status status = EcdsaVerifyKeyManager::Validate(ecdsa_key_format);
   if (!status.ok()) return status;
 
@@ -104,32 +89,8 @@ StatusOr<std::unique_ptr<MessageLite>> EcdsaPrivateKeyFactory::NewKey(
   ecdsa_public_key->set_y(ec_key.pub_y);
   *(ecdsa_public_key->mutable_params()) = ecdsa_key_format.params();
 
-  std::unique_ptr<MessageLite> key = std::move(ecdsa_private_key);
-  return std::move(key);
-}
-
-StatusOr<std::unique_ptr<MessageLite>> EcdsaPrivateKeyFactory::NewKey(
-    absl::string_view serialized_key_format) const {
-  EcdsaKeyFormat key_format;
-  if (!key_format.ParseFromString(std::string(serialized_key_format))) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Could not parse the passed string as proto '%s'.",
-                     EcdsaSignKeyManager::kKeyFormatUrl);
-  }
-  return NewKey(key_format);
-}
-
-StatusOr<std::unique_ptr<KeyData>> EcdsaPrivateKeyFactory::NewKeyData(
-    absl::string_view serialized_key_format) const {
-  auto new_key_result = NewKey(serialized_key_format);
-  if (!new_key_result.ok()) return new_key_result.status();
-  auto new_key = reinterpret_cast<const EcdsaPrivateKey&>(
-      *(new_key_result.ValueOrDie()));
-  std::unique_ptr<KeyData> key_data(new KeyData());
-  key_data->set_type_url(EcdsaSignKeyManager::kKeyType);
-  key_data->set_value(new_key.SerializeAsString());
-  key_data->set_key_material_type(KeyData::ASYMMETRIC_PRIVATE);
-  return std::move(key_data);
+  return absl::implicit_cast<StatusOr<std::unique_ptr<EcdsaPrivateKey>>>(
+        std::move(ecdsa_private_key));
 }
 
 StatusOr<std::unique_ptr<KeyData>>
@@ -146,22 +107,14 @@ EcdsaPrivateKeyFactory::GetPublicKeyData(
   auto key_data = absl::make_unique<KeyData>();
   key_data->set_type_url(EcdsaVerifyKeyManager::kKeyType);
   key_data->set_value(private_key.public_key().SerializeAsString());
-  key_data->set_key_material_type(KeyData:: ASYMMETRIC_PUBLIC);
+  key_data->set_key_material_type(KeyData::ASYMMETRIC_PUBLIC);
   return std::move(key_data);
 }
 
-constexpr char EcdsaSignKeyManager::kKeyFormatUrl[];
-constexpr char EcdsaSignKeyManager::kKeyTypePrefix[];
-constexpr char EcdsaSignKeyManager::kKeyType[];
 constexpr uint32_t EcdsaSignKeyManager::kVersion;
 
 EcdsaSignKeyManager::EcdsaSignKeyManager()
-    : key_type_(kKeyType), key_factory_(new EcdsaPrivateKeyFactory()) {
-}
-
-const std::string& EcdsaSignKeyManager::get_key_type() const {
-  return key_type_;
-}
+    : key_factory_(absl::make_unique<EcdsaPrivateKeyFactory>()) {}
 
 const KeyFactory& EcdsaSignKeyManager::get_key_factory() const {
   return *key_factory_;

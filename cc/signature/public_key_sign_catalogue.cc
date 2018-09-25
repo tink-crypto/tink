@@ -30,7 +30,7 @@ namespace {
 
 crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<PublicKeySign>>>
 CreateKeyManager(const std::string& type_url) {
-  if (type_url == EcdsaSignKeyManager::kKeyType) {
+  if (type_url == EcdsaSignKeyManager::static_key_type()) {
     std::unique_ptr<KeyManager<PublicKeySign>> manager(
         new EcdsaSignKeyManager());
     return std::move(manager);

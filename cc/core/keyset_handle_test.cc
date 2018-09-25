@@ -296,21 +296,21 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
     Keyset keyset;
     int key_count = 3;
 
-    AddTinkKey(EcdsaSignKeyManager::kKeyType,
+    AddTinkKey(EcdsaSignKeyManager::static_key_type(),
                /* key_id= */ 623628,
                *(key_factory.NewKey(
                    SignatureKeyTemplates::EcdsaP256().value()).ValueOrDie()),
                KeyStatusType::ENABLED,
                KeyData::ASYMMETRIC_PRIVATE,
                &keyset);
-    AddLegacyKey(EcdsaSignKeyManager::kKeyType,
+    AddLegacyKey(EcdsaSignKeyManager::static_key_type(),
                  /* key_id= */ 36285,
                  *(key_factory.NewKey(
                      SignatureKeyTemplates::EcdsaP384().value()).ValueOrDie()),
                  KeyStatusType::DISABLED,
                  KeyData::ASYMMETRIC_PRIVATE,
                  &keyset);
-    AddRawKey(EcdsaSignKeyManager::kKeyType,
+    AddRawKey(EcdsaSignKeyManager::static_key_type(),
               /* key_id= */ 42,
               *(key_factory.NewKey(
                   SignatureKeyTemplates::EcdsaP384().value()).ValueOrDie()),
@@ -352,7 +352,7 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
     const KeyFactory& aead_key_factory = aead_key_manager.get_key_factory();
     Keyset keyset;
 
-    AddTinkKey(EcdsaSignKeyManager::kKeyType,
+    AddTinkKey(EcdsaSignKeyManager::static_key_type(),
                /* key_id= */ 623628,
                *(key_factory.NewKey(
                    SignatureKeyTemplates::EcdsaP256().value()).ValueOrDie()),

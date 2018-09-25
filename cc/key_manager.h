@@ -54,7 +54,7 @@ class KeyFactory {
   virtual ~KeyFactory() {}
 };
 
-class PrivateKeyFactory : public KeyFactory {
+class PrivateKeyFactory : public virtual KeyFactory {
  public:
   // Returns public key data extracted from the given serialized_private_key.
   virtual

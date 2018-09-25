@@ -32,7 +32,7 @@ namespace crypto {
 namespace tink {
 
 template <typename KeyProto, typename KeyFormatProto>
-class KeyFactoryBase : public KeyFactory {
+class KeyFactoryBase : public virtual KeyFactory {
  public:
   KeyFactoryBase() {}
 
