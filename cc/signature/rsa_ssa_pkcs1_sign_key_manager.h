@@ -13,9 +13,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#ifndef THIRD_PARTY_TINK_CC_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
-#define THIRD_PARTY_TINK_CC_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
+#ifndef TINK_SIGNATURE_RSA_SSA_PKCS1_SIGN_KEY_MANAGER_H_
+#define TINK_SIGNATURE_RSA_SSA_PKCS1_SIGN_KEY_MANAGER_H_
 
 #include <algorithm>
 #include <vector>
@@ -23,7 +22,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/core/key_manager_base.h"
 #include "tink/key_manager.h"
-#include "tink/public_key_verify.h"
+#include "tink/public_key_sign.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -34,18 +33,13 @@
 namespace crypto {
 namespace tink {
 
-class RsaSsaPkcs1VerifyKeyManager
-    : public KeyManagerBase<PublicKeyVerify,
-                            google::crypto::tink::RsaSsaPkcs1PublicKey> {
+class RsaSsaPkcs1SignKeyManager
+    : public KeyManagerBase<PublicKeySign,
+                            google::crypto::tink::RsaSsaPkcs1PrivateKey> {
  public:
-  static constexpr char kKeyType[] =
-      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey";
   static constexpr uint32_t kVersion = 0;
 
-  RsaSsaPkcs1VerifyKeyManager();
-
-  // Returns the type_url identifying the key type handled by this manager.
-  const std::string& get_key_type() const override;
+  RsaSsaPkcs1SignKeyManager();
 
   // Returns the version of this key manager.
   uint32_t get_version() const override;
@@ -54,32 +48,26 @@ class RsaSsaPkcs1VerifyKeyManager
   // handled by this manager.
   const KeyFactory& get_key_factory() const override;
 
-  virtual ~RsaSsaPkcs1VerifyKeyManager() {}
+  virtual ~RsaSsaPkcs1SignKeyManager() {}
 
  protected:
-  crypto::tink::util::StatusOr<std::unique_ptr<PublicKeyVerify>>
-  GetPrimitiveFromKey(const google::crypto::tink::RsaSsaPkcs1PublicKey&
-                          rsa_ssa_pkcs1_public_key) const override;
+  crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>>
+  GetPrimitiveFromKey(const google::crypto::tink::RsaSsaPkcs1PrivateKey&
+                          key_proto) const override;
 
  private:
-  // Friends that re-use proto validation helpers.
   friend class RsaSsaPkcs1PrivateKeyFactory;
-  friend class RsaSsaPkcs1SignKeyManager;
 
-  static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
-  static constexpr char kKeyFormatUrl[] =
-      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1KeyFormat";
-
-  std::string key_type_;
-  std::unique_ptr<KeyFactory> key_factory_;
+  std::unique_ptr<PrivateKeyFactory> key_factory_;
 
   static crypto::tink::util::Status Validate(
-      const google::crypto::tink::RsaSsaPkcs1Params& params);
+      const google::crypto::tink::RsaSsaPkcs1KeyFormat& key_format);
+
   static crypto::tink::util::Status Validate(
-      const google::crypto::tink::RsaSsaPkcs1PublicKey& key);
+      const google::crypto::tink::RsaSsaPkcs1PrivateKey& key);
 };
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // THIRD_PARTY_TINK_CC_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
+#endif  // TINK_SIGNATURE_RSA_SSA_PKCS1_SIGN_KEY_MANAGER_H_

@@ -82,6 +82,22 @@ class SignatureKeyTemplates {
   //   - signature encoding: IEEE_P1363
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& EcdsaP521Ieee();
+
+  // Returns a KeyTemplate that generates new instances of RsaSsaPkcs1PrivateKey
+  // with the following parameters:
+  //   - Modulus size in bits: 2048.
+  //   - Hash function: SHA256.
+  //   - Public Exponent: 65537 (aka F4).
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& RsaSsaPkcs12048Sha256F4();
+
+  // Returns a KeyTemplate that generates new instances of RsaSsaPkcs1PrivateKey
+  // with the following parameters:
+  //   - Modulus size in bits: 4096.
+  //   - Hash function: SHA512.
+  //   - Public Exponent: 65537 (aka F4).
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& RsaSsaPkcs14096Sha512F4();
 };
 
 }  // namespace tink

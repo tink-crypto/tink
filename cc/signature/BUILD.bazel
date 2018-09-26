@@ -83,9 +83,15 @@ cc_library(
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [
+        "//cc/subtle:subtle_util_boringssl",
+        "//cc/util:constants",
         "//proto:common_cc_proto",
         "//proto:ecdsa_cc_proto",
+        "//proto:rsa_ssa_pkcs1_cc_proto",
         "//proto:tink_cc_proto",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -137,6 +143,47 @@ cc_library(
         "//proto:common_cc_proto",
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "sig_util",
+    srcs = ["sig_util.cc"],
+    hdrs = ["sig_util.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:public_key_sign",
+        "//cc:public_key_verify",
+        "//cc/util:status",
+    ],
+)
+
+cc_library(
+    name = "rsa_ssa_pkcs1_sign_key_manager",
+    srcs = ["rsa_ssa_pkcs1_sign_key_manager.cc"],
+    hdrs = ["rsa_ssa_pkcs1_sign_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":rsa_ssa_pkcs1_verify_key_manager",
+        ":sig_util",
+        "//cc:key_manager",
+        "//cc:key_manager_base",
+        "//cc:public_key_sign",
+        "//cc:registry",
+        "//cc/subtle:rsa_ssa_pkcs1_sign_boringssl",
+        "//cc/subtle:subtle_util_boringssl",
+        "//cc/util:enums",
+        "//cc/util:errors",
+        "//cc/util:protobuf_helper",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:common_cc_proto",
+        "//proto:rsa_ssa_pkcs1_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -408,6 +455,32 @@ cc_test(
 )
 
 cc_test(
+    name = "rsa_ssa_pkcs1_sign_key_manager_test",
+    size = "small",
+    srcs = ["rsa_ssa_pkcs1_sign_key_manager_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":rsa_ssa_pkcs1_sign_key_manager",
+        ":rsa_ssa_pkcs1_verify_key_manager",
+        ":signature_key_templates",
+        "//cc:config",
+        "//cc:public_key_sign",
+        "//cc:registry",
+        "//cc/aead:aead_key_templates",
+        "//cc/aead:aes_gcm_key_manager",
+        "//cc/subtle:subtle_util_boringssl",
+        "//cc/util:status",
+        "//cc/util:test_util",
+        "//proto:aes_eax_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:rsa_ssa_pkcs1_cc_proto",
+        "//proto:tink_cc_proto",
+        "@boringssl//:crypto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "public_key_sign_catalogue_test",
     size = "small",
     srcs = ["public_key_sign_catalogue_test.cc"],
@@ -459,10 +532,14 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":ecdsa_sign_key_manager",
+        ":rsa_ssa_pkcs1_sign_key_manager",
         ":signature_key_templates",
+        "//cc/subtle:subtle_util_boringssl",
         "//proto:common_cc_proto",
         "//proto:ecdsa_cc_proto",
+        "//proto:rsa_ssa_pkcs1_cc_proto",
         "//proto:tink_cc_proto",
+        "@boringssl//:crypto",
         "@com_google_googletest//:gtest_main",
     ],
 )
