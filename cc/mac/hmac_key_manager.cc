@@ -47,90 +47,38 @@ using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
-class HmacKeyFactory : public KeyFactory {
+class HmacKeyFactory : public KeyFactoryBase<HmacKey, HmacKeyFormat> {
  public:
   HmacKeyFactory() {}
 
-  // Generates a new random HmacKey, based on the specified 'key_format',
-  // which must contain HmacKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(const portable_proto::MessageLite& key_format) const override;
+  KeyData::KeyMaterialType key_material_type() const override {
+    return KeyData::SYMMETRIC;
+  }
 
-
-  // Generates a new random HmacKey, based on the specified
-  // 'serialized_key_format', which must contain HmacKeyFormat-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(absl::string_view serialized_key_format) const override;
-
-  // Generates a new random HmacKey, based on the specified
-  // 'serialized_key_format' (which must contain HmacKeyFormat-proto),
-  // and wraps it in a KeyData-proto.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  NewKeyData(absl::string_view serialized_key_format) const override;
+ protected:
+  StatusOr<std::unique_ptr<HmacKey>> NewKeyFromFormat(
+      const HmacKeyFormat& hmac_key_format) const override;
 };
 
-StatusOr<std::unique_ptr<MessageLite>> HmacKeyFactory::NewKey(
-    const portable_proto::MessageLite& key_format) const {
-  std::string key_format_url =
-      std::string(HmacKeyManager::kKeyTypePrefix) + key_format.GetTypeName();
-  if (key_format_url != HmacKeyManager::kKeyFormatUrl) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Key format proto '%s' is not supported by this manager.",
-                     key_format_url.c_str());
-  }
-  const HmacKeyFormat& hmac_key_format =
-      reinterpret_cast<const HmacKeyFormat&>(key_format);
+StatusOr<std::unique_ptr<HmacKey>> HmacKeyFactory::NewKeyFromFormat(
+    const HmacKeyFormat& hmac_key_format) const {
   Status status =  HmacKeyManager::Validate(hmac_key_format);
   if (!status.ok()) return status;
-
-  // Generate HmacKey.
-  std::unique_ptr<HmacKey> hmac_key(new HmacKey());
+  auto hmac_key = absl::make_unique<HmacKey>();
   hmac_key->set_version(HmacKeyManager::kVersion);
   *(hmac_key->mutable_params()) = hmac_key_format.params();
   hmac_key->set_key_value(
       subtle::Random::GetRandomBytes(hmac_key_format.key_size()));
-  std::unique_ptr<MessageLite> key = std::move(hmac_key);
-  return std::move(key);
+  return absl::implicit_cast<StatusOr<std::unique_ptr<HmacKey>>>(
+        std::move(hmac_key));
 }
 
-StatusOr<std::unique_ptr<MessageLite>> HmacKeyFactory::NewKey(
-    absl::string_view serialized_key_format) const {
-  HmacKeyFormat key_format;
-  if (!key_format.ParseFromString(std::string(serialized_key_format))) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Could not parse the passed string as proto '%s'.",
-                     HmacKeyManager::kKeyFormatUrl);
-  }
-  return NewKey(key_format);
-}
-
-StatusOr<std::unique_ptr<KeyData>> HmacKeyFactory::NewKeyData(
-    absl::string_view serialized_key_format) const {
-  auto new_key_result = NewKey(serialized_key_format);
-  if (!new_key_result.ok()) return new_key_result.status();
-  auto new_key = reinterpret_cast<const HmacKey&>(
-      *(new_key_result.ValueOrDie()));
-  std::unique_ptr<KeyData> key_data(new KeyData());
-  key_data->set_type_url(HmacKeyManager::kKeyType);
-  key_data->set_value(new_key.SerializeAsString());
-  key_data->set_key_material_type(KeyData::SYMMETRIC);
-  return std::move(key_data);
-}
-
-constexpr char HmacKeyManager::kKeyFormatUrl[];
-constexpr char HmacKeyManager::kKeyTypePrefix[];
-constexpr char HmacKeyManager::kKeyType[];
 constexpr uint32_t HmacKeyManager::kVersion;
 
 const int kMinKeySizeInBytes = 16;
 const int kMinTagSizeInBytes = 10;
 
-HmacKeyManager::HmacKeyManager()
-    : key_type_(kKeyType), key_factory_(new HmacKeyFactory()) {}
-
-const std::string& HmacKeyManager::get_key_type() const {
-  return key_type_;
-}
+HmacKeyManager::HmacKeyManager() : key_factory_(new HmacKeyFactory()) {}
 
 uint32_t HmacKeyManager::get_version() const {
   return kVersion;

@@ -30,7 +30,7 @@ namespace {
 
 crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<Mac>>> CreateKeyManager(
     const std::string& type_url) {
-  if (type_url == HmacKeyManager::kKeyType) {
+  if (type_url == HmacKeyManager::static_key_type()) {
     std::unique_ptr<KeyManager<Mac>> manager(new HmacKeyManager());
     return std::move(manager);
   }
