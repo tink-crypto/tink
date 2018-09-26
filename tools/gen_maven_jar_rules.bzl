@@ -12,8 +12,8 @@
 
 """ Definition of gen_maven_jar_rules. """
 
-load("//tools:java_single_jar.bzl", "java_single_jar")
-load("//tools:javadoc.bzl", "javadoc_library")
+load("//third_party/tink/tools:java_single_jar.bzl", "java_single_jar")
+load("//third_party/tink/tools:javadoc.bzl", "javadoc_library")
 
 _EXTERNAL_JAVADOC_LINKS = [
     "https://docs.oracle.com/javase/7/docs/api/",
