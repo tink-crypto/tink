@@ -36,9 +36,14 @@ namespace tink {
 class XChaCha20Poly1305KeyManager
     : public KeyManagerBase<Aead, google::crypto::tink::XChaCha20Poly1305Key> {
  public:
+  static constexpr char kKeyType[] =
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
   static constexpr uint32_t kVersion = 0;
 
   XChaCha20Poly1305KeyManager();
+
+  // Returns the type_url identifying the key type handled by this manager.
+  const std::string& get_key_type() const override;
 
   // Returns the version of this key manager.
   uint32_t get_version() const override;
@@ -55,6 +60,8 @@ class XChaCha20Poly1305KeyManager
 
  private:
   friend class XChaCha20Poly1305KeyFactory;
+
+  static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
 
   std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;

@@ -182,7 +182,6 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "//cc/util:validation",
-        "//proto:empty_cc_proto",
         "//proto:tink_cc_proto",
         "//proto:xchacha20_poly1305_cc_proto",
         "@com_google_absl//absl/strings",
