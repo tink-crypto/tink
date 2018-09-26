@@ -22,7 +22,6 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
 
 /**
  * RsaSsaPkcs1 (i.e. RSA Signature Schemes with Appendix (SSA) using PKCS1-v1_5 encoding) verifying
@@ -58,12 +57,12 @@ public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
     }
 
     // Step 2. RSA verification.
-    BigInteger s = bytes2Integer(signature);
+    BigInteger s = SubtleUtil.bytes2Integer(signature);
     if (s.compareTo(n) >= 0) {
       throw new GeneralSecurityException("signature out of range");
     }
     BigInteger m = s.modPow(e, n);
-    byte[] em = integer2Bytes(m, nLengthInBytes);
+    byte[] em = SubtleUtil.integer2Bytes(m, nLengthInBytes);
 
     // Step 3. PKCS1 encoding.
     byte[] expectedEm = emsaPkcs1(data, nLengthInBytes, hash);
@@ -76,7 +75,9 @@ public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
 
   // https://tools.ietf.org/html/rfc8017#section-9.2.
   private byte[] emsaPkcs1(byte[] m, int emLen, HashType hash) throws GeneralSecurityException {
-    MessageDigest digest = EngineFactory.MESSAGE_DIGEST.getInstance(toDigestAlgo(this.hash));
+    Validators.validateSignatureHash(hash);
+    MessageDigest digest =
+        EngineFactory.MESSAGE_DIGEST.getInstance(SubtleUtil.toDigestAlgo(this.hash));
     digest.update(m);
     byte[] h = digest.digest();
     byte[] asnPrefix = toAsnPrefix(hash);
@@ -97,56 +98,12 @@ public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
     return em;
   }
 
-  /**
-   * Converts an byte array to a nonnegative integer
-   * (https://tools.ietf.org/html/rfc8017#section-4.1).
-   */
-  private BigInteger bytes2Integer(byte[] bs) {
-    return new BigInteger(1, bs);
-  }
-
-  /**
-   * Converts a nonnegative integer to a byte array of a specified length
-   * (https://tools.ietf.org/html/rfc8017#section-4.2).
-   */
-  private byte[] integer2Bytes(BigInteger num, int intendedLength) throws GeneralSecurityException {
-    byte[] b = num.toByteArray();
-    if (b.length == intendedLength) {
-      return b;
-    }
-    if (b.length > intendedLength + 1 /* potential leading zero */) {
-      throw new GeneralSecurityException("integer too large");
-    }
-    if (b.length == intendedLength + 1) {
-      if (b[0] == 0 /* leading zero */) {
-        return Arrays.copyOfRange(b, 1, b.length);
-      } else {
-        throw new GeneralSecurityException("integer too large");
-      }
-    }
-    // Left zero pad b.
-    byte[] res = new byte[intendedLength];
-    System.arraycopy(b, 0, res, intendedLength - b.length, b.length);
-    return res;
-  }
-
   private byte[] toAsnPrefix(HashType hash) throws GeneralSecurityException {
     switch (hash) {
       case SHA256:
         return Hex.decode(ASN_PREFIX_SHA256);
       case SHA512:
         return Hex.decode(ASN_PREFIX_SHA512);
-      default:
-        throw new GeneralSecurityException("Unsupported hash " + hash);
-    }
-  }
-
-  private String toDigestAlgo(HashType hash) throws GeneralSecurityException {
-    switch (hash) {
-      case SHA256:
-        return "SHA-256";
-      case SHA512:
-        return "SHA-512";
       default:
         throw new GeneralSecurityException("Unsupported hash " + hash);
     }

@@ -51,8 +51,8 @@ java_library(
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [
-        ":subtle",
         ":mac",
+        ":subtle",
         "//java/src/main/java/com/google/crypto/tink:primitives",
     ],
 )
@@ -102,6 +102,8 @@ java_library(
         "Ed25519Verify.java",
         "RsaSsaPkcs1SignJce.java",
         "RsaSsaPkcs1VerifyJce.java",
+        "RsaSsaPssSignJce.java",
+        "RsaSsaPssVerifyJce.java",
     ],
     javacopts = JAVACOPTS_OSS,
     deps = [
