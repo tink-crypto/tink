@@ -23,14 +23,13 @@ import (
 
 // GetPublicKeyVerifyPrimitive returns a PublicKeyVerify primitive from the given keyset handle.
 func GetPublicKeyVerifyPrimitive(handle *tink.KeysetHandle) (tink.PublicKeyVerify, error) {
-	return GetPublicKeyVerifyPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
+	return VerifierWithKeyManager(handle, nil /*keyManager*/)
 }
 
-// GetPublicKeyVerifyPrimitiveWithCustomerManager returns a PublicKeyVerify primitive from the given
-// keyset handle and custom key manager.
-func GetPublicKeyVerifyPrimitiveWithCustomerManager(
-	handle *tink.KeysetHandle, manager tink.KeyManager) (tink.PublicKeyVerify, error) {
-	ps, err := tink.GetPrimitivesWithCustomManager(handle, manager)
+// VerifierWithKeyManager returns a PublicKeyVerify primitive from the given keyset handle and
+// custom key manager.
+func VerifierWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.PublicKeyVerify, error) {
+	ps, err := tink.PrimitivesWithKeyManager(kh, km)
 	if err != nil {
 		return nil, fmt.Errorf("public_key_verify_factory: cannot obtain primitive set: %s", err)
 	}

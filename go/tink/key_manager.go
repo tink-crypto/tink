@@ -19,37 +19,28 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-/*
-KeyManager "understands" keys of a specific key types: it can
-generate keys of a supported type and create primitives for
-supported keys.  A key type is identified by the global name of the
-protocol buffer that holds the corresponding key material, and is
-given by type_url-field of KeyData-protocol buffer.
-*/
+// KeyManager "understands" keys of a specific key types: it can generate keys of a supported type
+// and create primitives for supported keys.  A key type is identified by the global name of the
+// protocol buffer that holds the corresponding key material, and is given by type_url-field of
+// KeyData-protocol buffer.
 type KeyManager interface {
-	// GetPrimitiveFromSerializedKey constructs a primitive instance for the key given in
-	// serializedKey, which must be a serialized key protocol buffer handled by this manager.
-	GetPrimitiveFromSerializedKey(serializedKey []byte) (interface{}, error)
+	// Primitive constructs a primitive instance for the key given in serializedKey, which must be a
+	// serialized key protocol buffer handled by this manager.
+	Primitive(serializedKey []byte) (interface{}, error)
 
-	// GetPrimitiveFromKey constructs a primitive instance for the key given in {@code key}.
-	GetPrimitiveFromKey(key proto.Message) (interface{}, error)
+	// NewKey generates a new key according to specification in serializedKeyFormat, which must be
+	// supported by this manager.
+	NewKey(serializedKeyFormat []byte) (proto.Message, error)
 
-	// NewKeyFromSerializedKeyFormat Generates a new key according to specification in {@code serializedKeyFormat},
-	// which must be a serialized key format protocol buffer handled by this manager.
-	NewKeyFromSerializedKeyFormat(serializedKeyFormat []byte) (proto.Message, error)
-
-	// NewKeyFromKeyFormat generates a new key according to specification in {@code keyFormat}.
-	NewKeyFromKeyFormat(keyFormat proto.Message) (proto.Message, error)
-
-	// DoesSupport returns true iff this KeyManager supports key type identified by {@code typeURL}.
+	// DoesSupport returns true iff this KeyManager supports key type identified by typeURL.
 	DoesSupport(typeURL string) bool
 
-	// GetKeyType returns the type URL that identifes the key type of keys managed by this KeyManager.
-	GetKeyType() string
+	// TypeURL returns the type URL that identifes the key type of keys managed by this key manager.
+	TypeURL() string
 
 	// APIs for Key Management
 
-	// NewKeyData generates a new {@code KeyData} according to specification in {@code serializedkeyFormat}.
+	// NewKeyData generates a new KeyData according to specification in serializedkeyFormat.
 	// This should be used solely by the key management API.
 	NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error)
 }

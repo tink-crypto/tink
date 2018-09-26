@@ -122,11 +122,11 @@ func TestNewKeyData(t *testing.T) {
 	}
 }
 
-func TestNewKeyFromKeyTemplate(t *testing.T) {
+func TestNewKey(t *testing.T) {
 	setupRegistryTests()
 	// aead template
 	aesGcmTemplate := aead.Aes128GcmKeyTemplate()
-	key, err := tink.NewKeyFromKeyTemplate(aesGcmTemplate)
+	key, err := tink.NewKey(aesGcmTemplate)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
@@ -139,121 +139,72 @@ func TestNewKeyFromKeyTemplate(t *testing.T) {
 		t.Errorf("key doesn't match template")
 	}
 	//nil
-	if _, err := tink.NewKeyFromKeyTemplate(nil); err == nil {
+	if _, err := tink.NewKey(nil); err == nil {
 		t.Errorf("expect an error when key template is nil")
 	}
 	// unregistered type url
 	template := &tinkpb.KeyTemplate{TypeUrl: "some url", Value: []byte{0}}
-	if _, err := tink.NewKeyFromKeyTemplate(template); err == nil {
+	if _, err := tink.NewKey(template); err == nil {
 		t.Errorf("expect an error when key template is not registered")
 	}
 }
 
-func TestNewKeyFromKeyFormat(t *testing.T) {
-	setupRegistryTests()
-	// use aes-gcm key format
-	format := aead.NewAesGcmKeyFormat(16)
-	key, err := tink.NewKeyFromKeyFormat(aead.AesGcmTypeURL, format)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-	var aesGcmKey *gcmpb.AesGcmKey = key.(*gcmpb.AesGcmKey)
-	if uint32(len(aesGcmKey.KeyValue)) != format.KeySize {
-		t.Errorf("key doesn't match format")
-	}
-	// unregistered url
-	if _, err := tink.NewKeyFromKeyFormat("some url", format); err == nil {
-		t.Errorf("expect an error when typeURL has not been registered")
-	}
-	// unmatched url
-	if _, err := tink.NewKeyFromKeyFormat(mac.HmacTypeURL, format); err == nil {
-		t.Errorf("expect an error when typeURL doesn't match format")
-	}
-	// nil format
-	if _, err := tink.NewKeyFromKeyFormat(mac.HmacTypeURL, nil); err == nil {
-		t.Errorf("expect an error when format is nil")
-	}
-}
-
-func TestGetPrimitiveFromKey(t *testing.T) {
-	setupRegistryTests()
-	// hmac key
-	key := testutil.NewHmacKey(commonpb.HashType_SHA256, 16)
-	p, err := tink.GetPrimitiveFromKey(mac.HmacTypeURL, key)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-	var _ *subtleMac.Hmac = p.(*subtleMac.Hmac)
-	// unregistered url
-	if _, err := tink.GetPrimitiveFromKey("some url", key); err == nil {
-		t.Errorf("expect an error when typeURL has not been registered")
-	}
-	// unmatched url
-	if _, err := tink.GetPrimitiveFromKey(aead.AesGcmTypeURL, key); err == nil {
-		t.Errorf("expect an error when typeURL doesn't match key")
-	}
-	// nil key
-	if _, err := tink.GetPrimitiveFromKey(aead.AesGcmTypeURL, nil); err == nil {
-		t.Errorf("expect an error when key is nil")
-	}
-}
-
-func TestGetPrimitiveFromKeyData(t *testing.T) {
+func TestPrimitiveFromKeyData(t *testing.T) {
 	setupRegistryTests()
 	// hmac keydata
 	keyData := testutil.NewHmacKeyData(commonpb.HashType_SHA256, 16)
-	p, err := tink.GetPrimitiveFromKeyData(keyData)
+	p, err := tink.PrimitiveFromKeyData(keyData)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
 	var _ *subtleMac.Hmac = p.(*subtleMac.Hmac)
 	// unregistered url
 	keyData.TypeUrl = "some url"
-	if _, err := tink.GetPrimitiveFromKeyData(keyData); err == nil {
+	if _, err := tink.PrimitiveFromKeyData(keyData); err == nil {
 		t.Errorf("expect an error when typeURL has not been registered")
 	}
 	// unmatched url
 	keyData.TypeUrl = aead.AesGcmTypeURL
-	if _, err := tink.GetPrimitiveFromKeyData(keyData); err == nil {
+	if _, err := tink.PrimitiveFromKeyData(keyData); err == nil {
 		t.Errorf("expect an error when typeURL doesn't match key")
 	}
 	// nil
-	if _, err := tink.GetPrimitiveFromKeyData(nil); err == nil {
+	if _, err := tink.PrimitiveFromKeyData(nil); err == nil {
 		t.Errorf("expect an error when key data is nil")
 	}
 }
 
-func TestGetPrimitiveFromSerializedKey(t *testing.T) {
+func TestPrimitive(t *testing.T) {
 	setupRegistryTests()
 	// hmac key
 	key := testutil.NewHmacKey(commonpb.HashType_SHA256, 16)
 	serializedKey, _ := proto.Marshal(key)
-	p, err := tink.GetPrimitiveFromSerializedKey(mac.HmacTypeURL, serializedKey)
+	p, err := tink.Primitive(mac.HmacTypeURL, serializedKey)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
 	var _ *subtleMac.Hmac = p.(*subtleMac.Hmac)
 	// unregistered url
-	if _, err := tink.GetPrimitiveFromSerializedKey("some url", serializedKey); err == nil {
+	if _, err := tink.Primitive("some url", serializedKey); err == nil {
 		t.Errorf("expect an error when typeURL has not been registered")
 	}
 	// unmatched url
-	if _, err := tink.GetPrimitiveFromSerializedKey(aead.AesGcmTypeURL, serializedKey); err == nil {
+	if _, err := tink.Primitive(aead.AesGcmTypeURL, serializedKey); err == nil {
 		t.Errorf("expect an error when typeURL doesn't match key")
 	}
 	// void key
-	if _, err := tink.GetPrimitiveFromSerializedKey(aead.AesGcmTypeURL, nil); err == nil {
+	if _, err := tink.Primitive(aead.AesGcmTypeURL, nil); err == nil {
 		t.Errorf("expect an error when key is nil")
 	}
-	if _, err := tink.GetPrimitiveFromSerializedKey(aead.AesGcmTypeURL, []byte{}); err == nil {
+	if _, err := tink.Primitive(aead.AesGcmTypeURL, []byte{}); err == nil {
 		t.Errorf("expect an error when key is nil")
 	}
-	if _, err := tink.GetPrimitiveFromSerializedKey(aead.AesGcmTypeURL, []byte{0}); err == nil {
+	if _, err := tink.Primitive(aead.AesGcmTypeURL, []byte{0}); err == nil {
 		t.Errorf("expect an error when key is nil")
 	}
 }
 
-func TestGetPrimitives(t *testing.T) {
+func TestPrimitives(t *testing.T) {
 	setupRegistryTests()
 	// valid input
 	template1 := aead.Aes128GcmKeyTemplate()
@@ -265,7 +216,7 @@ func TestGetPrimitives(t *testing.T) {
 		tink.CreateKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset)
-	ps, err := tink.GetPrimitives(handle)
+	ps, err := tink.Primitives(handle)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
@@ -275,24 +226,24 @@ func TestGetPrimitives(t *testing.T) {
 	}
 	// custom manager
 	customManager := new(testutil.DummyAeadKeyManager)
-	ps, err = tink.GetPrimitivesWithCustomManager(handle, customManager)
+	ps, err = tink.PrimitivesWithKeyManager(handle, customManager)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
 	var _ *testutil.DummyAead = ps.Primary().Primitive().(*testutil.DummyAead)
 	// keysethandle is nil
-	if _, err := tink.GetPrimitives(nil); err == nil {
+	if _, err := tink.Primitives(nil); err == nil {
 		t.Errorf("expect an error when keysethandle is nil")
 	}
 	// keyset is empty
 	keyset = tink.CreateKeyset(1, []*tinkpb.Keyset_Key{})
 	handle, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset)
-	if _, err := tink.GetPrimitives(handle); err == nil {
+	if _, err := tink.Primitives(handle); err == nil {
 		t.Errorf("expect an error when keyset is empty")
 	}
 	keyset = tink.CreateKeyset(1, nil)
 	handle, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset)
-	if _, err := tink.GetPrimitives(handle); err == nil {
+	if _, err := tink.Primitives(handle); err == nil {
 		t.Errorf("expect an error when keyset is empty")
 	}
 	// no primary key
@@ -301,7 +252,7 @@ func TestGetPrimitives(t *testing.T) {
 		tink.CreateKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset)
-	if _, err := tink.GetPrimitives(handle); err == nil {
+	if _, err := tink.Primitives(handle); err == nil {
 		t.Errorf("expect an error when there is no primary key")
 	}
 	// there is primary key but it is disabled
@@ -310,7 +261,7 @@ func TestGetPrimitives(t *testing.T) {
 		tink.CreateKey(keyData2, tinkpb.KeyStatusType_ENABLED, 2, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset)
-	if _, err := tink.GetPrimitives(handle); err == nil {
+	if _, err := tink.Primitives(handle); err == nil {
 		t.Errorf("expect an error when primary key is disabled")
 	}
 	// multiple primary keys
@@ -319,7 +270,7 @@ func TestGetPrimitives(t *testing.T) {
 		tink.CreateKey(keyData2, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK),
 	})
 	handle, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset)
-	if _, err := tink.GetPrimitives(handle); err == nil {
+	if _, err := tink.Primitives(handle); err == nil {
 		t.Errorf("expect an error when there are multiple primary keys")
 	}
 }

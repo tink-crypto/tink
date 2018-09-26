@@ -35,15 +35,8 @@ func TestEcdsaVerifyGetPrimitiveBasic(t *testing.T) {
 	testParams := genValidEcdsaParams()
 	km := signature.NewEcdsaVerifyKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		key := testutil.NewEcdsaPublicKey(testParams[i].hashType, testParams[i].curve)
-		tmp, err := km.GetPrimitiveFromKey(key)
-		if err != nil {
-			t.Errorf("unexpect error in test case %d: %s ", i, err)
-		}
-		var _ *subtleSig.EcdsaVerify = tmp.(*subtleSig.EcdsaVerify)
-
-		serializedKey, _ := proto.Marshal(key)
-		tmp, err = km.GetPrimitiveFromSerializedKey(serializedKey)
+		serializedKey, _ := proto.Marshal(testutil.NewEcdsaPublicKey(testParams[i].hashType, testParams[i].curve))
+		tmp, err := km.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
@@ -55,12 +48,8 @@ func TestEcdsaVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	testParams := genInvalidEcdsaParams()
 	km := signature.NewEcdsaVerifyKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		key := testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve)
-		if _, err := km.GetPrimitiveFromKey(key); err == nil {
-			t.Errorf("expect an error in test case %d", i)
-		}
-		serializedKey, _ := proto.Marshal(key)
-		if _, err := km.GetPrimitiveFromSerializedKey(serializedKey); err == nil {
+		serializedKey, _ := proto.Marshal(testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve))
+		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
@@ -68,17 +57,15 @@ func TestEcdsaVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	key := testutil.NewEcdsaPublicKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
 	key.Version = signature.EcdsaVerifyKeyVersion + 1
-	if _, err := km.GetPrimitiveFromKey(key); err == nil {
+	serializedKey, _ := proto.Marshal(key)
+	if _, err := km.Primitive(serializedKey); err == nil {
 		t.Errorf("expect an error when version is invalid")
 	}
 	// nil input
-	if _, err := km.GetPrimitiveFromKey(nil); err == nil {
+	if _, err := km.Primitive(nil); err == nil {
 		t.Errorf("expect an error when input is nil")
 	}
-	if _, err := km.GetPrimitiveFromSerializedKey(nil); err == nil {
-		t.Errorf("expect an error when input is nil")
-	}
-	if _, err := km.GetPrimitiveFromSerializedKey([]byte{}); err == nil {
+	if _, err := km.Primitive([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty slice")
 	}
 }

@@ -45,15 +45,8 @@ func TestEcdsaSignGetPrimitiveBasic(t *testing.T) {
 	testParams := genValidEcdsaParams()
 	km := signature.NewEcdsaSignKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		key := testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve)
-		tmp, err := km.GetPrimitiveFromKey(key)
-		if err != nil {
-			t.Errorf("unexpect error in test case %d: %s ", i, err)
-		}
-		var _ *subtleSig.EcdsaSign = tmp.(*subtleSig.EcdsaSign)
-
-		serializedKey, _ := proto.Marshal(key)
-		tmp, err = km.GetPrimitiveFromSerializedKey(serializedKey)
+		serializedKey, _ := proto.Marshal(testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve))
+		tmp, err := km.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
@@ -66,12 +59,8 @@ func TestEcdsaSignGetPrimitiveWithInvalidInput(t *testing.T) {
 	testParams := genInvalidEcdsaParams()
 	km := signature.NewEcdsaSignKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		key := testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve)
-		if _, err := km.GetPrimitiveFromKey(key); err == nil {
-			t.Errorf("expect an error in test case %d", i)
-		}
-		serializedKey, _ := proto.Marshal(key)
-		if _, err := km.GetPrimitiveFromSerializedKey(serializedKey); err == nil {
+		serializedKey, _ := proto.Marshal(testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve))
+		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
@@ -79,17 +68,15 @@ func TestEcdsaSignGetPrimitiveWithInvalidInput(t *testing.T) {
 	key := testutil.NewEcdsaPrivateKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
 	key.Version = signature.EcdsaSignKeyVersion + 1
-	if _, err := km.GetPrimitiveFromKey(key); err == nil {
+	serializedKey, _ := proto.Marshal(key)
+	if _, err := km.Primitive(serializedKey); err == nil {
 		t.Errorf("expect an error when version is invalid")
 	}
 	// nil input
-	if _, err := km.GetPrimitiveFromKey(nil); err == nil {
+	if _, err := km.Primitive(nil); err == nil {
 		t.Errorf("expect an error when input is nil")
 	}
-	if _, err := km.GetPrimitiveFromSerializedKey(nil); err == nil {
-		t.Errorf("expect an error when input is nil")
-	}
-	if _, err := km.GetPrimitiveFromSerializedKey([]byte{}); err == nil {
+	if _, err := km.Primitive([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty slice")
 	}
 }
@@ -100,22 +87,12 @@ func TestEcdsaSignNewKeyBasic(t *testing.T) {
 	for i := 0; i < len(testParams); i++ {
 		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := signature.NewEcdsaKeyFormat(params)
-		tmp, err := km.NewKeyFromKeyFormat(format)
+		serializedFormat, _ := proto.Marshal(signature.NewEcdsaKeyFormat(params))
+		tmp, err := km.NewKey(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
-		var key *ecdsapb.EcdsaPrivateKey = tmp.(*ecdsapb.EcdsaPrivateKey)
-		if err := validateEcdsaPrivateKey(key, params); err != nil {
-			t.Errorf("invalid private key in test case %d: %s", i, err)
-		}
-
-		serializedFormat, _ := proto.Marshal(format)
-		tmp, err = km.NewKeyFromSerializedKeyFormat(serializedFormat)
-		if err != nil {
-			t.Errorf("unexpected error: %s", err)
-		}
-		key = tmp.(*ecdsapb.EcdsaPrivateKey)
+		key := tmp.(*ecdsapb.EcdsaPrivateKey)
 		if err := validateEcdsaPrivateKey(key, params); err != nil {
 			t.Errorf("invalid private key in test case %d: %s", i, err)
 		}
@@ -129,12 +106,8 @@ func TestEcdsaSignNewKeyWithInvalidInput(t *testing.T) {
 	for i := 0; i < len(testParams); i++ {
 		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := signature.NewEcdsaKeyFormat(params)
-		if _, err := km.NewKeyFromKeyFormat(format); err == nil {
-			t.Errorf("expect an error in test case %d", i)
-		}
-		serializedFormat, _ := proto.Marshal(format)
-		if _, err := km.NewKeyFromSerializedKeyFormat(serializedFormat); err == nil {
+		serializedFormat, _ := proto.Marshal(signature.NewEcdsaKeyFormat(params))
+		if _, err := km.NewKey(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
@@ -143,23 +116,16 @@ func TestEcdsaSignNewKeyWithInvalidInput(t *testing.T) {
 	for i := 0; i < len(testParams); i++ {
 		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_UNKNOWN_ENCODING)
-		format := signature.NewEcdsaKeyFormat(params)
-		if _, err := km.NewKeyFromKeyFormat(format); err == nil {
-			t.Errorf("expect an error in test case %d", i)
-		}
-		serializedFormat, _ := proto.Marshal(format)
-		if _, err := km.NewKeyFromSerializedKeyFormat(serializedFormat); err == nil {
+		serializedFormat, _ := proto.Marshal(signature.NewEcdsaKeyFormat(params))
+		if _, err := km.NewKey(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
 	// nil input
-	if _, err := km.NewKeyFromKeyFormat(nil); err == nil {
+	if _, err := km.NewKey(nil); err == nil {
 		t.Errorf("expect an error when input is nil")
 	}
-	if _, err := km.NewKeyFromSerializedKeyFormat(nil); err == nil {
-		t.Errorf("expect an error when input is nil")
-	}
-	if _, err := km.NewKeyFromSerializedKeyFormat([]byte{}); err == nil {
+	if _, err := km.NewKey([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty slice")
 	}
 }
@@ -175,19 +141,15 @@ func TestEcdsaSignNewKeyMultipleTimes(t *testing.T) {
 		format := signature.NewEcdsaKeyFormat(params)
 		serializedFormat, _ := proto.Marshal(format)
 		for j := 0; j < nTest; j++ {
-			key, _ := km.NewKeyFromKeyFormat(format)
+			key, _ := km.NewKey(serializedFormat)
 			serializedKey, _ := proto.Marshal(key)
-			keys[string(serializedKey)] = true
-
-			key, _ = km.NewKeyFromSerializedKeyFormat(serializedFormat)
-			serializedKey, _ = proto.Marshal(key)
 			keys[string(serializedKey)] = true
 
 			keyData, _ := km.NewKeyData(serializedFormat)
 			serializedKey = keyData.Value
 			keys[string(serializedKey)] = true
 		}
-		if len(keys) != nTest*3 {
+		if len(keys) != nTest*2 {
 			t.Errorf("key is repeated with params: %s", params)
 		}
 	}
@@ -199,8 +161,7 @@ func TestEcdsaSignNewKeyDataBasic(t *testing.T) {
 	for i := 0; i < len(testParams); i++ {
 		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := signature.NewEcdsaKeyFormat(params)
-		serializedFormat, _ := proto.Marshal(format)
+		serializedFormat, _ := proto.Marshal(signature.NewEcdsaKeyFormat(params))
 
 		keyData, err := km.NewKeyData(serializedFormat)
 		if err != nil {
@@ -243,14 +204,14 @@ func TestEcdsaSignNewKeyDataWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestGetPublicKeyDataBasic(t *testing.T) {
+func TestPublicKeyDataBasic(t *testing.T) {
 	testParams := genValidEcdsaParams()
 	km := signature.NewEcdsaSignKeyManager()
 	for i := 0; i < len(testParams); i++ {
 		key := testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve)
 		serializedKey, _ := proto.Marshal(key)
 
-		pubKeyData, err := km.GetPublicKeyData(serializedKey)
+		pubKeyData, err := km.PublicKeyData(serializedKey)
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
@@ -267,22 +228,22 @@ func TestGetPublicKeyDataBasic(t *testing.T) {
 	}
 }
 
-func TestGetPublicKeyDataWithInvalidInput(t *testing.T) {
+func TestPublicKeyDataWithInvalidInput(t *testing.T) {
 	km := signature.NewEcdsaSignKeyManager()
 	// modified key
 	key := testutil.NewEcdsaPrivateKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
 	serializedKey, _ := proto.Marshal(key)
 	serializedKey[0] = 0
-	if _, err := km.GetPublicKeyData(serializedKey); err == nil {
+	if _, err := km.PublicKeyData(serializedKey); err == nil {
 		t.Errorf("expect an error when input is a modified serialized key")
 	}
 	// nil
-	if _, err := km.GetPublicKeyData(nil); err == nil {
+	if _, err := km.PublicKeyData(nil); err == nil {
 		t.Errorf("expect an error when input is nil")
 	}
 	// empty slice
-	if _, err := km.GetPublicKeyData([]byte{}); err == nil {
+	if _, err := km.PublicKeyData([]byte{}); err == nil {
 		t.Errorf("expect an error when input is an empty slice")
 	}
 }

@@ -21,15 +21,13 @@ import (
 )
 
 // GetPrimitive creates a Mac primitive from the given keyset handle.
-func GetPrimitive(handle *tink.KeysetHandle) (tink.Mac, error) {
-	return GetPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
+func GetPrimitive(kh *tink.KeysetHandle) (tink.Mac, error) {
+	return PrimitiveWithKeyManager(kh, nil /*keyManager*/)
 }
 
-// GetPrimitiveWithCustomerManager creates a Mac primitive from the given
-// keyset handle and a custom key manager.
-func GetPrimitiveWithCustomerManager(
-	handle *tink.KeysetHandle, manager tink.KeyManager) (tink.Mac, error) {
-	ps, err := tink.GetPrimitivesWithCustomManager(handle, manager)
+// PrimitiveWithKeyManager creates a Mac primitive from the given keyset handle and a custom key manager.
+func PrimitiveWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Mac, error) {
+	ps, err := tink.PrimitivesWithKeyManager(kh, km)
 	if err != nil {
 		return nil, fmt.Errorf("mac_factory: cannot obtain primitive set: %s", err)
 	}

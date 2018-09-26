@@ -41,16 +41,8 @@ func TestAesGcmGetPrimitiveBasic(t *testing.T) {
 	keyManager := aead.NewAesGcmKeyManager()
 	for _, keySize := range keySizes {
 		key := testutil.NewAesGcmKey(uint32(keySize))
-		p, err := keyManager.GetPrimitiveFromKey(key)
-		if err != nil {
-			t.Errorf("unexpected error: %s", err)
-		}
-		if err := validateAesGcmPrimitive(p, key); err != nil {
-			t.Errorf("%s", err)
-		}
-
 		serializedKey, _ := proto.Marshal(key)
-		p, err = keyManager.GetPrimitiveFromSerializedKey(serializedKey)
+		p, err := keyManager.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
@@ -65,40 +57,34 @@ func TestAesGcmGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid AesGcmKey
 	testKeys := genInvalidAesGcmKeys()
 	for i := 0; i < len(testKeys); i++ {
-		if _, err := keyManager.GetPrimitiveFromKey(testKeys[i]); err == nil {
-			t.Errorf("expect an error in test case %d", i)
-		}
 		serializedKey, _ := proto.Marshal(testKeys[i])
-		if _, err := keyManager.GetPrimitiveFromSerializedKey(serializedKey); err == nil {
+		if _, err := keyManager.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
 	// nil
-	if _, err := keyManager.GetPrimitiveFromKey(nil); err == nil {
-		t.Errorf("expect an error when input is nil")
-	}
-	if _, err := keyManager.GetPrimitiveFromSerializedKey(nil); err == nil {
+	if _, err := keyManager.Primitive(nil); err == nil {
 		t.Errorf("expect an error when input is nil")
 	}
 	// empty array
-	if _, err := keyManager.GetPrimitiveFromSerializedKey([]byte{}); err == nil {
+	if _, err := keyManager.Primitive([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty")
 	}
 }
 
 func TestAesGcmNewKeyMultipleTimes(t *testing.T) {
-	keyManager := aead.NewAesGcmKeyManager()
+	km := aead.NewAesGcmKeyManager()
 	format := aead.NewAesGcmKeyFormat(32)
 	serializedFormat, _ := proto.Marshal(format)
 	keys := make(map[string]bool)
 	nTest := 26
 	for i := 0; i < nTest; i++ {
-		key, _ := keyManager.NewKeyFromSerializedKeyFormat(serializedFormat)
+		key, _ := km.NewKey(serializedFormat)
 		serializedKey, _ := proto.Marshal(key)
 		keys[string(serializedKey)] = true
 
-		key, _ = keyManager.NewKeyFromKeyFormat(format)
-		serializedKey, _ = proto.Marshal(key)
+		keyData, _ := km.NewKeyData(serializedFormat)
+		serializedKey = keyData.Value
 		keys[string(serializedKey)] = true
 	}
 	if len(keys) != nTest*2 {
@@ -110,21 +96,12 @@ func TestAesGcmNewKeyBasic(t *testing.T) {
 	keyManager := aead.NewAesGcmKeyManager()
 	for _, keySize := range keySizes {
 		format := aead.NewAesGcmKeyFormat(uint32(keySize))
-		m, err := keyManager.NewKeyFromKeyFormat(format)
+		serializedFormat, _ := proto.Marshal(format)
+		m, err := keyManager.NewKey(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
 		key := m.(*gcmpb.AesGcmKey)
-		if err := validateAesGcmKey(key, format); err != nil {
-			t.Errorf("%s", err)
-		}
-
-		serializedFormat, _ := proto.Marshal(format)
-		m, err = keyManager.NewKeyFromSerializedKeyFormat(serializedFormat)
-		if err != nil {
-			t.Errorf("unexpected error: %s", err)
-		}
-		key = m.(*gcmpb.AesGcmKey)
 		if err := validateAesGcmKey(key, format); err != nil {
 			t.Errorf("%s", err)
 		}
@@ -136,23 +113,17 @@ func TestAesGcmNewKeyWithInvalidInput(t *testing.T) {
 	// bad format
 	badFormats := genInvalidAesGcmKeyFormats()
 	for i := 0; i < len(badFormats); i++ {
-		if _, err := keyManager.NewKeyFromKeyFormat(badFormats[i]); err == nil {
-			t.Errorf("expect an error in test case %d", i)
-		}
 		serializedFormat, _ := proto.Marshal(badFormats[i])
-		if _, err := keyManager.NewKeyFromSerializedKeyFormat(serializedFormat); err == nil {
+		if _, err := keyManager.NewKey(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
 	// nil
-	if _, err := keyManager.NewKeyFromKeyFormat(nil); err == nil {
-		t.Errorf("expect an error when input is nil")
-	}
-	if _, err := keyManager.NewKeyFromSerializedKeyFormat(nil); err == nil {
+	if _, err := keyManager.NewKey(nil); err == nil {
 		t.Errorf("expect an error when input is nil")
 	}
 	// empty array
-	if _, err := keyManager.NewKeyFromSerializedKeyFormat([]byte{}); err == nil {
+	if _, err := keyManager.NewKey([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty")
 	}
 }
@@ -211,9 +182,9 @@ func TestAesGcmDoesSupport(t *testing.T) {
 	}
 }
 
-func TestAesGcmGetKeyType(t *testing.T) {
+func TestAesGcmTypeURL(t *testing.T) {
 	keyManager := aead.NewAesGcmKeyManager()
-	if keyManager.GetKeyType() != aead.AesGcmTypeURL {
+	if keyManager.TypeURL() != aead.AesGcmTypeURL {
 		t.Errorf("incorrect key type")
 	}
 }

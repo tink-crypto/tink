@@ -40,40 +40,29 @@ type DummyAeadKeyManager struct{}
 
 var _ tink.KeyManager = (*DummyAeadKeyManager)(nil)
 
-// GetPrimitiveFromSerializedKey constructs a primitive instance for the key given in
+// Primitive constructs a primitive instance for the key given in
 // serializedKey, which must be a serialized key protocol buffer handled by this manager.
-func (km *DummyAeadKeyManager) GetPrimitiveFromSerializedKey(serializedKey []byte) (interface{}, error) {
+func (km *DummyAeadKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	return new(DummyAead), nil
 }
 
-// GetPrimitiveFromKey constructs a primitive instance for the key given in {@code key}.
-func (km *DummyAeadKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, error) {
-	return new(DummyAead), nil
-}
-
-// NewKeyFromSerializedKeyFormat Generates a new key according to specification in {@code serializedKeyFormat},
-// which must be a serialized key format protocol buffer handled by this manager.
-func (km *DummyAeadKeyManager) NewKeyFromSerializedKeyFormat(serializedKeyFormat []byte) (proto.Message, error) {
+// NewKey generates a new key according to specification in serializedKeyFormat.
+func (km *DummyAeadKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-// NewKeyFromKeyFormat generates a new key according to specification in {@code keyFormat}.
-func (km *DummyAeadKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message, error) {
-	return nil, fmt.Errorf("not implemented")
-}
-
-// NewKeyData generates a new {@code KeyData} according to specification in {@code serializedkeyFormat}.
+// NewKeyData generates a new KeyData according to specification in serializedkeyFormat.
 func (km *DummyAeadKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-// DoesSupport returns true iff this KeyManager supports key type identified by {@code typeURL}.
+// DoesSupport returns true iff this KeyManager supports key type identified by typeURL.
 func (km *DummyAeadKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == aead.AesGcmTypeURL
 }
 
-// GetKeyType returns the type URL.
-func (km *DummyAeadKeyManager) GetKeyType() string {
+// TypeURL returns the type URL.
+func (km *DummyAeadKeyManager) TypeURL() string {
 	return aead.AesGcmTypeURL
 }
 

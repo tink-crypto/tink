@@ -22,6 +22,6 @@ import (
 type PrivateKeyManager interface {
 	KeyManager
 
-	// GetPublicKeyData extracts the public key data from the private key.
-	GetPublicKeyData(serializedKey []byte) (*tinkpb.KeyData, error)
+	// PublicKeyData extracts the public key data from the private key.
+	PublicKeyData(serializedKey []byte) (*tinkpb.KeyData, error)
 }

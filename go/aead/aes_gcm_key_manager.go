@@ -49,23 +49,13 @@ func NewAesGcmKeyManager() *AesGcmKeyManager {
 	return new(AesGcmKeyManager)
 }
 
-// GetPrimitiveFromSerializedKey creates an AesGcm subtle for the given
-// serialized AesGcmKey proto.
-func (km *AesGcmKeyManager) GetPrimitiveFromSerializedKey(serializedKey []byte) (interface{}, error) {
+// Primitive creates an AesGcm subtle for the given serialized AesGcmKey proto.
+func (km *AesGcmKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidAesGcmKey
 	}
 	key := new(gcmpb.AesGcmKey)
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
-		return nil, errInvalidAesGcmKey
-	}
-	return km.GetPrimitiveFromKey(key)
-}
-
-// GetPrimitiveFromKey creates an AesGcm subtle for the given AesGcmKey proto.
-func (km *AesGcmKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, error) {
-	key, ok := m.(*gcmpb.AesGcmKey)
-	if !ok {
 		return nil, errInvalidAesGcmKey
 	}
 	if err := km.validateKey(key); err != nil {
@@ -78,24 +68,13 @@ func (km *AesGcmKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, e
 	return ret, nil
 }
 
-// NewKeyFromSerializedKeyFormat creates a new key according to specification
-// the given serialized AesGcmKeyFormat.
-func (km *AesGcmKeyManager) NewKeyFromSerializedKeyFormat(serializedKeyFormat []byte) (proto.Message, error) {
+// NewKey creates a new key according to specification the given serialized AesGcmKeyFormat.
+func (km *AesGcmKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	if len(serializedKeyFormat) == 0 {
 		return nil, errInvalidAesGcmKeyFormat
 	}
 	keyFormat := new(gcmpb.AesGcmKeyFormat)
 	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
-		return nil, errInvalidAesGcmKeyFormat
-	}
-	return km.NewKeyFromKeyFormat(keyFormat)
-}
-
-// NewKeyFromKeyFormat creates a new key according to specification in the
-// given AesGcmKeyFormat.
-func (km *AesGcmKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message, error) {
-	keyFormat, ok := m.(*gcmpb.AesGcmKeyFormat)
-	if !ok {
 		return nil, errInvalidAesGcmKeyFormat
 	}
 	if err := km.validateKeyFormat(keyFormat); err != nil {
@@ -108,10 +87,11 @@ func (km *AesGcmKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message,
 	}, nil
 }
 
-// NewKeyData creates a new KeyData according to specification in  the given
-// serialized AesGcmKeyFormat. It should be used solely by the key management API.
+// NewKeyData creates a new KeyData according to specification in the given serialized
+// AesGcmKeyFormat.
+// It should be used solely by the key management API.
 func (km *AesGcmKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
-	key, err := km.NewKeyFromSerializedKeyFormat(serializedKeyFormat)
+	key, err := km.NewKey(serializedKeyFormat)
 	if err != nil {
 		return nil, err
 	}
@@ -131,8 +111,8 @@ func (km *AesGcmKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == AesGcmTypeURL
 }
 
-// GetKeyType returns the key type of keys managed by this key manager.
-func (km *AesGcmKeyManager) GetKeyType() string {
+// TypeURL returns the key type of keys managed by this key manager.
+func (km *AesGcmKeyManager) TypeURL() string {
 	return AesGcmTypeURL
 }
 

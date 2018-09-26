@@ -51,23 +51,13 @@ func NewEcdsaSignKeyManager() *EcdsaSignKeyManager {
 	return new(EcdsaSignKeyManager)
 }
 
-// GetPrimitiveFromSerializedKey creates an EcdsaSign subtle for the given
-// serialized EcdsaPrivateKey proto.
-func (km *EcdsaSignKeyManager) GetPrimitiveFromSerializedKey(serializedKey []byte) (interface{}, error) {
+// Primitive creates an EcdsaSign subtle for the given serialized EcdsaPrivateKey proto.
+func (km *EcdsaSignKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidEcdsaSignKey
 	}
 	key := new(ecdsapb.EcdsaPrivateKey)
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
-		return nil, errInvalidEcdsaSignKey
-	}
-	return km.GetPrimitiveFromKey(key)
-}
-
-// GetPrimitiveFromKey creates an EcdsaSign subtle for the given EcdsaPrivateKey proto.
-func (km *EcdsaSignKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, error) {
-	key, ok := m.(*ecdsapb.EcdsaPrivateKey)
-	if !ok {
 		return nil, errInvalidEcdsaSignKey
 	}
 	if err := km.validateKey(key); err != nil {
@@ -81,9 +71,8 @@ func (km *EcdsaSignKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}
 	return ret, nil
 }
 
-// NewKeyFromSerializedKeyFormat creates a new EcdsaPrivateKey according to specification
-// the given serialized EcdsaKeyFormat.
-func (km *EcdsaSignKeyManager) NewKeyFromSerializedKeyFormat(serializedKeyFormat []byte) (proto.Message, error) {
+// NewKey creates a new EcdsaPrivateKey according to specification the given serialized EcdsaKeyFormat.
+func (km *EcdsaSignKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	if len(serializedKeyFormat) == 0 {
 		return nil, errInvalidEcdsaSignKeyFormat
 	}
@@ -91,23 +80,17 @@ func (km *EcdsaSignKeyManager) NewKeyFromSerializedKeyFormat(serializedKeyFormat
 	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
 		return nil, fmt.Errorf("ecdsa_sign_key_manager: invalid key format: %s", err)
 	}
-	return km.NewKeyFromKeyFormat(keyFormat)
-}
-
-// NewKeyFromKeyFormat creates a new key according to specification in the
-// given EcdsaKeyFormat.
-func (km *EcdsaSignKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message, error) {
-	format, ok := m.(*ecdsapb.EcdsaKeyFormat)
-	if !ok {
-		return nil, errInvalidEcdsaSignKeyFormat
-	}
-	if err := km.validateKeyFormat(format); err != nil {
+	if err := km.validateKeyFormat(keyFormat); err != nil {
 		return nil, fmt.Errorf("ecdsa_sign_key_manager: %s", err)
 	}
 	// generate key
-	params := format.Params
+	params := keyFormat.Params
 	curve := tink.GetCurveName(params.Curve)
-	tmpKey, _ := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
+	tmpKey, err := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
+	if err != nil {
+		return nil, fmt.Errorf("cannot generate ECDSA key: %s", err)
+	}
+
 	keyValue := tmpKey.D.Bytes()
 	pub := NewEcdsaPublicKey(EcdsaSignKeyVersion, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
 	priv := NewEcdsaPrivateKey(EcdsaSignKeyVersion, pub, keyValue)
@@ -117,7 +100,7 @@ func (km *EcdsaSignKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Messa
 // NewKeyData creates a new KeyData according to specification in  the given
 // serialized EcdsaKeyFormat. It should be used solely by the key management API.
 func (km *EcdsaSignKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
-	key, err := km.NewKeyFromSerializedKeyFormat(serializedKeyFormat)
+	key, err := km.NewKey(serializedKeyFormat)
 	if err != nil {
 		return nil, err
 	}
@@ -132,8 +115,8 @@ func (km *EcdsaSignKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.K
 	}, nil
 }
 
-// GetPublicKeyData extracts the public key data from the private key.
-func (km *EcdsaSignKeyManager) GetPublicKeyData(serializedPrivKey []byte) (*tinkpb.KeyData, error) {
+// PublicKeyData extracts the public key data from the private key.
+func (km *EcdsaSignKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkpb.KeyData, error) {
 	privKey := new(ecdsapb.EcdsaPrivateKey)
 	if err := proto.Unmarshal(serializedPrivKey, privKey); err != nil {
 		return nil, errInvalidEcdsaSignKey
@@ -154,8 +137,8 @@ func (km *EcdsaSignKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == EcdsaSignTypeURL
 }
 
-// GetKeyType returns the key type of keys managed by this key manager.
-func (km *EcdsaSignKeyManager) GetKeyType() string {
+// TypeURL returns the key type of keys managed by this key manager.
+func (km *EcdsaSignKeyManager) TypeURL() string {
 	return EcdsaSignTypeURL
 }
 

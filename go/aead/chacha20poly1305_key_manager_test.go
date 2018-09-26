@@ -38,19 +38,12 @@ func TestNewChaCha20Poly1305KeyManager(t *testing.T) {
 
 func TestChaCha20Poly1305GetPrimitive(t *testing.T) {
 	km := aead.NewChaCha20Poly1305KeyManager()
-	key := km.NewChaCha20Poly1305Key()
-	p, err := km.GetPrimitiveFromKey(key)
-	if err != nil {
-		t.Errorf("km.GetPrimitiveFromKey(%v) = %v; want nil", key, err)
-	}
-	if err := validateChaCha20Poly1305Primitive(p, key); err != nil {
-		t.Errorf("validateChaCha20Poly1305Primitive(p, key) = %v; want nil", err)
-	}
-
+	m, _ := km.NewKey(nil)
+	key, _ := m.(*cppb.ChaCha20Poly1305Key)
 	serializedKey, _ := proto.Marshal(key)
-	p, err = km.GetPrimitiveFromSerializedKey(serializedKey)
+	p, err := km.Primitive(serializedKey)
 	if err != nil {
-		t.Errorf("km.GetPrimitiveFromSerializedKey(%v) = %v; want nil", serializedKey, err)
+		t.Errorf("km.Primitive(%v) = %v; want nil", serializedKey, err)
 	}
 	if err := validateChaCha20Poly1305Primitive(p, key); err != nil {
 		t.Errorf("validateChaCha20Poly1305Primitive(p, key) = %v; want nil", err)
@@ -61,43 +54,20 @@ func TestChaCha20Poly1305GetPrimitiveWithInvalidKeys(t *testing.T) {
 	km := aead.NewChaCha20Poly1305KeyManager()
 	invalidKeys := genInvalidChaCha20Poly1305Keys()
 	for _, key := range invalidKeys {
-		if _, err := km.GetPrimitiveFromKey(key); err == nil {
-			t.Errorf("km.GetPrimitiveFromKey(%v) = _, nil; want _, err", key)
-		}
 		serializedKey, _ := proto.Marshal(key)
-		if _, err := km.GetPrimitiveFromSerializedKey(serializedKey); err == nil {
-			t.Errorf("km.GetPrimitiveFromSerializedKey(%v) = _, nil; want _, err", serializedKey)
+		if _, err := km.Primitive(serializedKey); err == nil {
+			t.Errorf("km.Primitive(%v) = _, nil; want _, err", serializedKey)
 		}
 	}
 }
 
-func TestChaCha20Poly1305NewKeyFromSerializedKeyFormat(t *testing.T) {
+func TestChaCha20Poly1305NewKey(t *testing.T) {
 	km := aead.NewChaCha20Poly1305KeyManager()
-	m, err := km.NewKeyFromSerializedKeyFormat(nil)
+	m, err := km.NewKey(nil)
 	if err != nil {
-		t.Errorf("km.NewKeyFromSerializedKeyFormat(nil) = _, %v; want _, nil", err)
+		t.Errorf("km.NewKey(nil) = _, %v; want _, nil", err)
 	}
 	key, _ := m.(*cppb.ChaCha20Poly1305Key)
-	if err := validateChaCha20Poly1305Key(key); err != nil {
-		t.Errorf("validateChaCha20Poly1305Key(%v) = %v; want nil", key, err)
-	}
-}
-
-func TestChaCha20Poly1305NewKeyFromKeyFormat(t *testing.T) {
-	km := aead.NewChaCha20Poly1305KeyManager()
-	m, err := km.NewKeyFromKeyFormat(nil)
-	if err != nil {
-		t.Errorf("km.NewKeyFromKeyFormat(nil) = _, %v; want _, nil", err)
-	}
-	key, _ := m.(*cppb.ChaCha20Poly1305Key)
-	if err := validateChaCha20Poly1305Key(key); err != nil {
-		t.Errorf("validateChaCha20Poly1305Key(%v) = %v; want nil", key, err)
-	}
-}
-
-func TestNewChaCha20Poly1305Key(t *testing.T) {
-	km := aead.NewChaCha20Poly1305KeyManager()
-	key := km.NewChaCha20Poly1305Key()
 	if err := validateChaCha20Poly1305Key(key); err != nil {
 		t.Errorf("validateChaCha20Poly1305Key(%v) = %v; want nil", key, err)
 	}
@@ -134,10 +104,10 @@ func TestChaCha20Poly1305DoesSupport(t *testing.T) {
 	}
 }
 
-func TestChaCha20Poly1305GetKeyType(t *testing.T) {
+func TestChaCha20Poly1305TypeURL(t *testing.T) {
 	km := aead.NewChaCha20Poly1305KeyManager()
-	if kt := km.GetKeyType(); kt != aead.ChaCha20Poly1305TypeURL {
-		t.Errorf("km.GetKeyType() = %s; want %s", kt, aead.ChaCha20Poly1305TypeURL)
+	if kt := km.TypeURL(); kt != aead.ChaCha20Poly1305TypeURL {
+		t.Errorf("km.TypeURL() = %s; want %s", kt, aead.ChaCha20Poly1305TypeURL)
 	}
 }
 

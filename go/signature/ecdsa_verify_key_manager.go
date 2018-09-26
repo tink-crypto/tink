@@ -48,23 +48,13 @@ func NewEcdsaVerifyKeyManager() *EcdsaVerifyKeyManager {
 	return new(EcdsaVerifyKeyManager)
 }
 
-// GetPrimitiveFromSerializedKey creates an EcdsaVerify subtle for the given
-// serialized EcdsaPublicKey proto.
-func (km *EcdsaVerifyKeyManager) GetPrimitiveFromSerializedKey(serializedKey []byte) (interface{}, error) {
+// Primitive creates an EcdsaVerify subtle for the given serialized EcdsaPublicKey proto.
+func (km *EcdsaVerifyKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidEcdsaVerifyKey
 	}
 	key := new(ecdsapb.EcdsaPublicKey)
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
-		return nil, errInvalidEcdsaVerifyKey
-	}
-	return km.GetPrimitiveFromKey(key)
-}
-
-// GetPrimitiveFromKey creates an EcdsaVerify subtle for the given EcdsaPublicKey proto.
-func (km *EcdsaVerifyKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, error) {
-	key, ok := m.(*ecdsapb.EcdsaPublicKey)
-	if !ok {
 		return nil, errInvalidEcdsaVerifyKey
 	}
 	if err := km.validateKey(key); err != nil {
@@ -78,13 +68,8 @@ func (km *EcdsaVerifyKeyManager) GetPrimitiveFromKey(m proto.Message) (interface
 	return ret, nil
 }
 
-// NewKeyFromSerializedKeyFormat is not implemented
-func (km *EcdsaVerifyKeyManager) NewKeyFromSerializedKeyFormat(serializedKeyFormat []byte) (proto.Message, error) {
-	return nil, errEcdsaVerifyNotImplemented
-}
-
-// NewKeyFromKeyFormat is not implemented
-func (km *EcdsaVerifyKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message, error) {
+// NewKey is not implemented.
+func (km *EcdsaVerifyKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	return nil, errEcdsaVerifyNotImplemented
 }
 
@@ -99,8 +84,8 @@ func (km *EcdsaVerifyKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == EcdsaVerifyTypeURL
 }
 
-// GetKeyType returns the key type of keys managed by this key manager.
-func (km *EcdsaVerifyKeyManager) GetKeyType() string {
+// TypeURL returns the key type of keys managed by this key manager.
+func (km *EcdsaVerifyKeyManager) TypeURL() string {
 	return EcdsaVerifyTypeURL
 }
 

@@ -57,7 +57,7 @@ func (h *KeysetHandle) GetPublicKeysetHandle() (*KeysetHandle, error) {
 		if privKeyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PRIVATE {
 			return nil, fmt.Errorf("keyset_handle: keyset contains a non-private key")
 		}
-		pubKeyData, err := getPublicKeyData(privKeyData.TypeUrl, privKeyData.Value)
+		pubKeyData, err := publicKeyData(privKeyData.TypeUrl, privKeyData.Value)
 		if err != nil {
 			return nil, fmt.Errorf("keyset_handle: %s", err)
 		}
@@ -104,6 +104,6 @@ func (h *KeysetHandle) String() string {
 }
 
 func (h *KeysetHandle) validateKeyData(keyData *tinkpb.KeyData) error {
-	_, err := GetPrimitiveFromKeyData(keyData)
+	_, err := PrimitiveFromKeyData(keyData)
 	return err
 }

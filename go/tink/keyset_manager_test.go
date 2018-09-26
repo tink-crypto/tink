@@ -72,7 +72,7 @@ func TestEncryptedKeyset(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot create new key data: %s", err)
 	}
-	p, err := tink.GetPrimitiveFromKeyData(keyData)
+	p, err := tink.PrimitiveFromKeyData(keyData)
 	if p == nil || err != nil {
 		t.Errorf("cannot get primitive from key data: %s", err)
 	}

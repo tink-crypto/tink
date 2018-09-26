@@ -47,23 +47,13 @@ func NewHmacKeyManager() *HmacKeyManager {
 	return new(HmacKeyManager)
 }
 
-// GetPrimitiveFromSerializedKey constructs a Hmac instance for the given
-// serialized HmacKey.
-func (km *HmacKeyManager) GetPrimitiveFromSerializedKey(serializedKey []byte) (interface{}, error) {
+// Primitive constructs a Hmac instance for the given serialized HmacKey.
+func (km *HmacKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidHmacKey
 	}
 	key := new(hmacpb.HmacKey)
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
-		return nil, errInvalidHmacKey
-	}
-	return km.GetPrimitiveFromKey(key)
-}
-
-// GetPrimitiveFromKey constructs a HMAC instance for the given HmacKey.
-func (km *HmacKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, error) {
-	key, ok := m.(*hmacpb.HmacKey)
-	if !ok {
 		return nil, errInvalidHmacKey
 	}
 	if err := km.validateKey(key); err != nil {
@@ -77,24 +67,13 @@ func (km *HmacKeyManager) GetPrimitiveFromKey(m proto.Message) (interface{}, err
 	return hmac, nil
 }
 
-// NewKeyFromSerializedKeyFormat generates a new HmacKey according to specification
-// in the given serialized HmacKeyFormat.
-func (km *HmacKeyManager) NewKeyFromSerializedKeyFormat(serializedKeyFormat []byte) (proto.Message, error) {
+// NewKey generates a new HmacKey according to specification in the given HmacKeyFormat.
+func (km *HmacKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	if len(serializedKeyFormat) == 0 {
 		return nil, errInvalidHmacKeyFormat
 	}
 	keyFormat := new(hmacpb.HmacKeyFormat)
 	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
-		return nil, errInvalidHmacKeyFormat
-	}
-	return km.NewKeyFromKeyFormat(keyFormat)
-}
-
-// NewKeyFromKeyFormat generates a new HmacKey according to specification in
-// the given HmacKeyFormat.
-func (km *HmacKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message, error) {
-	keyFormat, ok := m.(*hmacpb.HmacKeyFormat)
-	if !ok {
 		return nil, errInvalidHmacKeyFormat
 	}
 	if err := km.validateKeyFormat(keyFormat); err != nil {
@@ -107,7 +86,7 @@ func (km *HmacKeyManager) NewKeyFromKeyFormat(m proto.Message) (proto.Message, e
 // NewKeyData generates a new KeyData according to specification in the given
 // serialized HmacKeyFormat. This should be used solely by the key management API.
 func (km *HmacKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
-	key, err := km.NewKeyFromSerializedKeyFormat(serializedKeyFormat)
+	key, err := km.NewKey(serializedKeyFormat)
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +107,8 @@ func (km *HmacKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == HmacTypeURL
 }
 
-// GetKeyType returns the type URL of keys managed by this KeyManager.
-func (km *HmacKeyManager) GetKeyType() string {
+// TypeURL returns the type URL of keys managed by this KeyManager.
+func (km *HmacKeyManager) TypeURL() string {
 	return HmacTypeURL
 }
 

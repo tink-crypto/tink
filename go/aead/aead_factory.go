@@ -22,14 +22,13 @@ import (
 
 // GetPrimitive returns a Aead primitive from the given keyset handle.
 func GetPrimitive(handle *tink.KeysetHandle) (tink.Aead, error) {
-	return GetPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
+	return PrimitiveWithKeyManager(handle, nil /*keyManager*/)
 }
 
-// GetPrimitiveWithCustomerManager returns a Aead primitive from the given
-// keyset handle and custom key manager.
-func GetPrimitiveWithCustomerManager(
-	handle *tink.KeysetHandle, manager tink.KeyManager) (tink.Aead, error) {
-	ps, err := tink.GetPrimitivesWithCustomManager(handle, manager)
+// PrimitiveWithKeyManager returns a Aead primitive from the given keyset handle and custom key
+// manager.
+func PrimitiveWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Aead, error) {
+	ps, err := tink.PrimitivesWithKeyManager(kh, km)
 	if err != nil {
 		return nil, fmt.Errorf("aead_factory: cannot obtain primitive set: %s", err)
 	}
@@ -37,8 +36,8 @@ func GetPrimitiveWithCustomerManager(
 	return ret, nil
 }
 
-// primitiveSetAead is an Aead implementation that uses the underlying primitive
-// set for encryption and decryption.
+// primitiveSetAead is an Aead implementation that uses the underlying primitive set for encryption
+// and decryption.
 type primitiveSetAead struct {
 	ps *tink.PrimitiveSet
 }

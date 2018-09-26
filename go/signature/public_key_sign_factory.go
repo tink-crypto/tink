@@ -22,15 +22,14 @@ import (
 )
 
 // GetPublicKeySignPrimitive returns a PublicKeySign primitive from the given keyset handle.
-func GetPublicKeySignPrimitive(handle *tink.KeysetHandle) (tink.PublicKeySign, error) {
-	return GetPublicKeySignPrimitiveWithCustomerManager(handle, nil /*keyManager*/)
+func GetPublicKeySignPrimitive(kh *tink.KeysetHandle) (tink.PublicKeySign, error) {
+	return SignerWithKeyManager(kh, nil /*keyManager*/)
 }
 
-// GetPublicKeySignPrimitiveWithCustomerManager returns a PublicKeySign primitive from the given
-// keyset handle and custom key manager.
-func GetPublicKeySignPrimitiveWithCustomerManager(
-	handle *tink.KeysetHandle, manager tink.KeyManager) (tink.PublicKeySign, error) {
-	ps, err := tink.GetPrimitivesWithCustomManager(handle, manager)
+// SignerWithKeyManager returns a PublicKeySign primitive from the given keyset handle and custom
+// key manager.
+func SignerWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.PublicKeySign, error) {
+	ps, err := tink.PrimitivesWithKeyManager(kh, km)
 	if err != nil {
 		return nil, fmt.Errorf("public_key_sign_factory: cannot obtain primitive set: %s", err)
 	}
