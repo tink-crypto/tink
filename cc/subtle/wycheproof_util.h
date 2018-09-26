@@ -42,6 +42,16 @@ class WycheproofUtil {
   static HashType GetHashType(const rapidjson::Value &val);
 
   static EllipticCurveType GetEllipticCurveType(const rapidjson::Value &val);
+
+  // Integers in Wycheproof are represented as signed bigendian hexadecimal
+  // strings in twos complement representation.
+  // Integers in EcKey are unsigned and are represented as an array of bytes
+  // using bigendian order.
+  // GetInteger can assume that val is always 0 or a positive integer, since
+  // they are values from the key: a convention in Wycheproof is that parameters
+  // in the test group are valid, only values in the test vector itself may
+  // be invalid.
+  static std::string GetInteger(const rapidjson::Value &val);
 };
 
 }  // namespace subtle

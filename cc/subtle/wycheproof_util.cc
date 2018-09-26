@@ -23,9 +23,9 @@
 #include "absl/strings/string_view.h"
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/istreamwrapper.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/subtle/common_enums.h"
 
 namespace crypto {
 namespace tink {
@@ -70,8 +70,8 @@ std::string WycheproofUtil::GetBytes(const rapidjson::Value &val) {
   return HexDecodeOrDie(s);
 }
 
-std::unique_ptr<rapidjson::Document>
-WycheproofUtil::ReadTestVectors(const std::string &filename) {
+std::unique_ptr<rapidjson::Document> WycheproofUtil::ReadTestVectors(
+    const std::string &filename) {
   const std::string kTestVectors = "../wycheproof/testvectors/";
   std::ifstream input_stream;
   input_stream.open(kTestVectors + filename);
@@ -101,8 +101,8 @@ HashType WycheproofUtil::GetHashType(const rapidjson::Value &val) {
   }
 }
 
-EllipticCurveType
-WycheproofUtil::GetEllipticCurveType(const rapidjson::Value &val) {
+EllipticCurveType WycheproofUtil::GetEllipticCurveType(
+    const rapidjson::Value &val) {
   std::string curve(val.GetString());
   if (curve == "secp256r1") {
     return EllipticCurveType::NIST_P256;
@@ -113,6 +113,20 @@ WycheproofUtil::GetEllipticCurveType(const rapidjson::Value &val) {
   } else {
     return EllipticCurveType::UNKNOWN_CURVE;
   }
+}
+
+std::string WycheproofUtil::GetInteger(const rapidjson::Value &val) {
+  std::string hex(val.GetString());
+  // Since val is a hexadecimal integer it can have an odd length.
+  if (hex.size() % 2 == 1) {
+    // Avoid a leading 0 byte.
+    if (hex[0] == '0') {
+      hex = std::string(hex, 1, hex.size() - 1);
+    } else {
+      hex = "0" + hex;
+    }
+  }
+  return HexDecode(hex).ValueOrDie();
 }
 
 }  // namespace subtle

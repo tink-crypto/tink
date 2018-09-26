@@ -32,7 +32,6 @@
 #include "tink/util/test_util.h"
 
 // TODO(quannguyen):
-//  + Add Wycheproof test once it's available.
 //  + Add tests for parameters validation.
 namespace crypto {
 namespace tink {
@@ -82,7 +81,7 @@ static const NistTestVector nist_test_vector{
     HashType::SHA256,
     32};
 
-TEST_F(RsaSsaPssVerifyBoringSslTest, testBasicVerify) {
+TEST_F(RsaSsaPssVerifyBoringSslTest, BasicVerify) {
   SubtleUtilBoringSSL::RsaPublicKey pub_key{nist_test_vector.n,
                                             nist_test_vector.e};
   SubtleUtilBoringSSL::RsaSsaPssParams params{nist_test_vector.sig_hash,
@@ -97,7 +96,7 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, testBasicVerify) {
   EXPECT_TRUE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
 }
 
-TEST_F(RsaSsaPssVerifyBoringSslTest, testNewErrors) {
+TEST_F(RsaSsaPssVerifyBoringSslTest, NewErrors) {
   SubtleUtilBoringSSL::RsaPublicKey nist_pub_key{nist_test_vector.n,
                                                  nist_test_vector.e};
   SubtleUtilBoringSSL::RsaSsaPssParams nist_params{
@@ -127,7 +126,7 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, testNewErrors) {
   }
 }
 
-TEST_F(RsaSsaPssVerifyBoringSslTest, testModification) {
+TEST_F(RsaSsaPssVerifyBoringSslTest, Modification) {
   SubtleUtilBoringSSL::RsaPublicKey pub_key{nist_test_vector.n,
                                             nist_test_vector.e};
   SubtleUtilBoringSSL::RsaSsaPssParams params{nist_test_vector.sig_hash,
@@ -160,6 +159,121 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, testModification) {
         verifier->Verify(truncated_signature, nist_test_vector.message);
     EXPECT_FALSE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
   }
+}
+
+static util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>> GetVerifier(
+    const rapidjson::Value& test_group) {
+  SubtleUtilBoringSSL::RsaPublicKey key;
+  key.n = WycheproofUtil::GetInteger(test_group["n"]);
+  key.e = WycheproofUtil::GetInteger(test_group["e"]);
+
+  SubtleUtilBoringSSL::RsaSsaPssParams params;
+  params.sig_hash = WycheproofUtil::GetHashType(test_group["sha"]);
+  params.mgf1_hash = WycheproofUtil::GetHashType(test_group["mgfSha"]);
+  params.salt_length = test_group["sLen"].GetInt();
+
+  auto result = RsaSsaPssVerifyBoringSsl::New(key, params);
+  if (!result.ok()) {
+    std::cout << "Failed: " << result.status() << "\n";
+  }
+  return result;
+}
+
+// Tests signature verification using the test vectors in the specified file.
+// allow_skipping determines whether it is OK to skip a test because
+// a verfier cannot be constructed. This option can be used for
+// if a file contains test vectors that are not necessarily supported
+// by tink.
+bool TestSignatures(const std::string& filename, bool allow_skipping) {
+  std::unique_ptr<rapidjson::Document> root =
+      WycheproofUtil::ReadTestVectors(filename);
+  std::cout << (*root)["algorithm"].GetString();
+  std::cout << "generator version " << (*root)["generatorVersion"].GetString();
+  std::cout << "expected version 0.4.12";
+  int passed_tests = 0;
+  int failed_tests = 0;
+  int group_count = 0;
+  for (const rapidjson::Value& test_group : (*root)["testGroups"].GetArray()) {
+    group_count++;
+    auto verifier_result = GetVerifier(test_group);
+    if (!verifier_result.ok()) {
+      std::string type = test_group["type"].GetString();
+      if (allow_skipping) {
+        std::cout << "Could not construct verifier for " << type << " group "
+                  << group_count << ": " << verifier_result.status();
+      } else {
+        ADD_FAILURE() << "Could not construct verifier for " << type
+                      << " group " << group_count << ": "
+                      << verifier_result.status();
+        failed_tests += test_group["tests"].GetArray().Size();
+      }
+      continue;
+    }
+    auto verifier = std::move(verifier_result.ValueOrDie());
+    for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
+      std::string expected = test["result"].GetString();
+      std::string msg = WycheproofUtil::GetBytes(test["msg"]);
+      std::string sig = WycheproofUtil::GetBytes(test["sig"]);
+      std::string id =
+          absl::StrCat(test["tcId"].GetInt(), " ", test["comment"].GetString());
+      auto status = verifier->Verify(sig, msg);
+      if (expected == "valid") {
+        if (status.ok()) {
+          ++passed_tests;
+        } else {
+          ++failed_tests;
+          ADD_FAILURE() << "Valid signature not verified:" << id
+                        << " status:" << status;
+        }
+      } else if (expected == "invalid") {
+        if (!status.ok()) {
+          ++passed_tests;
+        } else {
+          ++failed_tests;
+          ADD_FAILURE() << "Invalid signature verified:" << id;
+        }
+      } else if (expected == "acceptable") {
+        // The validity of the signature is undefined. Hence the test passes
+        // but we log the result since we might still want to know if the
+        // library is strict or forgiving.
+        ++passed_tests;
+        std::cout << "Acceptable signature:" << id << ":" << status;
+      } else {
+        ++failed_tests;
+        ADD_FAILURE() << "Invalid field result:" << expected;
+      }
+    }
+  }
+  int num_tests = (*root)["numberOfTests"].GetInt();
+  std::cout << "total number of tests: " << num_tests;
+  std::cout << "number of tests passed:" << passed_tests;
+  std::cout << "number of tests failed:" << failed_tests;
+  return failed_tests == 0;
+}
+
+TEST_F(RsaSsaPssVerifyBoringSslTest, WycheproofRsaPss2048Sha2560) {
+  ASSERT_TRUE(TestSignatures("rsa_pss_2048_sha256_mgf1_0_test.json",
+                             /*allow_skipping=*/false));
+}
+
+TEST_F(RsaSsaPssVerifyBoringSslTest, WycheproofRsaPss2048Sha25632) {
+  ASSERT_TRUE(TestSignatures("rsa_pss_2048_sha256_mgf1_32_test.json",
+                             /*allow_skipping=*/false));
+}
+
+TEST_F(RsaSsaPssVerifyBoringSslTest, WycheproofRsaPss3072Sha25632) {
+  ASSERT_TRUE(TestSignatures("rsa_pss_3072_sha256_mgf1_32_test.json",
+                             /*allow_skipping=*/false));
+}
+
+TEST_F(RsaSsaPssVerifyBoringSslTest, WycheproofRsaPss4096Sha25632) {
+  ASSERT_TRUE(TestSignatures("rsa_pss_4096_sha256_mgf1_32_test.json",
+                             /*allow_skipping=*/false));
+}
+
+TEST_F(RsaSsaPssVerifyBoringSslTest, WycheproofRsaPss4096Sha51232) {
+  ASSERT_TRUE(TestSignatures("rsa_pss_4096_sha512_mgf1_32_test.json",
+                             /*allow_skipping=*/false));
 }
 
 }  // namespace
