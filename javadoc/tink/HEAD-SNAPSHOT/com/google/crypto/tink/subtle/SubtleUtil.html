@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9};
+var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -147,18 +147,47 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/SubtleUtil.html#bytes2Integer-byte:A-">bytes2Integer</a></span>(byte[]&nbsp;bs)</code>
+<div class="block">Converts an byte array to a nonnegative integer
+ (https://tools.ietf.org/html/rfc8017#section-4.1).</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code>static byte[]</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/SubtleUtil.html#integer2Bytes-java.math.BigInteger-int-">integer2Bytes</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;num,
+             int&nbsp;intendedLength)</code>
+<div class="block">Converts a nonnegative integer to a byte array of a specified length
+ (https://tools.ietf.org/html/rfc8017#section-4.2).</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/SubtleUtil.html#isAndroid--">isAndroid</a></span>()</code>
 <div class="block">Best-effort checks that this is Android.</div>
 </td>
 </tr>
-<tr id="i1" class="rowColor">
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>static byte[]</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/SubtleUtil.html#mgf1-byte:A-int-com.google.crypto.tink.subtle.Enums.HashType-">mgf1</a></span>(byte[]&nbsp;mgfSeed,
+    int&nbsp;maskLen,
+    <a href="../../../../../com/google/crypto/tink/subtle/Enums.HashType.html" title="enum in com.google.crypto.tink.subtle">Enums.HashType</a>&nbsp;mgfHash)</code>
+<div class="block">Computes MGF1 as defined at https://tools.ietf.org/html/rfc8017#appendix-B.2.1.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/SubtleUtil.html#toDigestAlgo-com.google.crypto.tink.subtle.Enums.HashType-">toDigestAlgo</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/Enums.HashType.html" title="enum in com.google.crypto.tink.subtle">Enums.HashType</a>&nbsp;hash)</code>
+<div class="block">Returns the digest algorithm name corresponding to a hash type.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/SubtleUtil.html#toEcdsaAlgo-com.google.crypto.tink.subtle.Enums.HashType-">toEcdsaAlgo</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/Enums.HashType.html" title="enum in com.google.crypto.tink.subtle">Enums.HashType</a>&nbsp;hash)</code>
 <div class="block">Returns the Ecdsa algorithm name corresponding to a hash type.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/SubtleUtil.html#toRsaSsaPkcs1Algo-com.google.crypto.tink.subtle.Enums.HashType-">toRsaSsaPkcs1Algo</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/Enums.HashType.html" title="enum in com.google.crypto.tink.subtle">Enums.HashType</a>&nbsp;hash)</code>
 <div class="block">Returns the RSA SSA (Signature with Appendix) PKCS1 algorithm name corresponding to a hash
@@ -235,9 +264,28 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  type.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>hash</code> - the hash type</dd>
+<dd><code>hash</code> - the hash type.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the JCE's RSA SSA PKCS1 algorithm name for the hash.</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="toDigestAlgo-com.google.crypto.tink.subtle.Enums.HashType-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>toDigestAlgo</h4>
+<pre>public static&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;toDigestAlgo(<a href="../../../../../com/google/crypto/tink/subtle/Enums.HashType.html" title="enum in com.google.crypto.tink.subtle">Enums.HashType</a>&nbsp;hash)
+                           throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Returns the digest algorithm name corresponding to a hash type.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>hash</code> - the hash type.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>theh JCE's hash algorithm name.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
@@ -246,7 +294,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <a name="isAndroid--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>isAndroid</h4>
 <pre>public static&nbsp;boolean&nbsp;isAndroid()</pre>
@@ -254,6 +302,62 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>true if running on Android.</dd>
+</dl>
+</li>
+</ul>
+<a name="bytes2Integer-byte:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>bytes2Integer</h4>
+<pre>public static&nbsp;<a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;bytes2Integer(byte[]&nbsp;bs)</pre>
+<div class="block">Converts an byte array to a nonnegative integer
+ (https://tools.ietf.org/html/rfc8017#section-4.1).</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>bs</code> - the byte array to be converted to integer.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the corresponding integer.</dd>
+</dl>
+</li>
+</ul>
+<a name="integer2Bytes-java.math.BigInteger-int-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>integer2Bytes</h4>
+<pre>public static&nbsp;byte[]&nbsp;integer2Bytes(<a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;num,
+                                   int&nbsp;intendedLength)
+                            throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Converts a nonnegative integer to a byte array of a specified length
+ (https://tools.ietf.org/html/rfc8017#section-4.2).</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>num</code> - nonnegative integer to be converted.</dd>
+<dd><code>intendedLength</code> - intended length of the resulting integer.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the corresponding byte array of length <code>intendedLength</code>.</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="mgf1-byte:A-int-com.google.crypto.tink.subtle.Enums.HashType-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>mgf1</h4>
+<pre>public static&nbsp;byte[]&nbsp;mgf1(byte[]&nbsp;mgfSeed,
+                          int&nbsp;maskLen,
+                          <a href="../../../../../com/google/crypto/tink/subtle/Enums.HashType.html" title="enum in com.google.crypto.tink.subtle">Enums.HashType</a>&nbsp;mgfHash)
+                   throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Computes MGF1 as defined at https://tools.ietf.org/html/rfc8017#appendix-B.2.1.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
 </ul>

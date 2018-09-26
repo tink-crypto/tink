@@ -986,6 +986,11 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Bytes.html#Bytes--">Bytes()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Bytes.html" title="class in com.google.crypto.tink.subtle">Bytes</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SubtleUtil.html#bytes2Integer-byte:A-">bytes2Integer(byte[])</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></dt>
+<dd>
+<div class="block">Converts an byte array to a nonnegative integer
+ (https://tools.ietf.org/html/rfc8017#section-4.1).</div>
+</dd>
 </dl>
 <a name="I:C">
 <!--   -->
@@ -8175,6 +8180,11 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html#init-java.nio.ByteBuffer-byte:A-">init(ByteBuffer, byte[])</a></span> - Method in interface com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html" title="interface in com.google.crypto.tink.subtle">StreamSegmentDecrypter</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SubtleUtil.html#integer2Bytes-java.math.BigInteger-int-">integer2Bytes(BigInteger, int)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></dt>
+<dd>
+<div class="block">Converts a nonnegative integer to a byte array of a specified length
+ (https://tools.ietf.org/html/rfc8017#section-4.2).</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.Builder.html#internalGetFieldAccessorTable--">internalGetFieldAccessorTable()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.Builder.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey.Builder</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#internalGetFieldAccessorTable--">internalGetFieldAccessorTable()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
@@ -9552,6 +9562,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineFactory.html#MESSAGE_DIGEST">MESSAGE_DIGEST</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SubtleUtil.html#mgf1-byte:A-int-com.google.crypto.tink.subtle.Enums.HashType-">mgf1(byte[], int, Enums.HashType)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></dt>
+<dd>
+<div class="block">Computes MGF1 as defined at https://tools.ietf.org/html/rfc8017#appendix-B.2.1.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#modSqrt-java.math.BigInteger-java.math.BigInteger-">modSqrt(BigInteger, BigInteger)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
 <dd>
 <div class="block">Computes a square root modulo an odd prime.</div>
@@ -11992,6 +12006,18 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJce.html#RsaSsaPkcs1VerifyJce-java.security.interfaces.RSAPublicKey-com.google.crypto.tink.subtle.Enums.HashType-">RsaSsaPkcs1VerifyJce(RSAPublicKey, Enums.HashType)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPkcs1VerifyJce</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/subtle/RsaSsaPssSignJce.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">RsaSsaPssSignJce</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
+<dd>
+<div class="block">RsaSsaPss (i.e.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RsaSsaPssSignJce.html#RsaSsaPssSignJce-java.security.interfaces.RSAPrivateCrtKey-com.google.crypto.tink.subtle.Enums.HashType-com.google.crypto.tink.subtle.Enums.HashType-int-">RsaSsaPssSignJce(RSAPrivateCrtKey, Enums.HashType, Enums.HashType, int)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RsaSsaPssSignJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPssSignJce</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/subtle/RsaSsaPssVerifyJce.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">RsaSsaPssVerifyJce</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
+<dd>
+<div class="block">RsaSsaPss (i.e.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RsaSsaPssVerifyJce.html#RsaSsaPssVerifyJce-java.security.interfaces.RSAPublicKey-com.google.crypto.tink.subtle.Enums.HashType-com.google.crypto.tink.subtle.Enums.HashType-int-">RsaSsaPssVerifyJce(RSAPublicKey, Enums.HashType, Enums.HashType, int)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RsaSsaPssVerifyJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPssVerifyJce</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <a name="I:S">
 <!--   -->
@@ -13263,6 +13289,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RsaSsaPkcs1SignJce.html#sign-byte:A-">sign(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RsaSsaPkcs1SignJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPkcs1SignJce</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RsaSsaPssSignJce.html#sign-byte:A-">sign(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RsaSsaPssSignJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPssSignJce</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineFactory.html#SIGNATURE">SIGNATURE</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Verify.html#SIGNATURE_LEN">SIGNATURE_LEN</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Verify.html" title="class in com.google.crypto.tink.subtle">Ed25519Verify</a></dt>
@@ -13519,6 +13547,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#toBuilder--">toBuilder()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SubtleUtil.html#toDigestAlgo-com.google.crypto.tink.subtle.Enums.HashType-">toDigestAlgo(Enums.HashType)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></dt>
+<dd>
+<div class="block">Returns the digest algorithm name corresponding to a hash type.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SubtleUtil.html#toEcdsaAlgo-com.google.crypto.tink.subtle.Enums.HashType-">toEcdsaAlgo(Enums.HashType)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></dt>
 <dd>
 <div class="block">Returns the Ecdsa algorithm name corresponding to a hash type.</div>
@@ -13806,6 +13838,8 @@ the order they are declared.</div>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Verify.html#verify-byte:A-byte:A-">verify(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Verify.html" title="class in com.google.crypto.tink.subtle">Ed25519Verify</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJce.html#verify-byte:A-byte:A-">verify(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPkcs1VerifyJce</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RsaSsaPssVerifyJce.html#verify-byte:A-byte:A-">verify(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RsaSsaPssVerifyJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPssVerifyJce</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Mac.html#verifyMac-byte:A-byte:A-">verifyMac(byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink">Mac</a></dt>
 <dd>
