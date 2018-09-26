@@ -21,10 +21,13 @@
 #include "openssl/rsa.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
+#include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
+#include "proto/rsa_ssa_pss.pb.h"
+
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -38,6 +41,7 @@ using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
 using google::crypto::tink::RsaSsaPkcs1KeyFormat;
+using google::crypto::tink::RsaSsaPssKeyFormat;
 
 TEST(SignatureKeyTemplatesTest, KeyTemplatesWithDerEncoding) {
   std::string type_url = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
@@ -240,6 +244,74 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPkcs14096Sha512F4) {
 
   // Check that the key manager works with the template.
   RsaSsaPkcs1SignKeyManager key_manager;
+  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+  auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+  EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+}
+
+TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss2048Sha256Sha256F4) {
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey";
+  const KeyTemplate& key_template =
+      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4();
+  EXPECT_EQ(type_url, key_template.type_url());
+  EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+  RsaSsaPssKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_EQ(HashType::SHA256, key_format.params().sig_hash());
+  EXPECT_EQ(HashType::SHA256, key_format.params().mgf1_hash());
+  EXPECT_EQ(32, key_format.params().salt_length());
+  EXPECT_GE(key_format.modulus_size_in_bits(), 2048);
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), RSA_F4);
+  EXPECT_EQ(
+      BN_cmp(subtle::SubtleUtilBoringSSL::str2bn(key_format.public_exponent())
+                 .ValueOrDie()
+                 .get(),
+             e.get()),
+      0);
+
+  // Check that reference to the same object is returned.
+  const KeyTemplate& key_template_2 =
+      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4();
+  EXPECT_EQ(&key_template, &key_template_2);
+
+  // Check that the key manager works with the template.
+  RsaSsaPssSignKeyManager key_manager;
+  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+  auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
+  EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+}
+
+TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss4096Sha512Sha512F4) {
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey";
+  const KeyTemplate& key_template =
+      SignatureKeyTemplates::RsaSsaPss4096Sha512Sha512F4();
+  EXPECT_EQ(type_url, key_template.type_url());
+  EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+  RsaSsaPssKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_EQ(HashType::SHA512, key_format.params().sig_hash());
+  EXPECT_EQ(HashType::SHA512, key_format.params().mgf1_hash());
+  EXPECT_EQ(64, key_format.params().salt_length());
+  EXPECT_GE(key_format.modulus_size_in_bits(), 4096);
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), RSA_F4);
+  EXPECT_EQ(
+      BN_cmp(subtle::SubtleUtilBoringSSL::str2bn(key_format.public_exponent())
+                 .ValueOrDie()
+                 .get(),
+             e.get()),
+      0);
+
+  // Check that reference to the same object is returned.
+  const KeyTemplate& key_template_2 =
+      SignatureKeyTemplates::RsaSsaPss4096Sha512Sha512F4();
+  EXPECT_EQ(&key_template, &key_template_2);
+
+  // Check that the key manager works with the template.
+  RsaSsaPssSignKeyManager key_manager;
   EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
   auto new_key_result = key_manager.get_key_factory().NewKey(key_format);
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();

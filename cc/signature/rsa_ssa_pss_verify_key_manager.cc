@@ -31,8 +31,7 @@
 #include "proto/tink.pb.h"
 
 // TODO(quannguyen):
-//  + Validate mgf1 hash, salt length and possible e.
-//  + Add friend class RsaSsaPssSignBoringSSL.
+//  + Validate salt length and possible e.
 namespace crypto {
 namespace tink {
 
@@ -126,18 +125,9 @@ RsaSsaPssVerifyKeyManager::GetPrimitiveFromKey(
 
 // static
 Status RsaSsaPssVerifyKeyManager::Validate(const RsaSsaPssParams& params) {
-  // Validates signature hash.
-  switch (params.sig_hash()) {
-    case HashType::SHA256: /* fall through */
-    case HashType::SHA512:
-      break;
-    case HashType::SHA1:
-      return util::Status(util::error::INVALID_ARGUMENT,
-                          "SHA1 is not safe for digital signature");
-    default:
-      return ToStatusF(util::error::INVALID_ARGUMENT,
-                       "Unsupported hash function '%d'", params.sig_hash());
-  }
+  auto hash_result = subtle::SubtleUtilBoringSSL::ValidateSignatureHash(
+      Enums::ProtoToSubtle(params.sig_hash()));
+  if (!hash_result.ok()) return hash_result;
   // The most common use case is that MGF1 hash is the same as signature hash.
   // This is recommended by RFC https://tools.ietf.org/html/rfc8017#section-8.1.
   // While using different hashes doesn't cause security vulnerabilities, there
@@ -167,15 +157,6 @@ Status RsaSsaPssVerifyKeyManager::Validate(const RsaSsaPssPublicKey& key) {
       BN_num_bits(status_or_n.ValueOrDie().get()));
   if (!modulus_status.ok()) return modulus_status;
   return Validate(key.params());
-}
-
-// static
-Status RsaSsaPssVerifyKeyManager::Validate(
-    const RsaSsaPssKeyFormat& key_format) {
-  auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
-      key_format.modulus_size_in_bits());
-  if (!modulus_status.ok()) return modulus_status;
-  return Validate(key_format.params());
 }
 
 }  // namespace tink

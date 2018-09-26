@@ -98,6 +98,26 @@ class SignatureKeyTemplates {
   //   - Public Exponent: 65537 (aka F4).
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& RsaSsaPkcs14096Sha512F4();
+
+  // Returns a KeyTemplate that generates new instances of RsaSsaPssPrivateKey
+  // with the following parameters:
+  //   - Modulus size in bits: 2048.
+  //   - Signature hash: SHA256.
+  //   - MGF1 hash: SHA256.
+  //   - Salt length: 32 (i.e., SHA256's output length).
+  //   - Public Exponent: 65537 (aka F4).
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& RsaSsaPss2048Sha256Sha256F4();
+
+  // Returns a KeyTemplate that generates new instances of RsaSsaPssPrivateKey
+  // with the following parameters:
+  //   - Modulus size in bits: 4096.
+  //   - Signature hash: SHA512.
+  //   - MGF1 hash: SHA512.
+  //   - Salt length: 64 (i.e., SHA512's output length).
+  //   - Public Exponent: 65537 (aka F4).
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& RsaSsaPss4096Sha512Sha512F4();
 };
 
 }  // namespace tink
