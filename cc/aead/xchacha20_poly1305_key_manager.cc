@@ -26,6 +26,7 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
+#include "proto/empty.pb.h"
 #include "proto/tink.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
 
@@ -40,76 +41,30 @@ using portable_proto::MessageLite;
 
 const int kKeySizeInBytes = 32;
 
-class XChaCha20Poly1305KeyFactory : public KeyFactory {
+class XChaCha20Poly1305KeyFactory
+    : public KeyFactoryBase<XChaCha20Poly1305Key, google::crypto::tink::Empty> {
  public:
   XChaCha20Poly1305KeyFactory() {}
 
-  // Generates a new random XChaCha20Poly1305Key. XChaCha20Poly1305 does not
-  // need any key format, thus |key_format| is ignored.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(const portable_proto::MessageLite& key_format) const override;
+  KeyData::KeyMaterialType key_material_type() const override {
+    return KeyData::SYMMETRIC;
+  }
 
-  // Generates a new random XChaCha20Poly1305Key. XChaCha20Poly1305 does not
-  // need any key format, thus |serialized_key_format| is ignored.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(absl::string_view serialized_key_format) const override;
-
-  // Generates a new random XChaCha20Poly1305Key, and wraps it in a
-  // KeyData-proto. XChaCha20Poly1305 does not need any key format, thus
-  // |serialized_key_format| is ignored.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  NewKeyData(absl::string_view serialized_key_format) const override;
-
- private:
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey() const;
+ protected:
+  StatusOr<std::unique_ptr<XChaCha20Poly1305Key>> NewKeyFromFormat(
+      const google::crypto::tink::Empty&) const override {
+    auto xchacha20_poly1305_key = absl::make_unique<XChaCha20Poly1305Key>();
+    xchacha20_poly1305_key->set_version(XChaCha20Poly1305KeyManager::kVersion);
+    xchacha20_poly1305_key->set_key_value(
+        subtle::Random::GetRandomBytes(kKeySizeInBytes));
+    return xchacha20_poly1305_key;
+  }
 };
 
-StatusOr<std::unique_ptr<MessageLite>> XChaCha20Poly1305KeyFactory::NewKey()
-    const {
-  // Generate XChaCha20Poly1305Key.
-  std::unique_ptr<XChaCha20Poly1305Key> xchacha20_poly1305_key(
-      new XChaCha20Poly1305Key());
-  xchacha20_poly1305_key->set_version(XChaCha20Poly1305KeyManager::kVersion);
-  xchacha20_poly1305_key->set_key_value(
-      subtle::Random::GetRandomBytes(kKeySizeInBytes));
-  std::unique_ptr<MessageLite> key = std::move(xchacha20_poly1305_key);
-  return std::move(key);
-}
-
-StatusOr<std::unique_ptr<MessageLite>> XChaCha20Poly1305KeyFactory::NewKey(
-    const portable_proto::MessageLite& key_format) const {
-  return NewKey();
-}
-
-StatusOr<std::unique_ptr<MessageLite>> XChaCha20Poly1305KeyFactory::NewKey(
-    absl::string_view serialized_key_format) const {
-  return NewKey();
-}
-
-StatusOr<std::unique_ptr<KeyData>> XChaCha20Poly1305KeyFactory::NewKeyData(
-    absl::string_view serialized_key_format) const {
-  auto new_key_result = NewKey();
-  if (!new_key_result.ok()) return new_key_result.status();
-  auto new_key = reinterpret_cast<const XChaCha20Poly1305Key&>(
-      *(new_key_result.ValueOrDie()));
-  std::unique_ptr<KeyData> key_data(new KeyData());
-  key_data->set_type_url(XChaCha20Poly1305KeyManager::kKeyType);
-  key_data->set_value(new_key.SerializeAsString());
-  key_data->set_key_material_type(KeyData::SYMMETRIC);
-  return std::move(key_data);
-}
-
-constexpr char XChaCha20Poly1305KeyManager::kKeyTypePrefix[];
-constexpr char XChaCha20Poly1305KeyManager::kKeyType[];
 constexpr uint32_t XChaCha20Poly1305KeyManager::kVersion;
 
 XChaCha20Poly1305KeyManager::XChaCha20Poly1305KeyManager()
-    : key_type_(kKeyType), key_factory_(new XChaCha20Poly1305KeyFactory()) {}
-
-const std::string& XChaCha20Poly1305KeyManager::get_key_type() const {
-  return key_type_;
-}
+    : key_factory_(absl::make_unique<XChaCha20Poly1305KeyFactory>()) {}
 
 uint32_t XChaCha20Poly1305KeyManager::get_version() const { return kVersion; }
 
