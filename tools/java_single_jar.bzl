@@ -76,7 +76,7 @@ java_single_jar = rule(
     attrs = {
         "deps": attr.label_list(providers = ["java"]),
         "_singlejar": attr.label(
-            default = Label("//tools/jdk:singlejar"),
+            default = Label("@bazel_tools//tools/jdk:singlejar"),
             cfg = "host",
             allow_single_file = True,
             executable = True,
