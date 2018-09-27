@@ -170,12 +170,12 @@ func PrimitivesWithKeyManager(kh *KeysetHandle, km KeyManager) (*PrimitiveSet, e
 		if err != nil {
 			return nil, fmt.Errorf("registry: cannot get primitive from key: %s", err)
 		}
-		entry, err := primitiveSet.AddPrimitive(primitive, key)
+		entry, err := primitiveSet.Add(primitive, key)
 		if err != nil {
 			return nil, fmt.Errorf("registry: cannot add primitive: %s", err)
 		}
 		if key.KeyId == keyset.PrimaryKeyId {
-			primitiveSet.SetPrimary(entry)
+			primitiveSet.Primary = entry
 		}
 	}
 	return primitiveSet, nil

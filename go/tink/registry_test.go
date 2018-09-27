@@ -220,7 +220,7 @@ func TestPrimitives(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var aesGcm *subtleAead.AesGcm = ps.Primary().Primitive().(*subtleAead.AesGcm)
+	var aesGcm *subtleAead.AesGcm = ps.Primary.Primitive.(*subtleAead.AesGcm)
 	if len(aesGcm.Key) != 32 {
 		t.Errorf("primitive doesn't match input keyset handle")
 	}
@@ -230,7 +230,7 @@ func TestPrimitives(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ *testutil.DummyAead = ps.Primary().Primitive().(*testutil.DummyAead)
+	var _ *testutil.DummyAead = ps.Primary.Primitive.(*testutil.DummyAead)
 	// keysethandle is nil
 	if _, err := tink.Primitives(nil); err == nil {
 		t.Errorf("expect an error when keysethandle is nil")

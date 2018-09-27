@@ -33,33 +33,31 @@ func SignerWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Publi
 	if err != nil {
 		return nil, fmt.Errorf("public_key_sign_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret tink.PublicKeySign = newPrimitiveSetPublicKeySign(ps)
+	var ret tink.PublicKeySign = newSignerSet(ps)
 	return ret, nil
 }
 
-// primitiveSetPublicKeySign is an PublicKeySign implementation that uses the
-// underlying primitive set for signing.
-type primitiveSetPublicKeySign struct {
+// signerSet is an PublicKeySign implementation that uses the underlying primitive set for signing.
+type signerSet struct {
 	ps *tink.PrimitiveSet
 }
 
-// Asserts that primitiveSetPublicKeySign implements the PublicKeySign interface.
-var _ tink.PublicKeySign = (*primitiveSetPublicKeySign)(nil)
+// Asserts that signerSet implements the PublicKeySign interface.
+var _ tink.PublicKeySign = (*signerSet)(nil)
 
-// newPrimitiveSetPublicKeySign creates a new instance of primitiveSetPublicKeySign
-func newPrimitiveSetPublicKeySign(ps *tink.PrimitiveSet) *primitiveSetPublicKeySign {
-	ret := new(primitiveSetPublicKeySign)
+func newSignerSet(ps *tink.PrimitiveSet) *signerSet {
+	ret := new(signerSet)
 	ret.ps = ps
 	return ret
 }
 
-// Sign signs the given data and returns the signature concatenated with
-// the identifier of the primary primitive.
-func (s *primitiveSetPublicKeySign) Sign(data []byte) ([]byte, error) {
-	primary := s.ps.Primary()
-	var signer tink.PublicKeySign = (primary.Primitive()).(tink.PublicKeySign)
+// Sign signs the given data and returns the signature concatenated with the identifier of the
+// primary primitive.
+func (s *signerSet) Sign(data []byte) ([]byte, error) {
+	primary := s.ps.Primary
+	var signer tink.PublicKeySign = (primary.Primitive).(tink.PublicKeySign)
 	var signedData []byte
-	if primary.OutputPrefixType() == tinkpb.OutputPrefixType_LEGACY {
+	if primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 		signedData = append(signedData, data...)
 		signedData = append(signedData, tink.LegacyStartByte)
 	} else {
@@ -70,7 +68,7 @@ func (s *primitiveSetPublicKeySign) Sign(data []byte) ([]byte, error) {
 		return nil, err
 	}
 	var ret []byte
-	ret = append(ret, primary.Identifier()...)
+	ret = append(ret, primary.Prefix...)
 	ret = append(ret, signature...)
 	return ret, nil
 }

@@ -39,38 +39,38 @@ var tests = []struct {
 	},
 }
 
-func TestGetOutputPrefix(t *testing.T) {
+func TestOutputPrefix(t *testing.T) {
 	key := new(tinkpb.Keyset_Key)
 	for i, test := range tests {
 		key.KeyId = test.keyID
 		// legacy type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_LEGACY
-		prefix, err := tink.GetOutputPrefix(key)
+		prefix, err := tink.OutputPrefix(key)
 		if err != nil || !validatePrefix(prefix, tink.LegacyStartByte, test.result) {
 			t.Errorf("incorrect legacy prefix in test %d", i)
 		}
 		// crunchy type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_CRUNCHY
-		prefix, err = tink.GetOutputPrefix(key)
+		prefix, err = tink.OutputPrefix(key)
 		if err != nil || !validatePrefix(prefix, tink.LegacyStartByte, test.result) {
 			t.Errorf("incorrect legacy prefix in test %d", i)
 		}
 		// tink type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_TINK
-		prefix, err = tink.GetOutputPrefix(key)
+		prefix, err = tink.OutputPrefix(key)
 		if err != nil || !validatePrefix(prefix, tink.TinkStartByte, test.result) {
 			t.Errorf("incorrect tink prefix in test %d", i)
 		}
 		// raw type
 		key.OutputPrefixType = tinkpb.OutputPrefixType_RAW
-		prefix, err = tink.GetOutputPrefix(key)
+		prefix, err = tink.OutputPrefix(key)
 		if err != nil || prefix != tink.RawPrefix {
 			t.Errorf("incorrect raw prefix in test %d", i)
 		}
 	}
 	// unknown prefix type
 	key.OutputPrefixType = tinkpb.OutputPrefixType_UNKNOWN_PREFIX
-	if _, err := tink.GetOutputPrefix(key); err == nil {
+	if _, err := tink.OutputPrefix(key); err == nil {
 		t.Errorf("expect an error when prefix type is unknown")
 	}
 }

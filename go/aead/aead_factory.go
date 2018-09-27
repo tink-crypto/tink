@@ -32,37 +32,36 @@ func PrimitiveWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Ae
 	if err != nil {
 		return nil, fmt.Errorf("aead_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret tink.Aead = newPrimitiveSetAead(ps)
+	var ret tink.Aead = newPrimitiveSet(ps)
 	return ret, nil
 }
 
-// primitiveSetAead is an Aead implementation that uses the underlying primitive set for encryption
+// primitiveSet is an Aead implementation that uses the underlying primitive set for encryption
 // and decryption.
-type primitiveSetAead struct {
+type primitiveSet struct {
 	ps *tink.PrimitiveSet
 }
 
-// Asserts that primitiveSetAead implements the Aead interface.
-var _ tink.Aead = (*primitiveSetAead)(nil)
+// Asserts that primitiveSet implements the Aead interface.
+var _ tink.Aead = (*primitiveSet)(nil)
 
-// newPrimitiveSetAead creates a new instance of primitiveSetAead
-func newPrimitiveSetAead(ps *tink.PrimitiveSet) *primitiveSetAead {
-	ret := new(primitiveSetAead)
+func newPrimitiveSet(ps *tink.PrimitiveSet) *primitiveSet {
+	ret := new(primitiveSet)
 	ret.ps = ps
 	return ret
 }
 
 // Encrypt encrypts the given plaintext with the given additional authenticated data.
 // It returns the concatenation of the primary's identifier and the ciphertext.
-func (a *primitiveSetAead) Encrypt(pt []byte, ad []byte) ([]byte, error) {
-	primary := a.ps.Primary()
-	var p tink.Aead = (primary.Primitive()).(tink.Aead)
+func (a *primitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
+	primary := a.ps.Primary
+	var p tink.Aead = (primary.Primitive).(tink.Aead)
 	ct, err := p.Encrypt(pt, ad)
 	if err != nil {
 		return nil, err
 	}
 	var ret []byte
-	ret = append(ret, primary.Identifier()...)
+	ret = append(ret, primary.Prefix...)
 	ret = append(ret, ct...)
 	return ret, nil
 }
@@ -70,16 +69,16 @@ func (a *primitiveSetAead) Encrypt(pt []byte, ad []byte) ([]byte, error) {
 // Decrypt decrypts the given ciphertext and authenticates it with the given
 // additional authenticated data. It returns the corresponding plaintext if the
 // ciphertext is authenticated.
-func (a *primitiveSetAead) Decrypt(ct []byte, ad []byte) ([]byte, error) {
+func (a *primitiveSet) Decrypt(ct, ad []byte) ([]byte, error) {
 	// try non-raw keys
 	prefixSize := tink.NonRawPrefixSize
 	if len(ct) > prefixSize {
 		prefix := ct[:prefixSize]
 		ctNoPrefix := ct[prefixSize:]
-		entries, err := a.ps.GetPrimitivesWithByteIdentifier(prefix)
+		entries, err := a.ps.EntriesForPrefix(string(prefix))
 		if err == nil {
 			for i := 0; i < len(entries); i++ {
-				var p = (entries[i].Primitive()).(tink.Aead)
+				var p = (entries[i].Primitive).(tink.Aead)
 				pt, err := p.Decrypt(ctNoPrefix, ad)
 				if err == nil {
 					return pt, nil
@@ -88,10 +87,10 @@ func (a *primitiveSetAead) Decrypt(ct []byte, ad []byte) ([]byte, error) {
 		}
 	}
 	// try raw keys
-	entries, err := a.ps.GetRawPrimitives()
+	entries, err := a.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var p = (entries[i].Primitive()).(tink.Aead)
+			var p = (entries[i].Primitive).(tink.Aead)
 			pt, err := p.Decrypt(ct, ad)
 			if err == nil {
 				return pt, nil

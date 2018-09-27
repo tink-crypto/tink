@@ -45,7 +45,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if err != nil {
 		t.Errorf("GetPrimitive failed: %s", err)
 	}
-	expectedPrefix, _ := tink.GetOutputPrefix(primaryKey)
+	expectedPrefix, _ := tink.OutputPrefix(primaryKey)
 	if err := validateAeadFactoryCipher(a, a, expectedPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
@@ -68,7 +68,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	// encrypt with a random key not in the keyset, decrypt with the keyset should fail
 	keyset2 = testutil.NewTestAesGcmKeyset(tinkpb.OutputPrefixType_TINK)
 	primaryKey = keyset2.Key[0]
-	expectedPrefix, _ = tink.GetOutputPrefix(primaryKey)
+	expectedPrefix, _ = tink.OutputPrefix(primaryKey)
 	keysetHandle2, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset2)
 	a2, err = aead.GetPrimitive(keysetHandle2)
 	if err != nil {

@@ -38,7 +38,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if err != nil {
 		t.Errorf("GetPrimitive failed: %s", err)
 	}
-	expectedPrefix, _ := tink.GetOutputPrefix(primaryKey)
+	expectedPrefix, _ := tink.OutputPrefix(primaryKey)
 	if err := verifyMacPrimitive(p, p, expectedPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
 	}
@@ -61,7 +61,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	// mac with a random key not in the keyset, verify with the keyset should fail
 	keyset2 = testutil.NewTestHmacKeyset(tagSize, tinkpb.OutputPrefixType_TINK)
 	primaryKey = keyset2.Key[0]
-	expectedPrefix, _ = tink.GetOutputPrefix(primaryKey)
+	expectedPrefix, _ = tink.OutputPrefix(primaryKey)
 	keysetHandle2, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset2)
 	p2, err = mac.GetPrimitive(keysetHandle2)
 	if err != nil {

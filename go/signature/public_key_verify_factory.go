@@ -33,22 +33,21 @@ func VerifierWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Pub
 	if err != nil {
 		return nil, fmt.Errorf("public_key_verify_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret = newprimitiveSetPublicKeyVerify(ps)
+	var ret = newVerifierSet(ps)
 	return ret, nil
 }
 
-// primitiveSetPublicKeyVerify is an PublicKeySign implementation that uses the
+// verifierSet is an PublicKeySign implementation that uses the
 // underlying primitive set for signing.
-type primitiveSetPublicKeyVerify struct {
+type verifierSet struct {
 	ps *tink.PrimitiveSet
 }
 
-// Asserts that primitiveSetPublicKeyVerify implements the PublicKeyVerify interface.
-var _ tink.PublicKeyVerify = (*primitiveSetPublicKeyVerify)(nil)
+// Asserts that verifierSet implements the PublicKeyVerify interface.
+var _ tink.PublicKeyVerify = (*verifierSet)(nil)
 
-// newprimitiveSetPublicKeyVerify creates a new instance of primitiveSetPublicKeyVerify
-func newprimitiveSetPublicKeyVerify(ps *tink.PrimitiveSet) *primitiveSetPublicKeyVerify {
-	ret := new(primitiveSetPublicKeyVerify)
+func newVerifierSet(ps *tink.PrimitiveSet) *verifierSet {
+	ret := new(verifierSet)
 	ret.ps = ps
 	return ret
 }
@@ -56,34 +55,34 @@ func newprimitiveSetPublicKeyVerify(ps *tink.PrimitiveSet) *primitiveSetPublicKe
 var errInvalidSignature = fmt.Errorf("public_key_verify_factory: invalid signature")
 
 // Verify checks whether the given signature is a valid signature of the given data.
-func (v *primitiveSetPublicKeyVerify) Verify(signature []byte, data []byte) error {
+func (v *verifierSet) Verify(signature []byte, data []byte) error {
 	if len(signature) < tink.NonRawPrefixSize {
 		return errInvalidSignature
 	}
 	// try non-raw keys
 	prefix := signature[:tink.NonRawPrefixSize]
 	signatureNoPrefix := signature[tink.NonRawPrefixSize:]
-	entries, err := v.ps.GetPrimitivesWithByteIdentifier(prefix)
+	entries, err := v.ps.EntriesForPrefix(string(prefix))
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
 			var signedData []byte
-			if entries[i].OutputPrefixType() == tinkpb.OutputPrefixType_LEGACY {
+			if entries[i].PrefixType == tinkpb.OutputPrefixType_LEGACY {
 				signedData = append(signedData, data...)
 				signedData = append(signedData, tink.LegacyStartByte)
 			} else {
 				signedData = data
 			}
-			var verifier = (entries[i].Primitive()).(tink.PublicKeyVerify)
+			var verifier = (entries[i].Primitive).(tink.PublicKeyVerify)
 			if err := verifier.Verify(signatureNoPrefix, signedData); err == nil {
 				return nil
 			}
 		}
 	}
 	// try raw keys
-	entries, err = v.ps.GetRawPrimitives()
+	entries, err = v.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var verifier = (entries[i].Primitive()).(tink.PublicKeyVerify)
+			var verifier = (entries[i].Primitive).(tink.PublicKeyVerify)
 			if err := verifier.Verify(signature, data); err == nil {
 				return nil
 			}
