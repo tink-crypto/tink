@@ -484,6 +484,8 @@ cc_library(
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/synchronization",
     ],
 )
 

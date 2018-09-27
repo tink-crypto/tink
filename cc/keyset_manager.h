@@ -13,12 +13,13 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
 #ifndef TINK_KEYSET_MANAGER_H_
 #define TINK_KEYSET_MANAGER_H_
 
 #include <mutex>  // NOLINT(build/c++11)
 
+#include "absl/base/thread_annotations.h"
+#include "absl/synchronization/mutex.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -51,53 +52,64 @@ class KeysetManager {
   // 'keyset_template' and returns the key_id of the added key.
   // The added key has status 'ENABLED'.
   crypto::tink::util::StatusOr<uint32_t> Add(
-      const google::crypto::tink::KeyTemplate& key_template);
+      const google::crypto::tink::KeyTemplate& key_template)
+      LOCKS_EXCLUDED(keyset_mutex_);
 
   // Adds to the managed keyset a fresh key generated according to
   // 'keyset_template', sets the new key as the primary,
   // and returns the key_id of the added key.
   // The key that was primary prior to rotation remains 'ENABLED'.
   crypto::tink::util::StatusOr<uint32_t> Rotate(
-      const google::crypto::tink::KeyTemplate& key_template);
+      const google::crypto::tink::KeyTemplate& key_template)
+      LOCKS_EXCLUDED(keyset_mutex_);
 
   // Sets the status of the specified key to 'ENABLED'.
   // Succeeds only if before the call the specified key
   // has status 'DISABLED' or 'ENABLED'.
-  crypto::tink::util::Status Enable(uint32_t key_id);
+  crypto::tink::util::Status Enable(uint32_t key_id)
+      LOCKS_EXCLUDED(keyset_mutex_);
 
   // Sets the status of the specified key to 'DISABLED'.
   // Succeeds only if before the call the specified key
   // is not primary and has status 'DISABLED' or 'ENABLED'.
-  crypto::tink::util::Status Disable(uint32_t key_id);
+  crypto::tink::util::Status Disable(uint32_t key_id)
+      LOCKS_EXCLUDED(keyset_mutex_);
 
   // Sets the status of the specified key to 'DESTROYED',
   // and removes the corresponding key material, if any.
   // Succeeds only if before the call the specified key
   // is not primary and has status 'DISABLED', or 'ENABLED',
-  // or 'DESTROYED'
-  crypto::tink::util::Status Destroy(uint32_t key_id);
+  // or 'DESTROYED'.
+  crypto::tink::util::Status Destroy(uint32_t key_id)
+      LOCKS_EXCLUDED(keyset_mutex_);
 
   // Removes the specifed key from the managed keyset.
   // Succeeds only if the specified key is not primary.
   // After deletion the keyset contains one key fewer.
-  crypto::tink::util::Status Delete(uint32_t key_id);
+  crypto::tink::util::Status Delete(uint32_t key_id)
+      LOCKS_EXCLUDED(keyset_mutex_);
 
   // Sets the specified key as the primary.
   // Succeeds only if the specified key is 'ENABLED'.
-  crypto::tink::util::Status SetPrimary(uint32_t key_id);
+  crypto::tink::util::Status SetPrimary(uint32_t key_id)
+      LOCKS_EXCLUDED(keyset_mutex_);
 
   // Returns the count of all keys in the keyset.
   int KeyCount() const;
 
   // Returns a handle with a copy of the managed keyset.
-  std::unique_ptr<KeysetHandle> GetKeysetHandle();
+  std::unique_ptr<KeysetHandle> GetKeysetHandle() LOCKS_EXCLUDED(keyset_mutex_);
 
  private:
-  mutable std::recursive_mutex keyset_mutex_;
-  google::crypto::tink::Keyset keyset_;  // guarded by keyset_mutex_
+  crypto::tink::util::StatusOr<uint32_t> Add(
+      const google::crypto::tink::KeyTemplate& key_template, bool as_primary)
+      LOCKS_EXCLUDED(keyset_mutex_);
+
+  mutable absl::Mutex keyset_mutex_;
+  google::crypto::tink::Keyset keyset_ GUARDED_BY(keyset_mutex_);
 
   // Generates a new key_id avoiding collisions in the managed keyset.
-  uint32_t GenerateNewKeyId();
+  uint32_t GenerateNewKeyId() SHARED_LOCKS_REQUIRED(keyset_mutex_);
 };
 
 }  // namespace tink
