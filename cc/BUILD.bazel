@@ -87,8 +87,10 @@ PUBLIC_API_DEPS = [
     "//cc/util:status",
     "//cc/util:statusor",
     "//cc/util:validation",
+    "@com_google_absl//absl/base:core_headers",
     "@com_google_absl//absl/memory",
     "@com_google_absl//absl/strings",
+    "@com_google_absl//absl/synchronization",
 ]
 
 cc_library(
@@ -342,7 +344,9 @@ cc_library(
         "//cc/util:statusor",
         "//cc/util:validation",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
     ],
 )
 
