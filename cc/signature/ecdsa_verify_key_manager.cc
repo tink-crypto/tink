@@ -17,8 +17,8 @@
 #include "tink/signature/ecdsa_verify_key_manager.h"
 
 #include "absl/strings/string_view.h"
-#include "tink/public_key_verify.h"
 #include "tink/key_manager.h"
+#include "tink/public_key_verify.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
@@ -33,6 +33,9 @@
 namespace crypto {
 namespace tink {
 
+using crypto::tink::util::Enums;
+using crypto::tink::util::Status;
+using crypto::tink::util::StatusOr;
 using google::crypto::tink::EcdsaKeyFormat;
 using google::crypto::tink::EcdsaParams;
 using google::crypto::tink::EcdsaPublicKey;
@@ -41,67 +44,20 @@ using google::crypto::tink::EllipticCurveType;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using portable_proto::MessageLite;
-using crypto::tink::util::Enums;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
 
-class EcdsaPublicKeyFactory : public KeyFactory {
- public:
-  EcdsaPublicKeyFactory() {}
-
-  // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(const portable_proto::MessageLite& key_format) const override;
-
-  // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(absl::string_view serialized_key_format) const override;
-
-  // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  NewKeyData(absl::string_view serialized_key_format) const override;
-};
-
-StatusOr<std::unique_ptr<MessageLite>> EcdsaPublicKeyFactory::NewKey(
-    const portable_proto::MessageLite& key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED,
-                      "Operation not supported for public keys, "
-                      "please use the EcdsaSignKeyManager.");
-}
-
-StatusOr<std::unique_ptr<MessageLite>> EcdsaPublicKeyFactory::NewKey(
-    absl::string_view serialized_key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED,
-                      "Operation not supported for public keys, "
-                      "please use the EcdsaSignKeyManager.");
-}
-
-StatusOr<std::unique_ptr<KeyData>> EcdsaPublicKeyFactory::NewKeyData(
-    absl::string_view serialized_key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED,
-                      "Operation not supported for public keys, "
-                      "please use the EcdsaSignKeyManager.");
-}
-
-constexpr char EcdsaVerifyKeyManager::kKeyTypePrefix[];
-constexpr char EcdsaVerifyKeyManager::kKeyType[];
 constexpr uint32_t EcdsaVerifyKeyManager::kVersion;
 
 EcdsaVerifyKeyManager::EcdsaVerifyKeyManager()
-    : key_type_(kKeyType), key_factory_(new EcdsaPublicKeyFactory()) {
-}
-
-const std::string& EcdsaVerifyKeyManager::get_key_type() const {
-  return key_type_;
-}
+    : key_factory_(KeyFactory::AlwaysFailingFactory(
+          util::Status(util::error::UNIMPLEMENTED,
+                       "Operation not supported for public keys, "
+                       "please use the EcdsaSignKeyManager."))) {}
 
 const KeyFactory& EcdsaVerifyKeyManager::get_key_factory() const {
   return *key_factory_;
 }
 
-uint32_t EcdsaVerifyKeyManager::get_version() const {
-  return kVersion;
-}
+uint32_t EcdsaVerifyKeyManager::get_version() const { return kVersion; }
 
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 EcdsaVerifyKeyManager::GetPrimitiveFromKey(
@@ -155,16 +111,14 @@ Status EcdsaVerifyKeyManager::Validate(const EcdsaParams& params) {
 }
 
 // static
-Status EcdsaVerifyKeyManager::Validate(
-    const EcdsaPublicKey& key) {
+Status EcdsaVerifyKeyManager::Validate(const EcdsaPublicKey& key) {
   Status status = ValidateVersion(key.version(), kVersion);
   if (!status.ok()) return status;
   return Validate(key.params());
 }
 
 // static
-Status EcdsaVerifyKeyManager::Validate(
-    const EcdsaKeyFormat& key_format) {
+Status EcdsaVerifyKeyManager::Validate(const EcdsaKeyFormat& key_format) {
   if (!key_format.has_params()) {
     return Status(util::error::INVALID_ARGUMENT, "Missing params.");
   }

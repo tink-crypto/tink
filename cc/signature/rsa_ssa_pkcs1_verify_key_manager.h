@@ -38,14 +38,9 @@ class RsaSsaPkcs1VerifyKeyManager
     : public KeyManagerBase<PublicKeyVerify,
                             google::crypto::tink::RsaSsaPkcs1PublicKey> {
  public:
-  static constexpr char kKeyType[] =
-      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey";
   static constexpr uint32_t kVersion = 0;
 
   RsaSsaPkcs1VerifyKeyManager();
-
-  // Returns the type_url identifying the key type handled by this manager.
-  const std::string& get_key_type() const override;
 
   // Returns the version of this key manager.
   uint32_t get_version() const override;
@@ -66,11 +61,6 @@ class RsaSsaPkcs1VerifyKeyManager
   friend class RsaSsaPkcs1PrivateKeyFactory;
   friend class RsaSsaPkcs1SignKeyManager;
 
-  static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
-  static constexpr char kKeyFormatUrl[] =
-      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1KeyFormat";
-
-  std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
 
   static crypto::tink::util::Status Validate(

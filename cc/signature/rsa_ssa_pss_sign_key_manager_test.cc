@@ -168,7 +168,8 @@ TEST_F(RsaSsaPssSignKeyManagerTest, PublicKeyExtraction) {
       private_key_factory->GetPublicKeyData(private_key->SerializeAsString());
   EXPECT_TRUE(public_key_data_result.ok()) << public_key_data_result.status();
   auto public_key_data = std::move(public_key_data_result.ValueOrDie());
-  EXPECT_EQ(RsaSsaPssVerifyKeyManager::kKeyType, public_key_data->type_url());
+  EXPECT_EQ(RsaSsaPssVerifyKeyManager::static_key_type(),
+            public_key_data->type_url());
   EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC, public_key_data->key_material_type());
   EXPECT_EQ(private_key->public_key().SerializeAsString(),
             public_key_data->value());
