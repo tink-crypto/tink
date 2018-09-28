@@ -161,9 +161,9 @@ const KeyTemplate& SignatureKeyTemplates::EcdsaP521Ieee() {
 }
 
 // static
-const KeyTemplate& SignatureKeyTemplates::RsaSsaPkcs12048Sha256F4() {
+const KeyTemplate& SignatureKeyTemplates::RsaSsaPkcs13072Sha256F4() {
   static const KeyTemplate* key_template =
-      NewRsaSsaPkcs1KeyTemplate(HashType::SHA256, 2048, RSA_F4).release();
+      NewRsaSsaPkcs1KeyTemplate(HashType::SHA256, 3072, RSA_F4).release();
   return *key_template;
 }
 
@@ -175,9 +175,9 @@ const KeyTemplate& SignatureKeyTemplates::RsaSsaPkcs14096Sha512F4() {
 }
 
 // static
-const KeyTemplate& SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4() {
+const KeyTemplate& SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4() {
   static const KeyTemplate* key_template =
-      NewRsaSsaPssKeyTemplate(HashType::SHA256, HashType::SHA256, 32, 2048,
+      NewRsaSsaPssKeyTemplate(HashType::SHA256, HashType::SHA256, 32, 3072,
                               RSA_F4)
           .release();
   return *key_template;

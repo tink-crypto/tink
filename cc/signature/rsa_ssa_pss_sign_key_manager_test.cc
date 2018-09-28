@@ -115,7 +115,7 @@ TEST_F(RsaSsaPssSignKeyManagerTest, NewKeyFromKeyFormat) {
   const KeyFactory& key_factory = key_manager.get_key_factory();
   RsaSsaPssKeyFormat key_format;
   ASSERT_TRUE(key_format.ParseFromString(
-      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4().value()));
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4().value()));
   auto result = key_factory.NewKey(key_format);
   EXPECT_TRUE(result.ok()) << result.status();
   auto key = std::move(result.ValueOrDie());
@@ -161,7 +161,7 @@ TEST_F(RsaSsaPssSignKeyManagerTest, PublicKeyExtraction) {
       &(sign_key_manager.get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
   auto new_key_result = private_key_factory->NewKey(
-      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4().value());
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4().value());
   std::unique_ptr<RsaSsaPssPrivateKey> private_key(
       static_cast<RsaSsaPssPrivateKey*>(new_key_result.ValueOrDie().release()));
   auto public_key_data_result =
@@ -189,7 +189,7 @@ TEST_F(RsaSsaPssSignKeyManagerTest, NewKeyWithWeakSignatureHash) {
   const KeyFactory& key_factory = key_manager.get_key_factory();
   RsaSsaPssKeyFormat key_format;
   ASSERT_TRUE(key_format.ParseFromString(
-      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4().value()));
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4().value()));
   key_format.mutable_params()->set_sig_hash(pb::HashType::SHA1);
   auto result = key_factory.NewKey(key_format.SerializeAsString());
   EXPECT_FALSE(result.ok());
@@ -204,7 +204,7 @@ TEST_F(RsaSsaPssSignKeyManagerTest, NewKeyWithSmallModulus) {
   const KeyFactory& key_factory = key_manager.get_key_factory();
   RsaSsaPssKeyFormat key_format;
   ASSERT_TRUE(key_format.ParseFromString(
-      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4().value()));
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4().value()));
   key_format.set_modulus_size_in_bits(512);
   auto result = key_factory.NewKey(key_format.SerializeAsString());
   EXPECT_FALSE(result.ok());
@@ -219,7 +219,7 @@ TEST_F(RsaSsaPssSignKeyManagerTest, NewKeyWithMismatchMg1HashAndSigHash) {
   const KeyFactory& key_factory = key_manager.get_key_factory();
   RsaSsaPssKeyFormat key_format;
   ASSERT_TRUE(key_format.ParseFromString(
-      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4().value()));
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4().value()));
   key_format.mutable_params()->set_sig_hash(pb::HashType::SHA512);
   key_format.mutable_params()->set_mgf1_hash(pb::HashType::SHA256);
   auto result = key_factory.NewKey(key_format.SerializeAsString());
@@ -234,7 +234,7 @@ TEST_F(RsaSsaPssSignKeyManagerTest,
       &(sign_key_manager.get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
   auto new_key_result = private_key_factory->NewKey(
-      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4().value());
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4().value());
   std::unique_ptr<RsaSsaPssPrivateKey> private_key(
       static_cast<RsaSsaPssPrivateKey*>(new_key_result.ValueOrDie().release()));
   private_key->mutable_public_key()->mutable_params()->set_sig_hash(
@@ -253,7 +253,7 @@ TEST_F(RsaSsaPssSignKeyManagerTest, GetPrimitiveWithWeakSignatureHash) {
       &(sign_key_manager.get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
   auto new_key_result = private_key_factory->NewKey(
-      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4().value());
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4().value());
   std::unique_ptr<RsaSsaPssPrivateKey> private_key(
       static_cast<RsaSsaPssPrivateKey*>(new_key_result.ValueOrDie().release()));
   private_key->mutable_public_key()->mutable_params()->set_sig_hash(
@@ -272,7 +272,7 @@ TEST_F(RsaSsaPssSignKeyManagerTest, GetPrimitiveWithSmallModulus) {
       &(sign_key_manager.get_key_factory()));
   ASSERT_NE(private_key_factory, nullptr);
   auto new_key_result = private_key_factory->NewKey(
-      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4().value());
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4().value());
   std::unique_ptr<RsaSsaPssPrivateKey> private_key(
       static_cast<RsaSsaPssPrivateKey*>(new_key_result.ValueOrDie().release()));
   private_key->mutable_public_key()->set_n("\x23");
