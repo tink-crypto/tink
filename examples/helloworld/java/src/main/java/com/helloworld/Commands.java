@@ -61,7 +61,7 @@ public final class Commands {
       // Read the cleartext keyset from disk.
       // WARNING: reading cleartext keysets is a bad practice. Tink supports reading/writing
       // encrypted keysets, see
-      // https://github.com/google/tink/blob/master/doc/JAVA-HOWTO.md#loading-existing-keysets.
+      // https://github.com/google/tink/blob/master/docs/JAVA-HOWTO.md#loading-existing-keysets.
       return CleartextKeysetHandle.read(JsonKeysetReader.withFile(keyset));
     }
     KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
