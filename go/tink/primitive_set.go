@@ -45,9 +45,9 @@ func newEntry(p interface{}, prefix string, prefixType tinkpb.OutputPrefixType, 
 
 // PrimitiveSet is used for supporting key rotation: primitives in a set correspond to keys in a
 // keyset. Users will usually work with primitive instances, which essentially wrap primitive
-// sets. For example an instance of an Aead-primitive for a given keyset holds a set of
-// Aead-primitives corresponding to the keys in the keyset, and uses the set members to do the
-// actual crypto operations: to encrypt data the primary Aead-primitive from the set is used, and
+// sets. For example an instance of an AEAD-primitive for a given keyset holds a set of
+// AEAD-primitives corresponding to the keys in the keyset, and uses the set members to do the
+// actual crypto operations: to encrypt data the primary AEAD-primitive from the set is used, and
 // upon decryption the ciphertext's prefix determines the id of the primitive from the set.
 
 // PrimitiveSet is a public to allow its use in implementations of custom primitives.

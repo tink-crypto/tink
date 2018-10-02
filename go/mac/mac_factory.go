@@ -20,19 +20,18 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-// GetPrimitive creates a Mac primitive from the given keyset handle.
-func GetPrimitive(kh *tink.KeysetHandle) (tink.Mac, error) {
-	return PrimitiveWithKeyManager(kh, nil /*keyManager*/)
+// New creates a MAC primitive from the given keyset handle.
+func New(kh *tink.KeysetHandle) (tink.MAC, error) {
+	return NewWithKeyManager(kh, nil /*keyManager*/)
 }
 
-// PrimitiveWithKeyManager creates a Mac primitive from the given keyset handle and a custom key
-// manager.
-func PrimitiveWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Mac, error) {
+// NewWithKeyManager creates a MAC primitive from the given keyset handle and a custom key manager.
+func NewWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.MAC, error) {
 	ps, err := tink.PrimitivesWithKeyManager(kh, km)
 	if err != nil {
 		return nil, fmt.Errorf("mac_factory: cannot obtain primitive set: %s", err)
 	}
-	var mac tink.Mac = newPrimitiveSet(ps)
+	var mac tink.MAC = newPrimitiveSet(ps)
 	return mac, nil
 }
 
@@ -43,7 +42,7 @@ type primitiveSet struct {
 }
 
 // Asserts that primitiveSet implements the Mac interface.
-var _ tink.Mac = (*primitiveSet)(nil)
+var _ tink.MAC = (*primitiveSet)(nil)
 
 func newPrimitiveSet(ps *tink.PrimitiveSet) *primitiveSet {
 	ret := new(primitiveSet)
@@ -51,12 +50,12 @@ func newPrimitiveSet(ps *tink.PrimitiveSet) *primitiveSet {
 	return ret
 }
 
-// ComputeMac calculates a MAC over the given data using the primary primitive
+// ComputeMAC calculates a MAC over the given data using the primary primitive
 // and returns the concatenation of the primary's identifier and the calculated mac.
-func (m *primitiveSet) ComputeMac(data []byte) ([]byte, error) {
+func (m *primitiveSet) ComputeMAC(data []byte) ([]byte, error) {
 	primary := m.ps.Primary
-	var primitive tink.Mac = (primary.Primitive).(tink.Mac)
-	mac, err := primitive.ComputeMac(data)
+	var primitive tink.MAC = (primary.Primitive).(tink.MAC)
+	mac, err := primitive.ComputeMAC(data)
 	if err != nil {
 		return nil, err
 	}
@@ -66,16 +65,16 @@ func (m *primitiveSet) ComputeMac(data []byte) ([]byte, error) {
 	return ret, nil
 }
 
-var errInvalidMac = fmt.Errorf("mac_factory: invalid mac")
+var errInvalidMAC = fmt.Errorf("mac_factory: invalid mac")
 
-// VerifyMac verifies whether the given mac is a correct authentication code
+// VerifyMAC verifies whether the given mac is a correct authentication code
 // for the given data.
-func (m *primitiveSet) VerifyMac(mac, data []byte) (bool, error) {
+func (m *primitiveSet) VerifyMAC(mac, data []byte) error {
 	// This also rejects raw MAC with size of 4 bytes or fewer. Those MACs are
 	// clearly insecure, thus should be discouraged.
 	prefixSize := tink.NonRawPrefixSize
 	if len(mac) <= prefixSize {
-		return false, errInvalidMac
+		return errInvalidMAC
 	}
 	// try non raw keys
 	prefix := mac[:prefixSize]
@@ -83,10 +82,9 @@ func (m *primitiveSet) VerifyMac(mac, data []byte) (bool, error) {
 	entries, err := m.ps.EntriesForPrefix(string(prefix))
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var p tink.Mac = (entries[i].Primitive).(tink.Mac)
-			valid, err := p.VerifyMac(macNoPrefix, data)
-			if err == nil && valid {
-				return true, nil
+			var p tink.MAC = (entries[i].Primitive).(tink.MAC)
+			if err = p.VerifyMAC(macNoPrefix, data); err == nil {
+				return nil
 			}
 		}
 	}
@@ -94,13 +92,12 @@ func (m *primitiveSet) VerifyMac(mac, data []byte) (bool, error) {
 	entries, err = m.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var p tink.Mac = (entries[i].Primitive).(tink.Mac)
-			valid, err := p.VerifyMac(mac, data)
-			if err == nil && valid {
-				return true, nil
+			var p tink.MAC = (entries[i].Primitive).(tink.MAC)
+			if err = p.VerifyMAC(mac, data); err == nil {
+				return nil
 			}
 		}
 	}
 	// nothing worked
-	return false, errInvalidMac
+	return errInvalidMAC
 }

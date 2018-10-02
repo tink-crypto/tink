@@ -21,29 +21,29 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// GetPublicKeySignPrimitive returns a PublicKeySign primitive from the given keyset handle.
-func GetPublicKeySignPrimitive(kh *tink.KeysetHandle) (tink.PublicKeySign, error) {
-	return SignerWithKeyManager(kh, nil /*keyManager*/)
+// NewSigner returns a Signer primitive from the given keyset handle.
+func NewSigner(kh *tink.KeysetHandle) (tink.Signer, error) {
+	return NewSignerWithKeyManager(kh, nil /*keyManager*/)
 }
 
-// SignerWithKeyManager returns a PublicKeySign primitive from the given keyset handle and custom
+// NewSignerWithKeyManager returns a Signer primitive from the given keyset handle and custom
 // key manager.
-func SignerWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.PublicKeySign, error) {
+func NewSignerWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Signer, error) {
 	ps, err := tink.PrimitivesWithKeyManager(kh, km)
 	if err != nil {
 		return nil, fmt.Errorf("public_key_sign_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret tink.PublicKeySign = newSignerSet(ps)
+	var ret tink.Signer = newSignerSet(ps)
 	return ret, nil
 }
 
-// signerSet is an PublicKeySign implementation that uses the underlying primitive set for signing.
+// signerSet is an Signer implementation that uses the underlying primitive set for signing.
 type signerSet struct {
 	ps *tink.PrimitiveSet
 }
 
-// Asserts that signerSet implements the PublicKeySign interface.
-var _ tink.PublicKeySign = (*signerSet)(nil)
+// Asserts that signerSet implements the Signer interface.
+var _ tink.Signer = (*signerSet)(nil)
 
 func newSignerSet(ps *tink.PrimitiveSet) *signerSet {
 	ret := new(signerSet)
@@ -55,7 +55,7 @@ func newSignerSet(ps *tink.PrimitiveSet) *signerSet {
 // primary primitive.
 func (s *signerSet) Sign(data []byte) ([]byte, error) {
 	primary := s.ps.Primary
-	var signer tink.PublicKeySign = (primary.Primitive).(tink.PublicKeySign)
+	var signer tink.Signer = (primary.Primitive).(tink.Signer)
 	var signedData []byte
 	if primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 		signedData = append(signedData, data...)

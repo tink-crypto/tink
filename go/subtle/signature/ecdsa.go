@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package signature provides subtle implementations of the PublicKeySign and PublicKeyVerify primitives.
+// Package signature provides subtle implementations of the Signer and Verifier primitives.
 package signature
 
 import (
@@ -22,19 +22,19 @@ import (
 
 var errUnsupportedEncoding = fmt.Errorf("ecdsa: unsupported encoding")
 
-// EcdsaSignature is a struct holding r and s values of an ECDSA signature.
-type EcdsaSignature struct {
+// ECDSASignerature is a struct holding r and s values of an ECDSA signature.
+type ECDSASignerature struct {
 	R, S *big.Int
 }
 
-// NewEcdsaSignature creates a new ecdsaSignature object.
-func NewEcdsaSignature(r, s *big.Int) *EcdsaSignature {
-	return &EcdsaSignature{R: r, S: s}
+// NewECDSASignerature creates a new ecdsaSignature object.
+func NewECDSASignerature(r, s *big.Int) *ECDSASignerature {
+	return &ECDSASignerature{R: r, S: s}
 }
 
-// EncodeEcdsaSignature converts the signature to the given encoding format.
+// EncodeECDSASignature converts the signature to the given encoding format.
 // Only DER encoding is supported now.
-func (sig *EcdsaSignature) EncodeEcdsaSignature(encoding string) ([]byte, error) {
+func (sig *ECDSASignerature) EncodeECDSASignature(encoding string) ([]byte, error) {
 	switch encoding {
 	case "DER":
 		return asn1encode(sig)
@@ -43,11 +43,11 @@ func (sig *EcdsaSignature) EncodeEcdsaSignature(encoding string) ([]byte, error)
 	}
 }
 
-// DecodeEcdsaSignature creates a new ECDSA signature using the given byte slice.
+// DecodeECDSASignerature creates a new ECDSA signature using the given byte slice.
 // The function assumes that the byte slice is the concatenation of the BigEndian
 // representation of two big integer r and s.
-func DecodeEcdsaSignature(encodedBytes []byte,
-	encoding string) (*EcdsaSignature, error) {
+func DecodeECDSASignerature(encodedBytes []byte,
+	encoding string) (*ECDSASignerature, error) {
 	switch encoding {
 	case "DER":
 		return asn1decode(encodedBytes)
@@ -56,10 +56,10 @@ func DecodeEcdsaSignature(encodedBytes []byte,
 	}
 }
 
-// ValidateEcdsaParams validates ECDSA parameters.
+// ValidateECDSAParams validates ECDSA parameters.
 // The hash's strength must not be weaker than the curve's strength.
 // Only DER encoding is supported now.
-func ValidateEcdsaParams(hashAlg string, curve string, encoding string) error {
+func ValidateECDSAParams(hashAlg string, curve string, encoding string) error {
 	switch encoding {
 	case "DER":
 		break

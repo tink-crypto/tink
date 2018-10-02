@@ -20,48 +20,61 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-var errKeysetHandleInvalidKeyset = fmt.Errorf("keyset_handle: invalid keyset")
+var errInvalidKeyset = fmt.Errorf("keyset_handle: invalid keyset")
 
-// KeysetHandle provides abstracted access to Keysets, to limit the exposure
-// of actual protocol buffers that hold sensitive key material.
+// KeysetHandle provides access to a Keyset protobuf, to limit the exposure of actual protocol
+// buffers that hold sensitive key material.
 type KeysetHandle struct {
-	keyset          *tinkpb.Keyset
-	encryptedKeyset *tinkpb.EncryptedKeyset
+	ks *tinkpb.Keyset
 }
 
-// newKeysetHandle creates a new instance of KeysetHandle using the given keyset
-// and encrypted keyset. The given keyset must not be nil. Otherwise, an error will
-// be returned.
-func newKeysetHandle(keyset *tinkpb.Keyset,
-	encryptedKeyset *tinkpb.EncryptedKeyset) (*KeysetHandle, error) {
-	if keyset == nil || len(keyset.Key) == 0 {
-		return nil, errKeysetHandleInvalidKeyset
+// NewKeysetHandle creates a keyset handle that contains a single fresh key generated according
+// to the given KeyTemplate.
+func NewKeysetHandle(kt *tinkpb.KeyTemplate) (*KeysetHandle, error) {
+	ksm := NewKeysetManager()
+	err := ksm.Rotate(kt)
+	if err != nil {
+		return nil, fmt.Errorf("keyset_handle: cannot generate new keyset: %s", err)
 	}
-	return &KeysetHandle{
-		keyset:          keyset,
-		encryptedKeyset: encryptedKeyset,
-	}, nil
+	handle, err := ksm.KeysetHandle()
+	if err != nil {
+		return nil, fmt.Errorf("keyset_handle: cannot get keyset handle: %s", err)
+	}
+	return handle, nil
 }
 
-// GetPublicKeysetHandle returns a KeysetHandle of the public keys if the managed
-// keyset contains private keys.
-func (h *KeysetHandle) GetPublicKeysetHandle() (*KeysetHandle, error) {
-	privKeys := h.keyset.Key
+// KeysetHandleWithNoSecret creates a new instance of KeysetHandle using the given keyset which does
+// not contain any secret key material.
+func KeysetHandleWithNoSecret(ks *tinkpb.Keyset) (*KeysetHandle, error) {
+	for i := 0; i < len(ks.Key); i++ {
+		if ks.Key[i] == nil || ks.Key[i].KeyData == nil {
+			return nil, errInvalidKeyset
+		}
+		if ks.Key[i].KeyData.KeyMaterialType == tinkpb.KeyData_ASYMMETRIC_PRIVATE || ks.Key[i].KeyData.KeyMaterialType == tinkpb.KeyData_SYMMETRIC {
+			return nil, fmt.Errorf("keyset_handle: keyset contains a secret key material")
+		}
+		if err := validateKeyData(ks.Key[i].KeyData); err != nil {
+			return nil, fmt.Errorf("keyset_handle: %s", err)
+		}
+	}
+	return &KeysetHandle{ks}, nil
+}
+
+// Public returns a KeysetHandle of the public keys if the managed keyset contains private keys.
+func (h *KeysetHandle) Public() (*KeysetHandle, error) {
+	privKeys := h.ks.Key
 	pubKeys := make([]*tinkpb.Keyset_Key, len(privKeys))
 
 	for i := 0; i < len(privKeys); i++ {
 		if privKeys[i] == nil || privKeys[i].KeyData == nil {
-			return nil, errKeysetHandleInvalidKeyset
+			return nil, errInvalidKeyset
 		}
 		privKeyData := privKeys[i].KeyData
-		if privKeyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PRIVATE {
-			return nil, fmt.Errorf("keyset_handle: keyset contains a non-private key")
-		}
-		pubKeyData, err := publicKeyData(privKeyData.TypeUrl, privKeyData.Value)
+		pubKeyData, err := publicKeyData(privKeyData)
 		if err != nil {
 			return nil, fmt.Errorf("keyset_handle: %s", err)
 		}
-		if err := h.validateKeyData(pubKeyData); err != nil {
+		if err := validateKeyData(pubKeyData); err != nil {
 			return nil, fmt.Errorf("keyset_handle: %s", err)
 		}
 		pubKeys[i] = &tinkpb.Keyset_Key{
@@ -71,39 +84,44 @@ func (h *KeysetHandle) GetPublicKeysetHandle() (*KeysetHandle, error) {
 			OutputPrefixType: privKeys[i].OutputPrefixType,
 		}
 	}
-	pubKeyset := &tinkpb.Keyset{
-		PrimaryKeyId: h.keyset.PrimaryKeyId,
+	ks := &tinkpb.Keyset{
+		PrimaryKeyId: h.ks.PrimaryKeyId,
 		Key:          pubKeys,
 	}
-	return newKeysetHandle(pubKeyset, nil)
+	return &KeysetHandle{ks}, nil
 }
 
-// Keyset returns the Keyset component of this handle.
+// Keyset returns the Keyset managed by this handle.
 func (h *KeysetHandle) Keyset() *tinkpb.Keyset {
-	return h.keyset
+	return h.ks
 }
 
-// EncryptedKeyset returns the EncryptedKeyset component of this handle.
-func (h *KeysetHandle) EncryptedKeyset() *tinkpb.EncryptedKeyset {
-	return h.encryptedKeyset
-}
-
-// KeysetInfo returns a KeysetInfo of the Keyset of this handle.
-// KeysetInfo doesn't contain actual key material.
-func (h *KeysetHandle) KeysetInfo() (*tinkpb.KeysetInfo, error) {
-	return GetKeysetInfo(h.keyset)
-}
-
-// String returns the string representation of the KeysetInfo.
+// String returns a string representation of the managed keyset.
+// The result does not contain any sensitive key material.
 func (h *KeysetHandle) String() string {
-	info, err := h.KeysetInfo()
+	info, err := GetKeysetInfo(h.ks)
 	if err != nil {
 		return ""
 	}
 	return info.String()
 }
 
-func (h *KeysetHandle) validateKeyData(keyData *tinkpb.KeyData) error {
+func publicKeyData(privKeyData *tinkpb.KeyData) (*tinkpb.KeyData, error) {
+	if privKeyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PRIVATE {
+		return nil, fmt.Errorf("keyset_handle: keyset contains a non-private key")
+	}
+	km, err := GetKeyManager(privKeyData.TypeUrl)
+	if err != nil {
+		return nil, err
+	}
+	pkm, ok := km.(PrivateKeyManager)
+	if !ok {
+		return nil, fmt.Errorf("keyset_handle: %s does not belong to a PrivateKeyManager", privKeyData.TypeUrl)
+	}
+	return pkm.PublicKeyData(privKeyData.Value)
+}
+
+func validateKeyData(keyData *tinkpb.KeyData) error {
 	_, err := PrimitiveFromKeyData(keyData)
 	return err
 }

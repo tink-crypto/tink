@@ -25,12 +25,12 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func TestEcdsaKeyTemplates(t *testing.T) {
+func TestECDSAKeyTemplates(t *testing.T) {
 	var template *tinkpb.KeyTemplate
 	var err error
 	// ECDSA P-256
-	template = signature.EcdsaP256KeyTemplate()
-	err = checkEcdsaKeyTemplate(template,
+	template = signature.ECDSAP256KeyTemplate()
+	err = checkECDSAKeyTemplate(template,
 		commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256,
 		ecdsapb.EcdsaSignatureEncoding_DER)
@@ -38,8 +38,8 @@ func TestEcdsaKeyTemplates(t *testing.T) {
 		t.Errorf("invalid ECDSA P-256 key template: %s", err)
 	}
 	// ECDSA P-384
-	template = signature.EcdsaP384KeyTemplate()
-	err = checkEcdsaKeyTemplate(template,
+	template = signature.ECDSAP384KeyTemplate()
+	err = checkECDSAKeyTemplate(template,
 		commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P384,
 		ecdsapb.EcdsaSignatureEncoding_DER)
@@ -47,8 +47,8 @@ func TestEcdsaKeyTemplates(t *testing.T) {
 		t.Errorf("invalid ECDSA P-384 key template: %s", err)
 	}
 	// ECDSA P-521
-	template = signature.EcdsaP521KeyTemplate()
-	err = checkEcdsaKeyTemplate(template,
+	template = signature.ECDSAP521KeyTemplate()
+	err = checkECDSAKeyTemplate(template,
 		commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P521,
 		ecdsapb.EcdsaSignatureEncoding_DER)
@@ -57,12 +57,12 @@ func TestEcdsaKeyTemplates(t *testing.T) {
 	}
 }
 
-func checkEcdsaKeyTemplate(template *tinkpb.KeyTemplate,
+func checkECDSAKeyTemplate(template *tinkpb.KeyTemplate,
 	hashType commonpb.HashType,
 	curve commonpb.EllipticCurveType,
 	encoding ecdsapb.EcdsaSignatureEncoding) error {
-	if template.TypeUrl != signature.EcdsaSignTypeURL {
-		return fmt.Errorf("incorrect typeurl: expect %s, got %s", signature.EcdsaSignTypeURL, template.TypeUrl)
+	if template.TypeUrl != signature.ECDSASignerTypeURL {
+		return fmt.Errorf("incorrect typeurl: expect %s, got %s", signature.ECDSASignerTypeURL, template.TypeUrl)
 	}
 	format := new(ecdsapb.EcdsaKeyFormat)
 	if err := proto.Unmarshal(template.Value, format); err != nil {

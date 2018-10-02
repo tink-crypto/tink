@@ -21,7 +21,8 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/aead"
-	subtleAead "github.com/google/tink/go/subtle/aead"
+	"github.com/google/tink/go/insecure"
+	subtleAEAD "github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
@@ -29,24 +30,27 @@ import (
 )
 
 func setupFactoryTest() {
-	aead.RegisterStandardKeyTypes()
+	if err := aead.Register(); err != nil {
+		panic(fmt.Sprintf("cannot register AEAD key types: %s", err))
+
+	}
 }
 
 func TestFactoryMultipleKeys(t *testing.T) {
 	setupFactoryTest()
 	// encrypt with non-raw key
-	keyset := testutil.NewTestAesGcmKeyset(tinkpb.OutputPrefixType_TINK)
+	keyset := testutil.NewTestAESGCMKeyset(tinkpb.OutputPrefixType_TINK)
 	primaryKey := keyset.Key[0]
 	if primaryKey.OutputPrefixType == tinkpb.OutputPrefixType_RAW {
 		t.Errorf("expect a non-raw key")
 	}
-	keysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset)
-	a, err := aead.GetPrimitive(keysetHandle)
+	keysetHandle, _ := insecure.KeysetHandle(keyset)
+	a, err := aead.New(keysetHandle)
 	if err != nil {
-		t.Errorf("GetPrimitive failed: %s", err)
+		t.Errorf("aead.New failed: %s", err)
 	}
 	expectedPrefix, _ := tink.OutputPrefix(primaryKey)
-	if err := validateAeadFactoryCipher(a, a, expectedPrefix); err != nil {
+	if err := validateAEADFactoryCipher(a, a, expectedPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
 
@@ -56,25 +60,25 @@ func TestFactoryMultipleKeys(t *testing.T) {
 		t.Errorf("expect a raw key")
 	}
 	keyset2 := tink.CreateKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
-	keysetHandle2, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset2)
-	a2, err := aead.GetPrimitive(keysetHandle2)
+	keysetHandle2, _ := insecure.KeysetHandle(keyset2)
+	a2, err := aead.New(keysetHandle2)
 	if err != nil {
-		t.Errorf("GetPrimitive failed: %s", err)
+		t.Errorf("aead.New failed: %s", err)
 	}
-	if err := validateAeadFactoryCipher(a2, a, tink.RawPrefix); err != nil {
+	if err := validateAEADFactoryCipher(a2, a, tink.RawPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
 
 	// encrypt with a random key not in the keyset, decrypt with the keyset should fail
-	keyset2 = testutil.NewTestAesGcmKeyset(tinkpb.OutputPrefixType_TINK)
+	keyset2 = testutil.NewTestAESGCMKeyset(tinkpb.OutputPrefixType_TINK)
 	primaryKey = keyset2.Key[0]
 	expectedPrefix, _ = tink.OutputPrefix(primaryKey)
-	keysetHandle2, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset2)
-	a2, err = aead.GetPrimitive(keysetHandle2)
+	keysetHandle2, _ = insecure.KeysetHandle(keyset2)
+	a2, err = aead.New(keysetHandle2)
 	if err != nil {
-		t.Errorf("GetPrimitive failed: %s", err)
+		t.Errorf("aead.New failed: %s", err)
 	}
-	err = validateAeadFactoryCipher(a2, a, expectedPrefix)
+	err = validateAEADFactoryCipher(a2, a, expectedPrefix)
 	if err == nil || !strings.Contains(err.Error(), "decryption failed") {
 		t.Errorf("expect decryption to fail with random key: %s", err)
 	}
@@ -82,23 +86,23 @@ func TestFactoryMultipleKeys(t *testing.T) {
 
 func TestFactoryRawKeyAsPrimary(t *testing.T) {
 	setupFactoryTest()
-	keyset := testutil.NewTestAesGcmKeyset(tinkpb.OutputPrefixType_RAW)
+	keyset := testutil.NewTestAESGCMKeyset(tinkpb.OutputPrefixType_RAW)
 	if keyset.Key[0].OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("primary key is not a raw key")
 	}
-	keysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset)
+	keysetHandle, _ := insecure.KeysetHandle(keyset)
 
-	a, err := aead.GetPrimitive(keysetHandle)
+	a, err := aead.New(keysetHandle)
 	if err != nil {
 		t.Errorf("cannot get primitive from keyset handle: %s", err)
 	}
-	if err := validateAeadFactoryCipher(a, a, tink.RawPrefix); err != nil {
+	if err := validateAEADFactoryCipher(a, a, tink.RawPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
 }
 
-func validateAeadFactoryCipher(encryptCipher tink.Aead,
-	decryptCipher tink.Aead,
+func validateAEADFactoryCipher(encryptCipher tink.AEAD,
+	decryptCipher tink.AEAD,
 	expectedPrefix string) error {
 	prefixSize := len(expectedPrefix)
 	// regular plaintext
@@ -116,7 +120,7 @@ func validateAeadFactoryCipher(encryptCipher tink.Aead,
 	if string(ct[:prefixSize]) != expectedPrefix {
 		return fmt.Errorf("incorrect prefix with regular plaintext")
 	}
-	if prefixSize+len(pt)+subtleAead.AesGcmIvSize+subtleAead.AesGcmTagSize != len(ct) {
+	if prefixSize+len(pt)+subtleAEAD.AESGCMIvSize+subtleAEAD.AESGCMTagSize != len(ct) {
 		return fmt.Errorf("lengths of plaintext and ciphertext don't match with regular plaintext")
 	}
 
@@ -134,7 +138,7 @@ func validateAeadFactoryCipher(encryptCipher tink.Aead,
 	if string(ct[:prefixSize]) != expectedPrefix {
 		return fmt.Errorf("incorrect prefix with short plaintext")
 	}
-	if prefixSize+len(pt)+subtleAead.AesGcmIvSize+subtleAead.AesGcmTagSize != len(ct) {
+	if prefixSize+len(pt)+subtleAEAD.AESGCMIvSize+subtleAEAD.AESGCMTagSize != len(ct) {
 		return fmt.Errorf("lengths of plaintext and ciphertext don't match with short plaintext")
 	}
 	return nil

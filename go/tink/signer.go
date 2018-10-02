@@ -12,22 +12,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package aead provides implementations of the AEAD primitive.
-package aead
+package tink
 
-import (
-	"github.com/google/tink/go/tink"
-)
-
-// Register registers latest AEAD key types and their managers with the Registry.
-func Register() error {
-	if err := tink.RegisterKeyManager(NewAESGCMKeyManager()); err != nil {
-		return err
-	}
-
-	if err := tink.RegisterKeyManager(NewChaCha20Poly1305KeyManager()); err != nil {
-		return err
-	}
-
-	return tink.RegisterKeyManager(NewXChaCha20Poly1305KeyManager())
+// Signer is the signing interface for digital signature.
+// Implementations of this interface are secure against adaptive chosen-message attacks.
+// Signing data ensures authenticity and integrity of that data, but not its secrecy.
+type Signer interface {
+	// Computes the digital signature for data.
+	Sign(data []byte) ([]byte, error)
 }

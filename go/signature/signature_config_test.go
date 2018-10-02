@@ -22,21 +22,20 @@ import (
 )
 
 func TestSignatureConfigRegistration(t *testing.T) {
-	_, err := signature.RegisterStandardKeyTypes()
-	if err != nil {
+	if err := signature.Register(); err != nil {
 		t.Errorf("cannot register standard key types")
 	}
-	// check for EcdsaSignKeyManager
-	keyManager, err := tink.GetKeyManager(signature.EcdsaSignTypeURL)
+	// check for ECDSASignerKeyManager
+	keyManager, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*signature.EcdsaSignKeyManager)
+	var _ = keyManager.(*signature.ECDSASignerKeyManager)
 
-	// check for EcdsaVerifyKeyManager
-	keyManager, err = tink.GetKeyManager(signature.EcdsaVerifyTypeURL)
+	// check for ECDSAVerifierKeyManager
+	keyManager, err = tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*signature.EcdsaVerifyKeyManager)
+	var _ = keyManager.(*signature.ECDSAVerifierKeyManager)
 }

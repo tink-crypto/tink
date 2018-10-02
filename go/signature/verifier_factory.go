@@ -15,20 +15,21 @@
 package signature
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// GetPublicKeyVerifyPrimitive returns a PublicKeyVerify primitive from the given keyset handle.
-func GetPublicKeyVerifyPrimitive(handle *tink.KeysetHandle) (tink.PublicKeyVerify, error) {
-	return VerifierWithKeyManager(handle, nil /*keyManager*/)
+// NewVerifier returns a Verifier primitive from the given keyset handle.
+func NewVerifier(handle *tink.KeysetHandle) (tink.Verifier, error) {
+	return NewVerifierWithKeyManager(handle, nil /*keyManager*/)
 }
 
-// VerifierWithKeyManager returns a PublicKeyVerify primitive from the given keyset handle and
+// NewVerifierWithKeyManager returns a Verifier primitive from the given keyset handle and
 // custom key manager.
-func VerifierWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.PublicKeyVerify, error) {
+func NewVerifierWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Verifier, error) {
 	ps, err := tink.PrimitivesWithKeyManager(kh, km)
 	if err != nil {
 		return nil, fmt.Errorf("public_key_verify_factory: cannot obtain primitive set: %s", err)
@@ -37,14 +38,14 @@ func VerifierWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Pub
 	return ret, nil
 }
 
-// verifierSet is an PublicKeySign implementation that uses the
+// verifierSet is an Signer implementation that uses the
 // underlying primitive set for signing.
 type verifierSet struct {
 	ps *tink.PrimitiveSet
 }
 
-// Asserts that verifierSet implements the PublicKeyVerify interface.
-var _ tink.PublicKeyVerify = (*verifierSet)(nil)
+// Asserts that verifierSet implements the Verifier interface.
+var _ tink.Verifier = (*verifierSet)(nil)
 
 func newVerifierSet(ps *tink.PrimitiveSet) *verifierSet {
 	ret := new(verifierSet)
@@ -52,10 +53,10 @@ func newVerifierSet(ps *tink.PrimitiveSet) *verifierSet {
 	return ret
 }
 
-var errInvalidSignature = fmt.Errorf("public_key_verify_factory: invalid signature")
+var errInvalidSignature = errors.New("public_key_verify_factory: invalid signature")
 
 // Verify checks whether the given signature is a valid signature of the given data.
-func (v *verifierSet) Verify(signature []byte, data []byte) error {
+func (v *verifierSet) Verify(signature, data []byte) error {
 	if len(signature) < tink.NonRawPrefixSize {
 		return errInvalidSignature
 	}
@@ -72,8 +73,8 @@ func (v *verifierSet) Verify(signature []byte, data []byte) error {
 			} else {
 				signedData = data
 			}
-			var verifier = (entries[i].Primitive).(tink.PublicKeyVerify)
-			if err := verifier.Verify(signatureNoPrefix, signedData); err == nil {
+			var verifier = (entries[i].Primitive).(tink.Verifier)
+			if err = verifier.Verify(signatureNoPrefix, signedData); err == nil {
 				return nil
 			}
 		}
@@ -82,8 +83,8 @@ func (v *verifierSet) Verify(signature []byte, data []byte) error {
 	entries, err = v.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var verifier = (entries[i].Primitive).(tink.PublicKeyVerify)
-			if err := verifier.Verify(signature, data); err == nil {
+			var verifier = (entries[i].Primitive).(tink.Verifier)
+			if err = verifier.Verify(signature, data); err == nil {
 				return nil
 			}
 		}

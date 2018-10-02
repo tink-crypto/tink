@@ -1,3 +1,7 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])  # keep
+
+licenses(["notice"])  # Apache 2.0 # keep
+
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
@@ -23,15 +27,16 @@ go_library(
 )
 
 go_test(
-    name = "go_default_xtest",
+    name = "go_default_test",
     srcs = [
         "hmac_key_manager_test.go",
         "mac_config_test.go",
         "mac_factory_test.go",
         "mac_key_templates_test.go",
     ],
+    embed = [":go_default_library"],
     deps = [
-        ":go_default_library",
+        "//go/testkeysethandle:go_default_library",
         "//go/subtle:go_default_library",
         "//go/subtle/mac:go_default_library",
         "//go/subtle/random:go_default_library",

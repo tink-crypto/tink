@@ -17,6 +17,7 @@ package mac
 
 import (
 	"crypto/hmac"
+	"errors"
 	"fmt"
 	"hash"
 
@@ -39,37 +40,37 @@ var maxTagSizeInBytes = map[string]uint32{
 	"SHA512": uint32(64),
 }
 
-var errHmacInvalidInput = fmt.Errorf("hmac: invalid input")
+var errHMACInvalidInput = errors.New("HMAC: invalid input")
 
-// Hmac implementation of interface tink.Mac
-type Hmac struct {
+// HMAC implementation of interface tink.MAC
+type HMAC struct {
 	HashFunc func() hash.Hash
 	Key      []byte
 	TagSize  uint32
 }
 
-// This makes sure that Hmac implements the tink.Mac interface
-var _ tink.Mac = (*Hmac)(nil)
+// This makes sure that HMAC implements the tink.MAC interface
+var _ tink.MAC = (*HMAC)(nil)
 
-// NewHmac creates a new instance of Hmac with the specified key and tag size.
-func NewHmac(hashAlg string, key []byte, tagSize uint32) (*Hmac, error) {
+// NewHMAC creates a new instance of HMAC with the specified key and tag size.
+func NewHMAC(hashAlg string, key []byte, tagSize uint32) (*HMAC, error) {
 	keySize := uint32(len(key))
-	if err := ValidateHmacParams(hashAlg, keySize, tagSize); err != nil {
+	if err := ValidateHMACParams(hashAlg, keySize, tagSize); err != nil {
 		return nil, fmt.Errorf("hmac: %s", err)
 	}
 	hashFunc := subtle.GetHashFunc(hashAlg)
 	if hashFunc == nil {
 		return nil, fmt.Errorf("hmac: invalid hash algorithm")
 	}
-	return &Hmac{
+	return &HMAC{
 		HashFunc: hashFunc,
 		Key:      key,
 		TagSize:  tagSize,
 	}, nil
 }
 
-// ValidateHmacParams validates parameters of Hmac constructor.
-func ValidateHmacParams(hash string, keySize uint32, tagSize uint32) error {
+// ValidateHMACParams validates parameters of HMAC constructor.
+func ValidateHMACParams(hash string, keySize uint32, tagSize uint32) error {
 	// validate tag size
 	maxTagSize, found := maxTagSizeInBytes[hash]
 	if !found {
@@ -88,10 +89,10 @@ func ValidateHmacParams(hash string, keySize uint32, tagSize uint32) error {
 	return nil
 }
 
-// ComputeMac computes message authentication code (MAC) for the given data.
-func (h *Hmac) ComputeMac(data []byte) ([]byte, error) {
+// ComputeMAC computes message authentication code (MAC) for the given data.
+func (h *HMAC) ComputeMAC(data []byte) ([]byte, error) {
 	if data == nil {
-		return nil, errHmacInvalidInput
+		return nil, errHMACInvalidInput
 	}
 	mac := hmac.New(h.HashFunc, h.Key)
 	mac.Write(data)
@@ -99,15 +100,18 @@ func (h *Hmac) ComputeMac(data []byte) ([]byte, error) {
 	return tag[:h.TagSize], nil
 }
 
-// VerifyMac verifies whether the given MAC is a correct authentication code (MAC)
+// VerifyMAC verifies whether the given MAC is a correct authentication code (MAC)
 // the given data.
-func (h *Hmac) VerifyMac(mac []byte, data []byte) (bool, error) {
+func (h *HMAC) VerifyMAC(mac []byte, data []byte) error {
 	if mac == nil || data == nil {
-		return false, errHmacInvalidInput
+		return errHMACInvalidInput
 	}
-	expectedMAC, err := h.ComputeMac(data)
+	expectedMAC, err := h.ComputeMAC(data)
 	if err != nil {
-		return false, err
+		return err
 	}
-	return hmac.Equal(expectedMAC, mac), nil
+	if hmac.Equal(expectedMAC, mac) {
+		return nil
+	}
+	return errors.New("HMAC: invalid MAC")
 }

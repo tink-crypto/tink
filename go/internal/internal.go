@@ -12,19 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink
+// Package internal provides a coordination point for package tink, package insecure,
+// and package testkeysethandle.
+// internal must only be imported by these three packages.
+package internal
 
-/*
-PublicKeyVerify is the verifying interface for digital signature.
-Implementations of this interface are secure against adaptive chosen-message attacks.
-Signing data ensures authenticity and integrity of that data, but not its secrecy.
-*/
-type PublicKeyVerify interface {
-	/**
-	 * Verifies whether {@code signature} is a valid signature for {@code data}.
-	 *
-	 * @return an error if {@code signature} is not a valid signature for
-	 * {@code data}; nil otherwise.
-	 */
-	Verify(signature []byte, data []byte) error
-}
+// KeysetHandle is the raw constructor for a tink.KeysetHandle.
+var KeysetHandle interface{}

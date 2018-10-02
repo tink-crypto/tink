@@ -34,40 +34,40 @@ type ecdsaParams struct {
 	curve    commonpb.EllipticCurveType
 }
 
-func TestNewEcdsaSignKeyManager(t *testing.T) {
-	var km *signature.EcdsaSignKeyManager = signature.NewEcdsaSignKeyManager()
+func TestNewECDSASignerKeyManager(t *testing.T) {
+	var km *signature.ECDSASignerKeyManager = signature.NewECDSASignerKeyManager()
 	if km == nil {
-		t.Error("NewEcdsaSignKeyManager returns nil")
+		t.Error("NewECDSASignerKeyManager returns nil")
 	}
 }
 
-func TestEcdsaSignGetPrimitiveBasic(t *testing.T) {
-	testParams := genValidEcdsaParams()
-	km := signature.NewEcdsaSignKeyManager()
+func TestECDSASignerGetPrimitiveBasic(t *testing.T) {
+	testParams := genValidECDSAParams()
+	km := signature.NewECDSASignerKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		serializedKey, _ := proto.Marshal(testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve))
+		serializedKey, _ := proto.Marshal(testutil.NewECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
 		tmp, err := km.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
-		var _ *subtleSig.EcdsaSign = tmp.(*subtleSig.EcdsaSign)
+		var _ *subtleSig.ECDSASigner = tmp.(*subtleSig.ECDSASigner)
 	}
 }
 
-func TestEcdsaSignGetPrimitiveWithInvalidInput(t *testing.T) {
+func TestECDSASignGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid params
-	testParams := genInvalidEcdsaParams()
-	km := signature.NewEcdsaSignKeyManager()
+	testParams := genInvalidECDSAParams()
+	km := signature.NewECDSASignerKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		serializedKey, _ := proto.Marshal(testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve))
+		serializedKey, _ := proto.Marshal(testutil.NewECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
 	// invalid version
-	key := testutil.NewEcdsaPrivateKey(commonpb.HashType_SHA256,
+	key := testutil.NewECDSAPrivateKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
-	key.Version = signature.EcdsaSignKeyVersion + 1
+	key.Version = signature.ECDSASignerKeyVersion + 1
 	serializedKey, _ := proto.Marshal(key)
 	if _, err := km.Primitive(serializedKey); err == nil {
 		t.Errorf("expect an error when version is invalid")
@@ -81,42 +81,42 @@ func TestEcdsaSignGetPrimitiveWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestEcdsaSignNewKeyBasic(t *testing.T) {
-	testParams := genValidEcdsaParams()
-	km := signature.NewEcdsaSignKeyManager()
+func TestECDSASignNewKeyBasic(t *testing.T) {
+	testParams := genValidECDSAParams()
+	km := signature.NewECDSASignerKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		serializedFormat, _ := proto.Marshal(signature.NewEcdsaKeyFormat(params))
+		serializedFormat, _ := proto.Marshal(signature.NewECDSAKeyFormat(params))
 		tmp, err := km.NewKey(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
 		key := tmp.(*ecdsapb.EcdsaPrivateKey)
-		if err := validateEcdsaPrivateKey(key, params); err != nil {
+		if err := validateECDSAPrivateKey(key, params); err != nil {
 			t.Errorf("invalid private key in test case %d: %s", i, err)
 		}
 	}
 }
 
-func TestEcdsaSignNewKeyWithInvalidInput(t *testing.T) {
-	km := signature.NewEcdsaSignKeyManager()
+func TestECDSASignNewKeyWithInvalidInput(t *testing.T) {
+	km := signature.NewECDSASignerKeyManager()
 	// invalid hash and curve type
-	testParams := genInvalidEcdsaParams()
+	testParams := genInvalidECDSAParams()
 	for i := 0; i < len(testParams); i++ {
-		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		serializedFormat, _ := proto.Marshal(signature.NewEcdsaKeyFormat(params))
+		serializedFormat, _ := proto.Marshal(signature.NewECDSAKeyFormat(params))
 		if _, err := km.NewKey(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
 	// invalid encoding
-	testParams = genValidEcdsaParams()
+	testParams = genValidECDSAParams()
 	for i := 0; i < len(testParams); i++ {
-		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_UNKNOWN_ENCODING)
-		serializedFormat, _ := proto.Marshal(signature.NewEcdsaKeyFormat(params))
+		serializedFormat, _ := proto.Marshal(signature.NewECDSAKeyFormat(params))
 		if _, err := km.NewKey(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -130,15 +130,15 @@ func TestEcdsaSignNewKeyWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestEcdsaSignNewKeyMultipleTimes(t *testing.T) {
-	km := signature.NewEcdsaSignKeyManager()
-	testParams := genValidEcdsaParams()
+func TestECDSASignNewKeyMultipleTimes(t *testing.T) {
+	km := signature.NewECDSASignerKeyManager()
+	testParams := genValidECDSAParams()
 	nTest := 27
 	for i := 0; i < len(testParams); i++ {
 		keys := make(map[string]bool)
-		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := signature.NewEcdsaKeyFormat(params)
+		format := signature.NewECDSAKeyFormat(params)
 		serializedFormat, _ := proto.Marshal(format)
 		for j := 0; j < nTest; j++ {
 			key, _ := km.NewKey(serializedFormat)
@@ -155,21 +155,21 @@ func TestEcdsaSignNewKeyMultipleTimes(t *testing.T) {
 	}
 }
 
-func TestEcdsaSignNewKeyDataBasic(t *testing.T) {
-	km := signature.NewEcdsaSignKeyManager()
-	testParams := genValidEcdsaParams()
+func TestECDSASignNewKeyDataBasic(t *testing.T) {
+	km := signature.NewECDSASignerKeyManager()
+	testParams := genValidECDSAParams()
 	for i := 0; i < len(testParams); i++ {
-		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		serializedFormat, _ := proto.Marshal(signature.NewEcdsaKeyFormat(params))
+		serializedFormat, _ := proto.Marshal(signature.NewECDSAKeyFormat(params))
 
 		keyData, err := km.NewKeyData(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error in test case  %d: %s", i, err)
 		}
-		if keyData.TypeUrl != signature.EcdsaSignTypeURL {
+		if keyData.TypeUrl != signature.ECDSASignerTypeURL {
 			t.Errorf("incorrect type url in test case  %d: expect %s, got %s",
-				i, signature.EcdsaSignTypeURL, keyData.TypeUrl)
+				i, signature.ECDSASignerTypeURL, keyData.TypeUrl)
 		}
 		if keyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PRIVATE {
 			t.Errorf("incorrect key material type in test case  %d: expect %s, got %s",
@@ -179,19 +179,19 @@ func TestEcdsaSignNewKeyDataBasic(t *testing.T) {
 		if err := proto.Unmarshal(keyData.Value, key); err != nil {
 			t.Errorf("unexpect error in test case %d: %s", i, err)
 		}
-		if err := validateEcdsaPrivateKey(key, params); err != nil {
+		if err := validateECDSAPrivateKey(key, params); err != nil {
 			t.Errorf("invalid private key in test case %d: %s", i, err)
 		}
 	}
 }
 
-func TestEcdsaSignNewKeyDataWithInvalidInput(t *testing.T) {
-	km := signature.NewEcdsaSignKeyManager()
-	testParams := genInvalidEcdsaParams()
+func TestECDSASignNewKeyDataWithInvalidInput(t *testing.T) {
+	km := signature.NewECDSASignerKeyManager()
+	testParams := genInvalidECDSAParams()
 	for i := 0; i < len(testParams); i++ {
-		params := signature.NewEcdsaParams(testParams[i].hashType, testParams[i].curve,
+		params := signature.NewECDSAParams(testParams[i].hashType, testParams[i].curve,
 			ecdsapb.EcdsaSignatureEncoding_DER)
-		format := signature.NewEcdsaKeyFormat(params)
+		format := signature.NewECDSAKeyFormat(params)
 		serializedFormat, _ := proto.Marshal(format)
 
 		if _, err := km.NewKeyData(serializedFormat); err == nil {
@@ -205,17 +205,17 @@ func TestEcdsaSignNewKeyDataWithInvalidInput(t *testing.T) {
 }
 
 func TestPublicKeyDataBasic(t *testing.T) {
-	testParams := genValidEcdsaParams()
-	km := signature.NewEcdsaSignKeyManager()
+	testParams := genValidECDSAParams()
+	km := signature.NewECDSASignerKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		key := testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve)
+		key := testutil.NewECDSAPrivateKey(testParams[i].hashType, testParams[i].curve)
 		serializedKey, _ := proto.Marshal(key)
 
 		pubKeyData, err := km.PublicKeyData(serializedKey)
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
-		if pubKeyData.TypeUrl != signature.EcdsaVerifyTypeURL {
+		if pubKeyData.TypeUrl != signature.ECDSAVerifierTypeURL {
 			t.Errorf("incorrect type url: %s", pubKeyData.TypeUrl)
 		}
 		if pubKeyData.KeyMaterialType != tinkpb.KeyData_ASYMMETRIC_PUBLIC {
@@ -229,9 +229,9 @@ func TestPublicKeyDataBasic(t *testing.T) {
 }
 
 func TestPublicKeyDataWithInvalidInput(t *testing.T) {
-	km := signature.NewEcdsaSignKeyManager()
+	km := signature.NewECDSASignerKeyManager()
 	// modified key
-	key := testutil.NewEcdsaPrivateKey(commonpb.HashType_SHA256,
+	key := testutil.NewECDSAPrivateKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
 	serializedKey, _ := proto.Marshal(key)
 	serializedKey[0] = 0
@@ -250,15 +250,15 @@ func TestPublicKeyDataWithInvalidInput(t *testing.T) {
 
 var errSmallKey = fmt.Errorf("private key doesn't have adequate size")
 
-func validateEcdsaPrivateKey(key *ecdsapb.EcdsaPrivateKey, params *ecdsapb.EcdsaParams) error {
-	if key.Version != signature.EcdsaSignKeyVersion {
+func validateECDSAPrivateKey(key *ecdsapb.EcdsaPrivateKey, params *ecdsapb.EcdsaParams) error {
+	if key.Version != signature.ECDSASignerKeyVersion {
 		return fmt.Errorf("incorrect private key's version: expect %d, got %d",
-			signature.EcdsaSignKeyVersion, key.Version)
+			signature.ECDSASignerKeyVersion, key.Version)
 	}
 	publicKey := key.PublicKey
-	if publicKey.Version != signature.EcdsaSignKeyVersion {
+	if publicKey.Version != signature.ECDSASignerKeyVersion {
 		return fmt.Errorf("incorrect public key's version: expect %d, got %d",
-			signature.EcdsaSignKeyVersion, key.Version)
+			signature.ECDSASignerKeyVersion, key.Version)
 	}
 	if params.HashType != publicKey.Params.HashType ||
 		params.Curve != publicKey.Params.Curve ||
@@ -286,27 +286,28 @@ func validateEcdsaPrivateKey(key *ecdsapb.EcdsaPrivateKey, params *ecdsapb.Ecdsa
 		}
 	}
 	// try to sign and verify with the key
-	hash, curve, encoding := signature.GetEcdsaParamNames(publicKey.Params)
-	signer, err := subtleSig.NewEcdsaSign(hash, curve, encoding, key.KeyValue)
+	hash, curve, encoding := signature.GetECDSAParamNames(publicKey.Params)
+	signer, err := subtleSig.NewECDSASigner(hash, curve, encoding, key.KeyValue)
 	if err != nil {
-		return fmt.Errorf("unexpected error when creating EcdsaSign: %s", err)
+		return fmt.Errorf("unexpected error when creating ECDSASign: %s", err)
 	}
-	verifier, err := subtleSig.NewEcdsaVerify(hash, curve, encoding, publicKey.X, publicKey.Y)
+	verifier, err := subtleSig.NewECDSAVerifier(hash, curve, encoding, publicKey.X, publicKey.Y)
 	if err != nil {
-		return fmt.Errorf("unexpected error when creating EcdsaVerify: %s", err)
+		return fmt.Errorf("unexpected error when creating ECDSAVerify: %s", err)
 	}
 	data := random.GetRandomBytes(1281)
 	signature, err := signer.Sign(data)
 	if err != nil {
 		return fmt.Errorf("unexpected error when signing: %s", err)
 	}
+
 	if err := verifier.Verify(signature, data); err != nil {
 		return fmt.Errorf("unexpected error when verifying signature: %s", err)
 	}
 	return nil
 }
 
-func genValidEcdsaParams() []ecdsaParams {
+func genValidECDSAParams() []ecdsaParams {
 	return []ecdsaParams{
 		ecdsaParams{
 			hashType: commonpb.HashType_SHA256,
@@ -323,7 +324,7 @@ func genValidEcdsaParams() []ecdsaParams {
 	}
 }
 
-func genInvalidEcdsaParams() []ecdsaParams {
+func genInvalidECDSAParams() []ecdsaParams {
 	return []ecdsaParams{
 		ecdsaParams{
 			hashType: commonpb.HashType_SHA1,

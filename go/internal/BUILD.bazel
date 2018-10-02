@@ -1,0 +1,16 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])  # keep
+
+licenses(["notice"])  # Apache 2.0 # keep
+
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["internal.go"],
+    importpath = "github.com/google/tink/go/internal",
+    visibility = [
+        "//go/insecure:__pkg__",
+        "//go/testkeysethandle:__pkg__",
+        "//go/tink:__pkg__",
+    ],
+)

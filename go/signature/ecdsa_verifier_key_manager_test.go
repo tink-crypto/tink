@@ -24,39 +24,39 @@ import (
 	commonpb "github.com/google/tink/proto/common_go_proto"
 )
 
-func TestNewEcdsaVerifyKeyManager(t *testing.T) {
-	var km *signature.EcdsaVerifyKeyManager = signature.NewEcdsaVerifyKeyManager()
+func TestNewECDSAVerifierKeyManager(t *testing.T) {
+	var km *signature.ECDSAVerifierKeyManager = signature.NewECDSAVerifierKeyManager()
 	if km == nil {
-		t.Errorf("NewEcdsaVerifyKeyManager returns nil")
+		t.Errorf("NewECDSAVerifierKeyManager returns nil")
 	}
 }
 
-func TestEcdsaVerifyGetPrimitiveBasic(t *testing.T) {
-	testParams := genValidEcdsaParams()
-	km := signature.NewEcdsaVerifyKeyManager()
+func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {
+	testParams := genValidECDSAParams()
+	km := signature.NewECDSAVerifierKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		serializedKey, _ := proto.Marshal(testutil.NewEcdsaPublicKey(testParams[i].hashType, testParams[i].curve))
+		serializedKey, _ := proto.Marshal(testutil.NewECDSAPublicKey(testParams[i].hashType, testParams[i].curve))
 		tmp, err := km.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpect error in test case %d: %s ", i, err)
 		}
-		var _ *subtleSig.EcdsaVerify = tmp.(*subtleSig.EcdsaVerify)
+		var _ *subtleSig.ECDSAVerifier = tmp.(*subtleSig.ECDSAVerifier)
 	}
 }
 
-func TestEcdsaVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
-	testParams := genInvalidEcdsaParams()
-	km := signature.NewEcdsaVerifyKeyManager()
+func TestECDSAVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
+	testParams := genInvalidECDSAParams()
+	km := signature.NewECDSAVerifierKeyManager()
 	for i := 0; i < len(testParams); i++ {
-		serializedKey, _ := proto.Marshal(testutil.NewEcdsaPrivateKey(testParams[i].hashType, testParams[i].curve))
+		serializedKey, _ := proto.Marshal(testutil.NewECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
 	// invalid version
-	key := testutil.NewEcdsaPublicKey(commonpb.HashType_SHA256,
+	key := testutil.NewECDSAPublicKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
-	key.Version = signature.EcdsaVerifyKeyVersion + 1
+	key.Version = signature.ECDSAVerifierKeyVersion + 1
 	serializedKey, _ := proto.Marshal(key)
 	if _, err := km.Primitive(serializedKey); err == nil {
 		t.Errorf("expect an error when version is invalid")

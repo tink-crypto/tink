@@ -57,13 +57,13 @@ var hmacTests = []struct {
 	},
 }
 
-func TestHmacBasic(t *testing.T) {
+func TestHMACBasic(t *testing.T) {
 	for i, test := range hmacTests {
-		cipher, err := mac.NewHmac(test.hashAlg, test.key, test.tagSize)
+		cipher, err := mac.NewHMAC(test.hashAlg, test.key, test.tagSize)
 		if err != nil {
 			t.Errorf("cannot create new mac in test case %d: %s", i, err)
 		}
-		mac, err := cipher.ComputeMac(test.data)
+		mac, err := cipher.ComputeMAC(test.data)
 		if err != nil {
 			t.Errorf("mac computation failed in test case %d: %s", i, err)
 		}
@@ -71,80 +71,79 @@ func TestHmacBasic(t *testing.T) {
 			t.Errorf("incorrect mac in test case %d: expect %s, got %s",
 				i, test.expectedMac[:(test.tagSize*2)], hex.EncodeToString(mac))
 		}
-		valid, err := cipher.VerifyMac(mac, test.data)
-		if !valid || err != nil {
+		if err := cipher.VerifyMAC(mac, test.data); err != nil {
 			t.Errorf("mac verification failed in test case %d: %s", i, err)
 		}
 	}
 }
 
-func TestNewHmacWithInvalidInput(t *testing.T) {
+func TestNewHMACWithInvalidInput(t *testing.T) {
 	// invalid hash algorithm
-	_, err := mac.NewHmac("SHA224", random.GetRandomBytes(16), 32)
+	_, err := mac.NewHMAC("SHA224", random.GetRandomBytes(16), 32)
 	if err == nil || !strings.Contains(err.Error(), "invalid hash algorithm") {
 		t.Errorf("expect an error when hash algorithm is invalid")
 	}
 	// key too short
-	_, err = mac.NewHmac("SHA256", random.GetRandomBytes(1), 32)
+	_, err = mac.NewHMAC("SHA256", random.GetRandomBytes(1), 32)
 	if err == nil || !strings.Contains(err.Error(), "key too short") {
 		t.Errorf("expect an error when key is too short")
 	}
 	// tag too short
-	_, err = mac.NewHmac("SHA256", random.GetRandomBytes(16), 9)
+	_, err = mac.NewHMAC("SHA256", random.GetRandomBytes(16), 9)
 	if err == nil || !strings.Contains(err.Error(), "tag size too small") {
 		t.Errorf("expect an error when tag size is too small")
 	}
 	// tag too big
-	_, err = mac.NewHmac("SHA1", random.GetRandomBytes(16), 21)
+	_, err = mac.NewHMAC("SHA1", random.GetRandomBytes(16), 21)
 	if err == nil || !strings.Contains(err.Error(), "tag size too big") {
 		t.Errorf("expect an error when tag size is too big")
 	}
-	_, err = mac.NewHmac("SHA256", random.GetRandomBytes(16), 33)
+	_, err = mac.NewHMAC("SHA256", random.GetRandomBytes(16), 33)
 	if err == nil || !strings.Contains(err.Error(), "tag size too big") {
 		t.Errorf("expect an error when tag size is too big")
 	}
-	_, err = mac.NewHmac("SHA512", random.GetRandomBytes(16), 65)
+	_, err = mac.NewHMAC("SHA512", random.GetRandomBytes(16), 65)
 	if err == nil || !strings.Contains(err.Error(), "tag size too big") {
 		t.Errorf("expect an error when tag size is too big")
 	}
 }
 
-func TestComputeMacWithInvalidInput(t *testing.T) {
-	cipher, err := mac.NewHmac("SHA256", random.GetRandomBytes(16), 32)
+func TestComputeMACWithInvalidInput(t *testing.T) {
+	cipher, err := mac.NewHMAC("SHA256", random.GetRandomBytes(16), 32)
 	if err != nil {
-		t.Errorf("unexpected error when creating new Hmac")
+		t.Errorf("unexpected error when creating new HMAC")
 	}
-	if _, err := cipher.ComputeMac(nil); err == nil {
+	if _, err := cipher.ComputeMAC(nil); err == nil {
 		t.Errorf("expect an error when input is nil")
 	}
 }
 
-func TestVerifyMacWithInvalidInput(t *testing.T) {
-	cipher, err := mac.NewHmac("SHA256", random.GetRandomBytes(16), 32)
+func TestVerifyMACWithInvalidInput(t *testing.T) {
+	cipher, err := mac.NewHMAC("SHA256", random.GetRandomBytes(16), 32)
 	if err != nil {
-		t.Errorf("unexpected error when creating new Hmac")
+		t.Errorf("unexpected error when creating new HMAC")
 	}
-	if _, err := cipher.VerifyMac(nil, []byte{1}); err == nil {
+	if err := cipher.VerifyMAC(nil, []byte{1}); err == nil {
 		t.Errorf("expect an error when mac is nil")
 	}
-	if _, err := cipher.VerifyMac([]byte{1}, nil); err == nil {
+	if err := cipher.VerifyMAC([]byte{1}, nil); err == nil {
 		t.Errorf("expect an error when data is nil")
 	}
 }
 
-func TestHmacModification(t *testing.T) {
+func TestHMACModification(t *testing.T) {
 	for i, test := range hmacTests {
-		cipher, err := mac.NewHmac(test.hashAlg, test.key, test.tagSize)
+		cipher, err := mac.NewHMAC(test.hashAlg, test.key, test.tagSize)
 		if err != nil {
 			t.Errorf("cannot create new mac in test case %d: %s", i, err)
 		}
-		mac, _ := cipher.ComputeMac(test.data)
+		mac, _ := cipher.ComputeMAC(test.data)
 		for i := 0; i < len(mac); i++ {
 			tmp := mac[i]
 			for j := 0; j < 8; j++ {
 				mac[i] ^= 1 << uint8(j)
-				valid, _ := cipher.VerifyMac(mac, test.data)
-				if valid {
+				err := cipher.VerifyMAC(mac, test.data)
+				if err == nil {
 					t.Errorf("test case %d: modified MAC should be invalid", i)
 				}
 				mac[i] = tmp
@@ -153,17 +152,17 @@ func TestHmacModification(t *testing.T) {
 	}
 }
 
-func TestHmacTruncation(t *testing.T) {
+func TestHMACTruncation(t *testing.T) {
 	for i, test := range hmacTests {
-		cipher, err := mac.NewHmac(test.hashAlg, test.key, test.tagSize)
+		cipher, err := mac.NewHMAC(test.hashAlg, test.key, test.tagSize)
 		if err != nil {
 			t.Errorf("cannot create new mac in test case %d: %s", i, err)
 		}
-		mac, _ := cipher.ComputeMac(test.data)
+		mac, _ := cipher.ComputeMAC(test.data)
 		for i := 1; i < len(mac); i++ {
 			tmp := mac[:i]
-			valid, _ := cipher.VerifyMac(tmp, test.data)
-			if valid {
+			err := cipher.VerifyMAC(tmp, test.data)
+			if err == nil {
 				t.Errorf("test case %d: truncated MAC should be invalid", i)
 			}
 		}

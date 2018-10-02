@@ -50,10 +50,10 @@ func TestPrimitiveSetBasic(t *testing.T) {
 	// generate test keys
 	keys := createKeyset()
 	// add all test primitives
-	macs := make([]testutil.DummyMac, len(keys))
+	macs := make([]testutil.DummyMAC, len(keys))
 	entries := make([]*tink.Entry, len(macs))
 	for i := 0; i < len(macs); i++ {
-		macs[i] = testutil.DummyMac{Name: fmt.Sprintf("Mac#%d", i)}
+		macs[i] = testutil.DummyMAC{Name: fmt.Sprintf("Mac#%d", i)}
 		entries[i], err = ps.Add(macs[i], keys[i])
 		if err != nil {
 			t.Errorf("unexpected error when adding mac%d: %s", i, err)
@@ -64,7 +64,7 @@ func TestPrimitiveSetBasic(t *testing.T) {
 	ps.Primary = entries[primaryID]
 
 	// check raw primitive
-	rawMacs := []testutil.DummyMac{macs[3], macs[4]}
+	rawMacs := []testutil.DummyMAC{macs[3], macs[4]}
 	rawStatuses := []tinkpb.KeyStatusType{keys[3].Status, keys[4].Status}
 	rawPrefixTypes := []tinkpb.OutputPrefixType{keys[3].OutputPrefixType, keys[4].OutputPrefixType}
 	rawEntries, err := ps.RawEntries()
@@ -75,7 +75,7 @@ func TestPrimitiveSetBasic(t *testing.T) {
 		t.Errorf("raw primitives do not match input")
 	}
 	// check tink primitives, same id
-	tinkMacs := []testutil.DummyMac{macs[0], macs[5]}
+	tinkMacs := []testutil.DummyMAC{macs[0], macs[5]}
 	tinkStatuses := []tinkpb.KeyStatusType{keys[0].Status, keys[5].Status}
 	tinkPrefixTypes := []tinkpb.OutputPrefixType{keys[0].OutputPrefixType, keys[5].OutputPrefixType}
 	prefix, _ := tink.OutputPrefix(keys[0])
@@ -87,7 +87,7 @@ func TestPrimitiveSetBasic(t *testing.T) {
 		t.Errorf("tink primitives do not match the input key")
 	}
 	// check another tink primitive
-	tinkMacs = []testutil.DummyMac{macs[2]}
+	tinkMacs = []testutil.DummyMAC{macs[2]}
 	tinkStatuses = []tinkpb.KeyStatusType{keys[2].Status}
 	tinkPrefixTypes = []tinkpb.OutputPrefixType{keys[2].OutputPrefixType}
 	prefix, _ = tink.OutputPrefix(keys[2])
@@ -99,7 +99,7 @@ func TestPrimitiveSetBasic(t *testing.T) {
 		t.Errorf("tink primitives do not match the input key")
 	}
 	//check legacy primitives
-	legacyMacs := []testutil.DummyMac{macs[1]}
+	legacyMacs := []testutil.DummyMAC{macs[1]}
 	legacyStatuses := []tinkpb.KeyStatusType{keys[1].Status}
 	legacyPrefixTypes := []tinkpb.OutputPrefixType{keys[1].OutputPrefixType}
 	legacyPrefix, _ := tink.OutputPrefix(keys[1])
@@ -119,18 +119,18 @@ func TestAddWithInvalidInput(t *testing.T) {
 	if _, err := ps.Add(nil, key); err == nil {
 		t.Errorf("expect an error when primitive input is nil")
 	}
-	if _, err := ps.Add(*new(testutil.DummyMac), nil); err == nil {
+	if _, err := ps.Add(*new(testutil.DummyMAC), nil); err == nil {
 		t.Errorf("expect an error when key input is nil")
 	}
 	// unknown prefix type
 	invalidKey := testutil.NewDummyKey(0, tinkpb.KeyStatusType_ENABLED, tinkpb.OutputPrefixType_UNKNOWN_PREFIX)
-	if _, err := ps.Add(*new(testutil.DummyMac), invalidKey); err == nil {
+	if _, err := ps.Add(*new(testutil.DummyMAC), invalidKey); err == nil {
 		t.Errorf("expect an error when key is invalid")
 	}
 }
 
 func validateEntryList(entries []*tink.Entry,
-	macs []testutil.DummyMac,
+	macs []testutil.DummyMAC,
 	statuses []tinkpb.KeyStatusType,
 	prefixTypes []tinkpb.OutputPrefixType) bool {
 	if len(entries) != len(macs) {
@@ -144,17 +144,17 @@ func validateEntryList(entries []*tink.Entry,
 	return true
 }
 
-// Compares an entry with the testutil.DummyMac that was used to create the entry
+// Compares an entry with the testutil.DummyMAC that was used to create the entry
 func validateEntry(entry *tink.Entry,
-	testMac testutil.DummyMac,
+	testMac testutil.DummyMAC,
 	status tinkpb.KeyStatusType,
 	outputPrefixType tinkpb.OutputPrefixType) bool {
 	if entry.Status != status || entry.PrefixType != outputPrefixType {
 		return false
 	}
-	var dummyMac = entry.Primitive.(testutil.DummyMac)
+	var dummyMac = entry.Primitive.(testutil.DummyMAC)
 	data := []byte{1, 2, 3, 4, 5}
-	digest, err := dummyMac.ComputeMac(data)
+	digest, err := dummyMac.ComputeMAC(data)
 	if err != nil || !reflect.DeepEqual(append(data, testMac.Name...), digest) {
 		return false
 	}

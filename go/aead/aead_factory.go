@@ -20,30 +20,29 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-// GetPrimitive returns a Aead primitive from the given keyset handle.
-func GetPrimitive(handle *tink.KeysetHandle) (tink.Aead, error) {
-	return PrimitiveWithKeyManager(handle, nil /*keyManager*/)
+// New returns a AEAD primitive from the given keyset handle.
+func New(handle *tink.KeysetHandle) (tink.AEAD, error) {
+	return NewWithKeyManager(handle, nil /*keyManager*/)
 }
 
-// PrimitiveWithKeyManager returns a Aead primitive from the given keyset handle and custom key
-// manager.
-func PrimitiveWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.Aead, error) {
+// NewWithKeyManager returns a AEAD primitive from the given keyset handle and custom key manager.
+func NewWithKeyManager(kh *tink.KeysetHandle, km tink.KeyManager) (tink.AEAD, error) {
 	ps, err := tink.PrimitivesWithKeyManager(kh, km)
 	if err != nil {
 		return nil, fmt.Errorf("aead_factory: cannot obtain primitive set: %s", err)
 	}
-	var ret tink.Aead = newPrimitiveSet(ps)
+	var ret tink.AEAD = newPrimitiveSet(ps)
 	return ret, nil
 }
 
-// primitiveSet is an Aead implementation that uses the underlying primitive set for encryption
+// primitiveSet is an AEAD implementation that uses the underlying primitive set for encryption
 // and decryption.
 type primitiveSet struct {
 	ps *tink.PrimitiveSet
 }
 
-// Asserts that primitiveSet implements the Aead interface.
-var _ tink.Aead = (*primitiveSet)(nil)
+// Asserts that primitiveSet implements the AEAD interface.
+var _ tink.AEAD = (*primitiveSet)(nil)
 
 func newPrimitiveSet(ps *tink.PrimitiveSet) *primitiveSet {
 	ret := new(primitiveSet)
@@ -55,7 +54,7 @@ func newPrimitiveSet(ps *tink.PrimitiveSet) *primitiveSet {
 // It returns the concatenation of the primary's identifier and the ciphertext.
 func (a *primitiveSet) Encrypt(pt, ad []byte) ([]byte, error) {
 	primary := a.ps.Primary
-	var p tink.Aead = (primary.Primitive).(tink.Aead)
+	var p tink.AEAD = (primary.Primitive).(tink.AEAD)
 	ct, err := p.Encrypt(pt, ad)
 	if err != nil {
 		return nil, err
@@ -78,7 +77,7 @@ func (a *primitiveSet) Decrypt(ct, ad []byte) ([]byte, error) {
 		entries, err := a.ps.EntriesForPrefix(string(prefix))
 		if err == nil {
 			for i := 0; i < len(entries); i++ {
-				var p = (entries[i].Primitive).(tink.Aead)
+				var p = (entries[i].Primitive).(tink.AEAD)
 				pt, err := p.Decrypt(ctNoPrefix, ad)
 				if err == nil {
 					return pt, nil
@@ -90,7 +89,7 @@ func (a *primitiveSet) Decrypt(ct, ad []byte) ([]byte, error) {
 	entries, err := a.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			var p = (entries[i].Primitive).(tink.Aead)
+			var p = (entries[i].Primitive).(tink.AEAD)
 			pt, err := p.Decrypt(ct, ad)
 			if err == nil {
 				return pt, nil

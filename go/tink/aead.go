@@ -12,24 +12,23 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package tink defines interfaces for the crypto primitives that Tink supports.
 package tink
 
 /*
-Aead is the interface for authenticated encryption with additional authenticated data.
+AEAD is the interface for authenticated encryption with additional authenticated data.
 Implementations of this interface are secure against adaptive chosen ciphertext attacks.
 Encryption with additional data ensures authenticity and integrity of that data, but not
 its secrecy. (see RFC 5116, https://tools.ietf.org/html/rfc5116)
 */
-type Aead interface {
-	// Encrypt encrypts {@code plaintext} with {@code additionalData} as additional
+type AEAD interface {
+	// Encrypt encrypts plaintext with additionalData as additional
 	// authenticated data. The resulting ciphertext allows for checking
-	// authenticity and integrity of additional data ({@code additionalData}),
-	// but does not guarantee its secrecy.
-	Encrypt(plaintext []byte, additionalData []byte) ([]byte, error)
+	// authenticity and integrity of additional data additionalData,
+	// but there are no guarantees wrt. secrecy of that data.
+	Encrypt(plaintext, additionalData []byte) ([]byte, error)
 
-	// Decrypt decrypts {@code ciphertext} with {@code additionalData} as additional
+	// Decrypt decrypts ciphertext with {@code additionalData} as additional
 	// authenticated data. The decryption verifies the authenticity and integrity
 	// of the additional data, but there are no guarantees wrt. secrecy of that data.
-	Decrypt(ciphertext []byte, additionalData []byte) ([]byte, error)
+	Decrypt(ciphertext, additionalData []byte) ([]byte, error)
 }

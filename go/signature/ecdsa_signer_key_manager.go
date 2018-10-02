@@ -1,0 +1,158 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+package signature
+
+import (
+	"crypto/ecdsa"
+	"crypto/rand"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	subtleSignature "github.com/google/tink/go/subtle/signature"
+	"github.com/google/tink/go/subtle"
+	"github.com/google/tink/go/tink"
+	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
+)
+
+const (
+	// ECDSASignerKeyVersion is the maximum version of keys that this manager supports.
+	ECDSASignerKeyVersion = 0
+
+	// ECDSASignerTypeURL is the only type URL that this manager supports.
+	ECDSASignerTypeURL = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey"
+)
+
+// common errors
+var errInvalidECDSASignKey = fmt.Errorf("ecdsa_signer_key_manager: invalid key")
+var errInvalidECDSASignKeyFormat = fmt.Errorf("ecdsa_signer_key_manager: invalid key format")
+
+// ECDSASignerKeyManager is an implementation of KeyManager interface.
+// It generates new ECDSAPrivateKeys and produces new instances of ECDSASign subtle.
+type ECDSASignerKeyManager struct{}
+
+// Assert that ECDSASignerKeyManager implements the PrivateKeyManager interface.
+var _ tink.PrivateKeyManager = (*ECDSASignerKeyManager)(nil)
+
+// NewECDSASignerKeyManager creates a new ECDSASignerKeyManager.
+func NewECDSASignerKeyManager() *ECDSASignerKeyManager {
+	return new(ECDSASignerKeyManager)
+}
+
+// Primitive creates an ECDSASign subtle for the given serialized ECDSAPrivateKey proto.
+func (km *ECDSASignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+	if len(serializedKey) == 0 {
+		return nil, errInvalidECDSASignKey
+	}
+	key := new(ecdsapb.EcdsaPrivateKey)
+	if err := proto.Unmarshal(serializedKey, key); err != nil {
+		return nil, errInvalidECDSASignKey
+	}
+	if err := km.validateKey(key); err != nil {
+		return nil, err
+	}
+	hash, curve, encoding := GetECDSAParamNames(key.PublicKey.Params)
+	ret, err := subtleSignature.NewECDSASigner(hash, curve, encoding, key.KeyValue)
+	if err != nil {
+		return nil, fmt.Errorf("ecdsa_signer_key_manager: %s", err)
+	}
+	return ret, nil
+}
+
+// NewKey creates a new ECDSAPrivateKey according to specification the given serialized ECDSAKeyFormat.
+func (km *ECDSASignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+	if len(serializedKeyFormat) == 0 {
+		return nil, errInvalidECDSASignKeyFormat
+	}
+	keyFormat := new(ecdsapb.EcdsaKeyFormat)
+	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
+		return nil, fmt.Errorf("ecdsa_signer_key_manager: invalid key format: %s", err)
+	}
+	if err := km.validateKeyFormat(keyFormat); err != nil {
+		return nil, fmt.Errorf("ecdsa_signer_key_manager: %s", err)
+	}
+	// generate key
+	params := keyFormat.Params
+	curve := tink.GetCurveName(params.Curve)
+	tmpKey, err := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
+	if err != nil {
+		return nil, fmt.Errorf("cannot generate ECDSA key: %s", err)
+	}
+
+	keyValue := tmpKey.D.Bytes()
+	pub := NewECDSAPublicKey(ECDSASignerKeyVersion, params, tmpKey.X.Bytes(), tmpKey.Y.Bytes())
+	priv := NewECDSAPrivateKey(ECDSASignerKeyVersion, pub, keyValue)
+	return priv, nil
+}
+
+// NewKeyData creates a new KeyData according to specification in  the given
+// serialized ECDSAKeyFormat. It should be used solely by the key management API.
+func (km *ECDSASignerKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+	key, err := km.NewKey(serializedKeyFormat)
+	if err != nil {
+		return nil, err
+	}
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		return nil, errInvalidECDSASignKeyFormat
+	}
+	return &tinkpb.KeyData{
+		TypeUrl:         ECDSASignerTypeURL,
+		Value:           serializedKey,
+		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
+	}, nil
+}
+
+// PublicKeyData extracts the public key data from the private key.
+func (km *ECDSASignerKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkpb.KeyData, error) {
+	privKey := new(ecdsapb.EcdsaPrivateKey)
+	if err := proto.Unmarshal(serializedPrivKey, privKey); err != nil {
+		return nil, errInvalidECDSASignKey
+	}
+	serializedPubKey, err := proto.Marshal(privKey.PublicKey)
+	if err != nil {
+		return nil, errInvalidECDSASignKey
+	}
+	return &tinkpb.KeyData{
+		TypeUrl:         ECDSAVerifierTypeURL,
+		Value:           serializedPubKey,
+		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PUBLIC,
+	}, nil
+}
+
+// DoesSupport indicates if this key manager supports the given key type.
+func (km *ECDSASignerKeyManager) DoesSupport(typeURL string) bool {
+	return typeURL == ECDSASignerTypeURL
+}
+
+// TypeURL returns the key type of keys managed by this key manager.
+func (km *ECDSASignerKeyManager) TypeURL() string {
+	return ECDSASignerTypeURL
+}
+
+// validateKey validates the given ECDSAPrivateKey.
+func (km *ECDSASignerKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
+	if err := tink.ValidateVersion(key.Version, ECDSASignerKeyVersion); err != nil {
+		return fmt.Errorf("ecdsa_signer_key_manager: %s", err)
+	}
+	hash, curve, encoding := GetECDSAParamNames(key.PublicKey.Params)
+	return subtleSignature.ValidateECDSAParams(hash, curve, encoding)
+}
+
+// validateKeyFormat validates the given ECDSAKeyFormat.
+func (km *ECDSASignerKeyManager) validateKeyFormat(format *ecdsapb.EcdsaKeyFormat) error {
+	hash, curve, encoding := GetECDSAParamNames(format.Params)
+	return subtleSignature.ValidateECDSAParams(hash, curve, encoding)
+}

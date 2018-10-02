@@ -21,7 +21,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
-	subteAead "github.com/google/tink/go/subtle/aead"
+	subteAEAD "github.com/google/tink/go/subtle/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
@@ -30,32 +30,32 @@ import (
 
 var keySizes = []uint32{16, 24, 32}
 
-func TestNewAesGcmKeyManager(t *testing.T) {
-	keyManager := aead.NewAesGcmKeyManager()
+func TestNewAESGCMKeyManager(t *testing.T) {
+	keyManager := aead.NewAESGCMKeyManager()
 	if keyManager == nil {
-		t.Errorf("NewAesGcmKeyManager() returns nil")
+		t.Errorf("NewAESGCMKeyManager() returns nil")
 	}
 }
 
-func TestAesGcmGetPrimitiveBasic(t *testing.T) {
-	keyManager := aead.NewAesGcmKeyManager()
+func TestAESGCMGetPrimitiveBasic(t *testing.T) {
+	keyManager := aead.NewAESGCMKeyManager()
 	for _, keySize := range keySizes {
-		key := testutil.NewAesGcmKey(uint32(keySize))
+		key := testutil.NewAESGCMKey(uint32(keySize))
 		serializedKey, _ := proto.Marshal(key)
 		p, err := keyManager.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
-		if err := validateAesGcmPrimitive(p, key); err != nil {
+		if err := validateAESGCMPrimitive(p, key); err != nil {
 			t.Errorf("%s", err)
 		}
 	}
 }
 
-func TestAesGcmGetPrimitiveWithInvalidInput(t *testing.T) {
-	keyManager := aead.NewAesGcmKeyManager()
-	// invalid AesGcmKey
-	testKeys := genInvalidAesGcmKeys()
+func TestAESGCMGetPrimitiveWithInvalidInput(t *testing.T) {
+	keyManager := aead.NewAESGCMKeyManager()
+	// invalid AESGCMKey
+	testKeys := genInvalidAESGCMKeys()
 	for i := 0; i < len(testKeys); i++ {
 		serializedKey, _ := proto.Marshal(testKeys[i])
 		if _, err := keyManager.Primitive(serializedKey); err == nil {
@@ -72,9 +72,9 @@ func TestAesGcmGetPrimitiveWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestAesGcmNewKeyMultipleTimes(t *testing.T) {
-	km := aead.NewAesGcmKeyManager()
-	format := aead.NewAesGcmKeyFormat(32)
+func TestAESGCMNewKeyMultipleTimes(t *testing.T) {
+	km := aead.NewAESGCMKeyManager()
+	format := aead.NewAESGCMKeyFormat(32)
 	serializedFormat, _ := proto.Marshal(format)
 	keys := make(map[string]bool)
 	nTest := 26
@@ -92,26 +92,26 @@ func TestAesGcmNewKeyMultipleTimes(t *testing.T) {
 	}
 }
 
-func TestAesGcmNewKeyBasic(t *testing.T) {
-	keyManager := aead.NewAesGcmKeyManager()
+func TestAESGCMNewKeyBasic(t *testing.T) {
+	keyManager := aead.NewAESGCMKeyManager()
 	for _, keySize := range keySizes {
-		format := aead.NewAesGcmKeyFormat(uint32(keySize))
+		format := aead.NewAESGCMKeyFormat(uint32(keySize))
 		serializedFormat, _ := proto.Marshal(format)
 		m, err := keyManager.NewKey(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
 		key := m.(*gcmpb.AesGcmKey)
-		if err := validateAesGcmKey(key, format); err != nil {
+		if err := validateAESGCMKey(key, format); err != nil {
 			t.Errorf("%s", err)
 		}
 	}
 }
 
-func TestAesGcmNewKeyWithInvalidInput(t *testing.T) {
-	keyManager := aead.NewAesGcmKeyManager()
+func TestAESGCMNewKeyWithInvalidInput(t *testing.T) {
+	keyManager := aead.NewAESGCMKeyManager()
 	// bad format
-	badFormats := genInvalidAesGcmKeyFormats()
+	badFormats := genInvalidAESGCMKeyFormats()
 	for i := 0; i < len(badFormats); i++ {
 		serializedFormat, _ := proto.Marshal(badFormats[i])
 		if _, err := keyManager.NewKey(serializedFormat); err == nil {
@@ -128,16 +128,16 @@ func TestAesGcmNewKeyWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestAesGcmNewKeyDataBasic(t *testing.T) {
-	keyManager := aead.NewAesGcmKeyManager()
+func TestAESGCMNewKeyDataBasic(t *testing.T) {
+	keyManager := aead.NewAESGCMKeyManager()
 	for _, keySize := range keySizes {
-		format := aead.NewAesGcmKeyFormat(uint32(keySize))
+		format := aead.NewAESGCMKeyFormat(uint32(keySize))
 		serializedFormat, _ := proto.Marshal(format)
 		keyData, err := keyManager.NewKeyData(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
-		if keyData.TypeUrl != aead.AesGcmTypeURL {
+		if keyData.TypeUrl != aead.AESGCMTypeURL {
 			t.Errorf("incorrect type url")
 		}
 		if keyData.KeyMaterialType != tinkpb.KeyData_SYMMETRIC {
@@ -147,15 +147,15 @@ func TestAesGcmNewKeyDataBasic(t *testing.T) {
 		if err := proto.Unmarshal(keyData.Value, key); err != nil {
 			t.Errorf("incorrect key value")
 		}
-		if err := validateAesGcmKey(key, format); err != nil {
+		if err := validateAESGCMKey(key, format); err != nil {
 			t.Errorf("%s", err)
 		}
 	}
 }
 
-func TestAesGcmNewKeyDataWithInvalidInput(t *testing.T) {
-	keyManager := aead.NewAesGcmKeyManager()
-	badFormats := genInvalidAesGcmKeyFormats()
+func TestAESGCMNewKeyDataWithInvalidInput(t *testing.T) {
+	keyManager := aead.NewAESGCMKeyManager()
+	badFormats := genInvalidAESGCMKeyFormats()
 	for i := 0; i < len(badFormats); i++ {
 		serializedFormat, _ := proto.Marshal(badFormats[i])
 		if _, err := keyManager.NewKeyData(serializedFormat); err == nil {
@@ -172,64 +172,64 @@ func TestAesGcmNewKeyDataWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestAesGcmDoesSupport(t *testing.T) {
-	keyManager := aead.NewAesGcmKeyManager()
-	if !keyManager.DoesSupport(aead.AesGcmTypeURL) {
-		t.Errorf("AesGcmKeyManager must support %s", aead.AesGcmTypeURL)
+func TestAESGCMDoesSupport(t *testing.T) {
+	keyManager := aead.NewAESGCMKeyManager()
+	if !keyManager.DoesSupport(aead.AESGCMTypeURL) {
+		t.Errorf("AESGCMKeyManager must support %s", aead.AESGCMTypeURL)
 	}
 	if keyManager.DoesSupport("some bad type") {
-		t.Errorf("AesGcmKeyManager must support only %s", aead.AesGcmTypeURL)
+		t.Errorf("AESGCMKeyManager must support only %s", aead.AESGCMTypeURL)
 	}
 }
 
-func TestAesGcmTypeURL(t *testing.T) {
-	keyManager := aead.NewAesGcmKeyManager()
-	if keyManager.TypeURL() != aead.AesGcmTypeURL {
+func TestAESGCMTypeURL(t *testing.T) {
+	keyManager := aead.NewAESGCMKeyManager()
+	if keyManager.TypeURL() != aead.AESGCMTypeURL {
 		t.Errorf("incorrect key type")
 	}
 }
 
-func genInvalidAesGcmKeys() []proto.Message {
+func genInvalidAESGCMKeys() []proto.Message {
 	return []proto.Message{
-		// not a AesGcmKey
-		aead.NewAesGcmKeyFormat(32),
+		// not a AESGCMKey
+		aead.NewAESGCMKeyFormat(32),
 		// bad key size
-		aead.NewAesGcmKey(aead.AesGcmKeyVersion, random.GetRandomBytes(17)),
-		aead.NewAesGcmKey(aead.AesGcmKeyVersion, random.GetRandomBytes(25)),
-		aead.NewAesGcmKey(aead.AesGcmKeyVersion, random.GetRandomBytes(33)),
+		aead.NewAESGCMKey(aead.AESGCMKeyVersion, random.GetRandomBytes(17)),
+		aead.NewAESGCMKey(aead.AESGCMKeyVersion, random.GetRandomBytes(25)),
+		aead.NewAESGCMKey(aead.AESGCMKeyVersion, random.GetRandomBytes(33)),
 		// bad version
-		aead.NewAesGcmKey(aead.AesGcmKeyVersion+1, random.GetRandomBytes(16)),
+		aead.NewAESGCMKey(aead.AESGCMKeyVersion+1, random.GetRandomBytes(16)),
 	}
 }
 
-func genInvalidAesGcmKeyFormats() []proto.Message {
+func genInvalidAESGCMKeyFormats() []proto.Message {
 	return []proto.Message{
-		// not AesGcmKeyFormat
-		aead.NewAesGcmKey(aead.AesGcmKeyVersion, random.GetRandomBytes(16)),
+		// not AESGCMKeyFormat
+		aead.NewAESGCMKey(aead.AESGCMKeyVersion, random.GetRandomBytes(16)),
 		// invalid key size
-		aead.NewAesGcmKeyFormat(uint32(15)),
-		aead.NewAesGcmKeyFormat(uint32(23)),
-		aead.NewAesGcmKeyFormat(uint32(31)),
+		aead.NewAESGCMKeyFormat(uint32(15)),
+		aead.NewAESGCMKeyFormat(uint32(23)),
+		aead.NewAESGCMKeyFormat(uint32(31)),
 	}
 }
 
-func validateAesGcmKey(key *gcmpb.AesGcmKey, format *gcmpb.AesGcmKeyFormat) error {
+func validateAESGCMKey(key *gcmpb.AesGcmKey, format *gcmpb.AesGcmKeyFormat) error {
 	if uint32(len(key.KeyValue)) != format.KeySize {
 		return fmt.Errorf("incorrect key size")
 	}
-	if key.Version != aead.AesGcmKeyVersion {
+	if key.Version != aead.AESGCMKeyVersion {
 		return fmt.Errorf("incorrect key version")
 	}
 	// try to encrypt and decrypt
-	p, err := subteAead.NewAesGcm(key.KeyValue)
+	p, err := subteAEAD.NewAESGCM(key.KeyValue)
 	if err != nil {
 		return fmt.Errorf("invalid key")
 	}
-	return validateAesGcmPrimitive(p, key)
+	return validateAESGCMPrimitive(p, key)
 }
 
-func validateAesGcmPrimitive(p interface{}, key *gcmpb.AesGcmKey) error {
-	cipher := p.(*subteAead.AesGcm)
+func validateAESGCMPrimitive(p interface{}, key *gcmpb.AesGcmKey) error {
+	cipher := p.(*subteAEAD.AESGCM)
 	if !bytes.Equal(cipher.Key, key.KeyValue) {
 		return fmt.Errorf("key and primitive don't match")
 	}
