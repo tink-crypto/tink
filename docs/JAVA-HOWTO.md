@@ -184,7 +184,7 @@ e.g., writing to a file:
     // and write it to a file.
     String keysetFilename = "my_keyset.json";
     CleartextKeysetHandle.write(keysetHandle, JsonKeysetWriter.withFile(
-        new File(keysetFilename));
+        new File(keysetFilename)));
 ```
 
 Storing cleartext keysets on disk is not recommended. Tink supports encrypting
