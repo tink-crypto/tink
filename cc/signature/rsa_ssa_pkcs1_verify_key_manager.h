@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef THIRD_PARTY_TINK_CC_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
-#define THIRD_PARTY_TINK_CC_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
+#ifndef TINK_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
+#define TINK_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
 
 #include <algorithm>
 #include <vector>
@@ -72,4 +72,4 @@ class RsaSsaPkcs1VerifyKeyManager
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // THIRD_PARTY_TINK_CC_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
+#endif  // TINK_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
