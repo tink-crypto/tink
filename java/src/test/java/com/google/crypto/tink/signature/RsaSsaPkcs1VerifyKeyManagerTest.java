@@ -20,8 +20,10 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.TestUtil.BytesMutation;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.subtle.Hex;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,6 +78,18 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
         verifier.verify(t.sig, t.msg);
       } catch (GeneralSecurityException e) {
         fail("Valid signature, should not throw exception" + e);
+      }
+      for (BytesMutation mutation : TestUtil.generateMutations(t.sig)) {
+        try {
+          verifier.verify(mutation.value, t.msg);
+          fail(
+              String.format(
+                  "Invalid signature, should have thrown exception : sig = %s, msg = %s,"
+                      + " description = %s",
+                  Hex.encode(mutation.value), Hex.encode(t.msg), mutation.description));
+        } catch (GeneralSecurityException expected) {
+          // Expected.
+        }
       }
     }
   }

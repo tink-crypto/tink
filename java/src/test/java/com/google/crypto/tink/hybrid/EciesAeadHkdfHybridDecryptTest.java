@@ -22,6 +22,8 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.TestUtil.BytesMutation;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -29,6 +31,7 @@ import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.CurveType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -75,32 +78,32 @@ public class EciesAeadHkdfHybridDecryptTest {
 
     assertArrayEquals(plaintext, decrypted);
 
-    // Changes each bit of ciphertext and makes sure that the decryption failed. This test
-    // implicitly checks the modification of public key and the raw ciphertext.
-    for (int bytes = 0; bytes < ciphertext.length; bytes++) {
-      for (int bit = 0; bit < 8; bit++) {
-        byte[] modifiedCiphertext = Arrays.copyOf(ciphertext, ciphertext.length);
-        modifiedCiphertext[bytes] ^= (byte) (1 << bit);
-        try {
-          hybridDecrypt.decrypt(modifiedCiphertext, context);
-          fail("Invalid ciphertext, should have thrown exception");
-        } catch (GeneralSecurityException expected) {
-          // Expected
-        }
+    // Modifies ciphertext and makes sure that the decryption failed. This test implicitly checks
+    // the modification of public key and the raw ciphertext.
+    for (BytesMutation mutation : TestUtil.generateMutations(ciphertext)) {
+      try {
+        hybridDecrypt.decrypt(mutation.value, context);
+        fail(
+            String.format(
+                "Invalid ciphertext, should have thrown exception: ciphertext = %s,context = %s,"
+                    + " description = %s",
+                Hex.encode(mutation.value), Hex.encode(context), mutation.description));
+      } catch (GeneralSecurityException expected) {
+        // Expected
       }
     }
 
     // Modify context.
-    for (int bytes = 0; bytes < context.length; bytes++) {
-      for (int bit = 0; bit < 8; bit++) {
-        byte[] modifiedContext = Arrays.copyOf(context, context.length);
-        modifiedContext[bytes] ^= (byte) (1 << bit);
-        try {
-          hybridDecrypt.decrypt(ciphertext, modifiedContext);
-          fail("Invalid context, should have thrown exception");
-        } catch (GeneralSecurityException expected) {
-          // Expected
-        }
+    for (BytesMutation mutation : TestUtil.generateMutations(context)) {
+      try {
+        hybridDecrypt.decrypt(ciphertext, mutation.value);
+        fail(
+            String.format(
+                "Invalid context, should have thrown exception: context = %s, ciphertext = %s,"
+                    + " description = %s",
+                Hex.encode(mutation.value), Hex.encode(ciphertext), mutation.description));
+      } catch (GeneralSecurityException expected) {
+        // Expected
       }
     }
 

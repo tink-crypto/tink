@@ -75,10 +75,24 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.crypto.Cipher;
 
 /** Test helpers. */
 public class TestUtil {
+  /** A place holder to keep mutated bytes and its description. */
+  public static class BytesMutation {
+    public byte[] value;
+    public String description;
+
+    public BytesMutation(byte[] value, String description) {
+      this.value = value;
+      this.description = description;
+    }
+  }
+
   // This GCP KMS CryptoKey is restricted to the service account in {@code SERVICE_ACCOUNT_FILE}.
   public static final String RESTRICTED_CRYPTO_KEY_URI =
       String.format(
@@ -616,5 +630,33 @@ public class TestUtil {
       ret[i] = (int) (a[i] - (a[i] > Integer.MAX_VALUE ? (1L << 32) : 0));
     }
     return ret;
+  }
+
+  /**
+   * Generates mutations of {@code bytes}, e.g., flipping bits and truncating.
+   *
+   * @return a list of pairs of mutated value and mutation description.
+   */
+  public static List<BytesMutation> generateMutations(byte[] bytes) {
+    List<BytesMutation> res = new ArrayList<BytesMutation>();
+
+    // Flip bits.
+    for (int i = 0; i < bytes.length; i++) {
+      for (int j = 0; j < 8; j++) {
+        byte[] modifiedBytes = Arrays.copyOf(bytes, bytes.length);
+        modifiedBytes[i] = (byte) (modifiedBytes[i] ^ (1 << j));
+        res.add(new BytesMutation(modifiedBytes, String.format("Flip bit %d of data", i)));
+      }
+    }
+
+    // Truncate bytes.
+    for (int i = 0; i < bytes.length; i++) {
+      byte[] modifiedBytes = Arrays.copyOf(bytes, i);
+      res.add(new BytesMutation(modifiedBytes, String.format("Truncate upto %d bytes of data", i)));
+    }
+
+    // Append an extra byte.
+    res.add(new BytesMutation(Arrays.copyOf(bytes, bytes.length + 1), "Append an extra zero byte"));
+    return res;
   }
 }

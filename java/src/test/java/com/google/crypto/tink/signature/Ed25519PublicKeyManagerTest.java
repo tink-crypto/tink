@@ -16,18 +16,19 @@
 
 package com.google.crypto.tink.signature;
 
-import static com.google.crypto.tink.TestUtil.assertExceptionContains;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.TestUtil.BytesMutation;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,37 +60,29 @@ public class Ed25519PublicKeyManagerTest {
       fail("Did not expect GeneralSecurityException: " + e);
     }
 
-    // Flip bits in message.
-    for (int i = 0; i < message.length; i++) {
-      byte[] copy = Arrays.copyOf(message, message.length);
-      copy[i] = (byte) (copy[i] ^ 0xff);
+    for (BytesMutation mutation : TestUtil.generateMutations(message)) {
       try {
-        verifier.verify(signature, copy);
-        fail("Expected GeneralSecurityException");
-      } catch (GeneralSecurityException e) {
-        assertExceptionContains(e, "Signature check failed.");
+        verifier.verify(signature, mutation.value);
+        fail(
+            String.format(
+                "Invalid message, should have thrown exception: sig = %s, msg = %s,"
+                    + " description = %s",
+                Hex.encode(signature), Hex.encode(mutation.value), mutation.description));
+      } catch (GeneralSecurityException expected) {
+        // Expected.
       }
     }
 
-    // Flip bits in signature.
-    // Flip the last byte.
-    byte[] copySig = Arrays.copyOf(signature, signature.length);
-    copySig[copySig.length - 1] = (byte) (copySig[copySig.length - 1] ^ 0xff);
-    try {
-      verifier.verify(copySig, message);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "Signature check failed.");
-    }
-    // Flip other bytes.
-    for (int i = 0; i < signature.length - 1; i++) {
-      byte[] copy = Arrays.copyOf(signature, signature.length);
-      copy[i] = (byte) (copy[i] ^ 0xff);
+    for (BytesMutation mutation : TestUtil.generateMutations(signature)) {
       try {
-        verifier.verify(copy, message);
-        fail("Expected GeneralSecurityException");
-      } catch (GeneralSecurityException e) {
-        assertExceptionContains(e, "Signature check failed.");
+        verifier.verify(mutation.value, message);
+        fail(
+            String.format(
+                "Invalid signature, should have thrown exception: signature = %s, msg = %s,"
+                    + " description = %s",
+                Hex.encode(mutation.value), Hex.encode(message), mutation.description));
+      } catch (GeneralSecurityException expected) {
+        // Expected.
       }
     }
   }

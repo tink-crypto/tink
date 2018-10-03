@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.TestUtil.BytesMutation;
 import com.google.crypto.tink.WycheproofTestUtil;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
@@ -32,7 +33,6 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -215,26 +215,14 @@ public class EcdsaVerifyJceTest {
       // Verify with EcdsaVerifyJce.
       EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, HashType.SHA256, encoding);
 
-      // Flip bits.
-      for (int i = 0; i < signature.length; i++) {
-        for (int j = 0; j < 8; j++) {
-          byte[] modifiedSignature = Arrays.copyOf(signature, signature.length);
-          modifiedSignature[i] = (byte) (modifiedSignature[i] ^ (1 << j));
-          try {
-            verifier.verify(modifiedSignature, message);
-            fail("Invalid signature, should have thrown exception");
-          } catch (GeneralSecurityException expected) {
-            // Expected.
-          }
-        }
-      }
-
-      // Truncate the signature.
-      for (int i = 0; i < signature.length; i++) {
-        byte[] modifiedSignature = Arrays.copyOf(signature, i);
+      for (BytesMutation mutation : TestUtil.generateMutations(signature)) {
         try {
-          verifier.verify(modifiedSignature, message);
-          fail("Invalid signature, should have thrown exception");
+          verifier.verify(mutation.value, message);
+          fail(
+              String.format(
+                  "Invalid signature, should have thrown exception : signature = %s, message = %s, "
+                      + " description = %s",
+                  Hex.encode(mutation.value), message, mutation.description));
         } catch (GeneralSecurityException expected) {
           // Expected.
         }

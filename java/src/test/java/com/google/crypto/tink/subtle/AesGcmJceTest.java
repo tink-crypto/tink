@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.TestUtil.BytesMutation;
 import com.google.crypto.tink.WycheproofTestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -97,29 +98,14 @@ public class AesGcmJceTest {
     AesGcmJce gcm = new AesGcmJce(key);
     byte[] ciphertext = gcm.encrypt(message, aad);
 
-    // Flipping bits
-    for (int b = 0; b < ciphertext.length; b++) {
-      for (int bit = 0; bit < 8; bit++) {
-        byte[] modified = Arrays.copyOf(ciphertext, ciphertext.length);
-        modified[b] ^= (byte) (1 << bit);
-        try {
-          byte[] unused = gcm.decrypt(modified, aad);
-          fail("Decrypting modified ciphertext should fail");
-        } catch (GeneralSecurityException ex) {
-          // This is expected.
-          // This could be a AeadBadTagException when the tag verification
-          // fails or some not yet specified Exception when the ciphertext is too short.
-          // In all cases a GeneralSecurityException or a subclass of it must be thrown.
-        }
-      }
-    }
-
-    // Truncate the message.
-    for (int length = 0; length < ciphertext.length; length++) {
-      byte[] modified = Arrays.copyOf(ciphertext, length);
+    for (BytesMutation mutation : TestUtil.generateMutations(ciphertext)) {
       try {
-        byte[] unused = gcm.decrypt(modified, aad);
-        fail("Decrypting modified ciphertext should fail");
+        byte[] unused = gcm.decrypt(mutation.value, aad);
+        fail(
+            String.format(
+                "Decrypting modified ciphertext should fail : ciphertext = %s, aad = %s,"
+                    + " description = %s",
+                Hex.encode(mutation.value), Hex.encode(aad), mutation.description));
       } catch (GeneralSecurityException ex) {
         // This is expected.
         // This could be a AeadBadTagException when the tag verification
@@ -129,19 +115,19 @@ public class AesGcmJceTest {
     }
 
     // Modify AAD
-    for (int b = 0; b < aad.length; b++) {
-      for (int bit = 0; bit < 8; bit++) {
-        byte[] modified = Arrays.copyOf(aad, aad.length);
-        modified[b] ^= (byte) (1 << bit);
-        try {
-          byte[] unused = gcm.decrypt(ciphertext, modified);
-          fail("Decrypting with modified aad should fail");
-        } catch (GeneralSecurityException ex) {
-          // This is expected.
-          // This could be a AeadBadTagException when the tag verification
-          // fails or some not yet specified Exception when the ciphertext is too short.
-          // In all cases a GeneralSecurityException or a subclass of it must be thrown.
-        }
+    for (BytesMutation mutation : TestUtil.generateMutations(aad)) {
+      try {
+        byte[] unused = gcm.decrypt(ciphertext, mutation.value);
+        fail(
+            String.format(
+                "Decrypting with modified aad should fail: ciphertext = %s, aad = %s,"
+                    + " description = %s",
+                ciphertext, mutation.value, mutation.description));
+      } catch (GeneralSecurityException ex) {
+        // This is expected.
+        // This could be a AeadBadTagException when the tag verification
+        // fails or some not yet specified Exception when the ciphertext is too short.
+        // In all cases a GeneralSecurityException or a subclass of it must be thrown.
       }
     }
   }

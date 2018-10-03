@@ -20,11 +20,13 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.TestUtil;
+import com.google.crypto.tink.TestUtil.BytesMutation;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import java.security.GeneralSecurityException;
@@ -134,6 +136,18 @@ public class EcdsaVerifyKeyManagerTest {
         verifier.verify(t.sig, t.msg);
       } catch (GeneralSecurityException e) {
         fail("Valid signature, should not throw exception");
+      }
+      for (BytesMutation mutation : TestUtil.generateMutations(t.sig)) {
+        try {
+          verifier.verify(mutation.value, t.msg);
+          fail(
+              String.format(
+                  "Invalid signature, should have thrown exception : sig = %s, msg = %s,"
+                      + " description = %s",
+                  Hex.encode(mutation.value), Hex.encode(t.msg), mutation.description));
+        } catch (GeneralSecurityException expected) {
+          // Expected.
+        }
       }
     }
   }
