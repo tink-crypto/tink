@@ -19,16 +19,16 @@ import (
 	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 )
 
-// NewHmacParams returns a new HmacParams.
-func NewHmacParams(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacParams {
+// NewHMACParams returns a new HMACParams.
+func NewHMACParams(hashType commonpb.HashType, tagSize uint32) *hmacpb.HmacParams {
 	return &hmacpb.HmacParams{
 		Hash:    hashType,
 		TagSize: tagSize,
 	}
 }
 
-// NewHmacKey returns a new HmacKey.
-func NewHmacKey(params *hmacpb.HmacParams, version uint32, keyValue []byte) *hmacpb.HmacKey {
+// NewHMACKey returns a new HMACKey.
+func NewHMACKey(params *hmacpb.HmacParams, version uint32, keyValue []byte) *hmacpb.HmacKey {
 	return &hmacpb.HmacKey{
 		Version:  version,
 		Params:   params,
@@ -36,8 +36,8 @@ func NewHmacKey(params *hmacpb.HmacParams, version uint32, keyValue []byte) *hma
 	}
 }
 
-// NewHmacKeyFormat returns a new HmacKeyFormat.
-func NewHmacKeyFormat(params *hmacpb.HmacParams, keySize uint32) *hmacpb.HmacKeyFormat {
+// NewHMACKeyFormat returns a new HMACKeyFormat.
+func NewHMACKeyFormat(params *hmacpb.HmacParams, keySize uint32) *hmacpb.HmacKeyFormat {
 	return &hmacpb.HmacKeyFormat{
 		Params:  params,
 		KeySize: keySize,

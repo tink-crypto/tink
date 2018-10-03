@@ -24,6 +24,7 @@ import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.auto.service.AutoService;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.Version;
 import com.google.crypto.tink.subtle.Validators;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,7 +42,7 @@ public final class GcpKmsClient implements KmsClient {
   /** The prefix of all keys stored in Google Cloud KMS. */
   public static final String PREFIX = "gcp-kms://";
 
-  private static final String APPLICATION_NAME = "Tink";
+  private static final String APPLICATION_NAME = "Tink/" + Version.TINK_VERSION;
   private CloudKMS client;
   private String keyUri;
 

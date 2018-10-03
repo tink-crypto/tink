@@ -18,16 +18,16 @@ import (
 	gcmpb "github.com/google/tink/proto/aes_gcm_go_proto"
 )
 
-// NewAesGcmKey returns a new AesGcmKey.
-func NewAesGcmKey(version uint32, keyValue []byte) *gcmpb.AesGcmKey {
+// NewAESGCMKey returns a new AESGCMKey.
+func NewAESGCMKey(version uint32, keyValue []byte) *gcmpb.AesGcmKey {
 	return &gcmpb.AesGcmKey{
 		Version:  version,
 		KeyValue: keyValue,
 	}
 }
 
-// NewAesGcmKeyFormat returns a new AesGcmKeyFormat.
-func NewAesGcmKeyFormat(keySize uint32) *gcmpb.AesGcmKeyFormat {
+// NewAESGCMKeyFormat returns a new AESGCMKeyFormat.
+func NewAESGCMKeyFormat(keySize uint32) *gcmpb.AesGcmKeyFormat {
 	return &gcmpb.AesGcmKeyFormat{
 		KeySize: keySize,
 	}

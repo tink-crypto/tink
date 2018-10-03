@@ -12,26 +12,18 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package signature provides implementations of the PublicKeySign and PublicKeyVerify primitives.
+// Package signature provides implementations of the Signer and Verifier primitives.
 package signature
 
 import (
 	"github.com/google/tink/go/tink"
 )
 
-// RegisterStandardKeyTypes registers standard Aead key types and their managers
-// with the Registry.
-func RegisterStandardKeyTypes() (bool, error) {
-	result, err := RegisterKeyManager(NewEcdsaSignKeyManager())
+// Register registers latest signature key types and their managers with the Registry.
+func Register() error {
+	err := tink.RegisterKeyManager(NewECDSASignerKeyManager())
 	if err != nil {
-		return result, err
+		return err
 	}
-	return RegisterKeyManager(NewEcdsaVerifyKeyManager())
-}
-
-// RegisterKeyManager registers the given keyManager for the key type given in
-// keyManager.KeyType(). It returns true if registration was successful, false if
-// there already exisits a key manager for the key type.
-func RegisterKeyManager(keyManager tink.KeyManager) (bool, error) {
-	return tink.RegisterKeyManager(keyManager)
+	return tink.RegisterKeyManager(NewECDSAVerifierKeyManager())
 }

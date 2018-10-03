@@ -13,8 +13,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef THIRD_PARTY_TINK_CC_UTIL_CONSTANTS_H_
-#define THIRD_PARTY_TINK_CC_UTIL_CONSTANTS_H_
+#ifndef TINK_UTIL_CONSTANTS_H_
+#define TINK_UTIL_CONSTANTS_H_
 
 namespace crypto {
 namespace tink {
@@ -25,4 +25,4 @@ extern const char kTypeGoogleapisCom[];
 }  // namespace crypto
 
 
-#endif  // THIRD_PARTY_TINK_CC_UTIL_CONSTANTS_H_
+#endif  // TINK_UTIL_CONSTANTS_H_

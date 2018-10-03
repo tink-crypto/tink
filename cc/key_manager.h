@@ -35,6 +35,11 @@ namespace tink {
 // is independent of the primitive of the corresponding KeyManager.
 class KeyFactory {
  public:
+  // Helper function which creates a factory which always fails with a specified
+  // status.
+  static std::unique_ptr<KeyFactory> AlwaysFailingFactory(
+      const crypto::tink::util::Status& status);
+
   // Generates a new random key, based on the specified 'key_format'.
   virtual
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>

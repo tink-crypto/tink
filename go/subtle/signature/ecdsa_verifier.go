@@ -16,6 +16,7 @@ package signature
 
 import (
 	"crypto/ecdsa"
+	"errors"
 	"fmt"
 	"hash"
 	"math/big"
@@ -24,45 +25,40 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-var errInvalidSignature = fmt.Errorf("ecdsa_verify: invalid signature")
+var errInvalidSignature = errors.New("ecdsa_verify: invalid signature")
 
-// EcdsaVerify is an implementation of PublicKeyVerify for ECDSA.
+// ECDSAVerifier is an implementation of Verifier for ECDSA.
 // At the moment, the implementation only accepts signatures with strict DER encoding.
-type EcdsaVerify struct {
+type ECDSAVerifier struct {
 	publicKey *ecdsa.PublicKey
 	hashFunc  func() hash.Hash
 	encoding  string
 }
 
-// Assert that EcdsaVerify implements the PublicKeyVerify interface.
-var _ tink.PublicKeyVerify = (*EcdsaVerify)(nil)
+// Assert that ECDSAVerifier implements the Verifier interface.
+var _ tink.Verifier = (*ECDSAVerifier)(nil)
 
-// NewEcdsaVerify creates a new instance of EcdsaVerify.
-func NewEcdsaVerify(hashAlg string,
-	curve string,
-	encoding string,
-	x []byte,
-	y []byte) (*EcdsaVerify, error) {
+// NewECDSAVerifier creates a new instance of ECDSAVerifier.
+func NewECDSAVerifier(hashAlg string, curve string, encoding string, x []byte, y []byte) (*ECDSAVerifier, error) {
 	publicKey := &ecdsa.PublicKey{
 		Curve: subtle.GetCurve(curve),
 		X:     new(big.Int).SetBytes(x),
 		Y:     new(big.Int).SetBytes(y),
 	}
-	return NewEcdsaVerifyFromPublicKey(hashAlg, encoding, publicKey)
+	return NewECDSAVerifierFromPublicKey(hashAlg, encoding, publicKey)
 }
 
-// NewEcdsaVerifyFromPublicKey creates a new instance of EcdsaVerify.
-func NewEcdsaVerifyFromPublicKey(hashAlg string, encoding string,
-	publicKey *ecdsa.PublicKey) (*EcdsaVerify, error) {
+// NewECDSAVerifierFromPublicKey creates a new instance of ECDSAVerifier.
+func NewECDSAVerifierFromPublicKey(hashAlg string, encoding string, publicKey *ecdsa.PublicKey) (*ECDSAVerifier, error) {
 	if publicKey.Curve == nil {
 		return nil, fmt.Errorf("ecdsa_verify: invalid curve")
 	}
 	curve := subtle.ConvertCurveName(publicKey.Curve.Params().Name)
-	if err := ValidateEcdsaParams(hashAlg, curve, encoding); err != nil {
+	if err := ValidateECDSAParams(hashAlg, curve, encoding); err != nil {
 		return nil, fmt.Errorf("ecdsa_verify: %s", err)
 	}
 	hashFunc := subtle.GetHashFunc(hashAlg)
-	return &EcdsaVerify{
+	return &ECDSAVerifier{
 		publicKey: publicKey,
 		hashFunc:  hashFunc,
 		encoding:  encoding,
@@ -71,15 +67,15 @@ func NewEcdsaVerifyFromPublicKey(hashAlg string, encoding string,
 
 // Verify verifies whether the given signature is valid for the given data.
 // It returns an error if the signature is not valid; nil otherwise.
-func (e *EcdsaVerify) Verify(signatureBytes []byte, data []byte) error {
-	signature, err := DecodeEcdsaSignature(signatureBytes, e.encoding)
+func (e *ECDSAVerifier) Verify(signatureBytes, data []byte) error {
+	signature, err := DecodeECDSASignerature(signatureBytes, e.encoding)
 	if err != nil {
 		return errInvalidSignature
 	}
 	hashed := subtle.ComputeHash(e.hashFunc, data)
 	valid := ecdsa.Verify(e.publicKey, hashed, signature.R, signature.S)
-	if valid {
-		return nil
+	if !valid {
+		return errInvalidSignature
 	}
-	return errInvalidSignature
+	return nil
 }

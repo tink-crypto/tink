@@ -44,58 +44,16 @@ using portable_proto::MessageLite;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 
-class EciesAeadHkdfPublicKeyFactory : public KeyFactory {
- public:
-  EciesAeadHkdfPublicKeyFactory() {}
-
-  // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(const portable_proto::MessageLite& key_format) const override;
-
-  // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(absl::string_view serialized_key_format) const override;
-
-  // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  NewKeyData(absl::string_view serialized_key_format) const override;
-};
-
-StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPublicKeyFactory::NewKey(
-    const portable_proto::MessageLite& key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED,
-                      "Operation not supported for public keys, "
-                      "please use EciesAeadHkdfPrivateKeyManager.");
-}
-
-StatusOr<std::unique_ptr<MessageLite>> EciesAeadHkdfPublicKeyFactory::NewKey(
-    absl::string_view serialized_key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED,
-                      "Operation not supported for public keys, "
-                      "please use EciesAeadHkdfPrivateKeyManager.");
-}
-
-StatusOr<std::unique_ptr<KeyData>> EciesAeadHkdfPublicKeyFactory::NewKeyData(
-    absl::string_view serialized_key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED,
-                      "Operation not supported for public keys, "
-                      "please use EciesAeadHkdfPrivateKeyManager.");
-}
-
-constexpr char EciesAeadHkdfPublicKeyManager::kKeyTypePrefix[];
-constexpr char EciesAeadHkdfPublicKeyManager::kKeyType[];
 constexpr uint32_t EciesAeadHkdfPublicKeyManager::kVersion;
 
 EciesAeadHkdfPublicKeyManager::EciesAeadHkdfPublicKeyManager()
-    : key_type_(kKeyType), key_factory_(new EciesAeadHkdfPublicKeyFactory()) {
-}
+    : key_factory_(KeyFactory::AlwaysFailingFactory(
+          util::Status(util::error::UNIMPLEMENTED,
+                       "Operation not supported for public keys, "
+                       "please use EciesAeadHkdfPrivateKeyManager."))) {}
 
 const KeyFactory& EciesAeadHkdfPublicKeyManager::get_key_factory() const {
   return *key_factory_;
-}
-
-const std::string& EciesAeadHkdfPublicKeyManager::get_key_type() const {
-  return key_type_;
 }
 
 uint32_t EciesAeadHkdfPublicKeyManager::get_version() const {

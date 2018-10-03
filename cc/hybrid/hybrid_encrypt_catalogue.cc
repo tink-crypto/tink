@@ -30,9 +30,9 @@ namespace {
 
 crypto::tink::util::StatusOr<std::unique_ptr<KeyManager<HybridEncrypt>>>
 CreateKeyManager(const std::string& type_url) {
-  if (type_url == EciesAeadHkdfPublicKeyManager::kKeyType) {
+  if (type_url == EciesAeadHkdfPublicKeyManager::static_key_type()) {
     std::unique_ptr<KeyManager<HybridEncrypt>> manager(
-        new EciesAeadHkdfPublicKeyManager());
+        absl::make_unique<EciesAeadHkdfPublicKeyManager>());
     return std::move(manager);
   }
   return ToStatusF(crypto::tink::util::error::NOT_FOUND,

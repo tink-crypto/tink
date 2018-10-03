@@ -184,7 +184,7 @@ e.g., writing to a file:
     // and write it to a file.
     String keysetFilename = "my_keyset.json";
     CleartextKeysetHandle.write(keysetHandle, JsonKeysetWriter.withFile(
-        new File(keysetFilename));
+        new File(keysetFilename)));
 ```
 
 Storing cleartext keysets on disk is not recommended. Tink supports encrypting
@@ -258,15 +258,14 @@ section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
 The following table summarizes Java implementations of primitives that are
 currently available or planned (the latter are listed in brackets).
 
-| Primitive          | Implementations                                |
-| ------------------ | ---------------------------------------------- |
-| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope,  |
-:                    : CHACHA20-POLY1305                              :
-| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING |
-| Deterministic AEAD | AES-SIV                                        |
-| MAC                | HMAC-SHA2                                      |
-| Digital Signatures | ECDSA over NIST curves, ED25519                |
-| Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)     |
+| Primitive          | Implementations                                                 |
+| ------------------ | --------------------------------------------------------------- |
+| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305 |
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING                  |
+| Deterministic AEAD | AES-SIV                                                         |
+| MAC                | HMAC-SHA2                                                       |
+| Digital Signatures | ECDSA over NIST curves, ED25519                                 |
+| Hybrid Encryption  | ECIES with AEAD and HKDF, (NaCl CryptoBox)                      |
 
 Exact listings of primitives and their implementations available in a release _x.y.z_ of Tink
 are given in a corresponding [`TinkConfig.TINK_x_y_z`](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/config/TinkConfig.java)-variable.

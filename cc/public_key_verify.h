@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PUBLIC_KEY_VERIFY_H_
-#define PUBLIC_KEY_VERIFY_H_
+#ifndef TINK_PUBLIC_KEY_VERIFY_H_
+#define TINK_PUBLIC_KEY_VERIFY_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/util/status.h"
@@ -44,4 +44,4 @@ class PublicKeyVerify {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // PUBLIC_KEY_VERIFY_H_
+#endif  // TINK_PUBLIC_KEY_VERIFY_H_

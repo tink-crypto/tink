@@ -85,11 +85,11 @@ class SignatureKeyTemplates {
 
   // Returns a KeyTemplate that generates new instances of RsaSsaPkcs1PrivateKey
   // with the following parameters:
-  //   - Modulus size in bits: 2048.
+  //   - Modulus size in bits: 3072.
   //   - Hash function: SHA256.
   //   - Public Exponent: 65537 (aka F4).
   //   - OutputPrefixType: TINK
-  static const google::crypto::tink::KeyTemplate& RsaSsaPkcs12048Sha256F4();
+  static const google::crypto::tink::KeyTemplate& RsaSsaPkcs13072Sha256F4();
 
   // Returns a KeyTemplate that generates new instances of RsaSsaPkcs1PrivateKey
   // with the following parameters:
@@ -101,13 +101,13 @@ class SignatureKeyTemplates {
 
   // Returns a KeyTemplate that generates new instances of RsaSsaPssPrivateKey
   // with the following parameters:
-  //   - Modulus size in bits: 2048.
+  //   - Modulus size in bits: 3072.
   //   - Signature hash: SHA256.
   //   - MGF1 hash: SHA256.
   //   - Salt length: 32 (i.e., SHA256's output length).
   //   - Public Exponent: 65537 (aka F4).
   //   - OutputPrefixType: TINK
-  static const google::crypto::tink::KeyTemplate& RsaSsaPss2048Sha256Sha256F4();
+  static const google::crypto::tink::KeyTemplate& RsaSsaPss3072Sha256Sha256F4();
 
   // Returns a KeyTemplate that generates new instances of RsaSsaPssPrivateKey
   // with the following parameters:

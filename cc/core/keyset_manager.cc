@@ -61,12 +61,12 @@ StatusOr<std::unique_ptr<KeysetManager>> KeysetManager::New(
 StatusOr<std::unique_ptr<KeysetManager>> KeysetManager::New(
     const KeysetHandle& keyset_handle) {
   auto manager = absl::make_unique<KeysetManager>();
+  absl::MutexLock lock(&manager->keyset_mutex_);
   manager->keyset_ = keyset_handle.get_keyset();
   return std::move(manager);
 }
 
 uint32_t KeysetManager::GenerateNewKeyId() {
-  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
   while (true) {
     uint32_t key_id = NewKeyId();
     bool already_exists = false;
@@ -81,7 +81,7 @@ uint32_t KeysetManager::GenerateNewKeyId() {
 }
 
 std::unique_ptr<KeysetHandle> KeysetManager::GetKeysetHandle() {
-  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
+  absl::MutexLock lock(&keyset_mutex_);
   std::unique_ptr<Keyset> keyset_copy(new Keyset(keyset_));
   std::unique_ptr<KeysetHandle> handle(
       new KeysetHandle(std::move(keyset_copy)));
@@ -89,7 +89,12 @@ std::unique_ptr<KeysetHandle> KeysetManager::GetKeysetHandle() {
 }
 
 StatusOr<uint32_t> KeysetManager::Add(const KeyTemplate& key_template) {
-  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
+  return Add(key_template, false);
+}
+
+crypto::tink::util::StatusOr<uint32_t> KeysetManager::Add(
+    const google::crypto::tink::KeyTemplate& key_template, bool as_primary) {
+  absl::MutexLock lock(&keyset_mutex_);
   auto key_data_result = Registry::NewKeyData(key_template);
   if (!key_data_result.ok()) return key_data_result.status();
   auto key_data = std::move(key_data_result.ValueOrDie());
@@ -99,22 +104,19 @@ StatusOr<uint32_t> KeysetManager::Add(const KeyTemplate& key_template) {
   key->set_status(KeyStatusType::ENABLED);
   key->set_key_id(key_id);
   key->set_output_prefix_type(key_template.output_prefix_type());
+  if (as_primary) {
+    keyset_.set_primary_key_id(key_id);
+  }
   return key_id;
 }
 
 StatusOr<uint32_t> KeysetManager::Rotate(const KeyTemplate& key_template) {
-  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
-  auto add_result = Add(key_template);
-  if (!add_result.ok()) return add_result.status();
-  auto key_id = add_result.ValueOrDie();
-  auto status = SetPrimary(key_id);
-  if (!status.ok()) return status;
-  return key_id;
+  return Add(key_template, true);
 }
 
 
 Status KeysetManager::Enable(uint32_t key_id) {
-  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
+  absl::MutexLock lock(&keyset_mutex_);
   for (auto& key : *(keyset_.mutable_key())) {
     if (key.key_id() == key_id) {
       if (key.status() != KeyStatusType::DISABLED &&
@@ -134,7 +136,7 @@ Status KeysetManager::Enable(uint32_t key_id) {
 }
 
 Status KeysetManager::Disable(uint32_t key_id) {
-  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
+  absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Cannot disable primary key (key_id %" PRIu32 ").",
@@ -159,7 +161,7 @@ Status KeysetManager::Disable(uint32_t key_id) {
 }
 
 Status KeysetManager::Delete(uint32_t key_id) {
-  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
+  absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Cannot delete primary key (key_id %" PRIu32 ").",
@@ -181,7 +183,7 @@ Status KeysetManager::Delete(uint32_t key_id) {
 }
 
 Status KeysetManager::Destroy(uint32_t key_id) {
-  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
+  absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Cannot destroy primary key (key_id %" PRIu32 ").",
@@ -208,7 +210,7 @@ Status KeysetManager::Destroy(uint32_t key_id) {
 }
 
 Status KeysetManager::SetPrimary(uint32_t key_id) {
-  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
+  absl::MutexLock lock(&keyset_mutex_);
   for (auto& key : keyset_.key()) {
     if (key.key_id() == key_id) {
       if (key.status() != KeyStatusType::ENABLED) {
@@ -225,8 +227,9 @@ Status KeysetManager::SetPrimary(uint32_t key_id) {
                    key_id);
 }
 
+
 int KeysetManager::KeyCount() const {
-  std::lock_guard<std::recursive_mutex> lock(keyset_mutex_);
+  absl::MutexLock lock(&keyset_mutex_);
   return keyset_.key_size();
 }
 

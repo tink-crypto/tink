@@ -147,7 +147,7 @@ EciesAeadHkdfPrivateKeyFactory::GetPublicKeyData(
   auto status = EciesAeadHkdfPrivateKeyManager::Validate(private_key);
   if (!status.ok()) return status;
   auto key_data = absl::make_unique<KeyData>();
-  key_data->set_type_url(EciesAeadHkdfPublicKeyManager::kKeyType);
+  key_data->set_type_url(EciesAeadHkdfPublicKeyManager::static_key_type());
   key_data->set_value(private_key.public_key().SerializeAsString());
   key_data->set_key_material_type(KeyData:: ASYMMETRIC_PUBLIC);
   return std::move(key_data);

@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef THIRD_PARTY_TINK_CC_SUBTLE_RSA_SSA_PKCS1_VERIFY_BORINGSSL_H_
-#define THIRD_PARTY_TINK_CC_SUBTLE_RSA_SSA_PKCS1_VERIFY_BORINGSSL_H_
+#ifndef TINK_SUBTLE_RSA_SSA_PKCS1_VERIFY_BORINGSSL_H_
+#define TINK_SUBTLE_RSA_SSA_PKCS1_VERIFY_BORINGSSL_H_
 
 #include <memory>
 
@@ -63,4 +63,4 @@ class RsaSsaPkcs1VerifyBoringSsl : public PublicKeyVerify {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // THIRD_PARTY_TINK_CC_SUBTLE_RSA_SSA_PKCS1_VERIFY_BORINGSSL_H_
+#endif  // TINK_SUBTLE_RSA_SSA_PKCS1_VERIFY_BORINGSSL_H_

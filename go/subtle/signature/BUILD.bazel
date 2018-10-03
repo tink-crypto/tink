@@ -4,8 +4,8 @@ go_library(
     name = "go_default_library",
     srcs = [
         "ecdsa.go",
-        "ecdsa_sign.go",
-        "ecdsa_verify.go",
+        "ecdsa_signer.go",
+        "ecdsa_verifier.go",
         "encoding.go",
     ],
     importpath = "github.com/google/tink/go/subtle/signature",
@@ -17,9 +17,9 @@ go_library(
 )
 
 go_test(
-    name = "go_default_xtest",
+    name = "go_default_test",
     srcs = [
-        "ecdsa_sign_verify_test.go",
+        "ecdsa_signer_verifier_test.go",
         "ecdsa_test.go",
     ],
     data = [

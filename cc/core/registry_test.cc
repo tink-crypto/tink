@@ -525,10 +525,11 @@ TEST_F(RegistryTest, testGetPublicKeyData) {
 
   // Extract public key data and check.
   auto public_key_data_result = Registry::GetPublicKeyData(
-      EciesAeadHkdfPrivateKeyManager::kKeyType, ecies_key.SerializeAsString());
+      EciesAeadHkdfPrivateKeyManager::static_key_type(),
+      ecies_key.SerializeAsString());
   EXPECT_TRUE(public_key_data_result.ok()) << public_key_data_result.status();
   auto public_key_data = std::move(public_key_data_result.ValueOrDie());
-  EXPECT_EQ(EciesAeadHkdfPublicKeyManager::kKeyType,
+  EXPECT_EQ(EciesAeadHkdfPublicKeyManager::static_key_type(),
             public_key_data->type_url());
   EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC, public_key_data->key_material_type());
   EXPECT_EQ(ecies_key.public_key().SerializeAsString(),
@@ -545,7 +546,8 @@ TEST_F(RegistryTest, testGetPublicKeyData) {
 
   // Try with a bad serialized key.
   auto bad_key_result = Registry::GetPublicKeyData(
-      EciesAeadHkdfPrivateKeyManager::kKeyType, "some bad serialized key");
+      EciesAeadHkdfPrivateKeyManager::static_key_type(),
+      "some bad serialized key");
   EXPECT_FALSE(bad_key_result.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT,
             bad_key_result.status().error_code());
