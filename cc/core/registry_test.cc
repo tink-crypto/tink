@@ -179,7 +179,7 @@ TEST_F(RegistryTest, testRegisterKeyManagerMoreRestrictiveNewKeyAllowed) {
   EXPECT_TRUE(status.ok()) << status;
 
   auto result_before = Registry::NewKeyData(key_template);
-  EXPECT_TRUE(result_before.ok());
+  EXPECT_TRUE(result_before.ok()) << result_before.status();
 
   // Re-register the key manager with new_key_allowed == false and check the
   // restriction (i.e. new key data cannot be created).

@@ -66,6 +66,7 @@ PUBLIC_API_DEPS = [
     ":no_secret_keyset_handle",
     ":primitive_set",
     ":registry",
+    ":registry_impl",
     ":version",
     "//cc/aead:aead_config",
     "//cc/aead:aead_factory",
@@ -329,8 +330,21 @@ cc_library(
 
 cc_library(
     name = "registry",
-    srcs = ["core/registry.cc"],
     hdrs = ["registry.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        ":registry_impl",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "registry_impl",
+    srcs = ["core/registry_impl.cc"],
+    hdrs = ["core/registry_impl.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [

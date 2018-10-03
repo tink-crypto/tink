@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2018 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,7 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "tink/registry.h"
+#include "tink/core/registry_impl.h"
 
 #include <mutex>  // NOLINT(build/c++11)
 
@@ -29,16 +28,7 @@ using google::crypto::tink::KeyTemplate;
 namespace crypto {
 namespace tink {
 
-absl::Mutex Registry::maps_mutex_;
-Registry::LabelToObjectMap Registry::type_to_manager_map_;
-Registry::LabelToTypeNameMap Registry::type_to_primitive_map_;
-Registry::LabelToBoolMap Registry::type_to_new_key_allowed_map_;
-Registry::LabelToKeyFactoryMap Registry::type_to_key_factory_map_;
-Registry::LabelToObjectMap Registry::name_to_catalogue_map_;
-Registry::LabelToTypeNameMap Registry::name_to_primitive_map_;
-
-// static
-StatusOr<bool> Registry::get_new_key_allowed(const std::string& type_url) {
+StatusOr<bool> RegistryImpl::get_new_key_allowed(const std::string& type_url) {
   auto new_key_entry = type_to_new_key_allowed_map_.find(type_url);
   if (new_key_entry == type_to_new_key_allowed_map_.end()) {
     return ToStatusF(util::error::NOT_FOUND,
@@ -48,8 +38,7 @@ StatusOr<bool> Registry::get_new_key_allowed(const std::string& type_url) {
   return new_key_entry->second;
 }
 
-// static
-StatusOr<const KeyFactory*> Registry::get_key_factory(
+StatusOr<const KeyFactory*> RegistryImpl::get_key_factory(
     const std::string& type_url) {
   auto key_factory_entry = type_to_key_factory_map_.find(type_url);
   if (key_factory_entry == type_to_key_factory_map_.end()) {
@@ -60,8 +49,7 @@ StatusOr<const KeyFactory*> Registry::get_key_factory(
   return key_factory_entry->second;
 }
 
-// static
-StatusOr<std::unique_ptr<KeyData>> Registry::NewKeyData(
+StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
     const KeyTemplate& key_template) {
   absl::MutexLock lock(&maps_mutex_);
 
@@ -84,8 +72,7 @@ StatusOr<std::unique_ptr<KeyData>> Registry::NewKeyData(
   return result;
 }
 
-// static
-StatusOr<std::unique_ptr<KeyData>> Registry::GetPublicKeyData(
+StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
     const std::string& type_url, const std::string& serialized_private_key) {
   absl::MutexLock lock(&maps_mutex_);
   auto key_factory_result = get_key_factory(type_url);
@@ -103,7 +90,7 @@ StatusOr<std::unique_ptr<KeyData>> Registry::GetPublicKeyData(
   return result;
 }
 
-void Registry::Reset() {
+void RegistryImpl::Reset() {
   absl::MutexLock lock(&maps_mutex_);
   type_to_manager_map_.clear();
   type_to_primitive_map_.clear();
@@ -112,8 +99,6 @@ void Registry::Reset() {
   name_to_catalogue_map_.clear();
   name_to_primitive_map_.clear();
 }
-
-
 
 }  // namespace tink
 }  // namespace crypto

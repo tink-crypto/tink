@@ -58,7 +58,7 @@ class KeysetHandle {
   friend class CleartextKeysetHandle;
   friend class NoSecretKeysetHandle;
   friend class KeysetManager;
-  friend class Registry;
+  friend class RegistryImpl;
 
   // KeysetUtil::GetKeyset() provides access to get_keyset().
   friend class KeysetUtil;
