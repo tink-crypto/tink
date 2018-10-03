@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PUBLIC_KEY_SIGN_H_
-#define PUBLIC_KEY_SIGN_H_
+#ifndef TINK_PUBLIC_KEY_SIGN_H_
+#define TINK_PUBLIC_KEY_SIGN_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/util/statusor.h"
@@ -43,4 +43,4 @@ class PublicKeySign {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // PUBLIC_KEY_SIGN_H_
+#endif  // TINK_PUBLIC_KEY_SIGN_H_

@@ -22,25 +22,25 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-func TestDummyAead(t *testing.T) {
-	// Assert that DummyAead implements the Aead interface.
-	var _ tink.Aead = (*testutil.DummyAead)(nil)
+func TestDummyAEAD(t *testing.T) {
+	// Assert that DummyAEAD implements the AEAD interface.
+	var _ tink.AEAD = (*testutil.DummyAEAD)(nil)
 }
 
-func TestDummyMac(t *testing.T) {
-	// Assert that DummyMac implements the Aead interface.
-	var _ tink.Mac = (*testutil.DummyMac)(nil)
+func TestDummyMAC(t *testing.T) {
+	// Assert that DummyMAC implements the AEAD interface.
+	var _ tink.MAC = (*testutil.DummyMAC)(nil)
 	// try to compute mac
 	data := []byte{1, 2, 3, 4, 5}
-	dummyMac := &testutil.DummyMac{Name: "Mac12347"}
-	digest, err := dummyMac.ComputeMac(data)
+	dummyMAC := &testutil.DummyMAC{Name: "Mac12347"}
+	digest, err := dummyMAC.ComputeMAC(data)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	if !bytes.Equal(append(data, dummyMac.Name...), digest) {
+	if !bytes.Equal(append(data, dummyMAC.Name...), digest) {
 		t.Errorf("incorrect digest")
 	}
-	if valid, err := dummyMac.VerifyMac(nil, nil); !valid || err != nil {
-		t.Errorf("unexpected result of VerifyMac")
+	if err := dummyMAC.VerifyMAC(nil, nil); err != nil {
+		t.Errorf("unexpected result of VerifyMAC")
 	}
 }

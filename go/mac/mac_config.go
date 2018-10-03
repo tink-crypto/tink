@@ -12,22 +12,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package mac provides implementations of the Mac primitive.
+// Package mac provides implementations of the MAC primitive.
 package mac
 
 import (
 	"github.com/google/tink/go/tink"
 )
 
-// RegisterStandardKeyTypes registers standard Mac key types and their managers
-// with the Registry.
-func RegisterStandardKeyTypes() (bool, error) {
-	return RegisterKeyManager(NewHmacKeyManager())
-}
-
-// RegisterKeyManager registers the given keyManager for the key type given in
-// keyManager.KeyType(). It returns true if registration was successful, false if
-// there already exisits a key manager for the key type.
-func RegisterKeyManager(keyManager tink.KeyManager) (bool, error) {
-	return tink.RegisterKeyManager(keyManager)
+// Register registers latest MAC key types and their managers with the Registry.
+func Register() error {
+	return tink.RegisterKeyManager(NewHMACKeyManager())
 }

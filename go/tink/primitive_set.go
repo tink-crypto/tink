@@ -23,139 +23,75 @@ import (
 // Entry represents a single entry in the keyset. In addition to the actual primitive,
 // it holds the identifier and status of the primitive.
 type Entry struct {
-	primitive        interface{}
-	identifier       string
-	status           tinkpb.KeyStatusType
-	outputPrefixType tinkpb.OutputPrefixType
+	Primitive  interface{}
+	Prefix     string
+	PrefixType tinkpb.OutputPrefixType
+	Status     tinkpb.KeyStatusType
 }
 
-// NewEntry creates a new instance of Entry using the given information.
-func NewEntry(p interface{}, id string, stt tinkpb.KeyStatusType,
-	outputPrefixType tinkpb.OutputPrefixType) *Entry {
+func newEntry(p interface{}, prefix string, prefixType tinkpb.OutputPrefixType, status tinkpb.KeyStatusType) *Entry {
 	return &Entry{
-		primitive:        p,
-		identifier:       id,
-		status:           stt,
-		outputPrefixType: outputPrefixType,
+		Primitive:  p,
+		Prefix:     prefix,
+		Status:     status,
+		PrefixType: prefixType,
 	}
 }
 
-// Primitive returns the crypto primitive associated with the key entry.
-func (e *Entry) Primitive() interface{} {
-	return e.primitive
-}
+// PrimitiveSet is a container for a set of primitives (i.e. implementations of cryptographic
+// primitives offered by Tink). It provides also additional properties for the primitives
+// it holds. In particular, one of the primitives in the set can be distinguished as
+// "the primary" one.
 
-// Status returns the status of the key entry.
-func (e *Entry) Status() tinkpb.KeyStatusType {
-	return e.status
-}
+// PrimitiveSet is used for supporting key rotation: primitives in a set correspond to keys in a
+// keyset. Users will usually work with primitive instances, which essentially wrap primitive
+// sets. For example an instance of an AEAD-primitive for a given keyset holds a set of
+// AEAD-primitives corresponding to the keys in the keyset, and uses the set members to do the
+// actual crypto operations: to encrypt data the primary AEAD-primitive from the set is used, and
+// upon decryption the ciphertext's prefix determines the id of the primitive from the set.
 
-// Identifier returns the identifier of the key entry.
-func (e *Entry) Identifier() string {
-	return e.identifier
-}
-
-// OutputPrefixType returns the OutputPrefixType of the key entry.
-func (e *Entry) OutputPrefixType() tinkpb.OutputPrefixType {
-	return e.outputPrefixType
-}
-
-/*
-PrimitiveSet is a container class for a set of primitives (i.e. implementations of cryptographic
-primitives offered by Tink).  It provides also additional properties for the primitives
-it holds.  In particular, one of the primitives in the set can be distinguished as
-"the primary" one. <p>
-
-PrimitiveSet is an auxiliary class used for supporting key rotation: primitives in a set
-correspond to keys in a keyset.  Users will usually work with primitive instances,
-which essentially wrap primitive sets.  For example an instance of an Aead-primitive
-for a given keyset holds a set of Aead-primitives corresponding to the keys in the keyset,
-and uses the set members to do the actual crypto operations: to encrypt data the primary
-Aead-primitive from the set is used, and upon decryption the ciphertext's prefix
-determines the id of the primitive from the set. <p>
-
-PrimitiveSet is a public class to allow its use in implementations of custom primitives.
-*/
+// PrimitiveSet is a public to allow its use in implementations of custom primitives.
 type PrimitiveSet struct {
 	// Primary entry.
-	primary *Entry
+	Primary *Entry
 
-	// The primitives are stored in a map of
-	// (ciphertext prefix, list of primitives sharing the prefix).
-	// This allows quickly retrieving the primitives sharing some particular prefix.
-	// Because all RAW keys are using an empty prefix, this also quickly allows retrieving them.
-	primitives map[string][]*Entry
+	// The primitives are stored in a map of (ciphertext prefix, list of primitives sharing the
+	// prefix). This allows quickly retrieving the primitives sharing some particular prefix.
+	Entries map[string][]*Entry
 }
 
 // NewPrimitiveSet returns an empty instance of PrimitiveSet.
 func NewPrimitiveSet() *PrimitiveSet {
 	return &PrimitiveSet{
-		primary:    nil,
-		primitives: make(map[string][]*Entry),
+		Primary: nil,
+		Entries: make(map[string][]*Entry),
 	}
 }
 
-// GetRawPrimitives returns all primitives in the set that have RAW prefix.
-func (ps *PrimitiveSet) GetRawPrimitives() ([]*Entry, error) {
-	return ps.GetPrimitivesWithStringIdentifier(RawPrefix)
+// RawEntries returns all primitives in the set that have RAW prefix.
+func (ps *PrimitiveSet) RawEntries() ([]*Entry, error) {
+	return ps.EntriesForPrefix(RawPrefix)
 }
 
-// GetPrimitivesWithKey returns all primitives in the set that have prefix equal
-// to that of the given key.
-func (ps *PrimitiveSet) GetPrimitivesWithKey(key *tinkpb.Keyset_Key) ([]*Entry, error) {
-	if key == nil {
-		return nil, fmt.Errorf("primitive_set: key must not be nil")
-	}
-	id, err := GetOutputPrefix(key)
-	if err != nil {
-		return nil, fmt.Errorf("primitive_set: %s", err)
-	}
-	return ps.GetPrimitivesWithStringIdentifier(id)
-}
-
-// GetPrimitivesWithByteIdentifier returns all primitives in the set that have
-// the given prefix.
-func (ps *PrimitiveSet) GetPrimitivesWithByteIdentifier(id []byte) ([]*Entry, error) {
-	return ps.GetPrimitivesWithStringIdentifier(string(id))
-}
-
-// GetPrimitivesWithStringIdentifier returns all primitives in the set that have
-// the given prefix.
-func (ps *PrimitiveSet) GetPrimitivesWithStringIdentifier(id string) ([]*Entry, error) {
-	result, found := ps.primitives[id]
+// EntriesForPrefix returns all primitives in the set that have the given prefix.
+func (ps *PrimitiveSet) EntriesForPrefix(prefix string) ([]*Entry, error) {
+	result, found := ps.Entries[prefix]
 	if !found {
 		return []*Entry{}, nil
 	}
 	return result, nil
 }
 
-// Primitives returns all primitives of the set.
-func (ps *PrimitiveSet) Primitives() map[string][]*Entry {
-	return ps.primitives
-}
-
-// Primary returns the entry with the primary primitive.
-func (ps *PrimitiveSet) Primary() *Entry {
-	return ps.primary
-}
-
-// SetPrimary sets the primary entry of the set to the given entry.
-func (ps *PrimitiveSet) SetPrimary(e *Entry) {
-	ps.primary = e
-}
-
-// AddPrimitive creates a new entry in the primitive set using the given information
-// and returns the added entry.
-func (ps *PrimitiveSet) AddPrimitive(primitive interface{},
-	key *tinkpb.Keyset_Key) (*Entry, error) {
-	if key == nil || primitive == nil {
+// Add creates a new entry in the primitive set and returns the added entry.
+func (ps *PrimitiveSet) Add(p interface{}, key *tinkpb.Keyset_Key) (*Entry, error) {
+	if key == nil || p == nil {
 		return nil, fmt.Errorf("primitive_set: key and primitive must not be nil")
 	}
-	id, err := GetOutputPrefix(key)
+	prefix, err := OutputPrefix(key)
 	if err != nil {
 		return nil, fmt.Errorf("primitive_set: %s", err)
 	}
-	e := NewEntry(primitive, id, key.Status, key.OutputPrefixType)
-	ps.primitives[id] = append(ps.primitives[id], e)
+	e := newEntry(p, prefix, key.OutputPrefixType, key.Status)
+	ps.Entries[prefix] = append(ps.Entries[prefix], e)
 	return e, nil
 }

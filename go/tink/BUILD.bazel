@@ -1,25 +1,30 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])  # keep
+
+licenses(["notice"])  # Apache 2.0 # keep
+
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
     srcs = [
         "aead.go",
-        "cleartext_keyset_handle.go",
         "crypto_format.go",
+        "init.go",
         "key_manager.go",
         "keyset_handle.go",
         "keyset_manager.go",
         "mac.go",
         "primitive_set.go",
         "private_key_manager.go",
-        "public_key_sign.go",
-        "public_key_verify.go",
+        "signer.go",
+        "verifier.go",
         "registry.go",
         "util.go",
     ],
     importpath = "github.com/google/tink/go/tink",
     visibility = ["//visibility:public"],
     deps = [
+        "//go/internal:go_default_library",
         "//go/subtle/random:go_default_library",
         "//proto:common_go_proto",
         "//proto:tink_go_proto",
@@ -29,26 +34,19 @@ go_library(
 
 go_test(
     name = "go_default_test",
-    srcs = ["keyset_handle_test.go"],
-    embed = [":go_default_library"],
-    deps = [
-        "//proto:tink_go_proto",
-    ],
-)
-
-go_test(
-    name = "go_default_xtest",
     srcs = [
-        "cleartext_keyset_handle_test.go",
         "crypto_format_test.go",
+        "keyset_handle_test.go",
         "keyset_manager_test.go",
         "primitive_set_test.go",
         "registry_test.go",
         "util_test.go",
     ],
+    embed = [":go_default_library"],
     deps = [
-        ":go_default_library",
         "//go/aead:go_default_library",
+        "//go/testkeysethandle:go_default_library",
+        "//go/internal:go_default_library",
         "//go/mac:go_default_library",
         "//go/subtle/aead:go_default_library",
         "//go/subtle/mac:go_default_library",

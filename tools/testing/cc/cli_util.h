@@ -14,6 +14,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef TOOLS_TESTING_CC_CLI_UTIL_H_
+#define TOOLS_TESTING_CC_CLI_UTIL_H_
+
 #include <iostream>
 #include <fstream>
 
@@ -59,3 +62,5 @@ class CliUtil {
   // In case of errors writes a log message and aborts.
   static void Write(const std::string& output, const std::string& filename);
 };
+
+#endif  // TOOLS_TESTING_CC_CLI_UTIL_H_

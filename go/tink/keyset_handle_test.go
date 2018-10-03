@@ -12,48 +12,75 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink
+package tink_test
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/testkeysethandle"
+	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func TestNewKeysetHandleBasic(t *testing.T) {
-	keyData := CreateKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
-	key := CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
-	keyset := CreateKeyset(1, []*tinkpb.Keyset_Key{key})
-	keysetInfo, _ := GetKeysetInfo(keyset)
-	encryptedKeyset := CreateEncryptedKeyset([]byte{1}, keysetInfo)
-	h, err := newKeysetHandle(keyset, encryptedKeyset)
+func setUpKeysetHandleTest() {
+	if err := mac.Register(); err != nil {
+		panic(fmt.Sprintf("cannot register MAC key types: %v", err))
+	}
+}
+
+func TestNewKeysetHandle(t *testing.T) {
+	setUpKeysetHandleTest()
+
+	kt := mac.HMACSHA256Tag128KeyTemplate()
+	kh, err := tink.NewKeysetHandle(kt)
 	if err != nil {
-		t.Errorf("unexpected error when creating new KeysetHandle")
+		t.Errorf("unexpected error: %s", err)
 	}
-	// test Keyset()
-	if h.Keyset() != keyset {
-		t.Errorf("Keyset() returns incorrect value")
+	keyset := kh.Keyset()
+	if len(keyset.Key) != 1 {
+		t.Errorf("incorrect number of keys in the keyset: %d", len(keyset.Key))
 	}
-	// test EncryptedKeyset()
-	if h.EncryptedKeyset() != encryptedKeyset {
-		t.Errorf("EncryptedKeyset() returns incorrect value")
+	key := keyset.Key[0]
+	if keyset.PrimaryKeyId != key.KeyId {
+		t.Errorf("incorrect primary key id, expect %d, got %d", key.KeyId, keyset.PrimaryKeyId)
 	}
-	// test KeysetInfo()
-	tmp, _ := h.KeysetInfo()
-	if tmp.String() != keysetInfo.String() {
-		t.Errorf("KeysetInfo() returns incorrect value")
+	if key.KeyData.TypeUrl != kt.TypeUrl {
+		t.Errorf("incorrect type url, expect %s, got %s", kt.TypeUrl, key.KeyData.TypeUrl)
 	}
-	// test String()
-	if h.String() != keysetInfo.String() {
-		t.Errorf("String() returns incorrect value")
+	if _, err = mac.New(kh); err != nil {
+		t.Errorf("cannot get primitive from generated keyset handle: %s", err)
 	}
 }
 
 func TestNewKeysetHandleWithInvalidInput(t *testing.T) {
-	if _, err := newKeysetHandle(nil, nil); err == nil {
-		t.Errorf("NewKeysetHandle should not accept nil as Keyset")
+	setUpKeysetHandleTest()
+
+	// template unregistered TypeUrl
+	template := mac.HMACSHA256Tag128KeyTemplate()
+	template.TypeUrl = "some unknown TypeUrl"
+	if _, err := tink.NewKeysetHandle(template); err == nil {
+		t.Errorf("expect an error when TypeUrl is not registered")
 	}
-	if _, err := newKeysetHandle(new(tinkpb.Keyset), nil); err == nil {
-		t.Errorf("unexpected error: %s", err)
+	// nil
+	if _, err := tink.NewKeysetHandle(nil); err == nil {
+		t.Errorf("expect an error when template is nil")
+	}
+}
+
+func TestFromKeyset(t *testing.T) {
+	keyData := tink.CreateKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := tink.CreateKey(keyData, tinkpb.KeyStatusType_ENABLED, 1, tinkpb.OutputPrefixType_TINK)
+	keyset := tink.CreateKeyset(1, []*tinkpb.Keyset_Key{key})
+	keysetInfo, _ := tink.GetKeysetInfo(keyset)
+	h, _ := testkeysethandle.KeysetHandle(keyset)
+	// test Keyset
+	if h.Keyset() != keyset {
+		t.Errorf("Keyset is incorrect")
+	}
+	// test String()
+	if h.String() != keysetInfo.String() {
+		t.Errorf("String() returns incorrect value")
 	}
 }

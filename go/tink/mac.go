@@ -15,15 +15,16 @@
 package tink
 
 /*
-Mac is the interface for MACs (Message Authentication Codes).
+MAC is the interface for MACs (Message Authentication Codes).
 This interface should be used for authentication only, and not for other purposes
 (for example, it should not be used to generate pseudorandom bytes).
 */
-type Mac interface {
+type MAC interface {
 
-	// ComputeMac Computes message authentication code (MAC) for {@code data}.
-	ComputeMac(data []byte) ([]byte, error)
+	// ComputeMAC computes message authentication code (MAC) for code data.
+	ComputeMAC(data []byte) ([]byte, error)
 
-	// VerifyMac verifies whether {@code mac} is a correct authentication code (MAC) for {@code data}.
-	VerifyMac(mac []byte, data []byte) (bool, error)
+	// Verify returns nil if mac is a correct authentication code (MAC) for data,
+	// otherwise it returns an error.
+	VerifyMAC(mac, data []byte) error
 }

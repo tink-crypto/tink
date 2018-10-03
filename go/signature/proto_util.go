@@ -20,8 +20,8 @@ import (
 	ecdsapb "github.com/google/tink/proto/ecdsa_go_proto"
 )
 
-// NewEcdsaPrivateKey creates a EcdsaPrivateKey with the specified paramaters.
-func NewEcdsaPrivateKey(version uint32,
+// NewECDSAPrivateKey creates a ECDSAPrivateKey with the specified paramaters.
+func NewECDSAPrivateKey(version uint32,
 	publicKey *ecdsapb.EcdsaPublicKey,
 	keyValue []byte) *ecdsapb.EcdsaPrivateKey {
 	return &ecdsapb.EcdsaPrivateKey{
@@ -31,8 +31,8 @@ func NewEcdsaPrivateKey(version uint32,
 	}
 }
 
-// NewEcdsaPublicKey creates a EcdsaPublicKey with the specified paramaters.
-func NewEcdsaPublicKey(version uint32,
+// NewECDSAPublicKey creates a ECDSAPublicKey with the specified paramaters.
+func NewECDSAPublicKey(version uint32,
 	params *ecdsapb.EcdsaParams,
 	x []byte, y []byte) *ecdsapb.EcdsaPublicKey {
 	return &ecdsapb.EcdsaPublicKey{
@@ -43,8 +43,8 @@ func NewEcdsaPublicKey(version uint32,
 	}
 }
 
-// NewEcdsaParams creates a EcdsaParams with the specified parameters.
-func NewEcdsaParams(hashType commonpb.HashType,
+// NewECDSAParams creates a ECDSAParams with the specified parameters.
+func NewECDSAParams(hashType commonpb.HashType,
 	curve commonpb.EllipticCurveType,
 	encoding ecdsapb.EcdsaSignatureEncoding) *ecdsapb.EcdsaParams {
 	return &ecdsapb.EcdsaParams{
@@ -54,22 +54,22 @@ func NewEcdsaParams(hashType commonpb.HashType,
 	}
 }
 
-// NewEcdsaKeyFormat creates a EcdsaKeyFormat with the specified parameters.
-func NewEcdsaKeyFormat(params *ecdsapb.EcdsaParams) *ecdsapb.EcdsaKeyFormat {
+// NewECDSAKeyFormat creates a ECDSAKeyFormat with the specified parameters.
+func NewECDSAKeyFormat(params *ecdsapb.EcdsaParams) *ecdsapb.EcdsaKeyFormat {
 	return &ecdsapb.EcdsaKeyFormat{Params: params}
 }
 
-// GetEcdsaSignatureEncodingName returns the name of the EcdsaSignatureEncoding.
-func GetEcdsaSignatureEncodingName(encoding ecdsapb.EcdsaSignatureEncoding) string {
+// GetECDSASignatureEncodingName returns the name of the ECDSASignatureEncoding.
+func GetECDSASignatureEncodingName(encoding ecdsapb.EcdsaSignatureEncoding) string {
 	ret := ecdsapb.EcdsaSignatureEncoding_name[int32(encoding)]
 	return ret
 }
 
-// GetEcdsaParamNames returns the string representations of each parameter in
-// the given EcdsaParams.
-func GetEcdsaParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
+// GetECDSAParamNames returns the string representations of each parameter in
+// the given ECDSAParams.
+func GetECDSAParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
 	hashName := tink.GetHashName(params.HashType)
 	curveName := tink.GetCurveName(params.Curve)
-	encodingName := GetEcdsaSignatureEncodingName(params.Encoding)
+	encodingName := GetECDSASignatureEncodingName(params.Encoding)
 	return hashName, curveName, encodingName
 }

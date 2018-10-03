@@ -24,21 +24,21 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func TestAesGcmKeyTemplates(t *testing.T) {
+func TestAESGCMKeyTemplates(t *testing.T) {
 	// AES-GCM 128 bit
-	template := aead.Aes128GcmKeyTemplate()
-	if err := checkAesGcmKeyTemplate(template, uint32(16)); err != nil {
+	template := aead.AES128GCMKeyTemplate()
+	if err := checkAESGCMKeyTemplate(template, uint32(16)); err != nil {
 		t.Errorf("invalid AES-128 GCM key template: %s", err)
 	}
 	// AES-GCM 256 bit
-	template = aead.Aes256GcmKeyTemplate()
-	if err := checkAesGcmKeyTemplate(template, uint32(32)); err != nil {
+	template = aead.AES256GCMKeyTemplate()
+	if err := checkAESGCMKeyTemplate(template, uint32(32)); err != nil {
 		t.Errorf("invalid AES-256 GCM key template: %s", err)
 	}
 }
 
-func checkAesGcmKeyTemplate(template *tinkpb.KeyTemplate, keySize uint32) error {
-	if template.TypeUrl != aead.AesGcmTypeURL {
+func checkAESGCMKeyTemplate(template *tinkpb.KeyTemplate, keySize uint32) error {
+	if template.TypeUrl != aead.AESGCMTypeURL {
 		return fmt.Errorf("incorrect type url")
 	}
 	keyFormat := new(gcmpb.AesGcmKeyFormat)

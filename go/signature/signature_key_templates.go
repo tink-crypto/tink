@@ -21,50 +21,50 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// This file contains pre-generated KeyTemplate for PublicKeySign and PublicKeyVerify.
+// This file contains pre-generated KeyTemplate for Signer and Verifier.
 // One can use these templates to generate new Keyset, using utility functions
 // in either cleartext_keyset_handle or encrypted_keyset_handle.
 
-// EcdsaP256KeyTemplate is a KeyTemplate of EcdsaPrivateKey with the following parameters:
+// ECDSAP256KeyTemplate is a KeyTemplate of ECDSAPrivateKey with the following parameters:
 //   - Hash function: SHA256
 //   - Curve: NIST P-256
 //   - Signature encoding: DER
-func EcdsaP256KeyTemplate() *tinkpb.KeyTemplate {
-	return createEcdsaKeyTemplate(commonpb.HashType_SHA256,
+func ECDSAP256KeyTemplate() *tinkpb.KeyTemplate {
+	return createECDSAKeyTemplate(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256,
 		ecdsapb.EcdsaSignatureEncoding_DER)
 }
 
-// EcdsaP384KeyTemplate is a KeyTemplate of EcdsaPrivateKey with the following parameters:
+// ECDSAP384KeyTemplate is a KeyTemplate of ECDSAPrivateKey with the following parameters:
 //   - Hash function: SHA512
 //   - Curve: NIST P-384
 //   - Signature encoding: DER
-func EcdsaP384KeyTemplate() *tinkpb.KeyTemplate {
-	return createEcdsaKeyTemplate(commonpb.HashType_SHA512,
+func ECDSAP384KeyTemplate() *tinkpb.KeyTemplate {
+	return createECDSAKeyTemplate(commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P384,
 		ecdsapb.EcdsaSignatureEncoding_DER)
 }
 
-// EcdsaP521KeyTemplate is a KeyTemplate of EcdsaPrivateKey with the following parameters:
+// ECDSAP521KeyTemplate is a KeyTemplate of ECDSAPrivateKey with the following parameters:
 //   - Hash function: SHA512
 //   - Curve: NIST P-521
 //   - Signature encoding: DER
-func EcdsaP521KeyTemplate() *tinkpb.KeyTemplate {
-	return createEcdsaKeyTemplate(commonpb.HashType_SHA512,
+func ECDSAP521KeyTemplate() *tinkpb.KeyTemplate {
+	return createECDSAKeyTemplate(commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P521,
 		ecdsapb.EcdsaSignatureEncoding_DER)
 }
 
-// createEcdsaKeyTemplate creates a KeyTemplate containing a EcdasKeyFormat
+// createECDSAKeyTemplate creates a KeyTemplate containing a EcdasKeyFormat
 // with the given parameters.
-func createEcdsaKeyTemplate(hashType commonpb.HashType,
+func createECDSAKeyTemplate(hashType commonpb.HashType,
 	curve commonpb.EllipticCurveType,
 	encoding ecdsapb.EcdsaSignatureEncoding) *tinkpb.KeyTemplate {
-	params := NewEcdsaParams(hashType, curve, encoding)
-	format := NewEcdsaKeyFormat(params)
+	params := NewECDSAParams(hashType, curve, encoding)
+	format := NewECDSAKeyFormat(params)
 	serializedFormat, _ := proto.Marshal(format)
 	return &tinkpb.KeyTemplate{
-		TypeUrl: EcdsaSignTypeURL,
+		TypeUrl: ECDSASignerTypeURL,
 		Value:   serializedFormat,
 	}
 }

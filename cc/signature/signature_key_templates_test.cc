@@ -186,18 +186,18 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithIeeeEncoding) {
   }
 }
 
-TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPkcs12048Sha256F4) {
+TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPkcs13072Sha256F4) {
   std::string type_url =
       "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey";
 
   const KeyTemplate& key_template =
-      SignatureKeyTemplates::RsaSsaPkcs12048Sha256F4();
+      SignatureKeyTemplates::RsaSsaPkcs13072Sha256F4();
   EXPECT_EQ(type_url, key_template.type_url());
   EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
   RsaSsaPkcs1KeyFormat key_format;
   EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
   EXPECT_EQ(HashType::SHA256, key_format.params().hash_type());
-  EXPECT_GE(key_format.modulus_size_in_bits(), 2048);
+  EXPECT_GE(key_format.modulus_size_in_bits(), 3072);
   bssl::UniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), RSA_F4);
   EXPECT_EQ(
@@ -208,7 +208,7 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPkcs12048Sha256F4) {
       0);
   // Check that reference to the same object is returned.
   const KeyTemplate& key_template_2 =
-      SignatureKeyTemplates::RsaSsaPkcs12048Sha256F4();
+      SignatureKeyTemplates::RsaSsaPkcs13072Sha256F4();
   EXPECT_EQ(&key_template, &key_template_2);
 
   // Check that the key manager works with the template.
@@ -249,11 +249,11 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPkcs14096Sha512F4) {
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
 }
 
-TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss2048Sha256Sha256F4) {
+TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss3072Sha256Sha256F4) {
   std::string type_url =
       "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey";
   const KeyTemplate& key_template =
-      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4();
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4();
   EXPECT_EQ(type_url, key_template.type_url());
   EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
   RsaSsaPssKeyFormat key_format;
@@ -261,7 +261,7 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss2048Sha256Sha256F4) {
   EXPECT_EQ(HashType::SHA256, key_format.params().sig_hash());
   EXPECT_EQ(HashType::SHA256, key_format.params().mgf1_hash());
   EXPECT_EQ(32, key_format.params().salt_length());
-  EXPECT_GE(key_format.modulus_size_in_bits(), 2048);
+  EXPECT_GE(key_format.modulus_size_in_bits(), 3072);
   bssl::UniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), RSA_F4);
   EXPECT_EQ(
@@ -273,7 +273,7 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss2048Sha256Sha256F4) {
 
   // Check that reference to the same object is returned.
   const KeyTemplate& key_template_2 =
-      SignatureKeyTemplates::RsaSsaPss2048Sha256Sha256F4();
+      SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4();
   EXPECT_EQ(&key_template, &key_template_2);
 
   // Check that the key manager works with the template.

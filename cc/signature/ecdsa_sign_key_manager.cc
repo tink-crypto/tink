@@ -98,14 +98,14 @@ EcdsaPrivateKeyFactory::GetPublicKeyData(
     absl::string_view serialized_private_key) const {
   EcdsaPrivateKey private_key;
   if (!private_key.ParseFromString(std::string(serialized_private_key))) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Could not parse the passed string as proto '%s'.",
-                     EcdsaVerifyKeyManager::kKeyType);
+    return Status(util::error::INVALID_ARGUMENT,
+                  absl::StrCat("Could not parse the passed string as proto '",
+                               EcdsaVerifyKeyManager::static_key_type(), "'."));
   }
   auto status = EcdsaSignKeyManager::Validate(private_key);
   if (!status.ok()) return status;
   auto key_data = absl::make_unique<KeyData>();
-  key_data->set_type_url(EcdsaVerifyKeyManager::kKeyType);
+  key_data->set_type_url(EcdsaVerifyKeyManager::static_key_type());
   key_data->set_value(private_key.public_key().SerializeAsString());
   key_data->set_key_material_type(KeyData::ASYMMETRIC_PUBLIC);
   return std::move(key_data);

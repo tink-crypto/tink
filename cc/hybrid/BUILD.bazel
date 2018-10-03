@@ -227,6 +227,7 @@ cc_library(
         "//cc/util:protobuf_helper",
         "//cc/util:status",
         "//cc/util:statusor",
+        "//cc/util:validation",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/memory",

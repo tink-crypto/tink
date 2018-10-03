@@ -26,13 +26,13 @@ import (
 )
 
 func TestTemplates(t *testing.T) {
-	template := mac.HmacSha256Tag128KeyTemplate()
+	template := mac.HMACSHA256Tag128KeyTemplate()
 	if err := checkTemplate(template, 32, 16, commonpb.HashType_SHA256); err != nil {
-		t.Errorf("incorrect HmacSha256Tag128KeyTemplate: %s", err)
+		t.Errorf("incorrect HMACSHA256Tag128KeyTemplate: %s", err)
 	}
-	template = mac.HmacSha256Tag256KeyTemplate()
+	template = mac.HMACSHA256Tag256KeyTemplate()
 	if err := checkTemplate(template, 32, 32, commonpb.HashType_SHA256); err != nil {
-		t.Errorf("incorrect HmacSha256Tag256KeyTemplate: %s", err)
+		t.Errorf("incorrect HMACSHA256Tag256KeyTemplate: %s", err)
 	}
 }
 
@@ -40,7 +40,7 @@ func checkTemplate(template *tinkpb.KeyTemplate,
 	keySize uint32,
 	tagSize uint32,
 	hashType commonpb.HashType) error {
-	if template.TypeUrl != mac.HmacTypeURL {
+	if template.TypeUrl != mac.HMACTypeURL {
 		return fmt.Errorf("TypeUrl is incorrect")
 	}
 	format := new(hmacpb.HmacKeyFormat)
