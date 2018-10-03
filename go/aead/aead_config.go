@@ -12,30 +12,22 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package aead provides implementations of the Aead primitive.
+// Package aead provides implementations of the AEAD primitive.
 package aead
 
 import (
 	"github.com/google/tink/go/tink"
 )
 
-// RegisterStandardKeyTypes registers standard Aead key types and their managers
-// with the Registry.
-func RegisterStandardKeyTypes() (bool, error) {
-	if result, err := RegisterKeyManager(NewAesGcmKeyManager()); err != nil {
-		return result, err
+// Register registers latest AEAD key types and their managers with the Registry.
+func Register() error {
+	if err := tink.RegisterKeyManager(NewAESGCMKeyManager()); err != nil {
+		return err
 	}
 
-	if result, err := RegisterKeyManager(NewChaCha20Poly1305KeyManager()); err != nil {
-		return result, err
+	if err := tink.RegisterKeyManager(NewChaCha20Poly1305KeyManager()); err != nil {
+		return err
 	}
 
-	return RegisterKeyManager(NewXChaCha20Poly1305KeyManager())
-}
-
-// RegisterKeyManager registers the given keyManager for the key type given in
-// keyManager.KeyType(). It returns true if registration was successful, false if
-// there already exisits a key manager for the key type.
-func RegisterKeyManager(keyManager tink.KeyManager) (bool, error) {
-	return tink.RegisterKeyManager(keyManager)
+	return tink.RegisterKeyManager(NewXChaCha20Poly1305KeyManager())
 }

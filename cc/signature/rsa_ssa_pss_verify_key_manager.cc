@@ -45,54 +45,13 @@ using google::crypto::tink::RsaSsaPssParams;
 using google::crypto::tink::RsaSsaPssPublicKey;
 using portable_proto::MessageLite;
 
-class RsaSsaPssPublicKeyFactory : public KeyFactory {
- public:
-  RsaSsaPssPublicKeyFactory() {}
-
-  // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(const portable_proto::MessageLite& key_format) const override;
-
-  // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
-  NewKey(absl::string_view serialized_key_format) const override;
-
-  // Not implemented for public keys.
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  NewKeyData(absl::string_view serialized_key_format) const override;
-};
-
-StatusOr<std::unique_ptr<MessageLite>> RsaSsaPssPublicKeyFactory::NewKey(
-    const portable_proto::MessageLite& key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED,
-                      "Operation not supported for public keys, "
-                      "please use the RsaSsaPssSignKeyManager.");
-}
-
-StatusOr<std::unique_ptr<MessageLite>> RsaSsaPssPublicKeyFactory::NewKey(
-    absl::string_view serialized_key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED,
-                      "Operation not supported for public keys, "
-                      "please use the RsaSsaPssSignKeyManager.");
-}
-
-StatusOr<std::unique_ptr<KeyData>> RsaSsaPssPublicKeyFactory::NewKeyData(
-    absl::string_view serialized_key_format) const {
-  return util::Status(util::error::UNIMPLEMENTED,
-                      "Operation not supported for public keys, "
-                      "please use the RsaSsaPssSignKeyManager.");
-}
-
-constexpr char RsaSsaPssVerifyKeyManager::kKeyTypePrefix[];
-constexpr char RsaSsaPssVerifyKeyManager::kKeyType[];
 constexpr uint32_t RsaSsaPssVerifyKeyManager::kVersion;
 
 RsaSsaPssVerifyKeyManager::RsaSsaPssVerifyKeyManager()
-    : key_type_(kKeyType), key_factory_(new RsaSsaPssPublicKeyFactory()) {}
-
-const std::string& RsaSsaPssVerifyKeyManager::get_key_type() const {
-  return key_type_;
-}
+    : key_factory_(KeyFactory::AlwaysFailingFactory(
+          util::Status(util::error::UNIMPLEMENTED,
+                       "Operation not supported for public keys, "
+                       "please use the RsaSsaPssSignKeyManager."))) {}
 
 const KeyFactory& RsaSsaPssVerifyKeyManager::get_key_factory() const {
   return *key_factory_;

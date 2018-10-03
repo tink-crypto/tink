@@ -35,38 +35,36 @@ func TestSignVerify(t *testing.T) {
 	encoding := "DER"
 	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
 	// Use the private key and public key directly to create new instances
-	signer, err := subtleSignature.NewEcdsaSignFromPrivateKey(hash, encoding, priv)
+	signer, err := subtleSignature.NewECDSASignerFromPrivateKey(hash, encoding, priv)
 	if err != nil {
-		t.Errorf("unexpected error when creating EcdsaSign: %s", err)
+		t.Errorf("unexpected error when creating ECDSASigner: %s", err)
 	}
-	verifier, err := subtleSignature.NewEcdsaVerifyFromPublicKey(hash, encoding, &priv.PublicKey)
+	verifier, err := subtleSignature.NewECDSAVerifierFromPublicKey(hash, encoding, &priv.PublicKey)
 	if err != nil {
-		t.Errorf("unexpected error when creating EcdsaVerify: %s", err)
+		t.Errorf("unexpected error when creating ECDSAVerifier: %s", err)
 	}
 	signature, err := signer.Sign(data)
 	if err != nil {
 		t.Errorf("unexpected error when signing: %s", err)
 	}
-	err = verifier.Verify(signature, data)
-	if err != nil {
+	if err := verifier.Verify(signature, data); err != nil {
 		t.Errorf("unexpected error when verifying: %s", err)
 	}
 
 	// Use byte slices to create new instances
-	signer, err = subtleSignature.NewEcdsaSign(hash, curve, encoding, priv.D.Bytes())
+	signer, err = subtleSignature.NewECDSASigner(hash, curve, encoding, priv.D.Bytes())
 	if err != nil {
-		t.Errorf("unexpected error when creating EcdsaSign: %s", err)
+		t.Errorf("unexpected error when creating ECDSASigner: %s", err)
 	}
-	verifier, err = subtleSignature.NewEcdsaVerify(hash, curve, encoding, priv.X.Bytes(), priv.Y.Bytes())
+	verifier, err = subtleSignature.NewECDSAVerifier(hash, curve, encoding, priv.X.Bytes(), priv.Y.Bytes())
 	if err != nil {
-		t.Errorf("unexpected error when creating EcdsaVerify: %s", err)
+		t.Errorf("unexpected error when creating ECDSAVerifier: %s", err)
 	}
 	signature, err = signer.Sign(data)
 	if err != nil {
 		t.Errorf("unexpected error when signing: %s", err)
 	}
-	err = verifier.Verify(signature, data)
-	if err != nil {
+	if err = verifier.Verify(signature, data); err != nil {
 		t.Errorf("unexpected error when verifying: %s", err)
 	}
 }
@@ -127,7 +125,7 @@ func TestVectors(t *testing.T) {
 		if err != nil {
 			t.Errorf("cannot decode wy: %s", err)
 		}
-		verifier, err := subtleSignature.NewEcdsaVerify(hash, curve, encoding, x.Bytes(), y.Bytes())
+		verifier, err := subtleSignature.NewECDSAVerifier(hash, curve, encoding, x.Bytes(), y.Bytes())
 		if err != nil {
 			continue
 		}

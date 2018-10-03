@@ -22,16 +22,16 @@ import (
 )
 
 func TestConfigRegistration(t *testing.T) {
-	success, err := aead.RegisterStandardKeyTypes()
-	if !success || err != nil {
+	err := aead.Register()
+	if err != nil {
 		t.Errorf("cannot register standard key types")
 	}
 	// Check for AES-GCM key manager.
-	keyManager, err := tink.GetKeyManager(aead.AesGcmTypeURL)
+	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*aead.AesGcmKeyManager)
+	var _ = keyManager.(*aead.AESGCMKeyManager)
 
 	// Check for ChaCha20Poly1305 key manager.
 	keyManager, err = tink.GetKeyManager(aead.ChaCha20Poly1305TypeURL)

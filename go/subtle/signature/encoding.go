@@ -21,7 +21,7 @@ import (
 )
 
 // asn1encode encodes the given ECDSA signature using ASN.1 encoding.
-func asn1encode(sig *EcdsaSignature) ([]byte, error) {
+func asn1encode(sig *ECDSASignerature) ([]byte, error) {
 	ret, err := asn1.Marshal(*sig)
 	if err != nil {
 		return nil, fmt.Errorf("asn.1 encoding failed")
@@ -37,9 +37,9 @@ var errAsn1Decoding = fmt.Errorf("asn.1 decoding failed")
 // that the input follows strict DER encoding: after unmarshalling the signature bytes,
 // we marshal the obtained signature object again. Since DER encoding is deterministic,
 // we expect that the obtained bytes would be equal to the input.
-func asn1decode(b []byte) (*EcdsaSignature, error) {
+func asn1decode(b []byte) (*ECDSASignerature, error) {
 	// parse the signature
-	sig := new(EcdsaSignature)
+	sig := new(ECDSASignerature)
 	_, err := asn1.Unmarshal(b, sig)
 	if err != nil {
 		return nil, errAsn1Decoding

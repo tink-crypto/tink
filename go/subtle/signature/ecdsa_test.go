@@ -37,7 +37,7 @@ func TestEncodeDecode(t *testing.T) {
 	for i := 0; i < nTest; i++ {
 		sig := newRandomSignature()
 		encoding := "DER"
-		encoded, err := sig.EncodeEcdsaSignature(encoding)
+		encoded, err := sig.EncodeECDSASignature(encoding)
 		if err != nil {
 			t.Errorf("unexpected error during encoding: %s", err)
 		}
@@ -53,7 +53,7 @@ func TestEncodeDecode(t *testing.T) {
 		if len(encoded) != int(encoded[1])+2 {
 			t.Errorf("incorrect length, expected %d, got %d", len(encoded), encoded[1]+2)
 		}
-		decodedSig, err := DecodeEcdsaSignature(encoded, encoding)
+		decodedSig, err := DecodeECDSASignerature(encoded, encoding)
 		if err != nil {
 			t.Errorf("unexpected error during decoding: %s", err)
 		}
@@ -65,44 +65,44 @@ func TestEncodeDecode(t *testing.T) {
 
 func TestEncodeWithInvalidInput(t *testing.T) {
 	sig := newRandomSignature()
-	_, err := sig.EncodeEcdsaSignature("UNKNOWN_ENCODING")
+	_, err := sig.EncodeECDSASignature("UNKNOWN_ENCODING")
 	if err == nil {
 		t.Errorf("expect an error when encoding is invalid")
 	}
 }
 
 func TestDecodeWithInvalidInput(t *testing.T) {
-	var sig *EcdsaSignature
+	var sig *ECDSASignerature
 	var encoded []byte
 	encoding := "DER"
 
 	// modified first byte
 	sig = newRandomSignature()
-	encoded, _ = sig.EncodeEcdsaSignature(encoding)
+	encoded, _ = sig.EncodeECDSASignature(encoding)
 	encoded[0] = 0x31
-	if _, err := DecodeEcdsaSignature(encoded, encoding); err == nil {
+	if _, err := DecodeECDSASignerature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when first byte is not 0x30")
 	}
 	// modified tag
 	sig = newRandomSignature()
-	encoded, _ = sig.EncodeEcdsaSignature(encoding)
+	encoded, _ = sig.EncodeECDSASignature(encoding)
 	encoded[2] = encoded[2] + 1
-	if _, err := DecodeEcdsaSignature(encoded, encoding); err == nil {
+	if _, err := DecodeECDSASignerature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when tag is modified")
 	}
 	// modified length
 	sig = newRandomSignature()
-	encoded, _ = sig.EncodeEcdsaSignature(encoding)
+	encoded, _ = sig.EncodeECDSASignature(encoding)
 	encoded[1] = encoded[1] + 1
-	if _, err := DecodeEcdsaSignature(encoded, encoding); err == nil {
+	if _, err := DecodeECDSASignerature(encoded, encoding); err == nil {
 		t.Errorf("expect an error when length is modified")
 	}
 	// append unused 0s
 	sig = newRandomSignature()
-	encoded, _ = sig.EncodeEcdsaSignature(encoding)
+	encoded, _ = sig.EncodeECDSASignature(encoding)
 	tmp := make([]byte, len(encoded)+4)
 	copy(tmp, encoded)
-	if _, err := DecodeEcdsaSignature(tmp, encoding); err == nil {
+	if _, err := DecodeECDSASignerature(tmp, encoding); err == nil {
 		t.Errorf("expect an error when unused 0s are appended to signature")
 	}
 	// a struct with three numbers
@@ -112,21 +112,21 @@ func TestDecodeWithInvalidInput(t *testing.T) {
 		Z: new(big.Int).SetBytes(random.GetRandomBytes(32)),
 	}
 	encoded, _ = asn1.Marshal(randomStruct)
-	if _, err := DecodeEcdsaSignature(encoded, encoding); err == nil {
-		t.Errorf("expect an error when input is not an EcdsaSignature")
+	if _, err := DecodeECDSASignerature(encoded, encoding); err == nil {
+		t.Errorf("expect an error when input is not an ECDSASignerature")
 	}
 }
 
 func TestValidateParams(t *testing.T) {
 	params := genValidParams()
 	for i := 0; i < len(params); i++ {
-		if err := ValidateEcdsaParams(params[i].hash, params[i].curve, params[i].encoding); err != nil {
+		if err := ValidateECDSAParams(params[i].hash, params[i].curve, params[i].encoding); err != nil {
 			t.Errorf("unexpected error for valid params: %s, i = %d", err, i)
 		}
 	}
 	params = genInvalidParams()
 	for i := 0; i < len(params); i++ {
-		if err := ValidateEcdsaParams(params[i].hash, params[i].curve, params[i].encoding); err == nil {
+		if err := ValidateECDSAParams(params[i].hash, params[i].curve, params[i].encoding); err == nil {
 			t.Errorf("expect an error when params are invalid, i = %d", i)
 		}
 	}
@@ -155,8 +155,8 @@ func genValidParams() []paramsTest {
 	}
 }
 
-func newRandomSignature() *EcdsaSignature {
+func newRandomSignature() *ECDSASignerature {
 	r := new(big.Int).SetBytes(random.GetRandomBytes(32))
 	s := new(big.Int).SetBytes(random.GetRandomBytes(32))
-	return NewEcdsaSignature(r, s)
+	return NewECDSASignerature(r, s)
 }

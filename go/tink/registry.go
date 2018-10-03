@@ -53,22 +53,20 @@ func (kmMap *keyManagerMap) Put(typeURL string, keyManager KeyManager) {
 	kmMap.m[typeURL] = keyManager
 }
 
-// RegisterKeyManager registers the given key manager.
-// It does nothing if there already exists a key manager with the same typeURL.
-// It returns true if the key manager is registered; false otherwise.
-func RegisterKeyManager(km KeyManager) (bool, error) {
+// RegisterKeyManager registers the given key manager, and does nothing if there already exists a key manager with the same typeURL.
+func RegisterKeyManager(km KeyManager) error {
 	if km == nil {
-		return false, fmt.Errorf("registry: invalid key manager")
+		return fmt.Errorf("registry: km must be non null")
 	}
 	typeURL := km.TypeURL()
-	// try to get the key manager with the given typeURL, return false if there is
+	// try to get the key manager with the given typeURL, return nil if there is
 	_, existed := keyManagers.Get(typeURL)
 	if existed {
-		return false, nil
+		return nil
 	}
 	// add the manager
 	keyManagers.Put(typeURL, km)
-	return true, nil
+	return nil
 }
 
 // GetKeyManager returns the key manager for the given typeURL if existed.
@@ -170,25 +168,13 @@ func PrimitivesWithKeyManager(kh *KeysetHandle, km KeyManager) (*PrimitiveSet, e
 		if err != nil {
 			return nil, fmt.Errorf("registry: cannot get primitive from key: %s", err)
 		}
-		entry, err := primitiveSet.AddPrimitive(primitive, key)
+		entry, err := primitiveSet.Add(primitive, key)
 		if err != nil {
 			return nil, fmt.Errorf("registry: cannot add primitive: %s", err)
 		}
 		if key.KeyId == keyset.PrimaryKeyId {
-			primitiveSet.SetPrimary(entry)
+			primitiveSet.Primary = entry
 		}
 	}
 	return primitiveSet, nil
-}
-
-func publicKeyData(typeURL string, serializedPrivKey []byte) (*tinkpb.KeyData, error) {
-	km, err := GetKeyManager(typeURL)
-	if err != nil {
-		return nil, err
-	}
-	pkm, ok := km.(PrivateKeyManager)
-	if !ok {
-		return nil, fmt.Errorf("registry: %s does not belong to a PrivateKeyManager", typeURL)
-	}
-	return pkm.PublicKeyData(serializedPrivKey)
 }

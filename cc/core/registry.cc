@@ -29,7 +29,7 @@ using google::crypto::tink::KeyTemplate;
 namespace crypto {
 namespace tink {
 
-std::recursive_mutex Registry::maps_mutex_;
+absl::Mutex Registry::maps_mutex_;
 Registry::LabelToObjectMap Registry::type_to_manager_map_;
 Registry::LabelToTypeNameMap Registry::type_to_primitive_map_;
 Registry::LabelToBoolMap Registry::type_to_new_key_allowed_map_;
@@ -39,7 +39,6 @@ Registry::LabelToTypeNameMap Registry::name_to_primitive_map_;
 
 // static
 StatusOr<bool> Registry::get_new_key_allowed(const std::string& type_url) {
-  std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
   auto new_key_entry = type_to_new_key_allowed_map_.find(type_url);
   if (new_key_entry == type_to_new_key_allowed_map_.end()) {
     return ToStatusF(util::error::NOT_FOUND,
@@ -52,7 +51,6 @@ StatusOr<bool> Registry::get_new_key_allowed(const std::string& type_url) {
 // static
 StatusOr<const KeyFactory*> Registry::get_key_factory(
     const std::string& type_url) {
-  std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
   auto key_factory_entry = type_to_key_factory_map_.find(type_url);
   if (key_factory_entry == type_to_key_factory_map_.end()) {
     return ToStatusF(util::error::INTERNAL,
@@ -65,7 +63,7 @@ StatusOr<const KeyFactory*> Registry::get_key_factory(
 // static
 StatusOr<std::unique_ptr<KeyData>> Registry::NewKeyData(
     const KeyTemplate& key_template) {
-  std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
+  absl::MutexLock lock(&maps_mutex_);
 
   auto new_key_allowed_result = get_new_key_allowed(key_template.type_url());
   if (!new_key_allowed_result.ok()) {
@@ -89,7 +87,7 @@ StatusOr<std::unique_ptr<KeyData>> Registry::NewKeyData(
 // static
 StatusOr<std::unique_ptr<KeyData>> Registry::GetPublicKeyData(
     const std::string& type_url, const std::string& serialized_private_key) {
-  std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
+  absl::MutexLock lock(&maps_mutex_);
   auto key_factory_result = get_key_factory(type_url);
   if (!key_factory_result.ok()) {
     return key_factory_result.status();
@@ -106,7 +104,7 @@ StatusOr<std::unique_ptr<KeyData>> Registry::GetPublicKeyData(
 }
 
 void Registry::Reset() {
-  std::lock_guard<std::recursive_mutex> lock(maps_mutex_);
+  absl::MutexLock lock(&maps_mutex_);
   type_to_manager_map_.clear();
   type_to_primitive_map_.clear();
   type_to_new_key_allowed_map_.clear();

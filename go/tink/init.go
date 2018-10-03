@@ -12,18 +12,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// Package tink defines interfaces for the crypto primitives that Tink supports.
 package tink
 
-/*
-PublicKeySign is the signing interface for digital signature.
-Implementations of this interface are secure against adaptive chosen-message attacks.
-Signing data ensures authenticity and integrity of that data, but not its secrecy.
-*/
-type PublicKeySign interface {
-	/**
-	 * Computes the signature for {@code data}.
-	 *
-	 * @return the signature of {$code data}.
-	 */
-	Sign(data []byte) ([]byte, error)
+import (
+	"github.com/google/tink/go/internal"
+	tinkpb "github.com/google/tink/proto/tink_go_proto"
+)
+
+// keysetHandle is used by package insecure and package testkeysethandle (via package internal)
+// to create KeysetHandle from cleartext key material.
+func keysetHandle(ks *tinkpb.Keyset) *KeysetHandle {
+	return &KeysetHandle{ks}
+}
+
+func init() {
+	internal.KeysetHandle = keysetHandle
 }

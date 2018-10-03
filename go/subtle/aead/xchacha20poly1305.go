@@ -12,7 +12,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package aead provides subtle implementations of the Aead primitive.
 package aead
 
 import (
@@ -24,13 +23,13 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-// XChaCha20Poly1305 is an implementation of Aead interface.
+// XChaCha20Poly1305 is an implementation of AEAD interface.
 type XChaCha20Poly1305 struct {
 	Key []byte
 }
 
-// Assert that XChaCha20Poly1305 implements the Aead interface.
-var _ tink.Aead = (*XChaCha20Poly1305)(nil)
+// Assert that XChaCha20Poly1305 implements the AEAD interface.
+var _ tink.AEAD = (*XChaCha20Poly1305)(nil)
 
 // NewXChaCha20Poly1305 returns an XChaCha20Poly1305 instance.
 // The key argument should be a 32-bytes key.

@@ -20,30 +20,30 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-// This file contains pre-generated KeyTemplate for Aead keys. One can use these templates
+// This file contains pre-generated KeyTemplate for AEAD keys. One can use these templates
 // to generate new Keyset.
 
-// Aes128GcmKeyTemplate is a KeyTemplate of AesGcmKey with the following parameters:
+// AES128GCMKeyTemplate is a KeyTemplate of AESGCMKey with the following parameters:
 //   - Key size: 16 bytes
-func Aes128GcmKeyTemplate() *tinkpb.KeyTemplate {
-	return createAesGcmKeyTemplate(16)
+func AES128GCMKeyTemplate() *tinkpb.KeyTemplate {
+	return createAESGCMKeyTemplate(16)
 }
 
-// Aes256GcmKeyTemplate is a KeyTemplate of AesGcmKey with the following parameters:
+// AES256GCMKeyTemplate is a KeyTemplate of AESGCMKey with the following parameters:
 //   - Key size: 32 bytes
-func Aes256GcmKeyTemplate() *tinkpb.KeyTemplate {
-	return createAesGcmKeyTemplate(32)
+func AES256GCMKeyTemplate() *tinkpb.KeyTemplate {
+	return createAESGCMKeyTemplate(32)
 }
 
-// createAesGcmKeyTemplate creates a new AES-GCM key template with the given key
+// createAESGCMKeyTemplate creates a new AES-GCM key template with the given key
 // size in bytes.
-func createAesGcmKeyTemplate(keySize uint32) *tinkpb.KeyTemplate {
+func createAESGCMKeyTemplate(keySize uint32) *tinkpb.KeyTemplate {
 	format := &gcmpb.AesGcmKeyFormat{
 		KeySize: keySize,
 	}
 	serializedFormat, _ := proto.Marshal(format)
 	return &tinkpb.KeyTemplate{
-		TypeUrl: AesGcmTypeURL,
+		TypeUrl: AESGCMTypeURL,
 		Value:   serializedFormat,
 	}
 }

@@ -37,14 +37,9 @@ class EciesAeadHkdfPublicKeyManager
     : public KeyManagerBase<HybridEncrypt,
                             google::crypto::tink::EciesAeadHkdfPublicKey> {
  public:
-  static constexpr char kKeyType[] =
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
   static constexpr uint32_t kVersion = 0;
 
   EciesAeadHkdfPublicKeyManager();
-
-  // Returns the type_url identifying the key type handled by this manager.
-  const std::string& get_key_type() const override;
 
   // Returns the version of this key manager.
   uint32_t get_version() const override;
@@ -65,9 +60,6 @@ class EciesAeadHkdfPublicKeyManager
   friend class EciesAeadHkdfPrivateKeyFactory;
   friend class EciesAeadHkdfPrivateKeyManager;
 
-  static constexpr char kKeyTypePrefix[] = "type.googleapis.com/";
-
-  std::string key_type_;
   std::unique_ptr<KeyFactory> key_factory_;
 
   static crypto::tink::util::Status Validate(

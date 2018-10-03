@@ -87,8 +87,10 @@ PUBLIC_API_DEPS = [
     "//cc/util:status",
     "//cc/util:statusor",
     "//cc/util:validation",
+    "@com_google_absl//absl/base:core_headers",
     "@com_google_absl//absl/memory",
     "@com_google_absl//absl/strings",
+    "@com_google_absl//absl/synchronization",
 ]
 
 cc_library(
@@ -342,7 +344,9 @@ cc_library(
         "//cc/util:statusor",
         "//cc/util:validation",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
     ],
 )
 
@@ -431,7 +435,7 @@ cc_library(
 
 cc_library(
     name = "key_manager",
-    srcs = ["key_manager.h"],
+    srcs = ["core/key_manager.cc"],
     hdrs = ["key_manager.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
@@ -441,6 +445,7 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -480,6 +485,8 @@ cc_library(
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/synchronization",
     ],
 )
 
@@ -776,6 +783,20 @@ cc_test(
         "//cc/util:test_util",
         "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "key_manager_test",
+    size = "small",
+    srcs = ["core/key_manager_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":key_manager",
+        "@com_google_googletest//:gtest_main",
+        "//cc/util:status",
+        "//cc/util:test_matchers",
+        "//proto:empty_cc_proto",
     ],
 )
 

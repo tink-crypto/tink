@@ -20,25 +20,34 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/mac"
+	"github.com/google/tink/go/testkeysethandle"
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
+
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
 func TestFactoryMultipleKeys(t *testing.T) {
 	tagSize := uint32(16)
-	keyset := testutil.NewTestHmacKeyset(tagSize, tinkpb.OutputPrefixType_TINK)
+	keyset := testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_TINK)
 	primaryKey := keyset.Key[0]
 	if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_TINK {
 		t.Errorf("expect a tink key")
 	}
-	keysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset)
-
-	p, err := mac.GetPrimitive(keysetHandle)
+	keysetHandle, err := testkeysethandle.KeysetHandle(keyset)
 	if err != nil {
-		t.Errorf("GetPrimitive failed: %s", err)
+		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
 	}
-	expectedPrefix, _ := tink.GetOutputPrefix(primaryKey)
+
+	p, err := mac.New(keysetHandle)
+	if err != nil {
+		t.Errorf("mac.New failed: %s", err)
+	}
+	expectedPrefix, err := tink.OutputPrefix(primaryKey)
+	if err != nil {
+		t.Errorf("tink.OutputPrefix failed: %s", err)
+	}
+
 	if err := verifyMacPrimitive(p, p, expectedPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
 	}
@@ -49,23 +58,31 @@ func TestFactoryMultipleKeys(t *testing.T) {
 		t.Errorf("expect a raw key")
 	}
 	keyset2 := tink.CreateKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
-	keysetHandle2, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset2)
-	p2, err := mac.GetPrimitive(keysetHandle2)
+	keysetHandle2, err := testkeysethandle.KeysetHandle(keyset2)
 	if err != nil {
-		t.Errorf("GetPrimitive failed: %s", err)
+		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+	}
+
+	p2, err := mac.New(keysetHandle2)
+	if err != nil {
+		t.Errorf("mac.New failed: %s", err)
 	}
 	if err := verifyMacPrimitive(p2, p, tink.RawPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
 	}
 
 	// mac with a random key not in the keyset, verify with the keyset should fail
-	keyset2 = testutil.NewTestHmacKeyset(tagSize, tinkpb.OutputPrefixType_TINK)
+	keyset2 = testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_TINK)
 	primaryKey = keyset2.Key[0]
-	expectedPrefix, _ = tink.GetOutputPrefix(primaryKey)
-	keysetHandle2, _ = tink.CleartextKeysetHandle().ParseKeyset(keyset2)
-	p2, err = mac.GetPrimitive(keysetHandle2)
+	expectedPrefix, _ = tink.OutputPrefix(primaryKey)
+	keysetHandle2, err = testkeysethandle.KeysetHandle(keyset2)
 	if err != nil {
-		t.Errorf("cannot get primitive from keyset handle")
+		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+	}
+
+	p2, err = mac.New(keysetHandle2)
+	if err != nil {
+		t.Errorf("mac.New: cannot get primitive from keyset handle")
 	}
 	err = verifyMacPrimitive(p2, p, expectedPrefix, tagSize)
 	if err == nil || !strings.Contains(err.Error(), "mac verification failed") {
@@ -75,25 +92,28 @@ func TestFactoryMultipleKeys(t *testing.T) {
 
 func TestFactoryRawKey(t *testing.T) {
 	tagSize := uint32(16)
-	keyset := testutil.NewTestHmacKeyset(tagSize, tinkpb.OutputPrefixType_RAW)
+	keyset := testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_RAW)
 	primaryKey := keyset.Key[0]
 	if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("expect a raw key")
 	}
-	keysetHandle, _ := tink.CleartextKeysetHandle().ParseKeyset(keyset)
-	p, err := mac.GetPrimitive(keysetHandle)
+	keysetHandle, err := testkeysethandle.KeysetHandle(keyset)
 	if err != nil {
-		t.Errorf("GetPrimitive failed: %s", err)
+		t.Errorf("testkeysethandle.KeysetHandle failed: %s", err)
+	}
+	p, err := mac.New(keysetHandle)
+	if err != nil {
+		t.Errorf("mac.New failed: %s", err)
 	}
 	if err := verifyMacPrimitive(p, p, tink.RawPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
 	}
 }
 
-func verifyMacPrimitive(computePrimitive tink.Mac, verifyPrimitive tink.Mac,
+func verifyMacPrimitive(computePrimitive tink.MAC, verifyPrimitive tink.MAC,
 	expectedPrefix string, tagSize uint32) error {
 	data := []byte("hello")
-	tag, err := computePrimitive.ComputeMac(data)
+	tag, err := computePrimitive.ComputeMAC(data)
 	if err != nil {
 		return fmt.Errorf("mac computation failed: %s", err)
 	}
@@ -104,25 +124,22 @@ func verifyMacPrimitive(computePrimitive tink.Mac, verifyPrimitive tink.Mac,
 	if prefixSize+int(tagSize) != len(tag) {
 		return fmt.Errorf("incorrect tag length")
 	}
-	valid, err := verifyPrimitive.VerifyMac(tag, data)
-	if !valid || err != nil {
+	if err = verifyPrimitive.VerifyMAC(tag, data); err != nil {
 		return fmt.Errorf("mac verification failed: %s", err)
 	}
 
-	// Modify plaintext or tag and make sure VerifyMac failed.
+	// Modify plaintext or tag and make sure VerifyMAC failed.
 	var dataAndTag []byte
 	dataAndTag = append(dataAndTag, data...)
 	dataAndTag = append(dataAndTag, tag...)
-	valid, err = verifyPrimitive.VerifyMac(dataAndTag[len(data):], dataAndTag[:len(data)])
-	if !valid || err != nil {
+	if err = verifyPrimitive.VerifyMAC(dataAndTag[len(data):], dataAndTag[:len(data)]); err != nil {
 		return fmt.Errorf("mac verification failed: %s", err)
 	}
 	for i := 0; i < len(dataAndTag); i++ {
 		tmp := dataAndTag[i]
 		for j := 0; j < 8; j++ {
 			dataAndTag[i] ^= 1 << uint8(j)
-			valid, err = verifyPrimitive.VerifyMac(dataAndTag[len(data):], dataAndTag[:len(data)])
-			if valid && err == nil {
+			if err = verifyPrimitive.VerifyMAC(dataAndTag[len(data):], dataAndTag[:len(data)]); err == nil {
 				return fmt.Errorf("invalid tag or plaintext, mac should be invalid")
 			}
 			dataAndTag[i] = tmp

@@ -275,7 +275,7 @@ TEST_F(EcdsaSignKeyManagerTest, testPublicKeyExtraction) {
       new_key->SerializeAsString());
   EXPECT_TRUE(public_key_data_result.ok()) << public_key_data_result.status();
   auto public_key_data = std::move(public_key_data_result.ValueOrDie());
-  EXPECT_EQ(EcdsaVerifyKeyManager::kKeyType,
+  EXPECT_EQ(EcdsaVerifyKeyManager::static_key_type(),
             public_key_data->type_url());
   EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC, public_key_data->key_material_type());
   EXPECT_EQ(new_key->public_key().SerializeAsString(),

@@ -17,7 +17,7 @@ go_library(
 )
 
 go_test(
-    name = "go_default_xtest",
+    name = "go_default_test",
     srcs = [
         "aes_gcm_test.go",
         "chacha20poly1305_test.go",

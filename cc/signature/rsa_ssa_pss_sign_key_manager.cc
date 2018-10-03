@@ -130,12 +130,12 @@ StatusOr<std::unique_ptr<KeyData>> RsaSsaPssPrivateKeyFactory::GetPublicKeyData(
   if (!private_key.ParseFromString(std::string(serialized_private_key))) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Could not parse the passed string as proto '%s'.",
-                     RsaSsaPssVerifyKeyManager::kKeyType);
+                     RsaSsaPssVerifyKeyManager::static_key_type().c_str());
   }
   auto status = RsaSsaPssSignKeyManager::Validate(private_key);
   if (!status.ok()) return status;
   auto key_data = absl::make_unique<KeyData>();
-  key_data->set_type_url(RsaSsaPssVerifyKeyManager::kKeyType);
+  key_data->set_type_url(RsaSsaPssVerifyKeyManager::static_key_type());
   key_data->set_value(private_key.public_key().SerializeAsString());
   key_data->set_key_material_type(KeyData::ASYMMETRIC_PUBLIC);
   return std::move(key_data);

@@ -119,8 +119,8 @@ Tink is maintained by (A-Z):
 -   Haris Andrianakis
 -   Daniel Bleichenbacher
 -   Thai Duong
+-   Thomas Holenstein
 -   Charles Lee
 -   Quan Nguyen
 -   Bartosz Przydatek
-
-Disclaimer: Tink is not an officially supported Google product.
+-   Veronika Slívová
