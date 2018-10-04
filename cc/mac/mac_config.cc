@@ -16,10 +16,10 @@
 
 #include "tink/mac/mac_config.h"
 
+#include "absl/memory/memory.h"
 #include "tink/config.h"
 #include "tink/mac/mac_catalogue.h"
 #include "tink/util/status.h"
-
 
 namespace crypto {
 namespace tink {
@@ -49,7 +49,8 @@ const google::crypto::tink::RegistryConfig& MacConfig::Latest() {
 
 // static
 util::Status MacConfig::Register() {
-  auto status = Registry::AddCatalogue(kCatalogueName, new MacCatalogue());
+  auto status =
+      Registry::AddCatalogue(kCatalogueName, absl::make_unique<MacCatalogue>());
   if (!status.ok()) return status;
   return Config::Register(Latest());
 }

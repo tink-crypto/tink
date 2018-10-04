@@ -16,13 +16,13 @@
 
 #include "tink/hybrid/hybrid_config.h"
 
-#include "tink/config.h"
+#include "absl/memory/memory.h"
 #include "tink/aead/aead_config.h"
+#include "tink/config.h"
 #include "tink/hybrid/hybrid_decrypt_catalogue.h"
 #include "tink/hybrid/hybrid_encrypt_catalogue.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
-
 
 namespace crypto {
 namespace tink {
@@ -62,11 +62,11 @@ const google::crypto::tink::RegistryConfig& HybridConfig::Latest() {
 util::Status HybridConfig::Register() {
   auto status = AeadConfig::Register();
   if (!status.ok()) return status;
-  status = Registry::AddCatalogue(
-      kHybridDecryptCatalogueName, new HybridDecryptCatalogue());
+  status = Registry::AddCatalogue(kHybridDecryptCatalogueName,
+                                  absl::make_unique<HybridDecryptCatalogue>());
   if (!status.ok()) return status;
-  status = Registry::AddCatalogue(
-      kHybridEncryptCatalogueName, new HybridEncryptCatalogue());
+  status = Registry::AddCatalogue(kHybridEncryptCatalogueName,
+                                  absl::make_unique<HybridEncryptCatalogue>());
   if (!status.ok()) return status;
   return Config::Register(Latest());
 }

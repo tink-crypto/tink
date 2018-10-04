@@ -87,9 +87,8 @@ crypto::tink::util::Status Config::Register(
   auto key_manager_result = catalogue->GetKeyManager(
       entry.type_url(), entry.primitive_name(), entry.key_manager_version());
   if (!key_manager_result.ok()) return key_manager_result.status();
-  return Registry::RegisterKeyManager<P>(
-      key_manager_result.ValueOrDie().release(),
-      entry.new_key_allowed());
+  return Registry::RegisterKeyManager(
+      std::move(key_manager_result.ValueOrDie()), entry.new_key_allowed());
 }
 
 }  // namespace tink

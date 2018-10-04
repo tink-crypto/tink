@@ -49,10 +49,12 @@ namespace {
 class EciesAeadHkdfPrivateKeyManagerTest : public ::testing::Test {
  protected:
   static void SetUpTestCase() {
-    auto aes_gcm_key_manager = new AesGcmKeyManager();
-    ASSERT_TRUE(Registry::RegisterKeyManager(aes_gcm_key_manager).ok());
-    auto aes_ctr_hmac_key_manager = new AesCtrHmacAeadKeyManager();
-    ASSERT_TRUE(Registry::RegisterKeyManager(aes_ctr_hmac_key_manager).ok());
+    ASSERT_TRUE(Registry::RegisterKeyManager(
+                    absl::make_unique<AesGcmKeyManager>(), true)
+                    .ok());
+    ASSERT_TRUE(Registry::RegisterKeyManager(
+                    absl::make_unique<AesCtrHmacAeadKeyManager>(), true)
+                    .ok());
   }
 
   std::string key_type_prefix = "type.googleapis.com/";

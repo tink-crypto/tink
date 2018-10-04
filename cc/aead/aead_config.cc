@@ -16,6 +16,7 @@
 
 #include "tink/aead/aead_config.h"
 
+#include "absl/memory/memory.h"
 #include "tink/config.h"
 #include "tink/registry.h"
 #include "tink/aead/aead_catalogue.h"
@@ -66,7 +67,8 @@ const google::crypto::tink::RegistryConfig& AeadConfig::Latest() {
 util::Status AeadConfig::Register() {
   auto status = MacConfig::Register();
   if (!status.ok()) return status;
-  status = Registry::AddCatalogue(kCatalogueName, new AeadCatalogue());
+  status = Registry::AddCatalogue(kCatalogueName,
+                                  absl::make_unique<AeadCatalogue>());
   if (!status.ok()) return status;
   return Config::Register(Latest());
 }

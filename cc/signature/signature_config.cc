@@ -16,6 +16,7 @@
 
 #include "tink/signature/signature_config.h"
 
+#include "absl/memory/memory.h"
 #include "tink/config.h"
 #include "tink/registry.h"
 #include "tink/signature/public_key_sign_catalogue.h"
@@ -59,10 +60,11 @@ const google::crypto::tink::RegistryConfig& SignatureConfig::Latest() {
 // static
 util::Status SignatureConfig::Register() {
   auto status = Registry::AddCatalogue(
-      kPublicKeySignCatalogueName, new PublicKeySignCatalogue());
+      kPublicKeySignCatalogueName, absl::make_unique<PublicKeySignCatalogue>());
   if (!status.ok()) return status;
-  status = Registry::AddCatalogue(
-      kPublicKeyVerifyCatalogueName, new PublicKeyVerifyCatalogue());
+  status =
+      Registry::AddCatalogue(kPublicKeyVerifyCatalogueName,
+                             absl::make_unique<PublicKeyVerifyCatalogue>());
   if (!status.ok()) return status;
   return Config::Register(Latest());
 }
