@@ -330,21 +330,25 @@ TEST_F(RegistryTest, testRegisterKeyManager) {
 TEST_F(RegistryTest, testAddCatalogue) {
   std::string catalogue_name = "SomeCatalogue";
 
-  TestAeadCatalogue* null_catalogue = nullptr;
-  auto status = Registry::AddCatalogue(catalogue_name, null_catalogue);
+  std::unique_ptr<TestAeadCatalogue> null_catalogue = nullptr;
+  auto status =
+      Registry::AddCatalogue(catalogue_name, std::move(null_catalogue));
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code()) << status;
 
   // Add a catalogue.
-  status = Registry::AddCatalogue(catalogue_name, new TestAeadCatalogue());
+  status = Registry::AddCatalogue(catalogue_name,
+                                  absl::make_unique<TestAeadCatalogue>());
   EXPECT_TRUE(status.ok()) << status;
 
   // Add the same catalogue again, it should work (idempotence).
-  status = Registry::AddCatalogue(catalogue_name, new TestAeadCatalogue());
+  status = Registry::AddCatalogue(catalogue_name,
+                                  absl::make_unique<TestAeadCatalogue>());
   EXPECT_TRUE(status.ok()) << status;
 
   // Try overriding a catalogue.
-  status = Registry::AddCatalogue(catalogue_name, new AeadCatalogue());
+  status = Registry::AddCatalogue(catalogue_name,
+                                  absl::make_unique<AeadCatalogue>());
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
 

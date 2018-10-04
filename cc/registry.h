@@ -65,11 +65,12 @@ class Registry {
   // Adding a custom catalogue should be a one-time operation,
   // and fails if the given 'catalogue' tries to override
   // an existing, different catalogue for the specified name.
-  template <class P>
+  template <class ConcreteCatalogue>
   static crypto::tink::util::Status AddCatalogue(
-      const std::string& catalogue_name, std::unique_ptr<Catalogue<P>> catalogue) {
-    return RegistryImpl::GlobalInstance().AddCatalogue<P>(catalogue_name,
-                                                          catalogue.release());
+      const std::string& catalogue_name,
+      std::unique_ptr<ConcreteCatalogue> catalogue) {
+    return RegistryImpl::GlobalInstance().AddCatalogue(catalogue_name,
+                                                       catalogue.release());
   }
 
   // AddCatalogue has the same functionality as the overload which uses a
