@@ -355,6 +355,8 @@ cc_library(
         "aes_siv_boringssl.cc",
     ],
     hdrs = ["aes_siv_boringssl.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
     deps = [
         ":random",
         ":subtle_util_boringssl",

@@ -1,0 +1,47 @@
+package(default_visibility = ["//tools/build_defs:internal_pkg"])
+
+licenses(["notice"])  # Apache 2.0
+
+cc_library(
+    name = "aes_siv_key_manager",
+    srcs = ["aes_siv_key_manager.cc"],
+    hdrs = ["aes_siv_key_manager.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc:aead",
+        "//cc:key_manager",
+        "//cc:key_manager_base",
+        "//cc/subtle:aes_siv_boringssl",
+        "//cc/subtle:random",
+        "//cc/util:errors",
+        "//cc/util:protobuf_helper",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//cc/util:validation",
+        "//proto:aes_siv_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_absl//absl/base",
+    ],
+)
+
+# tests
+
+cc_test(
+    name = "aes_siv_key_manager_test",
+    size = "small",
+    srcs = ["aes_siv_key_manager_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aes_siv_key_manager",
+        "//cc:aead",
+        "//cc/util:status",
+        "//cc/util:statusor",
+        "//proto:aes_eax_cc_proto",
+        "//proto:aes_siv_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:tink_cc_proto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
