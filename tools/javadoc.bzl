@@ -32,7 +32,7 @@ def _javadoc_library(ctx):
 
     include_packages = ":".join(ctx.attr.root_packages)
     javadoc_command = [
-        ctx.file._javadoc_binary.path,
+        "%s/bin/javadoc" % ctx.attr._jdk[java_common.JavaRuntimeInfo].java_home,
         "-sourcepath srcs",
         "-use",
         "-subpackages",
@@ -72,7 +72,8 @@ def _javadoc_library(ctx):
                 if path_prefix in src.path:
                     prepare_srcs_command += "cp %s srcs/%s && " % (src.path, path_prefix)
 
-    jar_command = "%s cf %s -C tmp ." % (ctx.file._jar_binary.path, ctx.outputs.jar.path)
+    jar_binary = "%s/bin/jar" % ctx.attr._jdk[java_common.JavaRuntimeInfo].java_home
+    jar_command = "%s cf %s -C tmp ." % (jar_binary, ctx.outputs.jar.path)
 
     ctx.actions.run_shell(
         inputs = srcs + classpath + ctx.files._jdk,
@@ -94,17 +95,10 @@ javadoc_library = rule(
             default = _android_jar,
             allow_single_file = True,
         ),
-        "_javadoc_binary": attr.label(
-            default = Label("@local_jdk//:bin/javadoc"),
-            allow_single_file = True,
-        ),
-        "_jar_binary": attr.label(
-            default = Label("@local_jdk//:bin/jar"),
-            allow_single_file = True,
-        ),
         "_jdk": attr.label(
-            default = Label("@local_jdk//:jdk-default"),
+            default = Label("@bazel_tools//tools/jdk:current_java_runtime"),
             allow_files = True,
+            providers = [java_common.JavaRuntimeInfo],
         ),
     },
     outputs = {"jar": "%{name}.jar"},

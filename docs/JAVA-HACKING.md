@@ -3,7 +3,6 @@
 ## Building Tink
 
 *   Install [Bazel](https://docs.bazel.build/versions/master/install.html).
-    Version 0.9.0 or newer are known to work correctly with Tink.
 
 *   To build Java, install Android SDK 23 or newer and set the ANDROID_HOME
     environment variable to the path of your Android SDK. On macOS, the SDK is
