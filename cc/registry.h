@@ -85,9 +85,9 @@ class Registry {
   }
 
   // Registers the given 'manager' for the key type 'manager->get_key_type()'.
-  template <class P>
+  template <class ConcreteKeyManager>
   static crypto::tink::util::Status RegisterKeyManager(
-      std::unique_ptr<KeyManager<P>> manager, bool new_key_allowed) {
+      std::unique_ptr<ConcreteKeyManager> manager, bool new_key_allowed) {
     return RegistryImpl::GlobalInstance().RegisterKeyManager(manager.release(),
                                                              new_key_allowed);
   }
