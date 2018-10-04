@@ -39,9 +39,6 @@ import javax.annotation.concurrent.GuardedBy;
  *
  * <p>This class reads and writes to shared preferences, thus is best not to run on the UI thread.
  *
- * <p>On Android M or newer, the keysets are encrypted with master keys generated and stored in <a
- * href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
- *
  * <h3>Usage</h3>
  *
  * <pre>{@code
@@ -63,21 +60,21 @@ import javax.annotation.concurrent.GuardedBy;
  * {@code my_keyset_name} preference of the {@code my_pref_file_name} shared preferences file.
  *
  * <p>On Android M or newer and if a master key URI is set with {@link
- * AndroidKeysetManager.Builder#withKeyTemplate}, the keyset will be encrypted when written to
- * storage and decrypted when read.
+ * AndroidKeysetManager.Builder#withMasterKeyUri}, the keyset is encrypted with a master key
+ * generated and stored in <a
+ * href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>. When
+ * Tink cannot decrypt the keyset it would assume that it is not encrypted.
  *
  * <p>The master key URI must start with {@code android-keystore://}. If the master key doesn't
  * exist, a fresh one is generated. Usage of Android Keystore can be disabled with {@link
  * AndroidKeysetManager.Builder#doNotUseKeystore}.
  *
- * <p>If a master key URI is not chosen or on Android L or older, the keyset will be stored in
+ * <p>On Android L or older, or when the master key URI is not set, the keyset will be stored in
  * cleartext in private preferences which, thanks to the security of the Android framework, no other
  * apps can read or write.
  *
- * <p>When Tink cannot decrypt some keyset it would assume that the keyset is in cleartext.
- *
- * <p>The resulting manager supports all operations that supported by {@link KeysetManager}. For
- * example to rotate the keyset, one can do:
+ * <p>The resulting manager supports all operations supported by {@link KeysetManager}. For example
+ * to rotate the keyset, one can do:
  *
  * <pre>{@code
  * manager.rotate(SignatureKeyTemplates.ECDSA_P256);
@@ -113,10 +110,14 @@ public final class AndroidKeysetManager {
     }
 
     useKeystore = builder.useKeystore;
-    masterKey = builder.masterKey;
-    if (useKeystore && masterKey == null) {
+    if (useKeystore && builder.masterKeyUri == null) {
       throw new IllegalArgumentException(
           "need a master key URI, please set it with Builder#masterKeyUri");
+    }
+    if (shouldUseKeystore()) {
+      masterKey = AndroidKeystoreKmsClient.getOrGenerateNewAeadKey(builder.masterKeyUri);
+    } else {
+      masterKey = null;
     }
 
     keyTemplate = builder.keyTemplate;
@@ -127,7 +128,7 @@ public final class AndroidKeysetManager {
   public static final class Builder {
     private KeysetReader reader = null;
     private KeysetWriter writer = null;
-    private Aead masterKey = null;
+    private String masterKeyUri = null;
     private boolean useKeystore = true;
     private KeyTemplate keyTemplate = null;
 
@@ -153,8 +154,12 @@ public final class AndroidKeysetManager {
      * <p>Only master keys stored in Android Keystore is supported. The URI must start with {@code
      * android-keystore://}.
      */
-    public Builder withMasterKeyUri(String val) throws GeneralSecurityException, IOException {
-      masterKey = AndroidKeystoreKmsClient.getOrGenerateNewAeadKey(val);
+    public Builder withMasterKeyUri(String val) {
+      if (!val.startsWith(AndroidKeystoreKmsClient.PREFIX)) {
+        throw new IllegalArgumentException(
+            "key URI must start with " + AndroidKeystoreKmsClient.PREFIX);
+      }
+      masterKeyUri = val;
       return this;
     }
 
