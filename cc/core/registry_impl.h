@@ -16,7 +16,6 @@
 #ifndef TINK_CORE_REGISTRY_IMPL_H_
 #define TINK_CORE_REGISTRY_IMPL_H_
 
-#include <mutex>  // NOLINT(build/c++11)
 #include <typeinfo>
 #include <unordered_map>
 
@@ -95,30 +94,48 @@ class RegistryImpl {
   void Reset() LOCKS_EXCLUDED(maps_mutex_);
 
  private:
-  typedef std::unordered_map<std::string, std::unique_ptr<void, void (*)(void*)>>
-      LabelToObjectMap;
-  typedef std::unordered_map<std::string, const char*> LabelToTypeNameMap;
-  typedef std::unordered_map<std::string, bool> LabelToBoolMap;
-  typedef std::unordered_map<std::string, const KeyFactory*> LabelToKeyFactoryMap;
+  // All information for a given type url.
+  struct KeyTypeInfo {
+    KeyTypeInfo(std::unique_ptr<void, void (*)(void*)> key_manager,
+                const char* type_id_name, bool new_key_allowed,
+                const KeyFactory& key_factory)
+        : key_manager(std::move(key_manager)),
+          type_id_name(type_id_name),
+          new_key_allowed(new_key_allowed),
+          key_factory(key_factory) {}
+
+    // A pointer to a KeyManager<P>. We cannot use a normal unique_ptr because
+    // we do not know P. Hence, we pass a custom deleter which knows how to
+    // delete the object.
+    const std::unique_ptr<void, void (*)(void*)> key_manager;
+    // TypeId of the primitive for which this key was inserted.
+    const char* type_id_name;
+    // Whether the key manager allows creating new keys.
+    bool new_key_allowed;
+    // The factory which can produce keys of this type.
+    const KeyFactory& key_factory;
+  };
+
+  // All information for a given primitive label.
+  struct LabelInfo {
+    LabelInfo(std::unique_ptr<void, void (*)(void*)> catalogue,
+              const char* type_id_name)
+        : catalogue(std::move(catalogue)), type_id_name(type_id_name) {}
+    // A pointer to the underlying Catalogue<P>.
+    const std::unique_ptr<void, void (*)(void*)> catalogue;
+    // TypeId of the primitive for which this key was inserted.
+    const char* type_id_name;
+  };
 
   RegistryImpl() = default;
   RegistryImpl(const RegistryImpl&) = delete;
   RegistryImpl& operator=(const RegistryImpl&) = delete;
 
   absl::Mutex maps_mutex_;
-  // Maps for key manager data.
-  LabelToObjectMap type_to_manager_map_ GUARDED_BY(maps_mutex_);
-  LabelToTypeNameMap type_to_primitive_map_ GUARDED_BY(maps_mutex_);
-  LabelToBoolMap type_to_new_key_allowed_map_ GUARDED_BY(maps_mutex_);
-  LabelToKeyFactoryMap type_to_key_factory_map_ GUARDED_BY(maps_mutex_);
-  // Maps for catalogue-data.
-  LabelToObjectMap name_to_catalogue_map_ GUARDED_BY(maps_mutex_);
-  LabelToTypeNameMap name_to_primitive_map_ GUARDED_BY(maps_mutex_);
-
-  crypto::tink::util::StatusOr<bool> get_new_key_allowed(const std::string& type_url)
-      SHARED_LOCKS_REQUIRED(maps_mutex_);
-  crypto::tink::util::StatusOr<const KeyFactory*> get_key_factory(
-      const std::string& type_url) SHARED_LOCKS_REQUIRED(maps_mutex_);
+  std::unordered_map<std::string, KeyTypeInfo> type_url_to_info_
+      GUARDED_BY(maps_mutex_);
+  std::unordered_map<std::string, LabelInfo> name_to_catalogue_map_
+      GUARDED_BY(maps_mutex_);
 };
 
 template <class P>
@@ -143,17 +160,17 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
   absl::MutexLock lock(&maps_mutex_);
   auto curr_catalogue = name_to_catalogue_map_.find(catalogue_name);
   if (curr_catalogue != name_to_catalogue_map_.end()) {
-    auto existing = static_cast<Catalogue<P>*>(curr_catalogue->second.get());
+    auto existing =
+        static_cast<Catalogue<P>*>(curr_catalogue->second.catalogue.get());
     if (typeid(*existing).name() != typeid(*catalogue).name()) {
       return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                        "A catalogue named '%s' has been already added.",
                        catalogue_name.c_str());
     }
   } else {
-    name_to_catalogue_map_.insert(
-        std::make_pair(catalogue_name, std::move(entry)));
-    name_to_primitive_map_.insert(
-        std::make_pair(catalogue_name, typeid(P).name()));
+    name_to_catalogue_map_.emplace(
+        std::piecewise_construct, std::forward_as_tuple(catalogue_name),
+        std::forward_as_tuple(std::move(entry), typeid(P).name()));
   }
   return crypto::tink::util::Status::OK;
 }
@@ -168,14 +185,14 @@ crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
                      "No catalogue named '%s' has been added.",
                      catalogue_name.c_str());
   }
-  if (name_to_primitive_map_[catalogue_name] != typeid(P).name()) {
+  if (catalogue_entry->second.type_id_name != typeid(P).name()) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Wrong Primitive type for catalogue named '%s': "
                      "got '%s', expected '%s'",
                      catalogue_name.c_str(), typeid(P).name(),
-                     name_to_primitive_map_[catalogue_name]);
+                     catalogue_entry->second.type_id_name);
   }
-  return static_cast<Catalogue<P>*>(catalogue_entry->second.get());
+  return static_cast<Catalogue<P>*>(catalogue_entry->second.catalogue.get());
 }
 
 template <class P>
@@ -186,39 +203,35 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
         crypto::tink::util::error::INVALID_ARGUMENT,
         "Parameter 'manager' must be non-null.");
   }
-  std::string type_url = manager->get_key_type();
   std::unique_ptr<void, void (*)(void*)> entry(manager, delete_manager<P>);
+  std::string type_url = manager->get_key_type();
   if (!manager->DoesSupport(type_url)) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "The manager does not support type '%s'.",
                      type_url.c_str());
   }
   absl::MutexLock lock(&maps_mutex_);
-  auto curr_manager = type_to_manager_map_.find(type_url);
-  if (curr_manager != type_to_manager_map_.end()) {
-    auto existing = static_cast<KeyManager<P>*>(curr_manager->second.get());
+  auto it = type_url_to_info_.find(type_url);
+  if (it != type_url_to_info_.end()) {
+    auto existing = static_cast<KeyManager<P>*>(it->second.key_manager.get());
     if (typeid(*existing).name() != typeid(*manager).name()) {
       return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                        "A manager for type '%s' has been already registered.",
                        type_url.c_str());
     } else {
-      auto curr_new_key_allowed = type_to_new_key_allowed_map_.find(type_url);
-      if (!curr_new_key_allowed->second && new_key_allowed) {
+      if (!it->second.new_key_allowed && new_key_allowed) {
         return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
                          "A manager for type '%s' has been already registered "
                          "with forbidden new key operation.",
                          type_url.c_str());
-      } else {
-        curr_new_key_allowed->second = new_key_allowed;
       }
+      it->second.new_key_allowed = new_key_allowed;
     }
   } else {
-    type_to_manager_map_.insert(std::make_pair(type_url, std::move(entry)));
-    type_to_primitive_map_.insert(std::make_pair(type_url, typeid(P).name()));
-    type_to_new_key_allowed_map_.insert(
-        std::make_pair(type_url, new_key_allowed));
-    type_to_key_factory_map_.insert(
-        std::make_pair(type_url, &(manager->get_key_factory())));
+    type_url_to_info_.emplace(
+        std::piecewise_construct, std::forward_as_tuple(type_url),
+        std::forward_as_tuple(std::move(entry), typeid(P).name(),
+                              new_key_allowed, manager->get_key_factory()));
   }
   return crypto::tink::util::Status::OK;
 }
@@ -227,20 +240,20 @@ template <class P>
 crypto::tink::util::StatusOr<const KeyManager<P>*>
 RegistryImpl::get_key_manager(const std::string& type_url) {
   absl::MutexLock lock(&maps_mutex_);
-  auto manager_entry = type_to_manager_map_.find(type_url);
-  if (manager_entry == type_to_manager_map_.end()) {
+  auto it = type_url_to_info_.find(type_url);
+  if (it == type_url_to_info_.end()) {
     return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                      "No manager for type '%s' has been registered.",
                      type_url.c_str());
   }
-  if (type_to_primitive_map_[type_url] != typeid(P).name()) {
+  if (it->second.type_id_name != typeid(P).name()) {
     return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
                      "Wrong Primitive type for key type '%s': "
                      "got '%s', expected '%s'",
                      type_url.c_str(), typeid(P).name(),
-                     type_to_primitive_map_[type_url]);
+                     it->second.type_id_name);
   }
-  return static_cast<KeyManager<P>*>(manager_entry->second.get());
+  return static_cast<KeyManager<P>*>(it->second.key_manager.get());
 }
 
 template <class P>

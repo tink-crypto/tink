@@ -15,8 +15,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/core/registry_impl.h"
 
-#include <mutex>  // NOLINT(build/c++11)
-
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -28,59 +26,35 @@ using google::crypto::tink::KeyTemplate;
 namespace crypto {
 namespace tink {
 
-StatusOr<bool> RegistryImpl::get_new_key_allowed(const std::string& type_url) {
-  auto new_key_entry = type_to_new_key_allowed_map_.find(type_url);
-  if (new_key_entry == type_to_new_key_allowed_map_.end()) {
+StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
+    const KeyTemplate& key_template) {
+  absl::MutexLock lock(&maps_mutex_);
+  const std::string& type_url = key_template.type_url();
+  auto it = type_url_to_info_.find(type_url);
+  if (it == type_url_to_info_.end()) {
     return ToStatusF(util::error::NOT_FOUND,
                      "No manager for type '%s' has been registered.",
                      type_url.c_str());
   }
-  return new_key_entry->second;
-}
-
-StatusOr<const KeyFactory*> RegistryImpl::get_key_factory(
-    const std::string& type_url) {
-  auto key_factory_entry = type_to_key_factory_map_.find(type_url);
-  if (key_factory_entry == type_to_key_factory_map_.end()) {
-    return ToStatusF(util::error::INTERNAL,
-                     "No KeyFactory for key manager for type '%s' found.",
-                     type_url.c_str());
-  }
-  return key_factory_entry->second;
-}
-
-StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
-    const KeyTemplate& key_template) {
-  absl::MutexLock lock(&maps_mutex_);
-
-  auto new_key_allowed_result = get_new_key_allowed(key_template.type_url());
-  if (!new_key_allowed_result.ok()) {
-    return new_key_allowed_result.status();
-  }
-  if (!new_key_allowed_result.ValueOrDie()) {
+  if (!it->second.new_key_allowed) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "KeyManager for type '%s' does not allow "
                      "for creation of new keys.",
-                     key_template.type_url().c_str());
+                     type_url.c_str());
   }
-  auto key_factory_result = get_key_factory(key_template.type_url());
-  if (!key_factory_result.ok()) {
-    return key_factory_result.status();
-  }
-  auto factory = key_factory_result.ValueOrDie();
-  auto result = factory->NewKeyData(key_template.value());
-  return result;
+  return it->second.key_factory.NewKeyData(key_template.value());
 }
 
 StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
     const std::string& type_url, const std::string& serialized_private_key) {
   absl::MutexLock lock(&maps_mutex_);
-  auto key_factory_result = get_key_factory(type_url);
-  if (!key_factory_result.ok()) {
-    return key_factory_result.status();
+  auto it = type_url_to_info_.find(type_url);
+  if (it == type_url_to_info_.end()) {
+    return ToStatusF(util::error::INTERNAL, "No Key type '%s' registered.",
+                     type_url.c_str());
   }
   auto factory =
-      dynamic_cast<const PrivateKeyFactory*>(key_factory_result.ValueOrDie());
+      dynamic_cast<const PrivateKeyFactory*>(&it->second.key_factory);
   if (factory == nullptr) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "KeyManager for type '%s' does not have "
@@ -92,12 +66,8 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
 
 void RegistryImpl::Reset() {
   absl::MutexLock lock(&maps_mutex_);
-  type_to_manager_map_.clear();
-  type_to_primitive_map_.clear();
-  type_to_new_key_allowed_map_.clear();
-  type_to_key_factory_map_.clear();
+  type_url_to_info_.clear();
   name_to_catalogue_map_.clear();
-  name_to_primitive_map_.clear();
 }
 
 }  // namespace tink
