@@ -23,6 +23,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/keyset_handle.h"
@@ -150,6 +151,30 @@ class DummyAead : public Aead {
 
  private:
   std::string aead_name_;
+};
+
+// A dummy implementation of DeterministicAead-interface.
+// An instance of DummyDeterministicAead can be identified by a name specified
+// as a parameter of the constructor.
+// The implementation is the same as DummyAead.
+class DummyDeterministicAead : public DeterministicAead {
+ public:
+  DummyDeterministicAead(absl::string_view daead_name) : aead_(daead_name) {}
+
+  crypto::tink::util::StatusOr<std::string> EncryptDeterministically(
+      absl::string_view plaintext,
+      absl::string_view associated_data) const override {
+    return aead_.Encrypt(plaintext, associated_data);
+  }
+
+  crypto::tink::util::StatusOr<std::string> DecryptDeterministically(
+      absl::string_view ciphertext,
+      absl::string_view associated_data) const override {
+    return aead_.Decrypt(ciphertext, associated_data);
+  }
+
+ private:
+  DummyAead aead_;
 };
 
 // A dummy implementation of HybridEncrypt-interface.

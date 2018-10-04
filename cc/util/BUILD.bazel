@@ -10,7 +10,7 @@ cc_library(
     strip_include_prefix = "/cc",
     deps = [
         "@com_google_absl//absl/base:core_headers",
-    ]
+    ],
 )
 
 cc_library(
@@ -87,6 +87,7 @@ cc_library(
         ":statusor",
         "//cc:aead",
         "//cc:cleartext_keyset_handle",
+        "//cc:deterministic_aead",
         "//cc:hybrid_decrypt",
         "//cc:hybrid_encrypt",
         "//cc:keyset_handle",

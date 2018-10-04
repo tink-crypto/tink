@@ -16,13 +16,14 @@
 
 #include "tink/config.h"
 
-#include "tink/mac.h"
+#include "absl/strings/ascii.h"
 #include "tink/aead.h"
+#include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
+#include "tink/mac.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
-#include "absl/strings/ascii.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -78,6 +79,8 @@ util::Status Config::Register(
       status = Register<Mac>(entry);
     } else if (primitive_name == "aead") {
       status = Register<Aead>(entry);
+    } else if (primitive_name == "deterministicaead") {
+      status = Register<DeterministicAead>(entry);
     } else if (primitive_name == "hybriddecrypt") {
       status = Register<HybridDecrypt>(entry);
     } else if (primitive_name == "hybridencrypt") {

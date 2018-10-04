@@ -297,6 +297,7 @@ cc_library(
     deps = [
         ":aead",
         ":catalogue",
+        ":deterministic_aead",
         ":hybrid_decrypt",
         ":hybrid_encrypt",
         ":key_manager",
@@ -511,8 +512,8 @@ cc_library(
         "//cc/util:status",
         "//cc/util:statusor",
         "//proto:tink_cc_proto",
-        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/synchronization",
     ],
 )
@@ -820,10 +821,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":key_manager",
-        "@com_google_googletest//:gtest_main",
         "//cc/util:status",
         "//cc/util:test_matchers",
         "//proto:empty_cc_proto",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
