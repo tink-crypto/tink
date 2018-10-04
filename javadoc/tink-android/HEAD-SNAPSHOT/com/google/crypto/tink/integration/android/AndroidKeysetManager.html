@@ -116,6 +116,9 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 
  <p>This class reads and writes to shared preferences, thus is best not to run on the UI thread.
 
+ <p>On Android M or newer, the keysets are encrypted with master keys generated and stored in <a
+ href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>.
+
  <h3>Usage</h3>
 
  <pre><code>
@@ -134,20 +137,20 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
  <p>If the keyset is not found or invalid, and a valid <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withKeyTemplate-com.google.crypto.tink.proto.KeyTemplate-"><code>AndroidKeysetManager.Builder.withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate)</code></a>, a fresh keyset is generated and is written to the
  <code>my_keyset_name</code> preference of the <code>my_pref_file_name</code> shared preferences file.
 
- <p>On Android M or newer and if a master key URI is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withMasterKeyUri-java.lang.String-"><code>AndroidKeysetManager.Builder.withMasterKeyUri(java.lang.String)</code></a>, the keyset is encrypted with a master key
- generated and stored in <a
- href="https://developer.android.com/training/articles/keystore.html">Android Keystore</a>. When
- Tink cannot decrypt the keyset it would assume that it is not encrypted.
+ <p>On Android M or newer and if a master key URI is set with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#withKeyTemplate-com.google.crypto.tink.proto.KeyTemplate-"><code>AndroidKeysetManager.Builder.withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate)</code></a>, the keyset will be encrypted when written to
+ storage and decrypted when read.
 
  <p>The master key URI must start with <code>android-keystore://</code>. If the master key doesn't
  exist, a fresh one is generated. Usage of Android Keystore can be disabled with <a href="../../../../../../com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#doNotUseKeystore--"><code>AndroidKeysetManager.Builder.doNotUseKeystore()</code></a>.
 
- <p>On Android L or older, or when the master key URI is not set, the keyset will be stored in
+ <p>If a master key URI is not chosen or on Android L or older, the keyset will be stored in
  cleartext in private preferences which, thanks to the security of the Android framework, no other
  apps can read or write.
 
- <p>The resulting manager supports all operations supported by <a href="../../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink"><code>KeysetManager</code></a>. For example
- to rotate the keyset, one can do:
+ <p>When Tink cannot decrypt some keyset it would assume that the keyset is in cleartext.
+
+ <p>The resulting manager supports all operations that supported by <a href="../../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink"><code>KeysetManager</code></a>. For
+ example to rotate the keyset, one can do:
 
  <pre><code>
  manager.rotate(SignatureKeyTemplates.ECDSA_P256);
