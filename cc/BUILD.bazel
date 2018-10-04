@@ -16,6 +16,7 @@ PUBLIC_APIS = [
     "binary_keyset_writer.h",
     "catalogue.h",
     "config.h",
+    "deterministic_aead.h",
     "hybrid_config.h",
     "hybrid_decrypt.h",
     "hybrid_decrypt_factory.h",
@@ -50,6 +51,7 @@ PUBLIC_API_DEPS = [
     ":aead",
     ":binary_keyset_reader",
     ":binary_keyset_writer",
+    ":deterministic_aead",
     ":hybrid_decrypt",
     ":hybrid_encrypt",
     ":json_keyset_reader",
@@ -106,6 +108,17 @@ cc_library(
 cc_library(
     name = "aead",
     hdrs = ["aead.h"],
+    include_prefix = "tink",
+    strip_include_prefix = "/cc",
+    deps = [
+        "//cc/util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "deterministic_aead",
+    hdrs = ["deterministic_aead.h"],
     include_prefix = "tink",
     strip_include_prefix = "/cc",
     deps = [

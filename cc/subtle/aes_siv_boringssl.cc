@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "tink/daead.h"
+#include "tink/deterministic_aead.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -40,11 +40,11 @@ static void XorBlock(
 }
 
 // static
-crypto::tink::util::StatusOr<std::unique_ptr<Daead>> AesSivBoringSsl::New(
-    absl::string_view key_value) {
+crypto::tink::util::StatusOr<std::unique_ptr<DeterministicAead>>
+AesSivBoringSsl::New(absl::string_view key_value) {
   std::unique_ptr<AesSivBoringSsl> aes_siv(new AesSivBoringSsl());
   if (aes_siv->SetKey(key_value)) {
-    return std::unique_ptr<Daead>(aes_siv.release());
+    return std::unique_ptr<DeterministicAead>(aes_siv.release());
   } else {
     return util::Status(util::error::INTERNAL, "invalid key size");
   }
@@ -230,4 +230,3 @@ util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
-

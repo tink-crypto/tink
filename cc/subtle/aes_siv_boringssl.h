@@ -20,7 +20,7 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
-#include "tink/daead.h"
+#include "tink/deterministic_aead.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "openssl/aes.h"
@@ -32,8 +32,8 @@ namespace subtle {
 // AesSivBoringSsl is an implemenatation of AES-SIV-CMAC as defined in
 // https://tools.ietf.org/html/rfc5297 .
 // AesSivBoringSsl implements a deterministic encryption with additional
-// data (i.e. the Daead interface). Hence the implementation below is
-// restricted to one AD component.
+// data (i.e. the DeterministicAead interface). Hence the implementation
+// below is restricted to one AD component.
 //
 // Thread safety: This class is thread safe and thus can be used
 // concurrently.
@@ -51,10 +51,10 @@ namespace subtle {
 // Since 192-bit AES keys are not supported by tink for voodoo reasons
 // and RFC 5297 only supports same size encryption and MAC keys this
 // implies that keys must be 64 bytes (2*256 bits) long.
-class AesSivBoringSsl : public Daead {
+class AesSivBoringSsl : public DeterministicAead {
  public:
-  static crypto::tink::util::StatusOr<std::unique_ptr<Daead>> New(
-      absl::string_view key_value);
+  static crypto::tink::util::StatusOr<std::unique_ptr<DeterministicAead>>
+  New(absl::string_view key_value);
 
   crypto::tink::util::StatusOr<std::string> EncryptDeterministically(
       absl::string_view plaintext,

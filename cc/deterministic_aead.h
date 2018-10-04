@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_DAEAD_H_
-#define TINK_DAEAD_H_
+#ifndef TINK_DETERMINISTIC_AEAD_H_
+#define TINK_DETERMINISTIC_AEAD_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/util/statusor.h"
@@ -33,7 +33,7 @@ namespace tink {
 //   - thread safe/copy safe
 // References:
 // https://eprint.iacr.org/2016/1124.pdf
-class Daead {
+class DeterministicAead {
  public:
   // Encrypts 'plaintext' with 'associated_data' as associated data
   // deterministically, and returns the resulting ciphertext.
@@ -52,10 +52,10 @@ class Daead {
       absl::string_view ciphertext,
       absl::string_view associated_data) const = 0;
 
-  virtual ~Daead() {}
+  virtual ~DeterministicAead() {}
 };
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_DAEAD_H_
+#endif  // TINK_DETERMINISTIC_AEAD_H_
