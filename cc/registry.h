@@ -65,28 +65,48 @@ class Registry {
   // Adding a custom catalogue should be a one-time operation,
   // and fails if the given 'catalogue' tries to override
   // an existing, different catalogue for the specified name.
-  //
-  // Takes ownership of 'catalogue', which must be non-nullptr
-  // (in case of failure, 'catalogue' is deleted).
   template <class P>
+  static crypto::tink::util::Status AddCatalogue(
+      const std::string& catalogue_name, std::unique_ptr<Catalogue<P>> catalogue) {
+    return RegistryImpl::GlobalInstance().AddCatalogue<P>(catalogue_name,
+                                                          catalogue.release());
+  }
+
+  // AddCatalogue has the same functionality as the overload which uses a
+  // unique_ptr and which should be preferred.
+  //
+  // Takes ownership of 'catalogue', which must be non-nullptr (in case of
+  // failure, 'catalogue' is deleted).
+  template <class P>
+  ABSL_DEPRECATED("Use AddCatalogue with a unique_ptr input instead.")
   static crypto::tink::util::Status AddCatalogue(const std::string& catalogue_name,
                                                  Catalogue<P>* catalogue) {
-    return RegistryImpl::GlobalInstance().AddCatalogue<P>(catalogue_name,
-                                                          catalogue);
+    return AddCatalogue(catalogue_name, absl::WrapUnique(catalogue));
   }
 
   // Registers the given 'manager' for the key type 'manager->get_key_type()'.
-  // Takes ownership of 'manager', which must be non-nullptr.
   template <class P>
-  static crypto::tink::util::Status RegisterKeyManager(KeyManager<P>* manager,
-                                                       bool new_key_allowed) {
-    return RegistryImpl::GlobalInstance().RegisterKeyManager(manager,
+  static crypto::tink::util::Status RegisterKeyManager(
+      std::unique_ptr<KeyManager<P>> manager, bool new_key_allowed) {
+    return RegistryImpl::GlobalInstance().RegisterKeyManager(manager.release(),
                                                              new_key_allowed);
   }
 
+  // Same functionality as the overload which takes a unique pointer, for
+  // new_key_allowed = true.
   template <class P>
+  ABSL_DEPRECATED(
+      "Use RegisterKeyManager with a unique_ptr manager and new_key_allowed = "
+      "true instead.")
   static crypto::tink::util::Status RegisterKeyManager(KeyManager<P>* manager) {
-    return RegistryImpl::GlobalInstance().RegisterKeyManager(manager);
+    return RegisterKeyManager(absl::WrapUnique(manager), true);
+  }
+
+  template <class P>
+  ABSL_DEPRECATED("Use RegisterKeyManager with a unique_ptr manager instead.")
+  static crypto::tink::util::Status RegisterKeyManager(KeyManager<P>* manager,
+                                                       bool new_key_allowed) {
+    return RegisterKeyManager(absl::WrapUnique(manager), new_key_allowed);
   }
 
   // Returns a key manager for the given type_url (if any found).
