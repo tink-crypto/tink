@@ -68,7 +68,7 @@ func NewECDSAVerifierFromPublicKey(hashAlg string, encoding string, publicKey *e
 // Verify verifies whether the given signature is valid for the given data.
 // It returns an error if the signature is not valid; nil otherwise.
 func (e *ECDSAVerifier) Verify(signatureBytes, data []byte) error {
-	signature, err := DecodeECDSASignerature(signatureBytes, e.encoding)
+	signature, err := DecodeECDSASignature(signatureBytes, e.encoding)
 	if err != nil {
 		return errInvalidSignature
 	}

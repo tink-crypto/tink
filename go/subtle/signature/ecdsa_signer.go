@@ -76,7 +76,7 @@ func (e *ECDSASigner) Sign(data []byte) ([]byte, error) {
 		return nil, fmt.Errorf("ecdsa_sign: signing failed: %s", err)
 	}
 	// format the signature
-	sig := NewECDSASignerature(r, s)
+	sig := NewECDSASignature(r, s)
 	ret, err := sig.EncodeECDSASignature(e.encoding)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_sign: signing failed: %s", err)
