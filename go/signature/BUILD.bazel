@@ -9,10 +9,10 @@ go_library(
     srcs = [
         "ecdsa_signer_key_manager.go",
         "ecdsa_verifier_key_manager.go",
+        "init.go",
         "proto_util.go",
         "signer_factory.go",
         "verifier_factory.go",
-        "signature_config.go",
         "signature_key_templates.go",
     ],
     importpath = "github.com/google/tink/go/signature",
@@ -33,7 +33,7 @@ go_test(
     srcs = [
         "ecdsa_signer_key_manager_test.go",
         "ecdsa_verifier_key_manager_test.go",
-        "signature_config_test.go",
+        "init_test.go",
         "signature_factory_test.go",
         "signature_key_templates_test.go",
     ],

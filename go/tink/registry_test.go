@@ -15,7 +15,6 @@
 package tink_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
@@ -31,16 +30,6 @@ import (
 	hmacpb "github.com/google/tink/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
-
-func setupRegistryTests() {
-	if err := mac.Register(); err != nil {
-		panic(fmt.Sprintf("cannot register MAC key types: %v", err))
-	}
-
-	if err := aead.Register(); err != nil {
-		panic(fmt.Sprintf("cannot register AEAD key types: %v", err))
-	}
-}
 
 func TestRegistryBasic(t *testing.T) {
 	// try to put a HMACKeyManager
@@ -62,7 +51,6 @@ func TestRegisterKeyManager(t *testing.T) {
 	var km tink.KeyManager
 	var err error
 	// register mac and aead types.
-	setupRegistryTests()
 	// get HMACKeyManager
 	km, err = tink.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
@@ -83,7 +71,6 @@ func TestRegisterKeyManager(t *testing.T) {
 
 func TestRegisterKeyManagerWithCollision(t *testing.T) {
 	// register mac and aead types.
-	setupRegistryTests()
 	// dummyKeyManager's typeURL is equal to that of AESGCM
 	var dummyKeyManager tink.KeyManager = new(testutil.DummyAEADKeyManager)
 	// this should not overwrite the existing manager.
@@ -99,7 +86,6 @@ func TestRegisterKeyManagerWithCollision(t *testing.T) {
 }
 
 func TestNewKeyData(t *testing.T) {
-	setupRegistryTests()
 	// new Keydata from a Hmac KeyTemplate
 	keyData, err := tink.NewKeyData(mac.HMACSHA256Tag128KeyTemplate())
 	if err != nil {
@@ -124,7 +110,6 @@ func TestNewKeyData(t *testing.T) {
 }
 
 func TestNewKey(t *testing.T) {
-	setupRegistryTests()
 	// aead template
 	aesGcmTemplate := aead.AES128GCMKeyTemplate()
 	key, err := tink.NewKey(aesGcmTemplate)
@@ -151,7 +136,6 @@ func TestNewKey(t *testing.T) {
 }
 
 func TestPrimitiveFromKeyData(t *testing.T) {
-	setupRegistryTests()
 	// hmac keydata
 	keyData := testutil.NewHMACKeyData(commonpb.HashType_SHA256, 16)
 	p, err := tink.PrimitiveFromKeyData(keyData)
@@ -176,7 +160,6 @@ func TestPrimitiveFromKeyData(t *testing.T) {
 }
 
 func TestPrimitive(t *testing.T) {
-	setupRegistryTests()
 	// hmac key
 	key := testutil.NewHMACKey(commonpb.HashType_SHA256, 16)
 	serializedKey, _ := proto.Marshal(key)
@@ -206,7 +189,6 @@ func TestPrimitive(t *testing.T) {
 }
 
 func TestPrimitives(t *testing.T) {
-	setupRegistryTests()
 	// valid input
 	template1 := aead.AES128GCMKeyTemplate()
 	template2 := aead.AES256GCMKeyTemplate()

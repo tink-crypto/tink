@@ -12,38 +12,27 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package aead_test
+package signature_test
 
 import (
 	"testing"
 
-	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/tink"
 )
 
-func TestConfigRegistration(t *testing.T) {
-	err := aead.Register()
-	if err != nil {
-		t.Errorf("cannot register standard key types")
-	}
-	// Check for AES-GCM key manager.
-	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+func TestSignatureInit(t *testing.T) {
+	// check for ECDSASignerKeyManager
+	keyManager, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*aead.AESGCMKeyManager)
+	var _ = keyManager.(*signature.ECDSASignerKeyManager)
 
-	// Check for ChaCha20Poly1305 key manager.
-	keyManager, err = tink.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	// check for ECDSAVerifierKeyManager
+	keyManager, err = tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*aead.ChaCha20Poly1305KeyManager)
-
-	// Check for XChaCha20Poly1305 key manager.
-	keyManager, err = tink.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
-	}
-	var _ = keyManager.(*aead.XChaCha20Poly1305KeyManager)
+	var _ = keyManager.(*signature.ECDSAVerifierKeyManager)
 }

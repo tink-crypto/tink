@@ -12,14 +12,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package mac provides implementations of the MAC primitive.
-package mac
+// Package signature provides implementations of the Signer and Verifier primitives.
+package signature
 
 import (
+	"fmt"
+
 	"github.com/google/tink/go/tink"
 )
 
-// Register registers latest MAC key types and their managers with the Registry.
-func Register() error {
-	return tink.RegisterKeyManager(NewHMACKeyManager())
+func init() {
+  if err := tink.RegisterKeyManager(NewECDSASignerKeyManager()); err != nil {
+		panic(fmt.Sprintf("signature.init() failed: %v", err))
+	}
+  if err := tink.RegisterKeyManager(NewECDSAVerifierKeyManager()); err != nil {
+		panic(fmt.Sprintf("signature.init() failed: %v", err))
+  }
 }

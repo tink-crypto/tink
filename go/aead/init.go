@@ -12,23 +12,25 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package mac_test
+// Package aead provides implementations of the AEAD primitive.
+package aead
 
 import (
-	"testing"
+	"fmt"
 
-	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/tink"
 )
 
-func TestRegistration(t *testing.T) {
-	err := mac.Register()
-	if err != nil {
-		t.Errorf("cannot register standard key types")
+func init() {
+	if err := tink.RegisterKeyManager(NewAESGCMKeyManager()); err != nil {
+		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
-	keyManager, err := tink.GetKeyManager(mac.HMACTypeURL)
-	if err != nil {
-		t.Errorf("unexpected error: %s", err)
+
+	if err := tink.RegisterKeyManager(NewChaCha20Poly1305KeyManager()); err != nil {
+		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
-	var _ = keyManager.(*mac.HMACKeyManager)
+
+	if err := tink.RegisterKeyManager(NewXChaCha20Poly1305KeyManager()); err != nil {
+		panic(fmt.Sprintf("aead.init() failed: %v", err))
+	}
 }

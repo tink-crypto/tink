@@ -29,15 +29,7 @@ import (
 	tinkpb "github.com/google/tink/proto/tink_go_proto"
 )
 
-func setupFactoryTest() {
-	if err := aead.Register(); err != nil {
-		panic(fmt.Sprintf("cannot register AEAD key types: %s", err))
-
-	}
-}
-
 func TestFactoryMultipleKeys(t *testing.T) {
-	setupFactoryTest()
 	// encrypt with non-raw key
 	keyset := testutil.NewTestAESGCMKeyset(tinkpb.OutputPrefixType_TINK)
 	primaryKey := keyset.Key[0]
@@ -85,7 +77,6 @@ func TestFactoryMultipleKeys(t *testing.T) {
 }
 
 func TestFactoryRawKeyAsPrimary(t *testing.T) {
-	setupFactoryTest()
 	keyset := testutil.NewTestAESGCMKeyset(tinkpb.OutputPrefixType_RAW)
 	if keyset.Key[0].OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("primary key is not a raw key")
