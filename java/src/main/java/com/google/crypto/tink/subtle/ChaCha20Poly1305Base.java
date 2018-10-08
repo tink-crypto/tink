@@ -27,35 +27,30 @@ import java.security.InvalidKeyException;
 import javax.crypto.AEADBadTagException;
 
 /**
- * An {@link Aead} construction with a {@link Snuffle} and {@link Poly1305}, following RFC 7539,
- * section 2.8.
+ * Abstract base class for class of ChaCha20Poly1305 and XChaCha20Poly1305, following RFC 8439
+ * https://tools.ietf.org/html/rfc8439.
  *
  * <p>This implementation produces ciphertext with the following format: {@code nonce ||
  * actual_ciphertext || tag} and only decrypts the same format.
  */
-abstract class SnufflePoly1305 implements Aead {
-  private final byte[] key;
-  private final Snuffle snuffle;
-  private final Snuffle macKeysnuffle;
+abstract class ChaCha20Poly1305Base implements Aead {
+  private final ChaCha20Base chacha20;
+  private final ChaCha20Base macKeyChaCha20;
 
-  SnufflePoly1305(final byte[] key) throws InvalidKeyException {
-    this.key = key.clone();
-    this.snuffle = createSnuffleInstance(key, 1);
-    this.macKeysnuffle = createSnuffleInstance(key, 0);
+  public ChaCha20Poly1305Base(final byte[] key) throws InvalidKeyException {
+    this.chacha20 = newChaCha20Instance(key, 1);
+    this.macKeyChaCha20 = newChaCha20Instance(key, 0);
   }
 
-  abstract Snuffle createSnuffleInstance(final byte[] key, int initialCounter)
+  abstract ChaCha20Base newChaCha20Instance(final byte[] key, int initialCounter)
       throws InvalidKeyException;
 
   /**
    * Encrypts the {@code plaintext} with Poly1305 authentication based on {@code associatedData}.
    *
    * <p>Please note that nonce is randomly generated hence keys need to be rotated after encrypting
-   * a certain number of messages depending on the nonce size of the underlying {@link Snuffle}.
-   * Reference: Using 96-bit random nonces, it is possible to encrypt, with a single key, up to 2^32
-   * messages with probability of collision <= 2^-32 whereas using 192-bit random nonces, the number
-   * of messages that can be encrypted with the same key is up to 2^80 with the same probability of
-   * collusion.
+   * a certain number of messages depending on the nonce size of the underlying {@link
+   * ChaCha20Base}.
    *
    * @param plaintext data to encrypt
    * @param associatedData associated authenticated data
@@ -64,11 +59,12 @@ abstract class SnufflePoly1305 implements Aead {
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
-    if (plaintext.length > Integer.MAX_VALUE - snuffle.nonceSizeInBytes() - MAC_TAG_SIZE_IN_BYTES) {
+    if (plaintext.length
+        > Integer.MAX_VALUE - chacha20.nonceSizeInBytes() - MAC_TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("plaintext too long");
     }
     ByteBuffer ciphertext =
-        ByteBuffer.allocate(plaintext.length + snuffle.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES);
+        ByteBuffer.allocate(plaintext.length + chacha20.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES);
 
     encrypt(ciphertext, plaintext, associatedData);
     return ciphertext.array();
@@ -77,20 +73,20 @@ abstract class SnufflePoly1305 implements Aead {
   private void encrypt(ByteBuffer output, final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
     if (output.remaining()
-        < plaintext.length + snuffle.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
+        < plaintext.length + chacha20.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
       throw new IllegalArgumentException("Given ByteBuffer output is too small");
     }
     int firstPosition = output.position();
-    snuffle.encrypt(output, plaintext);
+    chacha20.encrypt(output, plaintext);
     output.position(firstPosition);
-    byte[] nonce = new byte[snuffle.nonceSizeInBytes()];
+    byte[] nonce = new byte[chacha20.nonceSizeInBytes()];
     output.get(nonce);
     output.limit(output.limit() - MAC_TAG_SIZE_IN_BYTES);
     byte[] aad = associatedData;
     if (aad == null) {
       aad = new byte[0];
     }
-    byte[] tag = Poly1305.computeMac(getMacKey(nonce), macDataRfc7539(aad, output));
+    byte[] tag = Poly1305.computeMac(getMacKey(nonce), macDataRfc8439(aad, output));
     output.limit(output.limit() + MAC_TAG_SIZE_IN_BYTES);
     output.put(tag);
   }
@@ -124,7 +120,7 @@ abstract class SnufflePoly1305 implements Aead {
    */
   private byte[] decrypt(ByteBuffer ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
-    if (ciphertext.remaining() < snuffle.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
+    if (ciphertext.remaining() < chacha20.nonceSizeInBytes() + MAC_TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("ciphertext too short");
     }
     int firstPosition = ciphertext.position();
@@ -134,25 +130,33 @@ abstract class SnufflePoly1305 implements Aead {
     // rewind to read ciphertext and compute tag.
     ciphertext.position(firstPosition);
     ciphertext.limit(ciphertext.limit() - MAC_TAG_SIZE_IN_BYTES);
-    byte[] nonce = new byte[snuffle.nonceSizeInBytes()];
+    byte[] nonce = new byte[chacha20.nonceSizeInBytes()];
     ciphertext.get(nonce);
     byte[] aad = associatedData;
     if (aad == null) {
       aad = new byte[0];
     }
     try {
-      Poly1305.verifyMac(getMacKey(nonce), macDataRfc7539(aad, ciphertext), tag);
+      Poly1305.verifyMac(getMacKey(nonce), macDataRfc8439(aad, ciphertext), tag);
     } catch (GeneralSecurityException ex) {
       throw new AEADBadTagException(ex.toString());
     }
 
     // rewind to decrypt the ciphertext.
     ciphertext.position(firstPosition);
-    return snuffle.decrypt(ciphertext);
+    return chacha20.decrypt(ciphertext);
   }
 
-  /** Prepares the input to MAC, following RFC 7539, section 2.8. */
-  static byte[] macDataRfc7539(final byte[] aad, ByteBuffer ciphertext) {
+  /** The MAC key is the first 32 bytes of the first key stream block */
+  private byte[] getMacKey(final byte[] nonce) throws GeneralSecurityException {
+    ByteBuffer firstBlock = macKeyChaCha20.chacha20Block(nonce, 0 /* counter */);
+    byte[] result = new byte[MAC_KEY_SIZE_IN_BYTES];
+    firstBlock.get(result);
+    return result;
+  }
+
+  /** Prepares the input to MAC, following RFC 8439, section 2.8. */
+  private static byte[] macDataRfc8439(final byte[] aad, ByteBuffer ciphertext) {
     int aadPaddedLen = (aad.length % 16 == 0) ? aad.length : (aad.length + 16 - aad.length % 16);
     int ciphertextLen = ciphertext.remaining();
     int ciphertextPaddedLen =
@@ -166,13 +170,5 @@ abstract class SnufflePoly1305 implements Aead {
     macData.putLong(aad.length);
     macData.putLong(ciphertextLen);
     return macData.array();
-  }
-
-  /** The MAC key is the first 32 bytes of the first key stream block */
-  private byte[] getMacKey(final byte[] nonce) throws InvalidKeyException {
-    ByteBuffer firstBlock = macKeysnuffle.getKeyStreamBlock(nonce, 0 /* counter */);
-    byte[] result = new byte[MAC_KEY_SIZE_IN_BYTES];
-    firstBlock.get(result);
-    return result;
   }
 }

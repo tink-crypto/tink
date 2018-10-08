@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2018 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,23 +16,22 @@
 
 package com.google.crypto.tink.subtle;
 
-
+import com.google.crypto.tink.annotations.Alpha;
 import java.security.InvalidKeyException;
 
 /**
- * ChaCha20Poly1305 AEAD construction, as described in <a
- * href="https://tools.ietf.org/html/rfc8439#section-2.8">RFC 8439, section 2.8</a>.
- *
- * @since 1.1.0
+ * XChaCha20Poly1305 AEAD construction, as described in
+ * https://tools.ietf.org/html/draft-arciszewski-xchacha-01.
  */
-public final class ChaCha20Poly1305 extends ChaCha20Poly1305Base {
-  public ChaCha20Poly1305(final byte[] key) throws InvalidKeyException {
+@Alpha
+public final class XChaCha20Poly1305 extends ChaCha20Poly1305Base {
+  public XChaCha20Poly1305(final byte[] key) throws InvalidKeyException {
     super(key);
   }
 
   @Override
   ChaCha20Base newChaCha20Instance(final byte[] key, int initialCounter)
       throws InvalidKeyException {
-    return new ChaCha20(key, initialCounter);
+    return new XChaCha20(key, initialCounter);
   }
 }
