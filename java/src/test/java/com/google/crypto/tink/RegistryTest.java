@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.TestUtil.assertExceptionContains;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.TestUtil.DummyAead;
@@ -34,6 +35,7 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.MacJce;
@@ -273,6 +275,28 @@ public class RegistryTest {
 
     KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
     assertThat(manager.getClass().toString()).contains("AesCtrHmacAeadKeyManager");
+  }
+
+  @Test
+  public void testGetPublicKeyData_shouldWork() throws Exception {
+    KeyData privateKeyData = Registry.newKeyData(SignatureKeyTemplates.ECDSA_P256);
+    KeyData publicKeyData = Registry.getPublicKeyData(privateKeyData.getTypeUrl(),
+        privateKeyData.getValue());
+    PublicKeyVerify verifier = Registry.<PublicKeyVerify>getPrimitive(publicKeyData);
+    PublicKeySign signer = Registry.<PublicKeySign>getPrimitive(privateKeyData);
+    byte[] message = "Nice test message".getBytes(UTF_8);
+    verifier.verify(signer.sign(message), message);
+  }
+
+  @Test
+  public void testGetPublicKeyData_shouldThrow() throws Exception {
+    KeyData keyData = Registry.newKeyData(MacKeyTemplates.HMAC_SHA256_128BITTAG);
+    try {
+      Registry.getPublicKeyData(keyData.getTypeUrl(), keyData.getValue());
+      fail("Expected GeneralSecurityException.");
+    } catch (GeneralSecurityException e) {
+      assertThat(e.toString()).contains("not a PrivateKeyManager");
+    }
   }
 
   @Test

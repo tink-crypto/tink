@@ -283,9 +283,9 @@ public final class Registry {
    *
    * @return a new {@link KeyData}
    */
-  public static synchronized <P> KeyData newKeyData(KeyTemplate keyTemplate)
+  public static synchronized KeyData newKeyData(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManager(keyTemplate.getTypeUrl());
+    KeyManager<?> manager = getKeyManager(keyTemplate.getTypeUrl());
     if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
       return manager.newKeyData(keyTemplate.getValue());
     } else {
@@ -302,9 +302,9 @@ public final class Registry {
    *
    * @return a new key
    */
-  public static synchronized <P> MessageLite newKey(KeyTemplate keyTemplate)
+  public static synchronized MessageLite newKey(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManager(keyTemplate.getTypeUrl());
+    KeyManager<?> manager = getKeyManager(keyTemplate.getTypeUrl());
     if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
       return manager.newKey(keyTemplate.getValue());
     } else {
@@ -321,9 +321,9 @@ public final class Registry {
    *
    * @return a new key
    */
-  public static synchronized <P> MessageLite newKey(String typeUrl, MessageLite format)
+  public static synchronized MessageLite newKey(String typeUrl, MessageLite format)
       throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManager(typeUrl);
+    KeyManager<?> manager = getKeyManager(typeUrl);
     if (newKeyAllowedMap.get(typeUrl).booleanValue()) {
       return manager.newKey(format);
     } else {
@@ -340,11 +340,14 @@ public final class Registry {
    *
    * @return a new key
    */
-  @SuppressWarnings("unchecked")
-  public static <P> KeyData getPublicKeyData(String typeUrl, ByteString serializedPrivateKey)
+  public static KeyData getPublicKeyData(String typeUrl, ByteString serializedPrivateKey)
       throws GeneralSecurityException {
-    PrivateKeyManager<P> manager = (PrivateKeyManager) getKeyManager(typeUrl);
-    return manager.getPublicKeyData(serializedPrivateKey);
+    KeyManager<?> manager = getKeyManager(typeUrl);
+    if (!(manager instanceof PrivateKeyManager)) {
+      throw new GeneralSecurityException(
+          "manager for key type " + typeUrl + " is not a PrivateKeyManager");
+    }
+    return ((PrivateKeyManager) manager).getPublicKeyData(serializedPrivateKey);
   }
 
   /**
