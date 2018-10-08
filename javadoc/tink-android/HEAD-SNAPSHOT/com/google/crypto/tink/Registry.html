@@ -246,27 +246,27 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i9" class="rowColor">
-<td class="colFirst"><code>static &lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
+<td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#getPublicKeyData-java.lang.String-com.google.protobuf.ByteString-">getPublicKeyData</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
                 com.google.protobuf.ByteString&nbsp;serializedPrivateKey)</code>
 <div class="block">Convenience method for extracting the public key data from the private key given in <code>serializedPrivateKey</code>.</div>
 </td>
 </tr>
 <tr id="i10" class="altColor">
-<td class="colFirst"><code>static &lt;P&gt;&nbsp;com.google.protobuf.MessageLite</code></td>
+<td class="colFirst"><code>static com.google.protobuf.MessageLite</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#newKey-com.google.crypto.tink.proto.KeyTemplate-">newKey</a></span>(<a href="../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>
 <div class="block">Convenience method for generating a new key for the specified <code>keyTemplate</code>.</div>
 </td>
 </tr>
 <tr id="i11" class="rowColor">
-<td class="colFirst"><code>static &lt;P&gt;&nbsp;com.google.protobuf.MessageLite</code></td>
+<td class="colFirst"><code>static com.google.protobuf.MessageLite</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#newKey-java.lang.String-com.google.protobuf.MessageLite-">newKey</a></span>(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
       com.google.protobuf.MessageLite&nbsp;format)</code>
 <div class="block">Convenience method for generating a new key for the specified <code>format</code>.</div>
 </td>
 </tr>
 <tr id="i12" class="altColor">
-<td class="colFirst"><code>static &lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
+<td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#newKeyData-com.google.crypto.tink.proto.KeyTemplate-">newKeyData</a></span>(<a href="../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>
 <div class="block">Convenience method for generating a new <a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto"><code>KeyData</code></a> for the specified <code>template</code>.</div>
 </td>
@@ -493,8 +493,8 @@ public static&nbsp;&lt;P&gt;&nbsp;void&nbsp;registerKeyManager(<a href="https://
 <ul class="blockList">
 <li class="blockList">
 <h4>newKeyData</h4>
-<pre>public static&nbsp;&lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a>&nbsp;newKeyData(<a href="../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)
-                              throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a>&nbsp;newKeyData(<a href="../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)
+                          throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Convenience method for generating a new <a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto"><code>KeyData</code></a> for the specified <code>template</code>.
 
  <p>It looks up a <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> identified by <code>keyTemplate.type_url</code>, and calls
@@ -515,8 +515,8 @@ public static&nbsp;&lt;P&gt;&nbsp;void&nbsp;registerKeyManager(<a href="https://
 <ul class="blockList">
 <li class="blockList">
 <h4>newKey</h4>
-<pre>public static&nbsp;&lt;P&gt;&nbsp;com.google.protobuf.MessageLite&nbsp;newKey(<a href="../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)
-                                                  throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public static&nbsp;com.google.protobuf.MessageLite&nbsp;newKey(<a href="../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)
+                                              throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Convenience method for generating a new key for the specified <code>keyTemplate</code>.
 
  <p>It looks up a <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> identified by <code>keyTemplate.type_url</code>, and calls
@@ -535,9 +535,9 @@ public static&nbsp;&lt;P&gt;&nbsp;void&nbsp;registerKeyManager(<a href="https://
 <ul class="blockList">
 <li class="blockList">
 <h4>newKey</h4>
-<pre>public static&nbsp;&lt;P&gt;&nbsp;com.google.protobuf.MessageLite&nbsp;newKey(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
-                                                         com.google.protobuf.MessageLite&nbsp;format)
-                                                  throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public static&nbsp;com.google.protobuf.MessageLite&nbsp;newKey(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
+                                                     com.google.protobuf.MessageLite&nbsp;format)
+                                              throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Convenience method for generating a new key for the specified <code>format</code>.
 
  <p>It looks up a <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> identified by <code>keyTemplate.type_url</code>, and calls
@@ -556,9 +556,9 @@ public static&nbsp;&lt;P&gt;&nbsp;void&nbsp;registerKeyManager(<a href="https://
 <ul class="blockList">
 <li class="blockList">
 <h4>getPublicKeyData</h4>
-<pre>public static&nbsp;&lt;P&gt;&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a>&nbsp;getPublicKeyData(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
-                                           com.google.protobuf.ByteString&nbsp;serializedPrivateKey)
-                                    throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a>&nbsp;getPublicKeyData(<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
+                                       com.google.protobuf.ByteString&nbsp;serializedPrivateKey)
+                                throws <a href="https://docs.oracle.com/javase/7/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Convenience method for extracting the public key data from the private key given in <code>serializedPrivateKey</code>.
 
  <p>It looks up a <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><code>PrivateKeyManager</code></a> identified by <code>typeUrl</code>, and calls <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html#getPublicKeyData-com.google.protobuf.ByteString-"><code>PrivateKeyManager.getPublicKeyData(com.google.protobuf.ByteString)</code></a> with <code>serializedPrivateKey</code> as the parameter.</div>
