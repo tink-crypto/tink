@@ -23,57 +23,30 @@ import (
 )
 
 var (
-	keyManagers = newKeyManagerMap()
+	keyManagersMu sync.RWMutex
+	keyManagers   = make(map[string]KeyManager) // typeURL -> KeyManager
 )
 
-type keyManagerMap struct {
-	sync.RWMutex
-	m map[string]KeyManager
-}
-
-func newKeyManagerMap() *keyManagerMap {
-	kmMap := new(keyManagerMap)
-	kmMap.m = make(map[string]KeyManager)
-	return kmMap
-}
-
-// Get returns whether the specified typeURL exists in the map and the corresponding value if it
-// exists.
-func (kmMap *keyManagerMap) Get(typeURL string) (KeyManager, bool) {
-	kmMap.RLock()
-	defer kmMap.RUnlock()
-	km, existed := kmMap.m[typeURL]
-	return km, existed
-}
-
-// Put associates the given keyManager with the given typeURL in the map.
-func (kmMap *keyManagerMap) Put(typeURL string, keyManager KeyManager) {
-	kmMap.Lock()
-	defer kmMap.Unlock()
-	kmMap.m[typeURL] = keyManager
-}
-
-// RegisterKeyManager registers the given key manager, and does nothing if there already exists a key manager with the same typeURL.
+// RegisterKeyManager registers the given key manager.
+// Does not allow to overwrite existing key managers.
 func RegisterKeyManager(km KeyManager) error {
-	if km == nil {
-		return fmt.Errorf("registry: km must be non null")
-	}
+	keyManagersMu.Lock()
+	defer keyManagersMu.Unlock()
 	typeURL := km.TypeURL()
-	// try to get the key manager with the given typeURL, return nil if there is
-	_, existed := keyManagers.Get(typeURL)
-	if existed {
-		return nil
+	if _, existed := keyManagers[typeURL]; existed {
+		return fmt.Errorf("tink.RegisterKeyManager: type %s already registered", typeURL)
 	}
-	// add the manager
-	keyManagers.Put(typeURL, km)
+	keyManagers[typeURL] = km
 	return nil
 }
 
 // GetKeyManager returns the key manager for the given typeURL if existed.
 func GetKeyManager(typeURL string) (KeyManager, error) {
-	km, existed := keyManagers.Get(typeURL)
+	keyManagersMu.RLock()
+	defer keyManagersMu.RUnlock()
+	km, existed := keyManagers[typeURL]
 	if !existed {
-		return nil, fmt.Errorf("registry: unsupported key type: %s", typeURL)
+		return nil, fmt.Errorf("tink.GetKeyManager: unsupported key type: %s", typeURL)
 	}
 	return km, nil
 }
