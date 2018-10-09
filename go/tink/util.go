@@ -15,6 +15,7 @@
 package tink
 
 import (
+	"errors"
 	"fmt"
 
 	commonpb "github.com/google/tink/proto/common_go_proto"
@@ -23,12 +24,10 @@ import (
 
 // ValidateVersion checks whether the given version is valid. The version is valid
 // only if it is the range [0..maxExpected]
-func ValidateVersion(version uint32, maxExpected uint32) error {
+func ValidateVersion(version, maxExpected uint32) error {
 	if version > maxExpected {
-		msg := fmt.Sprintf("key has version %v; "+
-			"only keys with version in range [0..%v] are supported",
+		return fmt.Errorf("key has version %v; only keys with version in range [0..%v] are supported",
 			version, maxExpected)
-		return fmt.Errorf(msg)
 	}
 	return nil
 }
@@ -46,7 +45,7 @@ func GetCurveName(curve commonpb.EllipticCurveType) string {
 // GetKeysetInfo returns a KeysetInfo from a Keyset protobuf.
 func GetKeysetInfo(keyset *tinkpb.Keyset) (*tinkpb.KeysetInfo, error) {
 	if keyset == nil {
-		return nil, fmt.Errorf("Gettinkpb.KeysetInfo() called with nil")
+		return nil, errors.New("Gettinkpb.KeysetInfo() called with nil")
 	}
 	nKey := len(keyset.Key)
 	keyInfos := make([]*tinkpb.KeysetInfo_KeyInfo, nKey)
@@ -66,7 +65,7 @@ func GetKeysetInfo(keyset *tinkpb.Keyset) (*tinkpb.KeysetInfo, error) {
 // GetKeyInfo returns a KeyInfo from a Key protobuf.
 func GetKeyInfo(key *tinkpb.Keyset_Key) (*tinkpb.KeysetInfo_KeyInfo, error) {
 	if key == nil {
-		return nil, fmt.Errorf("GetKeyInfo() called with nil")
+		return nil, errors.New("GetKeyInfo() called with nil")
 	}
 	return &tinkpb.KeysetInfo_KeyInfo{
 		TypeUrl:          key.KeyData.TypeUrl,
