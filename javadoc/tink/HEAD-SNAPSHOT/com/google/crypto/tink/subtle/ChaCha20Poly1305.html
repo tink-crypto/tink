@@ -114,8 +114,8 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">ChaCha20Poly1305</span>
 extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">ChaCha20-Poly1305, as described in <a href="https://tools.ietf.org/html/rfc7539#section-2.8">RFC
- 7539, section 2.8</a>.</div>
+<div class="block">ChaCha20Poly1305 AEAD construction, as described in <a
+ href="https://tools.ietf.org/html/rfc8439#section-2.8">RFC 8439, section 2.8</a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>1.1.0</dd>
@@ -226,11 +226,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <div class="block">Encrypts the <code>plaintext</code> with Poly1305 authentication based on <code>associatedData</code>.
 
  <p>Please note that nonce is randomly generated hence keys need to be rotated after encrypting
- a certain number of messages depending on the nonce size of the underlying <code>Snuffle</code>.
- Reference: Using 96-bit random nonces, it is possible to encrypt, with a single key, up to 2^32
- messages with probability of collision <= 2^-32 whereas using 192-bit random nonces, the number
- of messages that can be encrypted with the same key is up to 2^80 with the same probability of
- collusion.</div>
+ a certain number of messages depending on the nonce size of the underlying <code>ChaCha20Base</code>.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/Aead.html#encrypt-byte:A-byte:A-">encrypt</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></dd>
