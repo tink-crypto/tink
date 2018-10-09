@@ -22,9 +22,8 @@ import (
 )
 
 func TestMacInit(t *testing.T) {
-	keyManager, err := tink.GetKeyManager(mac.HMACTypeURL)
+	_, err := tink.GetKeyManager(mac.HMACTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*mac.HMACKeyManager)
 }

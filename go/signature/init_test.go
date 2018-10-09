@@ -23,16 +23,14 @@ import (
 
 func TestSignatureInit(t *testing.T) {
 	// check for ECDSASignerKeyManager
-	keyManager, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
+	_, err := tink.GetKeyManager(signature.ECDSASignerTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*signature.ECDSASignerKeyManager)
 
 	// check for ECDSAVerifierKeyManager
-	keyManager, err = tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
+	_, err = tink.GetKeyManager(signature.ECDSAVerifierTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*signature.ECDSAVerifierKeyManager)
 }

@@ -22,7 +22,7 @@ import (
 )
 
 func init() {
-	if err := tink.RegisterKeyManager(NewHMACKeyManager()); err != nil {
+	if err := tink.RegisterKeyManager(newHMACKeyManager()); err != nil {
 		panic(fmt.Sprintf("mac.init() failed: %v", err))
 	}
 }

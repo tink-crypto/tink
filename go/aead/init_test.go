@@ -23,23 +23,20 @@ import (
 
 func TestAeadInit(t *testing.T) {
 	// Check for AES-GCM key manager.
-	keyManager, err := tink.GetKeyManager(aead.AESGCMTypeURL)
+	_, err := tink.GetKeyManager(aead.AESGCMTypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*aead.AESGCMKeyManager)
 
 	// Check for ChaCha20Poly1305 key manager.
-	keyManager, err = tink.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
+	_, err = tink.GetKeyManager(aead.ChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*aead.ChaCha20Poly1305KeyManager)
 
 	// Check for XChaCha20Poly1305 key manager.
-	keyManager, err = tink.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
+	_, err = tink.GetKeyManager(aead.XChaCha20Poly1305TypeURL)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	var _ = keyManager.(*aead.XChaCha20Poly1305KeyManager)
 }

@@ -33,7 +33,10 @@ import (
 )
 
 func TestGetPrimitiveBasic(t *testing.T) {
-	km := mac.NewHMACKeyManager()
+	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	if err != nil {
+		t.Errorf("HMAC key manager not found: %s", err)
+	}
 	testKeys := genValidHMACKeys()
 	for i := 0; i < len(testKeys); i++ {
 		serializedKey, _ := proto.Marshal(testKeys[i])
@@ -48,7 +51,10 @@ func TestGetPrimitiveBasic(t *testing.T) {
 }
 
 func TestGetPrimitiveWithInvalidInput(t *testing.T) {
-	km := mac.NewHMACKeyManager()
+	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain HMAC key manager: %s", err)
+	}
 	// invalid key
 	testKeys := genInvalidHMACKeys()
 	for i := 0; i < len(testKeys); i++ {
@@ -67,7 +73,10 @@ func TestGetPrimitiveWithInvalidInput(t *testing.T) {
 }
 
 func TestNewKeyMultipleTimes(t *testing.T) {
-	km := mac.NewHMACKeyManager()
+	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain HMAC key manager: %s", err)
+	}
 	serializedFormat, _ := proto.Marshal(testutil.NewHMACKeyFormat(commonpb.HashType_SHA256, 32))
 	keys := make(map[string]bool)
 	nTest := 26
@@ -86,7 +95,10 @@ func TestNewKeyMultipleTimes(t *testing.T) {
 }
 
 func TestNewKeyBasic(t *testing.T) {
-	km := mac.NewHMACKeyManager()
+	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain HMAC key manager: %s", err)
+	}
 	testFormats := genValidHMACKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
 		serializedFormat, _ := proto.Marshal(testFormats[i])
@@ -101,7 +113,10 @@ func TestNewKeyBasic(t *testing.T) {
 }
 
 func TestNewKeyWithInvalidInput(t *testing.T) {
-	km := mac.NewHMACKeyManager()
+	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain HMAC key manager: %s", err)
+	}
 	// invalid key formats
 	testFormats := genInvalidHMACKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
@@ -123,7 +138,10 @@ func TestNewKeyWithInvalidInput(t *testing.T) {
 }
 
 func TestNewKeyDataBasic(t *testing.T) {
-	km := mac.NewHMACKeyManager()
+	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain HMAC key manager: %s", err)
+	}
 	testFormats := genValidHMACKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
 		serializedFormat, _ := proto.Marshal(testFormats[i])
@@ -148,7 +166,10 @@ func TestNewKeyDataBasic(t *testing.T) {
 }
 
 func TestNewKeyDataWithInvalidInput(t *testing.T) {
-	km := mac.NewHMACKeyManager()
+	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	if err != nil {
+		t.Errorf("HMAC key manager not found: %s", err)
+	}
 	// invalid key formats
 	testFormats := genInvalidHMACKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
@@ -164,7 +185,10 @@ func TestNewKeyDataWithInvalidInput(t *testing.T) {
 }
 
 func TestDoesSupport(t *testing.T) {
-	km := mac.NewHMACKeyManager()
+	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	if err != nil {
+		t.Errorf("HMAC key manager not found: %s", err)
+	}
 	if !km.DoesSupport(mac.HMACTypeURL) {
 		t.Errorf("HMACKeyManager must support %s", mac.HMACTypeURL)
 	}
@@ -174,16 +198,13 @@ func TestDoesSupport(t *testing.T) {
 }
 
 func TestTypeURL(t *testing.T) {
-	km := mac.NewHMACKeyManager()
+	km, err := tink.GetKeyManager(mac.HMACTypeURL)
+	if err != nil {
+		t.Errorf("HMAC key manager not found: %s", err)
+	}
 	if km.TypeURL() != mac.HMACTypeURL {
 		t.Errorf("incorrect GetKeyType()")
 	}
-}
-
-func TestKeyManagerInterface(t *testing.T) {
-	// This line results in a compilation error if HMACKeyManger doesn't implement the KeyManager
-	// interface.
-	var _ tink.KeyManager = (*mac.HMACKeyManager)(nil)
 }
 
 func genInvalidHMACKeys() []proto.Message {

@@ -39,20 +39,20 @@ const (
 var errInvalidECDSASignKey = fmt.Errorf("ecdsa_signer_key_manager: invalid key")
 var errInvalidECDSASignKeyFormat = fmt.Errorf("ecdsa_signer_key_manager: invalid key format")
 
-// ECDSASignerKeyManager is an implementation of KeyManager interface.
+// ecdsaSignerKeyManager is an implementation of KeyManager interface.
 // It generates new ECDSAPrivateKeys and produces new instances of ECDSASign subtle.
-type ECDSASignerKeyManager struct{}
+type ecdsaSignerKeyManager struct{}
 
-// Assert that ECDSASignerKeyManager implements the PrivateKeyManager interface.
-var _ tink.PrivateKeyManager = (*ECDSASignerKeyManager)(nil)
+// Assert that ecdsaSignerKeyManager implements the PrivateKeyManager interface.
+var _ tink.PrivateKeyManager = (*ecdsaSignerKeyManager)(nil)
 
-// NewECDSASignerKeyManager creates a new ECDSASignerKeyManager.
-func NewECDSASignerKeyManager() *ECDSASignerKeyManager {
-	return new(ECDSASignerKeyManager)
+// newECDSASignerKeyManager creates a new ecdsaSignerKeyManager.
+func newECDSASignerKeyManager() *ecdsaSignerKeyManager {
+	return new(ecdsaSignerKeyManager)
 }
 
 // Primitive creates an ECDSASign subtle for the given serialized ECDSAPrivateKey proto.
-func (km *ECDSASignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *ecdsaSignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidECDSASignKey
 	}
@@ -72,7 +72,7 @@ func (km *ECDSASignerKeyManager) Primitive(serializedKey []byte) (interface{}, e
 }
 
 // NewKey creates a new ECDSAPrivateKey according to specification the given serialized ECDSAKeyFormat.
-func (km *ECDSASignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+func (km *ecdsaSignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	if len(serializedKeyFormat) == 0 {
 		return nil, errInvalidECDSASignKeyFormat
 	}
@@ -99,7 +99,7 @@ func (km *ECDSASignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Messa
 
 // NewKeyData creates a new KeyData according to specification in  the given
 // serialized ECDSAKeyFormat. It should be used solely by the key management API.
-func (km *ECDSASignerKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+func (km *ecdsaSignerKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	key, err := km.NewKey(serializedKeyFormat)
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func (km *ECDSASignerKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb
 }
 
 // PublicKeyData extracts the public key data from the private key.
-func (km *ECDSASignerKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkpb.KeyData, error) {
+func (km *ecdsaSignerKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkpb.KeyData, error) {
 	privKey := new(ecdsapb.EcdsaPrivateKey)
 	if err := proto.Unmarshal(serializedPrivKey, privKey); err != nil {
 		return nil, errInvalidECDSASignKey
@@ -133,17 +133,17 @@ func (km *ECDSASignerKeyManager) PublicKeyData(serializedPrivKey []byte) (*tinkp
 }
 
 // DoesSupport indicates if this key manager supports the given key type.
-func (km *ECDSASignerKeyManager) DoesSupport(typeURL string) bool {
+func (km *ecdsaSignerKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == ECDSASignerTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
-func (km *ECDSASignerKeyManager) TypeURL() string {
+func (km *ecdsaSignerKeyManager) TypeURL() string {
 	return ECDSASignerTypeURL
 }
 
 // validateKey validates the given ECDSAPrivateKey.
-func (km *ECDSASignerKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
+func (km *ecdsaSignerKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
 	if err := tink.ValidateVersion(key.Version, ECDSASignerKeyVersion); err != nil {
 		return fmt.Errorf("ecdsa_signer_key_manager: %s", err)
 	}
@@ -152,7 +152,7 @@ func (km *ECDSASignerKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error
 }
 
 // validateKeyFormat validates the given ECDSAKeyFormat.
-func (km *ECDSASignerKeyManager) validateKeyFormat(format *ecdsapb.EcdsaKeyFormat) error {
+func (km *ecdsaSignerKeyManager) validateKeyFormat(format *ecdsapb.EcdsaKeyFormat) error {
 	hash, curve, encoding := GetECDSAParamNames(format.Params)
 	return subtleSignature.ValidateECDSAParams(hash, curve, encoding)
 }

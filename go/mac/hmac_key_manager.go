@@ -36,19 +36,19 @@ const (
 var errInvalidHMACKey = fmt.Errorf("hmac_key_manager: invalid key")
 var errInvalidHMACKeyFormat = fmt.Errorf("hmac_key_manager: invalid key format")
 
-// HMACKeyManager generates new HMACKeys and produces new instances of HMAC.
-type HMACKeyManager struct{}
+// hmacKeyManager generates new HMAC keys and produces new instances of HMAC.
+type hmacKeyManager struct{}
 
-// Assert that HMACKeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*HMACKeyManager)(nil)
+// Assert that hmacKeyManager implements the KeyManager interface.
+var _ tink.KeyManager = (*hmacKeyManager)(nil)
 
-// NewHMACKeyManager returns a new HMACKeyManager.
-func NewHMACKeyManager() *HMACKeyManager {
-	return new(HMACKeyManager)
+// newHMACKeyManager returns a new hmacKeyManager.
+func newHMACKeyManager() *hmacKeyManager {
+	return new(hmacKeyManager)
 }
 
 // Primitive constructs a HMAC instance for the given serialized HMACKey.
-func (km *HMACKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *hmacKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidHMACKey
 	}
@@ -68,7 +68,7 @@ func (km *HMACKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 }
 
 // NewKey generates a new HMACKey according to specification in the given HMACKeyFormat.
-func (km *HMACKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+func (km *hmacKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	if len(serializedKeyFormat) == 0 {
 		return nil, errInvalidHMACKeyFormat
 	}
@@ -85,7 +85,7 @@ func (km *HMACKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, err
 
 // NewKeyData generates a new KeyData according to specification in the given
 // serialized HMACKeyFormat. This should be used solely by the key management API.
-func (km *HMACKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+func (km *hmacKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	key, err := km.NewKey(serializedKeyFormat)
 	if err != nil {
 		return nil, err
@@ -103,18 +103,18 @@ func (km *HMACKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyDat
 }
 
 // DoesSupport checks whether this KeyManager supports the given key type.
-func (km *HMACKeyManager) DoesSupport(typeURL string) bool {
+func (km *hmacKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == HMACTypeURL
 }
 
 // TypeURL returns the type URL of keys managed by this KeyManager.
-func (km *HMACKeyManager) TypeURL() string {
+func (km *hmacKeyManager) TypeURL() string {
 	return HMACTypeURL
 }
 
 // validateKey validates the given HMACKey. It only validates the version of the
 // key because other parameters will be validated in primitive construction.
-func (km *HMACKeyManager) validateKey(key *hmacpb.HmacKey) error {
+func (km *hmacKeyManager) validateKey(key *hmacpb.HmacKey) error {
 	err := tink.ValidateVersion(key.Version, HMACKeyVersion)
 	if err != nil {
 		return fmt.Errorf("hmac_key_manager: %s", err)
@@ -125,7 +125,7 @@ func (km *HMACKeyManager) validateKey(key *hmacpb.HmacKey) error {
 }
 
 // validateKeyFormat validates the given HMACKeyFormat
-func (km *HMACKeyManager) validateKeyFormat(format *hmacpb.HmacKeyFormat) error {
+func (km *hmacKeyManager) validateKeyFormat(format *hmacpb.HmacKeyFormat) error {
 	if format.Params == nil {
 		return fmt.Errorf("null HMAC params")
 	}

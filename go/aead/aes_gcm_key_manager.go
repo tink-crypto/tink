@@ -37,20 +37,20 @@ const (
 var errInvalidAESGCMKey = fmt.Errorf("aes_gcm_key_manager: invalid key")
 var errInvalidAESGCMKeyFormat = fmt.Errorf("aes_gcm_key_manager: invalid key format")
 
-// AESGCMKeyManager is an implementation of KeyManager interface.
+// aesGCMKeyManager is an implementation of KeyManager interface.
 // It generates new AESGCMKey keys and produces new instances of AESGCM subtle.
-type AESGCMKeyManager struct{}
+type aesGCMKeyManager struct{}
 
-// Assert that aesGcmKeyManager implements the KeyManager interface.
-var _ tink.KeyManager = (*AESGCMKeyManager)(nil)
+// Assert that aesGCMKeyManager implements the KeyManager interface.
+var _ tink.KeyManager = (*aesGCMKeyManager)(nil)
 
-// NewAESGCMKeyManager creates a new aesGcmKeyManager.
-func NewAESGCMKeyManager() *AESGCMKeyManager {
-	return new(AESGCMKeyManager)
+// newAESGCMKeyManager creates a new aesGcmKeyManager.
+func newAESGCMKeyManager() *aesGCMKeyManager {
+	return new(aesGCMKeyManager)
 }
 
 // Primitive creates an AESGCM subtle for the given serialized AESGCMKey proto.
-func (km *AESGCMKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *aesGCMKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidAESGCMKey
 	}
@@ -69,7 +69,7 @@ func (km *AESGCMKeyManager) Primitive(serializedKey []byte) (interface{}, error)
 }
 
 // NewKey creates a new key according to specification the given serialized AESGCMKeyFormat.
-func (km *AESGCMKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
+func (km *aesGCMKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, error) {
 	if len(serializedKeyFormat) == 0 {
 		return nil, errInvalidAESGCMKeyFormat
 	}
@@ -90,7 +90,7 @@ func (km *AESGCMKeyManager) NewKey(serializedKeyFormat []byte) (proto.Message, e
 // NewKeyData creates a new KeyData according to specification in the given serialized
 // AESGCMKeyFormat.
 // It should be used solely by the key management API.
-func (km *AESGCMKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
+func (km *aesGCMKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyData, error) {
 	key, err := km.NewKey(serializedKeyFormat)
 	if err != nil {
 		return nil, err
@@ -107,17 +107,17 @@ func (km *AESGCMKeyManager) NewKeyData(serializedKeyFormat []byte) (*tinkpb.KeyD
 }
 
 // DoesSupport indicates if this key manager supports the given key type.
-func (km *AESGCMKeyManager) DoesSupport(typeURL string) bool {
+func (km *aesGCMKeyManager) DoesSupport(typeURL string) bool {
 	return typeURL == AESGCMTypeURL
 }
 
 // TypeURL returns the key type of keys managed by this key manager.
-func (km *AESGCMKeyManager) TypeURL() string {
+func (km *aesGCMKeyManager) TypeURL() string {
 	return AESGCMTypeURL
 }
 
 // validateKey validates the given AESGCMKey.
-func (km *AESGCMKeyManager) validateKey(key *gcmpb.AesGcmKey) error {
+func (km *aesGCMKeyManager) validateKey(key *gcmpb.AesGcmKey) error {
 	err := tink.ValidateVersion(key.Version, AESGCMKeyVersion)
 	if err != nil {
 		return fmt.Errorf("aes_gcm_key_manager: %s", err)
@@ -130,7 +130,7 @@ func (km *AESGCMKeyManager) validateKey(key *gcmpb.AesGcmKey) error {
 }
 
 // validateKeyFormat validates the given AESGCMKeyFormat.
-func (km *AESGCMKeyManager) validateKeyFormat(format *gcmpb.AesGcmKeyFormat) error {
+func (km *aesGCMKeyManager) validateKeyFormat(format *gcmpb.AesGcmKeyFormat) error {
 	if err := aead.ValidateAESKeySize(format.KeySize); err != nil {
 		return fmt.Errorf("aes_gcm_key_manager: %s", err)
 	}

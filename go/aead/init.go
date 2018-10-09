@@ -22,15 +22,15 @@ import (
 )
 
 func init() {
-	if err := tink.RegisterKeyManager(NewAESGCMKeyManager()); err != nil {
+	if err := tink.RegisterKeyManager(newAESGCMKeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 
-	if err := tink.RegisterKeyManager(NewChaCha20Poly1305KeyManager()); err != nil {
+	if err := tink.RegisterKeyManager(newChaCha20Poly1305KeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 
-	if err := tink.RegisterKeyManager(NewXChaCha20Poly1305KeyManager()); err != nil {
+	if err := tink.RegisterKeyManager(newXChaCha20Poly1305KeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 }
