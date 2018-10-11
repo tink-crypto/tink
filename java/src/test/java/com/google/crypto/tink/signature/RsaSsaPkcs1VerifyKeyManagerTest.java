@@ -69,6 +69,10 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
 
   @Test
   public void testNistTestVector() throws Exception {
+    if (TestUtil.isTsan()) {
+      // This test times out when running under thread sanitizer, so we just skip.
+      return;
+    }
     for (NistTestVector t : nistTestVectors) {
       RsaSsaPkcs1PublicKey pubKey =
           TestUtil.createRsaSsaPkcs1PubKey(t.modulus, t.exponent, t.hashType);

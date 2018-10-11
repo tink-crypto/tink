@@ -97,6 +97,10 @@ public class RsaSsaPkcs1SignKeyManagerTest {
 
   @Test
   public void testNewKeyWithVerifier() throws Exception {
+    if (TestUtil.isTsan()) {
+      // This test times out when running under thread sanitizer, so we just skip.
+      return;
+    }
     testNewKeyWithVerifier(SignatureKeyTemplates.RSA_SSA_PKCS1_2048_SHA256_F4);
     testNewKeyWithVerifier(SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA512_F4);
   }
