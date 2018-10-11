@@ -58,6 +58,8 @@ class PublicKeyVerifyCatalogue implements Catalogue<PublicKeyVerify> {
         return new Ed25519PublicKeyManager();
       case RsaSsaPkcs1VerifyKeyManager.TYPE_URL:
         return new RsaSsaPkcs1VerifyKeyManager();
+      case RsaSsaPssVerifyKeyManager.TYPE_URL:
+        return new RsaSsaPssVerifyKeyManager();
       default:
         throw new GeneralSecurityException(
             String.format(

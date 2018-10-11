@@ -20,8 +20,11 @@ import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
+import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Enums;
+import com.google.crypto.tink.subtle.Validators;
 import java.security.GeneralSecurityException;
 
 final class SigUtil {
@@ -62,6 +65,46 @@ final class SigUtil {
         break;
       default:
         throw new GeneralSecurityException(INVALID_PARAMS);
+    }
+  }
+
+  /**
+   * Validates RsaSsaPkcs1's parameters. As SHA1 is unsafe, we will only support SHA256 and SHA512
+   * for digital signature.
+   *
+   * @param params the RsaSsaPkcs1Params protocol buffer.
+   * @throws GeneralSecurityException iff it's invalid.
+   */
+  public static void validateRsaSsaPkcs1Params(RsaSsaPkcs1Params params)
+      throws GeneralSecurityException {
+    Validators.validateSignatureHash(toHashType(params.getHashType()));
+  }
+
+  /**
+   * Validates RsaSsaPss's parameters.
+   *
+   * <ul>
+   *   <li>As SHA1 is unsafe, we will only support SHA256 and SHA512 for digital signature.
+   *   <li>The most common use case is that MGF1 hash is the same as signature hash. This is
+   *       recommended by RFC https://tools.ietf.org/html/rfc8017#section-8.1. While using different
+   *       hashes doesn't cause security vulnerabilities, there is also no good reason to support
+   *       different hashes. Furthermore:
+   *       <ul>
+   *         <li>Golang does not support different hashes.
+   *         <li>BoringSSL supports different hashes just because of historical reason. There is no
+   *             real use case.
+   *         <li>Conscrypt/BouncyCastle do not support different hashes.
+   *       </ul>
+   * </ul>
+   *
+   * @param params the RsaSsaPssParams protocol buffer.
+   * @throws GeneralSecurityException iff it's invalid.
+   */
+  public static void validateRsaSsaPssParams(RsaSsaPssParams params)
+      throws GeneralSecurityException {
+    Validators.validateSignatureHash(toHashType(params.getSigHash()));
+    if (params.getSigHash() != params.getMgf1Hash()) {
+      throw new GeneralSecurityException("MGF1 hash is different from signature hash");
     }
   }
 

@@ -19,13 +19,13 @@ package com.google.crypto.tink.signature;
 import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.RsaSsaPkcs1KeyFormat;
-import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
-import com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey;
-import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
+import com.google.crypto.tink.proto.RsaSsaPssParams;
+import com.google.crypto.tink.proto.RsaSsaPssPrivateKey;
+import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
 import com.google.crypto.tink.subtle.EngineFactory;
-import com.google.crypto.tink.subtle.RsaSsaPkcs1SignJce;
-import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
+import com.google.crypto.tink.subtle.RsaSsaPssSignJce;
+import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -43,13 +43,13 @@ import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 
 /**
- * This key manager generates new {@code RsaSsaPkcs1PrivateKey} keys and produces new instances of
- * {@code RsaSsaPkcs1SignJce}.
+ * This key manager generates new {@code RsaSsaPssPrivateKey} keys and produces new instances of
+ * {@code RsaSsaPssSignJce}.
  */
-class RsaSsaPkcs1SignKeyManager implements PrivateKeyManager<PublicKeySign> {
+class RsaSsaPssSignKeyManager implements PrivateKeyManager<PublicKeySign> {
   /** Type url that this manager supports */
   public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey";
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey";
 
   /** Current version of this key manager. Keys with greater version are not supported. */
   private static final int VERSION = 0;
@@ -59,24 +59,24 @@ class RsaSsaPkcs1SignKeyManager implements PrivateKeyManager<PublicKeySign> {
   /** Test message. */
   private static final byte[] TEST_MESSAGE = "Tink and Wycheproof.".getBytes(UTF_8);
 
-  /** @param serializedKey serialized {@code RsaSsaPkcs1PrivateKey} proto */
+  /** @param serializedKey serialized {@code RsaSsaPssPrivateKey} proto */
   @Override
   public PublicKeySign getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      RsaSsaPkcs1PrivateKey privKeyProto = RsaSsaPkcs1PrivateKey.parseFrom(serializedKey);
+      RsaSsaPssPrivateKey privKeyProto = RsaSsaPssPrivateKey.parseFrom(serializedKey);
       return getPrimitive(privKeyProto);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized RsaSsaPkcs1PrivateKey proto", e);
+      throw new GeneralSecurityException("expected serialized RsaSsaPssPrivateKey proto", e);
     }
   }
 
-  /** @param key {@code RsaSsaPkcs1PrivateKey} proto */
+  /** @param key {@code RsaSsaPssPrivateKey} proto */
   @Override
   public PublicKeySign getPrimitive(MessageLite key) throws GeneralSecurityException {
-    if (!(key instanceof RsaSsaPkcs1PrivateKey)) {
-      throw new GeneralSecurityException("expected RsaSsaPkcs1PrivateKey proto");
+    if (!(key instanceof RsaSsaPssPrivateKey)) {
+      throw new GeneralSecurityException("expected RsaSsaPssPrivateKey proto");
     }
-    RsaSsaPkcs1PrivateKey keyProto = (RsaSsaPkcs1PrivateKey) key;
+    RsaSsaPssPrivateKey keyProto = (RsaSsaPssPrivateKey) key;
     validateKey(keyProto);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
     RSAPrivateCrtKey privateKey =
@@ -91,19 +91,26 @@ class RsaSsaPkcs1SignKeyManager implements PrivateKeyManager<PublicKeySign> {
                     new BigInteger(1, keyProto.getDp().toByteArray()),
                     new BigInteger(1, keyProto.getDq().toByteArray()),
                     new BigInteger(1, keyProto.getCrt().toByteArray())));
+    RsaSsaPssParams params = keyProto.getPublicKey().getParams();
     // Sign and verify a test message to make sure that the key is correct.
-    RsaSsaPkcs1SignJce signer =
-        new RsaSsaPkcs1SignJce(
-            privateKey, SigUtil.toHashType(keyProto.getPublicKey().getParams().getHashType()));
+    RsaSsaPssSignJce signer =
+        new RsaSsaPssSignJce(
+            privateKey,
+            SigUtil.toHashType(params.getSigHash()),
+            SigUtil.toHashType(params.getMgf1Hash()),
+            params.getSaltLength());
     RSAPublicKey publicKey =
         (RSAPublicKey)
             kf.generatePublic(
                 new RSAPublicKeySpec(
                     new BigInteger(1, keyProto.getPublicKey().getN().toByteArray()),
                     new BigInteger(1, keyProto.getPublicKey().getE().toByteArray())));
-    RsaSsaPkcs1VerifyJce verifier =
-        new RsaSsaPkcs1VerifyJce(
-            publicKey, SigUtil.toHashType(keyProto.getPublicKey().getParams().getHashType()));
+    RsaSsaPssVerifyJce verifier =
+        new RsaSsaPssVerifyJce(
+            publicKey,
+            SigUtil.toHashType(params.getSigHash()),
+            SigUtil.toHashType(params.getMgf1Hash()),
+            params.getSaltLength());
     try {
       verifier.verify(signer.sign(TEST_MESSAGE), TEST_MESSAGE);
     } catch (GeneralSecurityException e) {
@@ -115,31 +122,33 @@ class RsaSsaPkcs1SignKeyManager implements PrivateKeyManager<PublicKeySign> {
   }
 
   /**
-   * @param serializedKeyFormat serialized {@code RsaSsaPkcs1KeyFormat} proto
-   * @return new {@code RsaSsaPkcs1PrivateKey} proto
+   * @param serializedKeyFormat serialized {@code RsaSsaPssKeyFormat} proto
+   * @return new {@code RsaSsaPssPrivateKey} proto
    */
   @Override
   public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
     try {
-      RsaSsaPkcs1KeyFormat pkcs1KeyFormat = RsaSsaPkcs1KeyFormat.parseFrom(serializedKeyFormat);
-      return newKey(pkcs1KeyFormat);
+      RsaSsaPssKeyFormat pssKeyFormat = RsaSsaPssKeyFormat.parseFrom(serializedKeyFormat);
+      return newKey(pssKeyFormat);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected RsaSsaPkcs1KeyFormat proto", e);
+      throw new GeneralSecurityException("expected RsaSsaPssKeyFormat proto", e);
     }
   }
 
   /**
-   * @param keyFormat {@code RsaSsaPkcs1KeyFormat} proto
-   * @return new {@code RsaSsaPkcs1PrivateKey} proto
+   * @param keyFormat {@code RsaSsaPssKeyFormat} proto
+   * @return new {@code RsaSsaPssPrivateKey} proto
    */
   @Override
   public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
-    if (!(keyFormat instanceof RsaSsaPkcs1KeyFormat)) {
-      throw new GeneralSecurityException("expected RsaSsaPkcs1KeyFormat proto");
+    if (!(keyFormat instanceof RsaSsaPssKeyFormat)) {
+      throw new GeneralSecurityException("expected RsaSsaPssKeyFormat proto");
     }
-    RsaSsaPkcs1KeyFormat format = (RsaSsaPkcs1KeyFormat) keyFormat;
+    RsaSsaPssKeyFormat format = (RsaSsaPssKeyFormat) keyFormat;
     validateKeyFormat(format);
-    RsaSsaPkcs1Params params = format.getParams();
+    RsaSsaPssParams params = format.getParams();
+    Validators.validateRsaModulusSize(format.getModulusSizeInBits());
+    Validators.validateSignatureHash(SigUtil.toHashType(params.getSigHash()));
     KeyPairGenerator keyGen = EngineFactory.KEY_PAIR_GENERATOR.getInstance("RSA");
     RSAKeyGenParameterSpec spec =
         new RSAKeyGenParameterSpec(
@@ -150,19 +159,19 @@ class RsaSsaPkcs1SignKeyManager implements PrivateKeyManager<PublicKeySign> {
     RSAPublicKey pubKey = (RSAPublicKey) keyPair.getPublic();
     RSAPrivateCrtKey privKey = (RSAPrivateCrtKey) keyPair.getPrivate();
 
-    // Creates RsaSsaPkcs1PublicKey.
-    RsaSsaPkcs1PublicKey pkcs1PubKey =
-        RsaSsaPkcs1PublicKey.newBuilder()
+    // Creates RsaSsaPssPublicKey.
+    RsaSsaPssPublicKey pssPubKey =
+        RsaSsaPssPublicKey.newBuilder()
             .setVersion(VERSION)
             .setParams(params)
             .setE(ByteString.copyFrom(pubKey.getPublicExponent().toByteArray()))
             .setN(ByteString.copyFrom(pubKey.getModulus().toByteArray()))
             .build();
 
-    // Creates RsaSsaPkcs1PrivateKey.
-    return RsaSsaPkcs1PrivateKey.newBuilder()
+    // Creates RsaSsaPssPrivateKey.
+    return RsaSsaPssPrivateKey.newBuilder()
         .setVersion(VERSION)
-        .setPublicKey(pkcs1PubKey)
+        .setPublicKey(pssPubKey)
         .setD(ByteString.copyFrom(privKey.getPrivateExponent().toByteArray()))
         .setP(ByteString.copyFrom(privKey.getPrimeP().toByteArray()))
         .setQ(ByteString.copyFrom(privKey.getPrimeQ().toByteArray()))
@@ -173,12 +182,12 @@ class RsaSsaPkcs1SignKeyManager implements PrivateKeyManager<PublicKeySign> {
   }
 
   /**
-   * @param serializedKeyFormat serialized {@code RsaSsaPkcs1KeyFormat} proto
-   * @return {@code KeyData} with a new {@code RsaSsaPkcs1PrivateKey} proto
+   * @param serializedKeyFormat serialized {@code RsaSsaPssKeyFormat} proto
+   * @return {@code KeyData} with a new {@code RsaSsaPssPrivateKey} proto
    */
   @Override
   public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    RsaSsaPkcs1PrivateKey key = (RsaSsaPkcs1PrivateKey) newKey(serializedKeyFormat);
+    RsaSsaPssPrivateKey key = (RsaSsaPssPrivateKey) newKey(serializedKeyFormat);
     return KeyData.newBuilder()
         .setTypeUrl(TYPE_URL)
         .setValue(key.toByteString())
@@ -189,14 +198,14 @@ class RsaSsaPkcs1SignKeyManager implements PrivateKeyManager<PublicKeySign> {
   @Override
   public KeyData getPublicKeyData(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      RsaSsaPkcs1PrivateKey privKeyProto = RsaSsaPkcs1PrivateKey.parseFrom(serializedKey);
+      RsaSsaPssPrivateKey privKeyProto = RsaSsaPssPrivateKey.parseFrom(serializedKey);
       return KeyData.newBuilder()
-          .setTypeUrl(RsaSsaPkcs1VerifyKeyManager.TYPE_URL)
+          .setTypeUrl(RsaSsaPssVerifyKeyManager.TYPE_URL)
           .setValue(privKeyProto.getPublicKey().toByteString())
           .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
           .build();
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized RsaSsaPkcs1PrivateKey proto", e);
+      throw new GeneralSecurityException("expected serialized RsaSsaPssPrivateKey proto", e);
     }
   }
 
@@ -215,15 +224,15 @@ class RsaSsaPkcs1SignKeyManager implements PrivateKeyManager<PublicKeySign> {
     return VERSION;
   }
 
-  private void validateKeyFormat(RsaSsaPkcs1KeyFormat keyFormat) throws GeneralSecurityException {
-    SigUtil.validateRsaSsaPkcs1Params(keyFormat.getParams());
-    Validators.validateRsaModulusSize(keyFormat.getModulusSizeInBits());
+  private void validateKeyFormat(RsaSsaPssKeyFormat format) throws GeneralSecurityException {
+    SigUtil.validateRsaSsaPssParams(format.getParams());
+    Validators.validateRsaModulusSize(format.getModulusSizeInBits());
   }
 
-  private void validateKey(RsaSsaPkcs1PrivateKey privKey) throws GeneralSecurityException {
+  private void validateKey(RsaSsaPssPrivateKey privKey) throws GeneralSecurityException {
     Validators.validateVersion(privKey.getVersion(), VERSION);
     Validators.validateRsaModulusSize(
-        (new BigInteger(1, privKey.getPublicKey().getN().toByteArray())).bitLength());
-    SigUtil.validateRsaSsaPkcs1Params(privKey.getPublicKey().getParams());
+        new BigInteger(1, privKey.getPublicKey().getN().toByteArray()).bitLength());
+    SigUtil.validateRsaSsaPssParams(privKey.getPublicKey().getParams());
   }
 }

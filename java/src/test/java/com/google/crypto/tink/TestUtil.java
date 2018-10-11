@@ -60,6 +60,8 @@ import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.proto.RsaSsaPssParams;
+import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
@@ -381,6 +383,28 @@ public class TestUtil {
         .build();
   }
 
+  /**
+   * Returns a {@code RsaSsaPssPublicKey} constructed from {@code modulus}, {@code exponent}, {@code
+   * sigHash}, {@code mgf1Hash} and {@code saltLength}.
+   */
+  public static RsaSsaPssPublicKey createRsaSsaPssPubKey(
+      byte[] modulus, byte[] exponent, HashType sigHash, HashType mgf1Hash, int saltLength)
+      throws Exception {
+    final int version = 0;
+    RsaSsaPssParams params =
+        RsaSsaPssParams.newBuilder()
+            .setSigHash(sigHash)
+            .setMgf1Hash(mgf1Hash)
+            .setSaltLength(saltLength)
+            .build();
+
+    return RsaSsaPssPublicKey.newBuilder()
+        .setVersion(version)
+        .setParams(params)
+        .setN(ByteString.copyFrom(modulus))
+        .setE(ByteString.copyFrom(exponent))
+        .build();
+  }
   /**
    * @return a freshly generated {@code EciesAeadHkdfPrivateKey} constructed with specified
    *     parameters.

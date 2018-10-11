@@ -19,9 +19,10 @@ package com.google.crypto.tink.signature;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.proto.RsaSsaPssParams;
+import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
 import com.google.crypto.tink.subtle.EngineFactory;
-import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
+import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -33,46 +34,49 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
 
 /**
- * This key manager produces new instances of {@code RsaSsaPkcs1VerifyJce}. It doesn't support key
+ * This key manager produces new instances of {@code RsaSsaPssVerifyJce}. It doesn't support key
  * generation.
  */
-class RsaSsaPkcs1VerifyKeyManager implements KeyManager<PublicKeyVerify> {
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey";
+class RsaSsaPssVerifyKeyManager implements KeyManager<PublicKeyVerify> {
+  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey";
   /** Current version of this key manager. Keys with greater version are not supported. */
   private static final int VERSION = 0;
 
-  /** @param serializedKey serialized {@code RsaSsaPkcs1PublicKey} proto */
+  /** @param serializedKey serialized {@code RsaSsaPssPublicKey} proto */
   @Override
   public PublicKeyVerify getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
-      RsaSsaPkcs1PublicKey pubKey = RsaSsaPkcs1PublicKey.parseFrom(serializedKey);
+      RsaSsaPssPublicKey pubKey = RsaSsaPssPublicKey.parseFrom(serializedKey);
       return getPrimitive(pubKey);
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized RsaSsaPkcs1PublicKey proto", e);
+      throw new GeneralSecurityException("expected serialized RsaSsaPssPublicKey proto", e);
     }
   }
 
-  /** @param key {@code RsaSsaPkcs1PublicKey} proto */
+  /** @param key {@code RsaSsaPssPublicKey} proto */
   @Override
   public PublicKeyVerify getPrimitive(MessageLite key) throws GeneralSecurityException {
-    if (!(key instanceof RsaSsaPkcs1PublicKey)) {
-      throw new GeneralSecurityException("expected RsaSsaPkcs1PublicKey proto");
+    if (!(key instanceof RsaSsaPssPublicKey)) {
+      throw new GeneralSecurityException("expected RsaSsaPssPublicKey proto");
     }
-    RsaSsaPkcs1PublicKey keyProto = (RsaSsaPkcs1PublicKey) key;
+    RsaSsaPssPublicKey keyProto = (RsaSsaPssPublicKey) key;
     validateKey(keyProto);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
     BigInteger modulus = new BigInteger(1, keyProto.getN().toByteArray());
     BigInteger exponent = new BigInteger(1, keyProto.getE().toByteArray());
     RSAPublicKey publicKey =
         (RSAPublicKey) kf.generatePublic(new RSAPublicKeySpec(modulus, exponent));
-    return new RsaSsaPkcs1VerifyJce(
-        publicKey, SigUtil.toHashType(keyProto.getParams().getHashType()));
+    RsaSsaPssParams params = keyProto.getParams();
+    return new RsaSsaPssVerifyJce(
+        publicKey,
+        SigUtil.toHashType(params.getSigHash()),
+        SigUtil.toHashType(params.getMgf1Hash()),
+        params.getSaltLength());
   }
 
   /**
-   * @param serializedKeyFormat serialized {@code RsaSsaPkcs1KeyFormat} proto
-   * @return new {@code RsaSsaPkcs1PublicKey} proto
+   * @param serializedKeyFormat serialized {@code RsaSsaPssKeyFormat} proto
+   * @return new {@code RsaSsaPssPublicKey} proto
    */
   @Override
   public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
@@ -80,8 +84,8 @@ class RsaSsaPkcs1VerifyKeyManager implements KeyManager<PublicKeyVerify> {
   }
 
   /**
-   * @param keyFormat {@code RsaSsaPkcs1KeyFormat} proto
-   * @return new {@code RsaSsaPkcs1PublicKey} proto
+   * @param keyFormat {@code RsaSsaPssKeyFormat} proto
+   * @return new {@code RsaSsaPssPublicKey} proto
    */
   @Override
   public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
@@ -89,8 +93,8 @@ class RsaSsaPkcs1VerifyKeyManager implements KeyManager<PublicKeyVerify> {
   }
 
   /**
-   * @param serializedKeyFormat serialized {@code RsaSsaPkcs1KeyFormat} proto
-   * @return {@code KeyData} with a new {@code RsaSsaPkcs1PublicKey} proto
+   * @param serializedKeyFormat serialized {@code RsaSsaPssKeyFormat} proto
+   * @return {@code KeyData} with a new {@code RsaSsaPssPublicKey} proto
    */
   @Override
   public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
@@ -112,9 +116,9 @@ class RsaSsaPkcs1VerifyKeyManager implements KeyManager<PublicKeyVerify> {
     return VERSION;
   }
 
-  private void validateKey(RsaSsaPkcs1PublicKey pubKey) throws GeneralSecurityException {
+  private void validateKey(RsaSsaPssPublicKey pubKey) throws GeneralSecurityException {
     Validators.validateVersion(pubKey.getVersion(), VERSION);
-    Validators.validateRsaModulusSize((new BigInteger(1, pubKey.getN().toByteArray())).bitLength());
-    SigUtil.validateRsaSsaPkcs1Params(pubKey.getParams());
+    Validators.validateRsaModulusSize(new BigInteger(1, pubKey.getN().toByteArray()).bitLength());
+    SigUtil.validateRsaSsaPssParams(pubKey.getParams());
   }
 }
