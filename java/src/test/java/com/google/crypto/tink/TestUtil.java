@@ -516,6 +516,14 @@ public class TestUtil {
     }
   }
 
+  /**
+   * Best-effort checks that this is running under tsan. Returns false in doubt and externally to
+   * google.
+   */
+  public static boolean isTsan() {
+    return false;
+  }
+
   /** Returns whether we should skip a test with some AES key size. */
   public static boolean shouldSkipTestWithAesKeySize(int keySizeInBytes)
       throws NoSuchAlgorithmException {
