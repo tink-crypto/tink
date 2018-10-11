@@ -8857,6 +8857,10 @@
 </dd>
 <dt><a href="com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">KeyTypeEntryOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">KeyWrap</span></a> - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
+<dd>
+<div class="block">Interface for symmetric Key wrapping.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#KMS_AEAD_TYPE_URL">KMS_AEAD_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#KMS_ENVELOPE_AEAD_TYPE_URL">KMS_ENVELOPE_AEAD_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
@@ -8927,6 +8931,14 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/KmsEnvelopeAeadKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">KmsEnvelopeAeadKeyOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">Kwp</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
+<dd>
+<div class="block">Implements the key wrapping primitive KWP defined in NIST SP 800 38f.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Kwp.html#Kwp-byte:A-">Kwp(byte[])</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></dt>
+<dd>
+<div class="block">Construct a new Instance for KWP.</div>
+</dd>
 </dl>
 <a name="I:L">
 <!--   -->
@@ -13616,6 +13628,14 @@
 <dd>
 <div class="block"><code>UNKNOWN_STATUS = 0;</code></div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyWrap.html#unwrap-byte:A-">unwrap(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink">KeyWrap</a></dt>
+<dd>
+<div class="block">Unwraps a wrapped key.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Kwp.html#unwrap-byte:A-">unwrap(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></dt>
+<dd>
+<div class="block">Unwraps a wrapped key.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Base64.html#URL_SAFE">URL_SAFE</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle">Base64</a></dt>
 <dd>
 <div class="block">Encoder/decoder flag bit to indicate using the "URL and filename safe" variant of Base64 (see
@@ -13996,6 +14016,14 @@ the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withUrlSafeBase64--">withUrlSafeBase64()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyWrap.html#wrap-byte:A-">wrap(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink">KeyWrap</a></dt>
+<dd>
+<div class="block">Wraps some key material <code>data</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Kwp.html#wrap-byte:A-">wrap(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></dt>
+<dd>
+<div class="block">Wraps some key material <code>data</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetWriter.html#write-com.google.crypto.tink.proto.Keyset-">write(Keyset)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetWriter.html" title="class in com.google.crypto.tink">BinaryKeysetWriter</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetWriter.html#write-com.google.crypto.tink.proto.EncryptedKeyset-">write(EncryptedKeyset)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetWriter.html" title="class in com.google.crypto.tink">BinaryKeysetWriter</a></dt>
