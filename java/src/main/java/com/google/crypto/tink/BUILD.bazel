@@ -27,6 +27,7 @@ java_library(
         "DeterministicAead.java",
         "HybridDecrypt.java",
         "HybridEncrypt.java",
+        "KeyWrap.java",
         "Mac.java",
         "PublicKeySign.java",
         "PublicKeyVerify.java",

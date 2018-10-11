@@ -52,6 +52,7 @@ subtle_deps = [
     "//java/src/main/java/com/google/crypto/tink/subtle:aead",
     "//java/src/main/java/com/google/crypto/tink/subtle:daead",
     "//java/src/main/java/com/google/crypto/tink/subtle:hybrid",
+    "//java/src/main/java/com/google/crypto/tink/subtle:keywrap",
     "//java/src/main/java/com/google/crypto/tink/subtle:mac",
     "//java/src/main/java/com/google/crypto/tink/subtle:signature",
     "//java/src/main/java/com/google/crypto/tink/subtle:streaming",
