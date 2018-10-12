@@ -64,6 +64,10 @@ public class RsaSsaPssSignKeyManagerTest {
   }
 
   private void testNewKeyWithVerifier(KeyTemplate keyTemplate) throws Exception {
+    if (TestUtil.isTsan()) {
+      // This test times out in tsan mode.
+      return;
+    }
     // Call newKey multiple times and make sure that it generates different keys.
     int numTests = 3;
     RsaSsaPssPrivateKey[] privKeys = new RsaSsaPssPrivateKey[numTests];
