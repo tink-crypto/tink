@@ -149,6 +149,10 @@ public class RsaSsaPssSignKeyManagerTest {
   /** Tests that a public key is extracted properly from a private key. */
   @Test
   public void testGetPublicKeyData() throws Exception {
+    if (TestUtil.isTsan()) {
+      // This test times out in tsan mode.
+      return;
+    }
     KeysetHandle privateHandle =
         KeysetHandle.generateNew(SignatureKeyTemplates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4);
     KeyData privateKeyData = TestUtil.getKeyset(privateHandle).getKey(0).getKeyData();
