@@ -153,7 +153,8 @@ util::Status EcdsaVerifyBoringSsl::Verify(
                         reinterpret_cast<const uint8_t*>(derSig.data()),
                         derSig.size(), key_.get())) {
     // signature is invalid
-    return util::Status(util::error::UNKNOWN, "Signature is not valid.");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Signature is not valid.");
   }
   // signature is valid
   return util::Status::OK;
