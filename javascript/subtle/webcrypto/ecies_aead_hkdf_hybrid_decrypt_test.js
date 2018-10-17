@@ -26,12 +26,13 @@ const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const TestCase = goog.require('goog.testing.TestCase');
-
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
   setUp() {
     AeadConfig.register();
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
   },
 
   tearDown() {
@@ -199,9 +200,6 @@ testSuite({
   },
 
   async testDecrypt_differentPamarameters_shouldWork() {
-    // Set longer time for promiseTimout as the test sometimes takes longer than
-    // 1 second in Firefox.
-    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const repetitions = 5;
     const hkdfSalt = new Uint8Array(0);
 

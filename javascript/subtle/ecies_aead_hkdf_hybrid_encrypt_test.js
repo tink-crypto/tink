@@ -23,15 +23,20 @@ const EllipticCurves = goog.require('tink.subtle.EllipticCurves');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
 const RegistryEciesAeadHkdfDemHelper = goog.require('tink.hybrid.RegistryEciesAeadHkdfDemHelper');
+const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
   setUp() {
     AeadConfig.register();
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
   },
 
   tearDown() {
     Registry.reset();
+    // Reset the timeout.
+    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
   },
 
   async testNewInstance_shouldWork() {

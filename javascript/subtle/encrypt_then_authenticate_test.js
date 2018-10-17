@@ -22,6 +22,10 @@ const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
+  setUp() {
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
+  },
 
   tearDown() {
     // Reset the promise timeout to default value.
@@ -29,9 +33,6 @@ testSuite({
   },
 
   async testBasic() {
-    // Set longer time for promiseTimout as the test sometimes takes longer than
-    // 1 second in Firefox.
-    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
@@ -54,9 +55,6 @@ testSuite({
   },
 
   async testProbabilisticEncryption() {
-    // Set longer time for promiseTimout as the test sometimes takes longer than
-    // 1 second in Firefox.
-    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 12 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 10 /* tagSize */);
@@ -124,9 +122,6 @@ testSuite({
   },
 
   async testBitFlipCiphertext() {
-    // Set longer time for promiseTimout as the test sometimes takes longer than
-    // 1 second in Firefox.
-    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const aead = await EncryptThenAuthenticate.newAesCtrHmac(
         Random.randBytes(16) /* aesKey */, 16 /* ivSize */, 'SHA-256',
         Random.randBytes(16) /* hmacKey */, 16 /* tagSize */);

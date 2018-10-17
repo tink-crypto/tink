@@ -54,6 +54,8 @@ const PUBLIC_KEY_MANAGER_PRIMITIVE = HybridEncrypt;
 testSuite({
   setUp() {
     AeadConfig.register();
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
   },
 
   tearDown() {
@@ -340,9 +342,6 @@ testSuite({
   },
 
   async testGetPrimitive_fromKey() {
-    // Set longer time for promiseTimout as the test sometimes takes longer than
-    // 1 second in Firefox.
-    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const keyFormats = createTestSetOfKeyFormats();
     const privateKeyManager = new EciesAeadHkdfPrivateKeyManager();
     const publicKeyManager = new EciesAeadHkdfPublicKeyManager();
@@ -366,9 +365,6 @@ testSuite({
   },
 
   async testGetPrimitive_fromKeyData() {
-    // Set longer time for promiseTimout as the test sometimes takes longer than
-    // 1 second in Firefox.
-    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const keyFormats = createTestSetOfKeyFormats();
     const privateKeyManager = new EciesAeadHkdfPrivateKeyManager();
     const publicKeyManager = new EciesAeadHkdfPublicKeyManager();

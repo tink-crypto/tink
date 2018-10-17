@@ -26,6 +26,10 @@ const testSuite = goog.require('goog.testing.testSuite');
 
 
 testSuite({
+  setUp() {
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
+  },
 
   tearDown() {
     // Reset the promise timeout to default value.
@@ -33,9 +37,6 @@ testSuite({
   },
 
   async testEncapDecap() {
-    // Set longer time for promiseTimout as the test sometimes takes longer than
-    // 1 second in Firefox.
-    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const keyPair = await Ecdh.generateKeyPair('P-256');
     const publicKey = await Ecdh.exportCryptoKey(keyPair.publicKey);
     const privateKey = await Ecdh.exportCryptoKey(keyPair.privateKey);
@@ -188,9 +189,6 @@ testSuite({
   },
 
   async testEncapDecap_differentParams() {
-    // Set longer time for promiseTimout as the test sometimes takes longer than
-    // 1 second in Firefox.
-    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const curveTypes = Object.keys(EllipticCurves.CurveType);
     const hashTypes = ['SHA-1', 'SHA-256', 'SHA-512'];
     for (let curve of curveTypes) {
@@ -221,9 +219,6 @@ testSuite({
   },
 
   async testEncapDecap_modifiedToken() {
-    // Set longer time for promiseTimout as the test sometimes takes longer than
-    // 1 second in Firefox.
-    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     const curveTypes = Object.keys(EllipticCurves.CurveType);
     const hashTypes = ['SHA-1', 'SHA-256', 'SHA-512'];
     for (let crvId of curveTypes) {

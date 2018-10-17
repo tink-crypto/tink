@@ -23,6 +23,11 @@ const testSuite = goog.require('goog.testing.testSuite');
 
 
 testSuite({
+  setUp() {
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
+  },
+
   tearDown() {
     // Reset the promise timeout to default value.
     TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
@@ -41,7 +46,6 @@ testSuite({
   async testWycheproof_wycheproofWebcrypto() {
     // Set longer time for promiseTimout as the test sometimes takes longer than
     // 1 second in Firefox.
-    TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
     await runOnWycheproofTestVectors('ecdh_webcrypto_test.json');
   },
 

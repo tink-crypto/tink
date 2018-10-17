@@ -25,15 +25,17 @@ const testSuite = goog.require('goog.testing.testSuite');
 if ((Environment.IS_WEBCRYPTO_AVAILABLE)) {
   testSuite({
 
-    tearDown() {
-      // Reset the promise timeout to default value.
-      TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
-    },
+  setUp() {
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
+  },
+
+  tearDown() {
+    // Reset the timeout.
+    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
+  },
 
     async testBasic() {
-      // Set longer time for promiseTimout as the test sometimes takes longer
-      // than 1 second in Firefox.
-      TestCase.getActiveTestCase().promiseTimeout = 5000;  // 5s
       const aead = await AesGcm.newInstance(Random.randBytes(16));
       for (let i = 0; i < 100; i++) {
         const msg = Random.randBytes(i);
