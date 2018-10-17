@@ -57,6 +57,9 @@ public final class CleartextKeysetHandle {
     return KeysetHandle.fromKeyset(reader.read());
   }
 
+  /**
+   * @return the keyset underlying this {@code keysetHandle}.
+   */
   public static Keyset getKeyset(KeysetHandle keysetHandle) {
     return keysetHandle.getKeyset();
   }
