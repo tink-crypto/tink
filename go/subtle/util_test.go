@@ -16,6 +16,7 @@ package subtle_test
 
 import (
 	"encoding/hex"
+	"hash"
 	"testing"
 
 	"github.com/google/tink/go/subtle"
@@ -41,25 +42,29 @@ func TestConvertCurveName(t *testing.T) {
 
 func TestComputeHash(t *testing.T) {
 	data := []byte("Hello")
-	// SHA1
-	expectedMac := "f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0"
-	hashFunc := subtle.GetHashFunc("SHA1")
-	if hashFunc == nil || hex.EncodeToString(subtle.ComputeHash(hashFunc, data)) != expectedMac {
-		t.Errorf("invalid hash function for SHA1")
+	var tests = []struct {
+		hashFunc    func() hash.Hash
+		expectedMac string
+	}{
+		{subtle.GetHashFunc("SHA1"), "f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0"},
+		{subtle.GetHashFunc("SHA256"), "185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969"},
+		{subtle.GetHashFunc("SHA512"), "3615f80c9d293ed7402687f94b22d58e529b8cc7916f8fac7fddf7fbd5af4cf777d3d795a7a00a16bf7e7f3fb9561ee9baae480da9fe7a18769e71886b03f315"},
 	}
-	// SHA256
-	expectedMac = "185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969"
-	hashFunc = subtle.GetHashFunc("SHA256")
-	if hashFunc == nil || hex.EncodeToString(subtle.ComputeHash(hashFunc, data)) != expectedMac {
-		t.Errorf("invalid hash function for SHA256")
+
+	for _, tt := range tests {
+		hashFunc := tt.hashFunc
+		if hashFunc == nil {
+			t.Fatal("got nil hash func")
+		}
+		hashed, err := subtle.ComputeHash(hashFunc, data)
+		if err != nil {
+			t.Fatalf("got error: %q", err)
+		}
+		if gotMac := hex.EncodeToString(hashed); gotMac != tt.expectedMac {
+			t.Fatalf("Expected: %s. Got: %s", tt.expectedMac, gotMac)
+		}
 	}
-	// SHA512
-	expectedMac = "3615f80c9d293ed7402687f94b22d58e529b8cc7916f8fac7fddf7fbd5af4cf" +
-		"777d3d795a7a00a16bf7e7f3fb9561ee9baae480da9fe7a18769e71886b03f315"
-	hashFunc = subtle.GetHashFunc("SHA512")
-	if hashFunc == nil || hex.EncodeToString(subtle.ComputeHash(hashFunc, data)) != expectedMac {
-		t.Errorf("invalid hash function for SHA512")
-	}
+
 	// unknown
 	if subtle.GetHashFunc("UNKNOWN_HASH") != nil {
 		t.Errorf("unexpected result for invalid hash types")
