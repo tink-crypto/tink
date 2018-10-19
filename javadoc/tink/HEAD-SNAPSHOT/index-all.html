@@ -2511,6 +2511,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManager.html#doesSupport-java.lang.String-">doesSupport(String)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#doesSupport-java.lang.String-">doesSupport(String)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClient.html#doesSupport-java.lang.String-">doesSupport(String)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/util/KeysDownloader.html#download--">download()</a></span> - Method in class com.google.crypto.tink.util.<a href="com/google/crypto/tink/util/KeysDownloader.html" title="class in com.google.crypto.tink.util">KeysDownloader</a></dt>
@@ -5537,6 +5539,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManager.html#getKeyType--">getKeyType()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KmsAeadKeyFormat.Builder.html#getKeyUri--">getKeyUri()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KmsAeadKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">KmsAeadKeyFormat.Builder</a></dt>
 <dd>
 <div class="block">
@@ -6811,6 +6815,10 @@
 <dd>
 <div class="block">Constructs an instance of P for the key given in <code>key</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getPrimitive-com.google.protobuf.ByteString-">getPrimitive(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getPrimitive-com.google.protobuf.MessageLite-">getPrimitive(MessageLite)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">getPrimitive(KeysetHandle)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac">MacFactory</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive(KeysetHandle, KeyManager&lt;Mac&gt;)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac">MacFactory</a></dt>
@@ -6849,6 +6857,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive(KeysetHandle, KeyManager&lt;StreamingAead&gt;)</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadFactory.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getPrimitiveFromKey-KeyProto-">getPrimitiveFromKey(KeyProto)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>
+<div class="block">Creates a primitive from a given key.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KeyTypeEntry.Builder.html#getPrimitiveName--">getPrimitiveName()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a></dt>
 <dd>
 <div class="block">
@@ -9459,6 +9471,16 @@
 <div class="block">A KeyManager "understands" keys of a specific key type: it can generate keys of the supported
  type and create primitives for supported keys.</div>
 </dd>
+<dt><a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyManagerBase</span></a>&lt;<a href="com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>,<a href="com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyProto</a> extends com.google.protobuf.MessageLite,<a href="com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyFormatProto</a> extends com.google.protobuf.MessageLite&gt; - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
+<dd>
+<div class="block">A utility class to implement a <code>KeyManager</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#KeyManagerBase-java.lang.Class-java.lang.Class-java.lang.String-">KeyManagerBase(Class&lt;KeyProto&gt;, Class&lt;KeyFormatProto&gt;, String)</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>
+<div class="block">Returns the <code>KeyMaterialType</code> for this proto.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/util/KeysDownloader.html" title="class in com.google.crypto.tink.util"><span class="typeNameLink">KeysDownloader</span></a> - Class in <a href="com/google/crypto/tink/util/package-summary.html">com.google.crypto.tink.util</a></dt>
 <dd>
 <div class="block">Thread-safe downloader.</div>
@@ -10835,6 +10857,10 @@
 <dd>
 <div class="block">Generates a new key according to specification in <code>keyFormat</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#newKey-com.google.protobuf.ByteString-">newKey(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#newKey-com.google.protobuf.MessageLite-">newKey(MessageLite)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#newKey-com.google.crypto.tink.proto.KeyTemplate-">newKey(KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
 <div class="block">Convenience method for generating a new key for the specified <code>keyTemplate</code>.</div>
@@ -10847,9 +10873,15 @@
 <dd>
 <div class="block">Generates a new <code>KeyData</code> according to specification in <code>serializedkeyFormat</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#newKeyData-com.google.protobuf.ByteString-">newKeyData(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#newKeyData-com.google.crypto.tink.proto.KeyTemplate-">newKeyData(KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
 <div class="block">Convenience method for generating a new <a href="com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto"><code>KeyData</code></a> for the specified <code>template</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#newKeyFromFormat-KeyFormatProto-">newKeyFromFormat(KeyFormatProto)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>
+<div class="block">Creates a new key for a given format.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html#newKeyPair--">newKeyPair()</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html" title="class in com.google.crypto.tink.subtle">Ed25519Sign.KeyPair</a></dt>
 <dd>
@@ -12334,6 +12366,14 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(CodedInputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#parseKeyFormatProto-com.google.protobuf.ByteString-">parseKeyFormatProto(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>
+<div class="block">Parses a serialized key format proto.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#parseKeyProto-com.google.protobuf.ByteString-">parseKeyProto(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
+<dd>
+<div class="block">Parses a serialized key proto.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKeyFormat</a></dt>
