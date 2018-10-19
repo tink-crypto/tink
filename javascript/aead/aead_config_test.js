@@ -28,11 +28,20 @@ const PbKeyset = goog.require('proto.google.crypto.tink.Keyset');
 const PbOutputPrefixType = goog.require('proto.google.crypto.tink.OutputPrefixType');
 const Random = goog.require('tink.subtle.Random');
 const Registry = goog.require('tink.Registry');
+
+const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
 
 testSuite({
+  setUp() {
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
+  },
+
   tearDown() {
     Registry.reset();
+    // Reset the promise timeout to default value.
+    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
   },
 
   testConstants() {

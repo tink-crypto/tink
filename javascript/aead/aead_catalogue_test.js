@@ -19,11 +19,22 @@ const AeadCatalogue = goog.require('tink.aead.AeadCatalogue');
 const AesCtrHmacAeadKeyManager = goog.require('tink.aead.AesCtrHmacAeadKeyManager');
 const AesGcmKeyManager = goog.require('tink.aead.AesGcmKeyManager');
 
+const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
 
 const SUPPORTED_PRIMITIVE_NAME = 'Aead';
 
 testSuite({
+  setUp() {
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
+  },
+
+  tearDown() {
+    // Reset the promise timeout to default value.
+    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
+  },
+
   testGetKeyManager_wrongPrimitive() {
     const anotherPrimitiveName = 'Mac';
 

@@ -32,10 +32,21 @@ const PbHashType = goog.require('proto.google.crypto.tink.HashType');
 const PbKeyTemplate = goog.require('proto.google.crypto.tink.KeyTemplate');
 const PbPointFormat = goog.require('proto.google.crypto.tink.EcPointFormat');
 
+const TestCase = goog.require('goog.testing.TestCase');
 const testSuite = goog.require('goog.testing.testSuite');
 
 
 testSuite({
+  setUp() {
+    // Use a generous promise timeout for running continuously.
+    TestCase.getActiveTestCase().promiseTimeout = 1000 * 1000;  // 1000s
+  },
+
+  tearDown() {
+    // Reset the promise timeout to default value.
+    TestCase.getActiveTestCase().promiseTimeout = 1000;  // 1s
+  },
+
   testValidateParams_missingKemParams() {
     const invalidParams = createParams();
     invalidParams.setKemParams(null);
