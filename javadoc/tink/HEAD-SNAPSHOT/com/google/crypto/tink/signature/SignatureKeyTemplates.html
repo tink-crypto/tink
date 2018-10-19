@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9};
+var methods = {"i0":9,"i1":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -217,7 +217,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_3072_SHA256_F4">RSA_SSA_PKCS1_3072_SHA256_F4</a></span></code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_2048_SHA256_F4">RSA_SSA_PKCS1_2048_SHA256_F4</a></span></code>
 <div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
 
  
@@ -226,29 +226,11 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_4096_SHA512_F4">RSA_SSA_PKCS1_4096_SHA512_F4</a></span></code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_3072_SHA512_F4">RSA_SSA_PKCS1_3072_SHA512_F4</a></span></code>
 <div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
 
  
    Hash function: SHA512.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PSS_3072_SHA256_SHA256_32_F4">RSA_SSA_PSS_3072_SHA256_SHA256_32_F4</a></span></code>
-<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPssPrivateKey</code></a> with the following parameters:
-
- 
-   Signature hash: SHA256.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PSS_4096_SHA512_SHA512_64_F4">RSA_SSA_PSS_4096_SHA512_SHA512_64_F4</a></span></code>
-<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPssPrivateKey</code></a> with the following parameters:
-
- 
-   Signature hash: SHA512.</div>
 </td>
 </tr>
 </table>
@@ -294,14 +276,6 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#createRsaSsaPkcs1KeyTemplate-com.google.crypto.tink.proto.HashType-int-java.math.BigInteger-">createRsaSsaPkcs1KeyTemplate</a></span>(<a href="../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;hashType,
                             int&nbsp;modulusSize,
                             <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;publicExponent)</code>&nbsp;</td>
-</tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#createRsaSsaPssKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.HashType-int-int-java.math.BigInteger-">createRsaSsaPssKeyTemplate</a></span>(<a href="../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;sigHash,
-                          <a href="../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;mgf1Hash,
-                          int&nbsp;saltLength,
-                          int&nbsp;modulusSize,
-                          <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;publicExponent)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -435,70 +409,34 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="RSA_SSA_PKCS1_3072_SHA256_F4">
+<a name="RSA_SSA_PKCS1_2048_SHA256_F4">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>RSA_SSA_PKCS1_3072_SHA256_F4</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> RSA_SSA_PKCS1_3072_SHA256_F4</pre>
+<h4>RSA_SSA_PKCS1_2048_SHA256_F4</h4>
+<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> RSA_SSA_PKCS1_2048_SHA256_F4</pre>
 <div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
 
  <ul>
    <li>Hash function: SHA256.
-   <li>Modulus size: 3072 bit.
+   <li>Modulus size: 2048 bit.
    <li>Public exponent: 65537 (aka F4).
  </ul></div>
 </li>
 </ul>
-<a name="RSA_SSA_PKCS1_4096_SHA512_F4">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>RSA_SSA_PKCS1_4096_SHA512_F4</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> RSA_SSA_PKCS1_4096_SHA512_F4</pre>
-<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
-
- <ul>
-   <li>Hash function: SHA512.
-   <li>Modulus size: 4096 bit.
-   <li>Public exponent: 65537 (aka F4).
- </ul></div>
-</li>
-</ul>
-<a name="RSA_SSA_PSS_3072_SHA256_SHA256_32_F4">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>RSA_SSA_PSS_3072_SHA256_SHA256_32_F4</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> RSA_SSA_PSS_3072_SHA256_SHA256_32_F4</pre>
-<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPssPrivateKey</code></a> with the following parameters:
-
- <ul>
-   <li>Signature hash: SHA256.
-   <li>MGF1 hash: SHA256.
-   <li>Salt length: 32 (i.e., SHA256's output length).
-   <li>Modulus size: 3072 bit.
-   <li>Public exponent: 65537 (aka F4).
- </ul></div>
-</li>
-</ul>
-<a name="RSA_SSA_PSS_4096_SHA512_SHA512_64_F4">
+<a name="RSA_SSA_PKCS1_3072_SHA512_F4">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>RSA_SSA_PSS_4096_SHA512_SHA512_64_F4</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> RSA_SSA_PSS_4096_SHA512_SHA512_64_F4</pre>
-<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPssPrivateKey</code></a> with the following parameters:
+<h4>RSA_SSA_PKCS1_3072_SHA512_F4</h4>
+<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a> RSA_SSA_PKCS1_3072_SHA512_F4</pre>
+<div class="block">A <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
 
  <ul>
-   <li>Signature hash: SHA512.
-   <li>MGF1 hash: SHA512.
-   <li>Salt length: 64 (i.e., SHA512's output length).
-   <li>Modulus size: 4096 bit.
+   <li>Hash function: SHA512.
+   <li>Modulus size: 3072 bit.
    <li>Public exponent: 65537 (aka F4).
  </ul></div>
 </li>
@@ -547,7 +485,7 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <a name="createRsaSsaPkcs1KeyTemplate-com.google.crypto.tink.proto.HashType-int-java.math.BigInteger-">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>createRsaSsaPkcs1KeyTemplate</h4>
 <pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;createRsaSsaPkcs1KeyTemplate(<a href="../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;hashType,
@@ -556,24 +494,6 @@ extends <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> containing a <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1KeyFormat</code></a> with some specified
-     parameters.</dd>
-</dl>
-</li>
-</ul>
-<a name="createRsaSsaPssKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.HashType-int-int-java.math.BigInteger-">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>createRsaSsaPssKeyTemplate</h4>
-<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;createRsaSsaPssKeyTemplate(<a href="../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;sigHash,
-                                                     <a href="../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;mgf1Hash,
-                                                     int&nbsp;saltLength,
-                                                     int&nbsp;modulusSize,
-                                                     <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;publicExponent)</pre>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>a <a href="../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> containing a <a href="../../../../../com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPssKeyFormat</code></a> with some specified
      parameters.</dd>
 </dl>
 </li>
