@@ -132,36 +132,42 @@
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><a href="../../../../com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink">KeyWrap</a></td>
+<td class="colLast">
+<div class="block">Interface for symmetric Key wrapping.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></td>
 <td class="colLast">
 <div class="block">A KmsClient knows how to produce primitives backed by keys stored in remote KMS services.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink">Mac</a></td>
 <td class="colLast">
 <div class="block">Interface for Message Authentication Codes (MAC).</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink">PrivateKeyManager</a>&lt;P&gt;</td>
 <td class="colLast">
 <div class="block">A <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> that understands asymmetric private key types.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink">PublicKeySign</a></td>
 <td class="colLast">
 <div class="block">Interface for public key signing.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/PublicKeyVerify.html" title="interface in com.google.crypto.tink">PublicKeyVerify</a></td>
 <td class="colLast">
 <div class="block">Interface for public key signing.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink">StreamingAead</a></td>
 <td class="colLast">
 <div class="block">An interface for streaming authenticated encryption with associated data.</div>
@@ -227,52 +233,58 @@
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><a href="../../../../com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a>&lt;P,KeyProto extends com.google.protobuf.MessageLite,KeyFormatProto extends com.google.protobuf.MessageLite&gt;</td>
+<td class="colLast">
+<div class="block">A utility class to implement a <code>KeyManager</code>.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></td>
 <td class="colLast">
 <div class="block">A KeysetHandle provides abstracted access to <a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a>, to limit the exposure of actual
  protocol buffers that hold sensitive key material.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></td>
 <td class="colLast">
 <div class="block">Manages a <a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a> proto, with convenience methods that rotate, disable, enable or destroy
  keys.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/KmsClients.html" title="class in com.google.crypto.tink">KmsClients</a></td>
 <td class="colLast">
 <div class="block">A container for <a href="../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a>-objects that are needed by <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a>-objects for
  primitives that use KMS-managed keys.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink">NoSecretKeysetHandle</a></td>
 <td class="colLast">
 <div class="block">Static methods for reading cleartext keysets that don't contain any secret key material.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;</td>
 <td class="colLast">
 <div class="block">A container class for a set of primitives -- implementations of cryptographic primitives offered
  by Tink.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;P&gt;</td>
 <td class="colLast">
 <div class="block">A single entry in the set.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></td>
 <td class="colLast">
 <div class="block">A global container of key managers and catalogues.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/Version.html" title="class in com.google.crypto.tink">Version</a></td>
 <td class="colLast">
 <div class="block">Version of the Tink library.</div>
