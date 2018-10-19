@@ -140,29 +140,22 @@
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeysetManager.html#addNewKey-com.google.crypto.tink.proto.KeyTemplate-boolean-">addNewKey</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate,
-         boolean&nbsp;asPrimary)</code>
-<div class="block">Generates a fresh key using <code>keyTemplate</code> and returns the <code>keyId</code> of it.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeysetHandle.html#generateNew-com.google.crypto.tink.proto.KeyTemplate-">generateNew</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static com.google.protobuf.MessageLite</code></td>
 <td class="colLast"><span class="typeNameLabel">Registry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/Registry.html#newKey-com.google.crypto.tink.proto.KeyTemplate-">newKey</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>
 <div class="block">Convenience method for generating a new key for the specified <code>keyTemplate</code>.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
 <td class="colLast"><span class="typeNameLabel">Registry.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/Registry.html#newKeyData-com.google.crypto.tink.proto.KeyTemplate-">newKeyData</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>
 <div class="block">Convenience method for generating a new <a href="../../../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto"><code>KeyData</code></a> for the specified <code>template</code>.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeysetManager.html#rotate-com.google.crypto.tink.proto.KeyTemplate-">rotate</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as the
@@ -257,12 +250,6 @@
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">AeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#CHACHA20_POLY1305">CHACHA20_POLY1305</a></span></code>
 <div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/ChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto"><code>ChaCha20Poly1305Key</code></a>.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">AeadKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/AeadKeyTemplates.html#XCHACHA20_POLY1305">XCHACHA20_POLY1305</a></span></code>
-<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto"><code>XChaCha20Poly1305Key</code></a>.</div>
 </td>
 </tr>
 </tbody>
@@ -778,7 +765,7 @@
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_3072_SHA256_F4">RSA_SSA_PKCS1_3072_SHA256_F4</a></span></code>
+<td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_2048_SHA256_F4">RSA_SSA_PKCS1_2048_SHA256_F4</a></span></code>
 <div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
 
  
@@ -787,29 +774,11 @@
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_4096_SHA512_F4">RSA_SSA_PKCS1_4096_SHA512_F4</a></span></code>
+<td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_3072_SHA512_F4">RSA_SSA_PKCS1_3072_SHA512_F4</a></span></code>
 <div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
 
  
    Hash function: SHA512.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PSS_3072_SHA256_SHA256_32_F4">RSA_SSA_PSS_3072_SHA256_SHA256_32_F4</a></span></code>
-<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPssPrivateKey</code></a> with the following parameters:
-
- 
-   Signature hash: SHA256.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PSS_4096_SHA512_SHA512_64_F4">RSA_SSA_PSS_4096_SHA512_SHA512_64_F4</a></span></code>
-<div class="block">A <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="../../../../../../com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPssPrivateKey</code></a> with the following parameters:
-
- 
-   Signature hash: SHA512.</div>
 </td>
 </tr>
 </tbody>
@@ -832,14 +801,6 @@
 <td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#createRsaSsaPkcs1KeyTemplate-com.google.crypto.tink.proto.HashType-int-java.math.BigInteger-">createRsaSsaPkcs1KeyTemplate</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;hashType,
                             int&nbsp;modulusSize,
                             <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;publicExponent)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">SignatureKeyTemplates.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/SignatureKeyTemplates.html#createRsaSsaPssKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.HashType-int-int-java.math.BigInteger-">createRsaSsaPssKeyTemplate</a></span>(<a href="../../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;sigHash,
-                          <a href="../../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;mgf1Hash,
-                          int&nbsp;saltLength,
-                          int&nbsp;modulusSize,
-                          <a href="https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;publicExponent)</code>&nbsp;</td>
 </tr>
 </tbody>
 </table>

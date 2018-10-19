@@ -159,10 +159,6 @@
 <div class="block">
  KeyInfos in the KeysetInfo.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#addNewKey-com.google.crypto.tink.proto.KeyTemplate-boolean-">addNewKey(KeyTemplate, boolean)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
-<dd>
-<div class="block">Generates a fresh key using <code>keyTemplate</code> and returns the <code>keyId</code> of it.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#addPrimitive-P-com.google.crypto.tink.proto.Keyset.Key-">addPrimitive(P, Keyset.Key)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
 <dd>
 <div class="block">Creates an entry in the primitive table.</div>
@@ -747,11 +743,6 @@
 <div class="block">
  Chinese Remainder Theorem coefficient q^(-1) mod p.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#clearCrt--">clearCrt()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Chinese Remainder Theorem coefficient q^(-1) mod p.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EcdsaParams.Builder.html#clearCurve--">clearCurve()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EcdsaParams.Builder.html" title="class in com.google.crypto.tink.proto">EcdsaParams.Builder</a></dt>
 <dd>
 <div class="block">
@@ -763,11 +754,6 @@
  Required.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html#clearD--">clearD()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Private exponent.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#clearD--">clearD()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
  Private exponent.</div>
@@ -797,27 +783,12 @@
 <div class="block">
  d mod (p - 1).</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#clearDp--">clearDp()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- d mod (p - 1).</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html#clearDq--">clearDq()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
  d mod (q - 1).</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#clearDq--">clearDq()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- d mod (q - 1).</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html#clearE--">clearE()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Public exponent.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#clearE--">clearE()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
 <dd>
 <div class="block">
  Public exponent.</div>
@@ -1044,28 +1015,12 @@
 <dd>
 <div class="block"><code>optional bytes key_value = 3;</code></div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#clearMgf1Hash--">clearMgf1Hash()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Hash function used in MGF1 (a mask generation function based on a
- hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.Builder.html#clearModulusSizeInBits--">clearModulusSizeInBits()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1KeyFormat.Builder</a></dt>
 <dd>
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#clearModulusSizeInBits--">clearModulusSizeInBits()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html#clearN--">clearN()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Modulus.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#clearN--">clearN()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
 <dd>
 <div class="block">
  Modulus.</div>
@@ -1091,11 +1046,6 @@
  Optional.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html#clearP--">clearP()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- The following parameters are used to optimize RSA signature computation.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#clearP--">clearP()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
  The following parameters are used to optimize RSA signature computation.</div>
@@ -1180,16 +1130,6 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#clearParams--">clearParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#clearParams--">clearParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/Keyset.Builder.html#clearPrimaryKeyId--">clearPrimaryKeyId()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/Keyset.Builder.html" title="class in com.google.crypto.tink.proto">Keyset.Builder</a></dt>
 <dd>
 <div class="block">
@@ -1206,11 +1146,6 @@
  E.g.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.Builder.html#clearPublicExponent--">clearPublicExponent()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1KeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#clearPublicExponent--">clearPublicExponent()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
 <dd>
 <div class="block">
  Required.</div>
@@ -1235,32 +1170,10 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#clearPublicKey--">clearPublicKey()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html#clearQ--">clearQ()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
  The prime factor q of n.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#clearQ--">clearQ()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- The prime factor q of n.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#clearSaltLength--">clearSaltLength()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Salt length (see https://tools.ietf.org/html/rfc8017#section-9.1.1)
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#clearSigHash--">clearSigHash()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Hash function used in computing hash of the signing message
- (see https://tools.ietf.org/html/rfc8017#section-9.1.1).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/Keyset.Key.Builder.html#clearStatus--">clearStatus()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/Keyset.Key.Builder.html" title="class in com.google.crypto.tink.proto">Keyset.Key.Builder</a></dt>
 <dd>
@@ -1396,16 +1309,6 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#clearVersion--">clearVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#clearVersion--">clearVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.Builder.html#clearVersion--">clearVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.Builder.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key.Builder</a></dt>
 <dd>
 <div class="block"><code>optional uint32 version = 1;</code></div>
@@ -1526,15 +1429,11 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#createRsaSsaPkcs1KeyTemplate-com.google.crypto.tink.proto.HashType-int-java.math.BigInteger-">createRsaSsaPkcs1KeyTemplate(HashType, int, BigInteger)</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#createRsaSsaPssKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.HashType-int-int-java.math.BigInteger-">createRsaSsaPssKeyTemplate(HashType, HashType, int, int, BigInteger)</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Base64.html#CRLF">CRLF</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle">Base64</a></dt>
 <dd>
 <div class="block">Encoder flag bit to indicate lines should be terminated with a CRLF pair instead of just an LF.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html#CRT_FIELD_NUMBER">CRT_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#CRT_FIELD_NUMBER">CRT_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/OutputPrefixType.html#CRUNCHY_VALUE">CRUNCHY_VALUE</a></span> - Static variable in enum com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/OutputPrefixType.html" title="enum in com.google.crypto.tink.proto">OutputPrefixType</a></dt>
 <dd>
@@ -1560,8 +1459,6 @@
 <h2 class="title">D</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html#D_FIELD_NUMBER">D_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#D_FIELD_NUMBER">D_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Base64.html#decode-java.lang.String-">decode(String)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle">Base64</a></dt>
 <dd>
@@ -1715,8 +1612,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManager.html#doesSupport-java.lang.String-">doesSupport(String)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#doesSupport-java.lang.String-">doesSupport(String)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClient.html#doesSupport-java.lang.String-">doesSupport(String)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html#doNotUseKeystore--">doNotUseKeystore()</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager.Builder</a></dt>
@@ -1725,11 +1620,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html#DP_FIELD_NUMBER">DP_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#DP_FIELD_NUMBER">DP_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html#DQ_FIELD_NUMBER">DQ_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#DQ_FIELD_NUMBER">DQ_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
@@ -1833,14 +1724,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#dynamicMethod-com.google.protobuf.GeneratedMessageLite.MethodToInvoke-java.lang.Object-java.lang.Object-">dynamicMethod(GeneratedMessageLite.MethodToInvoke, Object, Object)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
 </dl>
@@ -1850,8 +1733,6 @@
 <h2 class="title">E</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#E_FIELD_NUMBER">E_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#E_FIELD_NUMBER">E_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EciesAeadHkdfParams.html#EC_POINT_FORMAT_FIELD_NUMBER">EC_POINT_FORMAT_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EciesAeadHkdfParams.html" title="class in com.google.crypto.tink.proto">EciesAeadHkdfParams</a></dt>
 <dd>&nbsp;</dd>
@@ -2610,21 +2491,6 @@
 <div class="block">
  Chinese Remainder Theorem coefficient q^(-1) mod p.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#getCrt--">getCrt()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Chinese Remainder Theorem coefficient q^(-1) mod p.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#getCrt--">getCrt()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>
-<div class="block">
- Chinese Remainder Theorem coefficient q^(-1) mod p.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html#getCrt--">getCrt()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPrivateKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- Chinese Remainder Theorem coefficient q^(-1) mod p.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EcdsaParams.Builder.html#getCurve--">getCurve()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EcdsaParams.Builder.html" title="class in com.google.crypto.tink.proto">EcdsaParams.Builder</a></dt>
 <dd>
 <div class="block">
@@ -2714,21 +2580,6 @@
  Private exponent.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#getD--">getD()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- Private exponent.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#getD--">getD()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Private exponent.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#getD--">getD()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>
-<div class="block">
- Private exponent.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html#getD--">getD()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPrivateKeyOrBuilder</a></dt>
 <dd>
 <div class="block">
  Private exponent.</div>
@@ -2835,14 +2686,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#getDefaultInstance--">getDefaultInstance()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KmsEnvelopeAeadKeyFormat.Builder.html#getDekTemplate--">getDekTemplate()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KmsEnvelopeAeadKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">KmsEnvelopeAeadKeyFormat.Builder</a></dt>
@@ -2920,21 +2763,6 @@
 <div class="block">
  d mod (p - 1).</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#getDp--">getDp()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- d mod (p - 1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#getDp--">getDp()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>
-<div class="block">
- d mod (p - 1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html#getDp--">getDp()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPrivateKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- d mod (p - 1).</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html#getDq--">getDq()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
@@ -2950,21 +2778,6 @@
 <div class="block">
  d mod (q - 1).</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#getDq--">getDq()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- d mod (q - 1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#getDq--">getDq()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>
-<div class="block">
- d mod (q - 1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html#getDq--">getDq()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPrivateKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- d mod (q - 1).</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html#getE--">getE()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey.Builder</a></dt>
 <dd>
 <div class="block">
@@ -2976,21 +2789,6 @@
  Public exponent.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html#getE--">getE()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- Public exponent.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#getE--">getE()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Public exponent.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#getE--">getE()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>
-<div class="block">
- Public exponent.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html#getE--">getE()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPublicKeyOrBuilder</a></dt>
 <dd>
 <div class="block">
  Public exponent.</div>
@@ -3693,8 +3491,6 @@
 <div class="block">
  Actual keys in the Keyset.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/CleartextKeysetHandle.html#getKeyset-com.google.crypto.tink.KeysetHandle-">getKeyset(KeysetHandle)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/CleartextKeysetHandle.html" title="class in com.google.crypto.tink">CleartextKeysetHandle</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html#getKeysetHandle--">getKeysetHandle()</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#getKeysetHandle--">getKeysetHandle()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
@@ -3810,8 +3606,6 @@
 <div class="block"><code>optional uint32 key_size = 2;</code></div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManager.html#getKeyType--">getKeyType()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KmsAeadKeyFormat.Builder.html#getKeyUri--">getKeyUri()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KmsAeadKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">KmsAeadKeyFormat.Builder</a></dt>
 <dd>
@@ -4022,42 +3816,6 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/ImmutableByteArray.html#getLength--">getLength()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ImmutableByteArray.html" title="class in com.google.crypto.tink.subtle">ImmutableByteArray</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#getMgf1Hash--">getMgf1Hash()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Hash function used in MGF1 (a mask generation function based on a
- hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#getMgf1Hash--">getMgf1Hash()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>
-<div class="block">
- Hash function used in MGF1 (a mask generation function based on a
- hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html#getMgf1Hash--">getMgf1Hash()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssParamsOrBuilder</a></dt>
-<dd>
-<div class="block">
- Hash function used in MGF1 (a mask generation function based on a
- hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#getMgf1HashValue--">getMgf1HashValue()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Hash function used in MGF1 (a mask generation function based on a
- hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#getMgf1HashValue--">getMgf1HashValue()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>
-<div class="block">
- Hash function used in MGF1 (a mask generation function based on a
- hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html#getMgf1HashValue--">getMgf1HashValue()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssParamsOrBuilder</a></dt>
-<dd>
-<div class="block">
- Hash function used in MGF1 (a mask generation function based on a
- hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#getModulus-java.security.spec.EllipticCurve-">getModulus(EllipticCurve)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
 <dd>
 <div class="block">Returns the modulus of the field used by the curve specified in ecParams.</div>
@@ -4077,21 +3835,6 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#getModulusSizeInBits--">getModulusSizeInBits()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#getModulusSizeInBits--">getModulusSizeInBits()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html#getModulusSizeInBits--">getModulusSizeInBits()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssKeyFormatOrBuilder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html#getN--">getN()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey.Builder</a></dt>
 <dd>
 <div class="block">
@@ -4103,21 +3846,6 @@
  Modulus.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html#getN--">getN()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- Modulus.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#getN--">getN()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Modulus.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#getN--">getN()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>
-<div class="block">
- Modulus.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html#getN--">getN()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPublicKeyOrBuilder</a></dt>
 <dd>
 <div class="block">
  Modulus.</div>
@@ -4269,21 +3997,6 @@
  The following parameters are used to optimize RSA signature computation.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#getP--">getP()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- The following parameters are used to optimize RSA signature computation.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#getP--">getP()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- The following parameters are used to optimize RSA signature computation.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#getP--">getP()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>
-<div class="block">
- The following parameters are used to optimize RSA signature computation.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html#getP--">getP()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPrivateKeyOrBuilder</a></dt>
 <dd>
 <div class="block">
  The following parameters are used to optimize RSA signature computation.</div>
@@ -4528,36 +4241,6 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#getParams--">getParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#getParams--">getParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html#getParams--">getParams()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssKeyFormatOrBuilder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#getParams--">getParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#getParams--">getParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html#getParams--">getParams()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPublicKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCtrHmacStreaming.html#getPlaintextSegmentSize--">getPlaintextSegmentSize()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCtrHmacStreaming.html" title="class in com.google.crypto.tink.subtle">AesCtrHmacStreaming</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html#getPlaintextSegmentSize--">getPlaintextSegmentSize()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesGcmHkdfStreaming.html" title="class in com.google.crypto.tink.subtle">AesGcmHkdfStreaming</a></dt>
@@ -4619,10 +4302,6 @@
 <dd>
 <div class="block">Constructs an instance of P for the key given in <code>key</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getPrimitive-com.google.protobuf.ByteString-">getPrimitive(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getPrimitive-com.google.protobuf.MessageLite-">getPrimitive(MessageLite)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">getPrimitive(KeysetHandle)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac">MacFactory</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive(KeysetHandle, KeyManager&lt;Mac&gt;)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac">MacFactory</a></dt>
@@ -4661,10 +4340,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-com.google.crypto.tink.KeyManager-">getPrimitive(KeysetHandle, KeyManager&lt;StreamingAead&gt;)</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadFactory.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadFactory</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#getPrimitiveFromKey-KeyProto-">getPrimitiveFromKey(KeyProto)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>
-<div class="block">Creates a primitive from a given key.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KeyTypeEntry.Builder.html#getPrimitiveName--">getPrimitiveName()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KeyTypeEntry.Builder.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry.Builder</a></dt>
 <dd>
 <div class="block">
@@ -4720,21 +4395,6 @@
  Required.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormatOrBuilder.html#getPublicExponent--">getPublicExponent()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1KeyFormatOrBuilder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#getPublicExponent--">getPublicExponent()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#getPublicExponent--">getPublicExponent()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html#getPublicExponent--">getPublicExponent()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssKeyFormatOrBuilder</a></dt>
 <dd>
 <div class="block">
  Required.</div>
@@ -4799,21 +4459,6 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#getPublicKey--">getPublicKey()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#getPublicKey--">getPublicKey()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html#getPublicKey--">getPublicKey()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPrivateKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html#getPublicKey--">getPublicKey()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html" title="class in com.google.crypto.tink.subtle">Ed25519Sign.KeyPair</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrivateKeyManager.html#getPublicKeyData-com.google.protobuf.ByteString-">getPublicKeyData(ByteString)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink">PrivateKeyManager</a></dt>
@@ -4843,41 +4488,8 @@
 <div class="block">
  The prime factor q of n.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#getQ--">getQ()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- The prime factor q of n.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#getQ--">getQ()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>
-<div class="block">
- The prime factor q of n.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html#getQ--">getQ()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPrivateKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- The prime factor q of n.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#getRawPrimitives--">getRawPrimitives()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#getSaltLength--">getSaltLength()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Salt length (see https://tools.ietf.org/html/rfc8017#section-9.1.1)
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#getSaltLength--">getSaltLength()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>
-<div class="block">
- Salt length (see https://tools.ietf.org/html/rfc8017#section-9.1.1)
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html#getSaltLength--">getSaltLength()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssParamsOrBuilder</a></dt>
-<dd>
-<div class="block">
- Salt length (see https://tools.ietf.org/html/rfc8017#section-9.1.1)
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKeyFormat</a></dt>
@@ -4980,52 +4592,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#getSerializedSize--">getSerializedSize()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#getSigHash--">getSigHash()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Hash function used in computing hash of the signing message
- (see https://tools.ietf.org/html/rfc8017#section-9.1.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#getSigHash--">getSigHash()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>
-<div class="block">
- Hash function used in computing hash of the signing message
- (see https://tools.ietf.org/html/rfc8017#section-9.1.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html#getSigHash--">getSigHash()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssParamsOrBuilder</a></dt>
-<dd>
-<div class="block">
- Hash function used in computing hash of the signing message
- (see https://tools.ietf.org/html/rfc8017#section-9.1.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#getSigHashValue--">getSigHashValue()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Hash function used in computing hash of the signing message
- (see https://tools.ietf.org/html/rfc8017#section-9.1.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#getSigHashValue--">getSigHashValue()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>
-<div class="block">
- Hash function used in computing hash of the signing message
- (see https://tools.ietf.org/html/rfc8017#section-9.1.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html#getSigHashValue--">getSigHashValue()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssParamsOrBuilder</a></dt>
-<dd>
-<div class="block">
- Hash function used in computing hash of the signing message
- (see https://tools.ietf.org/html/rfc8017#section-9.1.1).</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.Entry.html#getStatus--">getStatus()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/Keyset.Key.Builder.html#getStatus--">getStatus()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/Keyset.Key.Builder.html" title="class in com.google.crypto.tink.proto">Keyset.Key.Builder</a></dt>
@@ -5508,36 +5076,6 @@
  Required.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html#getVersion--">getVersion()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html#getVersion--">getVersion()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPrivateKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#getVersion--">getVersion()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html#getVersion--">getVersion()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPublicKeyOrBuilder</a></dt>
 <dd>
 <div class="block">
  Required.</div>
@@ -6027,36 +5565,6 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#hasParams--">hasParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#hasParams--">hasParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html#hasParams--">hasParams()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssKeyFormatOrBuilder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#hasParams--">hasParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#hasParams--">hasParams()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html#hasParams--">hasParams()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPublicKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EcdsaPrivateKey.Builder.html#hasPublicKey--">hasPublicKey()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EcdsaPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">EcdsaPrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
@@ -6113,21 +5621,6 @@
  Required.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html#hasPublicKey--">hasPublicKey()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKeyOrBuilder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#hasPublicKey--">hasPublicKey()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#hasPublicKey--">hasPublicKey()</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html#hasPublicKey--">hasPublicKey()</a></span> - Method in interface com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto">RsaSsaPssPrivateKeyOrBuilder</a></dt>
 <dd>
 <div class="block">
  Required.</div>
@@ -6487,16 +5980,6 @@
 <div class="block">A KeyManager "understands" keys of a specific key type: it can generate keys of the supported
  type and create primitives for supported keys.</div>
 </dd>
-<dt><a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyManagerBase</span></a>&lt;<a href="com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">P</a>,<a href="com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyProto</a> extends com.google.protobuf.MessageLite,<a href="com/google/crypto/tink/KeyManagerBase.html" title="type parameter in KeyManagerBase">KeyFormatProto</a> extends com.google.protobuf.MessageLite&gt; - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
-<dd>
-<div class="block">A utility class to implement a <code>KeyManager</code>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#KeyManagerBase-java.lang.Class-java.lang.Class-java.lang.String-">KeyManagerBase(Class&lt;KeyProto&gt;, Class&lt;KeyFormatProto&gt;, String)</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#keyMaterialType--">keyMaterialType()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>
-<div class="block">Returns the <code>KeyMaterialType</code> for this proto.</div>
-</dd>
 <dt><a href="com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">Keyset</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>
 <div class="block">
@@ -6594,10 +6077,6 @@
 </dd>
 <dt><a href="com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">KeyTypeEntryOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">KeyWrap</span></a> - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
-<dd>
-<div class="block">Interface for symmetric Key wrapping.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#KMS_AEAD_TYPE_URL">KMS_AEAD_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#KMS_ENVELOPE_AEAD_TYPE_URL">KMS_ENVELOPE_AEAD_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
@@ -6668,14 +6147,6 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/KmsEnvelopeAeadKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">KmsEnvelopeAeadKeyOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">Kwp</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
-<dd>
-<div class="block">Implements the key wrapping primitive KWP defined in NIST SP 800 38f.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Kwp.html#Kwp-byte:A-">Kwp(byte[])</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></dt>
-<dd>
-<div class="block">Construct a new Instance for KWP.</div>
-</dd>
 </dl>
 <a name="I:L">
 <!--   -->
@@ -6873,16 +6344,6 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#mergeParams-com.google.crypto.tink.proto.RsaSsaPssParams-">mergeParams(RsaSsaPssParams)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#mergeParams-com.google.crypto.tink.proto.RsaSsaPssParams-">mergeParams(RsaSsaPssParams)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EcdsaPrivateKey.Builder.html#mergePublicKey-com.google.crypto.tink.proto.EcdsaPublicKey-">mergePublicKey(EcdsaPublicKey)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EcdsaPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">EcdsaPrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
@@ -6903,26 +6364,17 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#mergePublicKey-com.google.crypto.tink.proto.RsaSsaPssPublicKey-">mergePublicKey(RsaSsaPssPublicKey)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineFactory.html#MESSAGE_DIGEST">MESSAGE_DIGEST</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SubtleUtil.html#mgf1-byte:A-int-com.google.crypto.tink.subtle.Enums.HashType-">mgf1(byte[], int, Enums.HashType)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></dt>
 <dd>
 <div class="block">Computes MGF1 as defined at https://tools.ietf.org/html/rfc8017#appendix-B.2.1.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#MGF1_HASH_FIELD_NUMBER">MGF1_HASH_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#modSqrt-java.math.BigInteger-java.math.BigInteger-">modSqrt(BigInteger, BigInteger)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
 <dd>
 <div class="block">Computes a square root modulo an odd prime.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.html#MODULUS_SIZE_IN_BITS_FIELD_NUMBER">MODULUS_SIZE_IN_BITS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1KeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#MODULUS_SIZE_IN_BITS_FIELD_NUMBER">MODULUS_SIZE_IN_BITS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <a name="I:N">
@@ -6931,8 +6383,6 @@
 <h2 class="title">N</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#N_FIELD_NUMBER">N_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#N_FIELD_NUMBER">N_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KeyTypeEntry.html#NEW_KEY_ALLOWED_FIELD_NUMBER">NEW_KEY_ALLOWED_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">KeyTypeEntry</a></dt>
 <dd>&nbsp;</dd>
@@ -7144,22 +6594,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#newBuilder-com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey-">newBuilder(RsaSsaPkcs1PublicKey)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#newBuilder--">newBuilder()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#newBuilder-com.google.crypto.tink.proto.RsaSsaPssKeyFormat-">newBuilder(RsaSsaPssKeyFormat)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#newBuilder--">newBuilder()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#newBuilder-com.google.crypto.tink.proto.RsaSsaPssParams-">newBuilder(RsaSsaPssParams)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#newBuilder--">newBuilder()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#newBuilder-com.google.crypto.tink.proto.RsaSsaPssPrivateKey-">newBuilder(RsaSsaPssPrivateKey)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#newBuilder--">newBuilder()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#newBuilder-com.google.crypto.tink.proto.RsaSsaPssPublicKey-">newBuilder(RsaSsaPssPublicKey)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#newBuilder--">newBuilder()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#newBuilder-com.google.crypto.tink.proto.XChaCha20Poly1305Key-">newBuilder(XChaCha20Poly1305Key)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
@@ -7191,10 +6625,6 @@
 <dd>
 <div class="block">Generates a new key according to specification in <code>keyFormat</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#newKey-com.google.protobuf.ByteString-">newKey(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#newKey-com.google.protobuf.MessageLite-">newKey(MessageLite)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#newKey-com.google.crypto.tink.proto.KeyTemplate-">newKey(KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
 <div class="block">Convenience method for generating a new key for the specified <code>keyTemplate</code>.</div>
@@ -7207,15 +6637,9 @@
 <dd>
 <div class="block">Generates a new <code>KeyData</code> according to specification in <code>serializedkeyFormat</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#newKeyData-com.google.protobuf.ByteString-">newKeyData(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#newKeyData-com.google.crypto.tink.proto.KeyTemplate-">newKeyData(KeyTemplate)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
 <div class="block">Convenience method for generating a new <a href="com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto"><code>KeyData</code></a> for the specified <code>template</code>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#newKeyFromFormat-KeyFormatProto-">newKeyFromFormat(KeyFormatProto)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>
-<div class="block">Creates a new key for a given format.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html#newKeyPair--">newKeyPair()</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html" title="class in com.google.crypto.tink.subtle">Ed25519Sign.KeyPair</a></dt>
 <dd>
@@ -7302,8 +6726,6 @@
 <dl>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html#P_FIELD_NUMBER">P_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#P_FIELD_NUMBER">P_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacStreamingKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrHmacStreamingKeyFormat</a></dt>
@@ -7339,10 +6761,6 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1KeyFormat</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#PARAMS_FIELD_NUMBER">PARAMS_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
@@ -7547,22 +6965,6 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parseDelimitedFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseDelimitedFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#parseDelimitedFrom-java.io.InputStream-">parseDelimitedFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
@@ -8396,70 +7798,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(CodedInputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parseFrom-com.google.protobuf.ByteString-">parseFrom(ByteString)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom(ByteString, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parseFrom-byte:A-">parseFrom(byte[])</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom(byte[], ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parseFrom-java.io.InputStream-">parseFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom(CodedInputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(CodedInputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parseFrom-com.google.protobuf.ByteString-">parseFrom(ByteString)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom(ByteString, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parseFrom-byte:A-">parseFrom(byte[])</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom(byte[], ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parseFrom-java.io.InputStream-">parseFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom(CodedInputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(CodedInputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parseFrom-com.google.protobuf.ByteString-">parseFrom(ByteString)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom(ByteString, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parseFrom-byte:A-">parseFrom(byte[])</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom(byte[], ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parseFrom-java.io.InputStream-">parseFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom(CodedInputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(CodedInputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parseFrom-com.google.protobuf.ByteString-">parseFrom(ByteString)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom(ByteString, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parseFrom-byte:A-">parseFrom(byte[])</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parseFrom-byte:A-com.google.protobuf.ExtensionRegistryLite-">parseFrom(byte[], ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parseFrom-java.io.InputStream-">parseFrom(InputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parseFrom-java.io.InputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(InputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parseFrom-com.google.protobuf.CodedInputStream-">parseFrom(CodedInputStream)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(CodedInputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#parseFrom-com.google.protobuf.ByteString-">parseFrom(ByteString)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#parseFrom-com.google.protobuf.ByteString-com.google.protobuf.ExtensionRegistryLite-">parseFrom(ByteString, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
@@ -8476,14 +7814,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#parseFrom-com.google.protobuf.CodedInputStream-com.google.protobuf.ExtensionRegistryLite-">parseFrom(CodedInputStream, ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#parseKeyFormatProto-com.google.protobuf.ByteString-">parseKeyFormatProto(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>
-<div class="block">Parses a serialized key format proto.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManagerBase.html#parseKeyProto-com.google.protobuf.ByteString-">parseKeyProto(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManagerBase.html" title="class in com.google.crypto.tink">KeyManagerBase</a></dt>
-<dd>
-<div class="block">Parses a serialized key proto.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKey.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/AesCtrHmacAeadKeyFormat.html" title="class in com.google.crypto.tink.proto">AesCtrHmacAeadKeyFormat</a></dt>
@@ -8586,14 +7916,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#parser--">parser()</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#pointDecode-com.google.crypto.tink.subtle.EllipticCurves.CurveType-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-byte:A-">pointDecode(EllipticCurves.CurveType, EllipticCurves.PointFormatType, byte[])</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
@@ -8651,8 +7973,6 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.html#PUBLIC_EXPONENT_FIELD_NUMBER">PUBLIC_EXPONENT_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1KeyFormat</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#PUBLIC_EXPONENT_FIELD_NUMBER">PUBLIC_EXPONENT_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EcdsaPrivateKey.html#PUBLIC_KEY_FIELD_NUMBER">PUBLIC_KEY_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EcdsaPrivateKey.html" title="class in com.google.crypto.tink.proto">EcdsaPrivateKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html#PUBLIC_KEY_FIELD_NUMBER">PUBLIC_KEY_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EciesAeadHkdfPrivateKey.html" title="class in com.google.crypto.tink.proto">EciesAeadHkdfPrivateKey</a></dt>
@@ -8660,8 +7980,6 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/Ed25519PrivateKey.html#PUBLIC_KEY_FIELD_NUMBER">PUBLIC_KEY_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/Ed25519PrivateKey.html" title="class in com.google.crypto.tink.proto">Ed25519PrivateKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html#PUBLIC_KEY_FIELD_NUMBER">PUBLIC_KEY_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#PUBLIC_KEY_FIELD_NUMBER">PUBLIC_KEY_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Verify.html#PUBLIC_KEY_LEN">PUBLIC_KEY_LEN</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Verify.html" title="class in com.google.crypto.tink.subtle">Ed25519Verify</a></dt>
 <dd>&nbsp;</dd>
@@ -8717,8 +8035,6 @@
 <h2 class="title">Q</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html#Q_FIELD_NUMBER">Q_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#Q_FIELD_NUMBER">Q_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <a name="I:R">
@@ -8848,8 +8164,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1.html#registerAllExtensions-com.google.protobuf.ExtensionRegistryLite-">registerAllExtensions(ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPss.html#registerAllExtensions-com.google.protobuf.ExtensionRegistryLite-">registerAllExtensions(ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPss.html" title="class in com.google.crypto.tink.proto">RsaSsaPss</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/Tink.html#registerAllExtensions-com.google.protobuf.ExtensionRegistryLite-">registerAllExtensions(ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/Tink.html" title="class in com.google.crypto.tink.proto">Tink</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/Xchacha20Poly1305.html#registerAllExtensions-com.google.protobuf.ExtensionRegistryLite-">registerAllExtensions(ExtensionRegistryLite)</a></span> - Static method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/Xchacha20Poly1305.html" title="class in com.google.crypto.tink.proto">Xchacha20Poly1305</a></dt>
@@ -8977,33 +8291,19 @@
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>, and sets the new key as the
  primary key.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_3072_SHA256_F4">RSA_SSA_PKCS1_3072_SHA256_F4</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_2048_SHA256_F4">RSA_SSA_PKCS1_2048_SHA256_F4</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>
 <div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
 
  
    Hash function: SHA256.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_4096_SHA512_F4">RSA_SSA_PKCS1_4096_SHA512_F4</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PKCS1_3072_SHA512_F4">RSA_SSA_PKCS1_3072_SHA512_F4</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
 <dd>
 <div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPkcs1PrivateKey</code></a> with the following parameters:
 
  
    Hash function: SHA512.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PSS_3072_SHA256_SHA256_32_F4">RSA_SSA_PSS_3072_SHA256_SHA256_32_F4</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
-<dd>
-<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPssPrivateKey</code></a> with the following parameters:
-
- 
-   Signature hash: SHA256.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html#RSA_SSA_PSS_4096_SHA512_SHA512_64_F4">RSA_SSA_PSS_4096_SHA512_SHA512_64_F4</a></span> - Static variable in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">SignatureKeyTemplates</a></dt>
-<dd>
-<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto"><code>RsaSsaPssPrivateKey</code></a> with the following parameters:
-
- 
-   Signature hash: SHA512.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/proto/RsaSsaPkcs1.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPkcs1</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
@@ -9063,52 +8363,6 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJce.html#RsaSsaPkcs1VerifyJce-java.security.interfaces.RSAPublicKey-com.google.crypto.tink.subtle.Enums.HashType-">RsaSsaPkcs1VerifyJce(RSAPublicKey, Enums.HashType)</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RsaSsaPkcs1VerifyJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPkcs1VerifyJce</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPss.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPss</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssKeyFormat</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>
-<div class="block">Protobuf type <code>google.crypto.tink.RsaSsaPssKeyFormat</code></div>
-</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssKeyFormat.Builder</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>
-<div class="block">Protobuf type <code>google.crypto.tink.RsaSsaPssKeyFormat</code></div>
-</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormatOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssKeyFormatOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssParams</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>
-<div class="block">Protobuf type <code>google.crypto.tink.RsaSsaPssParams</code></div>
-</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssParams.Builder</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>
-<div class="block">Protobuf type <code>google.crypto.tink.RsaSsaPssParams</code></div>
-</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssParamsOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssParamsOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssPrivateKey</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>
-<div class="block">
- key_type: type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey</div>
-</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssPrivateKey.Builder</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>
-<div class="block">
- key_type: type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey</div>
-</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssPrivateKeyOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssPublicKey</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>
-<div class="block">
- key_type: type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey</div>
-</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssPublicKey.Builder</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>
-<div class="block">
- key_type: type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey</div>
-</dd>
-<dt><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKeyOrBuilder.html" title="interface in com.google.crypto.tink.proto"><span class="typeNameLink">RsaSsaPssPublicKeyOrBuilder</span></a> - Interface in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/RsaSsaPssSignJce.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">RsaSsaPssSignJce</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
 <div class="block">RsaSsaPss (i.e.</div>
@@ -9127,8 +8381,6 @@
 </a>
 <h2 class="title">S</h2>
 <dl>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#SALT_LENGTH_FIELD_NUMBER">SALT_LENGTH_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Sign.html#SECRET_KEY_LEN">SECRET_KEY_LEN</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Sign.html" title="class in com.google.crypto.tink.subtle">Ed25519Sign</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EciesAeadDemParams.Builder.html#setAeadDem-com.google.crypto.tink.proto.KeyTemplate-">setAeadDem(KeyTemplate)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EciesAeadDemParams.Builder.html" title="class in com.google.crypto.tink.proto">EciesAeadDemParams.Builder</a></dt>
@@ -9188,11 +8440,6 @@
 <div class="block">
  Chinese Remainder Theorem coefficient q^(-1) mod p.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#setCrt-com.google.protobuf.ByteString-">setCrt(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Chinese Remainder Theorem coefficient q^(-1) mod p.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EcdsaParams.Builder.html#setCurve-com.google.crypto.tink.proto.EllipticCurveType-">setCurve(EllipticCurveType)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EcdsaParams.Builder.html" title="class in com.google.crypto.tink.proto">EcdsaParams.Builder</a></dt>
 <dd>
 <div class="block">
@@ -9214,11 +8461,6 @@
  Required.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html#setD-com.google.protobuf.ByteString-">setD(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Private exponent.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#setD-com.google.protobuf.ByteString-">setD(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
  Private exponent.</div>
@@ -9258,27 +8500,12 @@
 <div class="block">
  d mod (p - 1).</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#setDp-com.google.protobuf.ByteString-">setDp(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- d mod (p - 1).</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html#setDq-com.google.protobuf.ByteString-">setDq(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
  d mod (q - 1).</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#setDq-com.google.protobuf.ByteString-">setDq(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- d mod (q - 1).</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html#setE-com.google.protobuf.ByteString-">setE(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Public exponent.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#setE-com.google.protobuf.ByteString-">setE(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
 <dd>
 <div class="block">
  Public exponent.</div>
@@ -9602,34 +8829,12 @@
 <dd>
 <div class="block"><code>optional bytes key_value = 3;</code></div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#setMgf1Hash-com.google.crypto.tink.proto.HashType-">setMgf1Hash(HashType)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Hash function used in MGF1 (a mask generation function based on a
- hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#setMgf1HashValue-int-">setMgf1HashValue(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Hash function used in MGF1 (a mask generation function based on a
- hash function) (see https://tools.ietf.org/html/rfc8017#appendix-B.2.1).</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.Builder.html#setModulusSizeInBits-int-">setModulusSizeInBits(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1KeyFormat.Builder</a></dt>
 <dd>
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#setModulusSizeInBits-int-">setModulusSizeInBits(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html#setN-com.google.protobuf.ByteString-">setN(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Modulus.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#setN-com.google.protobuf.ByteString-">setN(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
 <dd>
 <div class="block">
  Modulus.</div>
@@ -9670,11 +8875,6 @@
  Optional.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html#setP-com.google.protobuf.ByteString-">setP(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- The following parameters are used to optimize RSA signature computation.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#setP-com.google.protobuf.ByteString-">setP(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
  The following parameters are used to optimize RSA signature computation.</div>
@@ -9839,26 +9039,6 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#setParams-com.google.crypto.tink.proto.RsaSsaPssParams-">setParams(RsaSsaPssParams)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#setParams-com.google.crypto.tink.proto.RsaSsaPssParams.Builder-">setParams(RsaSsaPssParams.Builder)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#setParams-com.google.crypto.tink.proto.RsaSsaPssParams-">setParams(RsaSsaPssParams)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#setParams-com.google.crypto.tink.proto.RsaSsaPssParams.Builder-">setParams(RsaSsaPssParams.Builder)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html#setPrimary-int-">setPrimary(int)</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></dt>
 <dd>
 <div class="block">Sets the key with <code>keyId</code> as primary.</div>
@@ -9892,11 +9072,6 @@
  E.g.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.Builder.html#setPublicExponent-com.google.protobuf.ByteString-">setPublicExponent(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1KeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1KeyFormat.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html#setPublicExponent-com.google.protobuf.ByteString-">setPublicExponent(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat.Builder</a></dt>
 <dd>
 <div class="block">
  Required.</div>
@@ -9941,43 +9116,10 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#setPublicKey-com.google.crypto.tink.proto.RsaSsaPssPublicKey-">setPublicKey(RsaSsaPssPublicKey)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#setPublicKey-com.google.crypto.tink.proto.RsaSsaPssPublicKey.Builder-">setPublicKey(RsaSsaPssPublicKey.Builder)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html#setQ-com.google.protobuf.ByteString-">setQ(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PrivateKey.Builder</a></dt>
 <dd>
 <div class="block">
  The prime factor q of n.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#setQ-com.google.protobuf.ByteString-">setQ(ByteString)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- The prime factor q of n.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#setSaltLength-int-">setSaltLength(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Salt length (see https://tools.ietf.org/html/rfc8017#section-9.1.1)
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#setSigHash-com.google.crypto.tink.proto.HashType-">setSigHash(HashType)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Hash function used in computing hash of the signing message
- (see https://tools.ietf.org/html/rfc8017#section-9.1.1).</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html#setSigHashValue-int-">setSigHashValue(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams.Builder</a></dt>
-<dd>
-<div class="block">
- Hash function used in computing hash of the signing message
- (see https://tools.ietf.org/html/rfc8017#section-9.1.1).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/Keyset.Key.Builder.html#setStatus-com.google.crypto.tink.proto.KeyStatusType-">setStatus(KeyStatusType)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/Keyset.Key.Builder.html" title="class in com.google.crypto.tink.proto">Keyset.Key.Builder</a></dt>
 <dd>
@@ -10137,16 +9279,6 @@
 <div class="block">
  Required.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html#setVersion-int-">setVersion(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html#setVersion-int-">setVersion(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.Builder.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey.Builder</a></dt>
-<dd>
-<div class="block">
- Required.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.Builder.html#setVersion-int-">setVersion(int)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.Builder.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key.Builder</a></dt>
 <dd>
 <div class="block"><code>optional uint32 version = 1;</code></div>
@@ -10202,8 +9334,6 @@
 <div class="block">Creates a <code>KeysetReader</code> that hex-encodes and writes keysets to the preference
  name <code>keysetName</code> in the private shared preferences file <code>prefFileName</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#SIG_HASH_FIELD_NUMBER">SIG_HASH_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PublicKeySign.html#sign-byte:A-">sign(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink">PublicKeySign</a></dt>
 <dd>
 <div class="block">Computes the signature for <code>data</code>.</div>
@@ -10436,14 +9566,6 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/KeyStatusType.html#UNKNOWN_STATUS_VALUE">UNKNOWN_STATUS_VALUE</a></span> - Static variable in enum com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/KeyStatusType.html" title="enum in com.google.crypto.tink.proto">KeyStatusType</a></dt>
 <dd>
 <div class="block"><code>UNKNOWN_STATUS = 0;</code></div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyWrap.html#unwrap-byte:A-">unwrap(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink">KeyWrap</a></dt>
-<dd>
-<div class="block">Unwraps a wrapped key.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Kwp.html#unwrap-byte:A-">unwrap(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></dt>
-<dd>
-<div class="block">Unwraps a wrapped key.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Base64.html#URL_SAFE">URL_SAFE</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Base64.html" title="class in com.google.crypto.tink.subtle">Base64</a></dt>
 <dd>
@@ -10708,10 +9830,6 @@ the order they are declared.</div>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#VERSION_FIELD_NUMBER">VERSION_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
 </dl>
@@ -10818,14 +9936,6 @@ the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/JsonKeysetReader.html#withUrlSafeBase64--">withUrlSafeBase64()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/JsonKeysetReader.html" title="class in com.google.crypto.tink">JsonKeysetReader</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyWrap.html#wrap-byte:A-">wrap(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink">KeyWrap</a></dt>
-<dd>
-<div class="block">Wraps some key material <code>data</code>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Kwp.html#wrap-byte:A-">wrap(byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Kwp.html" title="class in com.google.crypto.tink.subtle">Kwp</a></dt>
-<dd>
-<div class="block">Wraps some key material <code>data</code>.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetWriter.html#write-com.google.crypto.tink.proto.Keyset-">write(Keyset)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetWriter.html" title="class in com.google.crypto.tink">BinaryKeysetWriter</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/BinaryKeysetWriter.html#write-com.google.crypto.tink.proto.EncryptedKeyset-">write(EncryptedKeyset)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/BinaryKeysetWriter.html" title="class in com.google.crypto.tink">BinaryKeysetWriter</a></dt>
@@ -10956,14 +10066,6 @@ the order they are declared.</div>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPkcs1PublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPkcs1PublicKey</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssKeyFormat.html" title="class in com.google.crypto.tink.proto">RsaSsaPssKeyFormat</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPrivateKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPrivateKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssPublicKey.html" title="class in com.google.crypto.tink.proto">RsaSsaPssPublicKey</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html#writeTo-com.google.protobuf.CodedOutputStream-">writeTo(CodedOutputStream)</a></span> - Method in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto">XChaCha20Poly1305Key</a></dt>
 <dd>&nbsp;</dd>
 </dl>
@@ -10982,12 +10084,6 @@ the order they are declared.</div>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EcdsaPublicKey.html#X_FIELD_NUMBER">X_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EcdsaPublicKey.html" title="class in com.google.crypto.tink.proto">EcdsaPublicKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/EciesAeadHkdfPublicKey.html#X_FIELD_NUMBER">X_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/EciesAeadHkdfPublicKey.html" title="class in com.google.crypto.tink.proto">EciesAeadHkdfPublicKey</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadKeyTemplates.html#XCHACHA20_POLY1305">XCHACHA20_POLY1305</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadKeyTemplates.html" title="class in com.google.crypto.tink.aead">AeadKeyTemplates</a></dt>
-<dd>
-<div class="block">A <a href="com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto"><code>KeyTemplate</code></a> that generates new instances of <a href="com/google/crypto/tink/proto/XChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto"><code>XChaCha20Poly1305Key</code></a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#XCHACHA20_POLY1305_TYPE_URL">XCHACHA20_POLY1305_TYPE_URL</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/Xchacha20Poly1305.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">Xchacha20Poly1305</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>&nbsp;</dd>
