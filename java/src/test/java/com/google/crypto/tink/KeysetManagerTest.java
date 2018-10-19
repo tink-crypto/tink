@@ -617,6 +617,37 @@ public class KeysetManagerTest {
     TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_256BITTAG, keyset.getKey(1));
   }
 
+  @Test
+  public void testAddFromTemplate_onePrimary() throws Exception {
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
+    int keyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
+    Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(keyId);
+    TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, keyset.getKey(0));
+  }
+
+  @Test
+  public void testAddFromTemplate_onePrimaryAnotherPrimary() throws Exception {
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
+    keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
+    int primaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
+    Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(primaryKeyId);
+  }
+
+  @Test
+  public void testAddFromTemplate_primaryThenNonPrimary() throws Exception {
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
+    int primaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
+    keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, false);
+    Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(primaryKeyId);
+  }
+
+
   private void manipulateKeyset(KeysetManager manager) {
     try {
       KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
