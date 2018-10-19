@@ -17,6 +17,7 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.config.TinkConfig;
@@ -618,7 +619,7 @@ public class KeysetManagerTest {
   }
 
   @Test
-  public void testAddFromTemplate_onePrimary() throws Exception {
+  public void testAddNewKey_onePrimary() throws Exception {
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
     int keyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
@@ -628,7 +629,7 @@ public class KeysetManagerTest {
   }
 
   @Test
-  public void testAddFromTemplate_onePrimaryAnotherPrimary() throws Exception {
+  public void testAddNewKey_onePrimaryAnotherPrimary() throws Exception {
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
     keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
     int primaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
@@ -638,13 +639,25 @@ public class KeysetManagerTest {
   }
 
   @Test
-  public void testAddFromTemplate_primaryThenNonPrimary() throws Exception {
+  public void testAddNewKey_primaryThenNonPrimary() throws Exception {
     KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
     int primaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
     keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, false);
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
     assertThat(keyset.getKeyCount()).isEqualTo(2);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(primaryKeyId);
+  }
+
+  @Test
+  public void testAddNewKey_addThenDestroy() throws Exception {
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
+    keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, true);
+    int secondaryKeyId = keysetManager.addNewKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, false);
+    keysetManager.destroy(secondaryKeyId);
+    Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    // One of the two keys is destroyed and doesn't have keyData anymore.
+    assertTrue(!keyset.getKey(0).hasKeyData() || !keyset.getKey(1).hasKeyData());
   }
 
 
