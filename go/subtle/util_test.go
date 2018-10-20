@@ -43,8 +43,8 @@ func TestConvertCurveName(t *testing.T) {
 func TestComputeHash(t *testing.T) {
 	data := []byte("Hello")
 	var tests = []struct {
-		hashFunc    func() hash.Hash
-		expectedMac string
+		hashFunc     func() hash.Hash
+		expectedHash string
 	}{
 		{subtle.GetHashFunc("SHA1"), "f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0"},
 		{subtle.GetHashFunc("SHA256"), "185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969"},
@@ -60,8 +60,8 @@ func TestComputeHash(t *testing.T) {
 		if err != nil {
 			t.Fatalf("got error: %q", err)
 		}
-		if gotMac := hex.EncodeToString(hashed); gotMac != tt.expectedMac {
-			t.Fatalf("Expected: %s. Got: %s", tt.expectedMac, gotMac)
+		if gotHash := hex.EncodeToString(hashed); gotHash != tt.expectedHash {
+			t.Fatalf("Expected: %s. Got: %s", tt.expectedHash, gotHash)
 		}
 	}
 
