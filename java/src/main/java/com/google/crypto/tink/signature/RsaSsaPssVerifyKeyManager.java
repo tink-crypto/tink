@@ -16,9 +16,10 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.Empty;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
 import com.google.crypto.tink.subtle.EngineFactory;
@@ -26,7 +27,6 @@ import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -37,29 +37,18 @@ import java.security.spec.RSAPublicKeySpec;
  * This key manager produces new instances of {@code RsaSsaPssVerifyJce}. It doesn't support key
  * generation.
  */
-class RsaSsaPssVerifyKeyManager implements KeyManager<PublicKeyVerify> {
-  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey";
-  /** Current version of this key manager. Keys with greater version are not supported. */
-  private static final int VERSION = 0;
-
-  /** @param serializedKey serialized {@code RsaSsaPssPublicKey} proto */
-  @Override
-  public PublicKeyVerify getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
-    try {
-      RsaSsaPssPublicKey pubKey = RsaSsaPssPublicKey.parseFrom(serializedKey);
-      return getPrimitive(pubKey);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized RsaSsaPssPublicKey proto", e);
-    }
+class RsaSsaPssVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, RsaSsaPssPublicKey, Empty> {
+  public RsaSsaPssVerifyKeyManager() {
+    super(RsaSsaPssPublicKey.class, Empty.class, TYPE_URL);
   }
 
-  /** @param key {@code RsaSsaPssPublicKey} proto */
+  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey";
+
+  private static final int VERSION = 0;
+
   @Override
-  public PublicKeyVerify getPrimitive(MessageLite key) throws GeneralSecurityException {
-    if (!(key instanceof RsaSsaPssPublicKey)) {
-      throw new GeneralSecurityException("expected RsaSsaPssPublicKey proto");
-    }
-    RsaSsaPssPublicKey keyProto = (RsaSsaPssPublicKey) key;
+  public PublicKeyVerify getPrimitiveFromKey(RsaSsaPssPublicKey keyProto)
+      throws GeneralSecurityException {
     validateKey(keyProto);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
     BigInteger modulus = new BigInteger(1, keyProto.getN().toByteArray());
@@ -74,46 +63,31 @@ class RsaSsaPssVerifyKeyManager implements KeyManager<PublicKeyVerify> {
         params.getSaltLength());
   }
 
-  /**
-   * @param serializedKeyFormat serialized {@code RsaSsaPssKeyFormat} proto
-   * @return new {@code RsaSsaPssPublicKey} proto
-   */
   @Override
-  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
+  protected RsaSsaPssPublicKey newKeyFromFormat(Empty unused) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented");
-  }
-
-  /**
-   * @param keyFormat {@code RsaSsaPssKeyFormat} proto
-   * @return new {@code RsaSsaPssPublicKey} proto
-   */
-  @Override
-  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented");
-  }
-
-  /**
-   * @param serializedKeyFormat serialized {@code RsaSsaPssKeyFormat} proto
-   * @return {@code KeyData} with a new {@code RsaSsaPssPublicKey} proto
-   */
-  @Override
-  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented");
-  }
-
-  @Override
-  public boolean doesSupport(String typeUrl) {
-    return TYPE_URL.equals(typeUrl);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
   }
 
   @Override
   public int getVersion() {
     return VERSION;
+  }
+
+  @Override
+  protected KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.ASYMMETRIC_PUBLIC;
+  }
+
+  @Override
+  protected RsaSsaPssPublicKey parseKeyProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return RsaSsaPssPublicKey.parseFrom(byteString);
+  }
+
+  @Override
+  protected Empty parseKeyFormatProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return Empty.parseFrom(byteString);
   }
 
   private void validateKey(RsaSsaPssPublicKey pubKey) throws GeneralSecurityException {
