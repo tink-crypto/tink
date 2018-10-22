@@ -21,6 +21,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
@@ -132,6 +134,16 @@ public class UtilTest {
     } catch (GeneralSecurityException e) {
       fail("Valid keyset, should not fail: " + e);
     }
+  }
+
+  @Test
+  public void testValidateKeyset_withDestroyedKey() throws Exception {
+    TinkConfig.register();
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
+    keysetManager.addNewKey(AeadKeyTemplates.AES128_GCM, true);
+    int secondaryKey = keysetManager.addNewKey(AeadKeyTemplates.AES128_GCM, false);
+    keysetManager.destroy(secondaryKey);
+    Util.validateKeyset(CleartextKeysetHandle.getKeyset(keysetManager.getKeysetHandle()));
   }
 
   /** Tests that getKeysetInfo doesn't contain key material. */

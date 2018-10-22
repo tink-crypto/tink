@@ -16,26 +16,30 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
 import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesGcmHkdfStreaming;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
  * This key manager generates new {@code AesGcmHkdfStreamingKey} keys and produces new instances of
  * {@code AesGcmHkdfStreaming}.
  */
-class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
+class AesGcmHkdfStreamingKeyManager
+    extends KeyManagerBase<StreamingAead, AesGcmHkdfStreamingKey, AesGcmHkdfStreamingKeyFormat> {
+  public AesGcmHkdfStreamingKeyManager() {
+    super(AesGcmHkdfStreamingKey.class, AesGcmHkdfStreamingKeyFormat.class, TYPE_URL);
+  }
+
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =
@@ -43,22 +47,8 @@ class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
 
   /** @param serializedKey serialized {@code AesGcmHkdfStreamingKey} proto */
   @Override
-  public StreamingAead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
-    try {
-      AesGcmHkdfStreamingKey keyProto = AesGcmHkdfStreamingKey.parseFrom(serializedKey);
-      return getPrimitive(keyProto);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected AesGcmHkdfStreamingKey proto");
-    }
-  }
-
-  /** @param key {@code AesGcmHkdfStreamingKey} proto */
-  @Override
-  public StreamingAead getPrimitive(MessageLite key) throws GeneralSecurityException {
-    if (!(key instanceof AesGcmHkdfStreamingKey)) {
-      throw new GeneralSecurityException("expected AesGcmHkdfStreamingKey proto");
-    }
-    AesGcmHkdfStreamingKey keyProto = (AesGcmHkdfStreamingKey) key;
+  public StreamingAead getPrimitiveFromKey(AesGcmHkdfStreamingKey keyProto)
+      throws GeneralSecurityException {
     validate(keyProto);
     return new AesGcmHkdfStreaming(
         keyProto.getKeyValue().toByteArray(),
@@ -74,27 +64,8 @@ class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
    * @return new {@code AesGcmHkdfStreamingKey} proto
    */
   @Override
-  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    try {
-      AesGcmHkdfStreamingKeyFormat format =
-          AesGcmHkdfStreamingKeyFormat.parseFrom(serializedKeyFormat);
-      return newKey(format);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException(
-          "expected serialized AesGcmHkdfStreamingKeyFormat proto", e);
-    }
-  }
-
-  /**
-   * @param keyFormat {@code AesGcmHkdfStreamingKeyFormat} proto
-   * @return new {@code AesGcmHkdfStreamingKey} proto
-   */
-  @Override
-  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
-    if (!(keyFormat instanceof AesGcmHkdfStreamingKeyFormat)) {
-      throw new GeneralSecurityException("expected AesGcmHkdfStreamingKeyFormat proto");
-    }
-    AesGcmHkdfStreamingKeyFormat format = (AesGcmHkdfStreamingKeyFormat) keyFormat;
+  public AesGcmHkdfStreamingKey newKeyFromFormat(AesGcmHkdfStreamingKeyFormat format)
+      throws GeneralSecurityException {
     validate(format);
     return AesGcmHkdfStreamingKey.newBuilder()
         .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
@@ -103,33 +74,26 @@ class AesGcmHkdfStreamingKeyManager implements KeyManager<StreamingAead> {
         .build();
   }
 
-  /**
-   * @param serializedKeyFormat serialized {@code AesGcmHkdfStreamingKeyFormat} proto
-   * @return {@code KeyData} proto with a new {@code AesGcmHkdfStreamingKey} proto
-   */
-  @Override
-  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    AesGcmHkdfStreamingKey key = (AesGcmHkdfStreamingKey) newKey(serializedKeyFormat);
-    return KeyData.newBuilder()
-        .setTypeUrl(TYPE_URL)
-        .setValue(key.toByteString())
-        .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
-        .build();
-  }
-
-  @Override
-  public boolean doesSupport(String typeUrl) {
-    return typeUrl.equals(TYPE_URL);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
-  }
-
   @Override
   public int getVersion() {
     return VERSION;
+  }
+
+  @Override
+  protected KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.SYMMETRIC;
+  }
+
+  @Override
+  protected AesGcmHkdfStreamingKey parseKeyProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return AesGcmHkdfStreamingKey.parseFrom(byteString);
+  }
+
+  @Override
+  protected AesGcmHkdfStreamingKeyFormat parseKeyFormatProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return AesGcmHkdfStreamingKeyFormat.parseFrom(byteString);
   }
 
   private void validate(AesGcmHkdfStreamingKey key) throws GeneralSecurityException {

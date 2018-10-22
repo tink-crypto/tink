@@ -47,7 +47,7 @@ public class CleartextKeysetHandleTest {
     // Create a keyset that contains a single HmacKey.
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetHandle handle = KeysetHandle.generateNew(template);
-    Keyset keyset = handle.getKeyset();
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     handle = CleartextKeysetHandle.parseFrom(keyset.toByteArray());
     assertEquals(keyset, handle.getKeyset());
     try {

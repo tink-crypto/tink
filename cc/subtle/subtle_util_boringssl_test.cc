@@ -263,8 +263,9 @@ bool WycheproofTest(const rapidjson::Value& root) {
 }
 
 TEST(SubtleUtilBoringSSLTest, ComputeEcdhSharedSecretWithWycheproofTest) {
-  ASSERT_TRUE(
-      WycheproofTest(*WycheproofUtil ::ReadTestVectors("ecdh_test.json")));
+// placeholder_disabled_subtle_test, please ignore
+  ASSERT_TRUE(WycheproofTest(
+      *WycheproofUtil ::ReadTestVectors("ecdh_test.json")));
   ASSERT_TRUE(WycheproofTest(
       *WycheproofUtil ::ReadTestVectors("ecdh_secp256r1_test.json")));
   ASSERT_TRUE(WycheproofTest(

@@ -63,6 +63,8 @@ class AeadCatalogue implements Catalogue<Aead> {
         return new KmsAeadKeyManager();
       case KmsEnvelopeAeadKeyManager.TYPE_URL:
         return new KmsEnvelopeAeadKeyManager();
+      case XChaCha20Poly1305KeyManager.TYPE_URL:
+        return new XChaCha20Poly1305KeyManager();
       default:
         throw new GeneralSecurityException(
             String.format("No support for primitive 'Aead' with key type '%s'.", typeUrl));

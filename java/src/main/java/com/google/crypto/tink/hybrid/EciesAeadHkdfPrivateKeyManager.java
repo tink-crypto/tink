@@ -17,6 +17,7 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridDecrypt;
+import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
@@ -24,13 +25,13 @@ import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EciesHkdfKemParams;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
@@ -41,30 +42,21 @@ import java.security.spec.ECPoint;
  * This key manager generates new {@code EciesAeadHkdfPrivateKey} keys and produces new instances of
  * {@code EciesAeadHkdfHybridDecrypt}.
  */
-class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt> {
+class EciesAeadHkdfPrivateKeyManager
+    extends KeyManagerBase<HybridDecrypt, EciesAeadHkdfPrivateKey, EciesAeadHkdfKeyFormat>
+    implements PrivateKeyManager<HybridDecrypt> {
+  public EciesAeadHkdfPrivateKeyManager() {
+    super(EciesAeadHkdfPrivateKey.class, EciesAeadHkdfKeyFormat.class, TYPE_URL);
+  }
+
   private static final int VERSION = 0;
 
   public static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
 
-  /** @param serializedKey serialized {@code EciesAeadHkdfPrivateKey} proto */
   @Override
-  public HybridDecrypt getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
-    try {
-      EciesAeadHkdfPrivateKey recipientKeyProto = EciesAeadHkdfPrivateKey.parseFrom(serializedKey);
-      return getPrimitive(recipientKeyProto);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("expected serialized EciesAeadHkdfPrivateKey proto", e);
-    }
-  }
-
-  /** @param recipientKey {@code EciesAeadHkdfPrivateKey} proto */
-  @Override
-  public HybridDecrypt getPrimitive(MessageLite recipientKey) throws GeneralSecurityException {
-    if (!(recipientKey instanceof EciesAeadHkdfPrivateKey)) {
-      throw new GeneralSecurityException("expected EciesAeadHkdfPrivateKey proto");
-    }
-    EciesAeadHkdfPrivateKey recipientKeyProto = (EciesAeadHkdfPrivateKey) recipientKey;
+  public HybridDecrypt getPrimitiveFromKey(EciesAeadHkdfPrivateKey recipientKeyProto)
+      throws GeneralSecurityException {
     validate(recipientKeyProto);
     EciesAeadHkdfParams eciesParams = recipientKeyProto.getPublicKey().getParams();
     EciesHkdfKemParams kemParams = eciesParams.getKemParams();
@@ -83,30 +75,9 @@ class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt>
         demHelper);
   }
 
-  /**
-   * @param serializedKeyFormat serialized {@code EciesAeadHkdfKeyFormat} proto
-   * @return new {@code EciesAeadHkdfPrivateKey} proto
-   */
   @Override
-  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    try {
-      EciesAeadHkdfKeyFormat eciesKeyFormat = EciesAeadHkdfKeyFormat.parseFrom(serializedKeyFormat);
-      return newKey(eciesKeyFormat);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid EciesAeadHkdf key format", e);
-    }
-  }
-
-  /**
-   * @param keyFormat {@code EciesAeadHkdfKeyFormat} proto
-   * @return new {@code EciesAeadHkdfPrivateKey} proto
-   */
-  @Override
-  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
-    if (!(keyFormat instanceof EciesAeadHkdfKeyFormat)) {
-      throw new GeneralSecurityException("expected EciesAeadHkdfKeyFormat proto");
-    }
-    EciesAeadHkdfKeyFormat eciesKeyFormat = (EciesAeadHkdfKeyFormat) keyFormat;
+  public EciesAeadHkdfPrivateKey newKeyFromFormat(EciesAeadHkdfKeyFormat eciesKeyFormat)
+      throws GeneralSecurityException {
     HybridUtil.validate(eciesKeyFormat.getParams());
     EciesHkdfKemParams kemParams = eciesKeyFormat.getParams().getKemParams();
     KeyPair keyPair =
@@ -132,20 +103,6 @@ class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt>
         .build();
   }
 
-  /**
-   * @param serializedKeyFormat serialized {@code EciesAeadHkdfKeyFormat} proto
-   * @return {@code KeyData} with a new {@code EciesAeadHkdfPrivateKey} proto
-   */
-  @Override
-  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    EciesAeadHkdfPrivateKey key = (EciesAeadHkdfPrivateKey) newKey(serializedKeyFormat);
-    return KeyData.newBuilder()
-        .setTypeUrl(TYPE_URL)
-        .setValue(key.toByteString())
-        .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE)
-        .build();
-  }
-
   @Override
   public KeyData getPublicKeyData(ByteString serializedKey) throws GeneralSecurityException {
     try {
@@ -161,13 +118,20 @@ class EciesAeadHkdfPrivateKeyManager implements PrivateKeyManager<HybridDecrypt>
   }
 
   @Override
-  public boolean doesSupport(String typeUrl) {
-    return TYPE_URL.equals(typeUrl);
+  protected KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.ASYMMETRIC_PRIVATE;
   }
 
   @Override
-  public String getKeyType() {
-    return TYPE_URL;
+  protected EciesAeadHkdfPrivateKey parseKeyProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return EciesAeadHkdfPrivateKey.parseFrom(byteString);
+  }
+
+  @Override
+  protected EciesAeadHkdfKeyFormat parseKeyFormatProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return EciesAeadHkdfKeyFormat.parseFrom(byteString);
   }
 
   @Override

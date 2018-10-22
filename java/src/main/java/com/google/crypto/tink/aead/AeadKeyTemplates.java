@@ -139,6 +139,18 @@ public final class AeadKeyTemplates {
           .build();
 
   /**
+   * A {@link KeyTemplate} that generates new instances of {@link
+   * com.google.crypto.tink.proto.XChaCha20Poly1305Key}.
+   *
+   * @since 1.3.0
+   */
+  public static final KeyTemplate XCHACHA20_POLY1305 =
+      KeyTemplate.newBuilder()
+          .setTypeUrl(XChaCha20Poly1305KeyManager.TYPE_URL)
+          .setOutputPrefixType(OutputPrefixType.TINK)
+          .build();
+
+  /**
    * @return a {@link KeyTemplate} containing a {@link AesGcmKeyFormat} with some specified
    *     parameters.
    */

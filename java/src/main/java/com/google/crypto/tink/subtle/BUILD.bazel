@@ -161,6 +161,20 @@ java_library(
     ],
 )
 
+# KeyWrap subtle
+java_library(
+    name = "keywrap",
+    srcs = [
+        "Kwp.java",
+    ],
+    javacopts = JAVACOPTS_OSS,
+    deps = [
+        ":subtle",
+        "//java/src/main/java/com/google/crypto/tink:primitives",
+        "@com_google_code_findbugs_jsr305",
+    ],
+)
+
 # x25519 subtle
 
 java_library(

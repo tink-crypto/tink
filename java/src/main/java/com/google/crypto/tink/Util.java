@@ -77,14 +77,15 @@ class Util {
    * @throws GeneralSecurityException if {@code keyset} is invalid.
    */
   public static void validateKeyset(Keyset keyset) throws GeneralSecurityException {
-    if (keyset.getKeyCount() == 0) {
-      throw new GeneralSecurityException("empty keyset");
-    }
-
     int primaryKeyId = keyset.getPrimaryKeyId();
     boolean hasPrimaryKey = false;
     boolean containsOnlyPublicKeyMaterial = true;
+    int nonDestroyedKeys = 0;
     for (Keyset.Key key : keyset.getKeyList()) {
+      if (key.getStatus() == KeyStatusType.DESTROYED) {
+        continue;
+      }
+      ++nonDestroyedKeys;
       validateKey(key);
       if (key.getStatus() == KeyStatusType.ENABLED && key.getKeyId() == primaryKeyId) {
         if (hasPrimaryKey) {
@@ -96,6 +97,9 @@ class Util {
         containsOnlyPublicKeyMaterial = false;
       }
       // TODO(thaidn): use TypeLiteral to ensure that all keys are of the same primitive.
+    }
+    if (nonDestroyedKeys == 0) {
+      throw new GeneralSecurityException("empty keyset");
     }
     if (!hasPrimaryKey && !containsOnlyPublicKeyMaterial) {
       throw new GeneralSecurityException("keyset doesn't contain a valid primary key");

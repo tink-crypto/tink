@@ -16,76 +16,61 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
-import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.Empty;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Ed25519Verify;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 
 /**
  * This key manager produces new instances of {@code Ed25519Verify}. It doesn't support key
  * generation.
  */
-class Ed25519PublicKeyManager implements KeyManager<PublicKeyVerify> {
-  /** Type url that this manager supports */
+class Ed25519PublicKeyManager extends KeyManagerBase<PublicKeyVerify, Ed25519PublicKey, Empty> {
+  public Ed25519PublicKeyManager() {
+    super(Ed25519PublicKey.class, Empty.class, TYPE_URL);
+  }
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.Ed25519PublicKey";
 
-  /** Current version of this key manager. Keys with greater version are not supported. */
   private static final int VERSION = 0;
 
   @Override
-  public PublicKeyVerify getPrimitive(ByteString serialized) throws GeneralSecurityException {
-    try {
-      Ed25519PublicKey keyProto = Ed25519PublicKey.parseFrom(serialized);
-      return getPrimitive(keyProto);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid Ed25519 public key", e);
-    }
-  }
-
-  @Override
-  public PublicKeyVerify getPrimitive(MessageLite key) throws GeneralSecurityException {
-    if (!(key instanceof Ed25519PublicKey)) {
-      throw new GeneralSecurityException("expected Ed25519PublicKey proto");
-    }
-    Ed25519PublicKey keyProto = (Ed25519PublicKey) key;
+  public PublicKeyVerify getPrimitiveFromKey(Ed25519PublicKey keyProto)
+      throws GeneralSecurityException {
     validate(keyProto);
     return new Ed25519Verify(keyProto.getKeyValue().toByteArray());
   }
 
   @Override
-  public MessageLite newKey(ByteString unused) throws GeneralSecurityException {
+  protected Ed25519PublicKey newKeyFromFormat(Empty unused) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented");
-  }
-
-  @Override
-  public MessageLite newKey(MessageLite unused) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented");
-  }
-
-  @Override
-  public KeyData newKeyData(ByteString unused) throws GeneralSecurityException {
-    throw new GeneralSecurityException("Not implemented");
-  }
-
-  @Override
-  public boolean doesSupport(String typeUrl) {
-    return TYPE_URL.equals(typeUrl);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
   }
 
   @Override
   public int getVersion() {
     return VERSION;
+  }
+
+  @Override
+  protected KeyMaterialType keyMaterialType() {
+    return KeyMaterialType.ASYMMETRIC_PUBLIC;
+  }
+
+  @Override
+  protected Ed25519PublicKey parseKeyProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return Ed25519PublicKey.parseFrom(byteString);
+  }
+
+  @Override
+  protected Empty parseKeyFormatProto(ByteString byteString)
+      throws InvalidProtocolBufferException {
+    return Empty.parseFrom(byteString);
   }
 
   private void validate(Ed25519PublicKey keyProto) throws GeneralSecurityException {

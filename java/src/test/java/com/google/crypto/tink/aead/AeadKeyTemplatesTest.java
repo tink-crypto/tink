@@ -177,6 +177,14 @@ public class AeadKeyTemplatesTest {
   }
 
   @Test
+  public void testXCHACHA20_POLY1305() throws Exception {
+    KeyTemplate template = AeadKeyTemplates.XCHACHA20_POLY1305;
+    assertEquals(XChaCha20Poly1305KeyManager.TYPE_URL, template.getTypeUrl());
+    assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
+    assertTrue(template.getValue().isEmpty()); // Empty format.
+  }
+
+  @Test
   public void testCreateKmsAeadKeyTemplate() throws Exception {
     // Intentionally using "weird" or invalid values for parameters,
     // to test that the function correctly puts them in the resulting template.

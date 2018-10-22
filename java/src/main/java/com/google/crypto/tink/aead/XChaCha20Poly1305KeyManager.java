@@ -18,47 +18,46 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManagerBase;
-import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.Empty;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.ChaCha20Poly1305;
+import com.google.crypto.tink.proto.XChaCha20Poly1305Key;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
+import com.google.crypto.tink.subtle.XChaCha20Poly1305;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
 /**
- * This instance of {@code KeyManager} generates new {@code ChaCha20Poly1305} keys and produces new
- * instances of {@code ChaCha20Poly1305}.
+ * This instance of {@code KeyManager} generates new {@code XChaCha20Poly1305} keys and produces new
+ * instances of {@code XChaCha20Poly1305}.
  */
-class ChaCha20Poly1305KeyManager
-    extends KeyManagerBase<Aead, ChaCha20Poly1305Key, Empty> {
-  public ChaCha20Poly1305KeyManager() {
-    super(ChaCha20Poly1305Key.class, Empty.class, TYPE_URL);
+class XChaCha20Poly1305KeyManager extends KeyManagerBase<Aead, XChaCha20Poly1305Key, Empty> {
+  public XChaCha20Poly1305KeyManager() {
+    super(XChaCha20Poly1305Key.class, Empty.class, TYPE_URL);
   }
 
-  /** Type url that this manager supports */
   public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key";
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key";
 
   private static final int KEY_SIZE_IN_BYTES = 32;
 
-  /** Current version of this key manager. Keys with greater version are not supported. */
   private static final int VERSION = 0;
 
   @Override
-  public Aead getPrimitiveFromKey(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
+  public Aead getPrimitiveFromKey(XChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
     validate(keyProto);
-    return new ChaCha20Poly1305(keyProto.getKeyValue().toByteArray());
+    return new XChaCha20Poly1305(keyProto.getKeyValue().toByteArray());
   }
 
   @Override
-  protected ChaCha20Poly1305Key newKeyFromFormat(Empty unused) throws GeneralSecurityException {
-    return ChaCha20Poly1305Key.newBuilder()
-        .setVersion(VERSION)
-        .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
-        .build();
+  public boolean doesSupport(String typeUrl) {
+    return TYPE_URL.equals(typeUrl);
+  }
+
+  @Override
+  public String getKeyType() {
+    return TYPE_URL;
   }
 
   @Override
@@ -67,14 +66,22 @@ class ChaCha20Poly1305KeyManager
   }
 
   @Override
+  protected XChaCha20Poly1305Key newKeyFromFormat(Empty unused) throws GeneralSecurityException {
+    return XChaCha20Poly1305Key.newBuilder()
+        .setVersion(VERSION)
+        .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
+        .build();
+  }
+
+  @Override
   protected KeyMaterialType keyMaterialType() {
     return KeyMaterialType.SYMMETRIC;
   }
 
   @Override
-  protected ChaCha20Poly1305Key parseKeyProto(ByteString byteString)
+  protected XChaCha20Poly1305Key parseKeyProto(ByteString byteString)
       throws InvalidProtocolBufferException {
-    return ChaCha20Poly1305Key.parseFrom(byteString);
+    return XChaCha20Poly1305Key.parseFrom(byteString);
   }
 
   @Override
@@ -82,10 +89,10 @@ class ChaCha20Poly1305KeyManager
     return Empty.parseFrom(byteString);
   }
 
-  private void validate(ChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
+  private void validate(XChaCha20Poly1305Key keyProto) throws GeneralSecurityException {
     Validators.validateVersion(keyProto.getVersion(), VERSION);
     if (keyProto.getKeyValue().size() != KEY_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("invalid ChaCha20Poly1305Key: incorrect key length");
+      throw new GeneralSecurityException("invalid XChaCha20Poly1305Key: incorrect key length");
     }
   }
 }

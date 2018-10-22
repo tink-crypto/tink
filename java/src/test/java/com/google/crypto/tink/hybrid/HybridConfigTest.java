@@ -230,7 +230,7 @@ public class HybridConfigTest {
   @Test
   public void testConfigContents_LATEST() throws Exception {
     RegistryConfig config = HybridConfig.LATEST;
-    assertEquals(9, config.getEntryCount());
+    assertEquals(10, config.getEntryCount());
     assertEquals("TINK_HYBRID", config.getConfigName());
 
     TestUtil.verifyConfigEntry(
@@ -284,13 +284,20 @@ public class HybridConfigTest {
         0);
     TestUtil.verifyConfigEntry(
         config.getEntry(7),
+        "TinkAead",
+        "Aead",
+        "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
+        true,
+        0);
+    TestUtil.verifyConfigEntry(
+        config.getEntry(8),
         "TinkHybridDecrypt",
         "HybridDecrypt",
         "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
         true,
         0);
     TestUtil.verifyConfigEntry(
-        config.getEntry(8),
+        config.getEntry(9),
         "TinkHybridEncrypt",
         "HybridEncrypt",
         "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",

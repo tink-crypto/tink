@@ -158,8 +158,8 @@ public class XChaCha20Poly1305Test {
 
   @Test
   public void testLongMessages() throws Exception {
-    if (TestUtil.isAndroid()) {
-      System.out.println("testLongMessages doesn't work on Android, skipping");
+    if (TestUtil.isAndroid() || TestUtil.isTsan()) {
+      System.out.println("testLongMessages doesn't work on Android and under tsan, skipping");
       return;
     }
     int dataSize = 16;
@@ -232,6 +232,10 @@ public class XChaCha20Poly1305Test {
    */
   @Test
   public void testRandomNonce() throws Exception {
+    if (TestUtil.isTsan()) {
+      System.out.println("testRandomNonce takes too long under tsan, skipping");
+      return;
+    }
     byte[] key = Random.randBytes(KEY_SIZE);
     Aead aead = createInstance(key);
     byte[] message = new byte[0];

@@ -20,9 +20,10 @@ import com.google.crypto.tink.KeyManagerBase;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.Empty;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.proto.RsaSsaPssParams;
+import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
 import com.google.crypto.tink.subtle.EngineFactory;
-import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
+import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -33,21 +34,20 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
 
 /**
- * This key manager produces new instances of {@code RsaSsaPkcs1VerifyJce}. It doesn't support key
+ * This key manager produces new instances of {@code RsaSsaPssVerifyJce}. It doesn't support key
  * generation.
  */
-class RsaSsaPkcs1VerifyKeyManager
-    extends KeyManagerBase<PublicKeyVerify, RsaSsaPkcs1PublicKey, Empty> {
-  public RsaSsaPkcs1VerifyKeyManager() {
-    super(RsaSsaPkcs1PublicKey.class, Empty.class, TYPE_URL);
+class RsaSsaPssVerifyKeyManager extends KeyManagerBase<PublicKeyVerify, RsaSsaPssPublicKey, Empty> {
+  public RsaSsaPssVerifyKeyManager() {
+    super(RsaSsaPssPublicKey.class, Empty.class, TYPE_URL);
   }
 
+  public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey";
+
   private static final int VERSION = 0;
-  public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey";
 
   @Override
-  public PublicKeyVerify getPrimitiveFromKey(RsaSsaPkcs1PublicKey keyProto)
+  public PublicKeyVerify getPrimitiveFromKey(RsaSsaPssPublicKey keyProto)
       throws GeneralSecurityException {
     validateKey(keyProto);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
@@ -55,13 +55,16 @@ class RsaSsaPkcs1VerifyKeyManager
     BigInteger exponent = new BigInteger(1, keyProto.getE().toByteArray());
     RSAPublicKey publicKey =
         (RSAPublicKey) kf.generatePublic(new RSAPublicKeySpec(modulus, exponent));
-    return new RsaSsaPkcs1VerifyJce(
-        publicKey, SigUtil.toHashType(keyProto.getParams().getHashType()));
+    RsaSsaPssParams params = keyProto.getParams();
+    return new RsaSsaPssVerifyJce(
+        publicKey,
+        SigUtil.toHashType(params.getSigHash()),
+        SigUtil.toHashType(params.getMgf1Hash()),
+        params.getSaltLength());
   }
 
   @Override
-  public RsaSsaPkcs1PublicKey newKeyFromFormat(Empty serializedKeyFormat)
-      throws GeneralSecurityException {
+  protected RsaSsaPssPublicKey newKeyFromFormat(Empty unused) throws GeneralSecurityException {
     throw new GeneralSecurityException("Not implemented");
   }
 
@@ -76,9 +79,9 @@ class RsaSsaPkcs1VerifyKeyManager
   }
 
   @Override
-  protected RsaSsaPkcs1PublicKey parseKeyProto(ByteString byteString)
+  protected RsaSsaPssPublicKey parseKeyProto(ByteString byteString)
       throws InvalidProtocolBufferException {
-    return RsaSsaPkcs1PublicKey.parseFrom(byteString);
+    return RsaSsaPssPublicKey.parseFrom(byteString);
   }
 
   @Override
@@ -87,9 +90,9 @@ class RsaSsaPkcs1VerifyKeyManager
     return Empty.parseFrom(byteString);
   }
 
-  private void validateKey(RsaSsaPkcs1PublicKey pubKey) throws GeneralSecurityException {
+  private void validateKey(RsaSsaPssPublicKey pubKey) throws GeneralSecurityException {
     Validators.validateVersion(pubKey.getVersion(), VERSION);
-    Validators.validateRsaModulusSize((new BigInteger(1, pubKey.getN().toByteArray())).bitLength());
-    SigUtil.validateRsaSsaPkcs1Params(pubKey.getParams());
+    Validators.validateRsaModulusSize(new BigInteger(1, pubKey.getN().toByteArray()).bitLength());
+    SigUtil.validateRsaSsaPssParams(pubKey.getParams());
   }
 }

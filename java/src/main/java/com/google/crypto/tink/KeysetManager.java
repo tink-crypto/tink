@@ -65,8 +65,7 @@ public final class KeysetManager {
   @GuardedBy("this")
   public synchronized KeysetManager rotate(KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    Keyset.Key key = newKey(keyTemplate);
-    keysetBuilder.addKey(key).setPrimaryKeyId(key.getKeyId());
+    addNewKey(keyTemplate, true);
     return this;
   }
 
@@ -78,8 +77,23 @@ public final class KeysetManager {
    */
   @GuardedBy("this")
   public synchronized KeysetManager add(KeyTemplate keyTemplate) throws GeneralSecurityException {
-    keysetBuilder.addKey(newKey(keyTemplate));
+    addNewKey(keyTemplate, false);
     return this;
+  }
+
+  /**
+   * Generates a fresh key using {@code keyTemplate} and returns the {@code keyId} of it. In case
+   * {@isPrimary} is true the generated key will be the new primary.
+   */
+  @GuardedBy("this")
+  public synchronized int addNewKey(KeyTemplate keyTemplate, boolean asPrimary)
+      throws GeneralSecurityException {
+    Keyset.Key key = newKey(keyTemplate);
+    keysetBuilder.addKey(key);
+    if (asPrimary) {
+      keysetBuilder.setPrimaryKeyId(key.getKeyId());
+    }
+    return key.getKeyId();
   }
 
   /**

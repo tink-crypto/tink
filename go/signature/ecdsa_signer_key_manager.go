@@ -17,6 +17,7 @@ package signature
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
+	"errors"
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
@@ -36,8 +37,8 @@ const (
 )
 
 // common errors
-var errInvalidECDSASignKey = fmt.Errorf("ecdsa_signer_key_manager: invalid key")
-var errInvalidECDSASignKeyFormat = fmt.Errorf("ecdsa_signer_key_manager: invalid key format")
+var errInvalidECDSASignKey = errors.New("ecdsa_signer_key_manager: invalid key")
+var errInvalidECDSASignKeyFormat = errors.New("ecdsa_signer_key_manager: invalid key format")
 
 // ecdsaSignerKeyManager is an implementation of KeyManager interface.
 // It generates new ECDSAPrivateKeys and produces new instances of ECDSASign subtle.
@@ -78,17 +79,17 @@ func (km *ecdsaSignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.Messa
 	}
 	keyFormat := new(ecdsapb.EcdsaKeyFormat)
 	if err := proto.Unmarshal(serializedKeyFormat, keyFormat); err != nil {
-		return nil, fmt.Errorf("ecdsa_signer_key_manager: invalid key format: %s", err)
+		return nil, fmt.Errorf("ecdsa_signer_key_manager: invalid proto: %s", err)
 	}
 	if err := km.validateKeyFormat(keyFormat); err != nil {
-		return nil, fmt.Errorf("ecdsa_signer_key_manager: %s", err)
+		return nil, fmt.Errorf("ecdsa_signer_key_manager: invalid key format: %s", err)
 	}
 	// generate key
 	params := keyFormat.Params
 	curve := tink.GetCurveName(params.Curve)
 	tmpKey, err := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
 	if err != nil {
-		return nil, fmt.Errorf("cannot generate ECDSA key: %s", err)
+		return nil, fmt.Errorf("ecdsa_signer_key_manager: cannot generate ECDSA key: %s", err)
 	}
 
 	keyValue := tmpKey.D.Bytes()
@@ -145,7 +146,7 @@ func (km *ecdsaSignerKeyManager) TypeURL() string {
 // validateKey validates the given ECDSAPrivateKey.
 func (km *ecdsaSignerKeyManager) validateKey(key *ecdsapb.EcdsaPrivateKey) error {
 	if err := tink.ValidateVersion(key.Version, ECDSASignerKeyVersion); err != nil {
-		return fmt.Errorf("ecdsa_signer_key_manager: %s", err)
+		return fmt.Errorf("ecdsa_signer_key_manager: invalid key: %s", err)
 	}
 	hash, curve, encoding := GetECDSAParamNames(key.PublicKey.Params)
 	return subtleSignature.ValidateECDSAParams(hash, curve, encoding)
