@@ -4,6 +4,7 @@
 **`Ubuntu`**                                                                                   | **`macOS`**
 ---------------------------------------------------------------------------------------------- | -----------
 [![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png)](#) | [![Kokoro macOS](https://storage.googleapis.com/tink-kokoro-build-badges/tink-macos.png)](#)
+
 ## Index
 1. [Introduction](#introduction)
 2. [Getting Started](#getting-started)
@@ -11,6 +12,7 @@
 4. [Learn More](#learn-more)
 5. [Contact and Mailing List](#contact-and-mailing-list)
 6. [Maintainers](#maintainers)
+
 ## Introduction
 
 Using crypto in your application [shouldn't have
