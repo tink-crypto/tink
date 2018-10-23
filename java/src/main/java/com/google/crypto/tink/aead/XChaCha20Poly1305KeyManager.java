@@ -51,16 +51,6 @@ class XChaCha20Poly1305KeyManager extends KeyManagerBase<Aead, XChaCha20Poly1305
   }
 
   @Override
-  public boolean doesSupport(String typeUrl) {
-    return TYPE_URL.equals(typeUrl);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
-  }
-
-  @Override
   public int getVersion() {
     return VERSION;
   }

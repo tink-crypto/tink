@@ -85,16 +85,6 @@ class EciesAeadHkdfPublicKeyManager
   }
 
   @Override
-  public boolean doesSupport(String typeUrl) {
-    return TYPE_URL.equals(typeUrl);
-  }
-
-  @Override
-  public String getKeyType() {
-    return TYPE_URL;
-  }
-
-  @Override
   protected EciesAeadHkdfPublicKey parseKeyProto(ByteString byteString)
       throws InvalidProtocolBufferException {
     return EciesAeadHkdfPublicKey.parseFrom(byteString);

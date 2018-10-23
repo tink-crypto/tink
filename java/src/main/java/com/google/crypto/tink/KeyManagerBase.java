@@ -72,7 +72,7 @@ public abstract class KeyManagerBase<
   }
 
   @Override
-  public P getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
+  public final P getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
     try {
       KeyProto keyProto = parseKeyProto(serializedKey);
       return getPrimitiveFromKey(keyProto);
@@ -83,7 +83,7 @@ public abstract class KeyManagerBase<
   }
 
   @Override
-  public P getPrimitive(MessageLite key) throws GeneralSecurityException {
+  public final P getPrimitive(MessageLite key) throws GeneralSecurityException {
     return getPrimitiveFromKey(
         castOrSecurityException(
             key, "Expected proto of type " + keyProtoClass.getName(), keyProtoClass));
@@ -94,7 +94,7 @@ public abstract class KeyManagerBase<
    * @return new {@code AesGcmKey} proto
    */
   @Override
-  public MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
+  public final MessageLite newKey(ByteString serializedKeyFormat) throws GeneralSecurityException {
     try {
       KeyFormatProto format = parseKeyFormatProto(serializedKeyFormat);
       return newKeyFromFormat(format);
@@ -109,7 +109,7 @@ public abstract class KeyManagerBase<
    * @return new {@code AesGcmKey} proto
    */
   @Override
-  public MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
+  public final MessageLite newKey(MessageLite keyFormat) throws GeneralSecurityException {
     return newKeyFromFormat(
         castOrSecurityException(
             keyFormat,
@@ -118,12 +118,12 @@ public abstract class KeyManagerBase<
   }
 
   @Override
-  public boolean doesSupport(String typeUrl) {
+  public final boolean doesSupport(String typeUrl) {
     return typeUrl.equals(getKeyType());
   }
 
   @Override
-  public String getKeyType() {
+  public final String getKeyType() {
     return typeUrl;
   }
 
@@ -132,7 +132,7 @@ public abstract class KeyManagerBase<
    * @return {@code KeyData} proto with a new {@code AesGcmKey} proto
    */
   @Override
-  public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
+  public final KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
     KeyFormatProto format;
     try {
       format = parseKeyFormatProto(serializedKeyFormat);
